@@ -794,6 +794,9 @@ return [
     'embed_description' => 'Betten Sie Ihren Zeitplan in Ihre Website oder Ihren Blog ein, indem Sie den iframe-Code unten verwenden.',
     'embed_url' => 'Einbettungs-URL',
     'iframe_code' => 'Iframe-Code',
+    'embed_layout' => 'Layout',
+    'embed_layout_default' => 'Standard des Zeitplans (:layout)',
+    'embed_layout_help' => 'Ändert nur den Code, den Sie unten kopieren. Ihre Zeitplanseite behält ihr Standard-Layout.',
     'close' => 'Schließen',
     'payment_url' => 'Zahlungslink',
 

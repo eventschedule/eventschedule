@@ -59,10 +59,18 @@ class EmailService
                 $role = $event->getRoleWithEmailSettings();
             }
 
-            // Check if we should send email
+            // Check if we should send email.
+            //
+            // A buyer's ticket is transactional: somebody paid, so they must receive what they
+            // bought. When the schedule has no sender of its own we fall back to the platform
+            // rather than dropping the mail. This matters most for the free plan, whose organizers
+            // almost never configure SMTP, and which can now sell up to its monthly allowance -
+            // without the fallback the tier would take money and deliver nothing, silently, because
+            // this failure is a swallowed return value. The per-schedule sender remains the branded
+            // upgrade, and every non-transactional mail (newsletters, sale notifications) keeps the
+            // stricter gate.
             if (config('app.hosted')) {
-                // For hosted users, only send if role has email settings
-                if (! $role || ! $role->hasEmailSettings()) {
+                if (! $role) {
                     return self::ERROR_NOT_CONFIGURED;
                 }
             } else {
@@ -231,9 +239,17 @@ class EmailService
     /**
      * Send new sale notification to opted-in editors
      */
-    public function sendNewSaleNotification(Sale $sale, Event $event, Role $role): void
+    public function sendNewSaleNotification(Sale $sale, Event $event, Role $role, bool $isFirstSale = false): void
     {
         if (is_demo_role($role)) {
+            return;
+        }
+
+        // Ongoing sale notifications are Pro. The FIRST paid sale on an event always notifies,
+        // whatever the plan: it costs nothing, it is the moment a free organizer finds out the
+        // product works, and without it they would have to poll the Sales page to learn anything
+        // sold at all.
+        if (! $isFirstSale && ! $role->isPro()) {
             return;
         }
 
@@ -359,7 +375,19 @@ class EmailService
                 $this->sendTicketEmail($sale, $role);
             }
 
-            $this->sendNewSaleNotification($sale, $event, $role);
+            // Is this the event's first paid sale? Counted excluding this one, and excluding the
+            // grouped guest rows that individual-ticket orders create, so a single order of five
+            // does not read as five sales. Drives the always-send carve-out in
+            // sendNewSaleNotification(): a free organizer gets told their first ticket sold.
+            $isFirstSale = ! Sale::where('event_id', $sale->event_id)
+                ->where('id', '!=', $sale->id)
+                ->where('status', 'paid')
+                ->where('is_deleted', false)
+                ->where('payment_method', '!=', 'rsvp')
+                ->whereNull('group_id')
+                ->exists();
+
+            $this->sendNewSaleNotification($sale, $event, $role, $isFirstSale);
         } catch (\Exception $e) {
             Log::error('Failed to send sale confirmation emails: '.$e->getMessage(), [
                 'sale_id' => $sale->id,

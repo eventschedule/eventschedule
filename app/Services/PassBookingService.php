@@ -56,6 +56,16 @@ class PassBookingService
             return false;
         }
 
+        // Passes are Pro. This is the chokepoint every pass-booking surface reads, including the
+        // public secret-link routes, so the gate belongs here. A pass that was sold while the
+        // schedule was Pro keeps working only while the schedule still is; the redemption side is
+        // deliberately separate, the same way already-sold gift cards stay redeemable.
+        $event = $sale->event;
+
+        if (! $event || ! $event->isPro()) {
+            return false;
+        }
+
         $ticket = $this->passSaleTicket($sale)?->ticket;
 
         return (bool) ($ticket && $ticket->is_pass && $ticket->pass_allow_booking);

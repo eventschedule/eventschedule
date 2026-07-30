@@ -78,7 +78,7 @@
             @if ($role->showBranding())
             <div class="px-6 py-3 border-t border-gray-200 dark:border-gray-700 text-end">
                 <a href="https://eventschedule.com" target="_blank" rel="noopener noreferrer" class="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors" style="text-decoration: none;">
-                    Powered by Event Schedule
+                    {{ __('messages.powered_by_event_schedule') }}
                 </a>
             </div>
             @endif

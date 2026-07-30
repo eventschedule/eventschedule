@@ -321,6 +321,13 @@ class EventRepo
         // its daily creation cap. Hosted-only (canCreateEvent() returns true on selfhost). Checked
         // up front, before any side effects (venue creation, etc.), so a blocked request writes
         // nothing. Legitimate bulk flows (calendar sync, backup restore, demo) bypass saveEvent().
+        // Ticketing basics (types, checkout, sales) are available on every plan, but the extras are
+        // Pro: passes and subscriptions, individual tickets, add-ons and promo codes. Until the free
+        // plan could sell, none of these needed a gate here - a free schedule could persist them and
+        // they simply never became reachable. Now they would work, so the scrub has to be explicit.
+        // Matches the request-scrub idiom RoleController uses for gift cards and custom CSS.
+        $ticketExtrasAllowed = ! $currentRole || $currentRole->isPro();
+
         if ($event === null && $currentRole && ! $currentRole->canCreateEvent($user)) {
             throw new \App\Exceptions\EventCreationLimitException;
         }
@@ -747,6 +754,13 @@ class EventRepo
             if ($request->has($boolField)) {
                 $event->$boolField = $request->boolean($boolField);
             }
+        }
+
+        // Individual tickets is Pro. Scrubbed rather than validated so a hand-posted flag on a free
+        // schedule is ignored instead of failing the whole save. The RSVP variant of per-guest
+        // registration stays free, which is why this only clears the flag when it is being turned on.
+        if (! $ticketExtrasAllowed && $event->tickets_enabled && $event->individual_tickets) {
+            $event->individual_tickets = false;
         }
 
         if ($isNewEvent && ! $event->category_id && $currentRole) {
@@ -1422,7 +1436,15 @@ class EventRepo
                 // unit valid across one or more events; it is now allowed on any
                 // event (not only recurring), so subscriptions can be sold on a
                 // dedicated "Subscriptions" event.
+                //
+                // Passes are Pro (see $ticketExtrasAllowed). Scrubbed rather than rejected, so a
+                // hand-posted flag on a free schedule saves as an ordinary ticket instead of failing
+                // the whole event. An existing pass ticket keeps its stored flag: this only refuses
+                // to turn one ON, so a lapsed Pro schedule does not have its sold passes rewritten.
                 $isPass = (bool) ($data['is_pass'] ?? false);
+                if ($isPass && ! $ticketExtrasAllowed && empty($data['id'])) {
+                    $isPass = false;
+                }
                 $hasPassTicket = $hasPassTicket || $isPass;
 
                 $passUsageType = $isPass ? ($data['pass_usage_type'] ?? 'per_occurrence') : 'per_occurrence';
@@ -1569,8 +1591,8 @@ class EventRepo
             $event->tickets()->update(['is_deleted' => true]);
         }
 
-        // Save add-ons
-        if ($event->tickets_enabled) {
+        // Save add-ons (Pro; see $ticketExtrasAllowed)
+        if ($event->tickets_enabled && $ticketExtrasAllowed) {
             $addonData = $request->input('addons', []);
             $addonImageData = $request->input('addon_image_data', []);
             $addonIds = [];
@@ -1681,7 +1703,12 @@ class EventRepo
             $event->addons()
                 ->whereNotIn('id', $addonIds)
                 ->update(['is_deleted' => true]);
-        } else {
+        } elseif ($ticketExtrasAllowed) {
+            // Only wipe add-ons when the schedule is actually allowed to manage them. Without the
+            // $ticketExtrasAllowed guard, a free schedule saving any event would fall in here and
+            // silently destroy the add-ons a previously-Pro schedule still owns. Dormant is correct;
+            // deleted is not, and they come back on upgrade.
+
             // Clean up images for all addons before soft-deleting
             $addonsWithImages = $event->addons()
                 ->whereNotNull('image_url')
@@ -1700,8 +1727,8 @@ class EventRepo
             $event->addons()->update(['is_deleted' => true]);
         }
 
-        // Save promo codes
-        if ($event->tickets_enabled) {
+        // Save promo codes (Pro; see $ticketExtrasAllowed)
+        if ($event->tickets_enabled && $ticketExtrasAllowed) {
             $promoData = $request->input('promo_codes', []);
             $promoIds = [];
 

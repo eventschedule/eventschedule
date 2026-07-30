@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule for Workshop Instructors",
-        "description": "Fill every workshop seat. Announce classes, sell spots with zero platform fees, and email your students directly. Free forever.",
+        "description": "Set a class up once as a weekly series, cap the bench per session, and sell the spots from one link with zero platform fees.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -22,46 +22,6 @@
         }
     }
     </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "Is Event Schedule free for workshop instructors?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Event Schedule is free forever for sharing your workshop schedule, building a following, and syncing with Google Calendar. Paid registration and newsletters are available on the Pro plan, with zero platform fees."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I manage different types of workshops in one schedule?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Use sub-schedules to organize by workshop type - cooking classes, pottery, photography, or craft sessions. Each workshop can have its own description, images, pricing, capacity limits, and registration options."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "How do students discover my workshops?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Students can follow your schedule and receive email notifications when you add new workshops. Share your schedule link on social media, embed it on your studio or school website, or send newsletters to followers with upcoming sessions."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I sell spots and manage registrations?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Connect your Stripe account and sell workshop spots directly from your schedule. Set per-workshop pricing, limit capacity, and check in attendees with QR codes. Event Schedule charges zero platform fees."
-                }
-            }
-        ]
-    }
-    </script>
     <!-- Product Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
@@ -71,7 +31,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Workshop and Class Scheduling Software",
         "operatingSystem": "Web",
-        "description": "Fill every workshop seat. Announce classes, sell spots with zero platform fees, and email your students directly. Build multi-session series. No algorithm. Free forever.",
+        "description": "One class, set up once as a weekly series that ends after a set number of sessions, with the seat count kept per session date. Sell spots through your own Stripe account with zero platform fees, or run free registration with a seat limit.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -79,13 +39,18 @@
             "description": "Free forever"
         },
         "featureList": [
-            "Workshop announcement newsletters",
-            "Zero-fee ticketing and registration",
-            "Custom schedule URL for one-link sharing",
-            "Multi-session workshop series with bundle pricing",
-            "Per-workshop capacity management",
-            "Google Calendar two-way sync",
-            "Booking and audience analytics"
+            "A class set up once as a weekly series, ending on a date or after a set number of sessions",
+            "Single dates skipped or added without rebuilding the series",
+            "Free registration with a seat limit counted per session date",
+            "Named ticket types with their own prices, quantities and sales windows",
+            "Multi-class cards valid across the series, with a cancellation cutoff in hours before each session",
+            "Waitlist on the Pro plan, offering a freed seat to the next person waiting for that date",
+            "QR check-in, plus a downloadable QR code for your schedule",
+            "Zero platform fees on ticket sales through your own Stripe account",
+            "Sub-schedules that keep beginner and advanced strands apart on one link",
+            "Direct newsletters to the students who follow your schedule",
+            "Two-way Google, Outlook and CalDAV calendar sync",
+            "Embeddable calendar for the studio site you already have"
         ],
         "url": "{{ url()->current() }}",
         "keywords": "workshop scheduling, class registration software, workshop calendar, teaching class management, free workshop scheduling",
@@ -93,6 +58,35 @@
             "@type": "Organization",
             "name": "Event Schedule"
         }
+    }
+    </script>
+    <!-- HowTo Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to put a workshop series online with Event Schedule",
+        "description": "Set the class up once, cap the bench, and let students book the session they want.",
+        "step": [
+            {
+                "@type": "HowToStep",
+                "position": 1,
+                "name": "Set the class up as a series",
+                "text": "Create the class once as a recurring event, pick the day it runs, and give it an end: a last date, or a number of sessions."
+            },
+            {
+                "@type": "HowToStep",
+                "position": 2,
+                "name": "Cap the bench",
+                "text": "Set the seat limit. It is counted per session date, so a full Saturday does not close the next one. Skip the weeks the studio is closed."
+            },
+            {
+                "@type": "HowToStep",
+                "position": 3,
+                "name": "Open the sheet",
+                "text": "Share one link. Take free registrations, or connect Stripe and sell spots and multi-class cards with zero platform fees."
+            }
+        ]
     }
     </script>
     </x-slot>
@@ -106,220 +100,582 @@
     </script>
 
     <style {!! nonce_attr() !!}>
-        /* For-workshop-instructors "The Workshop" styles. The shared es-* motion
-           system and brand .text-gradient live in marketing.css; this holds the
-           unified chalk identity: chalk-white on-board text, the deep chalk-slate
-           heading gradient for light surfaces, the board-green stat surface, the
-           chalk strokes and bars, the post-it series cards, and the chalk-dust. */
-        /* Chalk-white gradient - reserved for text sitting on the dark board
-           surface (stat band, finale) and for dark mode. */
-        .chalk-text {
-            background: linear-gradient(135deg, #eef5ff, #cfe3ff, #b7d6f5);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 10px rgba(191, 219, 254, 0.32);
-        }
-        .dark .chalk-text {
-            background: linear-gradient(135deg, #f1f7ff, #cbe3ff, #b6f0ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 8px rgba(147, 197, 253, 0.3);
-            filter: blur(0.2px);
-        }
-        /* Heading gradient for light surfaces: deep board-green to chalk-slate so
-           it stays legible on white; flips to chalk-white in dark mode. */
-        .chalk-heading {
-            background: linear-gradient(135deg, #1f4a3d, #2b6b6e, #285f86);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .dark .chalk-heading {
-            background: linear-gradient(135deg, #bfdcff, #d8ecff, #b8f1ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 10px rgba(147, 197, 253, 0.28);
-        }
-        .postit-card {
-            box-shadow: 2px 3px 12px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s ease;
-        }
-        .postit-card:hover { transform: rotate(0deg) !important; }
+        /* ==============================================================
+           For-workshop-instructors "The Workshop" styles.
 
-        /* Rising chalk dust */
-        .es-chalk-dust { pointer-events: none; overflow: hidden; }
-        .es-chalk-dust span {
-            position: absolute;
-            bottom: -12px;
+           THE CONCEPT: the bench and the sheet pinned above it. An
+           instructor's real unit of work is not a date, it is a bench
+           with eight stools, run again next Saturday, with a numbered
+           sign-up sheet on the wall and a punch card in the student's
+           pocket. Those three objects ARE the product argument: one
+           recurring event (days_of_week + recurring_end_type), a seat
+           count kept per occurrence date (Event::rsvpRemaining($date),
+           Ticket::soldKey($date)), and a pass that spans the series
+           (tickets.is_pass).
+
+           SIGNATURE DEVICE: the sheet's ruled lines ARE the seats. Eight
+           numbered rules, six written on, two blank, and the count read
+           off the bottom. No bar chart, no percentage: a workshop's
+           capacity is a small whole number and it should read like one.
+
+           COLOUR: this page keeps the slate-blue end of its original
+           chalk family (#285f86 / #2f6ea3) and darkens it to #14506e so
+           it clears AA on the warm workshop ground. Measured: #14506e on
+           #f4f3f0 is 7.88, on the cream sheet #f7f2e6 is 7.82; #8ccbf0
+           on the dark ground #0b1013 is 10.85 and on the wall #101a20 is
+           10.01. Muted ink is #4b5560 (6.84) - NOT text-gray-500, which
+           only measures 4.2-4.5 on a tinted ground like this one.
+
+           FIXED PHYSICAL OBJECTS, identical with .dark on or off:
+           .es-shop-sheet (a sheet of cream paper) and .es-shop-wall (the
+           workshop wall). Both carry overrides for the shared classes
+           that otherwise flip: .grid-overlay, .animate-shimmer,
+           .es-claim:focus-within, and this page's own card/tag/pill.
+           ============================================================== */
+
+        /* --- Ground and ink ------------------------------------------ */
+        .es-shop-page { background-color: #f4f3f0; color: #141a1e; }
+        .dark .es-shop-page { background-color: #0b1013; color: #e6edf2; }
+        .es-shop-ink { color: #141a1e; }
+        .dark .es-shop-ink { color: #e6edf2; }
+        .es-shop-muted { color: #4b5560; }
+        .dark .es-shop-muted { color: #9aa8b2; }
+        .es-shop-accent { color: #14506e; }
+        .dark .es-shop-accent { color: #8ccbf0; }
+        /* Always-lit accent, for text on the fixed-dark wall in BOTH modes. */
+        .es-shop-lit { color: #8ccbf0; }
+        .es-shop-wall-ink { color: #e6edf2; }
+        .es-shop-wall-muted { color: #9aa8b2; }
+
+        /* Tabular figures, because everything on this page is a count. */
+        .es-shop-fig {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.01em;
+        }
+
+        /* --- Cards --------------------------------------------------- */
+        .es-shop-card {
+            border: 1px solid rgba(20, 26, 30, 0.12);
+            border-radius: 1rem;
+            background: #fdfdfc;
+        }
+        .dark .es-shop-card {
+            border-color: rgba(230, 237, 242, 0.12);
+            background: rgba(230, 237, 242, 0.045);
+        }
+
+        /* --- The wall: fixed dark in both colour modes ---------------- */
+        .es-shop-wall {
+            background-color: #101a20;
+            background-image:
+                radial-gradient(120% 100% at 50% 0%, rgba(140, 203, 240, 0.09) 0%, rgba(16, 26, 32, 0) 58%),
+                linear-gradient(180deg, #16232a 0%, #101a20 46%, #0a1216 100%);
+            box-shadow: inset 0 0 90px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(230, 237, 242, 0.06);
+        }
+        /* Pegboard: a punched-panel texture, not a drawing. A dark hole with a
+           lit lower lip on the same 26px grid reads as a drilled board. */
+        .es-shop-peg {
+            background-image:
+                radial-gradient(circle at 50% 44%, rgba(0, 0, 0, 0.6) 1.7px, transparent 1.9px),
+                radial-gradient(circle at 50% 58%, rgba(230, 237, 242, 0.07) 1.7px, transparent 1.9px);
+            background-size: 26px 26px, 26px 26px;
+            background-position: 0 0, 0 0;
+        }
+        /* Shared classes that flip with the colour mode. These MUST come
+           after their .dark rules so the later, equal-specificity rule
+           wins in both modes and the wall stays one object. */
+        .es-shop-wall .es-shop-card {
+            border-color: rgba(230, 237, 242, 0.14);
+            background: rgba(230, 237, 242, 0.05);
+        }
+        .es-shop-wall .grid-overlay {
+            background-image:
+                linear-gradient(rgba(230, 237, 242, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(230, 237, 242, 0.05) 1px, transparent 1px);
+        }
+        .es-shop-wall .animate-shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.16), transparent);
+            background-size: 200% 100%;
+        }
+        .es-shop-wall .es-claim:focus-within {
+            border-color: rgba(140, 203, 240, 0.75);
+            box-shadow: 0 0 0 4px rgba(140, 203, 240, 0.22);
+        }
+
+        /* --- Eyebrow label ------------------------------------------- */
+        .es-shop-tag {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.26em;
+            text-transform: uppercase;
+            color: #4b5560;
+        }
+        .dark .es-shop-tag { color: #9aa8b2; }
+        .es-shop-wall .es-shop-tag { color: #8ccbf0; }
+
+        /* --- The bench tag: a punched job tag carrying the section no. */
+        .es-shop-num {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.3rem 0.85rem 0.3rem 0.6rem;
+            border: 1px solid rgba(20, 26, 30, 0.18);
+            border-radius: 0.35rem;
+            background: #fdfdfc;
+            color: #141a1e;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-variant-numeric: tabular-nums;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+        }
+        .es-shop-num::before {
+            content: "";
+            width: 0.6rem;
+            height: 0.6rem;
+            flex: none;
             border-radius: 9999px;
-            background: radial-gradient(circle at 40% 35%, rgba(191, 219, 254, 0.95), rgba(147, 197, 253, 0.25));
-            opacity: 0;
-            animation: es-dust var(--dust-dur, 9s) linear infinite;
-            animation-delay: var(--dust-delay, 0s);
+            border: 1px solid rgba(20, 26, 30, 0.4);
         }
-        @keyframes es-dust {
-            0% { transform: translateY(0) translateX(0); opacity: 0; }
-            15% { opacity: var(--dust-op, 0.5); }
-            85% { opacity: var(--dust-op, 0.5); }
-            100% { transform: translateY(-170px) translateX(14px); opacity: 0; }
+        .dark .es-shop-num {
+            border-color: rgba(230, 237, 242, 0.2);
+            background: rgba(230, 237, 242, 0.05);
+            color: #e6edf2;
         }
-        /* Deep board-green surface for the stat band */
-        .chalk-board {
-            background:
-                radial-gradient(120% 100% at 50% 0%, rgba(31, 74, 61, 0.55) 0%, rgba(12, 30, 26, 0.6) 60%),
-                radial-gradient(120% 100% at 50% 0%, rgba(11, 20, 36, 0.9) 0%, rgba(5, 8, 8, 0.99) 62%),
-                #08110d;
+        .dark .es-shop-num::before { border-color: rgba(230, 237, 242, 0.45); }
+        .es-shop-wall .es-shop-num {
+            border-color: rgba(230, 237, 242, 0.2);
+            background: rgba(230, 237, 242, 0.05);
+            color: #e6edf2;
         }
-        /* Small chalkboard tile for the analytics chalk bar-chart */
-        .chalk-tile {
-            background: linear-gradient(160deg, rgba(36, 82, 68, 0.97), rgba(19, 46, 39, 0.98));
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), inset 0 0 22px rgba(0, 0, 0, 0.4);
+        .es-shop-wall .es-shop-num::before { border-color: rgba(230, 237, 242, 0.45); }
+
+        /* --- Plan pills ---------------------------------------------- */
+        .es-shop-plan {
+            display: inline-flex;
+            align-items: center;
+            flex: none;
+            padding: 0.1rem 0.45rem;
+            border: 1px solid rgba(20, 80, 110, 0.45);
+            border-radius: 0.25rem;
+            color: #14506e;
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
         }
-        .chalk-bar {
-            background: linear-gradient(180deg, rgba(240, 248, 255, 0.92), rgba(196, 221, 245, 0.6));
-            border-radius: 3px 3px 0 0;
-            box-shadow: 0 0 7px rgba(190, 225, 255, 0.35);
+        .dark .es-shop-plan { border-color: rgba(140, 203, 240, 0.45); color: #8ccbf0; }
+        .es-shop-plan-pro { border-color: rgba(20, 26, 30, 0.35); color: #141a1e; }
+        .dark .es-shop-plan-pro { border-color: rgba(230, 237, 242, 0.38); color: #e6edf2; }
+        .es-shop-wall .es-shop-plan { border-color: rgba(140, 203, 240, 0.45); color: #8ccbf0; }
+        .es-shop-wall .es-shop-plan-pro { border-color: rgba(230, 237, 242, 0.38); color: #e6edf2; }
+
+        /* --- THE SHEET: a sheet of cream paper. Fixed in both modes. -- */
+        .es-shop-sheet {
+            position: relative;
+            border: 1px solid rgba(20, 26, 30, 0.16);
+            border-radius: 0.5rem;
+            background-color: #f7f2e6;
+            background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(0, 0, 0, 0.02));
+            box-shadow: 0 22px 40px -24px rgba(10, 18, 22, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            color: #2a2721;
+            padding: 1.35rem 1.25rem 1.15rem 1.9rem;
         }
-        /* The chalkboard surfaces stay intentionally dark in both modes; these
-           deepen them a touch in dark mode so they nest into the page. */
-        .dark .chalk-board {
-            background:
-                radial-gradient(120% 100% at 50% 0%, rgba(28, 66, 55, 0.6) 0%, rgba(9, 24, 21, 0.72) 60%),
-                radial-gradient(120% 100% at 50% 0%, rgba(9, 16, 30, 0.94) 0%, rgba(4, 6, 6, 0.99) 62%),
-                #060d0a;
-        }
-        .dark .chalk-tile {
-            background: linear-gradient(160deg, rgba(31, 72, 60, 0.98), rgba(15, 40, 34, 0.99));
-            border-color: rgba(255, 255, 255, 0.06);
-        }
-        .dark .chalk-bar {
-            background: linear-gradient(180deg, rgba(244, 250, 255, 0.95), rgba(205, 228, 248, 0.62));
-            box-shadow: 0 0 8px rgba(190, 225, 255, 0.4);
-        }
-        .chalk-ink { color: #e8f2ff; }
-        .chalk-ink-dim { color: rgba(226, 240, 255, 0.62); }
-        /* Hand-drawn chalk strokes (hero underline + how-it-works arrows).
-           currentColor renders the chalk; deep slate on light, chalk-white on dark. */
-        .chalk-stroke { color: #2b6b6e; opacity: 0.75; }
-        .dark .chalk-stroke { color: #bfe3ff; opacity: 0.6; }
-        /* Folded post-it corner for a bento mock */
-        .postit-fold {
+        /* Punched binder holes down the left edge. */
+        .es-shop-holes {
             position: absolute;
-            right: 0;
-            bottom: 0;
-            width: 26px;
-            height: 26px;
-            background: linear-gradient(135deg, transparent 47%, rgba(0, 0, 0, 0.16) 49%);
-            border-bottom-right-radius: 1rem;
+            top: 1.4rem;
+            bottom: 1.4rem;
+            left: 0.65rem;
+            width: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
-        .dark .postit-fold {
-            background: linear-gradient(135deg, transparent 47%, rgba(0, 0, 0, 0.4) 49%);
+        .es-shop-holes i {
+            display: block;
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 9999px;
+            background: rgba(20, 26, 30, 0.1);
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.25);
         }
-        /* Chalk-blue accent for the See-all links, related-page cards, FAQ hovers */
-        .chalk-link { color: #2f6ea3; transition: color 0.2s ease; }
-        .chalk-link:hover { text-decoration: underline; }
-        .dark .chalk-link { color: #93c5fd; }
-        .chalk-rel { transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; }
-        .chalk-rel:hover { border-color: #7db5e6; background-color: rgba(125, 181, 230, 0.08); }
-        .dark .chalk-rel:hover { border-color: rgba(125, 181, 230, 0.35); background-color: rgba(125, 181, 230, 0.06); }
-        .group:hover .chalk-rel-title { color: #2f6ea3; }
-        .dark .group:hover .chalk-rel-title { color: #93c5fd; }
-        .group:hover .chalk-rel-arrow { color: #2f6ea3; }
-        .dark .group:hover .chalk-rel-arrow { color: #93c5fd; }
-        .chalk-faq { transition: border-color 0.2s ease; }
-        .chalk-faq:hover { border-color: rgba(125, 181, 230, 0.5); }
-        .dark .chalk-faq:hover { border-color: rgba(125, 181, 230, 0.35); }
+        .es-shop-sheet-ink { color: #2a2721; }
+        .es-shop-sheet-muted { color: #5a544a; }
+        .es-shop-sheet-accent { color: #14506e; }
+        .es-shop-sheet-rule { border-color: rgba(20, 26, 30, 0.14); }
+
+        /* A ruled line on the sheet IS a seat. */
+        .es-shop-line {
+            display: flex;
+            align-items: baseline;
+            gap: 0.7rem;
+            padding: 0.34rem 0 0.2rem;
+            border-bottom: 1px solid rgba(20, 80, 110, 0.22);
+        }
+        .es-shop-line-no {
+            flex: none;
+            width: 1.15rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-variant-numeric: tabular-nums;
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: #5a544a;
+        }
+        .es-shop-line-open .es-shop-line-name { color: #5a544a; letter-spacing: 0.18em; }
+        .es-shop-line-name { flex: 1 1 auto; min-width: 0; font-size: 0.86rem; font-weight: 600; }
+        .es-shop-line-how {
+            flex: none;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #14506e;
+        }
+        /* The written lines fill in when the sheet reveals. The transition
+           lives on the always-active rule; only the undrawn pre-state is
+           gated, so no-JS and reduced-motion users see a full sheet. */
+        .es-shop-line-name, .es-shop-line-how {
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            transition-delay: calc(var(--i, 0) * 0.09s + 0.35s);
+        }
+        html.es-anim [data-reveal]:not(.is-revealed) .es-shop-line-name,
+        html.es-anim [data-reveal]:not(.is-revealed) .es-shop-line-how {
+            opacity: 0;
+            transform: translateY(4px);
+        }
+        /* The tally stamped at the foot of the sheet. */
+        .es-shop-stamp {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.2rem 0.55rem;
+            border-radius: 0.25rem;
+            background: #14506e;
+            color: #ffffff;
+            font-size: 0.62rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        /* --- The session plan: one row per session in the series ------ */
+        .es-shop-sess {
+            display: grid;
+            grid-template-columns: 2.4rem 1fr auto;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 0;
+            border-top: 1px solid rgba(20, 26, 30, 0.1);
+        }
+        .dark .es-shop-sess { border-top-color: rgba(230, 237, 242, 0.1); }
+        .es-shop-sess-skip { opacity: 0.62; }
+        .es-shop-sess-skip .es-shop-sess-no {
+            border-style: dashed;
+            background: transparent;
+        }
+        .es-shop-sess-no {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 1.6rem;
+            border: 1px solid rgba(20, 80, 110, 0.35);
+            border-radius: 0.3rem;
+            background: rgba(20, 80, 110, 0.08);
+            color: #14506e;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.7rem;
+            font-weight: 800;
+        }
+        .dark .es-shop-sess-no {
+            border-color: rgba(140, 203, 240, 0.35);
+            background: rgba(140, 203, 240, 0.1);
+            color: #8ccbf0;
+        }
+
+        /* --- Table (the class card ledger) --------------------------- */
+        .es-shop-table { min-width: 34rem; }
+        .es-shop-tr { border-top: 1px solid rgba(20, 26, 30, 0.1); }
+        .dark .es-shop-tr { border-top-color: rgba(230, 237, 242, 0.1); }
+
+        /* --- Hairlines, wells, fine print, tooltips ------------------
+               These carry their own colours rather than Tailwind
+               arbitrary values, because an arbitrary utility that is not
+               already in the compiled bundle renders as nothing at all. */
+        .es-shop-hr { border-color: rgba(20, 26, 30, 0.1); }
+        .dark .es-shop-hr { border-color: rgba(230, 237, 242, 0.1); }
+        .es-shop-well {
+            border: 1px solid rgba(20, 80, 110, 0.22);
+            background: rgba(20, 80, 110, 0.06);
+        }
+        .dark .es-shop-well {
+            border-color: rgba(140, 203, 240, 0.22);
+            background: rgba(140, 203, 240, 0.07);
+        }
+        .es-shop-fine { font-size: 0.7rem; line-height: 1.55; }
+        .es-shop-tip {
+            border: 1px solid rgba(20, 26, 30, 0.12);
+            background: #ffffff;
+            color: #374151;
+        }
+        .dark .es-shop-tip {
+            border-color: rgba(230, 237, 242, 0.12);
+            background: #141a1e;
+            color: #d1d5db;
+        }
+
+        /* --- Chips (the class-type marquee) -------------------------- */
+        .es-shop-chip {
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+            padding: 0.35rem 0.85rem;
+            border: 1px solid rgba(20, 26, 30, 0.16);
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.7);
+            color: #4b5560;
+            font-size: 0.76rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .dark .es-shop-chip {
+            border-color: rgba(230, 237, 242, 0.16);
+            background: rgba(230, 237, 242, 0.05);
+            color: #9aa8b2;
+        }
+
+        /* --- Links, buttons, hovers --------------------------------- */
+        .es-shop-link { color: #14506e; }
+        .es-shop-link:hover { color: #0f4560; }
+        .dark .es-shop-link { color: #8ccbf0; }
+        .dark .es-shop-link:hover { color: #e6edf2; }
+        .es-shop-btn {
+            background-color: #14506e;
+            color: #ffffff;
+            box-shadow: 0 18px 36px -16px rgba(20, 80, 110, 0.55);
+        }
+        .es-shop-btn:hover { background-color: #0f4560; }
+        .dark .es-shop-btn { background-color: #8ccbf0; color: #0b1013; }
+        .dark .es-shop-btn:hover { background-color: #a9daf5; }
+        /* Always-lit button, for the wall, where light and dark are the same. */
+        .es-shop-btn-lit {
+            background-color: #8ccbf0;
+            color: #0b1013;
+            box-shadow: 0 18px 36px -16px rgba(140, 203, 240, 0.35);
+        }
+        .es-shop-btn-lit:hover { background-color: #a9daf5; }
+        .es-shop-hover:hover { border-color: rgba(20, 80, 110, 0.45); }
+        .dark .es-shop-hover:hover { border-color: rgba(140, 203, 240, 0.45); }
+        .es-shop-hover:hover .es-shop-hover-title,
+        .es-shop-hover:hover .es-shop-hover-arrow { color: #14506e; }
+        .dark .es-shop-hover:hover .es-shop-hover-title,
+        .dark .es-shop-hover:hover .es-shop-hover-arrow { color: #8ccbf0; }
+
+        /* --- Shared-system recolours (brand blue by default) --------- */
+        .es-hero .es-spot {
+            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(20, 80, 110, 0.14), transparent 60%);
+        }
+        .dark .es-hero .es-spot {
+            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(140, 203, 240, 0.12), transparent 60%);
+        }
+        .es-dot:hover .es-dot-pip { background-color: rgba(20, 80, 110, 0.6); }
+        .dark .es-dot:hover .es-dot-pip { background-color: rgba(140, 203, 240, 0.6); }
+        .es-dot.is-active .es-dot-pip { background: #14506e; }
+        .dark .es-dot.is-active .es-dot-pip { background: #8ccbf0; }
+
+        /* --- Focus rings. No border-radius: it would reshape the
+               element on focus, and outlines follow the shape anyway. -- */
+        #es-shop-page a:focus-visible,
+        #es-shop-page summary:focus-visible,
+        #es-shop-page input:focus-visible {
+            outline: 2px solid #14506e;
+            outline-offset: 3px;
+        }
+        .dark #es-shop-page a:focus-visible,
+        .dark #es-shop-page summary:focus-visible,
+        .dark #es-shop-page input:focus-visible {
+            outline-color: #8ccbf0;
+        }
+        .es-shop-wall a:focus-visible,
+        .es-shop-wall summary:focus-visible,
+        .es-shop-wall input:focus-visible {
+            outline-color: #8ccbf0 !important;
+        }
 
         @media (prefers-reduced-motion: reduce) {
-            .es-chalk-dust span { animation: none !important; }
-            .es-chalk-dust span { opacity: 0.3; transform: none; }
+            .es-shop-line-name, .es-shop-line-how {
+                opacity: 1 !important;
+                transform: none !important;
+                transition: none !important;
+            }
         }
     </style>
 
     @php
-        // Rising chalk dust: [left, size(px), duration, delay, opacity]
-        $dust = [
-            ['10%', 4, '9s', '0s', '0.5'],
-            ['22%', 6, '11s', '2s', '0.4'],
-            ['34%', 3, '8s', '3.5s', '0.35'],
-            ['46%', 5, '10s', '1s', '0.45'],
-            ['58%', 7, '12s', '2.6s', '0.4'],
-            ['69%', 4, '9s', '4.2s', '0.4'],
-            ['80%', 5, '10.5s', '1.4s', '0.45'],
-            ['91%', 3, '8.5s', '3.2s', '0.35'],
+        // The sheet: eight ruled lines, six written on. The line number IS the
+        // seat number, so capacity reads as the small whole number it is.
+        $sheet = [
+            [1, 'Maya R.', 'Paid'],
+            [2, 'Tom A.', 'Paid'],
+            [3, 'Priya S.', 'Class card'],
+            [4, 'Dan K.', 'Paid'],
+            [5, 'Lena M.', 'Class card'],
+            [6, 'Ivo P.', 'Paid'],
+            [7, null, null],
+            [8, null, null],
+        ];
+
+        // One class, one recurring event. Note session 04 keeps its number
+        // across the skipped week: an excluded date removes the date, it does
+        // not renumber the course.
+        $sessions = [
+            ['01', 'Sat 7 Feb', 'Hand building', 'Full', false],
+            ['02', 'Sat 14 Feb', 'Wheel throwing', '2 seats left', false],
+            ['03', 'Sat 21 Feb', 'Wheel throwing', '5 seats left', false],
+            ['--', 'Sat 28 Feb', 'Studio closed', 'Skipped', true],
+            ['04', 'Sat 7 Mar', 'Glazing', '8 seats left', false],
+            ['05', 'Sat 14 Mar', 'Firing and finish', '8 seats left', false],
+        ];
+
+        // A ten-class card, four sessions in.
+        $cardRows = [
+            ['1', 'Sat 7 Feb', 'Hand building', 'Used', '9'],
+            ['2', 'Sat 14 Feb', 'Wheel throwing', 'Used', '8'],
+            ['3', 'Sat 21 Feb', 'Wheel throwing', 'Used', '7'],
+            ['4', 'Sat 7 Mar', 'Glazing', 'Booked', '6'],
+            ['5', 'Not booked yet', 'Holder chooses', 'Open', '6'],
+        ];
+
+        $faqs = [
+            [
+                'q' => 'Is Event Schedule free for workshop instructors?',
+                'a' => 'Yes. Publishing your classes, running one as a weekly series, capping the seats with free registration, sorting strands into sub-schedules, emailing the students who follow you and syncing two ways with Google, Outlook or CalDAV are all free forever. Selling spots, multi-class cards, custom questions at checkout and QR check-in are on the Pro plan at $5 a month, and Event Schedule charges zero platform fees on what you sell.',
+            ],
+            [
+                'q' => 'Can I run different kinds of workshops on one schedule?',
+                'a' => 'Yes. Sub-schedules keep cooking, pottery, photography and craft strands apart on one link, each with its own colour, and every class carries its own description, images, capacity and prices. To be straight about what a sub-schedule is: it sorts and colours, it does not hide. A class you have not announced yet is a draft, and drafts are what keep it off the public page until you say so.',
+            ],
+            [
+                'q' => 'How do students find out about a new class?',
+                'a' => 'They follow your schedule, and then you email them. Nothing goes out on its own: you write the newsletter and send it, and you get open and click rates afterwards. The allowance counts recipients rather than sends, at 10 a month on Free, 100 on Pro and 1,000 on Enterprise. Alongside that, share your one link, embed the calendar on the studio site you already have, and download your schedule\'s QR code to tape to the bench.',
+            ],
+            [
+                'q' => 'Can I sell spots and cap the class?',
+                'a' => 'Yes. Connect your own Stripe account and sell spots with named ticket types, each with its own price, quantity and sales window. Free classes can use registration with a seat limit instead, on every plan. Either way the count is kept per session date, so a full Saturday does not close the next one, and students see the number of spots left rather than who is on the sheet.',
+            ],
+            [
+                'q' => 'How does a multi-class card work?',
+                'a' => 'A card is one purchase valid across the series, on the Pro plan. The holder gets a private link and books the session they want, and you can set how many people the card admits at each session. Give it a cancellation cutoff in hours before a session starts: cancel earlier than that and the seat goes back to the class, cancel later and the card\'s policy decides whether the visit is forfeited or the cancellation is blocked outright. Usage is tracked per session, so you can see which weeks a card holder actually turned up.',
+            ],
+            [
+                'q' => 'What about a class that runs twice on the same day?',
+                'a' => 'That is two events. One recurring event carries one start time, so a 10am beginners bench and a 2pm intermediate bench are two series, each with its own seat count and its own tickets. It is a little more setup and it keeps the two benches, and their money, properly apart.',
+            ],
+        ];
+
+        $dotSections = [
+            ['top', 'The sheet'],
+            ['unit', 'The unit'],
+            ['plan', 'The series'],
+            ['sheet', 'Two sides'],
+            ['card', 'The class card'],
+            ['money', 'Getting paid'],
+            ['after', 'After class'],
+            ['rest', 'Everything else'],
+            ['who', 'Perfect for'],
+            ['faq', 'Questions'],
+            ['claim', 'Open the sheet'],
         ];
     @endphp
 
+    <div id="es-shop-page" class="es-shop-page">
+
     <!-- ============================================================ -->
-    <!-- 1. Hero: teach what you love                                 -->
+    <!-- 1. Hero: the sheet pinned above the bench                    -->
     <!-- ============================================================ -->
-    <section class="es-hero relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
+    <section id="top" class="es-hero noise relative flex min-h-[calc(88svh-4rem)] scroll-mt-24 items-center overflow-hidden py-16">
         <div class="absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 28% 32%, rgba(14, 165, 233, 0.3), rgba(14, 165, 233, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 72% 40%, rgba(59, 130, 246, 0.3), rgba(59, 130, 246, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-3"></div>
-            <div class="es-rays absolute inset-0"></div>
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(20, 80, 110, 0.22), rgba(20, 80, 110, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 40%, rgba(140, 203, 240, 0.2), rgba(140, 203, 240, 0) 65%);"></div>
+            <div class="es-spot absolute inset-0"></div>
             <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
-            <div class="es-chalk-dust absolute inset-x-0 bottom-0 top-1/3">
-                @foreach ($dust as [$l, $s, $d, $dl, $op])
-                    <span style="left: {{ $l }}; width: {{ $s }}px; height: {{ $s }}px; --dust-dur: {{ $d }}; --dust-delay: {{ $dl }}; --dust-op: {{ $op }};"></span>
-                @endforeach
-            </div>
         </div>
 
-        <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
-                <svg aria-hidden="true" class="h-5 w-5 text-sky-500 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-                </svg>
-                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">For Workshop Instructors & Educators</span>
+        <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-14 lg:grid-cols-[1.05fr_1fr]">
+                <div>
+                    <div class="es-fade-up es-d-1 glass mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2.5">
+                        <svg aria-hidden="true" class="h-5 w-5 es-shop-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.247m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.247" />
+                        </svg>
+                        <span class="es-shop-muted text-sm font-medium tracking-wide">For workshop and class instructors</span>
+                    </div>
+
+                    <h1 class="es-balance es-shop-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <span class="es-mask"><span class="es-mask-line">One class. Ten Saturdays.</span></span>
+                        <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="es-shop-accent">Eight</span> seats each.</span></span>
+                    </h1>
+
+                    <p class="es-fade-up es-d-2 es-shop-muted mb-10 max-w-xl text-lg sm:text-xl">
+                        Set the class up once as a series, cap the bench, and let the sheet fill itself. The seat count is kept per session, so a full Saturday never closes the next one.
+                    </p>
+
+                    <div class="es-fade-up es-d-3 flex flex-col items-start gap-4 sm:flex-row">
+                        <a href="#plan" class="glass group inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl px-7 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+                            How a class is set up
+                            <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                        </a>
+                        <a href="{{ app_url('/sign_up?type=talent') }}" class="es-shop-btn group inline-flex items-center justify-center gap-2 rounded-2xl px-8 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
+                            Create your schedule
+                            <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- THE SHEET. Ruled lines are seats. -->
+                <div class="es-fade-up es-d-4" data-reveal>
+                    <div class="es-shop-sheet">
+                        <div class="es-shop-holes" aria-hidden="true"><i></i><i></i><i></i></div>
+                        <div class="mb-1 flex flex-wrap items-baseline justify-between gap-2">
+                            <h2 class="es-shop-sheet-ink text-base font-bold">Wheel Throwing &middot; Beginners</h2>
+                            <span class="es-shop-sheet-muted es-shop-fig text-xs">Sat 14 Feb &middot; 10:00</span>
+                        </div>
+                        <p class="es-shop-sheet-muted mb-4 border-b es-shop-sheet-rule pb-3 text-xs">Bench of eight &middot; session 02 of 10</p>
+
+                        <div>
+                            @foreach ($sheet as $i => [$no, $who, $how])
+                                <div class="es-shop-line @if (! $who) es-shop-line-open @endif">
+                                    <span class="es-shop-line-no">{{ $no }}</span>
+                                    <span class="es-shop-line-name es-shop-sheet-ink" style="--i: {{ $i }};">{{ $who ?: 'open' }}</span>
+                                    @if ($how)
+                                        <span class="es-shop-line-how" style="--i: {{ $i }};">{{ $how }}</span>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <div class="mt-4 flex flex-wrap items-center justify-between gap-2">
+                            <span class="es-shop-stamp">6 of 8 taken</span>
+                            <span class="es-shop-sheet-accent es-shop-fig text-xs font-bold">2 seats left</span>
+                        </div>
+                        <p class="es-shop-sheet-muted es-shop-fine mt-3">
+                            Your side of the sheet. Students see the number, never the names.
+                        </p>
+                    </div>
+                </div>
             </div>
 
-            <h1 class="es-balance mb-8 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
-                <span class="es-mask"><span class="es-mask-line">Teach what you love.</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="chalk-heading es-gradient-anim">Fill every seat.</span></span></span>
-            </h1>
-
-            <div class="chalk-stroke es-fade-up es-d-2 mx-auto -mt-2 mb-6 h-3 w-64 max-w-full" aria-hidden="true">
-                <svg viewBox="0 0 220 12" fill="none" preserveAspectRatio="none" class="h-full w-full">
-                    <path d="M4 7 Q 45 2 90 6 T 172 5 Q 198 7 216 4" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" />
-                    <path d="M10 10 Q 70 8 130 9 T 210 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.5" />
-                </svg>
-            </div>
-
-            <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-2xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
-                From pottery to photography, cooking to coding. One link for all your workshops. Reach students directly.
-            </p>
-
-            <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <a href="#features" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
-                    See the tools
-                    <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
-                </a>
-                <a href="{{ app_url('/sign_up?type=talent') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-600 to-blue-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-sky-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-sky-500/40">
-                    Create your schedule
-                    <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-            </div>
-
-            <!-- Workshop-type marquee -->
-            <div class="es-fade-up es-d-4 pointer-events-auto mx-auto mt-14 max-w-3xl">
+            <!-- What people teach -->
+            <div class="es-fade-up es-d-4 mx-auto mt-14 max-w-3xl">
                 <div class="es-marquee-mask">
-                    <div class="es-marquee" data-marquee="1" aria-hidden="true">
+                    <div class="es-marquee" data-marquee="1">
                         <div class="es-marquee-track">
-                            @for ($tc = 0; $tc < 2; $tc++)
-                                @foreach (['Cooking', 'Pottery', 'Photography', 'Woodworking', 'Painting', 'Music Lessons', 'Sewing', 'Coding'] as $tag)
-                                    <span class="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100/80 px-4 py-1.5 text-xs font-semibold text-sky-800 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-300">
-                                        <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-sky-400 to-blue-400"></span>
-                                        {{ $tag }}
-                                    </span>
+                            @for ($chipCopy = 0; $chipCopy < 2; $chipCopy++)
+                                @foreach (['Cooking', 'Pottery', 'Photography', 'Woodworking', 'Painting', 'Music lessons', 'Sewing', 'Coding', 'Printmaking', 'Bread'] as $chip)
+                                    <span @if ($chipCopy === 1) aria-hidden="true" @endif class="es-shop-chip">{{ $chip }}</span>
                                 @endforeach
                             @endfor
                         </div>
@@ -327,41 +683,200 @@
                 </div>
             </div>
         </div>
-
     </section>
 
     <!-- ============================================================ -->
-    <!-- 2. On the board (chalkboard dark band)                       -->
+    <!-- 2. The unit is the bench (the wall: fixed dark)               -->
     <!-- ============================================================ -->
-    <section class="bg-gray-50 px-2 py-14 dark:bg-[#0f0f14] sm:px-4 lg:py-20">
-        <div class="es-band-dark chalk-board noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+    <section id="unit" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
+        <div class="es-shop-wall noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
             <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 30%, rgba(45, 138, 110, 0.32), rgba(45, 138, 110, 0) 60%); opacity: 0.6;"></div>
-                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 65%, rgba(74, 160, 132, 0.24), rgba(74, 160, 132, 0) 60%); opacity: 0.55;"></div>
-                <div class="grid-overlay absolute inset-0 opacity-25"></div>
-                <div class="es-chalk-dust absolute inset-0">
-                    @foreach ($dust as [$l, $s, $d, $dl, $op])
-                        <span style="left: {{ $l }}; width: {{ $s }}px; height: {{ $s }}px; --dust-dur: {{ $d }}; --dust-delay: {{ $dl }}; --dust-op: {{ $op }};"></span>
-                    @endforeach
-                </div>
+                <div class="es-shop-peg absolute inset-0"></div>
+                <div class="grid-overlay absolute inset-0 opacity-20"></div>
             </div>
 
             <div class="relative z-10 mx-auto max-w-5xl">
-                <div class="mx-auto mb-12 max-w-2xl text-center" data-reveal>
-                    <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-sky-300 backdrop-blur-sm">On the board</span>
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-shop-num mb-6" data-reveal aria-hidden="true"><span>02</span></div>
+                    <p class="es-shop-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The unit</p>
+                    <h2 class="es-balance text-3xl font-black tracking-tight es-shop-wall-ink md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Most calendars think a class is <span class="es-shop-lit">one date.</span>
+                    </h2>
+                    <p class="es-shop-wall-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        It is a bench, run again next week, with the seats counted separately every time.
+                    </p>
                 </div>
-                <div class="grid grid-cols-1 gap-8 text-center md:grid-cols-3" data-reveal-group="90">
-                    <div data-reveal>
-                        <div class="chalk-text mb-2 text-4xl font-black md:text-5xl"><span data-count-to="68">68</span>%</div>
-                        <p class="text-gray-300">workshop spots go unsold without direct marketing</p>
+
+                <div class="grid gap-6 md:grid-cols-3" data-reveal-group="110">
+                    <div class="es-shop-card p-6" data-reveal="panel">
+                        <p class="es-shop-tag mb-3">The term</p>
+                        <h3 class="mb-2 text-lg font-bold es-shop-wall-ink">
+                            <span class="es-shop-fig" data-count-to="10">10</span> sessions
+                        </h3>
+                        <p class="text-sm es-shop-wall-muted">One event, a weekly pattern, ending after ten. Typing ten classes in by hand is ten chances to fat-finger a start time.</p>
                     </div>
-                    <div data-reveal>
-                        <div class="chalk-text mb-2 text-4xl font-black md:text-5xl">$0</div>
-                        <p class="text-gray-300">platform fees on ticket sales</p>
+                    <div class="es-shop-card p-6" data-reveal="panel">
+                        <p class="es-shop-tag mb-3">The bench</p>
+                        <h3 class="mb-2 text-lg font-bold es-shop-wall-ink">
+                            <span class="es-shop-fig" data-count-to="8">8</span> seats, per session
+                        </h3>
+                        <p class="text-sm es-shop-wall-muted">The cap is held per date, not per class. Fill this Saturday and the next one is still wide open, with its own count.</p>
                     </div>
-                    <div data-reveal>
-                        <div class="chalk-text mb-2 text-4xl font-black md:text-5xl">1-click</div>
-                        <p class="text-gray-300">email to your entire student list</p>
+                    <div class="es-shop-card p-6" data-reveal="panel">
+                        <p class="es-shop-tag mb-3">The link</p>
+                        <h3 class="mb-2 text-lg font-bold es-shop-wall-ink">1 address</h3>
+                        <p class="text-sm es-shop-wall-muted">Students see the whole term at one link, book the week that suits them, and download that date to their own calendar.</p>
+                    </div>
+                </div>
+
+                <p class="mt-10 text-center es-shop-wall-muted" data-reveal>
+                    The bench is the unit. Everything below hangs off it.
+                    <a href="#plan" class="es-shop-lit inline-flex items-center gap-1 font-semibold transition-all hover:gap-2">
+                        Set one up
+                        <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                    </a>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 3. Setting the series                                        -->
+    <!-- ============================================================ -->
+    <section id="plan" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-shop-num mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                <p class="es-shop-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Setting the series</p>
+                <h2 class="es-balance es-shop-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    The day, the weeks off, and <span class="es-shop-accent">the last one.</span>
+                </h2>
+                <p class="es-shop-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Three settings turn one event into a whole term, and all three are on the free plan.
+                </p>
+            </div>
+
+            <div class="grid gap-6 md:grid-cols-3" data-reveal-group="100">
+                <div class="es-shop-card p-7" data-reveal="panel">
+                    <div class="mb-3 flex flex-wrap items-center gap-2">
+                        <h3 class="es-shop-ink text-lg font-bold">The day it runs</h3>
+                        <span class="es-shop-plan">Free</span>
+                    </div>
+                    <p class="es-shop-muted text-sm">Pick the days of the week and the start time, or repeat every second week, monthly, or once a year. Saturdays is one entry, not ten.</p>
+                </div>
+                <div class="es-shop-card p-7" data-reveal="panel">
+                    <div class="mb-3 flex flex-wrap items-center gap-2">
+                        <h3 class="es-shop-ink text-lg font-bold">The weeks you are closed</h3>
+                        <span class="es-shop-plan">Free</span>
+                    </div>
+                    <p class="es-shop-muted text-sm">Take single dates out and add one-off dates in. A closed studio or a kiln repair does not mean rebuilding the term.</p>
+                </div>
+                <div class="es-shop-card p-7" data-reveal="panel">
+                    <div class="mb-3 flex flex-wrap items-center gap-2">
+                        <h3 class="es-shop-ink text-lg font-bold">The last session</h3>
+                        <span class="es-shop-plan">Free</span>
+                    </div>
+                    <p class="es-shop-muted text-sm">End on a date, or after a set number of sessions. This is the setting that makes a term a term instead of a weekly class that runs forever.</p>
+                </div>
+            </div>
+
+            <!-- The session plan: numbers survive the skipped week -->
+            <div class="mt-10 es-shop-card p-6 sm:p-8" data-reveal="panel">
+                <div class="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+                    <h3 class="es-shop-ink text-lg font-bold">Pottery Fundamentals</h3>
+                    <span class="es-shop-muted es-shop-fig text-xs">One recurring event &middot; Saturdays 10:00 &middot; ends after 10</span>
+                </div>
+                <div>
+                    @foreach ($sessions as [$sNo, $sDate, $sTitle, $sSeats, $sSkip])
+                        <div class="es-shop-sess @if ($sSkip) es-shop-sess-skip @endif">
+                            <span class="es-shop-sess-no">{{ $sNo }}</span>
+                            <span class="min-w-0">
+                                <span class="es-shop-ink block truncate text-sm font-semibold">{{ $sTitle }}</span>
+                                <span class="es-shop-muted es-shop-fig block text-xs">{{ $sDate }}</span>
+                            </span>
+                            <span class="es-shop-muted es-shop-fig text-xs font-bold">{{ $sSeats }}</span>
+                        </div>
+                    @endforeach
+                </div>
+                <p class="es-shop-muted es-shop-hr mt-5 border-t pt-4 text-xs">
+                    The skipped week does not use up a session. A date you take out comes off the count as well, so a term set to end after ten still teaches ten. Change the start time once and every remaining session follows it.
+                </p>
+            </div>
+
+            <p class="es-shop-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
+                A class that runs twice on the same day is two events, because one recurring event carries one start time. Two benches, two seat counts, no argument about which one somebody booked.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 4. Two sides of the same sheet (duplex)                      -->
+    <!-- ============================================================ -->
+    <section id="sheet" class="scroll-mt-24 es-shop-hr border-y py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-shop-num mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                <p class="es-shop-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Two sides</p>
+                <h2 class="es-balance es-shop-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
+                    You see the sheet. They see <span class="es-shop-accent">the count.</span>
+                </h2>
+                <p class="es-shop-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Names and email addresses belong to you. The public page shows spots remaining and nothing else: no roster, no addresses, not ever.
+                </p>
+            </div>
+
+            <div class="grid items-start gap-8 lg:grid-cols-2">
+                <!-- Your side -->
+                <div data-reveal="panel">
+                    <p class="es-shop-tag mb-3">Signed in as the instructor</p>
+                    <div class="es-shop-sheet">
+                        <div class="es-shop-holes" aria-hidden="true"><i></i><i></i><i></i></div>
+                        <div class="mb-4 flex flex-wrap items-baseline justify-between gap-2 border-b es-shop-sheet-rule pb-3">
+                            <h3 class="es-shop-sheet-ink text-sm font-bold">Sat 14 Feb &middot; 10:00</h3>
+                            <span class="es-shop-sheet-muted es-shop-fig text-xs">6 of 8</span>
+                        </div>
+                        <div>
+                            @foreach ($sheet as $i => [$no, $who, $how])
+                                <div class="es-shop-line @if (! $who) es-shop-line-open @endif">
+                                    <span class="es-shop-line-no">{{ $no }}</span>
+                                    <span class="es-shop-line-name es-shop-sheet-ink" style="--i: {{ $i }};">{{ $who ?: 'open' }}</span>
+                                    @if ($how)
+                                        <span class="es-shop-line-how" style="--i: {{ $i }};">{{ $how }}</span>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                        <p class="es-shop-sheet-muted es-shop-fine mt-4">
+                            Every name arrived with an email address, from a sale or from a free registration. Sales export to a CSV on the Pro plan, when you want the list somewhere else.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Their side -->
+                <div data-reveal="panel">
+                    <p class="es-shop-tag mb-3">What a student sees</p>
+                    <div class="es-shop-card p-6 sm:p-7">
+                        <h3 class="es-shop-ink text-lg font-bold">Wheel Throwing &middot; Beginners</h3>
+                        <p class="es-shop-muted es-shop-fig mt-1 text-xs">Sat 14 Feb &middot; 10:00 &middot; Clay Lane Studio</p>
+                        <p class="es-shop-accent es-shop-fig mt-5 text-2xl font-black">2 spots remaining</p>
+                        <div class="es-shop-well mt-4 rounded-xl p-4">
+                            <p class="es-shop-ink text-sm font-semibold">Register</p>
+                            <p class="es-shop-muted mt-1 text-xs">Name and email, or a card if the class is paid. That is the whole form, unless you have added a question of your own.</p>
+                        </div>
+                        <ul class="mt-5 space-y-3" data-reveal-group="70">
+                            <li class="flex gap-3" data-reveal>
+                                <svg aria-hidden="true" class="es-shop-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span class="es-shop-muted text-sm">The number comes off the same count you set, so it is right the moment somebody books.</span>
+                            </li>
+                            <li class="flex gap-3" data-reveal>
+                                <svg aria-hidden="true" class="es-shop-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span class="es-shop-muted text-sm">When the session is full, the form becomes a waitlist for that date instead of a dead end, which is a Pro feature.</span>
+                            </li>
+                            <li class="flex gap-3" data-reveal>
+                                <svg aria-hidden="true" class="es-shop-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span class="es-shop-muted text-sm">Free registration with a seat limit is on every plan; taking money for a spot is Pro.</span>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -369,300 +884,291 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 3. Bento features                                            -->
+    <!-- 5. The class card (a real record: the punch ledger)          -->
     <!-- ============================================================ -->
-    <section id="features" class="scroll-mt-24 bg-white py-20 dark:bg-[#0a0a0f] lg:py-28">
+    <section id="card" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-shop-num mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                <p class="es-shop-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The class card</p>
+                <h2 class="es-balance es-shop-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Ten classes, <span class="es-shop-accent">one purchase.</span>
+                </h2>
+                <p class="es-shop-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Because the term is one recurring event, a card can span it. The holder gets a private link, books the week that suits them, and the card keeps its own ledger.
+                </p>
+            </div>
+
+            <div class="es-shop-card p-6 sm:p-8" data-reveal="panel">
+                <div class="mb-5 flex flex-wrap items-center gap-2">
+                    <h3 class="es-shop-ink text-lg font-bold">Ten-class card &middot; Priya S.</h3>
+                    <span class="es-shop-plan es-shop-plan-pro">Pro</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="es-shop-table w-full border-collapse text-left">
+                        <caption class="sr-only">A ten-class card, four sessions in: each booking with its date, the class, whether it was used, and the number of classes still on the card</caption>
+                        <thead>
+                            <tr class="es-shop-tag">
+                                <th scope="col" class="pb-3 font-bold">Use</th>
+                                <th scope="col" class="pb-3 font-bold">Date</th>
+                                <th scope="col" class="pb-3 font-bold">Class</th>
+                                <th scope="col" class="pb-3 font-bold">Status</th>
+                                <th scope="col" class="pb-3 text-right font-bold">Left</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($cardRows as [$cNo, $cDate, $cClass, $cStatus, $cLeft])
+                                <tr class="es-shop-tr">
+                                    <th scope="row" class="es-shop-ink es-shop-fig py-3 pe-3 align-middle text-sm font-bold">{{ $cNo }}</th>
+                                    <td class="es-shop-muted es-shop-fig py-3 pe-3 align-middle text-xs">{{ $cDate }}</td>
+                                    <td class="es-shop-ink py-3 pe-3 align-middle text-sm">{{ $cClass }}</td>
+                                    <td class="py-3 pe-3 align-middle">
+                                        <span class="@if ($cStatus === 'Open') es-shop-muted @else es-shop-accent @endif es-shop-fig text-xs font-bold uppercase tracking-wider">{{ $cStatus }}</span>
+                                    </td>
+                                    <td class="es-shop-ink es-shop-fig py-3 text-right align-middle text-sm font-bold">{{ $cLeft }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <p class="es-shop-muted mt-4 text-xs">Usage is tracked per session, so you can see which weeks a card holder actually turned up to.</p>
+            </div>
+
+            <div class="mt-8 grid gap-6 md:grid-cols-3" data-reveal-group="100">
+                <div class="es-shop-card p-7" data-reveal="panel">
+                    <div class="mb-3 flex flex-wrap items-center gap-2">
+                        <h3 class="es-shop-ink text-lg font-bold">A cutoff you set</h3>
+                        <span class="es-shop-plan es-shop-plan-pro">Pro</span>
+                    </div>
+                    <p class="es-shop-muted text-sm">Give the card a cancellation cutoff in hours before a session starts. Cancel earlier than that and the seat goes back to the bench, and the waitlist for that date hears about it.</p>
+                </div>
+                <div class="es-shop-card p-7" data-reveal="panel">
+                    <div class="mb-3 flex flex-wrap items-center gap-2">
+                        <h3 class="es-shop-ink text-lg font-bold">A policy for late notice</h3>
+                        <span class="es-shop-plan es-shop-plan-pro">Pro</span>
+                    </div>
+                    <p class="es-shop-muted text-sm">Past the cutoff, the card decides: forfeit the class, or block the cancellation outright. Either way it is your rule, written down before anybody argues it.</p>
+                </div>
+                <div class="es-shop-card p-7" data-reveal="panel">
+                    <div class="mb-3 flex flex-wrap items-center gap-2">
+                        <h3 class="es-shop-ink text-lg font-bold">More than one seat</h3>
+                        <span class="es-shop-plan es-shop-plan-pro">Pro</span>
+                    </div>
+                    <p class="es-shop-muted text-sm">Set how many people a card admits at each session, so a parent-and-child card takes two places off the bench rather than one.</p>
+                </div>
+            </div>
+
+            <p class="es-shop-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
+                Cards are sold alongside single spots, not instead of them. Somebody who wants one Saturday can still just buy one Saturday.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 6. Getting paid                                              -->
+    <!-- ============================================================ -->
+    <section id="money" class="scroll-mt-24 es-shop-hr border-t py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-shop-num mb-6" data-reveal aria-hidden="true"><span>06</span></div>
+                <p class="es-shop-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Getting paid</p>
+                <h2 class="es-balance es-shop-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
+                    What the bench earns is <span class="es-shop-accent">what you keep.</span>
+                </h2>
+                <p class="es-shop-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Spots are sold through your own Stripe account. Event Schedule charges zero platform fees, so past Stripe's own processing the money is yours.
+                </p>
+            </div>
+
+            <div class="grid gap-6 md:grid-cols-3" data-reveal-group="100">
+                <div class="es-shop-card p-7" data-reveal="panel">
+                    <div class="mb-3 flex flex-wrap items-center gap-2">
+                        <h3 class="es-shop-ink text-lg font-bold">Prices, plainly</h3>
+                        <span class="es-shop-plan es-shop-plan-pro">Pro</span>
+                    </div>
+                    <p class="es-shop-muted text-sm">Named ticket types, each with its own price, quantity and sales window: early bird, concession, materials included. Discount codes and a rate for booking several at once come with them.</p>
+                </div>
+                <div class="es-shop-card p-7" data-reveal="panel">
+                    <div class="mb-3 flex flex-wrap items-center gap-2">
+                        <h3 class="es-shop-ink text-lg font-bold">Ask before they arrive</h3>
+                        <span class="es-shop-plan es-shop-plan-pro">Pro</span>
+                    </div>
+                    <p class="es-shop-muted text-sm">Custom questions collect what the class actually needs: apron size, dietary needs, whether they are bringing their own camera or borrowing yours.</p>
+                </div>
+                <div class="es-shop-card p-7" data-reveal="panel">
+                    <div class="mb-3 flex flex-wrap items-center gap-2">
+                        <h3 class="es-shop-ink text-lg font-bold">A class as a present</h3>
+                        <span class="es-shop-plan es-shop-plan-pro">Pro</span>
+                    </div>
+                    <p class="es-shop-muted text-sm">Sell a gift card that somebody sends to a recipient by email, with its balance redeemed toward any class on your schedule.</p>
+                </div>
+            </div>
+
+            <p class="es-shop-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
+                Teaching for free, or asking for the money in the room? Registration with a seat limit needs none of this and is on the free plan.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 7. After the class (the wall again)                          -->
+    <!-- ============================================================ -->
+    <section id="after" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
+        <div class="es-shop-wall noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                <div class="es-shop-peg absolute inset-0"></div>
+                <div class="grid-overlay absolute inset-0 opacity-25"></div>
+            </div>
+
+            <div class="relative z-10 mx-auto max-w-5xl">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-shop-num mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                    <p class="es-shop-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">After class</p>
+                    <h2 class="es-balance text-3xl font-black tracking-tight es-shop-wall-ink md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        The bit that fills <span class="es-shop-lit">next term.</span>
+                    </h2>
+                </div>
+
+                <div class="grid gap-6 md:grid-cols-3" data-reveal-group="100">
+                    <div class="es-shop-card p-6" data-reveal="panel">
+                        <div class="mb-2 flex flex-wrap items-center gap-2">
+                            <h3 class="text-lg font-bold es-shop-wall-ink">The code on the bench</h3>
+                            <span class="es-shop-plan">Free</span>
+                        </div>
+                        <p class="text-sm es-shop-wall-muted">Download your schedule's QR code, print it, and tape it to the bench. People who liked the class scan it on the way out and follow you.</p>
+                    </div>
+                    <div class="es-shop-card p-6" data-reveal="panel">
+                        <div class="mb-2 flex flex-wrap items-center gap-2">
+                            <h3 class="text-lg font-bold es-shop-wall-ink">What they made</h3>
+                            <span class="es-shop-plan">Free</span>
+                        </div>
+                        <p class="text-sm es-shop-wall-muted">Students add photos, video and comments to the class they came to, and nothing appears until you approve it. Free covers 25 photos per schedule.</p>
+                    </div>
+                    <div class="es-shop-card p-6" data-reveal="panel">
+                        <div class="mb-2 flex flex-wrap items-center gap-2">
+                            <h3 class="text-lg font-bold es-shop-wall-ink">Whether it landed</h3>
+                            <span class="es-shop-plan es-shop-plan-pro">Pro</span>
+                        </div>
+                        <p class="text-sm es-shop-wall-muted">Collect star ratings and written comments from the people who attended, so the second run of a class is better than the first.</p>
+                    </div>
+                </div>
+
+                <p class="mt-10 text-center es-shop-wall-muted" data-reveal>
+                    Being straight about following: it is a mailing list, not a notification robot. Nobody is told automatically when you add a class. You write the newsletter and you send it, and the allowance counts recipients: 10 a month on Free, 100 on Pro, 1,000 on Enterprise.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 8. Everything else: bento                                    -->
+    <!-- ============================================================ -->
+    <section id="rest" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Everything to fill every <span class="chalk-heading">workshop</span>
+                <div class="es-shop-num mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <p class="es-shop-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Everything else</p>
+                <h2 class="es-balance es-shop-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Between one Saturday and the next.
                 </h2>
             </div>
 
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="110">
-
-                <!-- Workshop announcements (2 cols) -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="flex flex-col gap-8 lg:flex-row lg:items-center">
-                            <div class="flex-1">
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-800/30 dark:bg-sky-900/40 dark:text-sky-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                                    Workshop Announcements
-                                </div>
-                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Announce new workshops, fill seats instantly</h3>
-                                <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">One click sends your upcoming workshops to every student who follows you. No algorithm decides who sees it.</p>
-                                <div class="flex flex-wrap gap-3">
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Email newsletters</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Direct to inbox</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">No social media needed</span>
-                                </div>
+                <!-- 1 -->
+                <div class="es-bento group relative md:col-span-2" data-reveal="panel" data-tilt="3.5">
+                    <div class="es-tilt-inner es-shop-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-shop-ink text-xl font-bold">Tell the students you already have</h3>
+                                <span class="es-shop-plan">Free</span>
                             </div>
-                            <div class="w-full shrink-0 lg:w-auto" aria-hidden="true">
-                                <div class="animate-float">
-                                    <div class="max-w-xs rounded-2xl border border-sky-300 bg-gradient-to-br from-sky-100 to-blue-100 p-4 dark:border-sky-400/30 dark:from-sky-950 dark:to-blue-950">
-                                        <div class="mb-3 text-[10px] font-semibold tracking-wide text-sky-600 dark:text-sky-300">UPCOMING WORKSHOPS</div>
-                                        <div class="space-y-3">
-                                            <div class="es-ai-field flex items-center gap-3 rounded-lg border border-sky-400/30 bg-sky-500/20 p-2" style="--i: 0;">
-                                                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500 to-red-500 text-xs font-bold text-white">SAT</div>
-                                                <div class="flex-1"><div class="text-sm font-semibold text-gray-900 dark:text-white">Italian Pasta Making</div><div class="text-xs text-sky-600 dark:text-sky-300">Sat, Feb 8 - 3 spots left</div></div>
-                                            </div>
-                                            <div class="es-ai-field flex items-center gap-3 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 1;">
-                                                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-yellow-500 text-xs font-bold text-white">SUN</div>
-                                                <div class="flex-1"><div class="text-sm font-medium text-gray-600 dark:text-gray-300">Wheel Throwing Basics</div><div class="text-xs text-gray-500 dark:text-gray-400">Sun, Feb 9 - 6 spots left</div></div>
-                                            </div>
-                                            <div class="es-ai-field flex items-center gap-3 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 2;">
-                                                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 text-xs font-bold text-white">WED</div>
-                                                <div class="flex-1"><div class="text-sm font-medium text-gray-600 dark:text-gray-300">Night Photography Walk</div><div class="text-xs text-gray-500 dark:text-gray-400">Wed, Feb 12 - 8 spots left</div></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <p class="es-shop-muted mb-4">Everyone who found you from the bench, the link or the embed and then followed your schedule is a mailing list you own. Write a newsletter when the next term goes up, and read the open and click rates afterwards.</p>
+                            <p class="es-shop-muted text-sm">The number worth knowing: the allowance counts recipients, not sends, so one email to 40 students is 40 of the month's allowance.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
-                <!-- Zero-fee ticketing -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/40 dark:text-emerald-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
-                            Zero-Fee Ticketing
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Keep 100% of every sale</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">No platform fees. No per-ticket charges. Every dollar your students pay goes to you.</p>
-                        <div class="mt-auto rounded-xl border border-emerald-400/30 bg-emerald-500/15 p-4 text-center" aria-hidden="true">
-                            <div class="mb-1 text-5xl font-bold text-emerald-500 dark:text-emerald-400"><span data-count-to="100">100</span>%</div>
-                            <div class="text-sm font-medium text-emerald-600 dark:text-emerald-300">you keep</div>
-                            <div class="mt-3 flex items-center justify-center gap-2">
-                                <div class="h-1 flex-1 rounded-full bg-emerald-400"></div>
-                                <span class="text-xs text-emerald-600 dark:text-emerald-300">$0 platform fees</span>
+                <!-- 2 -->
+                <div class="es-bento group relative" data-reveal="panel" data-tilt="5">
+                    <div class="es-tilt-inner es-shop-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-shop-ink text-xl font-bold">When a session fills</h3>
+                                <span class="es-shop-plan es-shop-plan-pro">Pro</span>
                             </div>
+                            <p class="es-shop-muted">A full session turns its sign-up into a waitlist for that date rather than a dead end. Cancel a booking and the freed seat is offered to the first person waiting on that date, and if they do not take it the offer passes to the next one.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
-                <!-- One link -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-blue-200 bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 dark:border-blue-800/30 dark:bg-blue-900/40 dark:text-blue-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
-                            One Link
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">One link for everything</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Share one URL. Students see all your upcoming workshops, book, and pay.</p>
-                        <div class="mt-auto rounded-xl border border-blue-400/30 bg-blue-500/15 p-4" aria-hidden="true">
-                            <div class="flex items-center gap-2 rounded-lg border border-gray-300 bg-gray-200 px-3 py-2 dark:border-white/10 dark:bg-[#0f0f14]">
-                                <svg aria-hidden="true" class="h-4 w-4 shrink-0 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
-                                <span class="truncate font-mono text-sm text-blue-600 dark:text-blue-300">yourworkshop.eventschedule.com</span>
+                <!-- 3 -->
+                <div class="es-bento group relative" data-reveal="panel" data-tilt="5">
+                    <div class="es-tilt-inner es-shop-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-shop-ink text-xl font-bold">Beginners and advanced</h3>
+                                <span class="es-shop-plan">Free</span>
                             </div>
-                            <div class="mt-3 flex gap-2">
-                                <div class="h-2 flex-1 rounded-full bg-blue-400/40"></div>
-                                <div class="h-2 flex-1 rounded-full bg-blue-400/25"></div>
-                                <div class="h-2 flex-1 rounded-full bg-blue-400/15"></div>
-                            </div>
+                            <p class="es-shop-muted">Sub-schedules keep the strands apart on one link, each with its own colour. They sort and they colour; hiding a class until you announce it is what a draft is for.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
-                <!-- Workshop series / curriculum (2 cols) -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="flex flex-col gap-8 lg:flex-row lg:items-center">
-                            <div class="flex-1">
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 dark:border-blue-800/30 dark:bg-blue-900/40 dark:text-blue-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-                                    Workshop Series
-                                </div>
-                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Build a curriculum that keeps students coming back</h3>
-                                <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">Create multi-session series with progressive skill building. Offer series discounts to encourage full enrollment.</p>
-                                <div class="flex flex-wrap gap-3">
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Multi-session series</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Progressive levels</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Bundle pricing</span>
-                                </div>
+                <!-- 4 -->
+                <div class="es-bento group relative md:col-span-2" data-reveal="panel" data-tilt="3.5">
+                    <div class="es-tilt-inner es-shop-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-shop-ink text-xl font-bold">On the studio site you already have</h3>
+                                <span class="es-shop-plan">Free</span>
                             </div>
-                            <div class="w-full shrink-0 lg:w-auto" aria-hidden="true">
-                                <div class="animate-float">
-                                    <div class="relative max-w-xs overflow-hidden rounded-2xl border border-blue-300 bg-gradient-to-br from-blue-100 to-sky-100 p-4 dark:border-blue-400/30 dark:from-blue-950 dark:to-sky-950">
-                                        <div class="postit-fold" aria-hidden="true"></div>
-                                        <div class="mb-3 flex items-center justify-between">
-                                            <div class="text-[10px] font-semibold tracking-wide text-blue-600 dark:text-blue-300">POTTERY FUNDAMENTALS</div>
-                                            <span class="inline-flex items-center rounded-full border border-green-300 bg-green-100 px-2 py-0.5 text-[10px] font-medium text-green-600 dark:border-green-500/30 dark:bg-green-500/20 dark:text-green-300">Series Discount</span>
-                                        </div>
-                                        <div class="space-y-2">
-                                            <div class="es-ai-field flex items-center gap-3 rounded-lg border border-blue-300 bg-blue-200 p-2 dark:border-blue-400/30 dark:bg-blue-500/20" style="--i: 0;">
-                                                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500/40 text-xs font-bold text-blue-600 dark:text-blue-200">1</div>
-                                                <div class="flex-1 text-sm font-medium text-gray-900 dark:text-white">Hand Building</div>
-                                                <svg aria-hidden="true" class="h-4 w-4 text-green-500 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                                            </div>
-                                            <div class="es-ai-field flex items-center gap-3 rounded-lg border border-blue-300 bg-blue-200 p-2 dark:border-blue-400/30 dark:bg-blue-500/20" style="--i: 1;">
-                                                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500/40 text-xs font-bold text-blue-600 dark:text-blue-200">2</div>
-                                                <div class="flex-1 text-sm font-medium text-gray-900 dark:text-white">Wheel Throwing</div>
-                                                <svg aria-hidden="true" class="h-4 w-4 text-green-500 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                                            </div>
-                                            <div class="es-ai-field flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-100 p-2 dark:border-blue-400/20 dark:bg-blue-500/10" style="--i: 2;">
-                                                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500/30 text-xs font-bold text-blue-600 dark:text-blue-300">3</div>
-                                                <div class="flex-1 text-sm font-medium text-gray-600 dark:text-gray-300">Glazing</div>
-                                                <div class="text-[10px] text-blue-600 dark:text-blue-400">Next</div>
-                                            </div>
-                                            <div class="es-ai-field flex items-center gap-3 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 3;">
-                                                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500/20 text-xs font-bold text-blue-500 dark:text-blue-400">4</div>
-                                                <div class="flex-1 text-sm font-medium text-gray-600 dark:text-gray-400">Advanced Forms</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <p class="es-shop-muted mb-4">Embed the calendar on your own site so the term lives where people look you up, and sync two ways with Google, Outlook and CalDAV so a class you move moves everywhere.</p>
+                            <p class="es-shop-muted text-sm">Built-in analytics show page views, the devices people are on and where the traffic came from. That is what they measure, and nothing more.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
-                <!-- Capacity management -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-amber-200 bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-800/30 dark:bg-amber-900/40 dark:text-amber-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                            Capacity Management
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Never overbook a class</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Set seat limits per workshop. Students see availability in real time.</p>
-                        <div class="mt-auto space-y-3" aria-hidden="true">
-                            <div class="es-ai-field flex items-center justify-between rounded-lg border border-red-400/30 bg-red-500/20 p-2" style="--i: 0;"><span class="text-sm font-medium text-gray-900 dark:text-white">Pasta Making</span><span class="text-xs font-medium text-red-600 dark:text-red-300">SOLD OUT</span></div>
-                            <div class="es-ai-field flex items-center justify-between rounded-lg border border-amber-400/30 bg-amber-500/20 p-2" style="--i: 1;"><span class="text-sm font-medium text-gray-900 dark:text-white">Wheel Throwing</span><span class="text-xs font-medium text-amber-600 dark:text-amber-300">2 seats left</span></div>
-                            <div class="es-ai-field flex items-center justify-between rounded-lg border border-green-400/30 bg-green-500/20 p-2" style="--i: 2;"><span class="text-sm font-medium text-gray-900 dark:text-white">Photography Walk</span><span class="text-xs font-medium text-green-600 dark:text-green-300">8 seats left</span></div>
+                <!-- 5 -->
+                <div class="es-bento group relative" data-reveal="panel" data-tilt="5">
+                    <div class="es-tilt-inner es-shop-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-shop-ink text-xl font-bold">Next term, faster</h3>
+                                <span class="es-shop-plan">Free</span>
+                            </div>
+                            <p class="es-shop-muted">Clone a class you have run before and change the dates. Keep it as a draft while you think about it, and publish when the term is settled.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
-                <!-- Google Calendar sync -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-blue-200 bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 dark:border-blue-800/30 dark:bg-blue-900/40 dark:text-blue-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                            Google Calendar
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Two-way calendar sync</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Your workshops appear in Google Calendar. Changes sync both ways automatically.</p>
-                        <div class="mt-auto rounded-xl border border-blue-400/30 bg-blue-500/15 p-3" aria-hidden="true">
-                            <div class="mb-3 flex items-center gap-3">
-                                <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-white">
-                                    <svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="18" rx="2" fill="#4285F4" /><rect x="4" y="8" width="16" height="11" rx="1" fill="white" /><text x="12" y="17" text-anchor="middle" font-size="8" font-weight="bold" fill="#4285F4">31</text></svg>
-                                </div>
-                                <div class="flex-1"><div class="text-sm font-medium text-gray-900 dark:text-white">Google Calendar</div><div class="text-xs text-green-500 dark:text-green-400">Connected</div></div>
+                <!-- 6 -->
+                <div class="es-bento group relative lg:col-span-2" data-reveal="panel" data-tilt="3.5">
+                    <div class="es-tilt-inner es-shop-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-shop-ink text-xl font-bold">The running order of one class</h3>
+                                <span class="es-shop-plan">Free</span>
                             </div>
-                            <div class="flex items-center justify-center gap-3">
-                                <div class="text-xs text-blue-600 dark:text-blue-300">Event Schedule</div>
-                                <svg aria-hidden="true" class="es-sync-dot h-4 w-4 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
-                                <div class="text-xs text-blue-600 dark:text-blue-300">Google Calendar</div>
-                            </div>
+                            <p class="es-shop-muted mb-4">Break a session into its parts with times, so people know the three hours are wedging, centering, pulling and a clean-up rather than a mystery. It shows on the class page as an agenda.</p>
+                            <p class="es-shop-muted text-sm">
+                                Already written the blurb somewhere else? Paste the text or drop in the flyer and the details are pulled out for you to check, ten a day on the free plan.
+                                <a href="{{ marketing_url('/features/ai') }}" class="es-shop-link font-medium hover:underline">How the import works</a>
+                            </p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Analytics (bottom right) -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-cyan-200 bg-cyan-100 px-3 py-1.5 text-sm font-medium text-cyan-700 dark:border-cyan-800/30 dark:bg-cyan-900/40 dark:text-cyan-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-                            Analytics
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Know what sells</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">See which workshops fill fastest, which days work best, and how your audience grows.</p>
-                        <div class="mt-auto chalk-tile rounded-xl p-3" aria-hidden="true">
-                            <div class="flex h-24 items-end gap-2">
-                                <div class="chalk-bar flex-1" style="height: 40%; opacity: 0.72;"></div>
-                                <div class="chalk-bar flex-1" style="height: 55%; opacity: 0.8;"></div>
-                                <div class="chalk-bar flex-1" style="height: 45%; opacity: 0.76;"></div>
-                                <div class="chalk-bar flex-1" style="height: 70%; opacity: 0.86;"></div>
-                                <div class="chalk-bar flex-1" style="height: 85%; opacity: 0.92;"></div>
-                                <div class="chalk-bar flex-1" style="height: 65%; opacity: 0.84;"></div>
-                                <div class="chalk-bar flex-1" style="height: 100%;"></div>
-                            </div>
-                            <div class="mt-2 flex items-center justify-between">
-                                <span class="chalk-ink-dim text-[10px]">Mon</span>
-                                <span class="chalk-ink text-[10px] font-medium">This week: 47 bookings</span>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 4. Workshop series progression (post-it desk)                -->
-    <!-- ============================================================ -->
-    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-24">
-        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-12 max-w-2xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                    See how a workshop series <span class="chalk-heading">comes together</span>
-                </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Progressive skill building. Multi-session enrollment. Loyal students.
-                </p>
-            </div>
-
-            <div class="relative rounded-3xl border border-sky-200 bg-gradient-to-br from-sky-100 to-blue-100 p-8 dark:border-sky-500/30 dark:from-sky-900/60 dark:to-blue-900/60 lg:p-10" data-reveal="panel">
-                <div class="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-                    <div>
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Pottery Fundamentals</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">4-session course - Saturdays in February</p>
-                    </div>
-                    <span class="inline-flex items-center rounded-full border border-green-500/30 bg-green-500/20 px-3 py-1 text-sm font-medium text-green-600 dark:text-green-300">
-                        <svg aria-hidden="true" class="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
-                        Series Discount: 15% off
-                    </span>
-                </div>
-
-                <div class="relative grid grid-cols-1 gap-4 md:grid-cols-4" data-reveal-group="90">
-                    <div data-reveal class="postit-card relative rounded-lg border border-yellow-300 bg-gradient-to-br from-yellow-100 to-amber-100 p-6 text-center dark:border-sky-500/30 dark:from-sky-800/60 dark:to-sky-700/40" style="transform: rotate(-1.5deg);">
-                        <div class="absolute right-0 top-0 h-6 w-6 bg-gradient-to-bl from-yellow-200/80 to-transparent dark:from-sky-600/40"></div>
-                        <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-sky-500/30"><span class="text-lg font-bold text-sky-700 dark:text-sky-200">1</span></div>
-                        <h4 class="mb-1 text-lg font-bold text-gray-900 dark:text-white">Hand Building</h4>
-                        <p class="text-xs text-gray-600 dark:text-gray-400">Feb 1 - Pinch & coil techniques</p>
-                    </div>
-
-                    <div class="absolute left-[24%] top-1/2 z-10 hidden -translate-y-1/2 md:flex">
-                        <svg aria-hidden="true" class="h-6 w-6 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                    </div>
-
-                    <div data-reveal class="postit-card relative rounded-lg border border-orange-300 bg-gradient-to-br from-orange-100 to-yellow-100 p-6 text-center dark:border-blue-500/30 dark:from-blue-800/60 dark:to-blue-700/40" style="transform: rotate(1deg);">
-                        <div class="absolute right-0 top-0 h-6 w-6 bg-gradient-to-bl from-orange-200/80 to-transparent dark:from-blue-600/40"></div>
-                        <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-500/30"><span class="text-lg font-bold text-blue-700 dark:text-blue-200">2</span></div>
-                        <h4 class="mb-1 text-lg font-bold text-gray-900 dark:text-white">Wheel Throwing</h4>
-                        <p class="text-xs text-gray-600 dark:text-gray-400">Feb 8 - Centering & pulling</p>
-                    </div>
-
-                    <div data-reveal class="postit-card relative rounded-lg border border-lime-300 bg-gradient-to-br from-lime-100 to-green-100 p-6 text-center dark:border-blue-500/30 dark:from-blue-800/60 dark:to-blue-700/40" style="transform: rotate(-0.5deg);">
-                        <div class="absolute right-0 top-0 h-6 w-6 bg-gradient-to-bl from-lime-200/80 to-transparent dark:from-blue-600/40"></div>
-                        <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-500/30"><span class="text-lg font-bold text-blue-700 dark:text-blue-200">3</span></div>
-                        <h4 class="mb-1 text-lg font-bold text-gray-900 dark:text-white">Glazing</h4>
-                        <p class="text-xs text-gray-600 dark:text-gray-400">Feb 15 - Color & finish</p>
-                    </div>
-
-                    <div data-reveal class="postit-card relative rounded-lg border border-sky-300 bg-gradient-to-br from-sky-100 to-blue-100 p-6 text-center dark:border-sky-500/30 dark:from-sky-800/60 dark:to-sky-700/40" style="transform: rotate(1.5deg);">
-                        <div class="absolute right-0 top-0 h-6 w-6 bg-gradient-to-bl from-sky-200/80 to-transparent dark:from-sky-600/40"></div>
-                        <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-sky-500/30"><span class="text-lg font-bold text-sky-700 dark:text-sky-200">4</span></div>
-                        <h4 class="mb-1 text-lg font-bold text-gray-900 dark:text-white">Advanced Forms</h4>
-                        <p class="text-xs text-gray-600 dark:text-gray-400">Feb 22 - Creative projects</p>
                     </div>
                 </div>
             </div>
@@ -670,23 +1176,24 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 5. Perfect for (shared sub-audience cards)                   -->
+    <!-- 9. Perfect for                                               -->
     <!-- ============================================================ -->
-    <section class="bg-white py-20 dark:bg-[#0a0a0f] lg:py-28">
+    <section id="who" class="scroll-mt-24 es-shop-hr border-t py-20 lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Perfect for all <span class="chalk-heading">workshop instructors</span>
+                <div class="es-shop-num mb-6" data-reveal aria-hidden="true"><span>09</span></div>
+                <h2 class="es-balance es-shop-ink mb-4 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.05s;">
+                    Perfect for all <span class="es-shop-accent">workshop instructors</span>
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Whatever you teach, Event Schedule helps you fill every class.
+                <p class="es-shop-muted text-lg sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Six seats or thirty, a bench is a bench.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
                 <x-sub-audience-card
                     name="Cooking Class Instructors"
-                    description="From pasta making to pastry arts. Share your recipes, sell spots, and build a community of food lovers."
+                    description="From pasta making to pastry arts. Cap the kitchen per session, ask about dietary needs at checkout, and build a following of food lovers."
                     icon-color="sky"
                     blog-slug="for-cooking-class-instructors"
                 >
@@ -699,7 +1206,7 @@
 
                 <x-sub-audience-card
                     name="Pottery & Ceramics Teachers"
-                    description="Wheel throwing, hand building, and glazing workshops. Manage studio capacity and skill levels."
+                    description="Wheel throwing, hand building and glazing. Run the term as one series, hold the wheels to the number you actually have, and sell a ten-class card."
                     icon-color="blue"
                     blog-slug="for-pottery-ceramics-teachers"
                 >
@@ -712,7 +1219,7 @@
 
                 <x-sub-audience-card
                     name="Photography Workshop Leaders"
-                    description="Photo walks, studio sessions, and editing workshops. Collect gear requirements from students upfront."
+                    description="Photo walks, studio sessions and editing evenings. Ask what gear they are bringing at checkout, and take a washed-out date out of the series."
                     icon-color="blue"
                     blog-slug="for-photography-workshop-leaders"
                 >
@@ -726,7 +1233,7 @@
 
                 <x-sub-audience-card
                     name="Craft & Maker Instructors"
-                    description="Woodworking, metalwork, sewing, and beyond. List materials needed and manage workshop capacities."
+                    description="Woodworking, metalwork, sewing and beyond. Put the materials list in the class description and hold the bench to the number of vices on it."
                     icon-color="amber"
                     blog-slug="for-craft-maker-instructors"
                 >
@@ -740,7 +1247,7 @@
 
                 <x-sub-audience-card
                     name="Art Teachers"
-                    description="Painting, drawing, and mixed media classes. Showcase student work and build a creative community."
+                    description="Painting, drawing and mixed media. Let students post what they made to the class page, all held for your approval first."
                     icon-color="cyan"
                     blog-slug="for-art-teachers"
                 >
@@ -753,7 +1260,7 @@
 
                 <x-sub-audience-card
                     name="Music Lesson Instructors"
-                    description="Group lessons, masterclasses, and jam sessions. Schedule recurring classes and manage student enrollment."
+                    description="Group lessons, masterclasses and jam sessions. Run the term as one weekly series and sell a card that covers the whole thing."
                     icon-color="teal"
                     blog-slug="for-music-lesson-instructors"
                 >
@@ -768,46 +1275,22 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 6. How it works                                              -->
+    <!-- 10. Three steps                                              -->
     <!-- ============================================================ -->
-    @php
-        $steps = [
-            ['1', 'List your workshops', 'Add your classes with descriptions, materials needed, skill levels, and pricing. Set capacity limits and recurring schedules.'],
-            ['2', 'Share your link', 'One URL for all your workshops. Put it in your bio, share it with your audience, and let students browse and book directly.'],
-            ['3', 'Fill your classes', 'Students follow you and get notified of new workshops. Send newsletters to fill spots. Keep 100% of ticket revenue.'],
-        ];
-    @endphp
-    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-24">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-2xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                    How it <span class="chalk-heading">works</span>
+    <section class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <h2 class="es-balance es-shop-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal>
+                    Three steps
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Get your workshops online in three steps.
-                </p>
             </div>
 
-            <div class="relative grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="90">
-                <div class="chalk-stroke pointer-events-none absolute top-1/2 z-10 hidden -translate-y-1/2 md:block" style="left: 31.5%;" aria-hidden="true">
-                    <svg viewBox="0 0 64 24" fill="none" class="h-6 w-16">
-                        <path d="M4 13 Q 26 7 44 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" fill="none" />
-                        <path d="M38 6 L 50 12 L 39 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-                    </svg>
-                </div>
-                <div class="chalk-stroke pointer-events-none absolute top-1/2 z-10 hidden -translate-y-1/2 md:block" style="left: 64.5%;" aria-hidden="true">
-                    <svg viewBox="0 0 64 24" fill="none" class="h-6 w-16">
-                        <path d="M4 12 Q 24 17 44 11" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" fill="none" />
-                        <path d="M38 5 L 50 11 L 40 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-                    </svg>
-                </div>
-                @foreach ($steps as [$num, $title, $desc])
-                    <div data-reveal class="text-center">
-                        <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-blue-500 text-2xl font-bold text-white shadow-lg shadow-sky-500/25">
-                            {{ $num }}
-                        </div>
-                        <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{{ $title }}</h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ $desc }}</p>
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-3" data-reveal-group="120">
+                @foreach ([['01', 'Set the class up as a series', 'Create the class once as a recurring event, pick the day it runs, and give it an end: a last date, or a number of sessions.'], ['02', 'Cap the bench', 'Set the seat limit. It is counted per session date, so a full Saturday does not close the next one. Skip the weeks the studio is closed.'], ['03', 'Open the sheet', 'Share one link. Take free registrations, or connect Stripe and sell spots and class cards with zero platform fees.']] as [$stepNum, $stepTitle, $stepBody])
+                    <div class="es-shop-card p-7" data-reveal="panel">
+                        <div class="es-shop-accent es-shop-fig mb-3 text-2xl font-black">{{ $stepNum }}</div>
+                        <h3 class="es-shop-ink mb-2 text-lg font-bold">{{ $stepTitle }}</h3>
+                        <p class="es-shop-muted text-sm leading-relaxed">{{ $stepBody }}</p>
                     </div>
                 @endforeach
             </div>
@@ -815,30 +1298,35 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 7. Key features                                              -->
+    <!-- 11. Key features                                             -->
     <!-- ============================================================ -->
-    <section class="border-t border-gray-200 bg-white py-20 dark:border-white/5 dark:bg-[#0a0a0f]">
+    <section class="es-shop-hr border-t py-20">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key <span class="chalk-heading">features</span></h2>
+            <h2 class="es-shop-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Key features</h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
-                    <x-feature-link-card name="Ticketing" description="Sell tickets with QR check-in and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="sky">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg></x-slot:icon>
+                    <x-feature-link-card name="Recurring Events" description="One class, a weekly pattern, ending after a set number of sessions" :url="marketing_url('/features/recurring-events')" icon-color="sky">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Recurring Events" description="Set events to repeat weekly on chosen days" :url="marketing_url('/features/recurring-events')" icon-color="lime">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-lime-600 dark:text-lime-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></x-slot:icon>
+                    <x-feature-link-card name="Ticketing" description="Named ticket types, class cards, QR check-in and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="blue">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Calendar Sync" description="Two-way sync with Google Calendar" :url="marketing_url('/features/calendar-sync')" icon-color="blue">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></x-slot:icon>
+                    <x-feature-link-card name="Newsletters" description="Email the students who follow you, with open and click rates" :url="marketing_url('/features/newsletters')" icon-color="green">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Calendar Sync" description="Two-way sync with Google, Outlook and CalDAV" :url="marketing_url('/features/calendar-sync')" icon-color="teal">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="chalk-link inline-flex items-center font-medium">
+                <a href="{{ marketing_url('/features') }}" class="es-shop-link inline-flex items-center font-medium hover:underline">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -851,26 +1339,24 @@
     @include('marketing.partials.pricing-nudge')
 
     <!-- ============================================================ -->
-    <!-- 8. Related pages                                             -->
+    <!-- 12. Related pages                                            -->
     <!-- ============================================================ -->
-    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14]">
-        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related <span class="chalk-heading">pages</span></h2>
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
+    <section class="es-shop-hr border-t py-16">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <h2 class="es-shop-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Related pages</h2>
+            <div class="grid grid-cols-2 gap-4 md:grid-cols-4" data-reveal-group="70">
                 @foreach ([['/for-online-classes', 'Online Classes'], ['/for-fitness-and-yoga', 'Fitness & Yoga'], ['/for-community-centers', 'Community Centers'], ['/for-libraries', 'Libraries']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="chalk-rel group flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
-                        <div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="chalk-rel-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
-                        </div>
-                        <svg aria-hidden="true" class="chalk-rel-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
+                    <a href="{{ marketing_url($relHref) }}" class="es-shop-hover es-shop-card group flex flex-col p-5 transition-all duration-200 hover:shadow-md" data-reveal>
+                        <span class="es-shop-hover-title es-shop-ink mb-3 text-sm font-semibold transition-colors">For {{ $relName }}</span>
+                        <span class="es-shop-hover-arrow es-shop-muted mt-auto inline-flex items-center gap-1 text-xs font-medium transition-colors">
+                            Read more
+                            <svg aria-hidden="true" class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                        </span>
                     </a>
                 @endforeach
             </div>
-            <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="chalk-link inline-flex items-center font-medium">
+            <div class="mt-8 text-center">
+                <a href="{{ marketing_url('/use-cases') }}" class="es-shop-link inline-flex items-center font-medium hover:underline">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -881,34 +1367,31 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 9. FAQ                                                       -->
+    <!-- 13. FAQ                                                      -->
     <!-- ============================================================ -->
-    <section class="bg-gray-100 py-20 dark:bg-black/30 lg:py-28">
+    <x-seo.faq-schema :items="$faqs" />
+
+    <section id="faq" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Frequently asked <span class="chalk-heading">questions</span>
+            <div class="mb-12 text-center">
+                <div class="es-shop-num mb-6" data-reveal aria-hidden="true"><span>10</span></div>
+                <h2 class="es-balance es-shop-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
+                    Frequently asked questions
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Everything workshop instructors ask about Event Schedule.
+                <p class="es-shop-muted text-lg" data-reveal style="--reveal-delay: 0.1s;">
+                    What instructors ask before they move a term across.
                 </p>
             </div>
 
-            <div class="space-y-4" data-reveal-group="80">
-                @foreach ([
-                    ['Is Event Schedule free for workshop instructors?', 'Yes. Event Schedule is free forever for sharing your workshop schedule, building a following, and syncing with Google Calendar. Paid registration and newsletters are available on the Pro plan, with zero platform fees.'],
-                    ['Can I manage different types of workshops in one schedule?', 'Yes. Use sub-schedules to organize by workshop type - cooking classes, pottery, photography, or craft sessions. Each workshop can have its own description, images, pricing, capacity limits, and registration options.'],
-                    ['How do students discover my workshops?', 'Students can follow your schedule and receive email notifications when you add new workshops. Share your schedule link on social media, embed it on your studio or school website, or send newsletters to followers with upcoming sessions.'],
-                    ['Can I sell spots and manage registrations?', 'Yes. Connect your Stripe account and sell workshop spots directly from your schedule. Set per-workshop pricing, limit capacity, and check in attendees with QR codes. Event Schedule charges zero platform fees.'],
-                ] as [$q, $a])
-                    <details name="faq" data-reveal class="chalk-faq group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
-                            <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
+            <div class="space-y-3" data-reveal-group="80">
+                @foreach ($faqs as $faqIndex => $faq)
+                    <details name="faq" class="es-shop-hover es-shop-card group p-6 transition-all duration-200" data-reveal>
+                        <summary class="es-shop-ink flex cursor-pointer items-start gap-3 font-semibold">
+                            <span class="es-shop-accent es-shop-fig flex-none text-sm font-bold" aria-hidden="true">{{ str_pad($faqIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                            <span class="es-shop-hover-title flex-1 transition-colors">{{ $faq['q'] }}</span>
+                            <svg aria-hidden="true" class="es-shop-muted mt-0.5 h-5 w-5 flex-none transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
                         </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{{ $a }}</p>
+                        <p class="faq-answer es-shop-muted mt-4 leading-relaxed ps-9">{{ $faq['a'] }}</p>
                     </details>
                 @endforeach
             </div>
@@ -916,39 +1399,34 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 10. Finale                                                   -->
+    <!-- 14. Finale                                                   -->
     <!-- ============================================================ -->
-    <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
+    <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
-            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-sky-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+            <div class="es-shop-wall noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl sm:px-12 lg:py-24" data-confetti data-reveal="panel">
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(14, 165, 233, 0.32), rgba(14, 165, 233, 0) 60%); opacity: 0.7;"></div>
+                    <div class="es-shop-peg absolute inset-0"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
-                    <div class="es-chalk-dust absolute inset-0">
-                        @foreach ($dust as [$l, $s, $d, $dl, $op])
-                            <span style="left: {{ $l }}; width: {{ $s }}px; height: {{ $s }}px; --dust-dur: {{ $d }}; --dust-delay: {{ $dl }}; --dust-op: {{ $op }};"></span>
-                        @endforeach
-                    </div>
                 </div>
-
                 <div class="relative z-10">
-                    <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Your workshop deserves a <span class="chalk-text">full room</span>
+                    <p class="es-shop-tag mb-4">Free forever</p>
+                    <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight es-shop-wall-ink md:text-5xl">
+                        Pin up the sheet. <span class="es-shop-lit">Fill the bench.</span>
                     </h2>
-                    <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
-                        Stop losing students to clunky booking systems. One link, zero fees, full classes. Free forever.
+                    <p class="mx-auto mb-10 max-w-2xl text-lg es-shop-wall-muted">
+                        Publishing your classes, capping the seats and emailing the students who follow you are free forever. Selling spots and class cards is five dollars a month, and nothing is taken off the top.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
                         <label for="es-claim-input" class="sr-only">Your schedule name</label>
                         <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
                             <input id="es-claim-input" type="text" placeholder="your-workshop" autocomplete="off" spellcheck="false" maxlength="30"
-                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
-                            <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
+                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-400 focus:outline-none focus:ring-0 sm:text-base">
+                            <span class="shrink-0 select-none font-mono text-sm es-shop-wall-muted sm:text-base">.eventschedule.com</span>
                         </div>
-                        <a href="{{ app_url('/sign_up?type=talent') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-sky-600 to-blue-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-sky-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-sky-500/40">
+                        <a href="{{ app_url('/sign_up?type=talent') }}" class="es-shop-btn-lit group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
                             <span class="relative z-10 flex items-center gap-2">
-                                Get Started Free
+                                Create your schedule
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                 </svg>
@@ -957,11 +1435,29 @@
                         </a>
                     </div>
 
-                    <p class="mt-6 text-sm text-gray-400">No credit card required</p>
+                    <p class="mt-6 text-sm es-shop-wall-muted">No credit card required</p>
                 </div>
             </div>
         </div>
     </section>
+
+    <!-- Desktop dot nav -->
+    <nav class="es-dotnav fixed top-1/2 z-40 hidden -translate-y-1/2 lg:block ltr:right-5 rtl:left-5" aria-label="Page sections">
+        <ul class="glass flex flex-col items-center gap-1.5 rounded-full px-2 py-3">
+            @foreach ($dotSections as [$sectionId, $sectionLabel])
+                <li class="relative">
+                    <a href="#{{ $sectionId }}" class="es-dot group block rounded-full" aria-label="{{ $sectionLabel }}">
+                        <span class="es-dot-pip block h-2 w-2 rounded-full bg-gray-400/60 dark:bg-white/30"></span>
+                        <span class="es-shop-tip pointer-events-none absolute top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 ltr:right-full ltr:mr-3 rtl:left-full rtl:ml-3">{{ $sectionLabel }}</span>
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    </nav>
+
+    </div>
+
+    <x-marketing.related-pages />
 
     <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
     @vite('resources/js/marketing-home.js')

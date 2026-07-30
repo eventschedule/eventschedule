@@ -5,14 +5,8 @@
     ]);
     $use24 = get_use_24_hour_time($role);
 
-    // Resolved once. It is the same schedule for every row, and Role::isPro() fans out to a subscription
-    // lookup, a trial check and an enterprise check - today those are cheap on repeat calls because the
-    // shared $role instance caches its subscriptions relation, but that is an accident of this variable
-    // being reused rather than something the gate can rely on.
-    $planIsCurrent = ! config('app.hosted') || $role->isPro();
-
     // Per-row presentation, computed once and shared by the desktop table and the mobile cards.
-    $rows = collect($bookings->all())->map(function ($s) use ($use24, $role, $planIsCurrent) {
+    $rows = collect($bookings->all())->map(function ($s) use ($use24, $role) {
         $e = $s->event;
         $cancelled = $e->is_cancelled || in_array($s->status, ['cancelled', 'refunded', 'expired']);
         $pending = $e->isAwaitingCreatorApproval();
@@ -30,9 +24,7 @@
             // endpoints in both directions: offering Reschedule on an unpaid card hold or a deactivated
             // type (where the POST bounces straight back with an error), and hiding it on pending rows
             // where it is allowed and the guest page offers it as "Change time".
-            'rescheduleBlocked' => \App\Support\AppointmentRescheduleGate::blockedReason(
-                $e, $s, $role, true, $planIsCurrent
-            ),
+            'rescheduleBlocked' => \App\Support\AppointmentRescheduleGate::blockedReason($e, $s, $role),
             // Nothing else bumps ical_sequence on a live appointment, so > 0 means "this was moved".
             'moved' => ! $cancelled && (int) $e->ical_sequence > 0,
             'shown' => \App\Utils\AppointmentTimeUtils::render($e, null, $use24),

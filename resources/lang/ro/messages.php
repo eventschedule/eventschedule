@@ -846,6 +846,9 @@ return [
     'embed_description' => 'Încorporează programul pe site-ul sau blogul tău folosind codul iframe de mai jos.',
     'embed_url' => 'URL Încorporare',
     'iframe_code' => 'Cod Iframe',
+    'embed_layout' => 'Aspect',
+    'embed_layout_default' => 'Implicit pentru program (:layout)',
+    'embed_layout_help' => 'Modifică doar codul copiat mai jos. Pagina programului tău păstrează Aspectul Implicit.',
     'close' => 'Închide',
     'payment_url' => 'Link de Plată',
 

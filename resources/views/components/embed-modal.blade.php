@@ -3,6 +3,14 @@
     $embedUrl = route('role.view_guest', ['subdomain' => $role->subdomain, 'embed' => 'true']);
     // For preview, use current request's protocol to avoid HTTPS cert issues in local dev
     $previewUrl = preg_replace('/^https?:/', request()->getScheme() . ':', $embedUrl);
+    // The Layout picker appends &layout= to both of the above. Blank means "leave it off",
+    // which keeps the schedule's own Default Layout in charge - the pre-existing behaviour.
+    $embedLayoutDefaultLabel = __('messages.embed_layout_default', ['layout' => __('messages.' . $role->eventLayout())]);
+    // Built here and handed to the script below so the server-rendered snippet and the one
+    // the Layout picker rebuilds cannot drift apart.
+    $embedBrandingLine = $role->showBranding()
+        ? "\n".'<p style="font-size: 12px; text-align: right; margin-top: 4px; opacity: 0.6;"><a href="https://eventschedule.com" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;">Powered by Event Schedule</a></p>'
+        : '';
 @endphp
 <div id="embed-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 transition-opacity"></div>
@@ -33,6 +41,20 @@
                                 {{ __('messages.embed_description') }}
                             </p>
                             
+                            <!-- Layout -->
+                            <div class="mb-4">
+                                <label for="embed-layout" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    {{ __('messages.embed_layout') }}
+                                </label>
+                                <select id="embed-layout"
+                                        class="block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] sm:text-sm">
+                                    <option value="">{{ $embedLayoutDefaultLabel }}</option>
+                                    <option value="calendar">{{ __('messages.calendar') }}</option>
+                                    <option value="list">{{ __('messages.list') }}</option>
+                                </select>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.embed_layout_help') }}</p>
+                            </div>
+
                             <!-- Embed URL -->
                             <div class="mb-4">
                                 <label for="embed-url" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -58,8 +80,7 @@
                                 <div class="flex">
                                     <textarea id="iframe-code" readonly rows="4"
                                               class="block w-full rounded-s-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] sm:text-sm font-mono text-xs"
-                                              style="resize: vertical;"><iframe src="{{ $embedUrl }}" width="100%" height="800" frameborder="0" style="border: none;"></iframe>
-@if($role->showBranding())<p style="font-size: 12px; text-align: right; margin-top: 4px; opacity: 0.6;"><a href="https://eventschedule.com" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;">Powered by Event Schedule</a></p>@endif</textarea>
+                                              style="resize: vertical;">{{ '<iframe src="'.$embedUrl.'" width="100%" height="800" frameborder="0" style="border: none;"></iframe>'.$embedBrandingLine }}</textarea>
                                     <button type="button" id="iframe-code-btn" class="js-copy-iframe-code inline-flex items-center rounded-e-lg border border-s-0 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 focus:border-[var(--brand-blue)] focus:outline-none focus:ring-1 focus:ring-[var(--brand-blue)]">
                                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
@@ -74,8 +95,8 @@
                                     {{ __('messages.preview') }}
                                 </label>                                
                                 <div class="border border-gray-300 dark:border-gray-700 rounded-lg p-2 bg-gray-50 dark:bg-gray-900" style="height: 300px; overflow: auto;">
+                                    {{-- No src until the modal opens; the script below sets it. --}}
                                     <iframe id="embed-preview-iframe"
-                                            data-src="{{ $previewUrl }}"
                                             width="100%" height="800" frameborder="0"
                                             style="border: none; border-radius: 4px;"></iframe>
                                 </div>
@@ -95,15 +116,68 @@
 </div>
 
 <script {!! nonce_attr() !!}>
+const embedBaseUrl = @json($embedUrl);
+const embedPreviewBaseUrl = @json($previewUrl);
+const embedBrandingLine = @json($embedBrandingLine);
+let embedPreviewLoaded = '';
+
+// A blank layout means "leave it off" and let the schedule's own setting decide.
+function embedUrlWithLayout(base, layout) {
+    if (! layout) {
+        return base;
+    }
+
+    return base + (base.includes('?') ? '&' : '?') + 'layout=' + encodeURIComponent(layout);
+}
+
+function selectedEmbedLayout() {
+    const select = document.getElementById('embed-layout');
+
+    return select ? select.value : '';
+}
+
+function updateEmbedSnippets() {
+    const layout = selectedEmbedLayout();
+    const url = embedUrlWithLayout(embedBaseUrl, layout);
+
+    const urlInput = document.getElementById('embed-url');
+    if (urlInput) {
+        urlInput.value = url;
+    }
+
+    const codeTextarea = document.getElementById('iframe-code');
+    if (codeTextarea) {
+        codeTextarea.value = '<iframe src="' + url + '" width="100%" height="800" frameborder="0" style="border: none;"></iframe>' + embedBrandingLine;
+    }
+
+    refreshEmbedPreview();
+}
+
+// The preview is deliberately not loaded until the modal is opened, and is reloaded only
+// when the URL actually changes so re-opening the modal does not refetch the schedule.
+function refreshEmbedPreview() {
+    const iframe = document.getElementById('embed-preview-iframe');
+    if (! iframe) {
+        return;
+    }
+
+    const url = embedUrlWithLayout(embedPreviewBaseUrl, selectedEmbedLayout());
+    if (embedPreviewLoaded === url) {
+        return;
+    }
+
+    embedPreviewLoaded = url;
+    iframe.src = url;
+}
+
 function openEmbedModal() {
     document.getElementById('embed-modal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
-    
-    // Load iframe only when modal is opened
-    const iframe = document.getElementById('embed-preview-iframe');
-    if (iframe && !iframe.src) {
-        iframe.src = iframe.getAttribute('data-src');
-    }
+
+    // Rebuild everything, not just the preview: browsers restore a <select>'s value across a
+    // soft reload, so the picker can already read "list" while the server-rendered URL and
+    // snippet still carry no layout. Copying then hands over something the preview disproves.
+    updateEmbedSnippets();
 }
 
 function closeEmbedModal() {
@@ -163,6 +237,12 @@ document.addEventListener('click', function(event) {
     const modal = document.getElementById('embed-modal');
     if (! modal.classList.contains('hidden') && ! event.target.closest('.relative.transform')) {
         closeEmbedModal();
+    }
+});
+
+document.addEventListener('change', function(event) {
+    if (event.target.id === 'embed-layout') {
+        updateEmbedSnippets();
     }
 });
 

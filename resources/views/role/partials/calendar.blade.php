@@ -23,6 +23,14 @@
     $isAdminRoute = $route == 'admin';
     $alwaysShowFilters = in_array($route ?? '', ['guest', 'admin']);
     $stickyBleedClass = ($route === 'guest' && !(isset($embed) && $embed)) ? '-mx-5 px-5' : '-mx-4 px-4';
+    // The path this schedule's own page lives at, with no trailing slash: '' when the schedule
+    // owns the whole host (hosted subdomains, custom domains) and '/{subdomain}' under selfhost's
+    // path-based routing. Built here rather than inline in the Vue data because Blade's @json
+    // splits its expression on commas. Sub-schedule URLs are derived from it so they do not
+    // hardcode one deployment's shape - '/{subdomain}/{group}' 404s on hosted.
+    $guestBasePath = $role && $role->subdomain
+        ? rtrim(parse_url(route('role.view_guest', ['subdomain' => $role->subdomain]), PHP_URL_PATH) ?? '', '/')
+        : '';
     $firstDay = $role?->first_day_of_week ?? 0;
     $lastDay = ($firstDay + 6) % 7;
     $startOfMonth = Carbon\Carbon::create($year, $month, 1)->startOfMonth()->startOfWeek($firstDay);
@@ -1953,9 +1961,15 @@ const calendarApp = createApp({
             hidePastEvents: {{ (isset($hide_past_events) && $hide_past_events) ? 'true' : 'false' }},
             maxEvents: {{ isset($max_events) ? $max_events : 0 }},
             subdomain: '{{ isset($subdomain) ? $subdomain : '' }}',
+            guestBasePath: @json($guestBasePath),
             route: '{{ $route }}',
             tab: '{{ $tab ?? '' }}',
             embed: {{ isset($embed) && $embed ? 'true' : 'false' }},
+            // The layout ?layout= asked for, or null. Read from the helper rather than $role
+            // because this partial also renders on the home route, which has none. It is the
+            // requested value, not currentView, so the event page's mini-calendar (which is
+            // always a mobile agenda) still hands the right layout back to the schedule.
+            layoutFromUrl: @json(requested_event_layout()),
             directRegistration: {{ isset($role) && $role->direct_registration ? 'true' : 'false' }},
             isRtl: {{ $isAdminRoute ? (auth()->check() && auth()->user()->isRtl() ? 'true' : 'false') : (isset($role) && $role->isRtl() ? 'true' : 'false') }},
             durationLabels: {
@@ -3074,6 +3088,12 @@ const calendarApp = createApp({
                 queryParams.push('schedule=' + this.selectedGroup);
             }
 
+            // Carry a URL-forced layout through to the event page so the breadcrumb there
+            // can hand it back and the visitor returns to the view they left.
+            if (this.layoutFromUrl) {
+                queryParams.push('layout=' + this.layoutFromUrl);
+            }
+
             if (queryParams.length > 0) {
                 url += '?' + queryParams.join('&');
             }
@@ -3783,39 +3803,31 @@ const calendarApp = createApp({
             }
         },
         updateUrlWithGroup(newGroupSlug) {
-            if (!newGroupSlug) {
-                // If no group selected, redirect to base guest URL
-                const baseUrl = `/${this.subdomain}`;
-                const currentUrl = new URL(window.location);
-                const params = new URLSearchParams(currentUrl.search);
-                
-                // Keep year and month if they exist
-                let newUrl = baseUrl;
-                if (params.get('year') && params.get('month')) {
-                    newUrl += `?year=${params.get('year')}&month=${params.get('month')}`;
-                }
-                
-                window.history.pushState({}, '', newUrl);
-                return;
-            }
-            
-            // Build new URL with group slug
+            // Only the path changes here, so carry the rest of the query string over rather
+            // than re-deriving a couple of keys - otherwise picking a sub-schedule silently
+            // drops ?layout=, ?lang= and ?dark=, and the URL the visitor copies or reloads
+            // renders differently from what they are looking at.
+            //
+            // Two params must NOT survive. ?schedule= is the query form of the very thing the
+            // path now expresses, and viewGuest falls back to it when the path resolves no
+            // group - leaving it would resurrect a sub-schedule the visitor just cleared.
+            // ?category= may have been reset a moment ago by the watcher below (or by
+            // clearFilters, which reaches here through it) because the new sub-schedule does
+            // not offer that category.
             const currentUrl = new URL(window.location);
-            const params = new URLSearchParams(currentUrl.search);
-            let newUrl = `/${this.subdomain}/${newGroupSlug}`;
-            
-            // Keep year and month parameters if they exist
-            if (params.get('year') && params.get('month')) {
-                newUrl += `?year=${params.get('year')}&month=${params.get('month')}`;
-            }
-            
-            // Update the URL without page reload
-            window.history.pushState({}, '', newUrl);
+            currentUrl.pathname = (this.guestBasePath + (newGroupSlug ? '/' + newGroupSlug : '')) || '/';
+            currentUrl.searchParams.delete('schedule');
+            currentUrl.searchParams.delete('category');
+
+            window.history.pushState({}, '', currentUrl.toString());
         }
     },
     mounted() {
-        // Check localStorage for saved view preference
-        if (this.subdomain && this.route !== 'admin' && !this.forceMobile) {
+        // Check localStorage for saved view preference. Skipped when ?layout= asked for a
+        // specific view, and inside an embed: the embedding site chooses the layout, there
+        // is no toggle in the frame to change it, and without this a preference the visitor
+        // saved on the schedule's own page would silently override every embed of it.
+        if (this.subdomain && this.route !== 'admin' && !this.forceMobile && !this.embed && !this.layoutFromUrl) {
             try {
                 const saved = localStorage.getItem('es_view_' + this.subdomain);
                 if (saved && ['calendar', 'list'].includes(saved)) {

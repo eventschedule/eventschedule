@@ -589,6 +589,9 @@ return [
     'embed_description' => 'Sluit je schema in op je website of blog met de iframe-code hieronder.',
     'embed_url' => 'Insluit-URL',
     'iframe_code' => 'Iframe-code',
+    'embed_layout' => 'Layout',
+    'embed_layout_default' => 'Standaard van de agenda (:layout)',
+    'embed_layout_help' => 'Wijzigt alleen de code die u hieronder kopieert. Uw agendapagina behoudt de standaard layout.',
     'close' => 'Sluiten',
 
     // Missing keys

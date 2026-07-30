@@ -22,13 +22,15 @@
     @endphp
     @if(session()->has('translate') || request()->lang == $targetCode)
         <span class="px-3 py-1 rounded-full font-medium {{ $activeClass }}" title="{{ $targetName }}" aria-label="{{ $targetName }}">{{ strtoupper($targetCode) }}</span>
-        <a href="{{ str_replace('http://', 'https://', request()->url()) }}?lang={{ $role->language_code }}"
+        {{-- fullUrlWithQuery, not url(), so switching language keeps the rest of the query
+             string (?layout=, ?category=, ?month= ...) intact. --}}
+        <a href="{{ str_replace('http://', 'https://', request()->fullUrlWithQuery(['lang' => $role->language_code])) }}"
            class="px-3 py-1 rounded-full font-medium transition-all duration-200 {{ $inactiveClass }}"
            title="{{ $authoredName }}" aria-label="{{ $authoredName }}">
             {{ strtoupper($role->language_code) }}
         </a>
     @else
-        <a href="{{ str_replace('http://', 'https://', request()->url()) }}?lang={{ $targetCode }}"
+        <a href="{{ str_replace('http://', 'https://', request()->fullUrlWithQuery(['lang' => $targetCode])) }}"
            class="px-3 py-1 rounded-full font-medium transition-all duration-200 {{ $inactiveClass }}"
            title="{{ $targetName }}" aria-label="{{ $targetName }}">
             {{ strtoupper($targetCode) }}

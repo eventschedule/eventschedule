@@ -99,7 +99,7 @@
 
     @php
         $viewGuestParams = ['subdomain' => $role->subdomain];
-        if ($role->event_layout == 'calendar') {
+        if ($role->eventLayout() == 'calendar') {
             if (now()->year != $year || now()->month != $month) {
                 $viewGuestParams['month'] = $month;
             }

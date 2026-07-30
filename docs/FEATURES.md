@@ -55,7 +55,7 @@ Gated by `$role->isPro()`. Enterprise users also get all Pro features.
 
 | Feature | Gate location | Notes |
 |---------|--------------|-------|
-| Remove Event Schedule branding | `$role->isWhiteLabeled()` / `$role->showBranding()` | White-label, removes "Powered by". One exception on the nexus: an Enterprise plan an admin granted by hand (`roles.plan_source = 'admin'`, no active Stripe subscription) keeps a small "Event Schedule" credit chip below the guest footer - see `layouts/app-guest.blade.php`. Customers paying through Stripe, and referral-earned plans (`plan_source = 'referral'`), never carry it |
+| Remove Event Schedule branding | `$role->isWhiteLabeled()` / `$role->showBranding()` | White-label, removes "Powered by" from all seven surfaces. The corner credit chip is decided separately by `Role::creditChipReason()`, which keeps it in three cases: a nexus Enterprise plan an admin granted by hand (`roles.plan_source = 'admin'`, no active Stripe subscription); an operator's own free tier on a self-hosted SaaS; and every schedule on a plain selfhost, unconditionally, as the AAL attribution. Stripe customers and referral-earned plans (`plan_source = 'referral'`) never carry it. Full matrix: [BRANDING_MATRIX.md](BRANDING_MATRIX.md) |
 | Ticketing & QR code check-ins | `$event->isPro()` in views and controllers | Create ticket types, scan QR codes |
 | Passes & subscriptions | Tied to ticketing gate, `$ticket->is_pass` | Multi-use passes redeemable across events (visit pass, membership, festival pass, season pass); usage tracked on the Subscriptions tab; per-pass cancellation deadline and late-cancel policy (forfeit or block) |
 | Individual tickets | Tied to ticketing gate, `$event->individual_tickets` | Collect per-attendee details; each guest gets own confirmation email and QR code |
@@ -179,10 +179,11 @@ Managed by `Role::newsletterLimit()` (`app/Models/Role.php`). Limits count indiv
 ## Key Code References
 
 - **Plan tier detection**: `Role::actualPlanTier()` - `app/Models/Role.php`
-- **Pro check**: `Role::isPro()` - returns `true` for Pro, Enterprise, selfhosted, testing, and admins
-- **Enterprise check**: `Role::isEnterprise()` - returns `true` for Enterprise, selfhosted, testing, and admins
-- **White-label check**: `Role::isWhiteLabeled()` - same as `isPro()` for branding removal
-- **Branding display**: `Role::showBranding()` - inverse of white-label check
+- **Pro check**: `Role::isPro()` - returns `true` for Pro, Enterprise (an active Stripe subscription, a generic trial, or a legacy unexpired `plan_type`), and selfhosted. There is no testing or admin branch
+- **Enterprise check**: `Role::isEnterprise()` - returns `true` for Enterprise and selfhosted. Same: no testing or admin branch
+- **White-label check**: `Role::isWhiteLabeled()` - same logic as `isPro()`
+- **Branding display**: `Role::showBranding()` - `false` on selfhost, otherwise `actualPlanTier() === 'free'`. NOT the inverse of `isWhiteLabeled()`: the selfhost case differs
+- **Credit chip**: `Role::creditChipReason()` - `'selfhost' | 'saas_free' | 'granted_plan' | null`; see [BRANDING_MATRIX.md](BRANDING_MATRIX.md)
 - **Newsletter limit**: `Role::newsletterLimit()` - returns limit based on tier
 - **Event Pro check**: `Event::isPro()` - returns `true` if any associated schedule is Pro
 - **Stripe config**: `config/services.php` lines 54-65

@@ -735,6 +735,17 @@ class TicketController extends Controller
 
     public function exportSales()
     {
+        // Pro only. The export already carries Pro-only columns (promo code, discount, gift card,
+        // check-in status, pass usage), and it needed no gate while only Pro schedules had sales to
+        // export. $hasPro here is user-level on purpose, matching the Sales page it is reached from:
+        // the export spans every schedule the user owns, so a per-schedule check has nothing to bind
+        // to. It is the same shape as the Feedback tab guard above.
+        $hasPro = auth()->user()->roles()->get()->contains(fn ($role) => $role->isPro());
+
+        if (! $hasPro) {
+            abort(403);
+        }
+
         $filter = strtolower(request()->filter ?? '');
         $includePast = request()->query('include_past') == 1;
         $sales = $this->salesQuery($filter, primaryOnly: false, includePast: $includePast)->orderBy('created_at', 'DESC')->get();
@@ -919,9 +930,45 @@ class TicketController extends Controller
             abort(404);
         }
 
-        // Verify event can sell tickets (checks past dates, tickets_enabled, and Pro plan)
+        // Verify event can sell tickets (checks past dates, tickets_enabled, and plan allowance)
         if (! $event->canSellTickets($request->event_date)) {
             return back()->withInput()->with('error', __('messages.tickets_not_available'));
+        }
+
+        // The selling schedule, not just any attached one, has to have allowance left: money is
+        // routed by the event owner and the sale is recorded against the subdomain the buyer came
+        // through, so that is the schedule the allowance belongs to.
+        //
+        // Checked once, up front, and then the whole cart is allowed through, the same way
+        // canSendNewsletter() lets an entire newsletter overshoot. Refusing a guest mid-cart because
+        // the organizer is one short is a far worse outcome than a small, bounded overage.
+        //
+        // Cash and other offline methods are counted but never blocked. There is no processing cost
+        // to us, and an organizer taking money at the door finding the app refuses to record it is
+        // indefensible. A paid ticket for an event starting within the grace window is exempt too.
+        $paysOnline = ! in_array($event->payment_method, ['cash', null], true);
+
+        if ($paysOnline
+            && ! $event->isPro()
+            && ! $event->withinTicketAllowanceGrace($request->event_date)
+            && ! $role->canSellPaidTickets()
+        ) {
+            $anyFreeTicket = $event->tickets->contains(
+                fn ($ticket) => ! $ticket->is_addon && (float) $ticket->price <= 0
+            );
+
+            // Only refuse when the cart actually needs the paid allowance. An order made up purely
+            // of free tiers is unlimited on every plan.
+            $wantsPaidTicket = collect($request->input('tickets', []))
+                ->filter(fn ($quantity) => (int) $quantity > 0)
+                ->keys()
+                ->map(fn ($hash) => $event->tickets->firstWhere('id', UrlUtils::decodeId($hash)))
+                ->filter()
+                ->contains(fn ($ticket) => ! $ticket->is_addon && (float) $ticket->price > 0);
+
+            if ($wantsPaidTicket || ! $anyFreeTicket) {
+                return back()->withInput()->with('error', __('messages.tickets_not_available'));
+            }
         }
 
         if (! $user && $request->create_account && config('app.hosted')) {
@@ -2570,13 +2617,17 @@ class TicketController extends Controller
         // scanning at (needed for cross-event subscriptions). List the user's
         // events without a tickets-only filter, since a subscription may cover
         // free / ticketless events.
-        $events = Event::with('creatorRole')
+        // Pro only, matching User::canScanEvent(). Listing an event the scanner would then refuse
+        // is worse than not listing it.
+        $events = Event::with(['creatorRole', 'roles'])
             ->where('user_id', $user->id)
             ->whereNotNull('starts_at')
             ->whereNull('appointment_type_id') // appointment bookings are not scannable events
             ->orderBy('starts_at', 'desc')
             ->limit(100)
-            ->get();
+            ->get()
+            ->filter(fn (Event $event) => $event->isPro())
+            ->values();
 
         // "Today" is each event's own calendar day at its venue, which is what
         // sales.event_date holds. Listed events may sit in different timezones, so query the

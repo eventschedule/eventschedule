@@ -3,329 +3,6 @@
     <x-slot name="description">Find answers to frequently asked questions about Event Schedule. Learn about pricing, features, ticketing, Google Calendar sync, selfhosting, and more.</x-slot>
     <x-slot name="breadcrumbTitle">FAQ</x-slot>
 
-    <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "What is Event Schedule?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Event Schedule is a free, open-source platform that lets you create professional, shareable event calendars and sell tickets. Whether you're a musician sharing gig dates, a venue managing your lineup, or a food truck posting daily locations, Event Schedule gives you a professional calendar your audience can easily access."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Is Event Schedule really free?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. The free plan includes unlimited events, mobile-optimized calendars, Google Calendar sync, team collaboration, venue location maps, and more. These features are free forever, not a trial. The Pro plan (which adds ticketing, event boosting, and branding removal) comes with a 7-day free trial, then $5/month after that. Enterprise adds custom domains, private events, multiple team members, and AI features at $15/month."
-            }
-            },
-            {
-                "@type": "Question",
-                "name": "Do I need technical skills to use it?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "No. Creating your schedule takes just a few clicks. Add your events, customize the look, and share the link. You can also paste event details or drop an image and our AI will extract the information automatically."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I embed my schedule on my website?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Every schedule has an embed code you can copy and paste into your website. The embedded calendar matches your site and updates automatically when you add or change events."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What's the difference between Free and Pro?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "The Free plan includes everything you need for a professional event calendar: unlimited events, Google Calendar sync, team collaboration, and mobile-optimized design. Pro adds ticketing with QR check-ins, the ability to remove Event Schedule branding, event graphics generation, event boosting with ads, custom CSS styling, and REST API access. Enterprise adds custom domains, private and password-protected events, multiple team members, AI features, email scheduling, agenda scanning, and priority support."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Do you take a percentage of my ticket sales?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "No. We never take a cut of your ticket revenue. When you sell tickets through Event Schedule, you pay only Stripe's standard processing fees (approximately 2.9% + $0.30 per transaction). The rest is yours."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What happens when my free trial ends?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "After your 7-day free trial, your card is automatically charged for Pro ($5/month or $50/year) or Enterprise ($15/month or $150/year). You can cancel anytime during or after the trial. If you cancel, your account reverts to the Free plan. You keep all your events and data; you just lose access to paid features like ticketing and branding removal."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I cancel anytime?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. There are no contracts or cancellation fees. Cancel your Pro subscription whenever you want, and your account stays active on the Free plan."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "How do I start selling tickets?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "First, connect your Stripe account (takes about 2 minutes). Then, when creating or editing an event, add ticket types with names, prices, and quantities. Your attendees can purchase directly from your event page and receive tickets with QR codes via email."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I create different ticket types for one event?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. You can create multiple ticket types per event, such as General Admission, VIP, Early Bird, or Student pricing. Each type can have its own price, quantity limit, sales start date, sales end date, and description."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "How do QR check-ins work?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "When someone buys a ticket, they receive an email with a QR code. At your event, open the check-in screen on any smartphone or tablet, scan the QR code, and the system verifies the ticket and marks it as used. No special hardware required."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I collect additional information from ticket buyers?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. You can add custom fields to your ticket forms, including text fields, dropdowns, date pickers, and yes/no questions. Use these to collect meal preferences, t-shirt sizes, accessibility needs, or any other information."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I offer free tickets alongside paid ones?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. You can mix free and paid ticket types on the same event. This is useful for comp tickets, volunteer passes, or free admission with optional paid upgrades."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Does Event Schedule sync with Google Calendar?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes, and it's bidirectional. Events you create in Event Schedule automatically appear in your connected Google Calendar. Events you add to Google Calendar also sync back to Event Schedule. Changes update in real-time via webhooks."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can my audience add events to their personal calendars?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Every event page has \"Add to Calendar\" buttons that let visitors save the event to Google Calendar, Apple Calendar, Outlook, or download an ICS file. This works for both you and your attendees."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What's the difference between a schedule, a sub-schedule, and an event?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "A schedule is your main calendar (like \"The Blue Note\" or \"DJ Sarah\"). Sub-schedules help organize events within that calendar by category, room, or series (like \"Main Stage\" and \"Lounge\"). Events are the individual shows, performances, or happenings on your schedule."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I create recurring events?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. When creating an event, you can set it to repeat daily, weekly, biweekly, or monthly. You can also specify an end date or number of occurrences. Each occurrence can be edited individually if needed."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I send newsletters to my followers?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Pro users can create and send branded newsletters to followers and ticket buyers using a drag-and-drop builder. Choose from pre-built templates, add event listings, images, and buttons, and track opens and clicks with built-in analytics."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Does Event Schedule have email marketing?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. The built-in newsletter feature includes audience segmentation, A/B testing, scheduled sends, and open/click tracking. You can target all followers, ticket buyers, specific sub-schedules, or a manual list of email addresses."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Who can see my schedule?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "By default, your schedule is public so your audience can find it. However, you control what information appears. You can also make individual events private or require a password."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Is payment processing secure?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. We never see or store your customers' credit card numbers. All payment processing happens through Stripe, which is PCI-DSS compliant and uses industry-standard encryption."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Do you sell my data?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "No. We don't sell, share, or use your data for advertising. Our built-in analytics are privacy-first and don't use external trackers. If you selfhost, your data stays entirely on your own servers."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Is Event Schedule open source?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Event Schedule is open source and licensed under the AAL (Attribution Assurance License). You can view the full source code on GitHub, contribute improvements, report issues, or fork it for your own projects."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I selfhost Event Schedule?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Download the code from GitHub and run it on your own server. Selfhosting is completely free and includes all features, including Pro features. This gives you complete control over your data and customization options."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Is there an API?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Pro users have access to our REST API, which lets you programmatically create events, manage schedules, retrieve ticket sales, and integrate with your own systems."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What languages does Event Schedule support?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "The interface is available in 12 languages: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, Arabic, Estonian, Romanian, and Russian. You can also use AI-powered translation to automatically translate your event descriptions."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I customize my schedule's appearance?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. You can customize colors, fonts, backgrounds, header images, profile images, and choose between grid or list layouts. Pro users and above can also add custom CSS for complete brand control. Enterprise users can use a custom domain."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Does Event Schedule support multiple languages?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. The interface supports 12 languages, and each schedule can have its own language setting. You can also use AI-powered translation to automatically translate event descriptions into other languages."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I track who views my schedule?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Built-in analytics track page views, unique visitors, devices, browsers, and traffic sources. Analytics is a Pro feature and uses privacy-first tracking with no external trackers."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Does Event Schedule integrate with Google Analytics?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Event Schedule has its own built-in analytics dashboard with page views, unique visitors, device breakdowns, and traffic sources. No external analytics integration is needed."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I import events from a flyer or image?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. The AI-powered import feature can extract event details from images, flyers, and pasted text. Simply drop an image or paste event information and the AI will parse it into structured event data."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can others submit events to my schedule?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Enable 'Accept Event Requests' in your schedule settings to let others submit events. You can optionally require approval before submitted events appear on your schedule."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What happens when tickets sell out?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "When all tickets sell out, a waitlist button appears automatically. Fans can join the waitlist by entering their name and email. When spots open up (from cancellations or refunds), the next person in line is notified via email and given 24 hours to complete their purchase."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I track check-ins in real time?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. The live check-in dashboard shows real-time progress bars, per-ticket-type breakdowns, and a recent activity feed with attendee names and check-in times. It auto-refreshes every 10 seconds and works on any device."
-                }
-            }
-        ]
-    }
-    </script>
-    </x-slot>
-
-    <style {!! nonce_attr() !!}>
-        .text-gradient-faq {
-            background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 50%, #06b6d4 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .dark .text-gradient-faq {
-            background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 50%, #22d3ee 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .es-finale-panel .text-gradient-faq {
-            background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 50%, #22d3ee 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        /* Signature motif: a row of question marks (the help center) */
-        .es-q {
-            flex: 0 0 auto;
-            font-weight: 800;
-            line-height: 1;
-            color: rgba(37, 99, 235, 0.8);
-            animation: es-q-pulse var(--q-dur, 2.8s) ease-in-out infinite;
-            animation-delay: var(--q-delay, 0s);
-        }
-        @keyframes es-q-pulse {
-            0%, 100% { opacity: 0.2; transform: scale(0.82); }
-            50% { opacity: 0.9; transform: scale(1); filter: drop-shadow(0 0 6px rgba(37, 99, 235, 0.5)); }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            .es-q, .animate-pulse-slow { animation: none !important; }
-            .es-q { opacity: 0.55; transform: none; }
-        }
-    </style>
-
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,
          so no-JS visitors, crawlers, and reduced-motion users always see everything. --}}
     <script {!! nonce_attr() !!}>
@@ -334,468 +11,1218 @@
         }
     </script>
 
-    <!-- ============================================================ -->
-    <!-- 1. Hero                                                     -->
-    <!-- ============================================================ -->
-    <section class="es-hero relative flex min-h-[calc(60svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
-        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 70%, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 32%, rgba(14, 165, 233, 0.26), rgba(14, 165, 233, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.14), rgba(6, 182, 212, 0) 60%);"></div>
-            <div class="es-rays absolute inset-0"></div>
-            <div class="absolute inset-0 grid-pattern"></div>
+    <style {!! nonce_attr() !!}>
+        /* ==============================================================
+           For-faq "The Front Desk" styles.
 
-            <div class="es-qs absolute bottom-6 left-0 right-0 mx-auto hidden h-14 max-w-4xl items-center justify-center gap-6 px-8 opacity-55 md:flex" style="mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);">
-                @for ($i = 0; $i < 12; $i++)
-                    @php $sz = [22, 30, 18, 26][$i % 4]; $dur = 2.6 + ($i % 5) * 0.4; $delay = ($i % 7) * 0.3; @endphp
-                    <span class="es-q" style="font-size: {{ $sz }}px; --q-dur: {{ $dur }}s; --q-delay: {{ $delay }}s;">?</span>
-                @endfor
-            </div>
+           CONCEPT: THE DESK IN THE LOBBY. Somebody arrives with a
+           question before they sign up. A front desk does two things
+           that no other object on this site does: it answers in ORDER,
+           and when it cannot answer it POINTS YOU DOWN A CORRIDOR. So
+           the page is built as a desk rather than as a stack of
+           accordions, and the two things the desk does become the two
+           structural devices:
+
+             - THE DIRECTORY BOARD, the engraved plaque on the wall
+               behind the desk. Nine corridors, numbered on a brass
+               tile, ruled apart by a hairline the way a plaque's rows
+               are, and each one carrying the RANGE OF FILING
+               REFERENCES that lives down it (01.01 to 01.04). It is
+               the hero AND it is the whole in-page navigation, which
+               is the point: a directory is nav that admits how big the
+               building is.
+             - THE DOCKET. Every answer carries a filing reference
+               (03.04) so it can be pointed at rather than described.
+               The reference is the grouping made visible, and it is
+               what the board's right-hand column indexes, so the hero,
+               the corridor plates and the answers are one object
+               system rather than three decorations.
+
+           DELIBERATELY NO DOTTED LEADERS. /for-comedians owns the
+           "numbered row + leader dots + right-hand value" rundown
+           board and at least four sibling pages already use leader
+           rows, so a fifth would be house furniture with a new
+           colour on it. The reference range is the column a rundown
+           board cannot carry, and the hairline rule reads as engraving
+           rather than as a table of contents.
+
+           And because the question people actually arrive with is "what
+           do I get for nothing", the counter carries a RATE CARD: a real
+           <table>, three plans across, eleven rows down, including the
+           rows that say no. The metaphor and the product argument are
+           the same sentence - the free plan is not a trial, so the desk
+           can answer without taking your card.
+
+           THE BOARD AND THE BAND ARE FIXED PHYSICAL OBJECTS. A brass-
+           lettered navy plaque is the same plaque in a dark lobby, so
+           .es-desk-board and .es-desk-band render IDENTICALLY with .dark
+           on and off. Shared classes that flip with the colour mode are
+           overridden inside them (grid-overlay, animate-shimmer,
+           es-claim:focus-within), and es-aurora is deliberately kept
+           OUT of both, because its opacity changes between modes.
+
+           COLOUR: the page keeps its existing hue family, blue, but
+           spends it as INK rather than as glow. Deep navy #1e3a8a and
+           #1d4ed8 on paper, #a8c3ff on the plaque. It is not the shared
+           brand blue -> sky -> cyan chrome gradient and it is not the
+           bright cyan/sky the audience pages took; a directory board is
+           painted, not lit.
+
+           NEVER use text-gray-500 here: #6b7280 measures only 4.35 on
+           this page's #f2f5fa ground. Use .es-desk-muted (6.62 on the
+           ground, 7.23 on a white card, 7.42 on a dark card).
+
+           BLADE RULE for this block: never use @supports probes here.
+           A "#" hex inside a parenthesized at-rule condition breaks
+           Blade compilation of every later parenthesized directive.
+           ============================================================== */
+
+        /* --- Ground and ink ------------------------------------------ */
+        .es-desk-page { background-color: #f2f5fa; color: #141b26; }
+        .dark .es-desk-page { background-color: #0b1119; color: #e9eef7; }
+        .es-desk-ink { color: #141b26; }
+        .dark .es-desk-ink { color: #e9eef7; }
+        .es-desk-muted { color: #4d5866; }
+        .dark .es-desk-muted { color: #9aabc4; }
+        .es-desk-accent { color: #1d4ed8; }
+        .dark .es-desk-accent { color: #a8c3ff; }
+        /* Always-lit accent, for use inside the fixed dark objects. */
+        .es-desk-lit { color: #a8c3ff; }
+
+        .text-gradient-desk {
+            background-image: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 55%, #0e7490 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .dark .text-gradient-desk {
+            background-image: linear-gradient(135deg, #a8c3ff 0%, #93c5fd 55%, #67e8f9 100%);
+        }
+        /* The fixed dark objects need the light stops unconditionally.
+           `background-image`, never the `background` shorthand: the
+           shorthand resets background-clip and the text goes solid. */
+        .es-desk-band .text-gradient-desk,
+        .es-desk-board .text-gradient-desk {
+            background-image: linear-gradient(135deg, #a8c3ff 0%, #93c5fd 55%, #67e8f9 100%);
+        }
+
+        /* --- Cards and secondary surfaces ---------------------------- */
+        .es-desk-card {
+            border: 1px solid rgba(20, 27, 38, 0.12);
+            border-radius: 1rem;
+            background-color: #ffffff;
+        }
+        .dark .es-desk-card {
+            border-color: rgba(233, 238, 247, 0.12);
+            background-color: #151b22;
+        }
+        .es-desk-sub {
+            background-color: #e7ebf3;
+        }
+        .dark .es-desk-sub { background-color: #1b222a; }
+        .es-desk-divide { border-color: rgba(20, 27, 38, 0.1); }
+        .dark .es-desk-divide { border-color: rgba(233, 238, 247, 0.12); }
+
+        /* --- Eyebrow / small caps ----------------------------------- */
+        .es-desk-tag {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.26em;
+            text-transform: uppercase;
+            color: #4d5866;
+        }
+        .dark .es-desk-tag { color: #9aabc4; }
+        .es-desk-band .es-desk-tag,
+        .es-desk-board .es-desk-tag { color: #a8c3ff; }
+
+        /* --- THE DIRECTORY BOARD ------------------------------------ */
+        .es-desk-board {
+            background-color: #101a2b;
+            background-image: linear-gradient(168deg, #16233a 0%, #101a2b 52%, #0b1220 100%);
+            border: 1px solid rgba(168, 195, 255, 0.16);
+            border-radius: 1.25rem;
+            box-shadow: inset 0 1px 0 rgba(233, 238, 247, 0.07), 0 24px 50px -28px rgba(9, 14, 24, 0.7);
+        }
+        .es-desk-board-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1.15rem 1.1rem 0.8rem;
+            border-bottom: 1px solid rgba(168, 195, 255, 0.16);
+        }
+        .es-desk-board-list { padding: 0.35rem 0.75rem 0.6rem; }
+        /* Engraved rows: a hairline between them, no leader dots. */
+        .es-desk-board-list li + li { border-top: 1px solid rgba(168, 195, 255, 0.13); }
+        .es-desk-board-row {
+            display: flex;
+            align-items: baseline;
+            gap: 0.7rem;
+            padding: 0.6rem 0.35rem;
+            transition: background-color 0.2s ease;
+        }
+        .es-desk-board-row:hover { background-color: rgba(168, 195, 255, 0.07); }
+        .es-desk-board-num {
+            flex: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 1.75rem;
+            padding: 0.1rem 0.35rem;
+            border-radius: 0.3rem;
+            background-color: rgba(168, 195, 255, 0.14);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-variant-numeric: tabular-nums;
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            color: #a8c3ff;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        .es-desk-board-row:hover .es-desk-board-num { background-color: #a8c3ff; color: #101a2b; }
+        .es-desk-board-name {
+            flex: 1 1 auto;
+            min-width: 0;
+            font-size: 0.94rem;
+            font-weight: 600;
+            color: #e9eef7;
+        }
+        /* The right-hand column a rundown board cannot carry: which filing
+           references live down this corridor. */
+        .es-desk-board-range {
+            flex: none;
+            white-space: nowrap;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-variant-numeric: tabular-nums;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            color: #9aabc4;
+            transition: color 0.2s ease;
+        }
+        .es-desk-board-row:hover .es-desk-board-range { color: #e9eef7; }
+        .es-desk-board-foot {
+            padding: 0.85rem 1.1rem 1.15rem;
+            border-top: 1px solid rgba(168, 195, 255, 0.16);
+            font-size: 0.75rem;
+            color: #9aabc4;
+        }
+
+        /* --- Corridor plate: the number + name that opens a group ---- */
+        .es-desk-plate {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 0.4rem 0.95rem 0.4rem 0.55rem;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(20, 27, 38, 0.16);
+            background-color: #ffffff;
+        }
+        .dark .es-desk-plate {
+            border-color: rgba(233, 238, 247, 0.18);
+            background-color: #151b22;
+        }
+        .es-desk-plate-num {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.15rem 0.45rem;
+            border-radius: 0.3rem;
+            background-color: #1e3a8a;
+            color: #ffffff;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-variant-numeric: tabular-nums;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+        }
+        .dark .es-desk-plate-num { background-color: #a8c3ff; color: #0b1119; }
+        .es-desk-plate-name {
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            color: #141b26;
+        }
+        .dark .es-desk-plate-name { color: #e9eef7; }
+
+        .es-desk-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #1d4ed8;
+        }
+        .dark .es-desk-back { color: #a8c3ff; }
+        .es-desk-back:hover { text-decoration: underline; }
+
+        /* --- THE DOCKET: one filed answer --------------------------- */
+        .es-desk-docket {
+            border: 1px solid rgba(20, 27, 38, 0.12);
+            border-radius: 0.85rem;
+            background-color: #ffffff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .dark .es-desk-docket {
+            border-color: rgba(233, 238, 247, 0.12);
+            background-color: #151b22;
+        }
+        .es-desk-docket[open] { box-shadow: 0 14px 30px -22px rgba(15, 25, 45, 0.55); }
+        .es-desk-summary {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.85rem;
+            padding: 1rem 1.15rem;
+            cursor: pointer;
+        }
+        .es-desk-ref {
+            flex: none;
+            padding-top: 0.1rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-variant-numeric: tabular-nums;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            color: #1d4ed8;
+        }
+        .dark .es-desk-ref { color: #a8c3ff; }
+        .es-desk-q {
+            flex: 1 1 auto;
+            min-width: 0;
+            font-weight: 600;
+            color: #141b26;
+        }
+        .dark .es-desk-q { color: #e9eef7; }
+        .es-desk-arrow {
+            flex: none;
+            margin-top: 0.15rem;
+            color: #4d5866;
+            transition: transform 0.25s ease;
+        }
+        .dark .es-desk-arrow { color: #9aabc4; }
+        .es-desk-docket[open] .es-desk-arrow { transform: rotate(180deg); }
+        .es-desk-answer { padding: 0 1.15rem 1.15rem 3.05rem; }
+        .es-desk-refer {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.4rem 1rem;
+            margin-top: 0.85rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid rgba(20, 27, 38, 0.1);
+        }
+        .dark .es-desk-refer { border-top-color: rgba(233, 238, 247, 0.12); }
+
+        /* --- THE RATE CARD ----------------------------------------- */
+        .es-desk-rate { width: 100%; border-collapse: collapse; text-align: left; }
+        .es-desk-rate th,
+        .es-desk-rate td {
+            padding: 0.7rem 0.85rem;
+            font-size: 0.86rem;
+            vertical-align: top;
+            border-top: 1px solid rgba(20, 27, 38, 0.1);
+        }
+        .dark .es-desk-rate th,
+        .dark .es-desk-rate td { border-top-color: rgba(233, 238, 247, 0.12); }
+        .es-desk-rate thead th {
+            border-top: 0;
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: #4d5866;
+            white-space: nowrap;
+        }
+        .dark .es-desk-rate thead th { color: #9aabc4; }
+        .es-desk-rate tbody th {
+            font-weight: 600;
+            color: #141b26;
+        }
+        .dark .es-desk-rate tbody th { color: #e9eef7; }
+        .es-desk-cell { color: #4d5866; }
+        .dark .es-desk-cell { color: #9aabc4; }
+        .es-desk-yes { font-weight: 700; color: #1e3a8a; }
+        .dark .es-desk-yes { color: #a8c3ff; }
+        .es-desk-scroll { overflow-x: auto; }
+
+        /* --- Chips, plan pills, links, buttons ---------------------- */
+        .es-desk-chip {
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+            padding: 0.3rem 0.8rem;
+            border-radius: 9999px;
+            border: 1px solid rgba(20, 27, 38, 0.14);
+            background-color: rgba(255, 255, 255, 0.75);
+            color: #4d5866;
+            font-size: 0.74rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .dark .es-desk-chip {
+            border-color: rgba(233, 238, 247, 0.16);
+            background-color: #151b22;
+            color: #9aabc4;
+        }
+        .es-desk-link { color: #1d4ed8; font-weight: 500; }
+        .es-desk-link:hover { color: #141b26; text-decoration: underline; }
+        .dark .es-desk-link { color: #a8c3ff; }
+        .dark .es-desk-link:hover { color: #e9eef7; }
+        /* The board and the band are dark in BOTH colour modes, so links
+           inside them take the light ink unconditionally. */
+        .es-desk-band .es-desk-link,
+        .es-desk-board .es-desk-link { color: #a8c3ff; }
+        .es-desk-band .es-desk-link:hover,
+        .es-desk-board .es-desk-link:hover { color: #e9eef7; }
+
+        .es-desk-btn {
+            background-color: #1e40af;
+            color: #ffffff;
+            box-shadow: 0 18px 36px -16px rgba(30, 64, 175, 0.55);
+        }
+        .es-desk-btn:hover { background-color: #1b3893; box-shadow: 0 22px 44px -16px rgba(30, 64, 175, 0.65); }
+        .dark .es-desk-btn { background-color: #a8c3ff; color: #0b1119; }
+        .dark .es-desk-btn:hover { background-color: #c2d5ff; }
+        /* Inside the fixed dark objects the button is the light one in both modes. */
+        .es-desk-band .es-desk-btn { background-color: #a8c3ff; color: #0b1119; }
+        .es-desk-band .es-desk-btn:hover { background-color: #c2d5ff; }
+
+        .es-desk-ghost {
+            border: 1px solid rgba(233, 238, 247, 0.28);
+            background-color: rgba(233, 238, 247, 0.08);
+            color: #e9eef7;
+        }
+        .es-desk-ghost:hover { background-color: rgba(233, 238, 247, 0.16); }
+
+        /* --- Hover treatment shared by dockets and referral cards --- */
+        .es-desk-hover:hover { border-color: rgba(29, 78, 216, 0.42); }
+        .dark .es-desk-hover:hover { border-color: rgba(168, 195, 255, 0.42); }
+        .es-desk-hover:hover .es-desk-hover-title { color: #1d4ed8; }
+        .dark .es-desk-hover:hover .es-desk-hover-title { color: #a8c3ff; }
+        .es-desk-hover-title { transition: color 0.2s ease; }
+
+        /* --- THE REFERRAL BAND: fixed dark in both colour modes ----- */
+        .es-desk-band {
+            background-color: #0c1420;
+            background-image: radial-gradient(125% 105% at 50% 0%, #16243a 0%, #0f1b2b 52%, #080e17 100%);
+            box-shadow: inset 0 0 90px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(233, 238, 247, 0.05);
+        }
+        /* Shared classes carry their own `.dark` rules in marketing.css, so a
+           fixed object has to pin them back. Verified with --bands. */
+        .es-desk-band .grid-overlay {
+            background-image:
+                linear-gradient(rgba(233, 238, 247, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(233, 238, 247, 0.05) 1px, transparent 1px);
+        }
+        .es-desk-band .animate-shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            background-size: 200% 100%;
+        }
+        .es-desk-band .es-claim:focus-within {
+            border-color: rgba(168, 195, 255, 0.78);
+            box-shadow: 0 0 0 4px rgba(168, 195, 255, 0.24);
+        }
+        .es-desk-slip {
+            border: 1px solid rgba(233, 238, 247, 0.14);
+            border-radius: 1rem;
+            background-color: rgba(233, 238, 247, 0.05);
+            transition: border-color 0.2s ease;
+        }
+        .es-desk-slip:hover { border-color: rgba(168, 195, 255, 0.45); }
+
+        /* --- Counter rule: the double hairline under a section head -- */
+        .es-desk-rule {
+            height: 3px;
+            border-top: 1px solid rgba(20, 27, 38, 0.16);
+            border-bottom: 1px solid rgba(20, 27, 38, 0.16);
+        }
+        .dark .es-desk-rule {
+            border-top-color: rgba(233, 238, 247, 0.16);
+            border-bottom-color: rgba(233, 238, 247, 0.16);
+        }
+        .es-desk-band .es-desk-rule {
+            border-top-color: rgba(233, 238, 247, 0.16);
+            border-bottom-color: rgba(233, 238, 247, 0.16);
+        }
+
+        /* --- Shared-system recolours (brand blue by default) -------- */
+        .es-hero .es-spot {
+            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(29, 78, 216, 0.13), transparent 60%);
+        }
+        .dark .es-hero .es-spot {
+            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(168, 195, 255, 0.11), transparent 60%);
+        }
+        .es-dot:hover .es-dot-pip { background-color: rgba(29, 78, 216, 0.62); }
+        .dark .es-dot:hover .es-dot-pip { background-color: rgba(168, 195, 255, 0.62); }
+        .es-dot.is-active .es-dot-pip { background: #1e40af; }
+        .dark .es-dot.is-active .es-dot-pip { background: #a8c3ff; }
+
+        /* --- The plaque sheen: one slow pass, gated ----------------- */
+        .es-desk-sheen {
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            background: linear-gradient(105deg, transparent 38%, rgba(233, 238, 247, 0.07) 50%, transparent 62%);
+            background-size: 260% 100%;
+            animation: es-desk-sheen 11s ease-in-out infinite;
+        }
+        @keyframes es-desk-sheen {
+            0%, 72%, 100% { background-position: 150% 0; }
+            36% { background-position: -50% 0; }
+        }
+
+        /* --- Focus rings. No border-radius here: setting it changes the
+               element's own shape on focus. Outlines already follow it. */
+        #es-desk-page a:focus-visible,
+        #es-desk-page summary:focus-visible,
+        #es-desk-page button:focus-visible {
+            outline: 2px solid #1e40af;
+            outline-offset: 3px;
+        }
+        .dark #es-desk-page a:focus-visible,
+        .dark #es-desk-page summary:focus-visible,
+        .dark #es-desk-page button:focus-visible {
+            outline-color: #a8c3ff;
+        }
+        .es-desk-board a:focus-visible,
+        .es-desk-band a:focus-visible,
+        .es-desk-band button:focus-visible {
+            outline-color: #a8c3ff !important;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .es-desk-sheen { animation: none; }
+            .es-desk-arrow { transition: none; }
+        }
+    </style>
+
+    @php
+        // ------------------------------------------------------------------
+        // Every answer on this page is a factual claim, so each one is
+        // traceable to docs/FEATURES.md or to code. Plan tiers in particular:
+        // newsletters are FREE (10/month), analytics is FREE, ticketing is
+        // Pro, custom domains and multiple team members are Enterprise, and
+        // the free plan has exactly ONE team member.
+        // ------------------------------------------------------------------
+        $github = 'https://github.com/eventschedule/eventschedule';
+
+        // Prices and the trial length come from the same config the /pricing page
+        // reads, so the rate card cannot quietly disagree with it.
+        $proMonthly = (int) config('services.stripe_platform.price_monthly_amount', 5);
+        $proYearly = (int) config('services.stripe_platform.price_yearly_amount', 50);
+        $entMonthly = (int) config('services.stripe_platform.enterprise_price_monthly_amount', 15);
+        $entYearly = (int) config('services.stripe_platform.enterprise_price_yearly_amount', 150);
+        $trialDays = (int) config('app.trial_days', 7);
+
+        $faqGroups = [
+            [
+                'id' => 'start',
+                'no' => '01',
+                'name' => 'Getting started',
+                'note' => 'What the thing is, and what it takes to have one.',
+                'items' => [
+                    [
+                        'q' => 'What is Event Schedule?',
+                        'a' => 'Event Schedule is an open-source platform for publishing a shareable event calendar and, when you want it, selling tickets from it. A musician posting gig dates, a venue publishing a lineup and a food truck posting where it will be parked all end up with the same object: one schedule at its own address, with the events on it, ready to send people to or embed in a site you already have.',
+                        'links' => [['Who uses it', marketing_url('/use-cases')]],
+                    ],
+                    [
+                        'q' => 'Do I need technical skills to use it?',
+                        'a' => 'No. You create a schedule, add events, and share the link. If the details are already written down somewhere, paste the text or drop in a flyer image and AI parsing fills the fields for you to check before you save. That is on the free plan, up to 10 parses a day.',
+                        'links' => [['How the AI import works', marketing_url('/features/ai')]],
+                    ],
+                    [
+                        'q' => 'Is Event Schedule really free?',
+                        'a' => 'Yes, and the free plan is not a trial that quietly expires. Unlimited events, a mobile-friendly public page at your own address, two-way Google, Outlook and CalDAV sync, sub-schedules, recurring events, free registration with a capacity limit, built-in analytics, the embeddable calendar, backup and restore, and newsletters at 10 emails a month all cost nothing, permanently. The paid plans add ticketing and a short list of other things, and the rate card above sets out exactly which.',
+                        'links' => [['Pricing', marketing_url('/pricing')]],
+                    ],
+                    [
+                        'q' => 'Can I embed my schedule on my website?',
+                        'a' => 'Yes, on the free plan. Every schedule has an iframe embed code you copy into your own site. It is a window onto the same schedule rather than a copy of it, so it is current the moment you change an event.',
+                        'links' => [['Sharing and embedding', marketing_url('/docs/sharing')], ['Embed calendar', marketing_url('/features/embed-calendar')]],
+                    ],
+                ],
+            ],
+            [
+                'id' => 'cost',
+                'no' => '02',
+                'name' => 'What it costs',
+                'note' => 'Three plans, two of them paid, and nothing taken from the door on any of them.',
+                'items' => [
+                    [
+                        'q' => "What's the difference between Free and Pro?",
+                        'a' => 'Free gives you the calendar: unlimited events, two-way calendar sync, sub-schedules, recurring events, built-in analytics, the embed, and newsletters at 10 emails a month. Pro is $' . $proMonthly . ' a month and is mostly about selling: ticketing with QR check-in, the check-in dashboard, passes, promo codes, gift cards, appointment booking, the sold-out waitlist, custom fields, generated event graphics, webhooks, the REST API, custom CSS, and taking the Event Schedule branding off your public pages. It also raises newsletters to 100 emails a month.',
+                        'links' => [['Compare the plans', marketing_url('/pricing')]],
+                    ],
+                    [
+                        'q' => 'What does Enterprise add?',
+                        'a' => 'Enterprise is $' . $entMonthly . ' a month and adds a custom domain for your schedule, Internal and Unlisted event visibility with an optional password, up to five team members with availability tracking, scheduled graphic emails, event creation over WhatsApp, the AI generators for schedule and event copy, agenda scanning, and newsletters at 1,000 emails a month. Priority support comes with it.',
+                        'links' => [['Pricing', marketing_url('/pricing')]],
+                    ],
+                    [
+                        'q' => 'Do you take a percentage of my ticket sales?',
+                        'a' => 'No. Event Schedule takes no cut of ticket revenue at all. Money moves through your own Stripe account, so the only thing off the top is Stripe\'s own processing fee, currently around 2.9% plus 30 cents a transaction in the United States. The rest is yours, and it lands in your account rather than in ours.',
+                        'links' => [['How Stripe connects', marketing_url('/stripe')]],
+                    ],
+                    [
+                        'q' => 'What happens when my free trial ends?',
+                        'a' => 'The ' . $trialDays . '-day trial applies to a paid plan, not to the product. When it ends, the card on file is charged for Pro at $' . $proMonthly . ' a month or $' . $proYearly . ' a year, or Enterprise at $' . $entMonthly . ' a month or $' . $entYearly . ' a year. Cancel during the trial and nothing is charged. Cancel later and the schedule drops back to the free plan with every event and every record intact. You lose the paid features, not the calendar.',
+                    ],
+                    [
+                        'q' => 'Can I cancel anytime?',
+                        'a' => 'Yes. There is no contract and no cancellation fee. The schedule reverts to the free plan and stays live at the same address. You can also take a copy with you first: backup and restore is on the free plan, so an export is not something you have to pay to be allowed.',
+                    ],
+                    [
+                        'q' => 'Can I add my team?',
+                        'a' => 'Free and Pro include one team member, which is you. Multiple team members are an Enterprise feature, capped at five, and Enterprise adds an availability tab for tracking who is around on which day. Being blunt about it, do not sign up for the free plan expecting to invite your whole staff.',
+                        'links' => [['Team members', marketing_url('/docs/managing-schedules#team')]],
+                    ],
+                ],
+            ],
+            [
+                'id' => 'tickets',
+                'no' => '03',
+                'name' => 'Tickets and money',
+                'note' => 'Ticketing is a Pro feature. What you charge stays between you and your audience.',
+                'items' => [
+                    [
+                        'q' => 'How do I start selling tickets?',
+                        'a' => 'Connect your Stripe account, which takes a couple of minutes, then add ticket types to an event with a name, a price and a quantity. Buyers pay on the event page and get an emailed ticket carrying a QR code. Ticketing is on the Pro plan.',
+                        'links' => [['Ticketing', marketing_url('/features/ticketing')], ['Connect Stripe', marketing_url('/stripe')]],
+                    ],
+                    [
+                        'q' => 'Can I create different ticket types for one event?',
+                        'a' => 'Yes, as many as the event needs: general admission, early bird, concession, a group rate. Each type carries its own price, quantity, description and sales window, and the window is a pair of exact dates and times rather than a rule about the door. Quantity is counted per occurrence date, so a weekly event does not share one pool of stock across every week.',
+                    ],
+                    [
+                        'q' => 'How do QR check-ins work?',
+                        'a' => 'Each ticket email carries a QR code. Open the scan screen on any phone or tablet, point it at the code, and the ticket is verified and marked as used. A second scan of the same code is caught rather than argued about at the door. No dedicated hardware.',
+                        'links' => [['Check-in', marketing_url('/docs/tickets')]],
+                    ],
+                    [
+                        'q' => 'Can I track check-ins in real time?',
+                        'a' => 'Yes, on Pro. The check-in dashboard shows how many people are in against how many sold, broken down by ticket type, with a recent activity feed of names and times. It refreshes itself every ten seconds and works on the phone in your hand at the door.',
+                        'links' => [['Check-in dashboard', marketing_url('/docs/tickets#checkin-dashboard')]],
+                    ],
+                    [
+                        'q' => 'Can I collect additional information from ticket buyers?',
+                        'a' => 'Yes, with custom fields on Pro. A field can be a short text answer, a longer one, a dropdown, a multi-select, a date or a yes/no switch, and you attach it either to the order or to each individual ticket. Access needs, a meal choice, a shirt size, a school contact: ask at the point of purchase and the answer arrives with the sale.',
+                        'links' => [['Custom fields', marketing_url('/features/custom-fields')]],
+                    ],
+                    [
+                        'q' => 'Can I offer free tickets alongside paid ones?',
+                        'a' => 'Yes. Free and paid ticket types sit on the same event, which covers comps, volunteer passes, and a free tier running alongside paid admission.',
+                    ],
+                    [
+                        'q' => 'Can I take sign-ups for a free event without paying for Pro?',
+                        'a' => 'Yes. Free registration is on the free plan, with an optional capacity limit counted per date, so a weekly session can hold twenty people this Thursday and twenty more next Thursday. Priced ticket types, card payment and QR check-in are the parts Pro adds.',
+                        'links' => [['Registration', marketing_url('/docs/tickets#registration')]],
+                    ],
+                    [
+                        'q' => 'What happens when tickets sell out?',
+                        'a' => 'A waitlist button appears in place of the sold-out ticket and people join with a name and an email. If stock comes back from a cancellation or a refund, the next person in line is emailed and has a 24-hour window to buy before the offer passes to the person behind them. Waitlists are on Pro.',
+                        'links' => [['Waitlist', marketing_url('/docs/tickets#waitlist')]],
+                    ],
+                ],
+            ],
+            [
+                'id' => 'dates',
+                'no' => '04',
+                'name' => 'Calendars and dates',
+                'note' => 'Where the dates live, and what a schedule is actually made of.',
+                'items' => [
+                    [
+                        'q' => 'Does Event Schedule sync with Google Calendar?',
+                        'a' => 'Yes, both ways, on the free plan. Events you create here appear in the Google Calendar you connect, and events you add there come back here. Google pushes changes over a webhook rather than waiting for a nightly job. Outlook and Microsoft 365 sync the same way, and CalDAV covers the rest. You also choose, per schedule, what should happen locally when an event is deleted in the external calendar: keep it, mark it cancelled, or delete it too.',
+                        'links' => [['Google Calendar sync', marketing_url('/google-calendar')], ['All calendar sync', marketing_url('/features/calendar-sync')]],
+                    ],
+                    [
+                        'q' => 'Can my audience add events to their personal calendars?',
+                        'a' => 'Yes. Every event page carries add-to-calendar buttons for Google, Apple and Outlook, and the Apple one is the .ics download, so anything that reads a calendar file is covered by the same button. On a recurring event each date gets its own set rather than one link for the whole series.',
+                    ],
+                    [
+                        'q' => 'Can I create recurring events?',
+                        'a' => 'Yes, on the free plan. An event can repeat daily, weekly, every few weeks on the days you choose, monthly on the same date, monthly on the same weekday, or yearly. Give the recurrence an end and it stops on its own: a closing date, or after a set number of occurrences. Individual dates can be added or taken out as exceptions, which is how a holiday or a one-off move gets handled without rebuilding the series.',
+                        'links' => [['Recurring events', marketing_url('/features/recurring-events')]],
+                    ],
+                    [
+                        'q' => "What's the difference between a schedule, a sub-schedule, and an event?",
+                        'a' => 'A schedule is the calendar itself, the thing with a name and an address, like The Blue Note or DJ Sarah. Sub-schedules are strands within it that sort and colour-code what is on, such as a series or a strand of programming, so somebody can look at one strand instead of the whole year. Events are the individual dates. One thing worth knowing: a sub-schedule organises, it does not hide. Hiding something is a visibility setting on the event.',
+                        'links' => [['Sub-schedules', marketing_url('/features/sub-schedules')]],
+                    ],
+                ],
+            ],
+            [
+                'id' => 'audience',
+                'no' => '05',
+                'name' => 'Your audience',
+                'note' => 'Following, emailing, and one thing this deliberately does not do.',
+                'items' => [
+                    [
+                        'q' => 'Can I send newsletters to my followers?',
+                        'a' => 'Yes, and on the free plan, not Pro. You compose in a block builder starting from a template, pull in your event listings, and send to followers, ticket buyers, a sub-schedule\'s audience or a list you import. Opens and clicks are reported afterwards. What changes with the plan is volume: 10 emails a month on Free, 100 on Pro, 1,000 on Enterprise, counted per recipient, so one letter to 40 followers uses 40 of the allowance. Uploading your own images into a newsletter is the one part that needs Pro.',
+                        'links' => [['Newsletters', marketing_url('/docs/newsletters')]],
+                    ],
+                    [
+                        'q' => 'Does Event Schedule have email marketing?',
+                        'a' => 'The newsletter tool is the email marketing. It has reusable audience segments, imported lists, A/B tests, a scheduled send, and open and click tracking. There is no separate product to buy and no second bill for it.',
+                        'links' => [['Recipients and segments', marketing_url('/docs/newsletters#recipients')]],
+                    ],
+                    [
+                        'q' => 'Do my followers get an email automatically when I add an event?',
+                        'a' => 'No, and it is worth being straight about that, because plenty of tools imply otherwise. Nothing goes out on your behalf when you add or change an event. Following your schedule puts somebody on your list so that you can write to them, and the newsletter is written and sent by you. Two automatic emails do exist and they run the other way: people holding a ticket are told if that event changes or is cancelled, and you are emailed when somebody submits a booking request.',
+                        'links' => [['Followers', marketing_url('/docs/managing-schedules#followers')]],
+                    ],
+                    [
+                        'q' => 'Can others submit events to my schedule?',
+                        'a' => 'Yes. Turn on event requests and your schedule gets a public submission form. On venue and curator schedules you can also require approval, so nothing appears until you have looked at it. Submissions land in a pending queue and you are emailed when one arrives.',
+                        'links' => [['Event requests', marketing_url('/docs/creating-schedules#engagement-requests')]],
+                    ],
+                ],
+            ],
+            [
+                'id' => 'privacy',
+                'no' => '06',
+                'name' => 'Privacy and visibility',
+                'note' => 'Who sees what, where the card details go, and what we do not do with any of it.',
+                'items' => [
+                    [
+                        'q' => 'Who can see my schedule?',
+                        'a' => 'By default the schedule is public, because being findable is usually the whole point of having one. You decide what appears on it, and every event carries its own visibility setting, so the page can be live while half of what is planned on it is not.',
+                        'links' => [['Event visibility', marketing_url('/docs/creating-events#draft')]],
+                    ],
+                    [
+                        'q' => 'Can I hide an event until I am ready?',
+                        'a' => 'Yes. Draft is on the free plan: the event exists for you and is published nowhere, not on the page, the feeds, the graphics, a newsletter or the calendar sync. Enterprise adds two more options: Internal, which stays members-only for good, and Unlisted, which is off the schedule but reachable by direct link, with an optional password.',
+                        'links' => [['Internal and unlisted events', marketing_url('/docs/creating-events#privacy')]],
+                    ],
+                    [
+                        'q' => 'Is payment processing secure?',
+                        'a' => 'Card details never reach us. Checkout runs through Stripe, which is PCI-DSS compliant, and the money lands in your own Stripe account. We hold the sale record, not the card number.',
+                        'links' => [['Stripe', marketing_url('/stripe')]],
+                    ],
+                    [
+                        'q' => 'Do you sell my data?',
+                        'a' => 'No. Your data is not sold, shared or used for advertising. The built-in analytics are first-party and count page views without loading a third-party tracker. If that is still not close enough to the bone, selfhost it and nothing leaves your own server.',
+                        'links' => [['Selfhosting', marketing_url('/selfhost')]],
+                    ],
+                ],
+            ],
+            [
+                'id' => 'look',
+                'no' => '07',
+                'name' => 'Look and language',
+                'note' => 'Making it look like you, in the language your audience reads.',
+                'items' => [
+                    [
+                        'q' => "Can I customize my schedule's appearance?",
+                        'a' => 'Yes. Accent colour, font, background, header image, profile image and a grid or list layout are all on the free plan, as is a logo-wall header that shows the venues you have played. Pro adds custom CSS for anything the settings do not reach, and takes the Event Schedule branding off your public pages. Enterprise puts the whole thing on a domain of your own.',
+                        'links' => [['Schedule styling', marketing_url('/docs/schedule-styling')]],
+                    ],
+                    [
+                        'q' => 'What languages does Event Schedule support?',
+                        'a' => 'Twelve: Arabic, Dutch, English, Estonian, French, German, Hebrew, Italian, Portuguese, Romanian, Russian and Spanish. The right-to-left languages are laid out right to left rather than bolted onto a left-to-right page.',
+                    ],
+                    [
+                        'q' => 'Does Event Schedule support multiple languages?',
+                        'a' => 'Yes. Each schedule picks the language it is written in, so two schedules on one account can be in two different languages. You can also nominate one other language to translate into, and event names and descriptions are translated by AI into it with a language switch on your public page. That is free, and it is one target language at a time rather than all twelve at once.',
+                        'links' => [['AI features', marketing_url('/features/ai')]],
+                    ],
+                ],
+            ],
+            [
+                'id' => 'data',
+                'no' => '08',
+                'name' => 'What you can measure',
+                'note' => 'Numbers you get, numbers you do not, and what the AI actually does.',
+                'items' => [
+                    [
+                        'q' => 'Can I track who views my schedule?',
+                        'a' => 'You get counts, not people, and being exact about it: the built-in dashboard reports page views over time, a desktop, mobile and tablet split, which countries those views came from, which domains referred them, and which UTM campaign tags they arrived with. It is on the free plan. What it does not report is any kind of person, not even a unique-visitor number, and it does not load a third-party tracker in order to get one.',
+                        'links' => [['Analytics', marketing_url('/docs/analytics')]],
+                    ],
+                    [
+                        'q' => 'Does Event Schedule integrate with Google Analytics?',
+                        'a' => 'There is no Google Analytics integration, on purpose. The built-in dashboard covers views, devices, countries, referring domains and UTM campaigns first-party, so your audience does not get handed to an ad network in order for you to learn that Tuesday was busy.',
+                        'links' => [['Analytics', marketing_url('/features/analytics')]],
+                    ],
+                    [
+                        'q' => 'Can I import events from a flyer or image?',
+                        'a' => 'Yes. Paste text or drop in an image and AI parsing pulls out the name, date, time, venue and description and fills the event form, where you check it before saving. It is on the free plan at 10 parses a day, 50 on Pro and 100 on Enterprise. It fills a form in; it does not publish anything by itself.',
+                        'links' => [['Creating events', marketing_url('/docs/creating-events')], ['AI features', marketing_url('/features/ai')]],
+                    ],
+                ],
+            ],
+            [
+                'id' => 'code',
+                'no' => '09',
+                'name' => 'Open source and selfhosting',
+                'note' => 'The part you can read, run, and take with you.',
+                'items' => [
+                    [
+                        'q' => 'Is Event Schedule open source?',
+                        'a' => 'Yes, under the Attribution Assurance License. The whole application is on GitHub: read it, file an issue, send a patch, or fork it for something of your own.',
+                        'links' => [['Open source', marketing_url('/open-source')], ['GitHub', $github, true]],
+                    ],
+                    [
+                        'q' => 'Can I selfhost Event Schedule?',
+                        'a' => 'Yes. Run it on your own server and it resolves to the Enterprise feature set at no cost, with the data on your own hardware. A selfhosted install even has a couple of things the hosted one does not, such as importing events from a URL or a city search, and one-click updates.',
+                        'links' => [['Selfhosting guide', marketing_url('/selfhost')], ['GitHub', $github, true]],
+                    ],
+                    [
+                        'q' => 'Is there an API?',
+                        'a' => 'Yes, on Pro. The REST API covers events, schedules, sub-schedules and sales, plus read endpoints for post-event feedback and fan-submitted content, and there are outgoing webhooks for sales, event changes and check-ins.',
+                        'links' => [['API reference', marketing_url('/docs/developer/api')]],
+                    ],
+                ],
+            ],
+        ];
+
+        // One flat list, so the visible dockets and the FAQPage schema can
+        // never drift apart: both read this array.
+        $faqs = [];
+        foreach ($faqGroups as $faqGroup) {
+            foreach ($faqGroup['items'] as $faqItem) {
+                $faqs[] = $faqItem;
+            }
+        }
+        $faqCount = count($faqs);
+
+        // The rate card. Verified row by row against docs/FEATURES.md.
+        // A cell takes affirmative navy ink only when it is an INCLUSION. Denials
+        // and ceilings take neutral ink, so no limit can read as a feature you are
+        // being sold: that covers "No", a bare quantity (a 10-email allowance, a
+        // one-member cap) and an "Up to 5". "Unlimited", "Zero" and a price are
+        // inclusions and stay affirmative.
+        $rateAffirmative = fn (string $cell) => ! (
+            in_array($cell, ['No', 'No ticketing'], true)
+            || preg_match('/^\d[\d,]*$/', $cell)
+            || str_starts_with($cell, 'Up to ')
+        );
+        $rateRows = [
+            ['What it costs', '$0, permanently', '$' . $proMonthly . ' / month or $' . $proYearly . ' / year', '$' . $entMonthly . ' / month or $' . $entYearly . ' / year'],
+            ['Events on your schedule', 'Unlimited', 'Unlimited', 'Unlimited'],
+            ['Public page, embed and QR code', 'Yes', 'Yes', 'Yes'],
+            ['Two-way Google, Outlook and CalDAV sync', 'Yes', 'Yes', 'Yes'],
+            ['Built-in analytics', 'Yes', 'Yes', 'Yes'],
+            ['Free registration with a capacity limit', 'Yes', 'Yes', 'Yes'],
+            ['Newsletter emails a month', '10', '100', '1,000'],
+            ['Ticketing, QR check-in and waitlist', 'No', 'Yes', 'Yes'],
+            ['Platform fee on ticket sales', 'No ticketing', 'Zero', 'Zero'],
+            ['Remove Event Schedule branding', 'No', 'Yes', 'Yes'],
+            ['Team members', '1', '1', 'Up to 5'],
+            ['Custom domain, Internal and Unlisted events', 'No', 'No', 'Yes'],
+        ];
+
+        $quickAnswers = [
+            [
+                'q' => 'Is it free?',
+                'a' => 'Yes, and permanently. The calendar, the public page, calendar sync, analytics and 10 newsletter emails a month cost nothing and always did.',
+                'ref' => '01.03',
+                'href' => '#start',
+            ],
+            [
+                'q' => 'Do you take a cut?',
+                'a' => 'No. Zero platform fees on ticket sales. The money goes through your own Stripe account, so the only deduction is Stripe\'s.',
+                'ref' => '02.03',
+                'href' => '#cost',
+            ],
+            [
+                'q' => 'Can I leave?',
+                'a' => 'Yes. Cancel with no fee and the schedule stays live on the free plan. Backup and restore is free, so an export is never held back.',
+                'ref' => '02.05',
+                'href' => '#cost',
+            ],
+        ];
+
+        $dotSections = [
+            ['top', 'The desk'],
+            ['quick', 'Three answers'],
+            ['rate', 'The rate card'],
+            ['start', '01 Getting started'],
+            ['cost', '02 What it costs'],
+            ['tickets', '03 Tickets and money'],
+            ['dates', '04 Calendars and dates'],
+            ['audience', '05 Your audience'],
+            ['privacy', '06 Privacy'],
+            ['look', '07 Look and language'],
+            ['data', '08 What you can measure'],
+            ['code', '09 Open source'],
+            ['refer', 'Not answered here'],
+            ['claim', 'Sign up'],
+        ];
+    @endphp
+
+    <x-seo.faq-schema :items="$faqs" />
+
+    <div id="es-desk-page" class="es-desk-page">
+
+    <!-- ============================================================ -->
+    <!-- 1. Hero: the desk, and the directory board behind it         -->
+    <!-- ============================================================ -->
+    <section id="top" class="es-hero noise relative flex min-h-[calc(78svh-4rem)] scroll-mt-24 items-center overflow-hidden py-16">
+        <div class="absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(30, 64, 175, 0.2), rgba(30, 64, 175, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 40%, rgba(14, 116, 144, 0.14), rgba(14, 116, 144, 0) 65%);"></div>
+            <div class="es-spot absolute inset-0"></div>
+            <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
         </div>
 
-        <div class="relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
-                <svg aria-hidden="true" class="h-5 w-5 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Help Center</span>
+        <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-14 lg:grid-cols-[1.05fr_1fr]">
+                <div>
+                    <div class="es-fade-up es-d-1 glass mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2.5">
+                        <svg aria-hidden="true" class="h-5 w-5 es-desk-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="es-desk-muted text-sm font-medium tracking-wide">{{ $faqCount }} answers, filed and numbered</span>
+                    </div>
+
+                    <h1 class="es-balance es-desk-ink mb-8 text-[2.5rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <span class="es-mask"><span class="es-mask-line">Ask at the desk.</span></span>
+                        <span class="es-mask es-mask-2"><span class="es-mask-line">Nobody needs your <span class="text-gradient-desk">card.</span></span></span>
+                    </h1>
+
+                    <p class="es-fade-up es-d-2 es-desk-muted mb-8 max-w-xl text-lg sm:text-xl">
+                        Everything anybody asks before signing up, grouped by corridor and answered in order. Plans, tickets, calendars, privacy, and the parts we do not do. Still stuck? <a href="mailto:{{ config('app.support_email') }}" class="es-desk-link">Email us</a> and a person replies.
+                    </p>
+
+                    <div class="es-fade-up es-d-3 mb-8 flex flex-col items-start gap-3 sm:flex-row">
+                        <a href="#rate" class="glass group inline-flex items-center justify-center gap-2 rounded-2xl px-7 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+                            See what free includes
+                            <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                        </a>
+                        <a href="{{ app_url('/sign_up') }}" class="es-desk-btn group inline-flex items-center justify-center gap-2 rounded-2xl px-8 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5">
+                            Get started free
+                            <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </a>
+                    </div>
+
+                    <div class="es-fade-up es-d-4 flex flex-wrap gap-2">
+                        <span class="es-desk-chip">Free plan, no expiry</span>
+                        <span class="es-desk-chip">Zero platform fees</span>
+                        <span class="es-desk-chip">Open source</span>
+                    </div>
+                </div>
+
+                <!-- The directory board: the hero device AND the page's nav. -->
+                <div class="es-fade-up es-d-4" data-reveal>
+                    <nav class="es-desk-board relative overflow-hidden" aria-label="Question directory">
+                        <div class="es-desk-sheen" aria-hidden="true"></div>
+                        <div class="relative">
+                            {{-- A real header row: the left column names the corridors,
+                                 the right one names what the right column holds. --}}
+                            <div class="es-desk-board-head">
+                                <span class="es-desk-tag">Directory</span>
+                                <span class="es-desk-tag">References</span>
+                            </div>
+                            <ul class="es-desk-board-list">
+                                @foreach ($faqGroups as $boardGroup)
+                                    <li>
+                                        <a href="#{{ $boardGroup['id'] }}" class="es-desk-board-row">
+                                            <span class="es-desk-board-num">{{ $boardGroup['no'] }}</span>
+                                            <span class="es-desk-board-name">{{ $boardGroup['name'] }}</span>
+                                            <span class="es-desk-board-range">{{ $boardGroup['no'] }}.01 to {{ $boardGroup['no'] }}.{{ str_pad(count($boardGroup['items']), 2, '0', STR_PAD_LEFT) }}</span>
+                                        </a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                            <p class="es-desk-board-foot">
+                                {{ $faqCount }} answers in {{ count($faqGroups) }} corridors. Longer form lives in the <a href="{{ route('marketing.docs') }}" class="es-desk-link">user guide</a>.
+                            </p>
+                        </div>
+                    </nav>
+                </div>
             </div>
-
-            <h1 class="es-balance mb-6 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
-                <span class="es-mask"><span class="es-mask-line">Frequently Asked</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-faq">Questions</span></span></span>
-            </h1>
-
-            <p class="es-fade-up es-d-2 mx-auto max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
-                Everything you need to know about Event Schedule. Can't find what you're looking for? <a href="mailto:{{ config('app.support_email') }}" class="text-blue-500 transition-colors hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300">Contact us</a>.
-            </p>
         </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- 2. FAQ Content                                              -->
+    <!-- 2. The three questions everyone opens with                   -->
     <!-- ============================================================ -->
-    <section class="bg-gray-100 py-24 dark:bg-[#0f0f14]">
-        <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-
-            <!-- Getting Started -->
-            <div class="mb-16">
-                <div class="mb-8 flex items-center gap-3" data-reveal>
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/25">
-                        <svg aria-hidden="true" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                    </div>
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Getting Started</h2>
-                </div>
-                <div class="space-y-4" data-reveal-group="60">
-                    <details name="faq-getting-started" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">What is Event Schedule?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">Event Schedule is a free, open-source platform that lets you create professional, shareable event calendars and sell tickets. Whether you're a musician sharing gig dates, a venue managing your lineup, or a food truck posting daily locations, Event Schedule gives you a professional calendar your audience can easily access.</p></div>
-                    </details>
-                    <details name="faq-getting-started" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">Is Event Schedule really free?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">Yes. The free plan includes unlimited events, mobile-optimized calendars, Google Calendar sync, team collaboration, venue location maps, and more. These features are free forever, not a trial. The <a href="{{ marketing_url('/pricing') }}" class="text-blue-600 underline hover:text-blue-700">Pro plan</a> (which adds ticketing, event boosting, and branding removal) comes with a 7-day free trial, then $5/month after that. Enterprise adds custom domains, private events, multiple team members, and AI features at $15/month.</p></div>
-                    </details>
-                    <details name="faq-getting-started" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">Do I need technical skills to use it?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">No. Creating your schedule takes just a few clicks. Add your events, customize the look, and share the link. You can also paste event details or drop an image and our <a href="{{ marketing_url('/features/ai') }}" class="text-blue-600 underline hover:text-blue-700">AI will extract the information</a> automatically.</p></div>
-                    </details>
-                    <details name="faq-getting-started" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">Can I embed my schedule on my website?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">Yes. Every schedule has an <a href="{{ marketing_url('/docs/sharing') }}" class="text-blue-600 underline hover:text-blue-700">embed code</a> you can copy and paste into your website. The embedded calendar matches your site and updates automatically when you add or change events.</p></div>
-                    </details>
-                </div>
+    <section id="quick" class="scroll-mt-24 border-t es-desk-divide py-16 lg:py-20">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-10 max-w-3xl text-center">
+                <p class="es-desk-tag mb-4" data-reveal>Asked first, every time</p>
+                <h2 class="es-balance es-desk-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
+                    Three answers before you <span class="text-gradient-desk">walk down a corridor.</span>
+                </h2>
+                <div class="es-desk-rule mx-auto mt-6 max-w-xs" aria-hidden="true"></div>
             </div>
 
-            <!-- Pricing & Billing -->
-            <div class="mb-16">
-                <div class="mb-8 flex items-center gap-3" data-reveal>
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-sky-500 shadow-lg shadow-blue-500/25">
-                        <svg aria-hidden="true" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+            <div class="grid gap-4 md:grid-cols-3" data-reveal-group="90">
+                @foreach ($quickAnswers as $quick)
+                    <div class="es-desk-card flex flex-col p-6" data-reveal="panel">
+                        <div class="mb-3 flex items-baseline gap-2">
+                            <span class="es-desk-ref">{{ $quick['ref'] }}</span>
+                            <h3 class="es-desk-ink text-lg font-bold">{{ $quick['q'] }}</h3>
+                        </div>
+                        <p class="es-desk-muted text-sm leading-relaxed">{{ $quick['a'] }}</p>
+                        <a href="{{ $quick['href'] }}" class="es-desk-link mt-auto inline-flex items-center gap-1 pt-4 text-sm">
+                            The long answer
+                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                        </a>
                     </div>
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Pricing & Billing</h2>
-                </div>
-                <div class="space-y-4" data-reveal-group="60">
-                    <details name="faq-pricing" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">What's the difference between Free and Pro?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">The Free plan includes everything you need for a professional event calendar: unlimited events, Google Calendar sync, team collaboration, and mobile-optimized design. Pro adds ticketing with QR check-ins, the ability to remove Event Schedule branding, event graphics generation, event boosting with ads, custom CSS styling, and REST API access. Enterprise adds custom domains, private and password-protected events, multiple team members, AI features, email scheduling, agenda scanning, and priority support. <a href="{{ marketing_url('/pricing') }}" class="text-blue-600 underline hover:text-blue-700">See our pricing page</a> for details.</p></div>
-                    </details>
-                    <details name="faq-pricing" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">Do you take a percentage of my ticket sales?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">No. We never take a cut of your ticket revenue. When you sell tickets through Event Schedule, you pay only <a href="{{ marketing_url('/stripe') }}" class="text-blue-600 underline hover:text-blue-700">Stripe's</a> standard processing fees (approximately 2.9% + $0.30 per transaction). The rest is yours.</p></div>
-                    </details>
-                    <details name="faq-pricing" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">What happens when my free trial ends?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">After your 7-day free trial, your card is automatically charged for Pro ($5/month or $50/year) or Enterprise ($15/month or $150/year). You can cancel anytime during or after the trial. If you cancel, your account reverts to the Free plan. You keep all your events and data; you just lose access to paid features like ticketing and branding removal.</p></div>
-                    </details>
-                    <details name="faq-pricing" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">Can I cancel anytime?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">Yes. There are no contracts or cancellation fees. Cancel your Pro subscription whenever you want, and your account stays active on the Free plan.</p></div>
-                    </details>
-                </div>
+                @endforeach
             </div>
-
-            <!-- Ticketing & Payments -->
-            <div class="mb-16">
-                <div class="mb-8 flex items-center gap-3" data-reveal>
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-cyan-500 shadow-lg shadow-sky-500/25">
-                        <svg aria-hidden="true" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                        </svg>
-                    </div>
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Ticketing & Payments</h2>
-                </div>
-                <div class="space-y-4" data-reveal-group="50">
-                    <details name="faq-ticketing" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">How do I start selling tickets?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">First, <a href="{{ marketing_url('/stripe') }}" class="text-blue-600 underline hover:text-blue-700">connect your Stripe account</a> (takes about 2 minutes). Then, when creating or editing an event, add ticket types with names, prices, and quantities. Your attendees can purchase directly from your event page and receive tickets with QR codes via email. Learn more about <a href="{{ marketing_url('/features/ticketing') }}" class="text-blue-600 underline hover:text-blue-700">ticketing</a>.</p></div>
-                    </details>
-                    <details name="faq-ticketing" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">Can I create different ticket types for one event?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">Yes. You can create multiple ticket types per event, such as General Admission, VIP, Early Bird, or Student pricing. Each type can have its own price, quantity limit, sales start date, sales end date, and description.</p></div>
-                    </details>
-                    <details name="faq-ticketing" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">How do QR check-ins work?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">When someone buys a ticket, they receive an email with a QR code. At your event, open the check-in screen on any smartphone or tablet, scan the QR code, and the system verifies the ticket and marks it as used. No special hardware required.</p></div>
-                    </details>
-                    <details name="faq-ticketing" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">Can I collect additional information from ticket buyers?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">Yes. You can add <a href="{{ marketing_url('/features/custom-fields') }}" class="text-blue-600 underline hover:text-blue-700">custom fields</a> to your ticket forms, including text fields, dropdowns, date pickers, and yes/no questions. Use these to collect meal preferences, t-shirt sizes, accessibility needs, or any other information.</p></div>
-                    </details>
-                    <details name="faq-ticketing" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">Can I offer free tickets alongside paid ones?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">Yes. You can mix free and paid ticket types on the same event. This is useful for comp tickets, volunteer passes, or free admission with optional paid upgrades.</p></div>
-                    </details>
-                    <details name="faq-ticketing" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">What happens when tickets sell out?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">When all tickets sell out, a waitlist button appears automatically. Fans can join the waitlist by entering their name and email. When spots open up (from cancellations or refunds), the next person in line is notified via email and given 24 hours to complete their purchase. Learn more in the <a href="{{ marketing_url('/docs/tickets#waitlist') }}" class="text-blue-600 underline hover:text-blue-700">ticketing guide</a>.</p></div>
-                    </details>
-                    <details name="faq-ticketing" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">Can I track check-ins in real time?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">Yes. The live <a href="{{ marketing_url('/docs/tickets#checkin-dashboard') }}" class="text-blue-600 underline hover:text-blue-700">check-in dashboard</a> shows real-time progress bars, per-ticket-type breakdowns, and a recent activity feed with attendee names and check-in times. It auto-refreshes every 10 seconds and works on any device.</p></div>
-                    </details>
-                </div>
-            </div>
-
-            <!-- Calendar & Sharing -->
-            <div class="mb-16">
-                <div class="mb-8 flex items-center gap-3" data-reveal>
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg shadow-blue-500/25">
-                        <svg aria-hidden="true" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                    </div>
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Calendar & Sharing</h2>
-                </div>
-                <div class="space-y-4" data-reveal-group="60">
-                    <details name="faq-calendar" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">Does Event Schedule sync with Google Calendar?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">Yes, and it's bidirectional. Events you create in Event Schedule automatically appear in your connected <a href="{{ marketing_url('/google-calendar') }}" class="text-blue-600 underline hover:text-blue-700">Google Calendar</a>. Events you add to Google Calendar also sync back to Event Schedule. Changes update in real-time via webhooks.</p></div>
-                    </details>
-                    <details name="faq-calendar" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">Can my audience add events to their personal calendars?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">Yes. Every event page has "Add to Calendar" buttons that let visitors save the event to Google Calendar, Apple Calendar, Outlook, or download an ICS file. This works for both you and your attendees.</p></div>
-                    </details>
-                    <details name="faq-calendar" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">What's the difference between a schedule, a sub-schedule, and an event?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">A schedule is your main calendar (like "The Blue Note" or "DJ Sarah"). <a href="{{ marketing_url('/features/sub-schedules') }}" class="text-blue-600 underline hover:text-blue-700">Sub-schedules</a> help organize events within that calendar by category, room, or series (like "Main Stage" and "Lounge"). Events are the individual shows, performances, or happenings on your schedule.</p></div>
-                    </details>
-                    <details name="faq-calendar" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">Can I create recurring events?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">Yes. When creating an event, you can set it to repeat daily, weekly, biweekly, or monthly. You can also specify an end date or number of occurrences. Each occurrence can be edited individually if needed.</p></div>
-                    </details>
-                </div>
-            </div>
-
-            <!-- Newsletters & Email -->
-            <div class="mb-16">
-                <div class="mb-8 flex items-center gap-3" data-reveal>
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 shadow-lg shadow-cyan-500/25">
-                        <svg aria-hidden="true" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                    </div>
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Newsletters & Email</h2>
-                </div>
-                <div class="space-y-4" data-reveal-group="70">
-                    <details name="faq-newsletters" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">Can I send newsletters to my followers?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">Yes. Pro users can create and send branded <a href="{{ marketing_url('/docs/newsletters') }}" class="text-blue-600 underline hover:text-blue-700">newsletters</a> to followers and ticket buyers using a drag-and-drop builder. Choose from pre-built templates, add event listings, images, and buttons, and track opens and clicks with built-in analytics.</p></div>
-                    </details>
-                    <details name="faq-newsletters" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">Does Event Schedule have email marketing?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">Yes. The built-in <a href="{{ marketing_url('/docs/newsletters') }}" class="text-blue-600 underline hover:text-blue-700">newsletter feature</a> includes audience segmentation, A/B testing, scheduled sends, and open/click tracking. You can target all followers, ticket buyers, specific sub-schedules, or a manual list of email addresses.</p></div>
-                    </details>
-                </div>
-            </div>
-
-            <!-- Customization -->
-            <div class="mb-16">
-                <div class="mb-8 flex items-center gap-3" data-reveal>
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 shadow-lg shadow-amber-500/25">
-                        <svg aria-hidden="true" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                        </svg>
-                    </div>
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Customization</h2>
-                </div>
-                <div class="space-y-4" data-reveal-group="70">
-                    <details name="faq-customization" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">Can I customize my schedule's appearance?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">Yes. You can customize colors, fonts, backgrounds, header images, profile images, and choose between grid or list layouts. Pro users and above can also add custom CSS for complete brand control. Enterprise users can use a custom domain. See our <a href="{{ marketing_url('/docs/schedule-styling') }}" class="text-blue-600 underline hover:text-blue-700">schedule styling guide</a> for details.</p></div>
-                    </details>
-                    <details name="faq-customization" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">Does Event Schedule support multiple languages?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">Yes. The interface supports 12 languages, and each schedule can have its own language setting. You can also use <a href="{{ marketing_url('/features/ai') }}" class="text-blue-600 underline hover:text-blue-700">AI-powered translation</a> to automatically translate event descriptions into other languages.</p></div>
-                    </details>
-                </div>
-            </div>
-
-            <!-- Analytics -->
-            <div class="mb-16">
-                <div class="mb-8 flex items-center gap-3" data-reveal>
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 shadow-lg shadow-teal-500/25">
-                        <svg aria-hidden="true" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                    </div>
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Analytics</h2>
-                </div>
-                <div class="space-y-4" data-reveal-group="70">
-                    <details name="faq-analytics" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">Can I track who views my schedule?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">Yes. Built-in analytics track page views, unique visitors, devices, browsers, and traffic sources. Analytics is a Pro feature and uses privacy-first tracking with no external trackers. See our <a href="{{ marketing_url('/docs/analytics') }}" class="text-blue-600 underline hover:text-blue-700">analytics documentation</a> for details.</p></div>
-                    </details>
-                    <details name="faq-analytics" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">Does Event Schedule integrate with Google Analytics?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">Event Schedule has its own built-in <a href="{{ marketing_url('/docs/analytics') }}" class="text-blue-600 underline hover:text-blue-700">analytics dashboard</a> with page views, unique visitors, device breakdowns, and traffic sources. No external analytics integration is needed.</p></div>
-                    </details>
-                </div>
-            </div>
-
-            <!-- Event Management -->
-            <div class="mb-16">
-                <div class="mb-8 flex items-center gap-3" data-reveal>
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 shadow-lg shadow-cyan-500/25">
-                        <svg aria-hidden="true" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                    </div>
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Event Management</h2>
-                </div>
-                <div class="space-y-4" data-reveal-group="70">
-                    <details name="faq-events" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">Can I import events from a flyer or image?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">Yes. The AI-powered import feature can extract event details from images, flyers, and pasted text. Simply drop an image or paste event information and the AI will parse it into structured event data. Learn more in our <a href="{{ marketing_url('/docs/creating-events') }}" class="text-blue-600 underline hover:text-blue-700">creating events guide</a>.</p></div>
-                    </details>
-                    <details name="faq-events" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">Can others submit events to my schedule?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">Yes. Enable "Accept Event Requests" in your schedule settings to let others submit events. You can optionally require approval before submitted events appear on your schedule. See <a href="{{ marketing_url('/docs/creating-schedules#engagement-requests') }}" class="text-blue-600 underline hover:text-blue-700">creating schedules</a> for setup details.</p></div>
-                    </details>
-                </div>
-            </div>
-
-            <!-- Privacy & Security -->
-            <div class="mb-16">
-                <div class="mb-8 flex items-center gap-3" data-reveal>
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 shadow-lg shadow-amber-500/25">
-                        <svg aria-hidden="true" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
-                    </div>
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Privacy & Security</h2>
-                </div>
-                <div class="space-y-4" data-reveal-group="70">
-                    <details name="faq-privacy" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">Who can see my schedule?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">By default, your schedule is public so your audience can find it. However, you control what information appears. You can also make individual events private or require a password.</p></div>
-                    </details>
-                    <details name="faq-privacy" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">Is payment processing secure?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">Yes. We never see or store your customers' credit card numbers. All payment processing happens through <a href="{{ marketing_url('/stripe') }}" class="text-blue-600 underline hover:text-blue-700">Stripe</a>, which is PCI-DSS compliant and uses industry-standard encryption.</p></div>
-                    </details>
-                    <details name="faq-privacy" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">Do you sell my data?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">No. We don't sell, share, or use your data for advertising. Our built-in analytics are privacy-first and don't use external trackers. If you selfhost, your data stays entirely on your own servers.</p></div>
-                    </details>
-                </div>
-            </div>
-
-            <!-- Technical & Selfhosting -->
-            <div>
-                <div class="mb-8 flex items-center gap-3" data-reveal>
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-gray-700 to-gray-900 shadow-lg shadow-gray-700/25">
-                        <svg aria-hidden="true" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                        </svg>
-                    </div>
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Technical & Selfhosting</h2>
-                </div>
-                <div class="space-y-4" data-reveal-group="60">
-                    <details name="faq-technical" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">Is Event Schedule open source?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">Yes. Event Schedule is <a href="{{ marketing_url('/open-source') }}" class="text-blue-600 underline hover:text-blue-700">open source</a> and licensed under the AAL (Attribution Assurance License). You can view the full source code on <a href="https://github.com/eventschedule/eventschedule" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-700">GitHub</a>, contribute improvements, report issues, or fork it for your own projects.</p></div>
-                    </details>
-                    <details name="faq-technical" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">Can I selfhost Event Schedule?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">Yes. Download the code from <a href="https://github.com/eventschedule/eventschedule" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-700">GitHub</a> and run it on your own server. Selfhosting is completely free and includes all features, including Pro features. This gives you complete control over your data and customization options. <a href="{{ marketing_url('/selfhost') }}" class="text-blue-600 underline hover:text-blue-700">Learn more about selfhosting</a>.</p></div>
-                    </details>
-                    <details name="faq-technical" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">Is there an API?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">Yes. Pro users have access to our <a href="{{ marketing_url('/docs/developer/api') }}" class="text-blue-600 underline hover:text-blue-700">REST API</a>, which lets you programmatically create events, manage schedules, retrieve ticket sales, and integrate with your own systems.</p></div>
-                    </details>
-                    <details name="faq-technical" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5">
-                            <span class="font-semibold text-gray-900 dark:text-white">What languages does Event Schedule support?</span>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">The interface is available in 12 languages: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, Arabic, Estonian, Romanian, and Russian. You can also use <a href="{{ marketing_url('/features/ai') }}" class="text-blue-600 underline hover:text-blue-700">AI-powered translation</a> to automatically translate your event descriptions.</p></div>
-                    </details>
-                </div>
-            </div>
-
         </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- 3. Finale                                                   -->
+    <!-- 3. The rate card on the counter (a real record table)        -->
     <!-- ============================================================ -->
-    <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
+    <section id="rate" class="scroll-mt-24 border-t es-desk-divide py-20 lg:py-24">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-10 max-w-3xl text-center">
+                <p class="es-desk-tag mb-4" data-reveal>On the counter</p>
+                <h2 class="es-balance es-desk-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
+                    The rate card, <span class="text-gradient-desk">including the rows that say no.</span>
+                </h2>
+                <p class="es-desk-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.1s;">
+                    Twelve rows, three plans. If a page ever tells you newsletters or analytics are paid features here, that page is out of date.
+                </p>
+            </div>
+
+            <div class="es-desk-card p-4 sm:p-6" data-reveal="panel">
+                <div class="es-desk-scroll">
+                    <table class="es-desk-rate">
+                        <caption class="sr-only">What each Event Schedule plan includes, with monthly and yearly prices</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">What you asked about</th>
+                                <th scope="col">Free</th>
+                                <th scope="col">Pro</th>
+                                <th scope="col">Enterprise</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($rateRows as [$rateLabel, $rateFree, $ratePro, $rateEnt])
+                                <tr>
+                                    <th scope="row">{{ $rateLabel }}</th>
+                                    <td class="{{ $rateAffirmative($rateFree) ? 'es-desk-yes' : 'es-desk-cell' }}">{{ $rateFree }}</td>
+                                    <td class="{{ $rateAffirmative($ratePro) ? 'es-desk-yes' : 'es-desk-cell' }}">{{ $ratePro }}</td>
+                                    <td class="{{ $rateAffirmative($rateEnt) ? 'es-desk-yes' : 'es-desk-cell' }}">{{ $rateEnt }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <p class="es-desk-muted es-desk-sub mt-4 rounded-xl p-4 text-sm">
+                    A selfhosted install resolves to the Enterprise feature set at no cost. Paid plans start with a {{ $trialDays }}-day trial, and cancelling drops a schedule back to Free without taking the calendar down.
+                    <a href="{{ marketing_url('/pricing') }}" class="es-desk-link">Full pricing</a>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 4. The corridors: nine groups of numbered dockets            -->
+    <!-- ============================================================ -->
+    @foreach ($faqGroups as $groupIndex => $group)
+        <section id="{{ $group['id'] }}" class="scroll-mt-24 border-t es-desk-divide py-16 lg:py-20">
+            <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                <div class="mb-8">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div class="es-desk-plate" data-reveal>
+                            <span class="es-desk-plate-num">{{ $group['no'] }}</span>
+                            <h2 class="es-desk-plate-name">{{ $group['name'] }}</h2>
+                        </div>
+                        <a href="#top" class="es-desk-back">
+                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
+                            Back to the directory
+                        </a>
+                    </div>
+                    <p class="es-desk-muted mt-4 max-w-2xl">{{ $group['note'] }}</p>
+                    <div class="es-desk-rule mt-5" aria-hidden="true"></div>
+                </div>
+
+                <div class="space-y-3" data-reveal-group="60">
+                    @foreach ($group['items'] as $itemIndex => $faq)
+                        <details name="faq-{{ $group['id'] }}" class="es-desk-docket es-desk-hover" data-reveal>
+                            <summary class="es-desk-summary">
+                                <span class="es-desk-ref" aria-hidden="true">{{ $group['no'] }}.{{ str_pad($itemIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                                <span class="es-desk-q es-desk-hover-title">{{ $faq['q'] }}</span>
+                                <svg aria-hidden="true" class="es-desk-arrow h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                            </summary>
+                            <div class="es-desk-answer">
+                                <p class="faq-answer es-desk-muted leading-relaxed">{{ $faq['a'] }}</p>
+                                @if (! empty($faq['links']))
+                                    <div class="es-desk-refer">
+                                        <span class="es-desk-tag">Referred to</span>
+                                        @foreach ($faq['links'] as $link)
+                                            @if (count($link) > 2)
+                                                <a href="{{ $link[1] }}" target="_blank" rel="noopener noreferrer" class="es-desk-link inline-flex items-center gap-1 text-sm">
+                                                    {{ $link[0] }}
+                                                    <svg aria-hidden="true" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                                </a>
+                                            @else
+                                                <a href="{{ $link[1] }}" class="es-desk-link inline-flex items-center gap-1 text-sm">
+                                                    {{ $link[0] }}
+                                                    <svg aria-hidden="true" class="h-3.5 w-3.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                                                </a>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        </details>
+                    @endforeach
+                </div>
+
+                @if ($groupIndex === count($faqGroups) - 1)
+                    <p class="es-desk-muted mt-8 text-sm">
+                        That is the last corridor. Anything still unanswered goes to a person, below.
+                    </p>
+                @endif
+            </div>
+        </section>
+    @endforeach
+
+    <!-- ============================================================ -->
+    <!-- 5. The referral slip (fixed dark in both colour modes)       -->
+    <!-- ============================================================ -->
+    <section id="refer" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
+        <div class="es-desk-band noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                <div class="grid-overlay absolute inset-0 opacity-20"></div>
+            </div>
+
+            <div class="relative z-10 mx-auto max-w-5xl">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <p class="es-desk-tag mb-4" data-reveal>Not answered here</p>
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.05s;">
+                        Then the desk hands you a <span class="es-desk-lit">slip.</span>
+                    </h2>
+                    <div class="es-desk-rule mx-auto mt-6 max-w-xs" aria-hidden="true"></div>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-3" data-reveal-group="100">
+                    <div class="es-desk-slip flex flex-col p-6" data-reveal="panel">
+                        <h3 class="mb-2 text-lg font-bold text-white">The long version</h3>
+                        <p class="mb-4 text-sm text-gray-400">The user guide walks through every screen, with the settings named as they appear in the admin portal.</p>
+                        <a href="{{ route('marketing.docs') }}" class="es-desk-link mt-auto inline-flex items-center gap-1 text-sm">
+                            Read the user guide
+                            <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                        </a>
+                    </div>
+                    <div class="es-desk-slip flex flex-col p-6" data-reveal="panel">
+                        <h3 class="mb-2 text-lg font-bold text-white">A person</h3>
+                        <p class="mb-4 text-sm text-gray-400">Write in with the question as you would ask it. There is no ticket queue to navigate and no chatbot in front of it.</p>
+                        <a href="mailto:{{ config('app.support_email') }}" class="es-desk-link mt-auto inline-flex items-center gap-1 text-sm">
+                            {{ config('app.support_email') }}
+                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                        </a>
+                    </div>
+                    <div class="es-desk-slip flex flex-col p-6" data-reveal="panel">
+                        <h3 class="mb-2 text-lg font-bold text-white">The source</h3>
+                        <p class="mb-4 text-sm text-gray-400">If the honest answer is "read the code", it is all public. Open an issue, or check whether somebody already has.</p>
+                        <a href="{{ $github }}" target="_blank" rel="noopener noreferrer" class="es-desk-link mt-auto inline-flex items-center gap-1 text-sm">
+                            GitHub
+                            <svg aria-hidden="true" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <p class="mt-10 text-center text-gray-300" data-reveal>
+                    Nothing on this page is behind a sign-up, and neither is the free plan.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 6. Where to next (related pages strip)                       -->
+    <!-- ============================================================ -->
+    <section class="border-t es-desk-divide py-16">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <h2 class="es-desk-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Where to next</h2>
+            <div class="grid grid-cols-2 gap-4 md:grid-cols-4" data-reveal-group="70">
+                @foreach ([['/pricing', 'Pricing', 'Every row of the rate card, in full'], ['/features', 'Features', 'What is actually in the product'], ['/use-cases', 'Use cases', 'The same tool, by who is using it'], ['/selfhost', 'Selfhosting', 'Run the whole thing yourself']] as [$nextHref, $nextName, $nextBlurb])
+                    <a href="{{ marketing_url($nextHref) }}" class="es-desk-card es-desk-hover flex flex-col p-5 transition-all duration-200 hover:shadow-md" data-reveal>
+                        <span class="es-desk-hover-title es-desk-ink mb-2 text-sm font-semibold">{{ $nextName }}</span>
+                        <span class="es-desk-muted mb-4 text-xs leading-relaxed">{{ $nextBlurb }}</span>
+                        <span class="es-desk-link mt-auto inline-flex items-center gap-1 text-xs">
+                            Read more
+                            <svg aria-hidden="true" class="h-3.5 w-3.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                        </span>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 7. Finale                                                    -->
+    <!-- ============================================================ -->
+    <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
-            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-blue-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+            <div class="es-desk-band noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl sm:px-12 lg:py-24" data-confetti data-reveal="panel">
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 0) 60%); opacity: 0.7;"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
                 </div>
                 <div class="relative z-10">
+                    <p class="es-desk-tag mb-4">Free forever</p>
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Still have <span class="text-gradient-faq">questions?</span>
+                        Take a name at the desk. <span class="es-desk-lit">Nothing to pay.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
-                        We're here to help. Browse our <a href="{{ route('marketing.docs') }}" class="text-white underline hover:text-white/90">documentation</a> for detailed guides, or reach out and we'll get back to you as soon as possible.
+                        Pick an address, add your first event, and share the link. Ticketing and the rest are there when you want them, and no card is asked for until then.
                     </p>
+
+                    <div class="mx-auto mb-8 flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
+                        <label for="es-claim-input" class="sr-only">Your schedule name</label>
+                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
+                            <input id="es-claim-input" type="text" placeholder="your-name" autocomplete="off" spellcheck="false" maxlength="30"
+                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
+                            <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
+                        </div>
+                    </div>
+
                     <div class="flex flex-wrap justify-center gap-4">
-                        <a href="mailto:{{ config('app.support_email') }}" class="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-8 py-4 text-lg font-semibold text-blue-600 shadow-xl transition-all hover:scale-105">
-                            Contact Us
-                            <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        <a href="mailto:{{ config('app.support_email') }}" class="es-desk-ghost inline-flex items-center justify-center gap-2 rounded-2xl px-8 py-4 text-lg font-semibold transition-all duration-200">
+                            Contact us
+                            <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
                         </a>
-                        <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/30 bg-white/20 px-8 py-4 text-lg font-semibold text-white transition-all hover:bg-white/30">
-                            Get Started Free
-                            <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                            </svg>
+                        <a href="{{ app_url('/sign_up') }}" class="es-desk-btn group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5">
+                            <span class="relative z-10 flex items-center gap-2">
+                                Get started free
+                                <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                            <span class="absolute inset-0 animate-shimmer" aria-hidden="true"></span>
                         </a>
                     </div>
+
+                    <p class="mt-6 text-sm text-gray-400">No credit card required</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Local confetti (no CDN) + motion engines -->
-    <script {!! nonce_attr() !!} src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}"></script>
+    <!-- Desktop dot nav -->
+    <nav class="es-dotnav fixed top-1/2 z-40 hidden -translate-y-1/2 lg:block ltr:right-5 rtl:left-5" aria-label="Page sections">
+        <ul class="glass flex flex-col items-center gap-1.5 rounded-full px-2 py-3">
+            @foreach ($dotSections as [$sectionId, $sectionLabel])
+                <li class="relative">
+                    <a href="#{{ $sectionId }}" class="es-dot group block rounded-full" aria-label="{{ $sectionLabel }}">
+                        <span class="es-dot-pip block h-2 w-2 rounded-full bg-gray-400/60 dark:bg-white/30"></span>
+                        <span class="es-desk-card pointer-events-none absolute top-1/2 -translate-y-1/2 whitespace-nowrap px-3 py-1 text-xs font-medium opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 ltr:right-full ltr:mr-3 rtl:left-full rtl:ml-3">{{ $sectionLabel }}</span>
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    </nav>
+
+    </div>
+
+    <x-marketing.related-pages />
+
+    <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
     @vite('resources/js/marketing-home.js')
 </x-marketing-layout>

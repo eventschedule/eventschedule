@@ -2,7 +2,13 @@
     use App\Utils\UrlUtils;
 
     // Data comes from RoleController::appointmentsTabData(). Only presentation lives here.
-    $isGated = config('app.hosted') && ! $role->isPro();
+    //
+    // Appointments are on every plan. The free plan carries one appointment type, so this tab shows
+    // an allowance rather than a paywall: the editor always renders, and only the "add another"
+    // action is gated. A schedule that lapsed from Pro keeps every type it created; the extras stop
+    // being bookable but are never deleted.
+    $typeLimit = $role->appointmentTypeLimit();
+    $atTypeLimit = ! $role->canCreateAppointmentType();
     $view = request('view', 'types');
     $types = $appointmentTypes;
     $editing = $appointmentEditing;
@@ -50,28 +56,6 @@
 @endphp
 
 <div class="space-y-4">
-    @if ($isGated)
-        <x-upgrade-prompt tier="pro" :subdomain="$role->subdomain" :learnMoreUrl="marketing_url('/features/appointments')">
-            {{ __('messages.appointments_pro_description') }}
-        </x-upgrade-prompt>
-        {{-- The gated state was a bare sentence; a free user could not tell what they would get.
-             Rendered outside the component because its slot sits inside a <p>. --}}
-        <div class="ap-card rounded-xl p-6">
-            <ul class="mx-auto max-w-md space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                @foreach ([
-                    __('messages.appointments_weekly_hours'),
-                    __('messages.appointments_date_overrides'),
-                    __('messages.appointments_scheduling_rules'),
-                    __('messages.appointments_share_link'),
-                ] as $feature)
-                    <li class="flex items-start gap-2">
-                        <svg class="w-4 h-4 mt-0.5 flex-shrink-0 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                        <span>{{ $feature }}</span>
-                    </li>
-                @endforeach
-            </ul>
-        </div>
-    @else
 
         {{-- Warnings --}}
         @if (! $role->timezone)
@@ -135,6 +119,10 @@
                 <div class="ap-card rounded-xl p-8 text-center">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.appointments_empty_title') }}</h3>
                     <p class="mx-auto max-w-md text-sm text-gray-600 dark:text-gray-400 mt-1 mb-4">{{ __('messages.appointments_empty_body') }}</p>
+                    @if ($typeLimit)
+                        {{-- Encourage, do not gate: with no types yet the allowance is unspent. --}}
+                        <p class="mx-auto max-w-md text-sm text-gray-500 dark:text-gray-400 -mt-2 mb-4">{{ __('messages.appointment_type_included_note') }}</p>
+                    @endif
                     @if (! $isViewer)
                         <x-brand-link href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments']) }}?new=1">{{ __('messages.appointments_new_type') }}</x-brand-link>
                     @endif
@@ -142,8 +130,33 @@
             @else
                 @if (! $isViewer)
                     <div class="flex justify-end">
-                        <x-brand-link href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments']) }}?new=1">{{ __('messages.appointments_new_type') }}</x-brand-link>
+                        @if ($atTypeLimit)
+                            {{-- Never hidden and never allowed to navigate to a form the server would
+                                 refuse: it opens the allowance modal instead, so the click explains
+                                 itself rather than reading as broken. --}}
+                            <button type="button" data-modal-open="upgrade-appointment-types"
+                                class="inline-flex items-center gap-2 px-4 py-3 text-base font-semibold rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 shadow-sm transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                                {{ __('messages.appointments_new_type') }}
+                                <x-lock-badge tier="pro" />
+                            </button>
+                        @else
+                            <x-brand-link href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments']) }}?new=1">{{ __('messages.appointments_new_type') }}</x-brand-link>
+                        @endif
                     </div>
+                @endif
+
+                @if ($typeLimit)
+                    @php $bookableType = $role->bookableAppointmentTypes()->first(); @endphp
+                    @if ($types->count() > $typeLimit && $bookableType)
+                        {{-- A lapsed Pro schedule keeps its extra types; say which one is live so the
+                             owner is never guessing why a booking link 404s. --}}
+                        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2">
+                            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
+                            <div class="text-sm text-amber-800 dark:text-amber-200">
+                                <x-user-text>{{ __('messages.appointment_types_clamped', ['limit' => $typeLimit, 'name' => $bookableType->name]) }}</x-user-text>
+                            </div>
+                        </div>
+                    @endif
                 @endif
                 <div class="space-y-3">
                     @foreach ($types as $type)
@@ -216,6 +229,17 @@
                     @endforeach
                 </div>
 
+                @if ($typeLimit)
+                    {{-- Quiet, factual, and only rendered when there is an allowance to report. --}}
+                    <x-usage-meter
+                        variant="inline"
+                        :label="__('messages.appointment_type_usage')"
+                        :used="$role->appointmentTypeCount()"
+                        :limit="$typeLimit"
+                        :usedText="__('messages.appointment_types_used', ['used' => $role->appointmentTypeCount(), 'limit' => $typeLimit])"
+                        :noteText="__('messages.appointment_type_included_note')" />
+                @endif
+
                 {{-- Every page in this app rolls its own clipboard handler; there is no global one. --}}
                 <script {!! nonce_attr() !!}>
                     document.addEventListener('click', function (e) {
@@ -236,5 +260,19 @@
                 </script>
             @endif
         @endif
-    @endif
+
+        {{-- The free-plan allowance modal, opened by the gated "add type" buttons above. --}}
+        @if ($atTypeLimit && ! $isViewer)
+            <x-upgrade-modal name="upgrade-appointment-types" tier="pro" :subdomain="$role->subdomain"
+                :learnMoreUrl="marketing_url('/features/appointments')"
+                :title="__('messages.appointment_type_limit_title')"
+                :bullets="[
+                    __('messages.appointment_type_pro_bullet_unlimited'),
+                    __('messages.appointments_date_overrides'),
+                    __('messages.appointments_scheduling_rules'),
+                    __('messages.appointments_share_link'),
+                ]">
+                {{ __('messages.appointment_type_limit_body') }}
+            </x-upgrade-modal>
+        @endif
 </div>

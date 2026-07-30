@@ -903,6 +903,9 @@ return [
     'embed_description' => 'Embed your schedule on your website or blog using the iframe code below.',
     'embed_url' => 'Embed URL',
     'iframe_code' => 'Iframe Code',
+    'embed_layout' => 'Layout',
+    'embed_layout_default' => 'Schedule default (:layout)',
+    'embed_layout_help' => 'Only changes the code you copy below. Your schedule page keeps its Default Layout setting.',
     'close' => 'Close',
     'payment_url' => 'Payment Link',
 
@@ -3150,6 +3153,44 @@ return [
     'photos_used' => ':used of :limit photos used',
     'photos_remaining' => ':count remaining',
     'photo_upgrade_plan' => 'Upgrade for unlimited photos',
+
+    // Shared usage meter and plan-gate copy (<x-usage-meter>, <x-plan-gate>).
+    'usage_used_of' => ':used of :limit used',
+    'usage_remaining' => ':count left',
+    'usage_unlimited' => 'Unlimited, included with your plan',
+    'compare_plans' => 'Compare plans',
+    'start_free_trial' => 'Start free trial',
+    'plan_price_line' => '$:monthly per month or $:yearly per year. Cancel anytime.',
+    'plan_trial_note' => 'Includes a :days day free trial.',
+
+    // Free-plan ticket allowance. The wording is deliberately "included" rather than "limit":
+    // 25 paid tickets a month with no platform fee is something the plan gives, not withholds.
+    'ticket_allowance_usage' => 'Paid tickets included this month',
+    'tickets_sold_of' => ':used of :limit sold',
+    'ticket_allowance_note' => 'Resets on :date. Free registration and RSVP are unlimited and never count. You keep 100% of every ticket you sell; we never take a cut.',
+    'ticket_allowance_included_title' => 'Your Free plan includes ticket sales',
+    'ticket_allowance_included_body' => 'You can sell :limit paid tickets a month on this schedule. Payouts go to your own Stripe account and we take no platform fee, the same as Pro. Free registration and RSVP do not count toward the :limit.',
+    'ticket_allowance_radio_hint' => 'Included on your Free plan: :limit paid tickets a month, with Stripe payouts and no platform fee. Free registration and RSVP are unlimited.',
+    'ticket_allowance_reached_title' => 'You have sold all :limit free tickets for :month',
+    'ticket_allowance_reached_body' => 'Online paid checkout is paused for this schedule until :date. Free registration and RSVP still work, and you can still take payment at the door.',
+    'ticket_allowance_upgrade' => 'Upgrade to Pro for unlimited ticket sales',
+    'ticket_allowance_pro_bullet_unlimited' => 'Unlimited paid ticket sales',
+    'ticket_allowance_pro_bullet_checkin' => 'QR code check-in dashboard',
+    'ticket_allowance_pro_bullet_promo' => 'Promo and discount codes',
+    'ticket_allowance_pro_bullet_waitlist' => 'Automatic sold-out waitlist',
+    'ticket_allowance_pro_bullet_passes' => 'Passes, subscriptions and individual tickets',
+    'ticket_allowance_pro_bullet_export' => 'Sales CSV export and webhooks',
+
+    // Free-plan appointment allowance.
+    'appointment_type_limit_reached' => 'Your plan includes :limit appointment type. Upgrade to Pro to offer more.',
+    'appointment_type_usage' => 'Appointment types',
+    'appointment_types_used' => ':used of :limit used',
+    'appointment_type_included_note' => 'Your Free plan includes one appointment type, fully featured. Pro adds unlimited types.',
+    'appointment_type_limit_title' => 'Add more appointment types with Pro',
+    'appointment_type_limit_body' => 'Your Free plan includes one appointment type. Pro removes the limit, so you can offer consultations, lessons and rehearsals side by side.',
+    'appointment_types_clamped' => 'Your plan includes :limit appointment type, so only :name is bookable right now. The others are kept and become bookable again when you upgrade.',
+    'appointment_type_pro_bullet_unlimited' => 'Unlimited appointment types',
+
     'download_all_photos' => 'Download all photos',
     'no_photos_to_download' => 'No photos to download.',
 

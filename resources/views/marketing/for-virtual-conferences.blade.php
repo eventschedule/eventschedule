@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule for Virtual Conferences",
-        "description": "Schedule and sell virtual conferences with multi-day agendas, tiered ticketing, speaker lineups, and attendee email notifications. Works with Zoom, Teams, YouTube Live, and any platform. Zero platform fees.",
+        "description": "Run a virtual conference day as one event with its running order inside it: every session is a part with its own start and end time, published on one link with one join link and zero platform fees.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -22,46 +22,6 @@
         }
     }
     </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "Can I schedule a multi-day virtual conference?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Add sessions across as many days as you need. Organize them into groups or tracks so attendees can browse by day, topic, or session type. Your full virtual conference agenda lives on one shareable page - a complete online conference schedule your attendees can bookmark."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What streaming platforms work with Event Schedule?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Any platform that gives you a meeting or streaming link. Zoom, Microsoft Teams, Google Meet, YouTube Live, Twitch, and any other platform. Event Schedule is platform-agnostic - just paste your link and attendees join from the conference agenda."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I sell different ticket types for my conference?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Create multiple virtual conference ticket types with different prices - general admission, VIP, early bird, speaker passes, or any custom tier. You keep 100% of the revenue. Event Schedule charges zero platform fees at any plan level. Stripe charges its standard processing fee (2.9% + $0.30)."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Is Event Schedule free for virtual conferences?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Event Schedule is free virtual conference software. The free plan includes unlimited events, attendee email notifications, follower features, and Google Calendar sync. There are zero platform fees on payments at any plan level. You only pay Stripe's standard processing fee if you charge for tickets."
-                }
-            }
-        ]
-    }
-    </script>
     <!-- Product Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
@@ -71,7 +31,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Virtual Conference Scheduling Software",
         "operatingSystem": "Web",
-        "description": "Schedule and sell virtual conferences with multi-day agendas, tiered ticketing, attendee email notifications, and payment processing. Works with Zoom, Teams, YouTube Live, and any platform.",
+        "description": "Enter a conference day as one event and its sessions as parts of the agenda, each with a name, a description and its own start and end time. The running order publishes on one link with one join link, and there are zero platform fees on tickets.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -79,20 +39,21 @@
             "description": "Free forever"
         },
         "featureList": [
-            "Multi-day conference scheduling",
-            "Tiered ticket types with zero platform fees",
-            "One shareable link for full conference agenda",
-            "Works with Zoom, Teams, YouTube Live, any platform",
-            "Email notifications to all attendees",
-            "Google Calendar two-way sync",
-            "Follower notifications for future conferences",
-            "QR code tickets for hybrid events",
-            "Attendee management dashboard",
-            "Open source virtual conference platform",
-            "Selfhosted conference scheduling option"
+            "A running order inside each event: named parts with start and end times, reorderable",
+            "Per-part descriptions in markdown, with schedule-level switches for whether the agenda editor asks for times and descriptions",
+            "Agenda scanning that reads a programme from a photo or text and fills in the parts (Enterprise)",
+            "One join link per event for Zoom, Microsoft Teams, Google Meet, YouTube Live or any platform",
+            "Named ticket types with their own prices, quantities and sales windows (Pro)",
+            "Zero platform fees on ticket sales through your own Stripe account",
+            "Free registration with a capacity limit, counted per date",
+            "Two-way Google, Outlook and CalDAV calendar sync, plus iCal download",
+            "Photos, video and comments that attach to the session they are about, behind an approval queue",
+            "Newsletters you write and send to the people who follow your schedule",
+            "Embeddable calendar for the website you already have",
+            "Open source, with a selfhosted option"
         ],
         "url": "{{ url()->current() }}",
-        "keywords": "virtual conference platform, online conference scheduling, virtual summit, conference ticketing",
+        "keywords": "virtual conference platform, online conference scheduling, conference agenda, virtual summit, conference ticketing",
         "screenshot": "{{ asset('images/social/for-virtual-conferences.png') }}",
         "provider": {
             "@type": "Organization",
@@ -105,23 +66,26 @@
     {
         "@context": "https://schema.org",
         "@type": "HowTo",
-        "name": "How to host a virtual conference with Event Schedule",
-        "description": "Three steps to schedule and host your virtual conference online.",
+        "name": "How to put a virtual conference agenda online with Event Schedule",
+        "description": "A conference day is one event. The running order goes inside it.",
         "step": [
             {
                 "@type": "HowToStep",
-                "name": "Build your agenda",
-                "text": "Add sessions, speakers, and streaming links. Organize by day and track."
+                "position": 1,
+                "name": "Create the day",
+                "text": "One event per conference day: its date, its start time, how long it runs, and the link people join."
             },
             {
                 "@type": "HowToStep",
-                "name": "Share your conference",
-                "text": "One link for the full schedule. Sell tickets with tiered pricing."
+                "position": 2,
+                "name": "Type the running order",
+                "text": "Add each session as a part of the agenda with a name, a start time and an end time, then drag the parts into order."
             },
             {
                 "@type": "HowToStep",
-                "name": "Go live",
-                "text": "Attendees join sessions from the agenda. You focus on content."
+                "position": 3,
+                "name": "Open the doors",
+                "text": "Free registration with a capacity limit, or named ticket types on the Pro plan. Share one link for the whole programme."
             }
         ]
     }
@@ -137,191 +101,592 @@
     </script>
 
     <style {!! nonce_attr() !!}>
-        /* For-virtual-conferences "The Agenda" styles. The shared es-* motion system
-           lives in marketing.css; this holds the navy-plus-electric-cyan conference
-           gradient (separating it from the site's brand blue), the color-coded
-           multi-track agenda tiles, a hanging lanyard badge that sways in the hero,
-           and the ticket-foil and approved-check moments. */
-        .text-gradient-conference {
-            background: linear-gradient(135deg, #1e3a8a, #0e7490, #0891b2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 40px rgba(8, 145, 178, 0.25);
-        }
-        .dark .text-gradient-conference {
-            background: linear-gradient(135deg, #60a5fa, #22d3ee, #67e8f9);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 40px rgba(34, 211, 238, 0.35);
-        }
+        /* ==============================================================
+           For-virtual-conferences "The Agenda" styles.
 
-        /* Agenda board: session tiles across a timeline illuminate in a wave, now
-           color-coded by track (electric cyan / amber / emerald) so the multi-track
-           conference program reads at a glance. */
-        .es-agenda { display: flex; align-items: center; }
-        .es-agenda-tile {
-            flex: 0 0 auto;
-            height: 10px; border-radius: 3px;
-            background: var(--ag-bg, linear-gradient(to right, rgba(56, 189, 248, 0.65), rgba(37, 99, 235, 0.65)));
-            animation: es-agenda-glow var(--ag-dur, 3s) ease-in-out infinite;
-            animation-delay: var(--ag-delay, 0s);
+           THE CONCEPT. A conference day is not fifteen events. It is ONE
+           event with a running order printed inside it, and that is
+           literally how the product stores it: an Event, plus ordered
+           EventPart rows each carrying name, description, start_time and
+           end_time. So the page IS a running order. A monospace time
+           gutter runs down the signature card and comes back as every
+           section's mark, and reading the page top to bottom is reading
+           the day: 09:00 the agenda, 12:40 in session, 17:30 close. The
+           spine is timed AGAINST the sample day printed in the hero, so
+           when a mark says a session is live at 12:40 the sample day's
+           lightning talks really are running (12:30 to 13:00), and every
+           mark after 13:00 really is after that stream stopped.
+
+           THE SIGNATURE DEVICE IS PROPORTIONAL, NOT A CALENDAR GRID.
+           A part's block height IS its duration in minutes, because on
+           an agenda the thing that matters is how long a thing takes.
+           A fifty minute keynote is twice a twenty five minute welcome
+           on the page, and a break is the same shape with nothing in it.
+
+           WHAT IT REFUSES TO DRAW. No tracks, no rooms, no per-session
+           stream links, no parallel columns. There is one running order
+           per event and one event_url per event, so drawing a track
+           lane would teach a model the product does not have. Parallel
+           sessions are separate events on the same date; the page says
+           so out loud in the FAQ.
+
+           COLOUR. The page keeps its inherited hue family, navy plus
+           electric cyan, but spends it as TWO FLAT INKS instead of the
+           three stop gradient it used to carry: navy #123a72 is the
+           structure, cyan is the single live signal. No gradient text
+           anywhere, which also removes the commonest AA failure in this
+           codebase. Measured: ink #101a2c on the #f2f5f9 ground 15.92,
+           muted #4a5568 6.88, navy accent 10.25, deep cyan #0c6478
+           6.18; in dark, ink #e8edf5 on #080b12 16.74, muted #98a6bd
+           7.99, cyan #67e8f9 13.58.
+
+           NEVER text-gray-500 here: 4.83 on pure white but only ~4.4 on
+           this tinted ground. Use .es-agenda-muted (6.88).
+
+           BLADE RULE for this block: no @supports probes, because a "#"
+           hex inside a parenthesized at-rule condition breaks Blade
+           compilation of every later parenthesized directive.
+           ============================================================== */
+
+        /* --- Ground and ink ------------------------------------------ */
+        .es-agenda-page { background-color: #f2f5f9; color: #101a2c; }
+        .dark .es-agenda-page { background-color: #080b12; color: #e8edf5; }
+        .es-agenda-ink { color: #101a2c; }
+        .dark .es-agenda-ink { color: #e8edf5; }
+        .es-agenda-muted { color: #4a5568; }
+        .dark .es-agenda-muted { color: #98a6bd; }
+        .es-agenda-accent { color: #123a72; }
+        .dark .es-agenda-accent { color: #67e8f9; }
+        /* Always-lit cyan, for the fixed-dark session window in both modes. */
+        .es-agenda-lit { color: #67e8f9; }
+        /* Hairline separators. These are page-local rather than an arbitrary
+           Tailwind border-[rgba(...)] utility on purpose: a colour utility
+           Tailwind has never seen is not in the built stylesheet, so it paints
+           nothing and the element silently keeps its inherited colour. */
+        .es-agenda-hair { border-color: rgba(16, 26, 44, 0.09); }
+        .dark .es-agenda-hair { border-color: rgba(232, 237, 245, 0.1); }
+
+        /* --- Cards --------------------------------------------------- */
+        .es-agenda-card {
+            border: 1px solid rgba(16, 26, 44, 0.11);
+            border-radius: 1rem;
+            background: #ffffff;
         }
-        .es-agenda-tile.is-cyan { --ag-bg: linear-gradient(to right, rgba(34, 211, 238, 0.7), rgba(6, 182, 212, 0.6)); --ag-glow: rgba(34, 211, 238, 0.55); }
-        .es-agenda-tile.is-amber { --ag-bg: linear-gradient(to right, rgba(251, 191, 36, 0.7), rgba(245, 158, 11, 0.6)); --ag-glow: rgba(251, 191, 36, 0.5); }
-        .es-agenda-tile.is-emerald { --ag-bg: linear-gradient(to right, rgba(52, 211, 153, 0.7), rgba(16, 185, 129, 0.6)); --ag-glow: rgba(52, 211, 153, 0.5); }
-        @keyframes es-agenda-glow {
-            0%, 100% { opacity: 0.2; }
-            50% { opacity: 0.9; box-shadow: 0 0 8px var(--ag-glow, rgba(56, 189, 248, 0.5)); }
-        }
-
-        /* Multi-track tabs on the 3-day agenda mock rows. */
-        .es-track-tab { position: absolute; left: 0; top: 6px; bottom: 6px; width: 3px; border-radius: 3px; }
-        .es-track-cyan { background: #22d3ee; box-shadow: 0 0 6px rgba(34, 211, 238, 0.6); }
-        .es-track-amber { background: #f59e0b; box-shadow: 0 0 6px rgba(245, 158, 11, 0.5); }
-        .es-track-emerald { background: #34d399; box-shadow: 0 0 6px rgba(52, 211, 153, 0.5); }
-
-        /* Hanging conference badge: a card on a thin lanyard that sways like a slow
-           pendulum from the clip at the top. */
-        @keyframes es-lanyard-sway {
-            0%, 100% { transform: rotate(-3.5deg); }
-            50% { transform: rotate(3.5deg); }
-        }
-        .es-lanyard { transform-origin: top center; animation: es-lanyard-sway 5s ease-in-out infinite; }
-        .es-lanyard-strap { width: 2px; height: 2.5rem; margin: 0 auto; background: linear-gradient(to bottom, rgba(34, 211, 238, 0.75), rgba(37, 99, 235, 0.75)); }
-        .es-lanyard-clip { width: 1.75rem; height: 0.5rem; margin: -3px auto 0; border-radius: 9999px; background: linear-gradient(to right, #22d3ee, #2563eb); }
-        .es-badge { width: 11rem; margin-top: 0.55rem; border-radius: 0.9rem; padding: 0.85rem; background: rgba(255, 255, 255, 0.85); border: 1px solid rgba(34, 211, 238, 0.4); box-shadow: 0 14px 30px rgba(8, 145, 178, 0.25); backdrop-filter: blur(8px); }
-        .dark .es-badge { background: rgba(255, 255, 255, 0.06); border-color: rgba(34, 211, 238, 0.3); box-shadow: 0 14px 30px rgba(34, 211, 238, 0.18); }
-        .es-badge-chip { display: inline-block; border-radius: 9999px; padding: 2px 9px; font-size: 9px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: #fff; background: linear-gradient(to right, #06b6d4, #2563eb); }
-        .es-badge-name { margin-top: 0.5rem; font-size: 0.9rem; font-weight: 700; color: #0f172a; }
-        .dark .es-badge-name { color: #fff; }
-        .es-badge-role { font-size: 10px; font-weight: 600; color: #0891b2; }
-        .dark .es-badge-role { color: #67e8f9; }
-        .es-badge-strip { margin-top: 0.6rem; height: 1.4rem; border-radius: 0.35rem; background: repeating-linear-gradient(90deg, rgba(34, 211, 238, 0.4) 0 3px, transparent 3px 7px); }
-
-        /* Badge-level chips on the tiered-ticket mock. */
-        .es-tier-chip { display: inline-block; margin-left: 6px; border-radius: 9999px; padding: 1px 7px; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; vertical-align: middle; }
-        .es-tier-std { background: rgba(30, 58, 138, 0.14); color: #1e3a8a; }
-        .dark .es-tier-std { background: rgba(96, 165, 250, 0.2); color: #93c5fd; }
-        .es-tier-vip { background: linear-gradient(to right, rgba(34, 211, 238, 0.3), rgba(37, 99, 235, 0.25)); color: #0e7490; }
-        .dark .es-tier-vip { color: #a5f3fc; }
-        .es-tier-early { background: rgba(6, 182, 212, 0.18); color: #0891b2; }
-        .dark .es-tier-early { background: rgba(34, 211, 238, 0.2); color: #67e8f9; }
-
-        /* VIP foil edge: a cyan metallic ring with a slow light sweep. */
-        @keyframes es-foil { 0% { background-position: 180% 0; } 100% { background-position: -80% 0; } }
-        .es-vip-foil { position: relative; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(34, 211, 238, 0.55), 0 0 12px rgba(34, 211, 238, 0.22); }
-        .es-vip-foil::after {
-            content: ""; position: absolute; inset: 0; pointer-events: none;
-            background: linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.5) 50%, transparent 62%);
-            background-size: 220% 100%;
-            animation: es-foil 3.6s ease-in-out infinite;
+        .dark .es-agenda-card {
+            border-color: rgba(232, 237, 245, 0.11);
+            background: rgba(232, 237, 245, 0.045);
         }
 
-        /* Approved-check pop on the attendee-feedback mock. */
-        @keyframes es-approve-pop {
-            0%, 35% { transform: scale(0.2); opacity: 0; }
-            55% { transform: scale(1.25); opacity: 1; }
-            70% { transform: scale(0.9); }
-            85%, 100% { transform: scale(1); opacity: 1; }
+        /* --- The section mark: a clock reading, a pip, a hairline ---- */
+        .es-agenda-slot { display: inline-flex; align-items: center; gap: 0.6rem; }
+        .es-agenda-clock {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-variant-numeric: tabular-nums;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            color: #123a72;
         }
-        .es-approve-check { transform-origin: center; animation: es-approve-pop 3.2s ease-in-out infinite; }
+        .dark .es-agenda-clock { color: #67e8f9; }
+        .es-agenda-pip {
+            width: 0.4rem; height: 0.4rem;
+            flex: none;
+            border-radius: 9999px;
+            background: #123a72;
+        }
+        .dark .es-agenda-pip { background: #67e8f9; }
+        .es-agenda-rule { width: 2.5rem; height: 1px; flex: none; background: rgba(16, 26, 44, 0.2); }
+        .dark .es-agenda-rule { background: rgba(232, 237, 245, 0.2); }
+        .es-agenda-tag {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: #4a5568;
+        }
+        .dark .es-agenda-tag { color: #98a6bd; }
 
-        /* Accent link + related-card hover recolor (navy/cyan, not brand blue). */
-        .vc-link { color: #0e7490; font-weight: 500; }
-        .vc-link:hover { text-decoration: underline; }
-        .dark .vc-link { color: #22d3ee; }
-        .vc-related-card:hover { border-color: #67e8f9; background-color: #ecfeff; }
-        .dark .vc-related-card:hover { border-color: rgba(34, 211, 238, 0.3); background-color: rgba(34, 211, 238, 0.06); }
-        .vc-related-card:hover .vc-related-title { color: #0891b2; }
-        .dark .vc-related-card:hover .vc-related-title { color: #22d3ee; }
-        .vc-related-card:hover .vc-related-arrow { color: #0891b2; }
-        .dark .vc-related-card:hover .vc-related-arrow { color: #22d3ee; }
+        /* --- The running order: block height IS duration ------------- */
+        .es-agenda-run { position: relative; display: flex; flex-direction: column; gap: 0.3rem; }
+        /* The spine, drawn between the time gutter and the blocks. */
+        .es-agenda-run::before {
+            content: "";
+            position: absolute;
+            top: 0.25rem; bottom: 0.25rem;
+            inset-inline-start: 3.45rem;
+            width: 1px;
+            background: rgba(16, 26, 44, 0.14);
+        }
+        .dark .es-agenda-run::before { background: rgba(232, 237, 245, 0.16); }
+        .es-agenda-row { display: grid; grid-template-columns: 3.1rem 1fr; gap: 0.8rem; align-items: stretch; }
+        .es-agenda-time {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-variant-numeric: tabular-nums;
+            font-size: 0.63rem;
+            font-weight: 800;
+            line-height: 1.5;
+            text-align: end;
+            color: #4a5568;
+        }
+        .dark .es-agenda-time { color: #98a6bd; }
+        .es-agenda-block {
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.35rem;
+            padding: 0.3rem 0.6rem;
+            background: rgba(18, 58, 114, 0.09);
+            border-inline-start: 2px solid #123a72;
+        }
+        .dark .es-agenda-block {
+            background: rgba(103, 232, 249, 0.09);
+            border-inline-start-color: #67e8f9;
+        }
+        /* A break is the same shape with nothing in it. */
+        .es-agenda-block-gap {
+            background: transparent;
+            border-inline-start-style: dashed;
+            border-inline-start-color: rgba(16, 26, 44, 0.3);
+        }
+        .dark .es-agenda-block-gap { border-inline-start-color: rgba(232, 237, 245, 0.28); }
+        .es-agenda-name { font-size: 0.73rem; font-weight: 700; line-height: 1.2; }
+        .es-agenda-dur {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.6rem;
+            font-variant-numeric: tabular-nums;
+        }
+        /* The day advancing: one hairline travelling down the running order. */
+        @keyframes es-agenda-sweep {
+            0% { top: 0; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+        .es-agenda-now {
+            position: absolute;
+            inset-inline: 3.45rem 0;
+            height: 1px;
+            background: linear-gradient(90deg, #0c6478, rgba(12, 100, 120, 0));
+            animation: es-agenda-sweep 15s linear infinite;
+        }
+        .dark .es-agenda-now { background: linear-gradient(90deg, #67e8f9, rgba(103, 232, 249, 0)); }
+        .es-agenda-now::before {
+            content: "";
+            position: absolute;
+            top: -2px;
+            inset-inline-start: -2px;
+            width: 5px; height: 5px;
+            border-radius: 9999px;
+            background: #0c6478;
+        }
+        .dark .es-agenda-now::before { background: #67e8f9; }
+
+        /* --- The live pip on the session window --------------------- */
+        @keyframes es-agenda-pulse {
+            0%, 100% { opacity: 0.4; transform: scale(0.85); }
+            50% { opacity: 1; transform: scale(1.15); }
+        }
+        .es-agenda-live {
+            display: inline-block;
+            width: 0.45rem; height: 0.45rem;
+            border-radius: 9999px;
+            background: #67e8f9;
+            animation: es-agenda-pulse 2.4s ease-in-out infinite;
+        }
+
+        /* --- The programme strip: one day per row, parts as ticks ---- */
+        .es-agenda-track {
+            position: relative;
+            height: 1.4rem;
+            border-radius: 0.35rem;
+            background: rgba(16, 26, 44, 0.06);
+        }
+        .dark .es-agenda-track { background: rgba(232, 237, 245, 0.07); }
+        .es-agenda-tick {
+            position: absolute;
+            top: 0.25rem; bottom: 0.25rem;
+            min-width: 2px;
+            border-radius: 0.15rem;
+            background: #123a72;
+        }
+        .dark .es-agenda-tick { background: #67e8f9; }
+        /* A break is a part, so it gets a tick like everything else, but the
+           same hollow shape it has in the hero: countable, and legible as
+           the thing where nothing is scheduled. */
+        .es-agenda-tick-gap {
+            background: transparent;
+            border: 1px dashed rgba(16, 26, 44, 0.34);
+        }
+        .dark .es-agenda-tick-gap { border-color: rgba(232, 237, 245, 0.32); }
+        .es-agenda-ruler {
+            display: flex;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-variant-numeric: tabular-nums;
+            font-size: 0.56rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            color: #4a5568;
+        }
+        .dark .es-agenda-ruler { color: #98a6bd; }
+        .es-agenda-ruler span { flex: 1 1 0; min-width: 0; }
+
+        /* --- One field of the event you actually type --------------- */
+        .es-agenda-field {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 0.5rem 0;
+            border-top: 1px solid rgba(16, 26, 44, 0.08);
+        }
+        .dark .es-agenda-field { border-top-color: rgba(232, 237, 245, 0.09); }
+        .es-agenda-key {
+            flex: none;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #4a5568;
+        }
+        .dark .es-agenda-key { color: #98a6bd; }
+        .es-agenda-val {
+            min-width: 0;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.74rem;
+            font-weight: 600;
+            text-align: end;
+            color: #101a2c;
+        }
+        .dark .es-agenda-val { color: #e8edf5; }
+
+        /* --- Plan pills -------------------------------------------- */
+        .es-agenda-plan {
+            display: inline-flex;
+            align-items: center;
+            flex: none;
+            padding: 0.1rem 0.45rem;
+            border-radius: 0.25rem;
+            border: 1px solid rgba(18, 58, 114, 0.4);
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.13em;
+            text-transform: uppercase;
+            color: #123a72;
+        }
+        .dark .es-agenda-plan { border-color: rgba(103, 232, 249, 0.42); color: #67e8f9; }
+        .es-agenda-plan-pro { border-color: rgba(16, 26, 44, 0.35); color: #101a2c; }
+        .dark .es-agenda-plan-pro { border-color: rgba(232, 237, 245, 0.38); color: #e8edf5; }
+        .es-agenda-plan-ent { border-color: rgba(12, 100, 120, 0.5); color: #0c6478; }
+        .dark .es-agenda-plan-ent { border-color: rgba(103, 232, 249, 0.3); color: #98a6bd; }
+
+        /* --- Chips ------------------------------------------------- */
+        .es-agenda-chip {
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+            padding: 0.35rem 0.85rem;
+            border-radius: 9999px;
+            border: 1px solid rgba(16, 26, 44, 0.14);
+            background: rgba(255, 255, 255, 0.75);
+            color: #4a5568;
+            font-size: 0.76rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .dark .es-agenda-chip {
+            border-color: rgba(232, 237, 245, 0.14);
+            background: rgba(232, 237, 245, 0.05);
+            color: #98a6bd;
+        }
+
+        /* --- Links and buttons ------------------------------------- */
+        .es-agenda-link { color: #123a72; }
+        .es-agenda-link:hover { color: #0c6478; }
+        .dark .es-agenda-link { color: #67e8f9; }
+        .dark .es-agenda-link:hover { color: #e8edf5; }
+
+        .es-agenda-btn {
+            background-color: #123a72;
+            box-shadow: 0 18px 36px -14px rgba(18, 58, 114, 0.5);
+        }
+        .es-agenda-btn:hover { background-color: #0d2c58; box-shadow: 0 22px 44px -14px rgba(18, 58, 114, 0.6); }
+        /* Dark mode flips the button to the cyan signal, so the label has to flip
+           to ink. White on #67e8f9 measures 1.45; #08111d on it measures 10.49. */
+        .dark .es-agenda-btn { background-color: #67e8f9; color: #08111d; }
+        .dark .es-agenda-btn:hover { background-color: #9defff; }
+
+        /* --- Dot-nav tooltip ---------------------------------------- */
+        .es-agenda-tip { background-color: #ffffff; color: #374151; }
+        .dark .es-agenda-tip { background-color: #101a2c; color: #d1d5db; }
+
+        /* --- Hover recolours on related cards and FAQ rows --------- */
+        .es-agenda-hover:hover { border-color: rgba(18, 58, 114, 0.45); }
+        .dark .es-agenda-hover:hover { border-color: rgba(103, 232, 249, 0.45); }
+        .es-agenda-hover:hover .es-agenda-hover-title,
+        .es-agenda-hover:hover .es-agenda-hover-arrow { color: #123a72; }
+        .dark .es-agenda-hover:hover .es-agenda-hover-title,
+        .dark .es-agenda-hover:hover .es-agenda-hover-arrow { color: #67e8f9; }
+
+        /* --- The session window ------------------------------------
+           A fixed physical object: the lights are down whichever colour
+           mode the reader is in, so this band must render IDENTICALLY
+           with .dark on and off. Shared classes carry their own .dark
+           rules in marketing.css, so each one is pinned below and the
+           whole band is verified with the --bands flag. ------------- */
+        .es-agenda-screen {
+            background-color: #070a11;
+            background-image: radial-gradient(120% 110% at 50% 0%, #101a2c 0%, #0a1120 55%, #05080e 100%);
+            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(232, 237, 245, 0.05);
+        }
+        .es-agenda-screen .es-agenda-card {
+            border-color: rgba(232, 237, 245, 0.13);
+            background: rgba(232, 237, 245, 0.05);
+        }
+        .es-agenda-screen .es-agenda-ink { color: #e8edf5; }
+        .es-agenda-screen .es-agenda-muted { color: #98a6bd; }
+        .es-agenda-screen .es-agenda-rule { background: rgba(232, 237, 245, 0.2); }
+        .es-agenda-screen .es-agenda-pip { background: #67e8f9; }
+        .es-agenda-screen .es-agenda-tag { color: #67e8f9; }
+        .es-agenda-screen .es-agenda-plan { border-color: rgba(103, 232, 249, 0.42); color: #67e8f9; }
+        .es-agenda-screen .es-aurora { opacity: 0.5; }
+        .es-agenda-screen .grid-overlay {
+            background-image:
+                linear-gradient(rgba(232, 237, 245, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(232, 237, 245, 0.05) 1px, transparent 1px);
+        }
+        .es-agenda-screen .animate-shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            background-size: 200% 100%;
+        }
+        /* The finale CTA lives INSIDE the band, so it cannot be allowed to
+           follow the page's colour mode: outside, .es-agenda-btn is navy with
+           a white label in light and cyan with an ink label in dark. On a band
+           that is always near-black the cyan treatment is the correct one, so
+           it is pinned here for both modes. Same specificity as
+           `.dark .es-agenda-btn`, so this must stay AFTER it in source order,
+           and it also outranks the element's own `text-white` utility. */
+        .es-agenda-screen .es-agenda-btn { background-color: #67e8f9; color: #08111d; }
+        .es-agenda-screen .es-agenda-btn:hover { background-color: #9defff; }
+        .es-agenda-screen .es-claim:focus-within {
+            border-color: rgba(103, 232, 249, 0.75);
+            box-shadow: 0 0 0 4px rgba(103, 232, 249, 0.22);
+        }
+
+        /* --- Shared-system recolours (brand blue by default) ------- */
+        .es-hero .es-spot {
+            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(18, 58, 114, 0.13), transparent 60%);
+        }
+        .dark .es-hero .es-spot {
+            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(103, 232, 249, 0.11), transparent 60%);
+        }
+        .es-dot:hover .es-dot-pip { background-color: rgba(18, 58, 114, 0.6); }
+        .dark .es-dot:hover .es-dot-pip { background-color: rgba(103, 232, 249, 0.6); }
+        .es-dot.is-active .es-dot-pip { background: #123a72; }
+        .dark .es-dot.is-active .es-dot-pip { background: #67e8f9; }
+
+        /* --- Focus rings. No border-radius here: setting it changes
+               the element's own shape on focus. -------------------- */
+        #es-agenda-page a:focus-visible,
+        #es-agenda-page summary:focus-visible,
+        #es-agenda-page input:focus-visible,
+        #es-agenda-page button:focus-visible {
+            outline: 2px solid #123a72;
+            outline-offset: 3px;
+        }
+        .dark #es-agenda-page a:focus-visible,
+        .dark #es-agenda-page summary:focus-visible,
+        .dark #es-agenda-page input:focus-visible,
+        .dark #es-agenda-page button:focus-visible {
+            outline-color: #67e8f9;
+        }
+        .es-agenda-screen a:focus-visible,
+        .es-agenda-screen summary:focus-visible,
+        .es-agenda-screen input:focus-visible,
+        .es-agenda-screen button:focus-visible {
+            outline-color: #67e8f9 !important;
+        }
 
         @media (prefers-reduced-motion: reduce) {
-            .es-agenda-tile, .es-lanyard, .es-approve-check { animation: none !important; }
-            .es-agenda-tile { opacity: 0.55; }
-            .es-lanyard { transform: none; }
-            .es-vip-foil::after { animation: none; opacity: 0; }
+            .es-agenda-now { animation: none !important; opacity: 0; }
+            .es-agenda-live { animation: none !important; opacity: 1; transform: none; }
         }
     </style>
 
+    @php
+        // ------------------------------------------------------------------
+        // Day one's running order. The product shape: ONE Event, plus ordered
+        // EventPart rows carrying name / description / start_time / end_time.
+        // A block's height IS its duration, so 0.085rem per minute turns the
+        // list into a proportional timetable rather than a stack of equals.
+        // ------------------------------------------------------------------
+        $minuteRem = 0.085;
+        $run = [
+            ['09:00', 'Doors, welcome and housekeeping', 25, false],
+            ['09:25', 'Opening keynote', 50, false],
+            ['10:15', 'Break', 15, true],
+            ['10:30', 'Panel: shipping in the open', 45, false],
+            ['11:15', 'Workshop: instrumenting your stack', 60, false],
+            ['12:15', 'Break', 15, true],
+            ['12:30', 'Lightning talks', 30, false],
+        ];
+        // A break is a part too, which the hero says out loud, so the count is all rows.
+        $runParts = count($run);
+
+        // The three-day programme. Each day is its own event on its own date,
+        // with its own running order and its own join link. Offsets are
+        // minutes from 09:00 across a 09:00-18:00 window (540 minutes), and
+        // the third value marks a break, which is a part like any other and
+        // so gets a tick - hollow, exactly as in the hero. Ticks are drawn
+        // 3px short of their true width so that abutting parts stay
+        // countable instead of fusing into one bar.
+        $window = 540;
+        $programme = [
+            ['Day 1', 'Tue 3 Mar', '09:00 to 13:00', 7, [[0, 25, false], [25, 50, false], [75, 15, true], [90, 45, false], [135, 60, false], [195, 15, true], [210, 30, false]]],
+            ['Day 2', 'Wed 4 Mar', '10:00 to 16:00', 9, [[60, 30, false], [90, 45, false], [135, 15, true], [150, 60, false], [210, 45, false], [255, 45, false], [300, 15, true], [315, 60, false], [375, 45, false]]],
+            ['Day 3', 'Thu 5 Mar', '09:30 to 13:00', 5, [[30, 45, false], [75, 15, true], [90, 60, false], [150, 45, false], [195, 45, false]]],
+        ];
+
+        // The event itself: the fields you fill in once for the whole day.
+        $dayFields = [
+            ['Event', 'Cloud Summit, day 1'],
+            ['Date', 'Tue 3 Mar 2026'],
+            ['Starts', '09:00'],
+            ['Runs for', '4 hours'],
+            ['Online', 'yes, one join link'],
+            ['Sub-schedule', 'Main programme'],
+        ];
+
+        $faqs = [
+            [
+                'q' => 'Can I schedule a multi-day virtual conference?',
+                'a' => 'Yes. Each conference day is one event on its own date, with its own join link, and the day\'s sessions go inside it as parts of the agenda. Every part has a name, an optional description and its own start and end time, so attendees read the whole running order on one link. Sub-schedules can file the days under a strand and give that strand a color.',
+            ],
+            [
+                'q' => 'Does each session get its own streaming link?',
+                'a' => 'One join link per event. A day is one event, so the day has one link and every part of its running order sits behind that link. If two sessions genuinely need two different links, make them two events on the same date. Any platform works, because all Event Schedule stores is the URL: Zoom, Microsoft Teams, Google Meet, YouTube Live, or anything else that gives you one.',
+            ],
+            [
+                'q' => 'What about tracks and rooms?',
+                'a' => 'There are none, and it is better to say so before you move a programme across. Event Schedule has one running order per event. Parallel sessions are separate events on the same date, and a sub-schedule can keep a strand together and color it, which is organizing and color-coding rather than access control. There is no room inventory and nothing is hidden by a sub-schedule.',
+            ],
+            [
+                'q' => 'Is the agenda free?',
+                'a' => 'Yes. Adding parts, naming them, giving them start and end times, writing a description for each one, dragging them into order and publishing the running order are all free forever, along with the join link, calendar sync and the embeddable calendar. Agenda scanning, which reads a printed or emailed programme and fills the parts in for you, is on the Enterprise plan. Typing them costs nothing.',
+            ],
+            [
+                'q' => 'Can I sell different ticket types for my conference?',
+                'a' => 'Yes, on the Pro plan at $5 a month. Create as many named ticket types as the conference needs, each with its own price, quantity and sales window, plus discount codes and add-ons. Individual tickets give every attendee their own confirmation email and QR code, and custom questions collect what you need at checkout. Event Schedule charges zero platform fees at every plan level: you connect your own Stripe account and Stripe\'s processing fee is the only cut. For a free conference, registration with a capacity limit works on the free plan.',
+            ],
+            [
+                'q' => 'How do attendees hear about the next edition?',
+                'a' => 'They follow your schedule, and you write them a newsletter when the next programme is set. Nothing goes out on its own: a newsletter is something you compose and send, with 10 emails a month on the free plan, 100 on Pro and 1,000 on Enterprise, counted one per recipient. Followers also show up with their name and email on your followers tab, so the audience is yours rather than a platform\'s.',
+            ],
+        ];
+
+        $dotSections = [
+            ['top', 'The running order'],
+            ['unit', 'One event'],
+            ['run', 'Setting it'],
+            ['programme', 'The programme'],
+            ['session', 'In session'],
+            ['tickets', 'The takings'],
+            ['after', 'Afterwards'],
+            ['who', 'Perfect for'],
+            ['faq', 'Questions'],
+            ['claim', 'Close'],
+        ];
+    @endphp
+
+    <div id="es-agenda-page" class="es-agenda-page">
+
     <!-- ============================================================ -->
-    <!-- 1. Hero: your whole conference on one page                   -->
+    <!-- 09:00  Hero: one day, one event, seven parts                 -->
     <!-- ============================================================ -->
-    <section class="es-hero relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
+    <section id="top" class="es-hero noise relative flex min-h-[calc(88svh-4rem)] scroll-mt-24 items-center overflow-hidden py-16">
         <div class="absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 70%, rgba(2, 132, 199, 0.3), rgba(2, 132, 199, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 32%, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.14), rgba(6, 182, 212, 0) 60%);"></div>
-            <div class="es-rays absolute inset-0"></div>
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(18, 58, 114, 0.28), rgba(18, 58, 114, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 40%, rgba(34, 211, 238, 0.16), rgba(34, 211, 238, 0) 65%);"></div>
+            <div class="es-spot absolute inset-0"></div>
             <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
-            <!-- Agenda timeline along the bottom edge -->
-            <div class="es-agenda absolute bottom-0 left-0 right-0 hidden h-20 items-center justify-center gap-1.5 px-8 opacity-40 md:flex" style="mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);">
-                @for ($i = 0; $i < 32; $i++)
-                    @php $w = [26, 40, 54, 34, 46][$i % 5]; $dur = 2.6 + ($i % 5) * 0.3; $delay = ($i % 8) * 0.16; $track = ['is-cyan', 'is-amber', 'is-emerald'][$i % 3]; @endphp
-                    <span class="es-agenda-tile {{ $track }}" style="width: {{ $w }}px; --ag-dur: {{ $dur }}s; --ag-delay: {{ $delay }}s;"></span>
-                @endfor
-            </div>
         </div>
 
-        <!-- Hanging conference badge on a lanyard -->
-        <div class="es-lanyard absolute right-8 top-24 z-20 hidden opacity-90 lg:block" aria-hidden="true">
-            <div class="es-lanyard-strap"></div>
-            <div class="es-lanyard-clip"></div>
-            <div class="es-badge">
-                <div><span class="es-badge-chip">All Access</span></div>
-                <div class="es-badge-name">Alex Rivera</div>
-                <div class="es-badge-role">Keynote Speaker</div>
-                <div class="es-badge-strip"></div>
-            </div>
-        </div>
+        <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-14 lg:grid-cols-[1.05fr_1fr]">
+                <div>
+                    <div class="es-fade-up es-d-1 glass mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2.5">
+                        <svg aria-hidden="true" class="es-agenda-accent h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.008v.008H3.75V6.75zM3.75 12h.008v.008H3.75V12zm0 5.25h.008v.008H3.75v-.008z" />
+                        </svg>
+                        <span class="es-agenda-muted text-sm font-medium tracking-wide">For virtual conference and online summit organizers</span>
+                    </div>
 
-        <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
-                <svg aria-hidden="true" class="h-5 w-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">For Conference Organizers & Event Planners</span>
-            </div>
+                    <h1 class="es-balance es-agenda-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <span class="es-mask"><span class="es-mask-line">A conference day is one event.</span></span>
+                        <span class="es-mask es-mask-2"><span class="es-mask-line">The <span class="es-agenda-accent">agenda</span> goes inside it.</span></span>
+                    </h1>
 
-            <h1 class="es-balance mb-6 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
-                <span class="es-mask"><span class="es-mask-line">Host virtual conferences that feel professional.</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-conference">Zero platform fees.</span></span></span>
-            </h1>
+                    <p class="es-fade-up es-d-2 es-agenda-muted mb-8 max-w-xl text-lg sm:text-xl">
+                        Enter each session as a part of the day, with its own name and its own start and end time. Your virtual conference agenda publishes as one running order, on one link, with one link to join, and it is free on every plan.
+                    </p>
 
-            <p class="es-fade-up es-d-2 mx-auto mb-4 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
-                Multi-day virtual conference agendas, multiple ticket types, speaker lineups. Schedule your conference, sell tickets, and let attendees browse the full agenda from one link.
-            </p>
-            <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-2xl text-base text-gray-400 dark:text-gray-500">
-                The virtual conference platform with built-in multi-day scheduling, tiered ticketing, attendee email notifications, and payment processing for conference organizers.
-            </p>
+                    <div class="es-fade-up es-d-3 flex flex-col items-start gap-4 sm:flex-row">
+                        <a href="#run" class="glass group inline-flex items-center justify-center gap-2 rounded-2xl px-7 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+                            See how a day is built
+                            <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                        </a>
+                        <a href="{{ app_url('/sign_up?type=talent') }}" class="es-agenda-btn group inline-flex items-center justify-center gap-2 rounded-2xl px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
+                            Create your conference schedule
+                            <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
 
-            <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <a href="#journey" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
-                    See how it scales
-                    <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
-                </a>
-                <a href="{{ app_url('/sign_up?type=talent') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-600 to-blue-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-sky-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-sky-500/40">
-                    Create your conference schedule
-                    <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
+                <!-- The running order. Block height is duration, so the page is
+                     proportional to the day rather than a stack of equal rows. -->
+                <div class="es-fade-up es-d-4" data-reveal>
+                    <div class="es-agenda-card p-6 sm:p-7">
+                        <div class="mb-1 flex flex-wrap items-baseline justify-between gap-2">
+                            <h2 class="es-agenda-ink text-lg font-bold">Cloud Summit, day 1</h2>
+                            <span class="es-agenda-clock">TUE 3 MAR</span>
+                        </div>
+                        <p class="es-agenda-muted mb-5 text-sm">One event &middot; {{ $runParts }} parts &middot; one link to join</p>
+
+                        <div class="es-agenda-run" aria-hidden="true">
+                            <span class="es-agenda-now"></span>
+                            @foreach ($run as [$partTime, $partName, $partMins, $partIsGap])
+                                <div class="es-agenda-row">
+                                    <div class="es-agenda-time">{{ $partTime }}</div>
+                                    <div class="es-agenda-block @if ($partIsGap) es-agenda-block-gap @endif" style="min-height: {{ $partIsGap ? '1.35rem' : '2.1rem' }}; height: {{ round($partMins * $minuteRem, 3) }}rem;">
+                                        <div class="es-agenda-name @if ($partIsGap) es-agenda-muted @else es-agenda-ink @endif">{{ $partName }}</div>
+                                        @if (! $partIsGap)
+                                            <div class="es-agenda-dur es-agenda-muted">{{ $partMins }} min</div>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                            <div class="es-agenda-row">
+                                <div class="es-agenda-time">13:00</div>
+                                <div class="es-agenda-dur es-agenda-muted leading-none">end of day</div>
+                            </div>
+                        </div>
+
+                        <p class="es-agenda-muted mt-5 es-agenda-hair border-t pt-4 text-xs">
+                            Each block is as tall as it is long. A break is a part with a name and a time too, which is why the gaps are on the page.
+                        </p>
+                    </div>
+                </div>
             </div>
 
             <!-- Conference-type marquee -->
-            <div class="es-fade-up es-d-4 pointer-events-auto mx-auto mt-14 max-w-3xl">
+            <div class="es-fade-up es-d-4 mx-auto mt-14 max-w-3xl">
                 <div class="es-marquee-mask">
-                    <div class="es-marquee" data-marquee="1" aria-hidden="true">
+                    <div class="es-marquee" data-marquee="1">
                         <div class="es-marquee-track">
-                            @for ($tc = 0; $tc < 2; $tc++)
-                                @foreach (['Tech Summits', 'Industry Conferences', 'Company Retreats', 'Professional Summits', 'Annual Meetings', 'Panel Events', 'Developer Cons', 'Hybrid Events'] as $tag)
-                                    <span class="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100/80 px-4 py-1.5 text-xs font-semibold text-sky-800 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-300">
-                                        <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-sky-400 to-blue-400"></span>
-                                        {{ $tag }}
-                                    </span>
+                            @for ($chipCopy = 0; $chipCopy < 2; $chipCopy++)
+                                @foreach (['Tech Summits', 'Industry Conferences', 'Company Retreats', 'Professional Summits', 'Annual Meetings', 'Panel Events', 'Developer Cons', 'Hybrid Events'] as $chip)
+                                    <span @if ($chipCopy === 1) aria-hidden="true" @endif class="es-agenda-chip">{{ $chip }}</span>
                                 @endforeach
                             @endfor
                         </div>
@@ -329,384 +694,482 @@
                 </div>
             </div>
         </div>
-
     </section>
 
     <!-- ============================================================ -->
-    <!-- 2. Stats                                                     -->
+    <!-- 09:40  The unit: what you enter vs what they read            -->
     <!-- ============================================================ -->
-    <section class="border-t border-gray-200 bg-gray-50 py-16 dark:border-white/5 dark:bg-[#0f0f14]">
-        <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <div class="grid gap-6 text-center md:grid-cols-3" data-reveal-group="90">
-                <div data-reveal class="p-6">
-                    <div class="mb-2 text-4xl font-black text-sky-500 dark:text-sky-400">~<span data-count-to="73">73</span>%</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">of organizations now host virtual or hybrid events</div>
+    <section id="unit" class="scroll-mt-24 es-agenda-hair border-y py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-agenda-slot mb-5" data-reveal>
+                    <span class="es-agenda-clock">09:40</span>
+                    <span class="es-agenda-pip" aria-hidden="true"></span>
+                    <span class="es-agenda-rule" aria-hidden="true"></span>
+                    <span class="es-agenda-tag">The unit</span>
                 </div>
-                <div data-reveal class="border-gray-200 p-6 dark:border-white/5 md:border-x">
-                    <div class="mb-2 text-4xl font-black text-blue-500 dark:text-blue-400">3-5x</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">wider reach compared to in-person only</div>
+                <h2 class="es-balance es-agenda-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
+                    Seven parts. <span class="es-agenda-accent">One event.</span>
+                </h2>
+                <p class="es-agenda-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Most calendars would have you enter that morning as seven separate events. Here you fill the day in once and type the running order underneath it, so the date, the join link and the tickets are stated once and cannot disagree with each other.
+                </p>
+            </div>
+
+            <div class="grid items-start gap-6 lg:grid-cols-2" data-reveal-group="110">
+                <!-- What you enter -->
+                <div class="es-agenda-card p-6 sm:p-7" data-reveal="panel">
+                    <div class="mb-4 flex flex-wrap items-center gap-2">
+                        <h3 class="es-agenda-ink text-lg font-bold">What you enter</h3>
+                        <span class="es-agenda-plan">Free</span>
+                    </div>
+                    <p class="es-agenda-muted mb-4 text-sm">The event: one date, one start, one duration, one link.</p>
+                    <div>
+                        @foreach ($dayFields as [$fieldKey, $fieldVal])
+                            <div class="es-agenda-field">
+                                <span class="es-agenda-key">{{ $fieldKey }}</span>
+                                <span class="es-agenda-val">{{ $fieldVal }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                    <p class="es-agenda-muted mt-4 text-xs">Move the date here and the whole running order moves with it, because the parts live inside the event. The clock times on the parts are the ones you typed, so those you edit yourself.</p>
                 </div>
-                <div data-reveal class="p-6">
-                    <div class="mb-2 text-4xl font-black text-cyan-500 dark:text-cyan-400">$0</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">platform fees on conference tickets</div>
+
+                <!-- What they read -->
+                <div class="es-agenda-card p-6 sm:p-7" data-reveal="panel">
+                    <div class="mb-4 flex flex-wrap items-center gap-2">
+                        <h3 class="es-agenda-ink text-lg font-bold">What they read</h3>
+                        <span class="es-agenda-plan">Free</span>
+                    </div>
+                    <p class="es-agenda-muted mb-4 text-sm">The parts: the running order, in order, with times.</p>
+                    <ol class="space-y-1.5">
+                        @foreach ($run as $runIndex => [$partTime, $partName, $partMins, $partIsGap])
+                            <li class="flex items-baseline gap-3">
+                                <span class="es-agenda-time w-11 flex-none">{{ $partTime }}</span>
+                                <span class="es-agenda-name min-w-0 flex-1 @if ($partIsGap) es-agenda-muted @else es-agenda-ink @endif">{{ $partName }}</span>
+                                <span class="es-agenda-dur es-agenda-muted flex-none">{{ $partMins }}m</span>
+                            </li>
+                        @endforeach
+                    </ol>
+                    <p class="es-agenda-muted mt-4 text-xs">The first few parts show on the schedule page with their times, and the rest sit behind a "more" line so a long day does not swamp the calendar.</p>
+                </div>
+            </div>
+
+            <div class="mt-8 grid gap-4 sm:grid-cols-3" data-reveal-group="90">
+                <div class="es-agenda-card p-6" data-reveal="panel">
+                    <p class="es-agenda-tag mb-3">Events to enter</p>
+                    <h3 class="es-agenda-ink mb-2 text-2xl font-black"><span data-count-to="1">1</span></h3>
+                    <p class="es-agenda-muted text-sm">One date, one start time, one duration. Not seven chances to mistype a time zone.</p>
+                </div>
+                <div class="es-agenda-card p-6" data-reveal="panel">
+                    <p class="es-agenda-tag mb-3">Parts inside it</p>
+                    <h3 class="es-agenda-ink mb-2 text-2xl font-black"><span data-count-to="7">7</span></h3>
+                    <p class="es-agenda-muted text-sm">As many as the day has. Each one carries a name, a description, a start and an end.</p>
+                </div>
+                <div class="es-agenda-card p-6" data-reveal="panel">
+                    <p class="es-agenda-tag mb-3">Links to share</p>
+                    <h3 class="es-agenda-ink mb-2 text-2xl font-black"><span data-count-to="1">1</span></h3>
+                    <p class="es-agenda-muted text-sm">The programme, the sign-up and the way in are the same page.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- 3. Bento features                                            -->
+    <!-- 10:30  Setting the running order                             -->
     <!-- ============================================================ -->
-    <section class="bg-white py-20 dark:bg-[#0a0a0f] lg:py-28">
+    <section id="run" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-agenda-slot mb-5" data-reveal>
+                    <span class="es-agenda-clock">10:30</span>
+                    <span class="es-agenda-pip" aria-hidden="true"></span>
+                    <span class="es-agenda-rule" aria-hidden="true"></span>
+                    <span class="es-agenda-tag">Setting the running order</span>
+                </div>
+                <h2 class="es-balance es-agenda-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
+                    Name it, time it, <span class="es-agenda-accent">drag it into place.</span>
+                </h2>
+                <p class="es-agenda-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Three things make a session, and all three are on the free plan.
+                </p>
+            </div>
+
+            <div class="grid gap-6 md:grid-cols-3" data-reveal-group="100">
+                <div class="es-agenda-card p-7" data-reveal="panel">
+                    <div class="mb-3 flex flex-wrap items-center gap-2">
+                        <h3 class="es-agenda-ink text-lg font-bold">A name, and not much else</h3>
+                        <span class="es-agenda-plan">Free</span>
+                    </div>
+                    <p class="es-agenda-muted text-sm">The name is the only thing a part needs. Add a description in markdown when the session deserves an abstract, and leave it empty when the title says it all.</p>
+                </div>
+                <div class="es-agenda-card p-7" data-reveal="panel">
+                    <div class="mb-3 flex flex-wrap items-center gap-2">
+                        <h3 class="es-agenda-ink text-lg font-bold">A start and an end</h3>
+                        <span class="es-agenda-plan">Free</span>
+                    </div>
+                    <p class="es-agenda-muted text-sm">Each part takes its own start time and its own end time, and both are optional. Two switches in the agenda editor, remembered for the whole schedule, decide whether it asks you for times and descriptions at all, so a programme that is still only titles stays a list of titles.</p>
+                </div>
+                <div class="es-agenda-card p-7" data-reveal="panel">
+                    <div class="mb-3 flex flex-wrap items-center gap-2">
+                        <h3 class="es-agenda-ink text-lg font-bold">An order you can change</h3>
+                        <span class="es-agenda-plan">Free</span>
+                    </div>
+                    <p class="es-agenda-muted text-sm">Drag a part up the list, or move it with the up and down buttons. When a speaker swaps slot the morning is one drag away from correct, not a re-typed agenda.</p>
+                </div>
+            </div>
+
+            <div class="es-agenda-card mx-auto mt-8 max-w-3xl p-7" data-reveal="panel">
+                <div class="mb-3 flex flex-wrap items-center gap-2">
+                    <h3 class="es-agenda-ink text-lg font-bold">Already have the programme written somewhere</h3>
+                    <span class="es-agenda-plan es-agenda-plan-ent">Enterprise</span>
+                </div>
+                <p class="es-agenda-muted text-sm">
+                    Agenda scanning reads a programme from a photo or from pasted text and fills the parts in for you, times and all. Being straight about the tier: that one is on the Enterprise plan, and there is a daily limit on it. Typing the parts yourself is free and always will be, which is why the rest of this page does not depend on it.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 11:45  The programme: three days, three events               -->
+    <!-- ============================================================ -->
+    <section id="programme" class="scroll-mt-24 es-agenda-hair border-y py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-agenda-slot mb-5" data-reveal>
+                    <span class="es-agenda-clock">11:45</span>
+                    <span class="es-agenda-pip" aria-hidden="true"></span>
+                    <span class="es-agenda-rule" aria-hidden="true"></span>
+                    <span class="es-agenda-tag">The programme</span>
+                </div>
+                <h2 class="es-balance es-agenda-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.08s;">
+                    Three days is three events, <span class="es-agenda-accent">stacked.</span>
+                </h2>
+                <p class="es-agenda-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    One event per date, each with its own running order and its own way in. Read down the strip and you are reading the whole conference at once.
+                </p>
+            </div>
+
+            <div class="es-agenda-card p-6 sm:p-8" data-reveal="panel">
+                <div class="mb-3 flex items-baseline justify-between gap-3">
+                    <p class="es-agenda-tag">Cloud Summit 2026</p>
+                    <p class="es-agenda-muted text-xs">21 parts across 3 days</p>
+                </div>
+                <table class="w-full border-collapse text-left">
+                    <caption class="sr-only">Cloud Summit 2026: each conference day with its date, the hours it runs and the number of agenda parts inside it</caption>
+                    <thead>
+                        <tr class="es-agenda-tag">
+                            <th scope="col" class="pb-3 font-bold">Day</th>
+                            <th scope="col" class="pb-3 font-bold">Date</th>
+                            <th scope="col" class="hidden pb-3 font-bold sm:table-cell">Runs</th>
+                            <th scope="col" class="pb-3 text-end font-bold">Parts</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr aria-hidden="true">
+                            <td colspan="4" class="pb-1 pt-1">
+                                <div class="es-agenda-ruler">
+                                    @foreach (range(9, 17) as $hour)
+                                        <span>{{ str_pad($hour, 2, '0', STR_PAD_LEFT) }}</span>
+                                    @endforeach
+                                </div>
+                            </td>
+                        </tr>
+                        @foreach ($programme as [$dayName, $dayDate, $dayHours, $dayParts, $dayTicks])
+                            <tr class="es-agenda-hair border-t">
+                                <th scope="row" class="es-agenda-ink py-3 pe-3 align-middle text-sm font-bold">{{ $dayName }}</th>
+                                <td class="es-agenda-muted py-3 pe-3 align-middle font-mono text-xs">{{ $dayDate }}</td>
+                                <td class="es-agenda-muted hidden py-3 pe-3 align-middle font-mono text-xs sm:table-cell">{{ $dayHours }}</td>
+                                <td class="es-agenda-muted py-3 align-middle text-end font-mono text-xs">{{ $dayParts }}</td>
+                            </tr>
+                            <tr aria-hidden="true">
+                                <td colspan="4" class="pb-3">
+                                    <div class="es-agenda-track">
+                                        @foreach ($dayTicks as [$tickAt, $tickFor, $tickIsGap])
+                                            <span class="es-agenda-tick @if ($tickIsGap) es-agenda-tick-gap @endif" style="inset-inline-start: {{ round($tickAt / $window * 100, 2) }}%; width: calc({{ round($tickFor / $window * 100, 2) }}% - 3px);"></span>
+                                        @endforeach
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                <p class="es-agenda-muted mt-4 text-xs">Each mark is one part of that day's running order, as wide as the part is long, drawn where it falls between 09:00 and 18:00. The hollow ones are the breaks. Count them and you get the number in the Parts column.</p>
+            </div>
+
+            <p class="es-agenda-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
+                Sub-schedules keep a strand of the programme together and give it a color, which is useful for a workshop day or a members-only strand you want to point people at. Worth saying plainly: a sub-schedule organizes and colors, it does not restrict who can see what, and there are no rooms and no tracks. To hide a day until you announce it, leave it as a draft.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 12:40  In session (fixed-dark: the lights are down)          -->
+    <!-- ============================================================ -->
+    <section id="session" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
+        <div class="es-agenda-screen noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 28% 28%, rgba(34, 211, 238, 0.14), rgba(34, 211, 238, 0) 60%);"></div>
+                <div class="grid-overlay absolute inset-0 opacity-25"></div>
+            </div>
+
+            <div class="relative z-10 mx-auto max-w-5xl">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-agenda-slot mb-5" data-reveal>
+                        <span class="es-agenda-live" aria-hidden="true"></span>
+                        <span class="es-agenda-lit font-mono text-xs font-extrabold tracking-widest">12:40</span>
+                        <span class="es-agenda-rule" aria-hidden="true"></span>
+                        <span class="es-agenda-tag">In session, lightning talks</span>
+                    </div>
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
+                        One link. <span class="es-agenda-lit">Wherever you stream.</span>
+                    </h2>
+                    <p class="es-agenda-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        Mark the day as an online event and paste the URL. Event Schedule stores a link, not an integration, so it has no opinion about where the conference actually happens.
+                    </p>
+                </div>
+
+                <div class="grid gap-6 md:grid-cols-3" data-reveal-group="100">
+                    <div class="es-agenda-card p-6" data-reveal="panel">
+                        <div class="mb-2 flex flex-wrap items-center gap-2">
+                            <h3 class="es-agenda-ink text-lg font-bold">Any platform</h3>
+                            <span class="es-agenda-plan">Free</span>
+                        </div>
+                        <p class="es-agenda-muted text-sm">Zoom, Microsoft Teams, Google Meet, YouTube Live, a webinar tool, your own player. Anything that hands you a URL works, because the URL is the whole integration.</p>
+                    </div>
+                    <div class="es-agenda-card p-6" data-reveal="panel">
+                        <div class="mb-2 flex flex-wrap items-center gap-2">
+                            <h3 class="es-agenda-ink text-lg font-bold">It lands in their calendar</h3>
+                            <span class="es-agenda-plan">Free</span>
+                        </div>
+                        <p class="es-agenda-muted text-sm">Attendees download an .ics for the day, and your own side syncs two ways with Google, Outlook and CalDAV, so the conference sits next to the rest of your week.</p>
+                    </div>
+                    <div class="es-agenda-card p-6" data-reveal="panel">
+                        <div class="mb-2 flex flex-wrap items-center gap-2">
+                            <h3 class="es-agenda-ink text-lg font-bold">Cap the room</h3>
+                            <span class="es-agenda-plan">Free</span>
+                        </div>
+                        <p class="es-agenda-muted text-sm">Free registration with a capacity limit, and the number of places left is counted for each date separately, so day two filling up says nothing about day three.</p>
+                    </div>
+                </div>
+
+                <p class="es-agenda-muted mt-10 text-center" data-reveal>
+                    One join link belongs to one event, so it covers the whole running order.
+                    <a href="{{ marketing_url('/features/online-events') }}" class="es-agenda-lit inline-flex items-center gap-1 font-semibold transition-all hover:gap-2">
+                        How online events work
+                        <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                    </a>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 14:20  The takings: registration and ticket types. Deliberately
+         NOT called "at the door": there is no door on a virtual
+         conference, and the spine has already gone live at 12:40, so a
+         mark about money reads forward here and a mark about arrival
+         would read backward.                                          -->
+    <!-- ============================================================ -->
+    <section id="tickets" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-start gap-12 lg:grid-cols-2">
+                <div>
+                    <div class="es-agenda-slot mb-5" data-reveal>
+                        <span class="es-agenda-clock">14:20</span>
+                        <span class="es-agenda-pip" aria-hidden="true"></span>
+                        <span class="es-agenda-rule" aria-hidden="true"></span>
+                        <span class="es-agenda-tag">The takings</span>
+                    </div>
+                    <h2 class="es-balance es-agenda-ink mb-5 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.08s;">
+                        Name your prices. <span class="es-agenda-accent">Keep the money.</span>
+                    </h2>
+                    <p class="es-agenda-muted mb-6 text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
+                        A free conference needs nothing but registration and a capacity, and that is on the free plan. A paid one gets named ticket types, each with its own price, quantity and sales window, on Pro at five dollars a month. Event Schedule takes nothing from either.
+                    </p>
+                    <ul class="es-agenda-muted space-y-3" data-reveal-group="70">
+                        <li class="flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="es-agenda-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>Zero platform fees at every plan level. You connect your own Stripe account, and Stripe's own processing fee is the only cut anybody takes.</span>
+                        </li>
+                        <li class="flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="es-agenda-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>Individual tickets give everyone in a company's group booking their own confirmation email and their own QR code, instead of one person holding twelve.</span>
+                        </li>
+                        <li class="flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="es-agenda-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>Custom questions on the ticket collect what the conference actually needs: a job title for the badge, an accessibility requirement, which workshop somebody picked.</span>
+                        </li>
+                        <li class="flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="es-agenda-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>Quantities are counted for each date on its own, and a waitlist can catch the people who arrive after a day has sold out.</span>
+                        </li>
+                    </ul>
+                    <p class="es-agenda-muted mt-6 text-sm" data-reveal>
+                        See the detail on the <a href="{{ marketing_url('/features/ticketing') }}" class="es-agenda-link font-medium hover:underline">ticketing page</a>.
+                    </p>
+                </div>
+
+                <div data-reveal="panel">
+                    <div class="es-agenda-card p-6 sm:p-7">
+                        <div class="mb-4 flex flex-wrap items-center gap-2">
+                            <h3 class="es-agenda-ink text-lg font-bold">Ticket types</h3>
+                            <span class="es-agenda-plan es-agenda-plan-pro">Pro</span>
+                        </div>
+                        <div class="space-y-2">
+                            @foreach ([['Full pass', 'all three days', '$149'], ['Single day', 'any one day', '$59'], ['Early bird', 'sales window closes 31 Jan', '$99'], ['Community rate', 'limited quantity', '$25'], ['Registration only', 'free conference, capped', 'Free']] as [$tierName, $tierScope, $tierPrice])
+                                <div class="flex items-baseline gap-3 es-agenda-hair border-t pt-2 text-sm first:border-0 first:pt-0">
+                                    <span class="es-agenda-ink min-w-0 flex-1 truncate font-semibold">{{ $tierName }}</span>
+                                    <span class="es-agenda-muted hidden truncate text-xs sm:inline">{{ $tierScope }}</span>
+                                    <span class="es-agenda-ink flex-none font-mono">{{ $tierPrice }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                        <div class="mt-5 flex items-baseline justify-between gap-3 es-agenda-hair border-t pt-4">
+                            <span class="es-agenda-key">Platform fee</span>
+                            <span class="es-agenda-accent font-mono text-lg font-black">$0</span>
+                        </div>
+                        <p class="es-agenda-muted mt-3 text-xs">
+                            The last row is the free plan on its own: registration with a capacity limit, no card involved. To be clear about what this is not, there is no seat map and buyers are not choosing a seat.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 15:30  Afterwards: bento                                     -->
+    <!-- ============================================================ -->
+    <section id="after" class="scroll-mt-24 es-agenda-hair border-t py-20 lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Everything you need to run a <span class="text-gradient-conference">virtual conference</span>
+                <div class="es-agenda-slot mb-5" data-reveal>
+                    <span class="es-agenda-clock">15:30</span>
+                    <span class="es-agenda-pip" aria-hidden="true"></span>
+                    <span class="es-agenda-rule" aria-hidden="true"></span>
+                    <span class="es-agenda-tag">Afterwards</span>
+                </div>
+                <h2 class="es-balance es-agenda-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
+                    When the stream stops.
                 </h2>
             </div>
 
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="110">
-
-                <!-- Multi-day agenda (2 cols) -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="flex flex-col gap-8 lg:flex-row lg:items-center">
-                            <div class="flex-1">
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-800/30 dark:bg-sky-900/40 dark:text-sky-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                    Multi-Day Agenda
-                                </div>
-                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Multi-day conference schedule</h3>
-                                <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">Organize keynotes, breakout sessions, and workshops across multiple days of your virtual conference. Attendees browse the full agenda and find the sessions they care about. Have a printed conference program? Scan it with AI to populate all your sessions automatically.</p>
-                                <div class="flex flex-wrap gap-3">
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Keynotes</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Breakout sessions</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Workshops</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">AI agenda scanning</span>
-                                </div>
+                <!-- 1 -->
+                <div class="es-bento group relative md:col-span-2" data-reveal="panel" data-tilt="3.5">
+                    <div class="es-tilt-inner es-agenda-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-agenda-ink text-xl font-bold">Feedback that knows which session it is about</h3>
+                                <span class="es-agenda-plan">Free</span>
                             </div>
-                            <div class="w-full shrink-0 lg:w-auto" aria-hidden="true">
-                                <div class="animate-float">
-                                    <div class="max-w-xs rounded-2xl border border-sky-300 bg-gradient-to-br from-sky-100 to-blue-100 p-4 dark:border-sky-400/30 dark:from-sky-950 dark:to-blue-950">
-                                        <div class="mb-3 flex items-center gap-3">
-                                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-blue-500 text-sm font-semibold text-white">TC</div>
-                                            <div><div class="text-sm font-semibold text-gray-900 dark:text-white">Tech Conference 2026</div><div class="text-xs text-sky-600 dark:text-sky-300">3-day agenda</div></div>
-                                        </div>
-                                        <div class="space-y-1.5">
-                                            <div class="es-ai-field relative rounded-lg border border-sky-400/20 bg-gradient-to-br from-sky-600/30 to-blue-600/30 p-2 pl-3" style="--i: 0;">
-                                                <span class="es-track-tab es-track-cyan" aria-hidden="true"></span>
-                                                <div class="text-[10px] font-semibold text-gray-900 dark:text-white">DAY 1 - Opening Keynote</div>
-                                                <div class="mt-0.5 text-[9px] text-gray-500 dark:text-gray-400">9:00 AM - Main Stage</div>
-                                            </div>
-                                            <div class="es-ai-field relative rounded-lg border border-blue-400/20 bg-gradient-to-br from-blue-600/20 to-cyan-600/20 p-2 pl-3" style="--i: 1;">
-                                                <span class="es-track-tab es-track-amber" aria-hidden="true"></span>
-                                                <div class="text-[10px] font-semibold text-gray-900 dark:text-white">DAY 2 - AI Workshop</div>
-                                                <div class="mt-0.5 text-[9px] text-gray-500 dark:text-gray-400">10:00 AM - Track B</div>
-                                            </div>
-                                            <div class="es-ai-field relative rounded-lg border border-cyan-400/20 bg-gradient-to-br from-cyan-600/20 to-sky-600/20 p-2 pl-3" style="--i: 2;">
-                                                <span class="es-track-tab es-track-emerald" aria-hidden="true"></span>
-                                                <div class="text-[10px] font-semibold text-gray-900 dark:text-white">DAY 3 - Closing Panel</div>
-                                                <div class="mt-0.5 text-[9px] text-gray-500 dark:text-gray-400">2:00 PM - Main Stage</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <p class="es-agenda-muted mb-4">Attendees add a photo, a video or a comment and pick the part of the running order it belongs to, so the note about the workshop is filed under the workshop rather than under a four hour day. Nothing appears until you approve it.</p>
+                            <p class="es-agenda-muted text-sm">The free plan covers 25 photos per schedule; Pro lifts the cap and lets you download the lot as a zip. Star ratings collected after the event are a Pro feature.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
-                <!-- Tiered tickets -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-blue-200 bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 dark:border-blue-800/30 dark:bg-blue-900/40 dark:text-blue-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
-                            Tiered Tickets
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Sell tiered conference tickets</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">General admission, VIP, speaker passes, early bird pricing. 100% of Stripe payments go to you. See all <a href="{{ marketing_url('/features/ticketing') }}" class="text-blue-600 underline hover:no-underline dark:text-blue-400">ticketing features</a>.</p>
-                        <div class="mt-auto rounded-xl border border-blue-400/30 bg-blue-500/15 p-4" aria-hidden="true">
-                            <div class="mb-3 space-y-2">
-                                <div class="es-ai-field flex items-center justify-between rounded-lg bg-blue-400/20 p-2" style="--i: 0;"><span class="text-xs font-medium text-gray-900 dark:text-white">General Admission<span class="es-tier-chip es-tier-std">Standard</span></span><span class="text-xs font-semibold text-blue-600 dark:text-blue-400">$49</span></div>
-                                <div class="es-ai-field es-vip-foil flex items-center justify-between rounded-lg bg-sky-400/20 p-2" style="--i: 1;"><span class="text-xs font-medium text-gray-900 dark:text-white">VIP Pass<span class="es-tier-chip es-tier-vip">Premium</span></span><span class="text-xs font-semibold text-sky-600 dark:text-sky-400">$149</span></div>
-                                <div class="es-ai-field flex items-center justify-between rounded-lg bg-cyan-400/20 p-2" style="--i: 2;"><span class="text-xs font-medium text-gray-900 dark:text-white">Early Bird<span class="es-tier-chip es-tier-early">Limited</span></span><span class="text-xs font-semibold text-cyan-600 dark:text-cyan-400">$29</span></div>
+                <!-- 2 -->
+                <div class="es-bento group relative" data-reveal="panel" data-tilt="5">
+                    <div class="es-tilt-inner es-agenda-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-agenda-ink text-xl font-bold">Write to the people who came</h3>
+                                <span class="es-agenda-plan">Free</span>
                             </div>
-                            <div class="border-t border-blue-400/20 pt-3">
-                                <div class="flex justify-between text-xs">
-                                    <span class="text-gray-500 dark:text-gray-400">Platform fee</span>
-                                    <span class="font-semibold text-blue-600 dark:text-blue-400">$0</span>
-                                </div>
-                            </div>
+                            <p class="es-agenda-muted">Attendees follow your schedule and you send them a newsletter when next year's programme is set. Nothing goes out on its own: 10 emails a month on Free, 100 on Pro and 1,000 on Enterprise, counted one per recipient.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
-                <!-- One link -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-cyan-200 bg-cyan-100 px-3 py-1.5 text-sm font-medium text-cyan-700 dark:border-cyan-800/30 dark:bg-cyan-900/40 dark:text-cyan-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
-                            Share Link
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">One link for your conference</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Share a single URL that attendees use to browse the full agenda, buy tickets, and join sessions.</p>
-                        <div class="mt-auto rounded-xl border border-gray-200 bg-gray-100 p-4 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
-                            <div class="mb-3 flex items-center gap-2 rounded-lg border border-cyan-400/30 bg-cyan-500/20 p-2">
-                                <svg aria-hidden="true" class="h-4 w-4 shrink-0 text-cyan-500 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
-                                <span class="truncate font-mono text-xs text-gray-900 dark:text-white">yourconf.eventschedule.com</span>
+                <!-- 3 -->
+                <div class="es-bento group relative" data-reveal="panel" data-tilt="5">
+                    <div class="es-tilt-inner es-agenda-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-agenda-ink text-xl font-bold">What the programme page did</h3>
+                                <span class="es-agenda-plan">Free</span>
                             </div>
-                            <div class="grid grid-cols-3 gap-1 text-center">
-                                <div class="rounded bg-gray-200 p-1.5 text-[10px] text-cyan-600 dark:bg-white/5 dark:text-cyan-300">Website</div>
-                                <div class="rounded bg-gray-200 p-1.5 text-[10px] text-cyan-600 dark:bg-white/5 dark:text-cyan-300">LinkedIn</div>
-                                <div class="rounded bg-gray-200 p-1.5 text-[10px] text-cyan-600 dark:bg-white/5 dark:text-cyan-300">Email</div>
-                            </div>
+                            <p class="es-agenda-muted">Built-in analytics show page views, the devices people read on, which countries they read from and where the traffic came from, right down to the referrer and the campaign tag. Enough to tell whether the programme page did its job.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
-                <!-- Works with any platform (2 cols) -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="grid items-center gap-8 md:grid-cols-2">
-                            <div>
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-100 px-3 py-1.5 text-sm font-medium text-teal-700 dark:border-teal-800/30 dark:bg-teal-900/40 dark:text-teal-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                                    Any Platform
-                                </div>
-                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white">Works with any streaming platform</h3>
-                                <p class="text-lg text-gray-500 dark:text-gray-400">Zoom, Microsoft Teams, YouTube Live, or custom RTMP. Add your streaming link per session, attendees join from the agenda. Learn more about <a href="{{ marketing_url('/features/online-events') }}" class="text-teal-600 underline hover:no-underline dark:text-teal-400">online event features</a>.</p>
+                <!-- 4 -->
+                <div class="es-bento group relative md:col-span-2" data-reveal="panel" data-tilt="3.5">
+                    <div class="es-tilt-inner es-agenda-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-agenda-ink text-xl font-bold">On the conference site you already built</h3>
+                                <span class="es-agenda-plan">Free</span>
                             </div>
-                            <div class="flex items-center justify-center" aria-hidden="true">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-36 rounded-xl border border-teal-400/30 bg-teal-500/15 p-4">
-                                        <div class="mb-2 text-center text-xs font-semibold text-teal-600 dark:text-teal-300">Your Agenda</div>
-                                        <div class="space-y-1.5">
-                                            <div class="h-2 rounded bg-gray-300 dark:bg-white/20"></div>
-                                            <div class="h-2 w-3/4 rounded bg-teal-400/40"></div>
-                                        </div>
-                                        <div class="mt-3 rounded-lg border border-teal-400/30 bg-teal-400/20 p-2">
-                                            <div class="text-center text-[10px] font-medium text-teal-800 dark:text-white">Opening Keynote</div>
-                                            <div class="mt-0.5 text-center text-[8px] text-teal-700 dark:text-teal-300">Day 1 - 9:00 AM</div>
-                                        </div>
-                                    </div>
-                                    <div class="flex flex-col items-center gap-1">
-                                        <svg aria-hidden="true" class="es-sync-dot h-6 w-6 text-teal-500 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                                        <span class="text-[10px] text-teal-500 dark:text-teal-400">stream link</span>
-                                    </div>
-                                    <div class="w-36 rounded-xl border border-gray-300 bg-gray-200 p-4 dark:border-white/20 dark:bg-white/10">
-                                        <div class="mb-2 text-center text-xs font-semibold text-gray-600 dark:text-gray-300">Platform</div>
-                                        <div class="space-y-2 text-center">
-                                            <div class="es-ai-field rounded bg-blue-400/20 p-1.5 text-[10px] text-blue-700 dark:text-blue-300" style="--i: 0;">Zoom</div>
-                                            <div class="es-ai-field rounded bg-sky-400/20 p-1.5 text-[10px] text-sky-700 dark:text-sky-300" style="--i: 1;">MS Teams</div>
-                                            <div class="es-ai-field rounded bg-red-400/20 p-1.5 text-[10px] text-red-700 dark:text-red-300" style="--i: 2;">YouTube Live</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <p class="es-agenda-muted mb-4">Embed the calendar in a page of your own so the programme lives where sponsors and speakers link to it, and switch the schedule to its list layout when a conference reads better as a list than as a month.</p>
+                            <p class="es-agenda-muted text-sm">The ticket form embeds too, on Pro, so people can register without leaving your site.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
-                <!-- Email all attendees (2 cols) -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="grid items-center gap-8 md:grid-cols-2">
-                            <div>
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-800/30 dark:bg-amber-900/40 dark:text-amber-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                                    Email Attendees
-                                </div>
-                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white">Email all attendees</h3>
-                                <p class="text-lg text-gray-500 dark:text-gray-400">Send updates, schedule changes, speaker announcements, and post-conference resources directly to attendees.</p>
+                <!-- 5 -->
+                <div class="es-bento group relative" data-reveal="panel" data-tilt="5">
+                    <div class="es-tilt-inner es-agenda-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-agenda-ink text-xl font-bold">Announce when you are ready</h3>
+                                <span class="es-agenda-plan">Free</span>
                             </div>
-                            <div class="rounded-xl border border-amber-400/30 bg-amber-500/15 p-3" aria-hidden="true">
-                                <div class="space-y-1.5">
-                                    <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/20 p-1.5" style="--i: 0;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] font-medium text-gray-900 dark:text-white">Schedule update</span></div>
-                                    <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/10 p-1.5" style="--i: 1;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] text-gray-600 dark:text-gray-300">Speaker announcement</span></div>
-                                    <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/10 p-1.5" style="--i: 2;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] text-gray-600 dark:text-gray-300">Post-conference resources</span></div>
-                                </div>
-                            </div>
+                            <p class="es-agenda-muted">A day you have not announced sits on your calendar as a draft and never appears publicly until you say so. Internal and unlisted visibility, including a password on the link, are Enterprise.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
-                <!-- Google Calendar sync -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-blue-200 bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 dark:border-blue-800/30 dark:bg-blue-900/40 dark:text-blue-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                            Calendar Sync
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Google Calendar sync</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Two-way sync keeps conference sessions organized alongside your other meetings and planning.</p>
-                        <div class="mt-auto flex items-center justify-center gap-3" aria-hidden="true">
-                            <div class="w-20 rounded-xl border border-blue-400/30 bg-blue-500/15 p-3">
-                                <div class="mb-1 text-center text-[10px] text-blue-600 dark:text-blue-300">Schedule</div>
-                                <div class="space-y-1">
-                                    <div class="es-sync-dot h-1.5 rounded bg-sky-400/60"></div>
-                                    <div class="es-sync-dot h-1.5 rounded bg-amber-400/60" style="--i: 1;"></div>
-                                </div>
+                <!-- 6 -->
+                <div class="es-bento group relative lg:col-span-2" data-reveal="panel" data-tilt="3.5">
+                    <div class="es-tilt-inner es-agenda-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-agenda-ink text-xl font-bold">Next year, from this year</h3>
+                                <span class="es-agenda-plan">Free</span>
                             </div>
-                            <div class="flex flex-col items-center gap-0.5">
-                                <svg aria-hidden="true" class="h-4 w-4 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-                                <svg aria-hidden="true" class="h-4 w-4 text-sky-500 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-                            </div>
-                            <div class="w-20 rounded-xl border border-gray-300 bg-gray-200 p-3 dark:border-white/20 dark:bg-white/10">
-                                <div class="mb-1 text-center text-[10px] text-gray-600 dark:text-gray-300">Google</div>
-                                <div class="space-y-1">
-                                    <div class="es-sync-dot h-1.5 rounded bg-blue-400/60" style="--i: 2;"></div>
-                                    <div class="es-sync-dot h-1.5 rounded bg-green-400/60" style="--i: 3;"></div>
-                                </div>
-                            </div>
+                            <p class="es-agenda-muted mb-4">Clone a day and you get its running order with it, which is most of the work of the next edition already done. On Pro you can save a day as a reusable template, and generate a share graphic built from the event so the date on it is right.</p>
+                            <p class="es-agenda-muted text-sm">A programme committee that needs more than one login is on Enterprise, which allows up to five team members. The free plan is a single member, so plan the handover if a colleague has to post the schedule.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
-                </div>
-
-                <!-- Attendees follow -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-slate-200 bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 dark:border-slate-700/40 dark:bg-slate-800/40 dark:text-slate-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                            Followers
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Attendees follow your events</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Followers get notified for next year's conference or related events you organize.</p>
-                        <div class="mt-auto" aria-hidden="true">
-                            <div class="flex items-center justify-center">
-                                <div class="flex -space-x-2">
-                                    <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-sky-500 to-blue-500 text-xs text-white dark:border-[#0a0a0f]">A</div>
-                                    <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-blue-500 to-cyan-500 text-xs text-white dark:border-[#0a0a0f]">B</div>
-                                    <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-cyan-500 to-teal-500 text-xs text-white dark:border-[#0a0a0f]">C</div>
-                                    <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-300 text-xs text-gray-600 dark:border-[#0a0a0f] dark:bg-white/20 dark:text-white">+520</div>
-                                </div>
-                            </div>
-                            <div class="mt-3 text-center text-xs text-slate-600 dark:text-slate-400">523 attendees following your conference</div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Attendee feedback (2 cols, bottom) -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="grid items-center gap-8 md:grid-cols-2">
-                            <div>
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/40 dark:text-emerald-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
-                                    Attendee Feedback
-                                </div>
-                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white">Attendee feedback</h3>
-                                <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">Let attendees leave comments on individual sessions. All feedback is approved by you before going live.</p>
-                                <div class="flex flex-wrap gap-3">
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Per-session comments</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Organizer approval</span>
-                                </div>
-                            </div>
-                            <div class="flex items-center justify-center" aria-hidden="true">
-                                <div class="max-w-xs rounded-2xl border border-emerald-300 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 dark:border-emerald-400/30 dark:from-emerald-950 dark:to-sky-950">
-                                    <div class="mb-2 text-xs text-gray-500 dark:text-white/70">AI Workshop - Day 2</div>
-                                    <div class="space-y-2">
-                                        <div class="es-ai-field flex items-start gap-2" style="--i: 0;">
-                                            <div class="mt-0.5 h-5 w-5 shrink-0 rounded-full bg-emerald-300 dark:bg-emerald-500/40"></div>
-                                            <div class="rounded-lg bg-white px-2 py-1 text-[10px] text-gray-600 dark:bg-white/10 dark:text-gray-300">Great session on LLMs!</div>
-                                        </div>
-                                        <div class="es-ai-field flex items-start gap-2" style="--i: 1;">
-                                            <div class="mt-0.5 h-5 w-5 shrink-0 rounded-full bg-sky-300 dark:bg-sky-500/40"></div>
-                                            <div class="rounded-lg bg-white px-2 py-1 text-[10px] text-gray-600 dark:bg-white/10 dark:text-gray-300">Very practical demos</div>
-                                        </div>
-                                        <div class="flex items-center gap-1 pt-1">
-                                            <svg aria-hidden="true" class="es-approve-check h-3 w-3 text-emerald-500 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                            <span class="text-[10px] text-emerald-600 dark:text-emerald-400">Approved by organizer</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 4. Journey (dark band)                                       -->
-    <!-- ============================================================ -->
-    @php
-        $journey = [
-            ['First virtual meetup', 'Share a link and host your first online session. Free registration gets attendees in the door.', 'border-sky-500/20 bg-sky-500/10', 'text-sky-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'],
-            ['Single-day summit', 'Organize multiple sessions in one day. Attendees browse the agenda and join the talks they want.', 'border-blue-500/20 bg-blue-500/10', 'text-blue-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />'],
-            ['Paid conference', 'Start selling tickets. Offer tiered pricing for general admission, VIP, and speaker passes.', 'border-cyan-500/20 bg-cyan-500/10', 'text-cyan-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'],
-            ['Multi-day conference', 'Keynotes, breakouts, and workshops across multiple days. Organize tracks for different audiences.', 'border-teal-500/20 bg-teal-500/10', 'text-teal-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />'],
-            ['Conference series', 'Run quarterly or annual conferences. Followers get notified when you announce the next edition.', 'border-amber-500/20 bg-amber-500/10', 'text-amber-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />'],
-            ['Hybrid events', 'Combine in-person and virtual attendance. Sell different ticket types for on-site and remote participants.', 'border-sky-500/20 bg-sky-500/10', 'text-sky-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'],
-        ];
-    @endphp
-    <section id="journey" class="scroll-mt-24 bg-white px-2 py-14 dark:bg-[#0a0a0f] sm:px-4 lg:py-20">
-        <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
-            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 25%, rgba(2, 132, 199, 0.26), rgba(2, 132, 199, 0) 60%); opacity: 0.6;"></div>
-                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 65%, rgba(37, 99, 235, 0.2), rgba(37, 99, 235, 0) 60%); opacity: 0.55;"></div>
-                <div class="grid-overlay absolute inset-0 opacity-25"></div>
-                <div class="es-agenda absolute bottom-0 left-0 right-0 flex h-16 items-center justify-center gap-1.5 px-8 opacity-30" style="mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);">
-                    @for ($i = 0; $i < 32; $i++)
-                        @php $w = [26, 40, 54, 34, 46][$i % 5]; $dur = 2.6 + ($i % 5) * 0.3; $delay = ($i % 8) * 0.16; $track = ['is-cyan', 'is-amber', 'is-emerald'][$i % 3]; @endphp
-                        <span class="es-agenda-tile {{ $track }}" style="width: {{ $w }}px; --ag-dur: {{ $dur }}s; --ag-delay: {{ $delay }}s;"></span>
-                    @endfor
-                </div>
-            </div>
-
-            <div class="relative z-10 mx-auto max-w-5xl">
-                <div class="mx-auto mb-14 max-w-2xl text-center">
-                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>
-                        From your first virtual event to a <span class="text-gradient-conference">conference series</span>
-                    </h2>
-                    <p class="text-lg text-gray-300 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                        Event Schedule grows with your conference program.
-                    </p>
-                </div>
-
-                <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="80">
-                    @foreach ($journey as [$title, $desc, $iconBg, $iconText, $icon])
-                        <div data-reveal class="rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition-all hover:-translate-y-1 hover:bg-white/[0.07]">
-                            <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl border {{ $iconBg }}">
-                                <svg aria-hidden="true" class="h-6 w-6 {{ $iconText }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $icon !!}</svg>
-                            </div>
-                            <h3 class="mb-2 text-lg font-semibold text-white">{{ $title }}</h3>
-                            <p class="text-sm text-gray-400">{{ $desc }}</p>
-                        </div>
-                    @endforeach
                 </div>
             </div>
         </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- 5. Perfect for (shared sub-audience cards)                   -->
+    <!-- 16:10  Perfect for                                           -->
     <!-- ============================================================ -->
-    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-28">
+    <section id="who" class="scroll-mt-24 es-agenda-hair border-t py-20 lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Perfect for every type of <span class="text-gradient-conference">virtual conference</span>
+                <div class="es-agenda-slot mb-5" data-reveal>
+                    <span class="es-agenda-clock">16:10</span>
+                    <span class="es-agenda-pip" aria-hidden="true"></span>
+                    <span class="es-agenda-rule" aria-hidden="true"></span>
+                    <span class="es-agenda-tag">Perfect for</span>
+                </div>
+                <h2 class="es-balance es-agenda-ink mb-4 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
+                    Every kind of <span class="es-agenda-accent">virtual conference</span>
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Whether it's a tech summit or an annual meeting, Event Schedule works for conference organizers of all kinds. Also see <a href="{{ marketing_url('/for-webinars') }}" class="text-gray-600 underline hover:no-underline dark:text-gray-300">Event Schedule for Webinars</a>.
+                <p class="es-agenda-muted text-lg sm:text-xl" data-reveal style="--reveal-delay: 0.15s;">
+                    A tech summit or an annual meeting, a half day or a whole week. Also see Event Schedule for <a href="{{ marketing_url('/for-webinars') }}" class="es-agenda-link font-medium hover:underline">webinars</a>.
                 </p>
             </div>
 
@@ -714,7 +1177,7 @@
                 <!-- Tech Companies -->
                 <x-sub-audience-card
                     name="Tech Companies"
-                    description="Product launches, developer conferences, hackathons. Share streaming links and sell tickets to a global audience."
+                    description="Product launches, developer conferences, hackathons. One event per day, the talks inside it, and a link that works wherever you stream."
                     icon-color="cyan"
                     blog-slug="for-tech-company-conferences"
                 >
@@ -728,12 +1191,12 @@
                 <!-- Professional Associations -->
                 <x-sub-audience-card
                     name="Professional Associations"
-                    description="Annual meetings, certification events, member summits. Organize multi-day agendas with tiered access."
-                    icon-color="teal"
+                    description="Annual meetings, certification events, member summits. Publish the running order with times so members can plan the day around one session."
+                    icon-color="blue"
                     blog-slug="for-professional-association-conferences"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                     </x-slot:icon>
@@ -742,7 +1205,7 @@
                 <!-- Nonprofits & NGOs -->
                 <x-sub-audience-card
                     name="Nonprofits & NGOs"
-                    description="Fundraising galas, awareness conferences, volunteer summits. Reach supporters worldwide with zero platform fees."
+                    description="Fundraising events, awareness conferences, volunteer summits. Reach supporters anywhere, and Event Schedule takes no cut of what the tickets raise."
                     icon-color="sky"
                     blog-slug="for-nonprofit-conferences"
                 >
@@ -756,12 +1219,12 @@
                 <!-- Corporate Teams -->
                 <x-sub-audience-card
                     name="Corporate Teams"
-                    description="All-hands meetings, training summits, leadership retreats. One link for your entire team to follow the agenda."
-                    icon-color="blue"
+                    description="All-hands meetings, training summits, leadership offsites. One link your whole team follows, with the agenda for the day printed on it."
+                    icon-color="teal"
                     blog-slug="for-corporate-team-conferences"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-6 h-6 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                     </x-slot:icon>
@@ -770,7 +1233,7 @@
                 <!-- Academic Institutions -->
                 <x-sub-audience-card
                     name="Academic Institutions"
-                    description="Research symposiums, faculty conferences, student events. Schedule sessions across days and tracks."
+                    description="Research symposiums, faculty conferences, student events. Every paper gets its own slot, with an abstract underneath it."
                     icon-color="amber"
                     blog-slug="for-academic-conferences"
                 >
@@ -784,7 +1247,7 @@
                 <!-- Industry Groups -->
                 <x-sub-audience-card
                     name="Industry Groups"
-                    description="Trade shows, networking events, expert panels. Build a following and notify attendees about future events."
+                    description="Trade shows, networking events, expert panels. Build a following, then write to them when the next programme is set."
                     icon-color="emerald"
                     blog-slug="for-industry-group-conferences"
                 >
@@ -799,31 +1262,32 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 6. How it works                                              -->
+    <!-- 16:40  Three steps                                           -->
     <!-- ============================================================ -->
-    @php
-        $steps = [
-            ['1', 'Build your agenda', 'Add sessions, speakers, and streaming links. Organize by day and track.'],
-            ['2', 'Share your conference', 'One link for the full schedule. Sell tickets with tiered pricing.'],
-            ['3', 'Go live', 'Attendees join sessions from the agenda. You focus on content.'],
-        ];
-    @endphp
-    <section class="bg-white py-20 dark:bg-[#0a0a0f] lg:py-24">
-        <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-2xl text-center">
-                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                    Three steps to your <span class="text-gradient-conference">virtual conference</span>
+    <section class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-agenda-slot mb-5" data-reveal>
+                    <span class="es-agenda-clock">16:40</span>
+                    <span class="es-agenda-pip" aria-hidden="true"></span>
+                    <span class="es-agenda-rule" aria-hidden="true"></span>
+                    <span class="es-agenda-tag">Three steps</span>
+                </div>
+                <h2 class="es-balance es-agenda-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
+                    From blank to published.
                 </h2>
             </div>
 
-            <div class="grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="90">
-                @foreach ($steps as [$num, $title, $desc])
-                    <div data-reveal class="text-center">
-                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-600 to-blue-600 text-xl font-bold text-white shadow-lg shadow-sky-600/25">
-                            {{ $num }}
-                        </div>
-                        <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{{ $title }}</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $desc }}</p>
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-3" data-reveal-group="120">
+                @foreach ([
+                    ['01', 'Create the day', 'One event per conference day: its date, its start time, how long it runs, and the link people join.'],
+                    ['02', 'Type the running order', 'Add each session as a part with a name, a start and an end. Drag the parts into order, and write an abstract where one helps.'],
+                    ['03', 'Open the doors', 'Free registration with a capacity limit, or named ticket types on Pro. Share one link for the whole programme.'],
+                ] as [$stepNum, $stepTitle, $stepBody])
+                    <div class="es-agenda-card p-7" data-reveal="panel">
+                        <div class="es-agenda-accent mb-3 font-mono text-2xl font-black">{{ $stepNum }}</div>
+                        <h3 class="es-agenda-ink mb-2 text-lg font-bold">{{ $stepTitle }}</h3>
+                        <p class="es-agenda-muted text-sm leading-relaxed">{{ $stepBody }}</p>
                     </div>
                 @endforeach
             </div>
@@ -831,15 +1295,28 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 7. Key features                                              -->
+    <!-- 17:00  Key features                                          -->
     <!-- ============================================================ -->
-    <section class="border-t border-gray-200 bg-gray-50 py-20 dark:border-white/5 dark:bg-[#0f0f14]">
+    <section class="es-agenda-hair border-t py-20">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key <span class="text-gradient-conference">features</span></h2>
+            <div class="mb-8 text-center">
+                <div class="es-agenda-slot mb-5" data-reveal>
+                    <span class="es-agenda-clock">17:00</span>
+                    <span class="es-agenda-pip" aria-hidden="true"></span>
+                    <span class="es-agenda-rule" aria-hidden="true"></span>
+                    <span class="es-agenda-tag">Key features</span>
+                </div>
+                <h2 class="es-agenda-ink text-2xl font-black tracking-tight md:text-3xl" data-reveal style="--reveal-delay: 0.08s;">What a conference actually leans on</h2>
+            </div>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
-                    <x-feature-link-card name="Online Events" description="Host virtual events with any streaming platform" :url="marketing_url('/features/online-events')" icon-color="sky">
+                    <x-feature-link-card name="Online Events" description="One join link per event, on any platform that gives you a URL" :url="marketing_url('/features/online-events')" icon-color="sky">
                         <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Ticketing" description="Named ticket types, QR codes, and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="blue">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
@@ -848,13 +1325,13 @@
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Newsletters" description="Send event updates directly to followers' inboxes" :url="marketing_url('/features/newsletters')" icon-color="green">
+                    <x-feature-link-card name="Newsletters" description="Write to the people who follow your schedule" :url="marketing_url('/features/newsletters')" icon-color="green">
                         <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="vc-link inline-flex items-center">
+                <a href="{{ marketing_url('/features') }}" class="es-agenda-link inline-flex items-center font-medium hover:underline">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -867,26 +1344,24 @@
     @include('marketing.partials.pricing-nudge')
 
     <!-- ============================================================ -->
-    <!-- 8. Related pages                                             -->
+    <!-- Related pages                                                -->
     <!-- ============================================================ -->
-    <section class="bg-white py-20 dark:bg-[#0a0a0f]">
-        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related <span class="text-gradient-conference">pages</span></h2>
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
+    <section class="es-agenda-hair border-t py-16">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <h2 class="es-agenda-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Related pages</h2>
+            <div class="grid grid-cols-2 gap-4 md:grid-cols-4" data-reveal-group="70">
                 @foreach ([['/for-webinars', 'Webinars'], ['/for-online-classes', 'Online Classes'], ['/for-live-qa-sessions', 'Live Q&A Sessions'], ['/for-watch-parties', 'Watch Parties']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="vc-related-card group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
-                        <div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="vc-related-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
-                        </div>
-                        <svg aria-hidden="true" class="vc-related-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
+                    <a href="{{ marketing_url($relHref) }}" class="es-agenda-hover es-agenda-card group flex flex-col p-5 transition-all duration-200 hover:shadow-md" data-reveal>
+                        <span class="es-agenda-hover-title es-agenda-ink mb-3 text-sm font-semibold transition-colors">For {{ $relName }}</span>
+                        <span class="es-agenda-hover-arrow es-agenda-muted mt-auto inline-flex items-center gap-1 text-xs font-medium transition-colors">
+                            Read more
+                            <svg aria-hidden="true" class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                        </span>
                     </a>
                 @endforeach
             </div>
-            <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="vc-link inline-flex items-center">
+            <div class="mt-8 text-center">
+                <a href="{{ marketing_url('/use-cases') }}" class="es-agenda-link inline-flex items-center font-medium hover:underline">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -897,34 +1372,36 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 9. FAQ                                                       -->
+    <!-- 17:10  FAQ                                                   -->
     <!-- ============================================================ -->
-    <section class="bg-gray-100 py-20 dark:bg-black/30 lg:py-28">
+    <x-seo.faq-schema :items="$faqs" />
+
+    <section id="faq" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Frequently asked <span class="text-gradient-conference">questions</span>
+            <div class="mb-12 text-center">
+                <div class="es-agenda-slot mb-5" data-reveal>
+                    <span class="es-agenda-clock">17:10</span>
+                    <span class="es-agenda-pip" aria-hidden="true"></span>
+                    <span class="es-agenda-rule" aria-hidden="true"></span>
+                    <span class="es-agenda-tag">Questions</span>
+                </div>
+                <h2 class="es-balance es-agenda-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.08s;">
+                    Frequently asked questions
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Everything conference organizers ask about Event Schedule.
+                <p class="es-agenda-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    What conference organizers ask before they move a programme across.
                 </p>
             </div>
 
-            <div class="space-y-4" data-reveal-group="80">
-                @foreach ([
-                    ['Can I schedule a multi-day virtual conference?', 'Yes. Add sessions across as many days as you need. Organize them into groups or tracks so attendees can browse by day, topic, or session type. Your full virtual conference agenda lives on one shareable page - a complete online conference schedule your attendees can bookmark.'],
-                    ['What streaming platforms work with Event Schedule?', 'Any platform that gives you a meeting or streaming link. Zoom, Microsoft Teams, Google Meet, YouTube Live, Twitch, and any other platform. Event Schedule is platform-agnostic - just paste your link and attendees join from the conference agenda.'],
-                    ['Can I sell different ticket types for my conference?', 'Yes. Create multiple virtual conference ticket types with different prices - general admission, VIP, early bird, speaker passes, or any custom tier. You keep 100% of the revenue. Event Schedule charges zero platform fees at any plan level. Stripe charges its standard processing fee (2.9% + $0.30).'],
-                    ['Is Event Schedule free for virtual conferences?', 'Yes. Event Schedule is free virtual conference software. The free plan includes unlimited events, attendee email notifications, follower features, and Google Calendar sync. There are zero platform fees on payments at any plan level. You only pay Stripe\'s standard processing fee if you charge for tickets.'],
-                ] as [$q, $a])
-                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
-                            <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
+            <div class="space-y-3" data-reveal-group="80">
+                @foreach ($faqs as $faqIndex => $faq)
+                    <details name="faq" class="es-agenda-hover es-agenda-card group p-6 transition-all duration-200" data-reveal>
+                        <summary class="es-agenda-ink flex cursor-pointer items-start gap-3 font-semibold">
+                            <span class="es-agenda-clock flex-none pt-0.5" aria-hidden="true">{{ str_pad($faqIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                            <span class="es-agenda-hover-title flex-1 transition-colors">{{ $faq['q'] }}</span>
+                            <svg aria-hidden="true" class="es-agenda-muted mt-0.5 h-5 w-5 flex-none transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
                         </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{{ $a }}</p>
+                        <p class="faq-answer es-agenda-muted mt-4 leading-relaxed ps-9">{{ $faq['a'] }}</p>
                     </details>
                 @endforeach
             </div>
@@ -932,38 +1409,36 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 10. Finale                                                   -->
+    <!-- 17:30  Close                                                 -->
     <!-- ============================================================ -->
-    <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
+    <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
-            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-sky-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+            <div class="es-agenda-screen noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl sm:px-12 lg:py-24" data-confetti data-reveal="panel">
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(2, 132, 199, 0.3), rgba(2, 132, 199, 0) 60%); opacity: 0.7;"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
-                    <div class="es-agenda absolute bottom-0 left-0 right-0 flex h-14 items-center justify-center gap-1.5 px-8 opacity-30" style="mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);">
-                        @for ($i = 0; $i < 26; $i++)
-                            @php $w = [26, 40, 54, 34, 46][$i % 5]; $dur = 2.6 + ($i % 5) * 0.3; $delay = ($i % 8) * 0.16; $track = ['is-cyan', 'is-amber', 'is-emerald'][$i % 3]; @endphp
-                            <span class="es-agenda-tile {{ $track }}" style="width: {{ $w }}px; --ag-dur: {{ $dur }}s; --ag-delay: {{ $delay }}s;"></span>
-                        @endfor
-                    </div>
                 </div>
-
                 <div class="relative z-10">
+                    <div class="es-agenda-slot mb-5">
+                        <span class="es-agenda-lit font-mono text-xs font-extrabold tracking-widest">17:30</span>
+                        <span class="es-agenda-pip" aria-hidden="true"></span>
+                        <span class="es-agenda-rule" aria-hidden="true"></span>
+                        <span class="es-agenda-tag">Close</span>
+                    </div>
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Your conference. Your audience. <span class="text-gradient-conference">No middleman.</span>
+                        One event. <span class="es-agenda-lit">The whole day inside it.</span>
                     </h2>
-                    <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
-                        Stop paying platform fees. Start hosting virtual conferences. Free forever.
+                    <p class="es-agenda-muted mx-auto mb-10 max-w-2xl text-lg">
+                        Publishing the running order, the join link and the calendar sync is free forever. Ticketing is five dollars a month, and Event Schedule takes nothing out of what you sell.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
                         <label for="es-claim-input" class="sr-only">Your schedule name</label>
                         <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
-                            <input id="es-claim-input" type="text" placeholder="your-conf" autocomplete="off" spellcheck="false" maxlength="30"
-                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
-                            <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
+                            <input id="es-claim-input" type="text" placeholder="your-summit" autocomplete="off" spellcheck="false" maxlength="30"
+                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-400 focus:outline-none focus:ring-0 sm:text-base">
+                            <span class="shrink-0 select-none font-mono es-agenda-muted text-sm sm:text-base">.eventschedule.com</span>
                         </div>
-                        <a href="{{ app_url('/sign_up?type=talent') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-sky-600 to-blue-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-sky-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-sky-500/40">
+                        <a href="{{ app_url('/sign_up?type=talent') }}" class="es-agenda-btn group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
                             <span class="relative z-10 flex items-center gap-2">
                                 Get Started Free
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -974,11 +1449,29 @@
                         </a>
                     </div>
 
-                    <p class="mt-6 text-sm text-gray-400">No credit card required</p>
+                    <p class="mt-6 es-agenda-muted text-sm">No credit card required</p>
                 </div>
             </div>
         </div>
     </section>
+
+    <!-- Desktop dot nav -->
+    <nav class="es-dotnav fixed top-1/2 z-40 hidden -translate-y-1/2 lg:block ltr:right-5 rtl:left-5" aria-label="Page sections">
+        <ul class="glass flex flex-col items-center gap-1.5 rounded-full px-2 py-3">
+            @foreach ($dotSections as [$sectionId, $sectionLabel])
+                <li class="relative">
+                    <a href="#{{ $sectionId }}" class="es-dot group block rounded-full" aria-label="{{ $sectionLabel }}">
+                        <span class="es-dot-pip block h-2 w-2 rounded-full bg-gray-400/60 dark:bg-white/30"></span>
+                        <span class="pointer-events-none absolute top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full es-agenda-tip border border-gray-200 px-3 py-1 text-xs font-medium opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 ltr:right-full ltr:mr-3 rtl:left-full rtl:ml-3 dark:border-white/10">{{ $sectionLabel }}</span>
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    </nav>
+
+    </div>
+
+    <x-marketing.related-pages />
 
     <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
     @vite('resources/js/marketing-home.js')

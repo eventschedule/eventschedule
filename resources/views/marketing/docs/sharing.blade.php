@@ -28,7 +28,7 @@
 
         <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10 mb-6">
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Your schedule URL format:</p>
-            <code class="text-blue-400">{{ config('app.url') }}/your-schedule-name</code>
+            <code class="text-blue-400">{{ route('role.view_guest', ['subdomain' => 'your-schedule-name']) }}</code>
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">Share this link anywhere:</p>
@@ -58,8 +58,9 @@
 
         <h3 class="doc-subheading">Getting the Embed Code</h3>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Go to your schedule's public page</li>
-            <li>Click the <strong class="text-gray-900 dark:text-white">"Embed"</strong> button (or look for the embed icon)</li>
+            <li>Open your schedule in the admin portal</li>
+            <li>Open the <strong class="text-gray-900 dark:text-white">Actions</strong> menu and choose <strong class="text-gray-900 dark:text-white">Embed Schedule</strong></li>
+            <li>Pick a <strong class="text-gray-900 dark:text-white">Layout</strong> if you want this embed to differ from your schedule's own default, and check the live preview</li>
             <li>Copy the HTML code provided</li>
             <li>Paste it into your website where you want the schedule to appear</li>
         </ol>
@@ -69,32 +70,68 @@
             <p>You can also embed a ticket purchase or RSVP form on your website. See the <a href="{{ route('marketing.docs.tickets') }}#embed-widget" class="doc-link">Embed Widget</a> section in the Selling Tickets guide.</p>
         </div>
 
-        <h3 class="doc-subheading">Embed Options</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Customize how your embedded schedule looks:</p>
-
+        <h3 class="doc-subheading" id="embed-parameters">URL Parameters</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Add these to the embed URL to change how the frame renders. They go after <code class="doc-inline-code">?embed=true</code>, separated by <code class="doc-inline-code">&amp;</code>.</p>
         <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
                     <tr>
-                        <th>Option</th>
+                        <th>Parameter</th>
                         <th>Description</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Height</span></td>
-                        <td>Set the height of the embed (in pixels or percentage)</td>
+                        <td><code class="doc-inline-code">embed=true</code></td>
+                        <td>Required. Renders the schedule on its own, with no header, footer or banner, and is the only URL another site is allowed to frame</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Theme</span></td>
-                        <td>Light or dark mode to match your website</td>
+                        <td><code class="doc-inline-code">layout=calendar</code><br><code class="doc-inline-code">layout=list</code></td>
+                        <td>Force the month calendar or the list, whatever your schedule's Default Layout is set to. Leave it off and the embed follows that setting</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Header</span></td>
-                        <td>Show or hide the schedule header</td>
+                        <td><code class="doc-inline-code">schedule=slug</code></td>
+                        <td>Show a single sub-schedule instead of everything</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">dark=true</code></td>
+                        <td>Force dark mode. Left off, the frame follows the visitor's own system setting</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">lang=xx</code></td>
+                        <td>Render the frame in a specific language (e.g. <code class="doc-inline-code">lang=es</code> for Spanish)</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">month=3</code> &amp; <code class="doc-inline-code">year=2027</code></td>
+                        <td>Open the frame on a specific month instead of the current one</td>
                     </tr>
                 </tbody>
             </table>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mt-4">The frame's width and height are plain iframe attributes, not parameters: <code class="doc-inline-code">width="100%"</code> lets it fill whatever column you drop it into, and you choose the height. Nothing measures the schedule and resizes the frame for you.</p>
+
+        <h3 class="doc-subheading">Two Layouts on One Page</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Because the layout is set per URL, you can embed the same schedule twice on the same page and give each frame its own layout:</p>
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>One calendar, one list</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code>&lt;iframe src="{{ route('role.view_guest', ['subdomain' => 'your-schedule-name']) }}?embed=true&amp;layout=calendar"
+        width="100%" height="800" frameborder="0" style="border: none;"&gt;&lt;/iframe&gt;
+
+&lt;iframe src="{{ route('role.view_guest', ['subdomain' => 'your-schedule-name']) }}?embed=true&amp;layout=list"
+        width="100%" height="800" frameborder="0" style="border: none;"&gt;&lt;/iframe&gt;</code></pre>
+        </div>
+
+        <div class="doc-callout doc-callout-warning">
+            <div class="doc-callout-title">Give the Calendar Room</div>
+            <p>The month calendar needs about 768px of frame width to render as a grid. Below that it falls back to a day-by-day agenda, which looks much like the list. If you are putting two frames side by side in narrow columns, expect both to show the agenda.</p>
+        </div>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Which Layout Wins</div>
+            <p><code class="doc-inline-code">?layout=</code> always wins. Without it, an embed uses your schedule's <a href="{{ route('marketing.docs.schedule_styling') }}#event-layout" class="doc-link">Default Layout</a>. A visitor who switches between calendar and list on your own schedule page only changes it for themselves there, and never affects your embeds.</p>
         </div>
     </section>
 
@@ -237,14 +274,18 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Embed shows wrong theme</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Check the embed code parameters. Add <code class="doc-inline-code">?dark=true</code> to the URL to force dark mode.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Add <code class="doc-inline-code">&amp;dark=true</code> to the embed URL to force dark mode. See <a href="#embed-parameters" class="doc-link">URL Parameters</a>.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Embed shows the wrong layout</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Add <code class="doc-inline-code">&amp;layout=calendar</code> or <code class="doc-inline-code">&amp;layout=list</code> to the embed URL to pin it, instead of relying on your schedule's Default Layout.</p>
             </div>
         </div>
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Responsive Embed Code</div>
             <pre class="text-xs text-gray-600 dark:text-gray-300 mt-2 overflow-x-auto"><code>&lt;div style="position: relative; padding-bottom: 75%; height: 0; overflow: hidden;"&gt;
-&lt;iframe src="YOUR_SCHEDULE_URL/embed"
+&lt;iframe src="{{ route('role.view_guest', ['subdomain' => 'your-schedule-name']) }}?embed=true"
 style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
 frameborder="0"&gt;&lt;/iframe&gt;
 &lt;/div&gt;</code></pre>
@@ -289,7 +330,7 @@ frameborder="0"&gt;&lt;/iframe&gt;
                 {
                     "@type": "HowToStep",
                     "name": "Embed on Your Website",
-                    "text": "Go to your schedule's public page, click the Embed button, copy the HTML code, and paste it into your website.",
+                    "text": "Open your schedule in the admin portal, choose Embed Schedule from the Actions menu, pick a layout, copy the HTML code, and paste it into your website.",
                     "url": "{{ url(route('marketing.docs.sharing')) }}#embed"
                 },
                 {

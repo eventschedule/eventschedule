@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule Ticketing",
-        "description": "Sell tickets directly through your event schedule with QR codes, multiple ticket types, and secure payment processing. Zero platform fees.",
+        "description": "Sell tickets from your own event page with named ticket types, promo codes, add-ons and passes, then scan the QR code at the door. Zero platform fees on ticket sales.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -21,107 +21,70 @@
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "What are the fees for selling tickets?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Event Schedule charges zero platform fees on ticket sales. You only pay the standard Stripe processing fees (typically 2.9% + $0.30 per transaction). 100% of the ticket price goes to you."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "How does QR code check-in work?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Every ticket includes a unique QR code sent to the buyer via email. At the door, use any smartphone to scan the QR code and check in attendees instantly. The system prevents duplicate scans and tracks attendance in real time."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What payment methods are supported?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Event Schedule supports Stripe for credit cards, Apple Pay, and Google Pay, as well as Invoice Ninja for professional B2B invoicing. You can also add a custom payment URL to link to any payment system."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "How are refunds handled?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Refunds are managed directly through your Stripe dashboard. You have full control over your refund policy and can issue full or partial refunds to individual ticket buyers at any time."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I offer promo codes or discounts?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes! You can create promo codes with either percentage or fixed amount discounts. Promo codes can be targeted to specific ticket types, giving you full control over your discount strategy."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What happens when tickets sell out?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "When all tickets sell out, a waitlist button appears automatically. Fans can join the waitlist and are notified one at a time when spots open up, with 24 hours to complete their purchase."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I get notified when tickets sell?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Enable sale notification emails in your schedule settings to receive an email whenever a ticket sells. Each notification includes buyer details, ticket type, and payment status."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I export my sales data?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Export all your sales as a CSV file with buyer info, ticket types, amounts, promo codes, payment status, and custom field responses. The file opens in Excel, Google Sheets, or any spreadsheet app."
-                }
-            }
-        ]
-    }
-    </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         "name": "Event Schedule Ticketing",
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Event Ticketing Software",
         "operatingSystem": "Web",
-        "description": "Sell tickets directly through your event schedule with QR codes, multiple ticket types, and secure Stripe payment processing. Zero platform fees.",
+        "description": "Sell tickets from your own event page and check them in at the door with a phone. Ticket types with their own price, quantity and sales window, promo codes, add-ons, passes, waitlist and QR check-in. Zero platform fees on ticket sales.",
         "offers": {
             "@type": "Offer",
-            "price": "0",
+            "price": "5",
             "priceCurrency": "USD",
-            "description": "Free with Pro plan"
+            "description": "Ticketing is included in the Pro plan at $5 per month, with a 7 day free trial. Zero platform fees on ticket sales."
         },
         "featureList": [
-            "Zero platform fees",
-            "QR code tickets",
-            "Multiple ticket types",
-            "Stripe payment processing",
-            "Mobile check-in",
-            "Automatic confirmation emails",
-            "Ticket waitlist",
-            "Check-in dashboard",
+            "Zero platform fees on ticket sales",
+            "Ticket types with their own price, quantity and sales window",
+            "Ticket inventory counted per occurrence date on recurring events",
+            "Combined inventory across every ticket type",
+            "Volume discounts and a maximum per order",
+            "Add-ons for parking, merchandise and meal packages",
+            "Promo codes with percentage or fixed discounts, usage limits and per-ticket targeting",
+            "Passes and season subscriptions valid across many events",
+            "Custom questions collected at checkout",
+            "Individual tickets, so each guest gets their own confirmation and QR code",
+            "QR code on every ticket, scanned from a phone at the door",
+            "One admission per ticket, with a warning on a second scan",
+            "Live check-in dashboard with a per-ticket-type breakdown",
+            "Ticket waitlist that notifies one person at a time",
             "Sale notification emails",
-            "Sales CSV export"
+            "Sales CSV export including custom field answers",
+            "Free registration and RSVP with optional capacity limits"
         ],
         "url": "{{ url()->current() }}",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule"
         }
+    }
+    </script>
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to sell tickets with Event Schedule",
+        "description": "Three steps from a published event to a scanned ticket at the door.",
+        "step": [
+            {
+                "@type": "HowToStep",
+                "position": 1,
+                "name": "Connect a payment method",
+                "text": "Connect your own Stripe account, or Invoice Ninja, or a payment URL, or take cash at the door. Money from card sales settles into your account, not ours."
+            },
+            {
+                "@type": "HowToStep",
+                "position": 2,
+                "name": "Add your ticket types",
+                "text": "Give each ticket type a name, a price, a quantity and, if you want one, a sales start and end date. Add promo codes, add-ons and custom questions on their own tabs."
+            },
+            {
+                "@type": "HowToStep",
+                "position": 3,
+                "name": "Scan at the door",
+                "text": "Every ticket goes out with a QR code. Open Sales on your phone, tap Scan Tickets, and each ticket admits once. The check-in dashboard keeps the count."
+            }
+        ]
     }
     </script>
     </x-slot>
@@ -135,592 +98,1149 @@
     </script>
 
     <style {!! nonce_attr() !!}>
-        /* For ticketing "The Turnstile" styles. The shared es-* motion system lives
-           in marketing.css; this holds the ticket glow gradient, the drifting
-           ticket-stub card, the QR scan line, and the barcode-scan motif. */
-        .text-gradient-ticket {
-            background: linear-gradient(135deg, #0284c7, #0ea5e9, #06b6d4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 40px rgba(2, 132, 199, 0.3);
-        }
-        .dark .text-gradient-ticket {
-            background: linear-gradient(135deg, #38bdf8, #22d3ee, #7dd3fc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 40px rgba(56, 189, 248, 0.3);
-        }
-        @keyframes es-ticket-float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        .es-ticket-float { animation: es-ticket-float 6s ease-in-out infinite; }
+        /* ==============================================================
+           For ticketing "The Turnstile" styles. A turnstile is the only
+           machine in the building that touches BOTH halves of a ticket:
+           it will not turn until the ticket is valid, it turns once per
+           ticket, and it keeps a count. That is the whole argument of
+           this page - Event Schedule is that turnstile with an empty
+           coin slot. So the page is built as sale side / turn / door
+           side, and the mid-page moment is a gate log of the real
+           verdicts the scanner returns.
 
-        /* QR scan line (kept from the original for the QR mock) */
-        @keyframes scan-line {
-            0%, 100% { transform: translateY(0); opacity: 1; }
-            50% { transform: translateY(100px); opacity: 0.5; }
-        }
-        .animate-scan { animation: scan-line 2s ease-in-out infinite; }
+           WHY NOT A DRAWING. CLAUDE.md forbids decorative outline
+           illustrations, so there is no turnstile rotor, no arm and no
+           gate anywhere in here. The concept is carried by MATERIAL and
+           TYPOGRAPHY instead: perforated ticket stock, a machined
+           counter plate, and monospace tabular readings.
 
-        /* Barcode-scan motif: bars brighten under a sweeping scanner light. */
-        .es-barcode { display: flex; align-items: center; gap: 2px; }
-        .es-bar {
-            flex: 0 0 auto; height: 100%; border-radius: 1px;
-            background: linear-gradient(to bottom, rgba(14, 165, 233, 0.6), rgba(6, 182, 212, 0.6));
-            animation: es-bar-scan var(--br-dur, 2.6s) ease-in-out infinite;
-            animation-delay: var(--br-delay, 0s);
+           WHY NOT "THE DOOR". /for-nightclubs already owns the doorway
+           and stands OUTSIDE the club in brushed steel. This page is
+           deliberately the mechanism just inside it, and it never uses
+           steel as its material.
+
+           COLOUR: the page keeps its inherited sky/blue family, spent
+           sparingly, because the campaign's hue wheel is spent and the
+           brief pins each page to its existing hue. Distinctiveness
+           comes from structure and material, not from a new hue.
+
+           MEASURED (never guessed):
+             light ground #f2f5f8: ink #0e1520 16.74, muted #4a5462 7.02,
+               accent #075985 6.91
+             dark ground  #080d13: ink #e8eef5 16.69, muted #93a4b8 7.65,
+               accent #7dd3fc 11.69
+             plate #161d25:  ink #e6edf4 14.38, muted #94a3b4 6.60,
+               lit #7dd3fc 10.19, admit #4ade80 9.75, refuse #fca5a5 8.95
+             band  #0c1219:  muted #93a4b8 7.38, lit #7dd3fc 11.28
+             stub  #f5f2ea:  ink #1a1712 15.97, muted #5b5344 6.79,
+               accent #075985 6.76
+           NEVER text-gray-500 on this page: 4.83 on pure white but only
+           ~4.2 on this tinted ground.
+
+           FIXED PHYSICAL OBJECTS, identical with .dark on and off:
+             .es-turn-plate  the machined counter plate
+             .es-turn-stub   the ticket stock and its counterfoil
+             .es-turn-band   the gate hall
+           Nothing inside those carries a dark: variant, and the shared
+           classes that flip themselves (grid-overlay, animate-shimmer,
+           es-claim:focus-within) are overridden per band below.
+
+           BLADE RULE for this block: never use @supports probes here. A
+           "#" hex inside a parenthesized at-rule condition breaks Blade
+           compilation of every later parenthesized directive.
+           ============================================================== */
+
+        /* --- Ground and ink --- */
+        .es-turn-page { background-color: #f2f5f8; color: #0e1520; }
+        .dark .es-turn-page { background-color: #080d13; color: #e8eef5; }
+        .es-turn-ink { color: #0e1520; }
+        .dark .es-turn-ink { color: #e8eef5; }
+        .es-turn-muted { color: #4a5462; }
+        .dark .es-turn-muted { color: #93a4b8; }
+        .es-turn-accent { color: #075985; }
+        .dark .es-turn-accent { color: #7dd3fc; }
+        /* Always-lit accent, for the fixed-dark surfaces in both modes. */
+        .es-turn-lit { color: #7dd3fc; }
+
+        /* --- The perforation. The page's signature rule: every band is
+               separated by a tear line, because a ticket is a thing that
+               comes apart into a sold half and an admitted half. --- */
+        .es-turn-perf {
+            height: 3px;
+            border: 0;
+            background-image: radial-gradient(circle at center, rgba(14, 21, 32, 0.34) 0, rgba(14, 21, 32, 0.34) 1px, rgba(14, 21, 32, 0) 1.5px);
+            background-size: 10px 3px;
+            background-repeat: repeat-x;
+            background-position: center;
         }
-        @keyframes es-bar-scan {
-            0%, 100% { opacity: 0.2; }
-            50% { opacity: 0.9; box-shadow: 0 0 8px rgba(14, 165, 233, 0.5); }
+        .dark .es-turn-perf {
+            background-image: radial-gradient(circle at center, rgba(232, 238, 245, 0.3) 0, rgba(232, 238, 245, 0.3) 1px, rgba(232, 238, 245, 0) 1.5px);
         }
+        /* Vertical tear, between a ticket and its counterfoil. Fixed in
+           both colour modes: it lives only on .es-turn-stub. */
+        .es-turn-perf-v {
+            width: 3px;
+            flex: none;
+            align-self: stretch;
+            background-image: radial-gradient(circle at center, rgba(26, 23, 18, 0.4) 0, rgba(26, 23, 18, 0.4) 1px, rgba(26, 23, 18, 0) 1.5px);
+            background-size: 3px 10px;
+            background-repeat: repeat-y;
+            background-position: center;
+        }
+
+        /* --- The counter plate: machined metal, FIXED in both modes --- */
+        .es-turn-plate {
+            border-radius: 1.1rem;
+            border: 1px solid rgba(232, 238, 245, 0.13);
+            background-color: #161d25;
+            background-image:
+                repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0 1px, rgba(255, 255, 255, 0) 1px 4px),
+                radial-gradient(130% 95% at 50% 0%, #1e2732 0%, #161d25 55%, #0c1218 100%);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.07),
+                inset 0 -22px 44px rgba(0, 0, 0, 0.45),
+                0 24px 50px -26px rgba(3, 10, 18, 0.6);
+        }
+        .es-turn-plate-ink { color: #e6edf4; }
+        .es-turn-plate-muted { color: #94a3b4; }
+        /* A milled seam across the plate, where a real counter housing splits. */
+        .es-turn-seam {
+            height: 1px;
+            background-image: linear-gradient(90deg, rgba(232, 238, 245, 0) 0%, rgba(232, 238, 245, 0.2) 18%, rgba(232, 238, 245, 0.2) 82%, rgba(232, 238, 245, 0) 100%);
+            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        /* --- Registers: a label on the left, a tabular reading on the right --- */
+        .es-turn-reg {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        .es-turn-read {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.04em;
+            font-weight: 700;
+        }
+        .es-turn-count {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-variant-numeric: tabular-nums;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            line-height: 1;
+            font-size: clamp(2.7rem, 9vw, 4rem);
+            color: #e6edf4;
+        }
+        /* The shared odometer paints each digit with the brand gradient. On a
+           machined plate a counter drum is solid ink, so override it. The
+           strip spans are built at runtime by marketing-home.js. */
+        .es-turn-plate .es-od-strip span {
+            background-image: none;
+            -webkit-text-fill-color: #e6edf4;
+            color: #e6edf4;
+        }
+
+        /* --- The duplex: sale side, the turn, door side --- */
+        .es-turn-duplex { display: grid; gap: 1.5rem; }
+        @media (min-width: 1024px) {
+            .es-turn-duplex { grid-template-columns: 1fr auto 1fr; gap: 2rem; align-items: stretch; }
+        }
+        /* The detent rail. A turnstile advances one notch at a time, so the
+           rail is notched rather than continuous. Abstract stroke, not a
+           drawing of anything. */
+        .es-turn-rail {
+            position: relative;
+            flex: 1 1 0;
+            width: auto;
+            height: 3px;
+            min-width: 2.5rem;
+            border-radius: 2px;
+            background-image: repeating-linear-gradient(90deg, rgba(7, 89, 133, 0.85) 0 11px, rgba(7, 89, 133, 0.16) 11px 18px);
+        }
+        .dark .es-turn-rail {
+            background-image: repeating-linear-gradient(90deg, rgba(125, 211, 252, 0.85) 0 11px, rgba(125, 211, 252, 0.18) 11px 18px);
+        }
+        @media (min-width: 1024px) {
+            .es-turn-rail {
+                width: 3px;
+                height: auto;
+                min-width: 0;
+                min-height: 3rem;
+                background-image: repeating-linear-gradient(180deg, rgba(7, 89, 133, 0.85) 0 11px, rgba(7, 89, 133, 0.16) 11px 18px);
+            }
+            .dark .es-turn-rail {
+                background-image: repeating-linear-gradient(180deg, rgba(125, 211, 252, 0.85) 0 11px, rgba(125, 211, 252, 0.18) 11px 18px);
+            }
+        }
+        /* One notch of travel at a time: steps() is the whole point of the
+           device. Only shown on the vertical rail, where there is travel to
+           see; on the stacked layout the rail is 3px tall. */
+        .es-turn-tick { display: none; }
+        @media (min-width: 1024px) {
+            .es-turn-tick {
+                display: block;
+                position: absolute;
+                left: -3px;
+                top: 0;
+                width: 9px;
+                height: 9px;
+                border-radius: 9999px;
+                background-color: #075985;
+                box-shadow: 0 0 10px rgba(7, 89, 133, 0.65);
+            }
+            .dark .es-turn-tick { background-color: #7dd3fc; box-shadow: 0 0 10px rgba(125, 211, 252, 0.6); }
+            html.es-anim .es-turn-tick { animation: es-turn-step 5.4s steps(6, end) infinite; }
+        }
+        @keyframes es-turn-step {
+            from { top: 0; }
+            to { top: calc(100% - 9px); }
+        }
+
+        /* The hub chip that sits on the rail: one ticket, one turn. */
+        .es-turn-hub {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.3rem 0.7rem;
+            border-radius: 9999px;
+            border: 1px solid rgba(7, 89, 133, 0.35);
+            background-color: #f2f5f8;
+            color: #075985;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            white-space: nowrap;
+        }
+        .dark .es-turn-hub {
+            border-color: rgba(125, 211, 252, 0.35);
+            background-color: #080d13;
+            color: #7dd3fc;
+        }
+
+        /* --- Cards --- */
+        .es-turn-card {
+            border: 1px solid rgba(14, 21, 32, 0.12);
+            border-radius: 1rem;
+            background-color: #ffffff;
+        }
+        .dark .es-turn-card {
+            border-color: rgba(232, 238, 245, 0.12);
+            background-color: rgba(232, 238, 245, 0.04);
+        }
+        .es-turn-band .es-turn-card {
+            border-color: rgba(232, 238, 245, 0.14);
+            background-color: rgba(232, 238, 245, 0.05);
+        }
+        .es-turn-hover:hover { border-color: rgba(7, 89, 133, 0.45); }
+        .dark .es-turn-hover:hover { border-color: rgba(125, 211, 252, 0.45); }
+        .es-turn-hover:hover .es-turn-hover-title,
+        .es-turn-hover:hover .es-turn-hover-arrow { color: #075985; }
+        .dark .es-turn-hover:hover .es-turn-hover-title,
+        .dark .es-turn-hover:hover .es-turn-hover-arrow { color: #7dd3fc; }
+
+        /* --- The ticket stub: real ticket stock, FIXED in both modes --- */
+        .es-turn-stub {
+            display: flex;
+            align-items: stretch;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            background-color: #f5f2ea;
+            background-image: repeating-linear-gradient(0deg, rgba(26, 23, 18, 0.028) 0 1px, rgba(26, 23, 18, 0) 1px 3px);
+            box-shadow: 0 22px 44px -22px rgba(3, 10, 18, 0.6), inset 0 0 0 1px rgba(26, 23, 18, 0.1);
+        }
+        .es-turn-stub-ink { color: #1a1712; }
+        .es-turn-stub-muted { color: #5b5344; }
+        .es-turn-stub-accent { color: #075985; }
+        /* A QR has to be dark on light to scan, so this panel is fixed too. */
+        .es-turn-qr {
+            width: 5.5rem;
+            height: 5.5rem;
+            border-radius: 0.4rem;
+            background-color: #ffffff;
+            padding: 0.3rem;
+            box-shadow: inset 0 0 0 1px rgba(26, 23, 18, 0.12);
+        }
+        .es-turn-qr svg { display: block; width: 100%; height: 100%; }
+
+        /* --- The gate log: the verdicts the scanner actually returns --- */
+        .es-turn-log { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+        .es-turn-row {
+            display: grid;
+            grid-template-columns: 4.9rem 1fr;
+            align-items: baseline;
+            gap: 0.75rem;
+            padding: 0.55rem 0;
+            border-top: 1px solid rgba(232, 238, 245, 0.09);
+        }
+        .es-turn-verdict {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+            border: 1px solid currentColor;
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+        }
+        .es-turn-verdict-pass { color: #4ade80; }
+        .es-turn-verdict-warn { color: #fcd34d; }
+        .es-turn-verdict-stop { color: #fca5a5; }
+
+        /* --- Fixed-dark band: the gate hall --- */
+        .es-turn-band {
+            background-color: #0c1219;
+            background-image: radial-gradient(125% 100% at 50% 0%, #16202b 0%, #0e151d 55%, #070c11 100%);
+            box-shadow: inset 0 0 90px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(232, 238, 245, 0.05);
+        }
+        /* Shared classes that flip with the colour mode. Pinned per band so
+           the hall renders identically with .dark on and off. */
+        .es-turn-band .grid-overlay {
+            background-image:
+                linear-gradient(rgba(232, 238, 245, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(232, 238, 245, 0.05) 1px, transparent 1px);
+        }
+        .es-turn-band .animate-shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            background-size: 200% 100%;
+        }
+        .es-turn-band .es-claim:focus-within {
+            border-color: rgba(125, 211, 252, 0.75);
+            box-shadow: 0 0 0 4px rgba(125, 211, 252, 0.22);
+        }
+        /* Ink for the band. No dark: variants: the hall is the same hall in
+           both colour modes, so these are single fixed values. */
+        .es-turn-band-ink { color: #e8eef5; }
+        .es-turn-band-muted { color: #93a4b8; }
+
+        /* --- Eyebrow labels --- */
+        .es-turn-tag {
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
+            color: #4a5462;
+        }
+        .dark .es-turn-tag { color: #93a4b8; }
+        .es-turn-band .es-turn-tag { color: #7dd3fc; }
+        .es-turn-plate .es-turn-tag { color: #94a3b4; }
+
+        /* --- Section mark: a gate number on a machined tab --- */
+        .es-turn-mark {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0.8rem;
+            border-radius: 0.3rem;
+            border: 1px solid rgba(14, 21, 32, 0.18);
+            background-color: #ffffff;
+            color: #0e1520;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-variant-numeric: tabular-nums;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+        }
+        .dark .es-turn-mark { border-color: rgba(232, 238, 245, 0.2); background-color: rgba(232, 238, 245, 0.05); color: #e8eef5; }
+        .es-turn-band .es-turn-mark { border-color: rgba(232, 238, 245, 0.2); background-color: rgba(232, 238, 245, 0.05); color: #e8eef5; }
+        .es-turn-mark::before {
+            content: "";
+            width: 2px;
+            align-self: stretch;
+            border-radius: 1px;
+            background-color: #075985;
+        }
+        .dark .es-turn-mark::before { background-color: #7dd3fc; }
+        .es-turn-band .es-turn-mark::before { background-color: #7dd3fc; }
+
+        /* --- Plan tags --- */
+        .es-turn-plan {
+            display: inline-flex;
+            align-items: center;
+            flex: none;
+            padding: 0.1rem 0.45rem;
+            border-radius: 0.25rem;
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            border: 1px solid rgba(7, 89, 133, 0.4);
+            color: #075985;
+        }
+        .dark .es-turn-plan { border-color: rgba(125, 211, 252, 0.42); color: #7dd3fc; }
+        .es-turn-plan-pro { border-color: rgba(14, 21, 32, 0.35); color: #0e1520; }
+        .dark .es-turn-plan-pro { border-color: rgba(232, 238, 245, 0.38); color: #e8eef5; }
+
+        /* --- The ticket-type record. A real table: this content IS a record. --- */
+        .es-turn-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .es-turn-table th,
+        .es-turn-table td { padding: 0.7rem 0.6rem; vertical-align: middle; }
+        .es-turn-table thead th {
+            font-size: 0.64rem;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: #4a5462;
+            border-bottom: 1px solid rgba(14, 21, 32, 0.14);
+        }
+        .dark .es-turn-table thead th { color: #93a4b8; border-bottom-color: rgba(232, 238, 245, 0.14); }
+        .es-turn-table tbody tr + tr th,
+        .es-turn-table tbody tr + tr td { border-top: 1px solid rgba(14, 21, 32, 0.08); }
+        .dark .es-turn-table tbody tr + tr th,
+        .dark .es-turn-table tbody tr + tr td { border-top-color: rgba(232, 238, 245, 0.08); }
+        .es-turn-num {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+
+        /* --- Chips --- */
+        .es-turn-chip {
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+            padding: 0.35rem 0.85rem;
+            border-radius: 9999px;
+            border: 1px solid rgba(14, 21, 32, 0.16);
+            background-color: rgba(255, 255, 255, 0.7);
+            color: #4a5462;
+            font-size: 0.76rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .dark .es-turn-chip {
+            border-color: rgba(232, 238, 245, 0.16);
+            background-color: rgba(232, 238, 245, 0.05);
+            color: #a9b6c4;
+        }
+
+        /* --- Links and buttons --- */
+        .es-turn-link { color: #075985; }
+        .es-turn-link:hover { color: #0e1520; }
+        .dark .es-turn-link { color: #7dd3fc; }
+        .dark .es-turn-link:hover { color: #e8eef5; }
+        .es-turn-btn {
+            background-color: #075985;
+            box-shadow: 0 18px 36px -14px rgba(7, 89, 133, 0.5);
+        }
+        .es-turn-btn:hover { background-color: #044866; box-shadow: 0 22px 44px -14px rgba(7, 89, 133, 0.6); }
+        /* In dark mode the fill goes bright, so the label has to go dark. This
+           lives here rather than as dark:text-[#08131c], because that arbitrary
+           utility is not in the built CSS and would silently do nothing. */
+        .dark .es-turn-btn { background-color: #7dd3fc; color: #08131c; }
+        .dark .es-turn-btn:hover { background-color: #a5e2fd; }
+
+        /* --- Dot-nav tooltip --- */
+        .es-turn-tip {
+            border-radius: 9999px;
+            border-color: rgba(14, 21, 32, 0.12);
+            background-color: #ffffff;
+            color: #0e1520;
+        }
+        .dark .es-turn-tip {
+            border-color: rgba(232, 238, 245, 0.12);
+            background-color: #161d25;
+            color: #cbd5e1;
+        }
+
+        /* --- Shared-system recolours (brand blue by default) --- */
+        .es-hero .es-spot {
+            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(7, 89, 133, 0.12), transparent 60%);
+        }
+        .dark .es-hero .es-spot {
+            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(125, 211, 252, 0.1), transparent 60%);
+        }
+        .es-dot:hover .es-dot-pip { background-color: rgba(7, 89, 133, 0.6); }
+        .dark .es-dot:hover .es-dot-pip { background-color: rgba(125, 211, 252, 0.6); }
+        .es-dot.is-active .es-dot-pip { background-color: #075985; }
+        .dark .es-dot.is-active .es-dot-pip { background-color: #7dd3fc; }
+
+        /* --- Focus rings. No border-radius here: setting it would change the
+               element's own shape on focus. Outlines already follow it. --- */
+        #es-turn-page a:focus-visible,
+        #es-turn-page summary:focus-visible,
+        #es-turn-page button:focus-visible {
+            outline: 2px solid #075985;
+            outline-offset: 3px;
+        }
+        .dark #es-turn-page a:focus-visible,
+        .dark #es-turn-page summary:focus-visible,
+        .dark #es-turn-page button:focus-visible {
+            outline-color: #7dd3fc;
+        }
+        .es-turn-band a:focus-visible,
+        .es-turn-band summary:focus-visible,
+        .es-turn-band button:focus-visible {
+            outline-color: #7dd3fc !important;
+        }
+
         @media (prefers-reduced-motion: reduce) {
-            .es-ticket-float, .animate-scan, .es-bar { animation: none !important; }
-            .es-bar { opacity: 0.5; }
+            .es-turn-tick { animation: none !important; top: 42% !important; }
         }
     </style>
 
-    <!-- ============================================================ -->
-    <!-- 1. Hero: integrated ticketing                                -->
-    <!-- ============================================================ -->
-    <section class="es-hero relative flex min-h-[calc(80svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
-        <div class="absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 70%, rgba(2, 132, 199, 0.3), rgba(2, 132, 199, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 32%, rgba(37, 99, 235, 0.28), rgba(37, 99, 235, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.14), rgba(6, 182, 212, 0) 60%);"></div>
-            <div class="es-rays absolute inset-0"></div>
-            <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
-            <!-- Barcode scanner along the bottom edge -->
-            <div class="es-barcode absolute bottom-0 left-0 right-0 mx-auto hidden h-16 max-w-4xl items-center justify-center px-8 opacity-40 md:flex" style="mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);">
-                @for ($i = 0; $i < 80; $i++)
-                    @php $w = [2, 4, 3, 6, 2, 5, 3, 2][$i % 8]; $dur = 2.2 + ($i % 6) * 0.25; $delay = ($i % 14) * 0.1; @endphp
-                    <span class="es-bar" style="width: {{ $w }}px; --br-dur: {{ $dur }}s; --br-delay: {{ $delay }}s;"></span>
-                @endfor
-            </div>
-        </div>
-
-        <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
-                <svg aria-hidden="true" class="h-5 w-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                </svg>
-                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Zero platform fees</span>
-            </div>
-
-            <h1 class="es-balance mb-6 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
-                <span class="es-mask"><span class="es-mask-line">Integrated</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-ticket">ticketing</span></span></span>
-            </h1>
-
-            <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
-                Sell tickets directly through your schedule. No plugins, no complicated setup.
-            </p>
-
-            <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <a href="{{ app_url('/sign_up') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-600 to-blue-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-sky-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-sky-500/40">
-                    Start selling tickets
-                    <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-                <a href="{{ route('marketing.docs.tickets') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
-                    Read the Ticketing guide
-                    <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                </a>
-            </div>
-        </div>
-
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 2. Bento features                                            -->
-    <!-- ============================================================ -->
-    <section class="bg-white py-20 dark:bg-[#0a0a0f] lg:py-24">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="100">
-
-                <!-- QR Tickets (2 cols) -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="flex flex-col items-center gap-8 lg:flex-row">
-                            <div class="flex-1">
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-800/30 dark:bg-sky-900/40 dark:text-sky-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
-                                    QR Tickets
-                                </div>
-                                <h2 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Contactless check-in</h2>
-                                <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">Every ticket comes with a unique QR code. Scan with any smartphone to check in attendees instantly. No special hardware required.</p>
-                                <div class="flex flex-wrap gap-3">
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Instant validation</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Prevent duplicates</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Real-time tracking</span>
-                                </div>
-                            </div>
-                            <div class="shrink-0" aria-hidden="true">
-                                <div class="animate-float">
-                                    <div class="h-64 w-48 rounded-2xl border border-gray-300 bg-gradient-to-br from-gray-200 to-gray-100 p-4 shadow-2xl dark:border-white/20 dark:from-white/10 dark:to-white/5">
-                                        <div class="mb-3 text-center">
-                                            <div class="font-semibold text-gray-900 dark:text-white">Jazz Night</div>
-                                            <div class="text-sm text-sky-600 dark:text-sky-300">VIP Access</div>
-                                        </div>
-                                        <div class="relative mx-auto h-32 w-32 overflow-hidden rounded-xl bg-white p-2">
-                                            <div class="h-full w-full bg-contain bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2029%2029%22%3E%3Cpath%20fill%3D%22%231f2937%22%20d%3D%22M0%200h7v7H0zm2%202v3h3V2zm8%200h1v1h1v1h-1v1h-1V3h-1V2h1zm4%200h1v4h-1V4h-1V3h1V2zm4%200h3v1h-2v1h-1V2zm5%200h7v7h-7zm2%202v3h3V4zM2%2010h1v1h1v1H2v-1H1v-1h1zm4%200h1v1H5v1H4v-1h1v-1h1zm3%200h1v3h1v1h-1v-1H9v-1h1v-1H9v-1zm5%200h1v2h1v-2h1v3h-1v1h-1v-1h-1v-1h-1v-1h1v-1zm5%200h1v1h-1v1h-1v-1h1v-1zm3%200h1v2h1v-1h1v3h-1v-1h-1v2h-1v-3h-1v-1h1v-1zM0%2014h1v1h1v-1h2v1h-1v1h1v2H3v-2H2v-1H0v-1zm4%200h1v1H4v-1zm9%200h1v1h-1v-1zm8%200h2v1h-2v-1zm0%202v1h1v1h1v1h-1v1h1v1h-2v-2h-1v-1h1v-1h-1v-1h1zm4%200h1v1h-1v-1zM0%2018h1v1H0v-1zm2%200h2v1h1v2H4v-1H3v1H2v-2h1v-1H2v-1zm5%200h3v1h1v2h-1v1h-1v-2H8v1H7v-1H6v-1h1v-1zm6%200h2v1h1v-1h1v2h-2v1h-1v-2h-1v-1zm-5%202h1v1H8v-1zM0%2022h7v7H0zm2%202v3h3v-3zm9-2h1v1h-1v-1zm2%200h1v1h1v2h-2v-1h-1v-1h1v-1zm3%200h3v1h-2v2h2v1h2v2h-1v1h-2v-1h-1v1h-2v-2h1v-2h-1v-2h1v-1zm7%200h1v1h1v1h-1v3h1v-2h1v3h1v-1h1v2h-2v1h-1v-1h-1v-1h-1v1h-2v-1h1v-2h1v-1h-1v-2h1v-1zm-9%202h1v1h-1v-1zm-2%202h1v1h-1v-1zm7%200h1v1h-1v-1zm-5%202h1v1h-1v-1zm2%200h2v1h-2v-1z%22%2F%3E%3C%2Fsvg%3E')]"></div>
-                                            <div class="absolute inset-x-0 top-0 h-1 animate-scan bg-gradient-to-r from-sky-500 to-blue-500"></div>
-                                        </div>
-                                        <div class="mt-3 text-center text-xs text-gray-500 dark:text-gray-400">Scan to check in</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Multiple ticket types -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-blue-200 bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 dark:border-blue-800/30 dark:bg-blue-900/40 dark:text-blue-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-                            Ticket Types
-                        </div>
-                        <h2 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Multiple tiers</h2>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">GA, VIP, early bird, group rates. Create as many ticket types as you need.</p>
-                        <div class="mt-auto space-y-3" aria-hidden="true">
-                            <div class="es-ai-field flex items-center justify-between rounded-xl border border-gray-200 bg-gray-100 p-3 dark:border-white/10 dark:bg-white/10" style="--i: 0;">
-                                <div><div class="font-medium text-gray-900 dark:text-white">Early Bird</div><div class="text-xs text-emerald-500 dark:text-emerald-400">50 remaining</div></div>
-                                <div class="text-xl font-bold text-gray-900 dark:text-white">$15</div>
-                            </div>
-                            <div class="es-ai-field flex items-center justify-between rounded-xl border border-gray-200 bg-gray-100 p-3 dark:border-white/10 dark:bg-white/10" style="--i: 1;">
-                                <div><div class="font-medium text-gray-900 dark:text-white">General</div><div class="text-xs text-gray-500 dark:text-gray-400">200 remaining</div></div>
-                                <div class="text-xl font-bold text-gray-900 dark:text-white">$25</div>
-                            </div>
-                            <div class="es-ai-field flex items-center justify-between rounded-xl border border-blue-400/30 bg-blue-500/20 p-3" style="--i: 2;">
-                                <div><div class="font-medium text-gray-900 dark:text-white">VIP</div><div class="text-xs text-blue-600 dark:text-blue-300">20 remaining</div></div>
-                                <div class="text-xl font-bold text-gray-900 dark:text-white">$75</div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Promo codes -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-amber-200 bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-800/30 dark:bg-amber-900/40 dark:text-amber-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
-                            Promo Codes
-                        </div>
-                        <h2 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Discount codes</h2>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Offer percentage or fixed amount discounts. Target specific ticket types.</p>
-                        <div class="mt-auto space-y-3" aria-hidden="true">
-                            <div class="es-ai-field flex items-center justify-between rounded-xl border border-amber-400/20 bg-amber-500/10 p-3" style="--i: 0;">
-                                <div class="font-mono text-sm text-gray-900 dark:text-white">EARLY20</div>
-                                <div class="text-sm font-semibold text-amber-600 dark:text-amber-300">20% off</div>
-                            </div>
-                            <div class="es-ai-field flex items-center justify-between rounded-xl border border-amber-400/20 bg-amber-500/10 p-3" style="--i: 1;">
-                                <div class="font-mono text-sm text-gray-900 dark:text-white">VIP10</div>
-                                <div class="text-sm font-semibold text-amber-600 dark:text-amber-300">$10 off</div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Reservations (2 cols) -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="grid items-center gap-8 md:grid-cols-2">
-                            <div>
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/40 dark:text-emerald-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                    Reservations
-                                </div>
-                                <h2 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white">Hold now, pay later</h2>
-                                <p class="text-lg text-gray-500 dark:text-gray-400">Let customers reserve tickets without paying upfront. Set expiration times and automatic reminders.</p>
-                            </div>
-                            <div class="rounded-2xl border border-gray-200 bg-gray-100 p-6 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
-                                <div class="mb-4 flex items-center gap-3">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/20">
-                                        <svg aria-hidden="true" class="h-5 w-5 text-emerald-500 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                                    </div>
-                                    <div>
-                                        <div class="font-medium text-gray-900 dark:text-white">2 tickets reserved</div>
-                                        <div class="text-sm text-gray-500 dark:text-gray-400">Jazz Night - VIP</div>
-                                    </div>
-                                </div>
-                                <div class="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4">
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-sm text-emerald-600 dark:text-emerald-300">Expires in</span>
-                                        <span class="font-mono font-bold text-gray-900 dark:text-white">23:45:12</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Waitlist (2 cols) -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="flex flex-col items-center gap-8 lg:flex-row">
-                            <div class="flex-1">
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-100 px-3 py-1.5 text-sm font-medium text-teal-700 dark:border-teal-800/30 dark:bg-teal-900/40 dark:text-teal-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                                    Waitlist
-                                </div>
-                                <h2 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Never miss a sale</h2>
-                                <p class="text-lg text-gray-500 dark:text-gray-400">When tickets sell out, fans can join the waitlist. They're automatically notified when spots open up, one at a time, with 24 hours to buy.</p>
-                            </div>
-                            <div class="w-full shrink-0 lg:w-64" aria-hidden="true">
-                                <div class="space-y-3">
-                                    <div class="es-ai-field flex items-center gap-3 rounded-xl border border-teal-400/20 bg-teal-500/10 p-3" style="--i: 0;">
-                                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-500/20">
-                                            <svg aria-hidden="true" class="h-4 w-4 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                                        </div>
-                                        <div class="min-w-0"><div class="truncate text-sm font-medium text-gray-900 dark:text-white">Sarah M.</div><div class="text-xs text-teal-600 dark:text-teal-300">Notified</div></div>
-                                    </div>
-                                    <div class="es-ai-field flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-100 p-3 dark:border-white/10 dark:bg-white/10" style="--i: 1;">
-                                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-300 dark:bg-white/10">
-                                            <svg aria-hidden="true" class="h-4 w-4 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                        </div>
-                                        <div class="min-w-0"><div class="truncate text-sm font-medium text-gray-900 dark:text-white">James K.</div><div class="text-xs text-gray-500 dark:text-gray-400">Waiting</div></div>
-                                    </div>
-                                    <div class="es-ai-field flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-100 p-3 dark:border-white/10 dark:bg-white/10" style="--i: 2;">
-                                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-300 dark:bg-white/10">
-                                            <svg aria-hidden="true" class="h-4 w-4 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                        </div>
-                                        <div class="min-w-0"><div class="truncate text-sm font-medium text-gray-900 dark:text-white">Alex R.</div><div class="text-xs text-gray-500 dark:text-gray-400">Waiting</div></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Sale notifications -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-lime-200 bg-lime-100 px-3 py-1.5 text-sm font-medium text-lime-700 dark:border-lime-800/30 dark:bg-lime-900/40 dark:text-lime-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-                            Sale Alerts
-                        </div>
-                        <h2 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Know when you sell</h2>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Get an email whenever a ticket sells. Buyer details, ticket types, and payment status, right in your inbox.</p>
-                        <div class="mt-auto rounded-xl border border-lime-400/20 bg-lime-500/10 p-4" aria-hidden="true">
-                            <div class="mb-2 flex items-center gap-3">
-                                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-lime-500/20">
-                                    <svg aria-hidden="true" class="h-4 w-4 text-lime-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                                </div>
-                                <div class="text-sm font-medium text-gray-900 dark:text-white">New sale!</div>
-                            </div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">2x VIP - Jazz Night</div>
-                            <div class="mt-1 text-xs text-lime-600 dark:text-lime-300">$150.00 - Paid</div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Free registration (3 cols) -->
-                <div class="es-bento group relative md:col-span-2 lg:col-span-3" data-tilt="2.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="grid items-center gap-8 md:grid-cols-3">
-                            <div class="md:col-span-2">
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-100 px-3 py-1.5 text-sm font-medium text-green-700 dark:border-green-800/30 dark:bg-green-900/40 dark:text-green-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
-                                    Free
-                                </div>
-                                <h2 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white">Free event registration</h2>
-                                <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">Not selling tickets? Enable registration and let attendees sign up with just a name and email. No payment setup needed, no ticketing complexity. Perfect for meetups, community events, and open gatherings.</p>
-                                <div class="flex flex-wrap gap-3">
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Optional capacity limits</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">QR code check-in</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Confirmation emails</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Free tier</span>
-                                </div>
-                            </div>
-                            <div class="flex justify-center" aria-hidden="true">
-                                <div class="w-full max-w-[220px] rounded-2xl border border-gray-200 bg-gray-100 p-5 dark:border-white/10 dark:bg-[#0f0f14]">
-                                    <div class="mb-4 text-center">
-                                        <div class="font-semibold text-gray-900 dark:text-white">Community Meetup</div>
-                                        <div class="text-sm text-green-600 dark:text-green-300">Free</div>
-                                    </div>
-                                    <div class="mb-4 space-y-3">
-                                        <div class="flex h-8 items-center rounded-lg border border-gray-200 bg-gray-200 px-3 dark:border-white/10 dark:bg-white/10"><span class="text-xs text-gray-500 dark:text-gray-400">Your name</span></div>
-                                        <div class="flex h-8 items-center rounded-lg border border-gray-200 bg-gray-200 px-3 dark:border-white/10 dark:bg-white/10"><span class="text-xs text-gray-500 dark:text-gray-400">Your email</span></div>
-                                    </div>
-                                    <div class="w-full rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 py-2 text-center text-sm font-semibold text-white">Register</div>
-                                    <div class="mt-3 text-center text-xs text-gray-500 dark:text-gray-400">12 of 50 spots remaining</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Check-in dashboard -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-rose-200 bg-rose-100 px-3 py-1.5 text-sm font-medium text-rose-700 dark:border-rose-800/30 dark:bg-rose-900/40 dark:text-rose-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-                            Live Dashboard
-                        </div>
-                        <h2 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Track every check-in</h2>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Real-time progress bars, per-ticket breakdowns, and a live activity feed. Auto-refreshes on any device.</p>
-                        <div class="mt-auto" aria-hidden="true">
-                            <div class="mb-1 flex justify-between text-sm">
-                                <span class="font-medium text-gray-900 dark:text-white">Checked in</span>
-                                <span class="font-semibold text-rose-600 dark:text-rose-300">67%</span>
-                            </div>
-                            <div class="h-3 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-white/10">
-                                <div class="h-full rounded-full bg-gradient-to-r from-rose-500 to-orange-500" style="width: 67%"></div>
-                            </div>
-                            <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">67 / 100 attendees</div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Sales export (2 cols) -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="grid items-center gap-8 md:grid-cols-2">
-                            <div>
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 dark:border-blue-800/30 dark:bg-blue-900/40 dark:text-blue-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                                    Export
-                                </div>
-                                <h2 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white">Download your sales data</h2>
-                                <p class="text-lg text-gray-500 dark:text-gray-400">Export all sales as a CSV with buyer info, ticket types, amounts, promo codes, payment status, and custom field responses. Opens in Excel, Google Sheets, or any spreadsheet app.</p>
-                            </div>
-                            <div class="overflow-x-auto rounded-2xl border border-gray-200 bg-gray-100 p-4 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
-                                <div class="flex gap-3 whitespace-nowrap font-mono text-xs">
-                                    <div class="space-y-2"><div class="font-semibold text-gray-500 dark:text-gray-400">Name</div><div class="text-gray-900 dark:text-white">Sarah M.</div><div class="text-gray-900 dark:text-white">James K.</div></div>
-                                    <div class="space-y-2"><div class="font-semibold text-gray-500 dark:text-gray-400">Ticket</div><div class="text-gray-900 dark:text-white">VIP</div><div class="text-gray-900 dark:text-white">GA</div></div>
-                                    <div class="space-y-2"><div class="font-semibold text-gray-500 dark:text-gray-400">Amount</div><div class="text-gray-900 dark:text-white">$75.00</div><div class="text-gray-900 dark:text-white">$25.00</div></div>
-                                    <div class="space-y-2"><div class="font-semibold text-gray-500 dark:text-gray-400">Promo</div><div class="text-gray-900 dark:text-white">EARLY20</div><div class="text-gray-500 dark:text-gray-400">-</div></div>
-                                    <div class="space-y-2"><div class="font-semibold text-gray-500 dark:text-gray-400">Status</div><div class="text-emerald-600 dark:text-emerald-400">Paid</div><div class="text-emerald-600 dark:text-emerald-400">Paid</div></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 3. How it works                                             -->
-    <!-- ============================================================ -->
     @php
+        // One event's ticket types, as the product actually stores them:
+        // Ticket.type / price / quantity / sales_start_at / sales_end_at, with
+        // the remaining count read per occurrence date via Ticket::soldKey($date).
+        // Sales windows are ABSOLUTE datetimes, so they are written as dates
+        // here, never as "two hours before doors".
+        $ticketTypes = [
+            ['Early Bird',      '$18',  '60',        'Sep 1 to Oct 30',   'Sold out',  'Volume discount at 4'],
+            ['General',         '$25',  '220',       'Open',              '143 left',  ''],
+            ['Student',         '$12',  '40',        'Open',              '31 left',   'Max 2 per order'],
+            ['Table of six',    '$132', '12',        'Open',              '4 left',    'One ticket, priced for a group'],
+            ['Parking',         '$8',   '80',        'Open',              '52 left',   'Add-on, not a ticket'],
+            ['Season pass',     '$120', '50',        'Nov 1 to Nov 30',   '26 left',   'Pass: one pool, not per date'],
+        ];
+
+        // The states TicketController::scanned() can return for a ticket, in the
+        // order the code checks them, and with the tone the scanner actually
+        // shows. Nothing invented: each string mirrors a real messages.* key on
+        // that path. WARN is deliberately not REFUSE - a second scan of a used
+        // ticket comes back as an orange warning over the holder's details
+        // (messages.warning_ticket_used), and no second admission is recorded.
+        $gateLog = [
+            ['pass', 'ADMIT',  'Sarah M. - General - first scan'],
+            ['warn', 'WARN',   'This ticket has already been used'],
+            ['stop', 'REFUSE', 'Not authorized to scan this ticket'],
+            ['stop', 'REFUSE', 'Check-in opens 24 hours before the start'],
+            ['stop', 'REFUSE', 'The check-in period has ended'],
+            ['stop', 'REFUSE', 'This ticket is not paid'],
+            ['stop', 'REFUSE', 'This ticket is cancelled'],
+            ['stop', 'REFUSE', 'This ticket is refunded'],
+        ];
+
+        $saleSide = [
+            ['Ticket types', 'Each one has its own name, price, quantity and optional sales start and end date.'],
+            ['Free ticket types', 'A price of zero is a valid ticket. It still gets a QR code and it still counts against the quantity.'],
+            ['Promo codes', 'Percentage or fixed amount, with usage limits, an expiry date and per-ticket targeting.'],
+            ['Volume discount', 'A minimum quantity unlocks a rate on that ticket line. A group of four gets it; one buyer does not.'],
+            ['A cap per order', 'Set a maximum per order on any ticket type, so one buyer cannot take the whole allocation in one go.'],
+            ['Add-ons', 'Parking, merchandise, a meal package. Priced separately and never discounted by a promo code.'],
+            ['Custom questions', 'Up to ten per order, plus up to ten more on any one ticket type when each guest has to answer.'],
+            ['Passes and subscriptions', 'One purchase a guest reuses across many events, with its own usage rules.'],
+        ];
+
+        $doorSide = [
+            ['A QR code per ticket', 'It is on the buyer\'s ticket page, which checkout lands them on, and it goes out with the confirmation email.'],
+            ['Your own email sender', 'Connect one once under Schedule Settings, Integrations, Email. Until you do, the sale and the ticket page work but no confirmation email leaves.'],
+            ['Individual tickets', 'Turn it on and every guest on the order gets their own email and their own code.'],
+            ['Scan from a phone', 'Sales, then Scan Tickets, then point the camera. No hardware to buy or rent.'],
+            ['One admission per ticket', 'A second scan comes back as an orange warning over the holder details, and no second admission is recorded.'],
+            ['It refuses for a reason', 'Unpaid, cancelled, refunded, too early, too late: each one names itself.'],
+            ['A live count', 'The check-in dashboard shows progress, a per-ticket-type breakdown and the last ten scans.'],
+            ['The record afterwards', 'Every sale carries its check-in status into the CSV export.'],
+        ];
+
+        $afterSale = [
+            ['Sale notification emails', 'An email each time a ticket sells, with the buyer, the ticket type, the amount, the status and any code used.', 'Pro'],
+            ['Sales CSV export', 'Buyer, ticket type, amount, promo code, payment method, check-in status and every custom answer.', 'Pro'],
+            ['Ticket waitlist', 'When a date sells out, guests can join. One person is notified at a time, with a 24 hour link to buy.', 'Pro'],
+            ['Bulk attendee import', 'Paste rows or upload a CSV for people who paid out of band. Up to 5,000 in one go.', 'Pro'],
+            ['Gift cards', 'Sell a balance somebody sends to a recipient by email, redeemable against tickets on your schedule.', 'Pro'],
+            ['Post-event feedback', 'Star ratings and comments collected from ticket buyers and registrants after the event ends.', 'Pro'],
+            ['Webhooks', 'POST notifications for sales, cancellations and check-ins, into whatever you already run.', 'Pro'],
+            ['Embeddable ticket form', 'Put the purchase or RSVP form on the website you already have, in one iframe.', 'Pro'],
+        ];
+
         $steps = [
-            ['1', 'Connect Payments', 'Link Stripe or Invoice Ninja to receive payments directly.'],
-            ['2', 'Add Tickets', 'Create ticket types with prices and quantities for your event.'],
-            ['3', 'Share Your Event', 'Visitors can purchase tickets directly from your schedule.'],
-            ['4', 'Check In', 'Scan QR codes at the door and track attendance with a live dashboard.'],
+            ['01', 'Connect a payment method', 'Your own Stripe account, Invoice Ninja, a payment URL, or cash at the door. Card money settles into your account, not ours.'],
+            ['02', 'Add your ticket types', 'A name, a price, a quantity, and a sales window if you want one. Promo codes, add-ons and custom questions have their own tabs.'],
+            ['03', 'Scan at the door', 'Open Sales on your phone and tap Scan Tickets. Each ticket admits once, and the dashboard keeps the count.'],
+        ];
+
+        $faqs = [
+            [
+                'q' => 'What are the fees for selling tickets?',
+                'a' => 'Event Schedule charges zero platform fees on ticket sales. Card payments run through your own connected Stripe account, so Stripe charges you its standard processing rate directly and the rest of the ticket price is yours. Nothing is deducted by us, on any plan, at any volume.',
+            ],
+            [
+                'q' => 'Do I need a paid plan to sell tickets?',
+                'a' => 'Ticketing and QR check-in are on the Pro plan, which is $5 a month with a 7 day free trial. Free registration is not: on every plan, including Free, you can turn on RSVP registration for a free event, set a capacity limit, and still get a confirmation email with a QR code for check-in.',
+            ],
+            [
+                'q' => 'How does QR code check-in work?',
+                'a' => 'Every ticket carries its own QR code, shown on the buyer\'s ticket page and sent with the confirmation email once you have connected an email sender under Schedule Settings, Integrations, Email. At the door you open Sales on your phone, tap Scan Tickets and point the camera. Each ticket admits once: scan it again and you get a warning instead of an entry. The check-in dashboard refreshes every 10 seconds with the running count and a per-ticket-type breakdown.',
+            ],
+            [
+                'q' => 'Is there a seat map or assigned seating?',
+                'a' => 'No, and it is worth being straight about it. Event Schedule sells named ticket types with their own prices and quantities, not numbered seats. A "Table of six" ticket type prices a table and limits how many exist, but the buyer is not picking a specific seat on a chart.',
+            ],
+            [
+                'q' => 'What payment methods are supported?',
+                'a' => 'Stripe for credit cards, Apple Pay and Google Pay; Invoice Ninja for invoice or payment-link billing; a custom payment URL to send buyers to any system you already use; or cash, where you add payment instructions to the confirmation email and mark the sale paid yourself.',
+            ],
+            [
+                'q' => 'How are refunds handled?',
+                'a' => 'You cancel or refund the sale from the Sales list, and the money movement happens in your Stripe dashboard, where you keep full control of your own refund policy. Cancelling a sale returns its tickets to the pool for that date, which is also what can trigger the next waitlist notification.',
+            ],
+            [
+                'q' => 'Can I offer promo codes or discounts?',
+                'a' => 'Yes. Promo codes take a percentage or a fixed amount off, and each one can have a maximum number of uses, an expiry date, an active toggle, and a target of either all ticket types or specific ones. Every code also generates a shareable link that pre-fills it at checkout. Separately, a volume discount can reward buying several of one ticket type at once.',
+            ],
+            [
+                'q' => 'What happens when tickets sell out?',
+                'a' => 'A Join Waitlist button appears on the event page for that date. Guests leave a name and email, and when tickets come back into the pool because a sale was cancelled, refunded or expired, the next person in line is emailed a 24 hour link to buy. Only one person is notified at a time, so a single returned ticket is not blasted at the whole list; if that link expires unused, the next person is emailed instead. The waitlist is a Pro feature.',
+            ],
+            [
+                'q' => 'How does inventory work on a recurring event?',
+                'a' => 'Per occurrence date. A ticket type with 220 available has 220 for each date the event runs, so a sold-out Saturday does not close the Sunday. A pass is the deliberate exception: one QR code covers the whole series, so a pass draws from a single pool rather than a fresh one per date.',
+            ],
+            [
+                'q' => 'Can I get notified when tickets sell, and export the data?',
+                'a' => 'Both. Turn on sale notification emails under Schedule, Settings, Notifications to get an email whenever a ticket sells, with the buyer, the ticket type, the amount, the payment status and any code applied. And the Sales list exports to CSV with buyer details, amounts, promo codes, payment method, check-in status and every custom field answer, ready for a spreadsheet.',
+            ],
+        ];
+
+        $dotSections = [
+            ['top', 'The gate'],
+            ['halves', 'Both halves'],
+            ['types', 'Ticket types'],
+            ['turn', 'The turn'],
+            ['fee', 'Zero at the gate'],
+            ['free', 'Before you upgrade'],
+            ['after', 'After the sale'],
+            ['faq', 'Questions'],
+            ['claim', 'Start selling'],
         ];
     @endphp
-    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-24">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-2xl text-center">
-                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                    Start selling in <span class="text-gradient-ticket">minutes</span>
-                </h2>
-                <p class="mt-4 text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Four simple steps to your first ticket sale.
-                </p>
-            </div>
 
-            <div class="grid grid-cols-1 gap-8 md:grid-cols-4" data-reveal-group="90">
-                @foreach ($steps as [$num, $title, $desc])
-                    <div data-reveal class="text-center">
-                        <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-blue-500 text-2xl font-bold text-white shadow-lg shadow-sky-500/25">
-                            {{ $num }}
-                        </div>
-                        <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{{ $title }}</h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ $desc }}</p>
-                    </div>
-                @endforeach
-            </div>
+    <div id="es-turn-page" class="es-turn-page">
+
+    <!-- ============================================================ -->
+    <!-- 1. Hero: the gate and its counter                            -->
+    <!-- ============================================================ -->
+    <section id="top" class="es-hero noise relative flex min-h-[calc(80svh-4rem)] scroll-mt-24 items-center overflow-hidden py-16">
+        <div class="absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 26% 68%, rgba(7, 89, 133, 0.22), rgba(7, 89, 133, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 74% 30%, rgba(2, 132, 199, 0.18), rgba(2, 132, 199, 0) 65%);"></div>
+            <div class="es-spot absolute inset-0"></div>
+            <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
         </div>
-    </section>
 
-    <!-- ============================================================ -->
-    <!-- 4. Zero fees (dark band)                                    -->
-    <!-- ============================================================ -->
-    <section class="bg-gray-50 px-2 py-14 dark:bg-[#0f0f14] sm:px-4 lg:py-20">
-        <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
-            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 25%, rgba(16, 185, 129, 0.24), rgba(16, 185, 129, 0) 60%); opacity: 0.6;"></div>
-                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 70%, rgba(2, 132, 199, 0.22), rgba(2, 132, 199, 0) 60%); opacity: 0.55;"></div>
-                <div class="grid-overlay absolute inset-0 opacity-25"></div>
-                <div class="es-barcode absolute bottom-0 left-0 right-0 mx-auto flex h-14 max-w-4xl items-center justify-center px-8 opacity-25" style="mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);">
-                    @for ($i = 0; $i < 72; $i++)
-                        @php $w = [2, 4, 3, 6, 2, 5, 3, 2][$i % 8]; $dur = 2.2 + ($i % 6) * 0.25; $delay = ($i % 14) * 0.1; @endphp
-                        <span class="es-bar" style="width: {{ $w }}px; --br-dur: {{ $dur }}s; --br-delay: {{ $delay }}s;"></span>
-                    @endfor
-                </div>
-            </div>
-
-            <div class="relative z-10 mx-auto max-w-4xl text-center">
-                <div class="mb-8 inline-flex h-20 w-20 items-center justify-center rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/20 to-teal-500/20" data-reveal>
-                    <span class="text-4xl font-black text-emerald-400">$0</span>
-                </div>
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>
-                    No platform fees. <span class="text-gradient-ticket">Ever.</span>
-                </h2>
-                <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    We don't take a cut of your ticket sales. You only pay Stripe's standard processing fees (typically 2.9% + $0.30 per transaction).
-                </p>
-
-                <div class="mx-auto grid max-w-3xl grid-cols-1 gap-4 md:grid-cols-3" data-reveal-group="80">
-                    <a href="{{ marketing_url('/stripe') }}" data-reveal class="group flex flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition-all hover:-translate-y-1 hover:border-blue-400/30 hover:bg-white/[0.07]">
-                        <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/20">
-                            <svg aria-hidden="true" class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
-                        </div>
-                        <h3 class="mb-2 font-semibold text-white transition-colors group-hover:text-blue-300">Stripe</h3>
-                        <p class="mb-3 text-sm text-gray-400">Credit cards, Apple Pay, Google Pay</p>
-                        <span class="mt-auto inline-flex items-center text-xs font-medium text-blue-400">
-                            Learn more
-                            <svg aria-hidden="true" class="ml-1 h-3 w-3 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                        </span>
-                    </a>
-
-                    <a href="{{ marketing_url('/invoiceninja') }}" data-reveal class="group flex flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition-all hover:-translate-y-1 hover:border-emerald-400/30 hover:bg-white/[0.07]">
-                        <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/20">
-                            <svg aria-hidden="true" class="h-6 w-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                        </div>
-                        <h3 class="mb-2 font-semibold text-white transition-colors group-hover:text-emerald-300">Invoice Ninja</h3>
-                        <p class="mb-3 text-sm text-gray-400">Professional invoicing for B2B</p>
-                        <span class="mt-auto inline-flex items-center text-xs font-medium text-emerald-400">
-                            Learn more
-                            <svg aria-hidden="true" class="ml-1 h-3 w-3 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                        </span>
-                    </a>
-
-                    <div data-reveal class="flex flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-6">
-                        <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-sky-500/20">
-                            <svg aria-hidden="true" class="h-6 w-6 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
-                        </div>
-                        <h3 class="mb-2 font-semibold text-white">Custom URL</h3>
-                        <p class="text-sm text-gray-400">Link to any payment system</p>
+        <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-14 lg:grid-cols-[1.05fr_1fr]">
+                <div>
+                    <div class="es-fade-up es-d-1 glass mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2.5">
+                        <svg aria-hidden="true" class="es-turn-accent h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                        </svg>
+                        <span class="es-turn-muted text-sm font-medium tracking-wide">Ticketing, with zero platform fees</span>
                     </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- ============================================================ -->
-    <!-- 5. Guide & next feature                                     -->
-    <!-- ============================================================ -->
-    <section class="bg-white py-20 dark:bg-[#0a0a0f]">
-        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="80">
+                    <h1 class="es-balance es-turn-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <span class="es-mask"><span class="es-mask-line">A ticket is only half of it.</span></span>
+                        <span class="es-mask es-mask-2"><span class="es-mask-line">The other half is <span class="es-turn-accent">the turn.</span></span></span>
+                    </h1>
 
-                <a href="{{ route('marketing.docs.tickets') }}" data-reveal class="group block">
-                    <div class="ap-card flex h-full flex-col rounded-3xl border border-gray-200 bg-white p-8 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-white/5 lg:p-10">
-                        <div class="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-sky-500/20 bg-sky-500/10">
-                            <svg aria-hidden="true" class="h-6 w-6 text-sky-500 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 transition-colors group-hover:text-sky-600 dark:text-white dark:group-hover:text-sky-400">Read the guide</h3>
-                        <p class="mb-4 text-lg text-gray-500 dark:text-gray-400">Learn how to get the most out of ticketing.</p>
-                        <span class="mt-auto inline-flex items-center gap-2 font-medium text-sky-500 transition-all group-hover:gap-3 dark:text-sky-400">
-                            Read guide
-                            <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                        </span>
-                    </div>
-                </a>
+                    <p class="es-fade-up es-d-2 es-turn-muted mb-10 max-w-xl text-lg sm:text-xl">
+                        Event Schedule sells the ticket, mails the QR code, refuses it at the door if it is not valid, admits it once, and keeps the count. What it takes out of the ticket price: nothing.
+                    </p>
 
-                <a href="{{ marketing_url('/features/ai') }}" data-reveal class="group block">
-                    <div class="flex h-full flex-col rounded-3xl border border-blue-200 bg-gradient-to-br from-blue-100 to-sky-100 p-8 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:from-blue-900 dark:to-sky-900 lg:p-10">
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-300">AI-Powered Import</h3>
-                        <p class="mb-4 text-lg text-gray-500 dark:text-gray-400">Paste text or drop an image. AI extracts event details automatically.</p>
-                        <span class="mt-auto inline-flex items-center gap-2 font-medium text-blue-500 transition-all group-hover:gap-3 dark:text-blue-400">
-                            Learn more
-                            <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                        </span>
-                    </div>
-                </a>
-
-                <div data-reveal class="ap-card flex h-full flex-col rounded-3xl border border-gray-200 bg-white p-8 dark:border-white/10 dark:bg-white/5 lg:p-10">
-                    <div class="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-sky-500/20 bg-sky-500/10">
-                        <svg aria-hidden="true" class="h-6 w-6 text-sky-500 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                    </div>
-                    <h3 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Popular with</h3>
-                    <div class="space-y-3">
-                        @foreach ([['/for-musicians', 'Musicians'], ['/for-venues', 'Venues'], ['/for-comedy-clubs', 'Comedy Clubs']] as [$href, $label])
-                            <a href="{{ marketing_url($href) }}" class="group/link flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 p-3 transition-all hover:border-sky-300 hover:bg-gray-100 dark:border-white/10 dark:bg-white/5 dark:hover:border-sky-500/30 dark:hover:bg-white/10">
-                                <span class="font-medium text-gray-900 dark:text-white">{{ $label }}</span>
-                                <svg aria-hidden="true" class="h-4 w-4 text-gray-400 transition-colors group-hover/link:text-sky-500 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                            </a>
-                        @endforeach
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 6. FAQ                                                      -->
-    <!-- ============================================================ -->
-    <section class="bg-gray-100 py-20 dark:bg-black/30 lg:py-28">
-        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Frequently asked <span class="text-gradient-ticket">questions</span>
-                </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Everything you need to know about ticketing.
-                </p>
-            </div>
-
-            <div class="space-y-4" data-reveal-group="80">
-                @foreach ([
-                    ['What are the fees for selling tickets?', 'Event Schedule charges zero platform fees on ticket sales. You only pay the standard Stripe processing fees (typically 2.9% + $0.30 per transaction). 100% of the ticket price goes to you.'],
-                    ['How does QR code check-in work?', 'Every ticket includes a unique QR code sent to the buyer via email. At the door, use any smartphone to scan the QR code and check in attendees instantly. The system prevents duplicate scans and tracks attendance in real time.'],
-                    ['What payment methods are supported?', 'Event Schedule supports Stripe for credit cards, Apple Pay, and Google Pay, as well as Invoice Ninja for professional B2B invoicing. You can also add a custom payment URL to link to any payment system.'],
-                    ['How are refunds handled?', 'Refunds are managed directly through your Stripe dashboard. You have full control over your refund policy and can issue full or partial refunds to individual ticket buyers at any time.'],
-                    ['Can I offer promo codes or discounts?', 'Yes! You can create promo codes with either percentage or fixed amount discounts. Promo codes can be targeted to specific ticket types, giving you full control over your discount strategy.'],
-                    ['What happens when tickets sell out?', 'When all tickets sell out, a waitlist button appears automatically. Fans can join the waitlist and are notified one at a time when spots open up, with 24 hours to complete their purchase.'],
-                    ['Can I get notified when tickets sell?', 'Yes. Enable sale notification emails in your schedule settings to receive an email whenever a ticket sells. Each notification includes buyer details, ticket type, and payment status.'],
-                    ['Can I export my sales data?', 'Yes. Export all your sales as a CSV file with buyer info, ticket types, amounts, promo codes, payment status, and custom field responses. The file opens in Excel, Google Sheets, or any spreadsheet app.'],
-                ] as [$q, $a])
-                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
-                            <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    <div class="es-fade-up es-d-3 flex flex-col items-start gap-4 sm:flex-row">
+                        <a href="{{ app_url('/sign_up') }}" class="es-turn-btn group inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
+                            Start selling tickets
+                            <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                             </svg>
-                        </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{{ $a }}</p>
-                    </details>
-                @endforeach
+                        </a>
+                        <a href="{{ route('marketing.docs.tickets') }}" class="glass group inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl px-7 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+                            Read the Ticketing guide
+                            <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- The counter plate. A turnstile's one organ is its counter. -->
+                <div class="es-fade-up es-d-4" data-reveal>
+                    <div class="es-turn-plate p-6 sm:p-7">
+                        <div class="mb-5 flex items-baseline justify-between gap-3">
+                            <p class="es-turn-tag">Gate 01</p>
+                            <p class="es-turn-plate-muted es-turn-read text-xs">Sat 14 Nov</p>
+                        </div>
+
+                        <p class="es-turn-plate-muted mb-2 text-xs font-semibold uppercase tracking-widest">Admitted</p>
+                        <div class="es-od es-turn-count mb-6" data-odometer="142">142</div>
+
+                        <div class="es-turn-seam mb-5" aria-hidden="true"></div>
+
+                        <dl class="space-y-3 text-sm">
+                            <div class="es-turn-reg">
+                                <dt class="es-turn-plate-muted">Tickets sold</dt>
+                                <dd class="es-turn-plate-ink es-turn-read">168</dd>
+                            </div>
+                            <div class="es-turn-reg">
+                                <dt class="es-turn-plate-muted">Refused at the door</dt>
+                                <dd class="es-turn-plate-ink es-turn-read">3</dd>
+                            </div>
+                            <div class="es-turn-reg">
+                                <dt class="es-turn-plate-muted">Platform fee taken</dt>
+                                <dd class="es-turn-lit es-turn-read">0.00</dd>
+                            </div>
+                        </dl>
+
+                        <p class="es-turn-plate-muted mt-5 border-t border-white/[0.08] pt-4 text-xs leading-relaxed">
+                            One number goes up, one stays at zero. The check-in dashboard refreshes every 10 seconds while the doors are open.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ticket types you can actually create. -->
+            <div class="es-fade-up es-d-4 mx-auto mt-14 max-w-4xl">
+                <div class="es-marquee-mask">
+                    <div class="es-marquee" data-marquee="1">
+                        <div class="es-marquee-track">
+                            @for ($chipCopy = 0; $chipCopy < 2; $chipCopy++)
+                                @foreach (['General Admission', 'Early Bird', 'VIP', 'Student', 'Table', 'Free Ticket', 'Season Pass', 'Membership', 'Parking Add-on', 'Free RSVP'] as $chip)
+                                    <span @if ($chipCopy === 1) aria-hidden="true" @endif class="es-turn-chip">{{ $chip }}</span>
+                                @endforeach
+                            @endfor
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="es-turn-perf mx-auto max-w-7xl" aria-hidden="true">
+
+    <!-- ============================================================ -->
+    <!-- 2. Both halves: the duplex either side of the turn           -->
+    <!-- ============================================================ -->
+    <section id="halves" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-turn-mark mb-6" data-reveal aria-hidden="true"><span>02</span></div>
+                <p class="es-turn-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Both halves</p>
+                <h2 class="es-balance es-turn-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Most tools stop at the <span class="es-turn-accent">checkout page.</span>
+                </h2>
+                <p class="es-turn-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    A ticket comes apart into two halves: the one you sold and the one you admitted. Both live in the same place here, on the same event, counted against the same quantity.
+                </p>
+            </div>
+
+            <div class="es-turn-duplex">
+                <div class="es-turn-card p-6 sm:p-7" data-reveal="panel">
+                    <p class="es-turn-tag mb-5">The sale side</p>
+                    <dl class="space-y-4" data-reveal-group="60">
+                        @foreach ($saleSide as [$sTitle, $sBody])
+                            <div data-reveal>
+                                <dt class="es-turn-ink text-sm font-bold">{{ $sTitle }}</dt>
+                                <dd class="es-turn-muted mt-1 text-sm leading-relaxed">{{ $sBody }}</dd>
+                            </div>
+                        @endforeach
+                    </dl>
+                </div>
+
+                <div class="flex flex-row items-center justify-center gap-4 lg:flex-col" aria-hidden="true">
+                    <div class="es-turn-rail">
+                        <span class="es-turn-tick"></span>
+                    </div>
+                    <span class="es-turn-hub">1 ticket &middot; 1 turn</span>
+                    <div class="es-turn-rail">
+                        <span class="es-turn-tick"></span>
+                    </div>
+                </div>
+
+                <div class="es-turn-card p-6 sm:p-7" data-reveal="panel">
+                    <p class="es-turn-tag mb-5">The door side</p>
+                    <dl class="space-y-4" data-reveal-group="60">
+                        @foreach ($doorSide as [$dTitle, $dBody])
+                            <div data-reveal>
+                                <dt class="es-turn-ink text-sm font-bold">{{ $dTitle }}</dt>
+                                <dd class="es-turn-muted mt-1 text-sm leading-relaxed">{{ $dBody }}</dd>
+                            </div>
+                        @endforeach
+                    </dl>
+                </div>
+            </div>
+
+            <p class="es-turn-muted mx-auto mt-10 max-w-2xl text-center text-sm" data-reveal>
+                Nothing is exported between the two sides and nothing is re-keyed. The ticket that was bought is the ticket that gets scanned.
+            </p>
+        </div>
+    </section>
+
+    <hr class="es-turn-perf mx-auto max-w-7xl" aria-hidden="true">
+
+    <!-- ============================================================ -->
+    <!-- 3. Ticket types: a real record, in a real table              -->
+    <!-- ============================================================ -->
+    <section id="types" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-turn-mark mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                <p class="es-turn-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Ticket types</p>
+                <h2 class="es-balance es-turn-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Name your prices. <span class="es-turn-accent">Not your seats.</span>
+                </h2>
+                <p class="es-turn-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Create as many ticket types as the event needs. Each one carries its own price, its own quantity, and optionally its own sales start and end date.
+                </p>
+            </div>
+
+            <div class="es-turn-card p-4 sm:p-7" data-reveal="panel">
+                <div class="overflow-x-auto">
+                    <table class="es-turn-table">
+                        <caption class="es-turn-muted mb-4 text-left text-xs">
+                            One event's ticket types, with what is left for the occurrence on Sat 14 Nov.
+                        </caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Ticket type</th>
+                                <th scope="col">Price</th>
+                                <th scope="col" class="hidden sm:table-cell">Quantity</th>
+                                <th scope="col" class="hidden md:table-cell">Sales window</th>
+                                <th scope="col">Sat 14 Nov</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($ticketTypes as [$tName, $tPrice, $tQty, $tWindow, $tLeft, $tNote])
+                                <tr>
+                                    <th scope="row" class="es-turn-ink text-sm font-bold">
+                                        {{ $tName }}
+                                        @if ($tNote)
+                                            <span class="es-turn-muted block text-[0.65rem] font-normal">{{ $tNote }}</span>
+                                        @endif
+                                    </th>
+                                    <td class="es-turn-ink es-turn-num text-sm font-semibold">{{ $tPrice }}</td>
+                                    <td class="es-turn-muted es-turn-num hidden text-xs sm:table-cell">{{ $tQty }}</td>
+                                    <td class="es-turn-muted es-turn-num hidden text-xs md:table-cell">{{ $tWindow }}</td>
+                                    <td class="es-turn-muted es-turn-num text-xs">{{ $tLeft }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mt-8 grid gap-4 md:grid-cols-3" data-reveal-group="90">
+                <div class="es-turn-card p-6" data-reveal="panel">
+                    <h3 class="es-turn-ink mb-2 text-base font-bold">A window is a date, not a countdown</h3>
+                    <p class="es-turn-muted text-sm leading-relaxed">A sales start and end are stored as single moments in time, so an early bird ends on the date you set. Separately, a per-event option keeps selling until the event ends rather than stopping at the start time.</p>
+                </div>
+                <div class="es-turn-card p-6" data-reveal="panel">
+                    <h3 class="es-turn-ink mb-2 text-base font-bold">Inventory is per date</h3>
+                    <p class="es-turn-muted text-sm leading-relaxed">On a recurring event, each occurrence gets its own count, so a sold-out Saturday does not close the Sunday. A combined limit can also cap the total across every ticket type at once.</p>
+                </div>
+                <div class="es-turn-card p-6" data-reveal="panel">
+                    <h3 class="es-turn-ink mb-2 text-base font-bold">There is no seat map</h3>
+                    <p class="es-turn-muted text-sm leading-relaxed">Worth being straight about. A "Table of six" type prices a table and limits how many exist, but nobody is choosing seat H14 off a chart. If you need a real seating chart, this is not it.</p>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- 7. Related features                                         -->
+    <!-- 4. The turn: the ticket, and the verdict (fixed-dark band)    -->
     <!-- ============================================================ -->
-    <section class="bg-white py-20 dark:bg-[#0a0a0f]">
+    <section id="turn" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
+        <div class="es-turn-band noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                <div class="grid-overlay absolute inset-0 opacity-20"></div>
+            </div>
+
+            <div class="relative z-10 mx-auto max-w-6xl">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-turn-mark mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                    <p class="es-turn-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The turn</p>
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        It turns <span class="es-turn-lit">once.</span>
+                    </h2>
+                    <p class="mt-5 text-lg es-turn-band-muted" data-reveal style="--reveal-delay: 0.15s;">
+                        Point a phone camera at the code and what comes back is a decision, not a guess. Admitted on a first scan; warned if that code has already been through; refused with the reason named.
+                    </p>
+                </div>
+
+                <div class="grid items-start gap-8 lg:grid-cols-[1.05fr_1fr]">
+                    <!-- The ticket and its counterfoil: real stock, fixed in both modes. -->
+                    <div data-reveal="panel">
+                        <div class="es-turn-stub">
+                            <div class="min-w-0 flex-1 p-5 sm:p-6">
+                                <p class="es-turn-stub-muted text-[0.6rem] font-extrabold uppercase tracking-[0.2em]">Admit one</p>
+                                <h3 class="es-turn-stub-ink mt-2 text-xl font-black leading-tight">Jazz Night</h3>
+                                <p class="es-turn-stub-muted mt-1 text-sm">Sat 14 Nov &middot; The Blue Room</p>
+                                <div class="mt-4 space-y-1.5 text-sm">
+                                    <div class="es-turn-reg">
+                                        <span class="es-turn-stub-muted">Ticket type</span>
+                                        <span class="es-turn-stub-ink es-turn-read">General</span>
+                                    </div>
+                                    <div class="es-turn-reg">
+                                        <span class="es-turn-stub-muted">Holder</span>
+                                        <span class="es-turn-stub-ink es-turn-read">Sarah M.</span>
+                                    </div>
+                                    <div class="es-turn-reg">
+                                        <span class="es-turn-stub-muted">Paid</span>
+                                        <span class="es-turn-stub-accent es-turn-read">$25.00</span>
+                                    </div>
+                                </div>
+                                <p class="es-turn-stub-muted mt-4 text-xs leading-relaxed">
+                                    Ticket notes ride along in the confirmation email and on this page: directions, parking, what to bring.
+                                </p>
+                            </div>
+                            <div class="es-turn-perf-v" aria-hidden="true"></div>
+                            <div class="flex flex-none flex-col items-center justify-center gap-3 p-5">
+                                <div class="es-turn-qr" aria-hidden="true">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 29 29" aria-hidden="true"><path fill="#1f2937" d="M0 0h7v7H0zm2 2v3h3V2zm8 0h1v1h1v1h-1v1h-1V3h-1V2h1zm4 0h1v4h-1V4h-1V3h1V2zm4 0h3v1h-2v1h-1V2zm5 0h7v7h-7zm2 2v3h3V4zM2 10h1v1h1v1H2v-1H1v-1h1zm4 0h1v1H5v1H4v-1h1v-1h1zm3 0h1v3h1v1h-1v-1H9v-1h1v-1H9v-1zm5 0h1v2h1v-2h1v3h-1v1h-1v-1h-1v-1h-1v-1h1v-1zm5 0h1v1h-1v1h-1v-1h1v-1zm3 0h1v2h1v-1h1v3h-1v-1h-1v2h-1v-3h-1v-1h1v-1zM0 14h1v1h1v-1h2v1h-1v1h1v2H3v-2H2v-1H0v-1zm4 0h1v1H4v-1zm9 0h1v1h-1v-1zm8 0h2v1h-2v-1zm0 2v1h1v1h1v1h-1v1h1v1h-2v-2h-1v-1h1v-1h-1v-1h1zm4 0h1v1h-1v-1zM0 18h1v1H0v-1zm2 0h2v1h1v2H4v-1H3v1H2v-2h1v-1H2v-1zm5 0h3v1h1v2h-1v1h-1v-2H8v1H7v-1H6v-1h1v-1zm6 0h2v1h1v-1h1v2h-2v1h-1v-2h-1v-1zm-5 2h1v1H8v-1zM0 22h7v7H0zm2 2v3h3v-3zm9-2h1v1h-1v-1zm2 0h1v1h1v2h-2v-1h-1v-1h1v-1zm3 0h3v1h-2v2h2v1h2v2h-1v1h-2v-1h-1v1h-2v-2h1v-2h-1v-2h1v-1zm7 0h1v1h1v1h-1v3h1v-2h1v3h1v-1h1v2h-2v1h-1v-1h-1v-1h-1v1h-2v-1h1v-2h1v-1h-1v-2h1v-1zm-9 2h1v1h-1v-1zm-2 2h1v1h-1v-1zm7 0h1v1h-1v-1zm-5 2h1v1h-1v-1zm2 0h2v1h-2v-1z"/></svg>
+                                </div>
+                                <p class="es-turn-stub-muted es-turn-read text-[0.58rem]">ES-8F42-1176</p>
+                            </div>
+                        </div>
+
+                        <p class="mt-5 text-sm leading-relaxed es-turn-band-muted">
+                            Turn on individual tickets and every guest on one order gets a stub of their own: their own confirmation email, their own code, and their own line in the check-in count.
+                        </p>
+                    </div>
+
+                    <!-- The gate log: the verdicts the scanner really returns. -->
+                    <div data-reveal="panel">
+                        <div class="es-turn-plate p-5 sm:p-6">
+                            <div class="mb-4 flex items-baseline justify-between gap-3">
+                                <p class="es-turn-tag">Gate log</p>
+                                <p class="es-turn-plate-muted es-turn-read text-xs">doors 19:30</p>
+                            </div>
+                            <div class="es-turn-log text-xs">
+                                @foreach ($gateLog as [$gKind, $gVerdict, $gReason])
+                                    <div class="es-turn-row">
+                                        <span class="es-turn-verdict @if ($gKind === 'pass') es-turn-verdict-pass @elseif ($gKind === 'warn') es-turn-verdict-warn @else es-turn-verdict-stop @endif">{{ $gVerdict }}</span>
+                                        <span class="es-turn-plate-ink min-w-0">{{ $gReason }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <p class="es-turn-plate-muted mt-5 border-t border-white/[0.08] pt-4 text-xs leading-relaxed">
+                                The window closes when the event ends, worked out from its start plus its duration. Scanning happens inside the admin panel, so anybody signed in to the schedule can work the door; adding team members of their own is an Enterprise feature.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-10 grid gap-4 md:grid-cols-3" data-reveal-group="90">
+                    <div class="es-turn-card p-6" data-reveal="panel">
+                        <h3 class="mb-2 text-base font-bold es-turn-band-ink">Progress, live</h3>
+                        <p class="text-sm leading-relaxed es-turn-band-muted">A percentage bar for the whole event, a breakdown per ticket type, and the last ten check-ins with names and times.</p>
+                    </div>
+                    <div class="es-turn-card p-6" data-reveal="panel">
+                        <h3 class="mb-2 text-base font-bold es-turn-band-ink">Filtered by date</h3>
+                        <p class="text-sm leading-relaxed es-turn-band-muted">Pick the event and the occurrence date, so a recurring event's Saturday count never mixes with its Sunday one.</p>
+                    </div>
+                    <div class="es-turn-card p-6" data-reveal="panel">
+                        <h3 class="mb-2 text-base font-bold es-turn-band-ink">No hardware</h3>
+                        <p class="text-sm leading-relaxed es-turn-band-muted">Whatever phone is in your pocket. The dashboard works on the same phone, or on a tablet propped at the desk.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="es-turn-perf mx-auto max-w-7xl" aria-hidden="true">
+
+    <!-- ============================================================ -->
+    <!-- 5. Zero at the gate                                          -->
+    <!-- ============================================================ -->
+    <section id="fee" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-turn-mark mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                <p class="es-turn-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The fee</p>
+                <h2 class="es-balance es-turn-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Nothing is taken <span class="es-turn-accent">at the gate.</span>
+                </h2>
+                <p class="es-turn-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Card sales run through your own connected Stripe account. Stripe charges you its standard processing rate directly, and the platform fee line is the one that stays at zero.
+                </p>
+            </div>
+
+            <div class="grid items-start gap-8 lg:grid-cols-[1.05fr_1fr]">
+                <div class="es-turn-card p-6 sm:p-8" data-reveal="panel">
+                    <p class="es-turn-tag mb-5">One $25 ticket</p>
+                    <dl class="space-y-3 text-sm">
+                        <div class="es-turn-reg">
+                            <dt class="es-turn-muted">Ticket price</dt>
+                            <dd class="es-turn-ink es-turn-read">25.00</dd>
+                        </div>
+                        <div class="es-turn-reg">
+                            <dt class="es-turn-muted">Event Schedule platform fee</dt>
+                            <dd class="es-turn-accent es-turn-read text-base">0.00</dd>
+                        </div>
+                        <div class="es-turn-reg">
+                            <dt class="es-turn-muted">Payment processing</dt>
+                            <dd class="es-turn-muted es-turn-read text-xs">Stripe's own rate, billed by Stripe</dd>
+                        </div>
+                    </dl>
+                    <div class="my-5" aria-hidden="true">
+                        <hr class="es-turn-perf">
+                    </div>
+                    <p class="es-turn-ink text-sm font-semibold">The rest lands in your Stripe account.</p>
+                    <p class="es-turn-muted mt-2 text-sm leading-relaxed">
+                        Not in ours, and not on a payout schedule we control. Take cash at the door instead and there is nothing to process at all: add payment instructions to the confirmation email and mark the sale paid when you are handed the money.
+                    </p>
+                    <p class="es-turn-muted mt-4 text-xs leading-relaxed">
+                        We are not going to put a competitor's fee table next to this. Check whatever you use today against your own last event and draw your own conclusion.
+                    </p>
+                </div>
+
+                <div class="grid gap-4 sm:grid-cols-2" data-reveal-group="80">
+                    <a href="{{ marketing_url('/stripe') }}" data-reveal class="es-turn-card es-turn-hover group flex flex-col p-6 transition-all duration-200 hover:shadow-md">
+                        <svg aria-hidden="true" class="es-turn-accent mb-4 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                        <h3 class="es-turn-hover-title es-turn-ink mb-2 text-base font-bold transition-colors">Stripe</h3>
+                        <p class="es-turn-muted mb-4 text-sm leading-relaxed">Cards, Apple Pay and Google Pay, into your own connected account.</p>
+                        <span class="es-turn-hover-arrow es-turn-muted mt-auto inline-flex items-center gap-1 text-xs font-semibold transition-colors">
+                            Learn more
+                            <svg aria-hidden="true" class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                        </span>
+                    </a>
+
+                    <a href="{{ marketing_url('/invoiceninja') }}" data-reveal class="es-turn-card es-turn-hover group flex flex-col p-6 transition-all duration-200 hover:shadow-md">
+                        <svg aria-hidden="true" class="es-turn-accent mb-4 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        <h3 class="es-turn-hover-title es-turn-ink mb-2 text-base font-bold transition-colors">Invoice Ninja</h3>
+                        <p class="es-turn-muted mb-4 text-sm leading-relaxed">Invoice or payment-link billing, for the buyers who need a real invoice.</p>
+                        <span class="es-turn-hover-arrow es-turn-muted mt-auto inline-flex items-center gap-1 text-xs font-semibold transition-colors">
+                            Learn more
+                            <svg aria-hidden="true" class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                        </span>
+                    </a>
+
+                    <div data-reveal class="es-turn-card flex flex-col p-6">
+                        <svg aria-hidden="true" class="es-turn-accent mb-4 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                        <h3 class="es-turn-ink mb-2 text-base font-bold">Payment URL</h3>
+                        <p class="es-turn-muted text-sm leading-relaxed">Send buyers to whatever you already run, and keep the ticket record here.</p>
+                    </div>
+
+                    <div data-reveal class="es-turn-card flex flex-col p-6">
+                        <svg aria-hidden="true" class="es-turn-accent mb-4 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <h3 class="es-turn-ink mb-2 text-base font-bold">Cash at the door</h3>
+                        <p class="es-turn-muted text-sm leading-relaxed">Hold the ticket unpaid, then mark it paid. Unpaid holds can auto-release after a set number of hours so the seats go back on sale.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="es-turn-perf mx-auto max-w-7xl" aria-hidden="true">
+
+    <!-- ============================================================ -->
+    <!-- 6. Before you upgrade: registration is free                  -->
+    <!-- ============================================================ -->
+    <section id="free" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-turn-mark mb-6" data-reveal aria-hidden="true"><span>06</span></div>
+                <p class="es-turn-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Before you upgrade</p>
+                <h2 class="es-balance es-turn-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    You may not need <span class="es-turn-accent">any of this.</span>
+                </h2>
+                <p class="es-turn-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    If the event is free and you only want a headcount, the free plan already does it, QR code and all. Read this before you pay us anything.
+                </p>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2" data-reveal-group="100">
+                <div class="es-turn-card flex flex-col p-7" data-reveal="panel">
+                    <div class="mb-4 flex flex-wrap items-center gap-2">
+                        <h3 class="es-turn-ink text-lg font-black">Registration</h3>
+                        <span class="es-turn-plan">Free</span>
+                    </div>
+                    <p class="es-turn-muted mb-5 text-sm leading-relaxed">A name and an email. No payment method to connect, no ticket types to configure.</p>
+                    <ul class="es-turn-muted space-y-2.5 text-sm">
+                        @foreach (['A Register button on your event page', 'An optional RSVP limit, counted per occurrence date', 'A confirmation email with a QR code for check-in', 'Registration notes in that email: directions, parking, what to bring', 'Guests can cancel their own registration from the email link', 'Every registration listed on the Sales tab'] as $freeItem)
+                            <li class="flex gap-2.5">
+                                <svg aria-hidden="true" class="es-turn-accent mt-0.5 h-4 w-4 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span>{{ $freeItem }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                    <p class="es-turn-muted mt-auto pt-5 text-xs leading-relaxed">Free on every plan. Newsletters are free too, at 10 emails a month, so you can email the people who came.</p>
+                </div>
+
+                <div class="es-turn-card flex flex-col p-7" data-reveal="panel">
+                    <div class="mb-4 flex flex-wrap items-center gap-2">
+                        <h3 class="es-turn-ink text-lg font-black">Ticketing</h3>
+                        <span class="es-turn-plan es-turn-plan-pro">Pro</span>
+                    </div>
+                    <p class="es-turn-muted mb-5 text-sm leading-relaxed">Everything on this page. $5 a month with a 7 day free trial, and still zero platform fees.</p>
+                    <ul class="es-turn-muted space-y-2.5 text-sm">
+                        @foreach (['Named ticket types with prices, quantities and sales windows', 'Promo codes, volume discounts, add-ons and gift cards', 'Passes and season subscriptions across many events', 'Custom questions at checkout, and individual tickets per guest', 'The check-in dashboard and the sold-out waitlist', 'The ticket form embedded on the website you already have'] as $proItem)
+                            <li class="flex gap-2.5">
+                                <svg aria-hidden="true" class="es-turn-accent mt-0.5 h-4 w-4 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span>{{ $proItem }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                    <p class="es-turn-muted mt-auto pt-5 text-xs leading-relaxed">Registration and ticketing are mutually exclusive on one event. Need free and paid side by side? Add a $0 ticket type next to the paid ones.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="es-turn-perf mx-auto max-w-7xl" aria-hidden="true">
+
+    <!-- ============================================================ -->
+    <!-- 7. After the sale                                            -->
+    <!-- ============================================================ -->
+    <section id="after" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-turn-mark mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                <p class="es-turn-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">After the sale</p>
+                <h2 class="es-balance es-turn-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    The part that happens <span class="es-turn-accent">on Monday.</span>
+                </h2>
+                <p class="es-turn-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    The count at the gate is only useful if it survives the night. These are the eight things the Sales list does once the doors are shut.
+                </p>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4" data-reveal-group="70">
+                @foreach ($afterSale as [$aTitle, $aBody, $aPlan])
+                    <div class="es-turn-card flex flex-col p-6" data-reveal="panel">
+                        <span class="es-turn-plan es-turn-plan-pro mb-3 self-start">{{ $aPlan }}</span>
+                        <h3 class="es-turn-ink mb-2 text-base font-bold">{{ $aTitle }}</h3>
+                        <p class="es-turn-muted text-sm leading-relaxed">{{ $aBody }}</p>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <hr class="es-turn-perf mx-auto max-w-7xl" aria-hidden="true">
+
+    <!-- ============================================================ -->
+    <!-- 8. Three steps                                               -->
+    <!-- ============================================================ -->
+    <section class="scroll-mt-24 py-20 lg:py-24">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <h2 class="es-balance es-turn-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal>
+                    Three steps
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-3" data-reveal-group="120">
+                @foreach ($steps as [$stepNum, $stepTitle, $stepBody])
+                    <div class="es-turn-card p-7" data-reveal="panel">
+                        <div class="es-turn-accent es-turn-num mb-3 text-2xl font-black">{{ $stepNum }}</div>
+                        <h3 class="es-turn-ink mb-2 text-lg font-bold">{{ $stepTitle }}</h3>
+                        <p class="es-turn-muted text-sm leading-relaxed">{{ $stepBody }}</p>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    @include('marketing.partials.pricing-nudge')
+
+    <!-- ============================================================ -->
+    <!-- 9. Related features                                          -->
+    <!-- ============================================================ -->
+    <section class="py-20">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related features</h2>
+            <h2 class="es-turn-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Related features</h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
                     <x-feature-link-card name="Stripe Payments" description="Accept credit cards, Apple Pay, and Google Pay with zero platform fees" :url="marketing_url('/stripe')" icon-color="blue">
@@ -748,33 +1268,110 @@
                     </x-feature-link-card>
                 </div>
             </div>
+            <div class="mt-6 text-center">
+                <a href="{{ marketing_url('/features') }}" class="es-turn-link inline-flex items-center font-medium hover:underline">
+                    See all features
+                    <svg aria-hidden="true" class="ml-1 h-4 w-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <hr class="es-turn-perf mx-auto max-w-7xl" aria-hidden="true">
+
+    <!-- ============================================================ -->
+    <!-- 10. Keep reading                                             -->
+    <!-- ============================================================ -->
+    <section class="py-16 lg:py-20">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <h2 class="es-turn-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Keep reading</h2>
+            <div class="grid grid-cols-2 gap-4 md:grid-cols-3" data-reveal-group="70">
+                @php
+                    $keepReading = [
+                        [route('marketing.docs.tickets'), 'Ticketing guide', 'Every tab, field and setting, written out.'],
+                        [route('marketing.docs.subscriptions'), 'Passes and subscriptions', 'One purchase, reused across many events.'],
+                        [marketing_url('/features/ai'), 'AI-powered import', 'Paste text or drop an image and get an event.'],
+                        [marketing_url('/for-musicians'), 'For musicians', 'Selling to a room you booked yourself.'],
+                        [marketing_url('/for-venues'), 'For venues', 'A door count for somebody else\'s show.'],
+                        [marketing_url('/for-comedy-clubs'), 'For comedy clubs', 'Several shows a night, each with its own count.'],
+                    ];
+                @endphp
+                @foreach ($keepReading as [$krHref, $krName, $krBlurb])
+                    <a href="{{ $krHref }}" class="es-turn-card es-turn-hover group flex flex-col p-5 transition-all duration-200 hover:shadow-md" data-reveal>
+                        <span class="es-turn-hover-title es-turn-ink mb-2 text-sm font-bold transition-colors">{{ $krName }}</span>
+                        <span class="es-turn-muted mb-3 text-xs leading-relaxed">{{ $krBlurb }}</span>
+                        <span class="es-turn-hover-arrow es-turn-muted mt-auto inline-flex items-center gap-1 text-xs font-semibold transition-colors">
+                            Read more
+                            <svg aria-hidden="true" class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                        </span>
+                    </a>
+                @endforeach
+            </div>
         </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- 8. Finale                                                   -->
+    <!-- 11. FAQ                                                      -->
     <!-- ============================================================ -->
-    <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
-        <div class="mx-auto max-w-6xl">
-            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-sky-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
-                <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(2, 132, 199, 0.3), rgba(2, 132, 199, 0) 60%); opacity: 0.7;"></div>
-                    <div class="grid-overlay absolute inset-0 opacity-30"></div>
-                    <div class="es-barcode absolute bottom-0 left-0 right-0 mx-auto flex h-14 max-w-3xl items-center justify-center px-8 opacity-25" style="mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);">
-                        @for ($i = 0; $i < 60; $i++)
-                            @php $w = [2, 4, 3, 6, 2, 5, 3, 2][$i % 8]; $dur = 2.2 + ($i % 6) * 0.25; $delay = ($i % 14) * 0.1; @endphp
-                            <span class="es-bar" style="width: {{ $w }}px; --br-dur: {{ $dur }}s; --br-delay: {{ $delay }}s;"></span>
-                        @endfor
-                    </div>
-                </div>
+    <x-seo.faq-schema :items="$faqs" />
 
+    <section id="faq" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <div class="mb-12 text-center">
+                <div class="es-turn-mark mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <h2 class="es-balance es-turn-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
+                    Frequently asked questions
+                </h2>
+                <p class="es-turn-muted text-lg" data-reveal style="--reveal-delay: 0.1s;">
+                    What people ask before they put their door money through somebody else's software.
+                </p>
+            </div>
+
+            <div class="space-y-3" data-reveal-group="80">
+                @foreach ($faqs as $faqIndex => $faq)
+                    <details name="faq" class="es-turn-card es-turn-hover group p-6 transition-all duration-200" data-reveal>
+                        <summary class="es-turn-ink flex cursor-pointer items-start gap-3 font-semibold">
+                            <span class="es-turn-accent es-turn-num flex-none text-sm font-bold" aria-hidden="true">{{ str_pad($faqIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                            <span class="es-turn-hover-title flex-1 transition-colors">{{ $faq['q'] }}</span>
+                            <svg aria-hidden="true" class="es-turn-muted mt-0.5 h-5 w-5 flex-none transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                        </summary>
+                        <p class="faq-answer es-turn-muted mt-4 leading-relaxed ps-9">{{ $faq['a'] }}</p>
+                    </details>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 12. Finale                                                   -->
+    <!-- ============================================================ -->
+    <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
+        <div class="mx-auto max-w-6xl">
+            <div class="es-turn-band noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+                <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                    <div class="grid-overlay absolute inset-0 opacity-30"></div>
+                </div>
                 <div class="relative z-10">
+                    <p class="es-turn-tag mb-4">Zero platform fees</p>
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Start selling tickets <span class="text-gradient-ticket">today</span>
+                        Sell the ticket. <span class="es-turn-lit">Keep the ticket.</span>
                     </h2>
-                    <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
-                        Set up ticketing for your events in minutes. No credit card required.
+                    <p class="mx-auto mb-10 max-w-2xl text-lg es-turn-band-muted">
+                        Publishing your events and taking free registrations is free forever. Ticketing, QR check-in and the waitlist are $5 a month, and nothing is taken at the gate.
                     </p>
+
+                    {{-- The last register. The hero's counter climbed to 142; this one never
+                         moves, and it is the one the page has been arguing about all along. --}}
+                    <div class="es-turn-plate mx-auto mb-10 max-w-sm p-6 text-left">
+                        <p class="es-turn-plate-muted mb-2 text-xs font-semibold uppercase tracking-widest">Platform fee taken</p>
+                        <div class="es-turn-count">0.00</div>
+                        <div class="es-turn-seam my-5" aria-hidden="true"></div>
+                        <p class="es-turn-plate-muted text-xs leading-relaxed">
+                            The other register on the same machine. It counted 142 admissions tonight and charged for none of them.
+                        </p>
+                    </div>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
                         <label for="es-claim-input" class="sr-only">Your schedule name</label>
@@ -783,7 +1380,7 @@
                                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
                             <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
-                        <a href="{{ app_url('/sign_up') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-sky-600 to-blue-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-sky-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-sky-500/40">
+                        <a href="{{ app_url('/sign_up') }}" class="es-turn-btn group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
                             <span class="relative z-10 flex items-center gap-2">
                                 Get Started Free
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -794,11 +1391,27 @@
                         </a>
                     </div>
 
-                    <p class="mt-6 text-sm text-gray-400">No credit card required</p>
+                    <p class="mt-6 text-sm es-turn-band-muted">No credit card required</p>
                 </div>
             </div>
         </div>
     </section>
+
+    <!-- Desktop dot nav -->
+    <nav class="es-dotnav fixed top-1/2 z-40 hidden -translate-y-1/2 lg:block ltr:right-5 rtl:left-5" aria-label="Page sections">
+        <ul class="glass flex flex-col items-center gap-1.5 rounded-full px-2 py-3">
+            @foreach ($dotSections as [$sectionId, $sectionLabel])
+                <li class="relative">
+                    <a href="#{{ $sectionId }}" class="es-dot group block rounded-full" aria-label="{{ $sectionLabel }}">
+                        <span class="es-dot-pip block h-2 w-2 rounded-full bg-gray-400/60 dark:bg-white/30"></span>
+                        <span class="pointer-events-none absolute top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full es-turn-tip border px-3 py-1 text-xs font-medium opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 ltr:right-full ltr:mr-3 rtl:left-full rtl:ml-3">{{ $sectionLabel }}</span>
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    </nav>
+
+    </div>
 
     <x-marketing.related-pages />
 

@@ -47,9 +47,11 @@ class SendAppointmentReminders extends Command
                 continue;
             }
 
+            // No plan check: appointments are on every plan, and a booking already taken has to be
+            // honoured whatever the schedule's plan does afterwards.
             $role = $event->getRoleWithEmailSettings() ?: $event->creatorRole;
-            if (! $role || ! $role->isPro()) {
-                continue; // feature lapsed
+            if (! $role) {
+                continue;
             }
             if (config('app.hosted') && ! $role->hasEmailSettings()) {
                 // Same transport gate as every other appointment mail: a schedule whose guests

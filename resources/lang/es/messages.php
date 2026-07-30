@@ -795,6 +795,9 @@ return [
     'embed_description' => 'Inserta tu horario en tu sitio web o blog usando el código iframe de abajo.',
     'embed_url' => 'URL de Inserción',
     'iframe_code' => 'Código Iframe',
+    'embed_layout' => 'Diseño',
+    'embed_layout_default' => 'Predeterminado del calendario (:layout)',
+    'embed_layout_help' => 'Solo cambia el codigo que copias abajo. Tu pagina de calendario mantiene su Diseño Predeterminado.',
     'close' => 'Cerrar',
     'payment_url' => 'Enlace de Pago',
 

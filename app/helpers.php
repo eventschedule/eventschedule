@@ -178,6 +178,30 @@ if (! function_exists('is_mobile')) {
     }
 }
 
+if (! function_exists('requested_event_layout')) {
+    /**
+     * The event layout asked for by ?layout= on the current request, or null when the
+     * parameter is absent or unrecognised (unrecognised falls through to the schedule's
+     * own setting rather than erroring). "grid" and "month" are undocumented aliases for
+     * "calendar" so a guessed value still works; the docs only name calendar and list,
+     * because ?layout=grid means something different on the event-graphic routes.
+     */
+    function requested_event_layout(): ?string
+    {
+        $requested = request()->query('layout');
+
+        if (! is_string($requested)) {
+            return null;
+        }
+
+        return match (strtolower(trim($requested))) {
+            'calendar', 'grid', 'month' => 'calendar',
+            'list' => 'list',
+            default => null,
+        };
+    }
+}
+
 if (! function_exists('is_rtl')) {
     /**
      * Check if the current user is on a rtl language

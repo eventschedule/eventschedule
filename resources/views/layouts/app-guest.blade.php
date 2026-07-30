@@ -197,7 +197,7 @@
             }
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif !important;
             min-height: 100vh;
-            background-attachment: {{ (($event && !request()->embed && !request()->graphic) || ($role->event_layout ?? 'calendar') === 'list') ? 'fixed' : 'scroll' }};
+            background-attachment: {{ (($event && !request()->embed && !request()->graphic) || $role->activeEventLayout() === 'list') ? 'fixed' : 'scroll' }};
             display: flex;
             flex-direction: column;
             @if ($event && $otherRole && $otherRole->isClaimed() && $otherRole->hasConfiguredBackground())
@@ -550,13 +550,15 @@
                 <div class="gp-lang-switcher flex items-center rounded-full p-1 text-sm shadow-md z-50 {{ $isRtl ? 'flex-row-reverse' : '' }}" translate="no">
                     @if(session()->has('translate') || request()->lang == $switcherTarget)
                         <span class="gp-lang-active px-3 py-1.5 rounded-full font-medium" title="{{ $switcherTargetName }}" aria-label="{{ $switcherTargetName }}">{{ strtoupper($switcherTarget) }}</span>
-                        <a href="{{ str_replace('http://', 'https://', request()->url()) }}?lang={{ $role->language_code }}"
+                        {{-- fullUrlWithQuery, not url(), so switching language keeps the rest of
+                             the query string (?layout=, ?category=, ?month= ...) intact. --}}
+                        <a href="{{ str_replace('http://', 'https://', request()->fullUrlWithQuery(['lang' => $role->language_code])) }}"
                            class="gp-lang-inactive px-3 py-1.5 rounded-full font-medium transition-all duration-200"
                            title="{{ $switcherAuthoredName }}" aria-label="{{ $switcherAuthoredName }}">
                             {{ strtoupper($role->language_code) }}
                         </a>
                     @else
-                        <a href="{{ str_replace('http://', 'https://', request()->url()) }}?lang={{ $switcherTarget }}"
+                        <a href="{{ str_replace('http://', 'https://', request()->fullUrlWithQuery(['lang' => $switcherTarget])) }}"
                            class="gp-lang-inactive px-3 py-1.5 rounded-full font-medium transition-all duration-200"
                            title="{{ $switcherTargetName }}" aria-label="{{ $switcherTargetName }}">
                             {{ strtoupper($switcherTarget) }}
@@ -597,34 +599,25 @@
     @endif
 
     @php
-        // A schedule whose Enterprise plan an admin handed out carries a small credit. Customers
-        // paying through Stripe do not: they buy white-label, and the marketing pages promise it
-        // without qualification.
-        //
-        // Both halves are load-bearing. plan_source alone would keep branding someone who was
-        // granted a plan and later subscribed, if any Stripe path ever forgot to clear it;
-        // hasActiveEnterpriseSubscription() alone would also catch referral rewards, which are
-        // earned rather than given (see ReferralController).
-        //
-        // The hosted guard is not redundant with is_nexus: they are independent env vars, and on
-        // an unhosted install actualPlanTier() short-circuits to 'enterprise' for every schedule
-        // (Role::actualPlanTier) while isWhiteLabeled() is unconditionally true. Without it, a
-        // selfhost operator who sets IS_NEXUS=true would brand pages that are meant to be fully
-        // white-labeled.
-        $showGrantedPlanCredit = config('app.is_nexus')
-            && config('app.hosted')
-            && $role->plan_source === 'admin'
-            && $role->actualPlanTier() === 'enterprise'
-            && ! $role->hasActiveEnterpriseSubscription();
+        // Which of the chip's three jobs applies here, or null for none - see
+        // Role::creditChipReason(). hosted and is_nexus are independent env vars, so the
+        // reasons are ordered there rather than unpicked here.
+        $creditReason = $role->creditChipReason();
 
-        // Tagged so the /admin traffic sources report can attribute signups to the credit. The
-        // marketing layout builds its canonical from request()->path(), so the query string
-        // self-canonicalizes away.
-        $creditUrl = 'https://eventschedule.com'
-            .($showGrantedPlanCredit ? '?utm_source=granted-plan&utm_medium=footer' : '');
+        // Tagged per reason so the /admin traffic sources report can tell an operator's free
+        // tier apart from a selfhost install apart from a granted plan. The marketing layout
+        // builds its canonical from request()->path(), so the query string self-canonicalizes
+        // away. The chip always points at eventschedule.com rather than marketing_url(): it is
+        // the license attribution, and that is not the operator's to rebrand.
+        $creditUtm = [
+            'selfhost' => '?utm_source=selfhost&utm_medium=footer',
+            'saas_free' => '?utm_source=saas&utm_medium=footer',
+            'granted_plan' => '?utm_source=granted-plan&utm_medium=footer',
+        ];
+        $creditUrl = 'https://eventschedule.com'.($creditUtm[$creditReason] ?? '');
     @endphp
 
-    @if (! request()->embed && ((! config('app.is_nexus') && $role->showBranding()) || $showGrantedPlanCredit))
+    @if (! request()->embed && $creditReason)
     <div class="flex justify-{{ $isRtl ? 'start' : 'end' }} p-4">
         {{-- Per the AAL license, please do not remove the link to Event Schedule --}}
         <a href="{{ $creditUrl }}" target="_blank" rel="noopener" title="{{ __('messages.powered_by_event_schedule') }}"

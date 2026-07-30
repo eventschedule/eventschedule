@@ -597,6 +597,9 @@ return [
     'embed_description' => 'Incorpora il tuo programma nel tuo sito web o blog usando il codice iframe qui sotto.',
     'embed_url' => 'URL di Incorporazione',
     'iframe_code' => 'Codice Iframe',
+    'embed_layout' => 'Layout',
+    'embed_layout_default' => 'Predefinito del calendario (:layout)',
+    'embed_layout_help' => 'Modifica solo il codice che copi qui sotto. La pagina del tuo calendario mantiene il suo Layout Predefinito.',
     'close' => 'Chiudi',
 
     // Missing keys

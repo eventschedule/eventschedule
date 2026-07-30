@@ -595,6 +595,9 @@ return [
     'embed_description' => 'Incorpore sua agenda em seu site ou blog usando o código iframe abaixo.',
     'embed_url' => 'URL de Incorporação',
     'iframe_code' => 'Código Iframe',
+    'embed_layout' => 'Layout',
+    'embed_layout_default' => 'Padrão da agenda (:layout)',
+    'embed_layout_help' => 'Altera apenas o código que você copia abaixo. A sua página de agenda mantém o seu Layout Padrão.',
     'close' => 'Fechar',
 
     // Missing keys

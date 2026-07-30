@@ -6,7 +6,7 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 
 **Progress:** 147 / 147 reviewed
 
-**Updated:** 27 / 147 rebuilt
+**Updated:** 114 / 147 rebuilt
 
 > Scope: static and functional marketing pages served under `marketing.*` routes (`routes/web.php`, `MarketingController`), cross-checked against `resources/views/sitemap.blade.php`. Excludes URL redirects, the shared partials/components, and individual blog posts. The comparison and replacement detail pages each render one shared template driven by per-slug data.
 
@@ -17,15 +17,15 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 | ✅ | ✅ | Homepage | `/` | Homepage-exclusive design: live poster wall, 3D showcase, pinned gallery rail, integrations orbit |
 | ✅ | ✅ | Features | `/features` | Rebuilt as five chapters via `<x-marketing.feature-chapter>` / `<x-marketing.feature-banner>` |
 | ✅ | ✅ | Pricing | `/pricing` | Rebuilt July 2026 (the feature lists are curated - see CLAUDE.md before editing them) |
-| ✅ | | About | `/about` | |
-| ✅ | | Demos / Examples | `/examples` | Route name is `marketing.demos` |
-| ✅ | | Search | `/search` | Functional page |
-| ✅ | | Browse | `/browse` | Functional page |
-| ✅ | | FAQ | `/faq` | |
-| ✅ | | Why Create an Account | `/why-create-account` | |
+| ✅ | ✅ | About | `/about` | "The Colophon" ground-up rebuild |
+| ✅ | ✅ | Demos / Examples | `/examples` | "The Showroom" ground-up rebuild; route name is `marketing.demos` |
+| ✅ | ✅ | Search | `/search` | "The Lookup" ground-up rebuild; functional page, search form and query handling preserved |
+| ✅ | ✅ | Browse | `/browse` | "The Newsstand" ground-up rebuild; functional page, filters and query params preserved |
+| ✅ | ✅ | FAQ | `/faq` | "The Front Desk" ground-up rebuild |
+| ✅ | ✅ | Why Create an Account | `/why-create-account` | "The Keyring" ground-up rebuild |
 | ✅ | ✅ | Use Cases | `/use-cases` | Component-driven directory via `<x-marketing.audience-card>` |
-| ✅ | | Contact | `/contact` | |
-| ✅ | | Open Source | `/open-source` | |
+| ✅ | ✅ | Contact | `/contact` | "The Postcard" ground-up rebuild |
+| ✅ | ✅ | Open Source | `/open-source` | "The Commit Log" ground-up rebuild |
 | ✅ | ✅ | Selfhost | `/selfhost` | "The Terminal" ground-up rebuild |
 | ✅ | ✅ | SaaS | `/saas` | "The Stack" ground-up rebuild; white-label SaaS operator landing |
 
@@ -33,38 +33,38 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 
 | Reviewed | Updated | Page | URL | Notes |
 |:--------:|:-------:|------|-----|-------|
-| ✅ | | Ticketing | `/features/ticketing` | |
-| ✅ | | Gift Cards | `/features/gift-cards` | |
-| ✅ | | AI | `/features/ai` | |
-| ✅ | | Calendar Sync | `/features/calendar-sync` | |
-| ✅ | | Analytics | `/features/analytics` | |
-| ✅ | | Integrations | `/features/integrations` | |
-| ✅ | | Custom Fields | `/features/custom-fields` | |
-| ✅ | | Custom Labels | `/features/custom-labels` | |
-| ✅ | | Team Scheduling | `/features/team-scheduling` | |
-| ✅ | | Sub-schedules | `/features/sub-schedules` | |
-| ✅ | | Online Events | `/features/online-events` | |
-| ✅ | | Newsletters | `/features/newsletters` | |
-| ✅ | | Recurring Events | `/features/recurring-events` | |
-| ✅ | | Embed Calendar | `/features/embed-calendar` | |
-| ✅ | | Embed Tickets | `/features/embed-tickets` | |
-| ✅ | | Fan Videos | `/features/fan-videos` | |
-| ✅ | | Polls | `/features/polls` | |
-| ✅ | | Boost | `/features/boost` | |
-| ✅ | | Private Events | `/features/private-events` | |
-| ✅ | | Event Graphics | `/features/event-graphics` | |
-| ✅ | | White Label | `/features/white-label` | |
-| ✅ | | Custom CSS | `/features/custom-css` | |
-| ✅ | | Custom Domain | `/features/custom-domain` | |
-| ✅ | | Feedback | `/features/feedback` | |
-| ✅ | | Availability | `/features/availability` | Local-dev only: `/features/availability` is shadowed by the `role.view_admin` `/{subdomain}/{tab}` route (tab `availability` is whitelisted) → 302 /login; production is unaffected (subdomain isolation). Verified via direct view render. |
-| ✅ | | Appointments | `/features/appointments` | Redesigned July 2026 on the gift-cards skeleton (Calendly-style booking launch page), so it is still the shared skeleton rather than a page-exclusive design. Local-dev only: shadowed by the `role.view_admin` `/{subdomain}/{tab}` route (tab `appointments` is whitelisted) → 302 /login; production unaffected. Verified via direct view render. |
-| ✅ | | Carpool | `/features/carpool` | |
-| ✅ | | Google Calendar | `/google-calendar` | Root-level integration page |
-| ✅ | | Outlook Calendar | `/outlook-calendar` | Root-level integration page |
-| ✅ | | CalDAV | `/caldav` | Root-level integration page |
-| ✅ | | Stripe | `/stripe` | Root-level integration page |
-| ✅ | | Invoice Ninja | `/invoiceninja` | Root-level integration page |
+| ✅ | ✅ | Ticketing | `/features/ticketing` | "The Turnstile" ground-up rebuild |
+| ✅ | ✅ | Gift Cards | `/features/gift-cards` | "The Gift Envelope" ground-up rebuild |
+| ✅ | ✅ | AI | `/features/ai` | "The Spark" ground-up rebuild |
+| ✅ | ✅ | Calendar Sync | `/features/calendar-sync` | "The Round Trip" ground-up rebuild (renamed from "The Loop", which recurring-events holds) |
+| ✅ | ✅ | Analytics | `/features/analytics` | "The Dashboard" ground-up rebuild |
+| ✅ | ✅ | Integrations | `/features/integrations` | "The Wire" ground-up rebuild |
+| ✅ | ✅ | Custom Fields | `/features/custom-fields` | "The Form" ground-up rebuild |
+| ✅ | ✅ | Custom Labels | `/features/custom-labels` | "The Rename" ground-up rebuild |
+| ✅ | ✅ | Team Scheduling | `/features/team-scheduling` | "The Lineup" ground-up rebuild |
+| ✅ | ✅ | Sub-schedules | `/features/sub-schedules` | "The Sort" ground-up rebuild |
+| ✅ | ✅ | Online Events | `/features/online-events` | "Go Live" ground-up rebuild |
+| ✅ | ✅ | Newsletters | `/features/newsletters` | "The Send" ground-up rebuild |
+| ✅ | ✅ | Recurring Events | `/features/recurring-events` | "The Loop" ground-up rebuild |
+| ✅ | ✅ | Embed Calendar | `/features/embed-calendar` | "The Paste" ground-up rebuild |
+| ✅ | ✅ | Embed Tickets | `/features/embed-tickets` | "The Widget" ground-up rebuild |
+| ✅ | ✅ | Fan Videos | `/features/fan-videos` | "The Reel" ground-up rebuild |
+| ✅ | ✅ | Polls | `/features/polls` | "The Vote" ground-up rebuild |
+| ✅ | ✅ | Boost | `/features/boost` | "The Launch" ground-up rebuild |
+| ✅ | ✅ | Private Events | `/features/private-events` | "The Vault" ground-up rebuild |
+| ✅ | ✅ | Event Graphics | `/features/event-graphics` | "The Gallery" ground-up rebuild |
+| ✅ | ✅ | White Label | `/features/white-label` | "The Blank Slate" ground-up rebuild |
+| ✅ | ✅ | Custom CSS | `/features/custom-css` | "The Stylesheet" ground-up rebuild |
+| ✅ | ✅ | Custom Domain | `/features/custom-domain` | "The Nameplate" ground-up rebuild |
+| ✅ | ✅ | Feedback | `/features/feedback` | "The Comment Card" ground-up rebuild |
+| ✅ | ✅ | Availability | `/features/availability` | "Office Hours" ground-up rebuild |
+| ✅ | ✅ | Appointments | `/features/appointments` | "The Appointment Book" ground-up rebuild (replaces the shared gift-cards skeleton) |
+| ✅ | ✅ | Carpool | `/features/carpool` | "Four Seats" ground-up rebuild |
+| ✅ | ✅ | Google Calendar | `/google-calendar` | "The Invitation" ground-up rebuild; root-level integration page |
+| ✅ | ✅ | Outlook Calendar | `/outlook-calendar` | "The Meeting Request" ground-up rebuild; root-level integration page |
+| ✅ | ✅ | CalDAV | `/caldav` | "The Open Protocol" ground-up rebuild; root-level integration page |
+| ✅ | ✅ | Stripe | `/stripe` | "The Payout" ground-up rebuild; root-level integration page |
+| ✅ | ✅ | Invoice Ninja | `/invoiceninja` | "The Ledger" ground-up rebuild; root-level integration page |
 
 ## Schedule Type Hubs (3)
 
@@ -80,7 +80,18 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 
 > **Restyle briefs.** Each note below can be pasted into Claude as the instruction for making that page's design more unique to its audience. Each page lives at `resources/views/marketing/for-{slug}.blade.php`. On most pages the existing signature is the accent gradient on the seven section headings plus a motif rendered in exactly three full-bleed layers (hero art, dark band, finale); the briefs below extend it deeper into the page. Shared ground rules for every brief: keep the shared es-* skeleton and section order; implement theming inside the page's nonce'd `<style>` block following the `/* For-x "Nickname" styles */` convention; every gradient needs light and dark variants; every animation needs a reduced-motion kill-switch; carry the accent and motif into at least one mid-page moment (bento, stats or week grid) and recolor the hard-coded blue "See all features" link and related-card hovers to the page accent; remove or actually use any dead `es-*-float` class; never use purple, violet, indigo, fuchsia or pink as accents; never use decorative line drawings (outline SVG illustrations of objects or scenes) - see CLAUDE.md; no new dependencies or external assets.
 
-**Restyle progress:** 17 / 31 applied
+**Restyle progress:** 31 / 31 applied
+
+> **Review status of the last 14 (2026-07-30).** The final 14 pages were rebuilt in one
+> parallel pass. Each was verified MECHANICALLY: HTTP 200, `audit-blade.py` reporting 0
+> problems (dead classes, undefined page-local classes, orphan descendant rules, forbidden
+> colours, em-dashes, reduced-motion kill-switches), and 0 WCAG AA contrast failures in both
+> colour modes. They did NOT receive the independent adversarial design/fabrication review
+> that the earlier 17 got, because the reviewing pass was cut short by a usage limit. Their
+> authors each reported their own accuracy sweep (fabricated features removed, plan tiers
+> corrected), but that self-report is unaudited. Worth a human read for design substance and
+> feature-claim accuracy before treating them as final. **Every OTHER page rebuilt in this
+> campaign (main, features, templates, legal) did get its independent reviewer.**
 
 **Verified (Jul 2026 audit):** 31 / 31 audited faithful to their briefs; 8 pages received small brief-completion fixes (see the Verified column).
 
@@ -103,69 +114,69 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 | ✅ | ✅ | ✅ course labels | For Restaurants | `/for-restaurants` | "Twenty-Four Covers" ground-up rebuild |
 | ✅ | ✅ | ✅ FAQ accent hover | For Breweries and Wineries | `/for-breweries-and-wineries` | "Most Nights Are Free" ground-up rebuild |
 | ✅ | ✅ | ✅ finale aurora recolored | For Art Galleries | `/for-art-galleries` | "Four Evenings" ground-up rebuild |
-| ✅ |  | ✅ | For Community Centers | `/for-community-centers` | |
-| ✅ |  | ✅ | For Fitness and Yoga | `/for-fitness-and-yoga` | |
-| ✅ |  | ✅ | For Workshop Instructors | `/for-workshop-instructors` | |
-| ✅ |  | ✅ | For Visual Artists | `/for-visual-artists` | |
-| ✅ |  | ✅ | For Farmers Markets | `/for-farmers-markets` | |
-| ✅ |  | ✅ | For Hotels and Resorts | `/for-hotels-and-resorts` | |
-| ✅ |  | ✅ comment + dark vars | For Libraries | `/for-libraries` | |
-| ✅ |  | ✅ | For Webinars | `/for-webinars` | |
-| ✅ |  | ✅ | For Live Concerts | `/for-live-concerts` | |
-| ✅ |  | ✅ | For Online Classes | `/for-online-classes` | |
-| ✅ |  | ✅ | For Virtual Conferences | `/for-virtual-conferences` | |
-| ✅ |  | ✅ | For Live Q&A Sessions | `/for-live-qa-sessions` | |
-| ✅ |  | ✅ | For Watch Parties | `/for-watch-parties` | |
-| ✅ |  | ✅ | For AI Agents | `/for-ai-agents` | |
+| ✅ | ✅ | ✅ | For Community Centers | `/for-community-centers` | "The Gathering Place" ground-up rebuild |
+| ✅ | ✅ | ✅ | For Fitness and Yoga | `/for-fitness-and-yoga` | "The Flow" ground-up rebuild |
+| ✅ | ✅ | ✅ | For Workshop Instructors | `/for-workshop-instructors` | "The Workshop" ground-up rebuild |
+| ✅ | ✅ | ✅ | For Visual Artists | `/for-visual-artists` | "The Studio Wall" ground-up rebuild |
+| ✅ | ✅ | ✅ | For Farmers Markets | `/for-farmers-markets` | "The Market" ground-up rebuild |
+| ✅ | ✅ | ✅ | For Hotels and Resorts | `/for-hotels-and-resorts` | "The Concierge" ground-up rebuild |
+| ✅ | ✅ | ✅ comment + dark vars | For Libraries | `/for-libraries` | "The Catalog" ground-up rebuild |
+| ✅ | ✅ | ✅ | For Webinars | `/for-webinars` | "On Air" ground-up rebuild |
+| ✅ | ✅ | ✅ | For Live Concerts | `/for-live-concerts` | "Live On Stage" ground-up rebuild |
+| ✅ | ✅ | ✅ | For Online Classes | `/for-online-classes` | "The Syllabus" ground-up rebuild |
+| ✅ | ✅ | ✅ | For Virtual Conferences | `/for-virtual-conferences` | "The Agenda" ground-up rebuild |
+| ✅ | ✅ | ✅ | For Live Q&A Sessions | `/for-live-qa-sessions` | "The Conversation" ground-up rebuild |
+| ✅ | ✅ | ✅ | For Watch Parties | `/for-watch-parties` | "The Screening" ground-up rebuild |
+| ✅ | ✅ | ✅ | For AI Agents | `/for-ai-agents` | "The Console" ground-up rebuild |
 
 ## Comparison / "Alternative" pages (17)
 
 | Reviewed | Updated | Page | URL | Notes |
 |:--------:|:-------:|------|-----|-------|
 | ✅ | ✅ | Compare (hub) | `/compare` | "Head to Head" ground-up rebuild; the 16 singles below share the `compare-single` template, which is still first-wave |
-| ✅ | | Eventbrite Alternative | `/eventbrite-alternative` | |
-| ✅ | | Luma Alternative | `/luma-alternative` | |
-| ✅ | | Ticket Tailor Alternative | `/ticket-tailor-alternative` | |
-| ✅ | | Google Calendar Alternative | `/google-calendar-alternative` | |
-| ✅ | | Meetup Alternative | `/meetup-alternative` | |
-| ✅ | | DICE Alternative | `/dice-alternative` | |
-| ✅ | | Brown Paper Tickets Alternative | `/brown-paper-tickets-alternative` | |
-| ✅ | | Splash Alternative | `/splash-alternative` | |
-| ✅ | | Sched Alternative | `/sched-alternative` | |
-| ✅ | | Whova Alternative | `/whova-alternative` | |
-| ✅ | | Accelevents Alternative | `/accelevents-alternative` | |
-| ✅ | | Tito Alternative | `/tito-alternative` | |
-| ✅ | | AddEvent Alternative | `/addevent-alternative` | |
-| ✅ | | Pretix Alternative | `/pretix-alternative` | |
-| ✅ | | Humanitix Alternative | `/humanitix-alternative` | |
-| ✅ | | Eventzilla Alternative | `/eventzilla-alternative` | |
+| ✅ | ✅ | Eventbrite Alternative | `/eventbrite-alternative` | Renders the rebuilt `compare-single` "The Scorecard" template |
+| ✅ | ✅ | Luma Alternative | `/luma-alternative` | Renders the rebuilt `compare-single` "The Scorecard" template |
+| ✅ | ✅ | Ticket Tailor Alternative | `/ticket-tailor-alternative` | Renders the rebuilt `compare-single` "The Scorecard" template |
+| ✅ | ✅ | Google Calendar Alternative | `/google-calendar-alternative` | Renders the rebuilt `compare-single` "The Scorecard" template |
+| ✅ | ✅ | Meetup Alternative | `/meetup-alternative` | Renders the rebuilt `compare-single` "The Scorecard" template |
+| ✅ | ✅ | DICE Alternative | `/dice-alternative` | Renders the rebuilt `compare-single` "The Scorecard" template |
+| ✅ | ✅ | Brown Paper Tickets Alternative | `/brown-paper-tickets-alternative` | Renders the rebuilt `compare-single` "The Scorecard" template |
+| ✅ | ✅ | Splash Alternative | `/splash-alternative` | Renders the rebuilt `compare-single` "The Scorecard" template |
+| ✅ | ✅ | Sched Alternative | `/sched-alternative` | Renders the rebuilt `compare-single` "The Scorecard" template |
+| ✅ | ✅ | Whova Alternative | `/whova-alternative` | Renders the rebuilt `compare-single` "The Scorecard" template |
+| ✅ | ✅ | Accelevents Alternative | `/accelevents-alternative` | Renders the rebuilt `compare-single` "The Scorecard" template |
+| ✅ | ✅ | Tito Alternative | `/tito-alternative` | Renders the rebuilt `compare-single` "The Scorecard" template |
+| ✅ | ✅ | AddEvent Alternative | `/addevent-alternative` | Renders the rebuilt `compare-single` "The Scorecard" template |
+| ✅ | ✅ | Pretix Alternative | `/pretix-alternative` | Renders the rebuilt `compare-single` "The Scorecard" template |
+| ✅ | ✅ | Humanitix Alternative | `/humanitix-alternative` | Renders the rebuilt `compare-single` "The Scorecard" template |
+| ✅ | ✅ | Eventzilla Alternative | `/eventzilla-alternative` | Renders the rebuilt `compare-single` "The Scorecard" template |
 
 ## "Replace" pages (13)
 
 | Reviewed | Updated | Page | URL | Notes |
 |:--------:|:-------:|------|-----|-------|
-| ✅ | | Replace (hub) | `/replace` | Hub page; the 12 singles below share the `replace-single` template |
-| ✅ | | Google Forms Replacement | `/google-forms-replacement` | |
-| ✅ | | Mailchimp Replacement | `/mailchimp-replacement` | |
-| ✅ | | Canva Replacement | `/canva-replacement` | |
-| ✅ | | Linktree Replacement | `/linktree-replacement` | |
-| ✅ | | Google Sheets Replacement | `/google-sheets-replacement` | |
-| ✅ | | Calendly Replacement | `/calendly-replacement` | |
-| ✅ | | SurveyMonkey Replacement | `/surveymonkey-replacement` | |
-| ✅ | | Doodle Replacement | `/doodle-replacement` | |
-| ✅ | | QR Code Generator Replacement | `/qr-code-generator-replacement` | |
-| ✅ | | Squarespace Replacement | `/squarespace-replacement` | |
-| ✅ | | Notion Replacement | `/notion-replacement` | |
-| ✅ | | Trello Replacement | `/trello-replacement` | |
+| ✅ | ✅ | Replace (hub) | `/replace` | "The Toolbelt" ground-up rebuild; hub for the 12 replacement singles. Hub page; the 12 singles below share the `replace-single` template |
+| ✅ | ✅ | Google Forms Replacement | `/google-forms-replacement` | Renders the rebuilt `replace-single` "The Swap" template |
+| ✅ | ✅ | Mailchimp Replacement | `/mailchimp-replacement` | Renders the rebuilt `replace-single` "The Swap" template |
+| ✅ | ✅ | Canva Replacement | `/canva-replacement` | Renders the rebuilt `replace-single` "The Swap" template |
+| ✅ | ✅ | Linktree Replacement | `/linktree-replacement` | Renders the rebuilt `replace-single` "The Swap" template |
+| ✅ | ✅ | Google Sheets Replacement | `/google-sheets-replacement` | Renders the rebuilt `replace-single` "The Swap" template |
+| ✅ | ✅ | Calendly Replacement | `/calendly-replacement` | Renders the rebuilt `replace-single` "The Swap" template |
+| ✅ | ✅ | SurveyMonkey Replacement | `/surveymonkey-replacement` | Renders the rebuilt `replace-single` "The Swap" template |
+| ✅ | ✅ | Doodle Replacement | `/doodle-replacement` | Renders the rebuilt `replace-single` "The Swap" template |
+| ✅ | ✅ | QR Code Generator Replacement | `/qr-code-generator-replacement` | Renders the rebuilt `replace-single` "The Swap" template |
+| ✅ | ✅ | Squarespace Replacement | `/squarespace-replacement` | Renders the rebuilt `replace-single` "The Swap" template |
+| ✅ | ✅ | Notion Replacement | `/notion-replacement` | Renders the rebuilt `replace-single` "The Swap" template |
+| ✅ | ✅ | Trello Replacement | `/trello-replacement` | Renders the rebuilt `replace-single` "The Swap" template |
 
 ## Legal / Policy (4)
 
 | Reviewed | Updated | Page | URL | Notes |
 |:--------:|:-------:|------|-----|-------|
-| ✅ | | Privacy Policy | `/privacy` | |
-| ✅ | | Terms of Service | `/terms-of-service` | |
-| ✅ | | Accessibility | `/accessibility` | |
-| ✅ | | Self-Hosting Terms of Service | `/self-hosting-terms-of-service` | |
+| ✅ | ✅ | Privacy Policy | `/privacy` | "The Fine Print" family treatment (shared restrained legal set); legal text verbatim |
+| ✅ | ✅ | Terms of Service | `/terms-of-service` | "The Fine Print" family treatment; legal text verbatim |
+| ✅ | ✅ | Accessibility | `/accessibility` | "The Fine Print" family treatment; legal text verbatim |
+| ✅ | ✅ | Self-Hosting Terms of Service | `/self-hosting-terms-of-service` | "The Fine Print" family treatment; legal text verbatim |
 
 ## Docs - User Guide (19)
 

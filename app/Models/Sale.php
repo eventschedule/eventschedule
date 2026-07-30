@@ -46,12 +46,14 @@ class Sale extends Model
         'guest_timezone',
         'reminder_sent_at',
         'confirmed_at',
+        'paid_at',
     ];
 
     protected $casts = [
         'feedback_sent_at' => 'datetime',
         'reminder_sent_at' => 'datetime',
         'confirmed_at' => 'datetime',
+        'paid_at' => 'datetime',
     ];
 
     protected static bool $cascadingGroup = false;
@@ -61,6 +63,14 @@ class Sale extends Model
         static::saving(function ($sale) {
             if ($sale->phone) {
                 $sale->phone = \App\Utils\PhoneUtils::normalize($sale->phone);
+            }
+
+            // Stamp the moment this sale became paid. Done here rather than at the dozen-odd
+            // paid-transition call sites (cash checkout, mark-paid, the Stripe / Invoice Ninja
+            // webhooks, payment-url success, appointments, the API) so no path can be missed.
+            // Covers both creation-as-paid (RSVP, free, appointments) and later transitions.
+            if ($sale->status === 'paid' && ! $sale->paid_at) {
+                $sale->paid_at = now();
             }
         });
 
@@ -74,10 +84,12 @@ class Sale extends Model
 
                 // Cascade paid status to grouped sales
                 if ($sale->group_id && $sale->isPrimarySale()) {
+                    // Raw update, so paid_at has to be set explicitly here - the saving() hook
+                    // that normally stamps it does not run for a query-builder update.
                     Sale::where('group_id', $sale->group_id)
                         ->where('id', '!=', $sale->id)
                         ->where('status', '!=', 'paid')
-                        ->update(['status' => 'paid']);
+                        ->update(['status' => 'paid', 'paid_at' => $sale->paid_at ?? now()]);
 
                     // Clear waitlist entries for guest emails (raw update above skips booted hooks)
                     $guestEmails = Sale::where('group_id', $sale->group_id)

@@ -41,6 +41,14 @@ class WaitlistController extends Controller
                 ]);
             }
         } else {
+            // The TICKET waitlist is Pro. Deliberately gated here and not above, so the RSVP branch
+            // stays free: it has always worked on every plan and free schedules may already depend
+            // on it. Until the free plan could sell tickets this branch needed no gate, because a
+            // free schedule could never reach a sold-out paid ticket.
+            if (! $event->isPro()) {
+                abort(404);
+            }
+
             if (! $event->allTicketsSoldOut($request->event_date)) {
                 return response()->json([
                     'success' => false,

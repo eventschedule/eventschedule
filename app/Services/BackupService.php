@@ -412,6 +412,7 @@ class BackupService
                 'reminder_sent_at' => $sale->reminder_sent_at?->toDateTimeString(),
                 'guest_timezone' => $sale->guest_timezone,
                 'confirmed_at' => $sale->confirmed_at?->toDateTimeString(),
+                'paid_at' => $sale->paid_at?->toDateTimeString(),
                 'created_at' => $sale->created_at?->toDateTimeString(),
             ];
 
@@ -1596,6 +1597,13 @@ class BackupService
         $sale->reminder_sent_at = $data['reminder_sent_at'] ?? null;
         $sale->guest_timezone = $data['guest_timezone'] ?? null;
         $sale->confirmed_at = $data['confirmed_at'] ?? null;
+
+        // saveQuietly() below fires no hooks, so the saving() hook that normally stamps paid_at
+        // does not run. Carry the original payment time across, falling back to created_at for
+        // backups taken before the column existed. Without this a restore of historic sales would
+        // land with paid_at = now() and burn the schedule's monthly ticket allowance.
+        $sale->paid_at = $data['paid_at']
+            ?? (($data['status'] ?? null) === 'paid' ? ($data['created_at'] ?? null) : null);
 
         // Remap promo_code_id
         $promoRefId = $data['_promo_code_ref_id'] ?? null;

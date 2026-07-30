@@ -32,11 +32,10 @@ class AppointmentController extends Controller
 
     public function __construct(protected AppointmentService $appointments) {}
 
-    /** GET /book - list bookable types (redirect when exactly one; 404 when none or gated). */
+    /** GET /book - list bookable types (redirect when exactly one; 404 when none). */
     public function showBook(Request $request, $subdomain)
     {
         $role = $this->resolveRole($subdomain);
-        $this->assertNotGated($role);
 
         $types = $this->bookableTypes($role);
         if ($types->isEmpty()) {
@@ -494,35 +493,23 @@ class AppointmentController extends Controller
         return Role::subdomain($subdomain)->firstOrFail();
     }
 
-    protected function assertNotGated(Role $role): void
-    {
-        if (config('app.hosted') && ! $role->isPro()) {
-            abort(404);
-        }
-    }
-
-    /** Bookable, active, non-deleted types for the schedule (role relation pre-set to avoid N+1). */
+    /**
+     * Bookable types for the schedule, with the free-plan cap applied.
+     *
+     * Appointments are on every plan; the free plan carries one type. A schedule that lapsed from
+     * Pro keeps every type it created, but only the allowance is bookable, so the guest surfaces
+     * and the picker must all read through the same clamped list.
+     */
     protected function bookableTypes(Role $role)
     {
-        return $role->appointmentTypes()->active()->get()
-            ->filter(function ($type) use ($role) {
-                $type->setRelation('role', $role);
-
-                return $type->isBookable();
-            })
-            ->values();
+        return $role->bookableAppointmentTypes();
     }
 
     protected function resolveBookableType(Role $role, string $slug): AppointmentType
     {
-        $this->assertNotGated($role);
+        $type = $this->bookableTypes($role)->firstWhere('slug', $slug);
 
-        $type = $role->appointmentTypes()->active()->where('slug', $slug)->first();
         if (! $type) {
-            abort(404);
-        }
-        $type->setRelation('role', $role);
-        if (! $type->isBookable()) {
             abort(404);
         }
 

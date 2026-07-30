@@ -22,6 +22,7 @@ class AppointmentTypeController extends Controller
     public function store(Request $request, $subdomain)
     {
         $role = $this->gate($request, $subdomain);
+        $this->planLimit($role);
         $data = $this->validated($request);
 
         $type = new AppointmentType;
@@ -81,6 +82,8 @@ class AppointmentTypeController extends Controller
     public function duplicate(Request $request, $subdomain, $hash)
     {
         $role = $this->gate($request, $subdomain);
+        // Duplicating is the second creation path, so it takes the same allowance check.
+        $this->planLimit($role);
         $type = $this->resolveType($role, $hash);
 
         $copy = $type->replicate();
@@ -254,13 +257,10 @@ class AppointmentTypeController extends Controller
     }
 
     /**
-     * Resolve the schedule, require an editor, and enforce the Pro gate on hosted.
+     * Resolve the schedule and require an editor.
      *
-     * $json is for endpoints the picker calls with fetch(). The plan gate normally aborts with a
-     * REDIRECT, and abort() carrying a Response throws it verbatim no matter what the client asked for -
-     * so fetch() followed it, got HTML, failed to parse, and the picker reported "session expired" for a
-     * lapsed plan. That is exactly the misleading outcome these endpoints exist to avoid, so they answer
-     * in JSON instead. Page endpoints keep the redirect, which is correct for a normal navigation.
+     * Appointments are available on every plan; the free plan is limited to one appointment type
+     * (enforced by planLimit() on the two creation paths), not locked out of the feature.
      */
     protected function gate(Request $request, $subdomain, bool $json = false): Role
     {
@@ -270,14 +270,29 @@ class AppointmentTypeController extends Controller
             abort(403);
         }
 
-        if (config('app.hosted') && ! $role->isPro()) {
-            abort($json
-                ? response()->json(['error' => __('messages.upgrade_required')], 403)
-                : redirect()->route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan'])
-                    ->with('error', __('messages.upgrade_required')));
+        return $role;
+    }
+
+    /**
+     * Refuse a new appointment type once the schedule's plan allowance is used up.
+     *
+     * $json is for endpoints the picker calls with fetch(). A plan refusal that aborts with a
+     * REDIRECT is thrown verbatim no matter what the client asked for, so fetch() followed it, got
+     * HTML, failed to parse, and reported "session expired" instead of the real reason. Page
+     * endpoints keep the redirect, which is correct for a normal navigation.
+     */
+    protected function planLimit(Role $role, bool $json = false): void
+    {
+        if ($role->canCreateAppointmentType()) {
+            return;
         }
 
-        return $role;
+        $message = __('messages.appointment_type_limit_reached', ['limit' => $role->appointmentTypeLimit()]);
+
+        abort($json
+            ? response()->json(['error' => $message], 403)
+            : redirect()->route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments'])
+                ->with('error', $message));
     }
 
     protected function resolveType(Role $role, string $hash): AppointmentType

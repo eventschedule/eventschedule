@@ -29,7 +29,6 @@ return [
     'env' => env('APP_ENV', 'production'),
     'cron_secret' => env('APP_CRON_SECRET', ''),
     'sentry_js_dsn' => env('SENTRY_JS_DSN', 'https://js.sentry-cdn.com/e40010dda2802390fc7a031a3db09b63.min.js'),
-    'custom_footer' => env('APP_CUSTOM_FOOTER', ''),
 
     'hosted' => (bool) env('IS_HOSTED', false),
     // Selfhost only: lift the single-user restriction so visitors can create accounts.

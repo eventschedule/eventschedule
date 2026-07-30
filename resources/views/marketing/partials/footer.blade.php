@@ -148,7 +148,7 @@
                         <img class="h-8 w-auto" src="{{ url('images/light_logo.png') }}" alt="Event Schedule" width="163" height="32" loading="lazy" />
                     </picture>
                 </a>
-                <p class="text-sm text-gray-400 dark:text-gray-500">
+                <p class="text-sm text-gray-600 dark:text-gray-400">
                     &copy; {{ date('Y') }} Event Schedule. All rights reserved.
                 </p>
                 <div class="flex items-center gap-4">

@@ -159,6 +159,33 @@ class Ticket extends Model
     }
 
     /**
+     * Whether this specific ticket may be sold right now, given the schedule's plan allowance.
+     *
+     * Event::canSellTickets() answers "is this event selling at all"; this answers it per row, which
+     * an event mixing free and paid tiers needs. A zero-price ticket is always sellable: free
+     * registration is unlimited on every plan and never consumes the paid allowance. A priced ticket
+     * needs the event to still be within allowance.
+     */
+    public function isSellable(): bool
+    {
+        $event = $this->event;
+
+        if (! $event) {
+            return false;
+        }
+
+        if ($this->is_addon || (float) $this->price <= 0) {
+            return true;
+        }
+
+        if ($event->isPro() || $event->withinTicketAllowanceGrace()) {
+            return true;
+        }
+
+        return $event->roles->contains(fn ($role) => $role->canSellPaidTickets());
+    }
+
+    /**
      * Resolve the set of event IDs a subscription/pass covers, within its home
      * schedule. `all_events`/`sub_schedule` are resolved dynamically so events
      * created after the pass was sold are covered automatically; `specific_events`

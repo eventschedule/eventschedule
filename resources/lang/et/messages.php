@@ -840,6 +840,9 @@ return [
     'embed_description' => 'Manustage oma ajakava oma veebisaidile või ajaveebi, kasutades allolevat iframe\'i koodi.',
     'embed_url' => 'Manusta URL',
     'iframe_code' => 'Iframe kood',
+    'embed_layout' => 'Paigutus',
+    'embed_layout_default' => 'Ajakava vaikeväärtus (:layout)',
+    'embed_layout_help' => 'Muudab ainult allpool kopeeritavat koodi. Teie ajakava leht säilitab oma vaikepaigutuse.',
     'close' => 'Sule',
     'payment_url' => 'Makse link',
 

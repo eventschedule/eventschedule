@@ -833,7 +833,7 @@
                 'chip' => 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/15 dark:text-cyan-300',
                 'items' => [
                     ['Custom domains', 'globe'],
-                    ['White-label, no Event Schedule branding', 'sparkles'],
+                    ['White-label, bar one small licence credit', 'sparkles'],
                     ['Custom CSS, fields and labels', 'brush'],
                     ['Event graphics and AI generation', 'photo'],
                     ['REST API and webhooks', 'link'],

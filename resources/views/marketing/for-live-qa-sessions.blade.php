@@ -22,46 +22,6 @@
         }
     }
     </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "Can I collect audience questions before the session?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Use the built-in email feature to send question prompts to all registered attendees before your live Q&A session. You can also include a link to a form or discussion thread in the event description so attendees submit questions ahead of time. Your full Q&A schedule lives on one shareable page that your audience can bookmark and revisit."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What streaming platforms work with Event Schedule?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Any platform that gives you a meeting or streaming link. Zoom, Google Meet, Microsoft Teams, YouTube Live, Twitter Spaces, and custom solutions. Event Schedule is platform-agnostic - just paste your link and attendees join from your schedule."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I charge for live Q&A sessions?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Set up paid registration with Stripe for premium Q&A sessions, expert AMAs, or exclusive office hours. You keep 100% of the ticket revenue - Event Schedule charges zero platform fees. Stripe charges its standard processing fee (2.9% + $0.30)."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Is Event Schedule free for hosting Q&A sessions?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Event Schedule is free Q&A hosting software. The free plan includes unlimited events, attendee email notifications, follower features, and Google Calendar sync. There are zero platform fees on ticket sales at any plan level. You only pay Stripe's standard processing fee if you sell tickets."
-                }
-            }
-        ]
-    }
-    </script>
     <!-- Product Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
@@ -71,7 +31,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Live Q&A Session Scheduling Software",
         "operatingSystem": "Web",
-        "description": "Schedule live Q&A sessions with built-in registration, audience interaction, ticketing, and streaming link integration. Works with Zoom, YouTube Live, and any platform.",
+        "description": "Schedule live Q&A sessions, AMAs and office hours with free registration and a capacity limit per date, an agenda your audience can read, polls your audience can add options to, and one join link for whatever platform you host on.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -79,19 +39,21 @@
             "description": "Free forever"
         },
         "featureList": [
-            "Email notifications to registered attendees",
-            "One registration link for all Q&A sessions",
-            "Zero-fee ticket sales for paid sessions",
-            "Google Calendar two-way sync",
-            "Works with Zoom, YouTube Live, Microsoft Teams",
-            "Recurring Q&A series scheduling",
-            "Attendee registration management",
-            "Follower notifications for new sessions",
-            "Open source Q&A session platform",
-            "Selfhosted Q&A scheduling option"
+            "Free registration with a capacity limit counted per session date",
+            "Confirmation email carrying your own registration notes",
+            "Agenda segments with their own start and end times",
+            "Polls on a session, with options your audience can suggest",
+            "Comments on a session or on a single agenda segment, held for approval",
+            "One join link for Zoom, Google Meet, Microsoft Teams or YouTube Live",
+            "Recurring office hours with date exceptions and an end",
+            "Zero platform fees on ticket sales through your own Stripe account",
+            "Two-way Google, Outlook and CalDAV calendar sync",
+            "Embeddable calendar for the website you already have",
+            "Newsletters you write and send yourself",
+            "Open source, with a selfhosted option"
         ],
         "url": "{{ url()->current() }}",
-        "keywords": "live Q&A platform, Q&A session scheduling, interactive Q&A events, paid Q&A sessions",
+        "keywords": "live Q&A platform, Q&A session scheduling, interactive Q&A events, paid Q&A sessions, office hours scheduling, AMA scheduling",
         "screenshot": "{{ asset('images/social/for-live-qa-sessions.png') }}",
         "provider": {
             "@type": "Organization",
@@ -105,22 +67,25 @@
         "@context": "https://schema.org",
         "@type": "HowTo",
         "name": "How to host a live Q&A session with Event Schedule",
-        "description": "Three steps to schedule and host your live Q&A session online.",
+        "description": "Three steps to schedule a live Q&A session, open registration, and collect what your audience wants to ask.",
         "step": [
             {
                 "@type": "HowToStep",
-                "name": "Create your session",
-                "text": "Add your topic, date, and streaming link. Set up free or paid registration."
+                "position": 1,
+                "name": "Set the hour",
+                "text": "Create the session with its date and time, mark it online and paste your join link, and add agenda segments if the hour has a shape."
             },
             {
                 "@type": "HowToStep",
-                "name": "Share your link",
-                "text": "Attendees register. Send question prompts before the session."
+                "position": 2,
+                "name": "Open registration",
+                "text": "Switch the session to Registration, set how many places there are, and write the note that goes out with every confirmation email."
             },
             {
                 "@type": "HowToStep",
-                "name": "Go live",
-                "text": "Answer questions in real-time. Follow up with a summary."
+                "position": 3,
+                "name": "Collect the questions",
+                "text": "Add a poll your audience can suggest options for, or let them comment on the session page, then host the hour wherever you already host it."
             }
         ]
     }
@@ -136,155 +101,664 @@
     </script>
 
     <style {!! nonce_attr() !!}>
-        /* For-live-qa-sessions "The Conversation" styles. The shared es-* motion
-           system lives in marketing.css; this holds the warm amber Q&A gradient plus
-           the two-voice system - questions in amber, answers in cool sky - carried
-           through the rising speech-bubble field, a raised-hand pulse, an upvote
-           tick, and a stack of pre-submitted questions. */
-        .text-gradient-qa {
-            background: linear-gradient(135deg, #d97706, #f59e0b, #ea580c);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 40px rgba(217, 119, 6, 0.3);
+        /* ==============================================================
+           For-live-qa-sessions "The Conversation" styles.
+
+           THE CONCEPT IS A TURN, NOT A BUBBLE. A live Q&A is an hour of
+           alternating turns: somebody asks, somebody answers. So the
+           page is built as a transcript. Every section is one turn -
+           a hanging monospace Q label, the audience's question as the
+           heading, and the answer underneath naming the actual setting
+           that answers it. A thread rule runs down the label column so
+           the turns read as one continuous conversation.
+
+           THE OBJECT IS A PRINTED RUN SHEET (.es-conv-sheet): the
+           agenda of one session, timecodes in the left margin. Event
+           parts really do carry a name, a start time and an end time,
+           so the sheet is the product's own data structure on paper.
+           It is the same physical sheet in both colour modes and
+           therefore carries NO dark: utilities and no shared classes -
+           verify with --bands=.es-conv-sheet, expect 0 diffs.
+
+           THE MOTIF IS A TURN-TAKING WAVEFORM (.es-conv-wave): bars
+           above the line are the audience, bars below are the host,
+           alternating. Abstract strokes, never an illustration.
+
+           COLOUR: the page's existing warm hue family, pushed off gold
+           and onto burnt orange so it does not read as one more amber
+           page. Measured on this page's own grounds:
+             #b03a06 on #faf7f4 = 5.70   accent, light
+             #fdba74 on #12100e = 11.26  accent, dark
+             #4f4a45 on #faf7f4 = 8.21   muted, light  (NEVER gray-500)
+             #a49b93 on #12100e = 6.95   muted, dark
+             #ffffff on #b03a06 = 6.08   button ink
+             #5a534c on #fffdfa = 7.45   muted, on the paper sheet
+           ============================================================== */
+
+        /* --- Ground and ink --- */
+        .es-conv-page { background-color: #faf7f4; color: #171412; }
+        .dark .es-conv-page { background-color: #12100e; color: #f1ece7; }
+        .es-conv-ink { color: #171412; }
+        .dark .es-conv-ink { color: #f1ece7; }
+        .es-conv-muted { color: #4f4a45; }
+        .dark .es-conv-muted { color: #a49b93; }
+        .es-conv-accent { color: #b03a06; }
+        .dark .es-conv-accent { color: #fdba74; }
+        /* Always-lit accent, for the bands that stay dark in both modes. */
+        .es-conv-lit { color: #fdba74; }
+        .es-conv-alt { background-color: #f4efe9; }
+        .dark .es-conv-alt { background-color: #171310; }
+        .es-conv-hr { border-color: rgba(23, 20, 18, 0.1); }
+        .dark .es-conv-hr { border-color: rgba(241, 236, 231, 0.1); }
+
+        /* --- The turn: hanging speaker label plus a thread rule --- */
+        .es-conv-turn { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+        @media (min-width: 640px) {
+            .es-conv-turn { grid-template-columns: 4.5rem 1fr; gap: 1.75rem; }
         }
-        .dark .text-gradient-qa {
-            background: linear-gradient(135deg, #fbbf24, #fcd34d, #fb923c);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 40px rgba(251, 191, 36, 0.3);
+        .es-conv-rail { display: flex; flex-direction: row; align-items: center; gap: 0.6rem; }
+        @media (min-width: 640px) {
+            .es-conv-rail { flex-direction: column; align-items: stretch; align-self: stretch; gap: 0.6rem; }
+        }
+        .es-conv-label {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 0.25rem;
+            flex: none;
+            align-self: flex-start;
+            padding: 0.28rem 0.5rem 0.32rem;
+            border: 1px solid rgba(23, 20, 18, 0.18);
+            border-radius: 0.35rem;
+            background-color: #ffffff;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.9rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            font-variant-numeric: tabular-nums;
+            color: #171412;
+        }
+        .dark .es-conv-label { border-color: rgba(241, 236, 231, 0.2); background-color: rgba(241, 236, 231, 0.05); color: #f1ece7; }
+        .es-conv-label-q { border-color: rgba(176, 58, 6, 0.42); color: #b03a06; }
+        .dark .es-conv-label-q { border-color: rgba(253, 186, 116, 0.42); color: #fdba74; }
+        .es-conv-label-n { font-size: 0.7rem; font-weight: 700; opacity: 0.72; }
+        .es-conv-thread { display: none; }
+        @media (min-width: 640px) {
+            .es-conv-thread {
+                display: block;
+                width: 1px;
+                flex: 1 1 auto;
+                min-height: 2.5rem;
+                margin-left: 1.05rem;
+                background-image: linear-gradient(to bottom, rgba(176, 58, 6, 0.42), rgba(176, 58, 6, 0.06));
+            }
+            .dark .es-conv-thread { background-image: linear-gradient(to bottom, rgba(253, 186, 116, 0.42), rgba(253, 186, 116, 0.06)); }
+        }
+        .es-conv-band .es-conv-thread { background-image: linear-gradient(to bottom, rgba(253, 186, 116, 0.45), rgba(253, 186, 116, 0.06)); }
+        /* A band stays the same dark room in both colour modes, so the speaker
+           labels inside it must be pinned too or they flip with .dark. */
+        .es-conv-band .es-conv-label { border-color: rgba(241, 236, 231, 0.2); background-color: rgba(241, 236, 231, 0.05); color: #f1ece7; }
+        .es-conv-band .es-conv-label-q { border-color: rgba(253, 186, 116, 0.42); color: #fdba74; }
+
+        /* --- Eyebrow, chips, plan pills --- */
+        .es-conv-tag {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.26em;
+            text-transform: uppercase;
+            color: #4f4a45;
+        }
+        .dark .es-conv-tag { color: #a49b93; }
+        .es-conv-band .es-conv-tag { color: #fdba74; }
+        .es-conv-chip {
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+            padding: 0.35rem 0.85rem;
+            border-radius: 9999px;
+            border: 1px solid rgba(23, 20, 18, 0.16);
+            background-color: rgba(255, 255, 255, 0.75);
+            color: #4f4a45;
+            font-size: 0.76rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .dark .es-conv-chip { border-color: rgba(241, 236, 231, 0.16); background-color: rgba(241, 236, 231, 0.05); color: #b6ada4; }
+        .es-conv-plan {
+            display: inline-flex;
+            align-items: center;
+            flex: none;
+            padding: 0.1rem 0.45rem;
+            border: 1px solid rgba(176, 58, 6, 0.42);
+            border-radius: 0.25rem;
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #b03a06;
+        }
+        .dark .es-conv-plan { border-color: rgba(253, 186, 116, 0.45); color: #fdba74; }
+        .es-conv-band .es-conv-plan { border-color: rgba(253, 186, 116, 0.45); color: #fdba74; }
+        .es-conv-plan-pro { border-color: rgba(23, 20, 18, 0.35); color: #171412; }
+        .dark .es-conv-plan-pro { border-color: rgba(241, 236, 231, 0.38); color: #f1ece7; }
+        .es-conv-band .es-conv-plan-pro { border-color: rgba(241, 236, 231, 0.38); color: #f1ece7; }
+
+        /* --- Cards --- */
+        .es-conv-card {
+            border: 1px solid rgba(23, 20, 18, 0.12);
+            border-radius: 1rem;
+            background-color: #ffffff;
+        }
+        .dark .es-conv-card { border-color: rgba(241, 236, 231, 0.12); background-color: rgba(241, 236, 231, 0.04); }
+        .es-conv-band .es-conv-card { border-color: rgba(241, 236, 231, 0.14); background-color: rgba(241, 236, 231, 0.05); }
+
+        /* --- Fixed-dark band: the same room in both colour modes --- */
+        .es-conv-band {
+            background-color: #171310;
+            background-image: radial-gradient(120% 100% at 50% 0%, #241c16 0%, #181310 55%, #0d0b09 100%);
+            box-shadow: inset 0 0 90px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(241, 236, 231, 0.05);
+        }
+        .es-conv-band .es-conv-ink { color: #f1ece7; }
+        .es-conv-band .es-conv-muted { color: #a49b93; }
+        /* Body copy and fine print ON a fixed-dark band, in both modes. These are
+           page-local rather than es-conv-onband utilities on purpose: an arbitrary
+           Tailwind value that no built page already uses is not in the compiled
+           bundle, so it silently paints nothing and the text falls back to the ink. */
+        .es-conv-onband { color: #d1d5db; }
+        .es-conv-ondim { color: #a49b93; }
+        /* Shared classes carry their own .dark rules, so pin them inside the band. */
+        .es-conv-band .grid-overlay {
+            background-image:
+                linear-gradient(rgba(241, 236, 231, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(241, 236, 231, 0.05) 1px, transparent 1px);
+        }
+        .es-conv-band .animate-shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            background-size: 200% 100%;
+        }
+        .es-conv-band .es-claim:focus-within {
+            border-color: rgba(253, 186, 116, 0.75);
+            box-shadow: 0 0 0 4px rgba(253, 186, 116, 0.22);
         }
 
-        /* Live-questions motif: speech bubbles rise and glow in a staggered wave.
-           Question bubbles are warm amber with a bottom-left tail; answer bubbles
-           (.is-a) are cool sky with a mirrored bottom-right tail, so the rising
-           field reads as a back-and-forth conversation. */
-        .es-qbubble { display: flex; align-items: flex-end; }
-        .es-qbubble-dot {
-            flex: 0 0 auto;
-            width: 14px; height: 11px;
-            border-radius: 6px 6px 6px 2px;
-            background: var(--qb-bg, linear-gradient(to right, rgba(245, 158, 11, 0.6), rgba(234, 88, 12, 0.6)));
-            animation: es-qbubble var(--qb-dur, 2.8s) ease-in-out infinite;
-            animation-delay: var(--qb-delay, 0s);
+        /* --- The printed run sheet. A physical object: no dark rules,
+               no shared classes, identical with .dark on and off. --- */
+        .es-conv-sheet {
+            position: relative;
+            overflow: hidden;
+            padding: 1.35rem 1.4rem 1.3rem;
+            border: 1px solid rgba(23, 20, 18, 0.14);
+            border-radius: 0.85rem;
+            background-color: #fffdfa;
+            color: #171412;
+            box-shadow: 0 24px 48px -28px rgba(23, 20, 18, 0.5);
         }
-        .es-qbubble-dot.is-a {
-            border-radius: 6px 6px 2px 6px;
-            --qb-bg: linear-gradient(to right, rgba(56, 189, 248, 0.6), rgba(14, 165, 233, 0.6));
-            --qb-glow: rgba(56, 189, 248, 0.5);
+        .es-conv-sheet::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background-image: repeating-linear-gradient(
+                to bottom,
+                transparent 0,
+                transparent 1.74rem,
+                rgba(23, 20, 18, 0.06) 1.74rem,
+                rgba(23, 20, 18, 0.06) 1.75rem);
         }
-        @keyframes es-qbubble {
-            0%, 100% { opacity: 0.2; transform: translateY(4px) scale(0.85); }
-            50% { opacity: 0.9; transform: translateY(0) scale(1); box-shadow: 0 0 8px var(--qb-glow, rgba(245, 158, 11, 0.5)); }
+        .es-conv-sheet::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 4.55rem;
+            width: 1px;
+            background-color: rgba(176, 58, 6, 0.28);
+        }
+        .es-conv-sheet-body { position: relative; z-index: 1; }
+        .es-conv-sheet-title { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.01em; color: #171412; }
+        .es-conv-sheet-meta {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            color: #5a534c;
+        }
+        .es-conv-slot { display: grid; grid-template-columns: 3.1rem 1fr; gap: 0.85rem; padding: 0.3rem 0 0.32rem; }
+        .es-conv-time {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.72rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            color: #b03a06;
+            padding-top: 0.1rem;
+        }
+        .es-conv-slot-name { font-size: 0.86rem; font-weight: 600; color: #171412; }
+        .es-conv-slot-note { font-size: 0.72rem; color: #5a534c; }
+        .es-conv-sheet-note {
+            font-size: 0.7rem;
+            line-height: 1.45;
+            color: #5a534c;
+            border-top: 1px solid rgba(23, 20, 18, 0.1);
+            padding-top: 0.7rem;
+            margin-top: 0.7rem;
+        }
+        .es-conv-sheet-stamp {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.12rem 0.45rem;
+            border: 1px solid rgba(176, 58, 6, 0.4);
+            border-radius: 0.25rem;
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #b03a06;
         }
 
-        /* Upvote tick: the answer-voice vote chip nudges up on a loop. */
-        @keyframes es-upvote { 0%, 55%, 100% { transform: translateY(0); } 28% { transform: translateY(-3px); } }
-        .es-upvote-tick { animation: es-upvote 2.6s ease-in-out infinite; }
-
-        /* Stacked pre-submitted question cards. */
-        .es-qstack { position: relative; height: 2.7rem; margin-top: 0.65rem; }
-        .es-qstack-layer { position: absolute; border-radius: 0.5rem; height: 1.9rem; }
-        .es-qstack-1 { left: 10px; right: 10px; top: 9px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.2); }
-        .es-qstack-2 { left: 5px; right: 5px; top: 4.5px; background: rgba(245, 158, 11, 0.16); border: 1px solid rgba(245, 158, 11, 0.25); }
-        .es-qstack-top { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 6px; border-radius: 0.5rem; padding: 0.4rem 0.55rem; background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(245, 158, 11, 0.3); }
-        .dark .es-qstack-top { background: rgba(255, 255, 255, 0.1); }
-        .es-qstack-q { font-size: 10px; color: #92400e; }
-        .dark .es-qstack-q { color: #fcd34d; }
-        .es-upvote { display: inline-flex; align-items: center; gap: 2px; border-radius: 0.3rem; padding: 1px 6px; font-size: 9px; font-weight: 700; background: rgba(56, 189, 248, 0.2); color: #0284c7; }
-        .dark .es-upvote { color: #7dd3fc; }
-        .es-upvote svg { width: 9px; height: 9px; }
-
-        /* Speech-bubble corner tail for the bento mock cards. */
-        .es-bubble-tail { position: relative; }
-        .es-bubble-tail::after {
-            content: ""; position: absolute; bottom: -8px; left: 22px;
-            width: 0; height: 0;
-            border-left: 8px solid transparent; border-right: 8px solid transparent;
-            border-top: 8px solid var(--tail-color, rgba(245, 158, 11, 0.5));
+        /* --- Turn-taking waveform. Above the line, the audience.
+               Below it, the host. Abstract strokes only. --- */
+        .es-conv-wave { display: flex; flex-direction: column; gap: 0; }
+        .es-conv-wave-mask {
+            -webkit-mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);
+            mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);
+        }
+        /* space-between plus flexible bars, so the turns stretch the full width of
+           whatever they sit in instead of clustering in the middle. */
+        .es-conv-wave-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 0; height: 2.1rem; }
+        .es-conv-wave-a { align-items: flex-start; }
+        .es-conv-wave-rule { height: 1px; background-image: linear-gradient(to right, transparent, rgba(176, 58, 6, 0.35), transparent); }
+        .dark .es-conv-wave-rule { background-image: linear-gradient(to right, transparent, rgba(253, 186, 116, 0.35), transparent); }
+        .es-conv-band .es-conv-wave-rule { background-image: linear-gradient(to right, transparent, rgba(253, 186, 116, 0.35), transparent); }
+        .es-conv-wave-bar {
+            flex: 1 1 0;
+            min-width: 2px;
+            max-width: 3px;
+            height: var(--wb, 40%);
+            border-radius: 2px;
+            background-color: rgba(176, 58, 6, 0.55);
+            transform-origin: bottom;
+            animation: es-conv-breathe var(--wd, 3.2s) ease-in-out infinite;
+            animation-delay: var(--wdelay, 0s);
+        }
+        .dark .es-conv-wave-bar { background-color: rgba(253, 186, 116, 0.5); }
+        .es-conv-band .es-conv-wave-bar { background-color: rgba(253, 186, 116, 0.5); }
+        .es-conv-wave-a .es-conv-wave-bar {
+            transform-origin: top;
+            background-color: rgba(23, 20, 18, 0.35);
+        }
+        .dark .es-conv-wave-a .es-conv-wave-bar { background-color: rgba(241, 236, 231, 0.28); }
+        .es-conv-band .es-conv-wave-a .es-conv-wave-bar { background-color: rgba(241, 236, 231, 0.28); }
+        @keyframes es-conv-breathe {
+            0%, 100% { transform: scaleY(0.55); opacity: 0.55; }
+            50% { transform: scaleY(1); opacity: 1; }
         }
 
-        /* Accent link + related-card hover recolor (warm amber, not brand blue). */
-        .qa-link { color: #b45309; font-weight: 500; }
-        .qa-link:hover { text-decoration: underline; }
-        .dark .qa-link { color: #fbbf24; }
-        .qa-related-card:hover { border-color: #fcd34d; background-color: #fffbeb; }
-        .dark .qa-related-card:hover { border-color: rgba(251, 191, 36, 0.3); background-color: rgba(251, 191, 36, 0.06); }
-        .qa-related-card:hover .qa-related-title { color: #d97706; }
-        .dark .qa-related-card:hover .qa-related-title { color: #fbbf24; }
-        .qa-related-card:hover .qa-related-arrow { color: #d97706; }
-        .dark .qa-related-card:hover .qa-related-arrow { color: #fbbf24; }
+        /* --- Hand-drawn underline on the accent word --- */
+        .es-conv-mark { position: relative; white-space: nowrap; }
+        .es-conv-mark-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -0.18em;
+            width: 100%;
+            height: 0.28em;
+            overflow: visible;
+            color: #b03a06;
+        }
+        .dark .es-conv-mark-line { color: #fdba74; }
+        .es-conv-mark-line path { stroke-dasharray: 240; stroke-dashoffset: 0; }
+        html.es-anim .es-conv-mark-line path { animation: es-conv-draw 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.55s backwards; }
+        @keyframes es-conv-draw { from { stroke-dashoffset: 240; } to { stroke-dashoffset: 0; } }
+
+        /* --- The poll: options, a fill bar, a suggestion row --- */
+        .es-conv-poll-q { font-size: 0.95rem; font-weight: 700; }
+        .es-conv-opt { padding: 0.3rem 0; }
+        .es-conv-opt-head { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem; font-size: 0.78rem; }
+        .es-conv-track { height: 0.4rem; border-radius: 9999px; background-color: rgba(241, 236, 231, 0.12); overflow: hidden; margin-top: 0.28rem; }
+        .es-conv-fill {
+            height: 100%;
+            border-radius: 9999px;
+            background-color: rgba(241, 236, 231, 0.32);
+            transform-origin: left;
+            transition: transform 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+            transition-delay: var(--fd, 0.2s);
+        }
+        .es-conv-fill-mine { background-color: #fdba74; }
+        html.es-anim [data-reveal]:not(.is-revealed) .es-conv-fill { transform: scaleX(0.015); }
+        .es-conv-count {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-variant-numeric: tabular-nums;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+        .es-conv-suggest {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.6rem;
+            margin-top: 0.7rem;
+            padding: 0.45rem 0.6rem;
+            border: 1px dashed rgba(253, 186, 116, 0.45);
+            border-radius: 0.5rem;
+            font-size: 0.74rem;
+            color: #a49b93;
+        }
+        .es-conv-suggest-btn {
+            flex: none;
+            padding: 0.05rem 0.42rem;
+            border: 1px solid rgba(253, 186, 116, 0.5);
+            border-radius: 0.3rem;
+            font-size: 0.8rem;
+            font-weight: 800;
+            line-height: 1.35;
+            color: #fdba74;
+        }
+        .es-conv-pending {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.6rem;
+            padding: 0.45rem 0.6rem;
+            border: 1px solid rgba(253, 186, 116, 0.4);
+            border-radius: 0.5rem;
+            background-color: rgba(253, 186, 116, 0.09);
+            font-size: 0.78rem;
+        }
+        .es-conv-mini {
+            flex: none;
+            padding: 0.08rem 0.45rem;
+            border-radius: 0.3rem;
+            border: 1px solid rgba(241, 236, 231, 0.24);
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #f1ece7;
+        }
+        .es-conv-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 1.15rem;
+            height: 1.15rem;
+            padding: 0 0.28rem;
+            border-radius: 9999px;
+            background-color: #fdba74;
+            color: #171412;
+            font-size: 0.65rem;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* --- Links, buttons, hover states --- */
+        .es-conv-link { color: #b03a06; }
+        .es-conv-link:hover { color: #171412; }
+        .dark .es-conv-link { color: #fdba74; }
+        .dark .es-conv-link:hover { color: #f1ece7; }
+        .es-conv-band .es-conv-link { color: #fdba74; }
+        .es-conv-band .es-conv-link:hover { color: #f1ece7; }
+        .es-conv-btn {
+            background-color: #b03a06;
+            box-shadow: 0 18px 36px -14px rgba(176, 58, 6, 0.5);
+        }
+        .es-conv-btn:hover { background-color: #8f2f05; box-shadow: 0 22px 44px -14px rgba(176, 58, 6, 0.6); }
+        /* The dark-mode fill is light, so the button's own ink has to flip with it.
+           Kept here rather than as a dark:text-[...] utility for the reason above. */
+        .dark .es-conv-btn { background-color: #fdba74; color: #171412; }
+        .dark .es-conv-btn:hover { background-color: #fecfa0; }
+        .es-conv-tip { background-color: #ffffff; border-color: rgba(23, 20, 18, 0.14); color: #4f4a45; }
+        .dark .es-conv-tip { background-color: #171310; border-color: rgba(241, 236, 231, 0.14); color: #b6ada4; }
+        /* Stat-strip separators: horizontal when the strip stacks, vertical once it
+           is a row. border-y-0 is not in the compiled bundle, so this is page-local. */
+        .es-conv-statmid {
+            padding: 1.5rem 1rem;
+            border-top: 1px solid rgba(23, 20, 18, 0.1);
+            border-bottom: 1px solid rgba(23, 20, 18, 0.1);
+        }
+        .dark .es-conv-statmid { border-top-color: rgba(241, 236, 231, 0.1); border-bottom-color: rgba(241, 236, 231, 0.1); }
+        @media (min-width: 768px) {
+            .es-conv-statmid {
+                padding: 0 1rem;
+                border-top: 0;
+                border-bottom: 0;
+                border-left: 1px solid rgba(23, 20, 18, 0.1);
+                border-right: 1px solid rgba(23, 20, 18, 0.1);
+            }
+            .dark .es-conv-statmid { border-left-color: rgba(241, 236, 231, 0.1); border-right-color: rgba(241, 236, 231, 0.1); }
+        }
+        .es-conv-hover:hover { border-color: rgba(176, 58, 6, 0.45); }
+        .dark .es-conv-hover:hover { border-color: rgba(253, 186, 116, 0.45); }
+        .es-conv-hover:hover .es-conv-hover-title,
+        .es-conv-hover:hover .es-conv-hover-arrow { color: #b03a06; }
+        .dark .es-conv-hover:hover .es-conv-hover-title,
+        .dark .es-conv-hover:hover .es-conv-hover-arrow { color: #fdba74; }
+
+        /* --- Shared-system recolours (brand blue by default) --- */
+        .es-hero .es-spot {
+            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(176, 58, 6, 0.12), transparent 60%);
+        }
+        .dark .es-hero .es-spot {
+            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(253, 186, 116, 0.1), transparent 60%);
+        }
+        .es-dot:hover .es-dot-pip { background-color: rgba(176, 58, 6, 0.6); }
+        .dark .es-dot:hover .es-dot-pip { background-color: rgba(253, 186, 116, 0.6); }
+        .es-dot.is-active .es-dot-pip { background: #b03a06; }
+        .dark .es-dot.is-active .es-dot-pip { background: #fdba74; }
+
+        /* --- Focus rings. No border-radius here: it would reshape the
+               element itself on focus. Outlines already follow it. --- */
+        #es-conv-page a:focus-visible,
+        #es-conv-page summary:focus-visible,
+        #es-conv-page input:focus-visible,
+        #es-conv-page button:focus-visible {
+            outline: 2px solid #b03a06;
+            outline-offset: 3px;
+        }
+        .dark #es-conv-page a:focus-visible,
+        .dark #es-conv-page summary:focus-visible,
+        .dark #es-conv-page input:focus-visible,
+        .dark #es-conv-page button:focus-visible {
+            outline-color: #fdba74;
+        }
+        .es-conv-band a:focus-visible,
+        .es-conv-band summary:focus-visible,
+        .es-conv-band input:focus-visible,
+        .es-conv-band button:focus-visible {
+            outline-color: #fdba74 !important;
+        }
 
         @media (prefers-reduced-motion: reduce) {
-            .es-qbubble-dot, .es-upvote-tick { animation: none !important; }
-            .es-qbubble-dot { opacity: 0.55; transform: none; }
+            .es-conv-wave-bar { animation: none !important; transform: none !important; opacity: 0.7; }
+            html.es-anim .es-conv-mark-line path { animation: none !important; }
+            .es-conv-fill { transition: none !important; transform: none !important; }
         }
     </style>
 
+    @php
+        // One session's agenda. Event parts carry a name, a start time and an
+        // end time, so this sheet is the product's own structure on paper.
+        $agenda = [
+            ['18:00', 'Welcome and what shipped this week', 'Five minutes, no slides'],
+            ['18:10', 'Open questions from the floor', 'The part everyone came for'],
+            ['18:40', 'The poll: what we dig into next month', 'Options the room suggested'],
+            ['18:50', 'Wrap and where to find the notes', ''],
+        ];
+
+        // Repeats, and the dates it skips. Recurring events are a day-of-week
+        // pattern with date exceptions and an end.
+        $series = [
+            ['Every Thursday', 'The pattern'],
+            ['Skips Dec 25 and Jan 1', 'Date exceptions'],
+            ['Ends after 20 sessions', 'The end'],
+        ];
+
+        // Six things an audience asks, and the setting that answers each.
+        $asks = [
+            ['Can I come?', 'Registration, with a limit on places', "The session's ticket section, Registration mode", 'Free'],
+            ['Where is the link?', 'One join link on the online session', "The session's location fields", 'Free'],
+            ['Can you ask this one for me?', 'A poll your audience can suggest options for', 'Engagement, then Polls, on the session', 'Pro'],
+            ['Can I say it in advance?', 'Comments, held until you approve them', 'The session page, or one agenda segment', 'Free'],
+            ['Tell me when the next one is', 'Follow, then a newsletter you write', 'Followers, then Newsletters', 'Free'],
+            ['Can I pay for the deep dive?', 'Named ticket types through your Stripe', "The session's ticket section, Tickets mode", 'Pro'],
+        ];
+
+        $steps = [
+            ['01', 'Set the hour', 'Date, time, and the join link. Add agenda segments if the hour has a shape, each with its own start and end time.'],
+            ['02', 'Open registration', 'Switch the session to Registration, set how many places there are, and write the note that rides along with every confirmation email.'],
+            ['03', 'Collect the questions', 'A poll the room can add options to, or comments on the page. Then host the hour wherever you already host it.'],
+        ];
+
+        $faqs = [
+            [
+                'q' => 'Can I collect audience questions before the session?',
+                'a' => 'Yes, three ways, and it is worth knowing exactly what each one is. A poll on the session lets people vote between your options and, if you allow it, suggest their own, which you approve before anyone sees them; polls are on the Pro plan. Comments are free: your audience can leave one on the session, or on a single agenda segment, and nothing appears until you approve it. And the note you attach to registration goes out with every confirmation email, so you can simply ask people to reply with what they want covered.',
+            ],
+            [
+                'q' => 'What streaming platforms work with Event Schedule?',
+                'a' => 'Any platform that gives you a meeting or streaming link. Zoom, Google Meet, Microsoft Teams, YouTube Live, or whatever you move to next year. Mark the session as online and paste the link: it shows on the session page and on each attendee\'s own registration page. To be straight with you, this is one link field rather than a streaming integration, and there is no embedded player.',
+            ],
+            [
+                'q' => 'Can I charge for live Q&A sessions?',
+                'a' => 'Yes, on the Pro plan. Connect your own Stripe account and sell named ticket types for a premium AMA or a paid deep dive, each with its own price, quantity and sales window. Event Schedule charges zero platform fees at every plan level, so past Stripe\'s own processing fee the money is yours. Free sessions do not need any of this: registration with a place limit is free.',
+            ],
+            [
+                'q' => 'Is Event Schedule free for hosting Q&A sessions?',
+                'a' => 'Yes. Unlimited sessions, registration with a capacity limit, the agenda, recurring office hours, the embeddable calendar, two-way Google, Outlook and CalDAV sync, built-in analytics and newsletters are all free forever. Polls, ticketing, custom questions on the registration form and the embeddable registration widget are on the Pro plan at five dollars a month. There are zero platform fees on ticket sales on every plan.',
+            ],
+            [
+                'q' => 'Do my followers get an email when I schedule a new session?',
+                'a' => 'No, and no page here will tell you otherwise. Nothing is sent to your audience automatically. You write a newsletter and send it when you have something to say, with 10 recipients a month on the free plan, 100 on Pro and 1,000 on Enterprise, counted per recipient rather than per send. The automatic emails run the other way: you are the one who gets notified when somebody suggests a poll option or leaves a comment waiting for approval.',
+            ],
+            [
+                'q' => 'Can I cap how many people join?',
+                'a' => 'Yes, and the count is per session date. Set a number of places on the session and every occurrence of a weekly office hour counts its own registrations, so this Thursday filling up does not close next Thursday. The page shows how many places are left, and once a date is full it stops taking registrations for that date. A waitlist for a full date is a Pro feature.',
+            ],
+        ];
+
+        $dotSections = [
+            ['top', 'The hour'],
+            ['arrive', 'Getting in'],
+            ['ask', 'Asking early'],
+            ['link', 'The link'],
+            ['series', 'Every Thursday'],
+            ['asks', 'Six asks'],
+            ['rest', 'Everything else'],
+            ['who', 'Perfect for'],
+            ['faq', 'Questions'],
+            ['claim', 'Open the hour'],
+        ];
+
+        // The waveform: alternating turns. Above the line the audience, below
+        // it the host, and a long answer follows a short question.
+        $waveQ = [];
+        $waveA = [];
+        foreach (range(0, 71) as $i) {
+            $waveQ[] = $i % 2 === 0 ? 34 + (($i * 17) % 62) : 8;
+            $waveA[] = $i % 2 === 1 ? 30 + (($i * 23) % 66) : 7;
+        }
+    @endphp
+
+    <div id="es-conv-page" class="es-conv-page">
+
     <!-- ============================================================ -->
-    <!-- 1. Hero: real conversations, on your schedule               -->
+    <!-- 1. Hero: one hour, and the sheet that runs it                -->
     <!-- ============================================================ -->
-    <section class="es-hero relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
+    <section id="top" class="es-hero noise relative flex min-h-[calc(88svh-4rem)] scroll-mt-24 items-center overflow-hidden py-16">
         <div class="absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 70%, rgba(217, 119, 6, 0.3), rgba(217, 119, 6, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 32%, rgba(234, 88, 12, 0.28), rgba(234, 88, 12, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 50%, rgba(251, 191, 36, 0.14), rgba(251, 191, 36, 0) 60%);"></div>
-            <div class="es-rays absolute inset-0"></div>
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(176, 58, 6, 0.2), rgba(176, 58, 6, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 40%, rgba(253, 186, 116, 0.16), rgba(253, 186, 116, 0) 65%);"></div>
+            <div class="es-spot absolute inset-0"></div>
             <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
-            <!-- Rising questions along the bottom edge -->
-            <div class="es-qbubble absolute bottom-0 left-0 right-0 hidden h-20 items-end justify-center gap-2 px-8 pb-6 opacity-40 md:flex" style="mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);">
-                @for ($i = 0; $i < 26; $i++)
-                    @php $dur = 2.4 + ($i % 5) * 0.28; $delay = ($i % 9) * 0.15; $voice = $i % 2 === 0 ? '' : 'is-a'; @endphp
-                    <span class="es-qbubble-dot {{ $voice }}" style="--qb-dur: {{ $dur }}s; --qb-delay: {{ $delay }}s;"></span>
-                @endfor
+            <div class="es-conv-wave absolute bottom-6 left-0 right-0 opacity-60 es-conv-wave-mask">
+                <div class="es-conv-wave-row">
+                    @foreach ($waveQ as $wi => $wh)
+                        <span class="es-conv-wave-bar" style="--wb: {{ $wh }}%; --wd: {{ 2.8 + ($wi % 5) * 0.3 }}s; --wdelay: {{ ($wi % 9) * 0.14 }}s;"></span>
+                    @endforeach
+                </div>
+                <div class="es-conv-wave-rule"></div>
+                <div class="es-conv-wave-row es-conv-wave-a">
+                    @foreach ($waveA as $wi => $wh)
+                        <span class="es-conv-wave-bar" style="--wb: {{ $wh }}%; --wd: {{ 3.1 + ($wi % 4) * 0.28 }}s; --wdelay: {{ ($wi % 7) * 0.16 }}s;"></span>
+                    @endforeach
+                </div>
             </div>
         </div>
 
-        <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
-                <svg aria-hidden="true" class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">For Speakers, Hosts & Community Builders</span>
+        <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-14 lg:grid-cols-[1.05fr_1fr]">
+                <div>
+                    <div class="es-fade-up es-d-1 glass mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2.5">
+                        <svg aria-hidden="true" class="es-conv-accent h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                        <span class="es-conv-muted text-sm font-medium tracking-wide">For AMAs, office hours and live Q&amp;A</span>
+                    </div>
+
+                    <h1 class="es-balance es-conv-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <span class="es-mask"><span class="es-mask-line">A live Q&amp;A is a</span></span>
+                        <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="es-conv-accent es-conv-mark">conversation<svg class="es-conv-mark-line" viewBox="0 0 240 12" fill="none" preserveAspectRatio="none" aria-hidden="true"><path d="M3 8.4C48 3.2 118 2.4 237 6.2" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" /></svg></span>, so plan it like one.</span></span>
+                    </h1>
+
+                    <p class="es-fade-up es-d-2 es-conv-muted mb-10 max-w-xl text-lg sm:text-xl">
+                        Registration with a real limit on places, an agenda your audience can read before they arrive, a poll they can add their own option to, and one link to wherever you are hosting. Zero platform fees, on every plan.
+                    </p>
+
+                    <div class="es-fade-up es-d-3 flex flex-col items-start gap-4 sm:flex-row">
+                        <a href="#arrive" class="glass group inline-flex items-center justify-center gap-2 rounded-2xl px-7 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+                            Read the turns
+                            <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                        </a>
+                        <a href="{{ app_url('/sign_up?type=talent') }}" class="es-conv-btn group inline-flex items-center justify-center gap-2 rounded-2xl px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
+                            Create your Q&amp;A schedule
+                            <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- The run sheet: one session's agenda, on paper. -->
+                <div class="es-fade-up es-d-4" data-reveal>
+                    <div class="es-conv-sheet">
+                        <div class="es-conv-sheet-body">
+                            <div class="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+                                <span class="es-conv-sheet-title">Office Hours #14</span>
+                                <span class="es-conv-sheet-meta">THU 18:00 &middot; 55 MIN &middot; ONLINE</span>
+                            </div>
+                            <div>
+                                @foreach ($agenda as [$slotTime, $slotName, $slotNote])
+                                    <div class="es-conv-slot">
+                                        <span class="es-conv-time">{{ $slotTime }}</span>
+                                        <span>
+                                            <span class="es-conv-slot-name">{{ $slotName }}</span>
+                                            @if ($slotNote)
+                                                <span class="es-conv-slot-note block">{{ $slotNote }}</span>
+                                            @endif
+                                        </span>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <div class="mt-3 flex flex-wrap items-center gap-2">
+                                <span class="es-conv-sheet-stamp">40 places &middot; 6 left</span>
+                                <span class="es-conv-sheet-stamp">Free registration</span>
+                            </div>
+                            <p class="es-conv-sheet-note">
+                                Agenda segments are free on every plan, and each one can take its own comments. The places counter is per date, so next Thursday starts again at forty.
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <h1 class="es-balance mb-6 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
-                <span class="es-mask"><span class="es-mask-line">Host live Q&A sessions that spark real conversations.</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-qa">Zero platform fees.</span></span></span>
-            </h1>
-
-            <p class="es-fade-up es-d-2 mx-auto mb-4 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
-                From AMAs to office hours. Schedule interactive sessions, manage speakers, and let your audience register from one link.
-            </p>
-            <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-2xl text-base text-gray-400 dark:text-gray-500">
-                The live Q&A scheduling platform with built-in registration, attendee email notifications, paid ticketing, and Google Calendar sync for speakers, hosts, and community builders.
-            </p>
-
-            <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <a href="#journey" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
-                    See how it grows
-                    <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
-                </a>
-                <a href="{{ app_url('/sign_up?type=talent') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-600 to-orange-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-amber-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-amber-500/40">
-                    Create your Q&A schedule
-                    <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-            </div>
-
-            <!-- Q&A-type marquee -->
-            <div class="es-fade-up es-d-4 pointer-events-auto mx-auto mt-14 max-w-3xl">
+            <!-- Session-type marquee -->
+            <div class="es-fade-up es-d-4 mx-auto mt-14 max-w-3xl">
                 <div class="es-marquee-mask">
-                    <div class="es-marquee" data-marquee="1" aria-hidden="true">
+                    <div class="es-marquee" data-marquee="1">
                         <div class="es-marquee-track">
-                            @for ($tc = 0; $tc < 2; $tc++)
-                                @foreach (['AMAs', 'Town Halls', 'Expert Panels', 'Fireside Chats', 'Community Q&As', 'Office Hours', 'Roundtables', 'Ask Me Anything'] as $tag)
-                                    <span class="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100/80 px-4 py-1.5 text-xs font-semibold text-amber-800 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-300">
-                                        <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-400"></span>
-                                        {{ $tag }}
-                                    </span>
+                            @for ($chipCopy = 0; $chipCopy < 2; $chipCopy++)
+                                @foreach (['AMAs', 'Office Hours', 'Town Halls', 'Expert Panels', 'Fireside Chats', 'Community Q&As', 'Roundtables', 'Ask Me Anything'] as $chip)
+                                    <span @if ($chipCopy === 1) aria-hidden="true" @endif class="es-conv-chip">{{ $chip }}</span>
                                 @endforeach
                             @endfor
                         </div>
@@ -292,340 +766,522 @@
                 </div>
             </div>
         </div>
-
     </section>
 
     <!-- ============================================================ -->
-    <!-- 2. Stats                                                     -->
+    <!-- 2. The only three numbers on this page                       -->
     <!-- ============================================================ -->
-    <section class="border-t border-gray-200 bg-gray-50 py-16 dark:border-white/5 dark:bg-[#0f0f14]">
-        <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+    <section class="es-conv-alt border-y py-14 es-conv-hr">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <p class="es-conv-tag mb-8 text-center" data-reveal>The only three numbers on this page</p>
             <div class="grid gap-6 text-center md:grid-cols-3" data-reveal-group="90">
-                <div data-reveal class="p-6">
-                    <div class="mb-2 text-4xl font-black text-amber-500 dark:text-amber-400">~<span data-count-to="85">85</span>%</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">higher engagement in interactive formats vs passive</div>
+                <div data-reveal class="px-4">
+                    <div class="es-conv-accent mb-2 text-4xl font-black">$0</div>
+                    <div class="es-conv-ink text-sm font-semibold">platform fees on ticket sales</div>
+                    <div class="es-conv-muted mt-1 text-xs">Every plan, including free. Stripe still charges its own processing fee.</div>
                 </div>
-                <div data-reveal class="border-gray-200 p-6 dark:border-white/5 md:border-x">
-                    <div class="mb-2 text-4xl font-black text-orange-500 dark:text-orange-400">3x</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">more audience retention with live Q&A vs recorded</div>
+                <div data-reveal class="es-conv-statmid">
+                    <div class="es-conv-accent mb-2 text-4xl font-black"><span data-count-to="5">5</span></div>
+                    <div class="es-conv-ink text-sm font-semibold">polls per session, 2 to 10 options each</div>
+                    <div class="es-conv-muted mt-1 text-xs">Polls are a Pro feature. Your audience can suggest options if you let them.</div>
                 </div>
-                <div data-reveal class="p-6">
-                    <div class="mb-2 text-4xl font-black text-emerald-500 dark:text-emerald-400">$0</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">platform fees on paid Q&A sessions</div>
+                <div data-reveal class="px-4">
+                    <div class="es-conv-accent mb-2 text-4xl font-black">10 <span class="es-conv-muted text-2xl">/</span> 100 <span class="es-conv-muted text-2xl">/</span> 1,000</div>
+                    <div class="es-conv-ink text-sm font-semibold">newsletter recipients a month</div>
+                    <div class="es-conv-muted mt-1 text-xs">Free, Pro, Enterprise. Counted per recipient, not per send.</div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- 3. Bento features                                            -->
+    <!-- 3. Turn 01: getting in                                       -->
     <!-- ============================================================ -->
-    <section class="bg-white py-20 dark:bg-[#0a0a0f] lg:py-28">
+    <section id="arrive" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="es-conv-turn">
+                <div class="es-conv-rail" data-reveal>
+                    <span class="es-conv-label es-conv-label-q">Q<span class="es-conv-label-n">01</span></span>
+                    <span class="es-conv-thread" aria-hidden="true"></span>
+                </div>
+                <div>
+                    <h2 class="es-balance es-conv-ink mb-5 text-3xl font-black tracking-tight md:text-4xl" data-reveal>
+                        How does anybody actually <span class="es-conv-accent">get in?</span>
+                    </h2>
+                    <p class="es-conv-muted mb-10 max-w-2xl text-lg" data-reveal style="--reveal-delay: 0.1s;">
+                        Registration. It is free, it is native, and it counts places per session date. A name and an email is all your audience has to type, and no account is required of them.
+                    </p>
+
+                    <div class="grid gap-6 md:grid-cols-3" data-reveal-group="100">
+                        <div class="es-conv-card p-7" data-reveal="panel">
+                            <div class="mb-3 flex flex-wrap items-center gap-2">
+                                <h3 class="es-conv-ink text-lg font-bold">A list, not a form you built</h3>
+                                <span class="es-conv-plan">Free</span>
+                            </div>
+                            <p class="es-conv-muted text-sm">Set the session to Registration instead of Tickets and it collects sign-ups itself. Every registration lands in the same place your ticket sales would.</p>
+                        </div>
+                        <div class="es-conv-card p-7" data-reveal="panel">
+                            <div class="mb-3 flex flex-wrap items-center gap-2">
+                                <h3 class="es-conv-ink text-lg font-bold">A limit that counts per date</h3>
+                                <span class="es-conv-plan">Free</span>
+                            </div>
+                            <p class="es-conv-muted text-sm">Give the session a number of places. A weekly office hour counts each Thursday separately, shows how many are left, and closes registration when that date is full.</p>
+                        </div>
+                        <div class="es-conv-card p-7" data-reveal="panel">
+                            <div class="mb-3 flex flex-wrap items-center gap-2">
+                                <h3 class="es-conv-ink text-lg font-bold">The confirmation email is yours to write</h3>
+                                <span class="es-conv-plan">Free</span>
+                            </div>
+                            <p class="es-conv-muted text-sm">Registration notes ride along with every confirmation. Put the joining instructions, the house rules, or an invitation to reply with a question in there once.</p>
+                        </div>
+                    </div>
+
+                    <p class="es-conv-muted mt-8 max-w-2xl text-sm" data-reveal>
+                        The honest limit: custom questions on that form, the ones asking what somebody does or what they want covered, are a Pro feature. The free list collects a name and an email, and one registration per person per date.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 4. Turn 02: asking early (fixed-dark band)                   -->
+    <!-- ============================================================ -->
+    <section id="ask" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
+        <div class="es-conv-band noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 20%, rgba(253, 186, 116, 0.12), rgba(253, 186, 116, 0) 60%); opacity: 0.5;"></div>
+                <div class="grid-overlay absolute inset-0 opacity-20"></div>
+                <div class="es-conv-wave absolute left-0 right-0 top-8 opacity-40 es-conv-wave-mask">
+                    <div class="es-conv-wave-row">
+                        @foreach ($waveQ as $wi => $wh)
+                            <span class="es-conv-wave-bar" style="--wb: {{ $wh }}%; --wd: {{ 3.4 + ($wi % 5) * 0.26 }}s; --wdelay: {{ ($wi % 8) * 0.15 }}s;"></span>
+                        @endforeach
+                    </div>
+                    <div class="es-conv-wave-rule"></div>
+                    <div class="es-conv-wave-row es-conv-wave-a">
+                        @foreach ($waveA as $wi => $wh)
+                            <span class="es-conv-wave-bar" style="--wb: {{ $wh }}%; --wd: {{ 3.6 + ($wi % 4) * 0.24 }}s; --wdelay: {{ ($wi % 6) * 0.18 }}s;"></span>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative z-10 mx-auto max-w-6xl">
+                <div class="es-conv-turn">
+                    <div class="es-conv-rail" data-reveal>
+                        <span class="es-conv-label es-conv-label-q">Q<span class="es-conv-label-n">02</span></span>
+                        <span class="es-conv-thread" aria-hidden="true"></span>
+                    </div>
+                    <div>
+                        <h2 class="es-balance mb-5 text-3xl font-black tracking-tight text-white md:text-4xl" data-reveal>
+                            Can I ask my question <span class="es-conv-lit">before we start?</span>
+                        </h2>
+                        <p class="mb-10 max-w-2xl text-lg es-conv-onband" data-reveal style="--reveal-delay: 0.1s;">
+                            Three real surfaces, and it is worth being precise about what each one is. A poll the room can add options to. Comments held for approval, which can hang off a single agenda segment. And the email you already send.
+                        </p>
+
+                        <!-- The poll, both sides of it -->
+                        <div class="grid gap-6 lg:grid-cols-2" data-reveal-group="110">
+                            <div class="es-conv-card p-6 sm:p-7" data-reveal="panel">
+                                <div class="mb-4 flex flex-wrap items-center gap-2">
+                                    <p class="es-conv-tag">What the room sees</p>
+                                    <span class="es-conv-plan es-conv-plan-pro">Pro</span>
+                                </div>
+                                <p class="es-conv-poll-q es-conv-ink mb-3">Which should we spend the hour on?</p>
+                                <div aria-hidden="true">
+                                    @foreach ([['The pricing change', 24, true, 0.15], ['The API rewrite', 18, false, 0.28], ['Roadmap for the quarter', 11, false, 0.41]] as [$optName, $optCount, $optMine, $optDelay])
+                                        <div class="es-conv-opt">
+                                            <div class="es-conv-opt-head">
+                                                <span class="es-conv-ink">{{ $optName }}</span>
+                                                <span class="es-conv-count {{ $optMine ? 'es-conv-lit' : 'es-conv-muted' }}">{{ $optCount }}</span>
+                                            </div>
+                                            <div class="es-conv-track">
+                                                <div class="es-conv-fill {{ $optMine ? 'es-conv-fill-mine' : '' }}" style="width: {{ round($optCount / 24 * 100) }}%; --fd: {{ $optDelay }}s;"></div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                    <div class="es-conv-suggest">
+                                        <span>Suggest another option</span>
+                                        <span class="es-conv-suggest-btn">+</span>
+                                    </div>
+                                </div>
+                                <p class="es-conv-muted mt-4 text-xs">
+                                    Results appear once somebody has voted: one vote each, from a signed-in account, counted per date. Close the poll and the results stay on the page. More on <a href="{{ marketing_url('/features/polls') }}" class="es-conv-link font-medium hover:underline">event polls</a>.
+                                </p>
+                            </div>
+
+                            <div class="es-conv-card p-6 sm:p-7" data-reveal="panel">
+                                <div class="mb-4 flex flex-wrap items-center gap-2">
+                                    <p class="es-conv-tag">What you see</p>
+                                    <span class="es-conv-plan es-conv-plan-pro">Pro</span>
+                                </div>
+                                <div class="mb-4 flex items-center gap-2" aria-hidden="true">
+                                    <span class="es-conv-ink text-sm font-semibold">Engagement</span>
+                                    <span class="es-conv-muted text-sm">/</span>
+                                    <span class="es-conv-lit text-sm font-semibold">Polls</span>
+                                    <span class="es-conv-badge">1</span>
+                                </div>
+                                <div class="es-conv-pending" aria-hidden="true">
+                                    <span class="es-conv-ink">&ldquo;Migrating off the old plan&rdquo;</span>
+                                    <span class="flex flex-none items-center gap-1.5">
+                                        <span class="es-conv-mini">Approve</span>
+                                        <span class="es-conv-mini">Reject</span>
+                                    </span>
+                                </div>
+                                <p class="es-conv-muted mt-4 text-sm">
+                                    Turn on suggestions and you can also require your approval, so a suggested option waits here until you accept it. Ten options is the ceiling, pending ones included.
+                                </p>
+                                <p class="es-conv-muted mt-3 text-sm">
+                                    You get an email when suggestions are waiting. That is the direction the notifications run on this platform: toward the host.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 grid gap-6 md:grid-cols-2" data-reveal-group="100">
+                            <div class="es-conv-card p-7" data-reveal="panel">
+                                <div class="mb-3 flex flex-wrap items-center gap-2">
+                                    <h3 class="es-conv-ink text-lg font-bold">Comments, on the segment they are about</h3>
+                                    <span class="es-conv-plan">Free</span>
+                                </div>
+                                <p class="es-conv-muted text-sm">Your audience can leave a comment on the session, or on one agenda segment, with just a name and an email. Nothing shows until you approve it, and you are emailed when submissions are waiting. A per-schedule toggle can require an account instead. More on <a href="{{ marketing_url('/features/fan-videos') }}" class="es-conv-link font-medium hover:underline">audience content</a>.</p>
+                            </div>
+                            <div class="es-conv-card p-7" data-reveal="panel">
+                                <div class="mb-3 flex flex-wrap items-center gap-2">
+                                    <h3 class="es-conv-ink text-lg font-bold">Or just ask by email</h3>
+                                    <span class="es-conv-plan">Free</span>
+                                </div>
+                                <p class="es-conv-muted text-sm">The registration note goes to everyone who signed up. A newsletter goes to everyone who follows you, and a poll can be dropped into it with a button that votes on the session page.</p>
+                            </div>
+                        </div>
+
+                        <p class="mt-10 max-w-3xl es-conv-onband" data-reveal>
+                            What Event Schedule does not have, so you are not surprised on day one: an upvoting question queue with a moderation console. A poll is a poll. Your question, up to ten options, one vote each, and a small approve or reject on any option the room suggests.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 5. Turn 03: the link                                         -->
+    <!-- ============================================================ -->
+    <section id="link" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="es-conv-turn">
+                <div class="es-conv-rail" data-reveal>
+                    <span class="es-conv-label es-conv-label-q">Q<span class="es-conv-label-n">03</span></span>
+                    <span class="es-conv-thread" aria-hidden="true"></span>
+                </div>
+                <div>
+                    <h2 class="es-balance es-conv-ink mb-5 text-3xl font-black tracking-tight md:text-4xl" data-reveal>
+                        So where do we <span class="es-conv-accent">actually meet?</span>
+                    </h2>
+                    <p class="es-conv-muted mb-10 max-w-2xl text-lg" data-reveal style="--reveal-delay: 0.1s;">
+                        Wherever you already host. Mark the session online, paste the link, and it appears on the session page and on each attendee's own registration page.
+                    </p>
+
+                    <div class="grid items-start gap-10 lg:grid-cols-2">
+                        <div class="grid gap-6 sm:grid-cols-2" data-reveal-group="100">
+                            <div class="es-conv-card p-7" data-reveal="panel">
+                                <div class="mb-3 flex flex-wrap items-center gap-2">
+                                    <h3 class="es-conv-ink text-lg font-bold">One field, any platform</h3>
+                                    <span class="es-conv-plan">Free</span>
+                                </div>
+                                <p class="es-conv-muted text-sm">Zoom, Google Meet, Microsoft Teams, YouTube Live, or the thing you switch to next year. Learn more about <a href="{{ marketing_url('/features/online-events') }}" class="es-conv-link font-medium hover:underline">online event features</a>.</p>
+                            </div>
+                            <div class="es-conv-card p-7" data-reveal="panel">
+                                <div class="mb-3 flex flex-wrap items-center gap-2">
+                                    <h3 class="es-conv-ink text-lg font-bold">In the room and online</h3>
+                                    <span class="es-conv-plan">Free</span>
+                                </div>
+                                <p class="es-conv-muted text-sm">In person and online are separate ticks, so a town hall can have a venue on the map and a join link for everyone who cannot be there.</p>
+                            </div>
+                            <div class="es-conv-card p-7 sm:col-span-2" data-reveal="panel">
+                                <div class="mb-3 flex flex-wrap items-center gap-2">
+                                    <h3 class="es-conv-ink text-lg font-bold">The link lands where they will look for it</h3>
+                                    <span class="es-conv-plan">Free</span>
+                                </div>
+                                <p class="es-conv-muted text-sm">Registering gives somebody their own page for that date, and the join link is on it. The confirmation email links straight there, so nobody has to search their inbox for a link you sent in March.</p>
+                            </div>
+                        </div>
+
+                        <div data-reveal="panel">
+                            <div class="es-conv-card p-6">
+                                <p class="es-conv-tag mb-4">Being straight with you</p>
+                                <p class="es-conv-muted text-sm leading-relaxed">
+                                    This is one link field, not a streaming integration. There is no embedded player, no viewer count, and nothing reads back from the platform you host on. That is also why it has never broken when a platform changed its API: it is a URL, and it is yours.
+                                </p>
+                                <div class="mt-5 flex flex-wrap gap-2" aria-hidden="true">
+                                    @foreach (['Zoom', 'Google Meet', 'Teams', 'YouTube Live', 'Anything with a URL'] as $platform)
+                                        <span class="es-conv-chip">{{ $platform }}</span>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 6. Turn 04: every Thursday                                   -->
+    <!-- ============================================================ -->
+    <section id="series" class="es-conv-alt scroll-mt-24 border-y py-20 es-conv-hr lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="es-conv-turn">
+                <div class="es-conv-rail" data-reveal>
+                    <span class="es-conv-label es-conv-label-q">Q<span class="es-conv-label-n">04</span></span>
+                    <span class="es-conv-thread" aria-hidden="true"></span>
+                </div>
+                <div>
+                    <h2 class="es-balance es-conv-ink mb-5 text-3xl font-black tracking-tight md:text-4xl" data-reveal>
+                        Is this a one-off, or <span class="es-conv-accent">every Thursday?</span>
+                    </h2>
+                    <p class="es-conv-muted mb-10 max-w-2xl text-lg" data-reveal style="--reveal-delay: 0.1s;">
+                        Office hours are one recurring session, not fifty copies. Pick the days it runs, take out the dates you are away, and give the run an end so it is not still open in eighteen months.
+                    </p>
+
+                    <div class="grid items-start gap-10 lg:grid-cols-2">
+                        <div data-reveal="panel">
+                            <div class="es-conv-sheet">
+                                <div class="es-conv-sheet-body">
+                                    <div class="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+                                        <span class="es-conv-sheet-title">Office Hours</span>
+                                        <span class="es-conv-sheet-meta">RECURRING</span>
+                                    </div>
+                                    <div>
+                                        @foreach ($series as $seriesIndex => [$seriesLine, $seriesLabel])
+                                            <div class="es-conv-slot">
+                                                <span class="es-conv-time">{{ str_pad($seriesIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                                                <span>
+                                                    <span class="es-conv-slot-name">{{ $seriesLine }}</span>
+                                                    <span class="es-conv-slot-note block">{{ $seriesLabel }}</span>
+                                                </span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <p class="es-conv-sheet-note">
+                                        One session, one agenda, one link, and its own count of places on every date it runs. Change the time once and every remaining Thursday follows.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid gap-6 sm:grid-cols-2" data-reveal-group="100">
+                            <div class="es-conv-card p-7" data-reveal="panel">
+                                <div class="mb-3 flex flex-wrap items-center gap-2">
+                                    <h3 class="es-conv-ink text-lg font-bold">The days it runs</h3>
+                                    <span class="es-conv-plan">Free</span>
+                                </div>
+                                <p class="es-conv-muted text-sm">A day-of-week pattern with a start time. Read more about <a href="{{ marketing_url('/features/recurring-events') }}" class="es-conv-link font-medium hover:underline">recurring events</a>.</p>
+                            </div>
+                            <div class="es-conv-card p-7" data-reveal="panel">
+                                <div class="mb-3 flex flex-wrap items-center gap-2">
+                                    <h3 class="es-conv-ink text-lg font-bold">The weeks you skip</h3>
+                                    <span class="es-conv-plan">Free</span>
+                                </div>
+                                <p class="es-conv-muted text-sm">Date exceptions take single dates out, or put an extra one in, without rebuilding the series. A skipped date is simply not there for your audience.</p>
+                            </div>
+                            <div class="es-conv-card p-7" data-reveal="panel">
+                                <div class="mb-3 flex flex-wrap items-center gap-2">
+                                    <h3 class="es-conv-ink text-lg font-bold">Two kinds of hour</h3>
+                                    <span class="es-conv-plan">Free</span>
+                                </div>
+                                <p class="es-conv-muted text-sm">Sub-schedules keep the weekly office hour and the quarterly AMA apart on one link, each with its own colour, so nobody scrolls past what they came for.</p>
+                            </div>
+                            <div class="es-conv-card p-7" data-reveal="panel">
+                                <div class="mb-3 flex flex-wrap items-center gap-2">
+                                    <h3 class="es-conv-ink text-lg font-bold">In their calendar too</h3>
+                                    <span class="es-conv-plan">Free</span>
+                                </div>
+                                <p class="es-conv-muted text-sm">Anyone can download a single date as a calendar file, and your own Google, Outlook or CalDAV calendar syncs both ways.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 7. The record: six asks, and what answers each               -->
+    <!-- ============================================================ -->
+    <section id="asks" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="es-conv-turn">
+                <div class="es-conv-rail" data-reveal>
+                    <span class="es-conv-label">A<span class="es-conv-label-n">ALL</span></span>
+                    <span class="es-conv-thread" aria-hidden="true"></span>
+                </div>
+                <div class="min-w-0">
+                    <h2 class="es-balance es-conv-ink mb-5 text-3xl font-black tracking-tight md:text-4xl" data-reveal>
+                        Six things an audience asks, and the <span class="es-conv-accent">setting that answers it</span>
+                    </h2>
+                    <p class="es-conv-muted mb-10 max-w-2xl text-lg" data-reveal style="--reveal-delay: 0.1s;">
+                        Every row names where the setting lives and which plan it is on. Nothing on this page is anywhere else.
+                    </p>
+
+                    <div class="es-conv-card p-5 sm:p-7" data-reveal="panel">
+                        <div class="overflow-x-auto">
+                            <table class="w-full border-collapse text-left">
+                                <caption class="sr-only">What a live Q&A audience asks for, the Event Schedule setting that answers it, where that setting lives, and the plan it is on</caption>
+                                <thead>
+                                    <tr class="es-conv-tag">
+                                        <th scope="col" class="pb-3 pe-4 font-bold">They ask</th>
+                                        <th scope="col" class="pb-3 pe-4 font-bold">You turn on</th>
+                                        <th scope="col" class="hidden pb-3 pe-4 font-bold md:table-cell">Where it lives</th>
+                                        <th scope="col" class="pb-3 font-bold">Plan</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($asks as [$askQ, $askWhat, $askWhere, $askPlan])
+                                        <tr class="border-t es-conv-hr">
+                                            <th scope="row" class="es-conv-ink py-4 pe-4 align-top text-sm font-bold">{{ $askQ }}</th>
+                                            <td class="es-conv-muted py-4 pe-4 align-top text-sm">
+                                                {{ $askWhat }}
+                                                <span class="es-conv-muted mt-1 block text-xs md:hidden">{{ $askWhere }}</span>
+                                            </td>
+                                            <td class="es-conv-muted hidden py-4 pe-4 align-top font-mono text-xs md:table-cell">{{ $askWhere }}</td>
+                                            <td class="py-4 align-top">
+                                                <span class="es-conv-plan {{ $askPlan === 'Pro' ? 'es-conv-plan-pro' : '' }}">{{ $askPlan }}</span>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="es-conv-muted mt-5 text-xs">
+                            Pro is five dollars a month. Zero platform fees on ticket sales applies on every plan, including the free one.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 8. Everything else: bento                                    -->
+    <!-- ============================================================ -->
+    <section id="rest" class="es-conv-alt scroll-mt-24 border-y py-20 es-conv-hr lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Everything you need to host <span class="text-gradient-qa">live Q&A sessions</span>
+                <p class="es-conv-tag mb-4" data-reveal>Everything else</p>
+                <h2 class="es-balance es-conv-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.05s;">
+                    Between one hour and the next.
                 </h2>
             </div>
 
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="110">
-
-                <!-- Email attendees (2 cols) -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="flex flex-col gap-8 lg:flex-row lg:items-center">
-                            <div class="flex-1">
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-800/30 dark:bg-amber-900/40 dark:text-amber-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                                    Email Attendees
-                                </div>
-                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Email attendees before sessions</h3>
-                                <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">Send reminders, share question prompts, and follow up with session summaries. Your audience, your inbox.</p>
-                                <div class="flex flex-wrap gap-3">
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Session reminders</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Question prompts</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Follow-up links</span>
-                                </div>
+                <!-- 1 -->
+                <div class="es-bento group relative lg:col-span-2" data-reveal="panel" data-tilt="3.5">
+                    <div class="es-tilt-inner es-conv-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-conv-ink text-xl font-bold">Tell the people who already follow you</h3>
+                                <span class="es-conv-plan">Free</span>
                             </div>
-                            <div class="w-full shrink-0 lg:w-auto" aria-hidden="true">
-                                <div class="animate-float">
-                                    <div class="es-bubble-tail max-w-xs rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-100 to-orange-100 p-4 dark:border-amber-400/30 dark:from-amber-950 dark:to-orange-950" style="--tail-color: rgba(245, 158, 11, 0.55);">
-                                        <div class="mb-3 flex items-center gap-3">
-                                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-500 text-sm font-semibold text-white">QA</div>
-                                            <div><div class="text-sm font-semibold text-gray-900 dark:text-white">Q&A Host</div><div class="text-xs text-amber-600 dark:text-amber-300">Session reminder</div></div>
-                                        </div>
-                                        <div class="rounded-xl border border-amber-400/20 bg-gradient-to-br from-amber-600/30 to-orange-600/30 p-3 text-center">
-                                            <div class="mb-1 text-xs font-semibold text-gray-900 dark:text-white">TOMORROW AT 3 PM</div>
-                                            <div class="text-sm font-bold text-amber-700 dark:text-amber-300">Ask Me Anything</div>
-                                            <div class="mt-1 text-[10px] text-gray-500 dark:text-gray-400">Submit your questions now</div>
-                                        </div>
-                                        <div class="mt-3 flex gap-4 text-xs">
-                                            <div class="text-gray-500 dark:text-gray-400"><span class="font-semibold text-emerald-500 dark:text-emerald-400">72%</span> opened</div>
-                                            <div class="text-gray-500 dark:text-gray-400"><span class="font-semibold text-amber-500 dark:text-amber-400">38%</span> clicked</div>
-                                        </div>
-                                        <div class="es-qstack" aria-hidden="true">
-                                            <div class="es-qstack-layer es-qstack-1"></div>
-                                            <div class="es-qstack-layer es-qstack-2"></div>
-                                            <div class="es-qstack-top">
-                                                <span class="es-qstack-q">Pre-submitted question</span>
-                                                <span class="es-upvote es-upvote-tick"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7" /></svg>42</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <p class="es-conv-muted mb-4">Your audience follows the schedule, and you see who they are. When there is something worth saying, you write a newsletter and send it, to everyone or to a segment, and you get open and click rates back.</p>
+                            <p class="es-conv-muted text-sm">Nothing goes out on its own. The allowance is 10 recipients a month on free, 100 on Pro and 1,000 on Enterprise, counted per recipient rather than per send. Read more about <a href="{{ marketing_url('/features/newsletters') }}" class="es-conv-link font-medium hover:underline">newsletters</a>.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
-                <!-- Sell premium Q&As -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/40 dark:text-emerald-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
-                            Ticketing
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Sell access to premium Q&As</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Charge for exclusive sessions. 100% of Stripe payments go to you. See all <a href="{{ marketing_url('/features/ticketing') }}" class="text-emerald-600 underline hover:no-underline dark:text-emerald-400">ticketing features</a>.</p>
-                        <div class="mt-auto rounded-xl border border-emerald-400/30 bg-emerald-500/15 p-4" aria-hidden="true">
-                            <div class="mb-3 text-center">
-                                <div class="text-xs text-emerald-700 dark:text-emerald-300">You keep</div>
-                                <div class="text-3xl font-bold text-gray-900 dark:text-white">100%</div>
-                                <div class="text-xs text-gray-500 dark:text-gray-400">of ticket sales</div>
+                <!-- 2 -->
+                <div class="es-bento group relative" data-reveal="panel" data-tilt="5">
+                    <div class="es-tilt-inner es-conv-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-conv-ink text-xl font-bold">A code people can point a phone at</h3>
+                                <span class="es-conv-plan">Free</span>
                             </div>
-                            <div class="border-t border-emerald-400/20 pt-3">
-                                <div class="flex justify-between text-xs">
-                                    <span class="text-gray-500 dark:text-gray-400">Platform fee</span>
-                                    <span class="font-semibold text-emerald-600 dark:text-emerald-400">$0</span>
-                                </div>
-                            </div>
+                            <p class="es-conv-muted">Every schedule has a QR code that takes somebody to your page and lets them follow you. Put it on the last slide of the session, which is when people actually want it.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
-                <!-- One link -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-orange-200 bg-orange-100 px-3 py-1.5 text-sm font-medium text-orange-700 dark:border-orange-800/30 dark:bg-orange-900/40 dark:text-orange-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
-                            Share Link
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">One link for all your sessions</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Put it on your website, email signature, or social profiles. All your Q&A sessions in one place.</p>
-                        <div class="mt-auto rounded-xl border border-gray-200 bg-gray-100 p-4 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
-                            <div class="mb-3 flex items-center gap-2 rounded-lg border border-orange-400/30 bg-orange-500/20 p-2">
-                                <svg aria-hidden="true" class="h-4 w-4 shrink-0 text-orange-500 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
-                                <span class="truncate font-mono text-xs text-gray-900 dark:text-white">yourqa.eventschedule.com</span>
+                <!-- 3 -->
+                <div class="es-bento group relative lg:col-span-2" data-reveal="panel" data-tilt="3.5">
+                    <div class="es-tilt-inner es-conv-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-conv-ink text-xl font-bold">On the site you already have</h3>
+                                <span class="es-conv-plan">Free</span>
                             </div>
-                            <div class="grid grid-cols-3 gap-1 text-center">
-                                <div class="rounded bg-gray-200 p-1.5 text-[10px] text-orange-600 dark:bg-white/5 dark:text-orange-300">Website</div>
-                                <div class="rounded bg-gray-200 p-1.5 text-[10px] text-orange-600 dark:bg-white/5 dark:text-orange-300">Email</div>
-                                <div class="rounded bg-gray-200 p-1.5 text-[10px] text-orange-600 dark:bg-white/5 dark:text-orange-300">Social</div>
-                            </div>
+                            <p class="es-conv-muted mb-4">Embed the calendar so your sessions sit where people look you up, and sync two ways with Google, Outlook and CalDAV so your own week stays honest.</p>
+                            <p class="es-conv-muted text-sm">Built-in <a href="{{ marketing_url('/features/analytics') }}" class="es-conv-link font-medium hover:underline">analytics</a> show page views, the devices people are on and where the traffic came from. That is what they measure, and nothing more. Embedding the registration form itself on another site is a Pro feature.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
-                <!-- Works with any platform (2 cols) -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="grid items-center gap-8 md:grid-cols-2">
-                            <div>
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-100 px-3 py-1.5 text-sm font-medium text-teal-700 dark:border-teal-800/30 dark:bg-teal-900/40 dark:text-teal-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                                    Any Platform
-                                </div>
-                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white">Works with any streaming platform</h3>
-                                <p class="text-lg text-gray-500 dark:text-gray-400">Zoom, Microsoft Teams, YouTube Live, Twitter Spaces, or custom RTMP. Add your link and attendees join from your schedule. Learn more about <a href="{{ marketing_url('/features/online-events') }}" class="text-teal-600 underline hover:no-underline dark:text-teal-400">online event features</a>.</p>
+                <!-- 4 -->
+                <div class="es-bento group relative" data-reveal="panel" data-tilt="5">
+                    <div class="es-tilt-inner es-conv-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-conv-ink text-xl font-bold">Not announced yet</h3>
+                                <span class="es-conv-plan">Free</span>
                             </div>
-                            <div class="flex items-center justify-center" aria-hidden="true">
-                                <div class="flex items-center gap-4">
-                                    <div class="es-bubble-tail w-36 rounded-xl border border-teal-400/30 bg-teal-500/15 p-4" style="--tail-color: rgba(20, 184, 166, 0.5);">
-                                        <div class="mb-2 text-center text-xs font-semibold text-teal-600 dark:text-teal-300">Your Schedule</div>
-                                        <div class="space-y-1.5">
-                                            <div class="h-2 rounded bg-gray-300 dark:bg-white/20"></div>
-                                            <div class="h-2 w-3/4 rounded bg-teal-400/40"></div>
-                                        </div>
-                                        <div class="mt-3 rounded-lg border border-teal-400/30 bg-teal-400/20 p-2">
-                                            <div class="text-center text-[10px] font-medium text-teal-800 dark:text-white">Live AMA</div>
-                                            <div class="mt-0.5 text-center text-[8px] text-teal-700 dark:text-teal-300">Fri 3:00 PM</div>
-                                        </div>
-                                    </div>
-                                    <div class="flex flex-col items-center gap-1">
-                                        <svg aria-hidden="true" class="es-sync-dot h-6 w-6 text-teal-500 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                                        <span class="text-[10px] text-teal-500 dark:text-teal-400">join link</span>
-                                    </div>
-                                    <div class="w-36 rounded-xl border border-gray-300 bg-gray-200 p-4 dark:border-white/20 dark:bg-white/10">
-                                        <div class="mb-2 text-center text-xs font-semibold text-gray-600 dark:text-gray-300">Streaming</div>
-                                        <div class="space-y-2 text-center">
-                                            <div class="es-ai-field rounded bg-blue-400/20 p-1.5 text-[10px] text-blue-700 dark:text-blue-300" style="--i: 0;">Zoom</div>
-                                            <div class="es-ai-field rounded bg-red-400/20 p-1.5 text-[10px] text-red-700 dark:text-red-300" style="--i: 1;">YouTube Live</div>
-                                            <div class="es-ai-field rounded bg-sky-400/20 p-1.5 text-[10px] text-sky-700 dark:text-sky-300" style="--i: 2;">Teams</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <p class="es-conv-muted">A session you are still thinking about sits on your calendar as a draft. You can see it, your audience cannot, and publishing is one switch when the date is real.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
-                <!-- Recurring Q&A series -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-amber-200 bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-800/30 dark:bg-amber-900/40 dark:text-amber-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                            Recurring
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Recurring Q&A series</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Weekly office hours or monthly AMAs. Set it once and let attendees follow along.</p>
-                        <div class="mt-auto rounded-xl border border-amber-400/30 bg-amber-500/15 p-3" aria-hidden="true">
-                            <div class="space-y-1.5">
-                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/20 p-1.5" style="--i: 0;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] font-medium text-gray-900 dark:text-white">Fri - Office Hours</span></div>
-                                <div class="es-ai-field flex items-center gap-2 rounded bg-sky-400/20 p-1.5" style="--i: 1;"><div class="h-1.5 w-1.5 rounded-full bg-sky-400"></div><span class="text-[10px] text-gray-600 dark:text-gray-300">Fri - Office Hours</span></div>
-                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/20 p-1.5" style="--i: 2;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] text-gray-600 dark:text-gray-300">Fri - Office Hours</span></div>
-                                <div class="es-ai-field flex items-center gap-2 rounded bg-sky-400/20 p-1.5" style="--i: 3;"><div class="h-1.5 w-1.5 rounded-full bg-sky-400"></div><span class="text-[10px] text-gray-600 dark:text-gray-300">Fri - Office Hours</span></div>
+                <!-- 5 -->
+                <div class="es-bento group relative lg:col-span-2" data-reveal="panel" data-tilt="3.5">
+                    <div class="es-tilt-inner es-conv-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-conv-ink text-xl font-bold">When the session is worth paying for</h3>
+                                <span class="es-conv-plan es-conv-plan-pro">Pro</span>
                             </div>
-                            <div class="mt-2 text-center text-[10px] text-amber-600 dark:text-amber-300">Repeats weekly</div>
+                            <p class="es-conv-muted mb-4">Connect your own Stripe and sell named ticket types for a paid AMA or a small-group deep dive, each with its own price, quantity and sales window, plus discount codes for the people you want back.</p>
+                            <p class="es-conv-muted text-sm">Quantities count per date, the same way places do. Event Schedule takes zero platform fees, so past Stripe's own processing the money is yours. See all <a href="{{ marketing_url('/features/ticketing') }}" class="es-conv-link font-medium hover:underline">ticketing features</a>.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
-                <!-- Google Calendar sync -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-blue-200 bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 dark:border-blue-800/30 dark:bg-blue-900/40 dark:text-blue-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                            Calendar Sync
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Google Calendar sync</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Two-way sync. Q&A sessions, prep time, and follow-ups all in one place.</p>
-                        <div class="mt-auto flex items-center justify-center gap-3" aria-hidden="true">
-                            <div class="w-20 rounded-xl border border-blue-400/30 bg-blue-500/15 p-3">
-                                <div class="mb-1 text-center text-[10px] text-blue-600 dark:text-blue-300">Schedule</div>
-                                <div class="space-y-1">
-                                    <div class="es-sync-dot h-1.5 rounded bg-amber-400/60"></div>
-                                    <div class="es-sync-dot h-1.5 rounded bg-orange-400/60" style="--i: 1;"></div>
-                                </div>
+                <!-- 6 -->
+                <div class="es-bento group relative" data-reveal="panel" data-tilt="5">
+                    <div class="es-tilt-inner es-conv-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-conv-ink text-xl font-bold">Ask how the hour went</h3>
+                                <span class="es-conv-plan es-conv-plan-pro">Pro</span>
                             </div>
-                            <div class="flex flex-col items-center gap-0.5">
-                                <svg aria-hidden="true" class="h-4 w-4 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-                                <svg aria-hidden="true" class="h-4 w-4 text-sky-500 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-                            </div>
-                            <div class="w-20 rounded-xl border border-gray-300 bg-gray-200 p-3 dark:border-white/20 dark:bg-white/10">
-                                <div class="mb-1 text-center text-[10px] text-gray-600 dark:text-gray-300">Google</div>
-                                <div class="space-y-1">
-                                    <div class="es-sync-dot h-1.5 rounded bg-blue-400/60" style="--i: 2;"></div>
-                                    <div class="es-sync-dot h-1.5 rounded bg-green-400/60" style="--i: 3;"></div>
-                                </div>
-                            </div>
+                            <p class="es-conv-muted">Post-event feedback collects a star rating and a comment from the people who were there, which is the quietest way to find out whether the hour was worth theirs.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
-                </div>
-
-                <!-- Audience follows (bottom right) -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-cyan-200 bg-cyan-100 px-3 py-1.5 text-sm font-medium text-cyan-700 dark:border-cyan-800/30 dark:bg-cyan-900/40 dark:text-cyan-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                            Followers
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Audience follows your sessions</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Followers get notified when you schedule new Q&A sessions.</p>
-                        <div class="mt-auto" aria-hidden="true">
-                            <div class="flex items-center justify-center">
-                                <div class="flex -space-x-2">
-                                    <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-amber-500 to-orange-500 text-xs text-white dark:border-[#0a0a0f]">A</div>
-                                    <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-orange-500 to-amber-500 text-xs text-white dark:border-[#0a0a0f]">B</div>
-                                    <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-amber-500 to-yellow-500 text-xs text-white dark:border-[#0a0a0f]">C</div>
-                                    <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-300 text-xs text-gray-600 dark:border-[#0a0a0f] dark:bg-white/20 dark:text-white">+156</div>
-                                </div>
-                            </div>
-                            <div class="mt-3 text-center text-xs text-cyan-600 dark:text-cyan-300">159 following your Q&A sessions</div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 4. Journey (dark band)                                       -->
-    <!-- ============================================================ -->
-    @php
-        $journey = [
-            ['First Q&A session', 'Share a link and host your first live Q&A. Free registration gets your audience in the door.', 'border-amber-500/20 bg-amber-500/10', 'text-amber-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />'],
-            ['Regular office hours', 'Set up weekly or monthly recurring sessions. Your audience follows along and gets notified.', 'border-orange-500/20 bg-orange-500/10', 'text-orange-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />'],
-            ['Paid expert Q&As', 'Start charging for premium access. Sell tickets with zero platform fees.', 'border-emerald-500/20 bg-emerald-500/10', 'text-emerald-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'],
-            ['Multi-speaker panels', 'Invite multiple speakers. Organize panels with different experts across sessions.', 'border-teal-500/20 bg-teal-500/10', 'text-teal-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />'],
-            ['Community series', 'Build a following. Followers get notified when you announce new sessions.', 'border-sky-500/20 bg-sky-500/10', 'text-sky-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />'],
-            ['Hybrid town halls', 'Combine in-person and virtual attendance. Sell different ticket types for on-site and remote participants.', 'border-amber-500/20 bg-amber-500/10', 'text-amber-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'],
-        ];
-    @endphp
-    <section id="journey" class="scroll-mt-24 bg-white px-2 py-14 dark:bg-[#0a0a0f] sm:px-4 lg:py-20">
-        <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
-            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 25%, rgba(217, 119, 6, 0.26), rgba(217, 119, 6, 0) 60%); opacity: 0.6;"></div>
-                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 65%, rgba(234, 88, 12, 0.2), rgba(234, 88, 12, 0) 60%); opacity: 0.55;"></div>
-                <div class="grid-overlay absolute inset-0 opacity-25"></div>
-                <div class="es-qbubble absolute bottom-0 left-0 right-0 flex h-16 items-end justify-center gap-2 px-8 pb-4 opacity-30" style="mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);">
-                    @for ($i = 0; $i < 26; $i++)
-                        @php $dur = 2.4 + ($i % 5) * 0.28; $delay = ($i % 9) * 0.15; $voice = $i % 2 === 0 ? '' : 'is-a'; @endphp
-                        <span class="es-qbubble-dot {{ $voice }}" style="--qb-dur: {{ $dur }}s; --qb-delay: {{ $delay }}s;"></span>
-                    @endfor
-                </div>
-            </div>
-
-            <div class="relative z-10 mx-auto max-w-5xl">
-                <div class="mx-auto mb-14 max-w-2xl text-center">
-                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>
-                        From your first Q&A to a <span class="text-gradient-qa">regular series</span>
-                    </h2>
-                    <p class="text-lg text-gray-300 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                        Event Schedule grows with your Q&A program.
-                    </p>
-                </div>
-
-                <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="80">
-                    @foreach ($journey as [$title, $desc, $iconBg, $iconText, $icon])
-                        <div data-reveal class="rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition-all hover:-translate-y-1 hover:bg-white/[0.07]">
-                            <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl border {{ $iconBg }}">
-                                <svg aria-hidden="true" class="h-6 w-6 {{ $iconText }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $icon !!}</svg>
-                            </div>
-                            <h3 class="mb-2 text-lg font-semibold text-white">{{ $title }}</h3>
-                            <p class="text-sm text-gray-400">{{ $desc }}</p>
-                        </div>
-                    @endforeach
                 </div>
             </div>
         </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- 5. Perfect for (shared sub-audience cards)                   -->
+    <!-- 9. Perfect for                                               -->
     <!-- ============================================================ -->
-    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-28">
+    <section id="who" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Perfect for every type of <span class="text-gradient-qa">live Q&A</span>
+                <h2 class="es-balance es-conv-ink mb-4 text-3xl font-black tracking-tight md:text-5xl" data-reveal>
+                    Perfect for every type of <span class="es-conv-accent">live Q&amp;A</span>
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Whether it's a product AMA or weekly office hours, Event Schedule works for you. Also see Event Schedule for <a href="{{ marketing_url('/for-webinars') }}" class="text-gray-600 underline hover:no-underline dark:text-gray-300">Webinars</a> and <a href="{{ marketing_url('/for-virtual-conferences') }}" class="text-gray-600 underline hover:no-underline dark:text-gray-300">Virtual Conferences</a>.
+                <p class="es-conv-muted text-lg sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
+                    A product AMA or a Thursday office hour, it is the same hour of turns. Also see Event Schedule for <a href="{{ marketing_url('/for-webinars') }}" class="es-conv-link font-medium hover:underline">Webinars</a> and <a href="{{ marketing_url('/for-virtual-conferences') }}" class="es-conv-link font-medium hover:underline">Virtual Conferences</a>.
                 </p>
             </div>
 
@@ -633,7 +1289,7 @@
                 <!-- Tech Founders -->
                 <x-sub-audience-card
                     name="Tech Founders"
-                    description="Product AMAs, roadmap Q&As, and investor office hours. Answer questions from your community in real-time."
+                    description="Product AMAs, roadmap Q&As, and investor office hours. Let the room vote on what the hour covers before it starts."
                     icon-color="cyan"
                     blog-slug="for-tech-founder-qa"
                 >
@@ -647,7 +1303,7 @@
                 <!-- Coaches & Consultants -->
                 <x-sub-audience-card
                     name="Coaches & Consultants"
-                    description="Client office hours, group coaching Q&As, and expert sessions. Build trust with direct audience interaction."
+                    description="Client office hours, group coaching Q&As, and expert sessions. Cap the places so the hour stays useful for everyone in it."
                     icon-color="teal"
                     blog-slug="for-coach-consultant-qa"
                 >
@@ -675,7 +1331,7 @@
                 <!-- Community Managers -->
                 <x-sub-audience-card
                     name="Community Managers"
-                    description="Town halls, member Q&As, and community feedback sessions. Keep your community engaged and informed."
+                    description="Town halls, member Q&As, and community feedback sessions. Collect what people want raised, then approve what goes on the page."
                     icon-color="blue"
                     blog-slug="for-community-manager-qa"
                 >
@@ -689,7 +1345,7 @@
                 <!-- Educators & Professors -->
                 <x-sub-audience-card
                     name="Educators & Professors"
-                    description="Student office hours, exam review sessions, and open Q&As. Make yourself accessible outside the classroom."
+                    description="Student office hours, exam review sessions, and open Q&As. One recurring session with a place limit on every date."
                     icon-color="amber"
                     blog-slug="for-educator-professor-qa"
                 >
@@ -703,7 +1359,7 @@
                 <!-- HR & Internal Teams -->
                 <x-sub-audience-card
                     name="HR & Internal Teams"
-                    description="All-hands Q&As, leadership town halls, and policy discussions. Keep your organization aligned and transparent."
+                    description="All-hands Q&As, leadership town halls, and policy discussions. Keep the agenda public and the draft ones private until they are ready."
                     icon-color="emerald"
                     blog-slug="for-hr-internal-team-qa"
                 >
@@ -718,31 +1374,22 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 6. How it works                                              -->
+    <!-- 10. Three steps                                              -->
     <!-- ============================================================ -->
-    @php
-        $steps = [
-            ['1', 'Create your session', 'Add your topic, date, and streaming link. Set up free or paid registration.'],
-            ['2', 'Share your link', 'Attendees register. Send question prompts before the session.'],
-            ['3', 'Go live', 'Answer questions in real-time. Follow up with a summary.'],
-        ];
-    @endphp
-    <section class="bg-white py-20 dark:bg-[#0a0a0f] lg:py-24">
-        <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+    <section class="es-conv-alt border-y py-20 es-conv-hr lg:py-24">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-2xl text-center">
-                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                    Three steps to a <span class="text-gradient-qa">packed Q&A session</span>
+                <h2 class="es-balance es-conv-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal>
+                    Three steps to a full hour
                 </h2>
             </div>
 
-            <div class="grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="90">
-                @foreach ($steps as [$num, $title, $desc])
-                    <div data-reveal class="text-center">
-                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-600 to-orange-600 text-xl font-bold text-white shadow-lg shadow-amber-600/25">
-                            {{ $num }}
-                        </div>
-                        <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{{ $title }}</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $desc }}</p>
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-3" data-reveal-group="120">
+                @foreach ($steps as [$stepNum, $stepTitle, $stepBody])
+                    <div class="es-conv-card p-7" data-reveal="panel">
+                        <div class="es-conv-accent mb-3 font-mono text-2xl font-black">{{ $stepNum }}</div>
+                        <h3 class="es-conv-ink mb-2 text-lg font-bold">{{ $stepTitle }}</h3>
+                        <p class="es-conv-muted text-sm leading-relaxed">{{ $stepBody }}</p>
                     </div>
                 @endforeach
             </div>
@@ -750,15 +1397,20 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 7. Key features                                              -->
+    <!-- 11. Key features                                             -->
     <!-- ============================================================ -->
-    <section class="border-t border-gray-200 bg-gray-50 py-20 dark:border-white/5 dark:bg-[#0f0f14]">
+    <section class="py-20">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key <span class="text-gradient-qa">features</span></h2>
+            <h2 class="es-conv-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Key features</h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
-                    <x-feature-link-card name="Online Events" description="Host virtual events with any streaming platform" :url="marketing_url('/features/online-events')" icon-color="sky">
+                    <x-feature-link-card name="Online Events" description="One join link, and it works with any platform" :url="marketing_url('/features/online-events')" icon-color="sky">
                         <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Recurring Events" description="Weekly office hours, with the dates you skip taken out" :url="marketing_url('/features/recurring-events')" icon-color="amber">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
@@ -767,13 +1419,13 @@
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Newsletters" description="Send event updates directly to followers' inboxes" :url="marketing_url('/features/newsletters')" icon-color="green">
+                    <x-feature-link-card name="Newsletters" description="Write to the people who follow you, when you have something to say" :url="marketing_url('/features/newsletters')" icon-color="green">
                         <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="qa-link inline-flex items-center">
+                <a href="{{ marketing_url('/features') }}" class="es-conv-link inline-flex items-center font-medium hover:underline">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -786,26 +1438,24 @@
     @include('marketing.partials.pricing-nudge')
 
     <!-- ============================================================ -->
-    <!-- 8. Related pages                                             -->
+    <!-- 12. Related pages                                            -->
     <!-- ============================================================ -->
-    <section class="bg-white py-20 dark:bg-[#0a0a0f]">
-        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related <span class="text-gradient-qa">pages</span></h2>
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
+    <section class="border-t py-16 es-conv-hr">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <h2 class="es-conv-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Related pages</h2>
+            <div class="grid grid-cols-2 gap-4 md:grid-cols-4" data-reveal-group="70">
                 @foreach ([['/for-webinars', 'Webinars'], ['/for-virtual-conferences', 'Virtual Conferences'], ['/for-online-classes', 'Online Classes'], ['/for-watch-parties', 'Watch Parties']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="qa-related-card group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
-                        <div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="qa-related-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
-                        </div>
-                        <svg aria-hidden="true" class="qa-related-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
+                    <a href="{{ marketing_url($relHref) }}" class="es-conv-hover es-conv-card group flex flex-col p-5 transition-all duration-200 hover:shadow-md" data-reveal>
+                        <span class="es-conv-hover-title es-conv-ink mb-3 text-sm font-semibold transition-colors">For {{ $relName }}</span>
+                        <span class="es-conv-hover-arrow es-conv-muted mt-auto inline-flex items-center gap-1 text-xs font-medium transition-colors">
+                            Read more
+                            <svg aria-hidden="true" class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                        </span>
                     </a>
                 @endforeach
             </div>
-            <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="qa-link inline-flex items-center">
+            <div class="mt-8 text-center">
+                <a href="{{ marketing_url('/use-cases') }}" class="es-conv-link inline-flex items-center font-medium hover:underline">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -816,34 +1466,31 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 9. FAQ                                                       -->
+    <!-- 13. FAQ                                                      -->
     <!-- ============================================================ -->
-    <section class="bg-gray-100 py-20 dark:bg-black/30 lg:py-28">
+    <x-seo.faq-schema :items="$faqs" />
+
+    <section id="faq" class="es-conv-alt scroll-mt-24 border-t py-20 es-conv-hr lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Frequently asked <span class="text-gradient-qa">questions</span>
+            <div class="mb-12 text-center">
+                <p class="es-conv-tag mb-4" data-reveal>Questions</p>
+                <h2 class="es-balance es-conv-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
+                    Frequently asked questions
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Everything Q&A hosts ask about Event Schedule.
+                <p class="es-conv-muted text-lg" data-reveal style="--reveal-delay: 0.1s;">
+                    What Q&amp;A hosts ask before they move a series across.
                 </p>
             </div>
 
-            <div class="space-y-4" data-reveal-group="80">
-                @foreach ([
-                    ['Can I collect audience questions before the session?', 'Yes. Use the built-in email feature to send question prompts to all registered attendees before your live Q&A session. You can also include a link to a form or discussion thread in the event description so attendees submit questions ahead of time. Your full Q&A schedule lives on one shareable page that your audience can bookmark and revisit.'],
-                    ['What streaming platforms work with Event Schedule?', 'Any platform that gives you a meeting or streaming link. Zoom, Google Meet, Microsoft Teams, YouTube Live, Twitter Spaces, and custom solutions. Event Schedule is platform-agnostic - just paste your link and attendees join from your schedule.'],
-                    ['Can I charge for live Q&A sessions?', 'Yes. Set up paid registration with Stripe for premium Q&A sessions, expert AMAs, or exclusive office hours. You keep 100% of the ticket revenue - Event Schedule charges zero platform fees. Stripe charges its standard processing fee (2.9% + $0.30).'],
-                    ['Is Event Schedule free for hosting Q&A sessions?', 'Yes. Event Schedule is free Q&A hosting software. The free plan includes unlimited events, attendee email notifications, follower features, and Google Calendar sync. There are zero platform fees on ticket sales at any plan level. You only pay Stripe\'s standard processing fee if you sell tickets.'],
-                ] as [$q, $a])
-                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
-                            <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
+            <div class="space-y-3" data-reveal-group="80">
+                @foreach ($faqs as $faqIndex => $faq)
+                    <details name="faq" class="es-conv-hover es-conv-card group p-6 transition-all duration-200" data-reveal>
+                        <summary class="es-conv-ink flex cursor-pointer items-start gap-3 font-semibold">
+                            <span class="es-conv-accent flex-none font-mono text-sm font-bold" aria-hidden="true">{{ str_pad($faqIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                            <span class="es-conv-hover-title flex-1 transition-colors">{{ $faq['q'] }}</span>
+                            <svg aria-hidden="true" class="es-conv-muted mt-0.5 h-5 w-5 flex-none transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
                         </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{{ $a }}</p>
+                        <p class="faq-answer es-conv-muted mt-4 leading-relaxed ps-9">{{ $faq['a'] }}</p>
                     </details>
                 @endforeach
             </div>
@@ -851,38 +1498,44 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 10. Finale                                                   -->
+    <!-- 14. Finale: the last turn                                    -->
     <!-- ============================================================ -->
-    <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
+    <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
-            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-amber-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+            <div class="es-conv-band noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl sm:px-12 lg:py-24" data-confetti data-reveal="panel">
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(217, 119, 6, 0.3), rgba(217, 119, 6, 0) 60%); opacity: 0.7;"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
-                    <div class="es-qbubble absolute bottom-0 left-0 right-0 flex h-14 items-end justify-center gap-2 px-8 pb-4 opacity-30" style="mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);">
-                        @for ($i = 0; $i < 22; $i++)
-                            @php $dur = 2.4 + ($i % 5) * 0.28; $delay = ($i % 9) * 0.15; $voice = $i % 2 === 0 ? '' : 'is-a'; @endphp
-                            <span class="es-qbubble-dot {{ $voice }}" style="--qb-dur: {{ $dur }}s; --qb-delay: {{ $delay }}s;"></span>
-                        @endfor
+                    <div class="es-conv-wave absolute bottom-7 left-0 right-0 opacity-40 es-conv-wave-mask">
+                        <div class="es-conv-wave-row">
+                            @foreach ($waveQ as $wi => $wh)
+                                <span class="es-conv-wave-bar" style="--wb: {{ $wh }}%; --wd: {{ 3.2 + ($wi % 5) * 0.22 }}s; --wdelay: {{ ($wi % 9) * 0.13 }}s;"></span>
+                            @endforeach
+                        </div>
+                        <div class="es-conv-wave-rule"></div>
+                        <div class="es-conv-wave-row es-conv-wave-a">
+                            @foreach ($waveA as $wi => $wh)
+                                <span class="es-conv-wave-bar" style="--wb: {{ $wh }}%; --wd: {{ 3.5 + ($wi % 4) * 0.2 }}s; --wdelay: {{ ($wi % 7) * 0.15 }}s;"></span>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
-
                 <div class="relative z-10">
+                    <span class="es-conv-label mb-6 inline-flex">A<span class="es-conv-label-n">LAST</span></span>
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Your sessions. Your audience. <span class="text-gradient-qa">No middleman.</span>
+                        You already have the answers. <span class="es-conv-lit">Give them somewhere to ask.</span>
                     </h2>
-                    <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
-                        Stop paying platform fees. Fill your Q&A sessions. Free forever.
+                    <p class="mx-auto mb-10 max-w-2xl text-lg es-conv-onband">
+                        Publishing your sessions, the agenda and registration with a place limit are free forever. Polls and ticketing are five dollars a month, and nothing is taken from the door.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
                         <label for="es-claim-input" class="sr-only">Your schedule name</label>
                         <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
-                            <input id="es-claim-input" type="text" placeholder="your-qa" autocomplete="off" spellcheck="false" maxlength="30"
+                            <input id="es-claim-input" type="text" placeholder="office-hours" autocomplete="off" spellcheck="false" maxlength="30"
                                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
-                            <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
+                            <span class="shrink-0 select-none font-mono text-sm es-conv-ondim sm:text-base">.eventschedule.com</span>
                         </div>
-                        <a href="{{ app_url('/sign_up?type=talent') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-amber-600 to-orange-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-amber-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-amber-500/40">
+                        <a href="{{ app_url('/sign_up?type=talent') }}" class="es-conv-btn group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
                             <span class="relative z-10 flex items-center gap-2">
                                 Get Started Free
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -893,11 +1546,27 @@
                         </a>
                     </div>
 
-                    <p class="mt-6 text-sm text-gray-400">No credit card required</p>
+                    <p class="mt-6 text-sm es-conv-ondim">No credit card required</p>
                 </div>
             </div>
         </div>
     </section>
+
+    <!-- Desktop dot nav -->
+    <nav class="es-dotnav fixed top-1/2 z-40 hidden -translate-y-1/2 lg:block ltr:right-5 rtl:left-5" aria-label="Page sections">
+        <ul class="glass flex flex-col items-center gap-1.5 rounded-full px-2 py-3">
+            @foreach ($dotSections as [$sectionId, $sectionLabel])
+                <li class="relative">
+                    <a href="#{{ $sectionId }}" class="es-dot group block rounded-full" aria-label="{{ $sectionLabel }}">
+                        <span class="es-dot-pip block h-2 w-2 rounded-full bg-gray-400/60 dark:bg-white/30"></span>
+                        <span class="pointer-events-none absolute top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full es-conv-tip border px-3 py-1 text-xs font-medium opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 ltr:right-full ltr:mr-3 rtl:left-full rtl:ml-3">{{ $sectionLabel }}</span>
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    </nav>
+
+    </div>
 
     <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
     @vite('resources/js/marketing-home.js')

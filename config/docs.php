@@ -288,7 +288,7 @@ return [
             'blurb' => 'Embed, share on social, and grow followers.',
             'icon' => 'share',
             'published' => '2024-01-01',
-            'modified' => '2026-02-01',
+            'modified' => '2026-07-30',
         ],
 
         'event-graphics' => [

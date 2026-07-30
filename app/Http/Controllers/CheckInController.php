@@ -13,12 +13,17 @@ class CheckInController extends Controller
     {
         $user = auth()->user();
 
-        $events = Event::with('creatorRole')
+        // Pro only. Until the free plan could sell, this needed no gate: a free schedule produced no
+        // paid sales, so the dashboard had nothing to show. Now that it can sell, the gate has to be
+        // explicit or check-in becomes a free feature by accident.
+        $events = Event::with(['creatorRole', 'roles'])
             ->where('user_id', $user->id)
             ->whereNull('appointment_type_id') // appointment bookings are not check-in events
             ->where(fn ($q) => $q->whereHas('tickets')->orWhere('rsvp_enabled', true))
             ->orderBy('starts_at', 'desc')
-            ->get();
+            ->get()
+            ->filter(fn (Event $event) => $event->isPro())
+            ->values();
 
         // Pre-select event with sales for today, else most recent. sales.event_date holds the
         // venue's calendar date, so compare against that rather than the app timezone's date;
@@ -61,6 +66,11 @@ class CheckInController extends Controller
 
         if (! $user->canViewEventData($event)) {
             return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Pro only, same as index(). See the note there on why this is now explicit.
+        if (! $event->isPro()) {
+            return response()->json(['error' => __('messages.upgrade_required')], 403);
         }
 
         // Default to the venue's calendar date, which is what sales.event_date and the

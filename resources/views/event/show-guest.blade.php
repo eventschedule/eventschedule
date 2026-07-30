@@ -470,8 +470,11 @@
               </div>
               @endif
 
-              {{-- Calendar links dropdown (inside venue card) --}}
-              @if (!$event->is_draft && $event->tickets_enabled && $event->isPro())
+              {{-- Calendar links dropdown (inside venue card). Not plan-gated: this is the quiet
+                   fallback a visitor sees when an event is not selling, so it has to render for a
+                   free ticketed event too - otherwise a free schedule at its monthly allowance shows
+                   a page with no buy button AND no calendar link, which reads as broken. --}}
+              @if (!$event->is_draft && $event->tickets_enabled)
               <div class="relative mt-4">
                 <button type="button"
                     class="calendar-card-toggle inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-base font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
@@ -541,8 +544,9 @@
              same predicate as the card's formatted_address. --}}
         <x-stay22-map :role="$role" :event="$event" :date="$date" :accent-color="$accentColor" />
 
-        {{-- Calendar links dropdown (fallback when no venue) --}}
-        @if (!$event->is_draft && !($event->venue && ($event->venue->name || $event->venue->formatted_address)) && $event->tickets_enabled && $event->isPro())
+        {{-- Calendar links dropdown (fallback when no venue). Not plan-gated, same reason as the
+             copy inside the venue card above. --}}
+        @if (!$event->is_draft && !($event->venue && ($event->venue->name || $event->venue->formatted_address)) && $event->tickets_enabled)
         <div class="relative {{ $role->isRtl() ? 'rtl' : '' }}">
           <button type="button"
               class="calendar-card-toggle inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-base font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
@@ -580,8 +584,11 @@
         </div>
         @endif
 
-        {{-- Create your own card --}}
-        @if (config('app.hosted') && ! $event->isPro())
+        {{-- Create your own card. Keyed off THIS schedule's tier, the same fact that decides
+             the footer strip, so the two cannot disagree. It used to read
+             `! $event->isPro()`, which is true when any schedule on the bill is paid - so a
+             free curator's page dropped this card while still carrying the strip. --}}
+        @if ($role->showBranding())
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-5 flex flex-col gap-6 {{ $role->isRtl() ? 'rtl' : '' }}">
           <p class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100">
             {{ __('messages.create_your_own_event_schedule') }}
@@ -622,6 +629,7 @@
           $queryParams = [];
           if (request('category')) $queryParams['category'] = request('category');
           if (request('schedule')) $queryParams['schedule'] = request('schedule');
+          if ($requestedLayout = requested_event_layout()) $queryParams['layout'] = $requestedLayout;
           if (request('date')) {
             $date = request('date');
             if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
@@ -887,7 +895,10 @@
                   @click="$dispatch('show-event-form')"
                   class="min-w-[180px] inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                   style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
-              @if ($event->allTicketsSoldOut($date))
+              @if ($event->allTicketsSoldOut($date) && $event->isPro())
+                {{-- The waitlist is Pro, so only offer it where it actually leads somewhere.
+                     A free schedule's sold-out event keeps its normal label rather than promising a
+                     waitlist that WaitlistController would refuse. --}}
                 {{ __('messages.join_waitlist') }}
               @else
                 {{ $event->areTicketsFree() ? $role->customLabel('get_tickets') : $role->customLabel('buy_tickets') }}
@@ -1062,8 +1073,12 @@
               </div>
             </div>
         </div>
-        @elseif ($event->canSellTickets($date) && $event->isPro())
-        {{-- Ticket form section (hidden by default, shown on CTA click) --}}
+        @elseif ($event->canSellTickets($date))
+        {{-- Ticket form section (hidden by default, shown on CTA click).
+             The redundant `&& $event->isPro()` that used to sit here was the difference between a
+             working buy button and a dead one: the CTA above is gated on canSellTickets() alone, so
+             any event that could sell but was not Pro rendered a button whose click target
+             (#event-form-section) had never been rendered. Keep these two conditions identical. --}}
         <div id="event-form-section" class="scroll-mt-4"
              style="display: none; transition: opacity 0.2s ease, transform 0.2s ease;"
              @if (request()->get('tickets') === 'true' || session('error') || $errors->any())

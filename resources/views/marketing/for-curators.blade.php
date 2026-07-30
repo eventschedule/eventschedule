@@ -110,10 +110,8 @@
         #es-cur-page { background-color: var(--esc-paper); color: var(--esc-ink); }
         .es-cur-ground { background-color: var(--esc-paper); }
         .es-cur-ground-2 { background-color: var(--esc-paper-2); }
-        .es-cur-ink { color: var(--esc-ink); }
         .es-cur-muted { color: var(--esc-muted); }
         .es-cur-faint { color: var(--esc-faint); }
-        .es-cur-spot { color: var(--esc-spot); }
         .es-cur-icon { color: var(--esc-spot); }
 
         /* --- Type: serif is display only, body copy stays the system sans --- */

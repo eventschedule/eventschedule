@@ -1,6 +1,6 @@
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl mb-0 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }} transition-[max-width] duration-300 ease-in-out mx-auto"
           data-view-width
-          style="max-width: {{ ($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem' }}"
+          style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}"
         >
           <div
             class="relative rounded-t-xl {{ $role->header_image === 'logos' ? '' : 'overflow-hidden before:block before:absolute before:bg-[#00000033] before:-inset-0 before:rounded-t-xl' }}"
@@ -443,16 +443,16 @@
                 <div class="hidden md:flex items-center rounded-md shadow-sm flex-shrink-0">
                     <button id="toggle-list-btn"
                             data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}"
-                            class="w-11 h-11 flex items-center justify-center rounded-s-md border-2 transition-all duration-200 {{ ($role->event_layout ?? 'calendar') !== 'list' ? 'hover:scale-105 hover:shadow-md' : 'text-gray-900 dark:text-white' }}"
-                            style="border-color: {{ $accentColor }}; {{ ($role->event_layout ?? 'calendar') !== 'list' ? 'background-color: ' . $accentColor . '; color: ' . $contrastColor : '' }}">
+                            class="w-11 h-11 flex items-center justify-center rounded-s-md border-2 transition-all duration-200 {{ $role->activeEventLayout() !== 'list' ? 'hover:scale-105 hover:shadow-md' : 'text-gray-900 dark:text-white' }}"
+                            style="border-color: {{ $accentColor }}; {{ $role->activeEventLayout() !== 'list' ? 'background-color: ' . $accentColor . '; color: ' . $contrastColor : '' }}">
                         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M3,4H7V8H3V4M9,5V7H21V5H9M3,10H7V14H3V10M9,11V13H21V11H9M3,16H7V20H3V16M9,17V19H21V17H9"/>
                         </svg>
                     </button>
                     <button id="toggle-calendar-btn"
                             data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}"
-                            class="w-11 h-11 flex items-center justify-center rounded-e-md border-2 border-s-0 transition-all duration-200 {{ ($role->event_layout ?? 'calendar') !== 'calendar' ? 'hover:scale-105 hover:shadow-md' : 'text-gray-900 dark:text-white' }}"
-                            style="border-color: {{ $accentColor }}; {{ ($role->event_layout ?? 'calendar') !== 'calendar' ? 'background-color: ' . $accentColor . '; color: ' . $contrastColor : '' }}">
+                            class="w-11 h-11 flex items-center justify-center rounded-e-md border-2 border-s-0 transition-all duration-200 {{ $role->activeEventLayout() !== 'calendar' ? 'hover:scale-105 hover:shadow-md' : 'text-gray-900 dark:text-white' }}"
+                            style="border-color: {{ $accentColor }}; {{ $role->activeEventLayout() !== 'calendar' ? 'background-color: ' . $accentColor . '; color: ' . $contrastColor : '' }}">
                         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M9,10V12H7V10H9M13,10V12H11V10H13M17,10V12H15V10H17M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5A2,2 0 0,1 5,3H6V1H8V3H16V1H18V3H19M19,19V8H5V19H19M9,14V16H7V14H9M13,14V16H11V14H13M17,14V16H15V14H17Z"/>
                         </svg>

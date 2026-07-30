@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule for Hotels & Resorts",
-        "description": "Elevate the guest experience. Share your activity calendar, sell tickets to special events, and keep guests engaged. Free forever.",
+        "description": "Put the week of guest activities on a page with your property's name on it, print the link on the key-card sleeve, and let guests read the card without asking the desk.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -22,46 +22,6 @@
         }
     }
     </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "Is Event Schedule free for hotels and resorts?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Event Schedule is free forever for sharing your activity calendar, building a guest following, and syncing with Google Calendar. Advanced features and newsletters are available on the Pro plan."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I manage guest activities, entertainment, and conferences together?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Use sub-schedules to organize by category - pool activities, spa sessions, live entertainment, kids clubs, dining events, and conference schedules. Guests see a unified calendar of everything happening at your property."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "How do guests discover activities during their stay?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Share your activity calendar via QR codes at check-in, embed it on your hotel website, or include the link in pre-arrival emails. Guests can also follow your schedule and receive notifications for new activities."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I sell tickets to special events and experiences?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Connect your Stripe account to sell tickets for special dinners, spa packages, excursions, and entertainment shows. Create different pricing for hotel guests and external visitors. Zero platform fees on all sales."
-                }
-            }
-        ]
-    }
-    </script>
     <!-- Product Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
@@ -71,7 +31,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Hotel and Resort Activity Management Software",
         "operatingSystem": "Web",
-        "description": "Elevate the guest experience. Share your activity calendar, sell tickets to special events, and keep guests engaged. No platform fees. Free forever.",
+        "description": "One page for every guest activity at your property: the standing week entered once as recurring activities, a printable QR code and link, free sign-ups with a capacity, and zero-fee ticketing for the paid experiences.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -79,13 +39,20 @@
             "description": "Free forever"
         },
         "featureList": [
-            "Guest activity newsletters",
-            "Multi-space management (pool, ballroom, spa, restaurant)",
-            "Zero-fee ticketing for special experiences",
-            "Full weekly activity planner",
-            "Google Calendar two-way sync",
-            "Team access for concierge and event staff",
-            "Activity engagement analytics"
+            "Standing activities entered once, repeating on chosen days of the week",
+            "Date exceptions for the weeks an activity does not run",
+            "A printable QR code and a short link for the key-card sleeve",
+            "Embeddable calendar for the hotel website you already have",
+            "Free sign-ups with a capacity, counted separately for each date",
+            "Zero-fee ticketing for paid experiences through your own Stripe account",
+            "QR check-in at the door",
+            "Promo codes for a resident rate",
+            "Sub-schedules with a name, a colour and their own link",
+            "Draft activities that stay members-only until you publish them",
+            "Booking requests that wait for you to accept them",
+            "Two-way Google, Outlook and CalDAV calendar sync",
+            "Newsletters to the guests who followed the schedule",
+            "Built-in analytics per activity"
         ],
         "url": "{{ url()->current() }}",
         "keywords": "hotel activity calendar, resort event schedule, guest activity management, hotel entertainment calendar, free hotel scheduling",
@@ -106,533 +73,962 @@
     </script>
 
     <style {!! nonce_attr() !!}>
-        /* For-hotels-and-resorts "The Concierge" styles. The shared es-* motion
-           system lives in marketing.css; this holds the slate-gold gradient,
-           the brass badge, the gold foil shimmer line, the drifting activity
-           card, and the twinkling gold-dust motif. */
-        .text-gradient-slate-gold {
-            background: linear-gradient(135deg, #64748b, #d97706);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .dark .text-gradient-slate-gold {
-            background: linear-gradient(135deg, #94a3b8, #fbbf24);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .hotel-brass-badge {
-            border: 1.5px solid rgba(217, 119, 6, 0.35);
-            box-shadow: inset 0 0 6px rgba(217, 119, 6, 0.1), 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-        .dark .hotel-brass-badge {
-            border-color: rgba(245, 158, 11, 0.3);
-            box-shadow: inset 0 0 8px rgba(245, 158, 11, 0.08), 0 1px 3px rgba(0, 0, 0, 0.2);
-        }
-        .hotel-shimmer-line {
-            background: linear-gradient(90deg, transparent, #d97706, transparent);
-            position: relative;
-            overflow: hidden;
-        }
-        .hotel-shimmer-line::after {
-            content: '';
-            position: absolute;
-            top: -1px;
-            left: -100%;
-            width: 60%;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
-            animation: es-shimmer 5s ease-in-out infinite;
-        }
-        .dark .hotel-shimmer-line::after {
-            background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.4), transparent);
-        }
-        @keyframes es-shimmer {
-            0% { left: -100%; }
-            100% { left: 200%; }
-        }
-        @keyframes es-activity-float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        .es-activity-float { animation: es-activity-float 6s ease-in-out infinite; }
+        /* ==============================================================
+           For-hotels-and-resorts "The Concierge" styles.
 
-        /* Twinkling gold dust */
-        .es-gold-dust span {
-            position: absolute;
-            border-radius: 9999px;
-            background: radial-gradient(circle, rgba(251, 191, 36, 0.95), rgba(217, 119, 6, 0.3));
-            opacity: 0;
-            animation: es-twinkle var(--tw-dur, 4s) ease-in-out infinite;
-            animation-delay: var(--tw-delay, 0s);
-        }
-        @keyframes es-twinkle {
-            0%, 100% { opacity: 0; transform: scale(0.4); }
-            50% { opacity: var(--tw-op, 0.7); transform: scale(1); }
+           CONCEPT: THE CARD IN THE RACK. Every property already has this
+           object - the printed card behind the desk that says what is on
+           today. It is the right object because it fails in a way the
+           product fixes: it is correct for about a day, the desk that
+           reads it aloud goes home at eleven, and the only guests who
+           get the answer are the ones who queue for it. So the whole
+           page is that card, promoted to a page: same object, always
+           current, and what you print is only the link to it.
+
+           The metaphor and the feature story are the same sentence:
+             - the card = the schedule's own public page,
+             - the rack = recurring activities on chosen days of the week
+               plus date exceptions, which is what makes a standing week
+               one entry instead of fifty-two,
+             - the sleeve = the ungated QR code (RoleController::qrCode)
+               plus the iframe embed, which is the whole distribution
+               story and costs nothing,
+             - the book = sign-ups with a capacity counted PER DATE
+               (Event::rsvpRemaining) for the free activities, and
+               ticketing for the paid ones.
+
+           The devices that carry it: the hero card and the key-card
+           sleeve on one shared stock; the brass rack tab that numbers
+           every section; a real <table> of the standing programme with
+           the days_of_week string rendered as it is stored; twenty-eight
+           equal day slots drawn twice, entered and published, so a
+           single date exception reads as one gap in a rhythm; the five
+           strands filed as five more cards behind five coloured tabs;
+           and the drawer/card duplex, which is the same argument as the
+           is_accepted visibility gate.
+
+           WHAT THE PAGE REFUSES TO DRAW. No room grid and no per-space
+           capacity: a sub-schedule is fillable on name, slug, colour
+           only, so it organises and colour-codes and nothing more. No
+           overlap or double-booking warning: no such check exists. No
+           automatic guest alerts: the only follower-facing mail is a
+           newsletter the owner writes and sends.
+
+           NO ARBITRARY TAILWIND VALUES. The marketing bundle is compiled
+           ahead of time, so a class like `lg:grid-cols-[1.05fr_0.95fr]`
+           or `dark:bg-[#1a1e23]` that no other page already uses simply
+           does not exist in the stylesheet and paints nothing - the hero
+           silently loses its second column and the dot-nav tooltip
+           silently keeps a white background in dark mode. Every layout,
+           colour and size this page needs that is not already in the
+           bundle is therefore declared here, in this block, by name.
+
+           COLOUR: the page keeps its slate-and-brass family, restated as
+           a MATERIAL pair rather than a gradient - stone ground, brass
+           rule, card stock. Distinctiveness comes from the material, the
+           serif display face and the record-shaped table, not from a new
+           hue. Measured (see the report): ink #191b1e 15.55 on the
+           #f4f3f0 ground, muted #4f555c 6.79, brass #6d4c14 7.02; in
+           dark #f0ece6 15.55 on #12151a, muted #a8afb6 8.25, brass
+           #e8c477 10.97. NEVER text-gray-500 on this ground.
+
+           THE CARD STOCK IS A FIXED PHYSICAL OBJECT: .es-conc-stock and
+           everything inside it renders identically with .dark on and
+           off, because a printed card does not know what the browser
+           theme is. It therefore carries no dark: utilities and no
+           shared class that flips.
+           ============================================================== */
+
+        /* --- Ground and ink ---------------------------------------- */
+        .es-conc-page { background-color: #f4f3f0; color: #191b1e; }
+        .dark .es-conc-page { background-color: #12151a; color: #f0ece6; }
+        .es-conc-ink { color: #191b1e; }
+        .dark .es-conc-ink { color: #f0ece6; }
+        .es-conc-muted { color: #4f555c; }
+        .dark .es-conc-muted { color: #a8afb6; }
+        .es-conc-accent { color: #6d4c14; }
+        .dark .es-conc-accent { color: #e8c477; }
+        /* Always-lit brass, for the two fixed-dark bands. */
+        .es-conc-lit { color: #e8c477; }
+
+        /* --- Page furniture that the compiled bundle does not carry ---
+               A seam between sections: one hairline, drawn the same way
+               everywhere so the page reads as a stack of filed cards. */
+        .es-conc-seam { border-top: 1px solid rgba(25, 27, 30, 0.1); }
+        .dark .es-conc-seam { border-top-color: rgba(240, 236, 230, 0.1); }
+
+        /* The hero's two columns: the argument on the left, the object on
+           the right, and the object is given slightly less room because a
+           card in a rack is a small thing. */
+        .es-conc-duo { display: grid; align-items: center; gap: 3rem; }
+        @media (min-width: 1024px) {
+            .es-conc-duo { grid-template-columns: 1.05fr 0.95fr; gap: 4rem; }
         }
 
-        /* Concierge motif extensions: a brass key-card mock (with punched slot),
-           slate category chips, a hairline gold column rule between guest-week
-           days, and champagne link / hover / FAQ states. All static (no new
-           keyframes), so the reduced-motion switch below already covers us. */
-        .hotel-keycard {
-            background: linear-gradient(135deg, #f8fafc 0%, #fef3c7 55%, #fcd991 100%);
-            border: 1px solid rgba(217, 119, 6, 0.3);
-            box-shadow: 0 12px 26px -10px rgba(217, 119, 6, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+        /* Hero texture: not a square grid but close-set vertical hairlines,
+           the edges of cards standing in a rack, with every fourth one
+           heavier. Masked to a soft ellipse so it never reaches the text. */
+        .es-conc-weave {
+            background-image:
+                linear-gradient(90deg, rgba(25, 27, 30, 0.085) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(25, 27, 30, 0.04) 1px, transparent 1px);
+            background-size: 148px 100%, 37px 100%;
+            -webkit-mask-image: radial-gradient(ellipse 74% 62% at 50% 38%, black 20%, transparent 74%);
+            mask-image: radial-gradient(ellipse 74% 62% at 50% 38%, black 20%, transparent 74%);
         }
-        .dark .hotel-keycard {
-            background: linear-gradient(135deg, #1f2937 0%, #3a2a17 60%, #4a3316 100%);
-            border-color: rgba(245, 158, 11, 0.3);
-            box-shadow: 0 12px 26px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(251, 191, 36, 0.15);
+        .dark .es-conc-weave {
+            background-image:
+                linear-gradient(90deg, rgba(240, 236, 230, 0.07) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(240, 236, 230, 0.03) 1px, transparent 1px);
         }
-        .hotel-keycard-slot {
-            display: inline-block;
-            width: 22px;
-            height: 6px;
-            border-radius: 9999px;
-            background: rgba(100, 116, 139, 0.3);
-            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+
+        /* The full-bleed bands stop widening on very large screens. */
+        @media (min-width: 1536px) {
+            .es-conc-wide { max-width: 100rem; margin-left: auto; margin-right: auto; }
         }
-        .dark .hotel-keycard-slot {
-            background: rgba(0, 0, 0, 0.5);
-            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+
+        /* Type sizes below Tailwind's smallest step. */
+        .es-conc-fine { font-size: 0.68rem; }
+        .es-conc-finer { font-size: 0.62rem; }
+        .es-conc-cap {
+            font-size: 0.58rem;
+            font-weight: 700;
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
         }
-        .hotel-keycard-muted { color: #64748b; }
-        .dark .hotel-keycard-muted { color: #94a3b8; }
-        .hotel-slate-chip {
+
+        /* --- Typography: a serif display face, which is the register a
+               property already prints its own card in. -------------- */
+        .es-conc-display {
+            font-family: ui-serif, Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+            font-weight: 600;
+            letter-spacing: -0.012em;
+            line-height: 1.08;
+        }
+        .es-conc-eyebrow {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.26em;
+            text-transform: uppercase;
+            color: #4f555c;
+        }
+        .dark .es-conc-eyebrow { color: #a8afb6; }
+        .es-conc-band .es-conc-eyebrow { color: #e8c477; }
+        .es-conc-num {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* A brass rule under one word of a heading. Drawn as a flat
+           stroke, not an illustration, and it never touches the glyphs. */
+        .es-conc-mark { color: #6d4c14; position: relative; white-space: nowrap; }
+        .dark .es-conc-mark { color: #e8c477; }
+        .es-conc-mark::after {
+            content: "";
+            position: absolute;
+            left: 0.02em;
+            right: 0.02em;
+            bottom: -0.12em;
+            height: 2px;
+            border-radius: 2px;
+            background: rgba(109, 76, 20, 0.5);
+        }
+        .dark .es-conc-mark::after { background: rgba(232, 196, 119, 0.45); }
+        .es-conc-band .es-conc-mark { color: #e8c477; }
+        .es-conc-band .es-conc-mark::after { background: rgba(232, 196, 119, 0.45); }
+
+        /* --- Surfaces ---------------------------------------------- */
+        .es-conc-card {
+            background-color: #fbfaf8;
+            border: 1px solid rgba(25, 27, 30, 0.13);
+            border-radius: 0.35rem;
+        }
+        .dark .es-conc-card {
+            background-color: #1a1e23;
+            border-color: rgba(240, 236, 230, 0.13);
+        }
+        /* A strand, drawn as one more card standing in the same rack: the
+           colour is on the tab edge, which is where a colour goes on a
+           filed card. The hex is a free-form value the owner picks, so it
+           is set inline per row and nothing about it is hard-coded here. */
+        .es-conc-rackrow {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 0.75rem;
+            border: 1px solid rgba(25, 27, 30, 0.13);
+            border-left-width: 4px;
+            border-radius: 0.15rem 0.35rem 0.35rem 0.15rem;
+            background-color: #fbfaf8;
+        }
+        .dark .es-conc-rackrow {
+            border-color: rgba(240, 236, 230, 0.13);
+            background-color: #1a1e23;
+        }
+        .es-conc-hover { transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+        .es-conc-hover:hover {
+            border-color: rgba(109, 76, 20, 0.45);
+            box-shadow: 0 12px 30px -20px rgba(25, 27, 30, 0.55);
+        }
+        .dark .es-conc-hover:hover {
+            border-color: rgba(232, 196, 119, 0.4);
+            box-shadow: 0 12px 30px -20px rgba(0, 0, 0, 0.85);
+        }
+        .es-conc-rule { height: 1px; background: rgba(25, 27, 30, 0.12); }
+        .dark .es-conc-rule { background: rgba(240, 236, 230, 0.12); }
+
+        /* --- The rack tab: a section numeral on a brass card tab --- */
+        .es-conc-tab {
             display: inline-flex;
             align-items: center;
-            border-radius: 9999px;
-            padding: 0 0.4rem;
-            font-size: 9px;
-            line-height: 1.5;
-            font-weight: 600;
-            letter-spacing: 0.03em;
-            background: rgba(100, 116, 139, 0.14);
-            color: #475569;
-            border: 1px solid rgba(100, 116, 139, 0.25);
+            gap: 0.5rem;
+            padding: 0.3rem 0.8rem 0.3rem 0.55rem;
+            border-radius: 0.15rem 0.35rem 0.35rem 0.15rem;
+            border: 1px solid rgba(25, 27, 30, 0.16);
+            border-left: 3px solid #6d4c14;
+            background: #fbfaf8;
+            color: #191b1e;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-variant-numeric: tabular-nums;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
         }
-        .dark .hotel-slate-chip {
-            background: rgba(148, 163, 184, 0.16);
-            color: #cbd5e1;
-            border-color: rgba(148, 163, 184, 0.28);
+        .dark .es-conc-tab {
+            border-color: rgba(240, 236, 230, 0.18);
+            border-left-color: #e8c477;
+            background: #1a1e23;
+            color: #f0ece6;
         }
-        .hotel-link-accent { color: #b45309; }
-        .dark .hotel-link-accent { color: #fbbf24; }
-        .hotel-related-card:hover {
-            border-color: rgba(217, 119, 6, 0.4);
-            background-color: rgba(217, 119, 6, 0.06);
+        .es-conc-band .es-conc-tab {
+            border-color: rgba(240, 236, 230, 0.18);
+            border-left-color: #e8c477;
+            background: rgba(240, 236, 230, 0.05);
+            color: #f0ece6;
         }
-        .dark .hotel-related-card:hover {
-            border-color: rgba(245, 158, 11, 0.3);
-            background-color: rgba(245, 158, 11, 0.06);
+
+        /* --- Plan pills. Tier only, never a state. ----------------- */
+        .es-conc-plan {
+            display: inline-flex;
+            align-items: center;
+            flex: none;
+            padding: 0.1rem 0.45rem;
+            border-radius: 0.2rem;
+            border: 1px solid rgba(25, 27, 30, 0.3);
+            color: #4f555c;
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
         }
-        .group:hover .hotel-related-title { color: #b45309; }
-        .dark .group:hover .hotel-related-title { color: #fbbf24; }
-        .group:hover .hotel-related-arrow { color: #b45309; }
-        .dark .group:hover .hotel-related-arrow { color: #fbbf24; }
-        .hotel-faq { transition: border-color 0.2s ease; }
-        .hotel-faq:hover { border-color: rgba(217, 119, 6, 0.35); }
-        .dark .hotel-faq:hover { border-color: rgba(245, 158, 11, 0.28); }
-        @media (min-width: 1024px) {
-            .hotel-day-rule::after {
-                content: '';
-                position: absolute;
-                top: 14%;
-                bottom: 14%;
-                right: 0;
-                width: 1px;
-                background: linear-gradient(to bottom, rgba(217, 119, 6, 0), rgba(217, 119, 6, 0.4), rgba(217, 119, 6, 0));
-                pointer-events: none;
-            }
-            .dark .hotel-day-rule::after {
-                background: linear-gradient(to bottom, rgba(251, 191, 36, 0), rgba(251, 191, 36, 0.35), rgba(251, 191, 36, 0));
-            }
-            .hotel-day-rule:last-child::after { display: none; }
+        .dark .es-conc-plan { border-color: rgba(240, 236, 230, 0.32); color: #a8afb6; }
+        .es-conc-band .es-conc-plan { border-color: rgba(240, 236, 230, 0.32); color: #a8afb6; }
+        .es-conc-plan-pro { border-color: rgba(109, 76, 20, 0.55); color: #6d4c14; background: rgba(109, 76, 20, 0.07); }
+        .dark .es-conc-plan-pro { border-color: rgba(232, 196, 119, 0.45); color: #e8c477; background: rgba(232, 196, 119, 0.1); }
+        .es-conc-band .es-conc-plan-pro { border-color: rgba(232, 196, 119, 0.45); color: #e8c477; background: rgba(232, 196, 119, 0.1); }
+
+        /* --- The standing card: a real table of a real record ------ */
+        .es-conc-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .es-conc-table th, .es-conc-table td { padding: 0.7rem 0.6rem; vertical-align: middle; }
+        .es-conc-table thead th {
+            padding-top: 0;
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #4f555c;
+            white-space: nowrap;
         }
+        .dark .es-conc-table thead th { color: #a8afb6; }
+        .es-conc-table tbody tr { border-top: 1px solid rgba(25, 27, 30, 0.1); }
+        .dark .es-conc-table tbody tr { border-top-color: rgba(240, 236, 230, 0.1); }
+        .es-conc-table th[scope="row"] { font-weight: 700; color: #191b1e; }
+        .dark .es-conc-table th[scope="row"] { color: #f0ece6; }
+
+        /* days_of_week is a seven-character string indexed from Sunday,
+           so the strip is drawn Sunday first: that is the stored shape. */
+        .es-conc-dow { display: flex; gap: 2px; }
+        .es-conc-dow span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.15rem;
+            height: 1.15rem;
+            border-radius: 0.15rem;
+            background: rgba(25, 27, 30, 0.06);
+            color: #4f555c;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.6rem;
+            font-weight: 700;
+        }
+        .dark .es-conc-dow span { background: rgba(240, 236, 230, 0.08); color: #a8afb6; }
+        .es-conc-dow .es-conc-dow-on { background-color: #6d4c14; color: #ffffff; }
+        .dark .es-conc-dow .es-conc-dow-on { background-color: #e8c477; color: #191b1e; }
+
+        /* --- Four weeks, twice. The upper strip is what one recurring
+               activity holds; the lower strip is what the page publishes
+               after a single date exception. The excepted date is drawn
+               EMPTY, not struck through and not annotated, because that
+               is literally what a guest gets: the day is not offered.
+               Proportional by design - twenty-eight equal slots, so the
+               one missing session is visible as a gap in a rhythm. --- */
+        .es-conc-weeks { display: flex; gap: 0.55rem; }
+        .es-conc-wk { flex: 1 1 0; min-width: 0; }
+        .es-conc-wk-cells { display: flex; gap: 2px; }
+        .es-conc-wk-cells span {
+            flex: 1 1 0;
+            min-width: 0;
+            height: 1.7rem;
+            border-radius: 0.15rem;
+            background-color: rgba(25, 27, 30, 0.07);
+        }
+        .dark .es-conc-wk-cells span { background-color: rgba(240, 236, 230, 0.08); }
+        .es-conc-wk-cells .es-conc-wk-on { background-color: #6d4c14; }
+        .dark .es-conc-wk-cells .es-conc-wk-on { background-color: #e8c477; }
+        .es-conc-wk-label {
+            margin-top: 0.35rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.58rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            color: #4f555c;
+        }
+        .dark .es-conc-wk-label { color: #a8afb6; }
+
+        /* How a guest joins: the three honest answers. */
+        .es-conc-join {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            white-space: nowrap;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            border: 1px solid rgba(25, 27, 30, 0.18);
+            color: #4f555c;
+            font-size: 0.68rem;
+            font-weight: 700;
+        }
+        .dark .es-conc-join { border-color: rgba(240, 236, 230, 0.2); color: #a8afb6; }
+        .es-conc-join-brass { border-color: rgba(109, 76, 20, 0.5); color: #6d4c14; }
+        .dark .es-conc-join-brass { border-color: rgba(232, 196, 119, 0.45); color: #e8c477; }
+
+        /* --- Strand dots. A sub-schedule's colour is a free-form hex
+               the owner picks, so these are set inline per row. ----- */
+        .es-conc-strand { display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap; }
+        .es-conc-pip { width: 0.5rem; height: 0.5rem; border-radius: 999px; flex: none; }
+
+        /* --- The card stock. FIXED OBJECT: identical in both modes. */
+        .es-conc-stock {
+            background-color: #f7f4ec;
+            background-image: linear-gradient(160deg, #fbf9f3 0%, #f7f4ec 46%, #f1ecdf 100%);
+            border: 1px solid rgba(109, 76, 20, 0.28);
+            border-radius: 0.3rem;
+            box-shadow: 0 26px 50px -28px rgba(25, 27, 30, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+            color: #22201b;
+        }
+        .es-conc-stock-ink { color: #22201b; }
+        .es-conc-stock-muted { color: #5d574c; }
+        .es-conc-stock-brass { color: #6d4c14; }
+        .es-conc-stock-rule { height: 2px; background: linear-gradient(90deg, #6d4c14, rgba(109, 76, 20, 0.15)); }
+        .es-conc-stock-hair { height: 1px; background: rgba(34, 32, 27, 0.14); }
+        .es-conc-stock-row { border-radius: 0.2rem; background: rgba(34, 32, 27, 0.04); }
+        .es-conc-stock-pill {
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+            padding: 0.05rem 0.4rem;
+            border-radius: 999px;
+            border: 1px solid rgba(34, 32, 27, 0.22);
+            color: #5d574c;
+            font-size: 0.58rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+        .es-conc-stock-pill-brass { border-color: rgba(109, 76, 20, 0.5); color: #6d4c14; }
+        /* Punched hole and the notched corner of a real sleeve. */
+        .es-conc-stock-slot {
+            width: 1.6rem;
+            height: 0.32rem;
+            border-radius: 999px;
+            background: rgba(34, 32, 27, 0.22);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+        }
+        .es-conc-stock-notch { border-top-right-radius: 1.1rem; }
+
+        /* The module block on the sleeve: a printed code, drawn as
+           filled squares from a fixed pattern. Decorative and hidden
+           from assistive tech. */
+        .es-conc-code { display: grid; grid-template-columns: repeat(9, 1fr); gap: 1px; }
+        .es-conc-code i { display: block; aspect-ratio: 1; background: rgba(34, 32, 27, 0.1); border-radius: 1px; }
+        .es-conc-code i.es-conc-code-on { background: #22201b; }
+
+        /* --- The book: a place kept, drawn proportionally ---------- */
+        .es-conc-meter { height: 0.45rem; border-radius: 999px; background: rgba(25, 27, 30, 0.1); overflow: hidden; }
+        .dark .es-conc-meter { background: rgba(240, 236, 230, 0.12); }
+        .es-conc-meter-fill { height: 100%; border-radius: 999px; background: #6d4c14; }
+        .dark .es-conc-meter-fill { background: #e8c477; }
+
+        /* --- Buttons and links ------------------------------------- */
+        .es-conc-btn {
+            background-color: #6d4c14;
+            color: #ffffff;
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .es-conc-btn:hover { background-color: #563b0d; transform: translateY(-1px); box-shadow: 0 16px 32px -18px rgba(109, 76, 20, 0.95); }
+        .dark .es-conc-btn { background-color: #e8c477; color: #191b1e; }
+        .dark .es-conc-btn:hover { background-color: #f2d492; }
+        .es-conc-ghost {
+            border: 1px solid rgba(25, 27, 30, 0.22);
+            color: #191b1e;
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+        .es-conc-ghost:hover { border-color: rgba(109, 76, 20, 0.55); background-color: rgba(109, 76, 20, 0.06); }
+        .dark .es-conc-ghost { border-color: rgba(240, 236, 230, 0.24); color: #f0ece6; }
+        .dark .es-conc-ghost:hover { border-color: rgba(232, 196, 119, 0.5); background-color: rgba(232, 196, 119, 0.08); }
+        .es-conc-link { color: #6d4c14; }
+        .es-conc-link:hover { color: #191b1e; }
+        .dark .es-conc-link { color: #e8c477; }
+        .dark .es-conc-link:hover { color: #f0ece6; }
+
+        /* --- The fixed-dark bands. A resolvable background-color sits
+               under the gradient so text is scored against a real
+               surface. ---------------------------------------------- */
+        .es-conc-band {
+            background-color: #12151a;
+            background-image:
+                radial-gradient(115% 90% at 50% 0%, rgba(109, 76, 20, 0.3), rgba(109, 76, 20, 0) 62%),
+                linear-gradient(180deg, #1a1e23, #12151a 62%, #0e1115);
+            border-radius: 1.5rem;
+        }
+        /* A pip inside a band, lit in both colour modes. */
+        .es-conc-bullet {
+            width: 0.375rem;
+            height: 0.375rem;
+            border-radius: 999px;
+            flex: none;
+            background-color: #e8c477;
+        }
+        /* Shared classes that flip with the colour mode and would
+           otherwise render two different bands. */
+        .es-conc-band .grid-overlay {
+            background-image:
+                linear-gradient(rgba(240, 236, 230, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(240, 236, 230, 0.05) 1px, transparent 1px);
+        }
+        .es-conc-band .animate-shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            background-size: 200% 100%;
+        }
+        .es-conc-band .es-claim:focus-within {
+            border-color: rgba(232, 196, 119, 0.75);
+            box-shadow: 0 0 0 4px rgba(232, 196, 119, 0.22);
+        }
+        /* Same for the card stock, which is the same printed object in
+           both modes and must not inherit a flipped shared rule. */
+        .es-conc-stock .grid-overlay {
+            background-image:
+                linear-gradient(rgba(34, 32, 27, 0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(34, 32, 27, 0.06) 1px, transparent 1px);
+        }
+
+        /* --- Shared chrome that is hard-coded brand blue -----------
+               The dot-nav tooltip is the one piece of shared chrome with
+               no page-local hook, and its dark surface has to be named
+               here or it stays white under gray-300 text. Measured:
+               #374151 on #ffffff is 10.31, #d1d5db on #1a1e23 is 11.37. */
+        .es-conc-tip {
+            border: 1px solid #e5e7eb;
+            background-color: #ffffff;
+            color: #374151;
+        }
+        .dark .es-conc-tip {
+            border-color: rgba(255, 255, 255, 0.1);
+            background-color: #1a1e23;
+            color: #d1d5db;
+        }
+        .es-conc-page .es-spot {
+            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(109, 76, 20, 0.12), transparent 60%);
+        }
+        .dark .es-conc-page .es-spot {
+            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(232, 196, 119, 0.1), transparent 60%);
+        }
+        .es-dot:hover .es-dot-pip { background-color: rgba(109, 76, 20, 0.65); }
+        .dark .es-dot:hover .es-dot-pip { background-color: rgba(232, 196, 119, 0.65); }
+        .es-dot.is-active .es-dot-pip { background: #6d4c14; }
+        .dark .es-dot.is-active .es-dot-pip { background: #e8c477; }
+
+        /* --- Focus rings. No border-radius here: an outline already
+               follows the element's own shape. ---------------------- */
+        #es-conc-page a:focus-visible,
+        #es-conc-page summary:focus-visible,
+        #es-conc-page button:focus-visible,
+        #es-conc-page input:focus-visible {
+            outline: 2px solid #6d4c14;
+            outline-offset: 3px;
+        }
+        .dark #es-conc-page a:focus-visible,
+        .dark #es-conc-page summary:focus-visible,
+        .dark #es-conc-page button:focus-visible,
+        .dark #es-conc-page input:focus-visible {
+            outline-color: #e8c477;
+        }
+        .es-conc-band a:focus-visible,
+        .es-conc-band summary:focus-visible,
+        .es-conc-band button:focus-visible,
+        .es-conc-band input:focus-visible {
+            outline-color: #e8c477 !important;
+        }
+
+        /* --- Motion: one drift on the hero card, gated ------------- */
+        @keyframes es-conc-settle {
+            0%, 100% { transform: translateY(0) rotate(-0.6deg); }
+            50% { transform: translateY(-7px) rotate(-0.2deg); }
+        }
+        .es-conc-settle { animation: es-conc-settle 9s ease-in-out infinite; }
         @media (prefers-reduced-motion: reduce) {
-            .hotel-shimmer-line::after, .es-activity-float, .es-gold-dust span { animation: none !important; }
-            .es-gold-dust span { opacity: 0.35; transform: scale(0.7); }
+            .es-conc-settle { animation: none; transform: rotate(-0.6deg); }
+            .es-conc-btn:hover { transform: none; }
         }
     </style>
 
     @php
-        // Twinkling gold dust: [left, top, size(px), duration, delay, opacity]
-        $gold = [
-            ['12%', '22%', 4, '4s', '0s', '0.8'],
-            ['28%', '14%', 3, '3.5s', '1.2s', '0.6'],
-            ['44%', '30%', 5, '5s', '2s', '0.7'],
-            ['60%', '17%', 3, '4s', '0.6s', '0.65'],
-            ['74%', '26%', 4, '4.5s', '2.6s', '0.75'],
-            ['88%', '19%', 3, '3.5s', '1.5s', '0.6'],
-            ['20%', '42%', 4, '4s', '3s', '0.6'],
-            ['82%', '44%', 5, '5s', '0.9s', '0.7'],
+        // ---------------------------------------------------------------
+        // The standing card. One row per activity that runs on a pattern.
+        // 'days' is the seven-character days_of_week string the product
+        // actually stores, indexed from Sunday, so the strip below is a
+        // direct rendering of that column. A once-a-month dinner is NOT
+        // expressible as a day-of-week pattern, so it is entered as its
+        // own dated activity and its row says so rather than pretending.
+        // 'join' is the honest mechanism: nothing, a free sign-up with a
+        // capacity, or a ticket.
+        // ---------------------------------------------------------------
+        $dowLetters = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+        $dowNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+        $strands = [
+            'wellness' => ['Wellness', '#2f7d64'],
+            'family'   => ['Family',   '#b07d1f'],
+            'water'    => ['Water',    '#1f6f93'],
+            'music'    => ['Music',    '#8a4a2f'],
+            'dining'   => ['Dining',   '#6d4c14'],
+        ];
+
+        $programme = [
+            ['Sunrise yoga',   'wellness', '0010101', '7:00',  'Place kept', '12 mats',   'free', false],
+            ['Kids club',      'family',   '1111111', '10:00', 'Drop in',    'no limit',  'free', false],
+            ['Reef walk',      'water',    '0001000', '8:30',  'Place kept', '8 places',  'free', false],
+            ['Terrace trio',   'music',    '0000011', '19:30', 'Drop in',    'no limit',  'free', false],
+            ['Sunset sail',    'water',    '0000100', '17:45', 'Ticket',     '$60',       'pro',  false],
+            ['Cellar dinner',  'dining',   null,      '19:30', 'Ticket',     '$95',       'pro',  true],
+        ];
+
+        // Four weeks of sunrise yoga, twice. The upper strip is the single
+        // recurring activity: days_of_week '0010101' indexed from Sunday, so
+        // it lands on Tuesday, Thursday and Saturday. The lower strip is what
+        // the page publishes once ONE date exception is set on the Thursday in
+        // week three - slot 18, because 18 % 7 is 4 and index 4 is Thursday.
+        // The excepted slot goes back to being an ordinary empty day, which is
+        // exactly what the product does: the date is removed, not annotated.
+        $yogaPattern = '0010101';
+        $exceptSlot = 18;
+        $entered = [];
+        $published = [];
+        foreach (range(0, 27) as $i) {
+            $on = $yogaPattern[$i % 7] === '1';
+            $entered[] = $on;
+            $published[] = ($i === $exceptSlot) ? false : $on;
+        }
+        $weekLabels = ['Mar 1', 'Mar 8', 'Mar 15', 'Mar 22'];
+
+        // Today's card in the hero. Times are the property's own.
+        $today = [
+            ['7:00',  'Sunrise yoga',  'wellness', 'Place kept'],
+            ['10:00', 'Kids club',     'family',   'Drop in'],
+            ['16:00', 'Reef walk',     'water',    'Place kept'],
+            ['19:30', 'Terrace trio',  'music',    'Drop in'],
+        ];
+
+        // The printed module block on the sleeve. Decorative: a fixed
+        // pattern of filled squares with the three corner finders a
+        // printed code has, not a scannable code.
+        $codeRows = [
+            '111010111',
+            '100010001',
+            '101010101',
+            '100000001',
+            '110101011',
+            '000110100',
+            '111010111',
+            '100011001',
+            '101010101',
+        ];
+
+        // The book. Two lines, two mechanisms, and the meters are
+        // computed from the same figures the text prints.
+        $book = [
+            ['Sunrise yoga',  'Thursday',  9,  12, 'Sign-ups', 'free', 'No money changes hands. A capacity, counted for this date only.'],
+            ['Cellar dinner', 'Saturday',  22, 30, 'Tickets',  'pro',  '$95 a head, through your own Stripe account. Zero platform fees.'],
+        ];
+
+        $faqs = [
+            [
+                'q' => 'Is Event Schedule free for hotels and resorts?',
+                'a' => 'Yes. The activity page and its link, the QR code, standing activities that repeat on chosen days of the week, date exceptions, sub-schedules, free sign-ups with a capacity, the embeddable calendar, two-way Google, Outlook and CalDAV sync and built-in analytics are all free forever. Newsletters are on the free plan too, at 10 emails a month counted per recipient, which Pro raises to 100 and Enterprise to 1,000. Ticketing for the paid experiences is on the Pro plan at $5 a month, and Event Schedule charges zero platform fees on sales.',
+            ],
+            [
+                'q' => 'How do guests find out what is on during their stay?',
+                'a' => 'Your schedule has its own address and a QR code you can download and print, so the link can go on the key-card sleeve, the room folder, a sign by the pool or the pre-arrival email. You can also embed the same calendar in the website you already have. Nothing is installed and no account is needed to read it. Guests can follow the schedule, which builds a list you can write a newsletter to; nothing is sent automatically, a newsletter goes out when you send it.',
+            ],
+            [
+                'q' => 'Can I set up the activities that run every week?',
+                'a' => 'Yes, on the free plan. An activity can repeat on chosen days of the week at a start time, so sunrise yoga on Tuesday, Thursday and Saturday is one entry rather than three more every week. Date exceptions take individual dates out for the week the court is being resurfaced, and guests simply do not see that day offered. One recurring activity carries one start time, so a morning session and an evening session are two entries.',
+            ],
+            [
+                'q' => 'Can guests reserve a place, and can I sell the paid experiences?',
+                'a' => 'Both. A free activity can take sign-ups with a capacity, and the count is kept for each date separately, so a full Tuesday does not close Thursday. Paid experiences use ticketing on the Pro plan: named ticket types with their own prices and quantities, QR check-in at the door, your own Stripe account and no platform fee from us. A promo code can carry a resident rate for the people staying with you.',
+            ],
+            [
+                'q' => 'Can I keep the pool, the spa, the kids club and the conference programme apart?',
+                'a' => 'Yes, with sub-schedules, free on every plan. Each one has a name, a colour and its own link, so the spa can point a sign at its own strand of the same calendar. Being straight about what they are: they organise and colour-code, they are not rooms with their own capacity, and nothing is checking whether two activities overlap. A conference day can carry its own agenda inside the event as parts, and anything you are not ready to show stays a Draft, which is members-only until you publish it.',
+            ],
+            [
+                'q' => 'Can more than one person keep the card up to date?',
+                'a' => 'The free plan is one team member, and multiple team members are an Enterprise feature capped at five. In between, calendar sync does a lot of the work: the schedule syncs two ways with Google, Outlook or CalDAV, so whoever runs the programme can work in the calendar they already have and the public page follows. Booking requests are free as well, so an act or a planner can ask about a date and it waits for you to accept it before it appears anywhere.',
+            ],
+        ];
+
+        $dotSections = [
+            ['top', 'The card'],
+            ['rack', 'The standing week'],
+            ['sleeve', 'The sleeve'],
+            ['book', 'Keeping a place'],
+            ['strands', 'The strands'],
+            ['desk', 'Behind the desk'],
+            ['who', 'Who it is for'],
+            ['how', 'How it works'],
+            ['faq', 'Questions'],
+            ['claim', 'Get started'],
         ];
     @endphp
 
+    <div id="es-conc-page" class="es-conc-page">
+
     <!-- ============================================================ -->
-    <!-- 1. Hero: elevate the guest experience                        -->
+    <!-- 1. Hero: the card in the rack                                -->
     <!-- ============================================================ -->
-    <section class="es-hero relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
-        <div class="absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 28% 30%, rgba(100, 116, 139, 0.28), rgba(100, 116, 139, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 72% 42%, rgba(217, 119, 6, 0.28), rgba(217, 119, 6, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 55% 72%, rgba(234, 179, 8, 0.14), rgba(234, 179, 8, 0) 60%);"></div>
-            <div class="es-rays absolute inset-0"></div>
-            <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
-            <!-- Marble speckle texture -->
-            <div class="absolute inset-0 opacity-[0.04] dark:opacity-[0.05]">
-                <svg aria-hidden="true" width="100%" height="100%">
-                    <defs>
-                        <pattern id="marble-speckle" x="0" y="0" width="120" height="120" patternUnits="userSpaceOnUse">
-                            <circle cx="15" cy="20" r="0.8" fill="#94a3b8" /><circle cx="45" cy="10" r="0.5" fill="#d97706" /><circle cx="80" cy="35" r="0.7" fill="#94a3b8" /><circle cx="25" cy="60" r="0.4" fill="#d97706" /><circle cx="65" cy="75" r="0.9" fill="#94a3b8" /><circle cx="100" cy="50" r="0.6" fill="#d97706" /><circle cx="35" cy="95" r="0.5" fill="#94a3b8" /><circle cx="75" cy="105" r="0.7" fill="#d97706" /><circle cx="110" cy="85" r="0.4" fill="#94a3b8" /><circle cx="10" cy="110" r="0.6" fill="#d97706" /><circle cx="55" cy="45" r="0.3" fill="#94a3b8" /><circle cx="90" cy="15" r="0.5" fill="#94a3b8" />
-                        </pattern>
-                    </defs>
-                    <rect width="100%" height="100%" fill="url(#marble-speckle)" />
-                </svg>
-            </div>
-            <div class="es-gold-dust absolute inset-0">
-                @foreach ($gold as [$l, $t, $s, $d, $dl, $op])
-                    <span style="left: {{ $l }}; top: {{ $t }}; width: {{ $s }}px; height: {{ $s }}px; --tw-dur: {{ $d }}; --tw-delay: {{ $dl }}; --tw-op: {{ $op }};"></span>
-                @endforeach
-            </div>
+    <section id="top" class="es-hero noise relative flex min-h-[calc(88svh-4rem)] scroll-mt-24 items-center overflow-hidden pb-16 pt-28">
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 26% 30%, rgba(109, 76, 20, 0.2), rgba(109, 76, 20, 0) 62%); opacity: 0.55;"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 74% 58%, rgba(79, 85, 92, 0.2), rgba(79, 85, 92, 0) 62%); opacity: 0.5;"></div>
+            <div class="es-spot absolute inset-0"></div>
+            <div class="es-conc-weave absolute inset-0"></div>
         </div>
 
-        <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <div class="es-fade-up es-d-1 hotel-brass-badge mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
-                <svg aria-hidden="true" class="h-5 w-5 text-amber-500 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">For Hotels & Resorts</span>
-            </div>
+        <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="es-conc-duo">
+                <div>
+                    <p class="es-conc-eyebrow es-fade-up es-d-1 mb-5">For hotels and resorts</p>
 
-            <h1 class="es-balance mb-6 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
-                <span class="es-mask"><span class="es-mask-line">Elevate the</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-slate-gold">guest experience.</span></span></span>
-            </h1>
+                    <h1 class="es-conc-display es-balance mb-7 text-[2.7rem] sm:text-6xl">
+                        <span class="es-mask"><span class="es-mask-line">The desk closes</span></span>
+                        <span class="es-mask es-mask-2"><span class="es-mask-line">at eleven.</span></span>
+                        <span class="es-mask es-mask-2"><span class="es-mask-line es-conc-accent">The card does not.</span></span>
+                    </h1>
 
-            <div class="es-fade-up es-d-2 mb-8 flex justify-center">
-                <div class="hotel-shimmer-line h-px w-48"></div>
-            </div>
+                    <p class="es-conc-muted es-fade-up es-d-2 mb-9 max-w-xl text-lg sm:text-xl">
+                        Guests ask the same four questions all week, and the answer lives with
+                        whoever is on the desk plus a printed sheet that went out of date on
+                        Tuesday. Put the week on a page with your property's name on it, then
+                        print the link on the key-card sleeve and let the card answer at six
+                        in the morning.
+                    </p>
 
-            <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
-                From pool parties to wine tastings. One calendar for every guest activity. Keep guests engaged and delighted.
-            </p>
-
-            <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <a href="#planner" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
-                    See the week
-                    <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
-                </a>
-                <a href="{{ app_url('/sign_up?type=venue') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-slate-700 to-amber-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-amber-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-amber-500/40">
-                    Create your activity calendar
-                    <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-            </div>
-
-            <!-- Property-type marquee -->
-            <div class="es-fade-up es-d-4 pointer-events-auto mx-auto mt-14 max-w-3xl">
-                <div class="es-marquee-mask">
-                    <div class="es-marquee" data-marquee="1" aria-hidden="true">
-                        <div class="es-marquee-track">
-                            @for ($tc = 0; $tc < 2; $tc++)
-                                @foreach (['Pool Parties', 'Live Entertainment', 'Conferences', 'Spa Events', 'Wine Tastings', 'Wedding Receptions', 'Excursions', 'Cooking Classes'] as $tag)
-                                    <span class="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100/80 px-4 py-1.5 text-xs font-semibold text-amber-800 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-300">
-                                        <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-slate-400 to-amber-400"></span>
-                                        {{ $tag }}
-                                    </span>
-                                @endforeach
-                            @endfor
-                        </div>
+                    <div class="es-fade-up es-d-3 flex flex-col gap-3 sm:flex-row">
+                        <a href="{{ app_url('/sign_up?type=venue') }}" class="es-conc-btn inline-flex items-center justify-center gap-2 rounded px-7 py-4 text-base font-semibold">
+                            Put the week on a page
+                            <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                        </a>
+                        <a href="#rack" class="es-conc-ghost inline-flex items-center justify-center gap-2 rounded px-7 py-4 text-base font-semibold">
+                            See the standing card
+                            <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                        </a>
                     </div>
-                </div>
-            </div>
-        </div>
 
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 2. Bento features                                            -->
-    <!-- ============================================================ -->
-    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-28">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Everything to delight your <span class="text-gradient-slate-gold">guests</span>
-                </h2>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="110">
-
-                <!-- Guest updates newsletter (2 cols) -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="flex flex-col gap-8 lg:flex-row lg:items-center">
-                            <div class="flex-1">
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 dark:border-slate-700/40 dark:bg-slate-800/60 dark:text-slate-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                                    Newsletter
-                                </div>
-                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Guests know what's happening before they ask.</h3>
-                                <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">Pool party tonight, wine tasting tomorrow, live jazz this weekend - one click emails every subscribed guest. Keep your property buzzing with activity.</p>
-                                <div class="flex flex-wrap gap-3">
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Direct to guests</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">No app download needed</span>
-                                </div>
-                            </div>
-                            <div class="w-full shrink-0 lg:w-auto" aria-hidden="true">
-                                <div class="animate-float">
-                                    <div class="max-w-xs rounded-2xl border border-amber-300 bg-gradient-to-br from-slate-100 to-amber-100 p-4 dark:border-amber-400/30 dark:from-slate-950 dark:to-amber-950">
-                                        <div class="mb-4 flex items-center gap-3">
-                                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-slate-500 to-amber-600"><svg aria-hidden="true" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></div>
-                                            <div><div class="text-sm font-medium text-gray-900 dark:text-white">This Week's Activities</div><div class="text-xs text-amber-600 dark:text-amber-300">Sending to 1,287 guests...</div></div>
-                                        </div>
-                                        <div class="space-y-2">
-                                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-white p-2 dark:bg-white/10" style="--i: 0;"><div class="h-2 w-2 rounded-full bg-amber-400"></div><span class="text-xs text-gray-600 dark:text-gray-300">Sunset Pool Party - Fri 6PM</span></div>
-                                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-white p-2 dark:bg-white/10" style="--i: 1;"><div class="h-2 w-2 rounded-full bg-blue-400"></div><span class="text-xs text-gray-600 dark:text-gray-300">Wine Tasting - Sat 7PM</span></div>
-                                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-white p-2 dark:bg-white/10" style="--i: 2;"><div class="h-2 w-2 rounded-full bg-teal-400"></div><span class="text-xs text-gray-600 dark:text-gray-300">Live Jazz Brunch - Sun 11AM</span></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Multi-space management -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-800/30 dark:bg-sky-900/40 dark:text-sky-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-                            Spaces
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Every space, one dashboard</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Pool, ballroom, spa, restaurant. Filter by space and avoid double-bookings across your property.</p>
-                        <div class="mt-auto space-y-2" aria-hidden="true">
-                            <div class="es-ai-field flex items-center gap-2 rounded-lg border border-sky-400/30 bg-sky-500/15 p-2" style="--i: 0;"><div class="h-2 w-2 rounded-full bg-sky-400"></div><span class="text-sm text-gray-900 dark:text-white">Pool Deck</span><span class="ml-auto text-xs text-sky-600 dark:text-sky-300">8 events</span></div>
-                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 1;"><div class="h-2 w-2 rounded-full bg-blue-400"></div><span class="text-sm text-gray-600 dark:text-gray-300">Grand Ballroom</span><span class="ml-auto text-xs text-gray-500 dark:text-gray-400">5 events</span></div>
-                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 2;"><div class="h-2 w-2 rounded-full bg-teal-400"></div><span class="text-sm text-gray-600 dark:text-gray-300">Spa & Wellness</span><span class="hotel-slate-chip ml-2">Wellness</span><span class="ml-auto text-xs text-gray-500 dark:text-gray-400">12 events</span></div>
-                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 3;"><div class="h-2 w-2 rounded-full bg-amber-400"></div><span class="text-sm text-gray-600 dark:text-gray-300">Restaurant Terrace</span><span class="hotel-slate-chip ml-2">Dining</span><span class="ml-auto text-xs text-gray-500 dark:text-gray-400">6 events</span></div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Ticketed events -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/40 dark:text-emerald-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
-                            Tickets
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Sell tickets, keep 100%</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Ticketed wine dinners, cooking classes, spa packages. Sell directly to guests with no platform fees.</p>
-                        <div class="mt-auto flex justify-center" aria-hidden="true">
-                            <div class="es-activity-float">
-                                <div class="hotel-keycard w-44 -rotate-2 rounded-xl p-4 text-center transition-transform group-hover:rotate-0">
-                                    <div class="mb-3 flex items-center justify-between">
-                                        <span class="hotel-brass-badge inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[8px] font-semibold text-amber-700 dark:text-amber-300">
-                                            <svg aria-hidden="true" viewBox="0 0 32 32" fill="none" class="h-3 w-3"><path d="M16,2 L19,11 L28,11 L21,17 L23,26 L16,21 L9,26 L11,17 L4,11 L13,11 Z" fill="#d97706" /></svg>
-                                            Concierge Pick
-                                        </span>
-                                        <span class="hotel-keycard-slot"></span>
-                                    </div>
-                                    <div class="hotel-keycard-muted text-[10px] uppercase tracking-widest">VIP Experience</div>
-                                    <div class="mt-1 font-serif text-sm font-semibold text-gray-900 dark:text-white">Wine Dinner</div>
-                                    <div class="mt-2 text-xl font-bold text-amber-700 dark:text-amber-300">$120<span class="text-xs font-normal">/guest</span></div>
-                                    <div class="hotel-keycard-muted mt-1 text-[10px]">Saturday &bull; 7 PM</div>
-                                    <div class="mt-1 text-[9px] text-amber-600 dark:text-amber-400">12 seats remaining</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Weekly activity planner (2 cols) -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="grid items-center gap-8 md:grid-cols-2">
-                            <div>
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-800/30 dark:bg-amber-900/40 dark:text-amber-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                    Activity Calendar
-                                </div>
-                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white">A full week of guest activities</h3>
-                                <p class="mb-4 text-lg text-gray-500 dark:text-gray-400">Plan every day of your guests' stay. From morning yoga to evening entertainment, keep the schedule fresh and engaging.</p>
-                                <div class="flex flex-wrap gap-3">
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Recurring events</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Mobile-friendly</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Embeddable</span>
-                                </div>
-                            </div>
-                            <div class="rounded-2xl border border-gray-200 bg-gray-50 p-4 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
-                                <div class="mb-3 text-center">
-                                    <div class="font-semibold text-gray-900 dark:text-white">The Grand Resort</div>
-                                    <div class="text-sm text-amber-600 dark:text-amber-300">This Week's Activities</div>
-                                </div>
-                                <div class="space-y-2">
-                                    <div class="es-ai-field flex items-center gap-3 rounded-lg border border-amber-400/30 bg-amber-500/15 p-2" style="--i: 0;"><div class="w-10 font-mono text-xs text-amber-600 dark:text-amber-300">Mon</div><span class="text-sm text-gray-900 dark:text-white">Pool Yoga &bull; 9 AM</span></div>
-                                    <div class="es-ai-field flex items-center gap-3 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 1;"><div class="w-10 font-mono text-xs text-gray-500 dark:text-gray-400">Tue</div><span class="text-sm text-gray-600 dark:text-gray-300">Guided Hike &bull; 8 AM</span></div>
-                                    <div class="es-ai-field flex items-center gap-3 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 2;"><div class="w-10 font-mono text-xs text-gray-500 dark:text-gray-400">Wed</div><span class="text-sm text-gray-600 dark:text-gray-300">Spa Special &bull; All Day</span></div>
-                                    <div class="es-ai-field flex items-center gap-3 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 3;"><div class="w-10 font-mono text-xs text-gray-500 dark:text-gray-400">Thu</div><span class="text-sm text-gray-600 dark:text-gray-300">Cooking Class &bull; 4 PM</span></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Google Calendar -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-blue-200 bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 dark:border-blue-800/30 dark:bg-blue-900/40 dark:text-blue-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                            Google Calendar
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Syncs with Google Calendar</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Two-way sync keeps your property calendar and Google Calendar in perfect harmony. Update once, reflected everywhere.</p>
-                        <div class="mt-auto flex justify-center" aria-hidden="true">
-                            <div class="flex items-center gap-3">
-                                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow-lg dark:bg-gray-800">
-                                    <svg aria-hidden="true" class="h-7 w-7" viewBox="0 0 24 24"><path fill="#4285F4" d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12s4.48 10 10 10 10-4.48 10-10z" opacity="0.1" /><path fill="#4285F4" d="M12 7v5l4.28 2.54.72-1.21-3.5-2.08V7H12z" /><path fill="#EA4335" d="M12 2C6.48 2 2 6.48 2 12h2c0-4.42 3.58-8 8-8V2z" /><path fill="#FBBC05" d="M2 12c0 5.52 4.48 10 10 10v-2c-4.42 0-8-3.58-8-8H2z" /><path fill="#34A853" d="M12 22c5.52 0 10-4.48 10-10h-2c0 4.42-3.58 8-8 8v2z" /></svg>
-                                </div>
-                                <div class="flex flex-col items-center gap-1">
-                                    <svg aria-hidden="true" class="es-sync-dot h-5 w-5 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
-                                    <span class="text-[10px] text-blue-600 dark:text-blue-300">Two-way sync</span>
-                                </div>
-                                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-slate-600 to-amber-500 shadow-lg">
-                                    <svg aria-hidden="true" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Team management -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-teal-200 bg-teal-100 px-3 py-1.5 text-sm font-medium text-teal-700 dark:border-teal-800/30 dark:bg-teal-900/40 dark:text-teal-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                            Team
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Your whole team, connected</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Events manager, concierge, spa director, F&B coordinator. Everyone updates the same calendar.</p>
-                        <div class="mt-auto space-y-2" aria-hidden="true">
-                            <div class="es-ai-field flex items-center gap-3 rounded-lg border border-teal-400/30 bg-teal-500/15 p-2" style="--i: 0;"><div class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-emerald-500 text-[10px] font-semibold text-white">EM</div><div class="flex-1"><div class="text-xs font-medium text-gray-900 dark:text-white">Events Manager</div><div class="text-[10px] text-teal-600 dark:text-teal-300">Full access</div></div></div>
-                            <div class="es-ai-field flex items-center gap-3 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 1;"><div class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-yellow-500 text-[10px] font-semibold text-white">CD</div><div class="flex-1"><div class="text-xs font-medium text-gray-600 dark:text-gray-300">Concierge Desk</div><div class="text-[10px] text-gray-500 dark:text-gray-400">View & share</div></div></div>
-                            <div class="es-ai-field flex items-center gap-3 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 2;"><div class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-500 text-[10px] font-semibold text-white">SD</div><div class="flex-1"><div class="text-xs font-medium text-gray-600 dark:text-gray-300">Spa Director</div><div class="text-[10px] text-gray-500 dark:text-gray-400">Spa events only</div></div></div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Analytics (bottom right) -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-cyan-200 bg-cyan-100 px-3 py-1.5 text-sm font-medium text-cyan-700 dark:border-cyan-800/30 dark:bg-cyan-900/40 dark:text-cyan-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-                            Analytics
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Know what guests love</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">See which activities get the most views, RSVPs, and ticket sales. Double down on what works.</p>
-                        <div class="mt-auto space-y-3" aria-hidden="true">
-                            <div class="es-ai-field" style="--i: 0;">
-                                <div class="mb-1 flex justify-between text-xs"><span class="text-gray-600 dark:text-gray-300">Pool Party</span><span class="text-cyan-600 dark:text-cyan-300">847 views</span></div>
-                                <div class="h-2 w-full rounded-full bg-gray-200 dark:bg-white/10"><div class="h-2 rounded-full bg-gradient-to-r from-cyan-500 to-sky-500" style="width: 92%"></div></div>
-                            </div>
-                            <div class="es-ai-field" style="--i: 1;">
-                                <div class="mb-1 flex justify-between text-xs"><span class="text-gray-600 dark:text-gray-300">Wine Tasting</span><span class="text-cyan-600 dark:text-cyan-300">623 views</span></div>
-                                <div class="h-2 w-full rounded-full bg-gray-200 dark:bg-white/10"><div class="h-2 rounded-full bg-gradient-to-r from-cyan-500 to-sky-500" style="width: 68%"></div></div>
-                            </div>
-                            <div class="es-ai-field" style="--i: 2;">
-                                <div class="mb-1 flex justify-between text-xs"><span class="text-gray-600 dark:text-gray-300">Spa Morning</span><span class="text-cyan-600 dark:text-cyan-300">412 views</span></div>
-                                <div class="h-2 w-full rounded-full bg-gray-200 dark:bg-white/10"><div class="h-2 rounded-full bg-gradient-to-r from-cyan-500 to-sky-500" style="width: 45%"></div></div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 3. Your guests' week (dark band)                             -->
-    <!-- ============================================================ -->
-    @php
-        $days = [
-            ['Mon', 'Pool Yoga', '9:00 AM', 'border-amber-400/30 bg-amber-500/[0.12]', 'text-amber-300', 'bg-amber-400', false],
-            ['Tue', 'Guided Hike', '8:00 AM', 'border-emerald-400/30 bg-emerald-500/[0.12]', 'text-emerald-300', 'bg-emerald-400', false],
-            ['Wed', 'Spa Special', 'All Day', 'border-teal-400/30 bg-teal-500/[0.12]', 'text-teal-300', 'bg-teal-400', false],
-            ['Thu', 'Cooking Class', '4:00 PM', 'border-orange-400/30 bg-orange-500/[0.12]', 'text-orange-300', 'bg-orange-400', false],
-            ['Fri', 'Wine Tasting', '7:00 PM', 'border-blue-400/40 bg-blue-500/[0.16]', 'text-blue-300', 'bg-blue-400', true],
-            ['Sat', 'Beach Party', '3:00 PM', 'border-rose-400/30 bg-rose-500/[0.12]', 'text-rose-300', 'bg-rose-400', false],
-            ['Sun', 'Sunday Brunch', '10:00 AM', 'border-sky-400/30 bg-sky-500/[0.12]', 'text-sky-300', 'bg-sky-400', false],
-        ];
-    @endphp
-    <section id="planner" class="scroll-mt-24 bg-white px-2 py-14 dark:bg-[#0a0a0f] sm:px-4 lg:py-20">
-        <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
-            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 30%, rgba(100, 116, 139, 0.24), rgba(100, 116, 139, 0) 60%); opacity: 0.6;"></div>
-                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 60%, rgba(217, 119, 6, 0.2), rgba(217, 119, 6, 0) 60%); opacity: 0.55;"></div>
-                <div class="grid-overlay absolute inset-0 opacity-25"></div>
-                <div class="es-gold-dust absolute inset-0">
-                    @foreach ($gold as [$l, $t, $s, $d, $dl, $op])
-                        <span style="left: {{ $l }}; top: {{ $t }}; width: {{ $s }}px; height: {{ $s }}px; --tw-dur: {{ $d }}; --tw-delay: {{ $dl }}; --tw-op: {{ $op }};"></span>
-                    @endforeach
-                </div>
-            </div>
-
-            <div class="relative z-10 mx-auto max-w-5xl">
-                <div class="mx-auto mb-14 max-w-2xl text-center">
-                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>
-                        Your guests' week <span class="text-gradient-slate-gold">at a glance</span>
-                    </h2>
-                    <p class="text-lg text-gray-300 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                        Morning yoga by the pool. Sunset cocktails on the terrace. Every day offers something special for your guests.
+                    <p class="es-conc-muted es-fade-up es-d-4 mt-8 max-w-lg text-sm">
+                        Free forever for the page, the link, the QR code and the standing week.
                     </p>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7" data-reveal-group="70">
-                    @foreach ($days as [$day, $activity, $time, $card, $accent, $dot, $concierge])
-                        <div data-reveal class="hotel-day-rule relative overflow-hidden rounded-xl border p-4 {{ $card }}">
-                            @if ($concierge)
-                                <div class="absolute -right-1 -top-1 h-8 w-8">
-                                    <svg aria-hidden="true" viewBox="0 0 32 32" fill="none" class="h-full w-full"><path d="M16,2 L19,11 L28,11 L21,17 L23,26 L16,21 L9,26 L11,17 L4,11 L13,11 Z" fill="#d97706" opacity="0.85" /></svg>
-                                </div>
-                            @endif
-                            <div class="mb-3 text-xs font-semibold uppercase tracking-wider {{ $accent }}">{{ $day }}</div>
-                            <div class="space-y-2">
-                                <div class="flex items-center gap-1.5"><div class="h-1.5 w-1.5 rounded-full {{ $dot }}"></div><span class="text-xs font-medium text-white">{{ $activity }}</span></div>
-                                <div class="flex items-center gap-1.5"><div class="h-1.5 w-1.5 rounded-full {{ $dot }} opacity-50"></div><span class="text-xs text-gray-400">{{ $time }}</span></div>
-                                @if ($concierge)
-                                    <div class="mt-1 text-[8px] font-medium text-amber-400">Concierge Pick</div>
-                                @endif
+                <!-- The card. A fixed printed object: it renders the same
+                     with the dark theme on or off, because card stock does
+                     not know what the browser is set to. -->
+                <div class="es-fade-up es-d-4" data-reveal>
+                    <div class="es-conc-settle es-conc-stock mx-auto max-w-sm p-6 sm:p-7">
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <p class="es-conc-cap es-conc-stock-brass">Today at</p>
+                                <p class="es-conc-display es-conc-stock-ink text-2xl">Lantern Bay</p>
                             </div>
+                            <div class="es-conc-stock-slot mt-2" aria-hidden="true"></div>
+                        </div>
+
+                        <div class="es-conc-stock-rule mt-4" aria-hidden="true"></div>
+
+                        <p class="es-conc-stock-muted es-conc-num es-conc-fine mt-3 uppercase tracking-[0.14em]">Thursday, 12 March</p>
+
+                        <ul class="mt-4 space-y-2">
+                            @foreach ($today as [$tTime, $tName, $tStrand, $tJoin])
+                                <li class="es-conc-stock-row flex items-center gap-3 p-2.5">
+                                    <span class="es-conc-stock-brass es-conc-num w-11 shrink-0 text-xs font-bold">{{ $tTime }}</span>
+                                    <span class="min-w-0 flex-1">
+                                        <span class="es-conc-stock-ink block truncate text-sm font-semibold">{{ $tName }}</span>
+                                        <span class="es-conc-strand es-conc-stock-muted es-conc-finer">
+                                            <span class="es-conc-pip" style="background: {{ $strands[$tStrand][1] }};" aria-hidden="true"></span>
+                                            {{ $strands[$tStrand][0] }}
+                                        </span>
+                                    </span>
+                                    <span class="es-conc-stock-pill @if ($tJoin === 'Place kept') es-conc-stock-pill-brass @endif">{{ $tJoin }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+
+                        <div class="es-conc-stock-hair mt-4" aria-hidden="true"></div>
+
+                        <p class="es-conc-stock-muted es-conc-num es-conc-fine mt-3">lanternbay.eventschedule.com</p>
+                    </div>
+
+                    <p class="es-conc-muted mx-auto mt-5 max-w-sm text-xs">
+                        The same card your desk already keeps. The difference is that this one is a
+                        page, so it is right at midnight, and the only thing you ever print is the
+                        line at the bottom.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 2. The standing week (01): recurring + exceptions            -->
+    <!-- ============================================================ -->
+    <section id="rack" class="scroll-mt-24 es-conc-seam py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-conc-tab mb-6" data-reveal aria-hidden="true"><span>01</span></div>
+                <p class="es-conc-eyebrow mb-4" data-reveal style="--reveal-delay: 0.05s;">The standing week</p>
+                <h2 class="es-conc-display es-balance es-conc-ink text-3xl md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Most of the week is <span class="es-conc-mark">the same week</span>.
+                </h2>
+                <p class="es-conc-muted mt-6 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Yoga on the lawn Tuesday, Thursday and Saturday at seven. Kids club every
+                    morning. The trio on the terrace at the weekend. Enter that rhythm once and
+                    the week draws itself for as long as it runs.
+                </p>
+            </div>
+
+            <div class="es-conc-card p-5 sm:p-7" data-reveal="panel">
+                <div class="overflow-x-auto">
+                    <table class="es-conc-table">
+                        <caption class="sr-only">The standing programme at Lantern Bay: each activity with its strand, the days it repeats, its start time and how a guest joins</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Activity</th>
+                                <th scope="col" class="hidden sm:table-cell">Strand</th>
+                                <th scope="col">Repeats</th>
+                                <th scope="col">Time</th>
+                                <th scope="col">How to join</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($programme as [$pName, $pStrand, $pDays, $pTime, $pJoin, $pNote, $pTier, $pDated])
+                                <tr>
+                                    <th scope="row" class="text-sm">{{ $pName }}</th>
+                                    <td class="hidden sm:table-cell">
+                                        <span class="es-conc-strand es-conc-muted text-xs">
+                                            <span class="es-conc-pip" style="background: {{ $strands[$pStrand][1] }};" aria-hidden="true"></span>
+                                            {{ $strands[$pStrand][0] }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if ($pDays)
+                                            <span class="sr-only">
+                                                @foreach (str_split($pDays) as $dIdx => $dOn)
+                                                    @if ($dOn === '1'){{ $dowNames[$dIdx] }}. @endif
+                                                @endforeach
+                                            </span>
+                                            <span class="es-conc-dow" aria-hidden="true">
+                                                @foreach (str_split($pDays) as $dIdx => $dOn)
+                                                    <span class="@if ($dOn === '1') es-conc-dow-on @endif">{{ $dowLetters[$dIdx] }}</span>
+                                                @endforeach
+                                            </span>
+                                        @else
+                                            <span class="es-conc-muted es-conc-num text-xs">one date</span>
+                                        @endif
+                                    </td>
+                                    <td class="es-conc-muted es-conc-num whitespace-nowrap text-xs">{{ $pTime }}</td>
+                                    <td>
+                                        <span class="es-conc-join @if ($pJoin !== 'Drop in') es-conc-join-brass @endif">{{ $pJoin }}</span>
+                                        <span class="es-conc-muted es-conc-num es-conc-finer mt-1 block">
+                                            {{ $pNote }}@if ($pTier === 'pro') &middot; Pro @endif
+                                        </span>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <p class="es-conc-muted mt-5 text-xs">
+                    The lit squares are the days the activity repeats, read from Sunday, which is
+                    exactly how the pattern is stored. The cellar dinner has no pattern on purpose:
+                    a repeat is by day of the week, so a once-a-month dinner is entered as its own
+                    dated activity.
+                </p>
+            </div>
+
+            <!-- One row of the table above, opened out over four weeks. The
+                 lower strip is the same activity after a single date
+                 exception, and the excepted Thursday is simply an empty
+                 slot: the product removes the date rather than marking it. -->
+            <div class="es-conc-card mt-4 p-5 sm:p-7" data-reveal="panel">
+                <div class="mb-6 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
+                    <h3 class="es-conc-ink text-base font-bold">Sunrise yoga, four weeks of March</h3>
+                    <span class="es-conc-muted es-conc-num es-conc-fine">Tuesday &middot; Thursday &middot; Saturday &middot; 7:00</span>
+                </div>
+
+                <p class="es-conc-eyebrow mb-2">What you entered</p>
+                <div class="es-conc-weeks" aria-hidden="true">
+                    @foreach ($weekLabels as $wIdx => $wLabel)
+                        <div class="es-conc-wk">
+                            <div class="es-conc-wk-cells">
+                                @foreach (range(0, 6) as $dOffset)
+                                    <span class="@if ($entered[$wIdx * 7 + $dOffset]) es-conc-wk-on @endif"></span>
+                                @endforeach
+                            </div>
+                            <p class="es-conc-wk-label">{{ $wLabel }}</p>
                         </div>
                     @endforeach
                 </div>
+                <p class="es-conc-muted es-conc-fine mt-2">One activity. Twelve sessions, and nothing to re-enter.</p>
 
-                <div class="mt-10 text-center" data-reveal>
-                    <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 backdrop-blur-sm">
-                        <svg aria-hidden="true" class="h-4 w-4 text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        <span class="text-sm text-gray-300">Set it once - recurring activities appear automatically every week</span>
+                <div class="es-conc-rule my-6" aria-hidden="true"></div>
+
+                <p class="es-conc-eyebrow mb-2">What the page publishes</p>
+                <div class="es-conc-weeks" aria-hidden="true">
+                    @foreach ($weekLabels as $wIdx => $wLabel)
+                        <div class="es-conc-wk">
+                            <div class="es-conc-wk-cells">
+                                @foreach (range(0, 6) as $dOffset)
+                                    <span class="@if ($published[$wIdx * 7 + $dOffset]) es-conc-wk-on @endif"></span>
+                                @endforeach
+                            </div>
+                            <p class="es-conc-wk-label">{{ $wLabel }}</p>
+                        </div>
+                    @endforeach
+                </div>
+                <p class="es-conc-muted es-conc-fine mt-2">
+                    One date exception, on Thursday 19 March. Eleven mornings instead of twelve.
+                </p>
+
+                <p class="es-conc-muted mt-6 text-xs">
+                    <span class="sr-only">Both strips describe the same activity: it runs on Tuesday, Thursday and Saturday for four weeks from 1 March, and a date exception removes Thursday 19 March.</span>
+                    Worth being exact about the second strip: the excepted morning is not
+                    labelled cancelled and not struck through. The date comes out, so a guest
+                    reading that week sees a Wednesday and a Friday and no reason to ask what
+                    happened to Thursday.
+                </p>
+            </div>
+
+            <div class="mt-4 grid gap-4 md:grid-cols-3" data-reveal-group="100">
+                @foreach ([
+                    ['One entry, not fifty-two', 'Pick the days and the start time and it keeps appearing. Nothing to re-enter on Sunday night, and nothing that quietly stops because somebody was on holiday.'],
+                    ['The weeks it does not run', 'A date exception takes a single date out. Yoga does not run the Thursday the lawn is being cut, and guests are simply not offered that morning rather than being told at the door.'],
+                    ['Morning and evening are two entries', 'One repeating activity carries one start time, so a sunrise class and a sunset class are two entries. A little more setup, and no confusion about which one somebody signed up for.'],
+                ] as [$rTitle, $rDesc])
+                    <div class="es-conc-card es-conc-hover p-6" data-reveal>
+                        <div class="mb-2 flex flex-wrap items-center gap-2">
+                            <h3 class="es-conc-ink text-base font-bold">{{ $rTitle }}</h3>
+                            <span class="es-conc-plan">Free</span>
+                        </div>
+                        <p class="es-conc-muted text-sm">{{ $rDesc }}</p>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 3. The sleeve (02): the QR, the link, the embed              -->
+    <!-- ============================================================ -->
+    <section id="sleeve" class="scroll-mt-24 es-conc-seam py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-14 lg:grid-cols-2 lg:gap-16">
+                <div>
+                    <div class="es-conc-tab mb-6" data-reveal aria-hidden="true"><span>02</span></div>
+                    <p class="es-conc-eyebrow mb-4" data-reveal style="--reveal-delay: 0.05s;">The sleeve</p>
+                    <h2 class="es-conc-display es-balance es-conc-ink mb-6 text-3xl md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Print the link. <span class="es-conc-mark">Never the week</span>.
+                    </h2>
+                    <p class="es-conc-muted mb-8 max-w-xl text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
+                        A printed week is wrong the first time something moves, and reprinting it is
+                        somebody's Thursday. Print the address instead. It never changes, so the
+                        sleeve you had made in March is still correct in November.
+                    </p>
+
+                    <ul class="space-y-4" data-reveal-group="90">
+                        @foreach ([
+                            ['A QR code you can print', 'Free', 'Download your schedule\'s code and put it where guests already look: the key-card sleeve, the room folder, the lift, a sign by the pool, the pre-arrival email. It opens the page in a browser, with nothing to install and no account needed to read it.'],
+                            ['The calendar, inside your own site', 'Free', 'Embed the same calendar in the page your website already has, so the "What\'s on" tab stops being a PDF from last season.'],
+                            ['A list you can write to', 'Free', 'Guests can follow the schedule, which gives you a list to send a newsletter to. Nothing goes out on its own: a newsletter is something you write and send. The allowance counts recipients, 10 a month free, 100 on Pro and 1,000 on Enterprise.'],
+                        ] as [$sTitle, $sPlan, $sDesc])
+                            <li class="flex items-start gap-3" data-reveal>
+                                <svg aria-hidden="true" class="es-conc-accent mt-0.5 h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span>
+                                    <span class="es-conc-ink font-semibold">{{ $sTitle }}</span>
+                                    <span class="es-conc-plan ms-1.5 align-middle">{{ $sPlan }}</span>
+                                    <span class="es-conc-muted block text-sm">{{ $sDesc }}</span>
+                                </span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+
+                <!-- The sleeve: the second printed object, same stock. -->
+                <div data-reveal="panel">
+                    <div class="es-conc-stock es-conc-stock-notch mx-auto max-w-md p-6 sm:p-7">
+                        <div class="flex items-start justify-between gap-5">
+                            <div class="min-w-0">
+                                <p class="es-conc-cap es-conc-stock-brass">Room key</p>
+                                <p class="es-conc-display es-conc-stock-ink mt-1 text-xl">What is on this week</p>
+                                <p class="es-conc-stock-muted mt-2 text-xs">Point a camera at the code, or type the line below.</p>
+                            </div>
+                            <div class="w-20 shrink-0 sm:w-24">
+                                <div class="es-conc-code" aria-hidden="true">
+                                    @foreach ($codeRows as $row)
+                                        @foreach (str_split($row) as $cell)
+                                            <i class="@if ($cell === '1') es-conc-code-on @endif"></i>
+                                        @endforeach
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="es-conc-stock-rule mt-5" aria-hidden="true"></div>
+
+                        <p class="es-conc-stock-ink es-conc-num mt-4 break-all text-sm font-semibold">lanternbay.eventschedule.com</p>
+                        <p class="es-conc-stock-muted mt-3 text-xs">
+                            One address for the whole property. It is the same page the desk reads
+                            from, so nobody is working off two versions of Tuesday.
+                        </p>
+
+                        <div class="es-conc-stock-hair mt-5" aria-hidden="true"></div>
+
+                        <div class="mt-4 flex flex-wrap gap-2">
+                            <span class="es-conc-stock-pill">Key-card sleeve</span>
+                            <span class="es-conc-stock-pill">Room folder</span>
+                            <span class="es-conc-stock-pill">Pool sign</span>
+                            <span class="es-conc-stock-pill">Pre-arrival email</span>
+                            <span class="es-conc-stock-pill es-conc-stock-pill-brass">Your own website</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -640,94 +1036,302 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 4. Perfect for (shared sub-audience cards)                   -->
+    <!-- 4. Keeping a place (03): sign-ups free, tickets Pro          -->
     <!-- ============================================================ -->
-    <section class="bg-white py-20 dark:bg-[#0a0a0f] lg:py-28">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Perfect for every type of <span class="text-gradient-slate-gold">property</span>
+    <section id="book" class="scroll-mt-24 es-conc-seam py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-conc-tab mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                <p class="es-conc-eyebrow mb-4" data-reveal style="--reveal-delay: 0.05s;">Keeping a place</p>
+                <h2 class="es-conc-display es-balance es-conc-ink text-3xl md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Twelve mats means <span class="es-conc-mark">twelve names</span>.
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    From boutique hotels to sprawling resorts.
+                <p class="es-conc-muted mt-6 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Some things guests just turn up to. Some things have a number: the mats, the
+                    boat, the seats in the cellar. Two mechanisms, and the difference is whether
+                    money is involved.
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
+            <div class="grid gap-4 lg:grid-cols-2" data-reveal-group="100">
+                @foreach ($book as [$bName, $bDay, $bTaken, $bTotal, $bKind, $bTier, $bNote])
+                    <div class="es-conc-card p-6 sm:p-7" data-reveal="panel">
+                        <div class="mb-5 flex flex-wrap items-center justify-between gap-2">
+                            <h3 class="es-conc-ink text-lg font-bold">{{ $bName }}</h3>
+                            @if ($bTier === 'pro')
+                                <span class="es-conc-plan es-conc-plan-pro">Pro</span>
+                            @else
+                                <span class="es-conc-plan">Free</span>
+                            @endif
+                        </div>
+
+                        <p class="es-conc-display es-conc-ink text-4xl">
+                            {{ $bTaken }}<span class="es-conc-muted text-lg font-normal"> of {{ $bTotal }}</span>
+                        </p>
+                        <p class="es-conc-muted mt-1 text-sm">{{ strtolower($bKind) }} taken for {{ $bDay }} &middot; {{ $bTotal - $bTaken }} left</p>
+
+                        <div class="es-conc-meter mt-4" aria-hidden="true">
+                            <div class="es-conc-meter-fill" style="width: {{ (int) round($bTaken / $bTotal * 100) }}%;"></div>
+                        </div>
+
+                        <div class="es-conc-rule my-6" aria-hidden="true"></div>
+                        <p class="es-conc-muted text-sm">{{ $bNote }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="mt-4 grid gap-4 md:grid-cols-3" data-reveal-group="90">
+                @foreach ([
+                    ['Counted for each date', 'Free', 'A full Tuesday does not close Thursday. Every date keeps its own count, which is the only way a standing activity with a limit can work at all.'],
+                    ['A ticket for the paid ones', 'Pro', 'Named ticket types with their own prices and quantities, QR check-in at the door, and your own Stripe account. Event Schedule takes nothing from the ticket price.'],
+                    ['A rate for people staying with you', 'Pro', 'A promo code carries a resident rate that the desk can hand out. Nothing is verifying who is a guest, so the code is what does it.'],
+                ] as [$kTitle, $kPlan, $kDesc])
+                    <div class="es-conc-card es-conc-hover p-6" data-reveal>
+                        <div class="mb-2 flex flex-wrap items-center gap-2">
+                            <h3 class="es-conc-ink text-base font-bold">{{ $kTitle }}</h3>
+                            @if ($kPlan === 'Pro')
+                                <span class="es-conc-plan es-conc-plan-pro">Pro</span>
+                            @else
+                                <span class="es-conc-plan">Free</span>
+                            @endif
+                        </div>
+                        <p class="es-conc-muted text-sm">{{ $kDesc }}</p>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 5. The strands (04): sub-schedules, and what they are not    -->
+    <!-- ============================================================ -->
+    <section id="strands" class="scroll-mt-24 es-conc-seam py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-start gap-14 lg:grid-cols-2 lg:gap-16">
+                <div class="order-2 lg:order-1">
+                    <!-- The rack itself: five cards standing behind five
+                         coloured tabs. The colour is a free-form hex the
+                         owner picks, so it is set inline on the tab edge
+                         and nothing about it is baked into the stylesheet. -->
+                    <div class="es-conc-card p-6 sm:p-7" data-reveal="panel">
+                        <p class="es-conc-eyebrow mb-4">Five strands, one address</p>
+                        <div class="space-y-2">
+                            @foreach ($strands as $sKey => [$sLabel, $sColor])
+                                <div class="es-conc-rackrow" style="border-left-color: {{ $sColor }};">
+                                    <span class="es-conc-ink min-w-0 flex-1 truncate text-sm font-semibold">{{ $sLabel }}</span>
+                                    <span class="es-conc-muted es-conc-num es-conc-fine truncate">/{{ $sKey }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                        <div class="es-conc-rule my-6" aria-hidden="true"></div>
+                        <p class="es-conc-muted text-xs">
+                            Each strand keeps its own link on the same address, so the spa can point
+                            a sign at its own list without asking for its own website. The colour is
+                            yours to pick, and it is the same colour the strand wears on the card.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="order-1 lg:order-2">
+                    <div class="es-conc-tab mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                    <p class="es-conc-eyebrow mb-4" data-reveal style="--reveal-delay: 0.05s;">The strands</p>
+                    <h2 class="es-conc-display es-balance es-conc-ink mb-6 text-3xl md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        The spa and the kids club, <span class="es-conc-mark">one card</span>.
+                    </h2>
+                    <p class="es-conc-muted mb-6 max-w-xl text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
+                        Sub-schedules give each part of the programme a name and a colour, so a
+                        family arriving on Friday can read the family strand and a couple on a
+                        wellness break can read theirs. Free on every plan.
+                    </p>
+
+                    <div class="es-conc-card p-5" data-reveal>
+                        <p class="es-conc-ink mb-2 text-sm font-bold">What a strand is not</p>
+                        <p class="es-conc-muted text-sm">
+                            It is a label, not a room. A strand has a name, a colour and a link and
+                            nothing else: no capacity of its own, and nothing in it is hidden from
+                            anybody. Nothing here checks whether two activities overlap either, so
+                            the ballroom is still your call. Anything you are not ready to show yet
+                            stays a Draft, which stays members-only until you publish it.
+                        </p>
+                    </div>
+
+                    <p class="mt-6" data-reveal>
+                        <span class="es-conc-plan">Free</span>
+                        <span class="es-conc-muted ms-2 text-sm">Strands, Drafts and the address itself cost nothing.</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 6. Behind the desk (05): the duplex, fixed-dark band         -->
+    <!-- ============================================================ -->
+    <section id="desk" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
+        <div class="es-conc-band noise relative overflow-hidden border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 es-conc-wide">
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                <div class="grid-overlay absolute inset-0 opacity-20"></div>
+            </div>
+
+            <div class="relative z-10 mx-auto max-w-5xl">
+                <div class="mx-auto mb-14 max-w-3xl text-center">
+                    <div class="es-conc-tab mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                    <p class="es-conc-eyebrow mb-4" data-reveal style="--reveal-delay: 0.05s;">Behind the desk</p>
+                    <h2 class="es-conc-display es-balance text-3xl text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        What the desk keeps, <span class="es-conc-mark">and what the card says</span>.
+                    </h2>
+                    <p class="mt-6 text-lg text-gray-300" data-reveal style="--reveal-delay: 0.15s;">
+                        A desk has a drawer as well as a card rack. The two sides are not the same
+                        list, and only one of them is public.
+                    </p>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-2" data-reveal-group="110">
+                    <div class="rounded-lg border border-white/10 bg-white/[0.05] p-7" data-reveal="panel">
+                        <p class="es-conc-lit es-conc-num mb-4 text-xs font-bold uppercase tracking-[0.18em]">In the drawer</p>
+                        <ul class="space-y-3">
+                            @foreach ([
+                                ['A Draft nobody can see', 'Free', 'The New Year dinner exists, with its price and its date, and stays members-only until you publish it.'],
+                                ['An enquiry waiting on you', 'Free', 'Booking requests arrive through the page and wait until you accept one, and the schedule can email you when a new one is sitting there. Nothing appears publicly first.'],
+                                ['A date taken out', 'Free', 'The exception for the Wednesday the pool is drained. It removes the date rather than annotating it.'],
+                                ['Your own calendar', 'Free', 'Two-way sync with Google, Outlook or CalDAV, so whoever runs the programme works where they already work.'],
+                                ['Tonight\'s check-in list', 'Pro', 'For the paid experiences, a scan at the door reads the ticket and marks it used, and the running count is staff-side only.'],
+                            ] as [$dTitle, $dPlan, $dDesc])
+                                <li class="flex gap-3">
+                                    <span class="es-conc-bullet mt-1.5" aria-hidden="true"></span>
+                                    <span>
+                                        <span class="text-sm font-semibold text-white">{{ $dTitle }}</span>
+                                        <span class="es-conc-plan @if ($dPlan === 'Pro') es-conc-plan-pro @endif ms-1.5 align-middle">{{ $dPlan }}</span>
+                                        <span class="block text-sm text-gray-400">{{ $dDesc }}</span>
+                                    </span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+
+                    <div class="rounded-lg border border-white/10 bg-white/[0.05] p-7" data-reveal="panel">
+                        <p class="es-conc-lit es-conc-num mb-4 text-xs font-bold uppercase tracking-[0.18em]">On the card</p>
+                        <ul class="space-y-3">
+                            @foreach ([
+                                ['Only what you published', 'Free', 'The public page carries exactly what you put on it. Nothing arrives on it because somebody else asked.'],
+                                ['Times in the property\'s own zone', 'Free', 'The schedule holds a time zone, so a guest reading the page in another one still sees seven in the morning here.'],
+                                ['A day that is simply not offered', 'Free', 'An excepted date does not appear as cancelled. It is not there, which is what a guest actually needs to know.'],
+                                ['One tap to their own phone', 'Free', 'Any activity, or a whole repeating one, downloads as a calendar file, so the sunrise class is in their own week.'],
+                                ['Nothing they did not ask for', 'Free', 'The card does not say who else signed up, and nobody is emailed because you added something. A newsletter reaches the guests who followed you when you write one and send it.'],
+                            ] as [$cTitle, $cPlan, $cDesc])
+                                <li class="flex gap-3">
+                                    <span class="es-conc-bullet mt-1.5" aria-hidden="true"></span>
+                                    <span>
+                                        <span class="text-sm font-semibold text-white">{{ $cTitle }}</span>
+                                        <span class="es-conc-plan ms-1.5 align-middle">{{ $cPlan }}</span>
+                                        <span class="block text-sm text-gray-400">{{ $cDesc }}</span>
+                                    </span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+
+                <p class="mx-auto mt-8 max-w-2xl text-center text-sm text-gray-400" data-reveal>
+                    The counting side is worth a look too: built-in analytics record views per
+                    activity, and sales against them, so next season's card is written from what
+                    guests actually turned up to. Free on every plan.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 7. Who it is for (06)                                        -->
+    <!-- ============================================================ -->
+    <section id="who" class="scroll-mt-24 es-conc-seam py-20 lg:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-conc-tab mb-6" data-reveal aria-hidden="true"><span>06</span></div>
+                <p class="es-conc-eyebrow mb-4" data-reveal style="--reveal-delay: 0.05s;">Who it is for</p>
+                <h2 class="es-conc-display es-balance es-conc-ink text-3xl md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Any property with a <span class="es-conc-mark">week to publish</span>.
+                </h2>
+                <p class="es-conc-muted mt-6 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    From a twelve-room townhouse to a resort with five strands running at once.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
                 <x-sub-audience-card
                     name="Boutique Hotels"
-                    description="Curated experiences, intimate tastings, and local excursions. Give guests a reason to stay in and explore."
+                    description="A tasting, a supper, a walk with somebody local. A handful of things a month, each one worth a page of its own."
                     icon-color="slate"
                     blog-slug="for-boutique-hotels"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        <svg aria-hidden="true" class="h-6 w-6 text-slate-600 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 21V6a1 1 0 011-1h9a1 1 0 011 1v15M15 11h4a1 1 0 011 1v9M3 21h18M8 9h3m-3 4h3" />
                         </svg>
                     </x-slot:icon>
                 </x-sub-audience-card>
 
                 <x-sub-audience-card
                     name="Beach Resorts"
-                    description="Pool parties, water sports, sunset yoga, beach bonfires. Keep the vacation vibes going all week long."
+                    description="Pool sessions, water sports, sunset yoga, a bonfire on Saturday. A standing week with a limit on the boat."
                     icon-color="amber"
                     blog-slug="for-beach-resorts"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                        <svg aria-hidden="true" class="h-6 w-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v2m0 12v2m8-8h-2M6 12H4m12.5-5.5l-1.4 1.4M8.9 15.1l-1.4 1.4m9 0l-1.4-1.4M8.9 8.9L7.5 7.5M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                     </x-slot:icon>
                 </x-sub-audience-card>
 
                 <x-sub-audience-card
                     name="Conference Hotels"
-                    description="Manage conference sessions, breakout rooms, networking events, and corporate dinners in one place."
-                    icon-color="indigo"
+                    description="Session times, networking evenings and corporate dinners on one calendar, with each day's agenda listed inside the event."
+                    icon-color="sky"
                     blog-slug="for-conference-hotels"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+                        <svg aria-hidden="true" class="h-6 w-6 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 11h10M4 16h13M4 21h7" />
                         </svg>
                     </x-slot:icon>
                 </x-sub-audience-card>
 
                 <x-sub-audience-card
                     name="Spa & Wellness Resorts"
-                    description="Meditation sessions, wellness workshops, spa treatments, and mindfulness classes. Nurture your guests' wellbeing."
+                    description="Meditation at six, breath work at eight, a workshop on Sunday. Small numbers, so every place is kept in advance."
                     icon-color="teal"
                     blog-slug="for-spa-resorts"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        <svg aria-hidden="true" class="h-6 w-6 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21c0-6 3-9 8-9-1 6-4 9-8 9zm0 0c0-6-3-9-8-9 1 6 4 9 8 9zm0 0V8" />
                         </svg>
                     </x-slot:icon>
                 </x-sub-audience-card>
 
                 <x-sub-audience-card
                     name="Mountain Lodges"
-                    description="Guided hikes, ski lessons, fireside gatherings, and nature excursions. Adventure awaits your guests every day."
+                    description="Guided walks, ski lessons, a fire and a talk. The programme changes with the season, and the address does not."
                     icon-color="emerald"
                     blog-slug="for-mountain-lodges"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21l6-6m0 0l4-8 4 8m-4-8l6 6M3 21h18" />
+                        <svg aria-hidden="true" class="h-6 w-6 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 20l6-9 3 4.5M12 20l5-8 4 8H3z" />
                         </svg>
                     </x-slot:icon>
                 </x-sub-audience-card>
 
                 <x-sub-audience-card
                     name="Casino Hotels"
-                    description="Shows, tournaments, dining events, and nightlife. Keep the entertainment calendar packed and visible."
-                    icon-color="violet"
+                    description="Shows, tournaments, dining nights and late music. A busy card, sold where it needs to be sold."
+                    icon-color="orange"
                     blog-slug="for-casino-hotels"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                        <svg aria-hidden="true" class="h-6 w-6 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 4h10a1 1 0 011 1v14a1 1 0 01-1 1H7a1 1 0 01-1-1V5a1 1 0 011-1zm5 3l2.5 4L12 15l-2.5-4L12 7z" />
                         </svg>
                     </x-slot:icon>
                 </x-sub-audience-card>
@@ -736,34 +1340,28 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 5. How it works                                              -->
+    <!-- 8. How it works (07)                                         -->
     <!-- ============================================================ -->
-    @php
-        $steps = [
-            ['1', 'Set up your property', 'Sign up and add your hotel or resort details. Set up spaces like pool, ballroom, spa, and restaurant.'],
-            ['2', 'Build your activity calendar', 'Add activities, entertainment, classes, and events. Set up recurring activities once and they appear every week.'],
-            ['3', 'Delight your guests', 'Share the link at check-in, print QR codes for rooms, embed on your website. Guests always know what\'s happening.'],
-        ];
-    @endphp
-    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-24">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section id="how" class="scroll-mt-24 es-conc-seam py-20 lg:py-24">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-2xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                    How it <span class="text-gradient-slate-gold">works</span>
+                <div class="es-conc-tab mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                <p class="es-conc-eyebrow mb-4" data-reveal style="--reveal-delay: 0.05s;">How it works</p>
+                <h2 class="es-conc-display es-balance es-conc-ink text-3xl md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
+                    An afternoon, <span class="es-conc-mark">then it runs</span>.
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Get your property's activity calendar online in three steps.
-                </p>
             </div>
 
-            <div class="grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="90">
-                @foreach ($steps as [$num, $title, $desc])
-                    <div data-reveal class="text-center">
-                        <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-600 to-amber-500 text-2xl font-bold text-white shadow-lg shadow-amber-500/25">
-                            {{ $num }}
-                        </div>
-                        <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{{ $title }}</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $desc }}</p>
+            <div class="grid gap-4 md:grid-cols-3" data-reveal-group="100">
+                @foreach ([
+                    ['01', 'Take the address', 'Sign up as a venue schedule, put the property\'s name on it, and name the strands: wellness, family, water, dining, whatever you actually run.'],
+                    ['02', 'Enter the standing week', 'Add the activities that repeat, with their days and their start times, and set exceptions for the dates they do not run. Give the ones with a number a capacity.'],
+                    ['03', 'Print the link', 'Download the QR code for the sleeve and the room folder, embed the calendar in your own site, and put the address in the pre-arrival email.'],
+                ] as [$hNum, $hTitle, $hDesc])
+                    <div class="es-conc-card p-7" data-reveal="panel">
+                        <p class="es-conc-accent es-conc-num mb-3 text-sm font-bold">{{ $hNum }}</p>
+                        <h3 class="es-conc-ink mb-2 text-lg font-bold">{{ $hTitle }}</h3>
+                        <p class="es-conc-muted text-sm">{{ $hDesc }}</p>
                     </div>
                 @endforeach
             </div>
@@ -771,37 +1369,37 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 6. Key features                                              -->
+    <!-- 9. Key features                                              -->
     <!-- ============================================================ -->
-    <section class="border-t border-gray-200 bg-white py-20 dark:border-white/5 dark:bg-[#0a0a0f]">
+    <section class="es-conc-seam py-20">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key <span class="text-gradient-slate-gold">features</span></h2>
+            <h2 class="es-conc-display es-conc-ink mb-8 text-center text-2xl md:text-3xl" data-reveal>Key features</h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
-                    <x-feature-link-card name="Ticketing" description="Sell tickets with QR check-in and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="sky">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg></x-slot:icon>
+                    <x-feature-link-card name="Recurring Events" description="The standing week as one entry, with exceptions for the dates it does not run" :url="marketing_url('/features/recurring-events')" icon-color="amber">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Newsletters" description="Send event updates directly to followers' inboxes" :url="marketing_url('/features/newsletters')" icon-color="green">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></x-slot:icon>
+                    <x-feature-link-card name="Embed Calendar" description="Put the same calendar inside the hotel website you already have" :url="marketing_url('/features/embed-calendar')" icon-color="sky">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Analytics" description="Track page views, devices, and traffic sources" :url="marketing_url('/features/analytics')" icon-color="emerald">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></x-slot:icon>
+                    <x-feature-link-card name="Ticketing" description="Sell the paid experiences with QR check-in and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="emerald">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Sub-Schedules" description="Organize events into categories and groups" :url="marketing_url('/features/sub-schedules')" icon-color="rose">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg></x-slot:icon>
+                    <x-feature-link-card name="Sub-schedules" description="Give the pool, the spa and the kids club a colour and a link" :url="marketing_url('/features/sub-schedules')" icon-color="teal">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h10" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium hover:underline hotel-link-accent">
+                <a href="{{ marketing_url('/features') }}" class="es-conc-link inline-flex items-center font-medium hover:underline">
                     See all features
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="ml-1 h-4 w-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
@@ -812,28 +1410,33 @@
     @include('marketing.partials.pricing-nudge')
 
     <!-- ============================================================ -->
-    <!-- 7. Related pages                                             -->
+    <!-- 10. Related pages                                            -->
     <!-- ============================================================ -->
-    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14]">
+    <section class="es-conc-seam py-16">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related <span class="text-gradient-slate-gold">pages</span></h2>
+            <h2 class="es-conc-display es-conc-ink mb-8 text-center text-2xl md:text-3xl" data-reveal>Related pages</h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
-                @foreach ([['/for-restaurants', 'Restaurants'], ['/for-venues', 'Venues'], ['/for-community-centers', 'Community Centers'], ['/for-bars', 'Bars']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group hotel-related-card flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
+                @foreach ([
+                    ['/for-restaurants', 'Restaurants'],
+                    ['/for-venues', 'Venues'],
+                    ['/for-community-centers', 'Community Centers'],
+                    ['/for-bars', 'Bars'],
+                ] as [$relHref, $relName])
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="es-conc-card es-conc-hover group flex items-center justify-between p-5">
                         <div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors hotel-related-title dark:text-white">{{ $relName }}</div>
+                            <div class="es-conc-muted text-sm">Event Schedule for</div>
+                            <div class="es-conc-ink text-lg font-semibold">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors hotel-related-arrow rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="es-conc-accent h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium hover:underline hotel-link-accent">
+                <a href="{{ marketing_url('/use-cases') }}" class="es-conc-link inline-flex items-center font-medium hover:underline">
                     See all use cases
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="ml-1 h-4 w-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
@@ -841,78 +1444,70 @@
         </div>
     </section>
 
+    <x-marketing.related-pages />
+
     <!-- ============================================================ -->
-    <!-- 8. FAQ                                                       -->
+    <!-- 11. FAQ (08)                                                 -->
     <!-- ============================================================ -->
-    <section class="bg-gray-100 py-20 dark:bg-black/30 lg:py-28">
+    <section id="faq" class="scroll-mt-24 es-conc-seam py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Frequently asked <span class="text-gradient-slate-gold">questions</span>
+                <div class="es-conc-tab mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <p class="es-conc-eyebrow mb-4" data-reveal style="--reveal-delay: 0.05s;">Questions</p>
+                <h2 class="es-conc-display es-balance es-conc-ink text-3xl md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Asked <span class="es-conc-mark">across the desk</span>.
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Everything hotels and resorts ask about Event Schedule.
-                </p>
             </div>
 
             <div class="space-y-4" data-reveal-group="80">
-                @foreach ([
-                    ['Is Event Schedule free for hotels and resorts?', 'Yes. Event Schedule is free forever for sharing your activity calendar, building a guest following, and syncing with Google Calendar. Advanced features and newsletters are available on the Pro plan.'],
-                    ['Can I manage guest activities, entertainment, and conferences together?', 'Yes. Use sub-schedules to organize by category - pool activities, spa sessions, live entertainment, kids clubs, dining events, and conference schedules. Guests see a unified calendar of everything happening at your property.'],
-                    ['How do guests discover activities during their stay?', 'Share your activity calendar via QR codes at check-in, embed it on your hotel website, or include the link in pre-arrival emails. Guests can also follow your schedule and receive notifications for new activities.'],
-                    ['Can I sell tickets to special events and experiences?', 'Yes. Connect your Stripe account to sell tickets for special dinners, spa packages, excursions, and entertainment shows. Create different pricing for hotel guests and external visitors. Zero platform fees on all sales.'],
-                ] as [$q, $a])
-                    <details name="faq" data-reveal class="hotel-faq group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
-                            <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                @foreach ($faqs as $faq)
+                    <details name="faq" data-reveal class="es-conc-card es-conc-hover group/faq overflow-hidden">
+                        <summary class="flex cursor-pointer items-center justify-between gap-4 p-6">
+                            <h3 class="es-conc-ink text-lg font-semibold">{{ $faq['q'] }}</h3>
+                            <svg aria-hidden="true" class="es-conc-muted h-5 w-5 shrink-0 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{{ $a }}</p>
+                        <p class="es-conc-muted faq-answer px-6 pb-6">{{ $faq['a'] }}</p>
                     </details>
                 @endforeach
             </div>
         </div>
     </section>
 
+    <x-seo.faq-schema :items="$faqs" />
+
     <!-- ============================================================ -->
-    <!-- 9. Finale                                                    -->
+    <!-- 12. Finale                                                   -->
     <!-- ============================================================ -->
-    <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
+    <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
-            <div class="mb-10 flex justify-center" data-reveal>
-                <div class="hotel-shimmer-line h-px w-48"></div>
-            </div>
-            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-amber-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+            <div class="es-conc-band noise relative overflow-hidden border border-white/10 px-6 py-16 text-center shadow-2xl sm:px-12 lg:py-24" data-confetti data-reveal="panel">
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(217, 119, 6, 0.3), rgba(217, 119, 6, 0) 60%); opacity: 0.7;"></div>
-                    <div class="grid-overlay absolute inset-0 opacity-30"></div>
-                    <div class="es-gold-dust absolute inset-0">
-                        @foreach ($gold as [$l, $t, $s, $d, $dl, $op])
-                            <span style="left: {{ $l }}; top: {{ $t }}; width: {{ $s }}px; height: {{ $s }}px; --tw-dur: {{ $d }}; --tw-delay: {{ $dl }}; --tw-op: {{ $op }};"></span>
-                        @endforeach
-                    </div>
+                    <div class="grid-overlay absolute inset-0 opacity-25"></div>
                 </div>
 
                 <div class="relative z-10">
-                    <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Give guests a reason to <span class="text-gradient-slate-gold">stay in</span>
+                    <p class="es-conc-eyebrow mb-6">Free to start</p>
+                    <h2 class="es-conc-display es-balance mx-auto mb-6 max-w-3xl text-3xl text-white md:text-5xl">
+                        Nobody should have to <span class="es-conc-mark">ask twice</span>.
                     </h2>
-                    <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
-                        One calendar for every activity at your property. Keep guests engaged, informed, and delighted. Free forever.
+                    <p class="mx-auto mb-10 max-w-xl text-lg text-gray-300 sm:text-xl">
+                        The card, the address, the QR code, the standing week and the sign-up sheet
+                        are free forever. Selling the paid experiences is five dollars a month, and
+                        none of the ticket price comes to us.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
                         <label for="es-claim-input" class="sr-only">Your schedule name</label>
-                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
-                            <input id="es-claim-input" type="text" placeholder="your-resort" autocomplete="off" spellcheck="false" maxlength="30"
-                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
+                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-lg border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
+                            <input id="es-claim-input" type="text" placeholder="your-property" autocomplete="off" spellcheck="false" maxlength="30"
+                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-400 focus:outline-none focus:ring-0 sm:text-base">
                             <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
-                        <a href="{{ app_url('/sign_up?type=venue') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-slate-700 to-amber-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-amber-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-amber-500/40">
+                        <a href="{{ app_url('/sign_up?type=venue') }}" class="es-conc-btn group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-lg px-8 py-4 text-lg font-semibold">
                             <span class="relative z-10 flex items-center gap-2">
-                                Get Started Free
+                                Put the week on a page
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                 </svg>
@@ -926,6 +1521,22 @@
             </div>
         </div>
     </section>
+
+    <!-- Section dot navigation -->
+    <nav class="es-dotnav fixed top-1/2 z-40 hidden -translate-y-1/2 lg:block ltr:right-5 rtl:left-5" aria-label="Page sections">
+        <ul class="glass flex flex-col items-center gap-1.5 rounded-full px-2 py-3">
+            @foreach ($dotSections as [$sectionId, $sectionLabel])
+                <li class="relative">
+                    <a href="#{{ $sectionId }}" class="es-dot group block rounded-full" aria-label="{{ $sectionLabel }}">
+                        <span class="es-dot-pip block h-2 w-2 rounded-full bg-gray-400/60 dark:bg-white/30"></span>
+                        <span class="es-conc-tip pointer-events-none absolute top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 ltr:right-full ltr:mr-3 rtl:left-full rtl:ml-3">{{ $sectionLabel }}</span>
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    </nav>
+
+    </div>
 
     <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
     @vite('resources/js/marketing-home.js')

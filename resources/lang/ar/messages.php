@@ -845,6 +845,9 @@ return [
     'embed_description' => 'قم بتضمين جدولك في موقعك الإلكتروني أو مدونتك باستخدام كود iframe أدناه.',
     'embed_url' => 'رابط التضمين',
     'iframe_code' => 'كود Iframe',
+    'embed_layout' => 'التخطيط',
+    'embed_layout_default' => 'الافتراضي للجدول (:layout)',
+    'embed_layout_help' => 'يغير الكود الذي تنسخه أدناه فقط. تحتفظ صفحة جدولك بإعداد التخطيط الافتراضي.',
     'close' => 'إغلاق',
     'payment_url' => 'رابط الدفع',
 

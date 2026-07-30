@@ -26,13 +26,17 @@
 
   <script {!! nonce_attr() !!}>
   (function() {
-      var serverDefault = '{{ $role->event_layout ?? "calendar" }}';
+      // A ?layout= on the URL is an explicit instruction and outranks whatever this
+      // visitor last toggled, so skip the saved preference entirely when one is present.
+      @if (! requested_event_layout())
+      var serverDefault = '{{ $role->activeEventLayout() }}';
       try {
           var saved = localStorage.getItem('es_view_{{ $role->subdomain }}');
           if (saved && saved !== serverDefault && (saved === 'calendar' || saved === 'list')) {
               document.documentElement.dataset.esView = saved;
           }
       } catch (e) {}
+      @endif
   })();
   </script>
   <style {!! nonce_attr() !!}>
@@ -133,7 +137,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
         @endphp
         @foreach($upcomingEventsWithVideos as $eventData)
         @endforeach
-        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl px-6 lg:px-16 py-6 flex flex-col gap-6 mt-6 transition-[max-width] duration-300 ease-in-out mx-auto" data-view-width style="max-width: {{ ($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem' }}">
+        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl px-6 lg:px-16 py-6 flex flex-col gap-6 mt-6 transition-[max-width] duration-300 ease-in-out mx-auto" data-view-width style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}">
           <!-- Carousel Container -->
           <div class="relative group">
             <!-- Carousel Track -->
@@ -326,7 +330,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
               :sponsors="$sponsorLogos"
               :title="$role->translatedSponsorSectionTitle()"
               :background="$role->sponsorBackground()"
-              :maxWidth="($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem'" />
+              :maxWidth="$role->activeEventLayout() === 'list' ? '56rem' : '200rem'" />
       </div>
       @endif
 
@@ -335,9 +339,9 @@ html[data-es-view="list"] #calendar-panel-wrapper {
         class="calendar-panel-border {{ empty($sponsorLogos) ? 'mt-2 md:mt-6' : '' }} mb-6 px-0 md:px-6 lg:px-16 pt-0 md:pt-4 pb-0 md:pb-6 transition-[max-width] duration-300 ease-in-out mx-auto"
         id="calendar-panel-wrapper"
         data-view-width
-        style="max-width: {{ ($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem' }}"
+        style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}"
       >
-        @include('role/partials/calendar', ['route' => 'guest', 'tab' => '', 'category' => request('category'), 'schedule' => request('schedule'), 'eventLayout' => $role->event_layout ?? 'calendar', 'pastEvents' => $pastEvents ?? collect(), 'hide_past_events' => $role->hide_past_events])
+        @include('role/partials/calendar', ['route' => 'guest', 'tab' => '', 'category' => request('category'), 'schedule' => request('schedule'), 'eventLayout' => $role->activeEventLayout(), 'pastEvents' => $pastEvents ?? collect(), 'hide_past_events' => $role->hide_past_events])
       </div>
       </section>
 
@@ -349,7 +353,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
         @endphp
         @if ($videoCount > 0)
           <div
-              class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6 transition-[max-width] duration-300 ease-in-out mx-auto" data-view-width style="max-width: {{ ($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem' }}"
+              class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6 transition-[max-width] duration-300 ease-in-out mx-auto" data-view-width style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}"
             >
               <div class="grid grid-cols-1 md:grid-cols-{{ $gridCols }} gap-8">
               @foreach ($videoLinks as $link)

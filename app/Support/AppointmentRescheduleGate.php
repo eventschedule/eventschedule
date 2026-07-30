@@ -27,16 +27,15 @@ class AppointmentRescheduleGate
      * before payment, so a requires_approval + stripe booking is pivot-null AND unpaid and reports
      * 'pending', which would slip straight through a state allow-list.
      *
-     * $planIsCurrent lets a caller that already knows the schedule's plan status pass it in.
-     * Role::isPro() fans out to a subscription lookup, a trial check and an enterprise check, so calling
-     * this per row over a 50-row page would add up to 150 queries. Null means "work it out".
+     * There is no plan check here. It used to carry one, plus a $planIsCurrent parameter so a 50-row
+     * page did not fan out to a subscription lookup per row. Appointments are now on every plan, so
+     * both are gone.
      */
     public static function blockedReason(
         Event $event,
         Sale $sale,
         ?Role $role = null,
-        bool $checkCooldown = true,
-        ?bool $planIsCurrent = null
+        bool $checkCooldown = true
     ): ?string {
         $role = $role ?: $event->creatorRole;
         $type = $event->appointmentType;
@@ -71,12 +70,9 @@ class AppointmentRescheduleGate
             return $unavailable();
         }
 
-        // Pro gate, matching the booking path. Cancel stays deliberately ungated, so a guest on a lapsed
-        // schedule is never trapped - they can still release the slot.
-        $planIsCurrent ??= ! config('app.hosted') || (bool) $role?->isPro();
-        if (! $planIsCurrent) {
-            return $unavailable();
-        }
+        // No plan gate. Appointments are available on every plan, and the free allowance caps how many
+        // types a schedule offers, not what may be done with a booking already taken. Refusing a move
+        // here would strand a guest with a booking they could only cancel.
 
         // Report the cooldown so the manage page does not offer a Reschedule button, and the picker does
         // not render a whole calendar, for a move the write path will refuse. Null until a real move

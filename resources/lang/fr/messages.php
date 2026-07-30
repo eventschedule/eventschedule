@@ -800,6 +800,9 @@ return [
     'embed_description' => 'Intégrez votre programme sur votre site web ou blog en utilisant le code iframe ci-dessous.',
     'embed_url' => 'URL d\'intégration',
     'iframe_code' => 'Code iframe',
+    'embed_layout' => 'Disposition',
+    'embed_layout_default' => 'Valeur par défaut du planning (:layout)',
+    'embed_layout_help' => 'Ne modifie que le code copié ci-dessous. Votre page de planning conserve sa disposition par défaut.',
     'close' => 'Fermer',
     'payment_url' => 'Lien de paiement',
 

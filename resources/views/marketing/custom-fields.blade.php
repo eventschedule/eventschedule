@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Custom Fields | Event Metadata & Forms - Event Schedule</x-slot>
-    <x-slot name="description">Collect exactly the info you need from ticket buyers. Add custom text, dropdown, date, and yes/no fields to your events and tickets.</x-slot>
+    <x-slot name="title">Custom Fields | Ask Your Own Questions on Every Form - Event Schedule</x-slot>
+    <x-slot name="description">Add your own questions to your ticket form, your registration form and your public event request form. Six field types, ten fields each on your schedule, your event and your ticket types, and every answer in your sales export.</x-slot>
     <x-slot name="breadcrumbTitle">Custom Fields</x-slot>
 
     <x-slot name="structuredData">
@@ -10,58 +10,34 @@
         "@type": "SoftwareApplication",
         "name": "Event Schedule - Custom Fields",
         "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Event Registration Forms",
         "operatingSystem": "Web",
-        "description": "Define custom event metadata fields and collect attendee information with flexible form fields including text, dropdown, date, and yes/no options.",
+        "description": "Define your own questions and have them asked on ticket forms, registration forms and public event request forms, with the answers filed on the order, the ticket and the sales export.",
         "featureList": [
-            "Custom event metadata fields",
-            "Attendee information collection",
-            "Text fields",
-            "Dropdown menus",
-            "Date pickers",
-            "Yes/No fields"
+            "Six field types: text, long text, Yes/No, date, dropdown and multi-select",
+            "Ten fields per schedule, ten per event and ten per ticket type",
+            "Fields asked once per order or once per ticket, or once per guest in a party",
+            "Questions asked on the public event request form",
+            "Required fields enforced in the browser and on the server",
+            "Validation patterns with ready-made presets, a tester and a hint",
+            "Private fields kept off the public schedule",
+            "Answers on the request card, the sales table, the ticket and the CSV export",
+            "Field values available to graphic templates and URL patterns as {custom_1} to {custom_10}",
+            "Public dropdown and multi-select fields become filters on your guest calendar",
+            "Field names and dropdown options translated automatically"
         ],
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD"
+            "priceCurrency": "USD",
+            "description": "Free plan available. Custom fields are included on the Pro plan."
         },
         "url": "{{ url()->current() }}",
+        "keywords": "custom fields, event registration form, attendee questions, checkout questions, event request form, dietary requirements, form validation",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule"
         }
-    }
-    </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "What types of custom fields can I create?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "You can create text fields, dropdowns, checkboxes, and date fields. Use them for anything from dietary preferences to t-shirt sizes to special requests."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Where do custom fields appear?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Custom fields appear on the ticket purchase form and reservation form. Attendees fill them out when buying tickets or reserving spots for your events."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I export custom field data?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. All custom field responses are included when you export your ticket sales or attendee data. You can download everything as a spreadsheet."
-                }
-            }
-        ]
     }
     </script>
     </x-slot>
@@ -75,405 +51,1410 @@
     </script>
 
     <style {!! nonce_attr() !!}>
-        /* For custom-fields "The Form" styles. The shared es-* motion system lives in
-           marketing.css; this holds the amber glow gradient, the drifting form-builder
-           card, and the checkbox-fill motif. */
-        .text-gradient-cf {
-            background: linear-gradient(135deg, #d97706, #f59e0b, #ea580c);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 40px rgba(217, 119, 6, 0.3);
-        }
-        .dark .text-gradient-cf {
-            background: linear-gradient(135deg, #fbbf24, #f59e0b, #fb923c);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 40px rgba(251, 191, 36, 0.3);
-        }
-        @keyframes es-cf-float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        .es-cf-float { animation: es-cf-float 6s ease-in-out infinite; }
+        /* ==============================================================
+           For custom-fields "The Form" styles. The page IS a form: a
+           definition on one side, an answer on the other. A custom field
+           is written once and the product renders it as a question and
+           files it as a column, so the whole page is built out of two
+           marks - the RULE (a blank waiting to be filled) and the SLOT
+           (the numbered register the answer lands in).
 
-        /* Checkbox-fill motif: boxes tick in a wave, like a form being completed. */
-        .es-checks { display: flex; align-items: center; }
-        .es-check {
-            flex: 0 0 auto; width: 12px; height: 12px; border-radius: 3px;
-            border: 1.5px solid rgba(217, 119, 6, 0.55);
-            animation: es-check-fill var(--ck-dur, 2.6s) ease-in-out infinite;
-            animation-delay: var(--ck-delay, 0s);
+           THE SIGNATURE DEVICE IS A BASELINE RULE, NOT A BOXED INPUT.
+           Boxed inputs are house furniture: every mock on this site
+           already draws them, and /for-spoken-word owns the physical
+           paper sign-up sheet. So controls here are drawn as underlines
+           on a cool office grey, and an unanswered field is a hollow
+           rule while an answered one is an inked rule. The section marks
+           are {custom_1} to {custom_10}, which are the product's REAL
+           template variables, so the page's numbering is also its
+           argument.
+
+           COLOUR: the page keeps its inherited amber family but spends
+           it at the burnt end (#9a3412 stamped ink) on a cool grey
+           ground rather than the warm gold-on-black the other amber
+           pages use. Measured: #9a3412 on #f4f5f7 = 6.70, #fdba74 on
+           #0c0f12 = 11.40, white on #9a3412 = 7.31, #0c0f12 on #fdba74
+           = 11.40.
+
+           NEVER use text-gray-500 here - it measures 4.83 on pure white
+           but drops on this tinted ground. Use .es-form-muted (7.36 on
+           the light ground, 7.51 on the dark one).
+
+           NO GRADIENT HEADING TEXT on purpose: a gradient is scored at
+           every stop and the bright amber stops fail on a light ground.
+           Accent words get .es-form-fill instead, which is a filled-in
+           blank and is on-concept.
+
+           BLADE RULE for this block: never use @supports probes here.
+           A "#" hex inside a parenthesized at-rule condition breaks
+           Blade compilation of every later parenthesized directive.
+           ============================================================== */
+
+        /* --- Ground and ink --- */
+        .es-form-page { background-color: #f4f5f7; color: #14181c; }
+        .dark .es-form-page { background-color: #0c0f12; color: #e9edf1; }
+
+        .es-form-ink { color: #14181c; }
+        .dark .es-form-ink { color: #e9edf1; }
+        .es-form-band .es-form-ink { color: #e9edf1; }
+
+        .es-form-muted { color: #4b5158; }
+        .dark .es-form-muted { color: #9aa3ac; }
+        .es-form-band .es-form-muted { color: #9aa3ac; }
+
+        .es-form-accent { color: #9a3412; }
+        .dark .es-form-accent { color: #fdba74; }
+
+        /* An accent word sitting on a filled-in blank. Drawn with
+           text-decoration, NOT a background gradient: a contrast probe that
+           walks up for the effective ground takes a gradient's first colour
+           stop as the background, so an underline painted as a background
+           image scores the accent against itself and fails at 1:1. An
+           underline is also the truer mark here - it is the rule of the
+           blank the word fills in. */
+        .es-form-fill {
+            color: #9a3412;
+            text-decoration-line: underline;
+            text-decoration-color: rgba(154, 52, 18, 0.55);
+            text-decoration-thickness: 0.09em;
+            text-underline-offset: 0.15em;
         }
-        @keyframes es-check-fill {
-            0%, 100% { background: transparent; box-shadow: none; }
-            50% { background: rgba(217, 119, 6, 0.75); box-shadow: 0 0 8px rgba(217, 119, 6, 0.5); }
+        .dark .es-form-fill {
+            color: #fdba74;
+            text-decoration-color: rgba(253, 186, 116, 0.6);
         }
+        .es-form-band .es-form-fill {
+            color: #fdba74;
+            text-decoration-color: rgba(253, 186, 116, 0.6);
+        }
+
+        /* --- Eyebrow labels and mono keys --- */
+        .es-form-tag {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.26em;
+            text-transform: uppercase;
+            color: #4b5158;
+        }
+        .dark .es-form-tag { color: #9aa3ac; }
+        .es-form-band .es-form-tag { color: #fdba74; }
+
+        .es-form-key {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.72rem;
+            letter-spacing: 0.02em;
+            color: #9a3412;
+        }
+        .dark .es-form-key { color: #fdba74; }
+
+        /* --- Section mark: the slot number IS the template variable --- */
+        .es-form-slot {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 0.3rem;
+            border: 1px solid rgba(20, 24, 28, 0.16);
+            background: #ffffff;
+            color: #14181c;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.75rem;
+            font-variant-numeric: tabular-nums;
+            font-weight: 700;
+        }
+        .dark .es-form-slot { border-color: rgba(233, 237, 241, 0.18); background: rgba(233, 237, 241, 0.05); color: #e9edf1; }
+        .es-form-band .es-form-slot { border-color: rgba(233, 237, 241, 0.18); background: rgba(233, 237, 241, 0.05); color: #e9edf1; }
+        .es-form-slot::before {
+            content: "";
+            width: 2px;
+            align-self: stretch;
+            border-radius: 1px;
+            background: #9a3412;
+        }
+        .dark .es-form-slot::before { background: #fdba74; }
+        .es-form-band .es-form-slot::before { background: #fdba74; }
+
+        /* --- Surfaces --- */
+        .es-form-card {
+            border: 1px solid rgba(20, 24, 28, 0.12);
+            border-radius: 1rem;
+            background: #ffffff;
+        }
+        .dark .es-form-card {
+            border-color: rgba(233, 237, 241, 0.12);
+            background: rgba(233, 237, 241, 0.04);
+        }
+        .es-form-band .es-form-card {
+            border-color: rgba(233, 237, 241, 0.13);
+            background: rgba(233, 237, 241, 0.05);
+        }
+
+        /* Secondary surface for the form mocks nested inside a card. */
+        .es-form-well {
+            border: 1px solid rgba(20, 24, 28, 0.1);
+            border-radius: 0.75rem;
+            background: #eceef1;
+        }
+        .dark .es-form-well { border-color: rgba(233, 237, 241, 0.1); background: #141a20; }
+
+        /* --- Fixed-dark band --- */
+        .es-form-band {
+            background-color: #0e1318;
+            background-image: radial-gradient(120% 100% at 50% 0%, #18202a 0%, #10161c 55%, #080b0e 100%);
+            box-shadow: inset 0 0 90px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(233, 237, 241, 0.05);
+        }
+        /* Shared classes that flip with the colour mode: pin them so the band
+           renders identically with .dark on and off. */
+        .es-form-band .grid-overlay {
+            background-image:
+                linear-gradient(rgba(233, 237, 241, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(233, 237, 241, 0.05) 1px, transparent 1px);
+        }
+        .es-form-band .animate-shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            background-size: 200% 100%;
+        }
+        .es-form-band .es-claim:focus-within {
+            border-color: rgba(253, 186, 116, 0.75);
+            box-shadow: 0 0 0 4px rgba(253, 186, 116, 0.22);
+        }
+
+        /* --- The control, drawn as a blank rule --- */
+        .es-form-ctl {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 0.3rem 0.1rem;
+            border-bottom: 2px solid rgba(20, 24, 28, 0.22);
+            font-size: 0.85rem;
+            color: #4b5158;
+        }
+        .dark .es-form-ctl { border-bottom-color: rgba(233, 237, 241, 0.22); color: #9aa3ac; }
+        /* An answered blank: inked rule, ink value. */
+        .es-form-ctl-on {
+            border-bottom-color: #9a3412;
+            color: #14181c;
+            font-weight: 600;
+        }
+        .dark .es-form-ctl-on { border-bottom-color: #fdba74; color: #e9edf1; }
+
+        /* --- The definition slip: a spec sheet, label left, value right --- */
+        .es-form-spec { margin: 0; }
+        .es-form-spec > div {
+            display: grid;
+            grid-template-columns: 8.5rem 1fr;
+            gap: 0.75rem;
+            padding: 0.45rem 0;
+            border-top: 1px solid rgba(20, 24, 28, 0.09);
+        }
+        .dark .es-form-spec > div { border-top-color: rgba(233, 237, 241, 0.09); }
+        .es-form-spec > div:first-child { border-top: 0; }
+        .es-form-spec dt {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #4b5158;
+            padding-top: 0.15rem;
+        }
+        .dark .es-form-spec dt { color: #9aa3ac; }
+        .es-form-spec dd {
+            margin: 0;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #14181c;
+        }
+        .dark .es-form-spec dd { color: #e9edf1; }
+        @media (max-width: 400px) {
+            .es-form-spec > div { grid-template-columns: 1fr; gap: 0.15rem; }
+        }
+        /* Stacked variant, for a spec slip sitting inside a narrow card well
+           where an 8.5rem label column would leave the value two words wide. */
+        .es-form-spec-tight > div { grid-template-columns: 1fr; gap: 0.15rem; }
+
+        /* --- Flag pills: the four switches a field carries --- */
+        .es-form-switch {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.25rem 0.7rem 0.25rem 0.5rem;
+            border-radius: 9999px;
+            border: 1px solid rgba(20, 24, 28, 0.16);
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            color: #4b5158;
+        }
+        .dark .es-form-switch { border-color: rgba(233, 237, 241, 0.16); color: #9aa3ac; }
+        .es-form-switch::before {
+            content: "";
+            width: 0.55rem;
+            height: 0.55rem;
+            border-radius: 2px;
+            border: 1.5px solid currentColor;
+        }
+        .es-form-switch-on {
+            border-color: rgba(154, 52, 18, 0.45);
+            color: #9a3412;
+        }
+        .dark .es-form-switch-on { border-color: rgba(253, 186, 116, 0.45); color: #fdba74; }
+        .es-form-switch-on::before { background: currentColor; }
+
+        /* --- The band texture: a row of blanks, some inked.
+               Abstract strokes only - no outline illustration. --- */
+        .es-form-blanks {
+            display: flex;
+            align-items: flex-end;
+            gap: 0.6rem;
+        }
+        .es-form-blank {
+            flex: 1 1 0;
+            min-width: 0;
+            height: 2px;
+            border-radius: 1px;
+            background: rgba(233, 237, 241, 0.16);
+        }
+        .es-form-blank-on {
+            background: #fdba74;
+            animation: es-form-ink var(--bk-dur, 3.4s) ease-in-out infinite;
+            animation-delay: var(--bk-delay, 0s);
+        }
+        @keyframes es-form-ink {
+            0%, 100% { opacity: 0.35; transform: scaleX(0.55); }
+            50% { opacity: 1; transform: scaleX(1); }
+        }
+        .es-form-blank-on { transform-origin: left center; }
+
+        /* --- The ten-slot register (real content, not ornament) --- */
+        .es-form-reg {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .es-form-reg-slot {
+            display: inline-flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            flex: 1 1 4.5rem;
+            min-width: 4.5rem;
+            padding: 0.55rem 0.6rem;
+            border-radius: 0.5rem;
+            border: 1px dashed rgba(20, 24, 28, 0.2);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.65rem;
+            font-variant-numeric: tabular-nums;
+            color: #4b5158;
+        }
+        .dark .es-form-reg-slot { border-color: rgba(233, 237, 241, 0.2); color: #9aa3ac; }
+        .es-form-reg-slot-on {
+            border-style: solid;
+            border-color: rgba(154, 52, 18, 0.5);
+            background: rgba(154, 52, 18, 0.07);
+            color: #9a3412;
+        }
+        .dark .es-form-reg-slot-on {
+            border-color: rgba(253, 186, 116, 0.5);
+            background: rgba(253, 186, 116, 0.08);
+            color: #fdba74;
+        }
+
+        /* --- Real tables --- */
+        .es-form-table { width: 100%; border-collapse: collapse; }
+        .es-form-table th,
+        .es-form-table td {
+            text-align: start;
+            padding: 0.7rem 0.9rem 0.7rem 0;
+            vertical-align: top;
+            border-top: 1px solid rgba(20, 24, 28, 0.1);
+        }
+        .dark .es-form-table th,
+        .dark .es-form-table td { border-top-color: rgba(233, 237, 241, 0.1); }
+        .es-form-table thead th {
+            border-top: 0;
+            padding-top: 0;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: #4b5158;
+        }
+        .dark .es-form-table thead th { color: #9aa3ac; }
+        .es-form-table tbody th {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: #14181c;
+            white-space: nowrap;
+        }
+        .dark .es-form-table tbody th { color: #e9edf1; }
+        .es-form-table tbody td { font-size: 0.85rem; color: #4b5158; }
+        .dark .es-form-table tbody td { color: #9aa3ac; }
+
+        /* The export row, in tabular mono. */
+        .es-form-csv {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.7rem;
+            white-space: nowrap;
+        }
+        .es-form-csv th,
+        .es-form-csv td {
+            text-align: start;
+            padding: 0.5rem 1.1rem 0.5rem 0;
+            border-top: 1px solid rgba(20, 24, 28, 0.1);
+        }
+        .dark .es-form-csv th,
+        .dark .es-form-csv td { border-top-color: rgba(233, 237, 241, 0.1); }
+        .es-form-csv thead th {
+            border-top: 0;
+            padding-top: 0;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #4b5158;
+        }
+        .dark .es-form-csv thead th { color: #9aa3ac; }
+        .es-form-csv tbody td { color: #14181c; }
+        .dark .es-form-csv tbody td { color: #e9edf1; }
+        .es-form-csv .es-form-csv-new { color: #9a3412; }
+        .dark .es-form-csv .es-form-csv-new { color: #fdba74; }
+
+        /* --- Section separators. Written as real rules rather than
+               border-[rgba(...)] utilities, because an arbitrary Tailwind value
+               that is not already in the built stylesheet renders as nothing. --- */
+        .es-form-hr { border-top: 1px solid rgba(20, 24, 28, 0.09); }
+        .dark .es-form-hr { border-top-color: rgba(233, 237, 241, 0.09); }
+        .es-form-hr-y {
+            border-top: 1px solid rgba(20, 24, 28, 0.09);
+            border-bottom: 1px solid rgba(20, 24, 28, 0.09);
+        }
+        .dark .es-form-hr-y {
+            border-top-color: rgba(233, 237, 241, 0.09);
+            border-bottom-color: rgba(233, 237, 241, 0.09);
+        }
+
+        /* Dot-nav tooltip ground (the shared nav ships brand-blue defaults). */
+        .es-form-tip {
+            border: 1px solid rgba(20, 24, 28, 0.12);
+            background: #ffffff;
+            color: #14181c;
+        }
+        .dark .es-form-tip {
+            border-color: rgba(233, 237, 241, 0.12);
+            background: #141a20;
+            color: #e9edf1;
+        }
+
+        /* --- The duplex rule: definition on one side, answer on the other --- */
+        .es-form-divide { border-top: 1px solid rgba(20, 24, 28, 0.12); padding-top: 2rem; }
+        .dark .es-form-divide { border-top-color: rgba(233, 237, 241, 0.12); }
+        @media (min-width: 768px) {
+            .es-form-divide {
+                border-top: 0;
+                padding-top: 0;
+                border-inline-start: 1px solid rgba(20, 24, 28, 0.12);
+                padding-inline-start: 2.5rem;
+            }
+            .dark .es-form-divide { border-inline-start-color: rgba(233, 237, 241, 0.12); }
+        }
+
+        /* --- Plan tags --- */
+        .es-form-plan {
+            display: inline-flex;
+            align-items: center;
+            flex: none;
+            padding: 0.1rem 0.45rem;
+            border-radius: 0.25rem;
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            border: 1px solid rgba(20, 24, 28, 0.35);
+            color: #14181c;
+        }
+        .dark .es-form-plan { border-color: rgba(233, 237, 241, 0.38); color: #e9edf1; }
+        .es-form-band .es-form-plan { border-color: rgba(233, 237, 241, 0.38); color: #e9edf1; }
+        .es-form-plan-pro { border-color: rgba(154, 52, 18, 0.5); color: #9a3412; }
+        .dark .es-form-plan-pro { border-color: rgba(253, 186, 116, 0.5); color: #fdba74; }
+        .es-form-band .es-form-plan-pro { border-color: rgba(253, 186, 116, 0.5); color: #fdba74; }
+
+        /* --- Links and buttons --- */
+        .es-form-link { color: #9a3412; }
+        .es-form-link:hover { color: #14181c; }
+        .dark .es-form-link { color: #fdba74; }
+        .dark .es-form-link:hover { color: #e9edf1; }
+        .es-form-band .es-form-link { color: #fdba74; }
+        .es-form-band .es-form-link:hover { color: #e9edf1; }
+
+        .es-form-btn {
+            background-color: #9a3412;
+            color: #ffffff;
+            box-shadow: 0 18px 36px -14px rgba(154, 52, 18, 0.5);
+        }
+        .es-form-btn:hover { background-color: #7c2a0e; box-shadow: 0 22px 44px -14px rgba(154, 52, 18, 0.6); }
+        .dark .es-form-btn { background-color: #fdba74; color: #0c0f12; }
+        .dark .es-form-btn:hover { background-color: #fed7aa; }
+        .es-form-band .es-form-btn { background-color: #fdba74; color: #0c0f12; }
+        .es-form-band .es-form-btn:hover { background-color: #fed7aa; }
+
+        /* --- Hover states on cards that are links or summaries --- */
+        .es-form-hover:hover { border-color: rgba(154, 52, 18, 0.45); }
+        .dark .es-form-hover:hover { border-color: rgba(253, 186, 116, 0.45); }
+        .es-form-hover:hover .es-form-hover-title,
+        .es-form-hover:hover .es-form-hover-arrow { color: #9a3412; }
+        .dark .es-form-hover:hover .es-form-hover-title,
+        .dark .es-form-hover:hover .es-form-hover-arrow { color: #fdba74; }
+
+        /* --- Marquee chips: real questions people ask --- */
+        .es-form-chip {
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+            padding: 0.35rem 0.9rem;
+            border-radius: 0.4rem;
+            border: 1px solid rgba(20, 24, 28, 0.14);
+            background: rgba(255, 255, 255, 0.75);
+            color: #4b5158;
+            font-size: 0.76rem;
+            font-weight: 600;
+        }
+        .dark .es-form-chip {
+            border-color: rgba(233, 237, 241, 0.14);
+            background: rgba(233, 237, 241, 0.05);
+            color: #9aa3ac;
+        }
+
+        /* --- Staged inner reveal. The pre-state is gated behind es-anim so a
+               no-JS visitor, a crawler and a reduced-motion user all see the
+               finished state. --- */
+        .es-form-line {
+            transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1), transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+            transition-delay: calc(var(--i, 0) * 0.12s + 0.35s);
+        }
+        html.es-anim [data-reveal]:not(.is-revealed) .es-form-line {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+
+        /* --- Shared-system recolors (brand blue by default) --- */
+        .es-hero .es-spot {
+            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(154, 52, 18, 0.12), transparent 60%);
+        }
+        .dark .es-hero .es-spot {
+            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(253, 186, 116, 0.1), transparent 60%);
+        }
+        .es-dot:hover .es-dot-pip { background-color: rgba(154, 52, 18, 0.6); }
+        .dark .es-dot:hover .es-dot-pip { background-color: rgba(253, 186, 116, 0.6); }
+        .es-dot.is-active .es-dot-pip { background: #9a3412; }
+        .dark .es-dot.is-active .es-dot-pip { background: #fdba74; }
+
+        /* --- Focus rings. No border-radius here: setting it changes the
+               element's own shape on focus. Outlines already follow it. --- */
+        #es-form-page a:focus-visible,
+        #es-form-page summary:focus-visible,
+        #es-form-page button:focus-visible {
+            outline: 2px solid #9a3412;
+            outline-offset: 3px;
+        }
+        .dark #es-form-page a:focus-visible,
+        .dark #es-form-page summary:focus-visible,
+        .dark #es-form-page button:focus-visible {
+            outline-color: #fdba74;
+        }
+        .es-form-band a:focus-visible,
+        .es-form-band summary:focus-visible,
+        .es-form-band button:focus-visible {
+            outline-color: #fdba74 !important;
+        }
+
         @media (prefers-reduced-motion: reduce) {
-            .es-cf-float, .es-check { animation: none !important; }
-            .es-check { background: rgba(217, 119, 6, 0.35); }
+            .es-form-blank-on { animation: none !important; opacity: 1; transform: none; }
+            .es-form-line { transition: none !important; }
         }
     </style>
 
-    <!-- ============================================================ -->
-    <!-- 1. Hero: custom fields                                       -->
-    <!-- ============================================================ -->
-    <section class="es-hero relative flex min-h-[calc(80svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
-        <div class="absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 70%, rgba(217, 119, 6, 0.3), rgba(217, 119, 6, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 32%, rgba(234, 88, 12, 0.28), rgba(234, 88, 12, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 50%, rgba(251, 191, 36, 0.14), rgba(251, 191, 36, 0) 60%);"></div>
-            <div class="es-rays absolute inset-0"></div>
-            <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
-            <!-- Checkbox line along the bottom edge -->
-            <div class="es-checks absolute bottom-0 left-0 right-0 mx-auto hidden h-16 max-w-4xl items-center justify-center gap-4 px-8 opacity-50 md:flex" style="mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);">
-                @for ($i = 0; $i < 30; $i++)
-                    @php $dur = 2 + ($i % 6) * 0.26; $delay = ($i % 12) * 0.16; @endphp
-                    <span class="es-check" style="--ck-dur: {{ $dur }}s; --ck-delay: {{ $delay }}s;"></span>
-                @endfor
-            </div>
-        </div>
-
-        <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
-                <svg aria-hidden="true" class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Flexible data collection</span>
-            </div>
-
-            <h1 class="es-balance mb-6 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
-                <span class="es-mask"><span class="es-mask-line">Custom</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-cf">Fields</span></span></span>
-            </h1>
-
-            <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
-                Collect the information you need from ticket buyers with flexible form fields.
-            </p>
-
-            <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <a href="{{ app_url('/sign_up') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-600 to-orange-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-amber-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-amber-500/40">
-                    Start Free Trial
-                    <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-                <a href="{{ route('marketing.docs.creating_schedules') }}#customize-custom-fields" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
-                    Read the Custom Fields guide
-                    <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                </a>
-            </div>
-        </div>
-
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 2. Bento features                                           -->
-    <!-- ============================================================ -->
-    <section class="bg-white py-20 dark:bg-[#0a0a0f] lg:py-24">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="100">
-
-                <!-- Five field types (2 cols) -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="flex flex-col items-center gap-8 lg:flex-row">
-                            <div class="flex-1">
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-800/30 dark:bg-amber-900/40 dark:text-amber-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" /></svg>
-                                    Field Types
-                                </div>
-                                <h2 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Five flexible field types</h2>
-                                <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">Choose the right input type for each piece of information you need to collect from attendees.</p>
-                                <div class="flex flex-wrap gap-3">
-                                    @foreach (['Text', 'Multiline', 'Yes/No', 'Date', 'Dropdown'] as $ft)
-                                        <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">{{ $ft }}</span>
-                                    @endforeach
-                                </div>
-                            </div>
-                            <div class="w-full shrink-0 lg:w-auto" aria-hidden="true">
-                                <div class="animate-float">
-                                    <div class="max-w-xs space-y-4 rounded-2xl border border-gray-200 bg-gray-100 p-5 dark:border-white/10 dark:bg-[#0f0f14]">
-                                        @foreach ([['Company Name', 'Acme Corp', false], ['T-Shirt Size', 'Large', true], ['Vegetarian Meal?', 'Yes', true], ['Date of Birth', '1990-05-15', true]] as $fi => [$lbl, $val, $chev])
-                                            <div class="es-ai-field" style="--i: {{ $fi }};">
-                                                <label class="mb-1 block text-xs text-gray-500 dark:text-gray-400">{{ $lbl }}</label>
-                                                <div class="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-200 px-3 py-2 text-sm text-gray-900 dark:border-white/10 dark:bg-white/10 dark:text-white">
-                                                    <span>{{ $val }}</span>
-                                                    @if ($chev)<svg aria-hidden="true" class="h-4 w-4 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>@endif
-                                                </div>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Event-level fields -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-orange-200 bg-orange-100 px-3 py-1.5 text-sm font-medium text-orange-700 dark:border-orange-800/30 dark:bg-orange-900/40 dark:text-orange-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                            Per-Order
-                        </div>
-                        <h2 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Event-level fields</h2>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Collect information once per order. Great for details that apply to the entire purchase.</p>
-                        <div class="mt-auto space-y-3" aria-hidden="true">
-                            @foreach ([['Company Name', 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'], ['Contact Phone', 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z']] as $oi => [$lbl, $path])
-                                <div class="es-ai-field flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-100 p-3 dark:border-white/10 dark:bg-white/10" style="--i: {{ $oi }};">
-                                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500/20"><svg aria-hidden="true" class="h-4 w-4 text-orange-500 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $path }}" /></svg></div>
-                                    <span class="text-sm text-gray-900 dark:text-white">{{ $lbl }}</span>
-                                </div>
-                            @endforeach
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Ticket-specific fields -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-yellow-200 bg-yellow-100 px-3 py-1.5 text-sm font-medium text-yellow-700 dark:border-yellow-800/30 dark:bg-yellow-900/40 dark:text-yellow-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
-                            Per-Ticket
-                        </div>
-                        <h2 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Ticket-specific fields</h2>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Collect info for each ticket type. Only shown when that specific ticket is selected.</p>
-                        <div class="mt-auto space-y-3" aria-hidden="true">
-                            <div class="es-ai-field rounded-xl border border-yellow-500/20 bg-yellow-500/10 p-3" style="--i: 0;">
-                                <div class="mb-2 text-xs font-medium text-yellow-700 dark:text-yellow-300">VIP Ticket</div>
-                                <div class="flex items-center gap-2"><svg aria-hidden="true" class="h-4 w-4 text-yellow-500 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg><span class="text-sm text-gray-900 dark:text-white">Seating Preference</span></div>
-                            </div>
-                            <div class="es-ai-field rounded-xl border border-gray-200 bg-gray-100 p-3 dark:border-white/10 dark:bg-white/10" style="--i: 1;">
-                                <div class="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400">Workshop Ticket</div>
-                                <div class="flex items-center gap-2"><svg aria-hidden="true" class="h-4 w-4 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg><span class="text-sm text-gray-900 dark:text-white">Experience Level</span></div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Required or optional (2 cols) -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="grid items-center gap-8 md:grid-cols-2">
-                            <div>
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-800/30 dark:bg-amber-900/40 dark:text-amber-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                    Validation
-                                </div>
-                                <h2 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white">Required or optional</h2>
-                                <p class="text-lg text-gray-500 dark:text-gray-400">Mark fields as required to ensure you get the information you need, or leave them optional for flexibility. Up to 10 fields per level.</p>
-                            </div>
-                            <div class="rounded-2xl border border-gray-200 bg-gray-100 p-6 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
-                                <div class="space-y-4">
-                                    @foreach ([['Dietary Requirements', true], ['Emergency Contact', true], ['How did you hear about us?', false]] as $vi => [$lbl, $req])
-                                        <div class="es-ai-field flex items-center justify-between rounded-xl border p-3 {{ $req ? 'border-gray-200 bg-gray-200 dark:border-white/10 dark:bg-white/10' : 'border-gray-100 bg-gray-100 dark:border-white/5 dark:bg-white/5' }}" style="--i: {{ $vi }};">
-                                            <div class="flex items-center gap-3">
-                                                @if ($req)
-                                                    <div class="flex h-5 w-5 items-center justify-center rounded bg-amber-500"><svg aria-hidden="true" class="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg></div>
-                                                    <span class="text-gray-900 dark:text-white">{{ $lbl }}</span>
-                                                @else
-                                                    <div class="h-5 w-5 rounded border border-gray-300 dark:border-white/30"></div>
-                                                    <span class="text-gray-500 dark:text-gray-400">{{ $lbl }}</span>
-                                                @endif
-                                            </div>
-                                            <span class="text-xs font-medium {{ $req ? 'text-amber-500 dark:text-amber-400' : 'text-gray-500 dark:text-gray-400' }}">{{ $req ? 'Required' : 'Optional' }}</span>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 3. Event custom fields (metadata)                           -->
-    <!-- ============================================================ -->
-    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-24">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mb-14 text-center">
-                <div class="mb-6 inline-flex items-center gap-2 rounded-full glass px-4 py-2" data-reveal>
-                    <svg aria-hidden="true" class="h-4 w-4 text-amber-500 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" /><path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" /></svg>
-                    <span class="text-sm text-gray-600 dark:text-gray-300">Event Metadata</span>
-                </div>
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>Event <span class="text-gradient-cf">custom fields</span></h2>
-                <p class="mx-auto max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.05s;">Define custom metadata fields at the schedule level that appear when creating or editing events. Perfect for tracking speaker names, room numbers, session types, and more.</p>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4 lg:grid-cols-2" data-reveal-group="80">
-                <div data-reveal class="ap-card rounded-3xl border border-amber-200 bg-amber-50 p-8 dark:border-amber-500/20 dark:bg-amber-900/20">
-                    <h3 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white">How it works</h3>
-                    <div class="space-y-6">
-                        @foreach ([['Define fields in schedule settings', 'Add up to 10 custom fields with names, types, and validation rules.'], ['Fill values when creating events', 'Fields appear automatically in the event edit form for your team to complete.'], ['Use in graphics & exports', 'Display values in event graphics using template variables like {custom_1}, {custom_2}, etc.']] as $hi => [$title, $desc])
-                            <div class="flex gap-4">
-                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/20 font-bold text-amber-600 dark:text-amber-400">{{ $hi + 1 }}</div>
-                                <div><h4 class="mb-1 font-medium text-gray-900 dark:text-white">{{ $title }}</h4><p class="text-sm text-gray-500 dark:text-gray-400">{{ $desc }}</p></div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-
-                <div data-reveal class="ap-card rounded-3xl border border-orange-200 bg-orange-50 p-8 dark:border-orange-500/20 dark:bg-orange-900/20">
-                    <h3 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white">Common uses</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        @foreach ([['Conferences', 'Speaker name, Topic, Session type'], ['Venues', 'Room number, Capacity, A/V setup'], ['Festivals', 'Stage, Genre, Age restriction'], ['Workshops', 'Skill level, Materials, Instructor']] as [$cat, $vals])
-                            <div class="rounded-xl border border-gray-200 bg-white p-4 dark:border-white/10 dark:bg-white/5">
-                                <div class="mb-1 text-sm font-medium text-amber-500 dark:text-amber-400">{{ $cat }}</div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $vals }}</p>
-                            </div>
-                        @endforeach
-                    </div>
-                    <div class="mt-6 rounded-xl border border-amber-500/20 bg-amber-500/10 p-4">
-                        <div class="flex items-start gap-3">
-                            <svg aria-hidden="true" class="mt-0.5 h-5 w-5 text-amber-500 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            <div>
-                                <div class="mb-1 text-sm font-medium text-amber-700 dark:text-amber-300">AI-Powered Import</div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">When importing events, AI automatically extracts custom field values from text and images.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 4. Ticket custom fields use cases (dark band)               -->
-    <!-- ============================================================ -->
     @php
-        $useCases = [
-            ['Dietary Restrictions', 'Ask about allergies and dietary preferences for catered events, workshops, and conferences.', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />'],
-            ['T-Shirt Sizes', 'Collect clothing sizes for conferences, charity runs, or any event with swag.', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />'],
-            ['Age Verification', 'Use date fields to collect birth dates for age-restricted events and venues.', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />'],
-            ['Accessibility Needs', 'Allow attendees to request wheelchair access, sign language interpreters, or other accommodations.', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />'],
-            ['B2B Information', 'Collect company names, job titles, and industry for professional conferences and networking events.', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />'],
-            ['Emergency Contacts', 'Gather emergency contact information for outdoor adventures, sports events, and multi-day retreats.', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />'],
+        // The six field types that actually exist. Validated in
+        // RoleUpdateRequest ('in:string,multiline_string,switch,date,dropdown,multiselect')
+        // and rendered by components/custom-field-input.blade.php and
+        // event/tickets.blade.php.
+        $types = [
+            ['Text', 'string', 'A single line to type in', 'Anything they type', 'Yes'],
+            ['Long text', 'multiline_string', 'A box that takes paragraphs', 'Anything they type', 'On the server'],
+            ['Yes / No', 'switch', 'A switch on a request form, a Yes or No menu at checkout', 'Fixed', 'No'],
+            ['Date', 'date', 'A date picker', 'Any date', 'No'],
+            ['Dropdown', 'dropdown', 'One choice from your list', 'A comma separated list you type', 'No'],
+            ['Multi-select', 'multiselect', 'A checklist, any number of ticks', 'A comma separated list you type', 'No'],
+        ];
+
+        // The three places a field can be defined, named by the cadence of the
+        // answer, because that is what choosing between them actually decides.
+        // Every one of them is Pro.
+        $homes = [
+            [
+                'Once per event',
+                'Defined on the schedule: Customize, then Custom Fields',
+                'Ten per schedule, answered once for each event. They appear on your own event form, and each one can also be asked of visitors on your public event request form. This is the set that carries the extra switches.',
+                'All four switches',
+                'You, or a visitor submitting an event to you',
+            ],
+            [
+                'Once per order',
+                'Defined on the event, with tickets or registration',
+                'Ten per event, asked once for the whole order. The same set appears on your ticket form and on your registration form, so the question does not change with the way you are taking sign-ups.',
+                'Required only',
+                'Whoever is buying or registering, once',
+            ],
+            [
+                'Once per ticket',
+                'Defined on each ticket type',
+                'Ten per ticket type, shown only while that ticket is in the basket. Turn on per guest fields and everyone in the party answers for themselves instead of one person answering for six.',
+                'Required only',
+                'The buyer, or each guest in the party',
+            ],
+        ];
+
+        // The four per-field switches on a schedule field.
+        $flags = [
+            ['Required', 'on', 'The form will not submit without an answer. Checked in the browser and checked again on the server, so an empty answer cannot slip past either one.'],
+            ['On request form', 'on', 'Ask the question of visitors submitting an event to you. On by default. Uncheck it to keep the field for your own use inside the admin portal.'],
+            ['Private', 'off', 'Keep the answer off your public schedule. It stays visible to you, and it still fills {custom_N} in graphic templates and URL patterns.'],
+            ['Validation pattern', 'on', 'Text fields can require a format. Pick email address, phone number, web address, numbers only or letters and numbers, or write your own, and test a sample value before you save it.'],
+        ];
+
+        // Where the answer to one field turns up. Every row is a real surface.
+        $landings = [
+            ['On the request card', 'A visitor answers on your event request form and the answer sits on the request in the admin portal, then travels with the event once you accept it.'],
+            ['On the order', 'Checkout answers appear beside the sale in your sales table, per order and per ticket.'],
+            ['On the ticket', 'The answers a buyer gave are printed on the ticket itself, so the person on the door reads the same thing you do.'],
+            ['In the export', 'The sales CSV gains one column per field name, so a spreadsheet of dietary counts is a download rather than an afternoon.'],
+        ];
+
+        $faqs = [
+            [
+                'q' => 'What types of custom field can I create?',
+                'a' => 'Six. Text, long text, Yes or No, date, dropdown and multi-select. Dropdown and multi-select take a comma separated list of choices that you type, and text fields can also require a format such as an email address or a reference code.',
+            ],
+            [
+                'q' => 'Where do custom fields appear?',
+                'a' => 'It depends on where you define them. Fields defined on the schedule appear on your own event form and, unless you turn it off, on your public event request form. Fields defined on an event are asked once per order on the ticket form and the free registration form. Fields defined on a ticket type are asked only when that ticket is being bought, and can be asked of each guest in the party.',
+            ],
+            [
+                'q' => 'Are custom fields free?',
+                'a' => 'The registration list itself is free forever, including a capacity limit and the count of places left on each date. The custom questions on that form are part of the Pro plan at $5 a month, which comes with a 7 day free trial. Event Schedule charges zero platform fees on ticket sales.',
+            ],
+            [
+                'q' => 'How many fields can I have?',
+                'a' => 'Ten on the schedule, ten on an event and ten on each ticket type. Drag them to change the order they are asked in.',
+            ],
+            [
+                'q' => 'Can I export the answers?',
+                'a' => 'Yes. The sales CSV export adds one column for every custom field name it finds, filled with what each buyer answered. The answers also appear in your sales table and on the ticket itself.',
+            ],
+            [
+                'q' => 'Can I collect an answer without publishing it?',
+                'a' => 'Yes. Mark the field private and the value stays off your public schedule while remaining visible to you in the admin portal. A private field can still be dropped into an event graphic or a URL pattern with {custom_N}.',
+            ],
+            [
+                'q' => 'What if my schedule is not in English?',
+                'a' => 'Each field can carry a second name for your schedule\'s other language. Leave it blank and it is filled in for you, along with your dropdown choices, so a visitor reads the question in the language they came for.',
+            ],
+        ];
+
+        $dotSections = [
+            ['top', 'The form'],
+            ['places', 'Three places'],
+            ['types', 'Six types'],
+            ['switches', 'Four switches'],
+            ['free', 'Free list, Pro questions'],
+            ['column', 'Question and column'],
+            ['requests', 'On the request form'],
+            ['slots', 'Ten slots'],
+            ['rest', 'Everything else'],
+            ['faq', 'Questions'],
+            ['claim', 'Start asking'],
         ];
     @endphp
-    <section class="bg-gray-50 px-2 py-14 dark:bg-[#0f0f14] sm:px-4 lg:py-20">
-        <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+
+    <div id="es-form-page" class="es-form-page">
+
+    <!-- ============================================================ -->
+    <!-- 1. Hero: one field definition, and what it renders as        -->
+    <!-- ============================================================ -->
+    <section id="top" class="es-hero noise relative flex min-h-[calc(88svh-4rem)] scroll-mt-24 items-center overflow-hidden py-16">
+        <div class="absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(154, 52, 18, 0.2), rgba(154, 52, 18, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 40%, rgba(253, 186, 116, 0.14), rgba(253, 186, 116, 0) 65%);"></div>
+            <div class="es-spot absolute inset-0"></div>
+            <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
+        </div>
+
+        <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-14 lg:grid-cols-[1.05fr_1fr]">
+                <div>
+                    <div class="es-fade-up es-d-1 glass mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2.5">
+                        <svg aria-hidden="true" class="h-5 w-5 es-form-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h10M4 18h13" />
+                        </svg>
+                        <span class="es-form-muted text-sm font-medium tracking-wide">For anyone who needs more than a name and an email</span>
+                    </div>
+
+                    <h1 class="es-balance es-form-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <span class="es-mask"><span class="es-mask-line">Ask the question.</span></span>
+                        <span class="es-mask es-mask-2"><span class="es-mask-line">Keep the <span class="es-form-fill">answer.</span></span></span>
+                    </h1>
+
+                    <p class="es-fade-up es-d-2 es-form-muted mb-10 max-w-xl text-lg sm:text-xl">
+                        A custom field is one definition. Event Schedule renders it as a question on the forms it belongs on, and files the answer as a column you can read, print and export.
+                    </p>
+
+                    <div class="es-fade-up es-d-3 flex flex-col items-start gap-4 sm:flex-row">
+                        <a href="#places" class="glass group inline-flex items-center justify-center gap-2 rounded-2xl px-7 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+                            Where a field lives
+                            <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                        </a>
+                        <a href="{{ app_url('/sign_up') }}" class="es-form-btn group inline-flex items-center justify-center gap-2 rounded-2xl px-8 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
+                            Create a schedule
+                            <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- The definition slip, and the control it becomes. -->
+                <div class="es-fade-up es-d-4" data-reveal>
+                    <div class="es-form-card p-6 sm:p-7">
+                        <div class="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+                            <h2 class="es-form-ink text-lg font-bold">One field, defined once</h2>
+                            <span class="es-form-key">{custom_3}</span>
+                        </div>
+
+                        <dl class="es-form-spec">
+                            <div class="es-form-line" style="--i: 0;">
+                                <dt>Field name</dt>
+                                <dd>Dietary requirements</dd>
+                            </div>
+                            <div class="es-form-line" style="--i: 1;">
+                                <dt>Type</dt>
+                                <dd>Dropdown</dd>
+                            </div>
+                            <div class="es-form-line" style="--i: 2;">
+                                <dt>Choices</dt>
+                                <dd>No preference, Vegetarian, Vegan, Gluten free</dd>
+                            </div>
+                            <div class="es-form-line" style="--i: 3;">
+                                <dt>Switches</dt>
+                                <dd class="flex flex-wrap gap-2">
+                                    <span class="es-form-switch es-form-switch-on">Required</span>
+                                    <span class="es-form-switch es-form-switch-on">On request form</span>
+                                    <span class="es-form-switch">Private</span>
+                                </dd>
+                            </div>
+                        </dl>
+
+                        <p class="es-form-tag mb-3 mt-6">Renders as</p>
+                        <div class="es-form-well p-4" aria-hidden="true">
+                            <p class="es-form-tag mb-2">Dietary requirements *</p>
+                            <div class="es-form-ctl es-form-ctl-on">
+                                <span>Vegetarian</span>
+                                <svg aria-hidden="true" class="h-4 w-4 self-center" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                            </div>
+                            <p class="es-form-tag mb-2 mt-5">Access needs</p>
+                            <div class="es-form-ctl">
+                                <span>Optional</span>
+                            </div>
+                        </div>
+
+                        <p class="es-form-muted mt-5 text-xs">
+                            This one lives on the schedule, so it is asked on your own event form and on your public event request form. Write a field on an event or a ticket type instead and it is asked at checkout.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Questions people actually ask -->
+            <div class="es-fade-up es-d-4 mx-auto mt-14 max-w-3xl">
+                <div class="es-marquee-mask">
+                    <div class="es-marquee" data-marquee="1">
+                        <div class="es-marquee-track">
+                            @for ($chipCopy = 0; $chipCopy < 2; $chipCopy++)
+                                @foreach (['Dietary requirements', 'T-shirt size', 'Access needs', 'Company name', 'Emergency contact', 'Date of birth', 'Equipment needed', 'Reference number', 'How did you hear about us?', 'Expected head count'] as $chip)
+                                    <span @if ($chipCopy === 1) aria-hidden="true" @endif class="es-form-chip">{{ $chip }}</span>
+                                @endforeach
+                            @endfor
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 2. Three places a field can live                             -->
+    <!-- ============================================================ -->
+    <section id="places" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-form-slot mb-6" data-reveal aria-hidden="true"><span>{custom_1}</span></div>
+                <p class="es-form-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Three places</p>
+                <h2 class="es-balance es-form-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    A field belongs to a schedule, an event, or <span class="es-form-fill">a ticket.</span>
+                </h2>
+                <p class="es-form-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Which one you pick decides who is asked and when. All three are on the Pro plan, and all three take up to ten fields.
+                </p>
+            </div>
+
+            <div class="grid gap-6 md:grid-cols-3" data-reveal-group="100">
+                @foreach ($homes as [$homeName, $homeWhere, $homeBody, $homeSwitches, $homeWho])
+                    <div class="es-form-card flex h-full flex-col p-7" data-reveal="panel">
+                        <div class="mb-3 flex flex-wrap items-center gap-2">
+                            <h3 class="es-form-ink text-lg font-bold">{{ $homeName }}</h3>
+                            <span class="es-form-plan es-form-plan-pro">Pro</span>
+                        </div>
+                        <p class="es-form-key mb-4">{{ $homeWhere }}</p>
+                        <p class="es-form-muted mb-6 text-sm">{{ $homeBody }}</p>
+                        <div class="es-form-well mt-auto p-4">
+                            <dl class="es-form-spec es-form-spec-tight">
+                                <div>
+                                    <dt>Answered by</dt>
+                                    <dd>{{ $homeWho }}</dd>
+                                </div>
+                                <div>
+                                    <dt>Switches</dt>
+                                    <dd>{{ $homeSwitches }}</dd>
+                                </div>
+                            </dl>
+                            <p class="es-form-muted mt-3 text-xs">All six field types, in any combination.</p>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <p class="es-form-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
+                Worth being precise about: the extra switches live on schedule fields, along with an instruction for the AI importer. A checkout field carries a name, a type, its choices and whether it is required.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 3. The six types: a record, so a table                       -->
+    <!-- ============================================================ -->
+    <section id="types" class="scroll-mt-24 es-form-hr-y py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-form-slot mb-6" data-reveal aria-hidden="true"><span>{custom_2}</span></div>
+                <p class="es-form-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Six types</p>
+                <h2 class="es-balance es-form-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Six types. <span class="es-form-fill">No more, no fewer.</span>
+                </h2>
+                <p class="es-form-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Here is the whole list, what the person filling the form actually gets, and where the choices come from.
+                </p>
+            </div>
+
+            <div class="es-form-card p-6 sm:p-8" data-reveal="panel">
+                <div class="overflow-x-auto">
+                    <table class="es-form-table">
+                        <caption class="sr-only">The six custom field types, what each renders as, where its choices come from, and whether a validation pattern applies</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Type</th>
+                                <th scope="col">What they get</th>
+                                <th scope="col">Choices</th>
+                                <th scope="col">Pattern</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($types as [$typeName, $typeKey, $typeRenders, $typeChoices, $typePattern])
+                                <tr>
+                                    <th scope="row">
+                                        {{ $typeName }}
+                                        <span class="es-form-key block font-normal">{{ $typeKey }}</span>
+                                    </th>
+                                    <td>{{ $typeRenders }}</td>
+                                    <td>{{ $typeChoices }}</td>
+                                    <td>{{ $typePattern }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <p class="es-form-muted mt-5 text-xs">
+                    A long text field is checked against its pattern on the server only, because a multi-line box has nowhere to hang a browser pattern. Everything else that can be pattern checked is checked in both places.
+                </p>
+            </div>
+
+            <div class="mt-8 grid gap-4 sm:grid-cols-2" data-reveal-group="90">
+                <div class="es-form-card flex h-full flex-col p-6" data-reveal="panel">
+                    <p class="es-form-tag mb-3">A dropdown</p>
+                    <div class="es-form-well p-4" aria-hidden="true">
+                        <p class="es-form-tag mb-2">T-shirt size *</p>
+                        <div class="es-form-ctl es-form-ctl-on mb-5">
+                            <span>Large</span>
+                            <svg aria-hidden="true" class="h-4 w-4 self-center" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                        </div>
+                        <p class="es-form-tag mb-2">Experience level *</p>
+                        <div class="es-form-ctl">
+                            <span>Select...</span>
+                            <svg aria-hidden="true" class="h-4 w-4 self-center" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                        </div>
+                    </div>
+                    <p class="es-form-muted mt-auto pt-4 text-sm">You type <span class="es-form-key">Small, Medium, Large, XL</span> once and every buyer picks from exactly those. A required one will not let the form through unanswered.</p>
+                </div>
+                <div class="es-form-card flex h-full flex-col p-6" data-reveal="panel">
+                    <p class="es-form-tag mb-3">A multi-select</p>
+                    <div class="es-form-well p-4" aria-hidden="true">
+                        <p class="es-form-tag mb-3">Equipment needed</p>
+                        <div class="flex flex-col items-start gap-2">
+                            <span class="es-form-switch es-form-switch-on">Projector</span>
+                            <span class="es-form-switch">PA system</span>
+                            <span class="es-form-switch es-form-switch-on">Two mics</span>
+                            <span class="es-form-switch">Piano</span>
+                        </div>
+                    </div>
+                    <p class="es-form-muted mt-auto pt-4 text-sm">The same comma separated list, ticked any number of times. This is how a request form becomes a checklist.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 4. Four switches per field                                   -->
+    <!-- ============================================================ -->
+    <section id="switches" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-start gap-12 lg:grid-cols-2">
+                <div>
+                    <div class="es-form-slot mb-6" data-reveal aria-hidden="true"><span>{custom_3}</span></div>
+                    <p class="es-form-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Four switches</p>
+                    <h2 class="es-balance es-form-ink mb-5 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
+                        A question is not just <span class="es-form-fill">its wording.</span>
+                    </h2>
+                    <p class="es-form-muted mb-8 text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
+                        Each field on your schedule carries four switches. They are what turn a box on a form into something you can rely on when the answers come back.
+                    </p>
+
+                    <div class="space-y-4" data-reveal-group="80">
+                        @foreach ($flags as [$flagName, $flagState, $flagBody])
+                            <div class="es-form-card p-6" data-reveal="panel">
+                                <div class="mb-2 flex flex-wrap items-center gap-3">
+                                    <span class="es-form-switch @if ($flagState === 'on') es-form-switch-on @endif">{{ $flagName }}</span>
+                                    <span class="es-form-plan es-form-plan-pro">Pro</span>
+                                </div>
+                                <p class="es-form-muted text-sm leading-relaxed">{{ $flagBody }}</p>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div data-reveal="panel">
+                    <div class="es-form-card p-6 sm:p-7">
+                        <div class="mb-5 flex flex-wrap items-baseline justify-between gap-2">
+                            <h3 class="es-form-ink text-lg font-bold">A pattern, and a hint</h3>
+                            <span class="es-form-key">string</span>
+                        </div>
+
+                        <div class="es-form-well p-4" aria-hidden="true">
+                            <p class="es-form-tag mb-2">Preset</p>
+                            <div class="es-form-ctl es-form-ctl-on mb-5">
+                                <span>Phone number</span>
+                                <svg aria-hidden="true" class="h-4 w-4 self-center" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                            </div>
+                            <p class="es-form-tag mb-2">Pattern</p>
+                            <div class="es-form-ctl es-form-ctl-on mb-5">
+                                <span class="es-form-key">\+?[0-9 ()\-]{6,20}</span>
+                            </div>
+                            <p class="es-form-tag mb-2">Test a value</p>
+                            <div class="es-form-ctl es-form-ctl-on">
+                                <span>+44 20 7946 0018</span>
+                                <svg aria-hidden="true" class="h-4 w-4 self-center es-form-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            </div>
+                        </div>
+
+                        <ul class="mt-6 space-y-3" data-reveal-group="70">
+                            <li class="es-form-muted flex gap-3 text-sm" data-reveal>
+                                <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none es-form-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span>Five ready-made presets: email address, phone number, web address, numbers only, letters and numbers.</span>
+                            </li>
+                            <li class="es-form-muted flex gap-3 text-sm" data-reveal>
+                                <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none es-form-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span>Or write your own, and try a sample value against it before you save.</span>
+                            </li>
+                            <li class="es-form-muted flex gap-3 text-sm" data-reveal>
+                                <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none es-form-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span>Your hint prints under the field, so nobody has to guess what format you meant.</span>
+                            </li>
+                        </ul>
+
+                        <p class="es-form-muted mt-5 text-xs">
+                            Drag the fields into the order you want them asked in. The order you set is the order on every form.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 5. Free list, Pro questions (fixed-dark band)                -->
+    <!-- ============================================================ -->
+    <section id="free" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
+        <div class="es-form-band noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
             <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 25%, rgba(217, 119, 6, 0.24), rgba(217, 119, 6, 0) 60%); opacity: 0.6;"></div>
-                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 70%, rgba(234, 88, 12, 0.2), rgba(234, 88, 12, 0) 60%); opacity: 0.55;"></div>
-                <div class="grid-overlay absolute inset-0 opacity-25"></div>
-                <div class="es-checks absolute bottom-0 left-0 right-0 mx-auto flex h-14 max-w-4xl items-center justify-center gap-4 px-8 opacity-30" style="mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);">
-                    @for ($i = 0; $i < 28; $i++)
-                        @php $dur = 2 + ($i % 6) * 0.26; $delay = ($i % 12) * 0.16; @endphp
-                        <span class="es-check" style="--ck-dur: {{ $dur }}s; --ck-delay: {{ $delay }}s;"></span>
+                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 28% 26%, rgba(253, 186, 116, 0.12), rgba(253, 186, 116, 0) 60%); opacity: 0.5;"></div>
+                <div class="grid-overlay absolute inset-0 opacity-20"></div>
+                <div class="es-form-blanks absolute bottom-6 left-0 right-0 mx-auto h-10 max-w-4xl px-8 opacity-60" style="mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);">
+                    @for ($bk = 0; $bk < 18; $bk++)
+                        <span class="es-form-blank @if ($bk % 3 === 0) es-form-blank-on @endif" style="--bk-dur: {{ 2.8 + ($bk % 5) * 0.34 }}s; --bk-delay: {{ ($bk % 9) * 0.22 }}s;"></span>
                     @endfor
                 </div>
             </div>
 
-            <div class="relative z-10 mx-auto max-w-6xl">
-                <div class="mx-auto mb-14 max-w-2xl text-center">
-                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>Ticket custom fields <span class="text-gradient-cf">use cases</span></h2>
-                    <p class="text-lg text-gray-300 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">Collect the right information from attendees during checkout.</p>
+            <div class="relative z-10 mx-auto max-w-5xl">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-form-slot mb-6" data-reveal aria-hidden="true"><span>{custom_4}</span></div>
+                    <p class="es-form-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The honest line</p>
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        The list is free. <span class="es-form-fill">The questions are Pro.</span>
+                    </h2>
+                    <p class="es-form-muted mx-auto mt-5 max-w-2xl text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        We would rather you read that here than find it in the product. Here is exactly where the line falls.
+                    </p>
                 </div>
 
-                <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
-                    @foreach ($useCases as [$title, $desc, $icon])
-                        <div data-reveal class="rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition-all hover:-translate-y-1 hover:bg-white/[0.07]">
-                            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/25">
-                                <svg aria-hidden="true" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $icon !!}</svg>
-                            </div>
-                            <h3 class="mb-2 text-lg font-semibold text-white">{{ $title }}</h3>
-                            <p class="text-sm text-gray-400">{{ $desc }}</p>
+                <div class="grid gap-6 md:grid-cols-3" data-reveal-group="110">
+                    <div class="es-form-card p-6" data-reveal="panel">
+                        <div class="mb-3 flex flex-wrap items-center gap-2">
+                            <h3 class="es-form-ink text-lg font-bold">Taking names</h3>
+                            <span class="es-form-plan">Free</span>
                         </div>
+                        <p class="es-form-muted text-sm leading-relaxed">Turn on registration and people sign up with their name and email. Set a capacity and each date shows how many places are left. Free forever, on every date of a recurring event.</p>
+                    </div>
+                    <div class="es-form-card p-6" data-reveal="panel">
+                        <div class="mb-3 flex flex-wrap items-center gap-2">
+                            <h3 class="es-form-ink text-lg font-bold">Asking anything else</h3>
+                            <span class="es-form-plan es-form-plan-pro">Pro</span>
+                        </div>
+                        <p class="es-form-muted text-sm leading-relaxed">Custom questions on that same form are Pro, at $5 a month with a 7 day free trial. The form does not change shape, it just starts asking what you need.</p>
+                    </div>
+                    <div class="es-form-card p-6" data-reveal="panel">
+                        <div class="mb-3 flex flex-wrap items-center gap-2">
+                            <h3 class="es-form-ink text-lg font-bold">Taking money</h3>
+                            <span class="es-form-plan es-form-plan-pro">Pro</span>
+                        </div>
+                        <p class="es-form-muted text-sm leading-relaxed">Ticketing is Pro too, through your own Stripe account. Event Schedule charges zero platform fees, so past Stripe's own processing the money is yours.</p>
+                    </div>
+                </div>
+
+                <p class="es-form-muted mt-10 text-center" data-reveal>
+                    Nothing here needs a plugin, an integration or a second form tool.
+                    <a href="{{ marketing_url('/pricing') }}" class="es-form-link inline-flex items-center gap-1 font-semibold transition-all hover:gap-2">
+                        See the plans
+                        <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                    </a>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 6. The question and the column (duplex)                      -->
+    <!-- ============================================================ -->
+    <section id="column" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-form-slot mb-6" data-reveal aria-hidden="true"><span>{custom_5}</span></div>
+                <p class="es-form-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Question and column</p>
+                <h2 class="es-balance es-form-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    One side asks. <span class="es-form-fill">The other side files.</span>
+                </h2>
+                <p class="es-form-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    A field is only worth defining if the answer turns up somewhere useful. Answers turn up in four places, and one of them is a spreadsheet.
+                </p>
+            </div>
+
+            <div class="grid gap-10 md:grid-cols-2" data-reveal-group="90">
+                <div data-reveal="panel">
+                    <p class="es-form-tag mb-4">The question you ask</p>
+                    <div class="es-form-card p-6 sm:p-7">
+                        <div class="es-form-well p-5" aria-hidden="true">
+                            <p class="es-form-tag mb-3">Checkout</p>
+                            <p class="es-form-tag mb-2">Name *</p>
+                            <div class="es-form-ctl es-form-ctl-on mb-5"><span>Dana Ruiz</span></div>
+                            <p class="es-form-tag mb-2">Dietary requirements *</p>
+                            <div class="es-form-ctl es-form-ctl-on mb-5">
+                                <span>Vegetarian</span>
+                                <svg aria-hidden="true" class="h-4 w-4 self-center" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                            </div>
+                            <p class="es-form-tag mb-2">Access needs</p>
+                            <div class="es-form-ctl es-form-ctl-on"><span>Step-free access</span></div>
+                        </div>
+                        <p class="es-form-muted mt-5 text-sm">
+                            Two extra questions on a form somebody was already filling in. Required ones will not let the order through empty.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="es-form-divide" data-reveal="panel">
+                    <p class="es-form-tag mb-4">The column you get</p>
+                    <div class="es-form-card p-6 sm:p-7">
+                        <div class="overflow-x-auto">
+                            <table class="es-form-csv">
+                                <caption class="sr-only">An extract of the sales CSV export, with one column added for each custom field</caption>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Tickets</th>
+                                        <th scope="col" class="es-form-csv-new">Dietary requirements</th>
+                                        <th scope="col" class="es-form-csv-new">Access needs</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Dana Ruiz</td>
+                                        <td>Standard x2</td>
+                                        <td class="es-form-csv-new">Vegetarian</td>
+                                        <td class="es-form-csv-new">Step-free access</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Priya Anand</td>
+                                        <td>Standard x1</td>
+                                        <td class="es-form-csv-new">Gluten free</td>
+                                        <td class="es-form-csv-new"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tom Okafor</td>
+                                        <td>Concession x1</td>
+                                        <td class="es-form-csv-new">No preference</td>
+                                        <td class="es-form-csv-new">Sign language</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="es-form-muted mt-5 text-sm">
+                            The sales export grows one column per field name. That is the whole trick: the caterer gets a count instead of a conversation.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" data-reveal-group="80">
+                @foreach ($landings as [$landName, $landBody])
+                    <div class="es-form-card flex h-full flex-col p-6" data-reveal="panel">
+                        <h3 class="es-form-ink mb-2 text-base font-bold">{{ $landName }}</h3>
+                        <p class="es-form-muted text-sm leading-relaxed">{{ $landBody }}</p>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 7. On the request form                                       -->
+    <!-- ============================================================ -->
+    <section id="requests" class="scroll-mt-24 es-form-hr-y py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-12 lg:grid-cols-2">
+                <div>
+                    <div class="es-form-slot mb-6" data-reveal aria-hidden="true"><span>{custom_6}</span></div>
+                    <p class="es-form-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">On the request form</p>
+                    <h2 class="es-balance es-form-ink mb-5 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Ask before you <span class="es-form-fill">say yes.</span>
+                    </h2>
+                    <p class="es-form-muted mb-6 text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
+                        If you take event requests from other people, every schedule field is also a question on that public form, on by default. So the things you always end up emailing about are answered before the request reaches you.
+                    </p>
+                    <ul class="space-y-3" data-reveal-group="70">
+                        <li class="es-form-muted flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none es-form-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>A multi-select becomes a kit checklist: which of your equipment they need, ticked.</span>
+                        </li>
+                        <li class="es-form-muted flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none es-form-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>A pattern forces a reference number into the shape your own records use.</span>
+                        </li>
+                        <li class="es-form-muted flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none es-form-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>Answers land on the request card in your admin portal, and stay with the event once you accept it.</span>
+                        </li>
+                        <li class="es-form-muted flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none es-form-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>Uncheck one switch to keep a field for your own use and off the public form entirely.</span>
+                        </li>
+                    </ul>
+                    <p class="es-form-muted mt-7 text-sm">
+                        <a href="{{ route('marketing.docs.creating_schedules') }}#customize-custom-fields" class="es-form-link font-medium hover:underline">Read the Custom Fields guide</a>
+                        for the field-by-field reference.
+                    </p>
+                </div>
+
+                <div data-reveal="panel">
+                    <div class="es-form-card p-6 sm:p-7">
+                        <div class="mb-5 flex flex-wrap items-baseline justify-between gap-2">
+                            <h3 class="es-form-ink text-lg font-bold">Request from a visitor</h3>
+                            <span class="es-form-key">Additional information</span>
+                        </div>
+                        <div class="es-form-well p-5" aria-hidden="true">
+                            <p class="es-form-tag mb-2">Expected head count *</p>
+                            <div class="es-form-ctl es-form-ctl-on mb-5"><span>120</span></div>
+                            <p class="es-form-tag mb-3">Equipment needed</p>
+                            <div class="mb-5 flex flex-col items-start gap-2">
+                                <span class="es-form-switch es-form-switch-on">Projector</span>
+                                <span class="es-form-switch">PA system</span>
+                                <span class="es-form-switch es-form-switch-on">Two mics</span>
+                            </div>
+                            <p class="es-form-tag mb-2">Booking reference *</p>
+                            <div class="es-form-ctl es-form-ctl-on mb-1"><span class="es-form-key">RQ-4417</span></div>
+                            <p class="es-form-muted text-xs">Two letters, a hyphen and four digits.</p>
+                        </div>
+                        <p class="es-form-muted mt-5 text-xs">
+                            The hint under the last field is yours to write. It is what stops the same correction happening twenty times.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 8. Ten slots                                                 -->
+    <!-- ============================================================ -->
+    <section id="slots" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-form-slot mb-6" data-reveal aria-hidden="true"><span>{custom_7}</span></div>
+                <p class="es-form-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Ten slots</p>
+                <h2 class="es-balance es-form-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Every field keeps a <span class="es-form-fill">numbered slot.</span>
+                </h2>
+                <p class="es-form-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    A schedule field holds a stable slot from one to ten, and the slot is a variable you can use. The number in the margin of each section on this page is one of them.
+                </p>
+            </div>
+
+            <div class="es-form-card p-6 sm:p-8" data-reveal="panel">
+                <div class="es-form-reg" aria-hidden="true">
+                    @foreach ([['Speaker', true], ['Topic', true], ['Dietary', true], ['Level', true], ['Kit list', true], ['Reference', true], ['Head count', true], ['', false], ['', false], ['', false]] as $slotIndex => [$slotLabel, $slotOn])
+                        <span class="es-form-reg-slot @if ($slotOn) es-form-reg-slot-on @endif">
+                            <span>{custom_{{ $slotIndex + 1 }}}</span>
+                            <span class="text-[0.7rem] font-semibold">{{ $slotLabel !== '' ? $slotLabel : 'empty' }}</span>
+                        </span>
                     @endforeach
                 </div>
+                <p class="es-form-muted mt-5 text-sm">Seven of ten slots in use on this schedule. The numbers do not shuffle when you reorder the fields.</p>
+
+                <div class="mt-8 grid gap-4 sm:grid-cols-3" data-reveal-group="90">
+                    <div class="es-form-well p-5" data-reveal>
+                        <h3 class="es-form-ink mb-2 text-base font-bold">In a graphic</h3>
+                        <p class="es-form-muted text-sm leading-relaxed">Drop <span class="es-form-key">{custom_1}</span> into an event graphic template and the value prints on the artwork with the title and the date.</p>
+                    </div>
+                    <div class="es-form-well p-5" data-reveal>
+                        <h3 class="es-form-ink mb-2 text-base font-bold">In a URL</h3>
+                        <p class="es-form-muted text-sm leading-relaxed">The same variable works in your event URL pattern, so a value you already collect can shape the address.</p>
+                    </div>
+                    <div class="es-form-well p-5" data-reveal>
+                        <h3 class="es-form-ink mb-2 text-base font-bold">As a filter</h3>
+                        <p class="es-form-muted text-sm leading-relaxed">A public dropdown or multi-select becomes a filter on your guest calendar. Mark it private and the filter goes away with it.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- 5. Next feature                                             -->
+    <!-- 9. Everything else: bento                                    -->
     <!-- ============================================================ -->
-    <section class="bg-white py-20 dark:bg-[#0a0a0f]">
-        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2" data-reveal-group="80">
+    <section id="rest" class="scroll-mt-24 es-form-hr py-20 lg:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-form-slot mb-6" data-reveal aria-hidden="true"><span>{custom_8}</span></div>
+                <p class="es-form-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Everything else</p>
+                <h2 class="es-balance es-form-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    The rest of the paperwork.
+                </h2>
+            </div>
 
-                <a href="{{ marketing_url('/features/team-scheduling') }}" data-reveal class="group block">
-                    <div class="flex h-full flex-col rounded-3xl border border-cyan-200 bg-gradient-to-br from-cyan-100 to-teal-100 p-8 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:from-cyan-900 dark:to-teal-900 lg:p-10">
-                        <div class="flex flex-1 flex-col items-center gap-8 lg:flex-row">
-                            <div class="flex flex-1 flex-col text-center lg:text-left">
-                                <h3 class="mb-3 text-2xl font-bold text-gray-900 transition-colors group-hover:text-cyan-600 dark:text-white dark:group-hover:text-cyan-300 lg:text-3xl">Team Scheduling</h3>
-                                <p class="mb-4 text-lg text-gray-500 dark:text-white/80">Invite team members via email, assign roles, and collaborate on events together.</p>
-                                <span class="mt-auto inline-flex items-center gap-2 font-medium text-cyan-500 transition-all group-hover:gap-3 dark:text-cyan-400">
-                                    Learn more
-                                    <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                                </span>
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="110">
+                <!-- 1 -->
+                <div class="es-bento group relative md:col-span-2" data-reveal="panel" data-tilt="3.5">
+                    <div class="es-tilt-inner es-form-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10 flex flex-1 flex-col">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-form-ink text-xl font-bold">Let the import fill it in</h3>
+                                <span class="es-form-plan es-form-plan-pro">Pro</span>
                             </div>
-                            <div class="shrink-0" aria-hidden="true">
-                                <div class="w-48 space-y-2 rounded-xl border border-gray-200 bg-gray-100 p-4 dark:border-white/10 dark:bg-[#0f0f14]">
-                                    @foreach ([['JD', 'John Doe', 'Owner', 'from-cyan-500 to-teal-500', 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300', true], ['AS', 'Alice Smith', 'Admin', 'from-teal-500 to-emerald-500', 'bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300', false], ['BJ', 'Bob Jones', 'Follower', 'from-emerald-500 to-green-500', 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300', false]] as [$in, $nm, $role, $ag, $rb, $active])
-                                        <div class="flex items-center gap-2 rounded-lg p-2 {{ $active ? 'bg-gray-200 dark:bg-white/10' : 'bg-gray-100 dark:bg-white/5' }}">
-                                            <div class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br {{ $ag }} text-[10px] font-semibold text-white">{{ $in }}</div>
-                                            <div class="min-w-0 flex-1"><div class="truncate text-xs font-medium {{ $active ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-300' }}">{{ $nm }}</div></div>
-                                            <span class="inline-flex items-center rounded px-1.5 py-0.5 text-[9px] {{ $rb }}">{{ $role }}</span>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
+                            <p class="es-form-muted mb-4">Every schedule field can carry an instruction for the importer: what this field means and where to look for it. Paste a flyer or a listing and the value arrives already in the box.</p>
+                            <p class="es-form-muted mt-auto text-sm">Event import runs on every plan with a daily allowance, 10 a day on Free and 50 on Pro. The custom fields it fills are Pro.</p>
                         </div>
-                    </div>
-                </a>
-
-                <div data-reveal class="ap-card flex h-full flex-col rounded-3xl border border-gray-200 bg-white p-8 dark:border-white/10 dark:bg-white/5 lg:p-10">
-                    <div class="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-sky-500/20 bg-sky-500/10">
-                        <svg aria-hidden="true" class="h-6 w-6 text-sky-500 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                    </div>
-                    <h3 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Popular with</h3>
-                    <div class="space-y-3">
-                        @foreach ([['/for-venues', 'Venues'], ['/for-hotels-and-resorts', 'Hotels & Resorts'], ['/for-fitness-and-yoga', 'Fitness & Yoga']] as [$href, $label])
-                            <a href="{{ marketing_url($href) }}" class="group/link flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 p-3 transition-all hover:border-sky-300 hover:bg-gray-100 dark:border-white/10 dark:bg-white/5 dark:hover:border-sky-500/30 dark:hover:bg-white/10">
-                                <span class="font-medium text-gray-900 dark:text-white">{{ $label }}</span>
-                                <svg aria-hidden="true" class="h-4 w-4 text-gray-400 transition-colors group-hover/link:text-sky-500 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                            </a>
-                        @endforeach
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
+                <!-- 2 -->
+                <div class="es-bento group relative" data-reveal="panel" data-tilt="5">
+                    <div class="es-tilt-inner es-form-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-form-ink text-xl font-bold">In two languages</h3>
+                                <span class="es-form-plan es-form-plan-pro">Pro</span>
+                            </div>
+                            <p class="es-form-muted">A field can hold a second name for your schedule's other language. Leave it blank and it is filled in for you, dropdown choices included.</p>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- 3 -->
+                <div class="es-bento group relative" data-reveal="panel" data-tilt="5">
+                    <div class="es-tilt-inner es-form-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-form-ink text-xl font-bold">On the door</h3>
+                                <span class="es-form-plan es-form-plan-pro">Pro</span>
+                            </div>
+                            <p class="es-form-muted">The answers a buyer gave are printed on their ticket, so whoever is scanning reads the same course choice or access note that you do.</p>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- 4 -->
+                <div class="es-bento group relative md:col-span-2" data-reveal="panel" data-tilt="3.5">
+                    <div class="es-tilt-inner es-form-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10 flex flex-1 flex-col">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-form-ink text-xl font-bold">One person, or all six</h3>
+                                <span class="es-form-plan es-form-plan-pro">Pro</span>
+                            </div>
+                            <p class="es-form-muted mb-4">By default one buyer answers once for the whole order. Turn on individual tickets and then per guest fields, and each person in the party gets their own name, their own QR code and their own answers, which is the difference between a dietary count you can cook to and a note saying "two of us are vegetarian".</p>
+                            <p class="es-form-muted mt-auto text-sm">
+                                Ticket types, sales windows and QR check-in all sit alongside this.
+                                <a href="{{ marketing_url('/features/ticketing') }}" class="es-form-link font-medium hover:underline">How ticketing works</a>
+                            </p>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- 5 -->
+                <div class="es-bento group relative" data-reveal="panel" data-tilt="5">
+                    <div class="es-tilt-inner es-form-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-form-ink text-xl font-bold">Bring a list with you</h3>
+                                <span class="es-form-plan es-form-plan-pro">Pro</span>
+                            </div>
+                            <p class="es-form-muted">Importing attendees you already sold elsewhere? The importer accepts their answers to your ticket fields too, so the spreadsheet you have lands complete.</p>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- 6 -->
+                <div class="es-bento group relative lg:col-span-2" data-reveal="panel" data-tilt="3.5">
+                    <div class="es-tilt-inner es-form-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-form-ink text-xl font-bold">What custom fields are not</h3>
+                            </div>
+                            <p class="es-form-muted mb-4">They are questions and answers, not a workflow engine. A field cannot branch to another field, cannot price an order differently, and cannot hold a file upload. What it can do is ask a clear question everywhere it belongs and hand you the answer in a column.</p>
+                            <p class="es-form-muted text-sm">If that is what you needed a separate form tool for, this replaces it. If you needed conditional logic, it does not.</p>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- 6. FAQ                                                      -->
+    <!-- 10. Related features                                         -->
     <!-- ============================================================ -->
-    <section class="bg-gray-100 py-20 dark:bg-black/30 lg:py-28">
+    <section class="scroll-mt-24 py-20 lg:py-24">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>Frequently asked <span class="text-gradient-cf">questions</span></h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">Everything you need to know about custom fields.</p>
+            <h2 class="es-form-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Related features</h2>
+            <div class="space-y-3" data-reveal-group="70">
+                <div data-reveal>
+                    <x-feature-link-card name="Ticketing" description="Named ticket types, QR check-in and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="orange">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Event Graphics" description="Print a field's value onto the artwork with {custom_1}" :url="marketing_url('/features/event-graphics')" icon-color="amber">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Embed Calendar" description="Put your schedule, and its filters, on your own site" :url="marketing_url('/features/embed-calendar')" icon-color="blue">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Team Scheduling" description="Enterprise: bring up to five people into one schedule" :url="marketing_url('/features/team-scheduling')" icon-color="teal">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+            </div>
+            <div class="mt-6 text-center">
+                <a href="{{ marketing_url('/features') }}" class="es-form-link inline-flex items-center font-medium hover:underline">
+                    See all features
+                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </a>
             </div>
 
-            <div class="space-y-4" data-reveal-group="80">
-                @foreach ([
-                    ['What types of custom fields can I create?', 'You can create text fields, dropdowns, checkboxes, and date fields. Use them for anything from dietary preferences to t-shirt sizes to special requests.'],
-                    ['Where do custom fields appear?', 'Custom fields appear on the ticket purchase form and reservation form. Attendees fill them out when buying tickets or reserving spots for your events.'],
-                    ['Can I export custom field data?', 'Yes. All custom field responses are included when you export your ticket sales or attendee data. You can download everything as a spreadsheet.'],
-                ] as [$q, $a])
-                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
-                            <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
+            <h2 class="es-form-ink mb-6 mt-16 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Popular with</h2>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3" data-reveal-group="70">
+                @foreach ([['/for-venues', 'Venues', 'Ask a visiting act what kit they need before you accept the date.'], ['/for-hotels-and-resorts', 'Hotels and Resorts', 'Take an arrival time or a dietary note with the booking.'], ['/for-fitness-and-yoga', 'Fitness and Yoga', 'Collect an injury note or an experience level with the sign-up.']] as [$popHref, $popName, $popBlurb])
+                    <a href="{{ marketing_url($popHref) }}" class="es-form-hover es-form-card group flex flex-col p-5 transition-all duration-200 hover:shadow-md" data-reveal>
+                        <span class="es-form-hover-title es-form-ink mb-2 text-sm font-semibold transition-colors">For {{ $popName }}</span>
+                        <span class="es-form-muted mb-4 text-xs leading-relaxed">{{ $popBlurb }}</span>
+                        <span class="es-form-hover-arrow es-form-muted mt-auto inline-flex items-center gap-1 text-xs font-medium transition-colors">
+                            Read more
+                            <svg aria-hidden="true" class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                        </span>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 11. FAQ                                                      -->
+    <!-- ============================================================ -->
+    <x-seo.faq-schema :items="$faqs" />
+
+    <section id="faq" class="scroll-mt-24 es-form-hr py-20 lg:py-28">
+        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <div class="mb-12 text-center">
+                <div class="es-form-slot mb-6" data-reveal aria-hidden="true"><span>{custom_9}</span></div>
+                <h2 class="es-balance es-form-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
+                    Frequently asked questions
+                </h2>
+                <p class="es-form-muted text-lg" data-reveal style="--reveal-delay: 0.1s;">
+                    Everything worth knowing before you start writing fields.
+                </p>
+            </div>
+
+            <div class="space-y-3" data-reveal-group="80">
+                @foreach ($faqs as $faqIndex => $faq)
+                    <details name="faq" class="es-form-hover es-form-card group p-6 transition-all duration-200" data-reveal>
+                        <summary class="es-form-ink flex cursor-pointer items-start gap-3 font-semibold">
+                            <span class="es-form-accent flex-none font-mono text-sm font-bold" aria-hidden="true">{{ str_pad($faqIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                            <span class="es-form-hover-title flex-1 transition-colors">{{ $faq['q'] }}</span>
+                            <svg aria-hidden="true" class="es-form-muted mt-0.5 h-5 w-5 flex-none transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
                         </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{{ $a }}</p>
+                        <p class="faq-answer es-form-muted mt-4 leading-relaxed ps-9">{{ $faq['a'] }}</p>
                     </details>
                 @endforeach
             </div>
@@ -481,54 +1462,26 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 7. Related features                                         -->
+    <!-- 12. Finale                                                   -->
     <!-- ============================================================ -->
-    <section class="bg-white py-20 dark:bg-[#0a0a0f]">
-        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related features</h2>
-            <div class="space-y-3" data-reveal-group="70">
-                <div data-reveal>
-                    <x-feature-link-card name="Ticketing" description="Sell tickets with QR check-in and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="sky">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Embed Calendar" description="Embed your event schedule on any website" :url="marketing_url('/features/embed-calendar')" icon-color="blue">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Team Scheduling" description="Invite team members to manage your schedule together" :url="marketing_url('/features/team-scheduling')" icon-color="amber">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 8. Finale                                                   -->
-    <!-- ============================================================ -->
-    <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
+    <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
-            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-amber-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+            <div class="es-form-band noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl sm:px-12 lg:py-24" data-confetti data-reveal="panel">
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(217, 119, 6, 0.3), rgba(217, 119, 6, 0) 60%); opacity: 0.7;"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
-                    <div class="es-checks absolute bottom-0 left-0 right-0 mx-auto flex h-14 max-w-3xl items-center justify-center gap-4 px-8 opacity-30" style="mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);">
-                        @for ($i = 0; $i < 24; $i++)
-                            @php $dur = 2 + ($i % 6) * 0.26; $delay = ($i % 12) * 0.16; @endphp
-                            <span class="es-check" style="--ck-dur: {{ $dur }}s; --ck-delay: {{ $delay }}s;"></span>
+                    <div class="es-form-blanks absolute bottom-6 left-0 right-0 mx-auto h-10 max-w-3xl px-8 opacity-50" style="mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);">
+                        @for ($fb = 0; $fb < 14; $fb++)
+                            <span class="es-form-blank @if ($fb % 3 === 1) es-form-blank-on @endif" style="--bk-dur: {{ 3 + ($fb % 5) * 0.3 }}s; --bk-delay: {{ ($fb % 7) * 0.24 }}s;"></span>
                         @endfor
                     </div>
                 </div>
-
                 <div class="relative z-10">
+                    <div class="es-form-slot mb-6" aria-hidden="true"><span>{custom_10}</span></div>
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Collect the data you <span class="text-gradient-cf">need</span>
+                        Stop chasing answers. <span class="es-form-fill">Ask on the form.</span>
                     </h2>
-                    <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
-                        Set up custom fields for your events today. Available on Pro plans.
+                    <p class="es-form-muted mx-auto mb-10 max-w-2xl text-lg">
+                        Registration and capacity are free forever. Custom questions come with Pro at $5 a month, with a 7 day free trial and no platform fees on anything you sell.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
@@ -538,9 +1491,9 @@
                                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
                             <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
-                        <a href="{{ app_url('/sign_up') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-amber-600 to-orange-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-amber-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-amber-500/40">
+                        <a href="{{ app_url('/sign_up') }}" class="es-form-btn group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
                             <span class="relative z-10 flex items-center gap-2">
-                                Start Free Trial
+                                Create your schedule
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                 </svg>
@@ -549,11 +1502,29 @@
                         </a>
                     </div>
 
-                    <p class="mt-6 text-sm text-gray-400">Available on Pro plans</p>
+                    <p class="es-form-muted mt-6 text-sm">No credit card required to start</p>
                 </div>
             </div>
         </div>
     </section>
+
+    <!-- Desktop dot nav -->
+    <nav class="es-dotnav fixed top-1/2 z-40 hidden -translate-y-1/2 lg:block ltr:right-5 rtl:left-5" aria-label="Page sections">
+        <ul class="glass flex flex-col items-center gap-1.5 rounded-full px-2 py-3">
+            @foreach ($dotSections as [$sectionId, $sectionLabel])
+                <li class="relative">
+                    <a href="#{{ $sectionId }}" class="es-dot group block rounded-full" aria-label="{{ $sectionLabel }}">
+                        <span class="es-dot-pip block h-2 w-2 rounded-full bg-gray-400/60 dark:bg-white/30"></span>
+                        <span class="pointer-events-none absolute top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full es-form-tip px-3 py-1 text-xs font-medium opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 ltr:right-full ltr:mr-3 rtl:left-full rtl:ml-3">{{ $sectionLabel }}</span>
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    </nav>
+
+    </div>
+
+    <x-marketing.related-pages />
 
     <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
     @vite('resources/js/marketing-home.js')

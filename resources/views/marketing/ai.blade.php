@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule AI Features",
-        "description": "AI-powered event management. Generate flyers, write descriptions, create brand style, parse text and images, scan agendas, translate to 12 languages, create events via WhatsApp, and automate with a full API for AI agents.",
+        "description": "Paste the text or drop the image and AI fills the event form: name, date, duration, venue, address, performers, price, currency and registration link. Agenda scanning, description writing, flyer and style generation, WhatsApp event creation and whole-schedule translation.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -21,104 +21,40 @@
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "What formats does the AI parser support?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "The AI can parse plain text, images (JPEG, PNG, GIF, WebP), screenshots, flyers, agendas, and setlists. It handles both single events and multi-event documents, extracting each event individually."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Which AI features are free vs. Enterprise?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "AI event parsing and instant translation are available on all plans including the free tier. Style generation, content generation, flyer generation, graphic text processing, and WhatsApp event creation are Enterprise features."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "How accurate is the AI?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "The AI is highly accurate for standard event formats. You always get to review and edit the results before saving. You can also add custom prompts to guide the AI for your specific format."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What can AI Style Generation create?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "AI Style Generation creates a complete visual identity for your schedule including profile image, header image, background image, accent color, and font. You can add custom style instructions and regenerate individual elements."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "How does WhatsApp event creation work?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Send a text message or photo of a flyer to your schedule's WhatsApp number. AI parses the details, auto-generates a flyer, and adds the event to your schedule automatically."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What languages are supported?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "The AI can parse events in any language and extract details correctly. The translation feature supports 12 languages including English, Spanish, French, German, Italian, Portuguese, Dutch, Hebrew, Arabic, Estonian, Romanian, and Russian."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can AI agents use Event Schedule programmatically?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Event Schedule provides a full REST API with OpenAPI 3.0 specification, llms.txt for AI discovery, and agents.json for defining agent workflows. AI agents can create, update, and manage events programmatically with smart creation features and webhook notifications."
-                }
-            }
-        ]
-    }
-    </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         "name": "Event Schedule AI Features",
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "AI Event Management Software",
         "operatingSystem": "Web",
-        "description": "AI-powered event management. Generate flyers, write descriptions, create brand style, parse text and images, scan agendas, translate to 12 languages, create events via WhatsApp, and automate with a full API for AI agents.",
+        "description": "AI event parsing from pasted text or a dropped image, on every plan. Agenda scanning, description writing, flyer and style generation, graphic email text and WhatsApp event creation on Enterprise. Whole-schedule translation into {{ count(config('app.supported_languages')) }} languages, free.",
         "offers": {
             "@type": "Offer",
             "price": "0",
             "priceCurrency": "USD",
-            "description": "Included free"
+            "description": "AI event parsing and translation are included free"
         },
         "featureList": [
-            "AI-powered text parsing",
-            "Image and flyer import",
-            "Agenda and setlist parsing",
-            "Multi-event image extraction",
-            "Automatic event extraction",
-            "AI agenda scanning for event parts",
-            "Custom AI prompts",
-            "Instant translation",
-            "AI style generation",
-            "AI content generation",
-            "AI flyer generation",
-            "AI graphic text processing",
-            "WhatsApp event creation",
-            "REST API for AI agents",
-            "OpenAPI 3.0 specification",
-            "llms.txt AI discovery",
-            "agents.json workflows",
-            "Webhook notifications",
-            "AI powered"
+            "Event parsing from pasted text",
+            "Event parsing from a dropped, pasted or uploaded image (JPEG, PNG, GIF, WebP)",
+            "One document can yield several events",
+            "Extraction into the real event fields, including price, currency and country code",
+            "Category matched against your own category list",
+            "Venue resolution against venues you already have, before a new one is created",
+            "Performer matching against talent already on the schedule",
+            "Duplicate detection against events already on the schedule",
+            "Agenda and setlist scanning into event parts (Enterprise)",
+            "Custom agenda prompts per event or as a schedule default (Enterprise)",
+            "Schedule and event description writing (Enterprise)",
+            "Flyer image generation (Enterprise)",
+            "Schedule style generation: profile, header and background images, accent colour and font (Enterprise)",
+            "AI pass over graphic email text (Enterprise)",
+            "Event creation over WhatsApp (Enterprise)",
+            "Whole-schedule translation into {{ count(config('app.supported_languages')) }} languages",
+            "REST API, OpenAPI 3.0 spec, llms.txt and agents.json for AI agents",
+            "Selfhosted installs use their own API keys with no daily caps"
         ],
         "url": "{{ url()->current() }}",
+        "keywords": "AI event import, parse event from flyer, event data extraction, AI agenda scanning, AI event flyer, schedule translation",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule"
@@ -136,713 +72,1350 @@
     </script>
 
     <style {!! nonce_attr() !!}>
-        /* For AI features "The Spark" styles. The shared es-* motion system lives in
-           marketing.css; this holds the AI glow gradient, the drifting generation
-           card, and the twinkling-sparkles motif. */
-        .text-gradient-ai {
-            background: linear-gradient(135deg, #2563eb, #0ea5e9, #06b6d4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 40px rgba(37, 99, 235, 0.3);
-        }
-        .dark .text-gradient-ai {
-            background: linear-gradient(135deg, #60a5fa, #38bdf8, #22d3ee);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 40px rgba(96, 165, 250, 0.3);
-        }
-        @keyframes es-ai-float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        .es-ai-float { animation: es-ai-float 6s ease-in-out infinite; }
+        /* ==============================================================
+           For-ai "The Spark" styles.
 
-        /* Twinkling-sparkles motif: AI generation shimmer. */
-        .es-sparkfield { display: flex; align-items: center; }
-        .es-spark {
-            flex: 0 0 auto;
-            width: 6px; height: 6px; border-radius: 9999px;
-            background: radial-gradient(circle, rgba(56, 189, 248, 0.95), rgba(56, 189, 248, 0) 70%);
-            animation: es-spark-tw var(--sp-dur, 2.4s) ease-in-out infinite;
-            animation-delay: var(--sp-delay, 0s);
+           THE CONCEPT IS A SPARK GAP, not a wand and not a swarm of
+           twinkling stars (the first-wave page used both, and sparkles
+           are the single most generic AI ornament there is). A spark gap
+           has two terminals and a measured distance between them. On one
+           side is the scrap somebody actually sent you: a WhatsApp
+           message, a photo of a poster taped to a wall. On the other is
+           the record the product needs: starts_at, duration, venue,
+           ticket_price, event_country_code. The gap is real, it is
+           narrow, and exactly one thing crosses it. That framing is also
+           the product argument, because it forces the page to say what
+           does NOT cross: the parser never reads a web page for event
+           details. A registration link is followed for its preview image
+           only (UrlUtils::getUrlMetadata pulls og:image and the final
+           redirect target, nothing else), so you paste the text, not the
+           link.
+
+           DEVICES
+             1. .es-spark-arcv / .es-spark-arc - the gap itself: two pads
+                joined by a filament with one travelling node. Vertical in
+                panels (which is how the real import screen is laid out:
+                paste box above, parsed results below), horizontal in the
+                section mark, so every section head is a small gap.
+             2. .es-spark-scrap vs .es-spark-rec - recessed dashed scrap
+                against a hard-edged record with a lit leading edge. The
+                two terminals, repeated.
+             3. .es-spark-table - the field manifest. A real <table>,
+                because the thing being described IS a record. Field names
+                are the literal keys GeminiUtils::parseEvent asks for.
+             4. .es-spark-rung - the venue resolution ladder, indented one
+                step per rung, in the order the code actually tries them
+                (GeminiUtils::parseEvent rungs 1-3, then the save-time
+                safety-net lookup in EventRepo::saveEvent, then creation).
+                Indentation carries the "only if the rung above missed".
+
+           COLOUR: the page keeps its inherited blue family but drops the
+           three-stop brand chrome gradient (blue -> sky -> cyan), which
+           is shared furniture and whose cyan stop measures 2.43 on white
+           and failed AA four times on the first-wave page. One solid
+           blue instead: #1d4ed8 light (6.09 on the #f2f4f8 ground),
+           #93c5fd dark (10.91 on #080b12). Distinctiveness comes from
+           the graphite worksheet ground, the monospace field language
+           and the gap structure, not from a new hue.
+
+           NEVER text-gray-500 here: 4.83 on pure white but only ~4.4 on
+           this page's tinted ground. Use .es-spark-muted (#474e5c, 7.59)
+           and .es-spark-bmuted (#9aa5bd, 7.15+) inside the dark bands.
+
+           .es-spark-band is a FIXED-DARK object: it renders identically
+           with .dark on and off, so the shared classes that flip inside
+           it (.grid-overlay, .animate-shimmer, .es-claim:focus-within,
+           .es-aurora) are pinned below.
+           ============================================================== */
+
+        /* --- Ground and ink --- */
+        .es-spark-page { background-color: #f2f4f8; color: #101623; }
+        .dark .es-spark-page { background-color: #080b12; color: #e9edf6; }
+        .es-spark-ink { color: #101623; }
+        .dark .es-spark-ink { color: #e9edf6; }
+        .es-spark-muted { color: #474e5c; }
+        .dark .es-spark-muted { color: #9aa5bd; }
+        .es-spark-accent { color: #1d4ed8; }
+        .dark .es-spark-accent { color: #93c5fd; }
+        /* Always-lit ink for the fixed-dark bands, in BOTH colour modes. */
+        .es-spark-lit { color: #93c5fd; }
+        .es-spark-bmuted { color: #9aa5bd; }
+        .es-spark-mono {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-variant-numeric: tabular-nums;
         }
-        @keyframes es-spark-tw {
-            0%, 100% { opacity: 0.15; transform: scale(0.55); }
-            50% { opacity: 1; transform: scale(1.25); box-shadow: 0 0 10px rgba(56, 189, 248, 0.6); }
+
+        /* --- Rules and separators. These live here, not in a Tailwind
+               arbitrary value: `border-[rgba(16,22,35,0.08)]` is not in the
+               built stylesheet, so it would draw nothing at all. --- */
+        .es-spark-edge {
+            border-block: 1px solid rgba(16, 22, 35, 0.08);
         }
+        .dark .es-spark-edge { border-block-color: rgba(233, 237, 246, 0.08); }
+        .es-spark-sep { border-top: 1px solid rgba(16, 22, 35, 0.1); }
+        .dark .es-spark-sep { border-top-color: rgba(233, 237, 246, 0.12); }
+        .es-spark-ladder > li + li { border-top: 1px solid rgba(16, 22, 35, 0.08); }
+        .dark .es-spark-ladder > li + li { border-top-color: rgba(233, 237, 246, 0.1); }
+
+        /* --- Cards --- */
+        .es-spark-card {
+            border: 1px solid rgba(16, 22, 35, 0.12);
+            border-radius: 1rem;
+            background: #ffffff;
+        }
+        .dark .es-spark-card {
+            border-color: rgba(233, 237, 246, 0.12);
+            background: #111725;
+        }
+        .es-spark-band .es-spark-card {
+            border-color: rgba(233, 237, 246, 0.14);
+            background: rgba(233, 237, 246, 0.05);
+        }
+
+        /* --- Terminal one: the scrap. Recessed, dashed, unresolved. --- */
+        .es-spark-scrap {
+            border: 1px dashed rgba(16, 22, 35, 0.3);
+            border-radius: 0.85rem;
+            background: rgba(16, 22, 35, 0.04);
+            padding: 1rem 1.1rem;
+        }
+        .dark .es-spark-scrap {
+            border-color: rgba(233, 237, 246, 0.26);
+            background: rgba(233, 237, 246, 0.05);
+        }
+
+        /* --- Terminal two: the record. Hard edge, lit leading rule. --- */
+        .es-spark-rec {
+            position: relative;
+            border: 1px solid rgba(29, 78, 216, 0.35);
+            border-radius: 0.85rem;
+            background: rgba(29, 78, 216, 0.05);
+            padding: 1rem 1.1rem;
+            overflow: hidden;
+        }
+        .dark .es-spark-rec {
+            border-color: rgba(147, 197, 253, 0.35);
+            background: rgba(147, 197, 253, 0.07);
+        }
+        .es-spark-rec::before {
+            content: "";
+            position: absolute;
+            inset-block: 0;
+            inset-inline-start: 0;
+            width: 3px;
+            background: #1d4ed8;
+        }
+        .dark .es-spark-rec::before { background: #93c5fd; }
+
+        /* A single parsed field: monospace key, plain value. */
+        .es-spark-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 0.15rem 0.6rem;
+            padding-block: 0.28rem;
+            border-top: 1px solid rgba(16, 22, 35, 0.08);
+        }
+        .dark .es-spark-row { border-top-color: rgba(233, 237, 246, 0.1); }
+        .es-spark-row:first-child { border-top: 0; }
+        .es-spark-key {
+            flex: none;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.01em;
+            color: #1d4ed8;
+        }
+        .dark .es-spark-key { color: #93c5fd; }
+        .es-spark-val { font-size: 0.82rem; font-weight: 600; }
+
+        /* --- The gap. Vertical in panels, horizontal in the section mark. --- */
+        .es-spark-arcv {
+            position: relative;
+            width: 2px;
+            height: 2.6rem;
+            margin-inline: auto;
+            border-radius: 1px;
+            background: linear-gradient(180deg, rgba(29, 78, 216, 0.12), rgba(29, 78, 216, 0.5), rgba(29, 78, 216, 0.12));
+        }
+        .dark .es-spark-arcv {
+            background: linear-gradient(180deg, rgba(147, 197, 253, 0.14), rgba(147, 197, 253, 0.55), rgba(147, 197, 253, 0.14));
+        }
+        .es-spark-arcv::after {
+            content: "";
+            position: absolute;
+            inset-inline-start: -3px;
+            top: 0;
+            width: 8px;
+            height: 8px;
+            border-radius: 9999px;
+            background: #1d4ed8;
+            box-shadow: 0 0 10px 2px rgba(29, 78, 216, 0.5);
+            animation: es-spark-jumpv 3.4s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+        }
+        .dark .es-spark-arcv::after {
+            background: #bfdbfe;
+            box-shadow: 0 0 12px 3px rgba(147, 197, 253, 0.55);
+        }
+        @keyframes es-spark-jumpv {
+            0% { top: 0; opacity: 0; }
+            14% { opacity: 1; }
+            64% { top: calc(100% - 8px); opacity: 1; }
+            82%, 100% { top: calc(100% - 8px); opacity: 0; }
+        }
+
+        .es-spark-arc {
+            position: relative;
+            flex: none;
+            width: 2.4rem;
+            height: 2px;
+            border-radius: 1px;
+            background: linear-gradient(90deg, rgba(29, 78, 216, 0.14), rgba(29, 78, 216, 0.55), rgba(29, 78, 216, 0.14));
+        }
+        .dark .es-spark-arc,
+        .es-spark-band .es-spark-arc {
+            background: linear-gradient(90deg, rgba(147, 197, 253, 0.16), rgba(147, 197, 253, 0.6), rgba(147, 197, 253, 0.16));
+        }
+        .es-spark-arc::after {
+            content: "";
+            position: absolute;
+            top: -3px;
+            inset-inline-start: 0;
+            width: 8px;
+            height: 8px;
+            border-radius: 9999px;
+            background: #1d4ed8;
+            box-shadow: 0 0 10px 2px rgba(29, 78, 216, 0.45);
+            animation: es-spark-jumph 3.4s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+        }
+        .dark .es-spark-arc::after,
+        .es-spark-band .es-spark-arc::after {
+            background: #bfdbfe;
+            box-shadow: 0 0 12px 3px rgba(147, 197, 253, 0.5);
+        }
+        @keyframes es-spark-jumph {
+            0% { inset-inline-start: 0; opacity: 0; }
+            14% { opacity: 1; }
+            64% { inset-inline-start: calc(100% - 8px); opacity: 1; }
+            82%, 100% { inset-inline-start: calc(100% - 8px); opacity: 0; }
+        }
+
+        /* --- Section mark: numeral, then a gap being crossed. --- */
+        .es-spark-mark {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+        }
+        .es-spark-num {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-variant-numeric: tabular-nums;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            color: #1d4ed8;
+        }
+        .dark .es-spark-num { color: #93c5fd; }
+        .es-spark-band .es-spark-num { color: #93c5fd; }
+
+        /* --- Eyebrow --- */
+        .es-spark-tag {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.26em;
+            text-transform: uppercase;
+            color: #474e5c;
+        }
+        .dark .es-spark-tag { color: #9aa5bd; }
+        .es-spark-band .es-spark-tag { color: #93c5fd; }
+
+        /* --- Plan pills --- */
+        .es-spark-plan {
+            display: inline-flex;
+            align-items: center;
+            flex: none;
+            padding: 0.1rem 0.45rem;
+            border-radius: 0.25rem;
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            border: 1px solid rgba(29, 78, 216, 0.42);
+            color: #1d4ed8;
+        }
+        .dark .es-spark-plan { border-color: rgba(147, 197, 253, 0.45); color: #93c5fd; }
+        .es-spark-band .es-spark-plan { border-color: rgba(147, 197, 253, 0.45); color: #93c5fd; }
+        .es-spark-plan-alt {
+            border-color: rgba(16, 22, 35, 0.32);
+            color: #101623;
+        }
+        .dark .es-spark-plan-alt { border-color: rgba(233, 237, 246, 0.36); color: #e9edf6; }
+
+        /* --- Chips --- */
+        .es-spark-chip {
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+            padding: 0.32rem 0.8rem;
+            border-radius: 9999px;
+            border: 1px solid rgba(16, 22, 35, 0.16);
+            background: rgba(255, 255, 255, 0.75);
+            color: #474e5c;
+            font-size: 0.76rem;
+            font-weight: 600;
+        }
+        .dark .es-spark-chip {
+            border-color: rgba(233, 237, 246, 0.16);
+            background: rgba(233, 237, 246, 0.05);
+            color: #9aa5bd;
+        }
+
+        /* --- The field manifest table --- */
+        .es-spark-table { width: 100%; border-collapse: collapse; text-align: start; }
+        .es-spark-table th,
+        .es-spark-table td {
+            padding: 0.5rem 0.6rem 0.5rem 0;
+            vertical-align: top;
+            text-align: start;
+            border-top: 1px solid rgba(16, 22, 35, 0.09);
+        }
+        .dark .es-spark-table th,
+        .dark .es-spark-table td { border-top-color: rgba(233, 237, 246, 0.1); }
+        .es-spark-table thead th { border-top: 0; }
+        .es-spark-group th {
+            padding-top: 1.2rem;
+            font-size: 0.68rem;
+            font-weight: 800;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: #1d4ed8;
+        }
+        .dark .es-spark-group th { color: #93c5fd; }
+        .es-spark-field {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.74rem;
+            font-weight: 600;
+            white-space: nowrap;
+            color: #101623;
+        }
+        .dark .es-spark-field { color: #e9edf6; }
+
+        /* --- The allowance board --- */
+        .es-spark-board { width: 100%; border-collapse: collapse; text-align: start; }
+        .es-spark-board th,
+        .es-spark-board td {
+            padding: 0.6rem 0.7rem 0.6rem 0;
+            vertical-align: top;
+            text-align: start;
+            border-top: 1px solid rgba(16, 22, 35, 0.09);
+            font-size: 0.85rem;
+        }
+        .dark .es-spark-board th,
+        .dark .es-spark-board td { border-top-color: rgba(233, 237, 246, 0.1); }
+        .es-spark-board thead th {
+            border-top: 0;
+            font-size: 0.68rem;
+            font-weight: 800;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: #474e5c;
+        }
+        .dark .es-spark-board thead th { color: #9aa5bd; }
+
+        /* --- The venue ladder: one indent step per rung the code tries. --- */
+        .es-spark-rung {
+            position: relative;
+            padding-inline-start: calc(0.9rem + var(--rung, 0) * 1.15rem);
+            padding-block: 0.75rem;
+        }
+        .es-spark-rung::before {
+            content: "";
+            position: absolute;
+            top: 1.15rem;
+            inset-inline-start: calc(var(--rung, 0) * 1.15rem);
+            width: 0.55rem;
+            height: 2px;
+            border-radius: 1px;
+            background: #1d4ed8;
+        }
+        .dark .es-spark-rung::before { background: #93c5fd; }
+        .es-spark-rung-last::before { background: rgba(16, 22, 35, 0.32); }
+        .dark .es-spark-rung-last::before { background: rgba(233, 237, 246, 0.34); }
+
+        /* --- Fixed-dark band. Identical with .dark on and off. --- */
+        .es-spark-band {
+            background-color: #070a11;
+            background-image: radial-gradient(120% 100% at 50% 0%, #10182b 0%, #0a1020 55%, #05070d 100%);
+            box-shadow: inset 0 0 90px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(233, 237, 246, 0.05);
+        }
+        /* The two terminals as inline chips, for the one-line gap in the finale. */
+        .es-spark-term {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 0.9rem;
+            border-radius: 0.7rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+        .es-spark-rec.es-spark-term { padding-inline-start: 1.1rem; }
+
+        /* The terminals also have to stop flipping inside the fixed-dark band:
+           .dark .es-spark-scrap / .es-spark-rec would otherwise repaint them
+           when the visitor is in dark mode. Same specificity, so these must
+           stay AFTER the base rules. */
+        .es-spark-band .es-spark-scrap {
+            border-color: rgba(233, 237, 246, 0.28);
+            background: rgba(233, 237, 246, 0.06);
+        }
+        .es-spark-band .es-spark-rec {
+            border-color: rgba(147, 197, 253, 0.35);
+            background: rgba(147, 197, 253, 0.08);
+        }
+        .es-spark-band .es-spark-rec::before { background: #93c5fd; }
+        .es-spark-band .es-spark-arcv {
+            background: linear-gradient(180deg, rgba(147, 197, 253, 0.14), rgba(147, 197, 253, 0.55), rgba(147, 197, 253, 0.14));
+        }
+        .es-spark-band .es-spark-arcv::after {
+            background: #bfdbfe;
+            box-shadow: 0 0 12px 3px rgba(147, 197, 253, 0.55);
+        }
+
+        /* Shared classes that would otherwise flip with the colour mode. */
+        .es-spark-band .grid-overlay {
+            background-image:
+                linear-gradient(rgba(233, 237, 246, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(233, 237, 246, 0.05) 1px, transparent 1px);
+        }
+        .es-spark-band .es-aurora { opacity: 0.5; }
+        .es-spark-band .animate-shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            background-size: 200% 100%;
+        }
+        .es-spark-band .es-claim:focus-within {
+            border-color: rgba(147, 197, 253, 0.75);
+            box-shadow: 0 0 0 4px rgba(147, 197, 253, 0.24);
+        }
+
+        /* --- Links and buttons --- */
+        .es-spark-link { color: #1d4ed8; }
+        .es-spark-link:hover { color: #101623; }
+        .dark .es-spark-link { color: #93c5fd; }
+        .dark .es-spark-link:hover { color: #e9edf6; }
+
+        .es-spark-btn {
+            background-color: #1d4ed8;
+            color: #ffffff;
+            box-shadow: 0 18px 36px -14px rgba(29, 78, 216, 0.55);
+        }
+        .es-spark-btn:hover { background-color: #1e40af; box-shadow: 0 22px 44px -14px rgba(29, 78, 216, 0.65); }
+        .dark .es-spark-btn { background-color: #93c5fd; color: #080b12; }
+        .dark .es-spark-btn:hover { background-color: #bfdbfe; }
+        .es-spark-band .es-spark-btn { background-color: #93c5fd; color: #080b12; }
+        .es-spark-band .es-spark-btn:hover { background-color: #bfdbfe; }
+
+        /* --- Hover affordance on cards that are links --- */
+        .es-spark-hover:hover { border-color: rgba(29, 78, 216, 0.5); }
+        .dark .es-spark-hover:hover { border-color: rgba(147, 197, 253, 0.5); }
+        .es-spark-hover:hover .es-spark-hover-title { color: #1d4ed8; }
+        .dark .es-spark-hover:hover .es-spark-hover-title { color: #93c5fd; }
+
+        /* --- Recolour the shared hero spotlight to this page's blue --- */
+        .es-hero .es-spot {
+            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(29, 78, 216, 0.12), transparent 60%);
+        }
+        .dark .es-hero .es-spot {
+            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(147, 197, 253, 0.1), transparent 60%);
+        }
+        .es-dot:hover .es-dot-pip { background-color: rgba(29, 78, 216, 0.6); }
+        .dark .es-dot:hover .es-dot-pip { background-color: rgba(147, 197, 253, 0.6); }
+        .es-dot.is-active .es-dot-pip { background: #1d4ed8; }
+        .dark .es-dot.is-active .es-dot-pip { background: #93c5fd; }
+
+        /* Dot-nav tooltip. Its colours live here, not in a Tailwind arbitrary
+           value: an unbuilt `dark:bg-[#111725]` does nothing, which left light
+           ink on a white pill and failed AA twelve times. */
+        .es-spark-tip {
+            border: 1px solid rgba(16, 22, 35, 0.14);
+            background: #ffffff;
+            color: #474e5c;
+        }
+        .dark .es-spark-tip {
+            border-color: rgba(233, 237, 246, 0.14);
+            background: #111725;
+            color: #e9edf6;
+        }
+
+        /* --- Focus rings. No border-radius here: it would reshape the element. --- */
+        #es-spark-page a:focus-visible,
+        #es-spark-page summary:focus-visible,
+        #es-spark-page button:focus-visible {
+            outline: 2px solid #1d4ed8;
+            outline-offset: 3px;
+        }
+        .dark #es-spark-page a:focus-visible,
+        .dark #es-spark-page summary:focus-visible,
+        .dark #es-spark-page button:focus-visible {
+            outline-color: #93c5fd;
+        }
+        .es-spark-band a:focus-visible,
+        .es-spark-band summary:focus-visible,
+        .es-spark-band button:focus-visible {
+            outline-color: #93c5fd !important;
+        }
+
         @media (prefers-reduced-motion: reduce) {
-            .es-ai-float, .es-spark { animation: none !important; }
-            .es-spark { opacity: 0.5; }
+            .es-spark-arcv::after,
+            .es-spark-arc::after {
+                animation: none !important;
+                opacity: 1 !important;
+            }
+            .es-spark-arcv::after { top: calc(50% - 4px); }
+            .es-spark-arc::after { inset-inline-start: calc(50% - 4px); }
         }
     </style>
 
-    <!-- ============================================================ -->
-    <!-- 1. Hero: AI-powered features                                 -->
-    <!-- ============================================================ -->
-    <section class="es-hero relative flex min-h-[calc(80svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
-        <div class="absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 70%, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 32%, rgba(14, 165, 233, 0.28), rgba(14, 165, 233, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.14), rgba(6, 182, 212, 0) 60%);"></div>
-            <div class="es-rays absolute inset-0"></div>
-            <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
-            <!-- Twinkling sparkles along the bottom edge -->
-            <div class="es-sparkfield absolute bottom-0 left-0 right-0 hidden h-20 items-center justify-center gap-4 px-8 pb-6 opacity-50 md:flex" style="mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);">
-                @for ($i = 0; $i < 30; $i++)
-                    @php $dur = 1.8 + ($i % 6) * 0.28; $delay = ($i % 11) * 0.18; @endphp
-                    <span class="es-spark" style="--sp-dur: {{ $dur }}s; --sp-delay: {{ $delay }}s;"></span>
-                @endfor
-            </div>
-        </div>
-
-        <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
-                <svg aria-hidden="true" class="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">AI-Powered</span>
-            </div>
-
-            <h1 class="es-balance mb-6 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
-                <span class="es-mask"><span class="es-mask-line">AI-powered</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-ai">features</span></span></span>
-            </h1>
-
-            <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
-                From smart import to content generation and visual branding. Paste text, drop an image, or let AI write your descriptions and create your style.
-            </p>
-
-            <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <a href="{{ app_url('/sign_up') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-blue-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
-                    Try it free
-                    <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-                <a href="{{ route('marketing.docs.ai_import') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
-                    Read the AI Import guide
-                    <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                </a>
-            </div>
-        </div>
-
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 2. Generate content and style                                -->
-    <!-- ============================================================ -->
-    <section class="bg-white py-20 dark:bg-[#0a0a0f] lg:py-24">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>Generate content and style with <span class="text-gradient-ai">AI</span></h2>
-                <p class="mt-4 text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">AI creates your visual identity and writes your content.</p>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="100">
-
-                <!-- AI Style Generation (2 cols) -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="grid items-center gap-8 md:grid-cols-2">
-                            <div>
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-800/30 dark:bg-sky-900/40 dark:text-sky-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>
-                                    Style Generation
-                                </div>
-                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white">Generate your brand style</h3>
-                                <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">AI creates a complete visual identity for your schedule - profile image, header image, background image, accent color, and font. Add style instructions to guide the look.</p>
-                                <div class="mb-4 flex flex-wrap gap-3">
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Profile image</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Header</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Background</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Accent color</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Font</span>
-                                </div>
-                                <span class="inline-flex items-center rounded-full border border-amber-200 bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/20 dark:text-amber-300">Enterprise</span>
-                            </div>
-                            <div class="flex items-center justify-center" aria-hidden="true">
-                                <div class="w-full max-w-xs rounded-2xl border border-gray-200 bg-gray-100 p-5 dark:border-white/10 dark:bg-[#0f0f14]">
-                                    <div class="mb-3 text-xs text-gray-500 dark:text-gray-400">Generated elements</div>
-                                    <div class="space-y-2.5">
-                                        @foreach (['Profile image', 'Header image', 'Background image', 'Accent color', 'Font'] as $ei => $el)
-                                            <div class="es-ai-field flex items-center gap-3" style="--i: {{ $ei }};">
-                                                <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-sky-500/20">
-                                                    @if ($el === 'Accent color')
-                                                        <div class="h-3.5 w-3.5 rounded-full bg-sky-400"></div>
-                                                    @else
-                                                        <svg aria-hidden="true" class="h-3.5 w-3.5 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                                                    @endif
-                                                </div>
-                                                <span class="text-sm text-gray-900 dark:text-white">{{ $el }}</span>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Write schedule descriptions -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-blue-200 bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 dark:border-blue-800/30 dark:bg-blue-900/40 dark:text-blue-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                            Content
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Write schedule descriptions</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Generate polished short and full descriptions for your schedule. Save custom prompts to maintain your tone.</p>
-                        <div class="mt-auto rounded-xl border border-gray-200 bg-gray-100 p-4 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
-                            <div class="mb-2 flex items-center gap-2">
-                                <svg aria-hidden="true" class="h-4 w-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" /></svg>
-                                <span class="text-xs text-gray-500 dark:text-gray-400">AI-generated</span>
-                            </div>
-                            <div class="text-sm leading-relaxed text-gray-600 dark:text-gray-300">A vibrant live music hub featuring jazz, blues, and soul performances every week...</div>
-                        </div>
-                        <div class="mt-4"><span class="inline-flex items-center rounded-full border border-amber-200 bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/20 dark:text-amber-300">Enterprise</span></div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Generate event details -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/40 dark:text-emerald-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" /></svg>
-                            Content
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Generate event details</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">AI writes event category, short description, and full description based on the event name and context.</p>
-                        <div class="mt-auto rounded-xl border border-gray-200 bg-gray-100 p-4 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
-                            <div class="space-y-2 text-sm">
-                                <div class="flex justify-between"><span class="text-gray-500 dark:text-white/60">Category:</span><span class="text-gray-900 dark:text-white">Music</span></div>
-                                <div class="flex justify-between"><span class="text-gray-500 dark:text-white/60">Short:</span><span class="text-gray-900 dark:text-white">Live jazz trio</span></div>
-                                <div class="mt-1 text-xs leading-relaxed text-gray-600 dark:text-gray-300">An evening of smooth jazz featuring...</div>
-                            </div>
-                        </div>
-                        <div class="mt-4"><span class="inline-flex items-center rounded-full border border-amber-200 bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/20 dark:text-amber-300">Enterprise</span></div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- AI text for graphic emails -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-amber-200 bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-800/30 dark:bg-amber-900/40 dark:text-amber-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                            Graphics
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">AI text for graphic emails</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Process your event list text through AI before sending graphic emails. Add flair, reformat, or customize.</p>
-                        <div class="mt-auto rounded-xl border border-gray-200 bg-gray-100 p-4 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
-                            <div class="mb-2 flex items-center gap-2">
-                                <svg aria-hidden="true" class="h-4 w-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" /></svg>
-                                <span class="text-xs text-gray-500 dark:text-gray-400">AI-processed</span>
-                            </div>
-                            <div class="text-sm leading-relaxed text-gray-600 dark:text-gray-300">This week's highlights...<br><span class="text-amber-600 dark:text-amber-300">Jazz Night - Fri 8pm</span></div>
-                        </div>
-                        <div class="mt-4"><span class="inline-flex items-center rounded-full border border-amber-200 bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/20 dark:text-amber-300">Enterprise</span></div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Generate event flyers -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-teal-200 bg-teal-100 px-3 py-1.5 text-sm font-medium text-teal-700 dark:border-teal-800/30 dark:bg-teal-900/40 dark:text-teal-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" /></svg>
-                            AI Flyer Generation
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Generate event flyers</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Enter event details and let AI create a professional, eye-catching flyer. Customize the style and regenerate until it's perfect.</p>
-                        <div class="mt-auto overflow-hidden rounded-xl border border-gray-200 bg-gray-100 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
-                            <div class="bg-gradient-to-br from-teal-600 to-cyan-700 p-4 text-center text-white">
-                                <div class="mb-0.5 text-sm font-bold">Summer Jazz Festival</div>
-                                <div class="mb-1 text-[10px] opacity-80">Saturday, July 12, 2025</div>
-                                <div class="mx-auto mb-1 h-0.5 w-8 bg-white/40"></div>
-                                <div class="text-[10px] opacity-70">Central Park Amphitheater</div>
-                            </div>
-                            <div class="flex flex-wrap gap-2 p-3">
-                                <span class="inline-flex items-center rounded-full bg-gray-200 px-2 py-0.5 text-[10px] text-gray-600 dark:bg-white/10 dark:text-gray-300">One-click</span>
-                                <span class="inline-flex items-center rounded-full bg-gray-200 px-2 py-0.5 text-[10px] text-gray-600 dark:bg-white/10 dark:text-gray-300">Custom style</span>
-                                <span class="inline-flex items-center rounded-full bg-gray-200 px-2 py-0.5 text-[10px] text-gray-600 dark:bg-white/10 dark:text-gray-300">Regenerate</span>
-                            </div>
-                        </div>
-                        <div class="mt-4"><span class="inline-flex items-center rounded-full border border-amber-200 bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/20 dark:text-amber-300">Enterprise</span></div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 3. Built for AI agents (dark band)                          -->
-    <!-- ============================================================ -->
-    <section class="bg-white px-2 py-14 dark:bg-[#0a0a0f] sm:px-4 lg:py-20">
-        <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
-            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 25%, rgba(37, 99, 235, 0.24), rgba(37, 99, 235, 0) 60%); opacity: 0.6;"></div>
-                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 70%, rgba(14, 165, 233, 0.2), rgba(14, 165, 233, 0) 60%); opacity: 0.55;"></div>
-                <div class="grid-overlay absolute inset-0 opacity-25"></div>
-                <div class="es-sparkfield absolute bottom-0 left-0 right-0 flex h-16 items-center justify-center gap-4 px-8 pb-3 opacity-40" style="mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);">
-                    @for ($i = 0; $i < 28; $i++)
-                        @php $dur = 1.8 + ($i % 6) * 0.28; $delay = ($i % 11) * 0.18; @endphp
-                        <span class="es-spark" style="--sp-dur: {{ $dur }}s; --sp-delay: {{ $delay }}s;"></span>
-                    @endfor
-                </div>
-            </div>
-
-            <div class="relative z-10 mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
-                <div data-reveal>
-                    <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-400/20 bg-blue-500/15 px-3 py-1.5 text-sm font-medium text-blue-300">
-                        <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
-                        API for AI Agents
-                    </div>
-                    <h2 class="es-balance mb-6 text-3xl font-black tracking-tight text-white md:text-4xl lg:text-5xl">Built for <span class="text-gradient-ai">AI agents</span></h2>
-                    <p class="mb-8 text-lg text-gray-300">A full REST API with OpenAPI 3.0 specification, llms.txt for AI discovery, and agents.json for defining agent workflows. Let AI agents create, update, and manage events programmatically.</p>
-                    <div class="mb-8 flex flex-wrap gap-3">
-                        @foreach (['REST API', 'OpenAPI 3.0', 'llms.txt', 'agents.json', 'Webhooks', 'Smart creation'] as $pill)
-                            <span class="inline-flex items-center rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-sm font-medium text-gray-300">{{ $pill }}</span>
-                        @endforeach
-                    </div>
-                    <a href="{{ marketing_url('/for-ai-agents') }}" class="inline-flex items-center gap-2 text-lg font-medium text-blue-300 transition-all hover:gap-3 hover:text-blue-200">
-                        Learn more
-                        <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                    </a>
-                </div>
-
-                <div class="flex flex-col items-center gap-6" data-reveal style="--reveal-delay: 0.12s;" aria-hidden="true">
-                    <div class="w-full max-w-md">
-                        <div class="mb-4 rounded-2xl border border-white/10 bg-white/[0.04] p-5">
-                            <div class="mb-3 flex items-center gap-2">
-                                <span class="inline-flex items-center rounded px-2 py-0.5 font-mono text-xs font-bold text-emerald-300" style="background: rgba(16,185,129,0.2);">POST</span>
-                                <span class="font-mono text-sm text-gray-400">/api/events</span>
-                            </div>
-                            <div class="rounded-lg bg-black/30 p-3 font-mono text-xs leading-relaxed text-gray-300">
-                                <span class="text-gray-500">{</span><br>
-                                &nbsp;&nbsp;<span class="text-blue-400">"name"</span>: <span class="text-emerald-400">"Jazz Night"</span>,<br>
-                                &nbsp;&nbsp;<span class="text-blue-400">"date"</span>: <span class="text-emerald-400">"2025-03-15"</span>,<br>
-                                &nbsp;&nbsp;<span class="text-blue-400">"venue"</span>: <span class="text-emerald-400">"Blue Note"</span><br>
-                                <span class="text-gray-500">}</span>
-                            </div>
-                        </div>
-                        <div class="my-2 flex justify-center">
-                            <svg aria-hidden="true" class="es-sync-dot h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
-                        </div>
-                        <div class="rounded-2xl border border-blue-400/30 bg-gradient-to-br from-blue-500/10 to-sky-500/10 p-5">
-                            <div class="mb-3 flex items-center gap-2">
-                                <span class="inline-flex items-center rounded px-2 py-0.5 font-mono text-xs font-bold text-emerald-300" style="background: rgba(16,185,129,0.2);">201</span>
-                                <span class="text-sm font-medium text-emerald-400">Created</span>
-                            </div>
-                            <div class="rounded-lg bg-black/20 p-3 font-mono text-xs leading-relaxed text-gray-300">
-                                <span class="text-gray-500">{</span><br>
-                                &nbsp;&nbsp;<span class="text-blue-400">"id"</span>: <span class="text-amber-400">4829</span>,<br>
-                                &nbsp;&nbsp;<span class="text-blue-400">"name"</span>: <span class="text-emerald-400">"Jazz Night"</span>,<br>
-                                &nbsp;&nbsp;<span class="text-blue-400">"status"</span>: <span class="text-emerald-400">"published"</span><br>
-                                <span class="text-gray-500">}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex flex-wrap justify-center gap-3">
-                        @foreach (['llms.txt', 'agents.json', 'openapi.json'] as $file)
-                            <span class="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-sm text-gray-300">
-                                <svg aria-hidden="true" class="h-3.5 w-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                                {{ $file }}
-                            </span>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 4. Import and parse events                                  -->
-    <!-- ============================================================ -->
-    <section class="bg-white py-20 dark:bg-[#0a0a0f] lg:py-24">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>Import and parse events with <span class="text-gradient-ai">AI</span></h2>
-                <p class="mt-4 text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">Paste text, drop an image, or send a WhatsApp message.</p>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="100">
-
-                <!-- Parse any format (2 cols) -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="flex flex-col items-center gap-8 lg:flex-row">
-                            <div class="flex-1">
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 dark:border-blue-800/30 dark:bg-blue-900/40 dark:text-blue-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                                    Smart Parsing
-                                </div>
-                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Parse any format</h3>
-                                <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">Flyers, emails, agendas, and setlists. Paste the text or drop an image and AI extracts event name, date, time, venue, and description. Multi-event images are parsed into individual events automatically.</p>
-                                <div class="flex flex-wrap gap-3">
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Text parsing</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Image recognition</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Any language</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Agendas & setlists</span>
-                                </div>
-                            </div>
-                            <div class="w-full shrink-0 lg:w-auto" aria-hidden="true">
-                                <div class="animate-float">
-                                    <div class="mb-4 max-w-xs rounded-2xl border border-gray-200 bg-gray-200 p-4 dark:border-white/10 dark:bg-[#0f0f14]">
-                                        <div class="mb-2 text-xs text-gray-400">Paste or drop</div>
-                                        <div class="font-mono text-sm leading-relaxed text-gray-600 dark:text-gray-300">Jazz Night at Blue Note<br>Friday, March 15 at 8pm<br>Featuring the Sarah Johnson Trio<br>Tickets: $25 at the door</div>
-                                    </div>
-                                    <div class="my-2 flex justify-center">
-                                        <svg aria-hidden="true" class="es-sync-dot h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
-                                    </div>
-                                    <div class="max-w-xs rounded-2xl border border-blue-400/30 bg-gradient-to-br from-blue-500/20 to-sky-500/20 p-4">
-                                        <div class="mb-2 text-xs text-blue-700 dark:text-blue-300">Extracted</div>
-                                        <div class="space-y-2 text-sm">
-                                            <div class="es-ai-field flex justify-between" style="--i: 0;"><span class="text-blue-700 dark:text-white/60">Name:</span><span class="text-blue-900 dark:text-white">Jazz Night</span></div>
-                                            <div class="es-ai-field flex justify-between" style="--i: 1;"><span class="text-blue-700 dark:text-white/60">Date:</span><span class="text-blue-900 dark:text-white">Mar 15, 8:00 PM</span></div>
-                                            <div class="es-ai-field flex justify-between" style="--i: 2;"><span class="text-blue-700 dark:text-white/60">Venue:</span><span class="text-blue-900 dark:text-white">Blue Note</span></div>
-                                            <div class="es-ai-field flex justify-between" style="--i: 3;"><span class="text-blue-700 dark:text-white/60">Talent:</span><span class="text-blue-900 dark:text-white">Sarah Johnson Trio</span></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Instant translation -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-800/30 dark:bg-sky-900/40 dark:text-sky-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" /></svg>
-                            Translation
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Instant translation</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Translate your entire schedule automatically. Choose which language to translate into, and visitors can switch between your language and the translation. Support for 12 languages including English, Spanish, French, German, and more.</p>
-                        <div class="mt-auto flex flex-wrap justify-center gap-2" aria-hidden="true">
-                            @foreach (['EN', 'ES', 'FR', 'DE', 'IT', 'PT', 'NL', 'HE', 'AR'] as $li => $lang)
-                                <span class="es-ai-field inline-flex items-center rounded-lg bg-gray-200 px-3 py-1.5 text-sm font-medium text-gray-900 dark:bg-white/10 dark:text-white" style="--i: {{ $li }};">{{ $lang }}</span>
-                            @endforeach
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Auto-link venues & talent -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/40 dark:text-emerald-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
-                            Smart Linking
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Auto-link venues & talent</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">AI matches parsed events to existing venues and performers in your schedule using fuzzy matching.</p>
-                        <div class="mt-auto rounded-xl border border-gray-200 bg-gray-100 p-4 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
-                            <div class="es-ai-field mb-3 flex items-center gap-3" style="--i: 0;">
-                                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/20"><svg aria-hidden="true" class="h-4 w-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></div>
-                                <div><div class="text-sm font-medium text-gray-900 dark:text-white">Blue Note Jazz Club</div><div class="text-xs text-emerald-600 dark:text-emerald-400">Matched to existing venue</div></div>
-                            </div>
-                            <div class="es-ai-field flex items-center gap-3" style="--i: 1;">
-                                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/20"><svg aria-hidden="true" class="h-4 w-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></div>
-                                <div><div class="text-sm font-medium text-gray-900 dark:text-white">Sarah Johnson Trio</div><div class="text-xs text-emerald-600 dark:text-emerald-400">Matched to existing talent</div></div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Any input works (2 cols) -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="grid items-center gap-8 md:grid-cols-2">
-                            <div>
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-800/30 dark:bg-sky-900/40 dark:text-sky-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                    Multiple Formats
-                                </div>
-                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white">Any input works</h3>
-                                <p class="text-lg text-gray-500 dark:text-gray-400">Text, images, screenshots, and flyers. Drop it in and AI figures out the rest.</p>
-                            </div>
-                            <div class="grid grid-cols-2 gap-4" aria-hidden="true">
-                                @foreach ([['Text', 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'], ['Images', 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'], ['Flyers', 'M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z'], ['Agendas', 'M4 6h16M4 10h16M4 14h16M4 18h16']] as $fi => [$label, $path])
-                                    <div class="es-ai-field rounded-xl border border-gray-200 bg-gray-100 p-4 text-center dark:border-white/10 dark:bg-[#0f0f14]" style="--i: {{ $fi }};">
-                                        <svg aria-hidden="true" class="mx-auto mb-2 h-8 w-8 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="{{ $path }}" /></svg>
-                                        <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $label }}</div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Scan a printed agenda (2 cols) -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="grid items-center gap-8 md:grid-cols-2">
-                            <div>
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-800/30 dark:bg-amber-900/40 dark:text-amber-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
-                                    Agenda Scanning
-                                </div>
-                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white">Scan a printed agenda</h3>
-                                <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">Point your camera at a printed agenda or upload an image. AI reads each line item and populates your event's parts automatically - sessions, acts, segments, and more.</p>
-                                <div class="flex flex-wrap gap-3">
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Camera capture</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Image upload</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Auto-populate parts</span>
-                                </div>
-                            </div>
-                            <div class="flex items-center justify-center" aria-hidden="true">
-                                <div>
-                                    <div class="mb-4 max-w-xs rounded-2xl border border-gray-200 bg-gray-200 p-4 dark:border-white/10 dark:bg-[#0f0f14]">
-                                        <div class="mb-2 text-xs text-gray-400">Printed agenda</div>
-                                        <div class="font-mono text-sm leading-relaxed text-gray-600 dark:text-gray-300">9:00 AM - Opening Keynote<br>10:30 AM - Panel Discussion<br>12:00 PM - Lunch Break<br>1:30 PM - Workshop A</div>
-                                    </div>
-                                    <div class="my-2 flex justify-center">
-                                        <svg aria-hidden="true" class="es-sync-dot h-6 w-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
-                                    </div>
-                                    <div class="max-w-xs rounded-2xl border border-amber-400/30 bg-gradient-to-br from-amber-500/20 to-orange-500/20 p-4">
-                                        <div class="mb-2 text-xs text-amber-700 dark:text-amber-300">Event parts</div>
-                                        <div class="space-y-1.5">
-                                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-amber-400/20 p-1.5" style="--i: 0;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-xs text-gray-900 dark:text-white">Opening Keynote</span><span class="ml-auto text-[10px] text-amber-700 dark:text-amber-300">9:00 AM</span></div>
-                                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-amber-400/10 p-1.5" style="--i: 1;"><div class="h-1.5 w-1.5 rounded-full bg-orange-400"></div><span class="text-xs text-gray-600 dark:text-gray-300">Panel Discussion</span><span class="ml-auto text-[10px] text-gray-500 dark:text-gray-400">10:30 AM</span></div>
-                                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-amber-400/10 p-1.5" style="--i: 2;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-xs text-gray-600 dark:text-gray-300">Workshop A</span><span class="ml-auto text-[10px] text-gray-500 dark:text-gray-400">1:30 PM</span></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Guide the AI (custom prompts) -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-blue-200 bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 dark:border-blue-800/30 dark:bg-blue-900/40 dark:text-blue-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                            Custom Prompts
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Guide the AI</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Add custom instructions to help AI understand your agenda format. Set prompts per event or as a default for your entire schedule.</p>
-                        <div class="mt-auto rounded-xl border border-gray-200 bg-gray-100 p-4 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
-                            <div class="mb-2 text-xs text-gray-500 dark:text-gray-400">Custom prompt</div>
-                            <div class="rounded-lg border border-blue-400/20 bg-blue-500/10 p-3">
-                                <div class="font-mono text-xs leading-relaxed text-blue-900 dark:text-blue-200">"Each line is a session.<br>Format: time - speaker - topic.<br>Ignore lunch breaks."</div>
-                            </div>
-                            <div class="mt-3 flex items-center gap-2 text-[10px] text-gray-500 dark:text-gray-400">
-                                <svg aria-hidden="true" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                Per-event or schedule-wide
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- WhatsApp (3 cols) -->
-                <div class="es-bento group relative md:col-span-2 lg:col-span-3" data-tilt="2.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="grid items-center gap-8 md:grid-cols-2">
-                            <div>
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/40 dark:text-emerald-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-                                    WhatsApp
-                                </div>
-                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white">Create events via WhatsApp</h3>
-                                <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">Send a text message or photo of a flyer to your schedule's WhatsApp number. AI parses the details, generates a flyer, and adds the event automatically.</p>
-                                <div class="mb-4 flex flex-wrap gap-3">
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Text or photo</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Auto-flyer</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Auto-curate</span>
-                                </div>
-                                <span class="inline-flex items-center rounded-full border border-amber-200 bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/20 dark:text-amber-300">Enterprise</span>
-                            </div>
-                            <div class="flex items-center justify-center" aria-hidden="true">
-                                <div class="w-full max-w-xs">
-                                    <div class="es-ai-field mb-3 rounded-2xl border border-gray-200 bg-gray-200 p-4 dark:border-white/10 dark:bg-[#0f0f14]" style="--i: 0;">
-                                        <div class="mb-2 flex items-center gap-2">
-                                            <div class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/20"><svg aria-hidden="true" class="h-3 w-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg></div>
-                                            <span class="text-xs text-gray-500 dark:text-gray-400">Incoming</span>
-                                        </div>
-                                        <div class="text-sm leading-relaxed text-gray-600 dark:text-gray-300">Jazz Night at Blue Note<br>Friday March 15 at 8pm</div>
-                                    </div>
-                                    <div class="es-ai-field rounded-2xl border border-emerald-400/30 bg-gradient-to-br from-emerald-500/20 to-green-500/20 p-4" style="--i: 1;">
-                                        <div class="mb-2 flex items-center gap-2">
-                                            <svg aria-hidden="true" class="h-4 w-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                                            <span class="text-xs font-medium text-emerald-700 dark:text-emerald-300">Event created</span>
-                                        </div>
-                                        <div class="text-sm text-gray-600 dark:text-gray-300">Jazz Night added to your schedule with auto-generated flyer.</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 5. How it works                                             -->
-    <!-- ============================================================ -->
     @php
-        $steps = [
-            ['1', 'Pick a feature', 'Import events, generate content, create your style, or process graphic text.'],
-            ['2', 'Provide input', 'Paste text, drop an image, or add custom instructions.'],
-            ['3', 'AI does the work', 'AI generates the result in seconds.'],
-            ['4', 'Review and save', 'Preview, edit if needed, and apply.'],
+        // A plausible near date: the parser is told the event falls in this month
+        // or the next, and GeminiUtils::parseEvent then nulls any parsed date more
+        // than three days in the past or more than two months out rather than
+        // letting a guessed year through.
+        $demo = \Illuminate\Support\Carbon::now()->addDays(18)->setTime(20, 0);
+
+        // Terminal one: the kind of scrap people actually send a curator.
+        $scrapLines = [
+            'Sarah Johnson Trio',
+            'Blue Note, '.$demo->format('D M j').', doors 8pm',
+            '$25 on the door',
+            'tickets: bluenote.example/tix',
+        ];
+
+        // Terminal two: what came out. Keys are the real field names.
+        $landed = [
+            ['event_name', 'Sarah Johnson Trio'],
+            ['event_date_time', $demo->format('Y-m-d H:i')],
+            ['venue_name', 'Blue Note'],
+            ['performer_name', 'Sarah Johnson Trio'],
+            ['ticket_price', '25'],
+            ['ticket_currency', 'USD'],
+            ['registration_url', 'bluenote.example/tix'],
+        ];
+
+        // The full manifest: every field GeminiUtils::parseEvent asks Gemini for,
+        // grouped, with what actually lands in it.
+        $manifest = [
+            ['The event itself', [
+                ['event_name', 'Kept in the language it was written in.'],
+                ['event_short_name', 'A two to five word version, used to build the URL.'],
+                ['short_description', 'A one line summary, capped at 200 characters.'],
+                ['event_details', 'The long description, as markdown.'],
+                ['category_name', 'Matched against your own category list: exact first, then partial, then a similarity match above 70 percent.'],
+            ]],
+            ['When', [
+                ['event_date_time', 'YYYY-MM-DD HH:MM. With no time given at all it defaults to 20:00.'],
+                ['event_duration', 'In hours. There is no separate end column: the end is the start plus the duration.'],
+            ]],
+            ['Where', [
+                ['venue_name', 'The name the venue lookup starts from. See the ladder below.'],
+                ['event_address', 'The street line only, without the city or the state. Falls back to your own street when the source names none.'],
+                ['event_city', 'The city, which is what narrows the venue lookup to the right one.'],
+                ['event_state', 'Region or state, when the source names one.'],
+                ['event_postal_code', 'When the source names one.'],
+                ['event_country_code', 'Normalised to a lowercase two letter ISO code, so "ISR" arrives as "il".'],
+                ['venue_email', 'Only if the source actually printed one.'],
+                ['venue_website', 'Only if the source actually printed one.'],
+            ]],
+            ['Who', [
+                ['performer_name', 'One per performer. Several distinct performers become several events, not one crowded event.'],
+                ['performer_email', 'Only if the source printed one.'],
+                ['performer_website', 'Only if the source printed one.'],
+            ]],
+            ['Money and links', [
+                ['ticket_price', 'The number only, with no currency symbol.'],
+                ['ticket_currency', 'A currency code, when a price was mentioned.'],
+                ['registration_url', 'Kept as the registration link, and its preview image becomes the event image.'],
+            ]],
+        ];
+
+        // The venue resolution ladder, in the order the code tries it. Rungs 1 to 3
+        // are GeminiUtils::parseEvent; rung 4 is the safety-net lookup in
+        // EventRepo::saveEvent that runs however the event was submitted.
+        $ladder = [
+            ['01', 'A venue you already own with this name', 'Owning it is the strongest possible signal, so no city and no country are needed. Matched on the normalised name or the normalised translated name.', 0],
+            ['02', 'Same city, and the same name or the same street', 'Plus the country when there is one. Both sides are normalised first, so curly quotes, long dashes, stray spaces and capitals cannot break a match that should have worked.', 1],
+            ['03', 'A venue already connected to this schedule', 'Anywhere this schedule already shares an event with, including venues another admin or a calendar sync added. Name or street, no city required.', 2],
+            ['04', 'One more look when you press save', 'The normalised name, plus the city and country when they are there, is looked up again at save time. That check does not care which screen the event came from: AI import, the ordinary event form or a guest submission all get it.', 3],
+            ['05', 'Nothing matched', 'Only now is a venue created, from the address you just checked in the preview. Nothing is quietly merged into the wrong room.', 4],
+        ];
+
+        // Enterprise generation set. Every row is a separate controller action.
+        $generates = [
+            [
+                'Schedule descriptions',
+                'A short description and a full markdown description for the schedule itself, from its name, type and categories.',
+                'RoleController::generateScheduleDetails',
+            ],
+            [
+                'Event descriptions',
+                'A category, a short description and a full description for one event, from its name and the context around it.',
+                'EventController::generateEventDetails',
+            ],
+            [
+                'A flyer image',
+                'A poster generated from the event details you already typed, with optional style instructions, regenerated until it is right.',
+                'EventController::generateFlyer',
+            ],
+            [
+                'A whole schedule style',
+                'Profile image, header image, background image, accent colour and font. Ask for all five or regenerate just one.',
+                'RoleController::generateStyle',
+            ],
+            [
+                'Graphic email text',
+                'A pass over the event list text that goes out with your graphic emails, driven by a prompt you save on the schedule.',
+                'GraphicController::processGraphicAIText',
+            ],
+            [
+                'Event parts from an agenda',
+                'Name, description, start time and end time for each line of a printed agenda or a setlist.',
+                'EventController::parseEventParts',
+            ],
+        ];
+
+        // Honest allowance board. Caps come from config/usage.php; every one of
+        // them returns null (no cap) when the install is selfhosted.
+        $board = [
+            ['Parse an event from text or an image', 'Every plan', '10 to 100 a day, by plan'],
+            ['Translate the whole schedule', 'Every plan', 'Hourly background job'],
+            ['Scan an agenda into event parts', 'Enterprise', '10 a day'],
+            ['Write a schedule or event description', 'Enterprise', '50 a day'],
+            ['Pass graphic email text through AI', 'Enterprise', '50 a day'],
+            ['Generate a flyer or a style image', 'Enterprise', '3 a day on trial, 10 once paid'],
+            ['Create an event over WhatsApp', 'Enterprise', 'Counts against the parse allowance'],
+        ];
+
+        // Language names come from config so the count, the chip strip and the FAQ
+        // answer cannot drift apart the way the old page's "12" and its nine chips did.
+        $langNames = collect(config('app.supported_languages'))->map(fn ($n) => ucfirst($n))->values()->sort()->values()->all();
+        $langCount = count($langNames);
+        $langList = implode(', ', array_slice($langNames, 0, -1)).' and '.$langNames[$langCount - 1];
+
+        $faqs = [
+            [
+                'q' => 'What can the AI parser read?',
+                'a' => 'Text you paste or type, and one image you drop, paste from the clipboard, or pick from a file dialog. Images can be JPEG, PNG, GIF or WebP, so a photo of a poster, a screenshot of a message and an exported flyer all work. What it cannot do is read a web page for you. A registration link is followed once for its preview image, but nothing on that page is mined for the details, so paste the text off the page rather than the link to it.',
+            ],
+            [
+                'q' => 'Can one image become several events?',
+                'a' => 'Yes. The parser returns a list, not a single record, and it is told to split distinct performers into separate events. A month grid or a festival line-up comes back as one row per event, each with its own date, venue and performer, and you save them one at a time or all together.',
+            ],
+            [
+                'q' => 'Which AI features are free and which are Enterprise?',
+                'a' => 'Event parsing and whole-schedule translation are on every plan, including the free one. Agenda scanning into event parts, description writing, flyer generation, schedule style generation, the AI pass over graphic email text and event creation over WhatsApp are Enterprise. Parsing is metered by a daily allowance rather than a plan gate, and a selfhosted install has no cap at all.',
+            ],
+            [
+                'q' => 'Does the AI ever save anything without me?',
+                'a' => 'Not from the import screen. Parsed events land in a preview where every field is an editable input, and nothing reaches your schedule until you save that row. The one exception is WhatsApp on Enterprise, which is designed to be hands free: it parses the message and creates the event, then messages you back a link so you can go and correct it.',
+            ],
+            [
+                'q' => 'Will it create a duplicate venue?',
+                'a' => 'It tries hard not to. Before making anything, it looks for a venue you already own with that name, then for a venue in the same city with the same name or street, then among the venues this schedule already shares an event with. When you press save the normalised name, city and country are looked up one more time, whatever screen the event came from. Only when all of that misses is a venue created, from the address you checked in the preview. Performers get a shorter version of the same treatment: the parsed name plus your country first, then the talent this schedule already works with.',
+            ],
+            [
+                'q' => 'What if the event is already on my schedule?',
+                'a' => 'The preview tells you. If an upcoming event on this schedule already has the same registration link, or the same start time plus the same venue address or the same performer, the row links to the event that exists instead of quietly making a second copy of it.',
+            ],
+            [
+                'q' => 'Can I teach it my agenda format?',
+                'a' => 'Yes, for agenda scanning. You can write instructions like "each line is a session, format is time then speaker then topic, ignore the lunch breaks" and either use them once or save them as the default for the whole schedule, with a per event override. Agenda scanning is an Enterprise feature.',
+            ],
+            [
+                'q' => 'Which languages does it work in?',
+                'a' => 'Parsing is not restricted to a list: fields are kept in the language they were written in, and where a translated twin exists the AI fills that too. The separate translation feature covers '.$langCount.' languages: '.$langList.'. Pick one target language for the schedule and visitors can switch between your language and it.',
+            ],
+            [
+                'q' => 'Which models are behind this, and what if I selfhost?',
+                'a' => 'Text parsing, writing and translation go to Google Gemini, and image generation to OpenAI, both configurable. A selfhosted install brings its own API keys, which is why the daily allowances do not apply there: you are paying the model provider directly rather than us.',
+            ],
+        ];
+
+        $dotSections = [
+            ['top', 'The gap'],
+            ['crosses', 'What crosses'],
+            ['manifest', 'The record'],
+            ['match', 'The ladder'],
+            ['agenda', 'The agenda'],
+            ['generate', 'What else it lights'],
+            ['languages', 'Languages'],
+            ['whatsapp', 'WhatsApp'],
+            ['allowance', 'Allowances'],
+            ['next', 'Next'],
+            ['faq', 'Questions'],
+            ['claim', 'Start'],
         ];
     @endphp
-    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-24">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-2xl text-center">
-                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>How it <span class="text-gradient-ai">works</span></h2>
-                <p class="mt-4 text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">Four steps from input to output.</p>
-            </div>
 
-            <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4" data-reveal-group="90">
-                @foreach ($steps as [$num, $title, $desc])
-                    <div data-reveal class="text-center">
-                        <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-sky-500 text-2xl font-bold text-white shadow-lg shadow-blue-500/25">{{ $num }}</div>
-                        <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{{ $title }}</h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ $desc }}</p>
+    <div id="es-spark-page" class="es-spark-page">
+
+    <!-- ============================================================ -->
+    <!-- 1. Hero: the gap, and one thing crossing it                  -->
+    <!-- ============================================================ -->
+    <section id="top" class="es-hero noise relative flex min-h-[calc(88svh-4rem)] scroll-mt-24 items-center overflow-hidden py-16">
+        <div class="absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 32%, rgba(29, 78, 216, 0.2), rgba(29, 78, 216, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 72% 42%, rgba(147, 197, 253, 0.14), rgba(147, 197, 253, 0) 65%);"></div>
+            <div class="es-spot absolute inset-0"></div>
+            <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
+        </div>
+
+        <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-14 lg:grid-cols-[1.05fr_1fr]">
+                <div>
+                    <div class="es-fade-up es-d-1 glass mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2.5">
+                        <svg aria-hidden="true" class="es-spark-accent h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 3L5 14h5l-1 7 8-11h-5l1-7z" />
+                        </svg>
+                        <span class="es-spark-muted text-sm font-medium tracking-wide">AI features, described exactly</span>
                     </div>
-                @endforeach
+
+                    <h1 class="es-balance es-spark-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <span class="es-mask"><span class="es-mask-line">A poster is not an event.</span></span>
+                        <span class="es-mask es-mask-2"><span class="es-mask-line">Something has to <span class="es-spark-accent">cross the gap.</span></span></span>
+                    </h1>
+
+                    <p class="es-fade-up es-d-2 es-spark-muted mb-10 max-w-xl text-lg sm:text-xl">
+                        On one side, the scrap somebody sent you. On the other, the fields a listing needs: a date, a duration, a venue, a price, a currency. Paste the text or drop the image, and the AI fills the form. You still get the last word on every field.
+                    </p>
+
+                    <div class="es-fade-up es-d-3 flex flex-col items-start gap-4 sm:flex-row">
+                        <a href="{{ app_url('/sign_up') }}" class="es-spark-btn group inline-flex items-center justify-center gap-2 rounded-2xl px-8 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
+                            Try it free
+                            <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </a>
+                        <a href="{{ route('marketing.docs.ai_import') }}" class="glass group inline-flex items-center justify-center gap-2 rounded-2xl px-7 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+                            Read the AI Import guide
+                            <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- The gap, vertical: scrap above, record below, exactly as the
+                     import screen is laid out. -->
+                <div class="es-fade-up es-d-4" data-reveal>
+                    <div class="es-spark-card p-6 sm:p-7">
+                        <p class="es-spark-tag mb-3">What you were sent</p>
+                        <div class="es-spark-scrap">
+                            <p class="es-spark-mono es-spark-muted text-[0.8rem] leading-relaxed">
+                                @foreach ($scrapLines as $line)
+                                    {{ $line }}@if (! $loop->last)<br>@endif
+                                @endforeach
+                            </p>
+                        </div>
+
+                        <div class="es-spark-arcv my-3" aria-hidden="true"></div>
+
+                        <p class="es-spark-tag mb-3">What the form receives</p>
+                        <div class="es-spark-rec">
+                            @foreach ($landed as [$k, $v])
+                                <div class="es-spark-row">
+                                    <span class="es-spark-key">{{ $k }}</span>
+                                    <span class="es-spark-val es-spark-ink">{{ $v }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <p class="es-spark-muted es-spark-sep mt-5 pt-4 text-xs">
+                            Every one of those is an editable input in the preview. Nothing is saved to your schedule until you save the row.
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- 6. Powered by Gemini & OpenAI                               -->
+    <!-- 2. What crosses, and what does not                           -->
     <!-- ============================================================ -->
-    <section class="border-t border-gray-200 bg-white py-20 dark:border-white/5 dark:bg-[#0a0a0f] lg:py-24">
-        <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <div class="mb-12 text-center">
-                <div class="mb-8 inline-flex h-20 w-20 items-center justify-center rounded-3xl border border-blue-500/30 bg-gradient-to-br from-blue-500/20 to-sky-500/20" data-reveal>
-                    <svg aria-hidden="true" class="h-10 w-10 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" /></svg>
+    <section id="crosses" class="scroll-mt-24 es-spark-edge py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-spark-mark mb-6" data-reveal aria-hidden="true">
+                    <span class="es-spark-num">01</span>
+                    <span class="es-spark-arc"></span>
                 </div>
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>Powered by Google Gemini & OpenAI</h2>
-                <p class="mx-auto max-w-2xl text-xl text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.1s;">Gemini handles text parsing and generation, while OpenAI DALL-E creates stunning images.</p>
-            </div>
-
-            <div class="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4" data-reveal-group="80">
-                @foreach ([['Best of both', 'Gemini for text, OpenAI for image generation'], ['Fast', 'Events parsed and content generated in seconds'], ['Multimodal', 'Works with text, images, screenshots, and flyers'], ['Any language', 'Parse and generate content in any language']] as [$stat, $sub])
-                    <div data-reveal class="ap-card rounded-2xl border border-gray-200 bg-white p-6 text-center dark:border-white/10 dark:bg-white/5">
-                        <div class="mb-1 text-2xl font-bold text-gray-900 dark:text-white">{{ $stat }}</div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $sub }}</p>
-                    </div>
-                @endforeach
-            </div>
-
-            <div class="text-center" data-reveal>
-                <p class="text-sm text-gray-500 dark:text-gray-400">
-                    Selfhosted users bring their own API keys.
-                    <x-link href="{{ route('marketing.docs.selfhost.ai') }}">Learn more</x-link>
+                <p class="es-spark-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The gap is narrow on purpose</p>
+                <h2 class="es-balance es-spark-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Two inputs cross it. <span class="es-spark-accent">A link does not.</span>
+                </h2>
+                <p class="es-spark-muted mx-auto mt-5 max-w-2xl text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Most tools are vague about this and you find out the hard way. So here it is plainly: the parser reads what you hand it, and it does not go browsing.
                 </p>
             </div>
-        </div>
-    </section>
 
-    <!-- ============================================================ -->
-    <!-- 7. Guide & next feature                                     -->
-    <!-- ============================================================ -->
-    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14]">
-        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="80">
-
-                <a href="{{ route('marketing.docs.creating_events') }}" data-reveal class="group block">
-                    <div class="ap-card flex h-full flex-col rounded-3xl border border-gray-200 bg-white p-8 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-white/5 lg:p-10">
-                        <div class="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-blue-500/20 bg-blue-500/10">
-                            <svg aria-hidden="true" class="h-6 w-6 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">Read the guide</h3>
-                        <p class="mb-4 text-lg text-gray-500 dark:text-gray-400">Learn how to use all AI-powered features.</p>
-                        <span class="mt-auto inline-flex items-center gap-2 font-medium text-blue-500 transition-all group-hover:gap-3 dark:text-blue-400">
-                            Read guide
-                            <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                        </span>
-                    </div>
-                </a>
-
-                <a href="{{ route('marketing.newsletters') }}" data-reveal class="group block">
-                    <div class="flex h-full flex-col rounded-3xl border border-sky-200 bg-gradient-to-br from-sky-100 to-cyan-100 p-8 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:from-sky-900 dark:to-cyan-900 lg:p-10">
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 transition-colors group-hover:text-sky-600 dark:text-white dark:group-hover:text-sky-300">Newsletters</h3>
-                        <p class="mb-4 text-lg text-gray-500 dark:text-white/80">Send branded newsletters to followers and ticket buyers with drag-and-drop building and A/B testing.</p>
-                        <span class="mt-auto inline-flex items-center gap-2 font-medium text-sky-500 transition-all group-hover:gap-3 dark:text-sky-400">
-                            Learn more
-                            <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                        </span>
-                    </div>
-                </a>
-
-                <div data-reveal class="ap-card flex h-full flex-col rounded-3xl border border-gray-200 bg-white p-8 dark:border-white/10 dark:bg-white/5 lg:p-10">
-                    <div class="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-sky-500/20 bg-sky-500/10">
-                        <svg aria-hidden="true" class="h-6 w-6 text-sky-500 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                    </div>
-                    <h3 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Popular with</h3>
-                    <div class="space-y-3">
-                        @foreach ([['/for-curators', 'Curators'], ['/for-musicians', 'Musicians'], ['/for-venues', 'Venues']] as [$href, $label])
-                            <a href="{{ marketing_url($href) }}" class="group/link flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 p-3 transition-all hover:border-sky-300 hover:bg-gray-100 dark:border-white/10 dark:bg-white/5 dark:hover:border-sky-500/30 dark:hover:bg-white/10">
-                                <span class="font-medium text-gray-900 dark:text-white">{{ $label }}</span>
-                                <svg aria-hidden="true" class="h-4 w-4 text-gray-400 transition-colors group-hover/link:text-sky-500 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                            </a>
-                        @endforeach
+            <div class="grid gap-4 lg:grid-cols-3" data-reveal-group="90">
+                <div class="es-spark-card flex h-full flex-col p-7" data-reveal="panel">
+                    <span class="es-spark-num mb-4">IN</span>
+                    <h3 class="es-spark-ink mb-3 text-xl font-bold">Text you paste or type</h3>
+                    <p class="es-spark-muted mb-5">A forwarded email, a message thread, a line off a listings page, a setlist. Any language: fields come back in the language they were written in, and the translated twins get filled alongside them.</p>
+                    <div class="mt-auto flex flex-wrap gap-2">
+                        <span class="es-spark-chip">Paste</span>
+                        <span class="es-spark-chip">Type</span>
+                        <span class="es-spark-chip">Any language</span>
                     </div>
                 </div>
 
+                <div class="es-spark-card flex h-full flex-col p-7" data-reveal="panel">
+                    <span class="es-spark-num mb-4">IN</span>
+                    <h3 class="es-spark-ink mb-3 text-xl font-bold">One image, however you have it</h3>
+                    <p class="es-spark-muted mb-5">Drag it onto the box, paste it out of your clipboard, or pick a file. JPEG, PNG, GIF and WebP, which covers a phone photo of a poster and a screenshot of a group chat. The image can become the event image too.</p>
+                    <div class="mt-auto flex flex-wrap gap-2">
+                        <span class="es-spark-chip">Drop</span>
+                        <span class="es-spark-chip">Paste</span>
+                        <span class="es-spark-chip">Upload</span>
+                    </div>
+                </div>
+
+                <div class="es-spark-card flex h-full flex-col p-7" data-reveal="panel">
+                    <span class="es-spark-num mb-4">NOT IN</span>
+                    <h3 class="es-spark-ink mb-3 text-xl font-bold">A URL for it to read</h3>
+                    <p class="es-spark-muted mb-5">The parser never reads a web page for event details, so a bare link on its own gives it nothing to work with. Open the page, copy the text, paste that. A ticket link inside your text is kept as the registration link and followed once for its preview image, which becomes the event image, but the page behind it is never mined for the date, the venue or the price.</p>
+                    <p class="es-spark-muted mt-auto text-sm">
+                        A <a href="{{ marketing_url('/selfhost') }}" class="es-spark-link font-semibold hover:underline">selfhosted install</a> is the one exception: a schedule there can be given a list of source pages and cities and swept once a day by the import command. That runs on your own server with your own keys, so it is not part of the hosted service.
+                    </p>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- 8. FAQ                                                      -->
+    <!-- 3. The record: the field manifest                            -->
     <!-- ============================================================ -->
-    <section class="bg-gray-100 py-20 dark:bg-black/30 lg:py-28">
-        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>Frequently asked <span class="text-gradient-ai">questions</span></h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">Everything you need to know about AI features.</p>
+    <section id="manifest" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-spark-mark mb-6" data-reveal aria-hidden="true">
+                    <span class="es-spark-num">02</span>
+                    <span class="es-spark-arc"></span>
+                </div>
+                <p class="es-spark-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The far terminal</p>
+                <h2 class="es-balance es-spark-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
+                    The record it has to <span class="es-spark-accent">land in.</span>
+                </h2>
+                <p class="es-spark-muted mx-auto mt-5 max-w-2xl text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Not a blob of text with a date somewhere in it. These are the fields the extraction actually asks for, and the ones you will be editing in the preview.
+                </p>
             </div>
 
-            <div class="space-y-4" data-reveal-group="80">
+            <div class="es-spark-card overflow-x-auto p-6 sm:p-8" data-reveal="panel">
+                <table class="es-spark-table">
+                    <caption class="sr-only">Every field the AI parser extracts, grouped, with what lands in each one</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col" class="es-spark-tag">Field</th>
+                            <th scope="col" class="es-spark-tag">What lands in it</th>
+                        </tr>
+                    </thead>
+                    @foreach ($manifest as [$groupName, $rows])
+                        <tbody>
+                            <tr class="es-spark-group">
+                                <th scope="colgroup" colspan="2">{{ $groupName }}</th>
+                            </tr>
+                            @foreach ($rows as [$field, $desc])
+                                <tr>
+                                    <th scope="row" class="es-spark-field">{{ $field }}</th>
+                                    <td class="es-spark-muted text-sm">{{ $desc }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    @endforeach
+                </table>
+            </div>
+
+            <div class="mt-4 grid gap-4 md:grid-cols-2" data-reveal-group="90">
+                <div class="es-spark-card p-7" data-reveal="panel">
+                    <h3 class="es-spark-ink mb-3 text-lg font-bold">Translated twins, filled in the same pass</h3>
+                    <p class="es-spark-muted text-sm">Name, short name, short description, address, city, state, venue name and performer name each have a translated twin, and the twin is asked for only when the main field is not already English. If your schedule language is not English the AI is told outright: keep the original wording in the main field, put the translation in the twin, rather than quietly overwriting one with the other.</p>
+                </div>
+                <div class="es-spark-card flex flex-col p-7" data-reveal="panel">
+                    <div class="mb-3 flex flex-wrap items-center gap-2">
+                        <h3 class="es-spark-ink text-lg font-bold">Your own custom fields, too</h3>
+                        <span class="es-spark-plan es-spark-plan-alt">Pro</span>
+                    </div>
+                    <p class="es-spark-muted text-sm">Custom fields you have added to events are appended to the extraction list with their type, their options and any hint you wrote for them, so a dropdown comes back as one of your options and a switch comes back as yes or no.</p>
+                    <p class="mt-auto pt-4">
+                        <x-link href="{{ marketing_url('/features/custom-fields') }}">About custom fields</x-link>
+                    </p>
+                </div>
+            </div>
+
+            <div class="es-spark-card mt-4 p-7 sm:p-8" data-reveal="panel">
+                <div class="grid items-center gap-8 md:grid-cols-2">
+                    <div>
+                        <h3 class="es-spark-ink mb-3 text-xl font-bold">One document, several events</h3>
+                        <p class="es-spark-muted mb-4">The parser returns a list, not a single record, and it is told to split distinct performers into separate events. A month grid, a festival line-up or a weekend of three sets comes back as one row per event, each with its own date, venue and performer.</p>
+                        <p class="es-spark-muted text-sm">Save them one at a time as you check them, or work down the list. A row that turns out to be nonsense is simply not saved.</p>
+                    </div>
+                    <div aria-hidden="true">
+                        <div class="es-spark-scrap mb-3">
+                            <p class="es-spark-mono es-spark-muted text-[0.7rem] leading-relaxed">one image: 3 acts, 3 dates</p>
+                        </div>
+                        <div class="es-spark-arcv mb-3"></div>
+                        <div class="space-y-2">
+                            @foreach ([['Sarah Johnson Trio', 'Blue Note'], ['The Wickers', 'Blue Note'], ['Ana Dorset', 'The Lamp Room']] as $ri => [$who, $where])
+                                <div class="es-spark-rec">
+                                    <div class="es-spark-row">
+                                        <span class="es-spark-key">event_name</span>
+                                        <span class="es-spark-val es-spark-ink">{{ $who }}</span>
+                                    </div>
+                                    <div class="es-spark-row">
+                                        <span class="es-spark-key">venue_name</span>
+                                        <span class="es-spark-val es-spark-ink">{{ $where }}</span>
+                                    </div>
+                                    <div class="es-spark-row">
+                                        <span class="es-spark-key">event_date_time</span>
+                                        <span class="es-spark-val es-spark-ink">{{ $demo->copy()->addDays($ri * 7)->format('Y-m-d H:i') }}</span>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 4. The ladder: how a venue is resolved                       -->
+    <!-- ============================================================ -->
+    <section id="match" class="scroll-mt-24 es-spark-edge py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-spark-mark mb-6" data-reveal aria-hidden="true">
+                    <span class="es-spark-num">03</span>
+                    <span class="es-spark-arc"></span>
+                </div>
+                <p class="es-spark-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Before it creates anything</p>
+                <h2 class="es-balance es-spark-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Five rungs down, then <span class="es-spark-accent">and only then</span>, a new venue.
+                </h2>
+                <p class="es-spark-muted mx-auto mt-5 max-w-2xl text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    The expensive failure in event import is not a wrong date, it is nine copies of the same room. So the lookup climbs down a ladder, and each rung only runs because the one above it missed.
+                </p>
+            </div>
+
+            <div class="es-spark-card p-6 sm:p-8" data-reveal="panel">
+                <ol class="es-spark-ladder">
+                    @foreach ($ladder as [$n, $test, $detail, $indent])
+                        <li class="es-spark-rung @if ($loop->last) es-spark-rung-last @endif" style="--rung: {{ $indent }};">
+                            <div class="mb-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                                <span class="es-spark-num" aria-hidden="true">{{ $n }}</span>
+                                <h3 class="es-spark-ink text-base font-bold">{{ $test }}</h3>
+                            </div>
+                            <p class="es-spark-muted text-sm">{{ $detail }}</p>
+                        </li>
+                    @endforeach
+                </ol>
+            </div>
+
+            <div class="mt-4 grid gap-4 md:grid-cols-3" data-reveal-group="90">
+                <div class="es-spark-card p-7" data-reveal="panel">
+                    <h3 class="es-spark-ink mb-3 text-lg font-bold">Performers, two rungs of their own</h3>
+                    <p class="es-spark-muted text-sm">The parsed name as written, plus your schedule's country, preferring a record that already has an email. Then the talent this schedule has worked with before, on name alone. A match links the event to the performer who exists instead of making a second one.</p>
+                </div>
+                <div class="es-spark-card p-7" data-reveal="panel">
+                    <h3 class="es-spark-ink mb-3 text-lg font-bold">Your own schedule is assumed</h3>
+                    <p class="es-spark-muted text-sm">Importing into a venue schedule pins every event to that venue and uses its address. Importing into a talent schedule pins every event to that performer. There is nothing to match, because you already told us.</p>
+                </div>
+                <div class="es-spark-card p-7" data-reveal="panel">
+                    <h3 class="es-spark-ink mb-3 text-lg font-bold">Already on the schedule</h3>
+                    <p class="es-spark-muted text-sm">If an upcoming event here already shares the registration link, or the start time plus the venue address or the performer, the row links to the event that exists rather than making a near duplicate of it.</p>
+                </div>
+            </div>
+
+            <p class="es-spark-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
+                Matching is normalisation, not guesswork. Curly quotes, long dashes, non-breaking spaces and capitals are folded on both sides first, so "The Blue Note" and "the blue note" are the same room and neither becomes a new one.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 5. The agenda: a second, finer gap                           -->
+    <!-- ============================================================ -->
+    <section id="agenda" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-12 lg:grid-cols-2">
+                <div>
+                    <div class="es-spark-mark mb-6" data-reveal aria-hidden="true">
+                        <span class="es-spark-num">04</span>
+                        <span class="es-spark-arc"></span>
+                    </div>
+                    <p class="es-spark-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Inside one event</p>
+                    <h2 class="es-balance es-spark-ink mb-5 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
+                        The same gap, <span class="es-spark-accent">one level down.</span>
+                    </h2>
+                    <p class="es-spark-muted mb-6 text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
+                        A conference day, a festival stage or a two hour set is not one thing, it is a running order. Point your camera at the printed agenda or upload the image, and each line becomes a part of the event with its own name, note and times.
+                    </p>
+                    <ul class="es-spark-muted space-y-3" data-reveal-group="70">
+                        <li class="flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="es-spark-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>Four things per line: a name, an optional note or speaker, a start time and an end time, in 24 hour form.</span>
+                        </li>
+                        <li class="flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="es-spark-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>A setlist with no times comes back in its printed order with the times left empty, rather than invented.</span>
+                        </li>
+                        <li class="flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="es-spark-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>Keep the photo of the agenda on the event if you want it, or throw it away after the scan.</span>
+                        </li>
+                        <li class="flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="es-spark-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>Agenda scanning is an Enterprise feature. Event parts themselves are free to build by hand on any plan.</span>
+                        </li>
+                    </ul>
+                    <p class="mt-6" data-reveal>
+                        <x-link href="{{ route('marketing.docs.scan_agenda') }}">Read the Scan Agenda guide</x-link>
+                    </p>
+                </div>
+
+                <div data-reveal="panel">
+                    <div class="es-spark-card p-6 sm:p-7">
+                        <div class="mb-3 flex flex-wrap items-center gap-2">
+                            <p class="es-spark-tag">The printed sheet</p>
+                            <span class="es-spark-plan">Enterprise</span>
+                        </div>
+                        <div class="es-spark-scrap">
+                            <p class="es-spark-mono es-spark-muted text-[0.8rem] leading-relaxed">
+                                09:00 Opening keynote, R. Adeyemi<br>
+                                10:30 Panel: touring on a budget<br>
+                                12:00 Lunch<br>
+                                13:30 Workshop A, studio 2
+                            </p>
+                        </div>
+
+                        <div class="es-spark-arcv my-3" aria-hidden="true"></div>
+
+                        <div class="mb-3 flex flex-wrap items-center gap-2">
+                            <p class="es-spark-tag">Event parts</p>
+                            <span class="es-spark-chip">Prompt: ignore the breaks</span>
+                        </div>
+                        <div class="es-spark-rec" aria-hidden="true">
+                            @foreach ([['Opening keynote', 'R. Adeyemi', '09:00', '10:15'], ['Panel: touring on a budget', 'Main room', '10:30', '11:45'], ['Workshop A', 'Studio 2', '13:30', '15:00']] as [$pn, $pd, $ps, $pe])
+                                <div class="es-spark-row">
+                                    <span class="es-spark-key">{{ $ps }}-{{ $pe }}</span>
+                                    <span class="es-spark-val es-spark-ink">{{ $pn }}</span>
+                                    <span class="es-spark-muted text-xs">{{ $pd }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <p class="es-spark-muted es-spark-sep mt-5 pt-4 text-xs">
+                            Write the instructions once and save them as the schedule default, then override them on the one event that is laid out differently.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 6. What else the spark lights (fixed-dark band)              -->
+    <!-- ============================================================ -->
+    <section id="generate" class="scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
+        <div class="es-spark-band noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-4 py-16 sm:px-6 lg:px-8 lg:py-24 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 26% 26%, rgba(29, 78, 216, 0.3), rgba(29, 78, 216, 0) 62%);"></div>
+                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 74% 66%, rgba(147, 197, 253, 0.16), rgba(147, 197, 253, 0) 62%);"></div>
+                <div class="grid-overlay absolute inset-0 opacity-25"></div>
+            </div>
+
+            <div class="relative z-10 mx-auto max-w-6xl">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-spark-mark mb-6" data-reveal aria-hidden="true">
+                        <span class="es-spark-num">05</span>
+                        <span class="es-spark-arc"></span>
+                    </div>
+                    <p class="es-spark-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Enterprise generation</p>
+                    <h2 class="es-balance mb-5 text-3xl font-black tracking-tight text-white md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Six more places it <span class="es-spark-lit">strikes.</span>
+                    </h2>
+                    <p class="es-spark-bmuted mx-auto max-w-2xl text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                        Reading is on every plan. Writing and drawing sit on the Enterprise plan, each one a separate button you press deliberately rather than something running in the background.
+                    </p>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="80">
+                    @foreach ($generates as [$gTitle, $gBody, $gPath])
+                        <div class="es-spark-card flex h-full flex-col p-7" data-reveal="panel">
+                            <div class="mb-3 flex flex-wrap items-center gap-2">
+                                <h3 class="text-lg font-bold text-white">{{ $gTitle }}</h3>
+                                <span class="es-spark-plan">Enterprise</span>
+                            </div>
+                            <p class="es-spark-bmuted mb-5 text-sm">{{ $gBody }}</p>
+                            <p class="es-spark-mono es-spark-lit mt-auto text-[0.7rem]">{{ $gPath }}</p>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="mx-auto mt-10 max-w-3xl text-center" data-reveal>
+                    <p class="es-spark-bmuted text-sm">
+                        Text generation goes to Google Gemini and image generation to OpenAI, and both are configurable. Generated images arrive as ordinary uploads on your schedule, so you can regenerate, replace or delete them like any image you had uploaded yourself.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 7. Translation                                               -->
+    <!-- ============================================================ -->
+    <section id="languages" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-12 lg:grid-cols-[1fr_1.05fr]">
+                <div>
+                    <div class="es-spark-mark mb-6" data-reveal aria-hidden="true">
+                        <span class="es-spark-num">06</span>
+                        <span class="es-spark-arc"></span>
+                    </div>
+                    <p class="es-spark-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Free on every plan</p>
+                    <h2 class="es-balance es-spark-ink mb-5 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Write it once. <span class="es-spark-accent">Publish it twice.</span>
+                    </h2>
+                    <p class="es-spark-muted mb-6 text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
+                        Pick one target language for the schedule and the whole thing is translated in the background: the schedule name and descriptions, every event, event parts, sub-schedule names, your request terms. Visitors get a switch between your language and the target.
+                    </p>
+                    <ul class="es-spark-muted space-y-3" data-reveal-group="70">
+                        <li class="flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="es-spark-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>Translations are stored, not fetched per visit, so a guest page never waits on a model.</span>
+                        </li>
+                        <li class="flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="es-spark-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>Change the target language and the stored translations are cleared and rebuilt in the new one, including sub-schedule names.</span>
+                        </li>
+                        <li class="flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="es-spark-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>You can edit any translated value by hand and keep your wording instead of the model's.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div data-reveal="panel">
+                    <div class="es-spark-card p-6 sm:p-8">
+                        <p class="es-spark-tag mb-4">{{ $langCount }} languages</p>
+                        <div class="flex flex-wrap gap-2">
+                            @foreach (config('app.supported_languages') as $langCode => $langName)
+                                <span class="es-spark-chip">
+                                    <span class="es-spark-mono es-spark-accent me-2 text-[0.7rem] uppercase">{{ $langCode }}</span>
+                                    {{ ucfirst($langName) }}
+                                </span>
+                            @endforeach
+                        </div>
+                        <p class="es-spark-muted es-spark-sep mt-6 pt-5 text-sm">
+                            Parsing is not limited to this list. It reads whatever the source is written in and keeps it that way. The list is what the schedule can be published in.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 8. WhatsApp                                                  -->
+    <!-- ============================================================ -->
+    <section id="whatsapp" class="scroll-mt-24 es-spark-edge py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-spark-mark mb-6" data-reveal aria-hidden="true">
+                    <span class="es-spark-num">07</span>
+                    <span class="es-spark-arc"></span>
+                </div>
+                <p class="es-spark-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The gap, with no screen</p>
+                <h2 class="es-balance es-spark-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Photograph the poster. <span class="es-spark-accent">Send it. Done.</span>
+                </h2>
+                <p class="es-spark-muted mx-auto mt-5 max-w-2xl text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    The one place the AI does save without you. It is meant for the moment you are standing in front of a wall of flyers, so it goes all the way and then reports back.
+                </p>
+            </div>
+
+            <div class="grid gap-4 lg:grid-cols-[1.15fr_1fr]">
+                <div class="es-spark-card flex flex-col p-7 sm:p-8" data-reveal="panel">
+                    <div class="mb-5 flex flex-wrap items-center gap-2">
+                        <h3 class="es-spark-ink text-xl font-bold">How it actually works</h3>
+                        <span class="es-spark-plan">Enterprise</span>
+                    </div>
+                    <ol class="space-y-4">
+                        @foreach ([
+                            ['01', 'Verify your phone number once, in your account settings. That number is how the message is matched to you, so it is your phone that is authorised, not a number of ours that you share around.'],
+                            ['02', 'Message the Event Schedule number on WhatsApp. Type the details, or just send the photo of the flyer.'],
+                            ['03', 'The event is created on your default schedule, or on your only schedule if you have one. The photo you sent becomes the event image.'],
+                            ['04', 'You get a reply with the name, the date and a link, so the first thing you can do is open it and fix whatever the poster got wrong.'],
+                        ] as [$wn, $wtext])
+                            <li class="flex gap-4">
+                                <span class="es-spark-num mt-1 flex-none" aria-hidden="true">{{ $wn }}</span>
+                                <p class="es-spark-muted text-sm leading-relaxed">{{ $wtext }}</p>
+                            </li>
+                        @endforeach
+                    </ol>
+                    <p class="es-spark-muted es-spark-sep mt-auto pt-5 text-xs">
+                        The message only ever makes the event. Tickets, visibility, recurrence and everything else are still set the ordinary way afterwards, on the edit screen.
+                    </p>
+                </div>
+
+                <div class="flex flex-col gap-4">
+                    <div class="es-spark-card p-7" data-reveal="panel">
+                        <h3 class="es-spark-ink mb-3 text-lg font-bold">Auto-curation still applies</h3>
+                        <p class="es-spark-muted text-sm">If the schedule is set to curate into others automatically, the new event goes out to them as well, the same as one you had typed in yourself, and waits for approval wherever that curator reviews submissions.</p>
+                    </div>
+                    <div class="es-spark-card p-7" data-reveal="panel">
+                        <h3 class="es-spark-ink mb-3 text-lg font-bold">Already have it? It says so.</h3>
+                        <p class="es-spark-muted text-sm">A message that resolves to an event already on your schedule gets a link back to that event instead of a duplicate.</p>
+                    </div>
+                    <div class="es-spark-card p-7" data-reveal="panel">
+                        <h3 class="es-spark-ink mb-3 text-lg font-bold">Needs Twilio</h3>
+                        <p class="es-spark-muted text-sm">WhatsApp runs through Twilio, so a selfhosted install has to configure that first before the feature exists at all.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 9. Allowances: the honest board                              -->
+    <!-- ============================================================ -->
+    <section id="allowance" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-spark-mark mb-6" data-reveal aria-hidden="true">
+                    <span class="es-spark-num">08</span>
+                    <span class="es-spark-arc"></span>
+                </div>
+                <p class="es-spark-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Plans and allowances</p>
+                <h2 class="es-balance es-spark-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
+                    What is free, what is not, <span class="es-spark-accent">and where it stops.</span>
+                </h2>
+                <p class="es-spark-muted mx-auto mt-5 max-w-2xl text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Model calls cost real money, so the ones on the free plan are metered rather than pretended to be infinite. Here are the actual limits.
+                </p>
+            </div>
+
+            <div class="es-spark-card overflow-x-auto p-6 sm:p-8" data-reveal="panel">
+                <table class="es-spark-board">
+                    <caption class="sr-only">Which AI features are on which plan, and their daily allowance</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Feature</th>
+                            <th scope="col">Plan</th>
+                            <th scope="col">Daily allowance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($board as [$bFeature, $bPlan, $bCap])
+                            <tr>
+                                <th scope="row" class="es-spark-ink pe-3 font-semibold">{{ $bFeature }}</th>
+                                <td class="pe-3">
+                                    <span class="es-spark-plan @if ($bPlan !== 'Every plan') es-spark-plan-alt @endif">{{ $bPlan }}</span>
+                                </td>
+                                <td class="es-spark-muted es-spark-mono text-xs">{{ $bCap }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-4 grid gap-4 md:grid-cols-2" data-reveal-group="90">
+                <div class="es-spark-card flex flex-col p-7" data-reveal="panel">
+                    <h3 class="es-spark-ink mb-3 text-lg font-bold">Selfhost and the caps disappear</h3>
+                    <p class="es-spark-muted mb-4 text-sm">Every one of those allowances only exists on the hosted service. A selfhosted install supplies its own Gemini and OpenAI keys, pays the model provider directly and is not metered by us at all.</p>
+                    <p class="mt-auto">
+                        <x-link href="{{ route('marketing.docs.selfhost.ai') }}">Selfhosted AI setup</x-link>
+                    </p>
+                </div>
+                <div class="es-spark-card flex flex-col p-7" data-reveal="panel">
+                    <h3 class="es-spark-ink mb-3 text-lg font-bold">Agents can drive all of this</h3>
+                    <p class="es-spark-muted mb-4 text-sm">There is a REST API with an OpenAPI 3.0 spec, plus llms.txt and agents.json so an agent can discover it and work without a human reading the docs first. API access is on the Pro plan.</p>
+                    <p class="mt-auto">
+                        <x-link href="{{ marketing_url('/for-ai-agents') }}">The API for AI agents</x-link>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 10. Where to go next                                         -->
+    <!-- ============================================================ -->
+    <section id="next" class="scroll-mt-24 es-spark-edge py-20 lg:py-24">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-spark-mark mb-6" data-reveal aria-hidden="true">
+                    <span class="es-spark-num">09</span>
+                    <span class="es-spark-arc"></span>
+                </div>
+                <h2 class="es-balance es-spark-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
+                    Where this <span class="es-spark-accent">usually leads.</span>
+                </h2>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="80">
                 @foreach ([
-                    ['What formats does the AI parser support?', 'The AI can parse plain text, images (JPEG, PNG, GIF, WebP), screenshots, flyers, agendas, and setlists. It handles both single events and multi-event documents, extracting each event individually.'],
-                    ['Which AI features are free vs. Enterprise?', 'AI event parsing and instant translation are available on all plans including the free tier. Style generation, content generation, flyer generation, graphic text processing, and WhatsApp event creation are Enterprise features.'],
-                    ['How accurate is the AI?', 'The AI is highly accurate for standard event formats. You always get to review and edit the results before saving. You can also add custom prompts to guide the AI for your specific format.'],
-                    ['What can AI Style Generation create?', 'AI Style Generation creates a complete visual identity for your schedule including profile image, header image, background image, accent color, and font. You can add custom style instructions to guide the look and regenerate individual elements.'],
-                    ['How does WhatsApp event creation work?', 'Send a text message or photo of a flyer to your schedule\'s WhatsApp number. AI parses the details, auto-generates a flyer, and adds the event to your schedule automatically.'],
-                    ['What languages are supported?', 'The AI can parse events in any language and extract details correctly. The translation feature supports 12 languages including English, Spanish, French, German, Italian, Portuguese, Dutch, Hebrew, Arabic, Estonian, Romanian, and Russian.'],
-                    ['Can AI agents use Event Schedule programmatically?', 'Yes. Event Schedule provides a full REST API with OpenAPI 3.0 specification, llms.txt for AI discovery, and agents.json for defining agent workflows. AI agents can create, update, and manage events programmatically with smart creation features and webhook notifications.'],
-                ] as [$q, $a])
-                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
-                            <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
+                    ['Creating events', 'Everything the import screen hands off to: dates, recurrence, parts, visibility and tickets.', route('marketing.docs.creating_events')],
+                    ['Event graphics', 'Turn the events you just imported into shareable images for Instagram, WhatsApp and email.', marketing_url('/features/event-graphics')],
+                    ['Newsletters', 'Mail the line-up to your followers and ticket buyers. Free on every plan, at ten recipients a month.', route('marketing.newsletters')],
+                    ['Calendar sync', 'Two-way sync with Google, Outlook and CalDAV, so an imported event lands in your own calendar too.', marketing_url('/features/calendar-sync')],
+                    ['Recurring events', 'A weekly night is one event with a day-of-week pattern, not fifty rows to import.', marketing_url('/features/recurring-events')],
+                    ['Custom fields', 'Add your own fields and the parser will extract them alongside the built-in ones.', marketing_url('/features/custom-fields')],
+                ] as [$nTitle, $nBody, $nHref])
+                    <a href="{{ $nHref }}" class="es-spark-card es-spark-hover group flex h-full flex-col p-7 transition-all duration-200 hover:-translate-y-0.5" data-reveal="panel">
+                        <h3 class="es-spark-ink es-spark-hover-title mb-3 text-lg font-bold transition-colors">{{ $nTitle }}</h3>
+                        <p class="es-spark-muted mb-5 text-sm">{{ $nBody }}</p>
+                        <span class="es-spark-accent mt-auto inline-flex items-center gap-2 text-sm font-semibold transition-all group-hover:gap-3">
+                            Read more
+                            <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                        </span>
+                    </a>
+                @endforeach
+            </div>
+
+            <div class="mt-8 flex flex-wrap items-center justify-center gap-3" data-reveal>
+                <span class="es-spark-tag me-1">Most used by</span>
+                @foreach ([['/for-curators', 'Curators'], ['/for-musicians', 'Musicians'], ['/for-venues', 'Venues']] as [$aHref, $aLabel])
+                    <a href="{{ marketing_url($aHref) }}" class="es-spark-chip es-spark-hover transition-colors">{{ $aLabel }}</a>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 11. FAQ                                                      -->
+    <!-- ============================================================ -->
+    <x-seo.faq-schema :items="$faqs" />
+
+    <section id="faq" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <div class="mb-12 text-center">
+                <div class="es-spark-mark mb-6" data-reveal aria-hidden="true">
+                    <span class="es-spark-num">10</span>
+                    <span class="es-spark-arc"></span>
+                </div>
+                <h2 class="es-balance es-spark-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
+                    Frequently asked questions
+                </h2>
+                <p class="es-spark-muted text-lg" data-reveal style="--reveal-delay: 0.1s;">
+                    The ones worth answering precisely, because the vague answers are what waste your afternoon.
+                </p>
+            </div>
+
+            <div class="space-y-3" data-reveal-group="80">
+                @foreach ($faqs as $faqIndex => $faq)
+                    <details name="faq" class="es-spark-card es-spark-hover group p-6 transition-all duration-200" data-reveal>
+                        <summary class="es-spark-ink flex cursor-pointer items-start gap-3 font-semibold">
+                            <span class="es-spark-num mt-1 flex-none" aria-hidden="true">{{ str_pad($faqIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                            <span class="es-spark-hover-title flex-1 transition-colors">{{ $faq['q'] }}</span>
+                            <svg aria-hidden="true" class="es-spark-muted mt-0.5 h-5 w-5 flex-none transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
                         </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{{ $a }}</p>
+                        <p class="faq-answer es-spark-muted mt-4 leading-relaxed ps-10">{{ $faq['a'] }}</p>
                     </details>
                 @endforeach
             </div>
@@ -850,65 +1423,33 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 9. Related features                                         -->
+    <!-- 12. Finale                                                   -->
     <!-- ============================================================ -->
-    <section class="bg-white py-20 dark:bg-[#0a0a0f]">
-        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related features</h2>
-            <div class="space-y-3" data-reveal-group="70">
-                <div data-reveal>
-                    <x-feature-link-card name="Event Graphics" description="Auto-generated shareable images for Instagram, WhatsApp, and email" :url="marketing_url('/features/event-graphics')" icon-color="orange">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Calendar Sync" description="Two-way sync with Google Calendar" :url="marketing_url('/features/calendar-sync')" icon-color="blue">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Recurring Events" description="Set events to repeat on any schedule automatically" :url="marketing_url('/features/recurring-events')" icon-color="green">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Custom Fields" description="Collect additional info from attendees with custom form fields" :url="marketing_url('/features/custom-fields')" icon-color="amber">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="API for AI Agents" description="REST API with OpenAPI spec, llms.txt, and agents.json for AI agent workflows" :url="marketing_url('/for-ai-agents')" icon-color="blue">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 10. Finale                                                  -->
-    <!-- ============================================================ -->
-    <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
+    <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
-            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-blue-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+            <div class="es-spark-band noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl sm:px-12 lg:py-24" data-confetti data-reveal="panel">
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 0) 60%); opacity: 0.7;"></div>
+                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 18%, rgba(29, 78, 216, 0.34), rgba(29, 78, 216, 0) 60%);"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
-                    <div class="es-sparkfield absolute bottom-0 left-0 right-0 flex h-14 items-center justify-center gap-4 px-8 pb-3 opacity-40" style="mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);">
-                        @for ($i = 0; $i < 24; $i++)
-                            @php $dur = 1.8 + ($i % 6) * 0.28; $delay = ($i % 11) * 0.18; @endphp
-                            <span class="es-spark" style="--sp-dur: {{ $dur }}s; --sp-delay: {{ $delay }}s;"></span>
-                        @endfor
-                    </div>
                 </div>
 
                 <div class="relative z-10">
+                    <p class="es-spark-tag mb-4">Free to start</p>
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Let AI do the <span class="text-gradient-ai">heavy lifting</span>
+                        Paste the mess. <span class="es-spark-lit">Keep the listing.</span>
                     </h2>
-                    <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
-                        From smart import to content generation and visual branding. AI handles the tedious work so you can focus on your events.
+                    <p class="es-spark-bmuted mx-auto mb-8 max-w-2xl text-lg sm:text-xl">
+                        Parsing and translation are included on the free plan, and Event Schedule takes zero platform fees on ticket sales.
                     </p>
+
+                    {{-- The gap one last time, at the smallest scale the page uses:
+                         one scrap, one filament, one record. --}}
+                    <div class="mx-auto mb-10 flex max-w-xl flex-col items-center justify-center gap-2 sm:flex-row sm:gap-4">
+                        <span class="es-spark-scrap es-spark-term es-spark-mono es-spark-bmuted">a photo on your phone</span>
+                        <span class="es-spark-arcv sm:hidden" aria-hidden="true"></span>
+                        <span class="es-spark-arc hidden sm:block" aria-hidden="true"></span>
+                        <span class="es-spark-rec es-spark-term es-spark-mono text-white">an event on your schedule</span>
+                    </div>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
                         <label for="es-claim-input" class="sr-only">Your schedule name</label>
@@ -917,9 +1458,9 @@
                                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
                             <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
-                        <a href="{{ app_url('/sign_up') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
+                        <a href="{{ app_url('/sign_up') }}" class="es-spark-btn group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
                             <span class="relative z-10 flex items-center gap-2">
-                                Get Started Free
+                                Get started free
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                 </svg>
@@ -928,11 +1469,27 @@
                         </a>
                     </div>
 
-                    <p class="mt-6 text-sm text-gray-400">No credit card required</p>
+                    <p class="es-spark-bmuted mt-6 text-sm">No credit card required</p>
                 </div>
             </div>
         </div>
     </section>
+
+    <!-- Desktop dot nav -->
+    <nav class="es-dotnav fixed top-1/2 z-40 hidden -translate-y-1/2 lg:block ltr:right-5 rtl:left-5" aria-label="Page sections">
+        <ul class="glass flex flex-col items-center gap-1.5 rounded-full px-2 py-3">
+            @foreach ($dotSections as [$sectionId, $sectionLabel])
+                <li class="relative">
+                    <a href="#{{ $sectionId }}" class="es-dot group block rounded-full" aria-label="{{ $sectionLabel }}">
+                        <span class="es-dot-pip block h-2 w-2 rounded-full bg-gray-400/60 dark:bg-white/30"></span>
+                        <span class="es-spark-tip pointer-events-none absolute top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 ltr:right-full ltr:mr-3 rtl:left-full rtl:ml-3">{{ $sectionLabel }}</span>
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    </nav>
+
+    </div>
 
     <x-marketing.related-pages />
 

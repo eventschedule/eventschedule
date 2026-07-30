@@ -37,6 +37,14 @@ class PromoCode extends Model
 
     public function isValid()
     {
+        // Promo codes are Pro. This is the shared chokepoint for both the guest validate endpoint
+        // and the apply step in checkout, so one gate covers both. It needed none while only Pro
+        // schedules could sell; now the free plan can, and a lapsed Pro schedule still owns real
+        // promo-code rows that would otherwise keep discounting.
+        if (! $this->event || ! $this->event->isPro()) {
+            return false;
+        }
+
         if (! $this->is_active) {
             return false;
         }

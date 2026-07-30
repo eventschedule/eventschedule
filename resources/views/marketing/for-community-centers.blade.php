@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Free Event Schedule for Community Centers | Manage Programs</x-slot>
-    <x-slot name="description">Keep your community connected. Manage programs, classes, room bookings, and events. Email members directly - no algorithm. Free forever.</x-slot>
+    <x-slot name="description">Keep your community connected. Manage programs, classes, hall-hire requests, and events. Email members directly - no algorithm. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For Community Centers</x-slot>
 
     <x-slot name="structuredData">
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule for Community Centers",
-        "description": "Keep your community connected. Manage programs, classes, room bookings, and events. Email members directly. Free forever.",
+        "description": "Keep your community connected. Manage programs, classes, hall-hire requests, and events. Email members directly. Free forever.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -22,46 +22,6 @@
         }
     }
     </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "Is Event Schedule free for community centers?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Event Schedule is free forever for sharing your program calendar, building a community following, and syncing with Google Calendar. Newsletters are free with a monthly send limit, and ticketing is available on the Pro plan."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I organize classes, meetings, and events by category?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Use sub-schedules to organize programs by type - fitness classes, youth programs, senior activities, community meetings, and special events. Each program can have its own schedule, description, and registration options."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "How do community members stay informed about programs?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Members can follow your center's schedule and receive email notifications for new programs. Embed your calendar on your website, share on social media, or send newsletters to keep the community informed."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can we handle event registration and payments?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Enable registration on any program to manage attendance. For paid classes or events, connect Stripe to handle payments with zero platform fees. Attendees receive QR codes for easy check-in."
-                }
-            }
-        ]
-    }
-    </script>
     <!-- Product Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
@@ -71,7 +31,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Community Center Event Management Software",
         "operatingSystem": "Web",
-        "description": "Keep your community connected. Manage programs, classes, room bookings, and events. Email members directly. No algorithm. Free forever.",
+        "description": "Every program the center runs, on one calendar with its own link. Embed it, sync it, print its QR code, and email the people who follow it. Free forever.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -79,14 +39,18 @@
             "description": "Free forever"
         },
         "featureList": [
-            "Program and class announcement newsletters",
-            "Facility rental and room booking inbox",
-            "Class registration with payments",
-            "Public community calendar with embedding",
-            "Multi-room scheduling",
-            "QR code check-in for attendance",
-            "Virtual and livestreamed events",
-            "Auto-generated social media graphics"
+            "Recurring weekly programs with date exceptions for the weeks they skip",
+            "Sub-schedules that group and color-code the strands, each with its own link",
+            "Free RSVP sign-up with an optional capacity, counted afresh for every date",
+            "Hall-hire requests that stay pending until you accept them",
+            "Public program calendar with an embeddable iframe",
+            "Two-way Google, Outlook and CalDAV calendar sync, plus iCal download",
+            "A downloadable QR code that opens your calendar",
+            "Direct newsletters to the people who follow the center",
+            "Ticketed classes through your own Stripe account with zero platform fees",
+            "QR check-in at the door",
+            "Member photos and comments on events, held in an approval queue (25 photos on the free plan)",
+            "Online events with the link people join on"
         ],
         "url": "{{ url()->current() }}",
         "keywords": "community center calendar, recreation program schedule, facility booking software, community events, free community center scheduling",
@@ -107,564 +71,998 @@
     </script>
 
     <style {!! nonce_attr() !!}>
-        /* For-community-centers "The Gathering Place" styles. The shared es-*
-           motion system lives in marketing.css; this holds the teal gradient
-           text, the drifting program-board card, and the gathering ripple. */
-        .text-gradient-teal {
-            background: linear-gradient(135deg, #14b8a6, #06b6d4);
+        /* ==============================================================
+           For-community-centers "The Gathering Place" styles.
+
+           CONCEPT: the noticeboard in the lobby. A community center does
+           not have a scheduling problem - the week already runs like
+           clockwork. It has a REACH problem: the only copy of the
+           timetable is a laminated sheet pinned to cork by the front
+           door, and cork only reaches whoever walks past it. So the page
+           keeps the board and multiplies the doors out of it: a link, an
+           iframe on the town website, a phone's own calendar, an inbox, a
+           printed QR code, and member photos coming back the other way.
+           Metaphor and feature story are the same sentence.
+
+           FOUR DEVICES CARRY IT:
+             1. THE BOARD - kraft cork in a stained frame holding pinned
+                index cards. A fixed physical object: it has no .dark
+                variant and no dark: utility anywhere inside it, so it
+                renders identically with .dark on and off. Verified with
+                --bands=.es-gather-board,.es-gather-band (0 diffs).
+             2. THE WEEK AS A REAL TABLE - seven day columns, one row per
+                program, marks on the days it runs. The table IS the
+                argument for recurring events (day-of-week patterns) and
+                sub-schedules (the strand dot), because that is exactly
+                the shape of the data.
+             3. SIX DOORS - the always-dark band. Same board, six ways out
+                of it, five of them free.
+             4. THE PINNED NUMBER TAB - section marks are index-card
+                corners with a pushpin, so the board's material runs the
+                whole length of the page, including inside the dark band.
+             5. THE TRAY AND THE PIN - a hall-hire request is a loose slip
+                in a tray until you accept it, and accepting it is what
+                pins it to the board. The pin IS is_accepted, so the mock
+                and the permission model are the same picture. (Earlier
+                drafts used a rotated rubber ACCEPTED stamp; for-venues
+                already owns that stamp on the same kind of mock, so it
+                went, and the pin does the job with the concept's own
+                vocabulary.)
+
+           CLAIM DISCIPLINE. Deleted from the first-wave page: multi-room
+           scheduling and "avoid scheduling conflicts" (no rooms exist and
+           there is no conflict detection anywhere in the codebase);
+           "members receive email notifications for new programs" (no such
+           job, mailable or command - NewsletterEmail is composed and sent
+           by the owner); "Sending to 2,341 members" (a fabricated follower
+           count); "livestreamed events" (an online event is one generic
+           event_url field). Corrected: newsletters are FREE at 10 emails a
+           month counted per recipient, not Pro. Sub-schedules are named as
+           grouping only, since Group is fillable on name, name_en, slug
+           and color and therefore has no visibility flag. Also removed on
+           review: "room bookings" in the meta description and the Service
+           schema, and room names ("main hall", "gym", "room A") plus
+           headcounts ("40 people") used as slip data in the hero and
+           hall-hire mocks - an Event has no room, space or headcount
+           field, so nothing here may render one. And the 25-photo free-tier
+           cap on fan photos is now stated wherever the photos claim is.
+
+           COLOUR. Kept the page's existing teal family with its warm
+           terracotta second, re-inked to measure. Distinctiveness comes
+           from material (cork, index-card stock, a pushpin, a paper tray)
+           and from typography (serif card stock against sans chrome,
+           tabular mono in the timetable), not from a new hue.
+
+           MEASURED (ratio : ground)
+             ground #f4f5f2   card #fcfcfa   sub #eff0ec
+             ink    #111917  16.33 : ground
+             muted  #4b5553   7.05 : ground   7.51 : card   6.74 : sub
+             accent #0b5b52   7.29 : ground   7.77 : card
+             warm   #95350f   6.87 : ground   7.32 : card
+             grad   #0b5b52 -> #0a4f63   7.29 / 8.30 : ground
+             white on #0b5b52 button 7.98, hover #08463f 10.72
+
+             dark ground #0c1211   card #161d1c   sub #1b2322
+             ink    #e8edec  15.99 : ground
+             muted  #a0acaa   8.08 : ground   7.32 : card   6.85 : sub
+             accent #5fdcc9  11.32 : ground  10.25 : card
+             warm   #f0a374   9.18 : ground   8.31 : card
+             grad   #8de6d2 -> #5fdcc9  12.95 / 11.32 : ground
+
+             band #0f1615 (identical in both modes)
+               white 17.6, gray-300 12.44, gray-400 7.22, #a0acaa 7.83,
+               lit #5fdcc9 10.97, warm #f0a374 8.90, card stock 16.83
+
+             board (identical in both modes)
+               cork #c8a878, frame #7a4f28
+               card stock #faf5e8: ink #2b2925 13.34, muted #5d574d 6.57,
+               day label #8f3411 7.23
+           ============================================================== */
+
+        /* --- Ground and ink ---------------------------------------- */
+        .es-gather-page { background-color: #f4f5f2; color: #111917; }
+        .dark .es-gather-page { background-color: #0c1211; color: #e8edec; }
+        .es-gather-ink { color: #111917; }
+        .dark .es-gather-ink { color: #e8edec; }
+        .es-gather-muted { color: #4b5553; }
+        .dark .es-gather-muted { color: #a0acaa; }
+        .es-gather-accent { color: #0b5b52; }
+        .dark .es-gather-accent { color: #5fdcc9; }
+        .es-gather-warm { color: #95350f; }
+        .dark .es-gather-warm { color: #f0a374; }
+        /* Always-lit accent, for text that sits on the fixed dark band. */
+        .es-gather-lit { color: #5fdcc9; }
+
+        .es-gather-grad {
+            background-image: linear-gradient(102deg, #0b5b52, #0a4f63);
             -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
             background-clip: text;
-        }
-        .dark .text-gradient-teal {
-            background: linear-gradient(135deg, #2dd4bf, #22d3ee);
-            -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
-        /* Gathering ripple - concentric rings spreading from a center point */
-        .es-ripple span {
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            height: 44px;
-            width: 44px;
-            margin: -22px 0 0 -22px;
-            border-radius: 9999px;
-            border: 1px solid rgba(45, 212, 191, 0.35);
-            transform: scale(0);
-            opacity: 0;
-            animation: es-ripple var(--rip-dur, 7s) ease-out infinite;
-            animation-delay: var(--rip-delay, 0s);
-        }
-        @keyframes es-ripple {
-            0% { transform: scale(0.2); opacity: 0.55; }
-            100% { transform: scale(9); opacity: 0; }
-        }
+        .dark .es-gather-grad { background-image: linear-gradient(102deg, #8de6d2, #5fdcc9); }
 
-        /* --- The Gathering Place: corkboard + terracotta warmth --- */
-        /* Warm terracotta secondary (#c2410c family) paired with the teal accent */
-        .cc-terra { color: #c2410c; }
-        .dark .cc-terra { color: #fb923c; }
-        .cc-teal { color: #0d9488; }
-        .dark .cc-teal { color: #2dd4bf; }
-        .cc-bg-terra { background-color: #c2410c; }
-        .dark .cc-bg-terra { background-color: #fb923c; }
-        .cc-bg-teal { background-color: #0d9488; }
-        .dark .cc-bg-teal { background-color: #2dd4bf; }
-        .cc-chip-terra { border-color: rgba(194, 65, 12, 0.30); background-color: rgba(194, 65, 12, 0.10); }
-        .dark .cc-chip-terra { border-color: rgba(251, 146, 60, 0.32); background-color: rgba(251, 146, 60, 0.13); }
-        .cc-chip-teal { border-color: rgba(13, 148, 136, 0.30); background-color: rgba(13, 148, 136, 0.10); }
-        .dark .cc-chip-teal { border-color: rgba(45, 212, 191, 0.32); background-color: rgba(45, 212, 191, 0.13); }
-
-        /* Hand-drawn wobbly underline tucked beneath gradient words */
-        .cc-wobble { position: relative; display: inline-block; }
-        .cc-wobble-line {
-            position: absolute;
-            left: -3%;
-            bottom: -0.26em;
-            width: 106%;
-            height: 0.34em;
-            color: #c2410c;
-            overflow: visible;
+        .es-gather-num {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+            font-variant-numeric: tabular-nums;
         }
-        .dark .cc-wobble-line { color: #fb923c; }
+        .es-gather-rule { height: 1px; background: rgba(17, 25, 23, 0.1); }
+        .dark .es-gather-rule { background: rgba(232, 237, 236, 0.12); }
 
-        /* Stamped "Approved" chip for the facility-rental mock */
-        .cc-stamp {
+        /* --- Eyebrow ------------------------------------------------ */
+        .es-gather-tag {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: #0b5b52;
+        }
+        .dark .es-gather-tag { color: #5fdcc9; }
+
+        /* --- Surfaces ----------------------------------------------- */
+        .es-gather-card {
+            background-color: #fcfcfa;
+            border: 1px solid rgba(17, 25, 23, 0.12);
+            border-radius: 0.75rem;
+        }
+        .dark .es-gather-card { background-color: #161d1c; border-color: rgba(232, 237, 236, 0.13); }
+        .es-gather-sub { background-color: #eff0ec; border-radius: 0.5rem; }
+        .dark .es-gather-sub { background-color: #1b2322; }
+        .es-gather-hover { transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+        .es-gather-hover:hover { border-color: rgba(11, 91, 82, 0.45); box-shadow: 0 10px 26px -18px rgba(17, 25, 23, 0.5); }
+        .dark .es-gather-hover:hover { border-color: rgba(95, 220, 201, 0.4); box-shadow: 0 10px 26px -18px rgba(0, 0, 0, 0.85); }
+
+        /* Honesty callout: what the product does NOT do. */
+        .es-gather-flag {
+            border-left: 3px solid #95350f;
+            background-color: rgba(149, 53, 15, 0.06);
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+        .dark .es-gather-flag { border-left-color: #f0a374; background-color: rgba(240, 163, 116, 0.09); }
+
+        /* --- Buttons ------------------------------------------------ */
+        .es-gather-btn {
+            background-color: #0b5b52;
+            color: #ffffff;
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .es-gather-btn:hover {
+            background-color: #08463f;
+            transform: translateY(-1px);
+            box-shadow: 0 14px 28px -16px rgba(11, 91, 82, 0.9);
+        }
+        .es-gather-ghost {
+            border: 1px solid rgba(17, 25, 23, 0.22);
+            color: #111917;
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+        .es-gather-ghost:hover { border-color: rgba(11, 91, 82, 0.5); background-color: rgba(11, 91, 82, 0.06); }
+        .dark .es-gather-ghost { border-color: rgba(232, 237, 236, 0.24); color: #e8edec; }
+        .dark .es-gather-ghost:hover { border-color: rgba(95, 220, 201, 0.45); background-color: rgba(95, 220, 201, 0.08); }
+
+        /* --- Plan tiers. Never reuse these for a state badge. ------- */
+        .es-gather-plan {
             display: inline-flex;
             align-items: center;
-            color: #c2410c;
-            border: 2px solid rgba(194, 65, 12, 0.55);
-            background: rgba(194, 65, 12, 0.07);
-            border-radius: 6px;
-            padding: 2px 8px;
-            font-size: 10px;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            padding: 0.1rem 0.5rem;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+        .es-gather-plan-free { border-color: rgba(17, 25, 23, 0.24); color: #4b5553; }
+        .dark .es-gather-plan-free { border-color: rgba(232, 237, 236, 0.26); color: #a0acaa; }
+        .es-gather-plan-pro { border-color: rgba(11, 91, 82, 0.5); color: #0b5b52; background-color: rgba(11, 91, 82, 0.08); }
+        .dark .es-gather-plan-pro { border-color: rgba(95, 220, 201, 0.42); color: #5fdcc9; background-color: rgba(95, 220, 201, 0.1); }
+
+        /* ==============================================================
+           THE BOARD. A real object: cork in a stained frame. It has no
+           .dark rule and carries no dark: utility, so it paints the same
+           in both colour modes. Everything pinned to it is the same.
+           ============================================================== */
+        .es-gather-board {
+            background-color: #c8a878;
+            background-image:
+                radial-gradient(circle at 16% 24%, rgba(96, 58, 24, 0.28) 0, rgba(96, 58, 24, 0.28) 1.5px, transparent 2px),
+                radial-gradient(circle at 56% 11%, rgba(96, 58, 24, 0.17) 0, rgba(96, 58, 24, 0.17) 1px, transparent 2px),
+                radial-gradient(circle at 83% 54%, rgba(96, 58, 24, 0.23) 0, rgba(96, 58, 24, 0.23) 1.5px, transparent 2px),
+                radial-gradient(circle at 34% 77%, rgba(96, 58, 24, 0.15) 0, rgba(96, 58, 24, 0.15) 1px, transparent 2px),
+                radial-gradient(circle at 69% 89%, rgba(96, 58, 24, 0.21) 0, rgba(96, 58, 24, 0.21) 1.5px, transparent 2px);
+            background-size: 88px 88px, 68px 68px, 108px 108px, 78px 78px, 98px 98px;
+            border: 8px solid #7a4f28;
+            border-radius: 0.5rem;
+            box-shadow:
+                inset 0 2px 14px rgba(58, 32, 11, 0.45),
+                0 18px 40px -22px rgba(24, 14, 5, 0.85);
+        }
+        /* A single-card strip of the same board, for the finale. */
+        .es-gather-strip { border-width: 6px; }
+
+        /* Pinned index card. Serif stock against the page's sans chrome. */
+        .es-gather-slip {
+            background-color: #faf5e8;
+            border-radius: 2px;
+            box-shadow: 0 6px 14px rgba(40, 22, 6, 0.42);
+            font-family: ui-serif, Georgia, 'Times New Roman', serif;
+        }
+        .es-gather-slip-day {
+            display: block;
+            color: #8f3411;
+            font-family: ui-sans-serif, system-ui, sans-serif;
+            font-size: 0.6rem;
             font-weight: 800;
             letter-spacing: 0.18em;
             text-transform: uppercase;
-            transform: rotate(-11deg);
-            box-shadow: 0 1px 2px rgba(60, 30, 10, 0.15);
         }
-        .dark .cc-stamp {
-            color: #fb923c;
-            border-color: rgba(251, 146, 60, 0.50);
-            background: rgba(251, 146, 60, 0.10);
+        .es-gather-slip-title { color: #2b2925; font-weight: 700; }
+        .es-gather-slip-sub {
+            color: #5d574d;
+            font-family: ui-sans-serif, system-ui, sans-serif;
+            font-size: 0.7rem;
+        }
+        .es-gather-slip-url {
+            color: #2b2925;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.72rem;
+            font-weight: 700;
+            word-break: break-all;
+        }
+        /* Faint ruled lines, so the stock reads as an index card. */
+        .es-gather-ruled {
+            background-image: repeating-linear-gradient(180deg, transparent 0 15px, rgba(43, 41, 37, 0.09) 15px 16px);
         }
 
-        /* Kraft corkboard that holds the community week */
-        .cc-corkboard {
-            background-color: #caa877;
+        /* Pushpin. Two shades so the board is not monotonous. */
+        .es-gather-pin {
+            height: 13px;
+            width: 13px;
+            border-radius: 999px;
+            background-image: radial-gradient(circle at 34% 28%, #f2d9c6, #8f3411 72%);
+            box-shadow: 0 2px 3px rgba(30, 16, 4, 0.55);
+        }
+        .es-gather-pin-teal { background-image: radial-gradient(circle at 34% 28%, #cdf3ea, #0b5b52 72%); }
+
+        /* The tray a request sits in before anyone has pinned it up. The
+           accepted request goes onto a strip of the board instead, so the
+           pin is doing the work a rubber ACCEPTED stamp would have done
+           (and for-venues already owns that stamp).
+
+           NOTE: the tray is deliberately NOT part of the fixed object. It
+           is a recessed region of the panel, in the same family as
+           .es-gather-sub, so it flips with the colour mode like every other
+           surface. Only the board, the card stock, the pin and the numbered
+           corner are pinned across modes: verify with
+           --bands=.es-gather-board,.es-gather-corner,.es-gather-slip and
+           do not add this class to that list. */
+        .es-gather-tray {
+            background-color: #eff0ec;
+            border: 1px dashed rgba(17, 25, 23, 0.22);
+            border-radius: 0.5rem;
+        }
+        .dark .es-gather-tray { background-color: #1b2322; border-color: rgba(232, 237, 236, 0.22); }
+
+        /* Section mark: an index-card corner with a pin through it. Fixed
+           stock in both modes, so it also works on the dark band. */
+        .es-gather-corner {
+            position: relative;
+            display: inline-flex;
+            align-items: flex-end;
+            justify-content: center;
+            width: 2.6rem;
+            height: 2.6rem;
+            padding-bottom: 0.3rem;
+            background-color: #faf5e8;
+            border-radius: 2px;
+            box-shadow: 0 5px 12px rgba(40, 22, 6, 0.4);
+            color: #2b2925;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.8rem;
+            font-weight: 700;
+            transform: rotate(-2.5deg);
+        }
+        .es-gather-corner::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 0.34rem;
+            height: 9px;
+            width: 9px;
+            margin-left: -4.5px;
+            border-radius: 999px;
+            background-image: radial-gradient(circle at 34% 28%, #cdf3ea, #0b5b52 72%);
+        }
+
+        /* ==============================================================
+           THE WEEK. A real table: seven day columns, one row per program.
+           ============================================================== */
+        .es-gather-th {
+            color: #0b5b52;
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+        .dark .es-gather-th { color: #5fdcc9; }
+        .es-gather-mark {
+            display: block;
+            height: 1.15rem;
+            width: 1.15rem;
+            margin: 0 auto;
+            border-radius: 4px;
+            background-color: var(--strand, #0b5b52);
+        }
+        .dark .es-gather-mark { background-color: var(--strand-dark, #5fdcc9); }
+        .es-gather-mark-off {
+            display: block;
+            height: 1.15rem;
+            width: 1.15rem;
+            margin: 0 auto;
+            border-radius: 4px;
+            background-color: rgba(17, 25, 23, 0.07);
+        }
+        .dark .es-gather-mark-off { background-color: rgba(232, 237, 236, 0.07); }
+        .es-gather-dot {
+            display: inline-block;
+            height: 0.45rem;
+            width: 0.45rem;
+            border-radius: 999px;
+            background-color: var(--strand, #0b5b52);
+        }
+        .dark .es-gather-dot { background-color: var(--strand-dark, #5fdcc9); }
+        /* The places bar reuses the table's mark colours, but it must be free
+           to shrink: .es-gather-mark carries a fixed 1.15rem width, and a flex
+           item's default min-width:auto floors at that, so sixteen of them
+           overflowed the panel at 390px. Reset the box here rather than
+           loosening the mark itself, which the table depends on. */
+        .es-gather-bar { display: flex; gap: 3px; }
+        .es-gather-bar > span {
+            flex: 1 1 0;
+            width: auto;
+            min-width: 0;
+            height: 0.5rem;
+            margin: 0;
+            border-radius: 2px;
+        }
+        .es-gather-tr { border-top: 1px solid rgba(17, 25, 23, 0.09); }
+        .dark .es-gather-tr { border-top-color: rgba(232, 237, 236, 0.09); }
+
+        /* ==============================================================
+           THE DOORS. Always-dark band, identical in both colour modes.
+           A resolvable background-color sits under the gradient so text
+           over it is scored against something real.
+           ============================================================== */
+        .es-gather-band {
+            background-color: #0f1615;
             background-image:
-                radial-gradient(circle at 15% 25%, rgba(99, 61, 26, 0.30) 0, rgba(99, 61, 26, 0.30) 1.5px, transparent 2px),
-                radial-gradient(circle at 55% 12%, rgba(99, 61, 26, 0.18) 0, rgba(99, 61, 26, 0.18) 1px, transparent 2px),
-                radial-gradient(circle at 82% 55%, rgba(99, 61, 26, 0.24) 0, rgba(99, 61, 26, 0.24) 1.5px, transparent 2px),
-                radial-gradient(circle at 35% 78%, rgba(99, 61, 26, 0.16) 0, rgba(99, 61, 26, 0.16) 1px, transparent 2px),
-                radial-gradient(circle at 68% 88%, rgba(99, 61, 26, 0.22) 0, rgba(99, 61, 26, 0.22) 1.5px, transparent 2px);
-            background-size: 90px 90px, 70px 70px, 110px 110px, 80px 80px, 100px 100px;
-            box-shadow:
-                inset 0 0 0 4px rgba(124, 74, 33, 0.55),
-                inset 0 2px 12px rgba(60, 33, 12, 0.45),
-                0 12px 30px rgba(0, 0, 0, 0.30);
+                radial-gradient(ellipse 70% 55% at 50% 0%, rgba(11, 91, 82, 0.5), rgba(11, 91, 82, 0) 72%),
+                linear-gradient(180deg, #14201e, #0f1615);
         }
-        .dark .cc-corkboard {
-            background-color: #5a4022;
+        .es-gather-door {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+        .es-gather-door:hover { border-color: rgba(95, 220, 201, 0.4); background-color: rgba(255, 255, 255, 0.075); }
+
+        /* Nothing inside the band may change between colour modes. These
+           three shared classes carry their own .dark rules in
+           marketing.css and are invisible to a grep of this file. Keep
+           them AFTER the .dark rules above so they win in both modes. */
+        .es-gather-band .grid-overlay {
             background-image:
-                radial-gradient(circle at 15% 25%, rgba(28, 16, 6, 0.45) 0, rgba(28, 16, 6, 0.45) 1.5px, transparent 2px),
-                radial-gradient(circle at 55% 12%, rgba(28, 16, 6, 0.30) 0, rgba(28, 16, 6, 0.30) 1px, transparent 2px),
-                radial-gradient(circle at 82% 55%, rgba(28, 16, 6, 0.38) 0, rgba(28, 16, 6, 0.38) 1.5px, transparent 2px),
-                radial-gradient(circle at 35% 78%, rgba(28, 16, 6, 0.26) 0, rgba(28, 16, 6, 0.26) 1px, transparent 2px),
-                radial-gradient(circle at 68% 88%, rgba(28, 16, 6, 0.34) 0, rgba(28, 16, 6, 0.34) 1.5px, transparent 2px);
-            box-shadow:
-                inset 0 0 0 4px rgba(58, 36, 16, 0.70),
-                inset 0 2px 12px rgba(0, 0, 0, 0.55),
-                0 12px 30px rgba(0, 0, 0, 0.45);
+                linear-gradient(rgba(232, 237, 236, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(232, 237, 236, 0.05) 1px, transparent 1px);
+        }
+        .es-gather-band .animate-shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            background-size: 200% 100%;
+        }
+        .es-gather-band .es-claim:focus-within {
+            border-color: rgba(95, 220, 201, 0.75);
+            box-shadow: 0 0 0 4px rgba(95, 220, 201, 0.22);
+        }
+        .es-gather-band .es-gather-tag { color: #5fdcc9; }
+        .es-gather-band .es-gather-grad { background-image: linear-gradient(102deg, #8de6d2, #5fdcc9); }
+        .es-gather-band .es-gather-plan-free { border-color: rgba(232, 237, 236, 0.26); color: #a0acaa; }
+
+        /* Shared dot navigation is hard-coded brand blue. */
+        .es-dot:hover .es-dot-pip { background-color: rgba(11, 91, 82, 0.65); }
+        .es-dot.is-active .es-dot-pip { background: #0b5b52; }
+        .dark .es-dot:hover .es-dot-pip { background-color: rgba(95, 220, 201, 0.65); }
+        .dark .es-dot.is-active .es-dot-pip { background: #5fdcc9; }
+
+        /* Focus rings. Never set a radius here: an outline follows the
+           element's own radius already. */
+        #es-gather-page a:focus-visible,
+        #es-gather-page summary:focus-visible,
+        #es-gather-page button:focus-visible,
+        #es-gather-page input:focus-visible {
+            outline: 2px solid #0b5b52;
+            outline-offset: 2px;
+        }
+        .dark #es-gather-page a:focus-visible,
+        .dark #es-gather-page summary:focus-visible,
+        .dark #es-gather-page button:focus-visible,
+        .dark #es-gather-page input:focus-visible {
+            outline-color: #5fdcc9;
+        }
+        .es-gather-band a:focus-visible,
+        .es-gather-band summary:focus-visible,
+        .es-gather-band button:focus-visible,
+        .es-gather-band input:focus-visible {
+            outline-color: #5fdcc9 !important;
         }
 
-        /* Pinned flyer cards (cream paper, slight rotation applied inline) */
-        .cc-flyer { background: #fdfaf1; box-shadow: 0 5px 12px rgba(45, 26, 8, 0.35); }
-        .cc-flyer-day { color: #b45309; }
-        .cc-flyer-title { color: #3f3a34; }
-        .cc-flyer-sub { color: #6b6157; }
-        .dark .cc-flyer { background: #f2ead9; box-shadow: 0 6px 14px rgba(0, 0, 0, 0.50); }
-
-        /* Pushpins holding the flyers (alternating terracotta / teal) */
-        .cc-pin {
-            height: 12px;
-            width: 12px;
-            border-radius: 9999px;
-            background: radial-gradient(circle at 35% 30%, #fca5a5, #c2410c 70%);
-            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.40);
+        /* Section separators, the timetable's scroll floor and the dot-nav
+           tooltip live here rather than as arbitrary Tailwind values, so the
+           page paints correctly without depending on a CSS rebuild. */
+        .es-gather-edge { border-top: 1px solid rgba(17, 25, 23, 0.1); }
+        .dark .es-gather-edge { border-top-color: rgba(232, 237, 236, 0.11); }
+        .es-gather-table { min-width: 34rem; }
+        .es-gather-tip {
+            background-color: #ffffff;
+            border: 1px solid rgba(17, 25, 23, 0.13);
+            color: #111917;
         }
-        .cc-pin-teal { background: radial-gradient(circle at 35% 30%, #99f6e4, #0d9488 70%); }
+        .dark .es-gather-tip {
+            background-color: #161d1c;
+            border-color: rgba(232, 237, 236, 0.14);
+            color: #e8edec;
+        }
 
-        /* Accent text links + related-card hovers (teal, warming to terracotta) */
-        .cc-textlink { color: #0d9488; }
-        .cc-textlink:hover { color: #c2410c; }
-        .dark .cc-textlink { color: #2dd4bf; }
-        .dark .cc-textlink:hover { color: #fb923c; }
-        .cc-relcard:hover { border-color: #5eead4; background-color: #f0fdfa; }
-        .dark .cc-relcard:hover { border-color: rgba(45, 212, 191, 0.35); background-color: rgba(20, 184, 166, 0.07); }
-        .cc-relcard:hover .cc-relcard-title,
-        .cc-relcard:hover .cc-relcard-arrow { color: #0d9488; }
-        .dark .cc-relcard:hover .cc-relcard-title,
-        .dark .cc-relcard:hover .cc-relcard-arrow { color: #2dd4bf; }
+        /* The newest card on the board lifts a little, as paper on cork
+           does. Gated below. */
+        .es-gather-sway { animation: es-gather-sway 9s ease-in-out infinite; transform-origin: 50% 6px; }
+        @keyframes es-gather-sway {
+            0%, 100% { transform: rotate(-2deg); }
+            50% { transform: rotate(1.2deg); }
+        }
 
         @media (prefers-reduced-motion: reduce) {
-            .es-ripple span { animation: none !important; }
-            .es-ripple span { opacity: 0; }
+            .es-gather-sway { animation: none !important; transform: rotate(-2deg); }
+            .es-gather-btn:hover { transform: none; }
         }
     </style>
 
+    @php
+        // ---------------------------------------------------------------
+        // The week as it hangs on the board. Each program is ONE event
+        // with the days it repeats on (day-of-week recurrence), and a
+        // strand is a sub-schedule, which colour-codes and groups only.
+        // The dot colours are inline custom properties rather than
+        // interpolated Tailwind classes, which the JIT cannot generate.
+        // ---------------------------------------------------------------
+        // Four strands need four hues a person can actually tell apart at
+        // 1.15rem, otherwise the colour-coding argument does not land. The
+        // first draft had Youth #0a4f63 next to Sport #2b4a63, which read as
+        // one navy in both modes. These are teal / blue / terracotta / moss,
+        // spread around the wheel and steering clear of the forbidden
+        // purple-violet-indigo-fuchsia-pink band. They are decorative marks
+        // with an sr-only "Runs Monday" behind them, so no text sits on them.
+        $strands = [
+            'Wellbeing' => ['#0b5b52', '#5fdcc9'],
+            'Youth'     => ['#14548c', '#86c5f0'],
+            'Learning'  => ['#95350f', '#f0a374'],
+            'Sport'     => ['#4a5a12', '#c2d47a'],
+        ];
+
+        $dayNames = ['Mon' => 'Monday', 'Tue' => 'Tuesday', 'Wed' => 'Wednesday', 'Thu' => 'Thursday', 'Fri' => 'Friday', 'Sat' => 'Saturday', 'Sun' => 'Sunday'];
+
+        // [program, strand, days it runs, sign-up]
+        $week = [
+            ['Senior fitness',   'Wellbeing', ['Mon', 'Wed', 'Fri'], 'RSVP, 24 places'],
+            ['Youth basketball', 'Youth',     ['Tue', 'Thu'],        'RSVP, 30 places'],
+            ['Toddler group',    'Wellbeing', ['Wed'],               'RSVP, 16 places'],
+            ['Pottery class',    'Learning',  ['Wed'],               'Ticketed, $45'],
+            ['Community lunch',  'Wellbeing', ['Thu'],               'Just turn up'],
+            ['Film night',       'Learning',  ['Fri'],               'RSVP, 60 places'],
+            ['Open gym',         'Sport',     ['Sat', 'Sun'],        'Just turn up'],
+        ];
+
+        // The cards actually pinned to the board in the hero. The second
+        // line is the time and the sign-up, which are the fields an event
+        // really has: there is no room or space field anywhere in the app,
+        // so nothing on a card here pretends there is one.
+        $pinned = [
+            ['Mon', 'Senior fitness', '9:30am, 24 places', -3.2],
+            ['Tue', 'Youth basketball', '6:00pm, 30 places', 2.4],
+            ['Wed', 'Toddler group', '10:00am, 16 places', -1.6],
+            ['Thu', 'Community lunch', '12:30pm, just turn up', 2.8],
+            ['Sat', 'Open gym', '8:00am, just turn up', -2.2],
+        ];
+
+        // The six ways out of the one board. Every row is free.
+        $doors = [
+            [
+                'Its own link',
+                'The center gets a page at its own address, with every program and every date on it, readable on a phone. That link is the thing you print, text and put in the newsletter.',
+                'M13.828 10.172a4 4 0 015.656 5.656l-3 3a4 4 0 01-5.656 0M10.172 13.828a4 4 0 01-5.656-5.656l3-3a4 4 0 015.656 0',
+            ],
+            [
+                'Embedded on the town website',
+                'One snippet drops the same calendar into the site the city already runs. Nobody is keeping two lists in step, because there is only one list.',
+                'M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4',
+            ],
+            [
+                'On the calendar they already check',
+                'Two-way sync with Google, Outlook and CalDAV, and an iCal download for a single date. A program lands where somebody will actually see it.',
+                'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+            ],
+            [
+                'In their inbox, when you say so',
+                'People follow the center and you write to them. You compose it and you send it, so nothing goes out behind your back. Ten emails a month free, counted per recipient, 100 on Pro and 1,000 on Enterprise.',
+                'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
+            ],
+            [
+                'Printed on the sheet itself',
+                'Your schedule has a QR code you can download and print. The laminated sheet on the actual board becomes a way into the online one, which is the whole trick.',
+                'M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z',
+            ],
+            [
+                'And back onto the board',
+                'Members can add photos and comments to a program, and every submission waits in an approval queue before anyone sees it. Twenty-five photos on the free plan, and Pro lifts the cap. The board fills itself back up.',
+                'M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z',
+            ],
+        ];
+
+        $faqs = [
+            [
+                'q' => 'Is Event Schedule free for community centers?',
+                'a' => 'Yes, and most of what a center needs is on the free plan: the public program calendar and its own link, recurring programs with date exceptions, sub-schedules, free RSVP sign-up with an optional capacity, the embeddable calendar, two-way Google, Outlook and CalDAV sync, iCal downloads, the downloadable QR code, built-in analytics, member photos and comments with an approval queue (25 photos on the free plan), and 10 newsletter emails a month. Newsletter allowances count each recipient as one email, so ten emails means ten people; Pro raises it to 100 a month and Enterprise to 1,000. Selling tickets for a paid class is on the Pro plan at $5 a month, and Event Schedule charges zero platform fees on the sale.',
+            ],
+            [
+                'q' => 'Can I organize classes, meetings, and events by category?',
+                'a' => 'Yes. Sub-schedules group and color-code the strands, so wellbeing, youth, learning and sport read apart at a glance, and each strand has its own shareable link, which means you can send a family a link that shows only the youth programs. Being straight about one thing: a sub-schedule has no visibility setting of its own and cannot hide anything. To keep a program off the public calendar until you are ready, save it as a Draft.',
+            ],
+            [
+                'q' => 'How do community members stay informed about programs?',
+                'a' => 'Through as many doors as you care to open, and all of them are yours to trigger. People follow the center and you write to them when there is something to say - you compose the newsletter and press send, nothing is emailed automatically. The calendar embeds into the website you already have. It syncs both ways with Google, Outlook and CalDAV, so a program can land on a phone. And your schedule has a QR code you can download and print for the board in the lobby.',
+            ],
+            [
+                'q' => 'Can we handle event registration and payments?',
+                'a' => 'Yes. Free sign-up with an optional capacity is on the free plan, and the capacity is counted per date, so a full Monday session does not stop the following Monday filling up. For a paid class, connect your own Stripe account on the Pro plan: the money goes to you, Event Schedule takes no cut, and every ticket carries a QR code you can scan at the door. You can also ask your own questions at checkout, and sell one pass that covers a whole term of a class.',
+            ],
+            [
+                'q' => 'Can outside groups request the hall?',
+                'a' => 'Yes. Turn on requests and a group can ask for a date through your page, either with a short booking form or by pasting a listing for us to read. Keep approval on and nothing appears publicly until you accept it, and you are emailed when requests are waiting. It is a request inbox rather than a room-booking system: there is no per-room availability and nothing warns you that two bookings overlap, so you are still the person who checks.',
+            ],
+        ];
+
+        $dotSections = [
+            ['top', 'The board'],
+            ['week', 'The week'],
+            ['doors', 'The doors'],
+            ['hall', 'Hall hire'],
+            ['signup', 'Sign-ups'],
+            ['who', 'Who it is for'],
+            ['how', 'How it works'],
+            ['faq', 'Questions'],
+            ['claim', 'Get started'],
+        ];
+    @endphp
+
+    <div id="es-gather-page" class="es-gather-page">
+
     <!-- ============================================================ -->
-    <!-- 1. Hero: where community comes together                      -->
+    <!-- 1. Hero: the board in the lobby                              -->
     <!-- ============================================================ -->
-    <section class="es-hero relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
-        <div class="absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(20, 184, 166, 0.32), rgba(20, 184, 166, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 40%, rgba(6, 182, 212, 0.3), rgba(6, 182, 212, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 55% 75%, rgba(16, 185, 129, 0.16), rgba(16, 185, 129, 0) 60%);"></div>
+    {{-- The nav overlays the top of the page, so the hero carries extra
+         top padding rather than letting the board sit under it. --}}
+    <section id="top" class="es-hero noise relative flex min-h-[calc(88svh-4rem)] scroll-mt-24 items-center overflow-hidden pb-16 pt-28">
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 28% 28%, rgba(11, 91, 82, 0.26), rgba(11, 91, 82, 0) 62%); opacity: 0.55;"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 74% 60%, rgba(95, 220, 201, 0.18), rgba(95, 220, 201, 0) 62%); opacity: 0.5;"></div>
+            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 55% 82%, rgba(149, 53, 15, 0.12), rgba(149, 53, 15, 0) 60%); opacity: 0.5;"></div>
             <div class="es-rays absolute inset-0"></div>
             <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
-            <!-- Gathering ripple, centered behind the headline -->
-            <div class="es-ripple absolute left-1/2 top-1/2 h-0 w-0 -translate-x-1/2 -translate-y-1/2">
-                <span style="--rip-dur: 8s; --rip-delay: 0s;"></span>
-                <span style="--rip-dur: 8s; --rip-delay: 2.6s;"></span>
-                <span style="--rip-dur: 8s; --rip-delay: 5.2s;"></span>
-            </div>
         </div>
 
-        <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
-                <svg aria-hidden="true" class="h-5 w-5 text-teal-500 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">For Community Centers & Recreation Facilities</span>
-            </div>
+        <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+                <div>
+                    <p class="es-gather-tag es-fade-up es-d-1 mb-5">For community centers and recreation facilities</p>
 
-            <h1 class="es-balance mb-8 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
-                <span class="es-mask"><span class="es-mask-line">Where your community</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-teal es-gradient-anim">comes together.</span></span></span>
-            </h1>
+                    <h1 class="es-balance mb-7 text-[2.6rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <span class="es-mask"><span class="es-mask-line">The board reaches</span></span>
+                        <span class="es-mask es-mask-2"><span class="es-mask-line">whoever <span class="es-gather-grad">walks past it</span>.</span></span>
+                    </h1>
 
-            <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
-                Stop hoping members check your Facebook page. Email your community directly - no algorithm decides who sees your programs.
-            </p>
+                    <p class="es-gather-muted es-fade-up es-d-2 mb-9 max-w-xl text-lg sm:text-xl">
+                        Your week already runs like clockwork. It is the timetable that never leaves the
+                        lobby. Put the same board on a link, in an inbox and on a phone, and the people
+                        who could not get through the door still see what you run.
+                    </p>
 
-            <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <a href="#features" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
-                    See the week
-                    <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
-                </a>
-                <a href="{{ app_url('/sign_up?type=venue') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-teal-600 to-cyan-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-teal-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-teal-500/40">
-                    Create your center's calendar
-                    <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-            </div>
-
-            <!-- Center-type marquee -->
-            <div class="es-fade-up es-d-4 pointer-events-auto mx-auto mt-14 max-w-3xl">
-                <div class="es-marquee-mask">
-                    <div class="es-marquee" data-marquee="1" aria-hidden="true">
-                        <div class="es-marquee-track">
-                            @for ($tc = 0; $tc < 2; $tc++)
-                                @foreach (['Recreation Center', 'Senior Center', 'Youth Center', 'Cultural Center', 'Neighborhood Center', 'Faith-Based Center'] as $tag)
-                                    <span class="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-100/80 px-4 py-1.5 text-xs font-semibold text-teal-800 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-300">
-                                        <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-teal-400 to-cyan-400"></span>
-                                        {{ $tag }}
-                                    </span>
-                                @endforeach
-                            @endfor
-                        </div>
+                    <div class="es-fade-up es-d-3 flex flex-col gap-3 sm:flex-row">
+                        <a href="#doors" class="es-gather-ghost inline-flex items-center justify-center gap-2 rounded-lg px-7 py-4 text-base font-semibold">
+                            See the six doors
+                            <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                        </a>
+                        <a href="{{ app_url('/sign_up?type=venue') }}" class="es-gather-btn inline-flex items-center justify-center gap-2 rounded-lg px-7 py-4 text-base font-semibold">
+                            Put your board online
+                            <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                        </a>
                     </div>
                 </div>
-            </div>
-        </div>
 
-    </section>
+                <!-- The board. Fixed object: identical with .dark on and off. -->
+                <div class="es-fade-up es-d-4" data-reveal>
+                    <div class="es-gather-board p-5 sm:p-6">
+                        <div class="grid grid-cols-2 gap-3" aria-hidden="true">
+                            @foreach ($pinned as $pi => [$pDay, $pName, $pWhere, $pRot])
+                                <div class="es-gather-slip es-gather-ruled relative px-3 pb-3 pt-5" style="transform: rotate({{ $pRot }}deg);">
+                                    <span class="es-gather-pin {{ $pi % 2 === 0 ? 'es-gather-pin-teal' : '' }} absolute left-1/2 top-1.5 -translate-x-1/2"></span>
+                                    <span class="es-gather-slip-day mb-1">{{ $pDay }}</span>
+                                    <span class="es-gather-slip-title block text-sm leading-tight">{{ $pName }}</span>
+                                    <span class="es-gather-slip-sub mt-0.5 block">{{ $pWhere }}</span>
+                                </div>
+                            @endforeach
 
-    <!-- ============================================================ -->
-    <!-- 2. The community week (dark band)                            -->
-    <!-- ============================================================ -->
-    @php
-        $week = [
-            ['Mon', 'text-teal-300', [['bg-teal-400', 'Senior Fitness', true], ['bg-cyan-400', 'Yoga Class', false]]],
-            ['Tue', 'text-emerald-300', [['bg-emerald-400', 'Youth Basketball', true], ['bg-green-400', 'Computer Lab', false]]],
-            ['Wed', 'text-blue-300', [['bg-blue-400', 'Art Classes', true], ['bg-sky-400', 'Book Club', false]]],
-            ['Thu', 'text-amber-300', [['bg-amber-400', 'Town Hall', true], ['bg-orange-400', 'Dance Class', false]]],
-            ['Fri', 'text-rose-300', [['bg-rose-400', 'Movie Night', true], ['bg-cyan-400', 'Teen Program', false]]],
-            ['Sat', 'text-sky-300', [['bg-sky-400', 'Kids Camp', true], ['bg-blue-400', 'Family Event', false]]],
-            ['Sun', 'text-sky-300', [['bg-sky-400', 'Open Gym', true], ['bg-blue-400', 'Craft Fair', false]]],
-        ];
-        // Slight per-flyer rotations for the corkboard, plus a shared hand-drawn underline
-        $ccRots = [-3.5, 2.5, -2, 3, -1.5, 2, -3];
-        $ccWobble = '<svg class="cc-wobble-line" viewBox="0 0 200 9" preserveAspectRatio="none" fill="none" aria-hidden="true"><path d="M2 6 C 20 3, 35 3, 52 5.5 S 88 8, 108 5 S 150 2.5, 170 5.5 S 194 6.5, 198 4.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-    @endphp
-    <section class="bg-gray-50 px-2 py-14 dark:bg-[#0f0f14] sm:px-4 lg:py-20">
-        <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
-            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 25%, rgba(20, 184, 166, 0.26), rgba(20, 184, 166, 0) 60%); opacity: 0.6;"></div>
-                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 65%, rgba(6, 182, 212, 0.22), rgba(6, 182, 212, 0) 60%); opacity: 0.55;"></div>
-                <div class="grid-overlay absolute inset-0 opacity-25"></div>
-                <div class="es-ripple absolute left-1/2 top-1/3 h-0 w-0 -translate-x-1/2">
-                    <span style="--rip-dur: 9s; --rip-delay: 0s;"></span>
-                    <span style="--rip-dur: 9s; --rip-delay: 3s;"></span>
-                    <span style="--rip-dur: 9s; --rip-delay: 6s;"></span>
-                </div>
-            </div>
+                            <div class="es-gather-slip es-gather-sway relative flex flex-col justify-center px-3 pb-3 pt-5">
+                                <span class="es-gather-pin absolute left-1/2 top-1.5 -translate-x-1/2"></span>
+                                <span class="es-gather-slip-day mb-1">And the newest card</span>
+                                <span class="es-gather-slip-url block">riverside.eventschedule.com</span>
+                            </div>
+                        </div>
+                    </div>
 
-            <div class="relative z-10 mx-auto max-w-5xl">
-                <div class="mx-auto mb-14 max-w-2xl text-center">
-                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>
-                        The community week, <span class="cc-wobble"><span class="text-gradient-teal">organized</span>{!! $ccWobble !!}</span>
-                    </h2>
-                    <p class="text-lg text-gray-300 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                        Senior fitness Monday morning. Youth basketball Tuesday evening. Art classes Wednesday. Keep every program visible and every room booked.
+                    <p class="es-gather-muted mt-5 text-xs">
+                        Six cards, one link. The board does not change. What changes is how many ways there are to read it.
                     </p>
                 </div>
-
-                <div class="cc-corkboard rounded-2xl p-5 md:p-7" data-reveal="panel">
-                    <div class="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-7" data-reveal-group="60">
-                        @foreach ($week as $wi => [$day, $text, $items])
-                            <div data-reveal>
-                                <div class="cc-flyer relative rounded-sm px-3 pb-3 pt-6 text-center" style="transform: rotate({{ $ccRots[$wi] }}deg);">
-                                    <span class="cc-pin {{ $wi % 2 === 0 ? '' : 'cc-pin-teal' }} absolute left-1/2 top-2 -translate-x-1/2"></span>
-                                    <div class="cc-flyer-day mb-2 text-[11px] font-bold uppercase tracking-wider">{{ $day }}</div>
-                                    <div class="space-y-1.5 text-left">
-                                        @foreach ($items as [$dot, $name, $bold])
-                                            <div class="flex items-center gap-1.5">
-                                                <div class="h-1.5 w-1.5 shrink-0 rounded-full {{ $dot }}"></div>
-                                                <span class="text-[11px] {{ $bold ? 'cc-flyer-title font-semibold' : 'cc-flyer-sub' }}">{{ $name }}</span>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-
-                <div class="mt-10 text-center" data-reveal>
-                    <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 backdrop-blur-sm">
-                        <svg aria-hidden="true" class="h-4 w-4 text-teal-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        <span class="text-sm text-gray-300">All recurring programs in one place - members see what's happening every day</span>
-                    </div>
-                </div>
             </div>
         </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- 3. Bento features                                            -->
+    <!-- 2. The week (01) - a real table                              -->
     <!-- ============================================================ -->
-    <section id="features" class="scroll-mt-24 bg-white py-20 dark:bg-[#0a0a0f] lg:py-28">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Everything to run your <span class="cc-wobble"><span class="text-gradient-teal">center</span>{!! $ccWobble !!}</span>
-                </h2>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="110">
-
-                <!-- Program announcements (2 cols) -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="flex flex-col gap-8 lg:flex-row lg:items-center">
-                            <div class="flex-1">
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-100 px-3 py-1.5 text-sm font-medium text-teal-700 dark:border-teal-800/30 dark:bg-teal-900/40 dark:text-teal-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                                    Newsletter
-                                </div>
-                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">New program? Your members are first to know.</h3>
-                                <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">Summer camp registration, new fitness classes, special events - one click emails everyone who signed up. No algorithm decides who sees your announcements.</p>
-                                <div class="flex flex-wrap gap-3">
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Your community, direct reach</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">No middleman</span>
-                                </div>
-                            </div>
-                            <div class="relative w-full shrink-0 lg:w-auto" aria-hidden="true">
-                                <div class="es-ripple pointer-events-none absolute left-1/2 top-1/2 h-0 w-0 -translate-x-1/2 -translate-y-1/2">
-                                    <span style="--rip-dur: 8s; --rip-delay: 0s;"></span>
-                                    <span style="--rip-dur: 8s; --rip-delay: 2.6s;"></span>
-                                    <span style="--rip-dur: 8s; --rip-delay: 5.2s;"></span>
-                                </div>
-                                <div class="animate-float relative">
-                                    <div class="max-w-xs rounded-2xl border border-teal-300 bg-gradient-to-br from-teal-50 to-cyan-50 p-4 dark:border-teal-400/30 dark:from-teal-950 dark:to-cyan-950">
-                                        <div class="mb-4 flex items-center gap-3">
-                                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600"><svg aria-hidden="true" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></div>
-                                            <div><div class="text-sm font-medium text-gray-900 dark:text-white">Summer Camp Registration</div><div class="text-xs text-teal-600 dark:text-teal-300">Sending to 2,341 members...</div></div>
-                                        </div>
-                                        <div class="space-y-2">
-                                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-white p-2 dark:bg-white/10" style="--i: 0;"><div class="h-2 w-2 rounded-full bg-emerald-400"></div><span class="text-xs text-gray-600 dark:text-gray-300">Sports Camp (Ages 8-12)</span></div>
-                                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-white p-2 dark:bg-white/10" style="--i: 1;"><div class="h-2 w-2 rounded-full bg-cyan-400"></div><span class="text-xs text-gray-600 dark:text-gray-300">Art Camp (Ages 6-10)</span></div>
-                                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-white p-2 dark:bg-white/10" style="--i: 2;"><div class="h-2 w-2 rounded-full bg-teal-400"></div><span class="text-xs text-gray-600 dark:text-gray-300">Science Camp (Ages 10-14)</span></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Room booking -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-800/30 dark:bg-sky-900/40 dark:text-sky-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                            Booking Inbox
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Facility rental requests come to you</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Groups submit requests online. Review, approve, or decline from your dashboard.</p>
-                        <div class="relative mt-auto space-y-2" aria-hidden="true">
-                            <div class="cc-stamp absolute -top-3 right-1 z-10">Approved</div>
-                            <div class="es-ai-field flex items-center gap-3 rounded-xl border border-sky-200 bg-sky-100 p-3 dark:border-sky-400/30 dark:bg-sky-500/20" style="--i: 0;">
-                                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-blue-500 text-xs font-semibold text-white">PTA</div>
-                                <div class="flex-1"><div class="text-sm font-medium text-gray-900 dark:text-white">Lincoln PTA</div><div class="text-xs text-sky-600 dark:text-sky-300">Meeting Room &bull; Oct 15</div></div>
-                                <div class="flex gap-1">
-                                    <div class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/20"><svg aria-hidden="true" class="h-3 w-3 text-emerald-500 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></div>
-                                    <div class="flex h-6 w-6 items-center justify-center rounded-full bg-red-500/20"><svg aria-hidden="true" class="h-3 w-3 text-red-500 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></div>
-                                </div>
-                            </div>
-                            <div class="es-ai-field flex items-center gap-3 rounded-xl bg-gray-100 p-3 dark:bg-white/5" style="--i: 1;">
-                                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-500 text-xs font-semibold text-white">SC</div>
-                                <div class="flex-1"><div class="text-sm font-medium text-gray-600 dark:text-gray-300">Scout Troop 42</div><div class="text-xs text-gray-500 dark:text-gray-400">Gym &bull; Oct 22</div></div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Class registration -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/40 dark:text-emerald-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
-                            Registration
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Fill your classes and workshops</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Sell registrations, manage capacity, scan tickets at the door. Works for camps, classes, and special events.</p>
-                        <div class="mt-auto flex justify-center" aria-hidden="true">
-                            <div class="w-44 -rotate-2 rounded-xl border border-emerald-300/50 bg-gradient-to-br from-emerald-100 to-green-50 p-4 text-center shadow-lg transition-transform group-hover:rotate-0">
-                                <div class="text-[10px] uppercase tracking-widest text-emerald-800">Registration</div>
-                                <div class="mt-1 font-serif text-sm font-semibold text-emerald-900">Pottery Class</div>
-                                <div class="mt-2 text-xl font-bold text-emerald-700">$45<span class="text-xs font-normal">/session</span></div>
-                                <div class="mt-1 text-[10px] text-emerald-600">Wednesdays &bull; 6 PM</div>
-                                <div class="mt-1 text-[9px] text-emerald-500">8 spots remaining</div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Community calendar (2 cols) -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="grid items-center gap-8 md:grid-cols-2">
-                            <div>
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-100 px-3 py-1.5 text-sm font-medium text-cyan-700 dark:border-cyan-800/30 dark:bg-cyan-900/40 dark:text-cyan-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                    Public Calendar
-                                </div>
-                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white">Everything happening at your center</h3>
-                                <p class="mb-4 text-lg text-gray-500 dark:text-gray-400">Public events, recurring programs, meetings, and classes - all in one professional calendar. Embed on your website or share the link.</p>
-                                <div class="flex flex-wrap gap-3">
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Mobile-friendly</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Embeddable</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Custom branding</span>
-                                </div>
-                            </div>
-                            <div class="rounded-2xl border border-gray-200 bg-gray-50 p-4 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
-                                <div class="mb-3 text-center">
-                                    <div class="font-semibold text-gray-900 dark:text-white">Riverside Community Center</div>
-                                    <div class="text-sm text-cyan-600 dark:text-cyan-300">October 2024</div>
-                                </div>
-                                <div class="space-y-2">
-                                    <div class="es-ai-field flex items-center gap-3 rounded-lg border border-cyan-200 bg-cyan-100 p-2 dark:border-cyan-400/30 dark:bg-cyan-500/20" style="--i: 0;"><div class="w-10 font-mono text-xs text-cyan-700 dark:text-cyan-300">Oct 5</div><span class="text-sm text-gray-900 dark:text-white">Fall Festival</span></div>
-                                    <div class="es-ai-field flex items-center gap-3 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 1;"><div class="w-10 font-mono text-xs text-gray-500 dark:text-gray-400">Oct 8</div><span class="text-sm text-gray-600 dark:text-gray-300">Senior Lunch</span></div>
-                                    <div class="es-ai-field flex items-center gap-3 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 2;"><div class="w-10 font-mono text-xs text-gray-500 dark:text-gray-400">Oct 12</div><span class="text-sm text-gray-600 dark:text-gray-300">Town Hall Meeting</span></div>
-                                    <div class="es-ai-field flex items-center gap-3 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 3;"><div class="w-10 font-mono text-xs text-gray-500 dark:text-gray-400">Oct 15</div><span class="text-sm text-gray-600 dark:text-gray-300">Youth Basketball</span></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Multi-room scheduling -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-amber-200 bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-800/30 dark:bg-amber-900/40 dark:text-amber-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-                            Spaces
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Every room at a glance</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Gym, meeting rooms, activity rooms, outdoor spaces. Filter by room and avoid scheduling conflicts.</p>
-                        <div class="mt-auto space-y-2" aria-hidden="true">
-                            <div class="es-ai-field flex items-center gap-2 rounded-lg border cc-chip-terra p-2" style="--i: 0;"><div class="h-2 w-2 rounded-full cc-bg-terra"></div><span class="text-sm text-gray-900 dark:text-white">Gymnasium</span><span class="cc-terra ml-auto text-xs">12 events</span></div>
-                            <div class="es-ai-field flex items-center gap-2 rounded-lg border cc-chip-teal p-2" style="--i: 1;"><div class="h-2 w-2 rounded-full cc-bg-teal"></div><span class="text-sm text-gray-900 dark:text-white">Meeting Room A</span><span class="cc-teal ml-auto text-xs">8 events</span></div>
-                            <div class="es-ai-field flex items-center gap-2 rounded-lg border cc-chip-terra p-2" style="--i: 2;"><div class="h-2 w-2 rounded-full cc-bg-terra"></div><span class="text-sm text-gray-900 dark:text-white">Activity Room</span><span class="cc-terra ml-auto text-xs">15 events</span></div>
-                            <div class="es-ai-field flex items-center gap-2 rounded-lg border cc-chip-teal p-2" style="--i: 3;"><div class="h-2 w-2 rounded-full cc-bg-teal"></div><span class="text-sm text-gray-900 dark:text-white">Outdoor Pavilion</span><span class="cc-teal ml-auto text-xs">4 events</span></div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- QR check-in -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-blue-200 bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 dark:border-blue-800/30 dark:bg-blue-900/40 dark:text-blue-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
-                            Check-in
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Track attendance easily</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Scan tickets at the door for classes and events. Know exactly who showed up.</p>
-                        <div class="mt-auto flex justify-center" aria-hidden="true">
-                            <div class="text-center">
-                                <div class="mx-auto mb-2 h-20 w-20 rounded-xl bg-white p-2 shadow-sm"><div class="h-full w-full bg-contain bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2029%2029%22%3E%3Cpath%20fill%3D%22%230f766e%22%20d%3D%22M0%200h7v7H0zm2%202v3h3V2zm8%200h1v1h1v1h-1v1h-1V3h-1V2h1zm4%200h1v4h-1V4h-1V3h1V2zm4%200h3v1h-2v1h-1V2zm5%200h7v7h-7zm2%202v3h3V4zM2%2010h1v1h1v1H2v-1H1v-1h1zm4%200h1v1H5v1H4v-1h1v-1h1zm3%200h1v3h1v1h-1v-1H9v-1h1v-1H9v-1zm5%200h1v2h1v-2h1v3h-1v1h-1v-1h-1v-1h-1v-1h1v-1zm5%200h1v1h-1v1h-1v-1h1v-1zm3%200h1v2h1v-1h1v3h-1v-1h-1v2h-1v-3h-1v-1h1v-1zM0%2014h1v1h1v-1h2v1h-1v1h1v2H3v-2H2v-1H0v-1zm4%200h1v1H4v-1zm9%200h1v1h-1v-1zm8%200h2v1h-2v-1zm0%202v1h1v1h1v1h-1v1h1v1h-2v-2h-1v-1h1v-1h-1v-1h1zm4%200h1v1h-1v-1zM0%2018h1v1H0v-1zm2%200h2v1h1v2H4v-1H3v1H2v-2h1v-1H2v-1zm5%200h3v1h1v2h-1v1h-1v-2H8v1H7v-1H6v-1h1v-1zm6%200h2v1h1v-1h1v2h-2v1h-1v-2h-1v-1zm-5%202h1v1H8v-1zM0%2022h7v7H0zm2%202v3h3v-3zm9-2h1v1h-1v-1zm2%200h1v1h1v2h-2v-1h-1v-1h1v-1zm3%200h3v1h-2v2h2v1h2v2h-1v1h-2v-1h-1v1h-2v-2h1v-2h-1v-2h1v-1zm7%200h1v1h1v1h-1v3h1v-2h1v3h1v-1h1v2h-2v1h-1v-1h-1v-1h-1v1h-2v-1h1v-2h1v-1h-1v-2h1v-1zm-9%202h1v1h-1v-1zm-2%202h1v1h-1v-1zm7%200h1v1h-1v-1zm-5%202h1v1h-1v-1zm2%200h2v1h-2v-1z%22%2F%3E%3C%2Fsvg%3E')]"></div></div>
-                                <div class="text-xs font-medium text-blue-600 dark:text-blue-300">Scan with any smartphone</div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Event graphics (bottom right) -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-rose-200 bg-rose-100 px-3 py-1.5 text-sm font-medium text-rose-700 dark:border-rose-800/30 dark:bg-rose-900/40 dark:text-rose-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                            Graphics
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Ready for social media</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Auto-generate promotional images for your programs. Download and share in seconds.</p>
-                        <div class="mt-auto flex justify-center" aria-hidden="true">
-                            <div class="relative h-32 w-32 rounded-xl border border-rose-200 bg-rose-100 p-2 dark:border-rose-400/30 dark:bg-rose-500/25">
-                                <div class="flex h-full w-full flex-col items-center justify-center rounded-lg bg-gradient-to-br from-teal-600/50 to-cyan-600/50">
-                                    <div class="mb-1 text-[10px] font-semibold text-white">THIS SATURDAY</div>
-                                    <div class="text-xs font-bold text-white">Fall Festival</div>
-                                    <div class="mt-1 text-[8px] text-white/80">Free admission</div>
-                                </div>
-                                <div class="absolute -bottom-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-rose-500">
-                                    <svg aria-hidden="true" class="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 4. Virtual events                                            -->
-    <!-- ============================================================ -->
-    <section class="bg-gray-50 py-16 dark:bg-[#0f0f14] lg:py-20">
+    <section id="week" class="scroll-mt-24 es-gather-edge py-20 lg:py-28">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <a href="{{ marketing_url('/features/online-events') }}" data-reveal="panel" class="es-bento group block">
-                <div class="es-tilt-inner relative overflow-hidden rounded-3xl border border-gray-200 bg-white p-8 dark:border-white/10 dark:bg-white/[0.04] lg:p-10">
-                    <div class="flex flex-col items-center gap-8 lg:flex-row">
-                        <div class="flex-1 text-center lg:text-left">
-                            <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-800/30 dark:bg-sky-900/40 dark:text-sky-300">
-                                <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                                Online Events
-                            </div>
-                            <h2 class="mb-3 text-2xl font-black tracking-tight text-gray-900 transition-colors group-hover:text-sky-600 dark:text-white dark:group-hover:text-sky-400 lg:text-3xl">Reach members who can't come in person</h2>
-                            <p class="mb-4 text-lg text-gray-500 dark:text-gray-400">Virtual town halls, online fitness classes, livestreamed community events. Members can participate from anywhere.</p>
-                            <div class="mb-4 flex flex-wrap justify-center gap-3 lg:justify-start">
-                                <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Virtual meetings</span>
-                                <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Online classes</span>
-                                <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Livestreams</span>
-                            </div>
-                            <span class="inline-flex items-center gap-2 font-medium text-sky-600 transition-all group-hover:gap-3 dark:text-sky-400">
-                                Learn more
-                                <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                            </span>
-                        </div>
-                        <div class="shrink-0" aria-hidden="true">
-                            <div class="w-52 rounded-2xl border border-gray-200 bg-gray-50 p-6 dark:border-white/10 dark:bg-[#0f0f14]">
-                                <div class="mb-4 flex items-center justify-between"><span class="text-xs text-gray-600 dark:text-gray-300">Virtual Town Hall</span><div class="flex items-center gap-1"><div class="h-2 w-2 animate-pulse rounded-full bg-red-500"></div><span class="text-[10px] text-red-500 dark:text-red-400">LIVE</span></div></div>
-                                <div class="mb-3 rounded-lg bg-gradient-to-br from-sky-600/30 to-blue-600/30 p-4 text-center"><div class="mb-1 text-2xl">&#128172;</div><div class="text-sm font-medium text-gray-900 dark:text-white">Community Q&A</div><div class="text-xs text-gray-500 dark:text-gray-400">with the Center Team</div></div>
-                                <div class="flex items-center justify-center gap-2 text-xs text-gray-500 dark:text-gray-400"><svg aria-hidden="true" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg><span>96 attending</span></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="es-glare" aria-hidden="true"></div>
-                    <div class="es-ring-glow" aria-hidden="true"></div>
-                </div>
-            </a>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 5. Perfect for (shared sub-audience cards)                   -->
-    <!-- ============================================================ -->
-    <section class="bg-white py-20 dark:bg-[#0a0a0f] lg:py-28">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Perfect for all types of <span class="cc-wobble"><span class="text-gradient-teal">community centers</span>{!! $ccWobble !!}</span>
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-gather-corner mb-6" data-reveal aria-hidden="true"><span>01</span></div>
+                <p class="es-gather-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The week</p>
+                <h2 class="es-balance es-gather-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Set it once. The week <span class="es-gather-grad">draws itself</span>.
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    From recreation facilities to neighborhood gathering spaces.
+                <p class="es-gather-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Every program that repeats is one entry with the days it runs on, not fifty-two
+                    copies of the same class. Add the weeks it skips as date exceptions and those
+                    dates come off the calendar, so nobody walks up to a hall that is shut.
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
+            <div class="es-gather-card p-5 sm:p-7" data-reveal="panel">
+                <div class="overflow-x-auto">
+                    <table class="es-gather-table w-full border-collapse text-left">
+                        <caption class="sr-only">A community center week: each recurring program, the days it runs, and how people sign up</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col" class="es-gather-th pb-3 pe-3">Program</th>
+                                @foreach ($dayNames as $dShort => $dLong)
+                                    <th scope="col" class="es-gather-th pb-3 text-center">{{ $dShort }}</th>
+                                @endforeach
+                                <th scope="col" class="es-gather-th hidden pb-3 ps-4 sm:table-cell">Sign-up</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($week as [$wName, $wStrand, $wDays, $wSignup])
+                                <tr class="es-gather-tr">
+                                    <th scope="row" class="py-3 pe-3 align-middle">
+                                        <span class="es-gather-ink block text-sm font-bold">{{ $wName }}</span>
+                                        <span class="es-gather-muted mt-0.5 flex items-center gap-1.5 text-[0.65rem] font-normal">
+                                            <span class="es-gather-dot" style="--strand: {{ $strands[$wStrand][0] }}; --strand-dark: {{ $strands[$wStrand][1] }};" aria-hidden="true"></span>
+                                            {{ $wStrand }}
+                                        </span>
+                                    </th>
+                                    @foreach ($dayNames as $dShort => $dLong)
+                                        <td class="px-1 py-3 align-middle">
+                                            @if (in_array($dShort, $wDays))
+                                                <span class="sr-only">Runs {{ $dLong }}</span>
+                                                <span class="es-gather-mark" style="--strand: {{ $strands[$wStrand][0] }}; --strand-dark: {{ $strands[$wStrand][1] }};" aria-hidden="true"></span>
+                                            @else
+                                                <span class="es-gather-mark-off" aria-hidden="true"></span>
+                                            @endif
+                                        </td>
+                                    @endforeach
+                                    <td class="es-gather-muted es-gather-num hidden py-3 ps-4 align-middle text-xs sm:table-cell">{{ $wSignup }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="es-gather-rule my-5" aria-hidden="true"></div>
+
+                <div class="grid gap-4 sm:grid-cols-3">
+                    @foreach ([
+                        ['One entry, every week', 'Pick the days and it repeats on them. Editing the class edits every date of it.'],
+                        ['The weeks it does not run', 'A date exception takes a single date out. Guests do not see a crossed-out line, they see the day simply absent.'],
+                        ['A strand is a sub-schedule', 'It groups and color-codes, and it has a link of its own that shows only those programs.'],
+                    ] as [$nTitle, $nBody])
+                        <div class="es-gather-sub p-4">
+                            <p class="es-gather-ink text-sm font-bold">{{ $nTitle }}</p>
+                            <p class="es-gather-muted mt-1 text-xs">{{ $nBody }}</p>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="es-gather-flag mt-8 p-5" data-reveal>
+                <p class="es-gather-warm text-sm font-bold uppercase tracking-wider">Being straight with you</p>
+                <p class="es-gather-muted mt-1 text-sm">
+                    A sub-schedule cannot hide anything. It has a name, a slug and a color, and that is
+                    all, so it is not a permission or a room. When you want a program off the public
+                    calendar until you are ready, that is what Draft is for.
+                </p>
+            </div>
+
+            <p class="mt-8 text-center" data-reveal>
+                <span class="es-gather-plan es-gather-plan-free">Free</span>
+                <span class="es-gather-muted ms-2 text-sm">Recurring programs, date exceptions and sub-schedules cost nothing.</span>
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 3. The doors (02) - fixed dark band                          -->
+    <!-- ============================================================ -->
+    <section id="doors" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
+        <div class="es-gather-band noise relative overflow-hidden rounded-[2rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                <div class="grid-overlay absolute inset-0 opacity-20"></div>
+            </div>
+
+            <div class="relative z-10 mx-auto max-w-6xl">
+                <div class="mx-auto mb-14 max-w-3xl text-center">
+                    <div class="es-gather-corner mb-6" data-reveal aria-hidden="true"><span>02</span></div>
+                    <p class="es-gather-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The doors</p>
+                    <h2 class="es-balance mb-5 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        One board, <span class="es-gather-grad">six doors out</span>.
+                    </h2>
+                    <p class="text-lg text-gray-300" data-reveal style="--reveal-delay: 0.15s;">
+                        The cork stays where it is. Everything below is the same week, leaving the
+                        building by a different route, and every one of them is on the free plan.
+                    </p>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="90">
+                    @foreach ($doors as $dIndex => [$dTitle, $dBody, $dIcon])
+                        <div class="es-gather-door flex h-full flex-col p-6" data-reveal="panel">
+                            <div class="mb-4 flex items-center gap-3">
+                                <span class="es-gather-lit es-gather-num text-xs font-bold">{{ str_pad($dIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                                <svg aria-hidden="true" class="es-gather-lit h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $dIcon }}" /></svg>
+                            </div>
+                            <h3 class="mb-2 text-lg font-bold text-white">{{ $dTitle }}</h3>
+                            <p class="text-sm text-gray-400">{{ $dBody }}</p>
+                            <p class="mt-auto pt-4">
+                                <span class="es-gather-plan es-gather-plan-free">Free</span>
+                            </p>
+                        </div>
+                    @endforeach
+                </div>
+
+                <p class="mx-auto mt-10 max-w-2xl text-center text-sm text-gray-400" data-reveal>
+                    Worth saying plainly, because software often implies otherwise: followers are never
+                    emailed automatically. A newsletter goes out when you write one and send it.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 4. Hall hire (03)                                            -->
+    <!-- ============================================================ -->
+    <section id="hall" class="scroll-mt-24 es-gather-edge py-20 lg:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-14 lg:grid-cols-2 lg:gap-16">
+                <div class="order-2 lg:order-1">
+                    <div class="es-bento group relative" data-tilt="3" data-reveal="panel">
+                        <div class="es-tilt-inner es-gather-card overflow-hidden p-6 sm:p-7">
+                            <div class="mb-5 flex flex-wrap items-baseline justify-between gap-2">
+                                <h3 class="es-gather-ink text-lg font-bold">Requests waiting</h3>
+                                <span class="es-gather-plan es-gather-plan-free">Free</span>
+                            </div>
+
+                            <div aria-hidden="true">
+                                <p class="es-gather-tag mb-2">Pinned up</p>
+                                <div class="es-gather-board es-gather-strip p-3">
+                                    <div class="es-gather-slip es-gather-ruled relative px-4 pb-4 pt-6">
+                                        <span class="es-gather-pin es-gather-pin-teal absolute left-1/2 top-1.5 -translate-x-1/2"></span>
+                                        <span class="es-gather-slip-day mb-1">Accepted</span>
+                                        <span class="es-gather-slip-title block text-sm">Lincoln PTA quiz night</span>
+                                        <span class="es-gather-slip-sub mt-1 block">Tue 15 Oct, 7:00pm to 9:00pm</span>
+                                    </div>
+                                </div>
+
+                                <p class="es-gather-tag mb-2 mt-6">Still in the tray</p>
+                                <div class="es-gather-tray space-y-2 p-3">
+                                    <div class="es-gather-slip p-4">
+                                        <span class="es-gather-slip-day mb-1">Pending</span>
+                                        <span class="es-gather-slip-title block text-sm">Scout Troop 42 meeting</span>
+                                        <span class="es-gather-slip-sub mt-1 block">Wed 22 Oct, 6:30pm to 8:00pm</span>
+                                    </div>
+                                    <div class="es-gather-slip p-4">
+                                        <span class="es-gather-slip-day mb-1">Pending</span>
+                                        <span class="es-gather-slip-title block text-sm">Allotment Society AGM</span>
+                                        <span class="es-gather-slip-sub mt-1 block">Sat 25 Oct, 10:00am to noon</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p class="es-gather-muted es-gather-edge mt-5 pt-4 text-xs">
+                                The pin is the public calendar. Accepting a request is what moves a slip out
+                                of the tray and onto the board, and nothing else does.
+                            </p>
+
+                            <div class="es-glare" aria-hidden="true"></div>
+                            <div class="es-ring-glow" aria-hidden="true"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="order-1 lg:order-2">
+                    <div class="es-gather-corner mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                    <p class="es-gather-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Hall hire</p>
+                    <h2 class="es-balance es-gather-ink mb-6 text-3xl font-black leading-tight tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        The slip waits for <span class="es-gather-grad">a pushpin</span>.
+                    </h2>
+                    <p class="es-gather-muted mb-8 max-w-xl text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
+                        Turn on requests and an outside group asks for a date through your page instead
+                        of leaving a note at reception that somebody has to type up. Nothing appears
+                        publicly until you accept it.
+                    </p>
+
+                    <ul class="space-y-4" data-reveal-group="80">
+                        @foreach ([
+                            ['Nothing posts without you', 'Keep approval on and every request sits pending. The public calendar only ever shows what you agreed to.'],
+                            ['A short form or a pasted listing', 'Ask for the details on a booking form, or let people paste what they already wrote and have it read for you.'],
+                            ['Your conditions on the form', 'The terms a hirer has to agree to go on the request itself, so they are answered before the conversation starts.'],
+                            ['Groups you already trust', 'Name the schedules whose requests you want posted without review, and leave everyone else pending.'],
+                            ['You are told, not the followers', 'A scheduled check emails you when requests are waiting. Nobody on your follower list hears about it.'],
+                        ] as [$hTitle, $hBody])
+                            <li class="flex items-start gap-3" data-reveal>
+                                <svg aria-hidden="true" class="es-gather-accent mt-0.5 h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span><span class="es-gather-ink font-semibold">{{ $hTitle }}</span> <span class="es-gather-muted">- {{ $hBody }}</span></span>
+                            </li>
+                        @endforeach
+                    </ul>
+
+                    <div class="es-gather-flag mt-8 p-5" data-reveal>
+                        <p class="es-gather-warm text-sm font-bold uppercase tracking-wider">What this is not</p>
+                        <p class="es-gather-muted mt-1 text-sm">
+                            It is a request inbox, not a room-booking system. There is no per-room
+                            availability grid, and nothing will warn you that two bookings overlap. You
+                            are still the person who checks, which is worth knowing before you rely on it.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 5. Sign-ups (04)                                             -->
+    <!-- ============================================================ -->
+    <section id="signup" class="scroll-mt-24 es-gather-edge py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-gather-corner mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                <p class="es-gather-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Sign-ups</p>
+                <h2 class="es-balance es-gather-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Sixteen places, <span class="es-gather-grad">counted per date</span>.
+                </h2>
+                <p class="es-gather-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    A toddler group that fits sixteen fits sixteen. You set that number once on the
+                    program, and it is counted separately for every date it runs, so a full Wednesday
+                    leaves the following Wednesday alone.
+                </p>
+            </div>
+
+            <div class="grid gap-6 lg:grid-cols-2" data-reveal-group="110">
+                <div class="es-gather-card es-gather-hover flex h-full flex-col p-7" data-reveal="panel">
+                    <div class="mb-4 flex flex-wrap items-center gap-2">
+                        <h3 class="es-gather-ink text-xl font-bold">The free class</h3>
+                        <span class="es-gather-plan es-gather-plan-free">Free</span>
+                    </div>
+                    <p class="es-gather-muted mb-6">
+                        Turn on sign-up, give the program a capacity, and people put their name down
+                        from your page. No card, no checkout, no plan.
+                    </p>
+
+                    <div class="es-gather-sub mb-6 p-5" aria-hidden="true">
+                        <p class="es-gather-tag mb-3">Toddler group, Wednesday</p>
+                        <div class="flex items-baseline gap-2">
+                            <span class="es-gather-ink es-gather-num text-4xl font-black leading-none">11</span>
+                            <span class="es-gather-muted es-gather-num text-sm font-bold">of 16 places taken</span>
+                        </div>
+                        <div class="es-gather-bar mt-4">
+                            @for ($s = 0; $s < 16; $s++)
+                                <span class="{{ $s < 11 ? 'es-gather-mark' : 'es-gather-mark-off' }}"></span>
+                            @endfor
+                        </div>
+                        <p class="es-gather-muted mt-3 text-xs">Next Wednesday starts again at nought of sixteen.</p>
+                    </div>
+
+                    <ul class="mt-auto space-y-2">
+                        @foreach ([
+                            'The capacity is optional. Leave it off and sign-up just stays open.',
+                            'A full date stops taking names by itself.',
+                            'Attendees can download the date to their own calendar.',
+                        ] as $fItem)
+                            <li class="es-gather-muted flex items-start gap-2 text-sm">
+                                <svg aria-hidden="true" class="es-gather-accent mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                {{ $fItem }}
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+
+                <div class="es-gather-card es-gather-hover flex h-full flex-col p-7" data-reveal="panel">
+                    <div class="mb-4 flex flex-wrap items-center gap-2">
+                        <h3 class="es-gather-ink text-xl font-bold">The paid class</h3>
+                        <span class="es-gather-plan es-gather-plan-pro">Pro</span>
+                    </div>
+                    <p class="es-gather-muted mb-6">
+                        Pottery costs money to run, so it costs money to join. Connect your own Stripe
+                        account and the money lands in it. Event Schedule charges zero platform fees, so
+                        past what Stripe takes for processing, the fee is yours.
+                    </p>
+
+                    <div class="es-gather-sub mb-6 p-5" aria-hidden="true">
+                        <p class="es-gather-tag mb-3">Pottery class, Wednesday</p>
+                        <div class="space-y-2">
+                            @foreach ([['Single session', '$45'], ['Term pass, one purchase', '$180'], ['Concession', '$28']] as [$tName, $tPrice])
+                                <div class="flex items-baseline gap-3 text-sm">
+                                    <span class="es-gather-ink min-w-0 flex-1 truncate font-semibold">{{ $tName }}</span>
+                                    <span class="es-gather-ink es-gather-num">{{ $tPrice }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                        <p class="es-gather-muted mt-3 text-xs">A pass is one purchase valid across every date of the class, once each.</p>
+                    </div>
+
+                    <ul class="mt-auto space-y-2">
+                        @foreach ([
+                            'Every ticket carries a QR code you scan at the door.',
+                            'Ask your own questions at checkout, so the answers arrive with the sale.',
+                            'Discount codes, a waitlist when a class fills, and a CSV of the whole list.',
+                        ] as $pItem)
+                            <li class="es-gather-muted flex items-start gap-2 text-sm">
+                                <svg aria-hidden="true" class="es-gather-accent mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                {{ $pItem }}
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+
+            <p class="es-gather-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
+                Ticketed classes are on the Pro plan at $5 a month. Free sign-up with a capacity is not,
+                and for a lot of centers that is the whole requirement.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 6. Who it is for (05)                                        -->
+    <!-- ============================================================ -->
+    <section id="who" class="scroll-mt-24 es-gather-edge py-20 lg:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-gather-corner mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                <p class="es-gather-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Who it is for</p>
+                <h2 class="es-balance es-gather-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Anywhere with a board <span class="es-gather-grad">by the door</span>.
+                </h2>
+                <p class="es-gather-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    From recreation facilities to neighborhood gathering spaces, every kind of community center runs on a board like this one.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
                 <x-sub-audience-card
                     name="Recreation Centers"
                     description="Sports leagues, fitness classes, camps, and recreational programs. Keep your community active and engaged."
@@ -672,9 +1070,8 @@
                     blog-slug="for-recreation-centers"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <svg aria-hidden="true" class="h-6 w-6 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0zM7.5 4.5c1.5 2 2 4.5 2 7.5s-.5 5.5-2 7.5m9-15c-1.5 2-2 4.5-2 7.5s.5 5.5 2 7.5" />
                         </svg>
                     </x-slot:icon>
                 </x-sub-audience-card>
@@ -686,8 +1083,8 @@
                     blog-slug="for-senior-centers"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        <svg aria-hidden="true" class="h-6 w-6 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21c-4.5-2.7-7.5-6-7.5-9.5A4.5 4.5 0 0112 8a4.5 4.5 0 017.5 3.5C19.5 15 16.5 18.3 12 21z" />
                         </svg>
                     </x-slot:icon>
                 </x-sub-audience-card>
@@ -699,8 +1096,8 @@
                     blog-slug="for-youth-centers"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        <svg aria-hidden="true" class="h-6 w-6 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5zm0 0v7m-5-4.5V19a5 5 0 0010 0v-2.5" />
                         </svg>
                     </x-slot:icon>
                 </x-sub-audience-card>
@@ -708,12 +1105,12 @@
                 <x-sub-audience-card
                     name="Cultural Centers"
                     description="Heritage events, language classes, cultural celebrations. Preserve and share traditions with your community."
-                    icon-color="violet"
+                    icon-color="amber"
                     blog-slug="for-cultural-centers"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                        <svg aria-hidden="true" class="h-6 w-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 20h16M6 20V9m4 11V9m4 11V9m4 11V9M3 9l9-5 9 5z" />
                         </svg>
                     </x-slot:icon>
                 </x-sub-audience-card>
@@ -721,12 +1118,12 @@
                 <x-sub-audience-card
                     name="Neighborhood Centers"
                     description="Local meetings, block parties, civic events, and community gatherings. Strengthen local bonds."
-                    icon-color="amber"
+                    icon-color="orange"
                     blog-slug="for-neighborhood-centers"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        <svg aria-hidden="true" class="h-6 w-6 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-8 9 8M6 10v10h12V10" />
                         </svg>
                     </x-slot:icon>
                 </x-sub-audience-card>
@@ -734,12 +1131,12 @@
                 <x-sub-audience-card
                     name="Faith-Based Centers"
                     description="Congregation events, community outreach, classes, and fellowship gatherings. Bring people together."
-                    icon-color="indigo"
+                    icon-color="sky"
                     blog-slug="for-faith-based-centers"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        <svg aria-hidden="true" class="h-6 w-6 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 21V8a3 3 0 016 0v13M4 21h16M7 12h10" />
                         </svg>
                     </x-slot:icon>
                 </x-sub-audience-card>
@@ -748,34 +1145,28 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 6. How it works                                              -->
+    <!-- 7. How it works (06)                                         -->
     <!-- ============================================================ -->
-    @php
-        $steps = [
-            ['1', 'Add your center', 'Sign up and add your center details. Set up rooms and spaces if you have multiple areas.'],
-            ['2', 'Post your programs', 'Add classes, events, meetings, and rentals. Set up recurring programs once.'],
-            ['3', 'Reach your members', 'Members follow your calendar. When you post a new program, it goes straight to their inbox.'],
-        ];
-    @endphp
-    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-24">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-2xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                    How it <span class="text-gradient-teal">works</span>
+    <section id="how" class="scroll-mt-24 es-gather-edge py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-gather-corner mb-6" data-reveal aria-hidden="true"><span>06</span></div>
+                <p class="es-gather-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">How it works</p>
+                <h2 class="es-balance es-gather-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Put it up, pin it, <span class="es-gather-grad">open the doors</span>.
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Get your community calendar online in three steps.
-                </p>
             </div>
 
-            <div class="grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="90">
-                @foreach ($steps as [$num, $title, $desc])
-                    <div data-reveal class="text-center">
-                        <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-500 to-cyan-500 text-2xl font-bold text-white shadow-lg shadow-teal-500/25">
-                            {{ $num }}
-                        </div>
-                        <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{{ $title }}</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $desc }}</p>
+            <div class="grid gap-6 md:grid-cols-3" data-reveal-group="110">
+                @foreach ([
+                    ['01', 'Put the board up', 'Sign up as a venue schedule and name the center. You have a public page and a link before you have added anything to it.'],
+                    ['02', 'Pin the week', 'Add each program once with the days it repeats on, group the strands into sub-schedules, and knock out the weeks it skips.'],
+                    ['03', 'Open the doors', 'Embed the calendar in the site you already have, sync it, print the QR code for the lobby, and write to the people who follow.'],
+                ] as [$sNum, $sTitle, $sBody])
+                    <div class="es-gather-card es-gather-hover p-7" data-reveal="panel">
+                        <p class="es-gather-accent es-gather-num mb-3 text-sm font-bold">{{ $sNum }}</p>
+                        <h3 class="es-gather-ink mb-2 text-lg font-bold">{{ $sTitle }}</h3>
+                        <p class="es-gather-muted text-sm">{{ $sBody }}</p>
                     </div>
                 @endforeach
             </div>
@@ -783,32 +1174,47 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 7. Key features                                              -->
+    <!-- 8. Key features                                              -->
     <!-- ============================================================ -->
-    <section class="border-t border-gray-200 bg-white py-20 dark:border-white/5 dark:bg-[#0a0a0f]">
+    <section class="es-gather-edge py-20">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key <span class="text-gradient-teal">features</span></h2>
+            <h2 class="es-gather-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Key features</h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
-                    <x-feature-link-card name="Embed Calendar" description="Add your schedule to any website with one snippet" :url="marketing_url('/features/embed-calendar')" icon-color="blue">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg></x-slot:icon>
+                    <x-feature-link-card name="Recurring Events" description="One entry with the days it repeats on, and exceptions for the weeks it skips" :url="marketing_url('/features/recurring-events')" icon-color="teal">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Recurring Events" description="Set events to repeat weekly on chosen days" :url="marketing_url('/features/recurring-events')" icon-color="lime">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-lime-600 dark:text-lime-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></x-slot:icon>
+                    <x-feature-link-card name="Sub-schedules" description="Group and color-code the strands, each with its own shareable link" :url="marketing_url('/features/sub-schedules')" icon-color="emerald">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h10" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Newsletters" description="Send event updates directly to followers' inboxes" :url="marketing_url('/features/newsletters')" icon-color="green">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></x-slot:icon>
+                    <x-feature-link-card name="Embed Calendar" description="Add your program calendar to the website you already have" :url="marketing_url('/features/embed-calendar')" icon-color="blue">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Online Events" description="One link people join on, for a virtual town hall or a class from home" :url="marketing_url('/features/online-events')" icon-color="sky">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Event Graphics" description="Generate a shareable image for a program to post or print (Pro)" :url="marketing_url('/features/event-graphics')" icon-color="amber">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Newsletters" description="Write to the people who follow the center, ten emails a month free" :url="marketing_url('/features/newsletters')" icon-color="green">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="cc-textlink inline-flex items-center font-medium hover:underline">
+                <a href="{{ marketing_url('/features') }}" class="es-gather-accent inline-flex items-center font-medium hover:underline">
                     See all features
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="ml-1 h-4 w-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
@@ -819,28 +1225,28 @@
     @include('marketing.partials.pricing-nudge')
 
     <!-- ============================================================ -->
-    <!-- 8. Related pages                                             -->
+    <!-- 9. Related pages                                             -->
     <!-- ============================================================ -->
-    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14]">
+    <section class="es-gather-edge py-16">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related <span class="text-gradient-teal">pages</span></h2>
+            <h2 class="es-gather-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Related pages</h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-libraries', 'Libraries'], ['/for-theaters', 'Theaters'], ['/for-workshop-instructors', 'Workshop Instructors'], ['/for-fitness-and-yoga', 'Fitness & Yoga']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group cc-relcard flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="es-gather-card es-gather-hover group flex items-center justify-between p-5">
                         <div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="cc-relcard-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
+                            <div class="es-gather-muted text-sm">Event Schedule for</div>
+                            <div class="es-gather-ink text-lg font-semibold">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="cc-relcard-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="es-gather-accent h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="cc-textlink inline-flex items-center font-medium hover:underline">
+                <a href="{{ marketing_url('/use-cases') }}" class="es-gather-accent inline-flex items-center font-medium hover:underline">
                     See all use cases
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="ml-1 h-4 w-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
@@ -848,73 +1254,75 @@
         </div>
     </section>
 
+    <x-marketing.related-pages />
+
     <!-- ============================================================ -->
-    <!-- 9. FAQ                                                       -->
+    <!-- 10. FAQ (07)                                                 -->
     <!-- ============================================================ -->
-    <section class="bg-gray-100 py-20 dark:bg-black/30 lg:py-28">
+    <section id="faq" class="scroll-mt-24 es-gather-edge py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Frequently asked <span class="text-gradient-teal">questions</span>
+                <div class="es-gather-corner mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                <p class="es-gather-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Questions</p>
+                <h2 class="es-balance es-gather-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Asked at <span class="es-gather-grad">the front desk</span>.
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Everything community centers ask about Event Schedule.
-                </p>
             </div>
 
             <div class="space-y-4" data-reveal-group="80">
-                @foreach ([
-                    ['Is Event Schedule free for community centers?', 'Yes. Event Schedule is free forever for sharing your program calendar, building a community following, and syncing with Google Calendar. Newsletters are free with a monthly send limit, and ticketing is available on the Pro plan.'],
-                    ['Can I organize classes, meetings, and events by category?', 'Yes. Use sub-schedules to organize programs by type - fitness classes, youth programs, senior activities, community meetings, and special events. Each program can have its own schedule, description, and registration options.'],
-                    ['How do community members stay informed about programs?', 'Members can follow your center\'s schedule and receive email notifications for new programs. Embed your calendar on your website, share on social media, or send newsletters to keep the community informed.'],
-                    ['Can we handle event registration and payments?', 'Yes. Enable registration on any program to manage attendance. For paid classes or events, connect Stripe to handle payments with zero platform fees. Attendees receive QR codes for easy check-in.'],
-                ] as [$q, $a])
-                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
-                            <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                @foreach ($faqs as $faq)
+                    <details name="faq" data-reveal class="es-gather-card group/faq overflow-hidden">
+                        <summary class="flex cursor-pointer items-center justify-between gap-4 p-6">
+                            <h3 class="es-gather-ink text-lg font-semibold">{{ $faq['q'] }}</h3>
+                            <svg aria-hidden="true" class="es-gather-muted h-5 w-5 shrink-0 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{{ $a }}</p>
+                        <p class="es-gather-muted faq-answer px-6 pb-6">{{ $faq['a'] }}</p>
                     </details>
                 @endforeach
             </div>
         </div>
     </section>
 
+    <x-seo.faq-schema :items="$faqs" />
+
     <!-- ============================================================ -->
-    <!-- 10. Finale                                                   -->
+    <!-- 11. Finale: the newest card on the board                     -->
     <!-- ============================================================ -->
-    <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
+    <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
-            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-teal-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+            <div class="es-gather-band noise relative overflow-hidden rounded-[2rem] border border-white/10 px-6 py-16 text-center shadow-2xl sm:px-12 lg:py-24" data-confetti data-reveal="panel">
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(20, 184, 166, 0.32), rgba(20, 184, 166, 0) 60%); opacity: 0.7;"></div>
-                    <div class="grid-overlay absolute inset-0 opacity-30"></div>
-                    <div class="es-ripple absolute left-1/2 top-1/3 h-0 w-0 -translate-x-1/2">
-                        <span style="--rip-dur: 9s; --rip-delay: 0s;"></span>
-                        <span style="--rip-dur: 9s; --rip-delay: 3s;"></span>
-                        <span style="--rip-dur: 9s; --rip-delay: 6s;"></span>
-                    </div>
+                    <div class="grid-overlay absolute inset-0 opacity-25"></div>
                 </div>
 
                 <div class="relative z-10">
-                    <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Stop hoping members <span class="cc-wobble"><span class="text-gradient-teal">check Facebook</span>{!! $ccWobble !!}</span>
+                    <div class="es-gather-board es-gather-strip mx-auto mb-9 w-full max-w-xs p-4" data-reveal>
+                        <div class="es-gather-slip es-gather-ruled es-gather-sway relative px-3 pb-3 pt-5 text-left" aria-hidden="true">
+                            <span class="es-gather-pin absolute left-1/2 top-1.5 -translate-x-1/2"></span>
+                            <span class="es-gather-slip-day mb-1">Pin this one up</span>
+                            <span class="es-gather-slip-url block">your-center.eventschedule.com</span>
+                        </div>
+                    </div>
+
+                    <p class="es-gather-tag mb-6">Free to start</p>
+                    <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black leading-tight tracking-tight text-white md:text-5xl">
+                        Put the board where <span class="es-gather-grad">people can find it</span>.
                     </h2>
-                    <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
-                        Email your community directly. Fill your programs. Free forever.
+                    <p class="mx-auto mb-10 max-w-xl text-lg text-gray-300 sm:text-xl">
+                        Everything the center already runs, on a link you can print, embed, sync and
+                        email. Free forever, and no cut of anything you sell.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
                         <label for="es-claim-input" class="sr-only">Your schedule name</label>
-                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
+                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-lg border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
                             <input id="es-claim-input" type="text" placeholder="your-center" autocomplete="off" spellcheck="false" maxlength="30"
-                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
+                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-400 focus:outline-none focus:ring-0 sm:text-base">
                             <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
-                        <a href="{{ app_url('/sign_up?type=venue') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-teal-600 to-cyan-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-teal-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-teal-500/40">
+                        <a href="{{ app_url('/sign_up?type=venue') }}" class="es-gather-btn group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-lg px-8 py-4 text-lg font-semibold">
                             <span class="relative z-10 flex items-center gap-2">
                                 Get Started Free
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -930,6 +1338,22 @@
             </div>
         </div>
     </section>
+
+    <!-- Section dot navigation -->
+    <nav class="es-dotnav fixed top-1/2 z-40 hidden -translate-y-1/2 lg:block ltr:right-5 rtl:left-5" aria-label="Page sections">
+        <ul class="glass flex flex-col items-center gap-1.5 rounded-full px-2 py-3">
+            @foreach ($dotSections as [$sectionId, $sectionLabel])
+                <li class="relative">
+                    <a href="#{{ $sectionId }}" class="es-dot group block rounded-full" aria-label="{{ $sectionLabel }}">
+                        <span class="es-dot-pip block h-2 w-2 rounded-full bg-gray-400/60 dark:bg-white/30"></span>
+                        <span class="es-gather-tip pointer-events-none absolute top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 ltr:right-full ltr:mr-3 rtl:left-full rtl:ml-3">{{ $sectionLabel }}</span>
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    </nav>
+
+    </div>
 
     <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
     @vite('resources/js/marketing-home.js')

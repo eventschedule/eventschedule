@@ -24,4 +24,13 @@ return [
     'event_create_user_daily_limit_trial' => (int) env('EVENT_CREATE_USER_DAILY_LIMIT_TRIAL', 300),
     'event_create_user_daily_limit_pro' => (int) env('EVENT_CREATE_USER_DAILY_LIMIT_PRO', 1500),
     'event_create_user_daily_limit_enterprise' => (int) env('EVENT_CREATE_USER_DAILY_LIMIT_ENTERPRISE', 3000),
+
+    // Free-plan allowances (hosted only; every paid plan, selfhost and the demo are unlimited).
+    // Unlike the anti-abuse caps above these are product limits, so there is only a _free variant:
+    // the limit helpers return null for every other tier before any counting happens.
+    // The per-user figure is a backstop, not a second product limit - one owner may run many
+    // schedules, so it stops the per-schedule allowance being multiplied by spreading events out.
+    'ticket_sale_monthly_limit_free' => (int) env('TICKET_SALE_MONTHLY_LIMIT_FREE', 25),
+    'ticket_sale_user_monthly_limit_free' => (int) env('TICKET_SALE_USER_MONTHLY_LIMIT_FREE', 50),
+    'appointment_type_limit_free' => (int) env('APPOINTMENT_TYPE_LIMIT_FREE', 1),
 ];

@@ -156,6 +156,19 @@
                 }
             }
 
+            // data-modal-open="<modal name>": open an <x-modal>. That component is Alpine and
+            // listens for an 'open-modal' window event, so a plain CustomEvent reaches it without
+            // this call site having to declare an Alpine island of its own (and without an inline
+            // handler, which CSP blocks).
+            var modalTrigger = e.target.closest('[data-modal-open]');
+            if (modalTrigger) {
+                e.preventDefault();
+                window.dispatchEvent(new CustomEvent('open-modal', {
+                    detail: modalTrigger.getAttribute('data-modal-open'),
+                }));
+                return;
+            }
+
             // Generic collapse: data-collapse="next|parent-next|child" (+ data-collapse-child, data-arrow)
             var collapse = e.target.closest('[data-collapse]');
             if (collapse) {

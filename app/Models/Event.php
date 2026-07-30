@@ -1559,7 +1559,61 @@ class Event extends Model
             return false;
         }
 
-        return $this->tickets_enabled && $this->isPro();
+        return $this->tickets_enabled && $this->hasTicketAllowance();
+    }
+
+    /**
+     * Whether the schedules behind this event may still sell a ticket for it.
+     *
+     * Selling is no longer Pro-only: the free plan sells up to a monthly allowance of PAID tickets.
+     * Three ways this is true:
+     *   - Any attached schedule is Pro. Unchanged from when this was a bare isPro() check, so a free
+     *     schedule co-listing on a Pro schedule's event behaves exactly as it did before.
+     *   - A free schedule still has allowance left.
+     *   - The event still has a sellable FREE ticket. Load-bearing: show-guest.blade.php gates the
+     *     whole buy CTA on canSellTickets(), so without this an event mixing a $0 tier with paid
+     *     ones would lose its buy button at the cap and take its free tier down with it - breaking
+     *     the promise that free registration is unlimited.
+     */
+    public function hasTicketAllowance(): bool
+    {
+        if ($this->isPro()) {
+            return true;
+        }
+
+        // Never blocks a sale the allowance is not supposed to govern.
+        if ($this->tickets->contains(fn ($ticket) => ! $ticket->is_addon && (float) $ticket->price <= 0)) {
+            return true;
+        }
+
+        // An event starting imminently is exempt, so a monthly cap can never kill sales during the
+        // final push for an event that is actually happening.
+        if ($this->withinTicketAllowanceGrace()) {
+            return true;
+        }
+
+        return $this->roles->contains(fn ($role) => $role->canSellPaidTickets());
+    }
+
+    /** Hours before an event starts during which the monthly allowance stops applying. */
+    public const TICKET_ALLOWANCE_GRACE_HOURS = 48;
+
+    public function withinTicketAllowanceGrace(?string $date = null): bool
+    {
+        try {
+            $start = $this->days_of_week && $date
+                ? $this->getStartDateTime($date, true, $this->scheduleTimezone())
+                : $this->getStartDateTime();
+        } catch (\Throwable $e) {
+            return false;
+        }
+
+        if (! $start) {
+            return false;
+        }
+
+        return $start->isFuture()
+            && $start->lessThanOrEqualTo(now()->addHours(self::TICKET_ALLOWANCE_GRACE_HOURS));
     }
 
     public function allTicketSalesEnded()
@@ -3056,7 +3110,17 @@ class Event extends Model
         $url = $this->getGuestUrl();
         $validFrom = $this->created_at ? $this->created_at->toIso8601String() : $this->getSchemaStartDate();
 
-        if ($this->tickets_enabled && $this->isPro() && ! $this->tickets->isEmpty()) {
+        if ($this->tickets_enabled && ! $this->tickets->isEmpty()) {
+            // Three states, not two. Falling through to the "free offer" default below for a
+            // ticketed event would publish structured data claiming a $25 event is free and in
+            // stock; emitting the real prices when nothing can be bought is just as wrong, because
+            // search results would show prices that lead to no buy button. So when the event is
+            // ticketed but not currently selling, publish no offers at all. Deliberately not
+            // SoldOut: that would contradict the guest-facing rule never to claim a sell-out.
+            if (! $this->hasTicketAllowance()) {
+                return [];
+            }
+
             $offers = [];
             $currency = $this->ticket_currency_code ?: 'USD';
 

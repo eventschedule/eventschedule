@@ -6,7 +6,7 @@
 --}}
 @php
     $minName = $role->translatedName();
-    $eventLayout = $role->event_layout ?? 'calendar';
+    $eventLayout = $role->activeEventLayout();
 @endphp
 <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm w-full border-b border-gray-200 dark:border-gray-700 shadow-md {{ $isRtl ? 'rtl' : '' }}"
      dir="{{ $isRtl ? 'rtl' : 'ltr' }}">

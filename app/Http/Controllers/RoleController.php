@@ -1239,11 +1239,14 @@ class RoleController extends Controller
                 } else {
                     session()->forget('translate');
 
-                    return redirect(request()->url());
+                    // Drop only ?lang=. url() would strip the whole query string, so switching
+                    // back to the authored language would silently lose ?layout=, ?month=,
+                    // ?category= and the rest of the visitor's context.
+                    return redirect(request()->fullUrlWithoutQuery('lang'));
                 }
             } else {
                 // If invalid language code, redirect to the same URL without the lang parameter
-                return redirect(request()->url());
+                return redirect(request()->fullUrlWithoutQuery('lang'));
             }
         } elseif (session()->has('translate')) {
             app()->setLocale($role->translation_language_code);
@@ -1594,6 +1597,15 @@ class RoleController extends Controller
             if ($event->isPasswordProtected() && ! $bypassPassword) {
                 abort(404);
             }
+
+            // The TICKET embed widget is Pro. The editor only ever hid the "Embed tickets" link, so
+            // this was reachable by anyone who knew the URL shape; that was harmless while free
+            // schedules could not sell, and is not any more. ?rsvp=true stays open on every plan:
+            // it has always worked that way and free schedules may already rely on it.
+            if (request()->get('tickets') === 'true' && ! $event->isPro()) {
+                abort(404);
+            }
+
             $view = 'event/show-guest-ticket-embed';
             $event->loadMissing(['tickets']);
         } elseif ($embed) {
@@ -2307,10 +2319,9 @@ class RoleController extends Controller
         // loaded with its sales - so the tab badge costs no extra query and cannot disagree with the
         // count on the Bookings > Pending filter.
         //
-        // Zero when the tab is gated: appointmentsTabData() returns an empty booking list for a lapsed
-        // plan, so a badge here promised a count and then led to an upgrade prompt and nothing else.
-        $appointmentsGated = config('app.hosted') && ! $role->isPro();
-        $pendingBookingCount = $appointmentsGated ? 0 : collect($requests)
+        // Appointments are available on every plan (the free plan carries one type), so the badge is
+        // never suppressed: whatever it counts, the owner can act on.
+        $pendingBookingCount = collect($requests)
             ->filter(fn ($event) => $event->appointment_type_id
                 && ! $event->is_cancelled
                 && $event->sales->contains(fn ($sale) => ! $sale->is_deleted
@@ -2482,8 +2493,6 @@ class RoleController extends Controller
      */
     protected function appointmentsTabData(Role $role): array
     {
-        $gated = config('app.hosted') && ! $role->isPro();
-
         $types = $role->appointmentTypes()->where('is_deleted', false)->orderBy('name')->get();
 
         $editHash = request('edit');
@@ -2494,9 +2503,9 @@ class RoleController extends Controller
         // storage/currencies.json, same source the event form uses for its currency select.
         $currencies = json_decode(file_get_contents(base_path('storage/currencies.json'))) ?: [];
 
-        if ($gated) {
-            return [$types, $editing, collect(), [], $currencies];
-        }
+        // No plan gate here: appointments are on every plan and the free allowance is a cap on how
+        // many types exist, not on seeing the bookings already taken against them. Returning an
+        // empty list for a lapsed plan hid bookings the owner still had to honour.
 
         // starts_at is stored as a UTC 'Y-m-d H:i:s' string, so a lexicographic compare against a
         // UTC-formatted "now" is a correct past/upcoming split.

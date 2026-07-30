@@ -224,6 +224,30 @@ class Role extends Model implements MustVerifyEmail
     }
 
     /**
+     * The event layout stored on the schedule, normalised. Two layouts exist: "calendar"
+     * (the month grid) and "list". "grid" is a legacy value that survives in the column's
+     * enum but was never offered in the UI and no view branches on it, so it resolves to
+     * the month calendar; null/invalid does too.
+     */
+    public function eventLayout(): string
+    {
+        $layout = $this->event_layout === 'grid' ? 'calendar' : $this->event_layout;
+
+        return in_array($layout, ['calendar', 'list'], true) ? $layout : 'calendar';
+    }
+
+    /**
+     * The layout to render right now. A valid ?layout= on the URL wins over the schedule's
+     * stored setting, which is what lets one site embed the same schedule twice, once as a
+     * calendar and once as a list. Read this on guest-facing surfaces; read eventLayout()
+     * when you want the stored setting itself.
+     */
+    public function activeEventLayout(): string
+    {
+        return requested_event_layout() ?? $this->eventLayout();
+    }
+
+    /**
      * Columns whose change makes this schedule's federated listings stale: the name
      * shown on the card, the venue address flattened into each listing, and the
      * subdomain the backlink is built from.
@@ -534,9 +558,9 @@ class Role extends Model implements MustVerifyEmail
 
     /**
      * Whether this schedule currently offers bookable appointments - drives the GP
-     * "Book a Time" button and the guest /book pages. Pro-gated on hosted (selfhost always
-     * qualifies); a type counts when active, not deleted, and free or with a working
-     * payment method.
+     * "Book a Time" button and the guest /book pages. Available on every plan; a type counts when
+     * active, not deleted, free or with a working payment method, and within the plan's allowance
+     * (see bookableAppointmentTypes()).
      */
     public function hasBookableAppointments(): bool
     {
@@ -544,17 +568,7 @@ class Role extends Model implements MustVerifyEmail
             return $this->hasBookableAppointmentsCache;
         }
 
-        if (config('app.hosted') && ! $this->isPro()) {
-            return $this->hasBookableAppointmentsCache = false;
-        }
-
-        $bookable = $this->appointmentTypes()->active()->get()->contains(function ($type) {
-            $type->setRelation('role', $this);
-
-            return $type->isBookable();
-        });
-
-        return $this->hasBookableAppointmentsCache = $bookable;
+        return $this->hasBookableAppointmentsCache = $this->bookableAppointmentTypes()->isNotEmpty();
     }
 
     /**
@@ -1722,11 +1736,53 @@ class Role extends Model implements MustVerifyEmail
 
     public function showBranding()
     {
-        if (config('app.hosted')) {
-            return $this->actualPlanTier() === 'free';
-        } else {
-            return ! $this->isWhiteLabeled();
+        // A single-tenant install has no tiers - actualPlanTier() short-circuits to
+        // 'enterprise' - and the footer strip is a hosted-platform growth CTA, so it has
+        // nothing to say there. Selfhost attribution is the credit chip instead; see
+        // creditChipReason(). This branch used to read `! $this->isWhiteLabeled()`, which
+        // was unconditionally false when unhosted, so the behaviour is unchanged.
+        if (! config('app.hosted')) {
+            return false;
         }
+
+        return $this->actualPlanTier() === 'free';
+    }
+
+    /**
+     * Why this schedule's guest pages carry the small "Event Schedule" credit chip, or
+     * null when they do not. Three distinct jobs share one piece of UI:
+     *
+     *  - 'selfhost'     the Attribution Assurance License credit. Unconditional: every
+     *                   schedule on a single-tenant install resolves to 'enterprise', so
+     *                   gating this on showBranding() left every selfhost guest page with
+     *                   no public attribution anywhere - only the logged-in admin footer.
+     *  - 'saas_free'    an operator's own free tier. The dark footer strip promotes THEM
+     *                   through marketing_url(); this chip is our attribution and keeps
+     *                   pointing at eventschedule.com.
+     *  - 'granted_plan' an Enterprise plan an admin handed out by hand. Customers paying
+     *                   through Stripe buy white-label and never carry it, and neither do
+     *                   plans earned through the referral programme.
+     *
+     * Both halves of the granted-plan test are load-bearing. plan_source alone would keep
+     * branding someone who was granted a plan and later subscribed, if any Stripe path ever
+     * forgot to clear it; hasActiveEnterpriseSubscription() alone would also catch referral
+     * rewards, which are earned rather than given (see ReferralController).
+     */
+    public function creditChipReason(): ?string
+    {
+        if (! config('app.hosted')) {
+            return 'selfhost';
+        }
+
+        if (! config('app.is_nexus')) {
+            return $this->showBranding() ? 'saas_free' : null;
+        }
+
+        $isGrantedPlan = $this->plan_source === 'admin'
+            && $this->actualPlanTier() === 'enterprise'
+            && ! $this->hasActiveEnterpriseSubscription();
+
+        return $isGrantedPlan ? 'granted_plan' : null;
     }
 
     /**
@@ -2316,6 +2372,272 @@ class Role extends Model implements MustVerifyEmail
         }
 
         return true;
+    }
+
+    /** Per-request memo for ticketsSoldThisMonth(). */
+    protected $ticketsSoldThisMonthCache = null;
+
+    /**
+     * Free-plan ticket allowance: how many PAID tickets this schedule may sell in a month.
+     *
+     * Null means unlimited, and it is returned BEFORE any counting happens, so selfhosted
+     * installs, demo schedules and every paid or trialling plan never run the count query.
+     * Demo schedules are exempt for the same reason showAds() exempts them: the demo is seeded
+     * with hundreds of paid sales and exists to show the product working, not a paywall.
+     */
+    public function ticketSaleLimit(): ?int
+    {
+        if (! config('app.hosted') || is_demo_role($this) || $this->isPro()) {
+            return null;
+        }
+
+        return (int) config('usage.ticket_sale_monthly_limit_free');
+    }
+
+    /**
+     * Backstop across every schedule the same owner runs. A hosted user may own 50 schedules and
+     * "unlimited schedules" is itself a free feature, so a per-schedule cap alone multiplies.
+     * Mirrors the per-user companion cap on event creation.
+     */
+    public function ticketSaleUserLimit(): ?int
+    {
+        if (! config('app.hosted') || is_demo_role($this) || $this->isPro()) {
+            return null;
+        }
+
+        return (int) config('usage.ticket_sale_user_monthly_limit_free');
+    }
+
+    /**
+     * When this schedule last dropped to the free plan, or null if it was never on a paid one.
+     *
+     * The allowance window starts at the later of this and the start of the month. Without it a
+     * schedule that trialled Pro, sold 200 tickets and lapsed on the 12th would read "200 of 25"
+     * for the rest of the month: paid checkout dead, dashboard red, and an "allowance used up"
+     * email sent to someone who never had a 25 allowance.
+     */
+    public function freeSince(): ?\Carbon\Carbon
+    {
+        $candidates = [];
+
+        if ($this->plan_expires) {
+            // plan_expires is a date string, so the schedule stayed paid through that whole day.
+            $expires = \Carbon\Carbon::parse($this->plan_expires)->endOfDay();
+
+            if ($expires->isPast()) {
+                $candidates[] = $expires;
+            }
+        }
+
+        if ($this->trial_ends_at && $this->trial_ends_at->isPast()) {
+            $candidates[] = \Carbon\Carbon::parse($this->trial_ends_at);
+        }
+
+        $subscription = $this->subscription('default');
+
+        if ($subscription && $subscription->ends_at && $subscription->ends_at->isPast()) {
+            $candidates[] = \Carbon\Carbon::parse($subscription->ends_at);
+        }
+
+        if (! $candidates) {
+            return null;
+        }
+
+        return collect($candidates)->sort()->last();
+    }
+
+    /** Start of the current allowance window: the later of this month and the drop to free. */
+    public function ticketAllowanceStart(): \Carbon\Carbon
+    {
+        $monthStart = now()->startOfMonth();
+        $freeSince = $this->freeSince();
+
+        return $freeSince && $freeSince->greaterThan($monthStart) ? $freeSince : $monthStart;
+    }
+
+    /** When the allowance next resets. Used for the "resets on ..." copy. */
+    public function ticketAllowanceResetsAt(): \Carbon\Carbon
+    {
+        return now()->startOfMonth()->addMonth();
+    }
+
+    /**
+     * Events that count against a set of schedules' allowances, as a SUBQUERY.
+     *
+     * Deliberately not a plucked id list: a large curator schedule can list tens of thousands of
+     * events and binding one placeholder each can exceed MySQL's prepared-statement limit.
+     *
+     * An event belongs to a schedule either through the event_role pivot or through
+     * creator_role_id, and it may be linked by only one of them, so both paths are covered.
+     * Curator schedules are the exception: a curator listing somebody else's event should not be
+     * charged for it, so a curator only owns what it created.
+     */
+    protected static function ticketAllowanceEventQuery(array $roleIds, array $curatorRoleIds)
+    {
+        $pivotRoleIds = array_values(array_diff($roleIds, $curatorRoleIds));
+
+        return \App\Models\Event::query()
+            ->select('events.id')
+            // Appointment bookings are real events with real sale_tickets; they have their own
+            // allowance (one appointment type) and must never consume the ticket one.
+            ->whereNull('events.appointment_type_id')
+            ->where(function ($query) use ($roleIds, $pivotRoleIds) {
+                $query->whereIn('events.creator_role_id', $roleIds);
+
+                if ($pivotRoleIds) {
+                    $query->orWhereExists(function ($sub) use ($pivotRoleIds) {
+                        $sub->selectRaw('1')
+                            ->from('event_role')
+                            ->whereColumn('event_role.event_id', 'events.id')
+                            ->whereIn('event_role.role_id', $pivotRoleIds);
+                    });
+                }
+            });
+    }
+
+    /**
+     * Paid tickets sold since $since for a set of schedules.
+     *
+     * "Paid ticket" excludes: free RSVPs (their own payment_method, and they create no
+     * sale_tickets rows at all), bulk attendee imports, add-ons (extras, not admissions), and
+     * zero-price rows. That last exclusion is load-bearing: a $0 order through the ticketing
+     * system is stored with the event's payment method and status 'paid', so without it free
+     * registration would silently eat the allowance.
+     *
+     * Windowed on paid_at, never created_at: a cash sale is created unpaid and only becomes paid
+     * when the owner marks it paid, so created_at would let cash escape the cap entirely.
+     */
+    protected static function paidTicketsSoldSince(array $roleIds, array $curatorRoleIds, \Carbon\Carbon $since): int
+    {
+        if (! $roleIds) {
+            return 0;
+        }
+
+        return (int) \Illuminate\Support\Facades\DB::table('sale_tickets')
+            ->join('sales', 'sales.id', '=', 'sale_tickets.sale_id')
+            ->join('tickets', 'tickets.id', '=', 'sale_tickets.ticket_id')
+            ->where('sales.status', 'paid')
+            ->where('sales.is_deleted', false)
+            ->whereNotIn('sales.payment_method', ['rsvp', 'import'])
+            ->where('tickets.is_addon', false)
+            ->where('tickets.price', '>', 0)
+            ->where('sales.paid_at', '>=', $since)
+            ->whereIn('sales.event_id', static::ticketAllowanceEventQuery($roleIds, $curatorRoleIds))
+            ->sum('sale_tickets.quantity');
+    }
+
+    /**
+     * Paid tickets this schedule has sold in the current allowance window.
+     *
+     * Memoized per request on the model. canSellTickets() is called seven times per guest event
+     * page render and once per day inside PassBookingService's availability loop, so the memo is
+     * what keeps those safe. Every paying customer, selfhost and demo schedule short-circuits on
+     * the null limit before reaching here.
+     */
+    public function ticketsSoldThisMonth(): int
+    {
+        if ($this->ticketsSoldThisMonthCache !== null) {
+            return $this->ticketsSoldThisMonthCache;
+        }
+
+        return $this->ticketsSoldThisMonthCache = static::paidTicketsSoldSince(
+            [$this->id],
+            $this->type === 'curator' ? [$this->id] : [],
+            $this->ticketAllowanceStart()
+        );
+    }
+
+    /** Paid tickets sold across every schedule this schedule's owner runs. */
+    public function ownerTicketsSoldThisMonth(): int
+    {
+        $roles = static::where('user_id', $this->user_id)->get(['id', 'type']);
+
+        return static::paidTicketsSoldSince(
+            $roles->pluck('id')->all(),
+            $roles->where('type', 'curator')->pluck('id')->all(),
+            $this->ticketAllowanceStart()
+        );
+    }
+
+    /**
+     * Whether this schedule may sell another PAID ticket right now. Free RSVP and zero-price
+     * tickets are unlimited and never consult this.
+     */
+    public function canSellPaidTickets(): bool
+    {
+        $limit = $this->ticketSaleLimit();
+
+        if (is_null($limit)) {
+            return true;
+        }
+
+        if ($this->ticketsSoldThisMonth() >= $limit) {
+            return false;
+        }
+
+        $userLimit = $this->ticketSaleUserLimit();
+
+        if (! is_null($userLimit) && $this->ownerTicketsSoldThisMonth() >= $userLimit) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Free-plan appointment allowance: how many appointment types this schedule may have.
+     * Null means unlimited. The single free type is otherwise fully featured.
+     */
+    public function appointmentTypeLimit(): ?int
+    {
+        if (! config('app.hosted') || is_demo_role($this) || $this->isPro()) {
+            return null;
+        }
+
+        return (int) config('usage.appointment_type_limit_free');
+    }
+
+    public function appointmentTypeCount(): int
+    {
+        return $this->appointmentTypes()->where('is_deleted', false)->count();
+    }
+
+    public function canCreateAppointmentType(): bool
+    {
+        $limit = $this->appointmentTypeLimit();
+
+        if (is_null($limit)) {
+            return true;
+        }
+
+        return $this->appointmentTypeCount() < $limit;
+    }
+
+    /**
+     * The appointment types a guest may actually book, with the free-plan cap applied.
+     *
+     * A schedule whose Pro plan lapsed keeps every type it created; they are clamped, never
+     * deleted, and light up again on upgrade. Clamping picks the oldest BOOKABLE type rather than
+     * the oldest active one: if the oldest active type is a paid type whose payment method has
+     * gone, clamping by age alone would leave the schedule with nothing bookable while a banner
+     * named the dead one as live.
+     */
+    public function bookableAppointmentTypes()
+    {
+        $types = $this->appointmentTypes()
+            ->active()
+            ->orderBy('id')
+            ->get()
+            ->filter(function ($type) {
+                $type->setRelation('role', $this);
+
+                return $type->isBookable();
+            })
+            ->values();
+
+        $limit = $this->appointmentTypeLimit();
+
+        return is_null($limit) ? $types : $types->take($limit)->values();
     }
 
     public function aiAgendaDailyLimit(): ?int

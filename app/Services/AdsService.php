@@ -106,6 +106,15 @@ class AdsService
             return null;
         }
 
+        // Never on a page that is actively selling tickets. The event page carries the inline ticket
+        // form, so an ad here - and worse, a paid promotion for another schedule's event - would sit
+        // beside the organizer's own buy button and compete with it. Free schedules are the only ones
+        // that carry ads and, since the free plan can sell, also the only ones this can happen to.
+        // Extends the checkout/booking exclusion already promised in docs/FEATURES.md.
+        if ($event && $event->tickets_enabled && $event->canSellTickets($request->query('date'))) {
+            return null;
+        }
+
         $native = null;
 
         // Google's ad crawlers are exempted from the bot filter so AdSense can read the page for

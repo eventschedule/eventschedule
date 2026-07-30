@@ -53,16 +53,20 @@
             </svg>
             Event Layout
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Choose how your events are displayed on your schedule page:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Choose how your events are displayed on your schedule page, under <strong>Edit schedule &rarr; Style &rarr; Default Layout</strong>. Visitors can switch between the two themselves, and their choice is remembered in their own browser.</p>
         <div class="space-y-3 mb-6">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Grid Layout</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Events displayed in a card grid. Best for schedules with event images and visual appeal.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Calendar</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Events laid out on a month grid, one cell per day. Best when the shape of the month matters, such as a venue with something on most nights.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">List Layout</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Events displayed in a compact list. Best for text-heavy schedules or when you have many events.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">List</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Events in date order as full-width cards, loaded well beyond the current month. Best when each event deserves its own space, or when they are spread thinly across the year.</p>
             </div>
+        </div>
+        <div class="doc-callout doc-callout-tip">
+            <div class="doc-callout-title">Per-embed override</div>
+            <p>This setting is the default for your schedule page and for embeds of it. An embed can override it with <code class="doc-inline-code">?layout=calendar</code> or <code class="doc-inline-code">?layout=list</code>, so one page can carry the same schedule twice in both layouts. See <a href="{{ route('marketing.docs.sharing') }}#embed-parameters" class="doc-link">Embed URL Parameters</a>.</p>
         </div>
     </section>
 
@@ -261,7 +265,8 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">When branding is removed, your schedule appears entirely as your own - no Event Schedule branding is visible to visitors. This is ideal for businesses, venues, and organizations that want a professional, branded presence.</p>
             </div>
         </div>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Branding is automatically removed for all Pro and Enterprise plans. Selfhosted installations also have branding removed by default.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Branding is automatically removed for all Pro and Enterprise plans.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Selfhosted installations behave like a paid plan, so the footer strip, the card on event pages, the lines in your embed snippets and newsletters, and ads are all removed by default. One small "Event Schedule" credit stays in the corner of your public pages: it is the attribution the Attribution Assurance License asks for in return for the application, so it is not tied to a plan and there is no setting that removes it.</p>
     </section>
 
     <!-- Custom CSS -->

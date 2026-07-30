@@ -513,6 +513,14 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function canScanEvent($event)
     {
+        // QR scanning is a Pro feature. This is the shared chokepoint for every scan path, so the
+        // gate belongs here rather than repeated at each caller. It needed no gate while only Pro
+        // schedules could sell: a free schedule produced no scannable ticket. Now that the free plan
+        // sells up to its monthly allowance, leaving it out would hand scanning to every tier.
+        if (! $event->isPro()) {
+            return false;
+        }
+
         if ($this->canEditEvent($event)) {
             return true;
         }
