@@ -2100,7 +2100,9 @@
                                             id="event_layout_{{ $layout }}"
                                             name="event_layout"
                                             value="{{ $layout }}"
-                                            {{ $role->event_layout == $layout ? 'checked' : '' }}
+                                            {{-- eventLayout(), not the raw column: it normalises the dead
+                                                 'grid' enum value so a legacy row still shows a selection. --}}
+                                            {{ $role->eventLayout() == $layout ? 'checked' : '' }}
                                             class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
                                         <label for="event_layout_{{ $layout }}" class="ms-2 text-gray-900 dark:text-gray-100">
                                             {{ __('messages.' . $layout) }}

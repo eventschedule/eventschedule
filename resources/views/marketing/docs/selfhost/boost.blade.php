@@ -25,8 +25,68 @@
             </svg>
             Overview
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The boost feature lets users promote events through paid Facebook and Instagram ads via the Meta Marketing API. The platform acts as an intermediary, creating campaigns, ad sets, and ads on behalf of users using a single platform-owned Meta ad account.</p>
-        <p class="text-gray-600 dark:text-gray-300">This guide walks through the complete Facebook/Meta configuration needed to enable the boost feature.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Boost lets the schedules on your instance promote events through paid Facebook and Instagram ads via the Meta Marketing API. Your instance acts as the intermediary: it creates the campaign, ad set and ad on behalf of the schedule owner using a single platform-owned Meta ad account, Facebook Page and system user token that you configure here. Nobody has to connect their own Facebook account, and there is no Facebook login step anywhere in the boost flow. For what the feature looks like from the schedule owner's side, see the <a href="{{ route('marketing.docs.boost') }}" class="doc-link">Boost user guide</a>.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Before you start, make sure you have:</p>
+        <ul class="doc-list mb-6">
+            <li>A Meta Business account, with permission to create an ad account and manage a Facebook Page</li>
+            <li>A payment method on that ad account. Meta bills it directly for all ad spend</li>
+            <li>A publicly reachable install over HTTPS. Every ad's destination is the event's own public page, so that URL has to resolve from the public internet. It also has to be reachable in the other direction if you want webhooks (Step 6)</li>
+        </ul>
+
+        <div class="doc-callout doc-callout-warning mb-6">
+            <div class="doc-callout-title">On a selfhosted install, the ad spend is yours</div>
+            <p>A selfhosted install charges nothing for a boost: the campaign is marked as paid with a total of 0, and the <code class="doc-inline-code">META_MARKUP_RATE</code> service fee is forced to 0 whenever <code class="doc-inline-code">IS_HOSTED=false</code>. No Stripe configuration is involved. Meta invoices the one ad account you configure below, so every campaign any schedule on your instance creates spends your money. Your two limits are <code class="doc-inline-code">META_MAX_BUDGET</code> per campaign and <code class="doc-inline-code">META_MAX_CONCURRENT_BOOSTS</code> campaigns in flight per schedule.</p>
+        </div>
+
+        <h3 class="doc-subheading">What has to be true before a schedule can boost</h3>
+
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Requirement</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code class="doc-inline-code">META_ACCESS_TOKEN</code> is set</td>
+                        <td>The switch that makes the Meta channel exist. It turns on the <strong class="text-gray-900 dark:text-white">Facebook &amp; Instagram</strong> button in the boost dashboard's event picker, and it is what the scheduler checks before running <code class="doc-inline-code">boost:sync</code>. Nothing is ever sent to Meta without it.</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">META_APP_ID</code> is set</td>
+                        <td>Enables the <strong class="text-gray-900 dark:text-white">Boost Event</strong> button in the header of the event edit page. Without it the button is disabled and says "Boost requires Meta Ads to be configured."</td>
+                    </tr>
+                    <tr>
+                        <td>The schedule is on a paid plan</td>
+                        <td>Boost is a Pro feature. With <code class="doc-inline-code">IS_HOSTED=false</code> every schedule resolves to Enterprise, so this is always satisfied and no upgrade prompt appears. If you run a multi-tenant SaaS with <code class="doc-inline-code">IS_HOSTED=true</code>, the normal plan gate applies.</td>
+                    </tr>
+                    <tr>
+                        <td>The event is published and upcoming</td>
+                        <td>Draft events are refused outright, and the event picker only lists events that are upcoming or ongoing, not draft, and have a name.</td>
+                    </tr>
+                    <tr>
+                        <td>The event has an image</td>
+                        <td>Every ad creative needs one. The flyer image is used, falling back to the schedule's profile image and then the venue's. The purchase form warns when there is none, and with no image at all creating the ad on Meta fails.</td>
+                    </tr>
+                    <tr>
+                        <td>A free concurrency slot</td>
+                        <td>A schedule may have <code class="doc-inline-code">META_MAX_CONCURRENT_BOOSTS</code> Meta campaigns in flight, counting those that are active or awaiting payment. On-network promotions are counted separately, so one channel cannot starve the other.</td>
+                    </tr>
+                    <tr>
+                        <td>A verified phone number</td>
+                        <td>Hosted only. A selfhosted install never asks for phone verification before a boost.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 class="doc-subheading">Boost has a second channel you configure elsewhere</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The Boost section of the admin panel covers two channels. Everything on this page is the <strong class="text-gray-900 dark:text-white">Meta</strong> channel: paid ads bought from Facebook and Instagram. The other is <strong class="text-gray-900 dark:text-white">on-network promotions</strong>, where a paid schedule buys placement on the public pages of free schedules on your own instance. It shares the same campaign records and the same dashboard, but none of the variables on this page apply to it.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">That is why <strong class="text-gray-900 dark:text-white">Boost</strong> can appear in the admin panel sidebar on an instance with no Meta configuration at all: the sidebar item shows when <code class="doc-inline-code">META_ACCESS_TOKEN</code> is set <em>or</em> the promotions engine is enabled. Promotions need three separate things - <code class="doc-inline-code">ADS_ENABLED=true</code> in <code class="doc-inline-code">.env</code>, the promotions engine switched on in the admin panel's monetization settings, and a multi-tenant hosted install - and they are covered in the <a href="{{ route('marketing.docs.saas.monetization') }}" class="doc-link">Monetization guide</a>. None of that is required for Meta boosts.</p>
+
+        <p class="text-gray-600 dark:text-gray-300">The rest of this guide walks through the Facebook and Meta configuration, in the order it is easiest to do it.</p>
     </section>
 
     <!-- Step 1: Create a Facebook App -->
@@ -43,6 +103,7 @@
             <li>Select <strong class="text-gray-900 dark:text-white">Other</strong> as the use case, then <strong class="text-gray-900 dark:text-white">Business</strong> as the app type</li>
             <li>Fill in the app name (e.g. "Event Schedule Boost") and contact email</li>
             <li>Once created, note the <strong class="text-gray-900 dark:text-white">App ID</strong> and <strong class="text-gray-900 dark:text-white">App Secret</strong> from App Settings > Basic</li>
+            <li>Add the app to your Business Account under <strong class="text-gray-900 dark:text-white">Business Settings > Accounts > Apps</strong>, so the system user in Step 4 can generate a token against it</li>
         </ol>
 
         <div class="doc-code-block">
@@ -53,6 +114,8 @@
             <pre><code><span class="code-variable">META_APP_ID</span>=<span class="code-string">your_app_id</span>
 <span class="code-variable">META_APP_SECRET</span>=<span class="code-string">your_app_secret</span></code></pre>
         </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mt-6">The two values do different jobs. The <strong class="text-gray-900 dark:text-white">App ID</strong> is what the event page checks before it enables the Boost button. The <strong class="text-gray-900 dark:text-white">App Secret</strong> is used only to verify the signature on incoming Meta webhooks (Step 6); it is never sent to the Marketing API.</p>
     </section>
 
     <!-- Step 2: Meta Business & Ad Account -->
@@ -69,6 +132,7 @@
             <li>Create a Business Account if you don't have one</li>
             <li>In <strong class="text-gray-900 dark:text-white">Business Settings > Accounts > Ad Accounts</strong>, click <strong class="text-gray-900 dark:text-white">Add > Create a new ad account</strong></li>
             <li>Name it (e.g. "Event Schedule Boost Ads"), set the currency and timezone</li>
+            <li>Add a payment method to the ad account. Meta bills it directly for every campaign your instance creates</li>
             <li>Note the <strong class="text-gray-900 dark:text-white">Ad Account ID</strong> (numeric, without the <code class="doc-inline-code">act_</code> prefix - the code adds that automatically)</li>
         </ol>
 
@@ -78,6 +142,11 @@
                 <button class="doc-copy-btn">Copy</button>
             </div>
             <pre><code><span class="code-variable">META_AD_ACCOUNT_ID</span>=<span class="code-string">your_ad_account_id</span></code></pre>
+        </div>
+
+        <div class="doc-callout doc-callout-info mt-6">
+            <div class="doc-callout-title">Match the currency</div>
+            <p>Budgets are sent to Meta as minor units with no currency attached, so Meta always spends in the ad account's own currency. Set <code class="doc-inline-code">META_DEFAULT_CURRENCY</code> to the currency you picked here, or the amounts shown in the app will be labelled in a currency Meta is not billing in. The app renders a symbol for USD, EUR and GBP and falls back to <code class="doc-inline-code">$</code> for anything else.</p>
         </div>
     </section>
 
@@ -89,12 +158,12 @@
             </svg>
             Step 3: Facebook Page
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Ads require a Facebook Page as the ad's identity (the "posted by" entity).</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Ads require a Facebook Page as the ad's identity (the "posted by" entity). Every ad your instance creates is published under this one Page, whichever schedule bought the boost.</p>
 
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Create a Facebook Page for your platform (or use an existing one)</li>
-            <li>Go to the Page, click <strong class="text-gray-900 dark:text-white">About</strong> or check the URL to find the Page ID</li>
             <li>In <strong class="text-gray-900 dark:text-white">Business Settings > Accounts > Pages</strong>, add this page to your Business Account</li>
+            <li>Select the page in that list to see its numeric <strong class="text-gray-900 dark:text-white">Page ID</strong></li>
         </ol>
 
         <div class="doc-code-block">
@@ -104,6 +173,8 @@
             </div>
             <pre><code><span class="code-variable">META_PAGE_ID</span>=<span class="code-string">your_page_id</span></code></pre>
         </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mt-6">The Page ID is written into every ad creative as its page identity, so leaving <code class="doc-inline-code">META_PAGE_ID</code> unset does not disable boost gracefully: the campaign is created locally and then fails when the ad is pushed to Meta.</p>
     </section>
 
     <!-- Step 4: System User & Access Token -->
@@ -114,7 +185,7 @@
             </svg>
             Step 4: System User & Access Token
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">A System User provides a stable, long-lived token that doesn't expire when a personal account changes.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">A System User provides a stable, long-lived token that doesn't expire when a personal account changes. This single token is what every campaign on your instance is created with, so treat it like a production secret.</p>
 
         <ol class="doc-list doc-list-numbered mb-6">
             <li>In <strong class="text-gray-900 dark:text-white">Business Settings > Users > System Users</strong>, click <strong class="text-gray-900 dark:text-white">Add</strong></li>
@@ -123,9 +194,10 @@
                 <ul class="doc-list mt-2">
                     <li>The Ad Account from Step 2 (with full control)</li>
                     <li>The Facebook Page from Step 3 (with full control)</li>
+                    <li>The Pixel from Step 5, if you set one up, so server-side conversions are authorized</li>
                 </ul>
             </li>
-            <li>Click <strong class="text-gray-900 dark:text-white">Generate New Token</strong>, select the app from Step 1, and grant these permissions:
+            <li>Click <strong class="text-gray-900 dark:text-white">Generate New Token</strong>, select the app from Step 1, choose the never-expiring option if you are offered one, and grant these permissions:
                 <ul class="doc-list mt-2">
                     <li><code class="doc-inline-code">ads_management</code> - create/update/delete campaigns, ad sets, ads, and creatives</li>
                     <li><code class="doc-inline-code">ads_read</code> - read campaign insights, ad status, and review feedback</li>
@@ -143,6 +215,8 @@
             </div>
             <pre><code><span class="code-variable">META_ACCESS_TOKEN</span>=<span class="code-string">your_system_user_token</span></code></pre>
         </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mt-6">This variable is the master switch for the feature. With it set, <strong class="text-gray-900 dark:text-white">Boost</strong> appears in the admin panel sidebar and the <code class="doc-inline-code">boost:sync</code> scheduled command starts running. With it blank, the sidebar item is hidden and nothing is ever sent to Meta.</p>
     </section>
 
     <!-- Step 5: Meta Pixel -->
@@ -153,11 +227,14 @@
             </svg>
             Step 5: Meta Pixel
         </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The pixel is <strong class="text-gray-900 dark:text-white">optional</strong>. Campaigns run without it; what you lose is conversion tracking, so ads can only be optimized and reported on by reach, impressions and clicks.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">When <code class="doc-inline-code">META_PIXEL_ID</code> is set, two things happen, both scoped to events with an <em>active</em> Meta campaign. The browser pixel is injected into that event's public page, tracking a page view and a content view. And when a ticket sale for that event completes through Stripe, the server sends a Purchase conversion to Meta's Conversions API using the system user token, with the buyer's email address SHA-256 hashed rather than sent in the clear.</p>
+
         <ol class="doc-list doc-list-numbered mb-6">
             <li>In <strong class="text-gray-900 dark:text-white">Events Manager</strong> (<code class="doc-inline-code">business.facebook.com/events_manager</code>), click <strong class="text-gray-900 dark:text-white">Connect Data Sources</strong></li>
             <li>Select <strong class="text-gray-900 dark:text-white">Web</strong>, name the pixel (e.g. "Event Schedule Pixel")</li>
-            <li>Choose <strong class="text-gray-900 dark:text-white">Conversions API</strong> as the connection method</li>
             <li>Note the <strong class="text-gray-900 dark:text-white">Pixel ID</strong></li>
+            <li>Assign the pixel to the system user from Step 4, so its token is allowed to send server-side events</li>
         </ol>
 
         <div class="doc-code-block">
@@ -166,6 +243,11 @@
                 <button class="doc-copy-btn">Copy</button>
             </div>
             <pre><code><span class="code-variable">META_PIXEL_ID</span>=<span class="code-string">your_pixel_id</span></code></pre>
+        </div>
+
+        <div class="doc-callout doc-callout-warning mt-6">
+            <div class="doc-callout-title">This loads third-party code for your visitors</div>
+            <p>Setting this variable makes guest pages for boosted events load Facebook's script from <code class="doc-inline-code">connect.facebook.net</code>. Setting it also widens the Content Security Policy on every response, adding <code class="doc-inline-code">connect.facebook.net</code> to <code class="doc-inline-code">script-src</code> and <code class="doc-inline-code">www.facebook.com</code> to <code class="doc-inline-code">connect-src</code>, since a script-inserted tag carries no nonce. Guests of events that are not being boosted still load nothing from Facebook, and leaving the variable blank means no Facebook code is loaded and no external request is made. If you do enable it, say so in your privacy policy.</p>
         </div>
     </section>
 
@@ -177,7 +259,7 @@
             </svg>
             Step 6: Webhooks
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The app uses webhooks to receive real-time updates when campaigns complete or ads get rejected.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Webhooks are <strong class="text-gray-900 dark:text-white">optional but recommended</strong>. They let your instance hear about a completed campaign or a rejected ad within seconds. Skip them and the same information still arrives, just up to 15 minutes later when <a href="#scheduled-command" class="doc-link">the scheduled command</a> polls Meta.</p>
 
         <ol class="doc-list doc-list-numbered mb-6">
             <li>In the Facebook App Dashboard, go to <strong class="text-gray-900 dark:text-white">Add Product</strong> and add <strong class="text-gray-900 dark:text-white">Webhooks</strong></li>
@@ -188,11 +270,10 @@
                     <li><strong class="text-gray-900 dark:text-white">Verify Token:</strong> A random string you choose (e.g. generate with <code class="doc-inline-code">openssl rand -hex 32</code>)</li>
                 </ul>
             </li>
-            <li>Subscribe to these fields:
+            <li>Subscribe to the two fields the app acts on:
                 <ul class="doc-list mt-2">
-                    <li><code class="doc-inline-code">campaign</code> - notifies when campaigns complete</li>
-                    <li><code class="doc-inline-code">ad</code> - notifies when ads are approved or rejected</li>
-                    <li><code class="doc-inline-code">ad_account</code> - notifies of account-level changes</li>
+                    <li><code class="doc-inline-code">campaign</code> - a campaign reported as completed is closed out locally, and its final analytics are pulled</li>
+                    <li><code class="doc-inline-code">ad</code> - an approval or a rejection is recorded against that ad</li>
                 </ul>
             </li>
         </ol>
@@ -207,8 +288,12 @@
 
         <div class="doc-callout doc-callout-warning mt-6">
             <div class="doc-callout-title">Important</div>
-            <p>Your server must be publicly accessible at the callback URL for webhook verification to succeed. The verify endpoint is <code class="doc-inline-code">GET /webhooks/meta</code> and the handler is <code class="doc-inline-code">POST /webhooks/meta</code>.</p>
+            <p>Your server must be publicly accessible at the callback URL for webhook verification to succeed. The verify endpoint is <code class="doc-inline-code">GET /webhooks/meta</code> and the handler is <code class="doc-inline-code">POST /webhooks/meta</code>. Verification is refused unless <code class="doc-inline-code">META_WEBHOOK_VERIFY_TOKEN</code> is set, and every delivery is rejected unless its signature matches one computed with <code class="doc-inline-code">META_APP_SECRET</code>, so both variables must be present. Both endpoints are rate limited (10 requests a minute for the verify handshake, 60 for deliveries).</p>
         </div>
+
+        <h3 class="doc-subheading">How a rejection is recorded</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Meta's verdict is stored per ad, as <code class="doc-inline-code">DISAPPROVED</code> in the <code class="doc-inline-code">meta_status</code> column of <code class="doc-inline-code">boost_ads</code>, together with the reason text Meta returned in <code class="doc-inline-code">meta_rejection_reason</code>. The ad's own <code class="doc-inline-code">status</code> column is the app's local lifecycle and is <em>not</em> where a rejection lands, so a query filtering rejected ads on <code class="doc-inline-code">status</code> silently returns nothing. This matters only if you inspect the tables directly; the campaign page reads both.</p>
+        <p class="text-gray-600 dark:text-gray-300">Once every ad on a campaign is disapproved, the campaign moves to <strong class="text-gray-900 dark:text-white">rejected</strong> and the owner is emailed and sent a push notification. The refund on that path is hosted-only, because a selfhosted install never charged for the campaign in the first place. The two paths differ in one detail: when <code class="doc-inline-code">boost:sync</code> finds the rejection it also pauses the campaign at Meta, whereas the webhook path relies on Meta having stopped delivery itself.</p>
     </section>
 
     <!-- Step 7: App Review -->
@@ -220,7 +305,7 @@
             </svg>
             Step 7: App Review
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">For production use, your app needs to go through Meta's App Review process.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">For production use, your app needs to hold access to the permissions it calls, which means going through Meta's App Review process. Note that you are not asking your users for anything: the integration only ever touches assets your own Business owns, and no schedule owner is ever sent to Facebook to grant a permission.</p>
 
         <ol class="doc-list doc-list-numbered mb-6">
             <li>In the App Dashboard, go to <strong class="text-gray-900 dark:text-white">App Review > Permissions and Features</strong></li>
@@ -251,7 +336,7 @@
             </svg>
             Step 8: Environment Variables
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Here is the full set of environment variables for the boost feature:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Here is the full set of environment variables for the Meta boost channel. Every one of them is read from <code class="doc-inline-code">config/services.php</code> under the <code class="doc-inline-code">meta</code> key, and the on-network promotions channel uses a completely separate set:</p>
 
         <div class="doc-code-block">
             <div class="doc-code-header">
@@ -271,25 +356,24 @@
 <span class="code-comment"># Required - Facebook Page for ad identity</span>
 <span class="code-variable">META_PAGE_ID</span>=<span class="code-string">your_page_id</span>
 
-<span class="code-comment"># Required - Pixel for Conversions API</span>
+<span class="code-comment"># Optional - Pixel for conversion tracking</span>
 <span class="code-variable">META_PIXEL_ID</span>=<span class="code-string">your_pixel_id</span>
 
-<span class="code-comment"># Required - Webhook verification</span>
+<span class="code-comment"># Optional - Webhook verification (only if you subscribe to webhooks)</span>
 <span class="code-variable">META_WEBHOOK_VERIFY_TOKEN</span>=<span class="code-string">your_random_verify_token</span>
 
 <span class="code-comment"># Optional - API version (default: v21.0)</span>
 <span class="code-variable">META_API_VERSION</span>=<span class="code-string">v21.0</span>
 
-<span class="code-comment"># Optional - Business settings</span>
-<span class="code-variable">META_MARKUP_RATE</span>=<span class="code-value">0.20</span>          <span class="code-comment"># 20% markup on ad spend (default)</span>
+<span class="code-comment"># Optional - Budget settings</span>
 <span class="code-variable">META_MIN_BUDGET</span>=<span class="code-value">10.00</span>          <span class="code-comment"># Minimum boost budget (default)</span>
 <span class="code-variable">META_MAX_BUDGET</span>=<span class="code-value">1000.00</span>        <span class="code-comment"># Maximum boost budget (default)</span>
-<span class="code-variable">META_DEFAULT_CURRENCY</span>=<span class="code-string">USD</span>      <span class="code-comment"># Default currency (default)</span>
-<span class="code-variable">META_MAX_CONCURRENT_BOOSTS</span>=<span class="code-value">3</span>   <span class="code-comment"># Max active boosts per schedule (default)</span>
+<span class="code-variable">META_DEFAULT_CURRENCY</span>=<span class="code-string">USD</span>      <span class="code-comment"># Match the ad account's currency</span>
+<span class="code-variable">META_MAX_CONCURRENT_BOOSTS</span>=<span class="code-value">3</span>   <span class="code-comment"># Live boosts per schedule (default)</span>
 </code></pre>
         </div>
 
-        <div class="overflow-x-auto mt-6">
+        <div class="doc-table-wrap mt-6">
             <table class="doc-table">
                 <thead>
                     <tr>
@@ -302,17 +386,17 @@
                     <tr>
                         <td><code class="doc-inline-code">META_APP_ID</code></td>
                         <td>Yes</td>
-                        <td>Facebook App ID from Step 1</td>
+                        <td>Facebook App ID from Step 1. Enables the Boost button on the event page</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">META_APP_SECRET</code></td>
                         <td>Yes</td>
-                        <td>Facebook App Secret from Step 1</td>
+                        <td>Facebook App Secret from Step 1. Verifies incoming webhook signatures</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">META_ACCESS_TOKEN</code></td>
                         <td>Yes</td>
-                        <td>System User access token from Step 4</td>
+                        <td>System User access token from Step 4. Turns the whole feature on</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">META_AD_ACCOUNT_ID</code></td>
@@ -322,32 +406,17 @@
                     <tr>
                         <td><code class="doc-inline-code">META_PAGE_ID</code></td>
                         <td>Yes</td>
-                        <td>Facebook Page ID for ad identity</td>
+                        <td>Facebook Page ID used as the identity on every ad creative</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">META_PIXEL_ID</code></td>
-                        <td>Yes</td>
-                        <td>Meta Pixel ID for Conversions API</td>
+                        <td>No</td>
+                        <td>Meta Pixel ID. Enables the browser pixel on boosted events and server-side Purchase conversions</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">META_WEBHOOK_VERIFY_TOKEN</code></td>
-                        <td>Yes</td>
-                        <td>Random string for webhook verification</td>
-                    </tr>
-                    <tr>
-                        <td><code class="doc-inline-code">META_MARKUP_RATE</code></td>
                         <td>No</td>
-                        <td>Platform markup on ad spend (default: 0.20)</td>
-                    </tr>
-                    <tr>
-                        <td><code class="doc-inline-code">META_MIN_BUDGET</code></td>
-                        <td>No</td>
-                        <td>Minimum boost budget in currency units (default: 10.00)</td>
-                    </tr>
-                    <tr>
-                        <td><code class="doc-inline-code">META_MAX_BUDGET</code></td>
-                        <td>No</td>
-                        <td>Maximum boost budget in currency units (default: 1000.00)</td>
+                        <td>Random string for the webhook handshake. Needed only if you subscribe to webhooks</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">META_API_VERSION</code></td>
@@ -355,28 +424,53 @@
                         <td>Meta Graph API version (default: v21.0)</td>
                     </tr>
                     <tr>
+                        <td><code class="doc-inline-code">META_MIN_BUDGET</code></td>
+                        <td>No</td>
+                        <td>Minimum budget per campaign, in currency units (default: 10.00)</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">META_MAX_BUDGET</code></td>
+                        <td>No</td>
+                        <td>Maximum budget per campaign, in currency units (default: 1000.00). This is the cap that applies on a selfhosted install</td>
+                    </tr>
+                    <tr>
                         <td><code class="doc-inline-code">META_DEFAULT_CURRENCY</code></td>
                         <td>No</td>
-                        <td>Default currency code (default: USD)</td>
+                        <td>Currency code campaigns are recorded in (default: USD). Set it to the ad account's currency</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">META_MAX_CONCURRENT_BOOSTS</code></td>
                         <td>No</td>
-                        <td>Maximum active boost campaigns per schedule (default: 3)</td>
+                        <td>Live campaigns allowed per schedule (default: 3). Applies on a selfhosted install; a hosted install earns its limit instead</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">META_MARKUP_RATE</code></td>
+                        <td>No</td>
+                        <td>Hosted only. Service fee added on top of the ad budget (default: 0.20). Forced to 0 when <code class="doc-inline-code">IS_HOSTED=false</code></td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">META_BOOST_DEFAULT_LIMIT</code></td>
+                        <td>No</td>
+                        <td>Hosted only. Starting per-campaign spending limit for a new schedule (default: 10.00), before its limit grows with completed campaigns</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <h3 class="doc-subheading">Config File</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Ensure the <code class="doc-inline-code">page_id</code> key is present in the meta config array in <code class="doc-inline-code">config/services.php</code>:</p>
+        <div class="doc-callout doc-callout-info mt-6">
+            <div class="doc-callout-title">Hosted-only controls</div>
+            <p>The <strong class="text-gray-900 dark:text-white">Grant Boost Credit</strong> and <strong class="text-gray-900 dark:text-white">Set Spending Limit</strong> panels under <strong class="text-gray-900 dark:text-white">Manage &gt; Boost</strong> in the admin panel, and the per-schedule limit that grows as a schedule completes campaigns, are all part of the hosted billing model. The panels are still drawn on a selfhosted install, but the values they write are never read: with <code class="doc-inline-code">IS_HOSTED=false</code> the per-campaign cap is always <code class="doc-inline-code">META_MAX_BUDGET</code> and there is nothing to charge credit against.</p>
+        </div>
+
+        <h3 class="doc-subheading">Applying the changes</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">No code changes are needed - every key above is already wired up in <code class="doc-inline-code">config/services.php</code>. Clear the config cache after editing <code class="doc-inline-code">.env</code>, or the app keeps reading the old values:</p>
 
         <div class="doc-code-block">
             <div class="doc-code-header">
-                <span>config/services.php</span>
+                <span>bash</span>
                 <button class="doc-copy-btn">Copy</button>
             </div>
-            <pre><code><span class="code-string">'page_id'</span> => <span class="code-keyword">env</span>(<span class="code-string">'META_PAGE_ID'</span>),</code></pre>
+            <pre><code><span class="code-keyword">php</span> artisan config:clear</code></pre>
         </div>
     </section>
 
@@ -388,7 +482,7 @@
             </svg>
             Step 9: Scheduled Command
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The <code class="doc-inline-code">boost:sync</code> command syncs analytics every 15 minutes (already scheduled in <code class="doc-inline-code">routes/console.php</code>). Make sure the Laravel scheduler is running:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Two commands keep boost campaigns in step with Meta. Both are already registered in <code class="doc-inline-code">routes/console.php</code> and run every 15 minutes, so all you have to do is make sure the Laravel scheduler is running:</p>
 
         <div class="doc-code-block">
             <div class="doc-code-header">
@@ -398,9 +492,19 @@
             <pre><code>* * * * * php artisan schedule:run</code></pre>
         </div>
 
-        <div class="doc-callout doc-callout-info mt-6">
+        <ul class="doc-list mt-6 mb-6">
+            <li><code class="doc-inline-code">boost:sync</code> - pulls each active or paused campaign's status from Meta, refreshes its analytics, emails and pushes the owner once a campaign passes 75% of its budget, closes out campaigns that have reached their end date, and recovers campaigns left in a pending payment state. The scheduler only invokes it when <code class="doc-inline-code">META_ACCESS_TOKEN</code> is set</li>
+            <li><code class="doc-inline-code">boost:expire-pending</code> - expires any campaign stuck in a pending payment state for more than 30 minutes and cancels its payment intent. It runs whether or not Meta is configured, because the on-network channel leaves the same kind of stuck record behind</li>
+        </ul>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">A third command, <code class="doc-inline-code">promo:sync</code>, settles the on-network promotions channel on the same 15 minute schedule. It is gated on <code class="doc-inline-code">ADS_ENABLED</code> rather than on any Meta variable, so it stays dormant on an instance that only uses Meta, and you do not need to configure anything here for it.</p>
+
+        <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Note</div>
             <p>If you already have the scheduler running for other Event Schedule features (e.g. Google Calendar sync, ticket releases), no additional cron configuration is needed.</p>
         </div>
+
+        <h3 class="doc-subheading">Queue workers</h3>
+        <p class="text-gray-600 dark:text-gray-300">Creating the campaign on Meta and fetching its analytics are queued jobs. With the default <code class="doc-inline-code">QUEUE_CONNECTION=sync</code> they run immediately inside the web request or the scheduled command, so nothing extra is required. If you have switched to a real queue driver, make sure a worker is running, or campaigns will be created inside the app and never reach Meta.</p>
     </section>
 </x-docs-page>

@@ -36,6 +36,38 @@
     @endif
 
     <div id="sales-panel">
+        {{-- Free-plan ticket allowance, one row per schedule that has sold something this month.
+             Schedule names are user-controlled, so they go through <x-user-text>. --}}
+        @foreach ($ticketQuotas ?? [] as $quota)
+            @php $exhausted = $quota['used'] >= $quota['limit']; @endphp
+            @if ($exhausted)
+                <x-plan-gate
+                    variant="banner"
+                    tier="pro"
+                    class="mb-4"
+                    :role="$quota['role']"
+                    :subdomain="$quota['role']->subdomain"
+                    :learnMoreUrl="marketing_url('/features/ticketing')"
+                    :title="__('messages.ticket_allowance_reached_title', ['limit' => $quota['limit'], 'month' => now()->translatedFormat('F')])">
+                    <x-user-text class="font-semibold">{{ $quota['role']->name }}</x-user-text>
+                    {{ __('messages.ticket_allowance_reached_body', ['date' => $quota['role']->ticketAllowanceResetsAt()->translatedFormat('F j')]) }}
+                </x-plan-gate>
+            @else
+                <div class="mb-4">
+                    {{-- The schedule name is user data, so it is rendered through x-user-text rather
+                         than interpolated into the meter's own text. --}}
+                    <x-user-text class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $quota['role']->name }}</x-user-text>
+                    <x-usage-meter
+                        variant="inline"
+                        class="mt-1"
+                        :label="__('messages.ticket_allowance_usage')"
+                        :used="$quota['used']"
+                        :limit="$quota['limit']"
+                        :usedText="__('messages.tickets_sold_of', ['used' => $quota['used'], 'limit' => $quota['limit']])" />
+                </div>
+            @endif
+        @endforeach
+
         <div class="flow-root">
             <div class="flex flex-col sm:flex-row sm:justify-between gap-4">
                 <div class="flex items-center gap-3 flex-1">
@@ -60,6 +92,12 @@
                         {{ __('messages.import') }}
                     </x-secondary-link>
                     @endif
+                    {{-- Export and the check-in DASHBOARD are Pro, and are hidden rather than shown
+                         locked: greyed-out buttons dominating the toolbar is a poor first impression
+                         of a tier meant to feel generous, and the allowance meter above is what
+                         should draw the eye. Scanning itself is NOT Pro - a free schedule that sold
+                         a ticket must still be able to admit the holder at the door. --}}
+                    @if ($hasPro)
                     <x-secondary-link href="#" id="export-sales">
                         <svg class="-ms-0.5 me-2 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />
@@ -72,6 +110,7 @@
                         </svg>
                         {{ __('messages.checkin_dashboard') }}
                     </x-secondary-link>
+                    @endif
                     <x-brand-link href="{{ route('ticket.scan') }}">
                         <svg class="-ms-0.5 me-2 h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
                             <path
@@ -441,7 +480,12 @@ let timeoutId;
 const filterInput = document.getElementById('filter');
 const clearButton = document.getElementById('clear-filter');
 
-// Export sales CSV
+// Export sales CSV.
+// Wrapped in the SAME condition as the button itself (the toolbar above): without this, a free
+// user hits a null dereference here and every listener registered below - the filter, the clear
+// button, the include-past toggle, updateResults() - is never reached. Same pattern the
+// Subscriptions and Gift Cards tab listeners already use.
+@if ($hasPro)
 document.getElementById('export-sales').addEventListener('click', function(e) {
     e.preventDefault();
     const filter = document.getElementById('filter').value;
@@ -452,6 +496,7 @@ document.getElementById('export-sales').addEventListener('click', function(e) {
     if (params.length) exportUrl += '?' + params.join('&');
     window.location.href = exportUrl;
 });
+@endif
 
 // Show/hide clear button based on input content
 filterInput.addEventListener('input', function(e) {

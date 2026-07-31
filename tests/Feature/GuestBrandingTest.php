@@ -98,7 +98,7 @@ class GuestBrandingTest extends TestCase
         $this->assertStringNotContainsString('utm_medium=footer', $content);
     }
 
-    // ----------------------------------------------------- self-hosted SaaS
+    // ------------------------------------------------------ selfhosted SaaS
 
     public function test_saas_free_gets_both_the_strip_and_the_chip(): void
     {
@@ -114,14 +114,18 @@ class GuestBrandingTest extends TestCase
         $this->assertStringNotContainsString(self::SPONSOR, $content);
     }
 
-    public function test_saas_paid_gets_nothing(): void
+    public function test_saas_paid_gets_the_chip_but_not_the_strip(): void
     {
+        // The tenant's subscription is between them and the operator. Our credit is owed by
+        // whoever redistributes the software, so it does not come off when a tenant upgrades -
+        // only eventschedule.com sells white-label. The strip does come off: it is the
+        // operator's growth CTA and belongs to the free tier.
         $this->deploy('saas');
 
         $content = $this->guestPage($this->paidRole());
 
+        $this->assertStringContainsString(self::CHIP_SAAS, $content);
         $this->assertStringNotContainsString(self::STRIP, $content);
-        $this->assertStringNotContainsString('utm_medium=footer', $content);
     }
 
     // ------------------------------------------------------------- selfhost
@@ -146,6 +150,27 @@ class GuestBrandingTest extends TestCase
         $this->deploy('selfhost');
 
         $this->assertStringContainsString(self::CHIP_SELFHOST, $this->guestPage($this->freeRole()));
+    }
+
+    public function test_selfhost_keeps_the_credit_even_if_is_nexus_is_set(): void
+    {
+        // hosted and is_nexus are independent env vars. The SaaS setup guide tells operators to
+        // leave IS_NEXUS off, but a misconfigured install must not silently drop the attribution:
+        // without the hosted-first guard this falls through to the nexus's plan logic, where an
+        // unhosted schedule resolves to 'enterprise', matches nothing, and answers null.
+        // deploy() cannot express this combination, so it is set directly.
+        config(['app.hosted' => false, 'app.is_nexus' => true]);
+
+        $this->assertSame('selfhost', $this->paidRole()->creditChipReason());
+        $this->assertSame('selfhost', $this->freeRole()->creditChipReason());
+
+        // A stale plan_source from a database that used to live on a hosted install must not
+        // rewrite this into the granted-plan case and mistag the traffic report.
+        $stale = $this->createRole($this->createOwner(), 'venue', [
+            'name' => 'Migrated Venue',
+            'plan_source' => 'admin',
+        ]);
+        $this->assertSame('selfhost', $stale->creditChipReason());
     }
 
     public function test_selfhost_chip_is_absent_from_embeds(): void
@@ -244,11 +269,12 @@ class GuestBrandingTest extends TestCase
         $this->assertNull($paid->creditChipReason());
         $this->assertSame('granted_plan', $granted->creditChipReason());
 
+        // Off the nexus the tier stops mattering, and so does plan_source - that column only
+        // means anything on the one install that hands plans out.
         $this->deploy('saas');
-        $this->assertSame('saas_free', $free->creditChipReason());
-        $this->assertNull($paid->creditChipReason());
-        // plan_source is a nexus concern; an operator's paid tenant is simply white-labeled.
-        $this->assertNull($granted->creditChipReason());
+        $this->assertSame('saas', $free->creditChipReason());
+        $this->assertSame('saas', $paid->creditChipReason());
+        $this->assertSame('saas', $granted->creditChipReason());
 
         $this->deploy('selfhost');
         $this->assertSame('selfhost', $free->creditChipReason());

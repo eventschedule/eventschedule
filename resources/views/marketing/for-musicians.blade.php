@@ -32,7 +32,7 @@
                 "name": "Is Event Schedule free for musicians?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Yes. Event Schedule is free forever for sharing your gig schedule, building a fan following, and syncing with Google Calendar. Ticketing and newsletters are available on the Pro and Enterprise plans, with no platform fees on ticket sales."
+                    "text": "Yes. Event Schedule is free forever for sharing your gig schedule, building a fan following, and syncing with Google Calendar. The free plan also sells up to 25 paid tickets a month and sends 10 newsletter emails a month. Scanning tickets at the door is free too. Pro lifts the ticket ceiling and adds the rest of the door kit: live check-in dashboard, promo codes, waitlists. Platform fees are zero on every plan."
                 }
             },
             {
@@ -1245,7 +1245,7 @@
                         </svg>
                     </summary>
                     <p class="faq-answer px-6 pb-6 text-[color:var(--esp-ink-soft)]">
-                        Yes. Event Schedule is free forever for sharing your gig schedule, building a fan following, and syncing with Google Calendar. Ticketing and newsletters are available on the Pro and Enterprise plans, with no platform fees on ticket sales.
+                        Yes. Event Schedule is free forever for sharing your gig schedule, building a fan following, and syncing with Google Calendar. The free plan also sells up to 25 paid tickets a month and sends 10 newsletter emails a month. Scanning tickets at the door is free too. Pro lifts the ticket ceiling and adds the rest of the door kit: live check-in dashboard, promo codes, waitlists. Platform fees are zero on every plan.
                     </p>
                 </details>
 

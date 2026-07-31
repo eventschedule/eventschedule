@@ -156,10 +156,13 @@
                 }
             }
 
-            // data-modal-open="<modal name>": open an <x-modal>. That component is Alpine and
+            // data-modal-open="NAME": open the x-modal component with that name. It is Alpine and
             // listens for an 'open-modal' window event, so a plain CustomEvent reaches it without
             // this call site having to declare an Alpine island of its own (and without an inline
             // handler, which CSP blocks).
+            //
+            // Do not write the component's tag form in this comment: Blade compiles component tags
+            // even inside JavaScript comments, and an unclosed one silently produces invalid PHP.
             var modalTrigger = e.target.closest('[data-modal-open]');
             if (modalTrigger) {
                 e.preventDefault();

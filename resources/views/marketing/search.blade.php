@@ -521,7 +521,7 @@
             ],
             [
                 'q' => 'Does it cost anything to be listed?',
-                'a' => 'No. Publishing a schedule and its events is free forever, and that is all being findable takes. Ticketing is a Pro feature, and Event Schedule charges zero platform fees on ticket sales, so past your payment processor\'s own fee the money is yours.',
+                'a' => 'No. Publishing a schedule and its events is free forever, and that is all being findable takes. Selling tickets is also included, up to 25 paid tickets a month on the Free plan, and Event Schedule charges zero platform fees on ticket sales at any tier, so past your payment processor\'s own fee the money is yours.',
             ],
         ];
 

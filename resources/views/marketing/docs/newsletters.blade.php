@@ -1,7 +1,7 @@
 <x-docs-page
     key="newsletters"
     description="Learn how to create, design, and send newsletters to your followers and ticket buyers with Event Schedule's built-in newsletter builder."
-    lede="Create and send branded newsletters to your followers and ticket buyers. Announce upcoming events, share digests, and keep your audience engaged."
+    lede="Compose branded emails and send them to your followers and ticket buyers. Newsletters are included on every plan, and you decide what goes out and when."
 >
     <x-slot:toc>
         <x-doc-nav-link href="#overview">Overview</x-doc-nav-link>
@@ -29,7 +29,7 @@
             Overview
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Newsletters let you send professionally designed emails directly to your audience. Use them to:
+            Newsletters live under <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Newsletters</strong>, and every schedule you own or help manage has its own list. Use them to:
         </p>
         <ul class="doc-list mb-6">
             <li>Announce upcoming events and share your schedule</li>
@@ -41,21 +41,50 @@
         <x-doc-screenshot id="newsletters--list" alt="Newsletter list" loading="eager" />
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The newsletter builder provides a drag-and-drop interface with live preview, pre-built templates, and audience segmentation so you can reach the right people with the right message.
+            The builder lays out your email as a stack of content blocks with a live preview beside it, and audience segments decide who receives it. Nothing goes out automatically: every newsletter is one you compose and send.
         </p>
 
         <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Sending Limits by Plan</div>
-            <p>Newsletter sending limits vary by plan tier. They count <strong class="text-gray-900 dark:text-white">individual recipients, not newsletters</strong>: a newsletter sent to 100 followers uses 100 of the monthly allowance.</p>
-            <ul class="doc-list mt-2">
-                <li><strong class="text-gray-900 dark:text-white">Free:</strong> 10 newsletter emails per month</li>
-                <li><strong class="text-gray-900 dark:text-white">Pro:</strong> 100 newsletter emails per month</li>
-                <li><strong class="text-gray-900 dark:text-white">Enterprise:</strong> 1,000 newsletter emails per month</li>
-                <li><strong class="text-gray-900 dark:text-white">Selfhosted:</strong> Unlimited</li>
-                <li><strong class="text-gray-900 dark:text-white">Own email settings:</strong> Unlimited, on any plan</li>
-            </ul>
-            <p class="mt-2">A usage meter at the top of the Newsletters page shows how many emails you have sent this month relative to your plan limit (e.g. "5 of 100 sent").</p>
+            <div class="doc-callout-title">Newsletters are on every plan, and the limit counts recipients</div>
+            <p>The monthly allowance counts <strong class="text-gray-900 dark:text-white">individual recipients, not newsletters</strong>. One newsletter sent to 100 followers uses 100 of the allowance, so on the Free plan a single send reaches at most 10 people.</p>
+            <div class="doc-table-wrap mt-3">
+                <table class="doc-table">
+                    <thead>
+                        <tr>
+                            <th>Plan</th>
+                            <th>Newsletter emails per month</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="font-semibold text-gray-900 dark:text-white">Free</span></td>
+                            <td>10</td>
+                        </tr>
+                        <tr>
+                            <td><span class="font-semibold text-gray-900 dark:text-white">Pro</span></td>
+                            <td>100</td>
+                        </tr>
+                        <tr>
+                            <td><span class="font-semibold text-gray-900 dark:text-white">Enterprise</span></td>
+                            <td>1,000</td>
+                        </tr>
+                        <tr>
+                            <td><span class="font-semibold text-gray-900 dark:text-white">Selfhosted</span></td>
+                            <td>Unlimited</td>
+                        </tr>
+                        <tr>
+                            <td><span class="font-semibold text-gray-900 dark:text-white">Any plan with its own email settings</span></td>
+                            <td>Unlimited</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="mt-3">Connect your own mail server under <a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="doc-link">Integrations &rarr; Email</a> and the cap is lifted for that schedule, because the messages leave through your provider rather than ours.</p>
         </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            A <strong class="text-gray-900 dark:text-white">Newsletter Email Usage</strong> meter sits at the top of the Newsletters, Create and Edit pages and reads "5 of 100 newsletter emails sent this month". Test sends are excluded from the count. Sending is checked against the whole recipient list up front: if a send would push you past the limit it is refused outright rather than delivered in part, so trim the segment or upgrade first.
+        </p>
     </section>
 
     <!-- Newsletter Builder -->
@@ -68,7 +97,7 @@
             Newsletter Builder
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The builder is organized into three tabs:
+            Click <strong class="text-gray-900 dark:text-white">Create Newsletter</strong> to open the builder. The editing panel is split into three tabs, with a live preview pinned beside it on wide screens.
         </p>
 
         <x-doc-screenshot id="newsletters--create" alt="Newsletter builder" />
@@ -76,21 +105,58 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Content</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Add and arrange content blocks using drag-and-drop. Each block can be edited inline, reordered, or removed. A live preview updates in real time as you build.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The subject line (required) and the block list. <strong class="text-gray-900 dark:text-white">Add Block</strong> opens the block palette; click a block to add it or drag it onto the canvas. Blocks are reordered by their drag handle, and each one can be selected to edit its fields inline, cloned, or removed.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Style</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Customize colors, fonts, and button styles. Choose a template as a starting point or design from scratch.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The <a href="#templates" class="doc-link">template</a> picker plus the colour, font and button settings described under <a href="#style-customization" class="doc-link">Style Customization</a>.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Settings</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Configure subject line, preview text, recipients, and scheduling. Set up A/B testing variants here.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Recipients (which <a href="#recipients" class="doc-link">segments</a> to send to), <a href="#ab-testing" class="doc-link">A/B testing</a> once the newsletter has been saved, and the footer text that replaces your schedule name at the bottom of the email.</p>
             </div>
         </div>
 
+        <h3 class="doc-subheading">Buttons Along the Bottom</h3>
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Button</th>
+                        <th>What it does</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Send a Test</span></td>
+                        <td>Emails the current draft to your schedule's contact address</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Save as Template</span></td>
+                        <td>Stores the blocks and style under a name you can reuse</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Schedule Newsletter</span></td>
+                        <td>Picks a future date and time to send</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Save</span></td>
+                        <td>Saves the draft without sending</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Send Now</span></td>
+                        <td>Delivers immediately to the selected recipients</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mt-4 mb-4">
+            Everything except <strong class="text-gray-900 dark:text-white">Save</strong> appears only after the newsletter has been saved once, so save your draft first.
+        </p>
+
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Tip</div>
-            <p>Use the live preview to see exactly how your newsletter will appear in your recipients' inboxes before sending.</p>
+            <p>The preview refreshes as you type and renders the same HTML your recipients receive, so use it to check block order and spacing. On phones the preview is a fourth tab that opens in a new window. A new newsletter starts from your most recent one's template, style settings and selected segments, so a house style only has to be set up once.</p>
         </div>
     </section>
 
@@ -103,7 +169,7 @@
             Block Types
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Build your newsletter by combining these content blocks:
+            Build your newsletter by combining these content blocks. A new newsletter starts with your profile image and header banner (when your schedule has them), a heading, two text blocks, an events block and your social links, all of which you can remove.
         </p>
 
         <h3 class="doc-subheading">Content Blocks</h3>
@@ -111,70 +177,65 @@
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Heading</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Large text for section titles and headlines.</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Text, Level (H1/H2/H3), Alignment (left/center/right)</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Heading Text, Heading Level (Header, Subheader or Section), Alignment (left, center or right)</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Text</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Rich text content with full formatting support.</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Content (Markdown editor with formatting)</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">A paragraph of Markdown, written in the same editor used elsewhere in the admin panel, with a toolbar for bold, italics, lists and links.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Content</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Events</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Automatically displays your upcoming events with flyer images, dates, and links.</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Event selection (all or specific), Layout (cards or list)</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Pulls in your events with their flyer image, date and a link to the event page. Left on All Upcoming Events it lists up to ten upcoming or ongoing events in date order; hand-picked events are shown in the order you tick them. Either way it never includes drafts, cancelled events, unlisted events or password-protected ones.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> All Upcoming Events (on) or a hand-picked list of events, Event Layout (cards or list)</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Button</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Call-to-action button with customizable text and link.</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Text, URL, Alignment (left/center/right)</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Call-to-action button. It picks up the accent colour and corner style from the Style tab.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Button Text, Button URL, Alignment</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Image</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Upload or link to one or more images. Add a caption, make the image clickable with a link URL, and pick a layout when using multiple images.</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> URL, Alt text, Caption, Link URL, Width, Alignment (left/center/right), Layout (column, row, or grid) when adding multiple images</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">One or more images, each with its own caption and link. Uploading a file requires a Pro plan <x-doc-badge plan="pro" />; on the Free plan you can still point the block at an image URL you host elsewhere. Uploads accept JPG, PNG, GIF and WebP up to 10&nbsp;MB.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Image URL or upload, Alt text, Caption, Link, Width, Alignment, and Layout (column, row or grid) once there is more than one image</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Video</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Embed a YouTube video thumbnail with a play button that links to the video.</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> YouTube URL (thumbnail auto-extracted)</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Offer</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Promotional offer card with pricing, coupon code, and call-to-action button.</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Title, Description, Original price, Sale price, Coupon code, Button text, Button URL, Alignment</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Email clients cannot play video, so this block shows the YouTube thumbnail with a play badge and links out to the video. Standard watch links, youtu.be links and Shorts links are all recognised.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> YouTube URL</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Quote</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Styled blockquote with attribution for testimonials or highlights.</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Quote text, Author, Author title</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Styled blockquote with attribution, for testimonials or press pull-quotes.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Quote Text, Author, Author Title</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sponsors</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Displays sponsor logos with names and tier badges. Choose to show sponsors from your schedule settings or from the first event.</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Source (from schedule or from first event)</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Your <a href="{{ route('marketing.docs.creating_schedules') }}#engagement" class="doc-link">sponsor logos</a>, under the section title you set on the schedule.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Sponsor Source (from your schedule settings, or from the first event in the newsletter)</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Poll</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Displays the first active poll from your upcoming events with a "Vote Now" button linking to the event page. Auto-populated from your events.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Shows the first active poll found across your upcoming events, with a button through to that event's page to vote. It has no fields to fill in, and renders nothing if no upcoming event has an active poll.</p>
             </div>
         </div>
 
-        <h3 class="doc-subheading">Layout & Utility Blocks</h3>
+        <h3 class="doc-subheading">Layout &amp; Utility Blocks</h3>
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Divider</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Horizontal line to visually separate sections.</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Style (solid/dashed/dotted)</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Divider Style (solid, dashed or dotted)</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Spacer</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Adjustable vertical spacing between blocks.</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Height (5 to 200px)</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Adjustable vertical gap between blocks.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Spacer Height, 5 to 200 pixels</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Social Links</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Icons linking to your social media profiles.</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Platform links (Website, Facebook, Instagram, Twitter/X, YouTube, TikTok, LinkedIn)</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Icons linking to your profiles. The block is pre-filled from the website and social links on your schedule, and each row can be edited or removed.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Platform and URL per link</p>
             </div>
         </div>
 
@@ -182,17 +243,17 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Profile Image</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Your schedule's profile image, displayed as a centered logo. Auto-populated from schedule settings.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Your schedule's profile image, centred like a logo. No fields: change the image on the schedule and every newsletter follows.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Header Banner</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Full-width banner image at the top of your newsletter. Auto-populated from schedule settings.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Your schedule's header image, full width at the top of the email. Also has no fields.</p>
             </div>
         </div>
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Tip</div>
-            <p>The <strong>Events</strong> block automatically pulls in your upcoming events, so your newsletter always shows the latest schedule without manual updates.</p>
+            <p>Leave the <strong>Events</strong> block on "All Upcoming Events" and a cloned newsletter always goes out with the current schedule, with no block editing between sends.</p>
         </div>
     </section>
 
@@ -205,34 +266,74 @@
             Templates
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Start with a pre-designed template and customize it to match your brand. Five templates are available:
+            The <strong class="text-gray-900 dark:text-white">Style</strong> tab opens with five built-in presets. Picking one rewrites the colour, font and button settings in a single click; your blocks, your footer text and the layout chosen on the Events block are left alone, so you can try presets on a finished draft without losing work.
         </p>
 
-        <div class="doc-fields">
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Modern</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Clean layout with bold accent colors and rounded elements. Great for a contemporary look.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Classic</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Traditional newsletter layout with a structured header, body, and footer. Professional and familiar.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Minimal</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Stripped-down design that puts content first. Uses plenty of whitespace and subtle typography.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Bold</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Eye-catching design with large headings and vibrant colors. Ideal for promotions and announcements.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Compact</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Dense layout that fits more content into less space. Perfect for event-heavy digests.</p>
-            </div>
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Preset</th>
+                        <th>Background</th>
+                        <th>Accent</th>
+                        <th>Font</th>
+                        <th>Buttons</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Modern</span></td>
+                        <td>White</td>
+                        <td>Your schedule's accent colour</td>
+                        <td>Arial</td>
+                        <td>Rounded</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Classic</span></td>
+                        <td>Warm off-white</td>
+                        <td>Brown</td>
+                        <td>Georgia</td>
+                        <td>Square</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Minimal</span></td>
+                        <td>White</td>
+                        <td>Grey</td>
+                        <td>Verdana</td>
+                        <td>Rounded</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Bold</span></td>
+                        <td>Near-black navy</td>
+                        <td>Red</td>
+                        <td>Arial</td>
+                        <td>Rounded</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Compact</span></td>
+                        <td>Light grey</td>
+                        <td>Green</td>
+                        <td>Trebuchet MS</td>
+                        <td>Square</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
+        <p class="text-gray-600 dark:text-gray-300 mt-4 mb-6">
+            Every value stays editable afterwards, so a preset is a starting point rather than a lock-in. Bold is the one preset with a dark background, and Compact tightens the padding and footer type as well as the palette.
+        </p>
 
+        <h3 class="doc-subheading">Saving Your Own Templates</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            After selecting a template, you can fully customize every aspect including colors, fonts, and content blocks.
+            Once a design works, keep it. Saved templates store the blocks, the preset and the style settings under a name of your choosing.
+        </p>
+        <ol class="doc-list doc-list-numbered mb-6">
+            <li>From a saved newsletter, click <strong class="text-gray-900 dark:text-white">Save as Template</strong> and give it a name, or open <strong class="text-gray-900 dark:text-white">Templates</strong> on the newsletter list page and click <strong class="text-gray-900 dark:text-white">Create Template</strong> to build one from scratch</li>
+            <li>Your templates are listed under <strong class="text-gray-900 dark:text-white">Templates</strong> with <strong class="text-gray-900 dark:text-white">Use</strong>, <strong class="text-gray-900 dark:text-white">Edit</strong> and <strong class="text-gray-900 dark:text-white">Delete</strong> actions</li>
+            <li>Whenever you have at least one saved template, a <strong class="text-gray-900 dark:text-white">Start from template</strong> picker appears at the top of the Create Newsletter page</li>
+        </ol>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            A template has no subject line and no recipients: those belong to the newsletter you create from it.
         </p>
     </section>
 
@@ -245,7 +346,7 @@
             Style Customization
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Fine-tune the visual appearance of your newsletter using the Style tab:
+            Below the preset picker, the <strong class="text-gray-900 dark:text-white">Style Settings</strong> panel controls the whole email. Each colour has both a swatch picker and a hex field.
         </p>
 
         <div class="doc-table-wrap">
@@ -259,35 +360,39 @@
                 <tbody>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Background Color</span></td>
-                        <td>The outer background color of the email</td>
+                        <td>The background behind the email body</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Accent Color</span></td>
-                        <td>Used for buttons, links, and highlighted elements</td>
+                        <td>Buttons, links and highlighted elements. Defaults to your schedule's accent colour</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Text Color</span></td>
-                        <td>Default color for body text</td>
+                        <td>Default colour for body text</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Font Family</span></td>
-                        <td>Choose from a selection of email-safe fonts</td>
+                        <td>Arial, Georgia, Verdana, Trebuchet MS or Courier New</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Button Style</span></td>
-                        <td>Rounded or square buttons with customizable colors</td>
+                        <td>Rounded or square corners on buttons</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Event Layout</span></td>
-                        <td>Cards or list - how events are displayed in the Events block</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Footer Text</span></td>
+                        <td>On the Settings tab. Replaces the schedule name printed above the unsubscribe link</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
+        <p class="text-gray-600 dark:text-gray-300 mt-4 mb-4">
+            The layout of the Events block is not a global setting: choose cards or list on the block itself.
+        </p>
+
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Note</div>
-            <p>Email clients have varying CSS support. The builder uses email-safe styles to ensure your newsletter looks consistent across Gmail, Outlook, Apple Mail, and other clients.</p>
+            <p>Email clients have varying CSS support, so the builder renders to table-based, inline-styled HTML with a small set of email-safe fonts. That is why the font list is short and why there is no free-form CSS here. Free schedules also carry a small "Powered by Event Schedule" line under the unsubscribe link; upgrading to Pro removes it.</p>
         </div>
     </section>
 
@@ -297,34 +402,46 @@
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
             </svg>
-            Recipients & Segments
+            Recipients &amp; Segments
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Choose who receives your newsletter by selecting a segment:
+            The <strong class="text-gray-900 dark:text-white">Recipients</strong> panel on the Settings tab lists your saved segments with a live recipient count beside each one. Tick as many as you need and the lists are merged. If you tick nothing, the newsletter goes to all your followers.
         </p>
 
+        <h3 class="doc-subheading">Segment Types</h3>
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">All Followers</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Send to everyone who follows your schedule. Best for general announcements and event digests. Learn how to <a href="{{ route('marketing.docs.sharing') }}#followers" class="doc-link">build your follower base</a>.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Everyone who follows your schedule and has not opted out of emails. Best for general announcements and event digests. Learn how to <a href="{{ route('marketing.docs.sharing') }}#followers" class="doc-link">build your follower base</a>.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Ticket Buyers</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Target people who have purchased <a href="{{ route('marketing.docs.tickets') }}" class="doc-link">tickets</a> to your events. Ideal for promoting similar upcoming events.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Everyone who has bought a ticket or registered for one of your events, taken from the email on the order. Optionally narrow it to a single event. See <a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Selling Tickets</a>.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Manual</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Enter specific email addresses. Useful for targeted sends to a curated list of recipients.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A list of addresses you supply, either typed in or bulk <a href="#importing-emails" class="doc-link">imported</a>. Useful for a curated press or partner list.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Waitlist</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">People currently on a <a href="{{ route('marketing.docs.tickets') }}#waitlist" class="doc-link">waitlist</a>, either waiting or already notified. Can also be narrowed to a single event.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sub-schedule</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Send to ticket buyers from a specific sub-schedule. Perfect for category-specific promotions.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Ticket buyers from events filed under one sub-schedule, for category-specific promotions. The option only appears once the schedule has at least one sub-schedule.</p>
             </div>
         </div>
 
+        <h3 class="doc-subheading">Who Actually Receives It</h3>
+        <ul class="doc-list mb-6">
+            <li>Addresses are matched case-insensitively and de-duplicated, so someone in two segments is emailed once and counts once against your allowance</li>
+            <li>Anyone who has unsubscribed from this schedule is removed, as is anyone who has turned off emails on their account</li>
+            <li>Every recipient is resolved at send time, so a follower who joins after you draft the newsletter is still included</li>
+        </ul>
+
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Schedule members are always included</div>
-            <p>Team members on the schedule (owner, admins, and viewers) who have email verified and are subscribed always receive every newsletter, regardless of the segment selected. This keeps the team in the loop on what's being sent.</p>
+            <p>Team members on the schedule (the owner, admins and viewers) whose email is verified and who have not turned off emails always receive every newsletter, whichever segments are selected. This keeps the team in the loop on what is being sent. They count against the monthly allowance like anyone else.</p>
         </div>
     </section>
 
@@ -337,26 +454,24 @@
             Managing Segments
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Create reusable audience segments that can be selected when sending newsletters. Access the segment manager by clicking the <strong class="text-gray-900 dark:text-white">Segments</strong> button on the newsletter list page.
+            Segments are reusable, so build them once and pick them from the Settings tab on every future newsletter. Click <strong class="text-gray-900 dark:text-white">Segments</strong> on the newsletter list page to manage them.
         </p>
 
         <h3 class="doc-subheading">Creating a Segment</h3>
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Click <strong class="text-gray-900 dark:text-white">Segments</strong> on the newsletter list page</li>
-            <li>Enter a name for the segment</li>
-            <li>Choose a segment type:
-                <ul class="doc-list mt-2">
-                    <li><strong class="text-gray-900 dark:text-white">All Followers</strong> - everyone who follows your schedule</li>
-                    <li><strong class="text-gray-900 dark:text-white">Ticket Buyers</strong> - people who have purchased tickets</li>
-                    <li><strong class="text-gray-900 dark:text-white">Manual</strong> - a custom list of email addresses you provide</li>
-                </ul>
-            </li>
-            <li>For manual segments, enter email addresses (one per line)</li>
+            <li>Under <strong class="text-gray-900 dark:text-white">Create Segment</strong>, enter a name</li>
+            <li>Choose the type: All Followers, Ticket Buyers, Manual, Waitlist or Sub-schedule</li>
+            <li>Fill in whatever the type asks for next: an optional event filter for Ticket Buyers and Waitlist, the sub-schedule for Sub-schedule, or the address list for Manual (one per line, with an optional name after a comma)</li>
             <li>Click <strong class="text-gray-900 dark:text-white">Create Segment</strong></li>
         </ol>
 
+        <h3 class="doc-subheading">Editing and Deleting</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Existing segments are listed with their type and recipient count. You can edit or delete any segment from this page. When creating a newsletter, your saved segments appear as selectable options in the Settings tab.
+            Each saved segment shows its type and its current recipient count. <strong class="text-gray-900 dark:text-white">Edit</strong> lets you rename it and change its event or sub-schedule filter, but not its type: to change the type, create a new segment. On a manual segment the edit page also lists the subscribers, where you can add one by name and email, correct an entry, or remove it.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            A segment that is still attached to a draft or scheduled newsletter cannot be deleted. Detach it there first, then delete.
         </p>
     </section>
 
@@ -369,28 +484,37 @@
             Importing Emails
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Bulk import contacts into a newsletter segment. Access the import tool by clicking the <strong class="text-gray-900 dark:text-white">Import Emails</strong> button on the newsletter list page.
+            Bring an existing mailing list across with the <strong class="text-gray-900 dark:text-white">Import Emails</strong> button on the newsletter list page. Up to 10,000 addresses can be imported at a time.
         </p>
 
         <h3 class="doc-subheading">Choosing a Segment</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            Before importing, choose where to add the contacts: create a new segment with a name you provide, or add to an existing manual segment.
+            Start by choosing where the contacts land: <strong class="text-gray-900 dark:text-white">Create new segment</strong> with a name you provide, or <strong class="text-gray-900 dark:text-white">Add to existing segment</strong>. Imports always go into a manual segment, so only manual segments appear in that dropdown.
         </p>
 
         <h3 class="doc-subheading">Import Methods</h3>
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Form Entry</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Add contacts one at a time using name and email fields. Best for small lists or individual additions.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Type contacts in row by row with name and email. The email is required, the name is optional. Best for small lists or one-off additions.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Paste Emails</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Paste a list of email addresses in various formats (one per line, comma-separated, or with names). The importer automatically parses the entries.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Paste a block of text and click <strong class="text-gray-900 dark:text-white">Parse Emails</strong>. One address per line, <code class="doc-inline-code">Name &lt;email&gt;</code>, comma-separated addresses and "email, name" pairs are all understood.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Upload CSV</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Upload a CSV file and map columns to email and name fields. The importer auto-detects columns and shows a preview before importing.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Drop in a CSV of up to 10&nbsp;MB, then map each column to Email, Name or Skip. The importer guesses the mapping and shows a preview with the row count before anything is saved.</p>
             </div>
+        </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mt-6 mb-4">
+            Whichever method you use, the rows are validated first and any bad or duplicate address is reported by row number so you can fix it before confirming. Addresses already in the target segment are skipped rather than duplicated.
+        </p>
+
+        <div class="doc-callout doc-callout-warning">
+            <div class="doc-callout-title">Imported contacts also become followers</div>
+            <p>Importing adds each address to the segment and follows your schedule with it, so imported people appear on your followers list and are reachable through the All Followers segment too. Only import lists that have agreed to hear from you, and remember that every recipient counts against your monthly allowance.</p>
         </div>
     </section>
 
@@ -403,27 +527,37 @@
             Sending
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            You have three options for delivering your newsletter:
+            You have three ways to deliver a saved newsletter:
         </p>
 
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Send Now</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Immediately delivers the newsletter to all selected recipients.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Confirm the prompt and the newsletter moves to Sending. Messages go out in small batches a few seconds apart rather than all at once, so a large send takes a few minutes to finish.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Schedule for Later</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Pick a date and time to send automatically. The newsletter is queued and sent at the scheduled time.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Schedule Newsletter</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Pick a future date and time, read in your own timezone. The send fires within a minute of that time. A banner on the edit page shows the scheduled time and offers <strong class="text-gray-900 dark:text-white">Cancel schedule</strong>, which returns it to Draft.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Send Test</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Sends a preview to your own email address so you can verify formatting and content before the real send.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Send a Test</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Sends one copy to your schedule's contact email address, so set that address first. Test sends do not count against your monthly allowance and are excluded from the statistics, and there is a short cooling-off period between tests.</p>
             </div>
+        </div>
+
+        <div class="doc-callout doc-callout-warning">
+            <div class="doc-callout-title">Verification is required before the first send</div>
+            <p>On eventschedule.com you must either <a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="doc-link">set up your own email settings</a> for the schedule or verify your phone number in your profile before newsletters can go out. Until then the Newsletters page shows a warning and every send is refused. Selfhosted installs are not affected.</p>
         </div>
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Tip</div>
-            <p>Always send a test email first to check that images load correctly and the layout looks good across different email clients.</p>
+            <p>Send a test first, every time. Images, links and dark-mode rendering are the three things that most often look different in a real inbox from the builder preview.</p>
+        </div>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Selfhosted: give the queue a real driver</div>
+            <p>With the <code class="doc-inline-code">sync</code> queue driver an immediate send of more than 50 recipients is refused, because the whole delivery would have to happen inside one web request. Either schedule the newsletter instead or configure a background queue driver and a worker. See the <a href="{{ route('marketing.docs.selfhost.installation') }}" class="doc-link">selfhost installation guide</a>.</p>
         </div>
     </section>
 
@@ -436,21 +570,31 @@
             A/B Testing
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Test different versions of your newsletter to find what resonates best with your audience.
+            An A/B test sends two versions to a slice of your audience, then sends whichever performed better to everyone else. Open the <strong class="text-gray-900 dark:text-white">A/B Testing</strong> panel on the Settings tab of a saved newsletter.
         </p>
 
-        <h3 class="doc-subheading">How It Works</h3>
+        <h3 class="doc-subheading">Setting Up a Test</h3>
+        <ol class="doc-list doc-list-numbered mb-6">
+            <li>Click <strong class="text-gray-900 dark:text-white">Create A/B Test</strong></li>
+            <li>Choose what to vary: the <strong class="text-gray-900 dark:text-white">Subject</strong> or the <strong class="text-gray-900 dark:text-white">Content above events</strong></li>
+            <li>Set the sample percentage, from 5% to 50% of your audience (20% by default)</li>
+            <li>Set how long to wait before picking a winner, from 1 to 72 hours (4 by default)</li>
+            <li>Choose the winning criterion: <strong class="text-gray-900 dark:text-white">Open rate</strong> or <strong class="text-gray-900 dark:text-white">Click rate</strong></li>
+            <li>Save. Your newsletter becomes variant A and a copy is created as variant B, which opens for editing so you can make the change you want to test</li>
+            <li>Send the test from variant B when both versions are ready</li>
+        </ol>
+
+        <h3 class="doc-subheading">What Happens Next</h3>
         <ul class="doc-list mb-6">
-            <li>Create two or more variants with different <strong>subject lines</strong> or <strong>newsletter content</strong></li>
-            <li>Choose a sample size from <strong>5% to 50%</strong> of your audience to receive the initial test</li>
-            <li>Set an evaluation period from <strong>1 to 72 hours</strong> (default: 4 hours) for results to accumulate</li>
-            <li>Pick a winner criterion: <strong>open rate</strong> or <strong>click rate</strong></li>
-            <li>The winning variant is automatically sent to the remaining recipients after the evaluation period</li>
+            <li>The sample is drawn at random and split evenly between A and B</li>
+            <li>When the waiting period is up, the better-performing variant on your chosen criterion is marked as the winner</li>
+            <li>The winner is then sent to everyone in the audience who was not in the sample, with no further action from you</li>
+            <li>The <a href="#analytics" class="doc-link">statistics</a> page shows both variants side by side with their sent counts, open rates and click rates, and flags the winner</li>
         </ul>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Note</div>
-            <p>A/B testing works best with larger audiences. With smaller lists, the results may not be statistically significant.</p>
+            <p>A test always has exactly two variants. The allowance check runs against the full audience before the sample goes out, so both stages have to fit inside your remaining monthly allowance. A/B testing also needs enough recipients to mean anything: on a list of a few dozen people the difference between variants is usually noise.</p>
         </div>
     </section>
 
@@ -463,7 +607,7 @@
             Analytics
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            After sending a newsletter, track its performance with detailed analytics:
+            Once a newsletter is sending or sent, its subject line on the list page links to a statistics page. The list itself also carries sortable Sent, Open Rate and Click Rate columns.
         </p>
 
         <div class="doc-table-wrap">
@@ -476,28 +620,45 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Open Rate</span></td>
-                        <td>Percentage of recipients who opened the email</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Sent</span></td>
+                        <td>How many messages were delivered to the mail server</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Click Tracking</span></td>
-                        <td>Number and percentage of recipients who clicked a link</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Opens</span></td>
+                        <td>Recipients who opened the email, and that as a percentage of sent</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Top Links</span></td>
-                        <td>Which links received the most clicks</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Clicks</span></td>
+                        <td>Recipients who clicked at least one link, and that as a percentage of sent</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Timeline</span></td>
-                        <td>When opens and clicks occurred over time</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Failed</span></td>
+                        <td>Messages the mail server rejected or could not deliver</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Opens and clicks over time</span></td>
+                        <td>Two charts plotting activity by day since the send</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Top clicked links</span></td>
+                        <td>The ten most-clicked destinations, with their click counts</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Recipients</span></td>
+                        <td>A sortable, paginated list of every recipient with their status and the time they first opened and clicked</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Use these insights to refine your content, sending times, and subject lines for future newsletters.
+        <p class="text-gray-600 dark:text-gray-300 mt-4 mb-4">
+            Opens are measured with a tracking pixel, so a recipient whose client blocks remote images counts as unopened even if they read the email. Treat the open rate as a floor and a trend rather than an exact number. Clicks are counted by routing each link through a redirect, which is also why link addresses in the delivered email look different from the ones you typed.
         </p>
+
+        <div class="doc-callout doc-callout-tip">
+            <div class="doc-callout-title">Newsletter traffic shows up in schedule analytics too</div>
+            <p>Links are tagged as newsletter traffic on their way out, so visits arriving from a send appear under traffic sources in <a href="{{ route('marketing.docs.analytics') }}#web-analytics" class="doc-link">Analytics</a>. That is how you tell what a newsletter did after the click, not just up to it.</p>
+        </div>
     </section>
 
     <!-- Managing Newsletters -->
@@ -510,40 +671,41 @@
             Managing Newsletters
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Your newsletters are organized by status in the admin panel:
+            The newsletter list shows every newsletter for the selected schedule with a status badge. Use the schedule picker at the top left to switch between the schedules you manage.
         </p>
 
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Draft</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Newsletters in progress that haven't been sent or scheduled yet. You can continue editing at any time.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">In progress, not sent or scheduled. Editable at any time.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Scheduled</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Newsletters queued for future delivery. You can cancel or reschedule before the send time.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Queued for a future time. Still editable, and <strong class="text-gray-900 dark:text-white">Cancel schedule</strong> on the edit page puts it back to Draft.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sending</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Currently in progress. Emails are being delivered to recipients.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Delivery is under way. It cannot be edited or deleted while in this state, and statistics are already available.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sent</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Delivered newsletters with analytics available. You can view performance or clone to create a new newsletter based on it.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Cancelled</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Newsletters that were scheduled but cancelled before delivery.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Delivered. Open its statistics, or clone it to start the next one.</p>
             </div>
         </div>
 
         <h3 class="doc-subheading">Cloning</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Clone any newsletter to create a copy with the same content, style, and settings. This is useful for recurring newsletters where you want to keep the same design but update the content.
+            <strong class="text-gray-900 dark:text-white">Clone</strong> copies the blocks, style and recipients into a fresh draft and opens it, leaving the original untouched. Statistics and any A/B test are not carried over. This is the quickest way to run a recurring digest.
         </p>
 
-        <h3 class="doc-subheading">Unsubscribe Management</h3>
+        <h3 class="doc-subheading">Deleting</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Every newsletter includes an unsubscribe link. When a recipient unsubscribes, they are automatically removed from future sends. You can view and manage unsubscribed contacts in your admin panel.
+            <strong class="text-gray-900 dark:text-white">Delete</strong> removes a newsletter from the list. A newsletter that is currently sending cannot be deleted; wait for it to finish.
+        </p>
+
+        <h3 class="doc-subheading">Unsubscribes</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Every newsletter footer carries an unsubscribe link. One click opts that address out and it is excluded from every future send for that schedule, automatically and with no work from you. Unsubscribes are per schedule, so someone who leaves one of your schedules still hears from the others. Recipients can also turn off all email from their own account settings, which removes them everywhere.
         </p>
     </section>
 
@@ -556,11 +718,11 @@
             See Also
         </h2>
         <ul class="doc-list">
-            <li><a href="{{ route('marketing.docs.sharing') }}" class="doc-link">Sharing Your Schedule</a> - More ways to reach your audience</li>
+            <li><a href="{{ route('marketing.docs.sharing') }}" class="doc-link">Sharing Your Schedule</a> - Grow the follower list your newsletters go to</li>
             <li><a href="{{ route('marketing.docs.event_graphics') }}" class="doc-link">Event Graphics</a> - Generate shareable images for social media</li>
             <li><a href="{{ route('marketing.docs.creating_events') }}" class="doc-link">Creating Events</a> - Add events that appear in your newsletters</li>
             <li><a href="{{ route('marketing.docs.analytics') }}" class="doc-link">Analytics</a> - Track how newsletters drive schedule views</li>
-            <li><a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Selling Tickets</a> - Set up ticketing for your events</li>
+            <li><a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Selling Tickets</a> - Set up ticketing, waitlists and buyer lists</li>
         </ul>
     </section>
 
@@ -582,26 +744,26 @@
                 },
                 {
                     "@type": "HowToStep",
-                    "name": "Add Content Blocks",
-                    "text": "Use the Content tab to add and arrange blocks such as headings, text, events, buttons, and images using drag-and-drop.",
+                    "name": "Write the Subject and Add Content Blocks",
+                    "text": "On the Content tab, enter the subject line, then add and arrange blocks such as headings, text, events, buttons and images.",
                     "url": "{{ url(route('marketing.docs.newsletters')) }}#block-types"
                 },
                 {
                     "@type": "HowToStep",
-                    "name": "Choose a Template",
-                    "text": "Select a pre-designed template (Modern, Classic, Minimal, Bold, or Compact) and customize colors, fonts, and button styles.",
+                    "name": "Choose a Template and Style",
+                    "text": "On the Style tab, pick a preset (Modern, Classic, Minimal, Bold or Compact) and adjust the colors, font and button style.",
                     "url": "{{ url(route('marketing.docs.newsletters')) }}#templates"
                 },
                 {
                     "@type": "HowToStep",
                     "name": "Select Recipients",
-                    "text": "Choose a segment for your newsletter: all followers, ticket buyers, a specific sub-schedule, or a manual list of email addresses.",
+                    "text": "On the Settings tab, tick the segments to send to: all followers, ticket buyers, a waitlist, a sub-schedule or a manual list. Selecting none sends to all followers.",
                     "url": "{{ url(route('marketing.docs.newsletters')) }}#recipients"
                 },
                 {
                     "@type": "HowToStep",
                     "name": "Send or Schedule",
-                    "text": "Send the newsletter immediately, schedule it for a future date and time, or send a test email to preview it first.",
+                    "text": "Send a test to your schedule's email address first, then send the newsletter immediately or schedule it for a future date and time.",
                     "url": "{{ url(route('marketing.docs.newsletters')) }}#sending"
                 }
             ]

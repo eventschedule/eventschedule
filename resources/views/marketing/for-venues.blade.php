@@ -256,7 +256,7 @@
             ],
             [
                 'q' => 'What does it cost to sell tickets?',
-                'a' => 'Ticketing is part of the Pro plan. Event Schedule charges no platform fee on ticket sales, so the only deduction is Stripe\'s standard processing fee, and payouts go straight to your own Stripe account.',
+                'a' => 'Selling is included on every plan, with the Free plan capped at 25 paid tickets a month and Pro removing the cap. Event Schedule charges no platform fee on ticket sales at any tier, so the only deduction is Stripe\'s standard processing fee, and payouts go straight to your own Stripe account.',
             ],
         ];
 

@@ -1559,7 +1559,7 @@ class Event extends Model
             return false;
         }
 
-        return $this->tickets_enabled && $this->hasTicketAllowance();
+        return $this->tickets_enabled && $this->hasTicketAllowance($date);
     }
 
     /**
@@ -1575,24 +1575,92 @@ class Event extends Model
      *     ones would lose its buy button at the cap and take its free tier down with it - breaking
      *     the promise that free registration is unlimited.
      */
-    public function hasTicketAllowance(): bool
+    public function hasTicketAllowance(?string $date = null): bool
+    {
+        // Event-level question: may this event sell ANYTHING? A surviving free tier is enough, so
+        // the buy button and the ticket form keep rendering at the cap and free registration stays
+        // unlimited. It deliberately does NOT imply the paid rows are sellable - that is
+        // paidTicketAllowanceAvailable(), which Ticket::isSellable() asks per row.
+        if ($this->tickets->contains(fn ($ticket) => ! $ticket->is_addon && (float) $ticket->price <= 0)) {
+            return true;
+        }
+
+        return $this->paidTicketAllowanceAvailable($date);
+    }
+
+    /**
+     * Whether a PAID ticket on this event may be sold right now.
+     *
+     * Separate from hasTicketAllowance() on purpose: an event that keeps selling because it has a
+     * free tier must not carry its paid tiers through with it, which would have been unlimited
+     * paid sales on a capped schedule.
+     */
+    public function paidTicketAllowanceAvailable(?string $date = null): bool
     {
         if ($this->isPro()) {
             return true;
         }
 
-        // Never blocks a sale the allowance is not supposed to govern.
-        if ($this->tickets->contains(fn ($ticket) => ! $ticket->is_addon && (float) $ticket->price <= 0)) {
+        // Offline money is counted but never refused: there is no processing cost to us, and an
+        // organizer taking cash at the door must never find the app refusing to record it. This
+        // lives HERE rather than in the checkout controller so the guest render and the write path
+        // cannot disagree - when it sat only in the controller, canSellTickets() had already
+        // refused the sale one gate earlier and the carve-out was unreachable.
+        if (! $this->takesOnlinePayment()) {
             return true;
         }
 
         // An event starting imminently is exempt, so a monthly cap can never kill sales during the
-        // final push for an event that is actually happening.
-        if ($this->withinTicketAllowanceGrace()) {
+        // final push for an event that is actually happening. $date matters: for a recurring event
+        // the base starts_at is the recurrence anchor, which is in the past, so without the
+        // occurrence date the grace would never fire for exactly the events that need it.
+        if ($this->withinTicketAllowanceGrace($date)) {
             return true;
         }
 
-        return $this->roles->contains(fn ($role) => $role->canSellPaidTickets());
+        return $this->ticketAllowanceRole()?->canSellPaidTickets() ?? true;
+    }
+
+    /**
+     * The schedule whose monthly allowance a sale of this event spends.
+     *
+     * The event's OWNING schedule, not whichever subdomain the guest happened to buy through.
+     * Attributing to the storefront let a free account create events on one schedule, list them on
+     * a curator schedule, and sell through the curator - whose own count was permanently zero. It
+     * also let the guest page and the checkout guard disagree, rendering a buy button that the
+     * write path then refused.
+     *
+     * Money already works this way: Stripe Connect routes by events.user_id, not by subdomain.
+     */
+    public function ticketAllowanceRole(): ?Role
+    {
+        // Memoized: hasTicketAllowance() runs several times per guest page render, and
+        // Ticket::isSellable() calls it once per ticket row, so an unmemoized lookup here is a
+        // query per row.
+        if ($this->ticketAllowanceRoleCache !== false) {
+            return $this->ticketAllowanceRoleCache;
+        }
+
+        if ($this->creator_role_id) {
+            $role = $this->relationLoaded('creatorRole') && $this->creatorRole
+                ? $this->creatorRole
+                : $this->creatorRole()->first();
+
+            return $this->ticketAllowanceRoleCache = $role;
+        }
+
+        // creator_role_id is backfilled but nullable on older rows; CheckData repairs it. Fall back
+        // the same way PassBookingService does.
+        return $this->ticketAllowanceRoleCache = $this->roles->first();
+    }
+
+    /** false = not resolved yet (null is a legitimate resolved value). */
+    protected $ticketAllowanceRoleCache = false;
+
+    /** Whether buying this event moves money through us, as opposed to being settled offline. */
+    public function takesOnlinePayment(): bool
+    {
+        return ! in_array($this->payment_method, ['cash', null], true);
     }
 
     /** Hours before an event starts during which the monthly allowance stops applying. */

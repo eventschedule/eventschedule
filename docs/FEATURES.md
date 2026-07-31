@@ -40,7 +40,10 @@ All users get these features with no subscription required.
 | Recurring events | Day-of-week recurring patterns with date exceptions (include/exclude specific dates) |
 | Newsletter management | Full newsletter creation and management UI (sending limits vary by tier) |
 | Embed calendar on website | iframe embed with X-Frame-Options |
-| Free event registration / RSVP | Native sign-up for free events with optional capacity limits |
+| Free event registration / RSVP | Native sign-up for free events with optional capacity limits. Unlimited on every tier, and never counted against the paid-ticket allowance below. The RSVP variants of the waitlist, per-guest individual registration and the `?rsvp=true` embed widget are free too - they always have been |
+| Sell tickets (25 paid tickets per month) | `Role::ticketSaleLimit()`. Create ticket types and take payment, including online via Stripe Connect with **no platform fee**, the same as Pro. Capped at 25 paid tickets per calendar month per schedule, with a per-owner backstop across a user's schedules. Free RSVPs, zero-price tickets, add-ons and appointment bookings never count. Cash sales are counted but never blocked, and the cap never applies to an event starting within 48 hours. The first paid sale on each event always notifies the organizer |
+| Appointment booking (1 appointment type) | `Role::appointmentTypeLimit()`. Fully featured otherwise: weekly hours, per-date overrides, buffers, approvals, and payment via Stripe / payment URL / cash. A schedule that lapses from Pro keeps every type it created; only the oldest bookable one stays bookable, and the rest return on upgrade |
+| QR code scanning at the door | `TicketController::scan()` / `scanned()`, gated only by `User::canScanEvent()` (a permission check for owners, admins and viewers - it has NO plan check). The "Scan Ticket" button on the Sales tab renders unconditionally. Scan the QR on any ticket or registration, including the 25 paid tickets a month the free plan sells; each ticket admits once and a re-scan warns. The live **Check-in dashboard** (running count and per-ticket-type breakdown) is the Pro half - see below |
 | iCal download | Download .ics files for individual events and recurring event dates |
 | Fan photos on events (25 per schedule) | User-submitted photos with approval workflow; upgrade prompt at limit |
 | Event cloning | Duplicate an existing event as a starting point for a new one |
@@ -55,11 +58,11 @@ Gated by `$role->isPro()`. Enterprise users also get all Pro features.
 
 | Feature | Gate location | Notes |
 |---------|--------------|-------|
-| Remove Event Schedule branding | `$role->isWhiteLabeled()` / `$role->showBranding()` | White-label, removes "Powered by" from all seven surfaces. The corner credit chip is decided separately by `Role::creditChipReason()`, which keeps it in three cases: a nexus Enterprise plan an admin granted by hand (`roles.plan_source = 'admin'`, no active Stripe subscription); an operator's own free tier on a self-hosted SaaS; and every schedule on a plain selfhost, unconditionally, as the AAL attribution. Stripe customers and referral-earned plans (`plan_source = 'referral'`) never carry it. Full matrix: [BRANDING_MATRIX.md](BRANDING_MATRIX.md) |
-| Ticketing & QR code check-ins | `$event->isPro()` in views and controllers | Create ticket types, scan QR codes |
-| Passes & subscriptions | Tied to ticketing gate, `$ticket->is_pass` | Multi-use passes redeemable across events (visit pass, membership, festival pass, season pass); usage tracked on the Subscriptions tab; per-pass cancellation deadline and late-cancel policy (forfeit or block) |
-| Individual tickets | Tied to ticketing gate, `$event->individual_tickets` | Collect per-attendee details; each guest gets own confirmation email and QR code |
-| Sell online via Stripe | Tied to ticketing gate | Stripe Connect payments, no platform fees |
+| Remove Event Schedule branding | `$role->isWhiteLabeled()` / `$role->showBranding()` | White-label, removes "Powered by" from all seven surfaces. The corner credit chip is decided separately by `Role::creditChipReason()` and is NOT tier-gated: on any install that is not eventschedule.com - a plain selfhost or an operator's own platform - every schedule carries it on every plan, as the AAL attribution owed by whoever redistributes the software. On the nexus the one case is an Enterprise plan an admin granted by hand (`roles.plan_source = 'admin'`, no active Stripe subscription); Stripe customers and referral-earned plans (`plan_source = 'referral'`) never carry it. Full matrix: [BRANDING_MATRIX.md](BRANDING_MATRIX.md) |
+| Unlimited ticket sales | `Event::hasTicketAllowance()` / `Role::canSellPaidTickets()` | No monthly cap on paid tickets. Selling itself is free (25/month); this removes the ceiling |
+| Passes & subscriptions | `PassBookingService::isBookable()`; `EventRepo::saveEvent()` scrubs `is_pass` below Pro | Multi-use passes redeemable across events (visit pass, membership, festival pass, season pass); usage tracked on the Subscriptions tab; per-pass cancellation deadline and late-cancel policy (forfeit or block) |
+| Individual tickets | `EventRepo::saveEvent()` scrubs `individual_tickets` below Pro. The RSVP variant is free | Collect per-attendee details; each guest gets own confirmation email and QR code |
+| Unlimited appointment types | `Role::appointmentTypeLimit()` returns null above free | Offer consultations, lessons and rehearsals side by side |
 | Generate event graphics | `GraphicController`, `$role->isPro()` | Auto-generated shareable images |
 | REST API access | All `Api/*Controller.php`, `$role->isPro()` | Full CRUD API for events, schedules, sales, sub-schedules; read endpoints for post-event feedback and fan content |
 | Webhooks | `WebhookService::dispatch()`, `$event->isPro()` | POST notifications for sales, events, check-ins |
@@ -69,18 +72,19 @@ Gated by `$role->isPro()`. Enterprise users also get all Pro features.
 | Event polls | `EventController`, `$role->isPro()` | Create polls on events, guests vote |
 | Event templates | `EventTemplateController`, `$role->isPro()` | Save an event as a reusable template and create new events from it (Templates tab) |
 | Check-in dashboard | `CheckInController`, `$role->isPro()` | Real-time attendance tracking with per-ticket breakdown |
-| Ticket waitlist | `WaitlistController`, `$event->isPro()` | Auto-notify when sold-out tickets become available |
-| Sale notification emails | `EmailService::sendNewSaleNotification()` | Opt-in email alerts when tickets sell |
+| Ticket waitlist | `WaitlistController::join()`, ticket branch only - the RSVP branch is free | Auto-notify when sold-out tickets become available |
+| Sale notification emails | `EmailService::sendNewSaleNotification()` | Opt-in email alerts when tickets sell. The **first** paid sale on each event always notifies, on every tier |
 | Push notifications | `OneSignalService::dispatch()`, `$role->isPro()` | Browser/mobile web push (via OneSignal) mirroring email notifications; opt-in, off by default, requires `ONESIGNAL_APP_ID` |
-| Sales CSV export | `TicketController::exportSales()` | Export sales data with custom fields |
+| Sales CSV export | `TicketController::exportSales()`, user-level `isPro()` (the export spans every schedule the user owns) | Export sales data with custom fields |
 | Post-event feedback | `FeedbackController`, `$role->isPro()` | Collect star ratings and comments from attendees after events |
 | Carpool matching | `CarpoolController`, `$role->isPro()` | Let attendees offer and request rides to events with driver approval, contact sharing, and reviews |
-| Embed ticket widget | `edit.blade.php`, `$role->isPro()` | Embed ticket purchase or RSVP form on external websites via iframe |
-| Promo/discount codes | `PromoCodeController`, tied to ticketing gate | Percentage or fixed discounts with usage limits and expiration dates |
+| Embed ticket widget | `RoleController::viewGuest()` for `?tickets=true` | Embed the ticket purchase form on external websites via iframe. The `?rsvp=true` embed is free |
+| Promo/discount codes | `PromoCode::isValid()` (covers both the guest validate endpoint and the checkout apply step) plus an `EventRepo` persist scrub | Percentage or fixed discounts with usage limits and expiration dates |
 | Gift cards | `GiftCardController`, `$role->giftCardsEnabled()` (`$role->isPro()`) | Sell balance-tracked gift cards buyers send to a recipient by email; redeemed toward tickets for any event on the schedule. Redemption of already-sold cards works even if selling is disabled |
-| Appointment booking | `AppointmentTypeController` / `AppointmentController`, `$role->isPro()` | Calendly-style bookable appointment types (any duration, start-time interval, weekly hours, per-date overrides for holidays, buffers, optional payment via Stripe / payment URL / cash, optional approval); guests book a time on the public `/book` page. Rescheduling moves the existing booking (guest from their private link, owner from the Bookings row) rather than cancelling and rebooking, so the payment, private link and calendar entry carry over. Distinct from the Enterprise "Availability management" tab, which tracks whole-day team member availability |
+| ~~Appointment booking~~ (moved to Free, capped at 1 type) | - | Calendly-style bookable appointment types (any duration, start-time interval, weekly hours, per-date overrides for holidays, buffers, optional payment via Stripe / payment URL / cash, optional approval); guests book a time on the public `/book` page. Rescheduling moves the existing booking (guest from their private link, owner from the Bookings row) rather than cancelling and rebooking, so the payment, private link and calendar entry carry over. Distinct from the Enterprise "Availability management" tab, which tracks whole-day team member availability |
 | Eventbrite import | EventbriteController, $role->isPro() | Import events from Eventbrite |
 | Bulk attendee import | `TicketController::importAttendees`, `$event->isPro()` | Import attendees in bulk from CSV or form entry (up to 5,000 rows per import) |
+| Ticket add-ons | `EventRepo::saveEvent()` persist scrub | Sell extras alongside a ticket, with their own stock and per-order maximum |
 | Invoice Ninja integration | `InvoiceNinjaController` | Alternative payment processing via Invoice Ninja |
 | 100 newsletter emails per month | `$role->newsletterLimit()` | Increased email sending limit (counts each recipient as one email) |
 | Unlimited fan photos + bulk download | `EventController`, `$role->isPro()` | No per-schedule photo cap; download all event photos as zip |
@@ -140,7 +144,7 @@ free tier and is never monetized. See `/docs/saas/monetization`.
 
 | Feature | Gate location | Notes |
 |---------|--------------|-------|
-| Ads on free schedules | `Role::showAds()` + `AdsService::isEligible()` | Google AdSense on free-tier public schedule and event pages. Never on paid tiers, embeds, checkout/booking/submission pages, password-gated pages, custom domains, or for the schedule's own members. Non-personalized by default; honours `Sec-GPC` |
+| Ads on free schedules | `Role::showAds()` + `AdsService::isEligible()` / `resolveSlot()` | Google AdSense on free-tier public schedule and event pages. Never on paid tiers, embeds, checkout/booking/submission pages, **any event page that is actively selling tickets**, password-gated pages, custom domains, or for the schedule's own members. The selling exclusion exists because the free plan can now sell: an ad, or worse a paid promotion for a rival event, must not sit beside the organizer's own buy button. Non-personalized by default; honours `Sec-GPC` |
 | Ad-free public pages | `Role::showAds()` returns false above free | The Pro-side benefit that mirrors "Remove Event Schedule branding" |
 | Buy network promotions | `PromotionController`, `$role->isPro()` | Pro schedules buy placement for a public event on free schedules' pages (CPM or CPC, prepaid, unspent budget refunded). Stored as `boost_campaigns` rows with `channel = 'network'` |
 | Host promotions opt-out | `roles.promotions_opt_out` | Free on all tiers: any schedule can decline to carry other schedules' promotions. Does not affect AdSense |
@@ -165,6 +169,41 @@ its own affiliate ID - custom domains.
 | Keep your own commission | `roles.stay22_aid` | Free on all tiers, deliberately not Pro-gated. Blank means the commission goes to the instance operator, which the settings page discloses |
 | Operator fallback ID | `Setting stay22_aid`, `/admin/settings` | Used for schedules that enabled the map without their own ID. Never used on a customer's custom domain |
 
+## Paid Ticket Limits
+
+Managed by `Role::ticketSaleLimit()` (`app/Models/Role.php`). Counts individual **paid** tickets, per
+schedule, per calendar month. A ticket counts when the sale is `paid`, not deleted, its payment
+method is neither `rsvp` nor `import`, and the ticket itself is not an add-on and has a price above
+zero. Appointment bookings are excluded (they create real `Sale` and `SaleTicket` rows, so the
+`events.appointment_type_id IS NULL` filter is mandatory). The window runs from the later of the
+start of the month and `Role::freeSince()`, so a schedule that lapses mid-month is not judged on
+what it sold while it was paying.
+
+| Tier | Paid tickets per month |
+|------|------------------------|
+| Free | 25 (plus a per-owner backstop across all their schedules) |
+| Pro | Unlimited |
+| Enterprise | Unlimited |
+| Selfhosted | Unlimited (`null`) |
+| Demo schedule | Unlimited (`null`) |
+
+Two rules keep the cap from landing at the worst possible moment:
+
+- **Cash and other offline methods are counted but never blocked.** There is no processing cost to
+  the operator, and refusing to record money taken at the door is indefensible.
+- **An event starting within 48 hours is exempt** (`Event::TICKET_ALLOWANCE_GRACE_HOURS`). The
+  allowance never stops sales for an event that is actually happening.
+
+Zero-price tickets are always sellable, so an event mixing a free tier with paid ones keeps selling
+its free tier at the cap (`Ticket::isSellable()`).
+
+## Appointment Type Limits
+
+Managed by `Role::appointmentTypeLimit()`. Free schedules get one fully-featured appointment type;
+Pro, Enterprise, selfhosted and demo schedules are uncapped. Over-cap schedules (a lapsed Pro plan)
+keep every type they created: `Role::bookableAppointmentTypes()` clamps the bookable set to the
+oldest **bookable** type, and the rest return on upgrade.
+
 ## Newsletter Email Limits
 
 Managed by `Role::newsletterLimit()` (`app/Models/Role.php`). Limits count individual email recipients, not newsletters. A newsletter sent to 100 followers uses 100 of the monthly allowance.
@@ -183,8 +222,17 @@ Managed by `Role::newsletterLimit()` (`app/Models/Role.php`). Limits count indiv
 - **Enterprise check**: `Role::isEnterprise()` - returns `true` for Enterprise and selfhosted. Same: no testing or admin branch
 - **White-label check**: `Role::isWhiteLabeled()` - same logic as `isPro()`
 - **Branding display**: `Role::showBranding()` - `false` on selfhost, otherwise `actualPlanTier() === 'free'`. NOT the inverse of `isWhiteLabeled()`: the selfhost case differs
-- **Credit chip**: `Role::creditChipReason()` - `'selfhost' | 'saas_free' | 'granted_plan' | null`; see [BRANDING_MATRIX.md](BRANDING_MATRIX.md)
+- **Credit chip**: `Role::creditChipReason()` - `'selfhost' | 'saas' | 'granted_plan' | null`. Keyed on the deployment, not the plan, and deliberately does not call `showBranding()`; see [BRANDING_MATRIX.md](BRANDING_MATRIX.md)
 - **Newsletter limit**: `Role::newsletterLimit()` - returns limit based on tier
+- **Paid ticket allowance**: `Role::ticketSaleLimit()`, `Role::ticketsSoldThisMonth()`,
+  `Role::canSellPaidTickets()`, `Role::freeSince()` - `app/Models/Role.php`
+- **Per-event selling gate**: `Event::canSellTickets()` / `Event::hasTicketAllowance()`; per-row
+  `Ticket::isSellable()`
+- **Appointment allowance**: `Role::appointmentTypeLimit()`, `Role::bookableAppointmentTypes()`
+- **Payment timestamp**: `sales.paid_at`, stamped by the `Sale::saving()` hook. The allowance windows
+  on this, never `created_at` - cash sales are created unpaid
+- **Limit config**: `config/usage.php` (`ticket_sale_monthly_limit_free`,
+  `ticket_sale_user_monthly_limit_free`, `appointment_type_limit_free`)
 - **Event Pro check**: `Event::isPro()` - returns `true` if any associated schedule is Pro
 - **Stripe config**: `config/services.php` lines 54-65
 - **Plan management UI**: `resources/views/role/show-admin-plan.blade.php`

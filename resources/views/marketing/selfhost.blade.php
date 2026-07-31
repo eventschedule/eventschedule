@@ -1259,7 +1259,7 @@
                         <h2 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl">Or turn it into your own product</h2>
                         <p class="mb-6 text-xl text-gray-600 dark:text-gray-300">The same install runs in multi-tenant mode. Give every customer a subdomain, set your own prices, bill them through your Stripe account and keep all of it.</p>
                         <ul class="mb-8 space-y-3">
-                            @foreach (['Multi-tenant subdomains built in', 'Stripe subscription billing with your own tiers', 'Full white-label branding', 'No licence fee and no revenue share'] as $item)
+                            @foreach (['Multi-tenant subdomains built in', 'Stripe subscription billing with your own tiers', 'White-label branding, bar one small licence credit', 'No licence fee and no revenue share'] as $item)
                                 <li class="flex items-center gap-3 text-gray-700 dark:text-gray-200">
                                     <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -1433,7 +1433,7 @@
             ['q' => 'How do updates work?', 'a' => 'When a new version is released, a notice appears in your admin panel. One click applies the update in seconds, database migrations included. No terminal access is required.'],
             ['q' => 'Do I have to set up a cron job?', 'a' => 'Yes, one line: "* * * * * php /path/to/eventschedule/artisan schedule:run". It drives reminder emails, calendar sync and the release of expired ticket reservations. Without it those stop running.'],
             ['q' => 'Does a selfhosted install send anything back to Event Schedule?', 'a' => 'No. There is no telemetry and no phone-home. The one optional exception is Federation, which is off by default and shares only your public events into the eventschedule.com listings, with every listing linking back to your own site. An admin has to switch it on, and each schedule can opt out.'],
-            ['q' => 'Can I run it as a white-label SaaS for my own customers?', 'a' => 'Yes. Set IS_HOSTED=true and the same install runs multi-tenant, with a subdomain per customer, Stripe subscription billing and your own plan tiers. You set the prices and keep the revenue.'],
+            ['q' => 'Can I run it as a white-label SaaS for my own customers?', 'a' => 'Yes. Set IS_HOSTED=true and the same install runs multi-tenant, with a subdomain per customer, Stripe subscription billing and your own plan tiers. You set the prices and keep the revenue. One thing to know before you price it: the licence credit stays on every customer\'s public pages, on the tiers you charge for as well as your free one. It is a small chip in the corner, and it is the whole of what the software costs you.'],
             ['q' => 'Can I move from the hosted version to selfhosted?', 'a' => 'Yes. Backup and restore is built in, so you can export your schedule data, with images if you want them, and import it into your own install.'],
         ];
     @endphp

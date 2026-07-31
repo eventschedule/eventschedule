@@ -46,7 +46,6 @@ class Sale extends Model
         'guest_timezone',
         'reminder_sent_at',
         'confirmed_at',
-        'paid_at',
     ];
 
     protected $casts = [
@@ -71,6 +70,15 @@ class Sale extends Model
             // Covers both creation-as-paid (RSVP, free, appointments) and later transitions.
             if ($sale->status === 'paid' && ! $sale->paid_at) {
                 $sale->paid_at = now();
+            } elseif ($sale->isDirty('status') && $sale->status === 'paid' && $sale->paid_at) {
+                // Re-paid after a refund or cancellation: re-stamp, or the sale would keep the
+                // original month's timestamp and never consume the allowance of the month it was
+                // actually paid in.
+                $original = $sale->getOriginal('status');
+
+                if (in_array($original, ['cancelled', 'refunded', 'expired'], true)) {
+                    $sale->paid_at = now();
+                }
             }
         });
 

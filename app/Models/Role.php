@@ -553,8 +553,8 @@ class Role extends Model implements MustVerifyEmail
         return $this->hasMany(AppointmentType::class);
     }
 
-    /** Per-request memo for hasBookableAppointments(). */
-    protected $hasBookableAppointmentsCache = null;
+    /** Per-request memo for bookableAppointmentTypes(). */
+    protected $bookableAppointmentTypesCache = null;
 
     /**
      * Whether this schedule currently offers bookable appointments - drives the GP
@@ -564,11 +564,7 @@ class Role extends Model implements MustVerifyEmail
      */
     public function hasBookableAppointments(): bool
     {
-        if ($this->hasBookableAppointmentsCache !== null) {
-            return $this->hasBookableAppointmentsCache;
-        }
-
-        return $this->hasBookableAppointmentsCache = $this->bookableAppointmentTypes()->isNotEmpty();
+        return $this->bookableAppointmentTypes()->isNotEmpty();
     }
 
     /**
@@ -1750,18 +1746,22 @@ class Role extends Model implements MustVerifyEmail
 
     /**
      * Why this schedule's guest pages carry the small "Event Schedule" credit chip, or
-     * null when they do not. Three distinct jobs share one piece of UI:
+     * null when they do not:
      *
-     *  - 'selfhost'     the Attribution Assurance License credit. Unconditional: every
-     *                   schedule on a single-tenant install resolves to 'enterprise', so
-     *                   gating this on showBranding() left every selfhost guest page with
-     *                   no public attribution anywhere - only the logged-in admin footer.
-     *  - 'saas_free'    an operator's own free tier. The dark footer strip promotes THEM
-     *                   through marketing_url(); this chip is our attribution and keeps
-     *                   pointing at eventschedule.com.
-     *  - 'granted_plan' an Enterprise plan an admin handed out by hand. Customers paying
+     *  - 'selfhost'     the Attribution Assurance License credit on a single-tenant install.
+     *  - 'saas'         the same credit on an operator's own multi-tenant platform.
+     *  - 'granted_plan' an Enterprise plan a nexus admin handed out by hand. Customers paying
      *                   through Stripe buy white-label and never carry it, and neither do
      *                   plans earned through the referral programme.
+     *
+     * Deliberately NOT keyed on the plan tier outside the nexus, and so deliberately not a
+     * function of showBranding(). The two predicates answer different questions: the footer
+     * strip is a growth CTA that belongs to whoever runs the platform, so it turns on the
+     * tenant's tier; this chip is the license credit, owed by whoever redistributes the
+     * software, so it turns on the deployment. An operator's paying tenant is as much a part
+     * of that redistribution as their free one, and the tenant's subscription is between them
+     * and the operator. eventschedule.com is the one install that sells white-label, so it is
+     * the one install where the chip depends on the plan at all.
      *
      * Both halves of the granted-plan test are load-bearing. plan_source alone would keep
      * branding someone who was granted a plan and later subscribed, if any Stripe path ever
@@ -1770,12 +1770,17 @@ class Role extends Model implements MustVerifyEmail
      */
     public function creditChipReason(): ?string
     {
+        // Tested before is_nexus, and not folded into the branch below: they are independent
+        // env vars, so a selfhost operator who also sets IS_NEXUS=true has to land here rather
+        // than fall through to the nexus's plan logic, where actualPlanTier() short-circuits to
+        // 'enterprise' for every schedule and would answer null - dropping the attribution from
+        // every public page on an install that is meant to always carry it.
         if (! config('app.hosted')) {
             return 'selfhost';
         }
 
         if (! config('app.is_nexus')) {
-            return $this->showBranding() ? 'saas_free' : null;
+            return 'saas';
         }
 
         $isGrantedPlan = $this->plan_source === 'admin'
@@ -2374,8 +2379,10 @@ class Role extends Model implements MustVerifyEmail
         return true;
     }
 
-    /** Per-request memo for ticketsSoldThisMonth(). */
+    /** Per-request memos for the allowance counts. */
     protected $ticketsSoldThisMonthCache = null;
+
+    protected $ownerTicketsSoldThisMonthCache = null;
 
     /**
      * Free-plan ticket allowance: how many PAID tickets this schedule may sell in a month.
@@ -2455,7 +2462,13 @@ class Role extends Model implements MustVerifyEmail
         return $freeSince && $freeSince->greaterThan($monthStart) ? $freeSince : $monthStart;
     }
 
-    /** When the allowance next resets. Used for the "resets on ..." copy. */
+    /**
+     * When the allowance next resets. Used for the "resets on ..." copy.
+     *
+     * Always the first of next month, which is when the calendar window rolls over. Note the
+     * CURRENT window may be shorter than a month for a schedule that lapsed mid-month (see
+     * ticketAllowanceStart), so this is the reset date, not the window length.
+     */
     public function ticketAllowanceResetsAt(): \Carbon\Carbon
     {
         return now()->startOfMonth()->addMonth();
@@ -2550,9 +2563,18 @@ class Role extends Model implements MustVerifyEmail
     /** Paid tickets sold across every schedule this schedule's owner runs. */
     public function ownerTicketsSoldThisMonth(): int
     {
+        // Memoized for the same reason ticketsSoldThisMonth() is, and it matters more: this one runs
+        // TWO queries and is reached on the healthy path (schedule under its own limit), whereas the
+        // per-schedule count short-circuits once the cap is hit. hasTicketAllowance() is evaluated
+        // eight times per guest event page, so without this a free schedule's public page paid
+        // sixteen duplicate queries.
+        if ($this->ownerTicketsSoldThisMonthCache !== null) {
+            return $this->ownerTicketsSoldThisMonthCache;
+        }
+
         $roles = static::where('user_id', $this->user_id)->get(['id', 'type']);
 
-        return static::paidTicketsSoldSince(
+        return $this->ownerTicketsSoldThisMonthCache = static::paidTicketsSoldSince(
             $roles->pluck('id')->all(),
             $roles->where('type', 'curator')->pluck('id')->all(),
             $this->ticketAllowanceStart()
@@ -2597,9 +2619,19 @@ class Role extends Model implements MustVerifyEmail
         return (int) config('usage.appointment_type_limit_free');
     }
 
+    /**
+     * Types held against the allowance.
+     *
+     * Counts ACTIVE, non-deleted types. Counting paused ones too meant a schedule with a single
+     * deactivated type was blocked from creating another while having nothing bookable at all -
+     * out of step with bookableAppointmentTypes(), which only ever offers active types.
+     */
     public function appointmentTypeCount(): int
     {
-        return $this->appointmentTypes()->where('is_deleted', false)->count();
+        return $this->appointmentTypes()
+            ->where('is_deleted', false)
+            ->where('is_active', true)
+            ->count();
     }
 
     public function canCreateAppointmentType(): bool
@@ -2624,6 +2656,14 @@ class Role extends Model implements MustVerifyEmail
      */
     public function bookableAppointmentTypes()
     {
+        // Memoized on the collection rather than on hasBookableAppointments()'s boolean: the GP
+        // header asks the boolean four times per render, but AppointmentController asks for the
+        // collection twice per booking page, and the admin tab asks again after the boolean has
+        // already run. Each of those built a fresh query.
+        if ($this->bookableAppointmentTypesCache !== null) {
+            return $this->bookableAppointmentTypesCache;
+        }
+
         $types = $this->appointmentTypes()
             ->active()
             ->orderBy('id')
@@ -2637,7 +2677,7 @@ class Role extends Model implements MustVerifyEmail
 
         $limit = $this->appointmentTypeLimit();
 
-        return is_null($limit) ? $types : $types->take($limit)->values();
+        return $this->bookableAppointmentTypesCache = is_null($limit) ? $types : $types->take($limit)->values();
     }
 
     public function aiAgendaDailyLimit(): ?int

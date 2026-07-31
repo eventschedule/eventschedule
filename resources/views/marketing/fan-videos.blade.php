@@ -1247,7 +1247,7 @@
 
                 <a href="{{ marketing_url('/features') }}" class="es-reel-hover es-reel-card group flex flex-col p-7 transition-all duration-200 hover:shadow-md" data-reveal>
                     <h3 class="es-reel-hover-title es-reel-ink mb-3 text-xl font-bold transition-colors">View all features</h3>
-                    <p class="es-reel-muted mb-4 text-sm">Calendar sync, embeds, recurring events and RSVPs are free alongside this. Ticketing is on Pro, with zero platform fees on what you sell.</p>
+                    <p class="es-reel-muted mb-4 text-sm">Calendar sync, embeds, recurring events and RSVPs are free alongside this, and so is selling up to 25 tickets a month, scanning them at the door included. Pro takes the ceiling off and adds the live check-in dashboard, with zero platform fees on every plan.</p>
                     <span class="es-reel-hover-arrow es-reel-link mt-auto inline-flex items-center gap-2 text-sm font-semibold transition-all group-hover:gap-3">
                         See features
                         <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>

@@ -619,7 +619,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for fitness and yoga instructors?',
-                'a' => 'Yes. Publishing your timetable, setting classes up as recurring events, free registration with a capacity limit per date, two-way Google, Outlook and CalDAV sync, the embeddable timetable, built-in analytics and newsletters to 10 recipients a month are all free forever. Class passes, paid drop-ins, QR check-in and the check-in dashboard are on the Pro plan at $5 a month, and Event Schedule charges zero platform fees on what you sell.',
+                'a' => 'Yes. Publishing your timetable, setting classes up as recurring events, free registration with a capacity limit per date, two-way Google, Outlook and CalDAV sync, the embeddable timetable, built-in analytics and newsletters to 10 recipients a month are all free forever, and so is selling up to 25 paid drop-ins a month. Scanning a QR code at the door is free on every plan too. Class passes, an unlimited number of paid visits and the live check-in dashboard are on the Pro plan at $5 a month, and Event Schedule charges zero platform fees on what you sell, free plan included.',
             ],
             [
                 'q' => 'Can I schedule recurring weekly classes?',
@@ -631,7 +631,7 @@
             ],
             [
                 'q' => 'Can I sell class passes and drop-ins?',
-                'a' => 'Yes, on the Pro plan, through your own Stripe account. Alongside a single drop-in you can sell a visit pass with a set number of visits, a membership that is unlimited until it expires, a course pass good for each covered class once, or a season pass covering every occurrence of one recurring class. Set how long the pass lasts, whether it covers the whole schedule, one sub-schedule or named classes, and how many people it admits at each class. Event Schedule charges zero platform fees, so past Stripe\'s own processing the money is yours.',
+                'a' => 'Yes, through your own Stripe account. Single drop-ins sell on the free plan, up to 25 paid tickets a month, and the Pro plan at $5 a month takes that ceiling off. Passes are the Pro half: alongside a single drop-in you can sell a visit pass with a set number of visits, a membership that is unlimited until it expires, a course pass good for each covered class once, or a season pass covering every occurrence of one recurring class. Set how long the pass lasts, whether it covers the whole schedule, one sub-schedule or named classes, and how many people it admits at each class. Event Schedule charges zero platform fees on either plan, so past Stripe\'s own processing the money is yours.',
             ],
             [
                 'q' => 'What happens when somebody cancels at the last minute?',
@@ -639,7 +639,7 @@
             ],
             [
                 'q' => 'Can students book a one-to-one with me?',
-                'a' => 'Yes, on the Pro plan. Appointment types are separate from classes: give one a length, a start-time interval, the hours you are open each week, buffers before and after, how much notice you need and how far ahead people may book, then students pick a slot on your public booking page. Each type says whether it happens in the studio, online or by phone, can require your approval before it is confirmed, and can be free or paid. Your classes already count as busy time, so nobody books a session on top of one.',
+                'a' => 'Yes, and one appointment type is free. Appointment types are separate from classes: give one a length, a start-time interval, the hours you are open each week, buffers before and after, how much notice you need and how far ahead people may book, then students pick a slot on your public booking page. Each type says whether it happens in the studio, online or by phone, can require your approval before it is confirmed, and can be free or paid. Pro lifts the one-type limit, so a private session, an assessment and a beginners consultation can sit side by side. Your classes already count as busy time, so nobody books a session on top of one.',
             ],
             [
                 'q' => 'Can my other teachers log in?',
@@ -950,7 +950,7 @@
                             </li>
                             <li class="flex gap-3" data-reveal>
                                 <svg aria-hidden="true" class="es-flow-lit mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                                <span>Passes are a Pro feature. Publishing the timetable they run against is not.</span>
+                                <span>Passes are a Pro feature. The timetable they run against, and your first 25 paid drop-ins a month, are not.</span>
                             </li>
                         </ul>
                     </div>
@@ -1159,28 +1159,28 @@
                 <div class="es-flow-card p-7" data-reveal="panel">
                     <div class="mb-3 flex flex-wrap items-center gap-2">
                         <h3 class="es-flow-ink text-lg font-bold">The hours you teach</h3>
-                        <span class="es-flow-plan es-flow-plan-pro">Pro</span>
+                        <span class="es-flow-plan">Free</span>
                     </div>
                     <p class="es-flow-muted text-sm">Weekly hours per day, and per-date overrides for the days that differ. A public holiday or a workshop weekend is a change to one date, not to the pattern.</p>
                 </div>
                 <div class="es-flow-card p-7" data-reveal="panel">
                     <div class="mb-3 flex flex-wrap items-center gap-2">
                         <h3 class="es-flow-ink text-lg font-bold">Room to breathe</h3>
-                        <span class="es-flow-plan es-flow-plan-pro">Pro</span>
+                        <span class="es-flow-plan">Free</span>
                     </div>
                     <p class="es-flow-muted text-sm">A length, the interval slots start on, buffers before and after, the notice you need, and how far ahead people may book. Nobody lands a 6:00 AM assessment at midnight.</p>
                 </div>
                 <div class="es-flow-card p-7" data-reveal="panel">
                     <div class="mb-3 flex flex-wrap items-center gap-2">
                         <h3 class="es-flow-ink text-lg font-bold">Studio, screen or phone</h3>
-                        <span class="es-flow-plan es-flow-plan-pro">Pro</span>
+                        <span class="es-flow-plan">Free</span>
                     </div>
                     <p class="es-flow-muted text-sm">Each type says where it happens, can ask for your approval before it is confirmed, and can be free or paid. If a time has to move, the booking moves with its payment and its private link rather than being cancelled and rebuilt.</p>
                 </div>
             </div>
 
             <p class="es-flow-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
-                Your classes count as busy time. The slot list already knows every recurring class on your timetable, so nobody books a one-to-one on top of Thursday's vinyasa.
+                Your classes count as busy time. The slot list already knows every recurring class on your timetable, so nobody books a one-to-one on top of Thursday's vinyasa. One appointment type is free; Pro is what lets several run side by side.
                 <a href="{{ marketing_url('/features/appointments') }}" class="es-flow-link font-medium hover:underline">How appointments work</a>
             </p>
         </div>
@@ -1285,8 +1285,8 @@
                             </div>
                             <p class="es-flow-muted mb-4">Built-in analytics rank your classes by views, show the devices people are on and where the traffic came from, and, once you are selling, which classes brought the money in. That is what they measure, and nothing more.</p>
                             <p class="es-flow-muted text-sm">
-                                When a class fills, a waitlist can take names and tell them the moment a place frees up.
-                                <span class="es-flow-plan es-flow-plan-pro ms-1">Pro</span>
+                                When a class fills, a waitlist can take names and tell them the moment a place frees up. Free on a class you are not charging for, and on a paid ticket it is
+                                <span class="es-flow-plan es-flow-plan-pro ms-1">Pro</span>.
                             </p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
@@ -1542,7 +1542,7 @@
                         Your classes. Your students. <span class="es-flow-lit">No middleman.</span>
                     </h2>
                     <p class="es-flow-muted mx-auto mb-10 max-w-2xl text-lg sm:text-xl">
-                        Publishing the timetable is free forever. Passes, drop-ins and check-in are five dollars a month, and nothing is taken off the door.
+                        Publishing the timetable is free forever, and so is selling your first 25 drop-ins a month. Passes, an unlimited count and the check-in dashboard are five dollars a month, and nothing is taken off the door.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

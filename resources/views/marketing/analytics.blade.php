@@ -333,8 +333,6 @@
             color: #047857;
         }
         .dark .es-dash-plan { border-color: rgba(52, 211, 153, 0.45); color: #34d399; }
-        .es-dash-plan-pro { border-color: rgba(16, 22, 19, 0.35); color: #101613; }
-        .dark .es-dash-plan-pro { border-color: rgba(230, 236, 232, 0.38); color: #e6ece8; }
 
         /* --- Buttons and links ------------------------------------ */
         /* The action switch is one physical colour in both modes: a
@@ -428,7 +426,6 @@
         }
         .es-dash-band .es-dash-corner::before { background: #34d399; }
         .es-dash-band .es-dash-plan { border-color: rgba(52, 211, 153, 0.45); color: #34d399; }
-        .es-dash-band .es-dash-plan-pro { border-color: rgba(230, 236, 232, 0.38); color: #e6ece8; }
         .es-dash-band .es-dash-rail { border-inline-start-color: rgba(52, 211, 153, 0.7); }
         /* The odometer strip hard-codes the brand-blue gradient in
            marketing.css, so each digit is re-inked as a green LED. */
@@ -535,7 +532,7 @@
         $faqs = [
             [
                 'q' => 'Is analytics included on the free plan?',
-                'a' => 'Yes. Built-in analytics is free on every plan, including selfhosted. Views by day, week or month, the device split, all eight traffic-source buckets, referrer domains, UTM values, country-level locations, social link clicks, top events and the per-schedule split are all on the free plan. The Revenue and Check-ins tabs are the exception, because they measure ticket sales, and ticketing is on the Pro plan at five dollars a month with zero platform fees.',
+                'a' => 'Yes. Built-in analytics is free on every plan, including selfhosted. Views by day, week or month, the device split, all eight traffic-source buckets, referrer domains, UTM values, country-level locations, social link clicks, top events and the per-schedule split are all on the free plan. The Revenue and Check-ins tabs only need ticket sales, not a plan: selling is free up to 25 paid tickets a month per schedule and scanning them at the door is free too, so both tabs fill in on the free plan. Pro at five dollars a month takes that cap off. Zero platform fees on every plan, free included.',
             ],
             [
                 'q' => 'Do you send my visitors to Google Analytics or any other tracker?',
@@ -983,7 +980,7 @@
                         Two more tabs, once you are <span class="es-dash-lit">selling tickets.</span>
                     </h2>
                     <p class="es-dash-fmuted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                        Views are the free half of the story. Sales and arrivals are the other half. Both tabs are there on every plan, but they only have numbers in them once there are ticket sales to count, and ticketing is on the Pro plan.
+                        Views are the free half of the story. Sales and arrivals are the other half. Both tabs are there on every plan, and both start counting on the free plan, which sells 25 paid tickets a month per schedule and scans them at the door for nothing. Pro at five dollars a month takes the cap off and adds the promo codes and boosts two of the rows below come from.
                     </p>
                 </div>
 
@@ -991,7 +988,7 @@
                     <div class="es-dash-card flex h-full flex-col p-6 sm:p-7" data-reveal="panel">
                         <div class="mb-4 flex flex-wrap items-center gap-2">
                             <h3 class="es-dash-fink text-xl font-bold">Revenue</h3>
-                            <span class="es-dash-plan es-dash-plan-pro">Pro</span>
+                            <span class="es-dash-plan">Free</span>
                         </div>
                         <p class="es-dash-fmuted mb-4 text-sm leading-relaxed">
                             Revenue for the range, split by currency when you sell in more than one. Conversion rate is paid sales against views. Revenue per view is shown only when the money is all in one currency, because averaging two currencies together would be a lie.
@@ -1007,7 +1004,7 @@
                     <div class="es-dash-card flex h-full flex-col p-6 sm:p-7" data-reveal="panel">
                         <div class="mb-4 flex flex-wrap items-center gap-2">
                             <h3 class="es-dash-fink text-xl font-bold">Check-ins</h3>
-                            <span class="es-dash-plan es-dash-plan-pro">Pro</span>
+                            <span class="es-dash-plan">Free</span>
                         </div>
                         <p class="es-dash-fmuted mb-4 text-sm leading-relaxed">
                             The gap between sold and turned up, which is the number nobody has and everybody wants. Scanned codes on the door become an attendance rate, and the shortfall is stated as a no-show rate rather than left for you to subtract.
@@ -1036,7 +1033,7 @@
                         @endforeach
                     </div>
                     <p class="es-dash-dim mt-4 es-dash-fine">
-                        Sample send. Newsletters themselves are free, at ten emails a month; the sales row at the bottom is the part that needs ticketing.
+                        Sample send. Newsletters themselves are free, at ten emails a month; the sales row at the bottom needs tickets on sale, and selling starts free too.
                     </p>
                 </div>
 
@@ -1207,7 +1204,7 @@
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Ticketing" description="Sell with zero platform fees, and unlock the Revenue and Check-ins tabs" :url="marketing_url('/features/ticketing')" icon-color="sky">
+                    <x-feature-link-card name="Ticketing" description="Sell with zero platform fees, and fill in the Revenue and Check-ins tabs" :url="marketing_url('/features/ticketing')" icon-color="sky">
                         <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>

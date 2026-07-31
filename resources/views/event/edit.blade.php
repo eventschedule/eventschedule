@@ -3018,6 +3018,15 @@
                                         </label>
                                     </div>
                                 </div>
+
+                                {{-- The single most useful sentence on this page for a free organizer, and
+                                     the only evergreen place they learn selling is included at all. The
+                                     one-time announcement banner expires; this does not. --}}
+                                @if ($role->ticketSaleLimit() !== null)
+                                <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
+                                    {{ __('messages.ticket_allowance_radio_hint', ['limit' => $role->ticketSaleLimit()]) }}
+                                </p>
+                                @endif
                             </fieldset>
 
                             <!-- Registration URL (only visible when tickets and RSVP are disabled) -->
@@ -3055,10 +3064,52 @@
 
                             <div v-show="event.tickets_enabled || event.rsvp_enabled">
 
-                                <!-- Upgrade banner for non-Pro users selecting Tickets -->
-                                <x-upgrade-prompt tier="pro" :learnMoreUrl="marketing_url('/features/ticketing')" :subdomain="$subdomain" v-show="event.tickets_enabled && !isPro" class="mb-4">
-                                    {{ __('messages.requires_pro_plan') }}
-                                </x-upgrade-prompt>
+                                {{-- The free plan's ticket allowance. Selling is no longer Pro-only, so this
+                                     is an entitlement notice under the cap and a warning only once it is
+                                     spent. The numbers are server-rendered (they cannot change without a
+                                     reload); only visibility is reactive. --}}
+                                @php
+                                    $ticketLimit = $role->ticketSaleLimit();
+                                    $ticketUsed = $ticketLimit === null ? 0 : $role->ticketsSoldThisMonth();
+                                    $ticketAtCap = $ticketLimit !== null && $ticketUsed >= $ticketLimit;
+                                    $ticketResetDate = $role->ticketAllowanceResetsAt()->translatedFormat('F j');
+                                @endphp
+                                @if ($ticketLimit !== null && ! $ticketAtCap)
+                                <div class="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-700 dark:bg-blue-900/20" v-show="event.tickets_enabled">
+                                    <div class="flex items-start gap-2">
+                                        <svg class="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z" />
+                                        </svg>
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-sm font-semibold text-blue-900 dark:text-blue-100">{{ __('messages.ticket_allowance_included_title') }}</p>
+                                            <p class="mt-0.5 text-sm text-blue-800 dark:text-blue-200">{{ __('messages.ticket_allowance_included_body', ['limit' => $ticketLimit]) }}</p>
+                                            <x-usage-meter
+                                                variant="inline"
+                                                class="mt-3"
+                                                :label="__('messages.ticket_allowance_usage')"
+                                                :used="$ticketUsed"
+                                                :limit="$ticketLimit"
+                                                :usedText="__('messages.tickets_sold_of', ['used' => $ticketUsed, 'limit' => $ticketLimit])"
+                                                :noteText="__('messages.ticket_allowance_note', ['date' => $ticketResetDate])" />
+                                            <p class="mt-2 text-sm">
+                                                <button type="button" data-modal-open="upgrade-tickets" class="font-medium text-[var(--brand-blue)] hover:underline">{{ __('messages.ticket_allowance_see_pro') }}</button>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                @elseif ($ticketLimit !== null)
+                                <x-plan-gate
+                                    variant="banner"
+                                    tier="pro"
+                                    class="mb-4"
+                                    :role="$role"
+                                    :subdomain="$subdomain"
+                                    :learnMoreUrl="marketing_url('/features/ticketing')"
+                                    :title="__('messages.ticket_allowance_reached_title', ['limit' => $ticketLimit, 'month' => now()->translatedFormat('F')])"
+                                    v-show="event.tickets_enabled">
+                                    {{ __('messages.ticket_allowance_reached_body', ['date' => $ticketResetDate]) }}
+                                </x-plan-gate>
+                                @endif
 
                                 <!-- Ticket Section Tabs -->
                                 <div class="mt-6 mb-6 border-b border-gray-200 dark:border-gray-700" v-show="event.tickets_enabled">
@@ -3091,11 +3142,53 @@
                                     </nav>
                                 </div>
 
-                                <!-- Disabled state wrapper for non-Pro ticket content -->
-                                <div :class="{'opacity-50 pointer-events-none select-none': event.tickets_enabled && !isPro}">
+                                {{-- This used to be a blanket "disabled state wrapper" that greyed out and
+                                     froze the entire ticket area for a non-Pro schedule. The free plan can
+                                     sell now, so the whole panel has to be usable; the individual Pro-only
+                                     options carry their own locks instead. Kept as a plain div so the
+                                     surrounding structure and indentation are unchanged. --}}
+                                <div>
 
                                 <!-- Payment Tab -->
                                 <div v-show="activeTicketTab === 'payment'">
+
+                                {{-- No payment method configured at all. The selector below is skipped
+                                     entirely in that case, so the whole tab used to be a currency
+                                     dropdown and a text-xs link, and the event would save, publish and
+                                     take no money. That was survivable while selling was Pro-only; the
+                                     free plan sends a much larger cohort down this exact path, so the
+                                     setup step has to be first-class.
+
+                                     Opens in a new tab deliberately: this form is unsaved. --}}
+                                @if (! $user->canAcceptStripePayments() && ! $user->invoiceninja_api_key && ! $user->payment_url)
+                                <div class="mb-6 ap-card rounded-xl p-6" v-show="event.tickets_enabled">
+                                    <div class="flex items-start gap-3">
+                                        <div class="dashboard-icon p-2 rounded-xl bg-blue-50 dark:bg-blue-500/10">
+                                            <svg class="w-5 h-5 text-[var(--brand-blue)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
+                                            </svg>
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.connect_stripe_to_get_paid') }}</h3>
+                                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ __('messages.connect_stripe_to_get_paid_body') }}</p>
+                                            <div class="mt-4 flex flex-wrap items-center gap-3">
+                                                <x-brand-link href="{{ route('profile.edit') }}#section-payment-methods" target="_blank" rel="noopener">
+                                                    {{ __('messages.connect_stripe') }}
+                                                </x-brand-link>
+                                                <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.connect_stripe_reload_hint') }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @elseif ($user->stripe_account_id && ! $user->stripe_completed_at)
+                                {{-- Stripe onboarding is asynchronous, so this window is real and had no UI
+                                     anywhere in the panel. --}}
+                                <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2" v-show="event.tickets_enabled">
+                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+                                    <div class="text-sm text-amber-800 dark:text-amber-200">{{ __('messages.stripe_verifying') }}</div>
+                                </div>
+                                @endif
+
                                 @if ($user->canAcceptStripePayments() || $user->invoiceninja_api_key || $user->payment_url)
                                 <div class="mb-6">
                                     <x-input-label for="payment_method" :value="__('messages.payment_method')"/>
@@ -3797,6 +3890,24 @@
 
                                 <!-- Promo Codes Tab -->
                                 <div v-show="activeTicketTab === 'promo_codes'">
+                                @if (! $role->isPro())
+                                {{-- The tab still opens and shows what promo codes do. A user who can see
+                                     the feature is far likelier to want it than one who hits a dead tab. --}}
+                                <x-plan-gate
+                                    tier="pro"
+                                    :role="$role"
+                                    :subdomain="$subdomain"
+                                    :learnMoreUrl="marketing_url('/features/ticketing')"
+                                    :title="__('messages.promo_codes')"
+                                    :bullets="[
+                                        __('messages.plan_gate_promo_bullet_types'),
+                                        __('messages.plan_gate_promo_bullet_limits'),
+                                        __('messages.plan_gate_promo_bullet_expiry'),
+                                        __('messages.plan_gate_promo_bullet_reporting'),
+                                    ]">
+                                    {{ __('messages.plan_gate_promo_body') }}
+                                </x-plan-gate>
+                                @else
                                 <div class="mb-6">
                                     <div v-for="(promoCode, pcIndex) in promoCodes" :key="pcIndex" class="mt-4 p-4 border border-gray-300 dark:border-gray-700 rounded-lg">
                                         <input type="hidden" v-bind:name="`promo_codes[${pcIndex}][id]`" :value="promoCode.id">
@@ -3919,10 +4030,27 @@
                                         + {{ __('messages.add_promo_code') }}
                                     </button>
                                 </div>
+                                @endif
                                 </div>
 
                                 <!-- Add-ons Tab -->
                                 <div v-show="activeTicketTab === 'add_ons'">
+                                    @if (! $role->isPro())
+                                    <x-plan-gate
+                                        tier="pro"
+                                        :role="$role"
+                                        :subdomain="$subdomain"
+                                        :learnMoreUrl="marketing_url('/features/ticketing')"
+                                        :title="__('messages.add_ons')"
+                                        :bullets="[
+                                            __('messages.plan_gate_addons_bullet_extras'),
+                                            __('messages.plan_gate_addons_bullet_stock'),
+                                            __('messages.plan_gate_addons_bullet_limits'),
+                                            __('messages.plan_gate_addons_bullet_reporting'),
+                                        ]">
+                                        {{ __('messages.add_ons_help') }}
+                                    </x-plan-gate>
+                                    @else
                                     <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.add_ons_help') }}</p>
 
                                     <div v-for="(addon, aIndex) in addons" :key="addon._key" class="mb-4 p-4 bg-gray-50 dark:bg-[#252526] rounded-lg">
@@ -4005,9 +4133,10 @@
                                         class="mt-2 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
                                         + {{ __('messages.add_add_on') }}
                                     </button>
+                                    @endif
                                 </div>
 
-                                </div><!-- /disabled state wrapper -->
+                                </div><!-- /was the blanket non-Pro wrapper; now a plain div -->
 
 
                             </div>
@@ -4015,7 +4144,10 @@
                             <hr class="my-4 border-gray-200 dark:border-gray-700">
 
                             @if ($user->isMember($subdomain))
-                            <div class="flex items-center gap-3 mt-3" :class="{'opacity-50 pointer-events-none select-none': event.tickets_enabled && !isPro}">
+                            {{-- Saving the ticket set as this schedule's default is not a Pro feature at
+                                 all; it only carried the blanket non-Pro wrapper because it sat next to
+                                 the ticket area. --}}
+                            <div class="flex items-center gap-3 mt-3">
                                 <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
                                     <input id="save_default_tickets" name="save_default_tickets" type="checkbox"
                                         class="sr-only peer">
@@ -7911,8 +8043,21 @@ function deleteFlyer(url, hash, token, element) {
     {{ __('messages.upgrade_feature_description_boost') }}
 </x-upgrade-modal>
 
-<x-upgrade-modal name="upgrade-tickets" tier="pro" :subdomain="$subdomain" :learnMoreUrl="marketing_url('/features/ticketing')">
-    {{ __('messages.upgrade_feature_description_tickets') }}
+{{-- Declared here for years with nothing dispatching it. Now the "See what Pro adds" link in the
+     free-plan allowance notice opens it, and it names the actual limit rather than saying
+     "Pro Feature". --}}
+<x-upgrade-modal name="upgrade-tickets" tier="pro" :subdomain="$subdomain"
+    :learnMoreUrl="marketing_url('/features/ticketing')"
+    :title="__('messages.upgrade_feature_title_tickets')"
+    :bullets="[
+        __('messages.ticket_allowance_pro_bullet_unlimited'),
+        __('messages.ticket_allowance_pro_bullet_checkin'),
+        __('messages.ticket_allowance_pro_bullet_promo'),
+        __('messages.ticket_allowance_pro_bullet_waitlist'),
+        __('messages.ticket_allowance_pro_bullet_passes'),
+        __('messages.ticket_allowance_pro_bullet_export'),
+    ]">
+    {{ __('messages.upgrade_feature_description_tickets', ['limit' => $role->ticketSaleLimit() ?? config('usage.ticket_sale_monthly_limit_free')]) }}
 </x-upgrade-modal>
 
 <x-upgrade-modal name="upgrade-privacy" tier="enterprise" :subdomain="$subdomain" :learnMoreUrl="marketing_url('/features/private-events')">

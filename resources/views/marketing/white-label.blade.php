@@ -21,7 +21,7 @@
             "Your own logo becomes the browser tab icon",
             "Public pages are never monetized above the free tier",
             "Nothing to configure: the check reads your plan",
-            "Selfhosted installations are white-labeled by default, apart from a small corner credit the license asks for"
+            "Any install other than eventschedule.com, selfhosted or your own platform, is white-labeled on every plan apart from a small corner credit the license asks for"
         ],
         "offers": {
             "@type": "Offer",
@@ -93,13 +93,16 @@
            "... | Event Schedule", og:site_name is hard-coded in
            app-guest.blade.php, and the BreadcrumbList JSON-LD names
            marketing_url() as the site root. Then the credit chip, whose
-           three cases live in Role::creditChipReason(): an admin-granted
-           Enterprise plan on the nexus ('granted_plan'), an operator's
-           own free tier on a self-hosted SaaS ('saas_free'), and every
-           schedule on a plain selfhost ('selfhost'), which carries it
-           unconditionally as the Attribution Assurance License credit.
-           Section 05 and the selfhost FAQ both have to say so - a page
-           selling white-label that overclaims gets found out on day one.
+           cases live in Role::creditChipReason(). Off the nexus it is
+           UNCONDITIONAL - every schedule, every plan, whether the install
+           is a plain selfhost ('selfhost') or an operator's own platform
+           ('saas') - because the Attribution Assurance License credit is
+           owed by whoever redistributes the software, not by the tenant
+           who happens to be paying. On the nexus the one case is an
+           admin-granted Enterprise plan ('granted_plan'). Section 03's
+           closing line, section 05, and BOTH the selfhost FAQ and the
+           operator FAQ have to keep saying so - a page selling
+           white-label that overclaims gets found out on day one.
 
            NOT USED HERE: a "before / after" toggle or a struck-through
            line. The removal is not an animation and there is no state
@@ -614,7 +617,7 @@
             ],
             [
                 'q' => 'Is anything left?',
-                'a' => 'Nothing in the body of the page, and two things outside it. First, the metadata in the page head: the title in the browser tab still ends in "Event Schedule", the site name in a shared link preview still reads Event Schedule, and the breadcrumb data still names us as the site root. The tab icon itself becomes your logo. Second, if an admin granted your Enterprise plan by hand rather than you buying it, a small Event Schedule credit chip stays below the footer. Customers who pay through Stripe never carry that chip, and neither do plans earned through the referral programme.',
+                'a' => 'On a schedule hosted here, nothing in the body of the page and two things outside it. First, the metadata in the page head: the title in the browser tab still ends in "Event Schedule", the site name in a shared link preview still reads Event Schedule, and the breadcrumb data still names us as the site root. The tab icon itself becomes your logo. Second, if an admin granted your Enterprise plan by hand rather than you buying it, a small Event Schedule credit chip stays below the footer; customers who pay through Stripe never carry that chip, and neither do plans earned through the referral programme. On any install that is not eventschedule.com the chip is not an exception at all - see the two questions below.',
             ],
             [
                 'q' => 'Do I need to change my embed after upgrading?',
@@ -623,6 +626,10 @@
             [
                 'q' => 'Is white labeling available on selfhosted installations?',
                 'a' => 'Yes, with one exception, and it is a small one. Every schedule on a selfhosted install behaves like a paid one, so there is nothing to buy: no strip at the foot of your pages, no card beside your events, no line in either embed snippet or in your newsletters, and no ads. What stays is a small "Event Schedule" credit in the corner of your public pages. Event Schedule is given away under the Attribution Assurance License, which asks for the credit in return, so that one is not a plan you can upgrade past.',
+            ],
+            [
+                'q' => 'I run my own platform on this software. Are my customers white-labeled?',
+                'a' => 'Nearly. Everything that carries our name on a free schedule here comes off yours the same way, and the strip at the foot of your free tier points at your marketing site rather than ours, because it is your growth CTA rather than ours. The one thing that does not come off is the small corner credit: on any install that is not eventschedule.com it sits on every public page on every plan, including the tiers you charge for. The licence asks for the attribution from whoever redistributes the software, and your customer\'s subscription is an arrangement between the two of you, so upgrading them is not ours to be paid by. It is a single small chip in the corner, it links to us rather than to anything of yours, and it is the whole of what running the platform for free costs you.',
             ],
             [
                 'q' => 'Can I put my own branding in the space?',
@@ -917,8 +924,9 @@
                     </h2>
                     <p class="es-slate2-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
                         A page selling white-label that promises "no trace anywhere" gets found out on
-                        the first afternoon. Nothing is left in the body of your page. Two things sit
-                        outside it, and here they are.
+                        the first afternoon. On a schedule you run here, nothing is left in the body of
+                        your page and two things sit outside it. Here they are, and then what changes
+                        if you run the software yourself instead.
                     </p>
                 </div>
 
@@ -964,18 +972,22 @@
                         <p class="es-slate2-muted mt-auto text-sm">
                             If an admin granted your Enterprise plan by hand rather than you buying it,
                             a small credit chip like this one stays at the foot of your public pages.
-                            Customers paying through Stripe never carry it, and neither do plans earned
-                            through the referral programme. A gift keeps its label.
+                            Here on eventschedule.com that is the only way to end up with it: customers
+                            paying through Stripe never carry it, and neither do plans earned through the
+                            referral programme. A gift keeps its label.
                         </p>
                     </div>
                 </div>
 
                 <p class="es-slate2-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
-                    That is the end of the list for your pages on this platform. A chip like the one
-                    above also sits in the corner of every page on a selfhosted install, where the
-                    licence rather than the plan puts it there - section 05 has that. One thing
-                    beside all of it: mail leaves our server unless you point the schedule at your
-                    own SMTP settings, which any plan can do. If any of it matters for your case,
+                    That is the end of the list for a schedule hosted here. Run the software somewhere
+                    else and the chip above stops being an exception: on any install that is not
+                    eventschedule.com, whether you selfhost for yourself or run a platform of your own
+                    for other people, it sits in the corner of every public page on every plan. The
+                    licence puts it there rather than the plan, so there is nothing to upgrade past -
+                    section 05 has the detail. One thing beside all of it: mail leaves our server
+                    unless you point the schedule at your own SMTP settings, which any plan can do.
+                    If any of it matters for your case,
                     <a href="{{ marketing_url('/contact') }}" class="es-slate2-lit font-medium underline">ask us</a>
                     before you pay rather than after.
                 </p>
@@ -1160,19 +1172,22 @@
                 <p class="es-slate2-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
                     A selfhosted installation is white-labeled by default. There is no plan to buy,
                     no strip to remove, and every schedule on it behaves like a paid one. One credit
-                    stays, in the corner, because the licence asks for it.
+                    stays, in the corner, because the licence asks for it - and it stays on the same
+                    terms if you turn the install into a platform for other people.
                 </p>
             </div>
 
-            {{-- Four cards, so 2x2 rather than the 3-up this section used with three. --}}
+            {{-- Five cards on a 2-up grid, so the last one spans the row and no cell is left
+                 empty. Third element is that span class. --}}
             <div class="grid gap-4 md:grid-cols-2" data-reveal-group="100">
                 @foreach ([
-                    ['Six of the seven, gone','The branding check answers no on an install that is not the hosted service, so the footer strip, the event-page card, both embed lines, the newsletter line and ads are never rendered in the first place.'],
-                    ['The seventh: one credit, one corner', 'A small "Event Schedule" chip sits in the corner of your public pages. It is the Attribution Assurance License credit - the licence gives you the whole application and asks for the mention in return - so it is not gated on a plan and there is no setting that removes it. Nothing else on the page, and nothing in your email or your embeds, carries our name.'],
-                    ['Every feature, not just this one', 'A selfhosted install resolves to the Enterprise tier throughout, so Custom CSS, custom labels and the banner come with it. The AI style generator is there too, but it calls an AI provider, so it stays hidden until you put your own API key in the environment file.'],
-                    ['Your servers, your data', 'Run it on your own hardware for a client, a festival or a chain of rooms. The source is open, so the branding check and everything around it is there to read.'],
-                ] as [$t, $d])
-                    <div class="es-slate2-card es-slate2-hover p-6" data-reveal>
+                    ['Six of the seven, gone','The branding check answers no on a single-tenant install, so the footer strip, the event-page card, both embed lines, the newsletter line and ads are never rendered in the first place.', ''],
+                    ['The seventh: one credit, one corner', 'A small "Event Schedule" chip sits in the corner of your public pages. It is the Attribution Assurance License credit - the licence gives you the whole application and asks for the mention in return - so it is not gated on a plan and there is no setting that removes it. Nothing else on the page, and nothing in your email or your embeds, carries our name.', ''],
+                    ['Running it for other people is the same deal', 'Switch the same install into multi-tenant mode and every schedule on it carries that one corner chip, on the tiers you charge for as well as your free one. The credit is owed by whoever redistributes the software, and what your customers pay you is between you and them. Your free tier also keeps a footer strip, but it points at your marketing site rather than ours.', ''],
+                    ['Every feature, not just this one', 'A selfhosted install resolves to the Enterprise tier throughout, so Custom CSS, custom labels and the banner come with it. The AI style generator is there too, but it calls an AI provider, so it stays hidden until you put your own API key in the environment file.', ''],
+                    ['Your servers, your data', 'Run it on your own hardware for a client, a festival or a chain of rooms. The source is open, so the branding check and everything around it is there to read.', 'md:col-span-2'],
+                ] as [$t, $d, $span])
+                    <div class="es-slate2-card es-slate2-hover p-6 {{ $span }}" data-reveal>
                         <h3 class="es-slate2-ink mb-2 text-lg font-bold">{{ $t }}</h3>
                         <p class="es-slate2-muted text-sm">{{ $d }}</p>
                     </div>

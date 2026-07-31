@@ -43,7 +43,7 @@
             "Per-part descriptions in markdown, with schedule-level switches for whether the agenda editor asks for times and descriptions",
             "Agenda scanning that reads a programme from a photo or text and fills in the parts (Enterprise)",
             "One join link per event for Zoom, Microsoft Teams, Google Meet, YouTube Live or any platform",
-            "Named ticket types with their own prices, quantities and sales windows (Pro)",
+            "Named ticket types with their own prices, quantities and sales windows, free up to 25 paid tickets a month (unlimited on Pro)",
             "Zero platform fees on ticket sales through your own Stripe account",
             "Free registration with a capacity limit, counted per date",
             "Two-way Google, Outlook and CalDAV calendar sync, plus iCal download",
@@ -85,7 +85,7 @@
                 "@type": "HowToStep",
                 "position": 3,
                 "name": "Open the doors",
-                "text": "Free registration with a capacity limit, or named ticket types on the Pro plan. Share one link for the whole programme."
+                "text": "Free registration with a capacity limit, or named ticket types, free for the first 25 paid tickets a month. Share one link for the whole programme."
             }
         ]
     }
@@ -373,8 +373,6 @@
             color: #123a72;
         }
         .dark .es-agenda-plan { border-color: rgba(103, 232, 249, 0.42); color: #67e8f9; }
-        .es-agenda-plan-pro { border-color: rgba(16, 26, 44, 0.35); color: #101a2c; }
-        .dark .es-agenda-plan-pro { border-color: rgba(232, 237, 245, 0.38); color: #e8edf5; }
         .es-agenda-plan-ent { border-color: rgba(12, 100, 120, 0.5); color: #0c6478; }
         .dark .es-agenda-plan-ent { border-color: rgba(103, 232, 249, 0.3); color: #98a6bd; }
 
@@ -575,7 +573,7 @@
             ],
             [
                 'q' => 'Can I sell different ticket types for my conference?',
-                'a' => 'Yes, on the Pro plan at $5 a month. Create as many named ticket types as the conference needs, each with its own price, quantity and sales window, plus discount codes and add-ons. Individual tickets give every attendee their own confirmation email and QR code, and custom questions collect what you need at checkout. Event Schedule charges zero platform fees at every plan level: you connect your own Stripe account and Stripe\'s processing fee is the only cut. For a free conference, registration with a capacity limit works on the free plan.',
+                'a' => 'Yes, and selling starts on the free plan. Create as many named ticket types as the conference needs, each with its own price, quantity and sales window, and sell up to 25 paid tickets a month. Pro at $5 a month takes that ceiling off and adds discount codes, add-ons and individual tickets, which give every attendee their own confirmation email and QR code; custom questions collect what you need at checkout. Event Schedule charges zero platform fees at every plan level: you connect your own Stripe account and Stripe\'s processing fee is the only cut. For a free conference, registration with a capacity limit is unlimited on the free plan.',
             ],
             [
                 'q' => 'How do attendees hear about the next edition?',
@@ -986,7 +984,7 @@
                         Name your prices. <span class="es-agenda-accent">Keep the money.</span>
                     </h2>
                     <p class="es-agenda-muted mb-6 text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
-                        A free conference needs nothing but registration and a capacity, and that is on the free plan. A paid one gets named ticket types, each with its own price, quantity and sales window, on Pro at five dollars a month. Event Schedule takes nothing from either.
+                        A free conference needs nothing but registration and a capacity, and that is on the free plan. So is charging for one: named ticket types, each with its own price, quantity and sales window, and the first 25 paid tickets every month. Pro at five dollars takes the ceiling off and adds individual tickets, discount codes and add-ons. Event Schedule takes nothing from either.
                     </p>
                     <ul class="es-agenda-muted space-y-3" data-reveal-group="70">
                         <li class="flex gap-3" data-reveal>
@@ -1015,7 +1013,7 @@
                     <div class="es-agenda-card p-6 sm:p-7">
                         <div class="mb-4 flex flex-wrap items-center gap-2">
                             <h3 class="es-agenda-ink text-lg font-bold">Ticket types</h3>
-                            <span class="es-agenda-plan es-agenda-plan-pro">Pro</span>
+                            <span class="es-agenda-plan">Free</span>
                         </div>
                         <div class="space-y-2">
                             @foreach ([['Full pass', 'all three days', '$149'], ['Single day', 'any one day', '$59'], ['Early bird', 'sales window closes 31 Jan', '$99'], ['Community rate', 'limited quantity', '$25'], ['Registration only', 'free conference, capped', 'Free']] as [$tierName, $tierScope, $tierPrice])
@@ -1031,7 +1029,7 @@
                             <span class="es-agenda-accent font-mono text-lg font-black">$0</span>
                         </div>
                         <p class="es-agenda-muted mt-3 text-xs">
-                            The last row is the free plan on its own: registration with a capacity limit, no card involved. To be clear about what this is not, there is no seat map and buyers are not choosing a seat.
+                            Every row here is on the free plan, the paid ones capped at 25 tickets a month and the last needing no card at all. To be clear about what this is not, there is no seat map and buyers are not choosing a seat.
                         </p>
                     </div>
                 </div>
@@ -1282,7 +1280,7 @@
                 @foreach ([
                     ['01', 'Create the day', 'One event per conference day: its date, its start time, how long it runs, and the link people join.'],
                     ['02', 'Type the running order', 'Add each session as a part with a name, a start and an end. Drag the parts into order, and write an abstract where one helps.'],
-                    ['03', 'Open the doors', 'Free registration with a capacity limit, or named ticket types on Pro. Share one link for the whole programme.'],
+                    ['03', 'Open the doors', 'Free registration with a capacity limit, or named ticket types, free to 25 paid tickets a month. Share one link for the whole programme.'],
                 ] as [$stepNum, $stepTitle, $stepBody])
                     <div class="es-agenda-card p-7" data-reveal="panel">
                         <div class="es-agenda-accent mb-3 font-mono text-2xl font-black">{{ $stepNum }}</div>
@@ -1428,7 +1426,7 @@
                         One event. <span class="es-agenda-lit">The whole day inside it.</span>
                     </h2>
                     <p class="es-agenda-muted mx-auto mb-10 max-w-2xl text-lg">
-                        Publishing the running order, the join link and the calendar sync is free forever. Ticketing is five dollars a month, and Event Schedule takes nothing out of what you sell.
+                        Publishing the running order, the join link and the calendar sync is free forever. So is selling, for the first 25 tickets a month; five dollars lifts the ceiling. Event Schedule takes nothing out of what you sell either way.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

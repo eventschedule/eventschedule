@@ -330,6 +330,51 @@ class HomeController extends Controller
             ]);
         }
 
+        // 1b) Free-plan ticket allowance running low or spent.
+        //
+        // The guest side is deliberately silent when the allowance runs out (a missing buy button
+        // reads the same as sales not being open yet, which is the least-shaming outcome), so the
+        // organizer has to get the loud signal here instead.
+        //
+        // Guarded on OWNERSHIP, not editor access: SubscriptionController::show redirects a
+        // non-owner, so showing an editor a to-do they cannot act on repeats a mistake this
+        // dashboard already avoids elsewhere.
+        if (config('app.hosted')) {
+            foreach ($rolesById as $role) {
+                if ($role->user_id !== auth()->id()) {
+                    continue;
+                }
+
+                $limit = $role->ticketSaleLimit();
+
+                // Null short-circuits before any counting, so paid schedules cost nothing here.
+                if (is_null($limit) || $limit < 1) {
+                    continue;
+                }
+
+                $used = $role->ticketsSoldThisMonth();
+
+                // Nothing below 80%: the meters on the Plan and Sales pages already cover that,
+                // and a to-do list is for things that need doing.
+                if ($used / $limit < 0.8) {
+                    continue;
+                }
+
+                $remaining = max(0, $limit - $used);
+
+                $items->push([
+                    'type' => 'ticket_quota',
+                    'count' => $remaining,
+                    'title' => $remaining > 0
+                        ? trans_choice('messages.pending_action_ticket_quota_low', $remaining, ['count' => $remaining])
+                        : __('messages.pending_action_ticket_quota_spent'),
+                    'subtitle' => $role->name,
+                    'url' => route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan']),
+                    'color' => 'amber',
+                ]);
+            }
+        }
+
         // Per-event queries below are scoped to events on the user's editable schedules
         // via a subquery (avoids pulling every event id into PHP on each dashboard load).
         $eventScope = fn ($query) => $query->select('event_id')

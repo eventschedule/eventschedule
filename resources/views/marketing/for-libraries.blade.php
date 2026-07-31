@@ -423,7 +423,6 @@
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
         .es-cat-drawer .es-cat-plan { border-color: rgba(244, 189, 82, 0.45); color: #f4bd52; }
-        .es-cat-drawer .es-cat-plan-pro { border-color: rgba(239, 233, 220, 0.35); color: #efe9dc; }
         /* The lamp over the drawer: static, so it cannot differ by mode. */
         .es-cat-lampglow {
             position: absolute;
@@ -620,7 +619,7 @@
             ['Teen Coding Club', 'Teens', '#2f5d50', 'Wednesdays, 16:30', '12', 'Free registration', ''],
             ['Book Club', 'Adults', '#1f3a5f', 'First Thursday, 19:00', '15', 'Free registration', ''],
             ['Tech Help Drop-in', 'Seniors', '#6b4226', 'Fridays, 13:00', 'No limit', 'Just turn up', ''],
-            ['Author Reading: Jane Ahmad', 'Adults', '#1f3a5f', 'Sat Oct 3, 19:00', '90', 'Tickets, $6', 'Pro'],
+            ['Author Reading: Jane Ahmad', 'Adults', '#1f3a5f', 'Sat Oct 3, 19:00', '90', 'Tickets, $6', ''],
             ['Local History Talk', 'Adults', '#1f3a5f', 'Not announced yet', '60', 'Draft', ''],
         ];
 
@@ -631,7 +630,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for libraries?',
-                'a' => 'Yes. Publishing your program calendar, setting programs up as recurring, organising them into sub-schedules, taking free registrations with a place limit, embedding the calendar on your library site, syncing two ways with Google, Outlook or CalDAV, and the built-in analytics are all free forever. Newsletters are free too, with 10 emails a month counted per recipient; Pro raises that to 100 and Enterprise to 1,000. Ticketing for paid programs is on the Pro plan at $5 a month, and Event Schedule charges zero platform fees on ticket sales.',
+                'a' => 'Yes. Publishing your program calendar, setting programs up as recurring, organising them into sub-schedules, taking free registrations with a place limit, embedding the calendar on your library site, syncing two ways with Google, Outlook or CalDAV, and the built-in analytics are all free forever. Newsletters are free too, with 10 emails a month counted per recipient; Pro raises that to 100 and Enterprise to 1,000. Selling tickets for a paid program is free as well, up to 25 paid tickets a month, and Pro at $5 a month lifts that ceiling and adds the live check-in count at the door. Event Schedule charges zero platform fees on ticket sales, on every plan.',
             ],
             [
                 'q' => 'Can I manage story times, author events, and workshops together?',
@@ -643,7 +642,7 @@
             ],
             [
                 'q' => 'Can patrons register for programs?',
-                'a' => 'Yes, on the free plan. Turn on registration and set a place limit, and the limit is counted separately for every date, so this Tuesday filling up does not close next Tuesday. Patrons get a confirmation email with their own link. For a paid program, connect Stripe on the Pro plan and sell named ticket types with zero platform fees, past Stripe\'s own processing.',
+                'a' => 'Yes, on the free plan. Turn on registration and set a place limit, and the limit is counted separately for every date, so this Tuesday filling up does not close next Tuesday. Patrons get a confirmation email with their own link. For a paid program, connect Stripe and sell named ticket types on the free plan too, up to 25 paid tickets a month, with zero platform fees past Stripe\'s own processing. Pro at $5 a month takes the 25 off.',
             ],
             [
                 'q' => 'What happens on the weeks the branch is closed?',
@@ -1021,7 +1020,7 @@
                     The Local History Talk is a Draft: on your calendar, not on the public one, until the speaker confirms. Sub-schedules colour-code and organise, so a Draft is how a program hides, not a strand.
                 </p>
                 <p class="es-cat-muted text-sm" data-reveal>
-                    Only the author reading needs the Pro plan, because it charges $6. Everything free stays free: the free registration on the other five is not a trial.
+                    The author reading charges $6, and the free plan still sells it: 25 paid tickets a month, no platform fee. Pro at $5 a month is what you buy when 90 seats will not fit inside 25. Everything free stays free: the free registration on the other five is not a trial.
                 </p>
             </div>
         </div>
@@ -1188,8 +1187,8 @@
                 </div>
 
                 <p class="mx-auto mt-10 max-w-2xl text-center es-cat-band-muted" data-reveal>
-                    <span class="es-cat-plan es-cat-plan-pro">Pro</span>
-                    goes one step further and embeds the sign-up form itself, so a patron registers for Tuesday without ever leaving the library website.
+                    <span class="es-cat-plan">Free</span>
+                    goes one step further still: embed the sign-up form itself, and a patron registers for Tuesday without ever leaving the library website.
                 </p>
             </div>
         </div>
@@ -1261,10 +1260,10 @@
                         <div class="relative z-10">
                             <div class="mb-4 flex flex-wrap items-center gap-2">
                                 <h3 class="es-cat-ink text-xl font-bold">When a program costs money</h3>
-                                <span class="es-cat-plan es-cat-plan-pro">Pro</span>
+                                <span class="es-cat-plan">Free</span>
                             </div>
-                            <p class="es-cat-muted mb-4">An author evening, a paid workshop, a Friends of the Library fundraiser. Named ticket types with their own prices and quantities, sold through your own Stripe account, and Event Schedule takes zero platform fees: past Stripe's own processing, the money is yours.</p>
-                            <p class="es-cat-muted text-sm">Also on Pro: extra questions at checkout for access needs or a child's age, a waitlist once a ticket type sells out, and QR check-in with a live count at the door. Free registration for free programs needs none of it.</p>
+                            <p class="es-cat-muted mb-4">An author evening, a paid workshop, a Friends of the Library fundraiser. Named ticket types with their own prices and quantities, sold through your own Stripe account on the free plan, up to 25 paid tickets a month, and Event Schedule takes zero platform fees: past Stripe's own processing, the money is yours.</p>
+                            <p class="es-cat-muted text-sm">Pro at $5 a month takes the 25 off and adds the desk work: extra questions at checkout for access needs or a child's age, a waitlist once a ticket type sells out, and a live count as patrons check in. Scanning the QR on a ticket is free on every plan; it is the running total that is Pro. Free registration for free programs needs none of it.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>

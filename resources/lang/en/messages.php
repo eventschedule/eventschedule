@@ -534,7 +534,7 @@ return [
     'localization' => 'Localization',
     'payment' => 'Payment',
     'options' => 'Options',
-    'requires_pro_plan' => 'Upgrade to Pro to sell tickets for your events.',
+    'requires_pro_plan' => 'Upgrade to Pro for unlimited ticket sales.',
     'requires_enterprise_plan' => 'Requires an Enterprise plan',
     'upgrade_enterprise_custom_domain' => 'Upgrade to Enterprise to use a custom domain.',
     'upgrade_enterprise_privacy' => 'Upgrade to Enterprise for private and password-protected events.',
@@ -1399,8 +1399,8 @@ return [
     'feature_agenda_scanning' => 'Agenda scanning',
     'feature_custom_css_enterprise' => 'Custom CSS styling',
     'feature_priority_support' => 'Priority support',
-    'feature_ticketing_qr' => 'Full ticketing & QR check-ins',
-    'feature_sell_online_stripe' => 'Sell online via Stripe',
+    'feature_ticketing_qr' => 'Unlimited ticket sales & QR check-ins',
+    'feature_sell_online_stripe' => 'Passes, subscriptions & individual tickets',
     'feature_event_graphics' => 'Generate event graphics',
     'feature_promo_codes' => 'Promo/discount codes',
     'feature_rest_api_webhooks' => 'REST API & webhooks',
@@ -2389,7 +2389,8 @@ return [
     'upgrade_feature_description_members' => 'Add team members to help manage your schedule.',
     'upgrade_feature_description_scan_agenda' => 'Use AI to scan event agendas and automatically create event details.',
     'upgrade_feature_description_boost' => 'Promote your event to reach a larger audience.',
-    'upgrade_feature_description_tickets' => 'Sell tickets for your events and manage sales directly from your schedule.',
+    'upgrade_feature_description_tickets' => 'Your Free plan sells up to :limit paid tickets a month. Pro removes the limit and adds the rest of the ticketing suite.',
+    'upgrade_feature_title_tickets' => 'Sell more than your monthly allowance',
     'upgrade_feature_description_availability' => 'Mark your available and unavailable dates so organizers know when to book you.',
     'upgrade_feature_description_ai_prompt' => 'Use AI to automatically transform and enhance the text in your event graphics.',
     'upgrade_feature_description_email_scheduling' => 'Automatically send event graphic emails to your audience on a recurring schedule.',
@@ -3180,6 +3181,31 @@ return [
     'ticket_allowance_pro_bullet_waitlist' => 'Automatic sold-out waitlist',
     'ticket_allowance_pro_bullet_passes' => 'Passes, subscriptions and individual tickets',
     'ticket_allowance_pro_bullet_export' => 'Sales CSV export and webhooks',
+    'ticket_allowance_unlimited' => 'Unlimited ticket sales. No platform fee, ever.',
+    'ticket_allowance_see_pro' => 'See what Pro adds',
+
+    // Getting paid. Shown in the tickets panel when nothing is configured yet, which is the state
+    // most new free organizers will be in.
+    'connect_stripe_to_get_paid' => 'Connect Stripe to get paid',
+    'connect_stripe_to_get_paid_body' => 'Payouts go straight to your own Stripe account. We take no platform fee, on Free or on Pro. Until a payment method is connected you can still take payment at the door.',
+    'connect_stripe_reload_hint' => 'Already connected? Reload this page.',
+    'stripe_verifying' => 'Stripe is verifying your details. This usually takes a few minutes. Finish setting up your tickets now; online payment turns on when Stripe is done.',
+
+    // In-panel paywalls for the Pro-only ticket extras. The tab still opens and explains the
+    // feature: a user who can see what it does is far likelier to want it than one who hits a dead tab.
+    'plan_gate_promo_body' => 'Give buyers a code for a percentage or fixed discount, with your own usage limits and expiry dates.',
+    'plan_gate_promo_bullet_types' => 'Percentage or fixed-amount discounts',
+    'plan_gate_promo_bullet_limits' => 'Usage limits per code',
+    'plan_gate_promo_bullet_expiry' => 'Expiry dates',
+    'plan_gate_promo_bullet_reporting' => 'Redemption reporting on the Sales page',
+    'plan_gate_addons_bullet_extras' => 'Sell extras alongside a ticket',
+    'plan_gate_addons_bullet_stock' => 'Track stock per add-on',
+    'plan_gate_addons_bullet_limits' => 'Set a maximum per order',
+    'plan_gate_addons_bullet_reporting' => 'Add-ons broken out in the sales export',
+
+    // The Plan tab explainer: what this plan carries, next to what the paid one adds.
+    'plan_overview_title' => 'Your plan',
+    'plan_overview_body' => 'Free includes :tickets paid tickets a month with Stripe payouts and no platform fee, :types appointment type, and unlimited free registration and RSVP. Pro adds:',
 
     // Free-plan appointment allowance.
     'appointment_type_limit_reached' => 'Your plan includes :limit appointment type. Upgrade to Pro to offer more.',
@@ -3654,6 +3680,8 @@ return [
     'ask_before_following' => 'Ask me before I follow a new schedule',
     'needs_attention' => 'Needs attention',
     'pending_action_requests' => '{1} :count event request|[2,*] :count event requests',
+    'pending_action_ticket_quota_low' => '{1} :count paid ticket left this month|[2,*] :count paid tickets left this month',
+    'pending_action_ticket_quota_spent' => 'Paid ticket allowance used up',
     'pending_action_fan_content' => '{1} :count submission to review|[2,*] :count submissions to review',
     'pending_action_poll_options' => '{1} :count poll suggestion|[2,*] :count poll suggestions',
     'pending_action_carpool_reports' => '{1} :count carpool report to review|[2,*] :count carpool reports to review',
@@ -3978,7 +4006,7 @@ return [
     'upgrade_required' => 'This feature requires an upgrade.',
     'appointment_types' => 'Appointment types',
     'bookings' => 'Bookings',
-    'appointments_pro_description' => 'Let guests book time with you on a public page. Upgrade to Pro to offer appointment booking.',
+    'appointments_pro_description' => 'Let guests book time with you on a public page.',
     'appointments_set_timezone_warning' => 'Set your schedule timezone before taking bookings. Times are currently computed in :tz.',
     'appointments_no_email_warning' => 'Guests will not receive confirmation emails until email sending is set up.',
     'appointments_share_link' => 'Your booking page',

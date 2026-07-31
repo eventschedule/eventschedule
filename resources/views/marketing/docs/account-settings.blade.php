@@ -1,19 +1,19 @@
 <x-docs-page
     key="account-settings"
-    description="Learn how to manage your profile, payment methods, API access, and Google integrations in Event Schedule."
-    lede="Manage your profile, payment methods, API access, and connected services from the Settings page."
+    description="Learn how to manage your profile, payment methods, API access, backups and connected calendars in Event Schedule."
+    lede="Everything on the Settings page: your profile, the payment method your tickets are sold through, API and webhook access, connected calendars, backups and account security."
 >
     <x-slot:toc>
         <x-doc-nav-link href="#profile">Profile Information</x-doc-nav-link>
         <x-doc-nav-group label="Payment Methods" href="#payments">
             <x-doc-nav-link href="#stripe">Stripe</x-doc-nav-link>
             <x-doc-nav-link href="#invoice-ninja">Invoice Ninja</x-doc-nav-link>
-            <x-doc-nav-link href="#payment-url">Payment URL</x-doc-nav-link>
+            <x-doc-nav-link href="#payment-url">Payment Link</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-link href="#api">API Settings</x-doc-nav-link>
         <x-doc-nav-link href="#webhooks">Webhooks</x-doc-nav-link>
         <x-doc-nav-link href="#google">Google Settings</x-doc-nav-link>
-        <x-doc-nav-link href="#microsoft">Outlook Settings</x-doc-nav-link>
+        <x-doc-nav-link href="#microsoft">Outlook Calendar</x-doc-nav-link>
         <x-doc-nav-link href="#backup">Backup & Restore</x-doc-nav-link>
         <x-doc-nav-link href="#app-update">App Update</x-doc-nav-link>
         <x-doc-nav-link href="#password">Update Password</x-doc-nav-link>
@@ -31,7 +31,10 @@
             Profile Information
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Access your account settings by clicking <strong>Settings</strong> in the main navigation. The Profile Information section is organized into two sub-tabs: <strong class="text-gray-900 dark:text-white">General</strong> and <strong class="text-gray-900 dark:text-white">Localization</strong>.
+            Open <strong class="text-gray-900 dark:text-white">Settings</strong> from the main navigation. Every settings section is listed down the left side of the page (an accordion on small screens), and this guide follows them in that order. These settings belong to <em>you</em>, not to a schedule: anything that differs per schedule, such as calendar sync or a schedule's own sending address, lives in <a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="doc-link">the schedule's settings</a> instead.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Profile Information itself is split into two tabs, <strong class="text-gray-900 dark:text-white">General</strong> and <strong class="text-gray-900 dark:text-white">Localization</strong>. A third tab, <strong class="text-gray-900 dark:text-white">Accessibility</strong>, appears only after you have hidden the accessibility widget, and its single button brings the widget back.
         </p>
 
         <x-doc-screenshot id="account-settings--settings" alt="Account settings page" loading="eager" />
@@ -48,23 +51,23 @@
                 <tbody>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Name</span></td>
-                        <td>Your display name, shown in team member lists and notifications</td>
+                        <td>Required. Your display name, shown to the other members of any schedule you belong to.</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Email</span></td>
-                        <td>Your login email address, used for account recovery and notifications</td>
+                        <td>Required. The address you sign in with and where account email is sent. Editing it clears your verification: the field then shows an unverified notice with a link to re-send the verification email.</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Phone Number</span></td>
-                        <td>Your phone number in international format. On the hosted platform, you'll need to verify your phone via SMS before it can be displayed on your schedules. Used for identity verification and displayed on schedules that have "Show phone number" enabled.</td>
+                        <td>Optional, in international format. On the hosted platform you can verify it by SMS, and a verified number is what unlocks sending <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletters</a> and running <a href="{{ route('marketing.docs.boost') }}" class="doc-link">ad campaigns</a> and on-network promotions. If one of your schedules uses the same number, that schedule's number counts as verified too.</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Default Schedule</span></td>
-                        <td>When you manage multiple schedules, choose which one is selected by default when you log in. Only shown if you have more than one schedule.</td>
+                        <td>Only shown when you can edit more than one schedule. It decides which schedule a new event belongs to when you start from the general Add Event entry point rather than from a schedule.</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Profile Image</span></td>
-                        <td>Upload a profile picture. This is used for your user avatar and may appear in team member lists.</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Square Profile Image</span></td>
+                        <td>Your avatar, as a PNG or JPEG. A square image works best: the form warns you if the picture is not square or is larger than 2.5MB. Use the small red cross on the thumbnail to remove the current image.</td>
                     </tr>
                 </tbody>
             </table>
@@ -82,15 +85,19 @@
                 <tbody>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Timezone</span></td>
-                        <td>Controls how dates and times are displayed throughout the app. Event times are stored in UTC and converted to your timezone for display.</td>
+                        <td>Controls how dates and times are shown to you throughout the app. Event times are stored in UTC and converted to this timezone while you are signed in.</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Language</span></td>
-                        <td>Sets the interface language. Twelve languages are supported: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, Arabic, Estonian, Romanian, and Russian.</td>
+                        <td>Sets the interface language. Twelve languages are available: Arabic, Dutch, English, Estonian, French, German, Hebrew, Italian, Portuguese, Romanian, Russian and Spanish.</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">24-Hour Time</span></td>
-                        <td>Toggle between 12-hour (AM/PM) and 24-hour time format across the app</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Use 24-hour time format</span></td>
+                        <td>Switches between 12-hour (AM/PM) and 24-hour clocks across the app.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Ask me before I follow a new schedule</span></td>
+                        <td>On by default. Shows a short consent notice, explaining that the schedule will see your name and email, the first time you follow a schedule. Turn it off to follow in one click.</td>
                     </tr>
                 </tbody>
             </table>
@@ -106,77 +113,77 @@
             Payment Methods
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            To sell tickets, you need to connect at least one payment method. Event Schedule supports three options, each available as a tab in your Settings page.
+            To sell tickets you need at least one payment method on your account. Event Schedule supports three, each on its own tab in this section. Which one an event uses is decided per event, on the event's <a href="{{ route('marketing.docs.tickets') }}#payment" class="doc-link">Payment</a> tab, so connecting more than one lets you route different events differently. Without any connected method the only option an event has is cash on the door.
         </p>
 
         <h3 id="stripe" class="doc-subheading">Stripe</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Stripe provides the most integrated payment experience with automatic ticket delivery and QR codes.
+            Stripe gives the most integrated experience: the buyer pays without leaving the checkout, the sale is marked paid automatically and the ticket with its QR code is emailed straight away.
         </p>
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Hosted Platform</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Click "Link Stripe Account" to connect via Stripe Connect. You'll be redirected to Stripe to authorize the connection. Payments go directly to your Stripe account with standard processing fees (2.9% + $0.30).</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Hosted platform</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Connect Stripe</strong> to start Stripe Connect onboarding, then complete the details on Stripe. Until Stripe finishes reviewing them the tab shows your account ID labelled <strong class="text-gray-900 dark:text-white">[Pending]</strong>. Buyers are charged on your own Stripe account, so payouts and Stripe's own processing fees are between you and Stripe. Event Schedule adds no platform fee of its own.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Selfhosted</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Stripe is configured at the server level via environment variables (<code class="text-xs bg-gray-200 dark:bg-white/10 px-1.5 py-0.5 rounded">STRIPE_PLATFORM_KEY</code> and <code class="text-xs bg-gray-200 dark:bg-white/10 px-1.5 py-0.5 rounded">STRIPE_PLATFORM_SECRET</code> in your <code class="text-xs bg-gray-200 dark:bg-white/10 px-1.5 py-0.5 rounded">.env</code> file) rather than through account settings. See the <x-link href="{{ route('marketing.docs.selfhost.stripe') }}">selfhosted Stripe setup guide</x-link> for details.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Stripe is configured once at the server level with the <code class="doc-inline-code">STRIPE_PLATFORM_KEY</code> and <code class="doc-inline-code">STRIPE_PLATFORM_SECRET</code> variables in your <code class="doc-inline-code">.env</code> file, not per account. The tab simply reports whether the server has Stripe configured. See the <x-link href="{{ route('marketing.docs.selfhost.stripe') }}">selfhosted Stripe setup guide</x-link>.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Unlinking</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">To disconnect your Stripe account, click "Unlink Stripe Account" in the Stripe tab. This does not affect your Stripe account itself, only the connection to Event Schedule.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Disconnecting</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Unlink Account</strong> under the account name in the Stripe tab and confirm. This only removes the connection to Event Schedule; your Stripe account and its history are untouched.</p>
             </div>
         </div>
 
         <h3 id="invoice-ninja" class="doc-subheading">Invoice Ninja</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Connect your <x-link href="https://invoiceninja.com" target="_blank">Invoice Ninja</x-link> account to process payments through Invoice Ninja's payment gateways. This is especially useful for selfhosted deployments.
+            Connect your <x-link href="https://invoiceninja.com" target="_blank">Invoice Ninja</x-link> account to take payment through any gateway Invoice Ninja supports, and to have each sale land in your books as an invoice. This is often the easiest route for a selfhosted deployment.
         </p>
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Connecting</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Provide your Invoice Ninja API Token and API URL to link the accounts. You can find your API token in your Invoice Ninja settings under Settings &rarr; Account Management. Enter the base address of your installation, without <code>/api/v1</code>, or leave the API URL blank to use the hosted invoicing.co service.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Enter your <strong class="text-gray-900 dark:text-white">API Token</strong> (required) and, if you selfhost Invoice Ninja, the <strong class="text-gray-900 dark:text-white">API URL</strong>. The token is in Invoice Ninja under Settings &rarr; Account Management. Enter the base address of your installation, without <code class="doc-inline-code">/api/v1</code>, or leave the API URL blank to use the hosted invoicing.co service. Saving verifies the credentials against your installation, which can take up to 30 seconds.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Changing Credentials</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Once connected, click "Edit" next to the company name to correct the API URL or rotate the token. Leave the token blank to keep the existing one. Your current connection is only replaced once the new credentials work.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Changing credentials</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Once connected, click <strong class="text-gray-900 dark:text-white">Edit</strong> next to the company name to correct the API URL or rotate the token. Leave the token blank to keep the existing one. Your current connection is only replaced once the new credentials work.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Checkout modes</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">After connecting, the tab offers two checkout modes: invoice mode (buyers pick tickets in Event Schedule) and payment link mode (buyers pick tickets on Invoice Ninja's purchase page, with grouped invoices). See <x-link href="{{ route('marketing.docs.tickets') }}#invoiceninja-modes">Invoice Ninja Modes</x-link> for a full comparison. If a payment link cannot be created for a sale, that checkout falls back to invoice mode automatically.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Troubleshooting</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">If the connection fails, the reason is shown directly under the form and the full detail is written to your application log. Common causes for selfhosted installations are a firewall, Cloudflare or other bot protection blocking API requests from your Event Schedule server, an <code>http</code> URL that redirects to <code>https</code>, and a self-signed TLS certificate the server does not trust.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">If the connection fails, a red panel at the top of the Invoice Ninja tab names the reason and shows the raw error, and the full detail is written to your application log. Common causes for selfhosted installations are a firewall, Cloudflare or other bot protection blocking API requests from your Event Schedule server, an <code class="doc-inline-code">http</code> URL that redirects to <code class="doc-inline-code">https</code>, and a self-signed TLS certificate the server does not trust.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Checkout Modes</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Invoice Ninja supports two checkout modes: invoice mode (ticket selection in Event Schedule) and payment link mode (ticket selection on Invoice Ninja's purchase page with grouped invoices). See <x-link href="{{ route('marketing.docs.tickets') }}#invoiceninja-modes">Invoice Ninja Modes</x-link> for a full comparison.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Unlinking</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">To disconnect Invoice Ninja, click "Unlink Invoice Ninja" in the Invoice Ninja tab.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Disconnecting</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Unlink Account</strong> next to the company name in the Invoice Ninja tab and confirm.</p>
             </div>
         </div>
         <div class="doc-callout doc-callout-tip mb-6">
             <div class="doc-callout-title">Tip</div>
-            <p>First-time Invoice Ninja users may be eligible for a free 1-year Pro upgrade. Look for the special offer banner when connecting.</p>
+            <p>Before you connect, the tab shows a special offer link: first-time Invoice Ninja users may be eligible for a free 1-year upgrade to Invoice Ninja Pro.</p>
         </div>
 
-        <h3 id="payment-url" class="doc-subheading">Payment URL</h3>
+        <h3 id="payment-url" class="doc-subheading">Payment Link</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Use any external payment page by providing its URL. This works with PayPal.me links, custom checkout pages, or any other payment system.
+            The tab is labelled <strong class="text-gray-900 dark:text-white">Payment Link</strong>. It points buyers at any external payment page you already have: a PayPal.me link, a bank transfer page, your own checkout, anything with a URL.
         </p>
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">How It Works</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Enter the URL where buyers should complete payment. When a buyer purchases a ticket, they are redirected to this URL to pay.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">How it works</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Enter the URL where buyers should pay and save. When somebody buys a ticket for an event using this method, the sale is recorded and the buyer is redirected to your URL. Because the money moves outside Event Schedule, the sale stays <strong class="text-gray-900 dark:text-white">unpaid</strong> until the payment is confirmed.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Unlinking</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">To remove the payment URL, click "Unlink Payment URL" in the Payment URL tab.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Removing it</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Unlink Account</strong> under the saved URL and confirm. The field is then empty and ready for a new URL.</p>
             </div>
         </div>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Note</div>
-            <p>You only need to configure one payment method. Stripe provides the most integrated experience with automatic ticket delivery and QR codes.</p>
+            <p>One payment method is enough. Stripe is the one to pick if you have a choice: it is the only method that confirms payment and delivers the ticket without any manual step.</p>
         </div>
     </section>
 
@@ -189,23 +196,27 @@
             API Settings
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The API settings section lets you enable programmatic access to your schedules and events (Pro plan required). See the <a href="{{ route('marketing.docs.developer.api') }}" class="doc-link">API Reference</a> for full endpoint documentation.
+            This section issues the key that authenticates REST API requests for your account. The endpoints themselves are a <strong class="text-gray-900 dark:text-white">Pro</strong> feature: the key can be generated on any plan, but every call is checked against the schedule it touches and a schedule below Pro is refused. See the <a href="{{ route('marketing.docs.developer.api') }}" class="doc-link">API Reference</a> for the full endpoint list.
         </p>
 
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Enable API</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Toggle API access on or off. When enabled, you can use the REST API to read and manage your schedules and events programmatically.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Enable API Access</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A single toggle. Saving it on generates a key straight away. Saving it off deletes the key, so anything using it stops working immediately.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">API Key</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Your secret API key is used to authenticate requests. Click "Show API Key" and enter your password to reveal it. Keep this key confidential and never share it publicly.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The full key is displayed exactly once, right after it is generated, next to a copy button. From then on the field shows dots and there is no way to reveal the key again, so store it somewhere safe the moment you create it. Send it as the <code class="doc-inline-code">X-API-Key</code> request header.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Expiry</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A key is valid for one year from the day it is issued. After that requests are rejected as expired, and you get a fresh key by turning the toggle off and on again.</p>
             </div>
         </div>
 
         <div class="doc-callout doc-callout-warning">
             <div class="doc-callout-title">Important</div>
-            <p>Your API key grants full access to your account. If you suspect it has been compromised, disable and re-enable the API to generate a new key. Note that disabling API access immediately invalidates the existing key.</p>
+            <p>The key grants the same access to your account that you have. If you suspect it has leaked, turn the API off and on again: that deletes the old key and issues a new one, and the old key stops working at once.</p>
         </div>
     </section>
 
@@ -218,19 +229,30 @@
             Webhooks
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Configure webhook endpoints to receive real-time POST notifications when events occur in your schedules (Pro plan required). See the <a href="{{ route('marketing.docs.developer.webhooks') }}" class="doc-link">Webhook documentation</a> for payload formats and verification details.
+            A webhook POSTs a JSON payload to a URL of yours whenever something happens in your schedules, such as a sale, an event change or a check-in. Webhooks are a <strong class="text-gray-900 dark:text-white">Pro</strong> feature: if none of your schedules are on Pro the section shows an upgrade notice, and activity on a schedule below Pro is never delivered. See the <a href="{{ route('marketing.docs.developer.webhooks') }}" class="doc-link">Webhook documentation</a> for payload formats and signature verification.
         </p>
 
-        <div class="doc-fields">
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Add Webhook</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Enter a URL, optional description, and select which event types to subscribe to. A signing secret is generated automatically and shown once after creation.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Manage Webhooks</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Edit URLs, toggle active/inactive, send test pings, view delivery logs, and regenerate signing secrets from the webhook list.</p>
-            </div>
-        </div>
+        <h3 class="doc-subheading">Adding a webhook</h3>
+        <ol class="doc-list doc-list-numbered mb-6">
+            <li>Enter the endpoint <strong class="text-gray-900 dark:text-white">URL</strong> that should receive the requests.</li>
+            <li>Add an optional <strong class="text-gray-900 dark:text-white">Description</strong> so you can tell endpoints apart in the list.</li>
+            <li>Under <strong class="text-gray-900 dark:text-white">Event types</strong>, leave every type switched on or turn off the ones you do not want. All types are on by default.</li>
+            <li>Click <strong class="text-gray-900 dark:text-white">Add Webhook</strong>. The signing secret appears once at the top of the section with a copy button, and is never shown again.</li>
+        </ol>
+
+        <h3 class="doc-subheading">Managing webhooks</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Each saved webhook is a row with its description, URL and subscribed event types, and a row of icon buttons:
+        </p>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Enable or disable</strong> the endpoint. A disabled webhook is dimmed and receives nothing.</li>
+            <li><strong class="text-gray-900 dark:text-white">Send a test ping</strong> to check the endpoint answers.</li>
+            <li><strong class="text-gray-900 dark:text-white">Edit</strong> opens a panel to change the URL, description and event types, and holds the <strong class="text-gray-900 dark:text-white">Regenerate secret</strong> link.</li>
+            <li><strong class="text-gray-900 dark:text-white">Delete</strong> the endpoint after a confirmation.</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            <strong class="text-gray-900 dark:text-white">View recent deliveries</strong> under each webhook expands a log of the latest attempts, with the event type, the response status (or <code class="doc-inline-code">timeout</code>), how long the request took and when it ran. The row also shows when the endpoint last fired.
+        </p>
     </section>
 
     <!-- Google Settings -->
@@ -242,48 +264,57 @@
             Google Settings
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Connect your Google account to enable Google Calendar sync and other Google integrations:
+            Two separate Google connections live here. Connecting one does not connect the other, and each can be disconnected on its own.
         </p>
 
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Google Account</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Link your Google account to enable login with Google. This is independent from Google Calendar sync and can be connected or disconnected separately. To disconnect your Google account, you must first have a password set on your account.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Links your Google identity so you can sign in with Google. <strong class="text-gray-900 dark:text-white">Disconnect</strong> is only available once your account has a password, otherwise you would lock yourself out; set one first under <a href="#password" class="doc-link">Update Password</a>.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Google Calendar</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Connect Google Calendar to enable two-way sync between Event Schedule and Google Calendar. This is a separate integration from the Google Account login above and can be connected or disconnected independently. Events created in either platform are automatically synced to the other. Each team member on a schedule can connect their own Google Calendar, so shared schedules sync to every member's personal calendar. Once connected, configure sync per schedule in <a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="doc-link">Integrations</a>.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Authorises two-way sync between Event Schedule and your Google Calendar. Every member of a schedule connects their own Google account here, so one shared schedule can sync into several personal calendars. Once connected, switch sync on for each schedule under <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-google" class="doc-link">Integrations</a>.</p>
             </div>
+        </div>
+
+        <div class="doc-callout doc-callout-info mb-6">
+            <div class="doc-callout-title">Note</div>
+            <p>A synced calendar gets one entry per event date that Event Schedule pushes, not a repeating series: a recurring event arrives as a single entry on the date the series starts. Use the schedule's iCal subscription feed if you want every date of a recurring event in your calendar.</p>
         </div>
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Tip</div>
-            <p>Google Calendar sync is configured per schedule in the schedule settings. Connect your Google account here first, then enable sync on each schedule you want to keep in sync. Team members on a shared schedule each control their own connection.</p>
+            <p>Connecting your account here does nothing on its own. Sync is enabled per schedule in the schedule's settings, and each team member controls their own connection.</p>
         </div>
     </section>
 
-    <!-- Outlook Settings -->
+    <!-- Outlook Calendar -->
     <section id="microsoft" class="doc-section">
         <h2 class="doc-heading">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
             </svg>
-            Outlook Settings
+            Outlook Calendar
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Connect your Outlook / Microsoft 365 account to enable two-way calendar sync via the Microsoft Graph API:
+            The section is called <strong class="text-gray-900 dark:text-white">Outlook Calendar</strong> in the settings navigation. It connects your Outlook or Microsoft 365 account through the Microsoft Graph API.
         </p>
 
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Outlook Calendar</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Connect Outlook to enable two-way sync between Event Schedule and your Outlook / Microsoft 365 calendar. Events created in either platform are automatically synced to the other, with near-real-time updates plus a 15-minute polling fallback. Once connected, configure sync per schedule in <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-microsoft" class="doc-link">Integrations</a>.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Connecting</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Connect Outlook Calendar</strong> and approve the permissions on Microsoft. Changes then flow both ways: Microsoft notifies Event Schedule as they happen, and a catch-up sync runs every 15 minutes in case a notification is missed. Once connected, switch sync on for each schedule under <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-microsoft" class="doc-link">Integrations</a>.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Selfhosted installations</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The integration needs Microsoft app credentials on the server. Without them the section reads "Outlook Calendar is not configured on this server" and there is no connect button. See the <x-link href="{{ route('marketing.docs.selfhost.microsoft_calendar') }}">selfhosted Outlook setup guide</x-link>.</p>
             </div>
         </div>
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Tip</div>
-            <p>Outlook Calendar sync is configured per schedule in the schedule settings. Connect your Outlook account here first, then enable sync on each schedule you want to keep in sync. Enable the Teams meetings option on a schedule to create Microsoft Teams meetings for online events automatically.</p>
+            <p>Enable the Teams meetings option on a schedule to have a Microsoft Teams meeting created automatically for its online events.</p>
         </div>
     </section>
 
@@ -293,40 +324,36 @@
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
             </svg>
-            Backup & Restore
+            Backup &amp; Restore
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            Export your schedules as portable backup files or import data from a previous backup. Backups include events, tickets, sales, sub-schedules, newsletters, and optionally images.
+            Export your schedules as a portable <code class="doc-inline-code">.zip</code> file, or restore one you exported earlier. A backup carries the schedule itself plus its sub-schedules, events, tickets, sales, promo codes and newsletters, and optionally the images. The section has two tabs, <strong class="text-gray-900 dark:text-white">Export</strong> and <strong class="text-gray-900 dark:text-white">Import</strong>.
         </p>
 
         <h3 class="doc-subheading">Exporting</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">
-            To create a backup, select which schedules to include and whether to include images. The export runs in the background, and you'll receive an email with a download link when it's ready. Download links expire after 7 days.
-        </p>
-        <div class="doc-fields">
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Schedule Selection</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Choose one or more schedules to include in the backup. Each schedule's events, tickets, sales, sub-schedules, and newsletters are exported together.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Include Images</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Toggle this on to include event images, schedule logos, and other media in the backup file. This increases the file size but ensures a complete backup.</p>
-            </div>
-        </div>
+        <ol class="doc-list doc-list-numbered mb-6">
+            <li>On the <strong class="text-gray-900 dark:text-white">Export</strong> tab, review the schedule list. Every schedule you can edit is listed and all are selected, so clear the ones you do not want.</li>
+            <li>Turn on <strong class="text-gray-900 dark:text-white">Include images</strong> to bundle profile images, flyers and photos. It is off by default and makes the file considerably larger.</li>
+            <li>Click <strong class="text-gray-900 dark:text-white">Export</strong>. Progress is reported in place, item by item, and you can cancel while it runs.</li>
+            <li>When it finishes, a <strong class="text-gray-900 dark:text-white">Download</strong> link appears. The link expires after 7 days. On installations that run a queue worker you also get an email when the export is ready.</li>
+        </ol>
 
         <h3 class="doc-subheading">Importing</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Upload a previously exported .zip backup file to restore your data. After uploading, you'll see a preview showing the schedules, event counts, ticket counts, and sale counts contained in the file. Select which schedules to import and confirm. Imported schedules are created as new schedules and will not overwrite existing data. You'll receive an email notification when the import is complete.
-        </p>
+        <ol class="doc-list doc-list-numbered mb-6">
+            <li>On the <strong class="text-gray-900 dark:text-white">Import</strong> tab, choose a <code class="doc-inline-code">.zip</code> export and click <strong class="text-gray-900 dark:text-white">Upload</strong>.</li>
+            <li>A preview lists each schedule in the file with its type, its event, ticket and sale counts and its date range. All are selected, so clear any you do not want.</li>
+            <li>Click <strong class="text-gray-900 dark:text-white">Start Import</strong>. Imported schedules are always created as new schedules, so nothing you already have is overwritten.</li>
+            <li>When it finishes you get a report per schedule, counting what was imported for each kind of record and listing any warnings, with a link to the new schedule. On installations that run a queue worker the detailed report is also emailed to you.</li>
+        </ol>
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Note</div>
-            <p>On the hosted platform, newsletter recipient emails, segment contacts, and unsubscribe lists are excluded from exports for privacy.</p>
+            <p>On the hosted platform, newsletter recipient emails, segment contacts and unsubscribe lists are left out of exports. They come from followers who did not share their address with your schedule directly.</p>
         </div>
 
         <div class="doc-callout doc-callout-warning">
             <div class="doc-callout-title">Important</div>
-            <p>On selfhosted installations, exports contain personal data including email addresses. Store backup files securely. For migrating between selfhosted instances, consider using <code class="text-xs bg-gray-200 dark:bg-white/10 px-1.5 py-0.5 rounded">mysqldump</code> for a complete database transfer.</p>
+            <p>On selfhosted installations, exports do contain personal data such as names and email addresses, so store the files securely. To move a whole installation to another server, <code class="doc-inline-code">mysqldump</code> is a better tool than export and import.</p>
         </div>
     </section>
 
@@ -340,7 +367,10 @@
             App Update
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            For selfhosted installations, the App Update section displays your currently installed version alongside the latest available version. If an update is available, you can apply it with a single click.
+            On a selfhosted installation this section shows the <strong class="text-gray-900 dark:text-white">Installed Version</strong> next to the <strong class="text-gray-900 dark:text-white">Latest Version</strong> published on GitHub. If they match it simply says you are up to date. If they differ, an <strong class="text-gray-900 dark:text-white">Update</strong> button downloads and applies the new release in one click.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            A large update can outrun PHP's execution limit. If it times out, run <code class="doc-inline-code">php artisan app:update</code> from the command line, raise <code class="doc-inline-code">max_execution_time</code> in <code class="doc-inline-code">php.ini</code>, or download the release zip linked under the button and extract it to <code class="doc-inline-code">/tmp/eventschedule/</code> before trying again.
         </p>
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Note</div>
@@ -357,11 +387,15 @@
             Update Password
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Change your account password by entering your current password and choosing a new one. Passwords must be at least 8 characters long.
+            Enter your current password, choose a new one and save. A password must be at least 8 characters long.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            If you signed up using Google or Facebook login, you can set a password here to enable email/password login as an alternative.
+            If your account was created by signing in with Google it has no password yet, and the section is titled <strong class="text-gray-900 dark:text-white">Set Password</strong> instead. It first asks you to confirm who you are with Google; after that you have a few minutes to choose a password, and only the new password field is shown.
         </p>
+        <div class="doc-callout doc-callout-tip">
+            <div class="doc-callout-title">Tip</div>
+            <p>Setting a password is also what makes it possible to disconnect Google later, and it gives you a way in if you ever lose access to your Google account.</p>
+        </div>
     </section>
 
     <!-- Two-Factor Authentication -->
@@ -373,27 +407,32 @@
             Two-Factor Authentication
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Add an extra layer of security to your account with two-factor authentication (2FA). When enabled, you'll need to enter a code from your authenticator app each time you log in.
+            Two-factor authentication (2FA) adds a second step to signing in, using a time-based one-time password from an authenticator app such as Google Authenticator, Authy or 1Password.
         </p>
 
+        <h3 class="doc-subheading">Turning it on</h3>
+        <ol class="doc-list doc-list-numbered mb-6">
+            <li>Enter your current password and click <strong class="text-gray-900 dark:text-white">Enable Two-Factor Authentication</strong>. Accounts with no password, created by signing in with Google, are not asked for one.</li>
+            <li>Scan the QR code with your authenticator app. If you cannot scan, type the key printed under the code into the app by hand.</li>
+            <li>Save the recovery codes shown on the same screen, somewhere other than the device holding the authenticator app.</li>
+            <li>Type the 6-digit code from the app and click <strong class="text-gray-900 dark:text-white">Confirm</strong>. Two-factor authentication is not active until this step succeeds.</li>
+        </ol>
+
+        <h3 class="doc-subheading">Afterwards</h3>
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Enabling 2FA</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Click "Enable" and enter your password to begin setup. You'll be shown a QR code to scan with an authenticator app such as Google Authenticator, Authy, or 1Password. After scanning, enter the code displayed in your app to confirm setup.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Recovery codes</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Each code works once and lets you sign in without the authenticator app. <strong class="text-gray-900 dark:text-white">Regenerate Codes</strong> issues a fresh set and displays it once; every earlier code stops working at that moment.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Recovery Codes</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">After enabling 2FA, you'll be shown a set of recovery codes. Save these codes in a safe place - they allow you to access your account if you lose your authenticator device. Each recovery code can only be used once. You can regenerate recovery codes at any time from this section.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Disabling 2FA</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">To disable two-factor authentication, click "Disable" and enter your password. This removes the 2FA requirement from your account and invalidates any existing recovery codes.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Turning it off</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Disable</strong> and type your password into the prompt, which only appears if your account has one. Disabling removes the authenticator secret and every remaining recovery code, so switching 2FA back on later starts from a new QR code.</p>
             </div>
         </div>
 
         <div class="doc-callout doc-callout-warning">
             <div class="doc-callout-title">Important</div>
-            <p>Store your recovery codes securely. If you lose access to your authenticator app and don't have your recovery codes, you will not be able to log in to your account.</p>
+            <p>Store your recovery codes securely. If you lose the authenticator app and no longer have the codes, you will not be able to sign in.</p>
         </div>
     </section>
 
@@ -406,27 +445,26 @@
             Delete Account
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Permanently delete your account and all associated data. This action:
+            Permanently deletes your account and everything attached to it. That means:
         </p>
         <ul class="doc-list mb-6">
-            <li>Removes your user account and profile</li>
-            <li>Deletes all schedules you own</li>
-            <li>Removes all events, tickets, and sales data</li>
-            <li>Disconnects any linked services (Stripe, Google, etc.)</li>
+            <li>Your user account, profile and profile image</li>
+            <li>Every schedule you own, with its events, tickets and sales</li>
+            <li>Connections to linked services such as Stripe and Google, including any calendar sync they were running</li>
         </ul>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The confirmation dialog includes an optional feedback textarea where you can share the reason for leaving. This helps us improve the platform.
+            Clicking <strong class="text-gray-900 dark:text-white">Delete Account</strong> opens a confirmation dialog with an optional <strong class="text-gray-900 dark:text-white">Why are you leaving?</strong> box. Anything you write there is emailed to the Event Schedule team as feedback and helps us improve the platform. Before that, download anything you want to keep, for example with <a href="#backup" class="doc-link">Backup &amp; Restore</a>.
         </p>
 
         <div class="doc-callout doc-callout-warning">
             <div class="doc-callout-title">Warning</div>
-            <p>Account deletion is permanent and cannot be undone. You will be asked to enter your password to confirm the deletion.</p>
+            <p>Deletion is permanent and cannot be undone. If your account has a password you are asked to type it in the dialog to confirm; accounts that only sign in with Google confirm without one.</p>
         </div>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Note</div>
-            <p>The Delete Account option is only available on the hosted platform (eventschedule.com). Selfhosted administrators manage accounts directly at the server level.</p>
+            <p>The Delete Account section is only shown on the hosted platform (eventschedule.com). On a selfhosted installation the administrator manages accounts on the server instead.</p>
         </div>
     </section>
 
@@ -440,9 +478,10 @@
         </h2>
         <ul class="doc-list">
             <li><a href="{{ route('marketing.docs.getting_started') }}" class="doc-link">Getting Started</a> - Set up your first schedule</li>
-            <li><a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Selling Tickets</a> - Configure ticketing after connecting a payment method</li>
-            <li><a href="{{ route('marketing.docs.creating_schedules') }}" class="doc-link">Advanced Schedule Settings</a> - Configure calendar sync and integrations per schedule</li>
+            <li><a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Selling Tickets</a> - Choose a payment method per event once one is connected</li>
+            <li><a href="{{ route('marketing.docs.creating_schedules') }}" class="doc-link">Advanced Schedule Settings</a> - Per-schedule calendar sync, sending address and other integrations</li>
             <li><a href="{{ route('marketing.docs.developer.api') }}" class="doc-link">API Reference</a> - Full API documentation for developers</li>
+            <li><a href="{{ route('marketing.docs.developer.webhooks') }}" class="doc-link">Webhooks</a> - Payload formats and signature verification</li>
         </ul>
     </section>
 
@@ -471,13 +510,13 @@
                 {
                     "@type": "HowToStep",
                     "name": "Configure Payment Methods",
-                    "text": "Connect Stripe, Invoice Ninja, or set a custom payment URL to start selling tickets.",
+                    "text": "Connect Stripe, Invoice Ninja, or set a payment link to start selling tickets.",
                     "url": "{{ url(route('marketing.docs.account_settings')) }}#payments"
                 },
                 {
                     "@type": "HowToStep",
                     "name": "Connect Google Services",
-                    "text": "Link your Google account and enable Google Calendar sync for bidirectional event synchronization.",
+                    "text": "Link your Google account and enable Google Calendar sync for two-way event synchronization.",
                     "url": "{{ url(route('marketing.docs.account_settings')) }}#google"
                 }
             ]

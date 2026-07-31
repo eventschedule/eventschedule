@@ -30,7 +30,7 @@
             "@type": "Offer",
             "price": "0",
             "priceCurrency": "USD",
-            "description": "Free to start. Ticketing is on the Pro plan."
+            "description": "Free to start, including up to 25 paid tickets a month. Pro at $5 a month lifts the cap."
         },
         "url": "{{ url()->current() }}",
         "keywords": "stripe ticket payments, stripe connect event tickets, zero platform fee ticketing, stripe checkout tickets, direct payouts",
@@ -670,7 +670,7 @@
         // figure Event Schedule collects on a sale.
         $remit = [
             ['Our cut of each sale', $money(0), 'There is no fee field in the charge we create.'],
-            ['The Pro plan, monthly', '$5', 'Nothing further is charged on a sale.'],
+            ['The Pro plan, monthly', '$5', 'Optional: it lifts the 25-a-month cap. Nothing further is charged on a sale.'],
             ['Card processing', "Stripe's rate", 'Stripe sets it, per country and method.'],
         ];
 
@@ -728,17 +728,17 @@
         // the same webhook. Each traced in the report.
         $sameRail = [
             ['Promo codes', 'A percentage or a fixed discount, with usage limits and an expiry, priced into the line items before the charge is created.', 'Pro'],
-            ['Volume discounts', 'Buy more of one ticket type and the per-unit price drops. The reconciliation spreads the rounding a cent at a time so the charge matches the total exactly.', 'Pro'],
+            ['Volume discounts', 'Buy more of one ticket type and the per-unit price drops. The reconciliation spreads the rounding a cent at a time so the charge matches the total exactly.', 'Free'],
             ['Gift cards', 'Sold through the same Stripe account and redeemed against a later ticket. A gift-card payment is checked harder still: the connected account that paid has to be the one selling the card, and the currency has to match.', 'Pro'],
             ['Add-ons', 'A drink, a programme, a workshop place. Priced as its own line on the same charge rather than a second checkout.', 'Pro'],
-            ['Appointments', 'A bookable slot can take payment through the same connected account, or a payment link, or cash.', 'Pro'],
+            ['Appointments', 'A bookable slot can take payment through the same connected account, or a payment link, or cash. One appointment type on the free plan, as many as you like on Pro.', 'Free'],
             ['Outgoing webhooks', 'When a sale is marked paid, Event Schedule can POST it to an endpoint you own, so your own systems hear about it too.', 'Pro'],
         ];
 
         $faqs = [
             [
                 'q' => 'Does Event Schedule take a cut of ticket sales?',
-                'a' => 'No. On the hosted platform the charge is created on your own connected Stripe account and no application fee is added to it, so there is no line where a platform cut could be taken. You pay Stripe its processing fee and keep the rest. Ticketing itself is on the Pro plan at $5 a month, which is the whole of what Event Schedule charges.',
+                'a' => 'No. On the hosted platform the charge is created on your own connected Stripe account and no application fee is added to it, so there is no line where a platform cut could be taken. You pay Stripe its processing fee and keep the rest. Selling starts on the free plan, at up to 25 paid tickets a month, and the Pro plan at $5 a month lifts that cap. The subscription is the whole of what Event Schedule charges.',
             ],
             [
                 'q' => 'How do I connect Stripe, and what happens if it is not finished?',
@@ -905,8 +905,8 @@
                     </ul>
 
                     <p data-reveal>
-                        <span class="es-payout-plan es-payout-plan-pro">Pro</span>
-                        <span class="es-payout-muted ms-2 text-sm">Selling tickets is $5 a month. That is the entire bill from us.</span>
+                        <span class="es-payout-plan es-payout-plan-free">Free</span>
+                        <span class="es-payout-muted ms-2 text-sm">Selling starts free, at 25 paid tickets a month. Pro lifts the cap for $5 a month, and that is the entire bill from us.</span>
                     </p>
                 </div>
 
@@ -1040,8 +1040,8 @@
             <div class="mt-8 text-center" data-reveal>
                 <span class="es-payout-plan es-payout-plan-free">Free</span>
                 <span class="es-payout-muted ms-2 text-sm">
-                    Connecting Stripe costs nothing and is not gated. What is on the Pro plan is putting
-                    tickets on sale.
+                    Connecting Stripe costs nothing and is not gated. Nor is selling: the free plan takes
+                    payment for up to 25 paid tickets a month, and Pro removes the ceiling.
                 </span>
             </div>
         </div>
@@ -1176,7 +1176,7 @@
                     <div class="es-payout-card es-payout-hover flex flex-col p-6" data-reveal>
                         <div class="mb-2 flex items-center gap-2">
                             <h3 class="es-payout-ink text-lg font-bold">{{ $railTitle }}</h3>
-                            <span class="es-payout-plan es-payout-plan-pro">{{ $railPlan }}</span>
+                            <span class="es-payout-plan {{ $railPlan === 'Free' ? 'es-payout-plan-free' : 'es-payout-plan-pro' }}">{{ $railPlan }}</span>
                         </div>
                         <p class="es-payout-muted text-sm">{{ $railBody }}</p>
                     </div>

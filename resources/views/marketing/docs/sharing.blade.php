@@ -27,8 +27,8 @@
         <x-doc-screenshot id="sharing--guest-portal" alt="Public schedule page" loading="eager" />
 
         <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10 mb-6">
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Your schedule URL format:</p>
-            <code class="text-blue-400">{{ route('role.view_guest', ['subdomain' => 'your-schedule-name']) }}</code>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Your schedule URL format:</p>
+            <code class="doc-inline-code">{{ route('role.view_guest', ['subdomain' => 'your-schedule-name']) }}</code>
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">Share this link anywhere:</p>
@@ -39,9 +39,11 @@
             <li>Printed materials</li>
         </ul>
 
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Every event also has its own permanent URL underneath the schedule URL, and every sub-schedule has one too, so you can point people at one strand of your programme instead of the whole calendar.</p>
+
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Enterprise Feature: Custom Domain</div>
-            <p>With an Enterprise plan, you can use your own domain (e.g., <code class="doc-inline-code">events.yourdomain.com</code>) for a more professional look. Configure this in <a href="{{ route('marketing.docs.creating_schedules') }}#settings-general" class="doc-link">Schedule Settings</a>.</p>
+            <p>With an Enterprise plan, you can use your own domain (e.g. <code class="doc-inline-code">events.yourdomain.com</code>) for a more professional look. Configure this in <a href="{{ route('marketing.docs.creating_schedules') }}#custom-domain" class="doc-link">Schedule Settings</a>. Once a custom domain is live it becomes the canonical address, so it is the one your QR code and your feed URLs point at.</p>
         </div>
     </section>
 
@@ -53,21 +55,29 @@
             </svg>
             Embedding on Your Website
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Add your schedule directly to your website using an embed code. Your events will automatically update without any extra work.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Add your schedule directly to your website with an iframe. It loads live from Event Schedule, so your events update on your site without any extra work. Embedding the calendar is available on every plan, including Free.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-6">See our <a href="{{ marketing_url('/features/embed-calendar') }}" class="doc-link">embed calendar feature page</a> for a full overview and demo.</p>
 
         <h3 class="doc-subheading">Getting the Embed Code</h3>
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Open your schedule in the admin portal</li>
             <li>Open the <strong class="text-gray-900 dark:text-white">Actions</strong> menu and choose <strong class="text-gray-900 dark:text-white">Embed Schedule</strong></li>
-            <li>Pick a <strong class="text-gray-900 dark:text-white">Layout</strong> if you want this embed to differ from your schedule's own default, and check the live preview</li>
-            <li>Copy the HTML code provided</li>
+            <li>Pick a <strong class="text-gray-900 dark:text-white">Layout</strong>. Leave it on <strong class="text-gray-900 dark:text-white">Schedule default</strong> to follow your schedule's own Default Layout, or choose Calendar or List to pin this one frame</li>
+            <li>Check the <strong class="text-gray-900 dark:text-white">Preview</strong>, which reloads each time you change the layout</li>
+            <li>Copy the <strong class="text-gray-900 dark:text-white">Iframe Code</strong> with the button beside the field, or copy the <strong class="text-gray-900 dark:text-white">Embed URL</strong> if you would rather write the tag yourself</li>
             <li>Paste it into your website where you want the schedule to appear</li>
         </ol>
 
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The layout picker only rewrites the code you copy. It never changes your schedule's own Default Layout setting.</p>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Free Plans Get a Credit Line</div>
+            <p>On a Free hosted plan the copied snippet includes a small "Powered by Event Schedule" line underneath the iframe. It sits outside the frame, so you can see exactly what you are pasting. <a href="{{ route('marketing.docs.schedule_styling') }}#remove-branding" class="doc-link">Removing branding</a> is a Pro feature. Selfhosted installs never add the line.</p>
+        </div>
+
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Embed Tickets Too</div>
-            <p>You can also embed a ticket purchase or RSVP form on your website. See the <a href="{{ route('marketing.docs.tickets') }}#embed-widget" class="doc-link">Embed Widget</a> section in the Selling Tickets guide.</p>
+            <p>An individual event URL can also be embedded as a purchase or RSVP form. The RSVP form embed is free on every plan; the ticket purchase widget is a Pro feature. See the <a href="{{ route('marketing.docs.tickets') }}#embed-widget" class="doc-link">Embed Widget</a> section in the Selling Tickets guide.</p>
         </div>
 
         <h3 class="doc-subheading" id="embed-parameters">URL Parameters</h3>
@@ -83,7 +93,7 @@
                 <tbody>
                     <tr>
                         <td><code class="doc-inline-code">embed=true</code></td>
-                        <td>Required. Renders the schedule on its own, with no header, footer or banner, and is the only URL another site is allowed to frame</td>
+                        <td>Required. Renders the schedule on its own, with no header, footer or banner, and is the only URL another site is allowed to frame. <code class="doc-inline-code">embed=1</code> works too</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">layout=calendar</code><br><code class="doc-inline-code">layout=list</code></td>
@@ -91,19 +101,23 @@
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">schedule=slug</code></td>
-                        <td>Show a single sub-schedule instead of everything</td>
+                        <td>Show a single sub-schedule instead of everything. The sub-schedule's own page URL (your schedule URL followed by the slug) does the same thing and can be embedded directly</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">category=id</code></td>
+                        <td>Show a single event category. The value is the category's numeric id, so the practical way to get it is to filter your schedule page and copy the id out of the resulting address bar</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">dark=true</code></td>
-                        <td>Force dark mode. Left off, the frame follows the visitor's own system setting</td>
+                        <td>Force dark mode. Left off, the frame uses the theme the visitor last chose on Event Schedule, and their system setting if they have never chosen one</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">lang=xx</code></td>
-                        <td>Render the frame in a specific language (e.g. <code class="doc-inline-code">lang=es</code> for Spanish)</td>
+                        <td>Switch the frame to your schedule's second language, the one set by <strong class="text-gray-900 dark:text-white">Offer a second language to visitors</strong> under Details. Any other language code is dropped and the frame falls back to your schedule's own language</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">month=3</code> &amp; <code class="doc-inline-code">year=2027</code></td>
-                        <td>Open the frame on a specific month instead of the current one</td>
+                        <td>Open the frame on a specific month instead of the current one. This moves the month calendar; the list always starts from today</td>
                     </tr>
                 </tbody>
             </table>
@@ -117,10 +131,10 @@
                 <span>One calendar, one list</span>
                 <button class="doc-copy-btn">Copy</button>
             </div>
-            <pre><code>&lt;iframe src="{{ route('role.view_guest', ['subdomain' => 'your-schedule-name']) }}?embed=true&amp;layout=calendar"
+            <pre><code>&lt;iframe src="{{ route('role.view_guest', ['subdomain' => 'your-schedule-name']) }}?embed=true&#38;layout=calendar"
         width="100%" height="800" frameborder="0" style="border: none;"&gt;&lt;/iframe&gt;
 
-&lt;iframe src="{{ route('role.view_guest', ['subdomain' => 'your-schedule-name']) }}?embed=true&amp;layout=list"
+&lt;iframe src="{{ route('role.view_guest', ['subdomain' => 'your-schedule-name']) }}?embed=true&#38;layout=list"
         width="100%" height="800" frameborder="0" style="border: none;"&gt;&lt;/iframe&gt;</code></pre>
         </div>
 
@@ -133,6 +147,15 @@
             <div class="doc-callout-title">Which Layout Wins</div>
             <p><code class="doc-inline-code">?layout=</code> always wins. Without it, an embed uses your schedule's <a href="{{ route('marketing.docs.schedule_styling') }}#event-layout" class="doc-link">Default Layout</a>. A visitor who switches between calendar and list on your own schedule page only changes it for themselves there, and never affects your embeds.</p>
         </div>
+
+        <h3 class="doc-subheading">What Travels Into the Frame</h3>
+        <ul class="doc-list">
+            <li><strong class="text-gray-900 dark:text-white">Your events, live.</strong> The frame loads from your schedule on every page view, so a date you move this afternoon is already right on your site. You never re-paste the tag.</li>
+            <li><strong class="text-gray-900 dark:text-white">Your look.</strong> Background, colour scheme and font come from your <a href="{{ route('marketing.docs.schedule_styling') }}" class="doc-link">Style</a> settings. Custom CSS, on Pro, applies inside the frame too.</li>
+            <li><strong class="text-gray-900 dark:text-white">Nothing else.</strong> No header, no footer, no banner, no language switcher, which is why the language is set in the URL instead.</li>
+            <li><strong class="text-gray-900 dark:text-white">No ads, ever.</strong> A Free schedule's own public pages can carry ads. An embed never does.</li>
+            <li><strong class="text-gray-900 dark:text-white">No search-engine competition.</strong> The embed URL is served <code class="doc-inline-code">noindex, nofollow</code>, so the page that ranks is yours, not the frame inside it.</li>
+        </ul>
     </section>
 
     <!-- Social Media -->
@@ -146,13 +169,23 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">Share your schedule and individual events on social media to reach more people.</p>
 
         <h3 class="doc-subheading">Sharing Your Schedule</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Simply share your schedule URL on any platform. Event Schedule automatically generates social media preview cards with your schedule name, description, and image.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Share your schedule URL on any platform. Event Schedule builds the preview card for you from what is already on the schedule:</p>
+        <ul class="doc-list">
+            <li><strong class="text-gray-900 dark:text-white">Title</strong> is your schedule name</li>
+            <li><strong class="text-gray-900 dark:text-white">Description</strong> is the first 155 characters of your schedule description. If you have not written one, it is generated from your schedule name, short description and, for a venue, the town</li>
+            <li><strong class="text-gray-900 dark:text-white">Image</strong> is your profile image, falling back to a generic Event Schedule image if you have not uploaded one</li>
+        </ul>
 
         <h3 class="doc-subheading">Sharing Individual Events</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Each event also has its own URL that you can share. The preview will show the event name, date, and flyer image.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Each event has its own URL. Its preview card uses the event name as the title and the event flyer as the image. The description is the event's short description, or its full description, or a line built from the event name, the venue and the date.</p>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Cards Are Cached by the Platform</div>
+            <p>Social networks cache preview cards the first time a link is posted. If you change a flyer or a description after sharing, use that platform's own debugging or card-refresh tool to make it re-read the page.</p>
+        </div>
 
         <h3 class="doc-subheading">Event Graphics</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Use the <a href="{{ route('marketing.docs.event_graphics') }}" class="text-blue-400 hover:text-blue-300">Event Graphics</a> feature to generate shareable images showing multiple upcoming events. Perfect for weekly social media posts.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Use the <a href="{{ route('marketing.docs.event_graphics') }}" class="doc-link">Event Graphics</a> feature to generate shareable images showing multiple upcoming events. Perfect for weekly social media posts. Open it from <strong class="text-gray-900 dark:text-white">Actions &rarr; Events Graphic</strong> in the admin portal. Generating graphics is a Pro feature.</p>
     </section>
 
     <!-- Followers -->
@@ -163,26 +196,31 @@
             </svg>
             Building Followers
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Let fans follow your schedule to get notified about new events. This builds your audience over time.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Following gives you a standing list of people who asked to hear from you. It is the audience your newsletters go to, and it builds up over time.</p>
+
+        <div class="doc-callout doc-callout-warning">
+            <div class="doc-callout-title">Following Is Not a Notification Subscription</div>
+            <p>Following does not send anyone an automatic email when you add or change an event. Nothing is sent to your followers unless you write and send a <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletter</a>. If someone wants your events to appear on their own calendar without you doing anything, point them at the <a href="#calendar-feeds" class="doc-link">iCal feed</a> instead.</p>
+        </div>
 
         <h3 class="doc-subheading">How Following Works</h3>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Visitors click <strong class="text-gray-900 dark:text-white">"Follow"</strong> on your schedule</li>
-            <li>They enter their email address</li>
-            <li>Your schedule appears on their dashboard for easy access</li>
-            <li>They can subscribe to your calendar feed to see events in their own calendar</li>
-            <li>They can unfollow at any time</li>
+            <li>A visitor clicks <strong class="text-gray-900 dark:text-white">Follow</strong> on your schedule</li>
+            <li>A short consent panel tells them the schedule will be able to see their name and email. They can tick "don't ask again" so they are not asked on the next schedule they follow</li>
+            <li>If they are not signed in, they are sent to sign up first. Following needs a free Event Schedule account, so an email address on its own is not enough</li>
+            <li>Your schedule then appears on their <strong class="text-gray-900 dark:text-white">Following</strong> page, where they can also copy your iCal or RSS feed, or sync the schedule into their own Google Calendar</li>
+            <li>They can unfollow at any time from that same page</li>
         </ol>
 
         <h3 class="doc-subheading">Managing Followers</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">View and manage your followers from <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Followers</strong>. You can:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Open the <strong class="text-gray-900 dark:text-white">Followers</strong> tab in the admin portal. The tab label carries the running total, so you can see how many followers you have without opening it. Inside you get:</p>
         <ul class="doc-list">
-            <li>See how many followers you have</li>
-            <li>View follower growth over time</li>
-            <li>Export your follower list</li>
+            <li>A table of every follower: name, email, the schedule they followed and the date they followed it</li>
+            <li>Sortable columns, newest first by default, and paging once the list grows</li>
+            <li>A <strong class="text-gray-900 dark:text-white">QR Code</strong> button, covered in <a href="#qr-code" class="doc-link">QR Codes</a> below</li>
         </ul>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Send <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletters</a> to your followers to keep them engaged and promote upcoming events.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Send <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletters</a> to your followers to keep them engaged and promote upcoming events. Newsletters are available on every plan, and the monthly allowance counts recipients rather than sends: a newsletter to 100 followers uses 100 of the allowance.</p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Privacy</div>
@@ -198,28 +236,40 @@
             </svg>
             Calendar Subscriptions
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Let your audience subscribe to your events directly in their calendar apps. Events automatically stay in sync.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Let your audience subscribe to your events directly in their calendar apps or feed readers. Both feeds are public, need no account, and are available on every plan.</p>
+
+        <h3 class="doc-subheading">Finding Your Feed URLs</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">In the admin portal, edit your schedule and open <strong class="text-gray-900 dark:text-white">Integrations &rarr; Advanced</strong>. The <strong class="text-gray-900 dark:text-white">iCal Feed</strong> and <strong class="text-gray-900 dark:text-white">RSS Feed</strong> fields each have a copy button. Your followers can copy the same two URLs from their own <strong class="text-gray-900 dark:text-white">Following</strong> page.</p>
 
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">iCal Feed</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Your schedule has an iCal feed URL that works with Google Calendar, Apple Calendar, Outlook, and any calendar app that supports subscriptions.</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Find your iCal URL at: <code class="doc-inline-code">your-schedule-url/ical</code></p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Works with Google Calendar, Apple Calendar, Outlook, and any calendar app that supports subscribing to a URL.</p>
+                <p class="text-sm"><code class="doc-inline-code">{{ route('feed.ical', ['subdomain' => 'your-schedule-name']) }}</code></p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">RSS Feed</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">For readers and aggregators that support RSS, your events are available as an RSS feed.</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Find your RSS URL at: <code class="doc-inline-code">your-schedule-url/rss</code></p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">For readers and aggregators that support RSS. Capped at 50 items, and a repeating event contributes only its next occurrence.</p>
+                <p class="text-sm"><code class="doc-inline-code">{{ route('feed.rss', ['subdomain' => 'your-schedule-name']) }}</code></p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Add to Calendar Buttons</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Each event page includes "Add to Calendar" buttons. Visitors can add individual events to their Google Calendar, Apple Calendar, or download an .ics file.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Each event page has an "Add to Calendar" button offering Google Calendar, Apple Calendar (which downloads an .ics file) and Microsoft Outlook. This copies one event across once; it is not a subscription.</p>
             </div>
         </div>
 
+        <h3 class="doc-subheading">What the Feeds Contain</h3>
+        <ul class="doc-list">
+            <li>Upcoming events only. An event that runs 24 hours or longer stays in the feed until it has actually ended</li>
+            <li>Repeating events are expanded into individual dated entries for the next 90 days, so a weekly night shows up as a run of entries rather than one</li>
+            <li>Drafts, unlisted events, cancelled events and password-protected events are all left out</li>
+            <li>Each entry carries the event title, description, venue address and a link back to the event page</li>
+            <li>Start and end times are exported as absolute instants, so every subscriber's calendar app shows them in that subscriber's own local time</li>
+        </ul>
+
         <div class="doc-callout doc-callout-tip">
-            <div class="doc-callout-title">Tip</div>
-            <p>Subscribed calendars automatically update when you add or change events. No action needed from your subscribers - they always see your latest schedule.</p>
+            <div class="doc-callout-title">Refresh Timing</div>
+            <p>Subscribed calendars pick up your changes on their own, with no action from your subscribers. The feed itself is cached for an hour, and calendar apps then refresh on their own schedule, which for Google Calendar can be several hours. Do not expect an edit to reach a subscriber's calendar within a minute or two.</p>
         </div>
     </section>
 
@@ -232,16 +282,20 @@
             </svg>
             QR Codes
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Generate a QR code for your schedule to use in printed materials, posters, or at your venue.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Generate a QR code for your schedule to use in printed materials, posters, or at your venue. It is available on every plan, including Free.</p>
 
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Followers</strong></li>
-            <li>Click <strong class="text-gray-900 dark:text-white">"QR Code"</strong></li>
-            <li>Download the QR code image</li>
+            <li>Open the <strong class="text-gray-900 dark:text-white">Followers</strong> tab in the admin portal</li>
+            <li>Click <strong class="text-gray-900 dark:text-white">QR Code</strong>. The image downloads straight away as <code class="doc-inline-code">qr-code.png</code>, a PNG about 300 pixels square with a quiet margin already around it</li>
             <li>Use it on flyers, posters, table tents, or anywhere else</li>
         </ol>
 
-        <p class="text-gray-600 dark:text-gray-300">When scanned, the QR code takes people directly to your schedule where they can view events and follow you.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">When scanned, the QR code takes people directly to your schedule where they can view events and follow you. If you have an Enterprise custom domain set up, the code points at that domain rather than the eventschedule.com address.</p>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">A Different QR Code from Ticket Check-In</div>
+            <p>This code points at your schedule and is for the public. Tickets carry their own QR codes, on every plan, including the 25 paid tickets a month a Free schedule sells, and the door scanner that admits people is free too. Only the live check-in dashboard, with its running count and per-ticket-type breakdown, is a Pro feature. See <a href="{{ route('marketing.docs.tickets') }}#check-in" class="doc-link">Check-In</a> in the Selling Tickets guide.</p>
+        </div>
     </section>
 
     <!-- Embed Troubleshooting -->
@@ -257,28 +311,36 @@
 
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Embed appears too small or cut off</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">The embed iframe needs explicit height. Set a minimum height of 600px for comfortable viewing. Example: <code class="doc-inline-code">height="800"</code> or <code class="doc-inline-code">style="height: 800px;"</code></p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">The frame is empty or the browser refuses to load it</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Almost always a missing <code class="doc-inline-code">?embed=true</code>. Every other Event Schedule URL is served with framing switched off, so a plain schedule link inside an iframe is refused by the browser. Copy the Embed URL out of the Embed Schedule dialog rather than out of your address bar. Privacy extensions that block third-party frames are the other, rarer cause; test in a private window.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Embed doesn't resize on mobile</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Set the width to 100% and wrap the iframe in a responsive container. Example: <code class="doc-inline-code">width="100%"</code> and put it inside a <code class="doc-inline-code">&lt;div style="max-width: 100%;"&gt;</code></p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Embed appears too small or cut off</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The embed iframe needs explicit height. Set a minimum height of 600px for comfortable viewing. Example: <code class="doc-inline-code">height="800"</code> or <code class="doc-inline-code">style="height: 800px;"</code></p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Scrollbars appear on the embed</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Increase the height of your iframe. The content may be taller than the container. For schedules with many events, try <code class="doc-inline-code">height="1000"</code> or higher.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Embed blocked by browser</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Some browsers or extensions block iframes for security. This is rare but can happen with strict privacy settings. Test in an incognito/private window to verify.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Embed shows wrong theme</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Add <code class="doc-inline-code">&amp;dark=true</code> to the embed URL to force dark mode. See <a href="#embed-parameters" class="doc-link">URL Parameters</a>.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Embed doesn't resize on mobile</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Set the width to 100% and wrap the iframe in a responsive container. Example: <code class="doc-inline-code">width="100%"</code> and put it inside a <code class="doc-inline-code">&lt;div style="max-width: 100%;"&gt;</code></p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Embed shows the wrong layout</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Add <code class="doc-inline-code">&amp;layout=calendar</code> or <code class="doc-inline-code">&amp;layout=list</code> to the embed URL to pin it, instead of relying on your schedule's Default Layout.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Add <code class="doc-inline-code">&amp;layout=calendar</code> or <code class="doc-inline-code">&amp;layout=list</code> to the embed URL to pin it, instead of relying on your schedule's Default Layout. Remember that a frame narrower than about 768px shows the agenda even when the calendar is pinned.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Embed shows the wrong theme</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Add <code class="doc-inline-code">&amp;dark=true</code> to the embed URL to force dark mode. See <a href="#embed-parameters" class="doc-link">URL Parameters</a>.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Embed shows the wrong language</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400"><code class="doc-inline-code">&amp;lang=</code> only accepts your schedule's second language. Any other code is dropped and the frame falls back to your schedule's own language. Turn on <strong class="text-gray-900 dark:text-white">Offer a second language to visitors</strong> under Details first.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">An event is missing from the embed</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The frame shows the same events as your public schedule page, so a draft, an unlisted event, or one still awaiting your acceptance will not appear. Check the event on your schedule page first; if it is missing there too, the problem is the event, not the embed.</p>
             </div>
         </div>
 
@@ -330,7 +392,7 @@ frameborder="0"&gt;&lt;/iframe&gt;
                 {
                     "@type": "HowToStep",
                     "name": "Embed on Your Website",
-                    "text": "Open your schedule in the admin portal, choose Embed Schedule from the Actions menu, pick a layout, copy the HTML code, and paste it into your website.",
+                    "text": "Open your schedule in the admin portal, choose Embed Schedule from the Actions menu, pick a layout, copy the iframe code, and paste it into your website.",
                     "url": "{{ url(route('marketing.docs.sharing')) }}#embed"
                 },
                 {
@@ -342,7 +404,7 @@ frameborder="0"&gt;&lt;/iframe&gt;
                 {
                     "@type": "HowToStep",
                     "name": "Build Your Followers",
-                    "text": "Visitors can follow your schedule to get notified about new events. View and manage followers from Admin Panel.",
+                    "text": "Visitors with a free Event Schedule account can follow your schedule, which adds it to their Following page and adds them to the audience your newsletters go to. View and manage followers from the Followers tab in the admin portal.",
                     "url": "{{ url(route('marketing.docs.sharing')) }}#followers"
                 }
             ]

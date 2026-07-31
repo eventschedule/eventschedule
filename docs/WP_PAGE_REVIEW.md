@@ -2,11 +2,52 @@
 
 A checklist of every WP (marketing) site page, used to track review progress as each page is reviewed.
 
-**Legend:** a checkmark in the **Reviewed** column marks a page as reviewed; a blank cell means it has not been reviewed yet. The **Updated** column marks pages that have a page-exclusive, ground-up design - either motif-driven (a large page-local `<style>` block with its own class namespace, headed by a `/* ... "Nickname" ... */` concept comment) or component-driven (restructured onto the shared components in `resources/views/components/marketing/`). A blank cell means the page is still on the first-wave es-* skeleton with a themed `.text-gradient-<page>` accent and is a candidate for a rebuild; the Notes cell of an updated page names its design. On the audience "For" pages table, Updated also means that page's restyle brief (the Notes cell) has been applied. The **Verified** column, which exists only on the two audience tables, records the July 2026 faithfulness audit: every page was read in full against its brief's Accent / Motif / Sections / Distinct targets; a plain ✅ means the brief was already fully realized, and a ✅ with a short note flags a small gap that this pass fixed.
+**Legend:** a checkmark in the **Reviewed** column marks a page as reviewed; a blank cell means it has not been reviewed yet. The **Updated** column marks pages that have a page-exclusive, ground-up design - either motif-driven (a large page-local `<style>` block with its own class namespace, headed by a `/* ... "Nickname" ... */` concept comment) or component-driven (restructured onto the shared components in `resources/views/components/marketing/`). A blank cell means the page is still on the first-wave es-* skeleton with a themed `.text-gradient-<page>` accent and is a candidate for a rebuild; the Notes cell of an updated page names its design. **The docs tables are the deliberate exception:** the 37 documentation pages share ONE restrained shell on purpose so the manual reads as a single book, so ✅ there records the July 2026 *accuracy and legibility* pass (every capability claim re-verified against code, stale UI labels fixed, contrast measured) rather than a page-exclusive design. On the audience "For" pages table, Updated also means that page's restyle brief (the Notes cell) has been applied. The **Verified** column, which exists only on the two audience tables, records the July 2026 faithfulness audit: every page was read in full against its brief's Accent / Motif / Sections / Distinct targets; a plain ✅ means the brief was already fully realized, and a ✅ with a short note flags a small gap that this pass fixed.
 
-**Progress:** 147 / 147 reviewed
+**Progress:** 151 / 151 reviewed
 
-**Updated:** 114 / 147 rebuilt
+**Updated:** 151 / 151 rebuilt
+
+> **Ticketing plan model change - SWEPT 2026-07-31.** Another session shipped a real product
+> change mid-campaign: the FREE tier now SELLS paid tickets, 25 per calendar month per
+> schedule (`Role::ticketSaleLimit()`, `config('usage.ticket_sale_monthly_limit_free')`) with
+> a 50/month per-owner backstop. Selfhost, demo schedules and Pro/trialling are unlimited;
+> non-addon zero-price tickets and events starting within 48 hours are exempt
+> (`Event::hasTicketAllowance()`). **Pro now means UNLIMITED ticket sales, not "ticketing".**
+> Still Pro: QR check-in dashboard, individual tickets, passes, waitlist, promo codes,
+> add-ons, sales CSV export, gift cards, bulk import, the ticket-purchase embed.
+>
+> A sentence-level scan found the stale claim on **21 pages** in three different phrasings
+> ("is on Pro", "are five dollars a month", "is $5 a month") - token greps had under-counted
+> it twice. All 21 were corrected one page at a time, each rewritten in its own page's voice
+> rather than by find/replace, which mangled prose here on a previous occasion. `/pricing` was
+> already correct and served as the reference; `contact`, `docs/subscriptions`,
+> `docs/selfhost/index` and `docs/analytics` were verified correct and left alone.
+>
+> Two further plan facts surfaced during the sweep and were fixed in passing: **appointment
+> booking is now FREE** (`Role::appointmentTypeLimit()`, one type free) and **volume discounts
+> were never Pro** (`volume_discount` is not in EventRepo's `$ticketExtrasAllowed` scrub).
+> `for-musicians` also carried the long-standing "newsletters are available on the Pro and
+> Enterprise plans" error - newsletters are FREE at 10 recipients/month - now corrected.
+>
+> **Door scanning is FREE - resolved and swept 2026-07-31.** The product owner decided free
+> users may scan the 25 tickets a month the free plan sells. **No code change was needed:**
+> `TicketController::scan()` and `scanned()` carry no plan gate at all (`scan()` even has a
+> comment saying it is available on every plan because the Pro feature is the dashboard),
+> `User::canScanEvent()` is a permission check for owners/admins/viewers with no `isPro()`,
+> and the "Scan Ticket" link in `ticket/sales.blade.php` renders outside the `@if` that guards
+> the dashboard link. The live **check-in dashboard** (`CheckInController::index/stats`,
+> running count and per-ticket-type breakdown) stays Pro, which is exactly what `/pricing`
+> already said.
+>
+> `docs/FEATURES.md` was the source of the error: it listed "QR code check-ins" under **Pro**
+> and claimed "the scan chokepoint is `User::canScanEvent()`" - a function with no plan check.
+> That row is now a **Free** row, "QR code scanning at the door", citing the real code path;
+> the separate "Check-in dashboard" Pro row is untouched. Then 20 marketing and docs pages
+> were corrected one at a time. Several kept a half that is still true - passes, promo codes,
+> add-ons, waitlist, custom fields and the live count all remain Pro - so this was never a
+> blanket replace. The sharpest result is on `/for-libraries`: "Scanning the QR on a ticket is
+> free on every plan; it is the running total that is Pro."
 
 > Scope: static and functional marketing pages served under `marketing.*` routes (`routes/web.php`, `MarketingController`), cross-checked against `resources/views/sitemap.blade.php`. Excludes URL redirects, the shared partials/components, and individual blog posts. The comparison and replacement detail pages each render one shared template driven by per-slug data.
 
@@ -184,56 +225,60 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 
 | Reviewed | Updated | Page | URL | Notes |
 |:--------:|:-------:|------|-----|-------|
-| ✅ | | Docs Home | `/docs` | |
-| ✅ | | Getting Started | `/docs/getting-started` | |
-| ✅ | | Creating Schedules | `/docs/creating-schedules` | |
-| ✅ | | Schedule Styling | `/docs/schedule-styling` | |
-| ✅ | | Managing Schedules | `/docs/managing-schedules` | |
-| ✅ | | Creating Events | `/docs/creating-events` | |
-| ✅ | | Sharing | `/docs/sharing` | |
-| ✅ | | Tickets | `/docs/tickets` | |
-| ✅ | | Subscriptions | `/docs/subscriptions` | |
-| ✅ | | Gift Cards | `/docs/gift-cards` | |
-| ✅ | | Appointments | `/docs/appointments` | |
-| ✅ | | Event Graphics | `/docs/event-graphics` | |
-| ✅ | | Newsletters | `/docs/newsletters` | |
-| ✅ | | Analytics | `/docs/analytics` | |
-| ✅ | | Account Settings | `/docs/account-settings` | |
-| ✅ | | Boost | `/docs/boost` | |
-| ✅ | | AI Import | `/docs/ai-import` | |
-| ✅ | | Scan Agenda | `/docs/scan-agenda` | |
-| ✅ | | Referral Program | `/docs/referral-program` | |
+| ✅ | ✅ | Docs Home | `/docs` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Getting Started | `/docs/getting-started` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Creating Schedules | `/docs/creating-schedules` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Schedule Styling | `/docs/schedule-styling` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Managing Schedules | `/docs/managing-schedules` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Creating Events | `/docs/creating-events` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Sharing | `/docs/sharing` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Tickets | `/docs/tickets` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Subscriptions | `/docs/subscriptions` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Gift Cards | `/docs/gift-cards` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Appointments | `/docs/appointments` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Event Graphics | `/docs/event-graphics` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Newsletters | `/docs/newsletters` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Analytics | `/docs/analytics` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Account Settings | `/docs/account-settings` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Boost | `/docs/boost` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | AI Import | `/docs/ai-import` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Scan Agenda | `/docs/scan-agenda` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Referral Program | `/docs/referral-program` | Accuracy pass (shared docs shell by design) |
 
-## Docs - Selfhost (9)
-
-| Reviewed | Updated | Page | URL | Notes |
-|:--------:|:-------:|------|-----|-------|
-| ✅ | | Selfhost Overview | `/docs/selfhost` | |
-| ✅ | | Installation | `/docs/selfhost/installation` | |
-| ✅ | | Stripe (Selfhost) | `/docs/selfhost/stripe` | |
-| ✅ | | Google Calendar (Selfhost) | `/docs/selfhost/google-calendar` | |
-| ✅ | | Boost (Selfhost) | `/docs/selfhost/boost` | |
-| ✅ | | Admin (Selfhost) | `/docs/selfhost/admin` | |
-| ✅ | | Email (Selfhost) | `/docs/selfhost/email` | |
-| ✅ | | AI (Selfhost) | `/docs/selfhost/ai` | |
-| ✅ | | Accessibility (Selfhost) | `/docs/selfhost/accessibility` | |
-
-## Docs - SaaS (3)
+## Docs - Selfhost (11)
 
 | Reviewed | Updated | Page | URL | Notes |
 |:--------:|:-------:|------|-----|-------|
-| ✅ | | SaaS Setup | `/docs/saas` | |
-| ✅ | | Custom Domains (SaaS) | `/docs/saas/custom-domains` | |
-| ✅ | | Twilio (SaaS) | `/docs/saas/twilio` | |
+| ✅ | ✅ | Selfhost Overview | `/docs/selfhost` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Installation | `/docs/selfhost/installation` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Stripe (Selfhost) | `/docs/selfhost/stripe` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Google Calendar (Selfhost) | `/docs/selfhost/google-calendar` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Microsoft Calendar (Selfhost) | `/docs/selfhost/microsoft-calendar` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Boost (Selfhost) | `/docs/selfhost/boost` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Admin (Selfhost) | `/docs/selfhost/admin` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Federation (Selfhost) | `/docs/selfhost/federation` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Email (Selfhost) | `/docs/selfhost/email` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | AI (Selfhost) | `/docs/selfhost/ai` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Accessibility (Selfhost) | `/docs/selfhost/accessibility` | Accuracy pass (shared docs shell by design) |
+
+## Docs - SaaS (5)
+
+| Reviewed | Updated | Page | URL | Notes |
+|:--------:|:-------:|------|-----|-------|
+| ✅ | ✅ | SaaS Setup | `/docs/saas` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Custom Domains (SaaS) | `/docs/saas/custom-domains` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Twilio (SaaS) | `/docs/saas/twilio` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Federation (SaaS) | `/docs/saas/federation` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Monetization (SaaS) | `/docs/saas/monetization` | Accuracy pass (shared docs shell by design) |
 
 ## Docs - Developer (2)
 
 | Reviewed | Updated | Page | URL | Notes |
 |:--------:|:-------:|------|-----|-------|
-| ✅ | | API | `/docs/developer/api` | |
-| ✅ | | Webhooks | `/docs/developer/webhooks` | |
+| ✅ | ✅ | API | `/docs/developer/api` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Webhooks | `/docs/developer/webhooks` | Accuracy pass (shared docs shell by design) |
 
-## Dynamic pages (not counted in the 147)
+## Dynamic pages (not counted in the 151)
 
 | Reviewed | Updated | Page | URL | Notes |
 |:--------:|:-------:|------|-----|-------|

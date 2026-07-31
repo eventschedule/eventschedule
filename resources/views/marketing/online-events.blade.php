@@ -520,7 +520,7 @@
             ],
             [
                 'q' => 'Can I sell tickets to an online event?',
-                'a' => 'Yes. Ticketing is on the Pro plan at $5 a month and works exactly the same for an online event as for a room: named ticket types with their own prices and quantities, per-attendee tickets, and payment through your own Stripe account. Event Schedule charges zero platform fees, so past Stripe\'s own processing the money is yours. Free registration with a capacity limit is on the free plan, and the cap is counted per date.',
+                'a' => 'Yes, and it works exactly the same for an online event as for a room: named ticket types with their own prices and quantities, and payment through your own Stripe account. Selling starts on the free plan, at 25 paid tickets a month. Pro is $5 a month and takes the ceiling off, and adds per-attendee tickets, QR check-in and the waitlist. Event Schedule charges zero platform fees on every plan, so past Stripe\'s own processing the money is yours. Free registration with a capacity limit is on the free plan, and the cap is counted per date.',
             ],
             [
                 'q' => 'What time will people in other countries see?',
@@ -532,7 +532,7 @@
             ],
             [
                 'q' => 'Do I need a paid plan to run online events?',
-                'a' => 'No. Online events are on the free plan, along with recurring dates, sub-schedules, the embeddable calendar, two-way calendar sync, built-in analytics and free registration. Ticketing, QR check-in and the waitlist are the Pro features, at $5 a month.',
+                'a' => 'No. Online events are on the free plan, along with recurring dates, sub-schedules, the embeddable calendar, two-way calendar sync, built-in analytics, free registration and selling up to 25 paid tickets a month. Pro is $5 a month for unlimited ticket sales, QR check-in and the waitlist.',
             ],
         ];
 
@@ -945,9 +945,9 @@
                     <div class="es-golive-card p-6" data-reveal="panel">
                         <div class="mb-2 flex flex-wrap items-center gap-2">
                             <h3 class="text-lg font-bold es-golive-onink">Sell seats to a stream</h3>
-                            <span class="es-golive-plan es-golive-plan-pro">Pro</span>
+                            <span class="es-golive-plan">Free</span>
                         </div>
-                        <p class="text-sm es-golive-onmuted">Named ticket types with their own prices and quantities, paid through your own Stripe account. Event Schedule takes nothing from the sale.</p>
+                        <p class="text-sm es-golive-onmuted">Named ticket types with their own prices and quantities, paid through your own Stripe account. 25 paid tickets a month on the free plan, no ceiling on Pro, and Event Schedule takes nothing from the sale on either.</p>
                     </div>
                     <div class="es-golive-card p-6" data-reveal="panel">
                         <div class="mb-2 flex flex-wrap items-center gap-2">
@@ -1332,7 +1332,7 @@
                         Tick the box. <span class="es-golive-lit">Go live.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg es-golive-onmuted">
-                        Online events, recurring dates and free registration are on the free plan. Ticketing is five dollars a month, and nothing is taken from the sale.
+                        Online events, recurring dates, free registration and 25 paid tickets a month are on the free plan. Five dollars a month lifts the ceiling, and nothing is taken from the sale either way.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

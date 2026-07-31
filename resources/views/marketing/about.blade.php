@@ -592,7 +592,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule really free?',
-                'a' => 'Yes, and not as a trial. Unlimited events and schedules, recurring events with date exceptions, sub-schedules, free registration with a capacity limit, two-way Google, Outlook and CalDAV sync, the embeddable calendar and built-in analytics are all on the free plan, with no credit card and no expiry. Ticketing with QR check-in is on the Pro plan at $5 a month, multiple team members are on Enterprise at $15, and the free plan is one team member.',
+                'a' => 'Yes, and not as a trial. Unlimited events and schedules, recurring events with date exceptions, sub-schedules, free registration with a capacity limit, two-way Google, Outlook and CalDAV sync, the embeddable calendar and built-in analytics are all on the free plan, along with selling up to 25 paid tickets a month and scanning them at the door, with no credit card and no expiry. Unlimited ticket sales and the check-in dashboard are on the Pro plan at $5 a month, multiple team members are on Enterprise at $15, and the free plan is one team member.',
             ],
             [
                 'q' => 'What license is it under, and where is the source?',
@@ -600,7 +600,7 @@
             ],
             [
                 'q' => 'Can I run it on my own server?',
-                'a' => 'Yes. Selfhost it and the database sits on hardware you control. A selfhosted install resolves to the Enterprise tier, so ticketing, the API, custom CSS, multiple team members and every other paid-tier feature is included, and two things exist only on a selfhosted install: one-click app updates and importing events from URLs or by city.',
+                'a' => 'Yes. Selfhost it and the database sits on hardware you control. A selfhosted install resolves to the Enterprise tier, so unlimited ticket sales, the API, custom CSS, multiple team members and every other paid-tier feature is included, and two things exist only on a selfhosted install: one-click app updates and importing events from URLs or by city.',
             ],
             [
                 'q' => 'Do you take a cut of ticket sales?',
@@ -909,11 +909,11 @@
                     <ul class="space-y-3">
                         <li class="flex gap-3">
                             <svg aria-hidden="true" class="es-colo-second mt-1 h-4 w-4 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span class="es-colo-muted text-sm">A free plan with no expiry and no credit card <span class="es-colo-pill">Free</span></span>
+                            <span class="es-colo-muted text-sm">A free plan that sells 25 tickets a month, with no expiry and no credit card <span class="es-colo-pill">Free</span></span>
                         </li>
                         <li class="flex gap-3">
                             <svg aria-hidden="true" class="es-colo-second mt-1 h-4 w-4 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span class="es-colo-muted text-sm">Ticketing and QR check-in for $5 a month <span class="es-colo-pill es-colo-pill-paid">Pro</span></span>
+                            <span class="es-colo-muted text-sm">Unlimited ticket sales and the check-in dashboard for $5 a month <span class="es-colo-pill es-colo-pill-paid">Pro</span></span>
                         </li>
                         <li class="flex gap-3">
                             <svg aria-hidden="true" class="es-colo-second mt-1 h-4 w-4 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -990,7 +990,7 @@
                             <p class="es-colo-fig es-colo-second" aria-hidden="true">01</p>
                             <div>
                                 <h3 class="es-colo-title es-colo-ink mb-2 text-xl">Free is not a trial</h3>
-                                <p class="es-colo-muted text-sm leading-relaxed">The free plan has no expiry date and asks for no card. Unlimited events and schedules, recurring events with date exceptions, sub-schedules, free registration with a capacity limit, two-way calendar sync, the embeddable calendar and built-in analytics all sit on it.</p>
+                                <p class="es-colo-muted text-sm leading-relaxed">The free plan has no expiry date and asks for no card. Unlimited events and schedules, recurring events with date exceptions, sub-schedules, free registration with a capacity limit, two-way calendar sync, the embeddable calendar and built-in analytics all sit on it, and so does selling tickets, up to 25 paid ones a month.</p>
                             </div>
                         </li>
                         <li class="es-colo-standing-row">

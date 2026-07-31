@@ -397,7 +397,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for theaters?',
-                'a' => 'Yes. Setting a production up as a run, marking dark days, splitting your spaces into sub-schedules, publishing your season and syncing two ways with Google, Outlook or CalDAV are all free forever. Ticketing with QR check-in, the check-in dashboard, season passes and custom checkout questions are on the Pro plan at $5 a month, and Event Schedule charges zero platform fees on ticket sales.',
+                'a' => 'Yes. Setting a production up as a run, marking dark days, splitting your spaces into sub-schedules, publishing your season and syncing two ways with Google, Outlook or CalDAV are all free forever, and so is selling: the free plan takes payment for up to 25 tickets a month per schedule, with free registration uncapped. The Pro plan at $5 a month lifts that ceiling and adds QR check-in, the check-in dashboard, season passes and custom checkout questions. Event Schedule charges zero platform fees on ticket sales on every plan, the free one included.',
             ],
             [
                 'q' => 'How do I set up a multi-week run?',
@@ -764,7 +764,7 @@
                 <div class="es-bill-card p-7" data-reveal="panel">
                     <div class="mb-3 flex flex-wrap items-center gap-2">
                         <h3 class="es-bill-ink text-lg font-bold">Tiers that close on time</h3>
-                        <span class="es-bill-plan es-bill-plan-pro">Pro</span>
+                        <span class="es-bill-plan">Free</span>
                     </div>
                     <p class="es-bill-muted text-sm">Give each type a sales window so preview pricing stops when previews do, and concessions can open later without you editing anything.</p>
                 </div>
@@ -1189,7 +1189,7 @@
                         Set the run once. <span class="es-bill-lit">Sell all fourteen.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-400">
-                        Publishing your season and its dates is free forever. Ticketing, passes and check-in are five dollars a month, and nothing is taken from the door.
+                        Publishing your season and its dates is free forever, and so is selling your first twenty-five tickets a month. Five dollars a month lifts the ceiling and adds season passes and check-in, and nothing is taken from the door.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

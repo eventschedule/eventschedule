@@ -59,7 +59,11 @@
     <div class="doc-cta-actions">
         <a href="{{ $v['primary']['href'] }}"
            @if ($external) target="_blank" rel="noopener noreferrer" @endif
-           class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--brand-button-bg-light)] to-[var(--brand-button-bg)] px-4 py-2.5 text-sm font-semibold text-white no-underline shadow-sm transition-all hover:from-[var(--brand-button-bg)] hover:to-[var(--brand-button-bg-hover)] hover:shadow-md">
+           {{-- Deliberately NOT --brand-button-bg-light (#5A8DFF): white on it measures
+                3.14:1 and failed AA on every docs page. These darker stops clear 5.2:1
+                and 6.7:1. Scoped here rather than shifting the shared brand token,
+                which also drives admin-portal buttons. --}}
+           class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#2563eb] to-[#1d4ed8] px-4 py-2.5 text-sm font-semibold text-white no-underline shadow-sm transition-all hover:from-[#1d4ed8] hover:to-[#1e40af] hover:shadow-md">
             {{ $v['primary']['label'] }}
         </a>
 

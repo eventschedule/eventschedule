@@ -926,15 +926,17 @@
                 <p>
                     <span class="es-ledg-plan es-ledg-plan-pro">Pro</span>
                     <span class="es-ledg-muted ml-2 text-sm">
-                        Ticketing, promo codes and gift cards, at $5 a month. Selfhosted installs get
-                        every Pro and Enterprise feature, and no plan pays a platform fee on sales.
+                        No ceiling on ticket sales, plus the check-in dashboard, promo codes and gift
+                        cards, at $5 a month. Selfhosted installs get every Pro and Enterprise
+                        feature, and no plan pays a platform fee on sales.
                     </span>
                 </p>
                 <p>
                     <span class="es-ledg-plan es-ledg-plan-free">Free</span>
                     <span class="es-ledg-muted ml-2 text-sm">
                         The schedule itself, its public page, calendar sync, RSVP with a capacity per
-                        date, and the embeddable calendar.
+                        date, the embeddable calendar, and the first 25 paid tickets a month, each one
+                        scanned at the door like any other.
                     </span>
                 </p>
             </div>

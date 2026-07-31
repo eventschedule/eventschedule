@@ -29,7 +29,10 @@
             data() {
                 return {
                     createAccount: @json((bool) old('create_account', false)),
-                    tickets: @json($event->tickets->filter(fn($t) => (!$t->isSalesEnded() && !$t->isSalesNotStarted()) || $event->show_unavailable_tickets)->values()->map(function ($ticket) use ($date) {
+                    {{-- isSellable() drops PAID rows the schedule's monthly allowance can no longer cover, while
+                         leaving free tiers in place, so a mixed event keeps selling what it may instead of
+                         offering a row that only fails at submit. --}}
+                    tickets: @json($event->tickets->filter(fn($t) => ((!$t->isSalesEnded() && !$t->isSalesNotStarted()) || $event->show_unavailable_tickets) && $t->setRelation('event', $event)->isSellable($date ?? request()->date))->values()->map(function ($ticket) use ($date) {
                         $data = $ticket->toData($date ?? request()->date);
                         $data['selectedQty'] = min((int) (old('tickets')[$data['id']] ?? 0), $data['quantity']);
                         $data['custom_fields'] = $ticket->custom_fields ?? [];
@@ -81,7 +84,10 @@
                     oldGuests: @json(old('guests', [])),
                     oldGuestTicketCustomValues: @json(old('guest_ticket_custom_values', [])),
                     hasError: @json(session('error') || $errors->any()),
-                    addons: @json(($event->addons ?? collect())->map(function ($addon) use ($date) {
+                    {{-- Add-ons are Pro. They were only unreachable before because a free schedule could not
+                         render this form at all; now it can, so a lapsed Pro schedule would otherwise keep
+                         selling them. --}}
+                    addons: @json(($event->addons ?? collect())->filter(fn($a) => $a->setRelation('event', $event)->isSellable($date ?? request()->date))->values()->map(function ($addon) use ($date) {
                         $data = $addon->toData($date ?? request()->date);
                         $data['selectedQty'] = min((int) (old('addons')[$data['id']] ?? 0), $data['quantity']);
                         return $data;
@@ -1325,6 +1331,10 @@
             <x-input-error :messages="$errors->get('cf-turnstile-response')" class="mt-2" />
         </div>
 
+        {{-- The waitlist is Pro. Rendering this block on a free schedule promised a waitlist and
+             then posted to an endpoint that 404s, surfacing as a bare "Error" - a dead end one
+             click past the CTA. Free sold-out events fall through to the plain sold-out state. --}}
+        @if ($event->isPro())
         <div v-if="isAllSoldOut" class="mt-6">
             <div v-if="waitlistMessage" class="mb-4 p-4 rounded-lg text-sm" :class="waitlistSuccess ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300'">
                 @{{ waitlistMessage }}
@@ -1351,6 +1361,7 @@
             </div>
             @endif
         </div>
+        @endif
 
         <div v-if="!isAllSoldOut" class="flex justify-end items-center pt-2 gap-8">
             @if (! request()->embed)

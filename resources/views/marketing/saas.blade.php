@@ -27,7 +27,7 @@
             "Stripe subscription billing",
             "Free, Pro, and Enterprise plan tiers with feature gating",
             "Configurable trial length",
-            "White-label branding",
+            "White-label branding, bar one small attribution link",
             "Ticketing with QR check-in",
             "REST API and webhooks"
         ],
@@ -41,7 +41,7 @@
     @php
         $howToSteps = [
             ['name' => 'Deploy the platform', 'text' => 'Install Event Schedule on your own server with Docker or the Softaculous one-click installer, then point wildcard DNS at it so every customer can get a subdomain.'],
-            ['name' => 'Apply your branding', 'text' => 'Set your app name, upload light and dark logos, and connect your own domain so the platform runs entirely under your brand.'],
+            ['name' => 'Apply your branding', 'text' => 'Set your app name, upload light and dark logos, and connect your own domain so the platform runs under your brand, bar the small attribution link the license asks for.'],
             ['name' => 'Connect Stripe and set your prices', 'text' => 'Connect your Stripe account, create prices for your Pro and Enterprise tiers, set the trial length with TRIAL_DAYS, and open sign-ups.'],
         ];
     @endphp
@@ -798,7 +798,7 @@
                     <div class="es-tilt-inner es-corners relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-8 dark:border-white/10 dark:bg-white/[0.04]">
                         <div class="es-tag mb-3">Module 05 · Branding</div>
                         <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">White-label branding</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Your app name, your light and dark logos, your domain. Customers see your brand everywhere.</p>
+                        <p class="mb-6 text-gray-500 dark:text-gray-400">Your app name, your light and dark logos, your domain. Customers see your brand, and one small credit of ours in the corner of public pages.</p>
                         <div class="relative mt-auto h-24 overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-white/10" aria-hidden="true">
                             <div class="absolute inset-0 flex items-center ltr:justify-start ltr:pl-5 rtl:justify-end rtl:pr-5">
                                 <div class="flex items-center gap-2">
@@ -1012,7 +1012,7 @@
                             $ownBullets = [
                                 '$0 license, no revenue share, no per-ticket fees',
                                 'Full code access, your data in your MySQL database',
-                                'Multi-tenant billing and white-label built in',
+                                'Multi-tenant billing built in, white-label bar one credit',
                             ];
                         @endphp
                         @foreach ($ownBullets as $li)
@@ -1069,7 +1069,7 @@
                                 </div>
                                 <div>
                                     <h3 class="font-semibold text-white">A small backlink</h3>
-                                    <p class="text-sm text-gray-400">Public schedule pages carry a small, discreet link back to eventschedule.com. That link is how the project grows, which keeps the software maintained for everyone.</p>
+                                    <p class="text-sm text-gray-400">Public schedule pages carry a small, discreet link back to eventschedule.com - every customer, on every tier you sell, including the paid ones. That link is how the project grows, which keeps the software maintained for everyone.</p>
                                 </div>
                             </div>
                         </div>

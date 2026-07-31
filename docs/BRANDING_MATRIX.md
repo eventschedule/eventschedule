@@ -15,7 +15,7 @@ they are written down together. Keep it in sync when any of those sites change.
 The three deployment modes those combine into:
 
 - **nexus** - `IS_HOSTED=true`, `IS_NEXUS=true`. eventschedule.com itself. Ad-free.
-- **self-hosted SaaS** - `IS_HOSTED=true`, `IS_NEXUS=false`. An operator running their own
+- **selfhosted SaaS** - `IS_HOSTED=true`, `IS_NEXUS=false`. An operator running their own
   multi-tenant platform, with their own tiers, Stripe and `APP_MARKETING_URL`.
 - **selfhost** - `IS_HOSTED=false`. Single-tenant. Every schedule resolves to `'enterprise'`.
 
@@ -23,13 +23,25 @@ The three deployment modes those combine into:
 
 ```php
 Role::showBranding()      // false on selfhost; else actualPlanTier() === 'free'
-Role::creditChipReason()  // 'selfhost' | 'saas_free' | 'granted_plan' | null
+Role::creditChipReason()  // 'selfhost' | 'saas' | 'granted_plan' | null
 ```
 
-`showBranding()` is **not** the inverse of `isWhiteLabeled()` - `isWhiteLabeled()` returns `true`
-unconditionally when not hosted, which is what left the old selfhost branch permanently `false`.
+They answer different questions, and `creditChipReason()` deliberately does **not** call
+`showBranding()`:
 
-`granted_plan` requires all of: `is_nexus`, `hosted`, `plan_source === 'admin'`,
+- **The strip turns on the tenant's tier.** It is a growth CTA belonging to whoever runs the
+  platform, so it is a free-tier thing and a paid tenant loses it.
+- **The chip turns on the deployment.** It is the license credit, owed by whoever redistributes the
+  software, so off the nexus every schedule carries it whatever its plan. An operator's paying
+  tenant is as much a part of that redistribution as their free one, and that tenant's subscription
+  is between them and the operator. eventschedule.com is the only install that sells white-label,
+  so it is the only install where the chip depends on a plan at all.
+
+`showBranding()` is also **not** the inverse of `isWhiteLabeled()` - `isWhiteLabeled()` returns
+`true` unconditionally when not hosted, which is what left the old selfhost branch permanently
+`false`.
+
+`granted_plan` requires all of: `is_nexus`, `plan_source === 'admin'`,
 `actualPlanTier() === 'enterprise'`, and no active Enterprise Stripe subscription.
 
 ## The matrix
@@ -39,7 +51,7 @@ unconditionally when not hosted, which is what left the old selfhost branch perm
 | Surface | nexus free | nexus paid | nexus Ent *admin-granted* | SaaS free | SaaS paid | selfhost (any tier) |
 |---|---|---|---|---|---|---|
 | Dark footer strip | yes, + "Supported by Invoice Ninja" | -- | -- | yes, links the operator's domain | -- | -- |
-| Corner credit chip | -- | -- | yes, `utm_source=granted-plan` | yes, `utm_source=saas` | -- | yes, `utm_source=selfhost` |
+| Corner credit chip | -- | -- | yes, `utm_source=granted-plan` | yes, `utm_source=saas` | yes, `utm_source=saas` | yes, `utm_source=selfhost` |
 | Event-page "Create your own" card | yes | -- | -- | yes | -- | -- |
 | Ads / promo slot | -- (nexus is ad-free) | -- | -- | yes, if the operator enabled ads | -- | -- |
 | Calendar embed, inside the iframe | -- | -- | -- | -- | -- | -- |
@@ -67,8 +79,10 @@ unconditionally when not hosted, which is what left the old selfhost branch perm
    link is the *operator's* growth CTA and follows `APP_MARKETING_URL`. A hardcoded
    `https://eventschedule.com` link is the license attribution and is not the operator's to
    rebrand. Do not "fix" the chip to use `marketing_url()`.
-2. **The strip and the chip are not alternatives.** On a self-hosted SaaS free tier both render, by
-   design (`8852635c`): the strip promotes the operator, the chip credits us.
+2. **The strip and the chip are not alternatives.** Off the nexus the chip is unconditional, and on
+   the operator's free tier the strip joins it - two credits on one page, by design: the strip
+   promotes the operator through `marketing_url()`, the chip credits us. Seeing both is not a
+   double-branding bug.
 3. **`request()->embed` suppresses both layout blocks.** Embeds carry attribution through the
    snippet line and the ticket-frame footer instead, never inside the calendar iframe.
    `?embed=1` never renders `event/show-guest.blade.php` (see `RoleController::viewGuest`), so the
@@ -77,12 +91,15 @@ unconditionally when not hosted, which is what left the old selfhost branch perm
    drops to free, so the strip renders there. Deliberate: it is the only genuine external backlink
    the hosted platform earns. Ads *are* suppressed on custom domains (AdSense policy), branding is
    not - the asymmetry is intentional.
-5. **Selfhost attribution is guest pages only.** The newsletter footer, both embed snippets and the
-   ticket-embed frame stay unbranded on selfhost. Adding our name to a selfhoster's outgoing mail
-   or to HTML they paste on a client's site is a different decision, not made yet.
+5. **The deployment-wide credit is guest pages only.** The newsletter footer, both embed snippets
+   and the ticket-embed frame stay keyed on `showBranding()` everywhere, so a paid tenant on an
+   operator's platform and every schedule on a selfhost install leave them unbranded. Putting our
+   name into someone's outgoing mail, or into HTML they paste on a client's site, is a different
+   decision and has not been made.
 6. **The WP documents this matrix publicly** and is written to not overclaim. Any change here needs
    `resources/views/marketing/white-label.blade.php` (the seven-row register, section 05, the
-   selfhost FAQ which also feeds the FAQ JSON-LD, and the file's own design comment) plus
+   selfhost and operator FAQs which also feed the FAQ JSON-LD, and the file's own design comment),
+   the operator-facing `marketing/saas.blade.php` and `marketing/selfhost.blade.php`, and
    `marketing/docs/schedule-styling.blade.php#remove-branding` to move with it.
 
 ## SEO note

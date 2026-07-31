@@ -569,7 +569,7 @@
             ],
             [
                 'q' => 'Is embedding the calendar free?',
-                'a' => 'Yes, on every plan and on selfhosted installs, with no limit on how many sites you paste it into. The separate ticket widget embed, which puts the purchase or RSVP form itself on your page, is a Pro feature.',
+                'a' => 'Yes, on every plan and on selfhosted installs, with no limit on how many sites you paste it into. The separate widget embed, which puts the form itself on your page, splits in two: the RSVP form is free as well, and the ticket purchase form is a Pro feature.',
             ],
             [
                 'q' => 'Do embed views show up in my analytics?',
@@ -943,7 +943,7 @@
                         <span class="es-paste-muted es-paste-mono text-[0.65rem] uppercase tracking-widest">the other one</span>
                     </div>
                     <h3 class="es-paste-ink mb-2 text-lg font-bold">The ticket widget</h3>
-                    <p class="es-paste-muted mb-4 text-sm leading-relaxed">A different tag for a different job: it puts the purchase or RSVP form itself on your page, rather than a calendar that links to it.</p>
+                    <p class="es-paste-muted mb-4 text-sm leading-relaxed">A different tag for a different job: it puts the form itself on your page, rather than a calendar that links to it. The RSVP version is free on every plan; putting the ticket purchase form on your page is the Pro half.</p>
                     <div class="mt-auto">
                         <x-link href="{{ marketing_url('/features/embed-tickets') }}">Embed tickets</x-link>
                     </div>
@@ -987,7 +987,7 @@
                 </a>
                 <div class="es-paste-card flex flex-col p-6 md:col-span-2" data-reveal>
                     <h3 class="es-paste-ink mb-1 text-base font-bold">Everything else on the free plan</h3>
-                    <p class="es-paste-muted text-sm leading-relaxed">The calendar itself, two-way Google, Outlook and CalDAV sync, RSVP with a capacity per date, sub-schedules, built-in analytics and newsletters to 10 recipients a month are all free. Ticketing, the ticket widget and custom fields are on Pro, and Event Schedule takes zero platform fees on ticket sales.</p>
+                    <p class="es-paste-muted text-sm leading-relaxed">The calendar itself, two-way Google, Outlook and CalDAV sync, RSVP with a capacity per date, sub-schedules, built-in analytics, newsletters to 10 recipients a month and selling up to 25 tickets a month are all free. Pro takes the ceiling off ticket sales and adds the check-in dashboard, the ticket purchase widget and custom fields. Event Schedule takes zero platform fees on ticket sales, on every plan.</p>
                     <div class="mt-auto pt-4">
                         <x-link href="{{ marketing_url('/pricing') }}">See pricing</x-link>
                     </div>

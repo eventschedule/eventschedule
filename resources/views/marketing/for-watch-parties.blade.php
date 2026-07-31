@@ -610,7 +610,7 @@
             ],
             [
                 'q' => 'Can I charge for watch party access?',
-                'a' => 'Yes, on the Pro plan at $5 a month. Create named ticket types with their own prices, quantities and sales windows, sell through your own Stripe account, and keep everything: Event Schedule takes zero platform fees on ticket sales at every plan level. Stripe charges its standard processing fee (2.9% + $0.30).',
+                'a' => 'Yes, and you can start charging on the free plan: 25 paid tickets a month per schedule, with free registration never counted against that. Create named ticket types with their own prices, quantities and sales windows, sell through your own Stripe account, and keep everything: Event Schedule takes zero platform fees on ticket sales at every plan level. Scanning tickets in at the door is free on every plan, and Pro at $5 a month removes the monthly cap and adds the live check-in dashboard, passes, promo codes and the waitlist. Stripe charges its standard processing fee (2.9% + $0.30).',
             ],
             [
                 'q' => 'Can I schedule recurring watch parties?',
@@ -622,7 +622,7 @@
             ],
             [
                 'q' => 'Is Event Schedule free for hosting watch parties?',
-                'a' => 'Yes. Unlimited events and screening series, one join link per event, free registration with per-date caps, the published running order, built-in analytics, the embeddable calendar and two-way calendar sync are all free forever. Ticketing is on the Pro plan at $5 a month, and there are zero platform fees on ticket sales at any level. You can also selfhost Event Schedule on your own server, where every Enterprise feature is included.',
+                'a' => 'Yes. Unlimited events and screening series, one join link per event, free registration with per-date caps, the published running order, built-in analytics, the embeddable calendar and two-way calendar sync are all free forever, and so are selling up to 25 paid tickets a month and scanning them in at the door. Pro at $5 a month lifts that cap and adds the live check-in dashboard and the rest of the door tooling, and there are zero platform fees on ticket sales at any level. You can also selfhost Event Schedule on your own server, where every Enterprise feature is included.',
             ],
         ];
 
@@ -1117,7 +1117,7 @@
                         Nothing is taken at the <span class="es-scr-accent">door.</span>
                     </h2>
                     <p class="es-scr-muted mb-6 text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
-                        A paid premiere, a benefit screening, a festival day pass. Ticketing is on the Pro plan at five dollars a month, payments run through your own Stripe account, and Event Schedule takes zero platform fees on every plan.
+                        A paid premiere, a benefit screening, a festival day pass. Selling starts on the free plan, twenty-five paid tickets a month, and five dollars a month takes the ceiling off and opens the door tooling. Payments run through your own Stripe account, and Event Schedule takes zero platform fees on every plan.
                     </p>
                     <ul class="es-scr-muted space-y-3" data-reveal-group="70">
                         <li class="flex gap-3" data-reveal>
@@ -1130,11 +1130,11 @@
                         </li>
                         <li class="flex gap-3" data-reveal>
                             <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none es-scr-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span>A pass valid across a run of screenings, once each, for a festival week or a season of Sunday documentaries.</span>
+                            <span>A pass valid across a run of screenings, once each, for a festival week or a season of Sunday documentaries. On Pro. Scanning them in at the door is free.</span>
                         </li>
                         <li class="flex gap-3" data-reveal>
                             <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none es-scr-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span>A waitlist that tells people when a sold-out screening frees up, plus promo codes and gift cards if you want them.</span>
+                            <span>A waitlist that tells people when a sold-out screening frees up, plus promo codes and gift cards if you want them, all on Pro.</span>
                         </li>
                     </ul>
                     <p class="es-scr-muted mt-6 text-sm">
@@ -1146,7 +1146,7 @@
                     <div class="es-scr-card p-6 sm:p-8">
                         <div class="mb-6 flex flex-wrap items-baseline justify-between gap-2">
                             <p class="es-scr-label">Premiere night</p>
-                            <span class="es-scr-plan es-scr-plan-paid">Pro</span>
+                            <span class="es-scr-plan es-scr-plan-paid">Free, then Pro</span>
                         </div>
 
                         <table class="w-full border-collapse text-left">
@@ -1249,7 +1249,7 @@
                             <span class="es-scr-plan">Free</span>
                         </div>
                         <h3 class="es-scr-ink mb-3 text-xl font-bold">On the site you already have</h3>
-                        <p class="es-scr-muted mb-6 text-sm leading-relaxed">Drop the calendar into your own page as an iframe and it keeps itself current. The ticket and registration form can be embedded too, on Pro.</p>
+                        <p class="es-scr-muted mb-6 text-sm leading-relaxed">Drop the calendar into your own page as an iframe and it keeps itself current. The registration form embeds the same way, free, and the ticket form on Pro.</p>
                         <div class="es-scr-inset mt-auto p-4" aria-hidden="true">
                             <p class="es-scr-fig es-scr-muted es-scr-xxs leading-relaxed" dir="ltr">&lt;iframe src="yourparty<wbr>.eventschedule.com<wbr>/embed"&gt;</p>
                         </div>
@@ -1602,7 +1602,7 @@
                         House lights down. <span class="es-scr-lit">Roll it.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg es-scr-booth-muted">
-                        The running order, the door and the list are free forever. Ticketing is five dollars a month, and nothing is taken at the door.
+                        The running order, the door and the list are free forever, and so are your first twenty-five paid tickets a month. Five dollars a month takes the ceiling off, and nothing is taken at the door.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

@@ -16,20 +16,7 @@
 
         @include('newsletter.partials._verification-warning')
 
-        @if ($role->newsletterLimit() !== null)
-        @php
-            $newsletterLimit = $role->newsletterLimit();
-            $newsletterUsed = $role->newslettersSentThisMonth();
-        @endphp
-        <div class="mb-4 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-            <span>{{ __('messages.newsletters_used', ['used' => $newsletterUsed, 'limit' => $newsletterLimit]) }}</span>
-            @if (config('cashier.key') && $role->actualPlanTier() !== 'enterprise' && $newsletterLimit < 1000)
-            <a href="{{ route('role.subscribe', ['subdomain' => $role->subdomain]) }}" class="text-[var(--brand-blue)] hover:underline text-xs font-medium">
-                {{ __('messages.newsletter_upgrade_plan') }}
-            </a>
-            @endif
-        </div>
-        @endif
+        @include('newsletter.partials._usage-meter')
 
         {{-- Template Picker --}}
         @if (!request('template_id') && ($savedTemplates ?? collect())->count())

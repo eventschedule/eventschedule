@@ -1200,7 +1200,7 @@
             </div>
 
             <p class="es-loop-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
-                Registration with a capacity limit is free on every plan. Ticketing, check-in and the waitlist are on Pro, at five dollars a month, and Event Schedule takes zero platform fees on ticket sales.
+                Registration with a capacity limit is free on every plan, and so is selling: 25 paid tickets a month per schedule, counted across the loop's dates rather than reset by each one. Five dollars a month takes that ceiling off and adds check-in and the waitlist, and Event Schedule takes zero platform fees on ticket sales on every plan.
             </p>
         </div>
     </section>
@@ -1606,7 +1606,7 @@
                         Set the loop once. <span class="es-loop-lit">Stop retyping Tuesdays.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300">
-                        Patterns, end conditions and date exceptions are free forever. Ticketing and check-in are five dollars a month, and nothing is taken from the door.
+                        Patterns, end conditions and date exceptions are free forever, and the free plan sells 25 paid tickets a month. Five dollars a month takes the ceiling off and opens check-in, and nothing is taken from the door on either.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

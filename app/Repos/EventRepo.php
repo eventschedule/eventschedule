@@ -326,7 +326,9 @@ class EventRepo
         // plan could sell, none of these needed a gate here - a free schedule could persist them and
         // they simply never became reachable. Now they would work, so the scrub has to be explicit.
         // Matches the request-scrub idiom RoleController uses for gift cards and custom CSS.
-        $ticketExtrasAllowed = ! $currentRole || $currentRole->isPro();
+        // Fails CLOSED: a caller that omits the schedule gets the free-tier ruleset rather than
+        // silently unlocking every Pro extra.
+        $ticketExtrasAllowed = $currentRole && $currentRole->isPro();
 
         if ($event === null && $currentRole && ! $currentRole->canCreateEvent($user)) {
             throw new \App\Exceptions\EventCreationLimitException;
@@ -1442,8 +1444,16 @@ class EventRepo
                 // the whole event. An existing pass ticket keeps its stored flag: this only refuses
                 // to turn one ON, so a lapsed Pro schedule does not have its sold passes rewritten.
                 $isPass = (bool) ($data['is_pass'] ?? false);
-                if ($isPass && ! $ticketExtrasAllowed && empty($data['id'])) {
-                    $isPass = false;
+                if ($isPass && ! $ticketExtrasAllowed) {
+                    // Gate on the STORED value, not on whether an id was posted. The previous
+                    // `empty($data['id'])` test only caught brand-new rows, and the edit form always
+                    // posts an id for existing ones - so a free schedule could create an ordinary
+                    // ticket and flip it into a pass on the very next save. An existing pass keeps
+                    // its flag, so a lapsed Pro schedule's sold passes are never rewritten.
+                    $existing = ! empty($data['id'])
+                        ? Ticket::where('event_id', $event->id)->find($data['id'])
+                        : null;
+                    $isPass = (bool) $existing?->is_pass;
                 }
                 $hasPassTicket = $hasPassTicket || $isPass;
 
@@ -1546,8 +1556,10 @@ class EventRepo
 
                 if (! empty($data['id'])) {
                     $ticket = Ticket::find($data['id']);
-                    $ticketIds[] = $ticket->id;
+                    // Guard before dereferencing: a bogus id used to 500 mid-save, after the event
+                    // row had already been written.
                     if ($ticket && $ticket->event_id == $event->id) {
+                        $ticketIds[] = $ticket->id;
                         $ticket->update(array_merge([
                             'type' => $data['type'] ?? null,
                             'quantity' => $data['quantity'] ?? null,

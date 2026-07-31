@@ -409,7 +409,12 @@ class AppointmentAdminTest extends TestCase
             ->assertSessionHasErrors('currency_code');
     }
 
-    public function test_non_pro_hosted_is_gated(): void
+    /**
+     * Appointments are available on every plan; the free plan carries ONE appointment type. So the
+     * first create succeeds and the second is refused - this used to assert the free plan could not
+     * create any.
+     */
+    public function test_free_hosted_gets_one_appointment_type_and_no_more(): void
     {
         config(['app.hosted' => true]);
         $owner = $this->createOwner();
@@ -417,11 +422,22 @@ class AppointmentAdminTest extends TestCase
             'timezone' => 'America/New_York',
             'plan_type' => 'free',
             'plan_expires' => now()->subDay()->format('Y-m-d'),
+            'trial_ends_at' => null,
         ]);
 
-        $this->actingAs($owner)->post(route('appointments.store', ['subdomain' => $role->subdomain]), $this->payload())
-            ->assertRedirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan']));
+        $this->assertFalse($role->fresh()->isPro(), 'sanity check: the fixture is not Pro');
 
-        $this->assertSame(0, AppointmentType::where('role_id', $role->id)->count());
+        $this->actingAs($owner)->post(route('appointments.store', ['subdomain' => $role->subdomain]), $this->payload())
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame(1, AppointmentType::where('role_id', $role->id)->count(), 'the first type is created');
+
+        // The second is refused, and lands back on the tab that explains why rather than on the
+        // plan page, so the owner keeps the context they were working in.
+        $this->actingAs($owner)->post(route('appointments.store', ['subdomain' => $role->subdomain]),
+            $this->payload(['name' => 'Second Type']))
+            ->assertRedirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments']));
+
+        $this->assertSame(1, AppointmentType::where('role_id', $role->id)->count(), 'still only one type');
     }
 }

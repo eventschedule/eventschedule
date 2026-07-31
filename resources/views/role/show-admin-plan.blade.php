@@ -142,75 +142,99 @@
             @endif
         </div>
 
+        {{-- Usage meters. All three share <x-usage-meter>; the markup used to be hand-rolled and
+             duplicated here and across three newsletter pages, which is how the thresholds drifted.
+             Ticket sales come first: it is the allowance tied to revenue. --}}
+
+        {{-- Paid ticket allowance --}}
+        @if (config('app.hosted'))
+        @php
+            $ticketLimit = $role->ticketSaleLimit();
+            $ticketUsed = $ticketLimit === null ? 0 : $role->ticketsSoldThisMonth();
+            $ticketResetDate = $role->ticketAllowanceResetsAt()->translatedFormat('F j');
+        @endphp
+        <x-usage-meter
+            variant="panel"
+            divider
+            :label="__('messages.ticket_allowance_usage')"
+            :used="$ticketUsed"
+            :limit="$ticketLimit"
+            :usedText="$ticketLimit === null ? null : __('messages.tickets_sold_of', ['used' => $ticketUsed, 'limit' => $ticketLimit])"
+            :unlimitedText="__('messages.ticket_allowance_unlimited')"
+            :noteText="$ticketLimit === null ? null : __('messages.ticket_allowance_note', ['date' => $ticketResetDate])"
+            :upgradeUrl="$ticketLimit !== null && config('cashier.key') ? route('role.subscribe', ['subdomain' => $role->subdomain]) : null"
+            :upgradeLabel="__('messages.ticket_allowance_upgrade')" />
+        @endif
+
         {{-- Newsletter Usage --}}
         @php $newsletterLimit = $role->newsletterLimit(); @endphp
-        @if ($newsletterLimit !== null)
-        @php
-            $newsletterUsed = $role->newslettersSentThisMonth();
-            $newsletterPercent = $newsletterLimit > 0 ? min(100, round(($newsletterUsed / $newsletterLimit) * 100)) : 0;
-            $newsletterRemaining = max(0, $newsletterLimit - $newsletterUsed);
-            $barColor = $newsletterPercent > 80 ? 'bg-red-500' : ($newsletterPercent >= 50 ? 'bg-yellow-500' : 'bg-emerald-500');
-            $barBgColor = $newsletterPercent > 80 ? 'bg-red-100 dark:bg-red-900/30' : ($newsletterPercent >= 50 ? 'bg-yellow-100 dark:bg-yellow-900/30' : 'bg-emerald-100 dark:bg-emerald-900/30');
-        @endphp
-        <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <h5 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.newsletter_usage') }}</h5>
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-sm text-gray-600 dark:text-gray-400">
-                    {{ __('messages.newsletters_used', ['used' => $newsletterUsed, 'limit' => $newsletterLimit]) }}
-                </span>
-                <span class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ __('messages.newsletters_remaining', ['count' => $newsletterRemaining]) }}
-                </span>
-            </div>
-            <div class="w-full h-2.5 rounded-full {{ $barBgColor }}">
-                <div class="h-2.5 rounded-full {{ $barColor }} transition-all" style="width: {{ $newsletterPercent }}%"></div>
-            </div>
-            @if (config('cashier.key') && $planTier !== 'enterprise' && $newsletterLimit < 1000)
-            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                <a href="{{ route('role.subscribe', ['subdomain' => $role->subdomain]) }}" class="text-[var(--brand-blue)] hover:underline font-medium">
-                    {{ __('messages.newsletter_upgrade_plan') }}
-                </a>
-            </p>
-            @endif
-        </div>
+        @if (config('app.hosted'))
+        @php $newsletterUsed = $newsletterLimit === null ? 0 : $role->newslettersSentThisMonth(); @endphp
+        <x-usage-meter
+            variant="panel"
+            divider
+            :label="__('messages.newsletter_usage')"
+            :used="$newsletterUsed"
+            :limit="$newsletterLimit"
+            :usedText="$newsletterLimit === null ? null : __('messages.newsletters_used', ['used' => $newsletterUsed, 'limit' => $newsletterLimit])"
+            :remainingText="$newsletterLimit === null ? null : __('messages.newsletters_remaining', ['count' => max(0, $newsletterLimit - $newsletterUsed)])"
+            :unlimitedText="__('messages.usage_unlimited')"
+            :upgradeUrl="$newsletterLimit !== null && config('cashier.key') && $planTier !== 'enterprise' && $newsletterLimit < 1000 ? route('role.subscribe', ['subdomain' => $role->subdomain]) : null"
+            :upgradeLabel="__('messages.newsletter_upgrade_plan')" />
         @endif
 
         {{-- Photo Usage --}}
         @php $photoLimit = $role->photoLimit(); @endphp
-        @if ($photoLimit !== null)
-        @php
-            $photoUsed = $role->photoCount();
-            $photoPercent = $photoLimit > 0 ? min(100, round(($photoUsed / $photoLimit) * 100)) : 0;
-            $photoRemaining = max(0, $photoLimit - $photoUsed);
-            $photoBarColor = $photoPercent > 80 ? 'bg-red-500' : ($photoPercent >= 50 ? 'bg-yellow-500' : 'bg-emerald-500');
-            $photoBarBgColor = $photoPercent > 80 ? 'bg-red-100 dark:bg-red-900/30' : ($photoPercent >= 50 ? 'bg-yellow-100 dark:bg-yellow-900/30' : 'bg-emerald-100 dark:bg-emerald-900/30');
-        @endphp
-        <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <h5 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.photo_usage') }}</h5>
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-sm text-gray-600 dark:text-gray-400">
-                    {{ __('messages.photos_used', ['used' => $photoUsed, 'limit' => $photoLimit]) }}
-                </span>
-                <span class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ __('messages.photos_remaining', ['count' => $photoRemaining]) }}
-                </span>
-            </div>
-            <div class="w-full h-2.5 rounded-full {{ $photoBarBgColor }}">
-                <div class="h-2.5 rounded-full {{ $photoBarColor }} transition-all" style="width: {{ $photoPercent }}%"></div>
-            </div>
-            @if (config('cashier.key'))
-            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                <a href="{{ route('role.subscribe', ['subdomain' => $role->subdomain]) }}" class="text-[var(--brand-blue)] hover:underline font-medium">
-                    {{ __('messages.photo_upgrade_plan') }}
-                </a>
-            </p>
-            @endif
-        </div>
+        @if (config('app.hosted'))
+        @php $photoUsed = $photoLimit === null ? 0 : $role->photoCount(); @endphp
+        <x-usage-meter
+            variant="panel"
+            divider
+            :label="__('messages.photo_usage')"
+            :used="$photoUsed"
+            :limit="$photoLimit"
+            :usedText="$photoLimit === null ? null : __('messages.photos_used', ['used' => $photoUsed, 'limit' => $photoLimit])"
+            :remainingText="$photoLimit === null ? null : __('messages.photos_remaining', ['count' => max(0, $photoLimit - $photoUsed)])"
+            :unlimitedText="__('messages.usage_unlimited')"
+            :upgradeUrl="$photoLimit !== null && config('cashier.key') ? route('role.subscribe', ['subdomain' => $role->subdomain]) : null"
+            :upgradeLabel="__('messages.photo_upgrade_plan')" />
         @endif
+    </div>
 
-        {{-- Action Buttons --}}
-        @if ($isOwner)
-        <div class="pt-8 space-y-4">
+    {{-- What the plan actually is. This is the page a confused owner lands on, so it is the right
+         place to spell out what Free carries and what Pro adds, rather than only showing what is
+         running out. --}}
+    @if ($planTier === 'free' && config('app.hosted'))
+    <div class="mt-4">
+        <x-plan-gate
+            tier="pro"
+            :role="$role"
+            :subdomain="$role->subdomain"
+            :title="__('messages.plan_overview_title')"
+            :learnMoreUrl="marketing_url('/pricing')"
+            :bullets="[
+                __('messages.ticket_allowance_pro_bullet_unlimited'),
+                __('messages.ticket_allowance_pro_bullet_checkin'),
+                __('messages.ticket_allowance_pro_bullet_promo'),
+                __('messages.ticket_allowance_pro_bullet_waitlist'),
+                __('messages.ticket_allowance_pro_bullet_passes'),
+                __('messages.appointment_type_pro_bullet_unlimited'),
+            ]">
+            {{ __('messages.plan_overview_body', [
+                'tickets' => $role->ticketSaleLimit() ?? 0,
+                'types' => $role->appointmentTypeLimit() ?? 0,
+            ]) }}
+        </x-plan-gate>
+    </div>
+    @endif
+
+    {{-- Owner-only actions. The card opens INSIDE the condition: every child here is itself
+         conditional, so an unconditional card rendered an empty bordered box for team members and
+         for selfhost owners with no cashier key. --}}
+    @if ($isOwner)
+    <div class="ap-card rounded-xl shadow-md p-8 border border-gray-100 mt-4">
+        <div class="space-y-4">
+        <div class="space-y-4">
             {{-- Subscribe Button (Free users or expired Pro/Enterprise) --}}
             @if (config('cashier.key') && !$role->hasActiveSubscription() && !$role->onGracePeriod() && ($role->onGenericTrial() || $role->plan_type == 'free' || ($role->plan_type == 'pro' && !$role->isPro())))
             <div>
@@ -323,8 +347,9 @@
             </div>
             @endif
         </div>
-        @endif
+        </div>
     </div>
+    @endif
 </div>
 
 @if (config('app.hosted'))

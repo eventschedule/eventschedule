@@ -682,7 +682,7 @@
             ],
             [
                 'q' => 'Can I charge for webinars?',
-                'a' => 'Yes, on the Pro plan at $5 a month. Connect your own Stripe account, add as many named ticket types as the session needs, each with its own price, quantity and sales window, and Event Schedule charges zero platform fees. Stripe charges its own standard processing fee, approximately 2.9% plus $0.30 a transaction. Free registration with a capacity limit needs no plan at all.',
+                'a' => 'Yes, and you can start on the free plan: 25 paid tickets a month, per schedule. Connect your own Stripe account, add as many named ticket types as the session needs, each with its own price, quantity and sales window, and Event Schedule charges zero platform fees on every plan. Stripe charges its own standard processing fee, approximately 2.9% plus $0.30 a transaction. Scanning a ticket\'s QR code is free on every plan, for the sessions you also run in a room. Pro at $5 a month takes the monthly ceiling off and adds the rest of the door tooling: the live check-in dashboard, the waitlist, promo codes and add-ons. Free registration with a capacity limit is unlimited and never counts against the 25.',
             ],
             [
                 'q' => 'Can I schedule a recurring webinar series?',
@@ -694,7 +694,7 @@
             ],
             [
                 'q' => 'Is Event Schedule free for hosting webinars?',
-                'a' => 'Yes. Unlimited webinars, the running order on each one, recurring series, free registration with a capacity limit, two-way calendar sync, the embeddable calendar and built-in analytics are all free forever. Ticketing, custom questions at checkout and the waitlist are on Pro at $5 a month, extra team members are on Enterprise, and there are zero platform fees on ticket sales at every plan level. On the hosted service, attendee email goes out through your own SMTP details, which you add once in the integrations tab on any plan.',
+                'a' => 'Yes. Unlimited webinars, the running order on each one, recurring series, free registration with a capacity limit, two-way calendar sync, the embeddable calendar and built-in analytics are all free forever, and so is selling your first 25 paid tickets a month and scanning those tickets in. Pro at $5 a month removes that ceiling and adds the live check-in dashboard, custom questions at checkout and the waitlist, extra team members are on Enterprise, and there are zero platform fees on ticket sales at every plan level. On the hosted service, attendee email goes out through your own SMTP details, which you add once in the integrations tab on any plan.',
             ],
         ];
 
@@ -1193,9 +1193,10 @@
                     <div class="es-air-card p-6" data-reveal="panel">
                         <div class="mb-2 flex flex-wrap items-center gap-2">
                             <h3 class="es-air-ink text-lg font-bold">Charging for the session</h3>
+                            <span class="es-air-plan">Free</span>
                             <span class="es-air-plan es-air-plan-pro">Pro</span>
                         </div>
-                        <p class="es-air-muted text-sm">Connect your own Stripe account and add named ticket types, each with its own price, quantity and sales window. Event Schedule takes zero platform fees, so past Stripe's own processing the money is yours. See <a href="{{ marketing_url('/features/ticketing') }}" class="es-air-link font-medium hover:underline">how ticketing works</a>.</p>
+                        <p class="es-air-muted text-sm">Connect your own Stripe account and add named ticket types, each with its own price, quantity and sales window. The first 25 paid tickets a month are on the free plan, and scanning their QR codes is free too if the session also has a room; Pro takes the ceiling off and adds the live check-in dashboard. Event Schedule takes zero platform fees either way, so past Stripe's own processing the money is yours. See <a href="{{ marketing_url('/features/ticketing') }}" class="es-air-link font-medium hover:underline">how ticketing works</a>.</p>
                     </div>
                     <div class="es-air-card p-6" data-reveal="panel">
                         <div class="mb-2 flex flex-wrap items-center gap-2">
@@ -1255,7 +1256,7 @@
                                 <h3 class="es-air-ink text-xl font-bold">On the site you already have</h3>
                                 <span class="es-air-plan">Free</span>
                             </div>
-                            <p class="es-air-muted">Embed the calendar on your own pages so the series lives where people look you up. The ticket and registration form can be embedded too, on Pro.</p>
+                            <p class="es-air-muted">Embed the calendar on your own pages so the series lives where people look you up. The registration form embeds too, on the free plan; the ticket purchase form is on Pro.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1574,7 +1575,7 @@
                         Publish the session. <span class="es-air-lit">Keep the room.</span>
                     </h2>
                     <p class="es-air-rack-note mx-auto mb-10 max-w-2xl text-lg">
-                        Unlimited webinars, the running order, recurring series and free registration are free forever. Ticketing is five dollars a month, and nothing is taken off the top.
+                        Unlimited webinars, the running order, recurring series and free registration are free forever, and so are the first twenty-five paid tickets a month. Five dollars a month takes the ceiling off, and nothing is ever taken off the top.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

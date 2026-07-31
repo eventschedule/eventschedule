@@ -38,7 +38,15 @@
     --doc-text-strong: #1e1e1e;
     --doc-text: #3e3e42;
     --doc-text-muted: #6b7280;
-    --doc-text-faint: #9ca3af;
+    /*
+     * "Faint" is used by .doc-nav-group-header, .doc-pager-label and
+     * .doc-toc-title, which are all 11px uppercase labels. #9ca3af measured
+     * 2.54:1 on white, so every docs page failed AA on its own navigation.
+     * At 11px there is no room below ~4.5:1, so faint resolves to the same ink
+     * as muted (4.83:1 on white) and the hierarchy is carried by size, weight
+     * and letter-spacing instead of by contrast.
+     */
+    --doc-text-faint: #6b7280;
 
     /* Links - the same blue <x-link> renders, so the two are one thing */
     --doc-link: #2563eb;
@@ -114,7 +122,9 @@
     --doc-text-strong: #ffffff;
     --doc-text: #d1d5db;
     --doc-text-muted: #9ca3af;
-    --doc-text-faint: #6b7280;
+    /* Same reasoning as the light block: #6b7280 measured 4.09:1 on the dark
+       docs ground, so it matches muted (7.75:1) rather than failing. */
+    --doc-text-faint: #9ca3af;
 
     --doc-link: #6b9aff;
     --doc-link-hover: #a5c8ff;

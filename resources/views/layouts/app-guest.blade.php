@@ -316,7 +316,9 @@
                 "eventStatus": @json($eventStatus, $jsonLdFlags),
                 "eventAttendanceMode": @json($attendanceMode, $jsonLdFlags),
                 "organizer": @json($organizer, $jsonLdFlags),
+@if (count($offers))
                 "offers": @json(count($offers) === 1 ? $offers[0] : $offers, $jsonLdFlags),
+@endif
                 "location": @json($location, $jsonLdFlags),
                 "isAccessibleForFree": {{ $event->isFree() ? 'true' : 'false' }},
                 "inLanguage": "{{ $role->language_code }}"
@@ -599,19 +601,21 @@
     @endif
 
     @php
-        // Which of the chip's three jobs applies here, or null for none - see
-        // Role::creditChipReason(). hosted and is_nexus are independent env vars, so the
-        // reasons are ordered there rather than unpicked here.
+        // Which of the chip's jobs applies here, or null for none - see
+        // Role::creditChipReason(). Off the nexus it is unconditional, whatever the tenant's
+        // plan; hosted and is_nexus are independent env vars, so the reasons are ordered
+        // there rather than unpicked here.
         $creditReason = $role->creditChipReason();
 
-        // Tagged per reason so the /admin traffic sources report can tell an operator's free
-        // tier apart from a selfhost install apart from a granted plan. The marketing layout
-        // builds its canonical from request()->path(), so the query string self-canonicalizes
-        // away. The chip always points at eventschedule.com rather than marketing_url(): it is
-        // the license attribution, and that is not the operator's to rebrand.
+        // Tagged per reason so the /admin traffic sources report can tell an operator's own
+        // platform apart from a selfhost install apart from a granted plan. The marketing
+        // layout builds its canonical from request()->path(), so the query string
+        // self-canonicalizes away. The chip always points at eventschedule.com rather than
+        // marketing_url(): it is the license attribution, and that is not the operator's to
+        // rebrand.
         $creditUtm = [
             'selfhost' => '?utm_source=selfhost&utm_medium=footer',
-            'saas_free' => '?utm_source=saas&utm_medium=footer',
+            'saas' => '?utm_source=saas&utm_medium=footer',
             'granted_plan' => '?utm_source=granted-plan&utm_medium=footer',
         ];
         $creditUrl = 'https://eventschedule.com'.($creditUtm[$creditReason] ?? '');

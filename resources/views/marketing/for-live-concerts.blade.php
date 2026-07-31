@@ -616,7 +616,7 @@
             ],
             [
                 'q' => 'Can I sell virtual tickets and venue tickets for the same show?',
-                'a' => 'Yes. They are two named ticket types on the same date, so one can be "Standing" at thirty and the other "Livestream" at twelve, each with its own price, quantity and sales window. Ticketing is on the Pro plan at five dollars a month, Event Schedule charges zero platform fees on the sale, and buyers get the stream link on their own ticket page. The public event page names only the domain you are streaming on.',
+                'a' => 'Yes. They are two named ticket types on the same date, so one can be "Standing" at thirty and the other "Livestream" at twelve, each with its own price, quantity and sales window. Selling is free up to 25 paid tickets a month and five dollars a month on Pro past that, Event Schedule charges zero platform fees on the sale either way, and buyers get the stream link on their own ticket page. The public event page names only the domain you are streaming on.',
             ],
             [
                 'q' => 'What streaming platforms does Event Schedule work with?',
@@ -624,7 +624,7 @@
             ],
             [
                 'q' => 'Is Event Schedule really free for streaming concerts?',
-                'a' => 'Yes. Unlimited dates, the whole routing on one address, recurring residencies with date exceptions, sub-schedules, two-way Google, Outlook and CalDAV sync, the embeddable calendar, free registration with a capacity limit, built-in analytics and ten newsletter emails a month are all free forever. Ticketing, passes and QR check-in are five dollars a month on Pro. There are zero platform fees on ticket sales at every tier, and past your own Stripe account the money is yours.',
+                'a' => 'Yes. Unlimited dates, the whole routing on one address, recurring residencies with date exceptions, sub-schedules, two-way Google, Outlook and CalDAV sync, the embeddable calendar, free registration with a capacity limit, built-in analytics, ten newsletter emails a month, selling up to 25 paid tickets a month and scanning them at the door are all free forever. Unlimited ticket sales, passes and the live check-in dashboard are five dollars a month on Pro. There are zero platform fees on ticket sales at every tier, and past your own Stripe account the money is yours.',
             ],
             [
                 'q' => 'What happens when a date moves or gets pulled?',
@@ -826,7 +826,7 @@
                 </div>
                 <div class="es-stage-card p-6 text-center" data-reveal="panel">
                     <div class="es-stage-accent es-stage-num mb-1 text-3xl font-black">$5</div>
-                    <p class="es-stage-muted text-sm">A month for the Pro plan, which is where ticketing, passes and QR check-in live.</p>
+                    <p class="es-stage-muted text-sm">A month for Pro. The free plan sells 25 paid tickets a month and scans the door already; Pro takes the ceiling off and adds passes and the check-in dashboard.</p>
                 </div>
                 <div class="es-stage-card p-6 text-center" data-reveal="panel">
                     <div class="es-stage-accent es-stage-num mb-1 text-3xl font-black">10</div>
@@ -933,16 +933,16 @@
                     <div class="es-stage-card p-6" data-reveal="panel">
                         <div class="mb-3 flex flex-wrap items-center gap-2">
                             <h3 class="es-stage-ink text-lg font-bold">Tiers that open and close</h3>
-                            <span class="es-stage-plan es-stage-plan-pro">Pro</span>
+                            <span class="es-stage-plan">Free</span>
                         </div>
-                        <p class="es-stage-muted text-sm">Each type gets a price, a quantity, a maximum per order and a sales window, so an early-bird allocation stops on its own.</p>
+                        <p class="es-stage-muted text-sm">Each type gets a price, a quantity, a maximum per order and a sales window, so an early-bird allocation stops on its own. Free to 25 paid tickets a month, uncapped on Pro.</p>
                     </div>
                     <div class="es-stage-card p-6" data-reveal="panel">
                         <div class="mb-3 flex flex-wrap items-center gap-2">
                             <h3 class="es-stage-ink text-lg font-bold">Scanned on the way in</h3>
-                            <span class="es-stage-plan es-stage-plan-pro">Pro</span>
+                            <span class="es-stage-plan">Free</span>
                         </div>
-                        <p class="es-stage-muted text-sm">Every ticket carries a QR code, scanned from any phone, with a check-in dashboard that breaks the count down by ticket type.</p>
+                        <p class="es-stage-muted text-sm">Every ticket carries a QR code, scanned from any phone on any plan. Pro adds the check-in dashboard that breaks the running count down by ticket type.</p>
                     </div>
                     <div class="es-stage-card p-6" data-reveal="panel">
                         <div class="mb-3 flex flex-wrap items-center gap-2">
@@ -1457,7 +1457,7 @@
                         Put the routing up. <span class="es-stage-lit">Keep the door.</span>
                     </h2>
                     <p class="es-stage-onmuted mx-auto mb-10 max-w-2xl text-lg sm:text-xl">
-                        Publishing the whole run and its dates is free forever. Ticketing and check-in are five dollars a month, and nothing is taken from the sale.
+                        Publishing the whole run is free forever, and so are your first 25 ticket sales a month and scanning them at the door. Five dollars a month takes the ceiling off and adds passes and the check-in dashboard, and nothing is taken from the sale.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

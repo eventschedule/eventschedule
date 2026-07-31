@@ -501,9 +501,12 @@
         // ------------------------------------------------------------------
         // Every answer on this page is a factual claim, so each one is
         // traceable to docs/FEATURES.md or to code. Plan tiers in particular:
-        // newsletters are FREE (10/month), analytics is FREE, ticketing is
-        // Pro, custom domains and multiple team members are Enterprise, and
-        // the free plan has exactly ONE team member.
+        // newsletters are FREE (10/month), analytics is FREE, SELLING TICKETS
+        // is free up to 25 paid tickets a month with no platform fee (the
+        // ticketing extras - QR check-in, waitlist, promo codes, passes,
+        // add-ons, CSV export - are Pro), APPOINTMENT BOOKING is free with one
+        // appointment type, custom domains and multiple team members are
+        // Enterprise, and the free plan has exactly ONE team member.
         // ------------------------------------------------------------------
         $github = 'https://github.com/eventschedule/eventschedule';
 
@@ -584,7 +587,7 @@
                 'id' => 'tickets',
                 'no' => '03',
                 'name' => 'Tickets and money',
-                'note' => 'Ticketing is a Pro feature. What you charge stays between you and your audience.',
+                'note' => 'Selling tickets is on every plan, with no platform fee. What you charge stays between you and your audience.',
                 'items' => [
                     [
                         'q' => 'How do I start selling tickets?',
@@ -796,8 +799,9 @@
         // one-member cap) and an "Up to 5". "Unlimited", "Zero" and a price are
         // inclusions and stay affirmative.
         $rateAffirmative = fn (string $cell) => ! (
-            in_array($cell, ['No', 'No ticketing'], true)
-            || preg_match('/^\d[\d,]*$/', $cell)
+            $cell === 'No'
+            // A bare quantity (10 emails, 1 member) or one carrying its unit ("1 type").
+            || preg_match('/^\d[\d,]*(\s|$)/', $cell)
             || str_starts_with($cell, 'Up to ')
         );
         $rateRows = [
@@ -808,8 +812,10 @@
             ['Built-in analytics', 'Yes', 'Yes', 'Yes'],
             ['Free registration with a capacity limit', 'Yes', 'Yes', 'Yes'],
             ['Newsletter emails a month', '10', '100', '1,000'],
-            ['Ticketing, QR check-in and waitlist', 'No', 'Yes', 'Yes'],
-            ['Platform fee on ticket sales', 'No ticketing', 'Zero', 'Zero'],
+            ['Paid tickets you can sell a month', 'Up to 25', 'Unlimited', 'Unlimited'],
+            ['Platform fee on ticket sales', 'Zero', 'Zero', 'Zero'],
+            ['QR check-in, waitlist, promo codes and passes', 'No', 'Yes', 'Yes'],
+            ['Appointment booking', '1 type', 'Unlimited types', 'Unlimited types'],
             ['Remove Event Schedule branding', 'No', 'Yes', 'Yes'],
             ['Team members', '1', '1', 'Up to 5'],
             ['Custom domain, Internal and Unlisted events', 'No', 'No', 'Yes'],

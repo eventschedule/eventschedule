@@ -749,7 +749,11 @@
                                     </div>
                                 </div>
                                 <div class="absolute -top-3 ltr:-right-2 rtl:-left-2 rounded-full border border-sky-200 bg-white px-3 py-1 text-[10px] font-semibold text-sky-600 shadow-md dark:border-sky-500/30 dark:bg-[#15151c] dark:text-sky-400">
-                                    Sent to <span data-count-to="1,248">1,248</span> followers
+                                    {{-- Kept under the 1,000-recipient Enterprise ceiling
+                                         (Role::newsletterLimit): the allowance counts
+                                         recipients, so a send of 1,248 is not possible on
+                                         any plan. --}}
+                                    Sent to <span data-count-to="940">940</span> followers
                                 </div>
                             </div>
                         </div>
@@ -1575,7 +1579,7 @@
                                         <span class="es-pop flex h-12 w-12 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-sky-400 to-sky-500 text-sm font-bold text-white dark:border-[#101016]" style="--i: 1;">J</span>
                                         <span class="es-pop flex h-12 w-12 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-cyan-400 to-cyan-500 text-sm font-bold text-white dark:border-[#101016]" style="--i: 2;">A</span>
                                         <span class="es-pop flex h-12 w-12 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-emerald-400 to-emerald-500 text-sm font-bold text-white dark:border-[#101016]" style="--i: 3;">S</span>
-                                        <span class="es-pop flex h-12 w-12 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-xs font-bold text-gray-600 dark:border-[#101016] dark:bg-white/10 dark:text-gray-300" style="--i: 4;">+1.2k</span>
+                                        <span class="es-pop flex h-12 w-12 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-xs font-bold text-gray-600 dark:border-[#101016] dark:bg-white/10 dark:text-gray-300" style="--i: 4;">+936</span>
                                     </div>
                                     <div class="es-pop flex items-center gap-3 rounded-2xl border border-gray-200 bg-white px-5 py-3 shadow-lg dark:border-white/10 dark:bg-[#15151c]" style="--i: 5;">
                                         <span class="flex h-9 w-9 items-center justify-center rounded-full bg-sky-100 dark:bg-sky-500/20">
@@ -1583,7 +1587,11 @@
                                         </span>
                                         <div class="text-left rtl:text-right">
                                             <div class="text-sm font-semibold text-gray-900 dark:text-white">Newsletter sent</div>
-                                            <div class="text-xs text-gray-500 dark:text-gray-400">1,248 followers notified</div>
+                                            {{-- "notified" read as an automatic alert, which
+                                                 does not exist: the owner composes and sends
+                                                 every newsletter. Recipients is also the unit
+                                                 the monthly allowance actually counts. --}}
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">940 recipients</div>
                                         </div>
                                         <svg class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                                     </div>

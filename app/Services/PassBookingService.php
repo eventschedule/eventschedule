@@ -87,7 +87,7 @@ class PassBookingService
 
         // Note: the events table has no is_deleted column (unlike tickets/sales);
         // coveredEventIds already scopes ids to the pass's own schedule.
-        return Event::with(['tickets', 'creatorRole'])
+        return Event::with(['tickets', 'creatorRole', 'roles'])
             ->whereIn('id', $ids)
             ->get();
     }
@@ -317,7 +317,7 @@ class PassBookingService
         $passTicket = $saleTicket->ticket;
         $schedule = $this->homeSchedule($sale);
 
-        $event = Event::with(['tickets', 'creatorRole'])->find($eventId);
+        $event = Event::with(['tickets', 'creatorRole', 'roles'])->find($eventId);
         if (! $event || ! $passTicket->covers($event, $schedule)) {
             $result->status = 'not_covered';
 

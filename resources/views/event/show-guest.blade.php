@@ -2170,7 +2170,9 @@
                 @click="$dispatch('show-event-form')"
                 class="flex-1 justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                 style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
-            @if ($event->allTicketsSoldOut($date))
+            @if ($event->allTicketsSoldOut($date) && $event->isPro())
+              {{-- Must match the desktop CTA's condition exactly; the waitlist is Pro, so offering
+                   it here on a free schedule would send the guest to a form that 404s. --}}
               {{ __('messages.join_waitlist') }}
             @else
               {{ $event->areTicketsFree() ? $role->customLabel('get_tickets') : $role->customLabel('buy_tickets') }}

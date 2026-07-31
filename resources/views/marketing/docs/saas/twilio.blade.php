@@ -1,7 +1,7 @@
 <x-docs-page
     key="saas/twilio"
-    description="Set up Twilio for phone number verification and WhatsApp messaging in your SaaS Event Schedule deployment."
-    lede="Set up Twilio to enable phone number verification and WhatsApp messaging for your Event Schedule deployment."
+    description="Set up Twilio for SMS phone verification, SMS invitations and WhatsApp event creation in your SaaS Event Schedule deployment."
+    lede="Set up Twilio to enable SMS phone verification, SMS invitations and WhatsApp event creation across your Event Schedule deployment."
 >
     <x-slot:toc>
         <x-doc-nav-link href="#overview">Overview</x-doc-nav-link>
@@ -21,36 +21,45 @@
             </svg>
             Overview
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Twilio is an optional integration that enables two features in Event Schedule:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Twilio is an optional integration. One Twilio account serves the whole deployment: you configure it once in <code class="doc-inline-code">.env</code>, and every schedule on the platform uses it. There is nothing for an individual schedule owner to connect. Twilio powers exactly three things:</p>
 
         <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
                     <tr>
                         <th>Feature</th>
-                        <th>Description</th>
+                        <th>What it does</th>
+                        <th>Requires</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td><strong class="text-gray-900 dark:text-white">Phone Verification</strong></td>
-                        <td>Users and schedules can verify their phone numbers via SMS code, adding trust and enabling phone-based contact</td>
+                        <td><strong class="text-gray-900 dark:text-white">Phone verification</strong></td>
+                        <td>Users verify their account phone number, and editors verify a schedule's public phone number, with a 6-digit code sent by SMS</td>
+                        <td>Hosted deployments</td>
                     </tr>
                     <tr>
-                        <td><strong class="text-gray-900 dark:text-white">WhatsApp Messaging</strong></td>
-                        <td>Send event notifications and updates to attendees via WhatsApp, with support for the 24-hour messaging window</td>
+                        <td><strong class="text-gray-900 dark:text-white">SMS invitations</strong></td>
+                        <td>When an invited team member, venue or talent has a phone number but no email address on file, the sign-up link goes out by SMS instead of email</td>
+                        <td>Hosted deployments</td>
                     </tr>
                     <tr>
-                        <td><strong class="text-gray-900 dark:text-white">WhatsApp Event Creation</strong></td>
-                        <td>Organizers with verified phone numbers can create events by sending a WhatsApp message with event details or a flyer image. AI parses the content and creates the event automatically (Enterprise feature).</td>
+                        <td><strong class="text-gray-900 dark:text-white">WhatsApp event creation</strong></td>
+                        <td>An organizer sends a text message or a flyer photo to your Twilio number and AI turns it into an event on their default schedule</td>
+                        <td>Enterprise plan, plus an AI key</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
         <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">What Twilio is not used for</div>
+            <p>Event Schedule never sends SMS or WhatsApp messages to attendees, ticket buyers or followers. Ticket confirmations, event change notices and newsletters are all email. The only outbound WhatsApp messages the app sends are replies to a message that someone has just sent to your Twilio number, so there is no broadcast or reminder channel to plan for.</p>
+        </div>
+
+        <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Note</div>
-            <p>Twilio is entirely optional. If not configured, the app will gracefully skip SMS and WhatsApp features without errors.</p>
+            <p>Twilio is entirely optional. If it is not configured, the app skips SMS and WhatsApp without errors: the verification controls are hidden, invitations fall back to email, and the WhatsApp webhook simply does nothing.</p>
         </div>
     </section>
 
@@ -66,13 +75,14 @@
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Sign up for a Twilio account at <code class="doc-inline-code">twilio.com</code></li>
             <li>From the Twilio Console dashboard, note your <strong class="text-gray-900 dark:text-white">Account SID</strong> and <strong class="text-gray-900 dark:text-white">Auth Token</strong></li>
-            <li>Navigate to <strong class="text-gray-900 dark:text-white">Phone Numbers</strong> &gt; <strong class="text-gray-900 dark:text-white">Manage</strong> &gt; <strong class="text-gray-900 dark:text-white">Buy a number</strong></li>
-            <li>Purchase a phone number with <strong class="text-gray-900 dark:text-white">SMS</strong> capability (and <strong class="text-gray-900 dark:text-white">WhatsApp</strong> if you plan to use WhatsApp messaging)</li>
+            <li>Navigate to <strong class="text-gray-900 dark:text-white">Phone Numbers</strong> &rarr; <strong class="text-gray-900 dark:text-white">Manage</strong> &rarr; <strong class="text-gray-900 dark:text-white">Buy a number</strong></li>
+            <li>Purchase a phone number with <strong class="text-gray-900 dark:text-white">SMS</strong> capability</li>
+            <li>If you want WhatsApp event creation, register that same number as a WhatsApp sender as well. Event Schedule sends WhatsApp from the number you put in <code class="doc-inline-code">TWILIO_FROM_NUMBER</code>, so it does not need a second number.</li>
         </ol>
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Tip</div>
-            <p>Twilio provides trial credit for new accounts, which is sufficient for testing. You can upgrade to a paid account when you are ready to go live.</p>
+            <p>Twilio provides trial credit for new accounts, which is sufficient for testing. Note that a trial account can only message numbers you have added as verified caller IDs, so a code that never arrives during testing is usually the trial restriction rather than a misconfiguration. You can upgrade to a paid account when you are ready to go live.</p>
         </div>
     </section>
 
@@ -91,19 +101,28 @@
 TWILIO_AUTH_TOKEN=your_auth_token
 TWILIO_FROM_NUMBER=+1234567890</code></pre>
 
-        <div class="space-y-4 mb-6 mt-6">
+        <p class="text-gray-600 dark:text-gray-300 mb-6 mt-4">All three are required. If any one of them is empty, both SMS and WhatsApp stay switched off: the app writes a warning to the log and carries on rather than failing.</p>
+
+        <h3 class="doc-subheading">Variable reference</h3>
+        <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">TWILIO_SID</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Your Twilio Account SID. Find it on the <strong>Twilio Console</strong> dashboard, displayed prominently at the top of the page.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">TWILIO_AUTH_TOKEN</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Your Twilio Auth Token. Found on the same Console dashboard page. Click to reveal the token and copy it.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Your Twilio Auth Token. Found on the same Console dashboard page. Click to reveal the token and copy it. The same token is used to authenticate outgoing requests and to validate the signature on incoming WhatsApp webhooks, so rotating it in Twilio means updating it here too.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">TWILIO_FROM_NUMBER</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">The Twilio phone number to send SMS from, in E.164 format (e.g., <code class="doc-inline-code">+15551234567</code>). This must be a number you have purchased or verified in your Twilio account.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The Twilio phone number to send from, in E.164 format (e.g., <code class="doc-inline-code">+15551234567</code>). This must be a number you have purchased or verified in your Twilio account.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">WhatsApp uses this same number, sent as <code class="doc-inline-code">whatsapp:</code> plus the value above. There is no separate WhatsApp variable.</p>
             </div>
+        </div>
+
+        <div class="doc-callout doc-callout-tip">
+            <div class="doc-callout-title">Tip</div>
+            <p>If you cache your configuration, run <code class="doc-inline-code">php artisan config:clear</code> after editing <code class="doc-inline-code">.env</code>, or the old values keep being used.</p>
         </div>
     </section>
 
@@ -115,24 +134,34 @@ TWILIO_FROM_NUMBER=+1234567890</code></pre>
             </svg>
             Phone Number Verification
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Once Twilio is configured, phone verification is automatically enabled in two places:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Once Twilio is configured, a verification control appears next to every saved but unverified phone number, in two places:</p>
 
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">User profiles</strong> - Users can add and verify a phone number on their account. A 6-digit code is sent via SMS and must be entered to confirm ownership.</li>
-            <li><strong class="text-gray-900 dark:text-white">Schedule contact info</strong> - Schedule editors can verify a phone number for their schedule, which is displayed as verified contact information on the public page.</li>
+            <li><strong class="text-gray-900 dark:text-white">Account settings</strong> - the <strong class="text-gray-900 dark:text-white">Phone Number</strong> field on a user's own profile. While the number is unverified the page reads "Your phone number is unverified." with a <strong class="text-gray-900 dark:text-white">Click here to verify your phone</strong> link underneath.</li>
+            <li><strong class="text-gray-900 dark:text-white">Schedule settings, Details &rarr; Contact Info</strong> - the schedule's <strong class="text-gray-900 dark:text-white">Phone Number</strong> field. Any editor of the schedule can run the verification, and the result belongs to the schedule rather than to the person who ran it.</li>
         </ul>
 
-        <h3 class="doc-subheading">How It Works</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Both controls are hosted-only. A single-tenant selfhosted install does not show them even with Twilio configured.</p>
+
+        <h3 class="doc-subheading">How it works</h3>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>The user enters a phone number in E.164 format (e.g., <code class="doc-inline-code">+15551234567</code>)</li>
-            <li>A 6-digit verification code is sent via SMS</li>
-            <li>The code is valid for 10 minutes</li>
-            <li>After successful verification, the phone number is marked as verified</li>
+            <li>Enter the number and save. The field has a country selector and stores the number in E.164 format (e.g., <code class="doc-inline-code">+15551234567</code>); the verify link only appears once a number has been saved.</li>
+            <li>Click <strong class="text-gray-900 dark:text-white">Click here to verify your phone</strong>. A 6-digit code is sent by SMS, reading "Your Event Schedule verification code is: ...".</li>
+            <li>Type the code into the box that appears and click <strong class="text-gray-900 dark:text-white">Verify</strong>. The code is valid for 10 minutes.</li>
+            <li>On success the number is marked verified and the control disappears. Editing the number later clears the verification and the control comes back.</li>
         </ol>
 
+        <h3 class="doc-subheading">What a verified number unlocks</h3>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">A public phone number.</strong> A schedule's phone is only shown to visitors when it has been verified <em>and</em> the <strong class="text-gray-900 dark:text-white">Show phone number</strong> toggle is on. The same rule governs a venue's phone number on an event page.</li>
+            <li><strong class="text-gray-900 dark:text-white">Platform discovery.</strong> A schedule qualifies for the platform's public listings once either its email address or its phone number is verified.</li>
+            <li><strong class="text-gray-900 dark:text-white">WhatsApp.</strong> Incoming WhatsApp messages are matched to an account by verified phone number, so nobody can create events by WhatsApp until their account phone is verified.</li>
+            <li><strong class="text-gray-900 dark:text-white">Claiming.</strong> When a user verifies their account phone, any unclaimed schedule carrying the same number and created within the past year is attached to that account as owner, and becomes their default schedule if they do not already have one.</li>
+        </ul>
+
         <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Rate Limiting</div>
-            <p>To prevent abuse, verification codes are limited to 5 requests per hour per phone number. Failed verification attempts are limited to 5 per 10 minutes.</p>
+            <div class="doc-callout-title">Rate limiting</div>
+            <p>To prevent abuse, a phone number can be sent at most 5 codes per hour. After 5 wrong entries within 10 minutes the pending code is discarded and a fresh one has to be requested.</p>
         </div>
     </section>
 
@@ -144,31 +173,48 @@ TWILIO_FROM_NUMBER=+1234567890</code></pre>
             </svg>
             WhatsApp Setup
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">To send WhatsApp messages, your Twilio number must be registered as a WhatsApp sender.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">WhatsApp on Event Schedule is inbound-first: an organizer messages your Twilio number, the app creates the event, and the confirmation goes back on the same thread. To accept those messages, your Twilio number has to be registered as a WhatsApp sender and pointed at the app's webhook.</p>
 
-        <h3 class="doc-subheading">Register as a WhatsApp Sender</h3>
+        <h3 class="doc-subheading">Register as a WhatsApp sender</h3>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>In the Twilio Console, go to <strong class="text-gray-900 dark:text-white">Messaging</strong> &gt; <strong class="text-gray-900 dark:text-white">Senders</strong> &gt; <strong class="text-gray-900 dark:text-white">WhatsApp Senders</strong></li>
+            <li>In the Twilio Console, go to <strong class="text-gray-900 dark:text-white">Messaging</strong> &rarr; <strong class="text-gray-900 dark:text-white">Senders</strong> &rarr; <strong class="text-gray-900 dark:text-white">WhatsApp Senders</strong></li>
             <li>Click <strong class="text-gray-900 dark:text-white">Add WhatsApp Sender</strong> and follow the guided setup</li>
-            <li>Submit your business profile and messaging templates for Meta approval</li>
-            <li>Once approved, your number can send WhatsApp messages</li>
+            <li>Submit your business profile for Meta approval</li>
+            <li>Once approved, your number can send and receive WhatsApp messages</li>
         </ol>
 
-        <h3 class="doc-subheading">Configure the Webhook URL</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Set the incoming message webhook so Event Schedule can receive WhatsApp replies:</p>
+        <h3 class="doc-subheading">Configure the webhook URL</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Set the incoming message webhook so Event Schedule can receive WhatsApp messages:</p>
         <ol class="doc-list doc-list-numbered mb-6">
             <li>In the Twilio Console, go to your WhatsApp Sender settings</li>
             <li>Set the webhook URL to: <code class="doc-inline-code">https://yourdomain.com/api/whatsapp/webhook</code></li>
             <li>Set the HTTP method to <strong class="text-gray-900 dark:text-white">POST</strong></li>
         </ol>
 
-        <div class="doc-callout doc-callout-tip">
-            <div class="doc-callout-title">24-Hour Messaging Window</div>
-            <p>WhatsApp enforces a 24-hour reply window. You can send free-form messages only within 24 hours of a user's last message. Outside this window, you must use pre-approved message templates. Plan your messaging strategy accordingly.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The webhook lives on your main application domain rather than on a tenant subdomain, it needs no authentication, and it accepts at most 60 requests per minute.</p>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Every request is signature checked</div>
+            <p>The app recomputes Twilio's <code class="doc-inline-code">X-Twilio-Signature</code> from your auth token and the exact URL Twilio called. If they do not match, the request is dropped silently and an empty reply is returned, so the URL you register has to match the URL the app sees, scheme included. If a proxy or load balancer terminates TLS in front of the app, make sure it is trusted so the app still builds an <code class="doc-inline-code">https://</code> URL.</p>
         </div>
 
-        <h3 class="doc-subheading">Event Creation</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">When WhatsApp is configured, organizers with verified phone numbers and Enterprise plans can send messages to create events. AI parses both text messages and images (such as flyers) to extract event details automatically.</p>
+        <div class="doc-callout doc-callout-tip">
+            <div class="doc-callout-title">No message templates to submit</div>
+            <p>WhatsApp only allows free-form messages within 24 hours of the recipient's last message. Every message Event Schedule sends is an immediate reply to a message that has just arrived, so it is always inside that window. There are no campaigns or reminders to schedule and no message templates to get approved.</p>
+        </div>
+
+        <h3 class="doc-subheading">Creating events by WhatsApp <x-doc-badge plan="enterprise" /></h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Once the sender and the webhook are live, an organizer can send event details as text, or a photo of a flyer or poster, and AI parses the content into an event on their default schedule.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">An incoming message has to satisfy all of the following, or the sender gets an explanatory reply instead of an event:</p>
+        <ul class="doc-list mb-6">
+            <li>The sending number belongs to a user account whose phone number has been <a href="#phone-verification" class="doc-link">verified</a>.</li>
+            <li>That user has a <strong class="text-gray-900 dark:text-white">Default schedule</strong> set in their account settings, or is an editor of exactly one schedule.</li>
+            <li>The message carries text, an image, or both. Only the first attachment is read, and only if it is an image.</li>
+            <li>Your deployment has an AI key configured (<code class="doc-inline-code">GEMINI_API_KEY</code>, or <code class="doc-inline-code">OPENAI_API_KEY</code>). It is the same parser used by AI import in the admin portal.</li>
+        </ul>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The reply carries the new event's name, link and date. If the parser recognises the event as one that already exists, it replies with a link to it rather than creating a duplicate.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">For user-facing instructions on creating events via WhatsApp, see the <a href="{{ route('marketing.docs.creating_events') }}#whatsapp" class="doc-link">Creating Events guide</a>.</p>
     </section>
@@ -183,17 +229,27 @@ TWILIO_FROM_NUMBER=+1234567890</code></pre>
         </h2>
 
         <h3 class="doc-subheading">Testing SMS</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">During development, you can verify SMS is working by checking the Laravel log file:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Requesting a phone verification code is the quickest end-to-end test, because the code is sent immediately rather than queued. Watch the Laravel log while you do it:</p>
         <pre class="doc-code-block"><code>tail -f storage/logs/laravel.log</code></pre>
-        <p class="text-gray-600 dark:text-gray-300 mb-6 mt-4">If Twilio is not configured, the app will log a warning: <code class="doc-inline-code">Twilio SMS not configured, skipping SMS send</code>. If configured but a send fails, error details including the Twilio response will be logged.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4 mt-4">If a variable is missing, the app logs <code class="doc-inline-code">Twilio SMS not configured, skipping SMS send</code> (or <code class="doc-inline-code">Twilio not configured, skipping WhatsApp send</code>) and carries on. If Twilio is configured but rejects the send, the failure is logged with the HTTP status and Twilio's response body, which usually names the problem outright.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Invitation messages are dispatched to the queue instead, so a stopped queue worker looks exactly like a broken Twilio account. Check the worker before you check the credentials.</p>
 
         <h3 class="doc-subheading">Testing WhatsApp</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Twilio provides a WhatsApp sandbox for testing without requiring Meta approval:</p>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>In the Twilio Console, go to <strong class="text-gray-900 dark:text-white">Messaging</strong> &gt; <strong class="text-gray-900 dark:text-white">Try it out</strong> &gt; <strong class="text-gray-900 dark:text-white">Send a WhatsApp message</strong></li>
-            <li>Follow the instructions to join the sandbox by sending a message from your phone to the Twilio sandbox number</li>
-            <li>Once connected, you can send and receive test messages through the sandbox</li>
+            <li>In the Twilio Console, go to <strong class="text-gray-900 dark:text-white">Messaging</strong> &rarr; <strong class="text-gray-900 dark:text-white">Try it out</strong> &rarr; <strong class="text-gray-900 dark:text-white">Send a WhatsApp message</strong></li>
+            <li>Follow the instructions to join the sandbox by sending the join code from your phone to the Twilio sandbox number</li>
+            <li>Point the sandbox's incoming-message webhook at <code class="doc-inline-code">https://yourdomain.com/api/whatsapp/webhook</code> using <strong class="text-gray-900 dark:text-white">POST</strong></li>
+            <li>Set <code class="doc-inline-code">TWILIO_FROM_NUMBER</code> to the sandbox number while you are testing. Replies are always sent from whatever that variable holds, so a mismatch shows up as an event that gets created without any confirmation coming back.</li>
         </ol>
+
+        <h3 class="doc-subheading">Troubleshooting</h3>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">No reply at all.</strong> The signature check almost certainly failed, and by design that produces an empty response rather than an error. Compare the URL in Twilio's Console debugger with the URL the app builds, and confirm the auth token matches.</li>
+            <li><strong class="text-gray-900 dark:text-white">"Your phone number is not linked to an account."</strong> The sending number does not match a user with a verified phone number. Verify it in account settings first.</li>
+            <li><strong class="text-gray-900 dark:text-white">"No default schedule set."</strong> The user edits more than one schedule and has not chosen a <strong class="text-gray-900 dark:text-white">Default schedule</strong> in account settings.</li>
+            <li><strong class="text-gray-900 dark:text-white">"Could not create event."</strong> The AI parser returned nothing usable, or no AI key is configured. The log entry for the request has the detail.</li>
+        </ul>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Note</div>

@@ -550,7 +550,7 @@
             ['L06', 'Calendly', 'marketing.replace_calendly', 'Scheduling and tracking',
                 'One-to-one bookings',
                 'Appointment types with weekly hours, per-date overrides, buffers and optional payment, booked on a public page.',
-                ['Pro']],
+                ['Free', 'Pro']],
             ['L07', 'SurveyMonkey', 'marketing.replace_surveymonkey', 'Registration and forms',
                 'A survey doing registration duty',
                 'Purpose-built registration, plus post-event feedback with star ratings and comments from the people who came.',
@@ -604,7 +604,7 @@
             ],
             [
                 'q' => 'Is one platform really cheaper than five?',
-                'a' => 'Publishing a schedule is free forever, and that free plan already covers the page, unlimited events, two-way Google, Outlook and CalDAV sync, RSVP with a capacity per date, built-in analytics, the embeddable calendar and newsletters at ten emails a month. Pro is five dollars a month and adds ticketing, QR check-in, event graphics, appointment booking and the API. Enterprise is fifteen. Event Schedule charges zero platform fees on ticket sales, so the door money is yours minus Stripe\'s processing fee.',
+                'a' => 'Publishing a schedule is free forever, and that free plan already covers the page, unlimited events, two-way Google, Outlook and CalDAV sync, RSVP with a capacity per date, selling up to 25 paid tickets a month, one appointment type, built-in analytics, the embeddable calendar and newsletters at ten emails a month. Pro is five dollars a month and takes the ceiling off the selling, then adds QR check-in, event graphics, more appointment types and the API. Enterprise is fifteen. Event Schedule charges zero platform fees on ticket sales on every plan, free included, so the door money is yours minus Stripe\'s processing fee.',
             ],
             [
                 'q' => 'What does Event Schedule not replace?',
@@ -697,7 +697,7 @@
                         </div>
                     </div>
                     <p class="es-belt-on-muted es-belt-xs mt-3 text-center">
-                        Twelve loops on one strap. Free to publish, five dollars a month for the paid half, and zero platform fees on ticket sales.
+                        Twelve loops on one strap. Free to publish and to sell your first 25 tickets a month, five dollars a month for the paid half, and zero platform fees on every plan.
                     </p>
                 </div>
             </div>
@@ -963,18 +963,20 @@
                         <span class="es-belt-ink text-3xl font-black">$0</span>
                         <span class="es-belt-tier es-belt-tier-free">Free</span>
                     </div>
-                    <h3 class="es-belt-ink mb-3 text-lg font-bold">Publish and be found</h3>
+                    <h3 class="es-belt-ink mb-3 text-lg font-bold">Publish, sell, be found</h3>
                     <ul class="es-belt-muted es-belt-small space-y-2">
                         <li>The schedule page and unlimited events</li>
                         <li>Two-way Google, Outlook and CalDAV sync</li>
                         <li>Free RSVP with a capacity per date</li>
+                        <li>Selling, up to 25 paid tickets a month, no platform fee</li>
+                        <li>One appointment type on a public booking page</li>
                         <li>Newsletters, ten emails a month, counting each recipient as one</li>
                         <li>Built-in analytics and the embeddable calendar</li>
                         <li>A QR code for the schedule page</li>
                         <li>Sub-schedules, agenda parts, recurring dates</li>
                         <li>Backup and restore, images included</li>
                     </ul>
-                    <p class="es-belt-muted es-belt-xs mt-auto pt-5">Covers all of L02, L04 and L12, and the unpaid half of L01, L05, L07, L09, L10 and L11.</p>
+                    <p class="es-belt-muted es-belt-xs mt-auto pt-5">Covers all of L02, L04 and L12, and the unpaid half of L01, L05, L06, L07, L09, L10 and L11.</p>
                 </div>
 
                 <div class="es-belt-card flex flex-col p-7" data-reveal="panel">
@@ -982,18 +984,18 @@
                         <span class="es-belt-ink text-3xl font-black">$5</span>
                         <span class="es-belt-tier es-belt-tier-pro">Pro</span>
                     </div>
-                    <h3 class="es-belt-ink mb-3 text-lg font-bold">Sell and let people book</h3>
+                    <h3 class="es-belt-ink mb-3 text-lg font-bold">Sell without a ceiling</h3>
                     <ul class="es-belt-muted es-belt-small space-y-2">
-                        <li>Ticketing with QR check-in and a check-in dashboard</li>
-                        <li>Zero platform fees through your own Stripe account</li>
+                        <li>Unlimited ticket sales, QR check-in and a check-in dashboard</li>
+                        <li>Passes, subscriptions and individual tickets</li>
                         <li>Event graphics generated from the event</li>
-                        <li>Appointment booking on a public page</li>
+                        <li>As many appointment types as you need</li>
                         <li>Your own questions at checkout, promo codes, waitlist</li>
                         <li>Polls, post-event feedback, sales CSV export</li>
                         <li>REST API, webhooks, custom CSS, ticket widget embed</li>
                         <li>One hundred newsletter emails a month</li>
                     </ul>
-                    <p class="es-belt-muted es-belt-xs mt-auto pt-5">Covers all of L03, L06 and L08, and the paid half of L01, L05, L07, L09, L10 and L11.</p>
+                    <p class="es-belt-muted es-belt-xs mt-auto pt-5">Covers all of L03 and L08, and the paid half of L01, L05, L06, L07, L09, L10 and L11.</p>
                 </div>
 
                 <div class="es-belt-card flex flex-col p-7" data-reveal="panel">
@@ -1046,9 +1048,9 @@
                 <div class="es-bento group relative md:col-span-2" data-reveal="panel" data-tilt="3.5">
                     <div class="es-tilt-inner es-belt-card relative flex h-full flex-col overflow-hidden p-7">
                         <div class="relative z-10">
-                            <span class="es-belt-tier es-belt-tier-pro mb-3 inline-flex">Pro</span>
+                            <span class="es-belt-tier es-belt-tier-free mb-3 inline-flex">Free</span>
                             <h3 class="es-belt-ink mb-2 text-xl font-bold">Zero platform fees on ticket sales</h3>
-                            <p class="es-belt-muted es-belt-small">Money moves through your own Stripe account and Event Schedule takes none of it. The only cut is Stripe's processing fee, which is the same cut it would take anywhere else. This is usually the line that pays for the whole switch.</p>
+                            <p class="es-belt-muted es-belt-small">Money moves through your own Stripe account and Event Schedule takes none of it, on every plan including the free one. The only cut is Stripe's processing fee, which is the same cut it would take anywhere else. This is usually the line that pays for the whole switch.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>

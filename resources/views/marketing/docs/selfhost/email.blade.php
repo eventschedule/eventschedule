@@ -1,8 +1,8 @@
 <x-docs-page
     key="selfhost/email"
-    description="Configure email sending for selfhosted Event Schedule. Set up SMTP, Mailgun, Amazon SES, or other mail drivers for ticket confirmations and newsletters."
-    lede="Configure email delivery so your Event Schedule instance can send ticket confirmations, newsletters, follower notifications, and more."
-    article-description="Configure email sending for your selfhosted Event Schedule instance. Set up SMTP, Mailgun, Amazon SES, or other mail drivers for ticket confirmations, newsletters, and notifications."
+    description="Configure email sending for selfhosted Event Schedule. Set up SMTP, Amazon SES, sendmail or another mail driver for ticket confirmations and newsletters."
+    lede="Configure email delivery so your Event Schedule instance can send ticket confirmations, newsletters, account emails and owner notifications."
+    article-description="Configure email sending for your selfhosted Event Schedule instance. Set up SMTP, Amazon SES or another mail driver for ticket confirmations, newsletters and notifications."
 >
     <x-slot:toc>
         <x-doc-nav-link href="#overview">Overview</x-doc-nav-link>
@@ -22,30 +22,35 @@
             </svg>
             Overview
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Event Schedule uses email for several features. Without a working email configuration, these features will not function:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Mail is configured once for the whole install, in your <code class="doc-inline-code">.env</code> file. Every schedule on the instance sends through that one mail transport. Without a working mail configuration these features do nothing:</p>
 
         <div class="grid md:grid-cols-2 gap-4 mb-6">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Ticket Confirmations</h4>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">Automatic emails sent to buyers after purchasing tickets, including ticket details and QR codes.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Ticket and booking confirmations</h4>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">The confirmation a buyer receives after checkout, with the ticket details and QR code, plus appointment confirmations, reminders and reschedule notices, and gift card deliveries.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Newsletters</h4>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">Send newsletters to followers of your schedules with upcoming event announcements.</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Newsletters that a schedule owner writes and sends to their followers. Following is an opt-in to be emailed by the schedule; there is no automatic email when a new event is added.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Follower Notifications</h4>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">Automatic notifications sent to followers when new events are published on a schedule.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Guest notifications</h4>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Waitlist openings when a spot frees up, post-event feedback requests, and carpool messages between attendees.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Account Emails</h4>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">Password resets, email verification, and other account-related emails.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Account and owner emails</h4>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Password resets, email verification for accounts and for a schedule's contact address, team member invitations, the daily digest of pending booking requests, opt-in alerts when a ticket sells, and the scheduled event graphic emails an owner sends to their own recipient list.</p>
             </div>
         </div>
 
         <div class="doc-callout doc-callout-warning">
-            <div class="doc-callout-title">Important</div>
-            <p>By default, Event Schedule uses the <code class="doc-inline-code">log</code> mail driver which writes emails to your log file instead of sending them. You must configure a real mail driver before going to production.</p>
+            <div class="doc-callout-title">The default is not a real mail transport</div>
+            <p>Out of the box <code class="doc-inline-code">MAIL_MAILER=log</code>. Event Schedule treats <code class="doc-inline-code">log</code> and <code class="doc-inline-code">array</code> as "no mail transport", so ticket and pass confirmations, appointment emails, gift card emails, sale alerts, feedback requests, carpool messages and poll suggestion notices are <strong class="text-gray-900 dark:text-white">skipped entirely</strong> rather than delivered. Mail that is not gated this way, such as password resets, verification emails, team invitations, waitlist openings and newsletters, is written into <code class="doc-inline-code">storage/logs/laravel.log</code> instead of being sent. Configure a real driver before you take a single booking.</p>
+        </div>
+
+        <div class="doc-callout doc-callout-info mt-6">
+            <div class="doc-callout-title">Install-wide, and never plan-gated</div>
+            <p>A selfhosted install resolves to the Enterprise feature set, so no email feature here is held back by a plan. Note the difference from the hosted service: the per-schedule <strong class="text-gray-900 dark:text-white">Email Settings</strong> tab, found in a schedule's Settings under Integrations, is only rendered when the app runs in hosted mode, and the monthly newsletter allowance, which on the hosted service counts individual recipients rather than newsletters, does not apply to a selfhosted install at all. Your schedules send unlimited newsletters to unlimited recipients through the mail transport you configure below.</p>
         </div>
     </section>
 
@@ -58,7 +63,15 @@
             </svg>
             SMTP Setup
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">SMTP is the most common way to send email. You can use any SMTP provider such as your hosting provider's mail server, Gmail, Outlook, or a transactional email service.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">SMTP is the recommended setup for a selfhosted install: it works with every provider and needs no extra packages. You can point it at your hosting provider's mail server, a mailbox at Gmail or Microsoft 365, or a transactional email service such as Amazon SES, Mailgun or Postmark.</p>
+
+        <h3 class="doc-subheading">Configure it in four steps</h3>
+        <ol class="doc-list doc-list-numbered mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Get SMTP credentials from your provider.</strong> A host name, a port, a username and a password. Transactional services issue SMTP credentials that are separate from their API keys.</li>
+            <li><strong class="text-gray-900 dark:text-white">Add the variables to <code class="doc-inline-code">.env</code>.</strong> Use the block below as a starting point and replace every value.</li>
+            <li><strong class="text-gray-900 dark:text-white">Clear the config cache.</strong> Run <code class="doc-inline-code">php artisan config:clear</code>, otherwise the old values keep being used.</li>
+            <li><strong class="text-gray-900 dark:text-white">Send yourself a test message.</strong> See <a href="#testing" class="doc-link">Testing</a> below.</li>
+        </ol>
 
         <h3 class="doc-subheading">Environment Variables</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Add these to your <code class="doc-inline-code">.env</code> file:</p>
@@ -129,6 +142,16 @@
                         <td>Default sender name</td>
                         <td><code class="doc-inline-code">${APP_NAME}</code> (uses your app name)</td>
                     </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">MAIL_URL</code></td>
+                        <td>Optional. A full SMTP connection string that stands in for the host, port, username and password values above. Useful when a provider hands you a single DSN</td>
+                        <td><code class="doc-inline-code">smtp://user:pass@smtp.example.com:587</code></td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">MAIL_EHLO_DOMAIN</code></td>
+                        <td>Optional. The domain announced in the SMTP handshake. Defaults to the host in your <code class="doc-inline-code">APP_URL</code>, which is usually correct; set it only if your provider requires a specific EHLO name</td>
+                        <td><code class="doc-inline-code">yourdomain.com</code></td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -141,7 +164,7 @@
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Gmail / Google Workspace</h4>
                 <div class="text-gray-600 dark:text-gray-400 text-sm space-y-1">
                     <p>Host: <code class="doc-inline-code">smtp.gmail.com</code> | Port: <code class="doc-inline-code">587</code> | Encryption: <code class="doc-inline-code">tls</code></p>
-                    <p>Requires an <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300">App Password</a> if 2FA is enabled.</p>
+                    <p>Requires an <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" class="doc-link">App Password</a> if 2FA is enabled. Personal mailboxes also apply a daily sending cap, so this suits a small instance rather than a busy one.</p>
                 </div>
             </div>
 
@@ -149,6 +172,7 @@
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Outlook / Microsoft 365</h4>
                 <div class="text-gray-600 dark:text-gray-400 text-sm space-y-1">
                     <p>Host: <code class="doc-inline-code">smtp.office365.com</code> | Port: <code class="doc-inline-code">587</code> | Encryption: <code class="doc-inline-code">tls</code></p>
+                    <p>SMTP authentication has to be enabled for the mailbox in the Microsoft 365 admin center; many tenants have it off by default.</p>
                 </div>
             </div>
 
@@ -156,7 +180,7 @@
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Amazon SES</h4>
                 <div class="text-gray-600 dark:text-gray-400 text-sm space-y-1">
                     <p>Host: <code class="doc-inline-code">email-smtp.us-east-1.amazonaws.com</code> (region-specific) | Port: <code class="doc-inline-code">587</code> | Encryption: <code class="doc-inline-code">tls</code></p>
-                    <p>Use your SES SMTP credentials (not your AWS access keys).</p>
+                    <p>Use your SES SMTP credentials (not your AWS access keys). SES also has a dedicated driver, see <a href="#drivers" class="doc-link">Other Mail Drivers</a>.</p>
                 </div>
             </div>
 
@@ -164,7 +188,7 @@
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Mailgun</h4>
                 <div class="text-gray-600 dark:text-gray-400 text-sm space-y-1">
                     <p>Host: <code class="doc-inline-code">smtp.mailgun.org</code> | Port: <code class="doc-inline-code">587</code> | Encryption: <code class="doc-inline-code">tls</code></p>
-                    <p>Username is usually <code class="doc-inline-code">postmaster@yourdomain.com</code>.</p>
+                    <p>Username is usually <code class="doc-inline-code">postmaster@yourdomain.com</code>. Mailgun is supported through SMTP; there is no <code class="doc-inline-code">mailgun</code> API driver in Event Schedule.</p>
                 </div>
             </div>
         </div>
@@ -178,7 +202,7 @@
             </svg>
             Other Mail Drivers
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">While SMTP works with any email provider, Laravel also supports dedicated drivers for certain services. These drivers use the provider's API directly, which can be faster and more reliable than SMTP.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Besides SMTP, Event Schedule ships with the mailers listed below. Set the one you want as <code class="doc-inline-code">MAIL_MAILER</code>. Anything not in this table has to be added to <code class="doc-inline-code">config/mail.php</code> yourself, and the app will fail with "Mailer is not defined" until it is.</p>
 
         <div class="doc-table-wrap">
             <table class="doc-table">
@@ -193,40 +217,60 @@
                     <tr>
                         <td>SMTP</td>
                         <td><code class="doc-inline-code">smtp</code></td>
-                        <td>Works with any SMTP server (recommended for most users)</td>
-                    </tr>
-                    <tr>
-                        <td>Mailgun</td>
-                        <td><code class="doc-inline-code">mailgun</code></td>
-                        <td>Requires <code class="doc-inline-code">MAILGUN_DOMAIN</code> and <code class="doc-inline-code">MAILGUN_SECRET</code></td>
+                        <td>Works with any SMTP server. Recommended for most installs</td>
                     </tr>
                     <tr>
                         <td>Amazon SES</td>
                         <td><code class="doc-inline-code">ses</code></td>
-                        <td>Requires AWS credentials configured</td>
-                    </tr>
-                    <tr>
-                        <td>Postmark</td>
-                        <td><code class="doc-inline-code">postmark</code></td>
-                        <td>Requires <code class="doc-inline-code">POSTMARK_TOKEN</code></td>
+                        <td>Ready to use. Set <code class="doc-inline-code">AWS_ACCESS_KEY_ID</code>, <code class="doc-inline-code">AWS_SECRET_ACCESS_KEY</code> and <code class="doc-inline-code">AWS_DEFAULT_REGION</code>; the AWS SDK is already bundled</td>
                     </tr>
                     <tr>
                         <td>Sendmail</td>
                         <td><code class="doc-inline-code">sendmail</code></td>
-                        <td>Uses the server's local sendmail binary</td>
+                        <td>Uses the server's local sendmail binary. Override the path with <code class="doc-inline-code">MAIL_SENDMAIL_PATH</code></td>
+                    </tr>
+                    <tr>
+                        <td>Failover</td>
+                        <td><code class="doc-inline-code">failover</code></td>
+                        <td>Tries <code class="doc-inline-code">smtp</code> first and falls back to <code class="doc-inline-code">log</code>, so a delivery outage is recorded instead of throwing</td>
+                    </tr>
+                    <tr>
+                        <td>Round robin</td>
+                        <td><code class="doc-inline-code">roundrobin</code></td>
+                        <td>Alternates between <code class="doc-inline-code">ses</code> and <code class="doc-inline-code">postmark</code>. Only worth using once both of those are set up</td>
+                    </tr>
+                    <tr>
+                        <td>Postmark</td>
+                        <td><code class="doc-inline-code">postmark</code></td>
+                        <td>Set <code class="doc-inline-code">POSTMARK_TOKEN</code>, and install the transport with <code class="doc-inline-code">composer require symfony/postmark-mailer</code>. Postmark's SMTP endpoint needs no extra package</td>
+                    </tr>
+                    <tr>
+                        <td>Resend</td>
+                        <td><code class="doc-inline-code">resend</code></td>
+                        <td>Set <code class="doc-inline-code">RESEND_KEY</code>, and install the transport with <code class="doc-inline-code">composer require resend/resend-php</code></td>
                     </tr>
                     <tr>
                         <td>Log</td>
                         <td><code class="doc-inline-code">log</code></td>
-                        <td>Writes emails to log file (default, for development only)</td>
+                        <td>The default. Writes to <code class="doc-inline-code">storage/logs/laravel.log</code> and suppresses transactional email. Development only</td>
+                    </tr>
+                    <tr>
+                        <td>Array</td>
+                        <td><code class="doc-inline-code">array</code></td>
+                        <td>Keeps messages in memory and sends nothing. Used by the test suite</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <div class="doc-callout doc-callout-tip">
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Mailgun</div>
+            <p>There is no <code class="doc-inline-code">mailgun</code> mailer in <code class="doc-inline-code">config/mail.php</code>, so <code class="doc-inline-code">MAIL_MAILER=mailgun</code> will not boot, and <code class="doc-inline-code">MAILGUN_DOMAIN</code> and <code class="doc-inline-code">MAILGUN_SECRET</code> are not read anywhere. Use Mailgun through <a href="#smtp" class="doc-link">SMTP</a> instead, which is the same infrastructure and needs no extra package.</p>
+        </div>
+
+        <div class="doc-callout doc-callout-tip mt-6">
             <div class="doc-callout-title">Recommendation</div>
-            <p>For production selfhosted instances, we recommend using SMTP with a transactional email service like Mailgun, Amazon SES, or Postmark. These services are designed for application-generated emails and offer better deliverability than personal email accounts.</p>
+            <p>For production selfhosted instances, we recommend SMTP pointed at a transactional email service such as Mailgun, Amazon SES or Postmark. These services are built for application-generated email, they let you authenticate your sending domain, and they give you far better deliverability than a personal mailbox.</p>
         </div>
     </section>
 
@@ -238,7 +282,7 @@
             </svg>
             Sender Configuration
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The <code class="doc-inline-code">MAIL_FROM_ADDRESS</code> and <code class="doc-inline-code">MAIL_FROM_NAME</code> determine who emails appear to come from.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The <code class="doc-inline-code">MAIL_FROM_ADDRESS</code> and <code class="doc-inline-code">MAIL_FROM_NAME</code> determine who emails appear to come from. A fresh install ships with <code class="doc-inline-code">MAIL_FROM_ADDRESS="hello@example.com"</code>, a reserved example domain that no receiving server will trust, so change it to an address on a domain you control before you send anything.</p>
 
         <div class="doc-code-block">
             <div class="doc-code-header">
@@ -249,7 +293,10 @@
 <span class="code-variable">MAIL_FROM_NAME</span>=<span class="code-string">"My Event Schedule"</span></code></pre>
         </div>
 
-        <div class="doc-callout doc-callout-info mt-6">
+        <h3 class="doc-subheading">One sender for every schedule</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">On a selfhosted install this is the From identity for all outgoing mail, whichever schedule triggered it. There is no per-schedule sender to configure: the Email Settings tab that lets an owner supply their own SMTP credentials is part of the hosted service and is not rendered when the app runs selfhosted. Pick an address that reads sensibly for every schedule on the instance, and one you can actually receive replies at.</p>
+
+        <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">DNS Records</div>
             <p>To improve email deliverability and avoid spam filters, set up these DNS records for your sending domain:</p>
             <ul class="doc-list mt-2">
@@ -269,9 +316,20 @@
             </svg>
             Testing
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">After configuring your email settings, verify that emails are being sent correctly.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">After configuring your email settings, verify that mail is really being sent. The Send Test Email button in the admin portal belongs to the hosted per-schedule email settings, so on a selfhosted install you test from the command line.</p>
 
-        <h3 class="doc-subheading">Quick Test</h3>
+        <h3 class="doc-subheading">1. Clear the config cache</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Laravel caches <code class="doc-inline-code">.env</code> values, so do this first or you will be testing the old configuration:</p>
+
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>bash</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code>php artisan config:clear</code></pre>
+        </div>
+
+        <h3 class="doc-subheading">2. Send a test message</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Use Laravel's built-in Artisan command to send a test email:</p>
 
         <div class="doc-code-block">
@@ -282,18 +340,17 @@
             <pre><code>php artisan tinker --execute="Mail::raw('Test email from Event Schedule', function(\$m) { \$m->to('your@email.com')->subject('Test'); });"</code></pre>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6 mt-4">If the email arrives, your configuration is working. If not, check the troubleshooting section below.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6 mt-4">Send it to a real mailbox you can open. Addresses on the reserved test domains (<code class="doc-inline-code">example.com</code>, <code class="doc-inline-code">example.org</code>, <code class="doc-inline-code">example.net</code>, <code class="doc-inline-code">test.com</code>, <code class="doc-inline-code">test.org</code>, <code class="doc-inline-code">test.net</code>) and anything at <code class="doc-inline-code">@localhost</code> are deliberately never emailed by the app's own notifications.</p>
 
-        <h3 class="doc-subheading">Clear Config Cache</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">After changing <code class="doc-inline-code">.env</code> values, clear the config cache:</p>
+        <h3 class="doc-subheading">3. Confirm queued mail is being processed</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Ticket confirmations, sale alerts and newsletter batches are dispatched as background jobs rather than sent inline. Which means:</p>
+        <ul class="doc-list mb-6">
+            <li>With the default <code class="doc-inline-code">QUEUE_CONNECTION=sync</code> they run immediately, in the same request. Nothing extra is needed.</li>
+            <li>With <code class="doc-inline-code">database</code> or <code class="doc-inline-code">redis</code> they wait for a worker. Event Schedule's scheduler runs <code class="doc-inline-code">queue:work --stop-when-empty</code> every minute and retries failed jobs every five minutes, so the <code class="doc-inline-code">schedule:run</code> cron job from the <a href="{{ route('marketing.docs.selfhost.installation') }}#cron" class="doc-link">installation guide</a> is what actually drains the mail queue. No cron, no email.</li>
+            <li>Scheduled newsletters are also released by that same cron, once a minute.</li>
+        </ul>
 
-        <div class="doc-code-block">
-            <div class="doc-code-header">
-                <span>bash</span>
-                <button class="doc-copy-btn">Copy</button>
-            </div>
-            <pre><code>php artisan config:clear</code></pre>
-        </div>
+        <p class="text-gray-600 dark:text-gray-300">A real end-to-end check is a free RSVP or a test ticket purchase on one of your own schedules: it exercises the queue, the mailable and the sender address together.</p>
     </section>
 
     <!-- Troubleshooting -->
@@ -310,10 +367,26 @@
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Emails not sending</h4>
                 <ul class="doc-list text-sm">
-                    <li>Check <code class="doc-inline-code">storage/logs/laravel.log</code> for error messages</li>
-                    <li>Verify <code class="doc-inline-code">MAIL_MAILER</code> is not set to <code class="doc-inline-code">log</code> (the default)</li>
+                    <li>Verify <code class="doc-inline-code">MAIL_MAILER</code> is not still <code class="doc-inline-code">log</code> or <code class="doc-inline-code">array</code> (<code class="doc-inline-code">log</code> is the default)</li>
                     <li>Run <code class="doc-inline-code">php artisan config:clear</code> after changing <code class="doc-inline-code">.env</code></li>
-                    <li>Make sure the queue worker is running if emails are queued: <code class="doc-inline-code">php artisan queue:work</code></li>
+                    <li>Check <code class="doc-inline-code">storage/logs/laravel.log</code> for error messages</li>
+                    <li>If <code class="doc-inline-code">QUEUE_CONNECTION</code> is not <code class="doc-inline-code">sync</code>, confirm the <code class="doc-inline-code">schedule:run</code> cron job is installed. It is what runs the queue worker; check <code class="doc-inline-code">storage/logs/scheduler.log</code> and the <code class="doc-inline-code">failed_jobs</code> table</li>
+                </ul>
+            </div>
+
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Nothing arrives and nothing is logged</h4>
+                <ul class="doc-list text-sm">
+                    <li>With <code class="doc-inline-code">MAIL_MAILER=log</code> the app treats itself as having no mail transport and skips ticket, appointment, gift card, sale-alert and feedback emails outright, so there is no error to find. Configure a real driver</li>
+                    <li>Confirmation emails are also skipped for addresses on the reserved test domains listed under <a href="#testing" class="doc-link">Testing</a>. Buy a test ticket with a real address</li>
+                </ul>
+            </div>
+
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">"Mailer [mailgun] is not defined"</h4>
+                <ul class="doc-list text-sm">
+                    <li><code class="doc-inline-code">MAIL_MAILER</code> names a mailer that does not exist in <code class="doc-inline-code">config/mail.php</code>. <code class="doc-inline-code">mailgun</code> is the usual culprit; use <code class="doc-inline-code">smtp</code> instead</li>
+                    <li>A "class not found" error from a valid value such as <code class="doc-inline-code">postmark</code> or <code class="doc-inline-code">resend</code> means the transport package is missing. See <a href="#drivers" class="doc-link">Other Mail Drivers</a></li>
                 </ul>
             </div>
 
@@ -330,7 +403,7 @@
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Authentication errors</h4>
                 <ul class="doc-list text-sm">
                     <li>Double-check your <code class="doc-inline-code">MAIL_USERNAME</code> and <code class="doc-inline-code">MAIL_PASSWORD</code></li>
-                    <li>For Gmail, use an <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300">App Password</a> instead of your regular password</li>
+                    <li>For Gmail, use an <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" class="doc-link">App Password</a> instead of your regular password</li>
                     <li>Make sure special characters in your password are properly quoted in the <code class="doc-inline-code">.env</code> file (wrap in double quotes)</li>
                 </ul>
             </div>
@@ -339,7 +412,7 @@
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Emails going to spam</h4>
                 <ul class="doc-list text-sm">
                     <li>Set up SPF, DKIM, and DMARC DNS records for your domain</li>
-                    <li>Use a <code class="doc-inline-code">MAIL_FROM_ADDRESS</code> on a domain you own (not a free email provider)</li>
+                    <li>Use a <code class="doc-inline-code">MAIL_FROM_ADDRESS</code> on a domain you own, not a free email provider and not the shipped <code class="doc-inline-code">hello@example.com</code></li>
                     <li>Consider using a dedicated transactional email service (Mailgun, SES, Postmark)</li>
                 </ul>
             </div>

@@ -37,7 +37,7 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Schedules (Roles) | 14 / 18 |
 | Sub-schedules (Groups) | 4 / 4 |
 | Events | 14 / 14 |
-| Ticketing & Payments | 17 / 23 |
+| Ticketing & Payments | 23 / 29 |
 | Community & Engagement | 7 / 9 |
 | Newsletters | 10 / 11 |
 | Integrations | 0 / 8 |
@@ -131,21 +131,26 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Feature | Tested | Test |
 |---|---|---|
 | Ticket types (create/settings) | ✓ | `TicketTest` |
+| Paid ticket allowance, 25/month (Free) | ✓ | `FreePlanLimitsTest` |
+| Allowance window after a mid-month downgrade | ✓ | `FreePlanLimitsTest` |
+| Per-owner allowance backstop | ✓ | `FreePlanLimitsTest` |
+| `sales.paid_at` stamping (incl. grouped cascade) | ✓ | `FreePlanLimitsTest` |
 | Free event registration / RSVP | ✓ | `TicketTest`, `TicketingTest` |
-| Promo / discount codes | ✓ | `TicketTest`, `TicketingTest` |
+| Promo / discount codes (Pro) | ✓ | `TicketTest`, `TicketingTest`, `FreePlanLimitsTest` (gate) |
 | Custom fields (event & ticket level) | ✓ | `TicketTest` |
 | Sales list / management | ✓ | `TicketTest` |
 | Ticket quantity limits / oversell | ✓ | `TicketingTest` |
-| Individual tickets (Pro) | ✓ | `TicketingTest` |
-| Passes & subscriptions (Pro) | ✓ | `TicketingTest` |
-| QR code ticketing / check-in | ✓ | `TicketingTest` |
-| Check-in dashboard (Pro) | ✓ | `TicketingTest` (stats) |
-| Ticket waitlist (Pro) | ✓ | `TicketingTest` |
-| Sales CSV export (Pro) | ✓ | `TicketingTest` |
+| Individual tickets (Pro) | ✓ | `TicketingTest`, `FreePlanLimitsTest` (scrub) |
+| Passes & subscriptions (Pro) | ✓ | `TicketingTest`, `FreePlanLimitsTest` (gate) |
+| QR code ticketing / check-in (Pro) | ✓ | `TicketingTest`, `FreePlanLimitsTest` (gate) |
+| Check-in dashboard (Pro) | ✓ | `TicketingTest` (stats), `FreePlanLimitsTest` (gate) |
+| Ticket waitlist (Pro; RSVP waitlist is Free) | ✓ | `TicketingTest`, `FreePlanLimitsTest` (both branches) |
+| Sales CSV export (Pro) | ✓ | `TicketingTest`, `FreePlanLimitsTest` (gate) |
 | Post-event feedback (Pro) | ✓ | `TicketingTest` |
-| Ticket add-ons / upsells | ✓ | `TicketingTest` |
+| Ticket add-ons / upsells (Pro) | ✓ | `TicketingTest`, `FreePlanLimitsTest` (scrub) |
 | Ticket reservations / release time | ✗ | — |
-| Sell online via Stripe | ✗ | — (needs Stripe) |
+| Sell online via Stripe (Free, within allowance) | ✗ | — (needs Stripe) |
+| Embed ticket widget (Pro; RSVP embed is Free) | ✓ | `FreePlanLimitsTest` (both branches) |
 | Invoice Ninja integration | ✗ | — (needs Invoice Ninja) |
 | Payment links | ✓ | `CheckoutBranchCharacterizationTest` (payment_url branch redirect + pending sale) |
 | Sale notification emails (Pro) | ✗ | skipped — env-guarded mail path (see Notes) |

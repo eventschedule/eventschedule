@@ -3811,9 +3811,9 @@ const calendarApp = createApp({
             // Two params must NOT survive. ?schedule= is the query form of the very thing the
             // path now expresses, and viewGuest falls back to it when the path resolves no
             // group - leaving it would resurrect a sub-schedule the visitor just cleared.
-            // ?category= may have been reset a moment ago by the watcher below (or by
-            // clearFilters, which reaches here through it) because the new sub-schedule does
-            // not offer that category.
+            // ?category= may have been reset a moment ago by the selectedGroup watcher above
+            // (or by clearFilters, which reaches here through it) because the new sub-schedule
+            // does not offer that category.
             const currentUrl = new URL(window.location);
             currentUrl.pathname = (this.guestBasePath + (newGroupSlug ? '/' + newGroupSlug : '')) || '/';
             currentUrl.searchParams.delete('schedule');

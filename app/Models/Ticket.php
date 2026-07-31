@@ -162,11 +162,15 @@ class Ticket extends Model
      * Whether this specific ticket may be sold right now, given the schedule's plan allowance.
      *
      * Event::canSellTickets() answers "is this event selling at all"; this answers it per row, which
-     * an event mixing free and paid tiers needs. A zero-price ticket is always sellable: free
-     * registration is unlimited on every plan and never consumes the paid allowance. A priced ticket
-     * needs the event to still be within allowance.
+     * an event mixing free and paid tiers needs: at the cap the $0 tier keeps selling while the
+     * paid ones stop, instead of the guest being shown a paid tier that only fails at submit.
+     *
+     * Add-ons are a Pro feature in their own right, so they follow the plan rather than the
+     * allowance - a lapsed Pro schedule keeps its add-on rows but stops selling them.
+     *
+     * Pass $date for a recurring event, or the grace window resolves against the recurrence anchor.
      */
-    public function isSellable(): bool
+    public function isSellable(?string $date = null): bool
     {
         $event = $this->event;
 
@@ -174,15 +178,16 @@ class Ticket extends Model
             return false;
         }
 
-        if ($this->is_addon || (float) $this->price <= 0) {
+        if ($this->is_addon) {
+            return $event->isPro();
+        }
+
+        // Free registration is unlimited on every plan and never consumes the paid allowance.
+        if ((float) $this->price <= 0) {
             return true;
         }
 
-        if ($event->isPro() || $event->withinTicketAllowanceGrace()) {
-            return true;
-        }
-
-        return $event->roles->contains(fn ($role) => $role->canSellPaidTickets());
+        return $event->paidTicketAllowanceAvailable($date);
     }
 
     /**

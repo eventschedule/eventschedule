@@ -592,8 +592,8 @@
             ['01', 'Google Calendar',  'two-way sync',        'both', 'Free'],
             ['02', 'Outlook 365',      'Microsoft Graph',     'both', 'Free'],
             ['03', 'CalDAV',           'your own server',     'both', 'Free'],
-            ['04', 'Stripe',           'checkout + webhook',  'both', 'Pro'],
-            ['05', 'Invoice Ninja',    'invoice or pay link', 'both', 'Pro'],
+            ['04', 'Stripe',           'checkout + webhook',  'both', 'Free'],
+            ['05', 'Invoice Ninja',    'invoice or pay link', 'both', 'Free'],
             ['06', 'Webhooks',         'your endpoint',       'out',  'Pro'],
             ['07', 'REST API',         'you call us',         'in',   'Pro'],
             ['08', 'Eventbrite',       'import on demand',    'in',   'Pro'],
@@ -620,11 +620,11 @@
                 'Server URL, username, password. Outbound on save; inbound is polled every fifteen minutes, because CalDAV has no notification standard to subscribe to.',
             ],
             [
-                'Stripe', 'out then in', 'Pro',
-                'Checkout runs on Stripe. On the hosted platform the charge is created on your own connected account, and the result returns as a signed webhook.',
+                'Stripe', 'out then in', 'Free',
+                'Checkout runs on Stripe. On the hosted platform the charge is created on your own connected account, and the result returns as a signed webhook. Selling starts free at twenty-five paid tickets a month per schedule; Pro takes the ceiling off.',
             ],
             [
-                'Invoice Ninja', 'out then in', 'Pro',
+                'Invoice Ninja', 'out then in', 'Free',
                 'Either an invoice per sale, or a payment link the buyer completes on your Invoice Ninja install. A webhook marks the sale paid when it clears.',
             ],
             [
@@ -672,7 +672,7 @@
         $faqs = [
             [
                 'q' => 'Which integrations are free?',
-                'a' => 'Two-way calendar sync with Google Calendar, Outlook or Microsoft 365 and any CalDAV server is free on every plan, and so is the nearby-accommodation map. Stripe and Invoice Ninja ride along with ticketing, and webhooks, the REST API, web push, Eventbrite import and ad boosting are on the Pro plan at $5 a month. Creating events over WhatsApp is the one Enterprise port, at $15. Selfhosted installs resolve to the top tier, so every port is on from the first boot.',
+                'a' => 'Two-way calendar sync with Google Calendar, Outlook or Microsoft 365 and any CalDAV server is free on every plan, and so is the nearby-accommodation map. So are the two money ports: selling starts free at twenty-five paid tickets a month per schedule, with zero platform fees on every plan. Pro at $5 a month takes that ceiling off and adds webhooks, the REST API, web push, Eventbrite import and ad boosting. Creating events over WhatsApp is the one Enterprise port, at $15. Selfhosted installs resolve to the top tier, so every port is on from the first boot.',
             ],
             [
                 'q' => 'Is the calendar sync really two-way?',
@@ -1038,7 +1038,7 @@
                     The money never <span class="es-wire-accent">lands here.</span>
                 </h2>
                 <p class="es-wire-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Both payment ports terminate in an account you own. Event Schedule charges zero platform fees on ticket sales, which is only possible because it is not in the middle of the transaction.
+                    Both payment ports terminate in an account you own, and both are open on the free plan, which sells twenty-five paid tickets a month per schedule before Pro takes the ceiling off. Event Schedule charges zero platform fees on ticket sales on every plan, which is only possible because it is not in the middle of the transaction.
                 </p>
             </div>
 
@@ -1047,7 +1047,7 @@
                     <div class="mb-4 flex flex-wrap items-center gap-2">
                         <span class="es-wire-port" aria-hidden="true">04</span>
                         <h3 class="es-wire-ink text-xl font-bold">Stripe</h3>
-                        <span class="es-wire-plan es-wire-plan-pro">Pro</span>
+                        <span class="es-wire-plan">Free</span>
                     </div>
                     <p class="es-wire-muted mb-5 text-sm">Checkout runs on Stripe's own page. On the hosted platform the charge is created on your connected account, so payouts arrive on your Stripe schedule, and the confirmation returns to us as a signed webhook.</p>
                     <div class="es-wire-spec mb-5">
@@ -1068,7 +1068,7 @@
                     <div class="mb-4 flex flex-wrap items-center gap-2">
                         <span class="es-wire-port" aria-hidden="true">05</span>
                         <h3 class="es-wire-ink text-xl font-bold">Invoice Ninja</h3>
-                        <span class="es-wire-plan es-wire-plan-pro">Pro</span>
+                        <span class="es-wire-plan">Free</span>
                     </div>
                     <p class="es-wire-muted mb-5 text-sm">Point Event Schedule at your Invoice Ninja install with an API token and URL. Useful when the buyer is an organisation that needs a document rather than a receipt.</p>
                     <div class="es-wire-spec mb-5">
@@ -1475,7 +1475,7 @@
                         Pick a port. <span class="es-wire-lit">Wire it up.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg es-wire-onband-muted">
-                        Calendar sync and the accommodation map are free forever. Ticketing, webhooks, the API, push and the imports are five dollars a month, and nothing is taken from the door.
+                        Calendar sync, the accommodation map and your first twenty-five ticket sales a month are free forever. Five dollars a month takes the ticket ceiling off and adds webhooks, the API, push and the imports. Nothing is taken from the door on any plan.
                     </p>
 
                     {{-- The last port on the panel is the reader's own, and it is the only

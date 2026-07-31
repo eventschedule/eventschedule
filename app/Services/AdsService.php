@@ -111,7 +111,9 @@ class AdsService
         // beside the organizer's own buy button and compete with it. Free schedules are the only ones
         // that carry ads and, since the free plan can sell, also the only ones this can happen to.
         // Extends the checkout/booking exclusion already promised in docs/FEATURES.md.
-        if ($event && $event->tickets_enabled && $event->canSellTickets($request->query('date'))) {
+        // The occurrence date is a ROUTE parameter (/{slug}/{id}/{date}), not a query string, so
+        // query('date') was always null and this judged the recurrence anchor instead.
+        if ($event && $event->tickets_enabled && $event->canSellTickets($request->route('date') ?? $request->query('date'))) {
             return null;
         }
 

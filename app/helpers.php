@@ -621,6 +621,10 @@ if (! function_exists('is_demo_role')) {
             return false;
         }
 
+        // Deliberately reads the relation rather than caching a resolved demo user id. Eloquent
+        // already memoizes $role->user per model instance, so the hot path (one schedule per guest
+        // page) costs one query either way, and every id-caching variant tried here went stale the
+        // moment a demo user was created after the first lookup.
         return $role->subdomain === \App\Services\DemoService::DEMO_ROLE_SUBDOMAIN
             || ($role->user && $role->user->email === \App\Services\DemoService::DEMO_EMAIL);
     }

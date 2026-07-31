@@ -190,8 +190,48 @@ class TicketController extends Controller
             $giftCards = $this->getGiftCardsData();
             $giftCardsCount = $giftCards->count();
 
-            return view('ticket.sales', compact('sales', 'count', 'waitlistCount', 'waitlistEntries', 'hasPro', 'groupCounts', 'sortBy', 'sortDir', 'subscriptions', 'subscriptionsCount', 'giftCards', 'giftCardsCount'));
+            $ticketQuotas = $this->getTicketQuotas();
+
+            return view('ticket.sales', compact('sales', 'count', 'waitlistCount', 'waitlistEntries', 'hasPro', 'groupCounts', 'sortBy', 'sortDir', 'subscriptions', 'subscriptionsCount', 'giftCards', 'giftCardsCount', 'ticketQuotas'));
         }
+    }
+
+    /**
+     * Free-plan ticket allowances for the schedules this user OWNS, for the banner on the Sales page.
+     *
+     * This page aggregates across every schedule, so there is no single $role to read. Returned for
+     * any free schedule that has sold at least one paid ticket this month, at any percentage:
+     * staying quiet below some threshold would mean the first time an organizer ever sees the meter
+     * is when half of it is already gone, on the one page whose whole subject is sales.
+     *
+     * @return \Illuminate\Support\Collection<int, array{role: Role, used: int, limit: int}>
+     */
+    private function getTicketQuotas()
+    {
+        if (! config('app.hosted')) {
+            return collect();
+        }
+
+        return auth()->user()->roles()
+            ->wherePivot('level', 'owner')
+            // isPro() reads the subscriptions relation; without this each role lazy-loads its own.
+            ->with('subscriptions')
+            ->get()
+            ->map(function ($role) {
+                $limit = $role->ticketSaleLimit();
+
+                // Null limit short-circuits before any counting, so paid schedules cost nothing here.
+                if (is_null($limit)) {
+                    return null;
+                }
+
+                $used = $role->ticketsSoldThisMonth();
+
+                return $used > 0 ? ['role' => $role, 'used' => $used, 'limit' => $limit] : null;
+            })
+            ->filter()
+            ->sortByDesc(fn ($row) => $row['used'] / max(1, $row['limit']))
+            ->values();
     }
 
     /**
@@ -911,7 +951,9 @@ class TicketController extends Controller
             return back();
         }
 
-        $event = Event::findOrFail(UrlUtils::decodeId($request->event_id));
+        // canSellTickets() below reads both relations; without this they lazy-load on the
+        // checkout POST.
+        $event = Event::with(['tickets', 'roles'])->findOrFail(UrlUtils::decodeId($request->event_id));
 
         $role = Role::subdomain($subdomain)->firstOrFail();
         if (! $event->roles()->wherePivot('role_id', $role->id)->exists()) {
@@ -935,40 +977,28 @@ class TicketController extends Controller
             return back()->withInput()->with('error', __('messages.tickets_not_available'));
         }
 
-        // The selling schedule, not just any attached one, has to have allowance left: money is
-        // routed by the event owner and the sale is recorded against the subdomain the buyer came
-        // through, so that is the schedule the allowance belongs to.
+        // Per-row allowance check. canSellTickets() above answers "is this event selling at all",
+        // which stays true while a free tier remains; this refuses the individual PAID rows the
+        // schedule's monthly allowance can no longer cover, so a cart of free tiers still goes
+        // through on a capped schedule.
         //
-        // Checked once, up front, and then the whole cart is allowed through, the same way
-        // canSendNewsletter() lets an entire newsletter overshoot. Refusing a guest mid-cart because
-        // the organizer is one short is a far worse outcome than a small, bounded overage.
+        // Whose allowance, whether offline payment is exempt and whether the 48-hour grace applies
+        // are all decided inside Ticket::isSellable() -> Event::hasTicketAllowance(), which is the
+        // same code the guest form filters on. Keeping one definition is what stops the buy button
+        // and the write path disagreeing.
         //
-        // Cash and other offline methods are counted but never blocked. There is no processing cost
-        // to us, and an organizer taking money at the door finding the app refuses to record it is
-        // indefensible. A paid ticket for an event starting within the grace window is exempt too.
-        $paysOnline = ! in_array($event->payment_method, ['cash', null], true);
+        // Checked once, up front, then the whole cart is allowed through - the same way
+        // canSendNewsletter() lets an entire newsletter overshoot. Refusing a guest mid-cart
+        // because the organizer is one short is worse than a small, bounded overage.
+        $unsellable = collect($request->input('tickets', []))
+            ->filter(fn ($quantity) => (int) $quantity > 0)
+            ->keys()
+            ->map(fn ($hash) => $event->tickets->firstWhere('id', UrlUtils::decodeId($hash)))
+            ->filter()
+            ->contains(fn ($ticket) => ! $ticket->isSellable($request->event_date));
 
-        if ($paysOnline
-            && ! $event->isPro()
-            && ! $event->withinTicketAllowanceGrace($request->event_date)
-            && ! $role->canSellPaidTickets()
-        ) {
-            $anyFreeTicket = $event->tickets->contains(
-                fn ($ticket) => ! $ticket->is_addon && (float) $ticket->price <= 0
-            );
-
-            // Only refuse when the cart actually needs the paid allowance. An order made up purely
-            // of free tiers is unlimited on every plan.
-            $wantsPaidTicket = collect($request->input('tickets', []))
-                ->filter(fn ($quantity) => (int) $quantity > 0)
-                ->keys()
-                ->map(fn ($hash) => $event->tickets->firstWhere('id', UrlUtils::decodeId($hash)))
-                ->filter()
-                ->contains(fn ($ticket) => ! $ticket->is_addon && (float) $ticket->price > 0);
-
-            if ($wantsPaidTicket || ! $anyFreeTicket) {
-                return back()->withInput()->with('error', __('messages.tickets_not_available'));
-            }
+        if ($unsellable) {
+            return back()->withInput()->with('error', __('messages.tickets_not_available'));
         }
 
         if (! $user && $request->create_account && config('app.hosted')) {
@@ -1097,8 +1127,10 @@ class TicketController extends Controller
                         }
                     }
 
-                    // Check add-on availability
-                    $addonSelections = $request->input('addons', []);
+                    // Check add-on availability. Add-ons are Pro, and a lapsed schedule keeps its
+                    // rows (they are made dormant, never deleted), so the sell path needs its own
+                    // check rather than relying on the row's absence.
+                    $addonSelections = $event->isPro() ? $request->input('addons', []) : [];
                     foreach ($addonSelections as $addonId => $addonQty) {
                         $addonQty = (int) $addonQty;
                         if ($addonQty > 0) {
@@ -1298,8 +1330,9 @@ class TicketController extends Controller
                     // Capture seat-only subtotal (before add-ons) for per-seat allocation
                     $seatsSubtotal = $isIndividualTickets ? $subtotal : 0;
 
-                    // Create SaleTickets for add-ons (attach to primary sale only)
-                    $addonSelections = $request->input('addons', []);
+                    // Create SaleTickets for add-ons (attach to primary sale only). Pro-gated, same
+                    // as the availability check above.
+                    $addonSelections = $event->isPro() ? $request->input('addons', []) : [];
                     $hasAddons = false;
                     $addonTotal = 0;
                     foreach ($addonSelections as $addonId => $addonQty) {
@@ -2617,17 +2650,16 @@ class TicketController extends Controller
         // scanning at (needed for cross-event subscriptions). List the user's
         // events without a tickets-only filter, since a subscription may cover
         // free / ticketless events.
-        // Pro only, matching User::canScanEvent(). Listing an event the scanner would then refuse
-        // is worse than not listing it.
+        // Available on every plan: you cannot sell somebody a ticket and then refuse to let the
+        // organizer admit them at the door. The Pro feature is the check-in DASHBOARD (live stats,
+        // per-ticket breakdown), not scanning itself.
         $events = Event::with(['creatorRole', 'roles'])
             ->where('user_id', $user->id)
             ->whereNotNull('starts_at')
             ->whereNull('appointment_type_id') // appointment bookings are not scannable events
             ->orderBy('starts_at', 'desc')
             ->limit(100)
-            ->get()
-            ->filter(fn (Event $event) => $event->isPro())
-            ->values();
+            ->get();
 
         // "Today" is each event's own calendar day at its venue, which is what
         // sales.event_date holds. Listed events may sit in different timezones, so query the

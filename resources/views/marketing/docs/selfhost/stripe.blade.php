@@ -1,7 +1,7 @@
 <x-docs-page
     key="selfhost/stripe"
-    description="Set up Stripe payments for Event Schedule based on your deployment type: selfhosted or SaaS operator."
-    lede="Choose the setup guide that matches how you're using Event Schedule."
+    description="Configure Stripe for ticket sales on a selfhosted Event Schedule install, or Stripe Connect plus Cashier subscription billing if you run Event Schedule as your own SaaS."
+    lede="A selfhosted install takes card payments with one set of platform keys. A SaaS operator needs two integrations: Connect for ticket sales and Cashier for plan subscriptions."
 >
     <x-slot:toc>
         <x-doc-nav-link href="#overview">Overview</x-doc-nav-link>
@@ -24,20 +24,27 @@
             </svg>
             Overview
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Event Schedule supports Stripe for payment processing, but the setup varies depending on how you're using the platform. This guide is organized by user type to help you find exactly what you need.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Ticket payments in Event Schedule run through <strong class="text-gray-900 dark:text-white">Stripe Checkout</strong>: the buyer pays on Stripe's own hosted page, Stripe calls a webhook back, and the sale is marked paid. What you have to configure depends on who collects the money - one account for the whole install, or a separate account per event owner.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The same keys and the same webhook endpoint also cover <a href="{{ route('marketing.docs.gift_cards') }}" class="doc-link">gift card</a> purchases and paid <a href="{{ route('marketing.docs.appointments') }}" class="doc-link">appointment bookings</a>, so you only set this up once.</p>
 
-        <div class="bg-green-500/10 border border-green-500/20 rounded-xl p-4 mb-6">
-            <div class="flex items-start gap-3">
-                <svg aria-hidden="true" class="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <div>
-                    <p class="text-green-700 dark:text-green-300 font-medium mb-1">Recommended: Use Invoice Ninja with Stripe</p>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm">For the best ticket selling experience, we recommend using <a href="https://invoiceninja.com" target="_blank" rel="noopener noreferrer" class="text-green-700 dark:text-green-400 hover:text-green-600 dark:hover:text-green-300">Invoice Ninja</a> alongside Stripe. Invoice Ninja provides additional features like professional invoicing, payment reminders, and detailed financial reporting that complement Stripe's payment processing.</p>
-                </div>
-            </div>
+        <div class="doc-callout doc-callout-success">
+            <div class="doc-callout-title">No platform fees</div>
+            <p>Event Schedule never takes a cut of a ticket sale. The Checkout Session is created without an application fee or a transfer, so the full amount lands in the account that took the payment - the one named in your <code class="doc-inline-code">.env</code> on a selfhosted install, or the seller's own connected account under Connect - and Stripe's own processing fee is the only deduction.</p>
         </div>
 
+        <div class="doc-callout doc-callout-tip">
+            <div class="doc-callout-title">Recommended: Stripe behind Invoice Ninja</div>
+            <p>Stripe is not the only option. If you want proper invoices, payment reminders and financial reporting on top of card processing, connect <a href="https://invoiceninja.com" target="_blank" rel="noopener noreferrer" class="doc-link">Invoice Ninja</a> instead and add Stripe as a gateway inside it. Buyers still pay by card; the paperwork lives in Invoice Ninja. See <a href="#invoice-ninja" class="doc-link">Invoice Ninja</a> below.</p>
+        </div>
+
+        <h3 class="doc-subheading">Where the payment method is chosen</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Server configuration only makes Stripe <em>available</em>. Each event still picks one payment method in the event editor, under <strong class="text-gray-900 dark:text-white">Tickets &rarr; Payment</strong>: Cash, Stripe, Invoice Ninja or Payment Link. The four options are described on the <a href="{{ route('marketing.docs.tickets') }}#payment" class="doc-link">Tickets</a> page.</p>
+
+        <div class="doc-callout doc-callout-plan">
+            <div class="doc-callout-title">Plan requirement</div>
+            <p>Selling tickets is included on the <strong>Free</strong> plan on eventschedule.com, capped at 25 paid tickets per schedule per calendar month; Pro and Enterprise lift the cap. Scanning tickets at the door is free too. A few extras around selling stay Pro there: the live check-in dashboard, the ticket widget embed, custom checkout fields and the ticket waitlist.</p>
+            <p class="mt-2">A selfhosted install has no monthly ticket allowance at all, and it resolves to the Enterprise tier, so nothing on this page is plan-gated on your own server.</p>
+        </div>
     </section>
 
     <!-- Choose Your Setup -->
@@ -62,25 +69,32 @@
                 <tbody>
                     <tr>
                         <td>Running your <strong class="text-gray-900 dark:text-white">own Event Schedule instance</strong> for your organization</td>
-                        <td>Your single Stripe account</td>
-                        <td><a href="#selfhosted-users" class="text-blue-400 hover:text-blue-300">Selfhosted Users</a></td>
+                        <td>The one Stripe account named in your <code class="doc-inline-code">.env</code></td>
+                        <td><a href="#selfhosted-users" class="doc-link">Selfhosted Users</a></td>
                     </tr>
                     <tr>
                         <td>Running a <strong class="text-gray-900 dark:text-white">white-label SaaS</strong> platform</td>
-                        <td>Your customers' Stripe accounts + your account for subscriptions</td>
-                        <td><a href="#saas-operators" class="text-blue-400 hover:text-blue-300">SaaS Operators</a></td>
+                        <td>Each customer's own connected Stripe account, plus your account for plan subscriptions</td>
+                        <td><a href="#saas-operators" class="doc-link">SaaS Operators</a></td>
+                    </tr>
+                    <tr>
+                        <td>Using <strong class="text-gray-900 dark:text-white">eventschedule.com</strong> (nothing to install)</td>
+                        <td>Your own connected Stripe account</td>
+                        <td>No server setup. Connect Stripe in <a href="{{ route('marketing.docs.account_settings') }}#payments" class="doc-link">Settings &rarr; Payment Methods</a></td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-6 border border-gray-200 dark:border-white/10 mb-6">
-            <h3 class="doc-subheading">Decision Tree</h3>
-            <div class="text-gray-600 dark:text-gray-300 space-y-3 text-sm">
-                <p><strong class="text-gray-900 dark:text-white">Q: Will multiple people create events and need their own payment accounts?</strong></p>
-                <p class="pl-4">→ Yes: <a href="#saas-operators" class="text-blue-400 hover:text-blue-300">SaaS Operators</a></p>
-                <p class="pl-4">→ No: <a href="#selfhosted-users" class="text-blue-400 hover:text-blue-300">Selfhosted Users</a></p>
-            </div>
+        <h3 class="doc-subheading">Which one am I?</h3>
+        <ul class="doc-list mb-6">
+            <li>Will several people each need to be paid into <strong class="text-gray-900 dark:text-white">their own</strong> Stripe account? You are a SaaS operator.</li>
+            <li>Should every ticket sold anywhere on the install settle into <strong class="text-gray-900 dark:text-white">one</strong> account you control? You are a selfhosted user.</li>
+        </ul>
+
+        <div class="doc-callout doc-callout-warning">
+            <div class="doc-callout-title">Stripe Connect needs hosted mode</div>
+            <p>Connect is only used when <code class="doc-inline-code">IS_HOSTED=true</code>. On a plain selfhosted install every ticket charge is created with your platform keys, even if a user has linked a Stripe account of their own, so per-owner payouts are a SaaS-operator setup rather than a selfhost one.</p>
         </div>
     </section>
 
@@ -94,22 +108,15 @@
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-6">If you're running your own Event Schedule instance for your organization, venue, or community, all ticket payments go to a single Stripe account that you control.</p>
 
-        <div class="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 mb-6">
-            <div class="flex items-start gap-3">
-                <svg aria-hidden="true" class="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <div>
-                    <p class="text-blue-700 dark:text-blue-300 font-medium mb-1">This guide is for you if...</p>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm">You want all ticket revenue from all events on your instance to go to one Stripe account. Event creators don't need their own Stripe accounts.</p>
-                </div>
-            </div>
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">This guide is for you if...</div>
+            <p>You want all ticket revenue from all events on your instance to go to one Stripe account. Event creators don't need Stripe accounts of their own, and there is nothing for them to connect.</p>
         </div>
 
         <h3 class="doc-subheading">1. Get Your Stripe API Keys</h3>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Go to the <a href="https://dashboard.stripe.com/" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300">Stripe Dashboard</a></li>
-            <li>Navigate to <strong class="text-gray-900 dark:text-white">Developers</strong> → <strong class="text-gray-900 dark:text-white">API keys</strong></li>
+            <li>Go to the <a href="https://dashboard.stripe.com/" target="_blank" rel="noopener noreferrer" class="doc-link">Stripe Dashboard</a></li>
+            <li>Open <strong class="text-gray-900 dark:text-white">Developers</strong> &rarr; <strong class="text-gray-900 dark:text-white">API keys</strong></li>
             <li>Note your <strong class="text-gray-900 dark:text-white">Publishable key</strong> and <strong class="text-gray-900 dark:text-white">Secret key</strong></li>
         </ol>
 
@@ -128,43 +135,51 @@
         </div>
 
         <ul class="doc-list mb-6">
-            <li><code class="doc-inline-code">STRIPE_PLATFORM_KEY</code>: Your publishable key (starts with <code class="doc-inline-code">pk_live_</code> or <code class="doc-inline-code">pk_test_</code>)</li>
-            <li><code class="doc-inline-code">STRIPE_PLATFORM_SECRET</code>: Your secret key (starts with <code class="doc-inline-code">sk_live_</code> or <code class="doc-inline-code">sk_test_</code>)</li>
+            <li><code class="doc-inline-code">STRIPE_PLATFORM_SECRET</code>: Your secret key (starts with <code class="doc-inline-code">sk_live_</code> or <code class="doc-inline-code">sk_test_</code>). This is the value that switches Stripe on: with it set, Stripe becomes an available payment method for every event owner on the install.</li>
+            <li><code class="doc-inline-code">STRIPE_PLATFORM_KEY</code>: Your publishable key (starts with <code class="doc-inline-code">pk_live_</code> or <code class="doc-inline-code">pk_test_</code>). Ticket checkout happens on Stripe's hosted page and does not need it, but the in-app card form for paid boosts and on-network promotions reads it, so set it too.</li>
             <li><code class="doc-inline-code">STRIPE_PLATFORM_WEBHOOK_SECRET</code>: Webhook signing secret (next step)</li>
         </ul>
 
+        <p class="text-gray-600 dark:text-gray-300 mb-6">If you cache your configuration, run <code class="doc-inline-code">php artisan config:clear</code> after editing <code class="doc-inline-code">.env</code> so the new values are picked up.</p>
+
         <h3 class="doc-subheading">3. Set Up Webhooks</h3>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>In Stripe Dashboard, go to <strong class="text-gray-900 dark:text-white">Developers</strong> → <strong class="text-gray-900 dark:text-white">Webhooks</strong></li>
+            <li>In Stripe Dashboard, go to <strong class="text-gray-900 dark:text-white">Developers</strong> &rarr; <strong class="text-gray-900 dark:text-white">Webhooks</strong></li>
             <li>Click <strong class="text-gray-900 dark:text-white">Add endpoint</strong></li>
             <li>Set URL to: <code class="doc-inline-code">https://yourdomain.com/stripe/webhook</code></li>
             <li>Select event: <code class="doc-inline-code">checkout.session.completed</code></li>
             <li>Save and copy the <strong class="text-gray-900 dark:text-white">Signing secret</strong> to <code class="doc-inline-code">STRIPE_PLATFORM_WEBHOOK_SECRET</code></li>
         </ol>
 
-        <div class="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-6">
-            <div class="flex items-start gap-3">
-                <svg aria-hidden="true" class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <div>
-                    <p class="text-amber-700 dark:text-amber-300 font-medium mb-1">Important: Webhook Event</p>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm">Make sure to select <code class="doc-inline-code">checkout.session.completed</code> - this is different from SaaS setups which use <code class="doc-inline-code">payment_intent.succeeded</code>.</p>
-                </div>
-            </div>
+        <div class="doc-callout doc-callout-warning">
+            <div class="doc-callout-title">Important: webhook event and secret</div>
+            <p>Select <code class="doc-inline-code">checkout.session.completed</code>. That is different from a SaaS Connect setup, which uses <code class="doc-inline-code">payment_intent.succeeded</code>.</p>
+            <p class="mt-2">The signing secret is not optional. Until <code class="doc-inline-code">STRIPE_PLATFORM_WEBHOOK_SECRET</code> is set, every call to <code class="doc-inline-code">/stripe/webhook</code> is rejected with <code class="doc-inline-code">400 Invalid signature</code> and no sale is ever marked paid.</p>
         </div>
 
         <h3 class="doc-subheading">4. Enable Stripe for Events</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Once configured, event creators can select "Stripe" as the payment method when creating events with tickets. All payments automatically use your platform Stripe account.</p>
+        <ol class="doc-list doc-list-numbered mb-6">
+            <li>Open <strong class="text-gray-900 dark:text-white">Settings</strong> &rarr; <strong class="text-gray-900 dark:text-white">Payment Methods</strong>. The <strong class="text-gray-900 dark:text-white">Stripe</strong> tab should read "Stripe is configured".</li>
+            <li>Edit an event and open its <strong class="text-gray-900 dark:text-white">Tickets</strong> section, then choose <strong class="text-gray-900 dark:text-white">Tickets</strong> rather than External or Registration.</li>
+            <li>On the <strong class="text-gray-900 dark:text-white">Payment</strong> tab, set <strong class="text-gray-900 dark:text-white">Payment method</strong> to <strong class="text-gray-900 dark:text-white">Stripe</strong> and pick the <strong class="text-gray-900 dark:text-white">Currency</strong> the tickets are priced in.</li>
+            <li>Add your ticket types on the <strong class="text-gray-900 dark:text-white">General</strong> tab and save. Payments automatically use your platform Stripe account.</li>
+        </ol>
 
         <h3 class="doc-subheading">How Checkout Works</h3>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Customer selects tickets and fills out the checkout form</li>
-            <li>Event Schedule creates a Stripe Checkout Session</li>
-            <li>Customer completes payment on Stripe's hosted page</li>
-            <li>Webhook confirms payment and marks the sale as paid</li>
-            <li>Customer receives their tickets</li>
+            <li>The buyer selects tickets and fills out the checkout form</li>
+            <li>Event Schedule creates a Stripe Checkout Session on your platform account, tagged with the sale ID</li>
+            <li>The buyer completes payment on Stripe's hosted page</li>
+            <li>Stripe calls <code class="doc-inline-code">/stripe/webhook</code>; Event Schedule verifies the signature, checks the amount charged against the amount owed, and marks the sale paid</li>
+            <li>The buyer is emailed their tickets, with a QR code for check-in</li>
         </ol>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Amounts are verified, not trusted</div>
+            <p>If the amount Stripe reports differs from the order total by more than one cent, the sale is <strong>not</strong> marked paid. It is flagged <code class="doc-inline-code">amount_mismatch</code> instead, and the mismatch is written to your application log for you to reconcile by hand.</p>
+        </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Gift card purchases and paid appointment bookings use exactly the same keys and the same endpoint, so no extra configuration is needed for either.</p>
     </section>
 
     <!-- SaaS Operators -->
@@ -175,35 +190,34 @@
             </svg>
             For SaaS Operators
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">If you're running your own white-label SaaS platform (like eventschedule.com but with your own branding), you need two Stripe integrations:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">If you're running your own white-label SaaS platform (like eventschedule.com but with your own branding), you need two Stripe integrations:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Both require <code class="doc-inline-code">IS_HOSTED=true</code>. The rest of the SaaS setup, including domains and plan limits, is covered in the <a href="{{ route('marketing.docs.saas.setup') }}#stripe" class="doc-link">SaaS setup guide</a>.</p>
 
-        <div class="grid md:grid-cols-2 gap-4 mb-6">
+        <div class="doc-fields doc-fields--2">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Stripe Connect</h4>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">So your event creator customers can connect their Stripe accounts and receive ticket payments directly.</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">So your event creator customers can connect their Stripe accounts and receive ticket payments directly. You never hold their ticket money.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Laravel Cashier</h4>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">To charge your customers for Pro subscriptions (the money you make as the platform operator).</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">To charge your customers for Pro and Enterprise plans (the money you make as the platform operator), billed to your own account.</p>
             </div>
         </div>
 
         <!-- Part A: Stripe Connect -->
-        <div class="bg-blue-500/5 border-l-4 border-blue-500 pl-4 mb-6">
-            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Part A: Stripe Connect (Ticket Sales)</h3>
-            <p class="text-gray-600 dark:text-gray-400 text-sm">Allow your event creators to receive payments for their ticket sales</p>
-        </div>
+        <h3 class="doc-subheading">Part A: Stripe Connect (ticket sales)</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Lets your event creators receive payments for their own ticket sales.</p>
 
-        <h4 class="doc-subheading">1. Enable Stripe Connect</h4>
+        <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">1. Enable Stripe Connect</h4>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Go to the <a href="https://dashboard.stripe.com/" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300">Stripe Dashboard</a></li>
-            <li>Navigate to <strong class="text-gray-900 dark:text-white">Settings</strong> → <strong class="text-gray-900 dark:text-white">Connect</strong> → <strong class="text-gray-900 dark:text-white">Settings</strong></li>
+            <li>Go to the <a href="https://dashboard.stripe.com/" target="_blank" rel="noopener noreferrer" class="doc-link">Stripe Dashboard</a></li>
+            <li>Open <strong class="text-gray-900 dark:text-white">Settings</strong> &rarr; <strong class="text-gray-900 dark:text-white">Connect</strong></li>
             <li>Enable Connect for your platform</li>
-            <li>Configure your branding and platform profile</li>
-            <li>Get your API keys from <strong class="text-gray-900 dark:text-white">Developers</strong> → <strong class="text-gray-900 dark:text-white">API keys</strong></li>
+            <li>Configure your branding and platform profile. Event Schedule creates the connected account for the user and sends them through Stripe's own hosted onboarding, so your branding is what they see.</li>
+            <li>Get your API keys from <strong class="text-gray-900 dark:text-white">Developers</strong> &rarr; <strong class="text-gray-900 dark:text-white">API keys</strong></li>
         </ol>
 
-        <h4 class="doc-subheading">2. Environment Configuration</h4>
+        <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">2. Environment Configuration</h4>
         <div class="doc-code-block">
             <div class="doc-code-header">
                 <span>.env</span>
@@ -215,30 +229,36 @@
         </div>
 
         <ul class="doc-list mb-6">
-            <li><code class="doc-inline-code">STRIPE_KEY</code>: Your platform's Stripe secret key</li>
-            <li><code class="doc-inline-code">STRIPE_WEBHOOK_SECRET</code>: Webhook secret for Connect events</li>
+            <li><code class="doc-inline-code">STRIPE_KEY</code>: Your platform's Stripe <strong class="text-gray-900 dark:text-white">secret</strong> key, despite the name. It is the key every Connect call is made with.</li>
+            <li><code class="doc-inline-code">STRIPE_WEBHOOK_SECRET</code>: Signing secret of the Connect webhook endpoint (next step)</li>
         </ul>
 
-        <h4 class="doc-subheading">3. Webhook Configuration</h4>
+        <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">3. Webhook Configuration</h4>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Go to <strong class="text-gray-900 dark:text-white">Developers</strong> → <strong class="text-gray-900 dark:text-white">Webhooks</strong></li>
-            <li>Click <strong class="text-gray-900 dark:text-white">Add endpoint</strong></li>
+            <li>Go to <strong class="text-gray-900 dark:text-white">Developers</strong> &rarr; <strong class="text-gray-900 dark:text-white">Webhooks</strong></li>
+            <li>Click <strong class="text-gray-900 dark:text-white">Add endpoint</strong> and choose to listen to events on <strong class="text-gray-900 dark:text-white">connected accounts</strong>, since the charges are created on your customers' accounts rather than yours</li>
             <li>Set URL to: <code class="doc-inline-code">https://yourdomain.com/stripe/webhook</code></li>
             <li>Select event: <code class="doc-inline-code">payment_intent.succeeded</code></li>
             <li>Save and copy the signing secret to <code class="doc-inline-code">STRIPE_WEBHOOK_SECRET</code></li>
         </ol>
 
-        <h4 class="doc-subheading">User Onboarding Flow</h4>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Your event creators will:</p>
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">One endpoint, two secrets</div>
+            <p><code class="doc-inline-code">/stripe/webhook</code> tries the Connect secret first and the platform secret second, so the same URL serves both. Event Schedule then checks that the secret matches the kind of sale: a Connect sale confirmed with the platform key, or a direct sale confirmed with the Connect key, is logged and ignored rather than marked paid.</p>
+        </div>
+
+        <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">What Your Event Creators Do</h4>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Go to <strong class="text-gray-900 dark:text-white">Profile</strong> → <strong class="text-gray-900 dark:text-white">Payment Methods</strong></li>
-            <li>Click <strong class="text-gray-900 dark:text-white">"Connect Stripe Account"</strong></li>
+            <li>Open <strong class="text-gray-900 dark:text-white">Settings</strong> &rarr; <strong class="text-gray-900 dark:text-white">Payment Methods</strong> &rarr; <strong class="text-gray-900 dark:text-white">Stripe</strong></li>
+            <li>Click <strong class="text-gray-900 dark:text-white">Connect Stripe</strong></li>
             <li>Complete Stripe's onboarding</li>
-            <li>Return to your platform ready to sell tickets</li>
+            <li>They return to your platform, their Stripe business name is shown with an <strong class="text-gray-900 dark:text-white">Unlink Account</strong> link, and Stripe becomes selectable as an event payment method</li>
         </ol>
 
-        <h4 class="doc-subheading">Connect API Endpoints</h4>
-        <div class="overflow-x-auto mb-8">
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Onboarding that is started but not finished leaves the field labeled <strong class="text-gray-900 dark:text-white">Account ID [Pending]</strong>, and the event editor's <strong class="text-gray-900 dark:text-white">Payment</strong> tab shows a "Stripe is verifying your details" notice. Stripe only becomes selectable as a payment method once Stripe reports that charges are enabled.</p>
+
+        <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Connect API Endpoints</h4>
+        <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
                     <tr>
@@ -249,43 +269,37 @@
                 <tbody>
                     <tr>
                         <td><code class="doc-inline-code">GET /stripe/link</code></td>
-                        <td>Start Stripe Connect onboarding</td>
+                        <td>Start Stripe Connect onboarding (signed in)</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">GET /stripe/complete</code></td>
-                        <td>Complete onboarding callback</td>
+                        <td>Complete onboarding callback (signed in)</td>
                     </tr>
                     <tr>
-                        <td><code class="doc-inline-code">GET /stripe/unlink</code></td>
-                        <td>Disconnect Stripe account</td>
+                        <td><code class="doc-inline-code">POST /stripe/unlink</code></td>
+                        <td>Disconnect Stripe account (signed in)</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">POST /stripe/webhook</code></td>
-                        <td>Handle <code class="doc-inline-code">payment_intent.succeeded</code></td>
+                        <td>Handle <code class="doc-inline-code">payment_intent.succeeded</code> and <code class="doc-inline-code">checkout.session.completed</code></td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
         <!-- Part B: Laravel Cashier -->
-        <div class="bg-blue-500/5 border-l-4 border-blue-500 pl-4 mb-6">
-            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Part B: Laravel Cashier (Subscription Billing)</h3>
-            <p class="text-gray-600 dark:text-gray-400 text-sm">Charge your customers for Pro plan subscriptions</p>
-        </div>
+        <h3 class="doc-subheading">Part B: Laravel Cashier (subscription billing)</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Charges your customers for Pro and Enterprise plans on your own Stripe account.</p>
 
-        <h4 class="doc-subheading">1. Create Subscription Products</h4>
+        <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">1. Create Subscription Products</h4>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>In Stripe Dashboard, go to <strong class="text-gray-900 dark:text-white">Products</strong> → <strong class="text-gray-900 dark:text-white">Add product</strong></li>
-            <li>Create a "Pro Plan" product with:
-                <ul class="doc-list mt-2 mb-2">
-                    <li>Monthly price (e.g., $9.99/month, recurring)</li>
-                    <li>Yearly price (e.g., $99.99/year, recurring)</li>
-                </ul>
-            </li>
-            <li>Note the <strong class="text-gray-900 dark:text-white">Price IDs</strong> (starts with <code class="doc-inline-code">price_</code>)</li>
+            <li>In Stripe Dashboard, go to <strong class="text-gray-900 dark:text-white">Products</strong> &rarr; <strong class="text-gray-900 dark:text-white">Add product</strong></li>
+            <li>Create a <strong class="text-gray-900 dark:text-white">Pro</strong> product with two recurring prices, one monthly and one yearly</li>
+            <li>Optionally create an <strong class="text-gray-900 dark:text-white">Enterprise</strong> product the same way. The Enterprise tier is hidden from the subscribe page unless both of its price IDs are configured.</li>
+            <li>Note each <strong class="text-gray-900 dark:text-white">Price ID</strong> (starts with <code class="doc-inline-code">price_</code>)</li>
         </ol>
 
-        <h4 class="doc-subheading">2. Environment Configuration</h4>
+        <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">2. Environment Configuration</h4>
         <div class="doc-code-block">
             <div class="doc-code-header">
                 <span>.env</span>
@@ -300,17 +314,18 @@
         </div>
 
         <ul class="doc-list mb-6">
-            <li><code class="doc-inline-code">STRIPE_PLATFORM_KEY</code>: Publishable key for your platform</li>
+            <li><code class="doc-inline-code">STRIPE_PLATFORM_KEY</code>: Publishable key for your platform, used by the card form on the subscribe page</li>
             <li><code class="doc-inline-code">STRIPE_PLATFORM_SECRET</code>: Secret key for your platform</li>
-            <li><code class="doc-inline-code">STRIPE_PLATFORM_WEBHOOK_SECRET</code>: Webhook secret for subscription events</li>
-            <li><code class="doc-inline-code">STRIPE_PRICE_MONTHLY</code>: Price ID for monthly subscription</li>
-            <li><code class="doc-inline-code">STRIPE_PRICE_YEARLY</code>: Price ID for yearly subscription</li>
+            <li><code class="doc-inline-code">STRIPE_PLATFORM_WEBHOOK_SECRET</code>: Signing secret of the subscription webhook endpoint</li>
+            <li><code class="doc-inline-code">STRIPE_PRICE_MONTHLY</code> and <code class="doc-inline-code">STRIPE_PRICE_YEARLY</code>: Pro price IDs</li>
+            <li><code class="doc-inline-code">STRIPE_ENTERPRISE_PRICE_MONTHLY</code> and <code class="doc-inline-code">STRIPE_ENTERPRISE_PRICE_YEARLY</code>: Enterprise price IDs. Leave both unset to sell Pro only.</li>
+            <li><code class="doc-inline-code">STRIPE_PRICE_MONTHLY_AMOUNT</code>, <code class="doc-inline-code">STRIPE_PRICE_YEARLY_AMOUNT</code>, <code class="doc-inline-code">STRIPE_ENTERPRISE_PRICE_MONTHLY_AMOUNT</code> and <code class="doc-inline-code">STRIPE_ENTERPRISE_PRICE_YEARLY_AMOUNT</code>: the amounts <em>displayed</em> in the app. They are labels only, so set them to match your Stripe prices or your pages will show the defaults of 5, 50, 15 and 150.</li>
         </ul>
 
-        <h4 class="doc-subheading">3. Subscription Webhook</h4>
+        <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">3. Subscription Webhook</h4>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Go to <strong class="text-gray-900 dark:text-white">Developers</strong> → <strong class="text-gray-900 dark:text-white">Webhooks</strong></li>
-            <li>Click <strong class="text-gray-900 dark:text-white">Add endpoint</strong> (this is a second webhook, separate from Connect)</li>
+            <li>Go to <strong class="text-gray-900 dark:text-white">Developers</strong> &rarr; <strong class="text-gray-900 dark:text-white">Webhooks</strong></li>
+            <li>Click <strong class="text-gray-900 dark:text-white">Add endpoint</strong> (this is a second webhook, separate from Connect, listening on your own account)</li>
             <li>Set URL to: <code class="doc-inline-code">https://yourdomain.com/stripe/subscription-webhook</code></li>
             <li>Select events:
                 <ul class="doc-list mt-2 mb-2">
@@ -318,16 +333,27 @@
                     <li><code class="doc-inline-code">customer.subscription.updated</code></li>
                     <li><code class="doc-inline-code">customer.subscription.deleted</code></li>
                     <li><code class="doc-inline-code">customer.subscription.trial_will_end</code></li>
+                    <li><code class="doc-inline-code">customer.updated</code></li>
+                    <li><code class="doc-inline-code">customer.deleted</code></li>
                     <li><code class="doc-inline-code">invoice.payment_succeeded</code></li>
                     <li><code class="doc-inline-code">invoice.payment_failed</code></li>
+                    <li><code class="doc-inline-code">invoice.payment_action_required</code></li>
+                    <li><code class="doc-inline-code">payment_method.automatically_updated</code></li>
                 </ul>
             </li>
             <li>Save and copy signing secret to <code class="doc-inline-code">STRIPE_PLATFORM_WEBHOOK_SECRET</code></li>
         </ol>
 
-        <h4 class="doc-subheading">4. Customer Portal Setup</h4>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">These events are what keep a schedule's plan in step with Stripe: a successful invoice sets the plan and term, a deleted subscription drops the schedule back to Free, and a failed payment emails the owner and sends them a push notification.</p>
+
+        <div class="doc-callout doc-callout-warning">
+            <div class="doc-callout-title">Stale price IDs silently downgrade Enterprise</div>
+            <p>The plan tier is decided by matching the subscription's price ID against the four configured in your <code class="doc-inline-code">.env</code>. A price ID that matches none of them is treated as <strong>Pro monthly</strong> rather than being ignored, so an Enterprise customer whose price ID no longer matches quietly loses Enterprise. Re-check all four values whenever you change your Stripe products.</p>
+        </div>
+
+        <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">4. Customer Portal Setup</h4>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Go to <strong class="text-gray-900 dark:text-white">Settings</strong> → <strong class="text-gray-900 dark:text-white">Billing</strong> → <strong class="text-gray-900 dark:text-white">Customer portal</strong></li>
+            <li>Go to <strong class="text-gray-900 dark:text-white">Settings</strong> &rarr; <strong class="text-gray-900 dark:text-white">Billing</strong> &rarr; <strong class="text-gray-900 dark:text-white">Customer portal</strong></li>
             <li>Enable subscription management features:
                 <ul class="doc-list mt-2 mb-2">
                     <li>Subscription cancellation</li>
@@ -338,7 +364,7 @@
             <li>Customize branding to match your platform</li>
         </ol>
 
-        <h4 class="doc-subheading">Subscription API Endpoints</h4>
+        <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Subscription API Endpoints</h4>
         <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
@@ -380,16 +406,9 @@
             </table>
         </div>
 
-        <div class="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 mb-6">
-            <div class="flex items-start gap-3">
-                <svg aria-hidden="true" class="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <div>
-                    <p class="text-blue-700 dark:text-blue-300 font-medium mb-1">Architecture Note</p>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm">Laravel Cashier uses the <code class="doc-inline-code">Role</code> model (schedule/calendar) as the billable entity, not <code class="doc-inline-code">User</code>. This means each schedule has its own subscription, and users can have multiple schedules with different plans.</p>
-                </div>
-            </div>
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Architecture note</div>
+            <p>Cashier bills the <strong>schedule</strong>, not the user account. Each schedule carries its own Stripe customer and subscription, so one person can own several schedules on different plans, and cancelling one leaves the others alone.</p>
         </div>
     </section>
 
@@ -401,40 +420,55 @@
             </svg>
             Invoice Ninja (Alternative Payment Method)
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">In addition to Stripe, Event Schedule supports <a href="https://invoiceninja.com" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300">Invoice Ninja</a> as an alternative payment method for ticket sales. Invoice Ninja is an open-source invoicing and payments platform that supports multiple payment gateways.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">In addition to Stripe, Event Schedule supports <a href="https://invoiceninja.com" target="_blank" rel="noopener noreferrer" class="doc-link">Invoice Ninja</a> as an alternative payment method for ticket sales and gift cards. Invoice Ninja is an open-source invoicing and payments platform that supports many payment gateways, Stripe among them.</p>
 
         <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">No Server Configuration Required</div>
-            <p>Unlike Stripe, Invoice Ninja does not require any <code class="doc-inline-code">.env</code> configuration on your server. Each user connects their own Invoice Ninja instance through the <strong>Profile > Payment Methods > Invoice Ninja</strong> tab in the admin panel.</p>
+            <div class="doc-callout-title">No server configuration required</div>
+            <p>Unlike Stripe, Invoice Ninja needs no <code class="doc-inline-code">.env</code> configuration at all. Each user connects their own Invoice Ninja company from <strong>Settings &rarr; Payment Methods &rarr; Invoice Ninja</strong> in the admin portal, so different event owners on the same install can use different Invoice Ninja accounts.</p>
         </div>
 
         <h3 class="doc-subheading">Prerequisites</h3>
         <ul class="doc-list mb-6">
-            <li>A running <a href="https://invoiceninja.com" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300">Invoice Ninja</a> instance (selfhosted or hosted)</li>
-            <li>An API key from your Invoice Ninja instance</li>
+            <li>An <a href="https://invoiceninja.com" target="_blank" rel="noopener noreferrer" class="doc-link">Invoice Ninja</a> company, either selfhosted or on invoicing.co</li>
+            <li>An API token from that company</li>
             <li>At least one payment gateway configured in Invoice Ninja</li>
         </ul>
 
         <h3 class="doc-subheading">Setup Steps</h3>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>In your Invoice Ninja instance, go to <strong class="text-gray-900 dark:text-white">Settings > Account Management > API Tokens</strong> and create a new API token</li>
-            <li>In Event Schedule, go to <strong class="text-gray-900 dark:text-white">Profile > Payment Methods > Invoice Ninja</strong></li>
-            <li>Enter your Invoice Ninja API URL (e.g. <code class="doc-inline-code">https://invoicing.yourdomain.com</code>)</li>
-            <li>Enter your API token</li>
-            <li>Save - Event Schedule will automatically create a webhook in your Invoice Ninja instance</li>
+            <li>In Invoice Ninja, go to <strong class="text-gray-900 dark:text-white">Settings &rarr; Account Management</strong> and create an API token</li>
+            <li>In Event Schedule, open <strong class="text-gray-900 dark:text-white">Settings &rarr; Payment Methods &rarr; Invoice Ninja</strong></li>
+            <li>Paste the token into <strong class="text-gray-900 dark:text-white">API Token</strong></li>
+            <li>Fill in <strong class="text-gray-900 dark:text-white">API URL</strong> with the base address of your instance, for example <code class="doc-inline-code">https://invoicing.yourdomain.com</code>, without a trailing <code class="doc-inline-code">/api/v1</code>. Leave it blank to use invoicing.co.</li>
+            <li>Save. Event Schedule verifies the credentials and registers a webhook in your Invoice Ninja company, so the connection either works or fails outright rather than saving a broken one.</li>
         </ol>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Once connected, the company name is shown with <strong class="text-gray-900 dark:text-white">Edit</strong> and <strong class="text-gray-900 dark:text-white">Unlink Account</strong> links. Editing the credentials replaces the old webhook rather than adding a second one, and leaving the token blank there means "keep the current token", so you can correct just the URL.</p>
 
         <h3 class="doc-subheading">How It Works</h3>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>When creating an event with tickets, select "Invoice Ninja" as the payment method</li>
-            <li>Event Schedule creates corresponding products in your Invoice Ninja instance for each ticket type</li>
-            <li>When a customer purchases tickets, they are redirected to an Invoice Ninja payment page</li>
-            <li>After payment, Invoice Ninja sends a webhook to Event Schedule to confirm the sale</li>
+            <li>Edit an event, open <strong class="text-gray-900 dark:text-white">Tickets &rarr; Payment</strong> and choose <strong class="text-gray-900 dark:text-white">Invoice Ninja</strong> as the payment method</li>
+            <li>At checkout the buyer is sent to Invoice Ninja: to an invoice they can pay, or to an Invoice Ninja purchase page, depending on the mode below</li>
+            <li>Invoice Ninja processes the card through whichever gateway you configured there</li>
+            <li>Invoice Ninja calls the webhook back so Event Schedule can mark the sale paid and email the tickets</li>
         </ol>
 
+        <h3 class="doc-subheading">Invoice Ninja Modes</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Once the company is connected, a <strong class="text-gray-900 dark:text-white">Checkout mode</strong> setting appears in the same Invoice Ninja tab. It applies to every event this user sells through Invoice Ninja. The full comparison lives on the <a href="{{ route('marketing.docs.tickets') }}#invoiceninja-modes" class="doc-link">Tickets</a> page.</p>
+        <div class="doc-fields doc-fields--2">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Invoice</h4>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Ticket selection and promo codes are handled in Event Schedule, and an invoice is created in Invoice Ninja for each purchase. Supports several promo codes.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Payment link</h4>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Buyers select tickets and enter promo codes on the Invoice Ninja purchase page, and invoices are grouped there. Event Schedule creates one Invoice Ninja product per ticket type and add-on the first time an event is bought, and passes one active promo code.</p>
+            </div>
+        </div>
+
         <div class="doc-callout doc-callout-tip">
-            <div class="doc-callout-title">Invoice Ninja Modes</div>
-            <p>Invoice Ninja can operate in two modes: <strong>Invoice mode</strong> (sends a full invoice to the buyer) or <strong>Payment link mode</strong> (directs to a simple payment page). You can choose the mode in the Invoice Ninja tab of your payment settings.</p>
+            <div class="doc-callout-title">Payment link mode falls back</div>
+            <p>If building the Invoice Ninja purchase page fails, that checkout quietly falls back to Invoice mode so the buyer can still pay. If your buyers keep landing on an invoice instead of the purchase page, check your application log for the Invoice Ninja warning.</p>
         </div>
     </section>
 
@@ -450,9 +484,10 @@
         <h3 class="doc-subheading">Test Mode Setup</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">For development and testing:</p>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Toggle to <strong class="text-gray-900 dark:text-white">"Test mode"</strong> in the Stripe Dashboard</li>
+            <li>Toggle to <strong class="text-gray-900 dark:text-white">Test mode</strong> in the Stripe Dashboard</li>
             <li>Use test API keys (starting with <code class="doc-inline-code">pk_test_</code> and <code class="doc-inline-code">sk_test_</code>)</li>
             <li>Create test webhook endpoints pointing to your development environment</li>
+            <li>Keep keys, prices and webhooks in one mode. Test keys with live price IDs, or the reverse, fail with a "No such price" error.</li>
         </ol>
 
         <h3 class="doc-subheading">Test Card Numbers</h3>
@@ -487,7 +522,7 @@
         <p class="text-gray-600 dark:text-gray-400 text-sm mb-6">Use any future expiration date and any 3-digit CVC.</p>
 
         <h3 class="doc-subheading">Testing Webhooks Locally</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Use the <a href="https://stripe.com/docs/stripe-cli" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300">Stripe CLI</a> to forward webhooks:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Use the <a href="https://stripe.com/docs/stripe-cli" target="_blank" rel="noopener noreferrer" class="doc-link">Stripe CLI</a> to forward webhooks:</p>
 
         <div class="doc-code-block">
             <div class="doc-code-header">
@@ -507,7 +542,12 @@ stripe listen --forward-to localhost:8000/stripe/webhook
 stripe listen --forward-to localhost:8000/stripe/subscription-webhook</code></pre>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The CLI displays a webhook signing secret to use in your <code class="doc-inline-code">.env</code> file.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The CLI prints a webhook signing secret for each listener. Put it in the variable that endpoint reads:</p>
+        <ul class="doc-list mb-6">
+            <li><code class="doc-inline-code">/stripe/webhook</code> on a selfhosted install: <code class="doc-inline-code">STRIPE_PLATFORM_WEBHOOK_SECRET</code></li>
+            <li><code class="doc-inline-code">/stripe/webhook</code> for Connect: <code class="doc-inline-code">STRIPE_WEBHOOK_SECRET</code></li>
+            <li><code class="doc-inline-code">/stripe/subscription-webhook</code>: <code class="doc-inline-code">STRIPE_PLATFORM_WEBHOOK_SECRET</code></li>
+        </ul>
 
         <h3 class="doc-subheading">Trigger Test Events</h3>
         <div class="doc-code-block">
@@ -524,6 +564,8 @@ stripe trigger payment_intent.succeeded
 <span class="code-comment"># Test subscription creation</span>
 stripe trigger customer.subscription.created</code></pre>
         </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A triggered event proves the endpoint is reachable and the signature verifies, but it carries no sale ID in its metadata, so no sale changes state. To test the full path, buy a ticket with a test card.</p>
     </section>
 
     <!-- Troubleshooting -->
@@ -538,13 +580,22 @@ stripe trigger customer.subscription.created</code></pre>
 
         <h3 class="doc-subheading">Common Issues</h3>
 
-        <div class="space-y-4 mb-8">
+        <div class="doc-fields mb-8">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Stripe is missing from the payment method list</h4>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-2"><strong class="text-gray-900 dark:text-white">Applies to:</strong> All setups</p>
+                <ul class="doc-list text-sm">
+                    <li>Selfhosted: <code class="doc-inline-code">STRIPE_PLATFORM_SECRET</code> is not set, or the config cache is stale. <strong class="text-gray-900 dark:text-white">Settings &rarr; Payment Methods &rarr; Stripe</strong> tells you which, since it reads "Stripe is configured" only when the secret is present.</li>
+                    <li>SaaS: the user has not finished Connect onboarding, so Stripe is not offered yet.</li>
+                </ul>
+            </div>
+
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">"Stripe account not connected" error</h4>
                 <p class="text-gray-600 dark:text-gray-400 text-sm mb-2"><strong class="text-gray-900 dark:text-white">Applies to:</strong> SaaS operators (Connect)</p>
                 <ul class="doc-list text-sm">
                     <li>User needs to complete Stripe Connect onboarding</li>
-                    <li>Check if <code class="doc-inline-code">stripe_account_id</code> and <code class="doc-inline-code">stripe_completed_at</code> are set on the user</li>
+                    <li>Check if <code class="doc-inline-code">stripe_account_id</code> and <code class="doc-inline-code">stripe_completed_at</code> are set on the user. An account ID without a completion timestamp means Stripe has not enabled charges yet.</li>
                 </ul>
             </div>
 
@@ -553,6 +604,7 @@ stripe trigger customer.subscription.created</code></pre>
                 <p class="text-gray-600 dark:text-gray-400 text-sm mb-2"><strong class="text-gray-900 dark:text-white">Applies to:</strong> All setups</p>
                 <ul class="doc-list text-sm">
                     <li>Verify the webhook secret matches the one in Stripe Dashboard</li>
+                    <li>A missing secret produces the same error: with neither variable set, every webhook is rejected</li>
                     <li>Make sure you're using the correct secret for each endpoint:
                         <ul class="doc-list mt-2">
                             <li><code class="doc-inline-code">STRIPE_WEBHOOK_SECRET</code> for Connect webhooks</li>
@@ -566,9 +618,21 @@ stripe trigger customer.subscription.created</code></pre>
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Payments not being recorded</h4>
                 <p class="text-gray-600 dark:text-gray-400 text-sm mb-2"><strong class="text-gray-900 dark:text-white">Applies to:</strong> Selfhosted users, SaaS operators</p>
                 <ul class="doc-list text-sm">
-                    <li>Check webhook logs in Stripe Dashboard → Webhooks → View logs</li>
+                    <li>Check webhook logs in Stripe Dashboard &rarr; Webhooks &rarr; View logs</li>
                     <li>Verify the webhook endpoint is accessible (not blocked by firewall)</li>
-                    <li>Check <code class="doc-inline-code">storage/logs/laravel.log</code> for errors</li>
+                    <li>Confirm the endpoint listens to the right event: <code class="doc-inline-code">checkout.session.completed</code> for direct payments, <code class="doc-inline-code">payment_intent.succeeded</code> for Connect</li>
+                    <li>For Connect, confirm the endpoint listens on connected accounts, not only on your own</li>
+                    <li>Check <code class="doc-inline-code">storage/logs/laravel.log</code> for errors, including a "webhook key mismatch" warning, which means the sale and the secret belong to different payment contexts</li>
+                </ul>
+            </div>
+
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">A sale is stuck as "amount mismatch"</h4>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-2"><strong class="text-gray-900 dark:text-white">Applies to:</strong> Selfhosted users, SaaS operators</p>
+                <ul class="doc-list text-sm">
+                    <li>Stripe reported a total more than a cent away from the order total, so the sale was deliberately not marked paid</li>
+                    <li><code class="doc-inline-code">storage/logs/laravel.log</code> records the expected and received amounts side by side</li>
+                    <li>Usual causes are a currency mismatch between the event and the Stripe account, or ticket prices edited after the buyer reached Stripe</li>
                 </ul>
             </div>
 
@@ -578,6 +642,7 @@ stripe trigger customer.subscription.created</code></pre>
                 <ul class="doc-list text-sm">
                     <li>Verify webhook events are being received</li>
                     <li>Check that all required subscription events are selected in Stripe</li>
+                    <li>Confirm the subscribed price ID is one of the four configured in your <code class="doc-inline-code">.env</code>. An unrecognized price ID is treated as Pro monthly, which looks like an Enterprise customer being downgraded</li>
                     <li>Review <code class="doc-inline-code">storage/logs/laravel.log</code> for errors</li>
                 </ul>
             </div>
@@ -590,13 +655,21 @@ stripe trigger customer.subscription.created</code></pre>
                     <li>Ensure the prices exist in the same Stripe mode (test vs live)</li>
                 </ul>
             </div>
+
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Enterprise is missing from the subscribe page</h4>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-2"><strong class="text-gray-900 dark:text-white">Applies to:</strong> SaaS operators</p>
+                <ul class="doc-list text-sm">
+                    <li>Both <code class="doc-inline-code">STRIPE_ENTERPRISE_PRICE_MONTHLY</code> and <code class="doc-inline-code">STRIPE_ENTERPRISE_PRICE_YEARLY</code> must be set. With one missing, the request is served as Pro.</li>
+                </ul>
+            </div>
         </div>
 
         <h3 class="doc-subheading">Debugging Logs</h3>
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Application:</strong> <code class="doc-inline-code">storage/logs/laravel.log</code></li>
-            <li><strong class="text-gray-900 dark:text-white">Stripe API:</strong> Dashboard → Developers → Logs</li>
-            <li><strong class="text-gray-900 dark:text-white">Webhooks:</strong> Dashboard → Developers → Webhooks → Select endpoint → View logs</li>
+            <li><strong class="text-gray-900 dark:text-white">Stripe API:</strong> Dashboard &rarr; Developers &rarr; Logs</li>
+            <li><strong class="text-gray-900 dark:text-white">Webhooks:</strong> Dashboard &rarr; Developers &rarr; Webhooks &rarr; Select endpoint &rarr; View logs</li>
         </ul>
     </section>
 
@@ -609,10 +682,11 @@ stripe trigger customer.subscription.created</code></pre>
             Security
         </h2>
         <ol class="doc-list doc-list-numbered">
-            <li><span class="font-semibold text-gray-900 dark:text-white">API Key Security:</span> Never expose secret keys in client-side code or version control. Use environment variables.</li>
-            <li><span class="font-semibold text-gray-900 dark:text-white">Webhook Verification:</span> Always verify webhook signatures - Event Schedule does this automatically.</li>
-            <li><span class="font-semibold text-gray-900 dark:text-white">HTTPS Required:</span> Stripe requires HTTPS for webhook endpoints in production.</li>
-            <li><span class="font-semibold text-gray-900 dark:text-white">PCI Compliance:</span> Using Stripe Checkout and Elements keeps you out of PCI scope - card data never touches your server.</li>
+            <li><span class="font-semibold text-gray-900 dark:text-white">API key security:</span> Secret keys belong in <code class="doc-inline-code">.env</code> only. Never put them in client-side code or commit them to version control.</li>
+            <li><span class="font-semibold text-gray-900 dark:text-white">Webhook verification:</span> Both endpoints are public URLs, so both signing secrets matter. <code class="doc-inline-code">/stripe/webhook</code> fails closed: a signature it cannot verify, and any request at all when no secret is configured, is rejected with a 400. <code class="doc-inline-code">/stripe/subscription-webhook</code> fails open: the signature check is only installed once <code class="doc-inline-code">STRIPE_PLATFORM_WEBHOOK_SECRET</code> is set, so leaving it blank leaves an unauthenticated endpoint that can move a schedule between plans.</li>
+            <li><span class="font-semibold text-gray-900 dark:text-white">Amount and account checks:</span> A confirmed payment is also checked against the amount owed, and on Connect against the account that took the money, before anything is marked paid.</li>
+            <li><span class="font-semibold text-gray-900 dark:text-white">HTTPS required:</span> Stripe requires HTTPS for webhook endpoints in production.</li>
+            <li><span class="font-semibold text-gray-900 dark:text-white">PCI compliance:</span> Using Stripe Checkout and Elements keeps you out of PCI scope. Card data never touches your server.</li>
         </ol>
     </section>
 </x-docs-page>

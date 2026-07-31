@@ -148,7 +148,11 @@ html {
 
 /* Documentation header accent (restrained es-* docs treatment) */
 .text-gradient-docs {
-    background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 50%, #06b6d4 100%);
+    /* The old #06b6d4 end stop measured 2.43:1 on white and failed AA for large
+       text (needs 3:1) on the H1 of every docs page. Ending on #0e7490 keeps the
+       blue-to-cyan travel while the faintest stop clears 4.5:1. The dark variant
+       below is unchanged - bright cyan on the dark ground already measures well. */
+    background: linear-gradient(135deg, #2563eb 0%, #0284c7 50%, #0e7490 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;

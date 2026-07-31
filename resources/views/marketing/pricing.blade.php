@@ -28,6 +28,8 @@
             'Embed calendar on website',
             'Recurring events',
             'Free event registration',
+            'Sell up to 25 tickets a month',
+            'Appointment booking (1 type)',
             'Built-in analytics',
             'Sub-schedules',
             '10 ' . __('messages.newsletters_per_month'),
@@ -35,8 +37,9 @@
         $proFeatures = [
             'Everything in Free',
             'Remove Event Schedule branding',
-            'Full ticketing suite & check-in dashboard',
-            'Sell online via Stripe',
+            'Unlimited ticket sales & check-in dashboard',
+            'Passes, subscriptions & individual tickets',
+            'Unlimited appointment types',
             __('messages.feature_boost'),
             'Custom fields',
             'Custom CSS styling',
@@ -74,9 +77,9 @@
         $calcEsBar = $calcEb > 0 ? round(($calcEs / $calcEb) * 100) : 0;
 
         $faqs = [
-            ['q' => 'Is there really a free plan?', 'a' => 'Yes! The free plan includes unlimited events and all core features. You only need to upgrade if you want to remove branding, sell tickets, or access advanced features.'],
+            ['q' => 'Is there really a free plan?', 'a' => 'Yes! The free plan includes unlimited events, all core features, appointment booking with one appointment type, and selling up to 25 paid tickets a month with no platform fee. You only need to upgrade if you want to remove branding, sell more than 25 tickets a month, or access advanced features.'],
             ['q' => 'How does the free trial work?', 'a' => 'When you sign up for Pro or Enterprise, you get a 7-day free trial. Enter your card to start, and you won\'t be charged until the trial ends. After that, Pro is $' . $proMonthly . '/month or $' . $proYearly . '/year, and Enterprise is $' . $entMonthly . '/month or $' . $entYearly . '/year. You can cancel anytime.'],
-            ['q' => 'What is the difference between Pro and Enterprise?', 'a' => 'Pro includes a full ticketing suite with check-in dashboard, Stripe payments, promo/discount codes, sales CSV export, white-label branding, event graphics, event boosting with ads, custom fields, custom CSS styling, REST API & webhooks, and 100 newsletter emails per month. Enterprise adds custom domains, private and password-protected events, multiple team members, WhatsApp event creation, email scheduling, agenda scanning, availability management, 1,000 newsletter emails per month, and priority support.'],
+            ['q' => 'What is the difference between Pro and Enterprise?', 'a' => 'The free plan already sells up to 25 paid tickets a month, scans tickets at the door and carries one appointment type. Pro removes both limits and adds the rest of the ticketing suite: the live check-in dashboard, passes and subscriptions, individual tickets, promo/discount codes, add-ons, waitlists and sales CSV export. It also adds white-label branding, event graphics, event boosting with ads, custom fields, custom CSS styling, REST API & webhooks, and 100 newsletter emails per month. Enterprise adds custom domains, private and password-protected events, up to five team members, WhatsApp event creation, email scheduling, agenda scanning, availability management, 1,000 newsletter emails per month, and priority support.'],
             ['q' => 'Can I cancel anytime?', 'a' => 'Absolutely. You can cancel your subscription at any time and you\'ll keep access until the end of your billing period.'],
             ['q' => 'Do you take a cut of ticket sales?', 'a' => 'No! We don\'t charge any fees on ticket sales. You only pay the standard Stripe processing fees (typically 2.9% + $0.30 per transaction).'],
         ];
@@ -97,14 +100,14 @@
                 "name": "Free",
                 "price": "0",
                 "priceCurrency": "USD",
-                "description": "Unlimited events and schedules, calendar sync, analytics, and free event registration."
+                "description": "Unlimited events and schedules, calendar sync, analytics, free event registration, and up to 25 paid tickets a month."
             },
             {
                 "@type": "Offer",
                 "name": "Pro",
                 "price": "{{ number_format($proMonthly, 2, '.', '') }}",
                 "priceCurrency": "USD",
-                "description": "Ticketing, Stripe payments, event graphics, API and webhooks. Also available at ${{ $proYearly }}/year.",
+                "description": "Unlimited ticket sales, live check-in dashboard, event graphics, API and webhooks. Also available at ${{ $proYearly }}/year.",
                 "priceSpecification": {
                     "@type": "UnitPriceSpecification",
                     "price": "{{ number_format($proMonthly, 2, '.', '') }}",

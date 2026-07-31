@@ -3,17 +3,20 @@
 
     // Both the visible glossary and the DefinedTermSet JSON-LD below read this
     // one array. They used to be two hand-maintained copies of the same nine
-    // terms.
+    // terms. Twelve keeps every row of the 3-up grid complete.
     $glossary = [
-        ['term' => 'Schedule', 'def' => 'Your event calendar with its own unique URL and branding. Each schedule can contain unlimited events.'],
-        ['term' => 'Event', 'def' => 'A single occurrence with a date, time, location, and details. Events belong to a schedule.'],
-        ['term' => 'Sub-schedule', 'def' => 'A category to organize events within your schedule (e.g., Live Music, Comedy, Workshops).'],
-        ['term' => 'Ticket', 'def' => 'A purchasable item for event attendance. Events can have multiple ticket types (e.g., General, VIP).'],
-        ['term' => 'Follower', 'def' => 'Someone who follows your schedule to receive updates about new events.'],
-        ['term' => 'Newsletter', 'def' => 'An email campaign sent to your followers or ticket buyers to announce events, share updates, or promote your schedule.'],
-        ['term' => 'Segment', 'def' => 'A defined audience group for sending newsletters (e.g., all followers, ticket buyers, or a custom list).'],
-        ['term' => 'Embed', 'def' => 'A widget that displays your schedule on an external website using an iframe or JavaScript snippet.'],
-        ['term' => 'Admin Panel', 'def' => 'The management interface where you configure your schedule, add events, and view analytics.'],
+        ['term' => 'Schedule', 'def' => 'Your event calendar, with its own URL, branding and settings. One schedule holds as many events as you like, on every plan.'],
+        ['term' => 'Schedule type', 'def' => 'Talent, Venue or Curator. The type decides what a schedule gets: a venue has a full address, a curator aggregates events from other schedules. Choose carefully, because the type is fixed once the schedule is saved.'],
+        ['term' => 'Sub-schedule', 'def' => 'A category for events inside one schedule, such as Live Music, Comedy or Workshops. Each one has its own color and its own URL, and visitors can filter by it. It organizes and color-codes only: it cannot hide an event.'],
+        ['term' => 'Event', 'def' => 'A single occurrence with a date, time, location and details. An event belongs to a schedule and can repeat on a weekly pattern with date exceptions.'],
+        ['term' => 'Request', 'def' => 'An event someone else submits from your public request page. Requests wait on the Requests tab until you accept or decline them, and you can opt in to an email when new ones land.'],
+        ['term' => 'Ticket', 'def' => 'A ticket type on an event, such as General or VIP. Sales run through your own Stripe account with no platform fees on any plan. Free schedules sell up to 25 paid tickets a month; Pro removes the cap.'],
+        ['term' => 'RSVP', 'def' => 'Free sign-up for an event, with an optional capacity limit per date. Available on every plan, and no Stripe account is needed.'],
+        ['term' => 'Follower', 'def' => 'Someone who follows your schedule so you can reach them later. Following shares their name and email with you; nothing goes out automatically, you send the emails.'],
+        ['term' => 'Newsletter', 'def' => 'An email you write and send to a segment. The monthly allowance counts recipients rather than sends: 10 free, 100 on Pro, 1,000 on Enterprise, and unlimited on selfhost or with your own mail server.'],
+        ['term' => 'Segment', 'def' => 'A saved audience for newsletters: all followers, ticket buyers, a ticket waitlist, buyers from one sub-schedule, or a list you enter by hand.'],
+        ['term' => 'Embed', 'def' => 'Your schedule shown on another website inside an iframe. The calendar embed and the RSVP form are free; embedding the ticket purchase widget needs Pro.'],
+        ['term' => 'Admin Panel', 'def' => 'The management side of one schedule, where you add events, change settings and read your analytics. Not the selfhost admin panel at /admin, which manages a whole install.'],
     ];
 
     // Full class strings - interpolated Tailwind colour classes do not
@@ -24,14 +27,14 @@
             'route' => 'marketing.docs.selfhost',
             'icon' => 'server',
             'title' => 'Selfhost Installation',
-            'lede' => 'Deploy on your own server. Complete control, full customization, no vendor lock-in.',
-            'links' => ['Installation guide', 'Stripe and calendar sync', 'Email and AI setup'],
+            'lede' => 'Run Event Schedule on your own server. A selfhosted install resolves to Enterprise, so no plan gate applies.',
+            'links' => ['Requirements and installation', 'Stripe payments and calendar sync', 'Email, AI and boost setup', 'Admin panel, federation, accessibility'],
             'cta' => 'View selfhost docs',
             'chip' => 'bg-sky-100 dark:bg-sky-500/15',
             'iconColor' => 'text-sky-600 dark:text-sky-400',
             'hover' => 'hover:border-sky-500/50 dark:hover:border-sky-400/40',
             'badge' => 'bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300',
-            'link' => 'text-sky-600 dark:text-sky-400',
+            'link' => 'text-sky-700 dark:text-sky-300',
             'glow' => 'bg-sky-500/12 dark:bg-sky-500/15',
         ],
         [
@@ -39,14 +42,14 @@
             'route' => 'marketing.docs.saas.setup',
             'icon' => 'cloud',
             'title' => 'SaaS Platform',
-            'lede' => 'Run Event Schedule as a multi-tenant SaaS with subdomains, plans and custom domains.',
-            'links' => ['Multi-tenant setup', 'Custom domains', 'Twilio verification'],
+            'lede' => 'Run Event Schedule as a multi-tenant SaaS with subdomains, plans and per-tenant custom domains.',
+            'links' => ['Multi-tenant setup', 'Custom domains with automatic SSL', 'Twilio phone verification', 'Federation, ads and promotions'],
             'cta' => 'View SaaS docs',
             'chip' => 'bg-cyan-100 dark:bg-cyan-500/15',
             'iconColor' => 'text-cyan-600 dark:text-cyan-400',
             'hover' => 'hover:border-cyan-500/50 dark:hover:border-cyan-400/40',
             'badge' => 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300',
-            'link' => 'text-cyan-600 dark:text-cyan-400',
+            'link' => 'text-cyan-700 dark:text-cyan-300',
             'glow' => 'bg-cyan-500/12 dark:bg-cyan-500/15',
         ],
         [
@@ -54,22 +57,22 @@
             'route' => 'marketing.docs.developer.api',
             'icon' => 'code',
             'title' => 'Developer',
-            'lede' => 'REST and webhook documentation for integrating with Event Schedule programmatically.',
-            'links' => ['REST API reference', 'Webhooks', 'HMAC signing'],
+            'lede' => 'Drive Event Schedule from your own code over REST. API access is a Pro feature, on reads as well as writes.',
+            'links' => ['REST API reference', 'API keys and rate limits', 'HMAC-signed webhooks', 'Sale, event and check-in payloads'],
             'cta' => 'Explore the API',
             'chip' => 'bg-emerald-100 dark:bg-emerald-500/15',
             'iconColor' => 'text-emerald-600 dark:text-emerald-400',
             'hover' => 'hover:border-emerald-500/50 dark:hover:border-emerald-400/40',
             'badge' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
-            'link' => 'text-emerald-600 dark:text-emerald-400',
+            'link' => 'text-emerald-700 dark:text-emerald-300',
             'glow' => 'bg-emerald-500/12 dark:bg-emerald-500/15',
         ],
     ];
 
     $steps = [
-        ['icon' => 'cog', 'title' => 'Create a schedule', 'text' => 'Pick a type, claim a URL, and add your logo and colours.', 'route' => 'marketing.docs.getting_started'],
-        ['icon' => 'plus', 'title' => 'Add your events', 'text' => 'Enter them by hand, import from text, or scan a printed agenda.', 'route' => 'marketing.docs.creating_events'],
-        ['icon' => 'share', 'title' => 'Share it', 'text' => 'Embed it on your site, post the link, and grow your followers.', 'route' => 'marketing.docs.sharing'],
+        ['icon' => 'cog', 'title' => 'Create a schedule', 'text' => 'Pick Talent, Venue or Curator, claim your URL, and add a logo and colors.', 'route' => 'marketing.docs.getting_started'],
+        ['icon' => 'plus', 'title' => 'Add your events', 'text' => 'Type them in, paste a listing for AI to parse, or scan a printed agenda on Enterprise.', 'route' => 'marketing.docs.creating_events'],
+        ['icon' => 'share', 'title' => 'Share it', 'text' => 'Embed the calendar on your site, post the link, and collect followers you can email later.', 'route' => 'marketing.docs.sharing'],
     ];
 @endphp
 
@@ -143,7 +146,14 @@
 
                 <h1 class="es-balance mb-4 text-[2.25rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-5xl lg:text-6xl">
                     <span class="es-mask"><span class="es-mask-line">Everything you need,</span></span>
-                    <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-docs">in one place</span></span></span>
+                    {{-- Same docs accent gradient, one shade deeper. The shared
+                         .text-gradient-docs ends on cyan-500, which measures 2.43
+                         against this white hero and misses AA; the 600-shade stops
+                         below clear 3:1 in BOTH themes, so one gradient serves
+                         light and dark. background-IMAGE, never the `background`
+                         shorthand, or the clip-to-text is reset and the letters
+                         turn into a filled box. --}}
+                    <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-docs" style="background-image: linear-gradient(135deg, #2563eb 0%, #0284c7 50%, #0891b2 100%);">in one place</span></span></span>
                 </h1>
 
                 <p class="es-fade-up es-d-2 mx-auto mb-9 max-w-2xl text-lg text-gray-500 dark:text-gray-400">
@@ -156,9 +166,9 @@
                     <x-docs.search variant="hero" />
 
                     <nav class="mt-4 flex flex-wrap items-center justify-center gap-2" aria-label="Page sections">
-                        <span class="text-xs text-gray-400">Jump to</span>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">Jump to</span>
                         @foreach ([['Get started', '#start'], ['User Guide', '#guide'], ['Platforms', '#platforms'], ['Glossary', '#glossary']] as [$label, $href])
-                            <a href="{{ $href }}" class="rounded-full border border-gray-200 bg-white/70 px-3 py-1 text-xs font-medium text-gray-600 transition-colors hover:border-[var(--brand-blue)] hover:text-[var(--brand-blue)] dark:border-white/10 dark:bg-white/5 dark:text-gray-300">{{ $label }}</a>
+                            <a href="{{ $href }}" class="rounded-full border border-gray-200 bg-white/70 px-3 py-1 text-xs font-medium text-gray-600 transition-colors hover:border-[var(--brand-blue)] hover:text-blue-700 dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:text-blue-300">{{ $label }}</a>
                         @endforeach
                     </nav>
                 </div>
@@ -171,7 +181,7 @@
         <section id="start" class="scroll-mt-24 border-t border-gray-200 bg-gray-50 py-14 dark:border-white/5 dark:bg-[#0f0f14]">
             <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
                 <div class="mb-6" data-reveal>
-                    <p class="mb-1 text-xs font-bold uppercase tracking-[0.14em] text-[var(--brand-blue)]">Start here</p>
+                    <p class="mb-1 text-xs font-bold uppercase tracking-[0.14em] text-blue-700 dark:text-blue-300">Start here</p>
                     <h2 class="es-balance text-2xl font-bold tracking-tight text-gray-900 dark:text-white md:text-3xl">From nothing to a live calendar</h2>
                 </div>
 
@@ -208,7 +218,7 @@
         <section id="guide" class="scroll-mt-24 bg-white py-16 dark:bg-[#0a0a0f] lg:py-20">
             <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
                 <div class="mb-8" data-reveal>
-                    <p class="mb-1 text-xs font-bold uppercase tracking-[0.14em] text-[var(--brand-blue)]">User Guide</p>
+                    <p class="mb-1 text-xs font-bold uppercase tracking-[0.14em] text-blue-700 dark:text-blue-300">User Guide</p>
                     <h2 class="es-balance text-2xl font-bold tracking-tight text-gray-900 dark:text-white md:text-3xl">Every part of the product</h2>
                 </div>
 
@@ -218,7 +228,7 @@
                             <div class="mb-5 flex flex-wrap items-baseline gap-x-3 gap-y-1" data-reveal>
                                 <h3 class="text-xl font-bold tracking-tight text-gray-900 dark:text-white">{{ $cluster['title'] }}</h3>
                                 <span class="text-sm text-gray-500 dark:text-gray-400">{{ $cluster['blurb'] }}</span>
-                                <span class="ms-auto text-xs font-medium text-gray-400">{{ count($cluster['pages']) }} guides</span>
+                                <span class="ms-auto text-xs font-medium text-gray-500 dark:text-gray-400">{{ count($cluster['pages']) }} {{ count($cluster['pages']) === 1 ? 'guide' : 'guides' }}</span>
                             </div>
 
                             <div data-reveal-group="70">
@@ -260,7 +270,7 @@
         <section id="platforms" class="scroll-mt-24 bg-white py-16 dark:bg-[#0a0a0f] lg:py-20">
             <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
                 <div class="mb-8" data-reveal>
-                    <p class="mb-1 text-xs font-bold uppercase tracking-[0.14em] text-[var(--brand-blue)]">Run it yourself</p>
+                    <p class="mb-1 text-xs font-bold uppercase tracking-[0.14em] text-blue-700 dark:text-blue-300">Run it yourself</p>
                     <h2 class="es-balance text-2xl font-bold tracking-tight text-gray-900 dark:text-white md:text-3xl">Platform and developer docs</h2>
                 </div>
 
@@ -312,7 +322,7 @@
         <section id="glossary" class="scroll-mt-24 border-t border-gray-200 bg-gray-50 py-16 dark:border-white/5 dark:bg-[#0f0f14]">
             <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
                 <div class="mb-8" data-reveal>
-                    <p class="mb-1 text-xs font-bold uppercase tracking-[0.14em] text-[var(--brand-blue)]">Reference</p>
+                    <p class="mb-1 text-xs font-bold uppercase tracking-[0.14em] text-blue-700 dark:text-blue-300">Reference</p>
                     <h2 class="es-balance text-2xl font-bold tracking-tight text-gray-900 dark:text-white md:text-3xl">Glossary</h2>
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Key terms used throughout Event Schedule.</p>
                 </div>
@@ -344,8 +354,13 @@
                         <p class="mx-auto mb-8 max-w-xl text-gray-400">Event Schedule is fully open source. Explore the code, report an issue, or contribute on GitHub.</p>
 
                         <div class="flex flex-wrap justify-center gap-3">
+                            {{-- Gradient inline, not from-/to- utilities: white on
+                                 --brand-button-bg-light (#5A8DFF) is 3.14, below AA
+                                 for this 16px label. These two stops are the WP link
+                                 blue and blue-700, at 5.2 and 6.7. --}}
                             <a href="https://github.com/eventschedule/eventschedule" target="_blank" rel="noopener noreferrer"
-                               class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--brand-button-bg-light)] to-[var(--brand-button-bg)] px-6 py-3 font-semibold text-white shadow-lg shadow-blue-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl">
+                               style="background-image: linear-gradient(to right, #2563eb, #1d4ed8);"
+                               class="inline-flex items-center gap-2 rounded-xl px-6 py-3 font-semibold text-white shadow-lg shadow-blue-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl">
                                 View on GitHub
                             </a>
                             <a href="https://github.com/eventschedule/eventschedule/discussions" target="_blank" rel="noopener noreferrer"

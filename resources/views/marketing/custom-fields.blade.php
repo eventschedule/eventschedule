@@ -1043,9 +1043,9 @@
                     <div class="es-form-card p-6" data-reveal="panel">
                         <div class="mb-3 flex flex-wrap items-center gap-2">
                             <h3 class="es-form-ink text-lg font-bold">Taking money</h3>
-                            <span class="es-form-plan es-form-plan-pro">Pro</span>
+                            <span class="es-form-plan">Free</span>
                         </div>
-                        <p class="es-form-muted text-sm leading-relaxed">Ticketing is Pro too, through your own Stripe account. Event Schedule charges zero platform fees, so past Stripe's own processing the money is yours.</p>
+                        <p class="es-form-muted text-sm leading-relaxed">Selling starts free: 25 paid tickets a month, through your own Stripe account, and scanning those tickets at the door is free too. Pro lifts that ceiling and adds the live check-in dashboard. Event Schedule charges zero platform fees on every plan, so past Stripe's own processing the money is yours.</p>
                     </div>
                 </div>
 

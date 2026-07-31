@@ -600,7 +600,7 @@
             ['Can you ask this one for me?', 'A poll your audience can suggest options for', 'Engagement, then Polls, on the session', 'Pro'],
             ['Can I say it in advance?', 'Comments, held until you approve them', 'The session page, or one agenda segment', 'Free'],
             ['Tell me when the next one is', 'Follow, then a newsletter you write', 'Followers, then Newsletters', 'Free'],
-            ['Can I pay for the deep dive?', 'Named ticket types through your Stripe', "The session's ticket section, Tickets mode", 'Pro'],
+            ['Can I pay for the deep dive?', 'Named ticket types through your Stripe', "The session's ticket section, Tickets mode", 'Free'],
         ];
 
         $steps = [
@@ -620,11 +620,11 @@
             ],
             [
                 'q' => 'Can I charge for live Q&A sessions?',
-                'a' => 'Yes, on the Pro plan. Connect your own Stripe account and sell named ticket types for a premium AMA or a paid deep dive, each with its own price, quantity and sales window. Event Schedule charges zero platform fees at every plan level, so past Stripe\'s own processing fee the money is yours. Free sessions do not need any of this: registration with a place limit is free.',
+                'a' => 'Yes, and you do not have to pay us before you start. Connect your own Stripe account and sell named ticket types for a premium AMA or a paid deep dive, each with its own price, quantity and sales window. The free plan sells up to 25 paid tickets a month per schedule, and scanning a ticket\'s QR code at the door is free on every plan; Pro, at five dollars a month, removes that ceiling and adds the rest of the door tooling, including the live check-in dashboard, discount codes, add-ons and a waitlist on a sold-out ticket type. Event Schedule charges zero platform fees at every plan level, free included, so past Stripe\'s own processing fee the money is yours. Free sessions do not need any of this: registration with a place limit is free.',
             ],
             [
                 'q' => 'Is Event Schedule free for hosting Q&A sessions?',
-                'a' => 'Yes. Unlimited sessions, registration with a capacity limit, the agenda, recurring office hours, the embeddable calendar, two-way Google, Outlook and CalDAV sync, built-in analytics and newsletters are all free forever. Polls, ticketing, custom questions on the registration form and the embeddable registration widget are on the Pro plan at five dollars a month. There are zero platform fees on ticket sales on every plan.',
+                'a' => 'Yes. Unlimited sessions, registration with a capacity limit, the agenda, recurring office hours, the embeddable calendar, the embeddable registration widget, two-way Google, Outlook and CalDAV sync, built-in analytics and newsletters are all free forever. Selling is free to start too, at 25 paid tickets a month. Polls, custom questions on the registration form and unlimited ticket sales are on the Pro plan at five dollars a month. There are zero platform fees on ticket sales on every plan.',
             ],
             [
                 'q' => 'Do my followers get an email when I schedule a new session?',
@@ -632,7 +632,7 @@
             ],
             [
                 'q' => 'Can I cap how many people join?',
-                'a' => 'Yes, and the count is per session date. Set a number of places on the session and every occurrence of a weekly office hour counts its own registrations, so this Thursday filling up does not close next Thursday. The page shows how many places are left, and once a date is full it stops taking registrations for that date. A waitlist for a full date is a Pro feature.',
+                'a' => 'Yes, and the count is per session date. Set a number of places on the session and every occurrence of a weekly office hour counts its own registrations, so this Thursday filling up does not close next Thursday. The page shows how many places are left, and once a date is full it stops taking registrations for that date. A waitlist for a full registration date is free as well; it is the waitlist on a sold-out paid ticket type that is a Pro feature.',
             ],
         ];
 
@@ -1154,7 +1154,7 @@
                             </table>
                         </div>
                         <p class="es-conv-muted mt-5 text-xs">
-                            Pro is five dollars a month. Zero platform fees on ticket sales applies on every plan, including the free one.
+                            Pro is five dollars a month, and on the ticketing row it is what lifts the free plan's ceiling of 25 paid tickets a month. Zero platform fees on ticket sales applies on every plan, including the free one.
                         </p>
                     </div>
                 </div>
@@ -1215,7 +1215,7 @@
                                 <span class="es-conv-plan">Free</span>
                             </div>
                             <p class="es-conv-muted mb-4">Embed the calendar so your sessions sit where people look you up, and sync two ways with Google, Outlook and CalDAV so your own week stays honest.</p>
-                            <p class="es-conv-muted text-sm">Built-in <a href="{{ marketing_url('/features/analytics') }}" class="es-conv-link font-medium hover:underline">analytics</a> show page views, the devices people are on and where the traffic came from. That is what they measure, and nothing more. Embedding the registration form itself on another site is a Pro feature.</p>
+                            <p class="es-conv-muted text-sm">Built-in <a href="{{ marketing_url('/features/analytics') }}" class="es-conv-link font-medium hover:underline">analytics</a> show page views, the devices people are on and where the traffic came from. That is what they measure, and nothing more. Embedding the registration form itself on another site is free too; it is the ticket purchase widget that is a Pro feature.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1243,10 +1243,10 @@
                         <div class="relative z-10">
                             <div class="mb-4 flex flex-wrap items-center gap-2">
                                 <h3 class="es-conv-ink text-xl font-bold">When the session is worth paying for</h3>
-                                <span class="es-conv-plan es-conv-plan-pro">Pro</span>
+                                <span class="es-conv-plan">Free</span>
                             </div>
-                            <p class="es-conv-muted mb-4">Connect your own Stripe and sell named ticket types for a paid AMA or a small-group deep dive, each with its own price, quantity and sales window, plus discount codes for the people you want back.</p>
-                            <p class="es-conv-muted text-sm">Quantities count per date, the same way places do. Event Schedule takes zero platform fees, so past Stripe's own processing the money is yours. See all <a href="{{ marketing_url('/features/ticketing') }}" class="es-conv-link font-medium hover:underline">ticketing features</a>.</p>
+                            <p class="es-conv-muted mb-4">Connect your own Stripe and sell named ticket types for a paid AMA or a small-group deep dive, each with its own price, quantity and sales window. Selling starts on the free plan, at 25 paid tickets a month.</p>
+                            <p class="es-conv-muted text-sm">Scanning a ticket's QR code at the door is free too. Pro takes that ceiling off and adds the rest of the door tooling: the live check-in dashboard, discount codes for the people you want back, add-ons and a waitlist on a sold-out ticket type. Quantities count per date, the same way places do. Event Schedule takes zero platform fees on every plan, so past Stripe's own processing the money is yours. See all <a href="{{ marketing_url('/features/ticketing') }}" class="es-conv-link font-medium hover:underline">ticketing features</a>.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1525,7 +1525,7 @@
                         You already have the answers. <span class="es-conv-lit">Give them somewhere to ask.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg es-conv-onband">
-                        Publishing your sessions, the agenda and registration with a place limit are free forever. Polls and ticketing are five dollars a month, and nothing is taken from the door.
+                        Publishing your sessions, the agenda and registration with a place limit are free forever, and so are your first 25 paid tickets a month. Five dollars a month buys polls and no ceiling on what you sell. Nothing is ever taken from the door.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

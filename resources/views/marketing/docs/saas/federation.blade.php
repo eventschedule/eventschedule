@@ -1,7 +1,8 @@
 <x-docs-page
     key="saas/federation"
-    description="Share your public events with the eventschedule.com listings. Every listing links back to the event on your own site, so the discovery traffic comes to you."
-    lede="Share your customers' public events with the eventschedule.com listings, and send the discovery traffic back to your platform."
+    description="Share your customers' public events with the eventschedule.com listings. You enable the network, each customer schedule opts in for itself, and every listing links back to your platform."
+    lede="Share your customers' public events with the eventschedule.com listings and send the discovery traffic back to your platform. You turn the network on for the whole install, eventschedule.com approves it once, and each customer's schedule then chooses whether to be listed."
+    article-description="Federation shares the public events on a multi-tenant Event Schedule install with the eventschedule.com listings. The operator enables it for the whole install, eventschedule.com reviews that install once, and each customer schedule chooses whether its events are listed. Every listing links back to the event on the operator's own site."
 >
     <x-slot:toc>
         <x-doc-nav-link href="#overview">Overview</x-doc-nav-link>

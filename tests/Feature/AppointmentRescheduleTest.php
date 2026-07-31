@@ -981,47 +981,33 @@ class AppointmentRescheduleTest extends TestCase
     }
 
     /**
-     * gate() aborts the plan check with a REDIRECT, and abort() carrying a Response throws it verbatim
-     * regardless of Accept - so fetch() followed it into HTML, res.json() threw, and the picker reported
-     * "session expired" to an owner whose plan had lapsed. These two endpoints answer in JSON.
+     * Appointments are available on every plan now, so a lapsed plan no longer blocks anything here.
+     *
+     * These two tests previously asserted the opposite: that the owner endpoints refused a lapsed
+     * plan, in JSON for the fetch() endpoints and as a redirect for the page. Refusing a move on an
+     * already-taken booking would strand the guest with a booking they could only cancel, so the
+     * gate is gone and the assertions are inverted.
      */
-    public function test_the_owner_json_endpoints_report_a_lapsed_plan_as_json(): void
+    public function test_the_owner_endpoints_still_work_on_a_lapsed_plan(): void
     {
         [$role, , $sale] = $this->booking();
         $owner = $role->user;
         $urls = $this->ownerUrls($role, $sale);
 
-        // Force the hosted Pro gate closed.
         config(['app.hosted' => true]);
-        $role->forceFill(['plan_type' => 'free', 'plan_expires' => now()->subDay()->format('Y-m-d')])->save();
+        $role->forceFill([
+            'plan_type' => 'free',
+            'plan_expires' => now()->subDay()->format('Y-m-d'),
+            'trial_ends_at' => null,
+        ])->save();
 
-        foreach (['slots' => 'get', 'post' => 'postJson'] as $key => $verb) {
-            $response = $verb === 'get'
-                ? $this->actingAs($owner)->getJson($urls[$key])
-                : $this->actingAs($owner)->postJson($urls[$key], ['slot' => '2030-01-01T10:00:00Z']);
+        $this->assertFalse($role->fresh()->isPro(), 'sanity check: the fixture is not Pro');
 
-            $response->assertStatus(403);
-            $this->assertNotNull($response->json('error'), $key.' must answer in JSON, not a redirect');
-            $this->assertSame(
-                'application/json',
-                explode(';', (string) $response->headers->get('content-type'))[0],
-                $key.' must not hand the picker an HTML page'
-            );
-        }
-    }
+        $slots = $this->actingAs($owner)->getJson($urls['slots']);
+        $slots->assertOk();
+        $this->assertNull($slots->json('error'), 'a lapsed plan is not a reason to refuse the slot list');
 
-    /** The page endpoint keeps its redirect - that is correct for a normal navigation. */
-    public function test_the_owner_page_still_redirects_a_lapsed_plan(): void
-    {
-        [$role, , $sale] = $this->booking();
-        $owner = $role->user;
-
-        config(['app.hosted' => true]);
-        $role->forceFill(['plan_type' => 'free', 'plan_expires' => now()->subDay()->format('Y-m-d')])->save();
-
-        $this->actingAs($owner)
-            ->get($this->ownerUrls($role, $sale)['page'])
-            ->assertRedirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan']));
+        $this->actingAs($owner)->get($urls['page'])->assertOk();
     }
 
     /**

@@ -571,9 +571,10 @@
             ['Add to Google, Outlook or Apple Calendar', 'An iCal download per date, plus two-way Google, Outlook and CalDAV sync', 'Free'],
             ['The Follow button under the schedule name', 'Followers you can write to: 10 newsletter emails a month on Free, counted per recipient', 'Free'],
             ['Save me a place, and the count of places left', 'Free registration with an optional capacity, per date', 'Free'],
+            ['Buy a ticket without leaving the page', 'Ticket types and card checkout, with zero platform fees. Free sells 25 paid tickets a month per schedule', 'Free'],
             ['Photos and comments from the people who came', 'Fan photos, video and comments, held in an approval queue. Free covers 25 photos per schedule', 'Free'],
             ['The line at the foot of a free schedule inviting you to make one of your own', 'The free-plan credit, which reads "Create your free schedule at eventschedule.com". Removing it is part of Pro', 'Pro'],
-            ['Buy a ticket, then show a code at the door', 'Ticket types, QR check-in and zero platform fees on what you sell', 'Pro'],
+            ['A code shown at the door, and scanned on the way in', 'QR scanning, on every plan. The live check-in dashboard is the Pro half, and Pro also lifts the 25-a-month ceiling on what you sell', 'Free'],
             ['A schedule on its own domain rather than a subdomain', 'Custom domains', 'Enterprise'],
         ];
 
@@ -595,7 +596,7 @@
         $faqs = [
             [
                 'q' => 'Can I create a schedule like these?',
-                'a' => 'Yes. Everything it takes to publish a schedule like the ones on this page is free forever: unlimited events, recurring dates, sub-schedules, your own colors and header image, free registration with a capacity, two-way calendar sync and an embeddable calendar. Selling tickets with QR check-in is on the Pro plan at five dollars a month, and Event Schedule charges no platform fees on ticket sales.',
+                'a' => 'Yes. Everything it takes to publish a schedule like the ones on this page is free forever: unlimited events, recurring dates, sub-schedules, your own colors and header image, free registration with a capacity, two-way calendar sync and an embeddable calendar. Selling starts free too, at 25 paid tickets a month per schedule, and scanning those codes at the door is free on every plan. Five dollars a month lifts the ceiling and adds the live check-in dashboard. Event Schedule charges no platform fees on ticket sales, on any plan.',
             ],
             [
                 'q' => 'Are these real schedules?',
@@ -611,7 +612,7 @@
             ],
             [
                 'q' => 'Can I put a calendar like this on my own website?',
-                'a' => 'Yes, on every plan. The embeddable calendar drops your schedule into a page on the site you already have, so the calendar lives in two places without being maintained in two places. Embedding the ticket or registration form itself is a Pro feature.',
+                'a' => 'Yes, on every plan. The embeddable calendar drops your schedule into a page on the site you already have, so the calendar lives in two places without being maintained in two places. Embedding the registration form is free as well, and embedding the ticket purchase form is a Pro feature.',
             ],
         ];
 
@@ -974,7 +975,7 @@
                 </div>
 
                 <p class="es-show-muted mt-10 text-center" data-reveal>
-                    {{ $specFree }} of those {{ count($spec) }} parts cost nothing. The {{ count($spec) - $specFree }} that cost something are selling tickets, dropping the credit line, and a domain of your own. Even when you sell, Event Schedule takes nothing from the door.
+                    {{ $specFree }} of those {{ count($spec) }} parts cost nothing. The {{ count($spec) - $specFree }} that cost something are dropping the credit line and a domain of your own. Selling starts free and so does scanning at the door, and Event Schedule takes nothing from the door on any plan.
                     <a href="{{ marketing_url('/pricing') }}" class="es-show-lit inline-flex items-center gap-1 font-semibold transition-all hover:gap-2">
                         See the plans
                         <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
@@ -1096,7 +1097,7 @@
                         There is a space on this floor <span class="es-show-lit">with your name on it.</span>
                     </h2>
                     <p class="es-show-muted mx-auto mb-10 max-w-2xl text-lg sm:text-xl">
-                        Publishing a schedule and its dates is free forever. Ticketing and QR check-in are five dollars a month, and nothing is taken from the door.
+                        Publishing a schedule and its dates is free forever, and so are the first 25 paid tickets you sell each month and scanning them in at the door. Five dollars a month lifts that ceiling and adds the live check-in dashboard, and nothing is taken from the door on any plan.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

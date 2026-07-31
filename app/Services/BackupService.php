@@ -845,7 +845,9 @@ class BackupService
             foreach ($scheduleData['appointment_types'] ?? [] as $typeData) {
                 try {
                     $type = $this->importAppointmentType($typeData, $role);
-                    if (isset($typeData['_ref_id'])) {
+                    // Null when the plan's allowance is already spent; the remaining types are
+                    // skipped rather than restored beyond what the schedule may create.
+                    if ($type && isset($typeData['_ref_id'])) {
                         $idMap['appointment_types'][$typeData['_ref_id']] = $type->id;
                     }
                 } catch (\Exception $e) {
@@ -919,6 +921,12 @@ class BackupService
                     foreach ($eventData['promo_codes'] ?? [] as $promoData) {
                         try {
                             $promo = $this->importPromoCode($promoData, $event, $idMap);
+
+                            // Null when the schedule's plan does not carry promo codes.
+                            if (! $promo) {
+                                continue;
+                            }
+
                             if (isset($promoData['_ref_id'])) {
                                 $idMap['promo_codes'][$promoData['_ref_id']] = $promo->id;
                             }
@@ -1420,7 +1428,10 @@ class BackupService
         $ticket->sales_start_at = $data['sales_start_at'] ?? null;
         $ticket->sales_end_at = $data['sales_end_at'] ?? null;
         $ticket->custom_fields = $data['custom_fields'] ?? null;
-        $ticket->is_pass = $data['is_pass'] ?? false;
+        // Pro extras are scrubbed on import exactly as they are on save. Restore is available on
+        // every plan and takes an arbitrary uploaded payload, so without this a free schedule
+        // could restore unlimited passes.
+        $ticket->is_pass = $event->isPro() ? ($data['is_pass'] ?? false) : false;
         $ticket->pass_usage_type = $data['pass_usage_type'] ?? 'per_occurrence';
         $ticket->pass_max_uses = $data['pass_max_uses'] ?? null;
         $ticket->pass_valid_days = $data['pass_valid_days'] ?? null;
@@ -1438,8 +1449,15 @@ class BackupService
         return $ticket;
     }
 
-    private function importPromoCode(array $data, Event $event, array &$idMap): PromoCode
+    private function importPromoCode(array $data, Event $event, array &$idMap): ?PromoCode
     {
+        // Promo codes are Pro, and restore takes an arbitrary uploaded payload on any plan.
+        // Skipped rather than imported-and-inert so a free schedule does not accumulate rows it
+        // cannot see or manage.
+        if (! $event->isPro()) {
+            return null;
+        }
+
         $validator = Validator::make($data, [
             'code' => 'required|string|max:50',
             'type' => 'required|in:percentage,fixed',
@@ -1517,8 +1535,14 @@ class BackupService
         return $giftCard;
     }
 
-    private function importAppointmentType(array $data, Role $role): AppointmentType
+    private function importAppointmentType(array $data, Role $role): ?AppointmentType
     {
+        // Honour the plan's appointment-type allowance, so a restore cannot hand a free
+        // schedule more bookable types than it may create through the UI.
+        if (! $role->canCreateAppointmentType()) {
+            return null;
+        }
+
         $validator = Validator::make($data, [
             'name' => 'required|string|max:255',
             'duration_minutes' => 'required|integer|min:1',

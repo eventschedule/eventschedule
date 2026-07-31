@@ -31,7 +31,7 @@
             "@type": "Offer",
             "price": "5",
             "priceCurrency": "USD",
-            "description": "Ticketing is included in the Pro plan at $5 per month, with a 7 day free trial. Zero platform fees on ticket sales."
+            "description": "Selling starts on the free plan, at up to 25 paid tickets a month, and those tickets are scanned at the door on every plan. Pro removes the monthly cap and adds the live check-in dashboard, the waitlist, promo codes and passes for $5 per month, with a 7 day free trial. Zero platform fees on ticket sales, on every plan."
         },
         "featureList": [
             "Zero platform fees on ticket sales",
@@ -644,7 +644,7 @@
             ['Gift cards', 'Sell a balance somebody sends to a recipient by email, redeemable against tickets on your schedule.', 'Pro'],
             ['Post-event feedback', 'Star ratings and comments collected from ticket buyers and registrants after the event ends.', 'Pro'],
             ['Webhooks', 'POST notifications for sales, cancellations and check-ins, into whatever you already run.', 'Pro'],
-            ['Embeddable ticket form', 'Put the purchase or RSVP form on the website you already have, in one iframe.', 'Pro'],
+            ['Embeddable ticket form', 'Put the purchase form on the website you already have, in one iframe. The RSVP embed is free.', 'Pro'],
         ];
 
         $steps = [
@@ -660,7 +660,7 @@
             ],
             [
                 'q' => 'Do I need a paid plan to sell tickets?',
-                'a' => 'Ticketing and QR check-in are on the Pro plan, which is $5 a month with a 7 day free trial. Free registration is not: on every plan, including Free, you can turn on RSVP registration for a free event, set a capacity limit, and still get a confirmation email with a QR code for check-in.',
+                'a' => 'No. The Free plan sells up to 25 paid tickets a month through Stripe, scans every one of them at the door, and we take no platform fee on any tier. Pro removes the monthly cap and adds the live check-in dashboard, waitlists, promo codes, passes and the sales export, for $5 a month with a 7 day free trial. Free registration is separate and unlimited on every plan: turn on RSVP for a free event, set a capacity limit, and attendees still get a confirmation email.',
             ],
             [
                 'q' => 'How does QR code check-in work?',
@@ -1136,7 +1136,7 @@
                     You may not need <span class="es-turn-accent">any of this.</span>
                 </h2>
                 <p class="es-turn-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    If the event is free and you only want a headcount, the free plan already does it, QR code and all. Read this before you pay us anything.
+                    If the event is free and you only want a headcount, the free plan already does it. If you are charging, it sells the first 25 paid tickets a month too. Read this before you pay us anything.
                 </p>
             </div>
 
@@ -1148,7 +1148,7 @@
                     </div>
                     <p class="es-turn-muted mb-5 text-sm leading-relaxed">A name and an email. No payment method to connect, no ticket types to configure.</p>
                     <ul class="es-turn-muted space-y-2.5 text-sm">
-                        @foreach (['A Register button on your event page', 'An optional RSVP limit, counted per occurrence date', 'A confirmation email with a QR code for check-in', 'Registration notes in that email: directions, parking, what to bring', 'Guests can cancel their own registration from the email link', 'Every registration listed on the Sales tab'] as $freeItem)
+                        @foreach (['A Register button on your event page', 'An optional RSVP limit, counted per occurrence date', 'A confirmation email carrying the guest\'s own QR code, to scan at the door', 'Registration notes in that email: directions, parking, what to bring', 'Guests can cancel their own registration from the email link', 'Every registration listed on the Sales tab'] as $freeItem)
                             <li class="flex gap-2.5">
                                 <svg aria-hidden="true" class="es-turn-accent mt-0.5 h-4 w-4 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                                 <span>{{ $freeItem }}</span>
@@ -1160,12 +1160,12 @@
 
                 <div class="es-turn-card flex flex-col p-7" data-reveal="panel">
                     <div class="mb-4 flex flex-wrap items-center gap-2">
-                        <h3 class="es-turn-ink text-lg font-black">Ticketing</h3>
+                        <h3 class="es-turn-ink text-lg font-black">Ticketing without a ceiling</h3>
                         <span class="es-turn-plan es-turn-plan-pro">Pro</span>
                     </div>
-                    <p class="es-turn-muted mb-5 text-sm leading-relaxed">Everything on this page. $5 a month with a 7 day free trial, and still zero platform fees.</p>
+                    <p class="es-turn-muted mb-5 text-sm leading-relaxed">Selling itself starts free, at 25 paid tickets a month. Pro takes the counter's ceiling off and adds the rest of this page: $5 a month with a 7 day free trial, and still zero platform fees.</p>
                     <ul class="es-turn-muted space-y-2.5 text-sm">
-                        @foreach (['Named ticket types with prices, quantities and sales windows', 'Promo codes, volume discounts, add-ons and gift cards', 'Passes and season subscriptions across many events', 'Custom questions at checkout, and individual tickets per guest', 'The check-in dashboard and the sold-out waitlist', 'The ticket form embedded on the website you already have'] as $proItem)
+                        @foreach (['No monthly cap on the paid tickets you sell', 'Promo codes, add-ons and gift cards', 'Passes and season subscriptions across many events', 'Custom questions at checkout, and individual tickets per guest', 'The check-in dashboard and the sold-out waitlist', 'The ticket form embedded on the website you already have'] as $proItem)
                             <li class="flex gap-2.5">
                                 <svg aria-hidden="true" class="es-turn-accent mt-0.5 h-4 w-4 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                                 <span>{{ $proItem }}</span>
@@ -1359,7 +1359,7 @@
                         Sell the ticket. <span class="es-turn-lit">Keep the ticket.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg es-turn-band-muted">
-                        Publishing your events and taking free registrations is free forever. Ticketing, QR check-in and the waitlist are $5 a month, and nothing is taken at the gate.
+                        Publishing your events, taking free registrations and scanning at the door are free forever, and so are the first 25 paid tickets you sell each month. Take the ceiling off, and add the live check-in dashboard and the waitlist, for $5 a month. Nothing is taken at the gate either way.
                     </p>
 
                     {{-- The last register. The hero's counter climbed to 142; this one never

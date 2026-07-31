@@ -383,8 +383,11 @@ class EmailService
                 ->where('id', '!=', $sale->id)
                 ->where('status', 'paid')
                 ->where('is_deleted', false)
-                ->where('payment_method', '!=', 'rsvp')
-                ->whereNull('group_id')
+                ->whereNotIn('payment_method', ['rsvp', 'import'])
+                // Primaries and ungrouped sales. A primary carries group_id = its own id, so
+                // whereNull() alone matched nothing on an individual-tickets event and every order
+                // looked like the first. Same idiom TicketController uses in four other places.
+                ->where(fn ($q) => $q->whereNull('group_id')->orWhereColumn('group_id', 'id'))
                 ->exists();
 
             $this->sendNewSaleNotification($sale, $event, $role, $isFirstSale);

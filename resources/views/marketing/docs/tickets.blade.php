@@ -1,7 +1,7 @@
 <x-docs-page
     key="tickets"
     description="Learn how to sell tickets and manage free event registration. Configure payment methods, create ticket types, enable RSVP, and manage sales."
-    lede="Set up ticketing for your events with zero platform fees. Connect payment processing, create ticket types, and keep 100% of your sales."
+    lede="Selling is included on every plan, with zero platform fees. Connect payment processing, create ticket types, and keep 100% of your sales."
     article-description="Learn how to set up and sell tickets for your events. Configure payment methods, create ticket types, and manage sales."
 >
     <x-slot:toc>
@@ -41,53 +41,98 @@
             </svg>
             General
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Event Schedule includes full ticketing functionality. Sell tickets directly from your event pages with secure payment processing, automatic confirmation emails, and QR code tickets. <strong class="text-gray-900 dark:text-white">Keep 100% of your ticket sales - we never charge platform fees.</strong></p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Sell tickets directly from your event pages with secure payment processing, automatic confirmation emails, and a QR code on every ticket. <strong class="text-gray-900 dark:text-white">Selling is included on every plan, including Free, and Event Schedule takes no cut of a ticket sale.</strong></p>
 
         <x-doc-screenshot id="tickets--sales" alt="Sales management page" loading="eager" />
 
         <div class="doc-callout doc-callout-tip mb-6">
-            <div class="doc-callout-title">Zero Platform Fees</div>
-            <p>Unlike other ticketing platforms that take a cut of every sale, Event Schedule charges nothing. You only pay standard payment processor fees (like Stripe's 2.9% + $0.30).</p>
+            <div class="doc-callout-title">Zero platform fees, on every plan</div>
+            <p>The checkout charge is created on <em>your own</em> connected Stripe account, with no application fee attached, so nothing is skimmed on the way through. This is the same on Free as it is on Pro: you pay only your payment processor's own fees. A selfhosted install charges through its own Stripe keys, which works the same way.</p>
         </div>
 
-        <div class="doc-fields">
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Features</h4>
-                <ul class="doc-list text-sm">
-                    <li>Multiple ticket types per event</li>
-                    <li>Quantity limits and sales deadlines</li>
-                    <li>QR code tickets for easy check-in</li>
-                    <li>Automatic confirmation emails</li>
-                    <li>Sales tracking and reporting</li>
-                    <li>Mobile-friendly checkout</li>
-                    <li>Pay-what-you-wish pricing option</li>
-                    <li>Custom checkout fields for attendee info</li>
-                    <li>Promo codes with percentage or fixed discounts</li>
-                    <li>Ticket waitlist for sold-out events</li>
-                    <li>Real-time check-in dashboard</li>
-                    <li>Sale notification emails for organizers</li>
-                </ul>
-            </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">When you edit an event, the <strong class="text-gray-900 dark:text-white">Tickets</strong> section offers three mutually exclusive modes. Pick the one that fits the event:</p>
+
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Mode</th>
+                        <th>What it does</th>
+                        <th>Plan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><a href="#external" class="doc-link">External</a></td>
+                        <td>Sends visitors to someone else's ticketing page, or to no ticketing at all. The default.</td>
+                        <td>Free</td>
+                    </tr>
+                    <tr>
+                        <td><a href="#registration" class="doc-link">Registration</a></td>
+                        <td>A name-and-email RSVP with an optional capacity limit per date. Unlimited on every plan.</td>
+                        <td>Free</td>
+                    </tr>
+                    <tr>
+                        <td><a href="#ticketing" class="doc-link">Tickets</a></td>
+                        <td>Ticket types with prices, quantities and checkout. Free tickets are unlimited; paid tickets have a monthly allowance on the Free plan.</td>
+                        <td>Free, capped</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">When editing an event, the Tickets section offers three modes: <strong class="text-gray-900 dark:text-white">External</strong>, <strong class="text-gray-900 dark:text-white">Registration</strong>, and <strong class="text-gray-900 dark:text-white">Tickets</strong>. Choose the mode that fits your event.</p>
+        <h3 class="doc-subheading">The Free plan's paid-ticket allowance</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A Free schedule can sell paid tickets, up to <strong class="text-gray-900 dark:text-white">25 paid tickets per calendar month</strong>. There is also a backstop of 50 paid tickets a month across every schedule one account owns, so the per-schedule allowance cannot be multiplied by spreading events over several schedules. <a href="{{ marketing_url('/pricing') }}" class="doc-link">Pro</a> and Enterprise remove both limits, and a <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> install is unlimited.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The allowance counts individual paid tickets, not orders, and several things never count against it:</p>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Free registration and RSVP</strong> - unlimited on every plan</li>
+            <li><strong class="text-gray-900 dark:text-white">Zero-price ticket types</strong> - a $0 tier sells without limit, even on an event that also has paid tiers</li>
+            <li><strong class="text-gray-900 dark:text-white"><a href="#add-ons" class="doc-link">Add-ons</a></strong> - extras, not admissions</li>
+            <li><strong class="text-gray-900 dark:text-white"><a href="{{ route('marketing.docs.appointments') }}" class="doc-link">Appointment bookings</a></strong> - they have their own separate allowance</li>
+            <li><strong class="text-gray-900 dark:text-white">Bulk <a href="#importing-attendees" class="doc-link">attendee imports</a></strong></li>
+        </ul>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Two rules keep the allowance from landing at the worst possible moment:</p>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Cash and other offline payments are counted but never blocked.</strong> Money taken at the door is always recordable, whatever the count says.</li>
+            <li><strong class="text-gray-900 dark:text-white">An event starting within 48 hours is exempt.</strong> The allowance never stops sales for an event that is about to happen.</li>
+        </ul>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The count resets on the first of each month. If a paid plan lapsed part-way through a month, the window starts from the moment it lapsed, so tickets you sold while paying are not charged to the Free allowance. When the allowance is spent, online paid checkout pauses for that schedule until the reset: free registration, free ticket tiers and payment at the door all keep working, and the event page falls back to an <strong class="text-gray-900 dark:text-white">Add to Calendar</strong> button instead of a dead buy button. The event editor shows the running count and the reset date in the Tickets section.</p>
+
+        <h3 class="doc-subheading">What ticketing includes</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Everything below works on the Free plan except where a Pro badge says otherwise.</p>
+        <ul class="doc-list">
+            <li>Any number of ticket types per event, each with its own price, quantity and description</li>
+            <li>Per-type sales start and end times, and an optional cap on how many one order may hold</li>
+            <li>Volume discounts on a ticket type</li>
+            <li><a href="#promo-codes" class="doc-link">Promo codes</a> and <a href="{{ route('marketing.docs.gift_cards') }}" class="doc-link">gift cards</a> <x-doc-badge plan="pro" /></li>
+            <li>Optional <a href="#add-ons" class="doc-link">add-ons</a> such as parking or merchandise <x-doc-badge plan="pro" /></li>
+            <li><a href="{{ route('marketing.docs.subscriptions') }}" class="doc-link">Passes and subscriptions</a> that one buyer reuses across many events <x-doc-badge plan="pro" /></li>
+            <li>Custom checkout fields, collected once per order or once per ticket <x-doc-badge plan="pro" /></li>
+            <li>A QR code on every ticket and phone scanning at the door, on every plan, plus a live <a href="#checkin-dashboard" class="doc-link">check-in dashboard</a> <x-doc-badge plan="pro" /></li>
+            <li>A <a href="#waitlist" class="doc-link">waitlist</a> that opens automatically when an event date sells out (free for registration, <x-doc-badge plan="pro" /> for tickets)</li>
+            <li>Sale notification emails, a <a href="#export" class="doc-link">CSV export</a> and a bulk <a href="#importing-attendees" class="doc-link">attendee import</a> <x-doc-badge plan="pro" /></li>
+            <li><a href="#feedback" class="doc-link">Post-event feedback</a> requests with star ratings <x-doc-badge plan="pro" /></li>
+        </ul>
     </section>
 
     <!-- External -->
     <section id="external" class="doc-section">
         <h3 class="doc-subheading">External</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The default mode. Use this when tickets are sold through an external platform (e.g., Eventbrite, Ticketmaster) or when no ticketing is needed. No payment processing is handled within Event Schedule.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The default mode. Use it when tickets are sold somewhere else (Eventbrite, Ticketmaster, a box office of your own) or when the event needs no ticketing at all. Event Schedule handles no money in this mode.</p>
 
         <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Fields</h4>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Registration URL:</strong> A link to your external ticketing page. Displayed as a button on your event page.</li>
-            <li><strong class="text-gray-900 dark:text-white">Price:</strong> An informational display price shown on the event page. Select a currency and enter the amount.</li>
-            <li><strong class="text-gray-900 dark:text-white">Coupon Code:</strong> Displayed alongside the registration URL for attendees to use on the external platform.</li>
+            <li><strong class="text-gray-900 dark:text-white">Registration URL:</strong> the external ticketing page. It becomes a <strong class="text-gray-900 dark:text-white">View Event</strong> button on your event page, opening in a new tab.</li>
+            <li><strong class="text-gray-900 dark:text-white">Price:</strong> a display-only price with a currency. Leave it blank if you do not know it; enter <code class="doc-inline-code">0</code> and the event page reads "Free entry".</li>
+            <li><strong class="text-gray-900 dark:text-white">Coupon Code:</strong> shown under the price so attendees can use it on the external platform. Event Schedule never validates it.</li>
         </ul>
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Tip</div>
-            <p>External mode is available on all plans, including Free.</p>
+            <p>External mode is available on every plan, including Free. The price row only appears on the event page once a Registration URL is set.</p>
         </div>
     </section>
 
@@ -99,22 +144,22 @@
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Edit your event and scroll to the <strong class="text-gray-900 dark:text-white">Tickets</strong> section</li>
             <li>Select the <strong class="text-gray-900 dark:text-white">Registration</strong> mode</li>
-            <li>Optionally set an <strong class="text-gray-900 dark:text-white">RSVP Limit</strong> for capacity management</li>
-            <li>Optionally add <strong class="text-gray-900 dark:text-white">Custom Fields</strong> to collect extra information from registrants</li>
+            <li>Optionally set a <strong class="text-gray-900 dark:text-white">Registration Limit</strong> to cap how many people can sign up</li>
+            <li>Optionally add <strong class="text-gray-900 dark:text-white">Custom Fields</strong> to collect extra details (Pro)</li>
             <li>Save the event</li>
         </ol>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Visitors will see a "Register" button on your event page. After registering, they receive a confirmation email with a QR code for check-in. Add <strong class="text-gray-900 dark:text-white">Registration notes</strong> (under Options) to include directions, parking, dress code, or other instructions in that email and on their ticket. You can view all registrations in your sales list.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Visitors then see a <strong class="text-gray-900 dark:text-white">Register</strong> button on your event page. After registering they receive a confirmation email with a QR code for check-in, and the registration appears in your sales list. Add <strong class="text-gray-900 dark:text-white">Registration notes</strong> (on the <a href="#options" class="doc-link">Options</a> tab) to put directions, parking, a dress code or anything else into that email and onto their ticket.</p>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Attendees can cancel their own registration from the confirmation page linked in their email.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Registrants can cancel themselves from the ticket page linked in their email, which frees the spot again.</p>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">For recurring events, capacity is tracked per occurrence, so each date has its own registration count against the RSVP limit.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4"><strong class="text-gray-900 dark:text-white">The Registration Limit is per date.</strong> On a recurring event each occurrence keeps its own count, so a limit of 30 means 30 people per date, not 30 across the series.</p>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">If you have <x-link href="{{ route('marketing.docs.developer.webhooks') }}">webhooks</x-link> configured, registrations trigger <code class="doc-inline-code">sale.created</code> and cancellations trigger <code class="doc-inline-code">sale.cancelled</code> webhook events.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">If you have <x-link href="{{ route('marketing.docs.developer.webhooks') }}">webhooks</x-link> configured, registrations fire <code class="doc-inline-code">sale.created</code> and cancellations fire <code class="doc-inline-code">sale.cancelled</code>.</p>
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Tip</div>
-            <p>Registration is available on all plans, including Free. It's perfect for meetups, community events, and open gatherings where you want to know who's coming without the formality of tickets.</p>
+            <p>Registration is unlimited on every plan, including Free, and never counts toward the <a href="#general" class="doc-link">paid-ticket allowance</a>. So are the <a href="#waitlist" class="doc-link">waitlist</a> on a full registration date, per-guest individual registration, and the <a href="#embed-widget" class="doc-link">RSVP embed widget</a>. Registration suits meetups, community events and open gatherings where you want to know who is coming without the formality of tickets. Custom checkout fields are the one part that needs Pro.</p>
         </div>
     </section>
 
@@ -124,99 +169,244 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">Full ticketing for paid or multi-type events. Create ticket types, connect a payment method, and sell directly from your event page.</p>
 
         <div class="doc-callout doc-callout-info mb-6">
-            <div class="doc-callout-title">Pro Feature</div>
-            <p>Ticketing is available on Pro plans. Starting at just $5/month with a 7-day free trial - and zero platform fees on your ticket sales.</p>
+            <div class="doc-callout-title">What Free includes, and what Pro adds</div>
+            <p>Creating ticket types, taking payment, scanning tickets at the door and keeping 100% of the money all work on the Free plan, within the <a href="#general" class="doc-link">25 paid tickets a month</a> allowance. Pro removes that ceiling and unlocks the surrounding toolkit: the live check-in dashboard, promo codes, add-ons, passes, individual tickets, the ticket waitlist, the CSV export, the bulk import, gift cards and post-event feedback. A <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> install resolves to Enterprise, so nothing here is held back there.</p>
         </div>
 
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Capability</th>
+                        <th>Free</th>
+                        <th>Pro and above</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Paid ticket sales</td>
+                        <td>25 per month, per schedule</td>
+                        <td>Unlimited</td>
+                    </tr>
+                    <tr>
+                        <td>Platform fee on a sale</td>
+                        <td>None</td>
+                        <td>None</td>
+                    </tr>
+                    <tr>
+                        <td>Free tickets, registration and RSVP</td>
+                        <td>Unlimited</td>
+                        <td>Unlimited</td>
+                    </tr>
+                    <tr>
+                        <td>Ticket types, quantities, sales windows, volume discounts, max per order</td>
+                        <td>Yes</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
+                        <td>QR codes and <a href="#check-in" class="doc-link">scanning at the door</a></td>
+                        <td>Yes</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
+                        <td>Live <a href="#checkin-dashboard" class="doc-link">check-in dashboard</a></td>
+                        <td>No</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
+                        <td><a href="#promo-codes" class="doc-link">Promo codes</a>, <a href="#add-ons" class="doc-link">add-ons</a>, <a href="{{ route('marketing.docs.gift_cards') }}" class="doc-link">gift cards</a></td>
+                        <td>No</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
+                        <td><a href="{{ route('marketing.docs.subscriptions') }}" class="doc-link">Passes</a>, individual tickets, custom checkout fields</td>
+                        <td>No</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
+                        <td>Ticket <a href="#waitlist" class="doc-link">waitlist</a>, <a href="#export" class="doc-link">CSV export</a>, <a href="#importing-attendees" class="doc-link">bulk import</a>, <a href="#embed-widget" class="doc-link">ticket embed</a></td>
+                        <td>No</td>
+                        <td>Yes</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Setting up ticket sales</h4>
         <ol class="doc-list doc-list-numbered mb-6">
+            <li>Connect a payment method first, under <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Settings &rarr; Payment Methods</strong>. Without one, the only choice on the Payment tab is Cash. See <a href="#payment" class="doc-link">Payment</a>.</li>
             <li>Edit your event and scroll to the <strong class="text-gray-900 dark:text-white">Tickets</strong> section</li>
             <li>Select the <strong class="text-gray-900 dark:text-white">Tickets</strong> mode</li>
-            <li>Click <strong class="text-gray-900 dark:text-white">"Add Ticket Type"</strong></li>
-            <li>Enter ticket details:
-                <ul class="doc-list mt-2 mb-2">
-                    <li>Name (e.g., "General Admission", "VIP")</li>
-                    <li>Price (or $0 for free tickets, or leave blank for pay-what-you-wish)</li>
-                    <li>Quantity available (leave blank for unlimited)</li>
-                    <li>Description (optional)</li>
-                </ul>
-            </li>
+            <li>Fill in the first ticket type (the four fields are described below), then use <strong class="text-gray-900 dark:text-white">+ Add Type</strong> for each further one</li>
+            <li>Open the <a href="#payment" class="doc-link">Payment</a> tab and choose a payment method and currency</li>
             <li>Save the event</li>
         </ol>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Once tickets are added, a "Get Tickets" button appears on your event page.</p>
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>What to enter</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Price</td>
+                        <td>Leave it blank (or enter <code class="doc-inline-code">0</code>) for a free ticket.</td>
+                    </tr>
+                    <tr>
+                        <td>Quantity</td>
+                        <td>Leave it blank for unlimited. On a recurring event the count is per date.</td>
+                    </tr>
+                    <tr>
+                        <td>Type</td>
+                        <td>The name shown to buyers, such as General Admission or VIP. It appears, and is required, as soon as there is more than one ticket type.</td>
+                    </tr>
+                    <tr>
+                        <td>Description</td>
+                        <td>Optional, supports Markdown.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The Tickets mode has four sub-tabs for configuration:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">A <strong class="text-gray-900 dark:text-white">Buy Tickets</strong> button then appears on your event page, or <strong class="text-gray-900 dark:text-white">Get Tickets</strong> when every type is free. Both labels can be reworded under <strong class="text-gray-900 dark:text-white">Customize &rarr; Custom Labels</strong> on the schedule's edit page.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The Tickets mode has five sub-tabs:</p>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">General:</strong> Add and manage ticket types</li>
-            <li><strong class="text-gray-900 dark:text-white"><a href="#payment" class="doc-link">Payment</a>:</strong> Choose your payment method (Stripe, Invoice Ninja, Payment URL, or Cash)</li>
-            <li><strong class="text-gray-900 dark:text-white"><a href="#options" class="doc-link">Options</a>:</strong> Custom checkout fields, ticket notes, terms, and expiration settings</li>
-            <li><strong class="text-gray-900 dark:text-white"><a href="#promo-codes" class="doc-link">Promo Codes</a>:</strong> Create discount codes for your tickets</li>
+            <li><strong class="text-gray-900 dark:text-white">General:</strong> the ticket types themselves, plus passes and per-type sales dates</li>
+            <li><strong class="text-gray-900 dark:text-white"><a href="#payment" class="doc-link">Payment</a>:</strong> payment method (Cash, Stripe, Invoice Ninja or Payment URL) and the currency</li>
+            <li><strong class="text-gray-900 dark:text-white"><a href="#options" class="doc-link">Options</a>:</strong> checkout toggles, custom fields, ticket notes and a terms link</li>
+            <li><strong class="text-gray-900 dark:text-white"><a href="#promo-codes" class="doc-link">Promo Codes</a>:</strong> discount codes <x-doc-badge plan="pro" /></li>
+            <li><strong class="text-gray-900 dark:text-white"><a href="#add-ons" class="doc-link">Add-ons</a>:</strong> optional extras buyers can attach to an order <x-doc-badge plan="pro" /></li>
         </ul>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The Promo Codes and Add-ons tabs still open on the Free plan: they show what the feature does and an upgrade panel in place of the editor.</p>
+
+        <div class="doc-callout">
+            <div class="doc-callout-title">Reuse a setup on the next event</div>
+            <p>At the bottom of the Tickets section, turn on <strong class="text-gray-900 dark:text-white">Save as default</strong> before saving. The ticket types you just built are then pre-filled on new events for this schedule.</p>
+        </div>
     </section>
 
     <!-- Ticket Types -->
     <section id="ticket-types" class="doc-section">
         <h3 class="doc-subheading">Ticket Types</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Create multiple ticket types to offer different options:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">A ticket type is a name, a price and a quantity. Add as many as the event needs:</p>
 
         <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
                     <tr>
                         <th>Example</th>
-                        <th>Use Case</th>
+                        <th>Use case</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">General Admission</span></td>
-                        <td>Standard entry ticket</td>
+                        <td>Standard entry</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">VIP</span></td>
-                        <td>Premium tickets with extra benefits</td>
+                        <td>A higher price, with the extras spelled out in the description</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Early Bird</span></td>
-                        <td>Discounted tickets for early buyers</td>
+                        <td>A cheaper type with a small quantity, or a sales end time</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Student/Senior</span></td>
-                        <td>Discounted tickets for specific groups</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Student / Senior</span></td>
+                        <td>A concession price for a specific group</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Table</span></td>
-                        <td>Reserved seating for groups</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Group of 4</span></td>
+                        <td>A volume discount that unlocks at four, rather than a separate type</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Pay What You Wish</span></td>
-                        <td>Let attendees choose their price (set minimum optional)</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Season Pass</span></td>
+                        <td>A <a href="{{ route('marketing.docs.subscriptions') }}" class="doc-link">pass</a> reused across the whole run <x-doc-badge plan="pro" /></td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
+        <div class="doc-callout doc-callout-info mb-6">
+            <div class="doc-callout-title">No seat maps, and no name-your-price</div>
+            <p>Event Schedule sells by quantity, not by seat: there is no seating chart, no assigned seat and no per-section inventory. There is also no pay-what-you-wish pricing - every ticket type has one fixed price, and a blank price simply means free.</p>
+        </div>
+
         <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Ticket Settings</h4>
-        <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Quantity:</strong> Limit how many tickets can be sold (leave blank for unlimited)</li>
-            <li><strong class="text-gray-900 dark:text-white">Sales start date:</strong> Schedule when a ticket type becomes available for purchase</li>
-            <li><strong class="text-gray-900 dark:text-white">Sales end date:</strong> Set a per-ticket-type cutoff to stop selling at a specific time</li>
-            <li><strong class="text-gray-900 dark:text-white">Combined inventory:</strong> Set a total ticket limit across all ticket types for your event</li>
-            <li><strong class="text-gray-900 dark:text-white">Pass / subscription:</strong> Turn a ticket type into a multi-use pass valid across many events (see below)</li>
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Setting</th>
+                        <th>What it does</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Quantity</td>
+                        <td>How many of this type exist. Blank means unlimited. On a recurring event the count is tracked <strong class="text-gray-900 dark:text-white">per date</strong>, so a quantity of 50 is 50 per occurrence.</td>
+                    </tr>
+                    <tr>
+                        <td>Ticket sales start</td>
+                        <td>One absolute date and time at which this type goes on sale. Appears once <strong class="text-gray-900 dark:text-white">Configure sales start/end dates</strong> is on, under <a href="#options" class="doc-link">Options</a>.</td>
+                    </tr>
+                    <tr>
+                        <td>Ticket sales end</td>
+                        <td>One absolute date and time at which this type stops selling.</td>
+                    </tr>
+                    <tr>
+                        <td>Max Per Order</td>
+                        <td>A cap on how many of this type one order may hold. Added with <strong class="text-gray-900 dark:text-white">+ Add Limit</strong>.</td>
+                    </tr>
+                    <tr>
+                        <td>Volume discount</td>
+                        <td>A percentage or fixed amount off once a buyer takes a minimum quantity. Added with <strong class="text-gray-900 dark:text-white">+ Add Discount</strong>.</td>
+                    </tr>
+                    <tr>
+                        <td>Custom Fields (Per Ticket) <x-doc-badge plan="pro" /></td>
+                        <td>Questions asked once for every ticket bought, rather than once per order. Added with <strong class="text-gray-900 dark:text-white">+ Add Field</strong>, up to 10 per ticket type.</td>
+                    </tr>
+                    <tr>
+                        <td>Pass or subscription <x-doc-badge plan="pro" /></td>
+                        <td>Turns the type into a multi-use pass. See <a href="{{ route('marketing.docs.subscriptions') }}" class="doc-link">Subscriptions &amp; Passes</a>.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Quantity, sales windows, max per order and volume discounts all work on the Free plan. Only the two rows marked Pro are gated.</p>
+
+        <div class="doc-callout doc-callout-info mb-6">
+            <div class="doc-callout-title">Sales windows are fixed instants, not offsets</div>
+            <p>A sales start or end is a single date and time, not "two hours before the event". On a recurring event that one instant governs the whole series, so it is best used for a one-off pre-sale window rather than a per-occurrence cutoff. To stop selling at each occurrence automatically, leave the dates blank: sales close at the start time by default, or at the event's end if <strong class="text-gray-900 dark:text-white">Allow sales after event starts</strong> is on.</p>
+        </div>
+
+        <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Individual quantities or one combined pool</h4>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">When an event has two or more ticket types and they all carry the <em>same</em> quantity, a choice appears under the list:</p>
+        <ul class="doc-list mb-4">
+            <li><strong class="text-gray-900 dark:text-white">Individual Quantities</strong> - each ticket type is counted separately, so the capacity is the sum. This is the default.</li>
+            <li><strong class="text-gray-900 dark:text-white">Combined Total</strong> - all types draw on a single pool of that size. Use it when 100 means 100 people through the door however they split between General and VIP.</li>
         </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The choice is hidden when the quantities differ, when any quantity is blank, or when there is only one seat-selling type. Passes are ignored in that judgement, since a pass does not define seat capacity.</p>
 
         <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Volume discount</h4>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Choose <strong class="text-gray-900 dark:text-white">Add volume discount</strong> on a ticket type to reward buying in bulk. Set the <strong class="text-gray-900 dark:text-white">minimum quantity</strong> that unlocks it, then a <strong class="text-gray-900 dark:text-white">percentage</strong> or <strong class="text-gray-900 dark:text-white">fixed amount</strong> off. A group of four booking together gets the discount; a single buyer does not.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Choose <strong class="text-gray-900 dark:text-white">+ Add Discount</strong> on a ticket type to reward buying in bulk. Set the <strong class="text-gray-900 dark:text-white">minimum quantity</strong> that unlocks it (two or more), then a <strong class="text-gray-900 dark:text-white">percentage</strong> or <strong class="text-gray-900 dark:text-white">fixed amount</strong> off. A group of four booking together gets the discount; a single buyer does not.</p>
         <div class="doc-callout mb-6">
             <div class="doc-callout-title">It applies to that ticket type only</div>
             <p>The discount comes off the line for that ticket type, not the whole order, and never off <a href="#add-ons" class="doc-link">add-ons</a>. Four discounted tickets plus a parking add-on means the four tickets are discounted and the parking is not. A <a href="#promo-codes" class="doc-link">promo code</a> stacks on top: the volume discount is taken off first, and the code is then worked out on what is left, so the two never double-count the same money.</p>
         </div>
 
         <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Max per order</h4>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Choose <strong class="text-gray-900 dark:text-white">Add limit</strong> to cap how many of one ticket type a single buyer can take in one order. This is what keeps a two-for-one early bird from being bought out by the first person through the door, and it is separate from the ticket type's total <strong class="text-gray-900 dark:text-white">Quantity</strong>: the quantity is how many exist, the limit is how many one order may hold.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Choose <strong class="text-gray-900 dark:text-white">+ Add Limit</strong> to cap how many of one ticket type a single buyer can take in one order. This is what keeps a two-for-one early bird from being bought out by the first person through the door, and it is separate from the ticket type's total <strong class="text-gray-900 dark:text-white">Quantity</strong>: the quantity is how many exist, the limit is how many one order may hold. Add-ons take the same limit.</p>
 
-        <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Passes &amp; subscriptions</h4>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Turn any ticket type into a multi-use <strong class="text-gray-900 dark:text-white">pass or subscription</strong> - one purchase a guest reuses across many events (a visit pass, a membership, a festival pass, or a season pass for a recurring event). See <a href="{{ route('marketing.docs.subscriptions') }}" class="doc-link">Subscriptions &amp; Passes</a> for the full guide.</p>
+        <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Passes &amp; subscriptions <x-doc-badge plan="pro" /></h4>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Turn on <strong class="text-gray-900 dark:text-white">This is a pass or subscription (multi-use)</strong> to make a ticket type one purchase a guest reuses across many events. Four types are offered: a visit pass with a fixed number of visits, an unlimited membership, a festival pass good once per event, and - on a recurring event only - a season pass.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Advance booking is <strong class="text-gray-900 dark:text-white">off by default</strong>, which makes a pass scan-at-the-door only. Turn on <strong class="text-gray-900 dark:text-white">Let holders book seats in advance</strong> first, and the per-date seat cap and the cancellation-deadline settings appear with it. Passes also keep one shared inventory bucket rather than a count per date. See <a href="{{ route('marketing.docs.subscriptions') }}" class="doc-link">Subscriptions &amp; Passes</a> for the full guide.</p>
     </section>
 
     <!-- Free Tickets -->
@@ -232,11 +422,16 @@
             <li>Save the event</li>
         </ol>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Visitors can "purchase" free tickets to RSVP. They'll receive a confirmation email with a QR code, and you'll have a list of who's coming. Add <strong class="text-gray-900 dark:text-white">Ticket notes</strong> (under Options) to include directions or other instructions in that email.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Visitors can "purchase" free tickets to RSVP. They'll receive a confirmation email with a QR code, and you'll have a list of who's coming. Add <strong class="text-gray-900 dark:text-white">Ticket Notes</strong> (under Options) to include directions or other instructions in that email. A holder of a free ticket can cancel it themselves from their ticket page, which releases the spot; paid orders are cancelled by you from the <a href="#managing-sales" class="doc-link">Sales</a> page.</p>
+
+        <div class="doc-callout doc-callout-tip mb-6">
+            <div class="doc-callout-title">Zero-price tickets are always sellable</div>
+            <p>A ticket type priced at zero never counts toward the Free plan's <a href="#general" class="doc-link">paid-ticket allowance</a>, and it keeps selling even when that allowance is spent. On an event that mixes a $0 tier with paid ones, the free tier stays on sale and only the paid rows pause.</p>
+        </div>
 
         <div class="doc-callout doc-callout-tip mb-6">
             <div class="doc-callout-title">Tip</div>
-            <p>For simple free events where you only need a headcount, use the <a href="#registration" class="doc-link">Registration</a> mode instead - it's simpler and available on all plans.</p>
+            <p>For simple free events where you only need a headcount, use the <a href="#registration" class="doc-link">Registration</a> mode instead - it's simpler, and its per-date limit and waitlist are free on every plan.</p>
         </div>
 
         <div class="doc-callout doc-callout-info">
@@ -253,16 +448,16 @@
             </svg>
             Payment
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Before you can sell tickets, you need to connect a payment method. Event Schedule supports several options:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Before you can take money online you need to connect a payment method. Payment methods belong to your account, not to a single event, so you connect one once and pick it per event. Event Schedule supports four options:</p>
 
         <div class="doc-fields" id="payment-setup">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Stripe</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Accept credit card payments directly. Money goes straight to your Stripe account. Set up Stripe in <a href="{{ route('marketing.docs.account_settings') }}#payments" class="doc-link">Account Settings</a>.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Accept card payments directly. Money goes straight to your own Stripe account, with no platform fee added on any plan. Set up Stripe in <a href="{{ route('marketing.docs.account_settings') }}#payments" class="doc-link">Account Settings</a>.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Invoice Ninja</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Connect your Invoice Ninja account for invoicing and payment tracking.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Connect your Invoice Ninja account for invoicing and payment tracking. Choose between <a href="#invoiceninja-modes" class="doc-link">two checkout modes</a>.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Payment URL</h4>
@@ -270,17 +465,24 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Cash</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Accept payment at the door. Add optional payment instructions for attendees.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Accept payment at the door. Add optional payment instructions for attendees. Always available, even with nothing connected.</p>
             </div>
         </div>
 
         <h3 class="doc-subheading">Connecting Stripe</h3>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Plan</strong></li>
-            <li>Click <strong class="text-gray-900 dark:text-white">"Connect Stripe"</strong></li>
+            <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Settings &rarr; Payment Methods</strong></li>
+            <li>Click <strong class="text-gray-900 dark:text-white">Connect Stripe</strong></li>
             <li>Complete the Stripe onboarding process</li>
-            <li>Once connected, Stripe will be available as a payment option</li>
+            <li>Once connected, Stripe appears as a payment option on the event's <strong class="text-gray-900 dark:text-white">Payment</strong> tab</li>
         </ol>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Stripe verifies a new account asynchronously, so there is a short window after onboarding where the account is linked but not yet ready to charge. The event editor shows a "verifying" notice during that time. If you finish onboarding in another tab, reload the event page to pick up the change.</p>
+
+        <div class="doc-callout doc-callout-info mb-6">
+            <div class="doc-callout-title">If no payment method is connected</div>
+            <p>The Payment tab shows a <strong class="text-gray-900 dark:text-white">Connect Stripe to get paid</strong> panel and the only selectable method is Cash. An event will still save and publish in that state, so connect a method before you announce a paid event.</p>
+        </div>
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Recommended</div>
@@ -364,8 +566,8 @@
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Configure additional checkout settings for your event's tickets.</p>
 
-        <h3 id="checkout-fields" class="doc-subheading">Custom Checkout Fields</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Collect additional information from attendees during checkout. You can add up to 10 custom fields per event.</p>
+        <h3 id="checkout-fields" class="doc-subheading">Custom Checkout Fields <x-doc-badge plan="pro" /></h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Collect additional information from attendees during checkout. You can add up to 10 custom fields per event. Each field has a name, a type (single line, paragraph, switch, date, dropdown or multi-select) and a required flag, and fields can be dragged into the order you want them asked.</p>
 
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Edit your event</li>
@@ -386,24 +588,67 @@
             </ul>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Responses are stored with each sale and can be viewed in your sales dashboard or exported.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Responses are stored with each sale, shown when you expand the sale on the <a href="#managing-sales" class="doc-link">Sales</a> page, and included in the <a href="#export" class="doc-link">CSV export</a> as one column per field.</p>
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Per-Ticket Custom Fields</div>
-            <p>In addition to event-level custom fields, you can also add custom fields to individual ticket types. When editing a ticket type, look for the <strong>Custom Fields (Per Ticket)</strong> section. These fields are collected once per ticket purchased, rather than once per order, and are useful when each attendee needs to provide individual information (e.g., meal choice, name for badge).</p>
+            <p>Fields added here are asked once per order. To ask something once per ticket instead, add the field on the ticket type itself: on the <strong>General</strong> tab, choose <strong>+ Add Field</strong> under a ticket type. Per-ticket fields are useful when each attendee needs to answer individually (meal choice, name for a badge), and each ticket type takes up to 10 of them.</p>
         </div>
 
         <h3 class="doc-subheading">Additional Settings</h3>
-        <ul class="doc-list">
-            <li><strong class="text-gray-900 dark:text-white">Ask for phone number:</strong> Add a phone number field to the checkout form. You can make it required and optionally include a country code selector. Collected phone numbers are also used for SMS notifications where Twilio is configured.</li>
-            <li><strong class="text-gray-900 dark:text-white">Individual tickets:</strong> Each attendee receives their own confirmation and QR code. When enabled, you can also collect custom ticket fields per guest.</li>
-            <li><strong class="text-gray-900 dark:text-white">Allow sales after event starts:</strong> Continue selling tickets until the event ends (start time plus duration) instead of stopping at the start time</li>
-            <li><strong class="text-gray-900 dark:text-white">Configure sales dates:</strong> Enable per-ticket-type start and end dates to schedule when each ticket type becomes available or stops selling</li>
-            <li><strong class="text-gray-900 dark:text-white">Show unavailable tickets:</strong> Display sold out and expired ticket types to visitors in a disabled state, so they can see what was offered</li>
-            <li><strong class="text-gray-900 dark:text-white">Expire unpaid tickets:</strong> Automatically release unpaid tickets after a set number of hours, making them available for other buyers</li>
-            <li><strong class="text-gray-900 dark:text-white">Ticket notes:</strong> Add notes that are included in the confirmation email and shown on the attendee's ticket (e.g., directions, parking, dress code, or what to bring). Supports <a href="{{ route('marketing.docs.creating_schedules') }}#available-variables" class="doc-link">template variables</a> like {event_name} and {venue}, and is available for both ticketed and registration events.</li>
-            <li><strong class="text-gray-900 dark:text-white">Terms URL:</strong> Link to your terms and conditions. Buyers must agree before purchasing.</li>
-        </ul>
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Setting</th>
+                        <th>What it does</th>
+                        <th>Plan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Ask for phone number</td>
+                        <td>Adds a phone field to the checkout form. Two sub-options appear once it is on: <strong class="text-gray-900 dark:text-white">Required</strong> and a <strong class="text-gray-900 dark:text-white">Country code</strong> selector. The number is stored on the sale, shown in the Sales list and included in the <a href="#export" class="doc-link">CSV export</a>.</td>
+                        <td>Free</td>
+                    </tr>
+                    <tr>
+                        <td>Individual tickets</td>
+                        <td>Each attendee gets their own confirmation email and QR code instead of one per order. A sub-toggle, <strong class="text-gray-900 dark:text-white">Collect ticket fields per guest</strong>, then asks the per-ticket custom fields once per attendee.</td>
+                        <td>Pro for ticketed events; free on <a href="#registration" class="doc-link">Registration</a></td>
+                    </tr>
+                    <tr>
+                        <td>Allow sales after event starts</td>
+                        <td>Keeps selling until the event ends (start time plus duration) instead of stopping at the start time.</td>
+                        <td>Free</td>
+                    </tr>
+                    <tr>
+                        <td>Configure sales start/end dates</td>
+                        <td>Reveals the per-ticket-type sales start and end fields described under <a href="#ticket-types" class="doc-link">Ticket Types</a>.</td>
+                        <td>Free</td>
+                    </tr>
+                    <tr>
+                        <td>Show unavailable tickets</td>
+                        <td>Displays sold out and expired ticket types to visitors in a disabled state, so they can see what was offered.</td>
+                        <td>Free</td>
+                    </tr>
+                    <tr>
+                        <td>Expire unpaid tickets</td>
+                        <td>Releases unpaid reservations after a set number of hours, returning them to stock. Only appears when at least one ticket type has both a price and a limited quantity, since there is nothing to release otherwise.</td>
+                        <td>Free</td>
+                    </tr>
+                    <tr>
+                        <td>Ticket Notes</td>
+                        <td>Text included in the confirmation email and printed on the attendee's ticket (directions, parking, dress code, what to bring). Supports <a href="{{ route('marketing.docs.creating_schedules') }}#available-variables" class="doc-link">template variables</a> such as <code class="doc-inline-code">{event_name}</code> and <code class="doc-inline-code">{venue}</code>. On a Registration event the same field is labelled <strong class="text-gray-900 dark:text-white">Registration Notes</strong>.</td>
+                        <td>Free</td>
+                    </tr>
+                    <tr>
+                        <td>Terms URL</td>
+                        <td>Links to your terms and conditions. Buyers must agree before purchasing. Leave it blank to use the default terms.</td>
+                        <td>Free</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </section>
 
     <!-- Promo Codes -->
@@ -413,7 +658,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
             </svg>
-            Promo Codes
+            Promo Codes <x-doc-badge plan="pro" />
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Offer discounts to attendees with promo codes. Buyers enter a code during checkout to receive a discount on their purchase.</p>
 
@@ -421,7 +666,7 @@
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Edit your event</li>
             <li>Go to the <strong class="text-gray-900 dark:text-white">Tickets &rarr; Promo Codes</strong> tab</li>
-            <li>Click <strong class="text-gray-900 dark:text-white">"Add Promo Code"</strong></li>
+            <li>Click <strong class="text-gray-900 dark:text-white">+ Add Promo Code</strong></li>
             <li>Enter the code (e.g., "EARLYBIRD", "VIP50")</li>
             <li>Choose the discount type and value</li>
             <li>Save the event</li>
@@ -435,13 +680,15 @@
 
         <h3 class="doc-subheading">Promo Code Settings</h3>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Max uses:</strong> Limit how many times the code can be used (leave blank for unlimited)</li>
-            <li><strong class="text-gray-900 dark:text-white">Expiration date:</strong> Set a date and time when the code stops working</li>
-            <li><strong class="text-gray-900 dark:text-white">Active/inactive:</strong> Toggle the code on or off without deleting it</li>
-            <li><strong class="text-gray-900 dark:text-white">Applies to:</strong> Apply the code to all ticket types, or target specific tickets only</li>
+            <li><strong class="text-gray-900 dark:text-white">Max Uses:</strong> Limit how many times the code can be used (leave blank for unlimited). The number of times it has been used is shown beside the code.</li>
+            <li><strong class="text-gray-900 dark:text-white">Expires At:</strong> A date and time when the code stops working</li>
+            <li><strong class="text-gray-900 dark:text-white">Active:</strong> A toggle that switches the code off without deleting it</li>
+            <li><strong class="text-gray-900 dark:text-white">Applies To:</strong> <strong class="text-gray-900 dark:text-white">All Tickets</strong>, or <strong class="text-gray-900 dark:text-white">Specific Tickets</strong> to tick the types it covers</li>
         </ul>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Each promo code generates a shareable link that pre-fills the code at checkout, making it easy to distribute to your audience.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Each promo code has a copy-link button that produces a shareable URL pre-filling the code at checkout, making it easy to distribute to your audience.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">A promo code never discounts <a href="#add-ons" class="doc-link">add-ons</a>, and it is worked out after any <a href="#ticket-types" class="doc-link">volume discount</a> on the same line, so the two never double-count the same money. A percentage code is capped at 100% and a fixed code can never discount more than the eligible subtotal.</p>
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Invoice Ninja Payment Link Mode</div>
@@ -460,7 +707,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 01-.657.643 48.491 48.491 0 01-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 01-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 00-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 01-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 00.657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 01-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.401.604-.401.959v0c0 .333.277.599.61.58a48.1 48.1 0 005.427-.63 48.05 48.05 0 00.582-4.717.532.532 0 00-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.959.401v0a.656.656 0 00.658-.663 48.422 48.422 0 00-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 01-.61-.58v0z" />
             </svg>
-            Add-ons
+            Add-ons <x-doc-badge plan="pro" />
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Add-ons are optional purchasable items that customers can include with their ticket order, such as parking passes, merchandise, or meal packages.</p>
 
@@ -468,16 +715,19 @@
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Edit your event</li>
             <li>Go to the <strong class="text-gray-900 dark:text-white">Tickets &rarr; Add-ons</strong> tab</li>
-            <li>Click <strong class="text-gray-900 dark:text-white">"+ Add Add-on"</strong></li>
+            <li>Click <strong class="text-gray-900 dark:text-white">+ Add add-on</strong></li>
             <li>Fill in the add-on details and save the event</li>
         </ol>
 
         <h3 class="doc-subheading">Add-on Fields</h3>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Name:</strong> The name displayed to customers (e.g., "Parking Pass", "Event T-Shirt")</li>
+            <li><strong class="text-gray-900 dark:text-white">Name</strong> (required): The name displayed to customers (e.g., "Parking Pass", "Event T-Shirt")</li>
             <li><strong class="text-gray-900 dark:text-white">Price:</strong> The price per unit (leave blank or set to 0 for free add-ons)</li>
             <li><strong class="text-gray-900 dark:text-white">Quantity:</strong> The total number available (leave blank for unlimited)</li>
             <li><strong class="text-gray-900 dark:text-white">Description:</strong> An optional description with additional details</li>
+            <li><strong class="text-gray-900 dark:text-white">URL:</strong> An optional link, for a size chart or a product page</li>
+            <li><strong class="text-gray-900 dark:text-white">Image:</strong> An optional picture of the item</li>
+            <li><strong class="text-gray-900 dark:text-white">+ Add Limit:</strong> Caps how many of this add-on one order may hold, the same as <a href="#ticket-types" class="doc-link">Max Per Order</a> on a ticket type</li>
         </ul>
 
         <h3 class="doc-subheading">How Add-ons Work</h3>
@@ -485,8 +735,9 @@
             <li>Add-ons appear in the checkout form only after the customer selects at least one ticket</li>
             <li>Customers choose a quantity for each add-on (or leave it at 0 to skip)</li>
             <li>Add-on totals are added to the ticket total at checkout</li>
-            <li>Promo codes do not apply to add-ons</li>
-            <li>Add-ons are tracked separately in sales records and confirmation emails</li>
+            <li>Promo codes and volume discounts do not apply to add-ons</li>
+            <li>Add-ons are tracked separately in sales records, the CSV export and confirmation emails</li>
+            <li>Add-ons never count toward the Free plan's <a href="#general" class="doc-link">paid-ticket allowance</a></li>
         </ul>
     </section>
 
@@ -498,31 +749,46 @@
             </svg>
             Managing Sales
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Track and manage your ticket sales from <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Sales</strong>.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Track and manage your ticket sales from <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Sales</strong>. The page spans every schedule you own, and carries tabs for <strong class="text-gray-900 dark:text-white">Sales</strong>, <strong class="text-gray-900 dark:text-white">Waitlist</strong>, <strong class="text-gray-900 dark:text-white">Feedback</strong>, <strong class="text-gray-900 dark:text-white">Subscriptions</strong> and <strong class="text-gray-900 dark:text-white">Gift Cards</strong>.</p>
 
         <h3 class="doc-subheading">What You Can See</h3>
         <ul class="doc-list mb-6">
-            <li>List of all purchases with buyer details</li>
-            <li>Payment status (paid, pending, refunded)</li>
-            <li>Check-in status</li>
-            <li>Total revenue</li>
+            <li>Every purchase with the buyer's name, email and phone</li>
+            <li>The event and the occurrence date the sale is for</li>
+            <li>Payment status: paid, unpaid, cancelled or refunded</li>
+            <li>The amount, any discount or gift card applied, and the transaction reference</li>
+            <li>Check-in status, and the star rating if the buyer left <a href="#feedback" class="doc-link">feedback</a></li>
         </ul>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Expand a row to see the individual tickets in the order, the add-ons, and any custom field answers. Columns can be sorted by clicking their headers.</p>
 
         <h3 id="filtering-sales" class="doc-subheading">Filtering Sales</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Use the filter input at the top of the sales list to search by buyer name, email, or event name. The filter updates results in real time. When exporting sales data, only the currently filtered results are included in the export.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Use the filter input at the top of the sales list to search by buyer name, email, phone, event name, status or transaction reference. The filter updates results in real time. When exporting sales data, only the currently filtered results are included in the export.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4"><strong class="text-gray-900 dark:text-white">Past events are hidden by default.</strong> Turn on <strong class="text-gray-900 dark:text-white">Include past events</strong> to bring older sales back into the list, and into the export.</p>
 
         <h3 class="doc-subheading">Actions</h3>
-        <ul class="doc-list">
-            <li><strong class="text-gray-900 dark:text-white">Resend tickets:</strong> Send confirmation email again</li>
-            <li><strong class="text-gray-900 dark:text-white">Mark as paid:</strong> For cash or external payments</li>
-            <li><strong class="text-gray-900 dark:text-white">Cancel/refund:</strong> Cancel a sale (refunds handled in Stripe)</li>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Open the <strong class="text-gray-900 dark:text-white">Actions</strong> menu on a sale row:</p>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">View Ticket:</strong> Open the attendee's ticket page, with its QR code</li>
+            <li><strong class="text-gray-900 dark:text-white">Send Email:</strong> Send the confirmation email again</li>
+            <li><strong class="text-gray-900 dark:text-white">Mark Paid:</strong> For cash or other payments taken outside the app</li>
+            <li><strong class="text-gray-900 dark:text-white">Refund Ticket:</strong> Mark a paid sale as refunded</li>
+            <li><strong class="text-gray-900 dark:text-white">Cancel Ticket:</strong> Cancel a paid or unpaid sale without recording a refund</li>
             <li><strong class="text-gray-900 dark:text-white">Delete:</strong> Permanently remove a sale record</li>
         </ul>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Refunding, cancelling or deleting a sale returns its tickets to stock, gives back any promo code use, credits any gift card balance the buyer spent, and notifies the next person on the <a href="#waitlist" class="doc-link">waitlist</a>.</p>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Refunds move no money</div>
+            <p>Refund Ticket changes the status in Event Schedule and adjusts your revenue figures. The actual money is returned in your Stripe Dashboard or Invoice Ninja account. Cancelling or deleting a sale that was paid for shows you a reminder to handle the refund yourself. These actions fire the matching <x-link href="{{ route('marketing.docs.developer.webhooks') }}">webhook</x-link>: <code class="doc-inline-code">sale.paid</code>, <code class="doc-inline-code">sale.refunded</code> or <code class="doc-inline-code">sale.cancelled</code>.</p>
+        </div>
     </section>
 
     <!-- Sale Notifications -->
     <section id="sale-notifications" class="doc-section">
-        <h3 class="doc-subheading">Sale Notification Emails</h3>
+        <h3 class="doc-subheading">Sale Notification Emails <x-doc-badge plan="pro" /></h3>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Opt in to receive an email notification every time a ticket sells. Each notification includes:</p>
 
         <ul class="doc-list mb-6">
@@ -533,38 +799,44 @@
             <li>Discount or promo code applied</li>
         </ul>
 
-        <h4 class="font-semibold text-gray-900 dark:text-white mb-2">How to Enable</h4>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Settings &rarr; Notifications</strong> and enable sale notification emails.</p>
+        <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-2">How to Enable</h4>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Open the schedule's edit page in the admin panel, go to <strong class="text-gray-900 dark:text-white">Settings &rarr; Notifications</strong> and turn on <strong class="text-gray-900 dark:text-white">New ticket sale</strong>. Every editor of the schedule can opt in separately. If <a href="{{ route('marketing.docs.account_settings') }}" class="doc-link">push notifications</a> are enabled, the same alert is mirrored to the browser.</p>
+
+        <div class="doc-callout doc-callout-tip mb-6">
+            <div class="doc-callout-title">The first sale always notifies</div>
+            <p>Ongoing sale notifications are a Pro feature, but the <strong class="text-gray-900 dark:text-white">first paid sale on each event</strong> emails you on every plan, including Free. You never have to poll the Sales page to find out that your first ticket sold.</p>
+        </div>
 
         <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Sender & Compliance</div>
+            <div class="doc-callout-title">Sender &amp; Compliance</div>
             <p>If you have a custom sender email configured for your schedule, sale notifications are sent from that address. All notification emails include an unsubscribe link for compliance.</p>
         </div>
     </section>
 
     <!-- Export -->
     <section id="export" class="doc-section">
-        <h3 class="doc-subheading">Exporting Sales Data</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Export your sales data for accounting, tax purposes, or to import into other systems.</p>
+        <h3 class="doc-subheading">Exporting Sales Data <x-doc-badge plan="pro" /></h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Export your sales data for accounting, tax purposes, or to import into other systems. The export covers every schedule you own.</p>
 
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Sales</strong></li>
-            <li>Filter by event or date range if needed</li>
-            <li>Click the <strong class="text-gray-900 dark:text-white">"Export"</strong> button</li>
-            <li>Download your sales data as a spreadsheet</li>
+            <li>Narrow the list with the filter box, and turn on <strong class="text-gray-900 dark:text-white">Include past events</strong> if you need older sales. The export contains exactly what the list is showing.</li>
+            <li>Click <strong class="text-gray-900 dark:text-white">Export</strong></li>
+            <li>Download your sales data as a CSV file</li>
         </ol>
 
         <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10 mb-6">
-            <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Export Includes</h4>
+            <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Export Includes</h4>
             <ul class="doc-list text-sm">
-                <li>Buyer name and email</li>
-                <li>Ticket type and quantity</li>
-                <li>Purchase date and amount</li>
-                <li>Transaction reference</li>
-                <li>Payment method and status</li>
-                <li>Promo code and discount amount</li>
-                <li>Check-in status</li>
-                <li>Custom checkout field responses (event-level and ticket-level)</li>
+                <li>Buyer name, email and phone</li>
+                <li>Event, event date and purchase date</li>
+                <li>Ticket types and quantities, and add-ons, as separate columns</li>
+                <li>Amount and currency</li>
+                <li>Promo code and discount amount, gift card code and gift card amount</li>
+                <li>Transaction reference, payment method and status</li>
+                <li>Check-in status and check-in time</li>
+                <li>Pass type, visits used and expiry, for <a href="{{ route('marketing.docs.subscriptions') }}" class="doc-link">pass</a> sales</li>
+                <li>Custom checkout field responses (event-level and ticket-level), one column per field</li>
             </ul>
         </div>
 
@@ -581,15 +853,15 @@
 
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Sales</strong> and click <strong class="text-gray-900 dark:text-white">Import</strong></li>
-            <li>Pick a schedule (if you own more than one) and an event</li>
-            <li>Either type rows in the Form tab or upload a CSV</li>
+            <li>Pick a schedule (if you own more than one), an event, and the <strong class="text-gray-900 dark:text-white">Event Date</strong> the attendees are coming on</li>
+            <li>Either type rows on the <strong class="text-gray-900 dark:text-white">Form Entry</strong> tab or switch to <strong class="text-gray-900 dark:text-white">Upload CSV</strong></li>
             <li>When uploading, map each CSV column to a field (name, email, phone, ticket type, etc.), then click <strong class="text-gray-900 dark:text-white">Next</strong> to review</li>
             <li>Optionally toggle <strong class="text-gray-900 dark:text-white">Send Email</strong> to send a confirmation email to each attendee</li>
             <li>Click <strong class="text-gray-900 dark:text-white">Save Attendees</strong></li>
         </ol>
 
         <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10 mb-6">
-            <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Supported CSV columns</h4>
+            <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Supported CSV columns</h4>
             <ul class="doc-list text-sm">
                 <li>Name, Email (required), Phone</li>
                 <li>Ticket Type (matched by name to existing ticket types)</li>
@@ -598,9 +870,14 @@
             </ul>
         </div>
 
-        <div class="doc-callout doc-callout-info">
+        <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Tips</div>
-            <p>Email is the only required column - everything else auto-detects from the header name. Comma, semicolon, and tab delimiters are all supported, as are UTF-8 CSVs exported from Excel. Duplicate emails within the same import are skipped automatically.</p>
+            <p>Email is the only required column - everything else auto-detects from the header name, and rows with no ticket type fall back to the type you picked. Comma, semicolon, and tab delimiters are all supported, as are UTF-8 CSVs exported from Excel. Duplicate emails within the same import are skipped automatically, as is any row that would push a ticket type past its remaining quantity; the result screen lists which rows were skipped and why.</p>
+        </div>
+
+        <div class="doc-callout doc-callout-tip">
+            <div class="doc-callout-title">Imports never spend the allowance</div>
+            <p>Imported attendees are recorded with their own payment method, so they never count toward the Free plan's <a href="#general" class="doc-link">paid-ticket allowance</a>. Sending the confirmation emails needs a working sender address for the schedule.</p>
         </div>
     </section>
 
@@ -617,36 +894,44 @@
 
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Sales</strong> on your phone</li>
-            <li>Click <strong class="text-gray-900 dark:text-white">"Scan Tickets"</strong></li>
+            <li>Click <strong class="text-gray-900 dark:text-white">Scan Ticket</strong></li>
             <li>Point your camera at the QR code on the ticket</li>
             <li>The app shows the ticket details and marks it as checked in</li>
         </ol>
 
+        <div class="doc-callout doc-callout-info mb-6">
+            <div class="doc-callout-title">Scanning is free; the live dashboard is Pro</div>
+            <p>Confirmation emails and ticket pages show a QR code on every plan, including Free, and scanning it in the app is free too, for every ticket and registration you sell. The live <a href="#checkin-dashboard" class="doc-link">check-in dashboard</a> is the part that needs <a href="{{ marketing_url('/pricing') }}" class="doc-link">Pro</a> or above. A <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> install has both.</p>
+        </div>
+
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Multiple Scanners</div>
-            <p>Any team member with access to your schedule can scan tickets. Just have them log in on their phone.</p>
+            <p>Any team member with access to your schedule can scan tickets, including viewers. Just have them log in on their phone.</p>
         </div>
 
         <h3 class="doc-subheading">Ticket Security</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Each ticket has a unique QR code that can only be scanned once. If someone tries to use a ticket that's already been checked in, you'll see a warning.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Each ticket has a unique QR code that can only be scanned once. If someone tries to use a ticket that's already been checked in, you'll see a warning. An unpaid or cancelled order shows its QR code struck through, marked Unpaid or Void.</p>
     </section>
 
     <!-- Check-in Dashboard -->
     <section id="checkin-dashboard" class="doc-section">
-        <h3 class="doc-subheading">Check-in Dashboard</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Monitor attendance in real time from <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Check-in</strong>. The dashboard provides a live overview of check-in progress for your event.</p>
+        <h3 class="doc-subheading">Check-in Dashboard <x-doc-badge plan="pro" /></h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Monitor attendance in real time from <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Sales &rarr; Check-in</strong>. The dashboard provides a live overview of check-in progress for your event.</p>
 
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Overall progress bar</strong> with percentage of attendees checked in</li>
             <li><strong class="text-gray-900 dark:text-white">Per-ticket-type breakdown</strong> showing check-in counts for each ticket type</li>
             <li><strong class="text-gray-900 dark:text-white">Guest headcount</strong> - when a <a href="{{ route('marketing.docs.subscriptions') }}#admissions-per-event" class="doc-link">pass admits guests</a>, a headcount including guests is shown next to the check-in count</li>
+            <li><strong class="text-gray-900 dark:text-white">Reserved pass seats</strong> for the occurrence, so door staff know how many pass holders are still expected</li>
             <li><strong class="text-gray-900 dark:text-white">Recent activity feed</strong> showing the last 10 check-ins with attendee names and times</li>
             <li><strong class="text-gray-900 dark:text-white">Filter by event and event date</strong> to view specific event dates</li>
         </ul>
 
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Counts are keyed to the venue's own calendar date, so an evening event west of UTC reports correctly rather than rolling over at the wrong midnight. Only redemptions count as checked in: a pass holder who booked a seat in advance appears in the reserved count until they actually arrive.</p>
+
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Auto-Refresh</div>
-            <p>The dashboard auto-refreshes every 10 seconds, so you always see the latest check-in data. It works on any device, including phones and tablets.</p>
+            <p>The dashboard refreshes every 10 seconds while the tab is in the foreground, so you always see the latest check-in data without draining a phone in your pocket. It works on any device, including phones and tablets.</p>
         </div>
     </section>
 
@@ -656,21 +941,26 @@
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            Ticket Waitlist
+            Waitlist
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">When tickets sell out, fans can join a waitlist to be notified when spots become available.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">When an event date fills up, fans can join a waitlist to be notified when spots become available.</p>
 
         <h3 class="doc-subheading">How It Works</h3>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>When all tickets sell out for an event date, a <strong class="text-gray-900 dark:text-white">"Join Waitlist"</strong> button appears on the event page</li>
+            <li>When all tickets sell out for an event date, a <strong class="text-gray-900 dark:text-white">Join Waitlist</strong> button appears on the event page</li>
             <li>Guests enter their name and email</li>
-            <li>When tickets become available (sale cancelled, refunded, or expired), the next person in line is notified via email</li>
-            <li>They receive a 24-hour link to purchase</li>
+            <li>When a spot opens up (a sale is cancelled, refunded, or expires unpaid), the next person in line is notified by email</li>
+            <li>They receive a link that is valid for 24 hours</li>
             <li>If they don't purchase in time, the next person in line is notified</li>
         </ol>
 
+        <div class="doc-callout doc-callout-info mb-6">
+            <div class="doc-callout-title">Free for registration, Pro for tickets</div>
+            <p>The waitlist on a full <a href="#registration" class="doc-link">Registration</a> date works on every plan, including Free. The waitlist on a sold-out <em>ticketed</em> event needs <a href="{{ marketing_url('/pricing') }}" class="doc-link">Pro</a> or above.</p>
+        </div>
+
         <h3 class="doc-subheading">Managing the Waitlist</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">View and manage the waitlist from <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Waitlist</strong>. The table shows each entry's name, email, event, date, and status.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">View and manage the waitlist on the <strong class="text-gray-900 dark:text-white">Waitlist</strong> tab of <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Sales</strong>. The tab appears once there is at least one entry, and the table shows each entry's name, email, event, date, and status.</p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">One at a Time</div>
@@ -691,15 +981,20 @@
         <h3 class="doc-subheading">Enabling Feedback</h3>
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Go to your schedule's edit page in the admin panel</li>
-            <li>Open <strong class="text-gray-900 dark:text-white">Settings &rarr; Notifications</strong></li>
-            <li>Enable <strong class="text-gray-900 dark:text-white">Post-event feedback</strong></li>
+            <li>Open <strong class="text-gray-900 dark:text-white">Engagement &rarr; Feedback</strong></li>
+            <li>Turn on <strong class="text-gray-900 dark:text-white">Post-event feedback</strong></li>
             <li>Choose a delay (how long after the event ends before emails are sent). The default is 24 hours.</li>
             <li>Save your changes</li>
         </ol>
 
+        <div class="doc-callout doc-callout-info mb-6">
+            <div class="doc-callout-title">Needs a sender address</div>
+            <p>On eventschedule.com the toggle stays disabled until the schedule has its own <a href="{{ route('marketing.docs.account_settings') }}" class="doc-link">email settings</a> configured, since feedback requests are sent from your address rather than ours. A selfhosted install only needs a working mailer.</p>
+        </div>
+
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Per-Event Override</div>
-            <p>You can override the schedule-level setting for individual events. In the event edit page, scroll to the <strong>Feedback</strong> section and choose "Enabled" or "Disabled" to override, or "Use schedule default" to follow the schedule setting.</p>
+            <p>You can override the schedule-level setting for individual events. In the event edit page, open <strong class="text-gray-900 dark:text-white">Engagement &rarr; Feedback</strong> and choose "Enabled" or "Disabled" to override, or "Use schedule default" to follow the schedule setting.</p>
         </div>
 
         <h3 class="doc-subheading">How It Works</h3>
@@ -746,7 +1041,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Payment Processing Fees</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Stripe charges their standard processing fees (typically 2.9% + $0.30 per transaction in the US). These fees are deducted from your payouts. Event Schedule does not charge additional fees for ticketing.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Stripe charges their standard processing fees (typically 2.9% + $0.30 per transaction in the US). These fees are deducted from your payouts. Event Schedule adds no platform fee on any plan, Free included.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Cancelled or Deleted Events</h4>
@@ -770,60 +1065,67 @@
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
             </svg>
-            Embed Widget <x-doc-badge plan="pro" />
+            Embed Widget
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Embed a ticket purchase or RSVP form directly on your own website using an iframe. Visitors can buy tickets or register without leaving your site.</p>
 
+        <div class="doc-callout doc-callout-info mb-6">
+            <div class="doc-callout-title">RSVP embed is free; the ticket embed is Pro</div>
+            <p>The <code class="doc-inline-code">rsvp=true</code> widget works on every plan, including Free, and always has. The <code class="doc-inline-code">tickets=true</code> widget needs <a href="{{ marketing_url('/pricing') }}" class="doc-link">Pro</a> or above.</p>
+        </div>
+
         <h3 class="doc-subheading">Getting the Embed Code</h3>
-        <ol class="doc-list list-decimal mb-6">
+        <ol class="doc-list doc-list-numbered mb-6">
             <li>Open your event in the admin panel and go to the <strong class="text-gray-900 dark:text-white">Tickets</strong> section</li>
-            <li>Enable <strong class="text-gray-900 dark:text-white">Tickets</strong> or <strong class="text-gray-900 dark:text-white">Registration</strong> mode</li>
+            <li>Enable <strong class="text-gray-900 dark:text-white">Tickets</strong> or <strong class="text-gray-900 dark:text-white">Registration</strong> mode and save the event</li>
             <li>Click the <strong class="text-gray-900 dark:text-white">Embed Tickets</strong> (or <strong class="text-gray-900 dark:text-white">Embed Registration</strong>) link next to the section heading</li>
             <li>Copy the iframe code and paste it into your website's HTML</li>
         </ol>
 
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The link that opens the snippet only appears for Pro schedules. On the Free plan you can still embed the RSVP form by building the URL yourself from the parameters below.</p>
+
         <h3 class="doc-subheading">URL Parameters</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">You can customize the embed URL with these parameters:</p>
         <div class="doc-table-wrap">
-            <table class="min-w-full text-sm">
+            <table class="doc-table">
                 <thead>
-                    <tr class="border-b border-gray-200 dark:border-white/10">
-                        <th class="text-left py-2 pr-4 font-semibold text-gray-900 dark:text-white">Parameter</th>
-                        <th class="text-left py-2 font-semibold text-gray-900 dark:text-white">Description</th>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Description</th>
                     </tr>
                 </thead>
-                <tbody class="text-gray-600 dark:text-gray-300">
-                    <tr class="border-b border-gray-100 dark:border-white/5">
-                        <td class="py-2 pr-4"><code class="doc-code">tickets=true</code></td>
-                        <td class="py-2">Show the ticket purchase form</td>
+                <tbody>
+                    <tr>
+                        <td><code class="doc-inline-code">tickets=true</code></td>
+                        <td>Show the ticket purchase form <x-doc-badge plan="pro" /></td>
                     </tr>
-                    <tr class="border-b border-gray-100 dark:border-white/5">
-                        <td class="py-2 pr-4"><code class="doc-code">rsvp=true</code></td>
-                        <td class="py-2">Show the RSVP registration form</td>
+                    <tr>
+                        <td><code class="doc-inline-code">rsvp=true</code></td>
+                        <td>Show the RSVP registration form <x-doc-badge plan="free" /></td>
                     </tr>
-                    <tr class="border-b border-gray-100 dark:border-white/5">
-                        <td class="py-2 pr-4"><code class="doc-code">embed=true</code></td>
-                        <td class="py-2">Enable embed mode (compact layout, no navigation)</td>
+                    <tr>
+                        <td><code class="doc-inline-code">embed=true</code></td>
+                        <td>Enable embed mode (compact layout, no navigation)</td>
                     </tr>
-                    <tr class="border-b border-gray-100 dark:border-white/5">
-                        <td class="py-2 pr-4"><code class="doc-code">dark=true</code></td>
-                        <td class="py-2">Force dark mode</td>
+                    <tr>
+                        <td><code class="doc-inline-code">dark=true</code></td>
+                        <td>Force dark mode</td>
                     </tr>
-                    <tr class="border-b border-gray-100 dark:border-white/5">
-                        <td class="py-2 pr-4"><code class="doc-code">promo=CODE</code></td>
-                        <td class="py-2">Pre-fill a promo code</td>
+                    <tr>
+                        <td><code class="doc-inline-code">promo=CODE</code></td>
+                        <td>Pre-fill a promo code</td>
                     </tr>
-                    <tr class="border-b border-gray-100 dark:border-white/5">
-                        <td class="py-2 pr-4"><code class="doc-code">lang=xx</code></td>
-                        <td class="py-2">Set the widget language (e.g., <code class="doc-code">lang=es</code> for Spanish)</td>
+                    <tr>
+                        <td><code class="doc-inline-code">lang=xx</code></td>
+                        <td>Set the widget language (e.g., <code class="doc-inline-code">lang=es</code> for Spanish)</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
         <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Private Events</div>
-            <p>The embed widget is not available for private events since they require authentication to access.</p>
+            <div class="doc-callout-title">Private and password-protected events</div>
+            <p>The embed widget is not available for private events, since they require authentication to access. A password-protected event only embeds for someone who has already entered the password.</p>
         </div>
 
         <div class="doc-callout doc-callout-info mt-4">
@@ -844,6 +1146,7 @@
             <li><a href="{{ route('marketing.docs.creating_events') }}" class="doc-link">Creating Events</a> - Add events to sell tickets for</li>
             <li><a href="{{ route('marketing.docs.gift_cards') }}" class="doc-link">Gift Cards</a> - Sell prepaid gift cards redeemable at checkout</li>
             <li><a href="{{ route('marketing.docs.subscriptions') }}" class="doc-link">Subscriptions &amp; Passes</a> - Sell one pass reused across many events</li>
+            <li><a href="{{ route('marketing.docs.appointments') }}" class="doc-link">Appointments</a> - Take bookings for a time slot, with their own allowance</li>
             <li><a href="{{ route('marketing.docs.sharing') }}" class="doc-link">Sharing Your Schedule</a> - Promote your events</li>
             <li><a href="{{ route('marketing.docs.event_graphics') }}" class="doc-link">Event Graphics</a> - Create promotional images</li>
             <li><a href="{{ route('marketing.docs.analytics') }}" class="doc-link">Analytics</a> - Track conversion rates and revenue per view</li>
@@ -866,14 +1169,14 @@
                 {
                     "@type": "HowToStep",
                     "name": "Connect Stripe",
-                    "text": "Go to Admin Panel, then Plan, and click Connect Stripe. Complete the Stripe onboarding process.",
+                    "text": "Go to Admin Panel, then Settings, then Payment Methods, and click Connect Stripe. Complete the Stripe onboarding process.",
                     "url": "{{ url(route('marketing.docs.tickets')) }}#payment-setup"
                 },
                 {
                     "@type": "HowToStep",
                     "name": "Create Ticket Types",
-                    "text": "Edit your event, scroll to Tickets section, click Add Ticket Type. Enter name, price, quantity, and description.",
-                    "url": "{{ url(route('marketing.docs.tickets')) }}#create-tickets"
+                    "text": "Edit your event, scroll to the Tickets section, select the Tickets mode, and add a type with a price, quantity and description.",
+                    "url": "{{ url(route('marketing.docs.tickets')) }}#ticket-types"
                 },
                 {
                     "@type": "HowToStep",
@@ -884,13 +1187,13 @@
                 {
                     "@type": "HowToStep",
                     "name": "Track Check-ins",
-                    "text": "Use the real-time check-in dashboard at Admin Panel, then Check-in, to monitor attendance with progress bars and a live activity feed.",
+                    "text": "Use the real-time check-in dashboard at Admin Panel, then Sales, then Check-in, to monitor attendance with progress bars and a live activity feed.",
                     "url": "{{ url(route('marketing.docs.tickets')) }}#checkin-dashboard"
                 },
                 {
                     "@type": "HowToStep",
                     "name": "Check In Attendees",
-                    "text": "Go to Admin Panel, then Sales on your phone, click Scan Tickets, and point your camera at the QR code.",
+                    "text": "Go to Admin Panel, then Sales on your phone, click Scan Ticket, and point your camera at the QR code.",
                     "url": "{{ url(route('marketing.docs.tickets')) }}#check-in"
                 }
             ]
