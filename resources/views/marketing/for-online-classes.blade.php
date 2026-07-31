@@ -516,7 +516,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for teaching online classes?',
-                'a' => 'Yes. Setting a course up as a term, skipping holiday weeks, ending the recurrence after a set number of sessions, taking free registrations with a seat cap per session date, publishing one link, embedding your schedule, syncing two ways with Google, Outlook or CalDAV, sending newsletters to the students who follow you and reading your analytics are all on the free plan. Selling seats, class cards and custom checkout questions are on the Pro plan at $5 a month, and Event Schedule charges zero platform fees on payments at any plan level.',
+                'a' => 'Yes. Setting a course up as a term, skipping holiday weeks, ending the recurrence after a set number of sessions, taking free registrations with a seat cap per session date, publishing one link, embedding your schedule, syncing two ways with Google, Outlook or CalDAV, sending newsletters to the students who follow you and reading your analytics are all on the free plan. Selling seats is free too, up to 25 paid tickets a month per schedule. Lifting that cap, plus class cards and custom checkout questions, is the Pro plan at $5 a month, and Event Schedule charges zero platform fees on payments at any plan level.',
             ],
             [
                 'q' => 'How do I set up a twelve-week term?',
@@ -528,7 +528,7 @@
             ],
             [
                 'q' => 'Can I cap how many students join each session?',
-                'a' => 'Yes, on the free plan. Set a seat cap on the course and it is counted per session date, so week three filling up does not close week four. When a session is full the register shows no seats left for that date and the sign-up button on that date becomes a waitlist instead. When somebody cancels, the first person waiting for that date is emailed and has twenty-four hours to take the seat before it passes to the next in line. That works the same way whether the date filled up on free registrations or on sold-out tickets.',
+                'a' => 'Yes, on the free plan. Set a seat cap on the course and it is counted per session date, so week three filling up does not close week four. When a session is full the register shows no seats left for that date and the sign-up button on that date becomes a waitlist instead. When somebody cancels, the first person waiting for that date is emailed and has twenty-four hours to take the seat before it passes to the next in line. The registration waitlist is free; the same waitlist on a sold-out paid date is a Pro feature.',
             ],
             [
                 'q' => 'Can I sell a card that covers the whole term?',
@@ -536,7 +536,7 @@
             ],
             [
                 'q' => 'Can I charge for individual sessions?',
-                'a' => 'Yes, on the Pro plan. Create as many named ticket types as the course needs, each with its own price and quantity: a drop-in seat, a concession rate, a free trial session. Payments run through your own Stripe account, so you keep everything except Stripe\'s standard processing fee. Event Schedule takes nothing.',
+                'a' => 'Yes, and selling is on the free plan: 25 paid tickets a month per schedule, unlimited on Pro. Create as many named ticket types as the course needs, each with its own price and quantity: a drop-in seat, a concession rate, a free trial session. Payments run through your own Stripe account, so you keep everything except Stripe\'s standard processing fee. Event Schedule takes nothing.',
             ],
             [
                 'q' => 'Do my students get an email when I add a class?',
@@ -779,7 +779,7 @@
                 <p class="es-syl-tag mb-3">Worth knowing</p>
                 <h3 class="es-syl-ink mb-2 text-lg font-bold">A term has one name, not twelve titles.</h3>
                 <p class="es-syl-muted text-sm leading-relaxed">
-                    A recurring event carries one name and one description, so week four is not separately titled "the past tense". If the weeks really are different topics with different prices, make them separate events - cloning one is a click - and keep them together in a sub-schedule. If they are one course, the term is the right shape, and the week-by-week breakdown belongs in the description or in the session's own agenda.
+                    A recurring event carries one name and one description, so week four is not separately titled "the past tense". If the weeks really are different topics with different prices, make them separate events - cloning one is a click - and keep them together in a sub-schedule. If they are one course, the term is the right shape, and the week-by-week breakdown belongs in the description, because the agenda you set runs the same way in every session.
                 </p>
             </div>
         </div>
@@ -867,8 +867,9 @@
                 <div class="es-syl-card p-6" data-reveal="panel">
                     <div class="mb-3 flex flex-wrap items-center gap-2">
                         <h3 class="es-syl-ink text-base font-bold">A waitlist when a date fills up</h3>
+                        <span class="es-syl-plan">Free</span>
                     </div>
-                    <p class="es-syl-muted text-sm">Once a date is full, the sign-up button on it becomes a waitlist. When somebody drops, the first person waiting for <em>that</em> date is emailed and has twenty-four hours to claim the seat before it moves to the next in line. Set the cap you can actually teach to and let the list do the rest.</p>
+                    <p class="es-syl-muted text-sm">Once a registration date is full, the sign-up button on it becomes a waitlist. When somebody drops, the first person waiting for <em>that</em> date is emailed and has twenty-four hours to claim the seat before it moves to the next in line. Set the cap you can actually teach to and let the list do the rest. On a sold-out <em>paid</em> date the same waitlist is Pro.</p>
                 </div>
             </div>
         </div>
@@ -900,7 +901,7 @@
                         </li>
                         <li class="flex gap-3" data-reveal>
                             <svg aria-hidden="true" class="es-syl-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span>Scope it to everything you teach, to one sub-schedule, or to named sessions, so a beginner card does not open the advanced track.</span>
+                            <span>Scope it to everything you teach, to one sub-schedule, or to the specific courses you name, so a beginner card does not open the advanced track.</span>
                         </li>
                         <li class="flex gap-3" data-reveal>
                             <svg aria-hidden="true" class="es-syl-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -912,7 +913,7 @@
                         </li>
                     </ul>
                     <p class="es-syl-muted mt-6 text-sm">
-                        Cards and single seats are Pro, at $5 a month. Publishing the term and taking free registrations is not.
+                        Class cards are Pro, at $5 a month. Publishing the term, taking free registrations and selling your first 25 paid tickets a month are not.
                         <a href="{{ marketing_url('/features/ticketing') }}" class="es-syl-link font-semibold underline hover:no-underline">See what ticketing includes</a>.
                     </p>
                 </div>
@@ -941,7 +942,7 @@
                     <div class="es-syl-sheet" data-reveal="panel">
                         <div class="es-syl-sheet-head flex items-center justify-between gap-2 px-4 py-2.5">
                             <span class="es-syl-sheet-ink font-mono text-[0.6rem] font-extrabold uppercase tracking-[0.2em]">Membership</span>
-                            <span class="es-syl-sheet-muted font-mono text-[0.6rem] font-bold">$45/term</span>
+                            <span class="es-syl-sheet-muted font-mono text-[0.6rem] font-bold">$45</span>
                         </div>
                         <div class="es-syl-ruled relative px-4 py-5">
                             <span class="es-syl-margin left-2.5" aria-hidden="true"></span>
@@ -956,7 +957,7 @@
                     <div class="es-syl-card p-5 sm:col-span-2" data-reveal="panel">
                         <div class="mb-3 flex flex-wrap items-center gap-2">
                             <h3 class="es-syl-ink text-base font-bold">And single seats, alongside</h3>
-                            <span class="es-syl-plan es-syl-plan-pro">Pro</span>
+                            <span class="es-syl-plan">Free</span>
                         </div>
                         <div class="space-y-2">
                             @foreach ([['Drop-in seat', 'one session', '$18'], ['Concession', 'one session', '$12'], ['First session', 'try it once', 'Free']] as [$tName, $tScope, $tPrice])
@@ -968,7 +969,7 @@
                             @endforeach
                         </div>
                         <p class="es-syl-muted mt-4 border-t pt-3 text-xs es-syl-hair">
-                            Cards are sold next to single seats, not instead of them. Payments run through your own Stripe account and Event Schedule takes <span class="es-syl-accent font-semibold">zero platform fees</span> at every plan level.
+                            Cards are sold next to single seats, not instead of them. Seats sell on the free plan up to 25 paid tickets a month, and Pro removes the cap. Payments run through your own Stripe account and Event Schedule takes <span class="es-syl-accent font-semibold">zero platform fees</span> at every plan level.
                         </p>
                     </div>
                 </div>
@@ -1011,7 +1012,7 @@
                         <span class="es-syl-plan">Free</span>
                     </div>
                     <p class="es-syl-muted text-sm">Embed the calendar in a page on your own site with an iframe. A list layout suits a term better than a month grid, and that is a setting.</p>
-                    <p class="es-syl-muted mt-auto pt-5 text-xs">The ticket and registration form can be embedded too, on the Pro plan.</p>
+                    <p class="es-syl-muted mt-auto pt-5 text-xs">The registration form can be embedded too, free. The ticket purchase form is the Pro version of that widget.</p>
                 </div>
                 <div class="es-syl-card flex flex-col p-7" data-reveal="panel">
                     <div class="mb-3 flex flex-wrap items-center gap-2">
@@ -1032,9 +1033,9 @@
     @php
         $rest = [
             ['Newsletters to your students', 'Free', 'Students follow your schedule so you can write to them. Materials before, a recording link after, next term when it opens. Ten recipients a month free, a hundred on Pro, a thousand on Enterprise, with open and click rates.'],
-            ['Two-way calendar sync', 'Free', 'Google, Outlook and CalDAV, both directions, so your teaching hours and the rest of your week sit in one calendar and neither one is a copy.'],
+            ['Two-way calendar sync', 'Free', 'Google, Outlook and CalDAV, both directions, so your teaching hours and the rest of your week sit in one calendar. A recurring term syncs across as its next session rather than as a repeating series; to see all twelve dates in a calendar app, subscribe to your schedule\'s calendar feed instead.'],
             ['Analytics that are already on', 'Free', 'Views, devices and where the traffic came from, per schedule. Enough to know whether the term filled from your newsletter or from somebody else linking you.'],
-            ['A session agenda', 'Free', 'Break a single session into parts with their own times, which is the honest place for a week-by-week outline inside one class.'],
+            ['A session agenda', 'Free', 'Break a class into named parts with their own times: warm-up, teaching, questions. It is the running order of a session, and on a term every session runs it.'],
             ['Sub-schedules for levels', 'Free', 'Beginner, intermediate and advanced as separate strands of the same link, each with its own colour. They organise and filter; they do not hide anything, and a pass can be scoped to one of them.'],
             ['Questions at checkout', 'Pro', 'Custom fields on the form collect what the course needs at the point of signing up: the level they think they are, dietary notes for a cooking class, a parent contact.'],
             ['Reusable event templates', 'Pro', 'Save a term as a template and start next term from it, or clone last term outright. A template keeps the pattern and the twelve-session end; the holiday dates it deliberately does not keep, because those belong to the calendar and not to the course. A clone keeps them.'],
@@ -1211,7 +1212,7 @@
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Online Events" description="Host virtual events with any streaming platform" :url="marketing_url('/features/online-events')" icon-color="sky">
+                    <x-feature-link-card name="Online Events" description="Publish sessions that meet on any platform, from one link field" :url="marketing_url('/features/online-events')" icon-color="sky">
                         <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
@@ -1314,7 +1315,7 @@
                         Write the term once. <span class="es-syl-lit">Teach all twelve.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg es-syl-dim">
-                        Publishing your term, capping the seats and taking free registrations are free forever. Selling seats and class cards is five dollars a month, and nothing is taken off what you charge.
+                        Publishing your term, capping the seats, taking free registrations and selling your first 25 paid tickets a month are free forever. Unlimited sales and class cards are five dollars a month, and nothing is taken off what you charge.
                     </p>
 
                     <div class="mx-auto mb-10 max-w-md" aria-hidden="true">

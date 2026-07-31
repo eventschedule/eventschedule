@@ -49,6 +49,32 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 > blanket replace. The sharpest result is on `/for-libraries`: "Scanning the QR on a ticket is
 > free on every plan; it is the running total that is Pro."
 
+> **Feature-claim accuracy audit (2026-07-31): 305 contradictions found and fixed.** The first
+> site-wide check of WP copy against what the app actually does, prompted by the fact that
+> accuracy had only ever been checked per page, at different times, against a `FEATURES.md`
+> that changed twice mid-campaign. A polarity-aware checker (`audit-claims.py`) ran over all
+> 151 pages - it has to be polarity-aware because these pages are full of deliberate honesty
+> statements ("there is no seat map") that a naive grep reports as defects. Then 25 high-risk
+> pages got a per-page agent required to cite the model, column or code path behind every
+> capability claim, or delete it.
+>
+> The worst finding was on `/for-circus-acrobatics`, a page that had already been rebuilt
+> *with* a documented fabrication sweep: a mock streaming player with a LIVE badge,
+> "847 watching", a live chat feed of invented viewer comments, and "$25 tip from Sarah!".
+> **No tipping code, no chat model and no viewer counter exist anywhere.** Also removed: the
+> homepage newsletter mock showing a send of 1,248 recipients (impossible - the Enterprise
+> ceiling is 1,000), "Followers get notified when you add events" on `/use-cases` (there is no
+> automatic follower notification at all), and a claim that one extra team member is free
+> (`RoleController::createMember()` hard-returns unless `isEnterprise()`).
+>
+> Result: **0 nonexistent-feature claims and 0 impossible numbers site-wide.** Two categories
+> are left deliberately unfixed because they are risks rather than present contradictions:
+> 5 pages hand-roll `FAQPage` JSON-LD instead of `<x-seo.faq-schema>` (verified on the
+> rendered HTML - every JSON-LD question does appear visibly today, so nothing is drifting),
+> and 57 pages hardcode "$5"/"$15" while `/pricing` reads them from
+> `config('services.stripe_platform.*')` (all correct today; they only go stale if the price
+> changes).
+
 > Scope: static and functional marketing pages served under `marketing.*` routes (`routes/web.php`, `MarketingController`), cross-checked against `resources/views/sitemap.blade.php`. Excludes URL redirects, the shared partials/components, and individual blog posts. The comparison and replacement detail pages each render one shared template driven by per-slug data.
 
 ## Main / Top-level (14)

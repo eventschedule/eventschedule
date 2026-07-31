@@ -22,18 +22,18 @@
             ['url' => '/for-libraries', 'name' => 'Libraries', 'blurb' => 'Share programs, author events, and community activities with patrons.', 'tags' => ['Public Libraries', 'University Libraries', 'Community Reading Rooms', 'Children\'s Libraries', 'Archive Centers', 'Mobile Libraries'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />'],
         ];
         $online = [
-            ['url' => '/for-webinars', 'name' => 'Webinars', 'blurb' => 'Host webinars with built-in registration, ticketing, and streaming link integration.', 'tags' => ['Product Demos', 'Training Sessions', 'Workshops', 'Panel Discussions', 'All-Hands', 'Lectures'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />'],
-            ['url' => '/for-online-classes', 'name' => 'Online Classes', 'blurb' => 'Schedule and sell online classes with recurring sessions and student notifications.', 'tags' => ['Yoga & Fitness', 'Cooking Classes', 'Art & Music Lessons', 'Language Courses', 'Coding Bootcamps', 'Tutoring'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />'],
-            ['url' => '/for-virtual-conferences', 'name' => 'Virtual Conferences', 'blurb' => 'Manage multi-day agendas with tiered ticketing and attendee notifications.', 'tags' => ['Tech Summits', 'Industry Conferences', 'Company Retreats', 'Professional Summits', 'Annual Meetings', 'Panel Events'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />'],
+            ['url' => '/for-webinars', 'name' => 'Webinars', 'blurb' => 'Host webinars with free registration, paid tickets, and one link field for any platform.', 'tags' => ['Product Demos', 'Training Sessions', 'Workshops', 'Panel Discussions', 'All-Hands', 'Lectures'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />'],
+            ['url' => '/for-online-classes', 'name' => 'Online Classes', 'blurb' => 'Schedule recurring classes, sell tickets, and put the join link on every student\'s ticket.', 'tags' => ['Yoga & Fitness', 'Cooking Classes', 'Art & Music Lessons', 'Language Courses', 'Coding Bootcamps', 'Tutoring'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />'],
+            ['url' => '/for-virtual-conferences', 'name' => 'Virtual Conferences', 'blurb' => 'Run multi-day programs with an agenda on each event and as many ticket types as you need.', 'tags' => ['Tech Summits', 'Industry Conferences', 'Company Retreats', 'Professional Summits', 'Annual Meetings', 'Panel Events'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />'],
             ['url' => '/for-live-qa-sessions', 'name' => 'Live Q&A Sessions', 'blurb' => 'Schedule live Q&A sessions with registration, ticketing, and streaming links.', 'tags' => ['AMAs', 'Town Halls', 'Expert Panels', 'Fireside Chats', 'Community Q&As', 'Office Hours'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />'],
-            ['url' => '/for-watch-parties', 'name' => 'Watch Parties', 'blurb' => 'Schedule watch parties with registration, ticketing, and streaming platform integration.', 'tags' => ['Premiere Screenings', 'Movie Nights', 'Sports Watch Parties', 'Series Finales', 'Documentary Screenings', 'Gaming Events'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />'],
-            ['url' => '/for-live-concerts', 'name' => 'Live Concerts', 'blurb' => 'Stream live concerts, sell virtual tickets alongside venue tickets, and email fans directly.', 'tags' => ['Acoustic Sets', 'Rock Shows', 'Jazz Nights', 'Festival Streams', 'Album Release Shows', 'DJ Sets'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />'],
+            ['url' => '/for-watch-parties', 'name' => 'Watch Parties', 'blurb' => 'Schedule screenings with registration and tickets, and one link field for any platform.', 'tags' => ['Premiere Screenings', 'Movie Nights', 'Sports Watch Parties', 'Series Finales', 'Documentary Screenings', 'Gaming Events'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />'],
+            ['url' => '/for-live-concerts', 'name' => 'Live Concerts', 'blurb' => 'List a hybrid show once, with the room and the join link on one event, and email fans directly.', 'tags' => ['Acoustic Sets', 'Rock Shows', 'Jazz Nights', 'Festival Streams', 'Album Release Shows', 'DJ Sets'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />'],
         ];
         $faqs = [
-            ['q' => 'Is Event Schedule free?', 'a' => 'Yes. Event Schedule is free forever for creating and sharing your event calendar. You can upgrade to Pro or Enterprise for advanced features like ticketing and newsletters. There are no platform fees on ticket sales - you only pay Stripe\'s standard processing fees.'],
+            ['q' => 'Is Event Schedule free?', 'a' => 'Yes. Event Schedule is free forever for creating and sharing your event calendar, and the free plan also sells up to 25 paid tickets a month and scans them at the door. Pro lifts that to unlimited ticket sales and adds event graphics, the API and the live check-in dashboard; Enterprise adds custom domains and extra team members. There are no platform fees on ticket sales - you only pay Stripe\'s standard processing fees.'],
             ['q' => 'What types of events can I manage?', 'a' => 'Any kind. Musicians share gig schedules, bars list their weekly lineups, theaters manage their season calendars, fitness instructors schedule classes, and conference organizers run multi-day programs. Event Schedule works for in-person events, online events, and hybrid events across every industry.'],
             ['q' => 'Can I sell tickets with Event Schedule?', 'a' => 'Yes. Sell tickets directly through your event page with Stripe integration. Buyers get QR code tickets for easy check-in at the door. There are no platform fees - you only pay Stripe\'s standard processing fees, so you keep more of your revenue.'],
-            ['q' => 'Does Event Schedule work for online events?', 'a' => 'Yes. Add a streaming link to any event and attendees see it when the event starts. Works with Zoom, Google Meet, YouTube Live, Twitch, or any platform. You can sell tickets for virtual events, run webinars, schedule online classes, and manage virtual conferences.'],
+            ['q' => 'Does Event Schedule work for online events?', 'a' => 'Yes. Paste the link people join on into any event and the whole link is printed on their ticket, while the public listing shows only the domain. It is a link and not an integration, so Zoom, Google Meet, YouTube Live, Twitch or a page on your own site all work the same way. You can sell tickets for virtual events, run webinars, schedule online classes, and manage virtual conferences.'],
             ['q' => 'Is Event Schedule open source?', 'a' => 'Yes. Event Schedule is fully open source. You can use the hosted version at eventschedule.com or selfhost it on your own server for complete control over your data and branding. The selfhosted version includes all features with no limits.'],
         ];
 
@@ -88,7 +88,8 @@
 
     <style {!! nonce_attr() !!}>
         .text-gradient-usecases {
-            background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 50%, #06b6d4 100%);
+            /* Light-mode stops stay at or above 3:1 on white, which large display text needs. */
+            background: linear-gradient(135deg, #2563eb 0%, #0284c7 50%, #0891b2 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -142,7 +143,7 @@
             </h1>
 
             <p class="es-fade-up es-d-2 mx-auto mb-7 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
-                Share your events, <a href="{{ marketing_url('/features/ticketing') }}" class="font-medium text-blue-600 hover:underline dark:text-blue-400">sell tickets</a> with zero platform fees, and <a href="{{ marketing_url('/features/newsletters') }}" class="font-medium text-blue-600 hover:underline dark:text-blue-400">email your followers</a> when new dates land. Free forever, open source, and <a href="{{ marketing_url('/selfhost') }}" class="font-medium text-blue-600 hover:underline dark:text-blue-400">selfhostable</a> if you want it on your own server.
+                Share your events, <a href="{{ marketing_url('/features/ticketing') }}" class="font-medium text-blue-600 hover:underline dark:text-blue-400">sell tickets</a> with zero platform fees, and <a href="{{ marketing_url('/features/newsletters') }}" class="font-medium text-blue-600 hover:underline dark:text-blue-400">email your followers</a> when you have new dates. Free forever, open source, and <a href="{{ marketing_url('/selfhost') }}" class="font-medium text-blue-600 hover:underline dark:text-blue-400">selfhostable</a> if you want it on your own server.
             </p>
 
             {{-- Jump row: the mobile wayfinding answer, since the dot nav is lg-only. --}}
@@ -169,7 +170,7 @@
                     </span>
                     <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl">For Performers &amp; Artists</h2>
                 </div>
-                <p class="text-lg text-gray-600 dark:text-gray-400">Musicians, DJs, performers, and artists who want to share their upcoming shows and build their audience. Sync with Google Calendar, let venues add you to their lineup through booking requests, and email your fans directly when new dates are announced.</p>
+                <p class="text-lg text-gray-600 dark:text-gray-400">Musicians, DJs, performers, and artists who want to share their upcoming shows and build their audience. Sync with Google Calendar, let venues add you to their lineup through booking requests, and email your fans directly whenever you announce new dates.</p>
 
                 <a href="{{ marketing_url('/for-talent') }}"
                    class="group mt-5 inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold ring-1 transition-all text-blue-700 ring-blue-200 hover:bg-blue-50 dark:text-blue-300 dark:ring-blue-400/30 dark:hover:bg-blue-500/10">
@@ -255,7 +256,10 @@
 
                     @php
                         $curatorTiles = [
-                            ['AI Import', 'Paste a URL or image, AI extracts event details', 'M13 10V3L4 14h7v7l9-11h-7z'],
+                            // Was "Paste a URL or image": the AI import screen takes pasted text
+                            // or a dropped image only. Nothing fetches a URL for you - the
+                            // URL/city importer is the selfhost-only ImportCuratorEvents command.
+                            ['AI Import', 'Paste the text or drop a flyer photo, AI fills in the details', 'M13 10V3L4 14h7v7l9-11h-7z'],
                             ['Aggregation', 'Pull events from venues, performers, and other curators', 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'],
                             ['Approval Workflow', 'Review and approve events before publishing', 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
                             // Was "Followers get notified when you add events", which is false:
@@ -277,7 +281,7 @@
                         @endforeach
                     </div>
 
-                    <span class="inline-flex items-center gap-1.5 font-semibold text-emerald-600 transition-all group-hover:gap-2.5 dark:text-emerald-400">
+                    <span class="inline-flex items-center gap-1.5 font-semibold text-emerald-700 transition-all group-hover:gap-2.5 dark:text-emerald-400">
                         Learn more
                         <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </span>
@@ -329,7 +333,7 @@
                     </span>
                     <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl">For Developers &amp; AI Agents</h2>
                 </div>
-                <p class="text-lg text-gray-600 dark:text-gray-400">Every schedule is also a REST API, a set of signed webhooks, and a public calendar feed. Agents can discover all of it on their own and run multi-step flows without anyone wiring them up first.</p>
+                <p class="text-lg text-gray-600 dark:text-gray-400">Every schedule publishes a public calendar feed, and on Pro it is also a REST API and a set of signed webhooks. Agents can discover all of it on their own and run multi-step flows without anyone wiring them up first.</p>
                 <a href="{{ marketing_url('/for-ai-agents') }}"
                    class="group mt-5 inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold ring-1 transition-all text-slate-700 ring-slate-300 hover:bg-slate-100 dark:text-slate-300 dark:ring-slate-400/30 dark:hover:bg-slate-500/10">
                     See the full developer guide
@@ -344,7 +348,7 @@
                     <span class="h-2.5 w-2.5 rounded-full" style="background-color: #FF5F57;"></span>
                     <span class="h-2.5 w-2.5 rounded-full" style="background-color: #FEBC2E;"></span>
                     <span class="h-2.5 w-2.5 rounded-full" style="background-color: #28C840;"></span>
-                    <span dir="ltr" class="ms-3 font-mono text-[11px] text-gray-500">GET /api/events</span>
+                    <span dir="ltr" class="ms-3 font-mono text-[11px] text-gray-400">GET /api/events</span>
                 </div>
                 <pre dir="ltr" class="overflow-x-auto font-mono text-[12px] leading-relaxed text-gray-300 sm:text-[13px]"><code><span class="text-emerald-400">$ curl https://eventschedule.com/api/events \
     -H "X-API-Key: $EVENTSCHEDULE_KEY"</span>
@@ -356,7 +360,7 @@
       "name": "Jazz Night",
       "starts_at": "2026-03-15 20:00:00",
       "venue_name": "Blue Note",
-      "url": "https://bluenote.eventschedule.com/jazz-night"
+      "url": "https://bluenote.eventschedule.com/jazz-night/8Q2Kx"
     }
   ],
   "meta": { "per_page": 100, "total": 42 }
@@ -368,7 +372,7 @@
                 <x-marketing.audience-card
                     :url="marketing_url('/docs/developer/api#authentication')"
                     name="REST API"
-                    blurb="Create schedules, events, tickets and sales from your own code. JSON in, JSON out, on every plan."
+                    blurb="Create schedules, events, tickets and sales from your own code. JSON in, JSON out, on Pro and on every selfhost install."
                     accent="slate"
                     :external="false"
                     :tags="['Schedules', 'Events', 'Sales', 'Categories', 'Feedback', 'Sub-schedules']">
@@ -389,7 +393,7 @@
                     blurb="Every operation described in OpenAPI 3.0.3, so you can generate a typed client in your language."
                     accent="slate"
                     :external="true"
-                    :tags="['26 operations', 'Generate a client', 'Always current']">
+                    :tags="['26 operations', 'Generate a client', 'Machine readable']">
                     <x-slot name="icon"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></x-slot>
                 </x-marketing.audience-card>
                 <x-marketing.audience-card

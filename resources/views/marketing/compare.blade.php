@@ -26,7 +26,7 @@
             ],
             [
                 'q' => 'Do I have to pay to use Event Schedule?',
-                'a' => 'No. The free plan is free forever with unlimited events and schedules. Pro at $'.$rates['eventschedule']['monthly'].'/mo adds ticketing, custom domains and the API, and selfhosted installs get every paid feature at no cost.',
+                'a' => 'No. The free plan is free forever with unlimited events and schedules, and it sells up to 25 paid tickets a month. Pro at $'.$rates['eventschedule']['monthly'].'/mo lifts that to unlimited ticket sales and adds the API, and selfhosted installs get every paid feature at no cost.',
             ],
         ];
 
@@ -93,7 +93,7 @@
                     "name": "Pro",
                     "price": "{{ $rates['eventschedule']['monthly'] }}",
                     "priceCurrency": "USD",
-                    "description": "Ticketing, custom domains and API access, with 0% platform fees on ticket sales"
+                    "description": "Unlimited ticket sales, the check-in dashboard and API access, with 0% platform fees on ticket sales"
                 }
             ]
         }
@@ -129,9 +129,13 @@
            is page-exclusive.
            ============================================================== */
 
-        /* Page accent gradient (blue to sky to cyan) */
+        /* Page accent gradient (blue to sky to cyan). The light-mode stops are the
+           darkened set .text-gradient-docs already uses: the old #0ea5e9/#06b6d4
+           end measured 2.77 and 2.43 on white and failed AA for large text, which
+           needs 3:1. Dark mode keeps the bright stops, which measure 7.5 and up on
+           the near-black ground. */
         .text-gradient-compare {
-            background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 50%, #06b6d4 100%);
+            background: linear-gradient(135deg, #2563eb 0%, #0284c7 50%, #0e7490 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -164,12 +168,15 @@
             background-image: linear-gradient(135deg, #6ee7b7 0%, #34d399 50%, #2dd4bf 100%);
         }
 
-        /* The signature: a typographic vs mark */
+        /* The signature: a typographic vs mark. It also appears at 14px inside the
+           "full comparison" link, so every light-mode stop has to clear 4.5:1 on
+           white, not the 3:1 large-text bar - hence a darker middle stop than the
+           heading gradient above. */
         .es-vs {
             font-weight: 900;
             font-style: italic;
             letter-spacing: -0.03em;
-            background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 50%, #06b6d4 100%);
+            background: linear-gradient(135deg, #2563eb 0%, #0369a1 50%, #0e7490 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -396,7 +403,7 @@
                                     <div class="es-vs px-2 text-xl sm:text-2xl" aria-hidden="true">vs</div>
                                     <div class="text-center">
                                         <div class="text-base font-bold text-gray-900 dark:text-white sm:text-lg">{{ $c['name'] }}</div>
-                                        <div class="text-xs text-gray-400 dark:text-gray-500">{{ $c['rows'][0]['theirs'] }}</div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ $c['rows'][0]['theirs'] }}</div>
                                     </div>
                                 </div>
 
@@ -408,7 +415,7 @@
                                         @php $isMoney = $row['feature'] === 'Platform fees'; @endphp
                                         <div class="grid grid-cols-[1fr_auto_1fr] items-start gap-2 px-4 py-3.5 sm:px-6">
                                             <dd class="text-end text-sm font-medium text-gray-800 dark:text-gray-200">{{ $row['ours'] }}</dd>
-                                            <dt class="px-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">{{ $row['feature'] }}</dt>
+                                            <dt class="px-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ $row['feature'] }}</dt>
                                             <dd class="text-sm {{ $isMoney ? 'es-cost font-semibold' : 'text-gray-600 dark:text-gray-400' }}">{{ $row['theirs'] }}</dd>
                                         </div>
                                     @endforeach
@@ -499,8 +506,8 @@
                         Start free
                         <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </a>
-                    <p class="mx-auto mt-5 max-w-2xl text-xs text-gray-400 dark:text-gray-500">
-                        Estimates from each platform's published rates. Stripe processing ({{ $rates['stripe']['label'] }}) is included for Event Schedule, Luma and Ticket Tailor; Eventbrite quotes its fee as inclusive of processing. Ticket Tailor publishes {{ $rates['ticket-tailor']['range'] }} depending on volume, so the midpoint is used here. Luma is shown at whichever of its free and Plus plans is cheaper for the event. Our free plan carries no monthly cost at all.
+                    <p class="mx-auto mt-5 max-w-2xl text-xs text-gray-500 dark:text-gray-400">
+                        Estimates from each platform's published rates. Stripe processing ({{ $rates['stripe']['label'] }}) is included for Event Schedule, Luma and Ticket Tailor; Eventbrite quotes its fee as inclusive of processing. Ticket Tailor publishes {{ $rates['ticket-tailor']['range'] }} depending on volume, so the midpoint is used here. Luma is shown at whichever of its free and Plus plans is cheaper for the event. Our free plan carries no monthly cost and covers up to 25 paid tickets a month.
                     </p>
                 </div>
             </div>
@@ -510,7 +517,12 @@
     <!-- ============================================================ -->
     <!-- The full matrix, in a disclosure                            -->
     <!-- ============================================================ -->
-    @php $matrixColumns = ['Event Schedule', 'Eventbrite', 'Luma', 'Ticket Tailor', 'Google Calendar']; @endphp
+    @php
+        $matrixColumns = ['Event Schedule', 'Eventbrite', 'Luma', 'Ticket Tailor', 'Google Calendar'];
+        // Feature rows only. COUNT_RECURSIVE was used here and counted every cell
+        // as well as every row, so the button offered "294 rows" of a 42-row table.
+        $matrixRowCount = array_sum(array_map('count', $sections));
+    @endphp
     <section id="matrix" class="scroll-mt-24 bg-gray-50 py-16 dark:bg-[#0f0f14] lg:py-24">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             {{-- Ships open, and the script closes it below md. It must not start
@@ -522,7 +534,7 @@
                         The <span class="text-gradient-compare">whole grid</span>
                     </h2>
                     <span class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-blue-600 dark:text-blue-400">
-                        <span class="group-open/matrix:hidden">Show all {{ count($sections, COUNT_RECURSIVE) - count($sections) }} rows</span>
+                        <span class="group-open/matrix:hidden">Show all {{ $matrixRowCount }} rows</span>
                         <span class="hidden group-open/matrix:inline">Hide the full grid</span>
                         <svg aria-hidden="true" class="h-4 w-4 transition-transform duration-300 group-open/matrix:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
                     </span>
@@ -681,7 +693,7 @@
                 <div class="es-bento group relative" data-tilt="3" data-reveal="panel">
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
                         <h3 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">Paste it, do not type it</h3>
-                        <p class="mb-6 text-sm text-gray-600 dark:text-gray-400">Drop in an email, a flyer or a URL and the date, time, venue and description are filled in for you.</p>
+                        <p class="mb-6 text-sm text-gray-600 dark:text-gray-400">Paste the text of an email or listing, or drop in a flyer image, and the date, time, venue and description are filled in for you.</p>
                         <div class="mt-auto rounded-2xl border border-gray-200 bg-gray-50 p-4 dark:border-white/10 dark:bg-black/20" aria-hidden="true">
                             <div class="mb-3 rounded-lg border border-gray-200 bg-white px-3 py-2 text-[11px] italic text-gray-500 dark:border-white/10 dark:bg-white/5 dark:text-gray-400">
                                 "Friday Night Jazz, Aug 14 at 8pm, The Blue Room"
@@ -725,17 +737,25 @@
                     </div>
                 </div>
 
-                <!-- 6. Event graphics: a poster, not an icon of a poster -->
+                <!-- 6. Event graphics: the flyers you already have, composed into one
+                     image. The mock used to be a single invented poster, which the
+                     generator has no concept of: it lays out the flyer images on your
+                     upcoming events, up to 20, and never draws an event from scratch. -->
                 <div class="es-bento group relative" data-tilt="3" data-reveal="panel">
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
                         <h3 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">Share graphics, generated</h3>
-                        <p class="mb-6 text-sm text-gray-600 dark:text-gray-400">Every event can produce a ready-to-post graphic in your own colours. No design tool, no export dance.</p>
+                        <p class="mb-6 text-sm text-gray-600 dark:text-gray-400">The flyers on your next events, up to 20 of them, laid out as one ready-to-post image in your own colours.</p>
                         <div class="mt-auto flex justify-center" aria-hidden="true">
                             <div class="w-32 overflow-hidden rounded-xl border border-gray-200 shadow-md dark:border-white/10">
-                                <div class="bg-gradient-to-br from-blue-600 via-sky-600 to-cyan-500 px-3 py-5 text-center">
-                                    <div class="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/70">Fri 14 Aug</div>
-                                    <div class="mt-1 text-sm font-black leading-tight text-white">Friday Night Jazz</div>
-                                    <div class="mt-2 text-[9px] text-white/80">The Blue Room &middot; 8:00 PM</div>
+                                <div class="bg-gradient-to-br from-blue-600 via-sky-600 to-cyan-500 px-3 py-3">
+                                    <div class="text-center text-[9px] font-semibold uppercase tracking-[0.2em] text-white/70">This week</div>
+                                    <div class="mt-2 grid grid-cols-2 gap-1.5">
+                                        @foreach (['Fri 14', 'Sat 15', 'Sat 15', 'Sun 16'] as $tile)
+                                            <div class="flex h-10 items-end rounded-md bg-white/20 p-1">
+                                                <span class="text-[7px] font-bold leading-none text-white/90">{{ $tile }}</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
                                 </div>
                                 <div class="bg-white px-3 py-1.5 text-center text-[8px] font-medium text-gray-400 dark:bg-[#101016] dark:text-gray-500">yourschedule.com</div>
                             </div>
@@ -772,7 +792,7 @@
             <div class="grid gap-4 md:grid-cols-3" data-reveal-group="90">
                 @php
                     $switchSteps = [
-                        ['Import your events', 'Events come across from Eventbrite directly. Anywhere else, paste a page or a URL and the AI reads the details out of it.'],
+                        ['Import your events', 'Events come across from Eventbrite directly. Anywhere else, paste the listing text or drop in a flyer image and the AI reads the details out of it.'],
                         ['Bring the attendees', 'Existing attendees import in bulk from a CSV, up to 5,000 rows at a time, so your lists arrive intact.'],
                         ['Keep your own copy', 'Backup and restore is built in, images included. Export whenever you like, selfhost it, or walk away with everything.'],
                     ];
@@ -951,7 +971,7 @@
 
         (function () {
             // The full grid ships open so its boxes are measurable; collapse it
-            // on small screens where 48 rows is not a reasonable default.
+            // on small screens where 42 rows is not a reasonable default.
             var disc = document.querySelector('details.matrix-disc');
             if (!disc || !window.matchMedia) return;
             var mq = window.matchMedia('(max-width: 767px)');

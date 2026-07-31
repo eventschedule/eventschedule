@@ -79,7 +79,7 @@
                 "@type": "HowToStep",
                 "position": 2,
                 "name": "Type the running order",
-                "text": "Add each session as a part of the agenda with a name, a start time and an end time, then drag the parts into order."
+                "text": "Add each session as a part of the agenda with a name, a start time and an end time, then move the parts into order."
             },
             {
                 "@type": "HowToStep",
@@ -569,7 +569,7 @@
             ],
             [
                 'q' => 'Is the agenda free?',
-                'a' => 'Yes. Adding parts, naming them, giving them start and end times, writing a description for each one, dragging them into order and publishing the running order are all free forever, along with the join link, calendar sync and the embeddable calendar. Agenda scanning, which reads a printed or emailed programme and fills the parts in for you, is on the Enterprise plan. Typing them costs nothing.',
+                'a' => 'Yes. Adding parts, naming them, giving them start and end times, writing a description for each one, moving them into order and publishing the running order are all free forever, along with the join link, calendar sync and the embeddable calendar. Agenda scanning, which reads a printed or emailed programme and fills the parts in for you, is on the Enterprise plan. Typing them costs nothing.',
             ],
             [
                 'q' => 'Can I sell different ticket types for my conference?',
@@ -786,7 +786,7 @@
                     <span class="es-agenda-tag">Setting the running order</span>
                 </div>
                 <h2 class="es-balance es-agenda-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
-                    Name it, time it, <span class="es-agenda-accent">drag it into place.</span>
+                    Name it, time it, <span class="es-agenda-accent">move it into place.</span>
                 </h2>
                 <p class="es-agenda-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
                     Three things make a session, and all three are on the free plan.
@@ -813,7 +813,7 @@
                         <h3 class="es-agenda-ink text-lg font-bold">An order you can change</h3>
                         <span class="es-agenda-plan">Free</span>
                     </div>
-                    <p class="es-agenda-muted text-sm">Drag a part up the list, or move it with the up and down buttons. When a speaker swaps slot the morning is one drag away from correct, not a re-typed agenda.</p>
+                    <p class="es-agenda-muted text-sm">Every part card has an up and a down button, so a session moves one row at a time. Switch times and descriptions off and the editor collapses to a drag-and-drop list of titles. When a speaker swaps slot the morning is a click away from correct, not a re-typed agenda.</p>
                 </div>
             </div>
 
@@ -997,11 +997,11 @@
                         </li>
                         <li class="flex gap-3" data-reveal>
                             <svg aria-hidden="true" class="es-agenda-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span>Custom questions on the ticket collect what the conference actually needs: a job title for the badge, an accessibility requirement, which workshop somebody picked.</span>
+                            <span>Custom questions on the ticket, another Pro one, collect what the conference actually needs: a job title for the badge, an accessibility requirement, which workshop somebody picked.</span>
                         </li>
                         <li class="flex gap-3" data-reveal>
                             <svg aria-hidden="true" class="es-agenda-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span>Quantities are counted for each date on its own, and a waitlist can catch the people who arrive after a day has sold out.</span>
+                            <span>Quantities are counted for each date on its own, and on Pro a waitlist catches the people who arrive after a day has sold out.</span>
                         </li>
                     </ul>
                     <p class="es-agenda-muted mt-6 text-sm" data-reveal>
@@ -1016,7 +1016,7 @@
                             <span class="es-agenda-plan">Free</span>
                         </div>
                         <div class="space-y-2">
-                            @foreach ([['Full pass', 'all three days', '$149'], ['Single day', 'any one day', '$59'], ['Early bird', 'sales window closes 31 Jan', '$99'], ['Community rate', 'limited quantity', '$25'], ['Registration only', 'free conference, capped', 'Free']] as [$tierName, $tierScope, $tierPrice])
+                            @foreach ([['Full pass', 'all three days', '$149'], ['Single day', 'any one day', '$59'], ['Early bird', 'sales window closes 31 Jan', '$99'], ['Community rate', 'limited quantity', '$25'], ['Student place', 'limited quantity', '$0']] as [$tierName, $tierScope, $tierPrice])
                                 <div class="flex items-baseline gap-3 es-agenda-hair border-t pt-2 text-sm first:border-0 first:pt-0">
                                     <span class="es-agenda-ink min-w-0 flex-1 truncate font-semibold">{{ $tierName }}</span>
                                     <span class="es-agenda-muted hidden truncate text-xs sm:inline">{{ $tierScope }}</span>
@@ -1029,7 +1029,7 @@
                             <span class="es-agenda-accent font-mono text-lg font-black">$0</span>
                         </div>
                         <p class="es-agenda-muted mt-3 text-xs">
-                            Every row here is on the free plan, the paid ones capped at 25 tickets a month and the last needing no card at all. To be clear about what this is not, there is no seat map and buyers are not choosing a seat.
+                            Every row here is on the free plan: the paid ones capped at 25 tickets a month, the $0 one never counted against that and still selling once the cap is reached. A conference with nothing to charge for turns the event over to free registration instead. To be clear about what this is not, there is no seat map and buyers are not choosing a seat.
                         </p>
                     </div>
                 </div>
@@ -1140,7 +1140,7 @@
                                 <h3 class="es-agenda-ink text-xl font-bold">Next year, from this year</h3>
                                 <span class="es-agenda-plan">Free</span>
                             </div>
-                            <p class="es-agenda-muted mb-4">Clone a day and you get its running order with it, which is most of the work of the next edition already done. On Pro you can save a day as a reusable template, and generate a share graphic built from the event so the date on it is right.</p>
+                            <p class="es-agenda-muted mb-4">Clone a day and you get its running order with it, which is most of the work of the next edition already done. On Pro you can save a day as a reusable template, and generate a share graphic that lays your next dates out from their flyer images, with the date printed on each if you switch that on.</p>
                             <p class="es-agenda-muted text-sm">A programme committee that needs more than one login is on Enterprise, which allows up to five team members. The free plan is a single member, so plan the handover if a colleague has to post the schedule.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
@@ -1279,7 +1279,7 @@
             <div class="grid grid-cols-1 gap-6 md:grid-cols-3" data-reveal-group="120">
                 @foreach ([
                     ['01', 'Create the day', 'One event per conference day: its date, its start time, how long it runs, and the link people join.'],
-                    ['02', 'Type the running order', 'Add each session as a part with a name, a start and an end. Drag the parts into order, and write an abstract where one helps.'],
+                    ['02', 'Type the running order', 'Add each session as a part with a name, a start and an end. Move the parts into order, and write an abstract where one helps.'],
                     ['03', 'Open the doors', 'Free registration with a capacity limit, or named ticket types, free to 25 paid tickets a month. Share one link for the whole programme.'],
                 ] as [$stepNum, $stepTitle, $stepBody])
                     <div class="es-agenda-card p-7" data-reveal="panel">

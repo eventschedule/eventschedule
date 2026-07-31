@@ -139,7 +139,7 @@
 
     <style {!! nonce_attr() !!}>
         .text-gradient-pricing {
-            background: linear-gradient(135deg, #10b981 0%, #0ea5e9 50%, #2563eb 100%);
+            background: linear-gradient(135deg, #059669 0%, #0284c7 50%, #2563eb 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -159,11 +159,11 @@
 
         /* Billing toggle: a single .is-annual class on #pricing-plans drives every
            state (no framework). Segmented control - the active half is a raised pill. */
-        .bt-seg { color: #6b7280; transition: background-color .2s, color .2s, box-shadow .2s; }
+        .bt-seg { color: #4b5563; transition: background-color .2s, color .2s, box-shadow .2s; }
         .dark .bt-seg { color: #9ca3af; }
         .bt-seg-month { background: #fff; color: #111827; box-shadow: 0 1px 2px rgba(0, 0, 0, .08); }
         .dark .bt-seg-month { background: #2d2d30; color: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, .4); }
-        #pricing-plans.is-annual .bt-seg-month { background: transparent; color: #6b7280; box-shadow: none; }
+        #pricing-plans.is-annual .bt-seg-month { background: transparent; color: #4b5563; box-shadow: none; }
         .dark #pricing-plans.is-annual .bt-seg-month { background: transparent; color: #9ca3af; box-shadow: none; }
         #pricing-plans.is-annual .bt-seg-year { background: #fff; color: #111827; box-shadow: 0 1px 2px rgba(0, 0, 0, .08); }
         .dark #pricing-plans.is-annual .bt-seg-year { background: #2d2d30; color: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, .4); }
@@ -301,7 +301,7 @@
                     <div class="mb-8">
                         <div class="-mx-6 -mt-6 mb-8 rounded-t-3xl bg-gradient-to-r from-blue-600 to-sky-500 px-4 py-3 text-center text-white lg:-mx-8 lg:-mt-8">
                             <div class="text-lg font-bold">7-Day Free Trial</div>
-                            <div class="text-sm text-blue-100">Try all Pro features risk-free</div>
+                            <div class="text-sm text-blue-50">Try all Pro features risk-free</div>
                         </div>
 
                         <div>
@@ -426,7 +426,7 @@
 
                     <div class="rounded-2xl border-2 border-emerald-300 bg-emerald-50/60 p-6 dark:border-emerald-500/40 dark:bg-emerald-500/10">
                         <div class="mb-1 text-sm font-semibold text-emerald-800 dark:text-emerald-300">Event Schedule Pro</div>
-                        <div class="mb-3 text-xs text-emerald-700/80 dark:text-emerald-400/80">${{ $proMonthly }}/month + Stripe, 0% platform fee</div>
+                        <div class="mb-3 text-xs text-emerald-800 dark:text-emerald-400/80">${{ $proMonthly }}/month + Stripe, 0% platform fee</div>
                         <div id="pf-es" class="mb-3 text-4xl font-black tracking-tight text-emerald-700 tabular-nums dark:text-emerald-300">${{ number_format($calcEs, 2) }}</div>
                         <div class="h-2 overflow-hidden rounded-full bg-emerald-100 dark:bg-emerald-500/20">
                             <div id="pf-bar" class="h-full rounded-full bg-emerald-500" style="width: {{ $calcEsBar }}%"></div>
@@ -442,7 +442,7 @@
                         Start your free trial
                         <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </a>
-                    <p class="mt-5 text-xs text-gray-400 dark:text-gray-500">
+                    <p class="mt-5 text-xs text-gray-500 dark:text-gray-400">
                         Stripe processing (2.9% + $0.30 per ticket) is included on the Event Schedule side. The comparison platform bundles processing into its own rate. Payouts go straight to your own Stripe account.
                     </p>
                 </div>
@@ -555,7 +555,7 @@
         <div class="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
             <div class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-white/10 dark:bg-white/[0.04]">
                 <p class="text-gray-700 dark:text-gray-300">
-                    Know other organizers? <a href="{{ route('marketing.docs.referral_program') }}" class="font-medium text-[#4E81FA] hover:underline">Earn free months with our referral program</a>.
+                    Know other organizers? <a href="{{ route('marketing.docs.referral_program') }}" class="font-medium text-blue-600 hover:underline dark:text-blue-400">Earn free months with our referral program</a>.
                 </p>
             </div>
         </div>

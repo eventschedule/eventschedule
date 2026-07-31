@@ -44,8 +44,8 @@
             "A printable QR code and a short link for the key-card sleeve",
             "Embeddable calendar for the hotel website you already have",
             "Free sign-ups with a capacity, counted separately for each date",
-            "Zero-fee ticketing for paid experiences through your own Stripe account",
-            "QR check-in at the door",
+            "Ticket sales for paid experiences through your own Stripe account, with no platform fee",
+            "QR ticket scanning at the door on every plan",
             "Promo codes for a resident rate",
             "Sub-schedules with a name, a colour and their own link",
             "Draft activities that stay members-only until you publish them",
@@ -616,10 +616,10 @@
         $programme = [
             ['Sunrise yoga',   'wellness', '0010101', '7:00',  'Place kept', '12 mats',   'free', false],
             ['Kids club',      'family',   '1111111', '10:00', 'Drop in',    'no limit',  'free', false],
-            ['Reef walk',      'water',    '0001000', '8:30',  'Place kept', '8 places',  'free', false],
+            ['Reef walk',      'water',    '0000001', '16:00', 'Place kept', '8 places',  'free', false],
             ['Terrace trio',   'music',    '0000011', '19:30', 'Drop in',    'no limit',  'free', false],
-            ['Sunset sail',    'water',    '0000100', '17:45', 'Ticket',     '$60',       'pro',  false],
-            ['Cellar dinner',  'dining',   null,      '19:30', 'Ticket',     '$95',       'pro',  true],
+            ['Sunset sail',    'water',    '0000100', '17:45', 'Ticket',     '$60',       'free', false],
+            ['Cellar dinner',  'dining',   null,      '19:30', 'Ticket',     '$95',       'free', true],
         ];
 
         // Four weeks of sunrise yoga, twice. The upper strip is the single
@@ -640,7 +640,9 @@
         }
         $weekLabels = ['Mar 1', 'Mar 8', 'Mar 15', 'Mar 22'];
 
-        // Today's card in the hero. Times are the property's own.
+        // Today's card in the hero. Times are the property's own, and the four
+        // rows are exactly the ones whose pattern above lights Saturday, so the
+        // card and the standing table describe the same week.
         $today = [
             ['7:00',  'Sunrise yoga',  'wellness', 'Place kept'],
             ['10:00', 'Kids club',     'family',   'Drop in'],
@@ -667,13 +669,13 @@
         // computed from the same figures the text prints.
         $book = [
             ['Sunrise yoga',  'Thursday',  9,  12, 'Sign-ups', 'free', 'No money changes hands. A capacity, counted for this date only.'],
-            ['Cellar dinner', 'Saturday',  22, 30, 'Tickets',  'pro',  '$95 a head, through your own Stripe account. Zero platform fees.'],
+            ['Cellar dinner', 'Saturday',  22, 30, 'Tickets',  'free', '$95 a head, through your own Stripe account. Zero platform fees, and the free plan sells 25 paid tickets a month.'],
         ];
 
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for hotels and resorts?',
-                'a' => 'Yes. The activity page and its link, the QR code, standing activities that repeat on chosen days of the week, date exceptions, sub-schedules, free sign-ups with a capacity, the embeddable calendar, two-way Google, Outlook and CalDAV sync and built-in analytics are all free forever. Newsletters are on the free plan too, at 10 emails a month counted per recipient, which Pro raises to 100 and Enterprise to 1,000. Ticketing for the paid experiences is on the Pro plan at $5 a month, and Event Schedule charges zero platform fees on sales.',
+                'a' => 'Yes. The activity page and its link, the QR code, standing activities that repeat on chosen days of the week, date exceptions, sub-schedules, free sign-ups with a capacity, the embeddable calendar, two-way Google, Outlook and CalDAV sync and built-in analytics are all free forever. Newsletters are on the free plan too, at 10 emails a month counted per recipient, which Pro raises to 100 and Enterprise to 1,000. Selling the paid experiences is free as well, up to 25 paid tickets a month per schedule, and Event Schedule charges zero platform fees on sales. Pro, at $'.(int) config('services.stripe_platform.price_monthly_amount', 5).' a month, takes the cap off and adds the extras: promo codes, passes, waitlists, add-ons and the live check-in dashboard.',
             ],
             [
                 'q' => 'How do guests find out what is on during their stay?',
@@ -685,7 +687,7 @@
             ],
             [
                 'q' => 'Can guests reserve a place, and can I sell the paid experiences?',
-                'a' => 'Both. A free activity can take sign-ups with a capacity, and the count is kept for each date separately, so a full Tuesday does not close Thursday. Paid experiences use ticketing on the Pro plan: named ticket types with their own prices and quantities, QR check-in at the door, your own Stripe account and no platform fee from us. A promo code can carry a resident rate for the people staying with you.',
+                'a' => 'Both, and both start free. A free activity can take sign-ups with a capacity, and the count is kept for each date separately, so a full Tuesday does not close Thursday. Paid experiences use ticketing: named ticket types with their own prices and quantities, QR scanning at the door, your own Stripe account and no platform fee from us. The free plan sells 25 paid tickets a month per schedule and Pro removes that ceiling. Promo codes, which is how you would carry a resident rate for the people staying with you, are a Pro feature.',
             ],
             [
                 'q' => 'Can I keep the pool, the spa, the kids club and the conference programme apart?',
@@ -774,7 +776,7 @@
 
                         <div class="es-conc-stock-rule mt-4" aria-hidden="true"></div>
 
-                        <p class="es-conc-stock-muted es-conc-num es-conc-fine mt-3 uppercase tracking-[0.14em]">Thursday, 12 March</p>
+                        <p class="es-conc-stock-muted es-conc-num es-conc-fine mt-3 uppercase tracking-[0.14em]">Saturday, 14 March</p>
 
                         <ul class="mt-4 space-y-2">
                             @foreach ($today as [$tTime, $tName, $tStrand, $tJoin])
@@ -881,7 +883,8 @@
                     The lit squares are the days the activity repeats, read from Sunday, which is
                     exactly how the pattern is stored. The cellar dinner has no pattern on purpose:
                     a repeat is by day of the week, so a once-a-month dinner is entered as its own
-                    dated activity.
+                    dated activity. The two ticketed rows are free to sell as well: the free plan
+                    covers 25 paid tickets a month, and Pro takes the ceiling off.
                 </p>
             </div>
 
@@ -1036,7 +1039,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 4. Keeping a place (03): sign-ups free, tickets Pro          -->
+    <!-- 4. Keeping a place (03): sign-ups free, tickets free to 25   -->
     <!-- ============================================================ -->
     <section id="book" class="scroll-mt-24 es-conc-seam py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -1083,7 +1086,7 @@
             <div class="mt-4 grid gap-4 md:grid-cols-3" data-reveal-group="90">
                 @foreach ([
                     ['Counted for each date', 'Free', 'A full Tuesday does not close Thursday. Every date keeps its own count, which is the only way a standing activity with a limit can work at all.'],
-                    ['A ticket for the paid ones', 'Pro', 'Named ticket types with their own prices and quantities, QR check-in at the door, and your own Stripe account. Event Schedule takes nothing from the ticket price.'],
+                    ['A ticket for the paid ones', 'Free', 'Named ticket types with their own prices and quantities, QR scanning at the door, and your own Stripe account. Event Schedule takes nothing from the ticket price. Free covers 25 paid tickets a month per schedule; Pro sells without a cap.'],
                     ['A rate for people staying with you', 'Pro', 'A promo code carries a resident rate that the desk can hand out. Nothing is verifying who is a guest, so the code is what does it.'],
                 ] as [$kTitle, $kPlan, $kDesc])
                     <div class="es-conc-card es-conc-hover p-6" data-reveal>
@@ -1195,7 +1198,7 @@
                                 ['An enquiry waiting on you', 'Free', 'Booking requests arrive through the page and wait until you accept one, and the schedule can email you when a new one is sitting there. Nothing appears publicly first.'],
                                 ['A date taken out', 'Free', 'The exception for the Wednesday the pool is drained. It removes the date rather than annotating it.'],
                                 ['Your own calendar', 'Free', 'Two-way sync with Google, Outlook or CalDAV, so whoever runs the programme works where they already work.'],
-                                ['Tonight\'s check-in list', 'Pro', 'For the paid experiences, a scan at the door reads the ticket and marks it used, and the running count is staff-side only.'],
+                                ['Tonight\'s running count', 'Pro', 'A scan at the door reads the ticket and marks it used on every plan. The live count and the breakdown by ticket type are the Pro half, and staff-side only.'],
                             ] as [$dTitle, $dPlan, $dDesc])
                                 <li class="flex gap-3">
                                     <span class="es-conc-bullet mt-1.5" aria-hidden="true"></span>
@@ -1216,7 +1219,7 @@
                                 ['Only what you published', 'Free', 'The public page carries exactly what you put on it. Nothing arrives on it because somebody else asked.'],
                                 ['Times in the property\'s own zone', 'Free', 'The schedule holds a time zone, so a guest reading the page in another one still sees seven in the morning here.'],
                                 ['A day that is simply not offered', 'Free', 'An excepted date does not appear as cancelled. It is not there, which is what a guest actually needs to know.'],
-                                ['One tap to their own phone', 'Free', 'Any activity, or a whole repeating one, downloads as a calendar file, so the sunrise class is in their own week.'],
+                                ['One tap to their own phone', 'Free', 'A date on the card adds itself to Google, Apple or Outlook as a single calendar entry, so Thursday\'s sunset sail is in their own week.'],
                                 ['Nothing they did not ask for', 'Free', 'The card does not say who else signed up, and nobody is emailed because you added something. A newsletter reaches the guests who followed you when you write one and send it.'],
                             ] as [$cTitle, $cPlan, $cDesc])
                                 <li class="flex gap-3">
@@ -1494,8 +1497,8 @@
                     </h2>
                     <p class="mx-auto mb-10 max-w-xl text-lg text-gray-300 sm:text-xl">
                         The card, the address, the QR code, the standing week and the sign-up sheet
-                        are free forever. Selling the paid experiences is five dollars a month, and
-                        none of the ticket price comes to us.
+                        are free forever, and so are the first twenty-five paid tickets a month.
+                        None of the ticket price comes to us on any plan.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

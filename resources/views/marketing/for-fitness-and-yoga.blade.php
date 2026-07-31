@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Free Event Schedule for Fitness & Yoga | Class Schedule</x-slot>
-    <x-slot name="description">Share your class schedule, sell drop-in passes, and reach students directly with newsletters. No algorithm. Zero platform fees. Free forever.</x-slot>
+    <x-slot name="description">Share your class schedule, sell drop-ins and class passes, and reach students directly with newsletters. No algorithm. Zero platform fees. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For Fitness & Yoga</x-slot>
 
     <x-slot name="structuredData">
@@ -40,7 +40,7 @@
         },
         "featureList": [
             "Recurring classes with a day-of-week pattern, date exceptions and an end",
-            "Visit passes, memberships, course passes and season passes",
+            "Visit passes, memberships, festival passes and season passes",
             "A cancellation deadline per pass, with forfeit or block after it",
             "A cap on how many advance seats pass holders may take per date",
             "Free registration with a capacity limit per class date",
@@ -612,7 +612,7 @@
         $passKinds = [
             ['Visit pass', 'A set number of visits, counted down as they are used', 'The ten-class card', 'pass_max_uses'],
             ['Membership', 'No count at all, valid until the pass expires', 'A monthly unlimited', 'pass_valid_days'],
-            ['Festival pass', 'One visit to each class the pass covers', 'A six-week course, one seat per session', 'pass_scope'],
+            ['Festival pass', 'One visit to each class the pass covers', 'A six-week course, one visit per session', 'pass_scope'],
             ['Season pass', 'Every occurrence of one recurring class, once each', 'A term of Tuesday 6:45 vinyasa', 'days_of_week'],
         ];
 
@@ -631,7 +631,7 @@
             ],
             [
                 'q' => 'Can I sell class passes and drop-ins?',
-                'a' => 'Yes, through your own Stripe account. Single drop-ins sell on the free plan, up to 25 paid tickets a month, and the Pro plan at $5 a month takes that ceiling off. Passes are the Pro half: alongside a single drop-in you can sell a visit pass with a set number of visits, a membership that is unlimited until it expires, a course pass good for each covered class once, or a season pass covering every occurrence of one recurring class. Set how long the pass lasts, whether it covers the whole schedule, one sub-schedule or named classes, and how many people it admits at each class. Event Schedule charges zero platform fees on either plan, so past Stripe\'s own processing the money is yours.',
+                'a' => 'Yes, through your own Stripe account. Single drop-ins sell on the free plan, up to 25 paid tickets a month, and the Pro plan at $5 a month takes that ceiling off. Passes are the Pro half: alongside a single drop-in you can sell a visit pass with a set number of visits, a membership that is unlimited until it expires, a festival pass good for each covered class once, or a season pass covering every occurrence of one recurring class. Set how long the pass lasts, whether it covers the whole schedule, one sub-schedule or named classes, and how many people it admits at each class. Event Schedule charges zero platform fees on either plan, so past Stripe\'s own processing the money is yours.',
             ],
             [
                 'q' => 'What happens when somebody cancels at the last minute?',
@@ -996,7 +996,7 @@
                                 </div>
                                 <div class="flex items-baseline justify-between gap-3">
                                     <dt class="es-flow-muted">Advance mats</dt>
-                                    <dd class="es-flow-ink font-semibold">Up to 2 per date</dd>
+                                    <dd class="es-flow-ink font-semibold">2 per date, all cards</dd>
                                 </div>
                             </dl>
 
@@ -1122,7 +1122,7 @@
                             <h3 class="es-flow-ink text-lg font-bold">How many mats fit</h3>
                             <span class="es-flow-plan">Free</span>
                         </div>
-                        <p class="es-flow-muted text-sm">For a class you are not charging for, turn on registration and give it a capacity. The remaining places are counted per date, so this Wednesday filling up does not close next Wednesday. Pass holders get their own separate cap on how many dates they may hold in advance.</p>
+                        <p class="es-flow-muted text-sm">For a class you are not charging for, turn on registration and give it a capacity. The remaining places are counted per date, so this Wednesday filling up does not close next Wednesday. Pass holders get their own separate cap on how many of a date's places they may reserve between them.</p>
                     </div>
                     <div class="es-flow-sub p-4" aria-hidden="true">
                         <div class="space-y-2">
@@ -1251,7 +1251,7 @@
                                 <h3 class="es-flow-ink text-xl font-bold">On the site you already have, and the calendar you already use</h3>
                                 <span class="es-flow-plan">Free</span>
                             </div>
-                            <p class="es-flow-muted mb-4">Embed the timetable on your own site so the week lives where people look you up, and sync two ways with Google, Outlook or CalDAV so your teaching hours and your life are one calendar. Any single class date downloads as an .ics file, and the schedule has a calendar feed that lists every date of a recurring class.</p>
+                            <p class="es-flow-muted mb-4">Embed the timetable on your own site so the week lives where people look you up, and sync two ways with Google, Outlook or CalDAV so your teaching hours and your life are one calendar. Worth knowing: a recurring class syncs across as a single entry, not as a repeating one. To see every class date in your calendar app, subscribe to the schedule's feed instead, which unrolls the next 90 days one date at a time. Any single class date also downloads as an .ics file.</p>
                             <p class="es-flow-muted text-sm">
                                 Teaching online as well? Mark the class as an online event and paste the link to wherever you are streaming it.
                                 <a href="{{ marketing_url('/features/online-events') }}" class="es-flow-link font-medium hover:underline">How online events work</a>
@@ -1379,7 +1379,7 @@
 
                 <x-sub-audience-card
                     name="Meditation Guides"
-                    description="Sound baths and mindfulness courses. A course pass covers each session of a six-week series once, so a seat is held for the whole run."
+                    description="Sound baths and mindfulness courses. A festival pass covers each session of a six-week series once, so the whole run is paid for up front."
                     icon-color="sky"
                     blog-slug="for-meditation-guides"
                 >

@@ -65,10 +65,10 @@ class RoleController extends Controller
 {
     use Traits\CalendarDataTrait;
 
-    // Max events loaded whenever the month window is dropped: the guest list layout
-    // (event_layout = 'list') and the admin calendar endpoint. Both display at most 100 upcoming
-    // events client-side, so the nearest 200 upcoming rows are a safe superset while keeping the
-    // query bounded (prevents hydrating the full event table on large schedules).
+    // Max events loaded whenever the month window is dropped, which is now both calendar-events
+    // endpoints, guest and admin, in either layout. They display at most 100 upcoming events
+    // client-side, so the nearest 200 upcoming rows are a safe superset while keeping the query
+    // bounded (prevents hydrating the full event table on large schedules).
     private const LIST_EVENT_CAP = 200;
 
     protected $eventRepo;
@@ -2006,21 +2006,22 @@ class RoleController extends Controller
         $firstDayOfWeek = $role->first_day_of_week ?? 0;
         $startOfGrid = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth()->startOfWeek($firstDayOfWeek);
         $startOfGridUtc = $startOfGrid->copy()->setTimezone('UTC');
-        $endOfGridUtc = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->endOfMonth()->endOfWeek(($firstDayOfWeek + 6) % 7)->addDays(2)->setTimezone('UTC');
 
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
         $unlockedEventIds = ! $isMemberOrAdmin ? $this->getUnlockedEventIds() : [];
 
-        // The list layout renders all upcoming events in one flat list, so it needs future events
-        // beyond the current month grid. Drop the upper-bound month window and cap the row count
-        // instead: bounded memory (this is what prevents the original OOM) and a safe superset of
-        // the events the list actually shows (it displays at most 100 upcoming events client-side).
-        $isListView = $request->boolean('list');
-        $queryEndUtc = $isListView ? null : $endOfGridUtc;
+        // No upper date bound, for the same reason adminCalendarEvents has none. The list layout
+        // renders every upcoming event in one flat list, and the calendar layout's mobile view is
+        // a flat agenda spanning four months with no month navigation at all (the controls are
+        // hidden below md), so stopping at the month boundary left later events permanently
+        // unreachable there. Cap the row count instead: bounded memory (this is what prevents the
+        // original OOM) and a safe superset of what either layout displays. The desktop month grid
+        // is unaffected - buildEventsMap() still places events per day within the viewed month, so
+        // the extra rows are loaded but never rendered.
 
         if ($role->isCurator()) {
             $events = Event::with(['roles', 'parts', 'tickets', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                ->inMonth($startOfGridUtc, $queryEndUtc)
+                ->inMonth($startOfGridUtc, null)
                 ->whereIn('id', function ($query) use ($role) {
                     $query->select('event_id')
                         ->from('event_role')
@@ -2038,11 +2039,11 @@ class RoleController extends Controller
                     });
                 })
                 ->orderBy('starts_at')
-                ->when($isListView, fn ($q) => $q->limit(self::LIST_EVENT_CAP))
+                ->limit(self::LIST_EVENT_CAP)
                 ->get();
         } else {
             $events = Event::with(['roles', 'parts', 'tickets', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                ->inMonth($startOfGridUtc, $queryEndUtc)
+                ->inMonth($startOfGridUtc, null)
                 ->where(function ($query) use ($role) {
                     $query->whereHas('roles', function ($query) use ($role) {
                         $query->where('role_id', $role->id)
@@ -2060,7 +2061,7 @@ class RoleController extends Controller
                     });
                 })
                 ->orderBy('starts_at')
-                ->when($isListView, fn ($q) => $q->limit(self::LIST_EVENT_CAP))
+                ->limit(self::LIST_EVENT_CAP)
                 ->get();
         }
 
@@ -2949,6 +2950,11 @@ class RoleController extends Controller
         $role = new Role;
         $role->type = $type;
         $role->require_account = $type === 'curator';
+        // Match the roles.event_layout column default. Without this the form's radio falls back to
+        // eventLayout()'s null default of 'calendar' and store()'s fill() persists that, so no
+        // schedule created through the UI ever got the list layout the column default asks for.
+        // Set here rather than in eventLayout(), whose fallback also serves existing rows.
+        $role->event_layout = 'list';
         $role->font_family = 'Roboto';
         $role->font_color = '#ffffff';
         $role->accent_color = '#007BFF';

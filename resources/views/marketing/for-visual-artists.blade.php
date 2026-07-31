@@ -47,14 +47,14 @@
             "Free RSVP with a capacity, counted per date",
             "Named ticket types with quantities counted per occurrence date",
             "Custom questions answered at checkout",
-            "QR check-in at the door",
+            "QR check-in at the door on every plan",
             "Zero platform fees on ticket sales through your own Stripe account",
             "Bookable studio visits with weekly hours and per-date overrides",
             "Direct newsletters to the people who follow your schedule",
             "A downloadable QR code for your schedule",
             "Two-way Google, Outlook and CalDAV calendar sync",
             "Embeddable calendar for your own portfolio site",
-            "Auto-generated event graphics"
+            "Shareable graphics built from the flyer images of your upcoming events"
         ],
         "url": "{{ url()->current() }}",
         "keywords": "artist exhibition calendar, visual artist scheduling, gallery show management, art event calendar, free artist scheduling",
@@ -354,14 +354,18 @@
         .es-brush-plan-pro { border-color: rgba(168, 53, 27, 0.5); color: #a8351b; background-color: rgba(168, 53, 27, 0.08); }
         .dark .es-brush-plan-pro { border-color: rgba(240, 147, 122, 0.45); color: #f0937a; background-color: rgba(240, 147, 122, 0.1); }
         .es-brush-band .es-brush-plan-pro { border-color: rgba(240, 147, 122, 0.45); color: #f0937a; background-color: rgba(240, 147, 122, 0.1); }
-        /* The Pro tag sits on the fixed cream index card in the hero, so it
-           must keep its light values in both colour modes. This has to come
-           AFTER `.dark .es-brush-plan-pro`: the specificity is identical, so
+        /* Plan tags sit on the fixed cream index card in the hero, so they
+           must keep their light values in both colour modes. This has to come
+           AFTER the `.dark` rules above: the specificity is identical, so
            source order is what decides it. */
         .es-brush-index .es-brush-plan-pro {
             border-color: rgba(168, 53, 27, 0.5);
             color: #a8351b;
             background-color: rgba(168, 53, 27, 0.08);
+        }
+        .es-brush-index .es-brush-plan-free {
+            border-color: rgba(26, 22, 19, 0.26);
+            color: #57504a;
         }
 
         /* --- The ledger: the working year as strips of tape ------------
@@ -578,7 +582,7 @@
                 'when'   => 'Sat Jun 20, 10am',
                 'note'   => 'Places sold in advance, counted for that date',
                 'tilt'   => '-0.8deg',
-                'plan'   => 'Pro',
+                'plan'   => 'Free',
             ],
         ];
 
@@ -589,9 +593,9 @@
             ['Ten Windows',        'Bell Street Gallery', 'Mar 6 to Apr 4',      'exhibitions', 2,  10, 'One event, accepted onto both pages',        null],
             ['Open studio',        'The studio',          'First Sat, Apr to Nov', 'studio',    11,  79, 'One recurring event, two dates removed',     null],
             ['Spring Art Fair',    'Riverside Fair',      'May 8 to 11',         'exhibitions', 22,   3, 'One event, at the fair as the venue',        null],
-            ['Monotype workshop',  'The studio',          'Sat Jun 20',          'teaching',    36,   3, 'Eight places, questions at checkout',        'Pro'],
+            ['Monotype workshop',  'The studio',          'Sat Jun 20',          'teaching',    36,   3, 'Eight places, plus questions at checkout',   'Pro'],
             ['Slow Water',         'Kiln Room',           'Sep 4 to Oct 12',     'exhibitions', 61,  13, 'A Draft until the gallery announces it',     null],
-            ['Studio visits',      'The studio',          'By appointment',      'studio',       1,  98, 'Bookable slots, not a fixed date',           'Pro'],
+            ['Studio visits',      'The studio',          'By appointment',      'studio',       1,  98, 'Bookable slots, not a fixed date',           null],
             ['Winter print sale',  'The studio',          'Dec 5 to 7',          'studio',      91,   3, 'Free to attend, with a capacity',            null],
         ];
         $months = ['Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -599,18 +603,18 @@
         // The header wall of venues, from Role::logoWallRoles(). Placeholder names
         // only: no third-party logo is drawn, and no real gallery is named.
         $plates = [
-            ['Bell Street Gallery', 'Solo, Mar'],
-            ['Kiln Room', 'Group, Sep'],
-            ['Riverside Fair', 'Booth, May'],
-            ['The Annexe', 'Group, Nov'],
-            ['Harbour Print Room', 'Solo, Jan'],
-            ['Fold Projects', 'Group, Jun'],
+            ['Bell Street Gallery', 'Links to their page'],
+            ['Kiln Room', 'Links to their page'],
+            ['Riverside Fair', 'No page to link to'],
+            ['The Annexe', 'Links to their page'],
+            ['Harbour Print Room', 'Links to their page'],
+            ['Fold Projects', 'No page to link to'],
         ];
 
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for visual artists?',
-                'a' => 'Yes. The wall itself costs nothing: your public page and its permanent link, recurring open studio dates with individual dates taken out, sub-schedules with their own colour and their own link, Drafts that stay off the page until you announce, the header wall of the venues you have shown with, two-way Google, Outlook and CalDAV calendar sync, an embeddable calendar, built-in analytics, a downloadable QR code for your schedule, free RSVP with a capacity, and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling places, generating event graphics and bookable studio visits are on the Pro plan at $5 a month, and Event Schedule charges zero platform fees on ticket sales.',
+                'a' => 'Yes. The wall itself costs nothing: your public page and its permanent link, recurring open studio dates with individual dates taken out, sub-schedules with their own colour and their own link, Drafts that stay off the page until you announce, the header wall of the venues you have shown with, two-way Google, Outlook and CalDAV calendar sync, an embeddable calendar, built-in analytics, a downloadable QR code for your schedule, free RSVP with a capacity, one bookable appointment type, QR check-in at the door, and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling paid places is free too, up to 25 a month. The Pro plan at $5 a month lifts that cap and adds event graphics, your own questions at checkout and more appointment types. Event Schedule charges zero platform fees on ticket sales on every plan.',
             ],
             [
                 'q' => 'Can I list exhibitions, open studios and art fairs together?',
@@ -622,15 +626,15 @@
             ],
             [
                 'q' => 'Do my open studio Saturdays have to be entered one at a time?',
-                'a' => 'No. One recurring event covers the whole run: pick the day of the week and the hours, and give the recurrence an end, either a date or a number of dates. Date exceptions take out the weekends you are away without rebuilding anything, and every date is a real occurrence with its own page, its own iCal file and its own RSVP count.',
+                'a' => 'No. One recurring event covers the whole run: pick the pattern, every week or the same weekday each month, set the hours, and give the recurrence an end, either a date or a number of dates. Date exceptions take out the weekends you are away without rebuilding anything, and every date is a real occurrence with its own page, its own iCal file and its own RSVP count.',
             ],
             [
                 'q' => 'Can I sell places at a workshop or a ticketed opening?',
-                'a' => 'Yes, on the Pro plan. Create as many named ticket types as the event needs, each with its own price and quantity. The quantity is counted per occurrence date, so a full March does not stop April selling. Add your own questions to be answered at checkout, check people in with a QR code at the door, and take the money through your own Stripe account. Event Schedule charges zero platform fees, so what you keep is the price less what Stripe charges.',
+                'a' => 'Yes, and the free plan sells the first 25 paid places each month. Create as many named ticket types as the event needs, each with its own price and quantity. The quantity is counted per occurrence date, so a full March does not stop April selling. Check people in with a QR code at the door on any plan, and take the money through your own Stripe account. Pro at $5 a month removes the 25-a-month cap and adds your own questions at checkout. Event Schedule charges zero platform fees either way, so what you keep is the price less what Stripe charges.',
             ],
             [
                 'q' => 'What happens to the photographs people take at the opening?',
-                'a' => 'They can go on the event. Visitors can add photos, videos and comments with just a name and an email, and everything lands in an approval queue first, so nothing is public until you have looked at it. A per-schedule setting can require an account instead. Free schedules hold up to 25 photos; the Pro plan removes the cap and lets you download the lot as a zip.',
+                'a' => 'They can go on the event. Visitors can add photos, videos and comments with just a name and an email, and everything lands in an approval queue first, so nothing is public until you have looked at it. A per-schedule setting can require an account instead. Free schedules hold up to 25 photos; the Pro plan removes the cap and lets you download an event\'s approved photos as a zip.',
             ],
             [
                 'q' => 'Can I show a gallery\'s exhibition without retyping it?',
@@ -706,7 +710,7 @@
                                 <div class="mb-2 flex items-baseline justify-between gap-3">
                                     <span class="{{ $sInk }} text-[0.6rem] font-extrabold uppercase tracking-[0.2em]">{{ $sName }}</span>
                                     @if ($w['plan'])
-                                        <span class="es-brush-plan es-brush-plan-pro">{{ $w['plan'] }}</span>
+                                        <span class="es-brush-plan {{ $w['plan'] === 'Pro' ? 'es-brush-plan-pro' : 'es-brush-plan-free' }}">{{ $w['plan'] }}</span>
                                     @endif
                                 </div>
                                 <p class="es-brush-index-ink text-xl font-black tracking-tight">{{ $w['title'] }}</p>
@@ -806,8 +810,9 @@
 
                     <p class="es-brush-muted mt-5 border-t es-brush-edge pt-4 text-xs">
                         The tape is the colour of the strand it belongs to, and its position comes
-                        from the same dates the row prints. Two of these seven rows are on the Pro
-                        plan; the other five are free.
+                        from the same dates the row prints. Only one thing here needs the Pro plan,
+                        the workshop's own questions at checkout. Selling the places does not: the
+                        free plan sells twenty-five paid tickets a month.
                     </p>
 
                     <div class="es-glare" aria-hidden="true"></div>
@@ -836,7 +841,7 @@
 
             <div class="grid gap-6 md:grid-cols-2" data-reveal-group="100">
                 @foreach ([
-                    ['studio', 'The Saturdays repeat', 'One recurring event covers the whole run: pick the day of the week and the hours, and give it an end, either a closing date or a number of dates. Date exceptions take out the two weekends you are away, so a change to the pattern is not a rebuild.'],
+                    ['studio', 'The Saturdays repeat', 'One recurring event covers the whole run: pick the pattern, every week or the same weekday each month, set the hours, and give it an end, either a closing date or a number of dates. Date exceptions take out the two weekends you are away, so a change to the pattern is not a rebuild.'],
                     ['exhibitions', 'The show nobody has announced', 'Keep the event as a Draft and it stays off your public page until the gallery has sent the invitations. Then publish it. A sub-schedule cannot do this, because a sub-schedule has no visibility of its own; hiding is what Draft is for.'],
                     ['teaching', 'Prints, paintings and teaching, sorted', 'Sub-schedules split one page into strands, each with its own colour and its own link. Send a school the workshops and a gallery the exhibitions, from a page you only maintain once.'],
                     ['exhibitions', 'The gallery already typed it', 'When a gallery lists you on their event it arrives on your schedule and waits for you to accept it. Accept it and the same entry shows on both pages, so the dates cannot end up saying two different things.'],
@@ -871,10 +876,10 @@
                         The galleries go up <span class="es-brush-grad">on the wall too</span>.
                     </h2>
                     <p class="es-brush-muted mb-8 max-w-xl text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
-                        Your page header can be a wall of the venues hosting your events, each one
-                        linking to that venue's own schedule. It builds itself out of shows you have
-                        already entered, so the exhibition history at the top of your page is a side
-                        effect of keeping the dates straight.
+                        Your page header can be a wall of the logos of the venues hosting your events,
+                        each claimed one linking through to that venue's own schedule. It builds
+                        itself out of shows you have already entered, so the exhibition history at
+                        the top of your page is a side effect of keeping the dates straight.
                     </p>
 
                     <ul class="space-y-4" data-reveal-group="90">
@@ -892,7 +897,7 @@
 
                     <p class="mt-7" data-reveal>
                         <span class="es-brush-plan es-brush-plan-free">Free</span>
-                        <span class="es-brush-muted ms-2 text-sm">Every plan. It is a header option on your schedule, not an add-on.</span>
+                        <span class="es-brush-muted ms-2 text-sm">Every plan. It is a banner-header option on your schedule, not an add-on.</span>
                     </p>
                 </div>
 
@@ -903,14 +908,16 @@
                             <div class="es-brush-pinned" style="--tilt: {{ $pk % 2 === 0 ? '-0.6deg' : '0.6deg' }};">
                                 <div class="es-brush-plate flex h-full flex-col justify-center px-4 py-5">
                                     <p class="es-brush-plate-name text-sm font-bold">{{ $plateName }}</p>
-                                    <p class="es-brush-plate-note mt-1.5 text-[0.6rem] font-bold uppercase">{{ $plateNote }}</p>
+                                    <p class="es-brush-plate-note mt-1.5 text-[0.6rem] font-bold">{{ $plateNote }}</p>
                                 </div>
                             </div>
                         @endforeach
                     </div>
                     <p class="es-brush-muted mt-5 text-xs">
                         A venue needs a picture on its own schedule to appear, and the wall holds up
-                        to thirty-six of them. Names here are illustrative.
+                        to thirty-six of them. A venue that runs a claimed schedule links through to
+                        it; one you entered yourself is just the logo. Names here are illustrative,
+                        and the real wall shows the logos rather than the names.
                     </p>
                 </div>
             </div>
@@ -981,7 +988,7 @@
                                 <span class="es-brush-lit font-mono text-xs font-bold">25</span>
                             </div>
                             <div class="es-brush-sub flex items-baseline justify-between gap-3 p-3.5">
-                                <span class="text-sm font-semibold text-white">Photos on Pro, and a zip of the lot</span>
+                                <span class="text-sm font-semibold text-white">Photos on Pro, and a zip per event</span>
                                 <span class="es-brush-lit font-mono text-xs font-bold">no cap</span>
                             </div>
                         </div>
@@ -996,7 +1003,7 @@
                     <span class="es-brush-plan es-brush-plan-free">Free</span>
                     <span class="ms-2">Photos, videos and comments with the approval queue, on every plan.</span>
                     <span class="es-brush-plan es-brush-plan-pro ms-3">Pro</span>
-                    <span class="ms-2">Removes the 25-photo cap and adds the zip download.</span>
+                    <span class="ms-2">Removes the 25-photo cap and adds the per-event zip download.</span>
                 </p>
             </div>
         </div>
@@ -1028,8 +1035,8 @@
                     </div>
                     <p class="es-brush-muted mb-5 text-sm">
                         Turn on registration and put a capacity on it. The count is kept per date, so
-                        a full first Saturday leaves the next one untouched, and the page shows how
-                        many places are left.
+                        a full first Saturday leaves the next one untouched, and the registration
+                        page shows how many places are left.
                     </p>
                     <div class="es-brush-sub mt-auto p-4" aria-hidden="true">
                         <p class="es-brush-muted text-[0.6rem] font-extrabold uppercase tracking-[0.18em]">Sat Mar 6, opening</p>
@@ -1041,12 +1048,13 @@
                     <p class="es-brush-verd mb-2 text-[0.6rem] font-extrabold uppercase tracking-[0.2em]">Teaching</p>
                     <div class="mb-3 flex flex-wrap items-center gap-2">
                         <h3 class="es-brush-ink text-lg font-bold">The workshop, sold in advance</h3>
-                        <span class="es-brush-plan es-brush-plan-pro">Pro</span>
+                        <span class="es-brush-plan es-brush-plan-free">Free</span>
                     </div>
                     <p class="es-brush-muted mb-5 text-sm">
                         Named ticket types with their own price and quantity, counted per occurrence
-                        date. Ask your own questions at checkout, scan a QR code at the door, and
-                        take the money through your own Stripe account.
+                        date. Scan a QR code at the door and take the money through your own Stripe
+                        account. Free sells twenty-five paid places a month; Pro lifts the cap and
+                        adds your own questions at checkout.
                     </p>
                     <div class="es-brush-sub mt-auto p-4" aria-hidden="true">
                         <p class="es-brush-muted text-[0.6rem] font-extrabold uppercase tracking-[0.18em]">Platform fee</p>
@@ -1058,12 +1066,12 @@
                     <p class="es-brush-ochre mb-2 text-[0.6rem] font-extrabold uppercase tracking-[0.2em]">Studio</p>
                     <div class="mb-3 flex flex-wrap items-center gap-2">
                         <h3 class="es-brush-ink text-lg font-bold">Studio visits, by appointment</h3>
-                        <span class="es-brush-plan es-brush-plan-pro">Pro</span>
+                        <span class="es-brush-plan es-brush-plan-free">Free</span>
                     </div>
                     <p class="es-brush-muted mb-5 text-sm">
                         Publish bookable slots instead of a fixed date. Set your weekly hours, how
                         far apart slots start, a buffer between them, and per-date overrides for the
-                        days you are away or installing.
+                        days you are away or installing. One bookable type is free; Pro adds more.
                     </p>
                     <div class="es-brush-sub mt-auto p-4" aria-hidden="true">
                         <p class="es-brush-muted text-[0.6rem] font-extrabold uppercase tracking-[0.18em]">Thursdays</p>
@@ -1107,7 +1115,7 @@
                     ['Free', 'Embedded in your own site', 'Drop the calendar into the portfolio site you already have. The dates on your site and the dates on your schedule are then the same dates.'],
                     ['Free', 'Google, Outlook and CalDAV', 'Two-way sync, so the install week, the opening and the fair sit in the calendar you actually look at, and a change in either place reaches the other.'],
                     ['Free', 'Who is reading', 'Built-in analytics on your schedule: which shows people opened, and how the page is being found.'],
-                    ['Pro', 'A picture to post', 'Generate a shareable graphic from the event\'s own details, with the title, the venue and the date already set, so an announcement does not need a design session.'],
+                    ['Pro', 'A picture to post', 'Generate one shareable image out of the flyers of your upcoming events, up to twenty at a time, with your own header and footer text and the date on each if you want it. An event without a flyer image is not in it.'],
                 ] as $ti => [$tPlan, $tTitle, $tBody])
                     <div data-reveal class="es-brush-pinned relative pt-2" style="--tilt: {{ $ti % 3 === 1 ? '0.6deg' : '-0.6deg' }};">
                         <span class="es-brush-pin" aria-hidden="true"></span>
@@ -1353,8 +1361,9 @@
                         Give the wall <span class="es-brush-grad">an address</span>.
                     </h2>
                     <p class="mx-auto mb-10 max-w-xl text-lg text-gray-300 sm:text-xl">
-                        The page, the dates, the gallery plates and the calendar sync cost nothing.
-                        Selling places is five dollars a month, and none of the price comes to us.
+                        The page, the dates, the gallery logos and the calendar sync cost nothing, and
+                        so do the first twenty-five paid places you sell each month. Lifting that cap
+                        is five dollars a month, and none of the ticket price comes to us.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

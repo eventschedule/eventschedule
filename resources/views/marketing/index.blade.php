@@ -320,7 +320,7 @@
         :steps="[
             ['name' => 'Create your schedule', 'text' => 'Sign up free. Add your events manually or import from Google Calendar.'],
             ['name' => 'Share your link', 'text' => 'Get your custom URL. Put it in your bio, website, or anywhere you want.'],
-            ['name' => 'Grow your audience', 'text' => 'Fans follow your schedule. Send them newsletters and notify them when you add new events.'],
+            ['name' => 'Grow your audience', 'text' => 'Fans follow your schedule, which gives you permission to email them. Write a newsletter and send it whenever you have news.'],
         ]"
     />
     {{-- FAQ JSON-LD is emitted alongside the visible FAQ section near the end of the page, driven by one $homeFaqs array so the markup always matches the rendered content. --}}
@@ -1072,7 +1072,9 @@
                 'href' => marketing_url('/features/online-events'),
                 'aria' => 'Learn more about online events',
                 'title' => 'Online Events',
-                'desc' => 'Host virtual events with any streaming platform. Easy toggle between in-person and online, with the link on every ticket.',
+                // One event_url field, not an integration: we never host or read back the
+                // stream, so name platforms only as examples of a link.
+                'desc' => 'Paste the link people join on: Zoom, Meet, Twitch, your own page. Toggle between in person and online, and the link prints on every ticket.',
                 'chip' => 'bg-sky-100 dark:bg-sky-500/20',
                 'text' => 'text-sky-600 dark:text-sky-400',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />',
@@ -1081,7 +1083,9 @@
                 'href' => marketing_url('/features/polls'),
                 'aria' => 'Learn more about event polls',
                 'title' => 'Event Polls',
-                'desc' => 'Add multiple choice polls. Guests vote and see real-time results.',
+                // EventController::votePoll returns results + total_votes in the response to
+                // your own vote, and they are hidden until then. Not a live ticker.
+                'desc' => 'Add multiple choice polls. Signed-in guests pick one option and the count comes back with their vote.',
                 'chip' => 'bg-blue-100 dark:bg-blue-500/20',
                 'text' => 'text-blue-600 dark:text-blue-400',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />',
@@ -1108,7 +1112,9 @@
                 'href' => marketing_url('/features/sub-schedules'),
                 'aria' => 'Learn more about sub-schedules',
                 'title' => 'Sub-schedules',
-                'desc' => 'Organize events into categories. Perfect for venues with multiple rooms or event series.',
+                // A Group is fillable on name, name_en, slug and color: it sorts and colour-codes.
+                // Rooms are not a feature, so do not imply per-room scheduling.
+                'desc' => 'Give a run of events a name, a colour and a link of its own. Perfect for a weekly series or a season of shows.',
                 'chip' => 'bg-rose-100 dark:bg-rose-500/20',
                 'text' => 'text-rose-600 dark:text-rose-400',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />',
@@ -1510,7 +1516,10 @@
                             <div class="es-step es-step-2 relative ltr:pl-20 rtl:pr-20">
                                 <span class="absolute top-0 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-xl font-bold text-white shadow-lg shadow-emerald-500/30 ltr:left-0 rtl:right-0">3</span>
                                 <h3 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">Grow your audience</h3>
-                                <p class="text-gray-600 dark:text-gray-400">Fans follow your schedule. Send them newsletters and notify them when you add new events.</p>
+                                {{-- No job, command or mailable sends followers a "new event"
+                                     alert: following grants permission to email, and the owner
+                                     composes and sends every NewsletterEmail themselves. --}}
+                                <p class="text-gray-600 dark:text-gray-400">Fans follow your schedule, which gives you permission to email them. Write a newsletter and send it whenever you have news.</p>
                             </div>
                         </div>
                     </div>
@@ -1609,8 +1618,13 @@
     <!-- ============================================================ -->
     @php
         $homeFaqs = [
-            ['q' => 'Is Event Schedule free?', 'a' => 'Yes, Event Schedule is free to use with unlimited events and schedules. Pro and Enterprise plans add features like ticketing, event boosting, custom branding, and AI tools.'],
-            ['q' => 'Can I sell tickets with Event Schedule?', 'a' => 'Yes, you can sell tickets with zero platform fees using Stripe or Invoice Ninja. Tickets include QR codes for check-in, and you can create multiple ticket types with promo codes.'],
+            // Tiers verified in code, not in FEATURES.md: Role::ticketSaleLimit() makes selling
+            // free up to 25 paid tickets a month, so "ticketing" is no longer a Pro feature;
+            // Pro is what removes the cap. TicketController::scan()/scanned() have no plan
+            // check, so scanning at the door is free too. Promo codes are Pro, so they are not
+            // listed in an answer about what selling includes.
+            ['q' => 'Is Event Schedule free?', 'a' => 'Yes, Event Schedule is free to use with unlimited events and schedules, and the free plan sells up to 25 paid tickets a month. Pro and Enterprise plans add unlimited ticket sales, event boosting, custom branding, and AI image generation.'],
+            ['q' => 'Can I sell tickets with Event Schedule?', 'a' => 'Yes, with zero platform fees using Stripe or Invoice Ninja. The free plan covers 25 paid tickets a month per schedule and Pro removes the cap. Every ticket carries a QR code you can scan at the door, and you can create multiple ticket types.'],
             ['q' => 'Does Event Schedule sync with Google Calendar?', 'a' => 'Yes, Event Schedule offers two-way Google Calendar sync with real-time webhook updates. You can also sync with any CalDAV-compatible calendar server.'],
             ['q' => 'Can I selfhost Event Schedule?', 'a' => 'Yes, Event Schedule is 100% open source. You can selfhost it on your own server for full control over your data, or use the hosted platform at eventschedule.com.'],
             ['q' => 'Who is Event Schedule for?', 'a' => 'Event Schedule is built for musicians, DJs, comedians, venues, bars, theaters, event curators, and anyone who needs to share an event schedule with their audience.'],

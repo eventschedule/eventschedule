@@ -11,8 +11,9 @@ use Tests\TestCase;
  * embedded twice on one page as a calendar and as a list. It overrides roles.event_layout
  * and is honored on the public schedule page as well as on ?embed=true.
  *
- * Every assertion targets `currentView: '<layout>'`, the Vue data key at
- * role/partials/calendar.blade.php that is the single authoritative init for the layout.
+ * Most assertions target `currentView: '<layout>'`, the Vue data key at
+ * role/partials/calendar.blade.php that is the single authoritative init for the layout. The
+ * create-form default is covered here too, since it feeds the same column.
  */
 class EmbedLayoutParamTest extends TestCase
 {
@@ -24,6 +25,21 @@ class EmbedLayoutParamTest extends TestCase
         $this->get($url)
             ->assertOk()
             ->assertSee("currentView: '".$layout."'", false);
+    }
+
+    public function test_new_schedule_form_defaults_to_the_list_layout(): void
+    {
+        // roles.event_layout defaults to 'list', but the create form checks its radios against
+        // Role::eventLayout(), whose fallback for an unsaved role is 'calendar'. Once the radios
+        // were switched to that accessor the form arrived with Calendar pre-checked and store()'s
+        // fill() persisted it, so new schedules silently stopped honouring the column default.
+        // Nothing asserted the default, which is why it went unnoticed.
+        $owner = $this->createOwner();
+
+        $response = $this->actingAs($owner)->get(route('new', ['type' => 'venue']));
+        $response->assertOk();
+
+        $this->assertSame('list', $response->viewData('role')->eventLayout());
     }
 
     public function test_embed_without_the_param_uses_the_stored_layout(): void

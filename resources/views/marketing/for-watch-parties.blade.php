@@ -44,7 +44,7 @@
             "A confirmation page carrying the join link, emailed to every registrant",
             "A published running order with times, for doors, feature and discussion",
             "Weekly and monthly screening series as one recurring event with date exceptions",
-            "Add to calendar links stamped in UTC, so a viewer's own calendar shows their local time",
+            "An .ics file for every event and every date of a series, stamped in UTC so a viewer's own calendar shows their local time",
             "Newsletters to your followers, to everyone who registered for one screening, or to a sub-schedule",
             "Named ticket types with their own prices, quantities and sales windows for paid screenings",
             "Zero platform fees on ticket sales through your own Stripe account",
@@ -610,15 +610,15 @@
             ],
             [
                 'q' => 'Can I charge for watch party access?',
-                'a' => 'Yes, and you can start charging on the free plan: 25 paid tickets a month per schedule, with free registration never counted against that. Create named ticket types with their own prices, quantities and sales windows, sell through your own Stripe account, and keep everything: Event Schedule takes zero platform fees on ticket sales at every plan level. Scanning tickets in at the door is free on every plan, and Pro at $5 a month removes the monthly cap and adds the live check-in dashboard, passes, promo codes and the waitlist. Stripe charges its standard processing fee (2.9% + $0.30).',
+                'a' => 'Yes, and you can start charging on the free plan: 25 paid tickets a month per schedule, with free registration never counted against that. Create named ticket types with their own prices, quantities and sales windows, sell through your own Stripe account, and keep everything: Event Schedule takes zero platform fees on ticket sales at every plan level. Scanning tickets in at the door is free on every plan, and Pro at $5 a month removes the monthly cap and adds the live check-in dashboard, passes, promo codes and the ticket waitlist. Stripe charges its own processing fee (typically 2.9% + $0.30).',
             ],
             [
                 'q' => 'Can I schedule recurring watch parties?',
-                'a' => 'Yes, and it is one event rather than fifty. Pick the days of the week, add date exceptions for the weeks you are skipping, and end the series on a date or after a set number of screenings. Registration caps and ticket inventory are counted per occurrence. The whole series syncs two ways with Google Calendar, Outlook and CalDAV.',
+                'a' => 'Yes, and it is one event rather than fifty. Pick the days of the week, add date exceptions for the weeks you are skipping, and end the series on a date or after a set number of screenings. Registration caps and ticket inventory are counted per occurrence. Two-way sync with Google Calendar, Outlook and CalDAV puts the next occurrence in your own calendar as a single entry; the subscribable iCal feed is the one that carries every date of the run.',
             ],
             [
                 'q' => 'Do my followers get emailed when I add a screening?',
-                'a' => 'Not automatically, and no page here will tell you otherwise. Nothing goes out on its own: you write the newsletter and you send it. What you get is the list and the targeting, free, so you can send to everyone who follows the schedule, to everyone who registered for one particular screening, or to one sub-schedule. The free plan covers 10 recipients a month, Pro 100 and Enterprise 1,000.',
+                'a' => 'Not automatically, and no page here will tell you otherwise. No newsletter goes out on its own: you write it and you send it. What you get is the list and the targeting, free, so you can send to everyone who follows the schedule, to everyone who registered for one particular screening, or to one sub-schedule. The free plan covers 10 recipients a month, Pro 100 and Enterprise 1,000.',
             ],
             [
                 'q' => 'Is Event Schedule free for hosting watch parties?',
@@ -822,7 +822,7 @@
                             <h3 class="es-scr-ink text-lg font-bold">A long sheet, scanned</h3>
                             <span class="es-scr-plan es-scr-plan-paid">Enterprise</span>
                         </div>
-                        <p class="es-scr-muted text-sm leading-relaxed">For a marathon or a festival day with a dozen slots, paste or upload the agenda and have the parts read off it instead of typing each one.</p>
+                        <p class="es-scr-muted text-sm leading-relaxed">For a marathon or a festival day with a dozen slots, point your phone's camera at the printed agenda and have the parts read off it instead of typing each one.</p>
                     </div>
                 </div>
 
@@ -929,7 +929,7 @@
                         <h3 class="es-scr-ink text-base font-bold">Ask one more thing</h3>
                         <span class="es-scr-plan es-scr-plan-paid">Pro</span>
                     </div>
-                    <p class="es-scr-muted text-sm">Add your own questions to the form, with presets or a pattern for the ones that need checking. "Seen it before?" is a better icebreaker than anything you can improvise once people are in.</p>
+                    <p class="es-scr-muted text-sm">Add your own questions to the form as text, a date, a toggle, a dropdown or a multi-select, and mark the ones you need answered. "Seen it before?" is a better icebreaker than anything you can improvise once people are in.</p>
                 </div>
                 <div class="es-scr-card es-scr-full p-6" data-reveal="panel">
                     <div class="mb-3 flex flex-wrap items-center gap-2">
@@ -1010,19 +1010,25 @@
                                 <span class="es-scr-screen-accent es-scr-fig truncate text-xs font-bold">watch.yourdomain.com/friday</span>
                             </div>
 
-                            <div class="mb-5 grid grid-cols-3 gap-2" aria-hidden="true">
-                                <div class="es-scr-screen-inset es-scr-screen-muted px-2 py-1.5 text-center es-scr-xxs font-bold uppercase tracking-wider">Google</div>
-                                <div class="es-scr-screen-inset es-scr-screen-muted px-2 py-1.5 text-center es-scr-xxs font-bold uppercase tracking-wider">Outlook</div>
-                                <div class="es-scr-screen-inset es-scr-screen-muted px-2 py-1.5 text-center es-scr-xxs font-bold uppercase tracking-wider">.ics</div>
+                            <div class="es-scr-screen-inset mb-5 flex items-center gap-3 px-3 py-3" aria-hidden="true">
+                                <span class="flex-none rounded" style="background-color: #161311; padding: 0.4rem;">
+                                    <svg class="h-7 w-7" style="color: #f4f3f0;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4h5v5H4V4zm11 0h5v5h-5V4zM4 15h5v5H4v-5zm11 2h2m3 0v3m-5 3h5M12 4v4m0 3h3m-3 4v5" />
+                                    </svg>
+                                </span>
+                                <div class="min-w-0">
+                                    <p class="es-scr-screen-ink text-xs font-bold">Scan for entry</p>
+                                    <p class="es-scr-screen-muted es-scr-xxs">The same code whether the night is free or ticketed</p>
+                                </div>
                             </div>
 
                             <p class="es-scr-screen-muted es-scr-screen-hair border-t pt-4 text-xs leading-relaxed">
-                                This is the page the confirmation email links to, and the join link is on it. The three calendar handoffs are stamped in UTC, so a viewer three timezones away gets the right hour in their own calendar without you doing timezone arithmetic in the description.
+                                This is the page the confirmation email links to, and the join link is on it. It carries a QR code too, so a hybrid night can scan the same registration in at the door, and scanning is free on every plan.
                             </p>
                         </div>
 
                         <p class="mt-5 text-xs leading-relaxed es-scr-booth-muted">
-                            To be exact about it: times on your public page are shown in your schedule's timezone. The calendar file is absolute, so that is the one to trust and the one to tell people to use.
+                            To be exact about it: times on your public page are shown in your schedule's timezone. The .ics file for each date is stamped in UTC, so that is the one to trust and the one to tell people to use.
                         </p>
                     </div>
                 </div>
@@ -1059,7 +1065,7 @@
                         <h3 class="es-scr-ink text-lg font-bold">Everyone who follows</h3>
                         <span class="es-scr-plan">Free</span>
                     </div>
-                    <p class="es-scr-muted text-sm leading-relaxed">A Follow button on your schedule, and a downloadable QR code you can put on screen at the end of the night so the room joins the list while the credits roll.</p>
+                    <p class="es-scr-muted text-sm leading-relaxed">A Follow button on your schedule, and a downloadable QR code for the schedule page you can put on screen at the end of the night, so the room can follow while the credits roll.</p>
                 </div>
                 <div class="es-scr-card flex flex-col p-7" data-reveal="panel">
                     <div class="mb-3 flex flex-wrap items-center gap-2">
@@ -1073,12 +1079,12 @@
             <div class="es-scr-card mt-6 p-7 sm:p-8" data-reveal="panel">
                 <div class="grid gap-8 md:grid-cols-2 md:items-center">
                     <div>
-                        <h3 class="es-scr-ink mb-3 text-xl font-bold">Nothing goes out on its own</h3>
+                        <h3 class="es-scr-ink mb-3 text-xl font-bold">No newsletter goes out on its own</h3>
                         <p class="es-scr-muted text-sm leading-relaxed">
                             There is no job that emails your followers when you add a date, and no page here is going to pretend otherwise. You write the email and you send it, which is slower and also the reason your list does not quietly rot. Open and click rates come back afterwards so you can tell whether Friday's note actually landed.
                         </p>
                         <p class="es-scr-muted mt-4 text-sm leading-relaxed">
-                            The one thing that does arrive by itself is the confirmation, which every registrant gets the moment they take a place. And notifications run the other way too: when somebody asks you to add their screening to your calendar, you are the one who gets the email.
+                            Automatic mail is kept for the things a person asked for: the confirmation every registrant gets the moment they take a place, and the note to the waitlist when a full night frees up. And notifications run the other way too: when somebody asks you to add their screening to your calendar, you are the one who gets the email.
                         </p>
                     </div>
                     <div class="es-scr-inset p-5">
@@ -1126,7 +1132,7 @@
                         </li>
                         <li class="flex gap-3" data-reveal>
                             <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none es-scr-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span>A ticket type can carry its own link, and that link goes out in the buyer's confirmation. A "watch at home" tier and an "in the room" tier can point at different places.</span>
+                            <span>Your own block of notes goes out in every buyer's confirmation email, so the join link and the house rules land with the ticket instead of in a separate mail you have to remember to send.</span>
                         </li>
                         <li class="flex gap-3" data-reveal>
                             <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none es-scr-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -1134,7 +1140,7 @@
                         </li>
                         <li class="flex gap-3" data-reveal>
                             <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none es-scr-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span>A waitlist that tells people when a sold-out screening frees up, plus promo codes and gift cards if you want them, all on Pro.</span>
+                            <span>A waitlist that tells people when a full screening frees up, free while the door is free registration and Pro once you are selling tickets. Promo codes and gift cards are Pro if you want them.</span>
                         </li>
                     </ul>
                     <p class="es-scr-muted mt-6 text-sm">
@@ -1251,7 +1257,7 @@
                         <h3 class="es-scr-ink mb-3 text-xl font-bold">On the site you already have</h3>
                         <p class="es-scr-muted mb-6 text-sm leading-relaxed">Drop the calendar into your own page as an iframe and it keeps itself current. The registration form embeds the same way, free, and the ticket form on Pro.</p>
                         <div class="es-scr-inset mt-auto p-4" aria-hidden="true">
-                            <p class="es-scr-fig es-scr-muted es-scr-xxs leading-relaxed" dir="ltr">&lt;iframe src="yourparty<wbr>.eventschedule.com<wbr>/embed"&gt;</p>
+                            <p class="es-scr-fig es-scr-muted es-scr-xxs leading-relaxed" dir="ltr">&lt;iframe src="yourparty<wbr>.eventschedule.com<wbr>/?embed=true"&gt;</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1316,8 +1322,8 @@
                             <span class="es-scr-plan">Free</span>
                         </div>
                         <h3 class="es-scr-ink mb-3 text-xl font-bold">Photos and reactions</h3>
-                        <p class="es-scr-muted mb-6 text-sm leading-relaxed">People who were there can post photos, clips and comments on the event with just a name and an email, and everything waits in an approval queue before it appears.</p>
-                        <p class="es-scr-muted mt-auto text-xs leading-relaxed">Twenty-five photos per schedule on the free plan, no cap on Pro, with a bulk download when you want the lot.</p>
+                        <p class="es-scr-muted mb-6 text-sm leading-relaxed">People who were there can post photos, YouTube clips and comments on the event with just a name and an email, and everything waits in an approval queue before it appears.</p>
+                        <p class="es-scr-muted mt-auto text-xs leading-relaxed">Twenty-five photos per schedule on the free plan. Pro takes the cap off and adds a bulk download when you want the lot.</p>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
@@ -1433,7 +1439,7 @@
 
                 <x-sub-audience-card
                     name="Corporate & Team Building"
-                    description="Team movie nights and company screenings for people in different offices. The calendar handoff is stamped in UTC, so everyone's own calendar shows their own hour."
+                    description="Team movie nights and company screenings for people in different offices. The .ics file for each date is stamped in UTC, so everyone's own calendar shows their own hour."
                     icon-color="emerald"
                     blog-slug="for-corporate-team-watch-parties"
                 >

@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Free Event Schedule for Venues | Manage Your Event Calendar</x-slot>
-    <x-slot name="description">Run your venue calendar front to back. Accept booking requests, sell tickets with QR check-in, and manage every room and stage. Free forever.</x-slot>
+    <x-slot name="description">Run your venue calendar front to back. Accept booking requests, sell tickets with QR check-in, and give every room and stage its own sub-schedule. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For Venues</x-slot>
 
     <x-slot name="structuredData">
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule for Venues",
-        "description": "Run your venue calendar front to back. Accept booking requests, sell tickets with QR check-in, take private hire bookings, and manage every room and stage. Zero platform fees.",
+        "description": "Run your venue calendar front to back. Accept booking requests, sell tickets with QR check-in, take private hire bookings, and give every room and stage its own sub-schedule. Zero platform fees.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -31,7 +31,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Venue Management Software",
         "operatingSystem": "Web",
-        "description": "Run your venue calendar front to back. Accept booking requests, sell tickets with QR check-in, take private hire bookings, and manage every room and stage.",
+        "description": "Run your venue calendar front to back. Accept booking requests, sell tickets with QR check-in, take private hire bookings, and give every room and stage its own sub-schedule.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -44,7 +44,7 @@
             "QR code ticketing and check-in dashboard",
             "Promo codes and gift cards",
             "Private hire booking",
-            "Multiple rooms and stages",
+            "Sub-schedules for rooms and stages",
             "Custom domain and white label",
             "Team management",
             "Google Calendar sync"
@@ -201,8 +201,8 @@
                 'name' => 'Free',
                 'price' => '$0',
                 'note' => 'forever',
-                'lede' => 'Everything you need to get the room listed and taking requests.',
-                'items' => ['Public event calendar', 'Booking request inbox', 'Sub-schedules for each room', 'Recurring nights', 'Google, Outlook and CalDAV sync', 'Free RSVPs and analytics'],
+                'lede' => 'Everything you need to get the room listed, taking requests and selling its first tickets.',
+                'items' => ['Public event calendar', 'Booking request inbox', '25 paid tickets a month, QR scanning included', 'Sub-schedules for each room', 'Recurring nights', 'Google, Outlook and CalDAV sync', 'Free RSVPs and analytics'],
                 'featured' => false,
             ],
             [
@@ -210,7 +210,7 @@
                 'price' => '$' . $proMonthly,
                 'note' => 'per month',
                 'lede' => 'Adds the box office and the things that make it look like yours.',
-                'items' => ['Everything in Free', 'Ticketing with QR check-in', 'Live check-in dashboard', 'Promo codes, gift cards and waitlists', 'Private hire bookings', 'No Event Schedule branding'],
+                'items' => ['Everything in Free', 'Unlimited ticket sales', 'Live check-in dashboard', 'Promo codes, gift cards and waitlists', 'Unlimited bookable spaces', 'No Event Schedule branding'],
                 'featured' => true,
             ],
             [
@@ -218,7 +218,7 @@
                 'price' => '$' . $entMonthly,
                 'note' => 'per month',
                 'lede' => 'For rooms with a real team and a brand of their own.',
-                'items' => ['Everything in Pro', 'Your own domain', 'Multiple team members', 'Internal and unlisted events', '1,000 newsletter recipients a month', 'Priority support'],
+                'items' => ['Everything in Pro', 'Your own domain', 'Up to five team members', 'Internal and unlisted events', '1,000 newsletter recipients a month', 'Priority support'],
                 'featured' => false,
             ],
         ];
@@ -232,7 +232,7 @@
         $faqs = [
             [
                 'q' => 'Can I manage multiple rooms or stages?',
-                'a' => 'Yes. Use sub-schedules to organize events by room, stage, or area. Main stage, rooftop bar, private room - each gets its own filterable view within your calendar. Visitors can filter by space or see everything at once.',
+                'a' => 'Yes, as sub-schedules. Main stage, rooftop bar, private room - give each one a name and a colour, and it gets its own filterable view and its own page within your calendar. Visitors can filter by space or see everything at once. A sub-schedule labels an event rather than reserving a space, so it will not warn you if two things land in the same room.',
             ],
             [
                 'q' => 'How do performers request to play at my venue?',
@@ -244,11 +244,11 @@
             ],
             [
                 'q' => 'Can multiple staff members manage the calendar?',
-                'a' => 'Your schedule includes one team member on the free plan, and the Enterprise plan adds as many as you need. Each member is either an admin, who can add and edit events, or a viewer, who can see the schedule without changing it. Anyone with access to the schedule can scan tickets at the door from their own phone.',
+                'a' => 'Your schedule includes one team member on the free plan, and the Enterprise plan adds up to five. Each member is either an admin, who can add and edit events, or a viewer, who can see the schedule without changing it. Anyone with access to the schedule can scan tickets at the door from their own phone.',
             ],
             [
                 'q' => 'Can people book our function room or studio time?',
-                'a' => 'Yes, on the Pro plan. Create a bookable type for each space you rent out, set the hours you are available, add per-date overrides for holidays, and take a deposit through Stripe if you want one. Guests pick a time on your public booking page, and you can require approval before anything is confirmed.',
+                'a' => 'Yes. Create a bookable type for the space you rent out, set the hours you are available, add per-date overrides for holidays, and charge for it through Stripe if you want to. The free plan carries one bookable type and Pro removes the cap. Guests pick a time on your public booking page, and you can require approval before anything is confirmed.',
             ],
             [
                 'q' => 'Can we use our own domain and remove Event Schedule branding?',
@@ -434,11 +434,11 @@
             </span>
         </div>
         <div class="space-y-2">
-            @foreach ([['Thu 12', 'Open Mic', 'Free'], ['Fri 13', 'The Rialtos', 'From $12'], ['Sat 14', 'Soul Night', 'From $8'], ['Sun 15', 'Makers Market', 'Free']] as $i => [$when, $what, $price])
+            @foreach ([['Thu 12', 'Open Mic', '8pm'], ['Fri 13', 'The Rialtos', '8pm'], ['Sat 14', 'Soul Night', '9pm'], ['Sun 15', 'Makers Market', '11am']] as $i => [$when, $what, $startTime])
                 <div class="es-ai-field flex items-center gap-3 rounded-lg border p-2.5 {{ $i === 1 ? 'border-sky-400/40 bg-sky-500/10' : 'border-gray-200 bg-gray-50 dark:border-white/10 dark:bg-white/5' }}" style="--i: {{ $i }};">
                     <div class="w-12 shrink-0 font-mono text-[11px] text-sky-600 dark:text-sky-300">{{ $when }}</div>
                     <span class="min-w-0 flex-1 truncate text-sm text-gray-900 dark:text-white">{{ $what }}</span>
-                    <span class="shrink-0 text-[11px] text-gray-500 dark:text-gray-400">{{ $price }}</span>
+                    <span class="shrink-0 text-[11px] text-gray-500 dark:text-gray-400">{{ $startTime }}</span>
                 </div>
             @endforeach
         </div>
@@ -462,7 +462,7 @@
 
         <div class="mb-3 text-center">
             <div class="text-sm font-bold text-gray-900 dark:text-white">The Rialtos</div>
-            <div class="text-[11px] text-gray-500 dark:text-gray-400">Fri 13, doors 8pm</div>
+            <div class="text-[11px] text-gray-500 dark:text-gray-400">Fri 13, 8pm</div>
         </div>
         <div class="mb-3 flex justify-center">
             <div class="relative rounded-xl bg-white p-2 shadow-md ring-1 ring-gray-200 dark:ring-white/10">
@@ -522,8 +522,8 @@
         accent="teal"
         badge="Private hire"
         heading="Let people book the room"
-        lede="The function room, the studio, the back bar, a venue tour. Publish the hours each space is free and let people pick a time themselves, with a deposit up front if you want one."
-        :chips="['Bookable spaces', 'Weekly hours', 'Holiday overrides', 'Deposits via Stripe', 'Approval required', 'Reschedule links']"
+        lede="The function room, the studio, the back bar, a venue tour. Publish the hours each space is free and let people pick a time themselves, with the price paid up front if you want it."
+        :chips="['Bookable spaces', 'Weekly hours', 'Holiday overrides', 'Paid by Stripe', 'Approval required', 'Reschedule links']"
         :flip="true"
         frame="panel"
         ground="gray">
@@ -538,7 +538,7 @@
                 <div class="text-sm font-bold text-gray-900 dark:text-white">Back room hire</div>
                 <div class="text-[11px] text-gray-500 dark:text-gray-400">2 hours, up to 40 people</div>
             </div>
-            <span class="rounded-full bg-teal-100 px-2.5 py-1 text-[11px] font-semibold text-teal-700 dark:bg-teal-500/20 dark:text-teal-300">$60 deposit</span>
+            <span class="rounded-full bg-teal-100 px-2.5 py-1 text-[11px] font-semibold text-teal-700 dark:bg-teal-500/20 dark:text-teal-300">$60 to book</span>
         </div>
         <div class="mb-3 text-[11px] font-medium text-gray-500 dark:text-gray-400">Saturday 21</div>
         <div class="grid grid-cols-3 gap-2">
@@ -580,7 +580,7 @@
             ],
             [
                 'title' => 'Online events',
-                'desc' => 'Stream a show and sell to people who cannot get to the room.',
+                'desc' => 'Paste the join link and sell to people who cannot get to the room.',
                 'href' => marketing_url('/features/online-events'),
                 'chip' => 'bg-blue-100 dark:bg-blue-500/15', 'text' => 'text-blue-600 dark:text-blue-400',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />',
@@ -744,7 +744,7 @@
             </div>
         </div>
         <div class="space-y-1.5">
-            @foreach ([['General admission', '96 / 180'], ['Early bird', '24 / 40'], ['Guest list', '8 / 20']] as $i => [$tierName, $tierCount])
+            @foreach ([['General admission', '96 / 180'], ['Early bird', '24 / 40'], ['Comps', '8 / 20']] as $i => [$tierName, $tierCount])
                 <div class="es-ai-field flex items-center justify-between rounded-lg bg-gray-50 px-2.5 py-1.5 text-[11px] dark:bg-white/5" style="--i: {{ $i }};">
                     <span class="text-gray-600 dark:text-gray-300">{{ $tierName }}</span>
                     <span class="font-semibold text-gray-900 dark:text-white">{{ $tierCount }}</span>
@@ -758,7 +758,7 @@
         accent="cyan"
         badge="Rooms and stages"
         heading="Main stage, rooftop, back room"
-        lede="Give every space its own sub-schedule. Visitors can filter down to the room they care about or see the whole building at once, and you stop double-booking the back room."
+        lede="Give every space its own sub-schedule, with its own name and colour. Visitors can filter down to the room they care about, open the page for that room alone, or see the whole building at once."
         :chips="['Sub-schedules', 'Filterable views', 'A page per room', 'Recurring nights per space']"
         frame="panel"
         ground="dark">

@@ -41,7 +41,7 @@
     @php
         $howToSteps = [
             ['name' => 'Deploy the platform', 'text' => 'Install Event Schedule on your own server with Docker or the Softaculous one-click installer, then point wildcard DNS at it so every customer can get a subdomain.'],
-            ['name' => 'Apply your branding', 'text' => 'Set your app name, upload light and dark logos, and connect your own domain so the platform runs under your brand, bar the small attribution link the license asks for.'],
+            ['name' => 'Apply your branding', 'text' => 'Point APP_LOGO_LIGHT and APP_LOGO_DARK at your own logos, run the install on your own domain, and set APP_MARKETING_URL so the platform runs under your brand, bar the small attribution link the license asks for.'],
             ['name' => 'Connect Stripe and set your prices', 'text' => 'Connect your Stripe account, create prices for your Pro and Enterprise tiers, set the trial length with TRIAL_DAYS, and open sign-ups.'],
         ];
     @endphp
@@ -574,7 +574,7 @@
                     </div>
 
                     <ul class="es-fade-up es-d-4 mt-8 flex flex-wrap items-center justify-center gap-2 lg:justify-start">
-                        @foreach (['100% open source', 'No per-ticket fees', 'Unlimited customers', 'All Enterprise features unlocked'] as $chip)
+                        @foreach (['100% open source', 'No per-ticket fees', 'Unlimited customers', 'No paid tier for operators'] as $chip)
                             <li class="inline-flex items-center gap-1.5 rounded-full glass px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300">
                                 <svg aria-hidden="true" class="h-3.5 w-3.5 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                                 {{ $chip }}
@@ -724,14 +724,14 @@
                     <div class="es-tilt-inner es-corners relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-8 dark:border-white/10 dark:bg-white/[0.04]">
                         <div class="es-tag mb-3">Module 02 · Plans</div>
                         <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Plan tiers you control</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Free, Pro, and Enterprise are built in, with features gated per tier. You decide what each tier includes and costs.</p>
+                        <p class="mb-6 text-gray-500 dark:text-gray-400">Free, Pro, and Enterprise are built in, with features gated per tier. The split ships with the platform; you set what each tier costs.</p>
                         <div class="mt-auto overflow-hidden rounded-2xl border border-gray-200 text-sm dark:border-white/10" aria-hidden="true">
                             <div class="grid grid-cols-[1fr_2.5rem_2.5rem_2.5rem] items-center gap-y-1 p-3">
                                 <span></span>
                                 <span class="text-center text-[11px] font-semibold text-gray-400 dark:text-gray-500">Free</span>
                                 <span class="es-tier-pro rounded-md py-0.5 text-center text-[11px] font-bold text-blue-600 dark:text-blue-400">Pro</span>
                                 <span class="text-center text-[11px] font-semibold text-gray-400 dark:text-gray-500">Ent</span>
-                                @foreach ([['Schedule pages', true, true, true], ['Ticketing', false, true, true], ['API + webhooks', false, true, true], ['Custom domains', false, false, true]] as $row)
+                                @foreach ([['Schedule pages', true, true, true], ['Unlimited ticket sales', false, true, true], ['API + webhooks', false, true, true], ['Custom domains', false, false, true]] as $row)
                                     <span class="truncate py-1.5 text-xs text-gray-600 dark:text-gray-300">{{ $row[0] }}</span>
                                     @foreach ([1, 2, 3] as $col)
                                         <span class="{{ $col === 2 ? 'es-tier-pro rounded-md' : '' }} flex justify-center py-1.5">
@@ -798,7 +798,7 @@
                     <div class="es-tilt-inner es-corners relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-8 dark:border-white/10 dark:bg-white/[0.04]">
                         <div class="es-tag mb-3">Module 05 · Branding</div>
                         <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">White-label branding</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Your app name, your light and dark logos, your domain. Customers see your brand, and one small credit of ours in the corner of public pages.</p>
+                        <p class="mb-6 text-gray-500 dark:text-gray-400">Your light and dark logos, your domain, your marketing site behind the free-tier footer. Customers see your brand, and one small credit of ours in the corner of public pages.</p>
                         <div class="relative mt-auto h-24 overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-white/10" aria-hidden="true">
                             <div class="absolute inset-0 flex items-center ltr:justify-start ltr:pl-5 rtl:justify-end rtl:pr-5">
                                 <div class="flex items-center gap-2">
@@ -825,7 +825,7 @@
                     <div class="es-corners relative overflow-hidden rounded-3xl border border-gray-200 bg-white p-6 dark:border-white/10 dark:bg-white/[0.04]">
                         <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
                             <div class="es-tag">Module 06 · Scale</div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Unlimited customers, unlimited schedules, and every Enterprise feature unlocked on your install.</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Unlimited customers, unlimited schedules, and no operator tier to buy: every feature ships in the box.</p>
                         </div>
                         <div class="es-marquee es-marquee-mask" data-marquee="1" aria-hidden="true">
                             <div class="es-marquee-track">
@@ -920,7 +920,7 @@
                         </div>
                     </div>
                 </div>
-                <p class="mt-8 border-t border-gray-100 pt-5 text-xs text-gray-400 dark:border-white/5 dark:text-gray-500">Estimates for illustration. Stripe processing fees apply per transaction and vary by country. Your results depend on your pricing and your customers.</p>
+                <p class="mt-8 border-t border-gray-100 pt-5 text-xs text-gray-400 dark:border-white/5 dark:text-gray-500">Estimates for illustration. Subscriptions are billed per schedule, so a customer running more than one pays for each. Stripe processing fees apply per transaction and vary by country. Your results depend on your pricing and your customers.</p>
             </div>
 
             <!-- Illustrative activity ticker -->
@@ -1169,12 +1169,12 @@
                             <div class="es-step es-step-1 relative ltr:pl-20 rtl:pr-20">
                                 <span class="absolute top-0 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-cyan-500 text-xl font-bold text-white shadow-lg shadow-sky-500/30 ltr:left-0 rtl:right-0">2</span>
                                 <h3 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">Wire up the business</h3>
-                                <p class="text-gray-600 dark:text-gray-400">Set your app name, upload light and dark logos, connect Stripe, and create the prices for your Pro and Enterprise tiers. One variable sets your trial length.</p>
+                                <p class="text-gray-600 dark:text-gray-400">Point the logo variables at your own light and dark artwork, connect Stripe, and create the prices for your Pro and Enterprise tiers. One variable sets your trial length.</p>
                             </div>
                             <div class="es-step es-step-2 relative ltr:pl-20 rtl:pr-20">
                                 <span class="absolute top-0 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-orange-400 text-xl font-bold text-white shadow-lg shadow-amber-500/30 ltr:left-0 rtl:right-0">3</span>
                                 <h3 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">Your first customer signs up</h3>
-                                <p class="text-gray-600 dark:text-gray-400">They pick a subdomain, start a trial, and subscribe through your Stripe. From here on, growth is a sales problem, not an engineering one.</p>
+                                <p class="text-gray-600 dark:text-gray-400">They pick a subdomain, start on Free, then subscribe through your Stripe, with your trial length running before the first charge. From here on, growth is a sales problem, not an engineering one.</p>
                             </div>
                         </div>
                     </div>
@@ -1347,7 +1347,7 @@
                             </div>
                         </div>
                         <h3 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">The guest portal</h3>
-                        <p class="mb-6 flex-grow text-sm text-gray-500 dark:text-gray-400">The public schedule their attendees see: browse events, buy tickets, RSVP, and scan in at the door with QR codes.</p>
+                        <p class="mb-6 flex-grow text-sm text-gray-500 dark:text-gray-400">The public schedule their attendees see: browse events, buy tickets, RSVP, and carry the QR code that gets scanned at the door.</p>
                         <a href="https://simpsons.eventschedule.com" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-sky-600 px-6 py-3 font-medium text-white transition-colors hover:from-blue-500 hover:to-sky-500">
                             Open the Guest Demo
                             <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
@@ -1403,9 +1403,9 @@
                     </div>
                     <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl"><span class="text-gradient-saas">Federation</span> sends traffic back to you</h2>
                     <p class="mb-6 text-lg text-gray-500 dark:text-gray-400 sm:text-xl">An optional network that sends discovery traffic back to your platform.</p>
-                    <p class="mb-6 text-gray-600 dark:text-gray-300">Share your customers' public events, online and in person, to the eventschedule.com listings. Every listing links straight back to the event on your platform: extra reach and SEO for your customers, opt-in and off by default.</p>
+                    <p class="mb-6 text-gray-600 dark:text-gray-300">Share your customers' public events, online and in person, to the eventschedule.com listings. Every listing links straight back to the event on your platform: extra reach and SEO for your customers. It stays off until you switch it on, and we review each install once before anything is published.</p>
                     <ul class="space-y-3">
-                        @foreach (['Discovery traffic flows to your installation', 'Your customers reach a wider audience', 'Off by default, and every schedule can opt out'] as $li)
+                        @foreach (['Discovery traffic flows to your installation', 'Your customers reach a wider audience', 'You turn the network on, then each schedule opts in for itself'] as $li)
                             <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
                                 <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                                 {{ $li }}
@@ -1503,11 +1503,11 @@
             ],
             [
                 'q' => 'Can I set my own subscription prices?',
-                'a' => 'Yes. You create the products and prices in your own Stripe account, and the built-in Free, Pro, and Enterprise tiers use them. You also control the trial length with a single TRIAL_DAYS setting. Whatever your customers pay lands in your Stripe account.',
+                'a' => 'Yes. You create the products and prices in your own Stripe account, and the built-in Free, Pro, and Enterprise tiers use them. You also control the trial length with a single TRIAL_DAYS setting. Whatever your customers pay lands in your Stripe account, and subscriptions are billed per schedule, so a customer who runs three pays for each one they upgrade.',
             ],
             [
                 'q' => 'Is there a limit on customers or ticket sales?',
-                'a' => 'No. The platform does not limit the number of customers, schedules, events, or tickets sold. Each customer gets their own subdomain on your domain, and capacity limits only exist where an event organizer chooses to set them.',
+                'a' => 'There is no cap on the number of customers or schedules, and nobody takes a cut of a ticket sale. The built-in Free tier does have allowances your customers upgrade past: 25 paid tickets a month per schedule, 10 newsletter recipients a month, 25 fan photos. Free RSVPs never count, the ticket figure is an environment variable you can raise, and Pro and Enterprise are unlimited on ticket sales.',
             ],
             [
                 'q' => 'How is this different from a reseller or partner program?',
@@ -1523,12 +1523,12 @@
             ],
             [
                 'q' => 'Can my customers use their own domain?',
-                'a' => 'Yes. Every customer gets a subdomain like acme.yourdomain.com out of the box, and you can also point a customer\'s own domain at their schedule. The custom domains guide covers the DNS and proxy setup.',
+                'a' => 'Yes. Every customer gets a subdomain like acme.yourdomain.com out of the box, and a schedule on your Enterprise tier can additionally be served from the customer\'s own domain. The custom domains guide covers the DNS and proxy setup.',
                 'more' => ['label' => 'Read the custom domains guide', 'href' => 'marketing.docs.saas.custom_domains'],
             ],
             [
                 'q' => 'Do I get all features, or is there a paid tier for operators?',
-                'a' => 'Selfhosted installations run with every Enterprise feature unlocked: ticketing with QR check-in, REST API and webhooks, newsletters, analytics, event graphics, and AI features with your own API keys. The Free, Pro, and Enterprise tiers exist for your customers, and you decide what each tier includes and costs.',
+                'a' => 'There is no paid tier for operators: you get the whole codebase and we never bill you. A single-tenant install runs with every Enterprise feature unlocked. In SaaS mode the tiers apply to every schedule on the platform, including your own, so grant yourself a plan from /admin to unlock Pro and Enterprise screens. The feature split ships with the platform; the prices are yours to set.',
             ],
         ];
     @endphp

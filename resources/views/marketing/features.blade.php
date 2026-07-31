@@ -237,7 +237,7 @@
                     <div class="font-medium text-gray-900 dark:text-white">Early Bird</div>
                     <div class="text-xs text-emerald-600 dark:text-emerald-400">50 remaining</div>
                 </div>
-                <div class="text-xl font-bold text-gray-900 dark:text-white">$15</div>
+                <div class="text-xl font-bold text-gray-900 dark:text-white">$18</div>
             </div>
             <div class="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-white/10 dark:bg-white/5">
                 <div>
@@ -331,7 +331,7 @@
         </div>
         <div class="mb-3 rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-white/10 dark:bg-white/5">
             <div class="mb-1 text-xs text-gray-500 dark:text-gray-400">Code</div>
-            <div dir="ltr" class="font-mono text-sm text-cyan-600 dark:text-cyan-300">GIFT-8Q2K-2026</div>
+            <div dir="ltr" class="font-mono text-sm text-cyan-600 dark:text-cyan-300">8Q2K-7MRT-4XPW</div>
         </div>
         <div class="flex items-center justify-between text-xs">
             <span class="text-gray-500 dark:text-gray-400">Balance</span>
@@ -390,7 +390,7 @@
                         <div class="text-sm text-blue-100">Platform fees on tickets</div>
                     </div>
                     <div>
-                        <div class="mb-2 text-3xl font-bold text-white md:text-4xl">11</div>
+                        <div class="mb-2 text-3xl font-bold text-white md:text-4xl">12</div>
                         <div class="text-sm text-blue-100">Languages supported</div>
                     </div>
                 </div>
@@ -414,8 +414,8 @@
         accent="blue"
         badge="Calendar Sync"
         heading="Two-way sync"
-        lede="Sync with Google Calendar, Outlook and any CalDAV server automatically. Changes flow in both directions via real-time webhooks."
-        :chips="['Two-way sync', 'Real-time updates', 'Google, Outlook, CalDAV']"
+        lede="Sync with Google Calendar, Outlook and any CalDAV server automatically. Google and Outlook push changes back within minutes; CalDAV is polled every fifteen."
+        :chips="['Two-way sync', 'Free on every plan', 'Google, Outlook, CalDAV']"
         :lead="true"
         frame="browser"
         frame-url="calendar.google.com"
@@ -459,8 +459,8 @@
         accent="teal"
         badge="Recurring Events"
         heading="Automate your week"
-        lede="Set events to repeat weekly on your chosen days. Three end conditions, per-occurrence tickets, and Google Calendar sync."
-        :chips="['Weekly recurrence', 'Per-event tickets', 'Google Sync']"
+        lede="Set events to repeat daily, weekly, biweekly, monthly or yearly. Three end conditions, per-date ticket inventory, and an iCal feed that unrolls every date."
+        :chips="['Daily to yearly', 'Per-date tickets', 'iCal feed']"
         :flip="true"
         ground="white">
         <x-slot name="badgeIcon">
@@ -492,8 +492,8 @@
         accent="cyan"
         badge="Sub-schedules"
         heading="Organize your events"
-        lede="Create sub-schedules to categorize events by room, stage, series, or any way you like."
-        :chips="['Multiple rooms', 'Event categories']"
+        lede="Create sub-schedules to sort events by stage, series, or any way you like. Each one gets a colour, a visitor filter and its own URL."
+        :chips="['Colour-coded', 'Visitor filter', 'Its own URL']"
         frame="browser"
         frame-url="thevenue.eventschedule.com"
         ground="gray">
@@ -529,8 +529,8 @@
         accent="sky"
         badge="Online Events"
         heading="Go live, anywhere"
-        lede="Toggle any event to online and add your streaming URL. Works with Zoom, YouTube, or any platform."
-        :chips="['Virtual events', 'Any streaming platform']"
+        lede="Tick Online on any event and paste the link people join on. Zoom, YouTube, Teams or your own page: it is a link, not an integration."
+        :chips="['Virtual events', 'Any platform link']"
         :flip="true"
         ground="white">
         <x-slot name="badgeIcon">
@@ -546,7 +546,7 @@
             </div>
         </div>
         <div>
-            <div class="mb-1 text-[10px] text-gray-500 dark:text-gray-400">Streaming URL</div>
+            <div class="mb-1 text-[10px] text-gray-500 dark:text-gray-400">Event link</div>
             <div class="flex items-center gap-2 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-700 dark:border-sky-400/30 dark:bg-sky-500/15 dark:text-sky-300">
                 <svg aria-hidden="true" class="h-4 w-4 shrink-0 text-sky-500 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />
@@ -676,15 +676,15 @@
         </div>
         <div class="flex justify-between border-t border-gray-200 pt-3 text-center dark:border-white/10">
             <div>
-                <div class="text-lg font-bold text-gray-900 dark:text-white">1,248</div>
+                <div class="text-lg font-bold text-gray-900 dark:text-white">800</div>
                 <div class="text-[10px] text-gray-500 dark:text-gray-400">Sent</div>
             </div>
             <div>
-                <div class="text-lg font-bold text-gray-900 dark:text-white">524</div>
+                <div class="text-lg font-bold text-gray-900 dark:text-white">336</div>
                 <div class="text-[10px] text-gray-500 dark:text-gray-400">Opens</div>
             </div>
             <div>
-                <div class="text-lg font-bold text-gray-900 dark:text-white">225</div>
+                <div class="text-lg font-bold text-gray-900 dark:text-white">144</div>
                 <div class="text-[10px] text-gray-500 dark:text-gray-400">Clicks</div>
             </div>
         </div>
@@ -736,7 +736,7 @@
         badge="Event Boost"
         heading="Amplify your events"
         lede="Turn any event into a live Facebook and Instagram ad. Set your budget, pick your audience, and launch in minutes. No ad manager required."
-        :chips="['Facebook & Instagram', 'Smart targeting', 'Real-time analytics']"
+        :chips="['Facebook & Instagram', 'Smart targeting', 'Reach, clicks and spend']"
         :flip="true"
         frame="phone"
         ground="gray">
@@ -759,7 +759,7 @@
             <div class="h-1.5 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
                 <div class="es-bar h-full w-3/5 rounded-full bg-gradient-to-r from-orange-400 to-amber-500" style="--bd: 0.15s;"></div>
             </div>
-            <div class="mt-1 text-[10px] font-medium text-amber-600 dark:text-amber-300">$50 / 7 days</div>
+            <div class="mt-1 text-[10px] font-medium text-amber-600 dark:text-amber-300">$60 / 7 days</div>
         </div>
         <div class="rounded-lg border border-gray-200 bg-gray-50 p-2 text-center dark:border-white/10 dark:bg-white/5">
             <div class="text-[10px] text-gray-500 dark:text-gray-400">Est. reach</div>
@@ -784,7 +784,7 @@
         badge="Fan Engagement"
         heading="Build community around events"
         lede="Fans and attendees can add YouTube videos and comments to your events, including on individual agenda items. All submissions need your approval before they go live."
-        :chips="['YouTube videos', 'Comments', 'Community', 'Organizer approval', 'Per-segment feedback']"
+        :chips="['YouTube videos', 'Comments', 'Community', 'Organizer approval', 'Per agenda item']"
         :lead="true"
         frame="phone"
         ground="white">
@@ -820,8 +820,8 @@
         accent="blue"
         badge="Event Polls"
         heading="Let your audience decide"
-        lede="Add polls to any event. Guests vote on multiple choice questions and see real-time results. A simple way to boost engagement."
-        :chips="['Multiple choice', 'One vote per user', 'Real-time results']"
+        lede="Add polls to any event. Signed-in guests mark one choice, and the count comes back the moment they vote. A simple way to boost engagement."
+        :chips="['Multiple choice', 'One vote per account', 'Results on vote']"
         :flip="true"
         ground="gray">
         <x-slot name="badgeIcon">
@@ -946,8 +946,8 @@
         accent="teal"
         badge="Custom Domains"
         heading="Your domain, your brand"
-        lede="Use your own domain name for your schedule. Automatic SSL included, no technical setup required."
-        :chips="['Automatic SSL', 'Branded URLs']"
+        lede="Use your own domain name for your schedule. Point one DNS record at us and the certificate is issued automatically."
+        :chips="['Automatic SSL', 'Branded URLs', 'Enterprise plan']"
         :lead="true"
         frame="browser"
         frame-url="events.myband.com"
@@ -1024,8 +1024,8 @@
         accent="cyan"
         badge="Team Scheduling"
         heading="Collaborate together"
-        lede="Invite team members via email, assign roles, and manage events together."
-        :chips="['Invite members', 'Custom permissions']"
+        lede="Invite people by email as admins or viewers and run the schedule together. The free plan is a team of one; Enterprise goes up to five."
+        :chips="['Invite by email', 'Owner, admin, viewer']"
         ground="white">
         <x-slot name="badgeIcon">
             <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1053,7 +1053,7 @@
                 <div class="min-w-0 flex-1">
                     <div class="truncate text-sm font-medium text-gray-600 dark:text-gray-300">Bob Jones</div>
                 </div>
-                <span class="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">Follower</span>
+                <span class="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">Viewer</span>
             </div>
         </div>
     </x-marketing.feature-banner>
@@ -1129,7 +1129,7 @@
                 'href' => route('marketing.availability'),
                 'aria' => 'Learn more about availability management',
                 'title' => 'Availability',
-                'desc' => 'Track which days your whole team is free before you commit to a booking.',
+                'desc' => 'Everyone on a talent schedule marks the dates they cannot play, and the whole team sees the marks.',
                 'chip' => 'bg-teal-100 dark:bg-teal-500/20',
                 'text' => 'text-teal-600 dark:text-teal-400',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />',
@@ -1236,15 +1236,15 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule really free?',
-                'a' => 'Yes. Unlimited events, unlimited schedules, calendar sync, free registration with capacity limits, analytics and newsletters are all included on the free plan, with no time limit and no credit card required.',
+                'a' => 'Yes. Unlimited events, unlimited schedules, calendar sync, free registration with capacity limits, analytics and QR check-in at the door are all included on the free plan, with no time limit and no credit card required. Two things are metered rather than unlimited: newsletters reach 10 recipients a month, and you can sell up to 25 paid tickets a month.',
             ],
             [
                 'q' => 'Do you take a cut of ticket sales?',
-                'a' => 'No. Event Schedule charges zero platform fees on tickets. You connect your own Stripe account and payouts go straight to you, so the only deduction is Stripe processing.',
+                'a' => 'No. Event Schedule charges zero platform fees on tickets, on every plan including free. You connect your own Stripe account and payouts go straight to you, so the only deduction is Stripe processing. The free plan caps volume at 25 paid tickets a month rather than taking a cut; Pro removes the cap.',
             ],
             [
                 'q' => 'Can I use my own domain?',
-                'a' => 'Yes. Custom domains are available on the Enterprise plan. SSL certificates are issued automatically and no DNS expertise is required.',
+                'a' => 'Yes. Custom domains are available on the Enterprise plan. You add one CNAME record at your registrar, and the SSL certificate is issued automatically once it resolves.',
             ],
             [
                 'q' => 'Can I run it on my own server?',

@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Webinars | Registration & Streaming</x-slot>
+    <x-slot name="title">Free Event Schedule for Webinars | Registration & Join Links</x-slot>
     <x-slot name="description">Host webinars with built-in registration, ticketing, direct attendee email, and a join link on any platform. Works with Zoom, Google Meet, or any link. Zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">For Webinars</x-slot>
 
@@ -43,7 +43,7 @@
             "Public listing shows the platform's domain, never the join link",
             "Free registration with a capacity limit counted per session date",
             "Registrants get their own registration page carrying the join link",
-            "Change notices emailed to everyone who registered, free RSVPs included",
+            "A change notice you approve before it emails everyone who registered, free RSVPs included",
             "A running order on the event built from agenda parts",
             "Weekly or monthly recurring series with skipped dates and a fixed end",
             "Zero platform fees on ticket sales through your own Stripe account",
@@ -84,7 +84,7 @@
                 "@type": "HowToStep",
                 "position": 3,
                 "name": "Go on air",
-                "text": "Everyone who registered gets their own registration page carrying the join link. Move the time or swap the link and they are all emailed."
+                "text": "Everyone who registered gets their own registration page carrying the join link. Swap the link and Event Schedule offers to email them all before it saves."
             }
         ]
     }
@@ -682,7 +682,7 @@
             ],
             [
                 'q' => 'Can I charge for webinars?',
-                'a' => 'Yes, and you can start on the free plan: 25 paid tickets a month, per schedule. Connect your own Stripe account, add as many named ticket types as the session needs, each with its own price, quantity and sales window, and Event Schedule charges zero platform fees on every plan. Stripe charges its own standard processing fee, approximately 2.9% plus $0.30 a transaction. Scanning a ticket\'s QR code is free on every plan, for the sessions you also run in a room. Pro at $5 a month takes the monthly ceiling off and adds the rest of the door tooling: the live check-in dashboard, the waitlist, promo codes and add-ons. Free registration with a capacity limit is unlimited and never counts against the 25.',
+                'a' => 'Yes, and you can start on the free plan: 25 paid tickets a month, per schedule. Connect your own Stripe account, add as many named ticket types as the session needs, each with its own price, quantity and sales window, and Event Schedule charges zero platform fees on every plan. Stripe charges its own standard processing fee, approximately 2.9% plus $0.30 a transaction. Scanning a ticket\'s QR code is free on every plan, for the sessions you also run in a room. Pro at $5 a month takes the monthly ceiling off and adds the rest of the door tooling: the live check-in dashboard, the sold-out ticket waitlist, promo codes and add-ons. Free registration with a capacity limit is unlimited and never counts against the 25.',
             ],
             [
                 'q' => 'Can I schedule a recurring webinar series?',
@@ -690,11 +690,11 @@
             ],
             [
                 'q' => 'Do people who registered find out if I move the session?',
-                'a' => 'Yes. Change the time, the date or the join link and everyone who registered is emailed the change, free registrations included, and the same goes out if you cancel. Followers are different: following your schedule puts somebody on a list you can email, and you write and send that newsletter yourself. Nothing is sent to followers automatically when you add a session.',
+                'a' => 'Yes, once you say so. Change the join link or the venue and Event Schedule stops on the way to saving and asks whether to email everyone who registered, with a short note you can write into it; cancelling asks the same way. On a one-off session moving the date or the time asks too, though on a recurring series the prompt covers the link and the venue rather than the weekly time. Free registrations are on the list either way. Followers are different: following your schedule puts somebody on a list you can email, and you write and send that newsletter yourself. Nothing is sent to followers automatically when you add a session.',
             ],
             [
                 'q' => 'Is Event Schedule free for hosting webinars?',
-                'a' => 'Yes. Unlimited webinars, the running order on each one, recurring series, free registration with a capacity limit, two-way calendar sync, the embeddable calendar and built-in analytics are all free forever, and so is selling your first 25 paid tickets a month and scanning those tickets in. Pro at $5 a month removes that ceiling and adds the live check-in dashboard, custom questions at checkout and the waitlist, extra team members are on Enterprise, and there are zero platform fees on ticket sales at every plan level. On the hosted service, attendee email goes out through your own SMTP details, which you add once in the integrations tab on any plan.',
+                'a' => 'Yes. Unlimited webinars, the running order on each one, recurring series, free registration with a capacity limit, two-way calendar sync, the embeddable calendar and built-in analytics are all free forever, and so is selling your first 25 paid tickets a month and scanning those tickets in. Pro at $5 a month removes that ceiling and adds the live check-in dashboard, custom questions on the registration form and the sold-out ticket waitlist, extra team members are on Enterprise, and there are zero platform fees on ticket sales at every plan level. On the hosted service, attendee email goes out through your own SMTP details, which you add once in the integrations tab on any plan.',
             ],
         ];
 
@@ -883,7 +883,7 @@
                     <div class="es-air-card p-6" data-reveal="panel">
                         <p class="es-air-label mb-3">03 &middot; Changed</p>
                         <h3 class="mb-2 text-lg font-bold es-air-rack-ink">When you move it</h3>
-                        <p class="es-air-rack-note text-sm">Edit the time, the date or the link and everyone who registered is emailed the change. Free registrations count, and cancelling sends the same way.</p>
+                        <p class="es-air-rack-note text-sm">Change the join link or the venue and Event Schedule stops on the way to saving to ask whether to email everyone who registered. Free registrations count, and cancelling asks the same way.</p>
                     </div>
                 </div>
 
@@ -1038,7 +1038,7 @@
                     </div>
 
                     <hr class="es-air-rule mt-5">
-                    <p class="es-air-rack-note mt-4 text-xs">Each segment is a named part with an optional start and end time, drag-reorderable. The bar is its share of the hour.</p>
+                    <p class="es-air-rack-note mt-4 text-xs">Each segment is a named part with an optional start and end time, moved up or down into order. The bar is its share of the hour.</p>
                 </div>
 
                 <div class="mt-6 grid gap-6 md:grid-cols-3" data-reveal-group="100">
@@ -1208,9 +1208,10 @@
                     <div class="es-air-card p-6" data-reveal="panel">
                         <div class="mb-2 flex flex-wrap items-center gap-2">
                             <h3 class="es-air-ink text-lg font-bold">When a session fills up</h3>
+                            <span class="es-air-plan">Free</span>
                             <span class="es-air-plan es-air-plan-pro">Pro</span>
                         </div>
-                        <p class="es-air-muted text-sm">Turn on the waitlist and people join it once the tickets are gone. If a place comes back, they are notified automatically.</p>
+                        <p class="es-air-muted text-sm">A free session that hits its cap turns its own form into a waitlist, on every plan; the waitlist behind sold-out paid tickets is the Pro one. Either way, when a place comes back the person who has waited longest is emailed automatically and has 24 hours to take it.</p>
                     </div>
                 </div>
             </div>
@@ -1271,7 +1272,7 @@
                                 <h3 class="es-air-ink text-xl font-bold">In the calendar you live in</h3>
                                 <span class="es-air-plan">Free</span>
                             </div>
-                            <p class="es-air-muted">Two-way sync with Google, Outlook and CalDAV. Move a session in either place and the other one follows.</p>
+                            <p class="es-air-muted">Two-way sync with Google, Outlook and CalDAV. Move a session in either place and the other one follows. A recurring series syncs across as one entry; the subscribe feed is what unrolls the individual dates.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1288,7 +1289,7 @@
                                 <span class="es-air-plan es-air-plan-pro">Pro</span>
                             </div>
                             <p class="es-air-muted mb-4">Download a QR code for your schedule and put it on the last slide, so the people already watching can follow the series before they close the tab. That one costs nothing on any plan.</p>
-                            <p class="es-air-muted text-sm">On Pro you can also generate a share graphic from a session in a story, square, portrait or landscape crop. It is built from the event, so the title and the time are already correct. Built-in analytics, free on every plan, then show page views, devices and where the traffic came from, which is what they measure and nothing more.</p>
+                            <p class="es-air-muted text-sm">On Pro you can also generate one share graphic of your next sessions, up to twenty of them, in a story, square, portrait or landscape crop. It is built from the sessions that carry their own image, so the titles and the times are already correct. Built-in analytics, free on every plan, then show page views, devices and where the traffic came from, which is what they measure and nothing more.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1443,7 +1444,7 @@
                 @foreach ([
                     ['03', 'Paste the link', 'Create the session, paste your meeting or streaming link into the Event URL field, and type the running order if it has segments.'],
                     ['02', 'Open registration', 'Free registration with a capacity limit, or named ticket types through your own Stripe account. Either way the platform fee is zero.'],
-                    ['01', 'Go on air', 'Everyone who registered has their own page with the join link. Move the time or swap the link and they are all emailed.'],
+                    ['01', 'Go on air', 'Everyone who registered has their own page with the join link. Swap the link and you are asked whether to email them all.'],
                 ] as [$stepNum, $stepTitle, $stepBody])
                     <div class="es-air-card p-7" data-reveal="panel">
                         <div class="es-air-accent es-air-num mb-3 text-3xl font-black">{{ $stepNum }}</div>

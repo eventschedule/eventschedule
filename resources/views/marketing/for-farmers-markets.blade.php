@@ -47,9 +47,9 @@
             "Sub-schedules that keep produce, bakery, flowers and the winter market on their own strands of one link",
             "An agenda on each market day for demos, music and workshops",
             "Free RSVP with a places limit, counted per market date",
-            "Pitch fees sold as ticket types, with stock counted per market date and QR check-in at the gate",
-            "Zero platform fees on sales through your own Stripe account",
-            "A downloadable QR code that turns a shopper at the stall into a follower",
+            "Pitch fees sold as ticket types, with stock counted per market date and free QR scanning at the gate",
+            "Zero platform fees on sales through your own Stripe account, on every plan",
+            "A downloadable QR code that puts your market page in a shopper's hand, one tap from following",
             "Newsletters you write and send to the people who follow the market",
             "Two-way Google, Outlook and CalDAV calendar sync",
             "An embeddable calendar for the website you already have"
@@ -97,7 +97,8 @@
                schedules will be automatically approved"), which is why
                the table has exactly two states and no others.
              - Market morning is event parts (EventPart: name,
-               start_time, end_time, sort_order), free.
+               description, start_time, end_time, sort_order), free,
+               which is why each line in the mock carries a note.
 
            COLOUR: the page's existing lime-into-leaf family, kept but
            pulled much darker on light grounds so it can carry text.
@@ -465,6 +466,15 @@
     </style>
 
     @php
+        // Prices come from config, never hard-coded: an env override used to
+        // silently desync the marketing copy from what billing actually charges.
+        $proMonthly = (int) config('services.stripe_platform.price_monthly_amount', 5);
+
+        // The free paid-ticket allowance, straight from the setting the app
+        // enforces in Role::ticketSaleLimit(). Selling is FREE up to this many
+        // paid tickets a month per schedule; Pro removes the ceiling.
+        $freeTicketCap = (int) config('usage.ticket_sale_monthly_limit_free', 25);
+
         // ONE season, written down once. Every figure the page states is
         // derived from this, so the strip and the prose cannot drift apart.
         // Saturdays from opening day to closing day, grouped by month; each
@@ -515,7 +525,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for farmers markets?',
-                'a' => 'Yes. The whole season is free forever: a recurring market day with a closing date, date exceptions for the Saturdays you lose to weather, sub-schedules for produce, bakery, flowers and the winter market, an agenda on each market day, free RSVP with a places limit, a downloadable QR code that turns a shopper into a follower, built-in analytics, two-way Google, Outlook and CalDAV sync, and an embeddable calendar. Newsletters are free too, at ten emails a month counted one per recipient, and go up to a hundred on Pro and a thousand on Enterprise. Selling pitch fees or tickets is on the Pro plan at $5 a month, and Event Schedule takes zero platform fees on what you sell.',
+                'a' => 'Yes. The whole season is free forever: a recurring market day with a closing date, date exceptions for the Saturdays you lose to weather, sub-schedules for produce, bakery, flowers and the winter market, an agenda on each market day, free RSVP with a places limit, a downloadable QR code that puts your market page in a shopper\'s hand, built-in analytics, two-way Google, Outlook and CalDAV sync, and an embeddable calendar. Newsletters are free too, at ten emails a month counted one per recipient, and go up to a hundred on Pro and a thousand on Enterprise. Selling is free as well, for the first '.$freeTicketCap.' paid tickets a month, with zero platform fees on what you sell; Pro at $'.$proMonthly.' a month takes that ceiling off.',
             ],
             [
                 'q' => 'How do I set up a whole market season at once?',
@@ -523,7 +533,7 @@
             ],
             [
                 'q' => 'What happens when a market day is rained off?',
-                'a' => 'Take that single date out of the recurrence as a date exception and it comes off the listing, leaving the rest of the season untouched. Being straight about what shoppers see: the date is simply absent rather than crossed out with a notice, so if you want to explain why, that is a newsletter or a note on the market page. You can also put a one-off date back in the same way, for a bank holiday Monday market.',
+                'a' => 'Take that single date out of the recurrence as a date exception and it comes off the listing, leaving the rest of the season untouched. Being straight about what shoppers see: the date is simply absent rather than crossed out with a notice, so if you want to explain why, that is a newsletter or a note on the market page. The same panel has an include list that puts a one-off date on, for a bank holiday Monday market.',
             ],
             [
                 'q' => 'Can traders put themselves forward for a market day?',
@@ -531,11 +541,11 @@
             ],
             [
                 'q' => 'Can I charge for pitches and take the money online?',
-                'a' => 'Yes, on the Pro plan. A pitch fee is a named ticket type with its own price and stock, and the stock is counted per market date, so a full Saturday does not stop the following Saturday selling. Ask what you need to know at checkout, such as whether they need power or how long the van is, then scan the QR code at the gate on market morning. Sales go through your own Stripe account and Event Schedule charges no platform fee on top.',
+                'a' => 'Yes, and the first '.$freeTicketCap.' paid tickets a month are on the free plan. A pitch fee is a named ticket type with its own price and stock, and the stock is counted per market date, so a full Saturday does not stop the following Saturday selling. Scanning the QR code at the gate on market morning is free too. Pro at $'.$proMonthly.' a month lifts the monthly ceiling and adds the live check-in dashboard and your own questions at checkout, such as whether they need power or how long the van is. Sales go through your own Stripe account and Event Schedule charges no platform fee on top.',
             ],
             [
                 'q' => 'How do shoppers hear about the market?',
-                'a' => 'They follow the market, and you email them. Your schedule has a QR code you can download and print on the A-board, the pitch sign or the tote bags, so somebody standing in front of you becomes a follower in one scan. Nothing is sent automatically: when you have something worth saying, a new trader or the first strawberries, you write a newsletter and send it. You can also embed the calendar on the website you already have, and shoppers can add market days to their own Google, Outlook or Apple calendar.',
+                'a' => 'They follow the market, and you email them. Your schedule has a QR code you can download and print on the A-board, the pitch sign or the tote bags, so somebody standing in front of you is one scan and one tap from following. Nothing is sent automatically: when you have something worth saying, a new trader or the first strawberries, you write a newsletter and send it. You can also embed the calendar on the website you already have, and shoppers can add market days to their own Google, Outlook or Apple calendar.',
             ],
             [
                 'q' => 'Can I run a separate winter or evening market?',
@@ -675,7 +685,7 @@
                     Opening day, closing day, and <span class="es-mkt-grad">every Saturday between</span>.
                 </h2>
                 <p class="es-mkt-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Three settings turn one event into a whole season, and all three are on the free plan.
+                    Three choices turn one event into a whole season, and all three are on the free plan.
                 </p>
             </div>
 
@@ -723,7 +733,7 @@
                     <ul class="space-y-4" data-reveal-group="90">
                         @foreach ([
                             ['One date, not the season', 'A date exception removes a single occurrence. You are not rebuilding the recurrence and you are not deleting the market.'],
-                            ['Dates can go back in, too', 'The same setting adds a one-off date that is not on the usual day, for a bank holiday Monday market or a late-night in December.'],
+                            ['Dates can go back in, too', 'Next to it is an include list that adds a one-off date that is not on the usual day, for a bank holiday Monday market or a late-night in December.'],
                             ['What shoppers actually see', 'That Saturday is simply absent. There is no cancelled banner and no strike-through, so if the reason matters, send a newsletter or say it on the market page.'],
                         ] as [$rT, $rD])
                             <li class="flex items-start gap-3" data-reveal>
@@ -931,7 +941,7 @@
                         <div class="es-tilt-inner es-mkt-card overflow-hidden p-6 sm:p-7">
                             <div class="mb-1 flex flex-wrap items-baseline justify-between gap-2">
                                 <h3 class="es-mkt-ink text-lg font-bold">Pitch fee</h3>
-                                <span class="es-mkt-plan es-mkt-plan-pro">Pro</span>
+                                <span class="es-mkt-plan es-mkt-plan-free">Free</span>
                             </div>
                             <p class="es-mkt-muted mb-5 text-sm">A named ticket type with a price and a stock, counted per market date.</p>
 
@@ -952,7 +962,8 @@
 
                             <p class="es-mkt-muted mt-5 es-mkt-hr pt-4 text-xs">
                                 A full Saturday does not stop the following Saturday selling. Each market
-                                date keeps its own count.
+                                date keeps its own count. The free plan sells {{ $freeTicketCap }} paid
+                                tickets a month, so thirty pitches every week is a Pro market.
                             </p>
 
                             <div class="es-glare" aria-hidden="true"></div>
@@ -965,7 +976,7 @@
                     <div class="es-mkt-corner mb-6" data-reveal aria-hidden="true"><span>05</span></div>
                     <p class="es-mkt-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Pitch fees</p>
                     <h2 class="es-balance es-mkt-ink mb-6 text-3xl font-black leading-tight tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                        Take the pitch fee online. <span class="es-mkt-grad">Keep all of it</span>.
+                        Take the pitch fee online. <span class="es-mkt-grad">We take none of it</span>.
                     </h2>
                     <p class="es-mkt-muted mb-8 max-w-xl text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
                         No envelope of notes and no chasing anybody in the car park. Sales run through
@@ -975,15 +986,19 @@
 
                     <div class="space-y-3" data-reveal-group="90">
                         @foreach ([
-                            ['Counted per market date', 'Thirty pitches means thirty on that date. Sell out on a Saturday in June and the rest of the season is unaffected.'],
-                            ['Ask while they pay', 'Attach your own questions to the pitch fee: power, van length, insurance number. The answers arrive with the payment instead of in a separate thread.'],
-                            ['Scan them in', 'Every buyer gets a QR code, and you scan it at the entrance to the square. The check-in dashboard shows who is in as the morning goes on.'],
-                            ['Sell tickets too, if you need to', 'A ticketed cooking class or a harvest supper works the same way, with the same zero platform fee.'],
-                        ] as [$pT, $pD])
+                            ['Counted per market date', false, 'Thirty pitches means thirty on that date. Sell out on a Saturday in June and the rest of the season is unaffected.'],
+                            ['Ask while they pay', true, 'Attach your own questions to the pitch fee: power, van length, insurance number. The answers arrive with the payment instead of in a separate thread.'],
+                            ['Scan them in', false, 'Every buyer gets a QR code, and scanning it at the entrance to the square costs nothing. The live check-in dashboard, counting who is in as the morning goes on, is the Pro half.'],
+                            ['Sell tickets too, if you need to', false, 'A ticketed cooking class or a harvest supper works the same way, out of the same monthly allowance and with the same zero platform fee.'],
+                        ] as [$pT, $pIsPro, $pD])
                             <div class="es-mkt-card es-mkt-hover p-4" data-reveal>
                                 <div class="flex flex-wrap items-center gap-2">
                                     <p class="es-mkt-ink text-sm font-bold">{{ $pT }}</p>
-                                    <span class="es-mkt-plan es-mkt-plan-pro">Pro</span>
+                                    @if ($pIsPro)
+                                        <span class="es-mkt-plan es-mkt-plan-pro">Pro</span>
+                                    @else
+                                        <span class="es-mkt-plan es-mkt-plan-free">Free</span>
+                                    @endif
                                 </div>
                                 <p class="es-mkt-muted mt-1 text-sm">{{ $pD }}</p>
                             </div>
@@ -991,8 +1006,9 @@
                     </div>
 
                     <p class="es-mkt-muted mt-7 text-sm" data-reveal>
-                        Selling is the Pro plan at $5 a month. Publishing the season, taking submissions
-                        and free RSVP places are not.
+                        Selling is free for your first {{ $freeTicketCap }} paid tickets a month, and Pro
+                        at ${{ $proMonthly }} a month has no ceiling at all. Publishing the season, taking
+                        submissions and free RSVP places never count against it.
                     </p>
                 </div>
             </div>
@@ -1062,7 +1078,7 @@
                 <div>
                     <div class="space-y-3" data-reveal-group="90">
                         @foreach ([
-                            ['Print the code once', 'Every schedule has a QR code you can download as an image and put on the A-board, the pitch signs or the tote bags. One scan and they are on your list.'],
+                            ['Print the code once', 'Every schedule has a QR code you can download as an image and put on the A-board, the pitch signs or the tote bags. One scan opens your market page, and Follow is a tap from there.'],
                             ['You write the email', 'Nothing goes out on its own. When there is something worth saying, a new cheesemaker or the first strawberries, you write a newsletter and send it.'],
                             ['Ten a month, free', 'The free plan covers ten newsletter emails a month, counted one per recipient. Pro is a hundred and Enterprise is a thousand.'],
                             ['No algorithm in the middle', 'A market page and an email list are yours. Nobody decides how many of your shoppers get to see that you are open this week.'],
@@ -1203,7 +1219,7 @@
                 @foreach ([
                     ['01', 'Set the season', 'The market name, the square, the days of the week and the hours. Then give the recurrence a closing date so it stops on its own.'],
                     ['02', 'Open the pitch list', 'Turn on submissions, write your pitch terms, and name your regulars as approved schedules. Everybody else waits for you.'],
-                    ['03', 'Print the code', 'Download your QR code, put it on the A-board, and start a list of shoppers you can email without asking anybody\'s permission.'],
+                    ['03', 'Print the code', 'Download your QR code, put it on the A-board, and start a list of shoppers who tapped Follow, yours to email with no algorithm in the middle.'],
                 ] as [$hN, $hT, $hD])
                     <div class="es-mkt-card p-7" data-reveal="panel">
                         <p class="es-mkt-accent es-mkt-num mb-3 text-sm font-bold">{{ $hN }}</p>
@@ -1346,8 +1362,9 @@
                         Put the whole season up <span class="es-mkt-grad">before opening day</span>.
                     </h2>
                     <p class="es-mkt-muted mx-auto mb-10 max-w-xl text-lg sm:text-xl">
-                        The season, the pitch list and the email list cost nothing. Selling pitches is
-                        five dollars a month, and none of it comes to us.
+                        The season, the pitch list and the email list cost nothing, and so do your first
+                        {{ $freeTicketCap }} paid tickets a month. Unlimited selling is ${{ $proMonthly }}
+                        a month, and none of what you take at the gate comes to us.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

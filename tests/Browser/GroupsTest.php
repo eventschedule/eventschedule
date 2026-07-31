@@ -18,6 +18,19 @@ class GroupsTest extends DuskTestCase
     use DatabaseTruncation;
 
     /**
+     * The date every event in this test is created on. Resolved once per test so event creation
+     * and the guest assertions can never disagree, even if the run crosses midnight.
+     */
+    protected string $eventDate;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->eventDate = date('Y-m-d', strtotime('+7 days'));
+    }
+
+    /**
      * Test sub-schedules functionality:
      * 1. User can create sub-schedules in their role
      * 2. They can create events and assign them to a sub-schedule
@@ -151,7 +164,7 @@ class GroupsTest extends DuskTestCase
         $workshops = $role->groups()->where('name', 'Workshops')->first();
 
         // Create first event for "Main Shows" sub-schedule
-        $browser->visit('/talent/add-event?date='.date('Y-m-d', strtotime('+7 days')))
+        $browser->visit('/talent/add-event?date='.$this->eventDate)
             ->waitFor('#event_name', 15)
             ->pause(1000);
 
@@ -198,7 +211,7 @@ class GroupsTest extends DuskTestCase
         $eventRole->save();
 
         // Create second event for "Workshops" sub-schedule
-        $browser->visit('/talent/add-event?date='.date('Y-m-d', strtotime('+7 days')))
+        $browser->visit('/talent/add-event?date='.$this->eventDate)
             ->waitFor('#event_name', 15)
             ->pause(1000);
 
@@ -245,7 +258,7 @@ class GroupsTest extends DuskTestCase
         $eventRole->save();
 
         // Create third event without sub-schedule
-        $browser->visit('/talent/add-event?date='.date('Y-m-d', strtotime('+7 days')))
+        $browser->visit('/talent/add-event?date='.$this->eventDate)
             ->waitFor('#event_name', 15)
             ->pause(1000);
 
@@ -281,32 +294,37 @@ class GroupsTest extends DuskTestCase
      */
     protected function testGuestViewFiltering(Browser $browser): void
     {
-        // Visit guest view - should show all events initially
-        $browser->visit('/talent')
-            ->waitForText('Talent', 5)
-            ->pause(1000);
+        // The guest calendar renders one month at a time, so the events only land in the default
+        // window when today and today+7d share a month - otherwise this passed for three weeks a
+        // month and failed for the rest. ?date= points the page at the month the events are in (it
+        // only sets month/year). Sub-schedule slugs resolve before any event-slug lookup, so the
+        // filtered URLs below are unaffected by it.
+        $eventMonth = '?date='.$this->eventDate;
 
-        // Check that all events are visible initially
-        $browser->assertSee('Main Show Event')
+        // Visit guest view - should show all events initially. The calendar is loaded over Ajax,
+        // so wait for the first event rather than asserting after a fixed pause.
+        $browser->visit('/talent'.$eventMonth)
+            ->waitForText('Talent', 5)
+            ->waitForText('Main Show Event', 15)
             ->assertSee('Workshop Event')
             ->assertSee('General Event');
 
         // Test filtering by "Main Shows" sub-schedule by visiting the filtered URL
-        $browser->visit('/talent/main-shows')
+        $browser->visit('/talent/main-shows'.$eventMonth)
             ->waitForText('Talent', 5)
             ->waitForText('Main Show Event', 10)
             ->assertDontSee('Workshop Event')
             ->assertDontSee('General Event');
 
         // Test filtering by "Workshops" sub-schedule by visiting the filtered URL
-        $browser->visit('/talent/workshops')
+        $browser->visit('/talent/workshops'.$eventMonth)
             ->waitForText('Talent', 5)
             ->waitForText('Workshop Event', 10)
             ->assertDontSee('Main Show Event')
             ->assertDontSee('General Event');
 
         // Test "All Schedules" filter by visiting the base URL again
-        $browser->visit('/talent')
+        $browser->visit('/talent'.$eventMonth)
             ->waitForText('Talent', 5)
             ->waitForText('Main Show Event', 10)
             ->waitForText('Workshop Event', 10)
@@ -446,7 +464,7 @@ class GroupsTest extends DuskTestCase
      */
     protected function createEventNamed(Browser $browser, string $eventName): void
     {
-        $browser->visit('/talent/add-event?date='.date('Y-m-d', strtotime('+7 days')))
+        $browser->visit('/talent/add-event?date='.$this->eventDate)
             ->waitFor('#event_name', 15)
             ->pause(1000);
 

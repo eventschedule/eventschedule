@@ -44,11 +44,11 @@
             "Free RSVP sign-up with an optional capacity, counted afresh for every date",
             "Hall-hire requests that stay pending until you accept them",
             "Public program calendar with an embeddable iframe",
-            "Two-way Google, Outlook and CalDAV calendar sync, plus iCal download",
+            "Two-way Google, Outlook and CalDAV calendar sync, plus a subscribable iCal feed that unrolls every date",
             "A downloadable QR code that opens your calendar",
             "Direct newsletters to the people who follow the center",
-            "Ticketed classes through your own Stripe account with zero platform fees",
-            "QR check-in at the door",
+            "Ticketed classes through your own Stripe account with zero platform fees, 25 paid tickets a month on the free plan",
+            "QR ticket scanning at the door on every plan",
             "Member photos and comments on events, held in an approval queue (25 photos on the free plan)",
             "Online events with the link people join on"
         ],
@@ -126,6 +126,22 @@
            hall-hire mocks - an Event has no room, space or headcount
            field, so nothing here may render one. And the 25-photo free-tier
            cap on fan photos is now stated wherever the photos claim is.
+
+           SECOND-WAVE CORRECTIONS. Selling tickets is NOT Pro: the free plan
+           sells 25 paid tickets a month per schedule (Role::ticketSaleLimit,
+           config/usage.php), with zero platform fees on every plan, so the
+           "paid class" panel, its closing line and two FAQ answers said the
+           wrong tier. Pro removes the ceiling and adds the extras that ARE
+           gated (passes and promo codes are scrubbed in EventRepo::saveEvent,
+           the waitlist and the sales CSV export and custom fields each carry
+           their own isPro check). Door-scanning is free on every plan
+           (TicketController::scan has no plan check); only the live check-in
+           dashboard is Pro, so the schema featureList no longer says
+           "check-in". And no RRULE is emitted anywhere in app/: Google,
+           Outlook and CalDAV each receive one instance built from
+           getStartDateTime(), so a weekly program syncs as ONE entry. Only the
+           iCal feed unrolls the dates (FeedController::icalFeed walks 90 days
+           and writes a VEVENT per match), which the sync copy now says.
 
            COLOUR. Kept the page's existing teal family with its warm
            terracotta second, re-inked to measure. Distinctiveness comes
@@ -587,7 +603,7 @@
             ],
             [
                 'On the calendar they already check',
-                'Two-way sync with Google, Outlook and CalDAV, and an iCal download for a single date. A program lands where somebody will actually see it.',
+                'Two-way sync with Google, Outlook and CalDAV puts an event on the calendar you already keep, one entry each, so a weekly program lands once. The iCal feed anyone can subscribe to is the one that unrolls every date.',
                 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
             ],
             [
@@ -610,7 +626,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for community centers?',
-                'a' => 'Yes, and most of what a center needs is on the free plan: the public program calendar and its own link, recurring programs with date exceptions, sub-schedules, free RSVP sign-up with an optional capacity, the embeddable calendar, two-way Google, Outlook and CalDAV sync, iCal downloads, the downloadable QR code, built-in analytics, member photos and comments with an approval queue (25 photos on the free plan), and 10 newsletter emails a month. Newsletter allowances count each recipient as one email, so ten emails means ten people; Pro raises it to 100 a month and Enterprise to 1,000. Selling tickets for a paid class is on the Pro plan at $5 a month, and Event Schedule charges zero platform fees on the sale.',
+                'a' => 'Yes, and most of what a center needs is on the free plan: the public program calendar and its own link, recurring programs with date exceptions, sub-schedules, free RSVP sign-up with an optional capacity, the embeddable calendar, two-way Google, Outlook and CalDAV sync, iCal downloads, the downloadable QR code, built-in analytics, member photos and comments with an approval queue (25 photos on the free plan), and 10 newsletter emails a month. Newsletter allowances count each recipient as one email, so ten emails means ten people; Pro raises it to 100 a month and Enterprise to 1,000. Even selling a paid class is free, up to 25 paid tickets a month per schedule, and Event Schedule charges zero platform fees on the sale whatever plan you are on. Pro at $5 a month lifts that ceiling.',
             ],
             [
                 'q' => 'Can I organize classes, meetings, and events by category?',
@@ -618,11 +634,11 @@
             ],
             [
                 'q' => 'How do community members stay informed about programs?',
-                'a' => 'Through as many doors as you care to open, and all of them are yours to trigger. People follow the center and you write to them when there is something to say - you compose the newsletter and press send, nothing is emailed automatically. The calendar embeds into the website you already have. It syncs both ways with Google, Outlook and CalDAV, so a program can land on a phone. And your schedule has a QR code you can download and print for the board in the lobby.',
+                'a' => 'Through as many doors as you care to open, and all of them are yours to trigger. People follow the center and you write to them when there is something to say - you compose the newsletter and press send, nothing is emailed automatically. The calendar embeds into the website you already have. It syncs both ways with Google, Outlook and CalDAV, one entry per event, and the schedule also publishes an iCal feed that unrolls every date of a weekly program for anyone who subscribes to it. And your schedule has a QR code you can download and print for the board in the lobby.',
             ],
             [
                 'q' => 'Can we handle event registration and payments?',
-                'a' => 'Yes. Free sign-up with an optional capacity is on the free plan, and the capacity is counted per date, so a full Monday session does not stop the following Monday filling up. For a paid class, connect your own Stripe account on the Pro plan: the money goes to you, Event Schedule takes no cut, and every ticket carries a QR code you can scan at the door. You can also ask your own questions at checkout, and sell one pass that covers a whole term of a class.',
+                'a' => 'Yes. Free sign-up with an optional capacity is on the free plan, and the capacity is counted per date, so a full Monday session does not stop the following Monday filling up. For a paid class, connect your own Stripe account: the money goes to you, Event Schedule takes no cut, and every ticket carries a QR code you can scan at the door on any plan. The free plan sells 25 paid tickets a month per schedule, and free sign-ups are never counted against that. Pro lifts the ceiling and adds the extras: asking your own questions at checkout, and selling one pass that covers a whole term of a class.',
             ],
             [
                 'q' => 'Can outside groups request the hall?',
@@ -882,12 +898,12 @@
                                     <div class="es-gather-slip p-4">
                                         <span class="es-gather-slip-day mb-1">Pending</span>
                                         <span class="es-gather-slip-title block text-sm">Scout Troop 42 meeting</span>
-                                        <span class="es-gather-slip-sub mt-1 block">Wed 22 Oct, 6:30pm to 8:00pm</span>
+                                        <span class="es-gather-slip-sub mt-1 block">Wed 23 Oct, 6:30pm to 8:00pm</span>
                                     </div>
                                     <div class="es-gather-slip p-4">
                                         <span class="es-gather-slip-day mb-1">Pending</span>
                                         <span class="es-gather-slip-title block text-sm">Allotment Society AGM</span>
-                                        <span class="es-gather-slip-sub mt-1 block">Sat 25 Oct, 10:00am to noon</span>
+                                        <span class="es-gather-slip-sub mt-1 block">Sat 26 Oct, 10:00am to noon</span>
                                     </div>
                                 </div>
                             </div>
@@ -1003,12 +1019,13 @@
                 <div class="es-gather-card es-gather-hover flex h-full flex-col p-7" data-reveal="panel">
                     <div class="mb-4 flex flex-wrap items-center gap-2">
                         <h3 class="es-gather-ink text-xl font-bold">The paid class</h3>
-                        <span class="es-gather-plan es-gather-plan-pro">Pro</span>
+                        <span class="es-gather-plan es-gather-plan-free">Free to 25 a month</span>
                     </div>
                     <p class="es-gather-muted mb-6">
                         Pottery costs money to run, so it costs money to join. Connect your own Stripe
                         account and the money lands in it. Event Schedule charges zero platform fees, so
-                        past what Stripe takes for processing, the fee is yours.
+                        past what Stripe takes for processing, the fee is yours. The free plan sells 25
+                        paid tickets a month per schedule, and Pro lifts the ceiling.
                     </p>
 
                     <div class="es-gather-sub mb-6 p-5" aria-hidden="true">
@@ -1021,14 +1038,14 @@
                                 </div>
                             @endforeach
                         </div>
-                        <p class="es-gather-muted mt-3 text-xs">A pass is one purchase valid across every date of the class, once each.</p>
+                        <p class="es-gather-muted mt-3 text-xs">A pass is one purchase valid across every date of the class, once each. Passes are a Pro option.</p>
                     </div>
 
                     <ul class="mt-auto space-y-2">
                         @foreach ([
-                            'Every ticket carries a QR code you scan at the door.',
-                            'Ask your own questions at checkout, so the answers arrive with the sale.',
-                            'Discount codes, a waitlist when a class fills, and a CSV of the whole list.',
+                            'Every ticket carries a QR code you scan at the door, on any plan.',
+                            'Passes, discount codes and a waitlist when a class fills are Pro.',
+                            'So are your own questions at checkout and a CSV of the whole list.',
                         ] as $pItem)
                             <li class="es-gather-muted flex items-start gap-2 text-sm">
                                 <svg aria-hidden="true" class="es-gather-accent mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -1040,8 +1057,10 @@
             </div>
 
             <p class="es-gather-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
-                Ticketed classes are on the Pro plan at $5 a month. Free sign-up with a capacity is not,
-                and for a lot of centers that is the whole requirement.
+                <span class="es-gather-plan es-gather-plan-pro">Pro</span>
+                <span class="ms-2">At $5 a month Pro lifts the 25-a-month ceiling on paid tickets and adds
+                passes, discount codes, the waitlist and the sales CSV. Free sign-up with a capacity is
+                never counted against that number, and for a lot of centers that is the whole requirement.</span>
             </p>
         </div>
     </section>

@@ -42,7 +42,7 @@
             "Free registration with a capacity limit counted per session date",
             "Confirmation email carrying your own registration notes",
             "Agenda segments with their own start and end times",
-            "Polls on a session, with options your audience can suggest",
+            "Polls on a session, with options your audience can suggest (Pro plan)",
             "Comments on a session or on a single agenda segment, held for approval",
             "One join link for Zoom, Google Meet, Microsoft Teams or YouTube Live",
             "Recurring office hours with date exceptions and an end",
@@ -628,7 +628,7 @@
             ],
             [
                 'q' => 'Do my followers get an email when I schedule a new session?',
-                'a' => 'No, and no page here will tell you otherwise. Nothing is sent to your audience automatically. You write a newsletter and send it when you have something to say, with 10 recipients a month on the free plan, 100 on Pro and 1,000 on Enterprise, counted per recipient rather than per send. The automatic emails run the other way: you are the one who gets notified when somebody suggests a poll option or leaves a comment waiting for approval.',
+                'a' => 'No, and no page here will tell you otherwise. Nothing is sent to your audience automatically. You write a newsletter and send it when you have something to say, with 10 recipients a month on the free plan, 100 on Pro and 1,000 on Enterprise, counted per recipient rather than per send. The automatic emails run the other way, and even those are opt-in: you switch on a notification to yourself for when somebody suggests a poll option or leaves a comment waiting for approval.',
             ],
             [
                 'q' => 'Can I cap how many people join?',
@@ -907,7 +907,7 @@
                                     </div>
                                 </div>
                                 <p class="es-conv-muted mt-4 text-xs">
-                                    Results appear once somebody has voted: one vote each, from a signed-in account, counted per date. Close the poll and the results stay on the page. More on <a href="{{ marketing_url('/features/polls') }}" class="es-conv-link font-medium hover:underline">event polls</a>.
+                                    Results appear once you have voted: one vote each, from a signed-in account, counted per date. Close the poll and the results are on the page for everyone. More on <a href="{{ marketing_url('/features/polls') }}" class="es-conv-link font-medium hover:underline">event polls</a>.
                                 </p>
                             </div>
 
@@ -933,7 +933,7 @@
                                     Turn on suggestions and you can also require your approval, so a suggested option waits here until you accept it. Ten options is the ceiling, pending ones included.
                                 </p>
                                 <p class="es-conv-muted mt-3 text-sm">
-                                    You get an email when suggestions are waiting. That is the direction the notifications run on this platform: toward the host.
+                                    The Polls tab always carries a count of what is waiting. The email about it is a toggle you switch on, and on the hosted plan that one sends through your own email settings. Either way, the notifications run toward the host.
                                 </p>
                             </div>
                         </div>
@@ -944,14 +944,14 @@
                                     <h3 class="es-conv-ink text-lg font-bold">Comments, on the segment they are about</h3>
                                     <span class="es-conv-plan">Free</span>
                                 </div>
-                                <p class="es-conv-muted text-sm">Your audience can leave a comment on the session, or on one agenda segment, with just a name and an email. Nothing shows until you approve it, and you are emailed when submissions are waiting. A per-schedule toggle can require an account instead. More on <a href="{{ marketing_url('/features/fan-videos') }}" class="es-conv-link font-medium hover:underline">audience content</a>.</p>
+                                <p class="es-conv-muted text-sm">Your audience can leave a comment on the session, or on one agenda segment, with just a name and an email. Nothing shows until you approve it, and the pending count sits on the Fan Content tab; the email about it is a toggle you switch on. A per-schedule toggle can require an account instead. More on <a href="{{ marketing_url('/features/fan-videos') }}" class="es-conv-link font-medium hover:underline">audience content</a>.</p>
                             </div>
                             <div class="es-conv-card p-7" data-reveal="panel">
                                 <div class="mb-3 flex flex-wrap items-center gap-2">
                                     <h3 class="es-conv-ink text-lg font-bold">Or just ask by email</h3>
                                     <span class="es-conv-plan">Free</span>
                                 </div>
-                                <p class="es-conv-muted text-sm">The registration note goes to everyone who signed up. A newsletter goes to everyone who follows you, and a poll can be dropped into it with a button that votes on the session page.</p>
+                                <p class="es-conv-muted text-sm">The registration note goes to everyone who signed up. A newsletter goes to everyone who follows you, and once you are on Pro a poll can be dropped into it with a button that votes on the session page.</p>
                             </div>
                         </div>
 
@@ -1261,7 +1261,7 @@
                                 <h3 class="es-conv-ink text-xl font-bold">Ask how the hour went</h3>
                                 <span class="es-conv-plan es-conv-plan-pro">Pro</span>
                             </div>
-                            <p class="es-conv-muted">Post-event feedback collects a star rating and a comment from the people who were there, which is the quietest way to find out whether the hour was worth theirs.</p>
+                            <p class="es-conv-muted">Post-event feedback collects a star rating and a comment from the people who were there, which is the quietest way to find out whether the hour was worth theirs. On the hosted plan the request sends through your own email settings.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>

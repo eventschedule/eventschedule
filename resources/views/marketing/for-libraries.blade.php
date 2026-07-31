@@ -71,7 +71,7 @@
                 "@type": "HowToStep",
                 "position": 1,
                 "name": "Catalogue the program",
-                "text": "Add the program once as a recurring event: the days it runs, the room, the audience, and an end date or a number of sessions."
+                "text": "Add the program once as a recurring event: the days it runs, the sub-schedule it belongs to, and an end date or a number of sessions."
             },
             {
                 "@type": "HowToStep",
@@ -740,7 +740,7 @@
                         <dl class="es-cat-card-rule mt-4 space-y-1.5 pt-4 text-sm">
                             <div class="flex items-baseline justify-between gap-4">
                                 <dt class="es-cat-card-muted">Runs</dt>
-                                <dd class="es-cat-card-ink font-medium">Sep 1 to Jun 9, weekly</dd>
+                                <dd class="es-cat-card-ink font-medium">Tuesdays, from Sep 1</dd>
                             </div>
                             <div class="flex items-baseline justify-between gap-4">
                                 <dt class="es-cat-card-muted">Ends</dt>
@@ -758,9 +758,9 @@
 
                         <div class="es-cat-card-rule mt-4 pt-3">
                             <div class="es-cat-tracing flex flex-wrap items-center gap-x-4 gap-y-1">
-                                <span class="inline-flex items-center gap-1.5"><span class="es-cat-swatch" style="background-color: #8a4f0b;"></span>1. Children</span>
-                                <span class="inline-flex items-center gap-1.5"><span class="es-cat-swatch" style="background-color: #2f5d50;"></span>2. Under fives</span>
-                                <span class="inline-flex items-center gap-1.5"><span class="es-cat-swatch" style="background-color: #1f3a5f;"></span>3. Literacy</span>
+                                <span class="inline-flex items-center gap-1.5"><span class="es-cat-swatch" style="background-color: #8a4f0b;"></span>Children &middot; this card</span>
+                                <span class="inline-flex items-center gap-1.5"><span class="es-cat-swatch" style="background-color: #2f5d50;"></span>Teens</span>
+                                <span class="inline-flex items-center gap-1.5"><span class="es-cat-swatch" style="background-color: #1f3a5f;"></span>Adults</span>
                             </div>
                         </div>
 
@@ -769,7 +769,7 @@
                         </div>
                     </div>
                     <p class="es-cat-muted mx-auto mt-4 max-w-md text-center text-xs">
-                        One record. The tracings along the foot are its sub-schedules.
+                        One record, filed on one sub-schedule. The others are the strands a patron can filter the calendar down to.
                     </p>
                 </div>
             </div>
@@ -816,7 +816,7 @@
                 <div class="es-cat-panel p-7" data-reveal="panel">
                     <p class="es-cat-eyebrow mb-3">Main entry</p>
                     <h3 class="es-cat-ink mb-2 text-lg font-bold">The program itself</h3>
-                    <p class="es-cat-muted text-sm">Name, description, an image, the room it happens in and a map to the branch. Written once and it stands for every session.</p>
+                    <p class="es-cat-muted text-sm">Name, description, an image, the branch address and a map drawn from it. Written once and it stands for every session.</p>
                 </div>
                 <div class="es-cat-panel p-7" data-reveal="panel">
                     <p class="es-cat-eyebrow mb-3">Collation</p>
@@ -831,7 +831,7 @@
                 <div class="es-cat-panel p-7" data-reveal="panel">
                     <p class="es-cat-eyebrow mb-3">Tracings</p>
                     <h3 class="es-cat-ink mb-2 text-lg font-bold">Where else it appears</h3>
-                    <p class="es-cat-muted text-sm">One program can sit on more than one strand of the calendar, the way one card generated a subject card and an author card.</p>
+                    <p class="es-cat-muted text-sm">Attach the visiting author's own schedule and the program appears on their calendar as well as yours, the way one card generated a subject card and an author card.</p>
                 </div>
                 <div class="es-cat-panel p-7" data-reveal="panel">
                     <p class="es-cat-eyebrow mb-3">Not yet catalogued</p>
@@ -968,7 +968,7 @@
                     A branch week, <span class="es-cat-accent">as a record.</span>
                 </h2>
                 <p class="es-cat-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Seven programs, five sub-schedules, one link. Six of these rows cost nothing.
+                    Seven programs, four sub-schedules, one link. Six of these rows cost nothing.
                 </p>
             </div>
 
@@ -1020,7 +1020,7 @@
                     The Local History Talk is a Draft: on your calendar, not on the public one, until the speaker confirms. Sub-schedules colour-code and organise, so a Draft is how a program hides, not a strand.
                 </p>
                 <p class="es-cat-muted text-sm" data-reveal>
-                    The author reading charges $6, and the free plan still sells it: 25 paid tickets a month, no platform fee. Pro at $5 a month is what you buy when 90 seats will not fit inside 25. Everything free stays free: the free registration on the other five is not a trial.
+                    The author reading charges $6, and the free plan still sells it: 25 paid tickets a month, no platform fee. Pro at $5 a month is what you buy when 90 seats will not fit inside 25. Everything free stays free: the free registration on the other four is not a trial.
                 </p>
             </div>
         </div>
@@ -1048,11 +1048,11 @@
                         </li>
                         <li class="flex gap-3" data-reveal>
                             <svg aria-hidden="true" class="es-cat-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span>Groups you trust can be listed as pre-approved, so the regulars stop waiting on you.</span>
+                            <span>Community groups that run their own schedule can be listed as pre-approved, so the regulars stop waiting on you.</span>
                         </li>
                         <li class="flex gap-3" data-reveal>
                             <svg aria-hidden="true" class="es-cat-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span>The one email Event Schedule sends on its own goes to you: a note that requests are waiting.</span>
+                            <span>Event Schedule emails you when requests are waiting, so the queue is not something you have to remember to open.</span>
                         </li>
                         <li class="flex gap-3" data-reveal>
                             <svg aria-hidden="true" class="es-cat-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -1146,7 +1146,7 @@
                                 <h3 class="text-lg font-bold es-cat-band-ink">On the library website</h3>
                                 <span class="es-cat-plan">Free</span>
                             </div>
-                            <p class="text-sm es-cat-band-muted">Embed the calendar in the site you already have, and sync two ways with Google, Outlook or CalDAV so the branch calendar and this one never disagree.</p>
+                            <p class="text-sm es-cat-band-muted">Embed the calendar in the site you already have, and sync two ways with Google, Outlook or CalDAV. Worth knowing: a recurring program crosses to those calendars as a single entry, so it is the iCal feed, not the sync, that unrolls every Tuesday.</p>
                         </div>
                         <div class="es-cat-panel p-6" data-reveal="panel">
                             <div class="mb-2 flex flex-wrap items-center gap-2">
@@ -1232,7 +1232,7 @@
                                 <h3 class="es-cat-ink text-xl font-bold">Next year's summer reading</h3>
                                 <span class="es-cat-plan">Free</span>
                             </div>
-                            <p class="es-cat-muted">Clone last year's program and change the dates. The description, the room, the sub-schedule and the place limit come with it.</p>
+                            <p class="es-cat-muted">Clone last year's program and change the dates. The description, the recurrence with its date exceptions, the venue and the place limit all come with it.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1278,7 +1278,7 @@
                                 <h3 class="es-cat-ink text-xl font-bold">The poster for the noticeboard</h3>
                                 <span class="es-cat-plan es-cat-plan-pro">Pro</span>
                             </div>
-                            <p class="es-cat-muted">Generate a graphic from a program in a story, square, portrait or landscape crop. It is built from the record, so the title, the date and the time are already right.</p>
+                            <p class="es-cat-muted">Generate one graphic from your upcoming programs, up to twenty of them, in a story, square, portrait or landscape crop. Only programs carrying their own flyer image appear, and printing the date on each is a setting, off until you turn it on.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1420,7 +1420,7 @@
 
             <div class="grid grid-cols-1 gap-6 md:grid-cols-3" data-reveal-group="120">
                 @foreach ([
-                    ['01', 'Catalogue the program', 'Sign up as a venue schedule, add the branch, and enter the program once: the days it runs, the room, the audience, and an end date or a number of sessions.'],
+                    ['01', 'Catalogue the program', 'Sign up as a venue schedule, add the branch, and enter the program once: the days it runs, the sub-schedule it belongs to, and an end date or a number of sessions.'],
                     ['02', 'Take out the closed days', 'Add date exceptions for public holidays and training days, and add single extra dates for one-off sessions. Set up your sub-schedules for children, teens, adults and seniors.'],
                     ['03', 'Open the places', 'Turn on free registration with a place limit, embed the calendar on the library site, print the QR code, and email the patrons who follow you when there is news.'],
                 ] as [$stepNum, $stepTitle, $stepBody])

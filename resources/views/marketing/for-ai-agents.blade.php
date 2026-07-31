@@ -26,14 +26,14 @@
             "description": "REST API access is part of the Pro plan. Selfhosted installations include it at no cost."
         },
         "featureList": [
-            "27 REST endpoints across schedules, sub-schedules, events, categories, sales, feedback and fan content",
+            "27 REST endpoints across registration, schedules, sub-schedules, events, categories, sales, feedback and fan content",
             "OpenAPI 3.0 specification at /api/openapi.json",
             "llms.txt and llms-full.txt for LLM discovery",
             "agents.json describing four multi-step agent flows",
             "API key authentication through the X-API-Key header",
             "Recurring events with a seven-bit day-of-week mask and three ways to end",
             "Ticket types, agenda parts, members and a venue in the same create call",
-            "HMAC-SHA256 signed webhooks for ten event types",
+            "HMAC-SHA256 signed webhooks for twelve event types",
             "300 GET and 30 write requests per minute, per IP",
             "Encoded string IDs rather than sequential integers",
             "Zero platform fees on ticket sales"
@@ -455,14 +455,14 @@
             ['Auth', 'No key required. Each of these has its own throttle.', [
                 ['POST', '/api/register/send-code', 'Mail a six-digit verification code. Hosted mode only, five per address per hour.'],
                 ['POST', '/api/register', 'Create the account and return a key. Three per IP per hour.'],
-                ['POST', '/api/login', 'Return a fresh key. It replaces the previous one.'],
+                ['POST', '/api/login', 'Mint a key for an account that has none. A live key returns 409 instead.'],
             ]],
             ['Schedules', 'A schedule is the tenant: a venue, a talent or a curator.', [
                 ['GET', '/api/schedules', 'List the schedules you own or administer. Filter by name and by type.'],
                 ['GET', '/api/schedules/{subdomain}', 'One schedule, with its sub-schedules inlined.'],
                 ['POST', '/api/schedules', 'Create one. name and type are required; the subdomain is generated from the name.'],
-                ['PUT', '/api/schedules/{subdomain}', 'Change any field except the subdomain. Partial payloads are fine.'],
-                ['DELETE', '/api/schedules/{subdomain}', 'Remove it and everything under it. Owner level only, not admin.'],
+                ['PUT', '/api/schedules/{subdomain}', 'Name, contact, description, timezone, language, address. Partial payloads are fine.'],
+                ['DELETE', '/api/schedules/{subdomain}', 'Marks it deleted, so it and its pages go dark. Owner level only, not admin.'],
             ]],
             ['Sub-schedules', 'Named strands inside one schedule, each with its own colour.', [
                 ['GET', '/api/schedules/{subdomain}/groups', 'id, name, slug and colour for each sub-schedule.'],
@@ -471,7 +471,7 @@
                 ['DELETE', '/api/schedules/{subdomain}/groups/{group_id}', 'Events survive; their sub-schedule reference is cleared.'],
             ]],
             ['Events', 'The big one. Tickets, agenda parts, members and recurrence all ride along.', [
-                ['GET', '/api/events', 'Paginated, newest first. Nine filters, including tickets_enabled and rsvp_enabled.'],
+                ['GET', '/api/events', 'Paginated, newest first. Ten filters, including tickets_enabled and rsvp_enabled.'],
                 ['GET', '/api/events/{id}', 'One event with its tickets, members and agenda parts.'],
                 ['POST', '/api/events/{subdomain}', 'Create an event on a schedule. Carries its own 30-per-minute throttle.'],
                 ['PUT', '/api/events/{id}', 'Partial update. Recurrence, tickets and agenda parts survive being omitted.'],
@@ -534,6 +534,8 @@
             ['event.deleted', 'An event is gone.'],
             ['event.cancelled', 'An event is cancelled.'],
             ['ticket.scanned', 'A ticket QR code is scanned at the door.'],
+            ['ticket.booked', 'A pass holder reserves a place on a date.'],
+            ['ticket.booking_cancelled', 'A pass holder releases a reserved place.'],
             ['feedback.submitted', 'An attendee left a rating.'],
         ];
 
@@ -556,11 +558,11 @@
             ],
             [
                 'q' => 'How does authentication work?',
-                'a' => 'One header, X-API-Key. Get a key from POST /api/register or POST /api/login, or generate one in your account settings. Keys are valid for a year. Login mints a new key and replaces the old one, so store it rather than calling login on every run, and accounts with two-factor authentication have to generate keys from the web UI. Every endpoint except register, send-code and login requires the header.',
+                'a' => 'One header, X-API-Key. Get a key from POST /api/register or POST /api/login, or generate one in your account settings. Keys are valid for a year. Login only mints a key when the account has none, and returns 409 while one is still live, so store the key rather than calling login on every run. Accounts with two-factor authentication have to generate keys from the web UI. Every endpoint except register, send-code and login requires the header.',
             ],
             [
                 'q' => 'What can I actually do with it?',
-                'a' => $endpointCount.' endpoints across schedules, sub-schedules, events, categories and sales, plus two read-only feeds for post-event feedback and fan-submitted content. The first five have full create, read, update and delete. A single create call can carry ticket types, agenda parts, performing members, a venue and a recurrence pattern, so publishing a run of shows is one request rather than six.',
+                'a' => $endpointCount.' endpoints across registration, schedules, sub-schedules, events, categories and sales, plus two read-only feeds for post-event feedback and fan-submitted content. Schedules, sub-schedules, events and sales have full create, read, update and delete; categories are read-only lookups. A single create call can carry ticket types, agenda parts, performing members, a venue and a recurrence pattern, so publishing a run of shows is one request rather than six.',
             ],
             [
                 'q' => 'What is llms.txt, and why are there two of them?',
@@ -572,11 +574,11 @@
             ],
             [
                 'q' => 'Are there webhooks, or do I have to poll?',
-                'a' => 'There are webhooks, on the Pro plan. Ten event types cover sales, event changes, door scans and feedback. Each delivery is signed with HMAC-SHA256 in an X-Webhook-Signature header so you can verify it came from us, payloads match the shapes the API returns, and there is a delivery log in your settings for debugging.',
+                'a' => 'There are webhooks, on the Pro plan. Twelve event types cover sales, event changes, door scans, pass bookings and feedback. Each delivery is signed with HMAC-SHA256 in an X-Webhook-Signature header so you can verify it came from us, payloads match the shapes the API returns, and there is a delivery log in your settings for debugging.',
             ],
             [
                 'q' => 'Which IDs does the API use?',
-                'a' => 'Encoded strings, never sequential integers. An event, a ticket, a sale and a sub-schedule all identify themselves with a short opaque string, and that is the same string that appears in the public URL. Category IDs are the exception: they are small integers you read from the categories endpoint.',
+                'a' => 'Encoded strings, never sequential integers. An event, a ticket, a sale and a sub-schedule all identify themselves with a short opaque string, and an event\'s is the same string that appears in its public URL, so you can build a link straight from a response. Category IDs are the exception: they are small integers you read from the categories endpoint.',
             ],
             [
                 'q' => 'Can I run this against my own installation?',
@@ -674,7 +676,7 @@
                         </div>
 <pre class="es-cons-pre"><span class="es-cons-t-pun">{ </span><span class="es-cons-t-key">"data"</span><span class="es-cons-t-pun">: {</span>
   <span class="es-cons-t-key">"id"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"Kd3Vq7"</span><span class="es-cons-t-pun">,</span>
-  <span class="es-cons-t-key">"url"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"https://synth-lab.eventschedule.com/Kd3Vq7"</span><span class="es-cons-t-pun">,</span>
+  <span class="es-cons-t-key">"url"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"https://synth-lab.eventschedule.com/analog-night/Kd3Vq7"</span><span class="es-cons-t-pun">,</span>
   <span class="es-cons-t-key">"tickets"</span><span class="es-cons-t-pun">: [{</span> <span class="es-cons-t-key">"id"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"9pR3vB"</span><span class="es-cons-t-pun">,</span> <span class="es-cons-t-key">"type"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"Advance"</span> <span class="es-cons-t-pun">}]</span>
 <span class="es-cons-t-pun">}, </span><span class="es-cons-t-key">"meta"</span><span class="es-cons-t-pun">: {</span> <span class="es-cons-t-key">"message"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"Event created successfully"</span> <span class="es-cons-t-pun">} }</span></pre>
                         <p class="es-cons-rule es-cons-dim px-4 py-3 text-xs">
@@ -725,7 +727,7 @@
                 <div class="es-cons-card flex flex-col p-6" data-reveal>
                     <div class="es-cons-mono es-cons-key mb-3 text-sm font-bold">X-API-Key</div>
                     <p class="es-cons-ink mb-2 text-sm font-semibold">One header</p>
-                    <p class="es-cons-muted mt-auto text-sm">Register, log in, or generate a key in your settings. Keys last a year. Nothing else is required.</p>
+                    <p class="es-cons-muted mt-auto text-sm">Register, generate a key in your settings, or log in when you have none. Keys last a year. Nothing else is required.</p>
                 </div>
                 <div class="es-cons-card flex flex-col p-6" data-reveal>
                     <div class="es-cons-mono es-cons-key mb-3 text-sm font-bold">300 / 30</div>
@@ -734,13 +736,13 @@
                 </div>
                 <div class="es-cons-card flex flex-col p-6" data-reveal>
                     <div class="es-cons-mono es-cons-key mb-3 text-sm font-bold">per_page &le; 500</div>
-                    <p class="es-cons-ink mb-2 text-sm font-semibold">Every list paginates</p>
-                    <p class="es-cons-muted mt-auto text-sm">100 by default, 500 at most, with a <span class="es-cons-mono">meta</span> block carrying the page, the total and the bounds.</p>
+                    <p class="es-cons-ink mb-2 text-sm font-semibold">The big lists paginate</p>
+                    <p class="es-cons-muted mt-auto text-sm">100 by default, 500 at most, with a <span class="es-cons-mono">meta</span> block carrying the page, the total and the bounds. Categories and sub-schedules come back whole.</p>
                 </div>
                 <div class="es-cons-card flex flex-col p-6" data-reveal>
                     <div class="es-cons-mono es-cons-key mb-3 text-sm font-bold">Kd3Vq7</div>
                     <p class="es-cons-ink mb-2 text-sm font-semibold">IDs are opaque strings</p>
-                    <p class="es-cons-muted mt-auto text-sm">Never a sequential integer, and the same string appears in the public URL, so you can build a link from a response.</p>
+                    <p class="es-cons-muted mt-auto text-sm">Never a sequential integer, and an event's is the same string that appears in its public URL, so you can build a link from a response.</p>
                 </div>
             </div>
 
@@ -903,7 +905,7 @@
 <span class="es-cons-t-pun">}</span></pre>
                     </div>
                     <p class="es-cons-muted mt-4 text-sm">
-                        Nine filters on the events list, including whether tickets or RSVP are switched on, a venue, a sub-schedule and a date window. You narrow server-side rather than pulling a year and filtering in the agent.
+                        Ten filters on the events list, including whether tickets or RSVP are switched on, a venue, a sub-schedule and a date window. You narrow server-side rather than pulling a year and filtering in the agent.
                     </p>
                 </div>
 
@@ -1003,7 +1005,7 @@
                         </div>
                         <div class="es-cons-card mt-4 p-5">
                             <p class="es-cons-dim text-sm leading-relaxed">
-                                The signature is an HMAC-SHA256 of the raw body, keyed on a secret shown once when you add the hook. Verify it before you trust the payload. <span class="es-cons-bright font-semibold">Use <span class="es-cons-mono">data.id</span> as your idempotency key</span>, because a delivery can repeat. There is a delivery log in your settings when something goes wrong.
+                                The signature is an HMAC-SHA256 of the raw body, keyed on a secret shown once when you add the hook. Verify it before you trust the payload. <span class="es-cons-bright font-semibold">Key on <span class="es-cons-mono">data.id</span> plus the event type</span>, because a delivery can repeat and one sale fires several types. There is a delivery log in your settings when something goes wrong.
                             </p>
                             <p class="mt-4 text-sm">
                                 <a href="{{ route('marketing.docs.developer.webhooks') }}" class="es-cons-link font-medium hover:underline">Webhook reference, with verification snippets</a>
@@ -1011,11 +1013,11 @@
                         </div>
                     </div>
 
-                    <!-- the ten types -->
+                    <!-- the twelve types -->
                     <div data-reveal>
                         <div class="es-cons-term overflow-hidden">
                             <div class="es-cons-bar">
-                                <span class="es-cons-mono es-cons-lit text-xs font-bold uppercase tracking-[0.2em]">Ten event types</span>
+                                <span class="es-cons-mono es-cons-lit text-xs font-bold uppercase tracking-[0.2em]">Twelve event types</span>
                                 <span class="es-cons-plan es-cons-plan-pro ms-auto">pro</span>
                             </div>
                             <ul>
@@ -1135,7 +1137,7 @@
                         <span class="es-cons-plan es-cons-plan-pro mb-4 self-start">pro</span>
                         <h3 class="es-cons-ink mb-3 text-xl font-bold">Read-only feeds</h3>
                         <p class="es-cons-muted mb-5 text-sm leading-relaxed">
-                            Two endpoints exist purely so you can pull audience content somewhere else: post-event ratings and comments, and approved fan photos, videos and comments. Submitter email addresses are never in the payload.
+                            Two endpoints exist purely so you can pull audience content somewhere else: post-event ratings and comments, and approved fan photos, videos and comments. Fan submissions carry a display name only; the ratings feed names the attendee, so treat it as owner-facing.
                         </p>
                         <p class="es-cons-muted mt-auto text-xs leading-relaxed">
                             Each kind of fan submission has its own ID sequence, so key on <span class="es-cons-mono es-cons-key">type</span> and <span class="es-cons-mono es-cons-key">id</span> together when you store a row.
@@ -1417,7 +1419,7 @@
                             The last call is the <span class="es-cons-lit">first one.</span>
                         </h2>
                         <p class="es-cons-dim mb-10 max-w-xl text-lg">
-                            Pick a name and start, or register straight from your code. Publishing a schedule and its dates is free forever; the API and ticketing are ${{ $proMonthly }} a month, and Event Schedule takes nothing from the door.
+                            Pick a name and start, or register straight from your code. Publishing a schedule and its dates is free forever, and so are the first 25 paid tickets a month; the API and unlimited ticket sales are ${{ $proMonthly }} a month, and Event Schedule takes nothing from the door.
                         </p>
 
                         <div class="flex max-w-2xl flex-col items-stretch gap-3 sm:flex-row">

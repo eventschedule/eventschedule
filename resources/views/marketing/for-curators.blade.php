@@ -43,7 +43,7 @@
             "Submission and approval inbox",
             "AI event import from text and flyers",
             "Sub-schedules",
-            "Follower notifications",
+            "Newsletters to your followers",
             "Schedule graphics"
         ],
         "url": "{{ url()->current() }}",
@@ -443,6 +443,9 @@
         #es-cur-rates > section { background-color: var(--esc-paper-2); }
         #es-cur-rates h2 { color: var(--esc-ink); font-family: var(--esc-serif); }
         #es-cur-rates .text-3xl { color: var(--esc-ink); font-family: var(--esc-serif); }
+        /* The "/mo" rider inside the price keeps Tailwind's gray-500, which lands
+           at 4.1:1 on this cream ground. Re-ink it with the page's own muted ink. */
+        #es-cur-rates .text-3xl span { color: var(--esc-muted); }
         #es-cur-rates .text-sm { color: var(--esc-muted); }
         #es-cur-rates .w-px { background-color: var(--esc-rule); }
         #es-cur-rates a { color: var(--esc-spot); }
@@ -494,24 +497,24 @@
         // the showtime; here it is the plan the feature needs, checked against
         // docs/FEATURES.md.
         $curListings = [
-            ['Venues publish straight to your guide', 'Free', 'Any schedule can name you as a default curator. Everything they post lands on your calendar.'],
-            ['Add anything you already found', 'Free', 'See an event on another schedule? One click puts it on yours as well.'],
-            ['A submission inbox you control', 'Free', 'Anyone can submit an event. Nothing reaches the public page until you accept it.'],
+            ['Venues publish straight to your guide', 'Free', 'A venue that follows your guide can name it a default curator. Everything they post then lands in your queue.'],
+            ['Never list the same thing twice', 'Free', 'When something you paste in is already on Event Schedule, one click lists that event instead of a second copy.'],
+            ['A submission inbox you control', 'Free', 'Readers send you events through the form on your page. Nothing reaches the public page until you accept it.'],
             ['Trusted sources skip the queue', 'Free', 'Approve a venue once and everything they send after that publishes straight through.'],
             ['File every event under a section', 'Free', 'Sort what arrives into sub-schedules: music, markets, kids, whatever your guide needs.'],
             ['Merge duplicate venues', 'Free', 'Ten submitters spell the same room ten ways. Merge them back into one in a single place.'],
-            ['Readers hear about it automatically', 'Free', 'People follow the guide and get an email whenever you add something new.'],
+            ['Email the week to your readers', 'Free', 'Following the guide is permission to email. You write the newsletter and send it: ten recipients a month free, a hundred on Pro.'],
             ['Embed it on the site you have', 'Free', 'Drop the calendar straight into your blog or your organisation page.'],
-            ['Weekly schedule graphics', 'Pro', 'Generate a shareable image of the week ahead for your socials and your newsletter.'],
+            ['Schedule graphics', 'Pro', 'Build one shareable image out of what is coming up. Events need their own flyer to appear, and twenty of them fit.'],
             ['Your own domain', 'Enterprise', 'Run the guide on your own address instead of a subdomain.'],
         ];
 
         $curFaqs = [
-            ['q' => 'Is Event Schedule free for event curators?', 'a' => 'Yes. Aggregating events, running the approval inbox, building a following and syncing with Google, Outlook or CalDAV are all free forever. Schedule graphics and branding are on the Pro plan, and your own domain is on Enterprise.'],
-            ['q' => 'How do events get onto my guide?', 'a' => 'Three ways. A venue or performer can name you as a default curator, and everything they schedule lands on your calendar. You can add any public event you find on another schedule with one click. And anyone can submit an event through the public form on your page. You can also create events yourself, or import them from pasted text or a photo of a flyer.'],
+            ['q' => 'Is Event Schedule free for event curators?', 'a' => 'Yes. Aggregating events, running the approval inbox, building a following and syncing with Google, Outlook or CalDAV are all free forever. Schedule graphics and removing our branding are on the Pro plan, and your own domain is on Enterprise.'],
+            ['q' => 'How do events get onto my guide?', 'a' => 'Three ways. A venue or performer who follows your guide can name it a default curator, and everything they schedule then lands in your queue. Visitors can submit an event through the form on your page, signed in by default. And you can add events yourself, by hand or by pasting in text or a photo of a flyer.'],
             ['q' => 'Can I control which events appear on my schedule?', 'a' => 'Yes. Submitted events wait in your inbox until you accept or decline them, so nothing reaches the public page without your say-so. If you trust a source, add their schedule to your approved list and their events publish straight through.'],
-            ['q' => 'Do I need permission to list an event from another schedule?', 'a' => 'Public events on Event Schedule can be added to your guide, and the listing keeps pointing back at the schedule that owns it. Draft and private events cannot be added by anyone else, so nothing unpublished can end up on your page.'],
-            ['q' => 'How do people discover my curated schedule?', 'a' => 'Followers get an email when you add new events. Share your schedule link on social media, embed the calendar on your blog or website, or send a newsletter with the highlights of the week.'],
+            ['q' => 'What happens when an event is already on Event Schedule?', 'a' => 'You are offered the existing one. Paste in something the site already knows about and the importer flags the match, so a single click lists that event on your guide instead of creating a second copy, and the listing keeps pointing back at the schedule that owns it. Draft and private events are never offered, so nothing unpublished can end up on your page.'],
+            ['q' => 'How do people discover my curated schedule?', 'a' => 'Share your schedule link on social media, embed the calendar on your blog or website, and let search engines index the page. Readers who follow the guide are giving you permission to email them, so a newsletter with the highlights of the week is yours to send whenever you like.'],
         ];
     @endphp
 
@@ -619,7 +622,7 @@
                                 <div class="relative">
                                     <p class="es-cur-pick">
                                         <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z" /></svg>
-                                        Editor's pick
+                                        From the editor
                                     </p>
                                     <p class="es-cur-serif mt-1.5 text-lg font-bold leading-snug">Forty-seven sources. One page.</p>
                                 </div>
@@ -657,10 +660,10 @@
                         somebody's Friday.
                     </p>
                     <p class="es-cur-serif text-lg leading-relaxed" data-reveal style="color: var(--esc-muted);">
-                        Event Schedule is built that way on purpose. Events arrive from the schedules you
-                        follow, from the submission form on your page, and from whatever you paste in
-                        yourself. You accept, you file, you publish. After that the guide keeps itself
-                        current while you get on with covering the scene.
+                        Event Schedule is built that way on purpose. Events arrive from the schedules that
+                        name your guide as their curator, from the submission form on your page, and from
+                        whatever you paste in yourself. You accept, you file, you publish. After that the
+                        guide keeps filling itself while you get on with covering the scene.
                     </p>
                 </div>
 
@@ -862,7 +865,7 @@
                         <div class="flex-1">
                             <p class="es-cur-kicker text-center lg:text-start" style="color: var(--esc-spot);">And so</p>
                             <p class="es-cur-serif mt-3 text-center text-lg leading-relaxed lg:text-start" style="color: var(--esc-muted);">
-                                A guide is a permanent, searchable address anybody can find. Keep the group
+                                A guide is a permanent address anybody can find and link to. Keep the group
                                 for the chat. Put one link in it, and let the archive do the rest.
                             </p>
                         </div>
@@ -870,7 +873,7 @@
 
                     <div class="es-cur-rule-hair mt-8"></div>
                     <div class="grid gap-6 pt-7 md:grid-cols-3" data-reveal-group="80">
-                        @foreach ([['One link to share', 'Post the guide once instead of every event twice.'], ['A searchable archive', 'Readers can browse what is coming and what already happened.'], ['Reach past the group', 'Anyone can find the guide, not only the people already in the room.']] as [$mTitle, $mBody])
+                        @foreach ([['One link to share', 'Post the guide once instead of every event twice.'], ['A standing archive', 'Readers can browse what is coming and what already happened.'], ['Reach past the group', 'Anyone can find the guide, not only the people already in the room.']] as [$mTitle, $mBody])
                             <div data-reveal>
                                 <h4 class="es-cur-serif text-lg font-bold">{{ $mTitle }}</h4>
                                 <p class="es-cur-agate es-cur-muted mt-1.5">{{ $mBody }}</p>
@@ -886,7 +889,7 @@
                             <p class="es-cur-kicker es-cur-faint">Advertisement</p>
                             <h3 class="es-cur-serif mt-2 text-2xl font-bold">Not everything on your guide has an address.</h3>
                             <p class="es-cur-agate es-cur-muted mt-2 max-w-xl">
-                                Online events get a streaming link instead of a venue, and they list on your
+                                An online event carries a link instead of a venue, and it lists on your
                                 guide exactly like everything else.
                             </p>
                         </div>
@@ -939,7 +942,7 @@
                     <div class="es-cur-ad" data-reveal>
                         <x-sub-audience-card
                             name="Festival Programmers"
-                            description="Publish your full multi-stage lineup and let attendees follow set times as they firm up."
+                            description="Publish the full lineup, file each stage under its own sub-schedule, and fix the set times as they firm up."
                             icon-color="amber"
                         >
                             <x-slot:icon>
@@ -953,7 +956,7 @@
                     <div class="es-cur-ad" data-reveal>
                         <x-sub-audience-card
                             name="Scene Blogs"
-                            description="Turn your niche coverage into a living calendar. Import events straight from posts and flyers."
+                            description="Turn your niche coverage into a living calendar. Import events from pasted text and flyer photos."
                             icon-color="amber"
                         >
                             <x-slot:icon>
@@ -982,7 +985,7 @@
                     <div class="es-cur-ad" data-reveal>
                         <x-sub-audience-card
                             name="Tourism & Visitor Boards"
-                            description="Show visitors everything happening this week, updated automatically as venues post."
+                            description="Show visitors everything happening this week, topped up as the venues that list you post."
                             icon-color="amber"
                         >
                             <x-slot:icon>
@@ -1031,7 +1034,7 @@
                     </div>
 
                     <div class="mt-10 grid gap-9 md:grid-cols-3" data-reveal-group="120">
-                        @foreach ([['1', 'Start the paper', 'Sign up, name your guide, and say which city or which scene it covers.'], ['2', 'Fill the listings', 'Follow the venues and performers you cover, open submissions, and paste in whatever else you find.'], ['3', 'Go to press', 'Share one link. Readers follow it, and every new event reaches them without you posting twice.']] as [$pNum, $pTitle, $pBody])
+                        @foreach ([['1', 'Start the paper', 'Sign up, name your guide, and say which city or which scene it covers.'], ['2', 'Fill the listings', 'Let the venues you cover list your guide as their curator, open submissions, and paste in whatever else you find.'], ['3', 'Go to press', 'Share one link instead of posting every event twice. Readers follow the guide, and the week\'s highlights go out by newsletter.']] as [$pNum, $pTitle, $pBody])
                             <div data-reveal>
                                 <p class="es-cur-press-num">{{ $pNum }}</p>
                                 <div class="es-cur-press-rule mt-3"></div>

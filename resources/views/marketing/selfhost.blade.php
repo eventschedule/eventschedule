@@ -49,7 +49,7 @@
             ],
             [
                 'name' => 'Run the setup wizard',
-                'text' => 'Leave APP_URL blank in .env and open your domain. The browser wizard collects your database connection, app name, email settings and admin account, generates the app key and runs the database migrations for you.',
+                'text' => 'Leave APP_URL blank in .env and open your domain. The browser wizard tests your database connection, creates your admin account, runs the database migrations and writes the configuration back to .env for you.',
             ],
             [
                 'name' => 'Add the cron entry',
@@ -407,7 +407,7 @@
         $marqueeRows = [
             [
                 ['Ticketing and QR check-in', 'bg-emerald-500', route('marketing.ticketing')],
-                ['Custom domains', 'bg-teal-500', route('marketing.custom_domain')],
+                ['Private events', 'bg-teal-500', route('marketing.private_events')],
                 ['AI import', 'bg-emerald-400', route('marketing.ai')],
                 ['Newsletters', 'bg-cyan-500', route('marketing.newsletters')],
                 ['Gift cards', 'bg-teal-400', route('marketing.gift_cards')],
@@ -532,14 +532,14 @@
                 'lines' => [
                     ['cmd', 'cd /var/www'],
                     ['cmd', 'unzip eventschedule.zip'],
+                    ['cmd', 'cp .env.example .env'],
                     ['cmd', 'chmod -R 755 storage'],
                     ['cmd', 'chown -R www-data:www-data storage bootstrap public .env'],
-                    ['cmd', 'cp .env.example .env'],
                     ['note', '# leave APP_URL blank, then open your domain'],
                 ],
                 'exit' => 'Setup wizard ready',
                 'cta' => ['Read the full guide', route('marketing.docs.selfhost.installation'), false],
-                'copy' => "cd /var/www\nunzip eventschedule.zip\nchmod -R 755 storage\nchown -R www-data:www-data storage bootstrap public .env\ncp .env.example .env",
+                'copy' => "cd /var/www\nunzip eventschedule.zip\ncp .env.example .env\nchmod -R 755 storage\nchown -R www-data:www-data storage bootstrap public .env",
             ],
         ];
     @endphp
@@ -624,7 +624,9 @@
                     ['Web server', 'Apache or Nginx with rewrites', 'server'],
                     ['SSL', 'Required, HTTPS only', 'shield'],
                 ];
-                $phpExtensions = ['BCMath', 'Ctype', 'Fileinfo', 'Intl', 'JSON', 'Mbstring', 'OpenSSL', 'PDO (MySQL)', 'Tokenizer', 'XML', 'cURL', 'GD or Imagick'];
+                // GD, not Imagick: image work is all GD and Imagick is not used anywhere in
+                // the codebase, so listing it as an alternative would be a false claim.
+                $phpExtensions = ['BCMath', 'Ctype', 'Fileinfo', 'Intl', 'JSON', 'Mbstring', 'OpenSSL', 'PDO (MySQL)', 'MySQLi', 'Tokenizer', 'XML', 'cURL', 'GD', 'Zip'];
                 $reqIcons = [
                     'chip' => 'M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z',
                     'db' => 'M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4',
@@ -683,8 +685,8 @@
 
                 <div data-reveal="left">
                     <div class="es-prompt mb-3" aria-hidden="true"><span class="es-prompt-path">~/eventschedule</span> $ open https://your-domain.com</div>
-                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl">No config files to hand-edit</h2>
-                    <p class="mb-8 text-lg text-gray-500 dark:text-gray-400">Leave <code class="rounded bg-gray-200 px-1.5 py-0.5 font-mono text-[0.85em] dark:bg-white/10">APP_URL</code> blank and open your domain. The wizard collects everything it needs, generates the app key and runs the migrations itself.</p>
+                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl">Set up in a browser, not a text editor</h2>
+                    <p class="mb-8 text-lg text-gray-500 dark:text-gray-400">Leave <code class="rounded bg-gray-200 px-1.5 py-0.5 font-mono text-[0.85em] dark:bg-white/10">APP_URL</code> blank and open your domain. The app generates its own key on first boot, and the wizard tests the database, runs the migrations and writes the configuration back itself. Mail settings are the one thing it leaves to you.</p>
 
                     <ol class="space-y-4" data-reveal-group="90">
                         @foreach ($howToSteps as $sIndex => $step)
@@ -729,7 +731,9 @@
 
                                 {{-- es-ai-field is the shared "fields materialize" reveal. --}}
                                 <div class="space-y-3">
-                                    @foreach ([['Database', 'eventschedule'], ['Database user', 'eventschedule'], ['App name', 'My Events'], ['Admin email', 'you@your-domain.com']] as $fi => $field)
+                                    {{-- The wizard's real fields: the five DB values, then the admin
+                                         account. It never asks for an app name or mail settings. --}}
+                                    @foreach ([['Database host', 'localhost'], ['Database', 'eventschedule'], ['Database user', 'eventschedule'], ['Admin email', 'you@your-domain.com']] as $fi => $field)
                                         <div class="es-ai-field" style="--i: {{ $fi }};">
                                             <div class="mb-1 text-[10px] font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">{{ $field[0] }}</div>
                                             <div class="flex items-center justify-between gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 dark:border-white/10 dark:bg-white/5">
@@ -765,7 +769,10 @@
         $selfhostOnly = [
             [
                 'title' => 'Auto import from the web',
-                'body' => 'Point Event Schedule at a URL or search a city and AI pulls the events in, on a schedule you set. It checks each site\'s robots.txt first.',
+                // ImportCuratorEvents scrapes the configured URLs only, once a day from the
+                // scheduler. Configured cities are a filter on what those pages return, not
+                // a search: the city branch is marked a placeholder in the command.
+                'body' => 'Point Event Schedule at a list of URLs and AI pulls the events in once a day, keeping only the cities you name. It checks each site\'s robots.txt first.',
             ],
             [
                 'title' => 'One-click app updates',
@@ -809,7 +816,9 @@
                 'chip' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
                 'items' => [
                     ['Ticketing with QR check-in', 'ticket'],
-                    ['Stripe Connect, no platform fees', 'card'],
+                    // NOT Connect: Connect is only used when IS_HOSTED=true. A single-tenant
+                    // install charges with the platform keys in your own .env.
+                    ['Stripe Checkout, no platform fees', 'card'],
                     ['Passes and subscriptions', 'badge'],
                     ['Promo codes and gift cards', 'gift'],
                     ['Waitlists and a check-in dashboard', 'list'],
@@ -821,7 +830,8 @@
                 'chip' => 'bg-teal-100 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300',
                 'items' => [
                     ['Multiple team members', 'users'],
-                    ['Team availability tracking', 'calendar'],
+                    // The availability tab renders for talent schedules only (show-admin.blade.php).
+                    ['Availability tracking on talent schedules', 'calendar'],
                     ['Appointment booking', 'clock'],
                     ['Internal and unlisted events', 'lock'],
                     ['Unlimited newsletter emails', 'mail'],
@@ -832,7 +842,10 @@
                 'heading' => 'Make it yours',
                 'chip' => 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/15 dark:text-cyan-300',
                 'items' => [
-                    ['Custom domains', 'globe'],
+                    // NOT per-schedule custom domains: ResolveCustomDomain returns early when
+                    // ! config('app.hosted'), so that setting is a hosted-mode feature. What is
+                    // true here is that the whole install runs on a domain you chose.
+                    ['Runs on your own domain', 'globe'],
                     ['White-label, bar one small licence credit', 'sparkles'],
                     ['Custom CSS, fields and labels', 'brush'],
                     ['Event graphics and AI generation', 'photo'],
@@ -1151,6 +1164,10 @@
         // does it for you, 'you' = you do it. Amber stays out of it - the
         // operator-responsibility rule is spent on the dark band above, and
         // reusing it here would read as a warning rather than a comparison.
+        // Plan prices come from the same config keys /pricing reads, so the two pages
+        // can never quote different numbers.
+        $hostedProMonthly = (int) config('services.stripe_platform.price_monthly_amount', 5);
+        $hostedEntMonthly = (int) config('services.stripe_platform.enterprise_price_monthly_amount', 15);
         $comparison = [
             [
                 'title' => 'Hosted',
@@ -1160,7 +1177,7 @@
                     ['Setup', 'We have it running before you finish your coffee'],
                     ['Infrastructure', 'We run the servers, backups and updates'],
                     ['Updates', 'Automatic, you never think about it'],
-                    ['Features', 'Free, Pro at $5/mo or Enterprise at $15/mo'],
+                    ['Features', 'Free, Pro at $'.$hostedProMonthly.'/mo or Enterprise at $'.$hostedEntMonthly.'/mo'],
                     ['Your data', 'Hosted by us, exportable at any time'],
                     ['Support', 'Email support, priority on Enterprise'],
                 ],
@@ -1259,7 +1276,9 @@
                         <h2 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl">Or turn it into your own product</h2>
                         <p class="mb-6 text-xl text-gray-600 dark:text-gray-300">The same install runs in multi-tenant mode. Give every customer a subdomain, set your own prices, bill them through your Stripe account and keep all of it.</p>
                         <ul class="mb-8 space-y-3">
-                            @foreach (['Multi-tenant subdomains built in', 'Stripe subscription billing with your own tiers', 'White-label branding, bar one small licence credit', 'No licence fee and no revenue share'] as $item)
+                            {{-- "your own prices", not "your own tiers": the tier names are Free,
+                                 Pro and Enterprise in code; what you supply is the Stripe Price IDs. --}}
+                            @foreach (['Multi-tenant subdomains built in', 'Stripe subscription billing at your own prices', 'White-label branding, bar one small licence credit', 'No licence fee and no revenue share'] as $item)
                                 <li class="flex items-center gap-3 text-gray-700 dark:text-gray-200">
                                     <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -1303,7 +1322,7 @@
                                     <div class="text-2xl font-bold text-gray-900 dark:text-white">$4,940</div>
                                 </div>
                                 <div class="grid grid-cols-3 gap-2">
-                                    @foreach ([['Free', '142 users'], ['Pro', '89 users'], ['Team', '16 users']] as [$tierName, $tierCount])
+                                    @foreach ([['Free', '142 users'], ['Pro', '89 users'], ['Enterprise', '16 users']] as [$tierName, $tierCount])
                                         <div class="rounded-lg bg-emerald-500/15 p-3 text-center">
                                             <div class="font-semibold text-gray-900 dark:text-white">{{ $tierName }}</div>
                                             <div class="text-xs text-emerald-700 dark:text-emerald-300">{{ $tierCount }}</div>
@@ -1427,13 +1446,13 @@
     @php
         $selfhostFaqs = [
             ['q' => 'Is Event Schedule really free to selfhost?', 'a' => 'Yes. Event Schedule is open source under the Attribution Assurance License. There is no licence fee, no per-event charge and no platform fee on ticket sales. Your only costs are the server and Stripe\'s own processing fees.'],
-            ['q' => 'Do I get the paid features when I selfhost?', 'a' => 'All of them. A selfhosted install is treated as Enterprise throughout the code, so ticketing, custom domains, team members, the API, AI generation and everything else are included at no cost. Two features, auto import from URLs and one-click app updates, exist only on selfhosted installs.'],
+            ['q' => 'Do I get the paid features when I selfhost?', 'a' => 'A selfhosted install is treated as Enterprise throughout the code, so ticketing, team members, the API, AI generation and everything else are included at no cost. Two features, auto import from URLs and one-click app updates, exist only on selfhosted installs. Per-schedule custom domains are the one thing that does not carry over, because they belong to hosted mode and your install already runs on a domain you chose.'],
             ['q' => 'What do I need on the server?', 'a' => 'PHP 8.2 or newer with the usual extensions, MySQL 5.7+ or MariaDB 10.3+, Apache or Nginx with rewrites enabled, and an SSL certificate. Most shared hosts already meet this.'],
             ['q' => 'Can I install it on shared hosting?', 'a' => 'Yes. If your host offers Softaculous, Event Schedule installs in one click with the database and configuration set up for you. Otherwise upload the release zip and point your document root at the public directory.'],
             ['q' => 'How do updates work?', 'a' => 'When a new version is released, a notice appears in your admin panel. One click applies the update in seconds, database migrations included. No terminal access is required.'],
             ['q' => 'Do I have to set up a cron job?', 'a' => 'Yes, one line: "* * * * * php /path/to/eventschedule/artisan schedule:run". It drives reminder emails, calendar sync and the release of expired ticket reservations. Without it those stop running.'],
             ['q' => 'Does a selfhosted install send anything back to Event Schedule?', 'a' => 'No. There is no telemetry and no phone-home. The one optional exception is Federation, which is off by default and shares only your public events into the eventschedule.com listings, with every listing linking back to your own site. An admin has to switch it on, and each schedule can opt out.'],
-            ['q' => 'Can I run it as a white-label SaaS for my own customers?', 'a' => 'Yes. Set IS_HOSTED=true and the same install runs multi-tenant, with a subdomain per customer, Stripe subscription billing and your own plan tiers. You set the prices and keep the revenue. One thing to know before you price it: the licence credit stays on every customer\'s public pages, on the tiers you charge for as well as your free one. It is a small chip in the corner, and it is the whole of what the software costs you.'],
+            ['q' => 'Can I run it as a white-label SaaS for my own customers?', 'a' => 'Yes. Set IS_HOSTED=true and the same install runs multi-tenant, with a subdomain per customer, Stripe subscription billing and your own prices on the Pro and Enterprise tiers. You set the prices and keep the revenue. One thing to know before you price it: the licence credit stays on every customer\'s public pages, on the tiers you charge for as well as your free one. It is a small chip in the corner, and it is the whole of what the software costs you.'],
             ['q' => 'Can I move from the hosted version to selfhosted?', 'a' => 'Yes. Backup and restore is built in, so you can export your schedule data, with images if you want them, and import it into your own install.'],
         ];
     @endphp

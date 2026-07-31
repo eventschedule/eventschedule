@@ -44,12 +44,12 @@
             "Free registration with a seat limit counted per session date",
             "Named ticket types with their own prices, quantities and sales windows",
             "Multi-class cards valid across the series, with a cancellation cutoff in hours before each session",
-            "Waitlist on the Pro plan, offering a freed seat to the next person waiting for that date",
+            "A waitlist when a session fills, offering a freed seat to the next person waiting for that date",
             "QR check-in, plus a downloadable QR code for your schedule",
             "Zero platform fees on ticket sales through your own Stripe account",
             "Sub-schedules that keep beginner and advanced strands apart on one link",
             "Direct newsletters to the students who follow your schedule",
-            "Two-way Google, Outlook and CalDAV calendar sync",
+            "Two-way Google, Outlook and CalDAV calendar sync, a recurring class syncing as one entry",
             "Embeddable calendar for the studio site you already have"
         ],
         "url": "{{ url()->current() }}",
@@ -526,31 +526,33 @@
             [8, null, null],
         ];
 
-        // One class, one recurring event. Note session 04 keeps its number
-        // across the skipped week: an excluded date removes the date, it does
-        // not renumber the course.
+        // One class, one recurring event, so every session carries the SAME name
+        // and the same start time - the date is what changes. Session 04 keeps
+        // its number across the skipped week: an excluded date removes the date,
+        // it does not renumber the course.
         $sessions = [
-            ['01', 'Sat 7 Feb', 'Hand building', 'Full', false],
-            ['02', 'Sat 14 Feb', 'Wheel throwing', '2 seats left', false],
-            ['03', 'Sat 21 Feb', 'Wheel throwing', '5 seats left', false],
-            ['--', 'Sat 28 Feb', 'Studio closed', 'Skipped', true],
-            ['04', 'Sat 7 Mar', 'Glazing', '8 seats left', false],
-            ['05', 'Sat 14 Mar', 'Firing and finish', '8 seats left', false],
+            ['01', 'Sat 7 Feb', '10:00', 'Full', false],
+            ['02', 'Sat 14 Feb', '10:00', '2 seats left', false],
+            ['03', 'Sat 21 Feb', '10:00', '5 seats left', false],
+            ['--', 'Sat 28 Feb', 'Date taken out', 'Skipped', true],
+            ['04', 'Sat 7 Mar', '10:00', '8 seats left', false],
+            ['05', 'Sat 14 Mar', '10:00', '8 seats left', false],
         ];
 
-        // A ten-class card, four sessions in.
+        // A ten-class card, four sessions in. Same class every time, because the
+        // card spans one recurring event.
         $cardRows = [
-            ['1', 'Sat 7 Feb', 'Hand building', 'Used', '9'],
-            ['2', 'Sat 14 Feb', 'Wheel throwing', 'Used', '8'],
-            ['3', 'Sat 21 Feb', 'Wheel throwing', 'Used', '7'],
-            ['4', 'Sat 7 Mar', 'Glazing', 'Booked', '6'],
-            ['5', 'Not booked yet', 'Holder chooses', 'Open', '6'],
+            ['1', 'Sat 7 Feb', 'Pottery Fundamentals', 'Used', '9'],
+            ['2', 'Sat 14 Feb', 'Pottery Fundamentals', 'Used', '8'],
+            ['3', 'Sat 21 Feb', 'Pottery Fundamentals', 'Used', '7'],
+            ['4', 'Sat 7 Mar', 'Pottery Fundamentals', 'Booked', '6'],
+            ['5', 'Not booked yet', 'Any session left in the term', 'Open', '6'],
         ];
 
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for workshop instructors?',
-                'a' => 'Yes. Publishing your classes, running one as a weekly series, capping the seats with free registration, sorting strands into sub-schedules, emailing the students who follow you and syncing two ways with Google, Outlook or CalDAV are all free forever. Selling spots, multi-class cards, custom questions at checkout and QR check-in are on the Pro plan at $5 a month, and Event Schedule charges zero platform fees on what you sell.',
+                'a' => 'Yes. Publishing your classes, running one as a weekly series, capping the seats with free registration, sorting strands into sub-schedules, emailing the students who follow you and syncing two ways with Google, Outlook or CalDAV are all free forever. So is selling, up to 25 paid spots a month, and so is scanning the QR at the door on every plan. Lifting that ceiling, plus multi-class cards, custom questions at checkout and the live check-in screen, is the Pro plan at $5 a month, and Event Schedule charges zero platform fees on what you sell.',
             ],
             [
                 'q' => 'Can I run different kinds of workshops on one schedule?',
@@ -562,7 +564,7 @@
             ],
             [
                 'q' => 'Can I sell spots and cap the class?',
-                'a' => 'Yes. Connect your own Stripe account and sell spots with named ticket types, each with its own price, quantity and sales window. Free classes can use registration with a seat limit instead, on every plan. Either way the count is kept per session date, so a full Saturday does not close the next one, and students see the number of spots left rather than who is on the sheet.',
+                'a' => 'Yes. Connect your own Stripe account and sell spots with named ticket types, each with its own price, quantity and sales window. The free plan sells 25 paid spots a month and Pro lifts the ceiling; free classes can use registration with a seat limit instead, unlimited on every plan. Either way the count is kept per session date, so a full Saturday does not close the next one, and students see the number of spots left rather than who is on the sheet.',
             ],
             [
                 'q' => 'How does a multi-class card work?',
@@ -787,12 +789,12 @@
                     <span class="es-shop-muted es-shop-fig text-xs">One recurring event &middot; Saturdays 10:00 &middot; ends after 10</span>
                 </div>
                 <div>
-                    @foreach ($sessions as [$sNo, $sDate, $sTitle, $sSeats, $sSkip])
+                    @foreach ($sessions as [$sNo, $sDate, $sNote, $sSeats, $sSkip])
                         <div class="es-shop-sess @if ($sSkip) es-shop-sess-skip @endif">
                             <span class="es-shop-sess-no">{{ $sNo }}</span>
                             <span class="min-w-0">
-                                <span class="es-shop-ink block truncate text-sm font-semibold">{{ $sTitle }}</span>
-                                <span class="es-shop-muted es-shop-fig block text-xs">{{ $sDate }}</span>
+                                <span class="es-shop-ink es-shop-fig block truncate text-sm font-semibold">{{ $sDate }}</span>
+                                <span class="es-shop-muted block text-xs">{{ $sNote }}</span>
                             </span>
                             <span class="es-shop-muted es-shop-fig text-xs font-bold">{{ $sSeats }}</span>
                         </div>
@@ -870,11 +872,11 @@
                             </li>
                             <li class="flex gap-3" data-reveal>
                                 <svg aria-hidden="true" class="es-shop-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                                <span class="es-shop-muted text-sm">When the session is full, the form becomes a waitlist for that date instead of a dead end, which is a Pro feature.</span>
+                                <span class="es-shop-muted text-sm">When the session is full, the form becomes a waitlist for that date instead of a dead end: free on registration, Pro once the spots are paid tickets.</span>
                             </li>
                             <li class="flex gap-3" data-reveal>
                                 <svg aria-hidden="true" class="es-shop-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                                <span class="es-shop-muted text-sm">Free registration with a seat limit is on every plan; taking money for a spot is Pro.</span>
+                                <span class="es-shop-muted text-sm">Free registration with a seat limit is unlimited on every plan, and the free plan sells 25 paid spots a month on top of that.</span>
                             </li>
                         </ul>
                     </div>
@@ -907,7 +909,7 @@
 
                 <div class="overflow-x-auto">
                     <table class="es-shop-table w-full border-collapse text-left">
-                        <caption class="sr-only">A ten-class card, four sessions in: each booking with its date, the class, whether it was used, and the number of classes still on the card</caption>
+                        <caption class="sr-only">A ten-class card, four sessions in: each booking with its date, the class it covers, whether it was used, and the number of classes still on the card</caption>
                         <thead>
                             <tr class="es-shop-tag">
                                 <th scope="col" class="pb-3 font-bold">Use</th>
@@ -978,7 +980,7 @@
                     What the bench earns is <span class="es-shop-accent">what you keep.</span>
                 </h2>
                 <p class="es-shop-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Spots are sold through your own Stripe account. Event Schedule charges zero platform fees, so past Stripe's own processing the money is yours.
+                    Spots are sold through your own Stripe account. Event Schedule charges zero platform fees on every plan, so past Stripe's own processing the money is yours. The free plan sells 25 paid spots a month; Pro takes the ceiling off.
                 </p>
             </div>
 
@@ -986,9 +988,9 @@
                 <div class="es-shop-card p-7" data-reveal="panel">
                     <div class="mb-3 flex flex-wrap items-center gap-2">
                         <h3 class="es-shop-ink text-lg font-bold">Prices, plainly</h3>
-                        <span class="es-shop-plan es-shop-plan-pro">Pro</span>
+                        <span class="es-shop-plan">Free</span>
                     </div>
-                    <p class="es-shop-muted text-sm">Named ticket types, each with its own price, quantity and sales window: early bird, concession, materials included. Discount codes and a rate for booking several at once come with them.</p>
+                    <p class="es-shop-muted text-sm">Named ticket types, each with its own price, quantity and sales window: early bird, concession, materials included. A cheaper rate for booking several at once comes with them. Discount codes are Pro.</p>
                 </div>
                 <div class="es-shop-card p-7" data-reveal="panel">
                     <div class="mb-3 flex flex-wrap items-center gap-2">
@@ -1098,9 +1100,9 @@
                         <div class="relative z-10">
                             <div class="mb-4 flex flex-wrap items-center gap-2">
                                 <h3 class="es-shop-ink text-xl font-bold">When a session fills</h3>
-                                <span class="es-shop-plan es-shop-plan-pro">Pro</span>
+                                <span class="es-shop-plan">Free</span>
                             </div>
-                            <p class="es-shop-muted">A full session turns its sign-up into a waitlist for that date rather than a dead end. Cancel a booking and the freed seat is offered to the first person waiting on that date, and if they do not take it the offer passes to the next one.</p>
+                            <p class="es-shop-muted">A full session turns its sign-up into a waitlist for that date rather than a dead end. Cancel a booking and the freed seat is offered to the first person waiting on that date, and if they do not take it the offer passes to the next one. Free when the class takes registrations; on paid tickets the waitlist is Pro.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1130,7 +1132,7 @@
                                 <h3 class="es-shop-ink text-xl font-bold">On the studio site you already have</h3>
                                 <span class="es-shop-plan">Free</span>
                             </div>
-                            <p class="es-shop-muted mb-4">Embed the calendar on your own site so the term lives where people look you up, and sync two ways with Google, Outlook and CalDAV so a class you move moves everywhere.</p>
+                            <p class="es-shop-muted mb-4">Embed the calendar on your own site so the term lives where people look you up, and sync two ways with Google, Outlook and CalDAV. A recurring class crosses as a single entry rather than ten, so the term itself stays here where the seats are counted.</p>
                             <p class="es-shop-muted text-sm">Built-in analytics show page views, the devices people are on and where the traffic came from. That is what they measure, and nothing more.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
@@ -1163,7 +1165,7 @@
                             </div>
                             <p class="es-shop-muted mb-4">Break a session into its parts with times, so people know the three hours are wedging, centering, pulling and a clean-up rather than a mystery. It shows on the class page as an agenda.</p>
                             <p class="es-shop-muted text-sm">
-                                Already written the blurb somewhere else? Paste the text or drop in the flyer and the details are pulled out for you to check, ten a day on the free plan.
+                                Already written the blurb somewhere else? Paste the text or drop in the flyer and the details are pulled out for you to check, on every plan.
                                 <a href="{{ marketing_url('/features/ai') }}" class="es-shop-link font-medium hover:underline">How the import works</a>
                             </p>
                         </div>
@@ -1414,7 +1416,7 @@
                         Pin up the sheet. <span class="es-shop-lit">Fill the bench.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg es-shop-wall-muted">
-                        Publishing your classes, capping the seats and emailing the students who follow you are free forever. Selling spots and class cards is five dollars a month, and nothing is taken off the top.
+                        Publishing your classes, capping the seats and emailing the students who follow you are free forever, and so are the first 25 paid spots a month. Unlimited sales and class cards are five dollars a month, and nothing is taken off the top.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

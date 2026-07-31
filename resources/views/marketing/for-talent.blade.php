@@ -32,11 +32,11 @@
         $performerTypes = ['Musicians', 'DJs', 'Comedians', 'Dancers', 'Magicians', 'Poets', 'Acrobats', 'Actors', 'Bands', 'Instructors', 'Artists', 'Vendors'];
 
         $faqs = [
-            ['q' => 'Is Event Schedule free for performers?', 'a' => 'Yes. Sharing your show schedule, syncing your calendar, taking booking requests from venues, and letting fans follow you are all free forever, and so is a newsletter allowance of 10 emails each month, counted per recipient rather than per send. Ticketing, event graphics and a larger newsletter allowance are on the Pro plan at $' . $proMonthly . '/month, and there are still no platform fees on ticket sales.'],
+            ['q' => 'Is Event Schedule free for performers?', 'a' => 'Yes. Sharing your show schedule, syncing your calendar, taking booking requests from venues, letting fans follow you and selling up to 25 paid tickets a month are all free forever, and so is a newsletter allowance of 10 emails each month, counted per recipient rather than per send. Unlimited ticket sales, schedule graphics and a larger newsletter allowance are on the Pro plan at $' . $proMonthly . '/month, and there are still no platform fees on ticket sales.'],
             ['q' => 'What happens when a venue books me for a show?', 'a' => 'The venue adds you to their event and you get a request. Accept it and the gig appears on your schedule automatically, with the venue listed on it. You never type the same date into two calendars, and both schedules stay in sync from then on.'],
-            ['q' => 'I already have a Linktree. Why would I need this?', 'a' => 'A link page shows buttons. A schedule shows dates. Your Event Schedule page lists your actual upcoming shows with venues, times and ticket links, updates itself as you add dates, and lets fans follow you for an email when a new show lands. You can keep your link page and point it here, or replace it entirely.'],
+            ['q' => 'I already have a Linktree. Why would I need this?', 'a' => 'A link page shows buttons. A schedule shows dates. Your Event Schedule page lists your actual upcoming shows with venues, times and ticket links, updates itself as you add dates, and lets fans follow you so you can email them when a new show lands. You can keep your link page and point it here, or replace it entirely.'],
             ['q' => 'Can I put my dates on my own website and social profiles?', 'a' => 'Yes. Embed your schedule on any website with a single iframe, or share your schedule URL on social profiles, EPKs and booking platforms. There are also iCal and RSS feeds, so your dates can flow into other calendars and sites automatically. Everything updates the moment you add a show.'],
-            ['q' => 'How do fans find out about my upcoming shows?', 'a' => 'Fans follow your schedule and get an email when you add new dates. On Pro you can also send newsletters with your upcoming shows, generate a shareable graphic for each event, and boost events with Meta Ads.'],
+            ['q' => 'How do fans find out about my upcoming shows?', 'a' => 'Your dates are public the moment you add them, on your schedule page and in your iCal and RSS feeds. Fans who follow you are giving you permission to email them, and you write and send that email yourself: 10 recipients a month free, 100 on Pro. Pro also generates a shareable graphic of your upcoming shows and lets you boost events with Meta Ads.'],
         ];
     @endphp
 
@@ -167,7 +167,7 @@
             </h1>
 
             <p class="es-fade-up es-d-2 mx-auto mb-8 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
-                Musicians, comedians, DJs, dancers, magicians and more. Venues add you to their lineup, your dates land on your page automatically, and fans get told. Free forever, and you can <a href="{{ marketing_url('/features/ticketing') }}" class="font-medium text-blue-600 hover:underline dark:text-blue-400">sell tickets</a> with zero platform fees.
+                Musicians, comedians, DJs, dancers, magicians and more. Venues add you to their lineup, you accept, and the date lands on your page with the venue attached. Free forever, and you can <a href="{{ marketing_url('/features/ticketing') }}" class="font-medium text-blue-600 hover:underline dark:text-blue-400">sell tickets</a> with zero platform fees.
             </p>
 
             <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -310,7 +310,7 @@
         accent="sky"
         badge="Announce it once"
         heading="Add the date once. It shows up everywhere."
-        lede="Your schedule page, your own website, your followers' calendars and any app that reads a feed. Add a show in one place and every one of them updates, including the calendar you already live in."
+        lede="Your schedule page, your own website, and any calendar app subscribed to your feed. Add a show in one place and every one of them updates, including the calendar you already live in."
         :chips="['Website embed', 'Google, Outlook, CalDAV', 'iCal and RSS feeds', 'Free']"
         :flip="true"
         ground="gray"
@@ -345,7 +345,7 @@
         badge="Sell the tickets"
         heading="Take the door yourself. Keep all of it."
         lede="Sell straight from your event page through your own Stripe account. Buyers get a QR ticket, you scan them in at the door, and the money lands with you. We never take a cut of a ticket, on any plan."
-        :chips="['Zero platform fees', 'QR check-in', 'Season and visit passes', 'Pro']"
+        :chips="['Zero platform fees', '25 paid tickets a month, free', 'QR scanning, free', 'Unlimited sales and passes, Pro']"
         ground="white"
         frame="phone">
         <div>
@@ -377,8 +377,8 @@
         accent="emerald"
         badge="Fill the room"
         heading="Tell the people who already said yes."
-        lede="Fans who follow you get an email the moment a date lands. Write a newsletter when you want to say more, and let Event Schedule generate the poster so you have something to post the same afternoon."
-        :chips="['Follower emails, free', 'Newsletters', 'Event graphics, Pro', 'Meta Ads boost, Pro']"
+        lede="Following you is a fan handing over their email address. You write the newsletter and choose when it goes, and Event Schedule builds a graphic of your upcoming dates so you have something to post the same afternoon."
+        :chips="['Followers, free', '10 recipients a month free', '100 on Pro', 'Schedule graphics, Pro']"
         :flip="true"
         ground="gray"
         frame="panel">
@@ -386,7 +386,7 @@
             <div class="rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-white/10 dark:bg-white/[0.04]">
                 <div class="mb-2 flex items-center justify-between">
                     <span class="text-[11px] font-bold text-gray-900 dark:text-white">New dates just added</span>
-                    <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-semibold text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">1,284 followers</span>
+                    <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-semibold text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">Draft newsletter</span>
                 </div>
                 <div class="space-y-1.5" aria-hidden="true">
                     <span class="block h-1.5 w-full rounded-full bg-gray-200 dark:bg-white/10"></span>
@@ -396,12 +396,12 @@
             </div>
             <div class="flex items-center gap-2.5">
                 <div class="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-cyan-600 text-white">
-                    <span class="text-[8px] uppercase tracking-wide opacity-80">Fri</span>
-                    <span class="text-lg font-black leading-none">12</span>
+                    <span class="text-[8px] uppercase tracking-wide opacity-80">Shows</span>
+                    <span class="text-lg font-black leading-none">6</span>
                 </div>
                 <div class="min-w-0 flex-1">
-                    <div class="text-[11px] font-semibold text-gray-900 dark:text-white">Poster generated</div>
-                    <div class="text-[10px] text-gray-500 dark:text-gray-400">Square, story and banner sizes</div>
+                    <div class="text-[11px] font-semibold text-gray-900 dark:text-white">Graphic generated</div>
+                    <div class="text-[10px] text-gray-500 dark:text-gray-400">Square, story and landscape sizes</div>
                 </div>
             </div>
         </div>
@@ -413,8 +413,8 @@
         accent="amber"
         badge="After the show"
         heading="The night doesn't end at load-out."
-        lede="People who were there post photos and video to the event page, and nothing goes live until you approve it. Ratings tell you how it went, and your analytics tell you which venues and which cities actually turn up."
-        :chips="['Fan photos and video', 'Approval queue', 'Analytics', 'Post-event ratings, Pro']"
+        lede="People who were there post photos and video to the event page, and nothing goes live until you approve it. Ticket buyers can rate the night, and your analytics tell you which venue pages your dates are actually being seen on."
+        :chips="['Fan photos and video', 'Approval queue', 'Analytics, free', 'Ratings from buyers, Pro']"
         ground="white"
         frame="panel">
         <div class="space-y-3">
@@ -433,9 +433,9 @@
                 <span class="text-[11px] font-semibold text-gray-700 dark:text-gray-300">4.6 from 38 ratings</span>
             </div>
             <div class="space-y-1.5">
-                @foreach ([['Portland', 'w-full'], ['Seattle', 'w-8/12'], ['Eugene', 'w-5/12']] as [$city, $w])
+                @foreach ([['The Lantern', 'w-full'], ['Blue Room', 'w-8/12'], ['Open Mic', 'w-5/12']] as [$appearance, $w])
                     <div class="flex items-center gap-2">
-                        <span class="w-14 shrink-0 text-[10px] text-gray-500 dark:text-gray-400">{{ $city }}</span>
+                        <span class="w-14 shrink-0 truncate text-[10px] text-gray-500 dark:text-gray-400">{{ $appearance }}</span>
                         <span class="h-1.5 flex-1 rounded-full bg-gray-100 dark:bg-white/10">
                             <span class="block h-1.5 {{ $w }} rounded-full bg-gradient-to-r from-blue-500 to-cyan-500"></span>
                         </span>
@@ -508,7 +508,7 @@
                     What you get <span class="text-gradient-talent">free</span>, and what costs ${{ $proMonthly }}
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.1s;">
-                    Most performers never need to pay. The line is drawn at selling and promoting.
+                    Most performers never need to pay. The line is drawn at volume and promotion.
                 </p>
             </div>
 
@@ -523,8 +523,9 @@
                             'Booking requests from venues and curators',
                             '<a href="' . marketing_url('/features/calendar-sync') . '" class="font-medium text-blue-600 hover:underline dark:text-blue-400">Google Calendar, Outlook and CalDAV sync</a>',
                             'Website embed, iCal and RSS feeds',
-                            '<a href="' . marketing_url('/features/online-events') . '" class="font-medium text-blue-600 hover:underline dark:text-blue-400">Online and hybrid shows</a> with a streaming link',
-                            'Followers, with an email when you add dates',
+                            '<a href="' . marketing_url('/features/online-events') . '" class="font-medium text-blue-600 hover:underline dark:text-blue-400">Online and hybrid shows</a> with a link to wherever it happens',
+                            'Up to 25 paid tickets a month, with QR scanning at the door',
+                            'Followers you can email, 10 recipients a month',
                             'Fan photos, videos and comments, all approved by you',
                         ] as $freeItem)
                             <li class="flex gap-2.5">
@@ -547,10 +548,10 @@
                     </div>
                     <ul class="mb-6 space-y-2.5 text-sm text-gray-600 dark:text-gray-400">
                         @foreach ([
-                            'Sell tickets with QR check-in and zero platform fees',
+                            'Unlimited ticket sales, still zero platform fees',
                             'Season passes, visit passes and promo codes',
                             '100 newsletter recipients a month, up from 10',
-                            'Auto-generated event graphics for socials',
+                            'Auto-generated schedule graphics for socials',
                             'Remove Event Schedule branding',
                             'Boost events with Meta Ads',
                         ] as $proItem)

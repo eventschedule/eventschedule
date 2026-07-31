@@ -91,26 +91,39 @@ class RoleGuestSurfaceCharacterizationTest extends TestCase
         $this->assertStringContainsString('Calendar Event', $response->getContent());
     }
 
-    public function test_calendar_events_list_mode_includes_future_month_events(): void
+    public function test_calendar_events_include_future_month_events_but_map_stays_in_month(): void
     {
-        // The list layout loads all upcoming events in one flat fetch. A one-time event two months
-        // out must be excluded from the current-month calendar query but included when list=1 is set.
+        // Neither layout is bounded to the viewed month: the list layout loads every upcoming event
+        // in one flat fetch, and the calendar layout's mobile view is a flat four-month agenda with
+        // no month navigation, so a month-bounded fetch left later events unreachable there. What
+        // still holds the desktop grid to one month is eventsMap, which it renders its cells from.
         $owner = $this->createOwner();
         $role = $this->createRole($owner, 'venue', ['event_layout' => 'list']);
+
+        $thisMonth = now()->setTime(12, 0);
+        $future = now()->addMonthsNoOverflow(2)->setTime(12, 0);
+
+        $this->createEvent($role, [
+            'name' => 'This Month Event',
+            'starts_at' => $thisMonth->format('Y-m-d H:i:s'),
+        ]);
         $this->createEvent($role, [
             'name' => 'Next Month Event',
-            'starts_at' => now()->addMonthsNoOverflow(2)->setTime(12, 0)->format('Y-m-d H:i:s'),
+            'starts_at' => $future->format('Y-m-d H:i:s'),
         ]);
 
-        // Current-month calendar query (bounded window) should NOT contain the future-month event.
-        $bounded = $this->get('/'.$role->subdomain.'/api/calendar-events');
-        $bounded->assertOk();
-        $this->assertStringNotContainsString('Next Month Event', $bounded->getContent());
+        // Both the plain calendar fetch and the list fetch carry the future-month event.
+        foreach (['', '?list=1'] as $query) {
+            $response = $this->get('/'.$role->subdomain.'/api/calendar-events'.$query);
+            $response->assertOk();
+            $this->assertStringContainsString('Next Month Event', $response->getContent());
 
-        // List query (unbounded, row-capped) SHOULD contain it.
-        $list = $this->get('/'.$role->subdomain.'/api/calendar-events?list=1');
-        $list->assertOk();
-        $this->assertStringContainsString('Next Month Event', $list->getContent());
+            // The grid map still covers only the month being viewed, so the extra rows are loaded
+            // but never placed in a desktop calendar cell.
+            $eventsMap = (array) $response->json('eventsMap');
+            $this->assertArrayHasKey($thisMonth->format('Y-m-d'), $eventsMap);
+            $this->assertArrayNotHasKey($future->format('Y-m-d'), $eventsMap);
+        }
     }
 
     public function test_calendar_events_for_unclaimed_schedule_returns_empty_shell(): void

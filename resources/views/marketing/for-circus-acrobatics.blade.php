@@ -22,62 +22,6 @@
         }
     }
     </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "Is Event Schedule free for circus performers?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Event Schedule is free forever for sharing your performance schedule, building a fan following, and syncing with Google Calendar. Ticketing is available on the Pro plan with zero platform fees on ticket sales, and newsletters are free with a monthly send limit."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I manage tour dates and local shows in one schedule?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. List all your performances in one place - touring shows, local gigs, festival appearances, and private events. Use sub-schedules to organize by show type or tour leg. Fans see everything in one calendar."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "How do audiences discover my performances?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Fans can follow your schedule and receive email notifications for new shows. Share your schedule link on social media, your booking page, or embed it on your website. Send newsletters to followers with upcoming tour dates."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I sell tickets to my shows?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Connect your Stripe account and sell tickets directly from your schedule. Create different ticket types for different seating or experiences. Zero platform fees - you only pay Stripe's standard processing fees."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I sell class passes for my aerial or acro classes?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. On the Pro plan you can sell multi-use passes alongside regular tickets - like a 10-class pass or a monthly membership. Passes are redeemable across your events, usage is tracked automatically, and you can set a cancellation deadline for late drops. Zero platform fees apply to passes too."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can my whole troupe manage one schedule?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Every schedule includes one additional team member for free, and the Enterprise plan supports multiple team members - so your rigger, stage manager, and performers can all update the calendar. Enterprise also adds availability management to track who is free for each booking."
-                }
-            }
-        ]
-    }
-    </script>
     <!-- Product Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
@@ -96,15 +40,15 @@
         },
         "featureList": [
             "Festival circuit tracking for summer tours",
-            "Technical rigging specs for venue bookers",
-            "Workshop scheduling with multi-class passes",
-            "Troupe and ensemble collaboration",
+            "Technical rigging specs on your schedule page",
+            "Workshop scheduling with multi-class passes on Pro",
+            "Crew members and availability on Enterprise",
             "Zero-fee ticket sales with QR door check-in",
-            "Event planner booking kit",
+            "Booking request form for event planners",
             "Sub-schedules for shows, classes, and corporate gigs",
-            "Direct newsletter announcements to fans",
-            "Online event streaming and virtual tickets",
-            "Auto-generated show posters"
+            "Newsletters you write and send to your followers",
+            "Online events carried by one link field",
+            "Auto-generated show posters on Pro"
         ],
         "url": "{{ url()->current() }}",
         "keywords": "circus schedule, acrobat show calendar, circus performer booking, circus event management, free circus scheduling, aerial class passes, circus troupe schedule",
@@ -138,7 +82,7 @@
                 "@type": "HowToStep",
                 "position": 3,
                 "name": "Build your following",
-                "text": "Fans follow your schedule and get notified about performances in their area."
+                "text": "Fans follow your schedule, which gives you permission to email them. You write the newsletter and choose when it goes out."
             }
         ]
     }
@@ -350,8 +294,10 @@
         .dark .es-hero .es-spot { background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(255, 215, 0, 0.10), transparent 60%); }
 
         /* Big-top accent links + hover cards */
-        .es-circus-link { color: #b45309; transition: color 0.2s ease; }
-        .es-circus-link:hover { color: #92400e; }
+        /* #b45309 lands at 4.42 on the #f8efe6 band, just under AA, so the light
+           tone starts one step darker. */
+        .es-circus-link { color: #92400e; transition: color 0.2s ease; }
+        .es-circus-link:hover { color: #78350f; }
         .dark .es-circus-link { color: #FFB300; }
         .dark .es-circus-link:hover { color: #FFD700; }
         .es-circus-hover { transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; }
@@ -431,7 +377,7 @@
                     See the program
                     <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
                 </a>
-                <a href="{{ app_url('/sign_up?type=talent') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-amber-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-amber-500/40">
+                <a href="{{ app_url('/sign_up?type=talent') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-700 to-orange-700 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-amber-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-amber-500/40">
                     Create your performance schedule
                     <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -470,9 +416,9 @@
             ['num' => 'I', 'eyebrow' => 'Festival Circuit', 'title' => 'Track Your Tour', 'desc' => 'Renaissance faires, Burning Man, Fringe festivals - show fans every stop on your summer circuit.'],
             ['num' => 'II', 'eyebrow' => 'Technical Requirements', 'title' => 'Rigging & Tech Specs', 'desc' => 'Ceiling height, rigging points, weight capacity, floor space - share specs venues actually need.'],
             ['num' => 'III', 'eyebrow' => 'Teaching', 'title' => 'Fill Your Workshops', 'desc' => 'Aerial basics, fire safety, acro fundamentals - share your class schedule with students.'],
-            ['num' => 'IV', 'eyebrow' => 'Ensemble', 'title' => 'Coordinate Your Troupe', 'desc' => 'Aerialist, rigger, stage manager - everyone sees the schedule. No more group chat chaos.'],
-            ['num' => 'V', 'eyebrow' => 'Ticketing', 'title' => 'Keep 100% of Sales', 'desc' => 'Your show, your revenue. Zero platform fees. QR tickets for door check-in.'],
-            ['num' => 'VI', 'eyebrow' => 'Booking', 'title' => 'Event Planner Kit', 'desc' => 'One link with your availability, videos, specs, and rates. Perfect for corporate bookers and wedding planners.'],
+            ['num' => 'IV', 'eyebrow' => 'Ensemble', 'title' => 'Coordinate Your Troupe', 'desc' => 'Aerialist, rigger, stage manager - on Enterprise the whole crew edits the same schedule.'],
+            ['num' => 'V', 'eyebrow' => 'Ticketing', 'title' => 'Keep 100% of Sales', 'desc' => 'Your show, your revenue. Zero platform fees on every plan. QR tickets you scan at the door.'],
+            ['num' => 'VI', 'eyebrow' => 'Booking', 'title' => 'Event Planner Kit', 'desc' => 'One link with your dates, videos, specs, and rates, plus a booking request form. Perfect for corporate bookers and wedding planners.'],
         ];
     @endphp
     <section id="features" class="scroll-mt-24 overflow-x-clip bg-[#f8efe6] py-20 dark:bg-[#0f0f14] lg:py-28">
@@ -547,7 +493,7 @@
                             <div class="lg:order-last">
                                 <h3 class="mb-4 text-2xl font-black tracking-tight text-gray-900 dark:text-white lg:text-3xl">{{ $circusActs[1]['title'] }}</h3>
                                 <p class="mb-4 text-lg text-gray-600 dark:text-gray-400">{{ $circusActs[1]['desc'] }}</p>
-                                <p class="text-gray-600 dark:text-gray-400">Put your technical rider on the schedule with custom fields, so every booker sees exactly what your act requires before they call.</p>
+                                <p class="text-gray-600 dark:text-gray-400">Write your technical rider into your schedule description and it sits at the top of your page, on the same link as your dates, so every booker reads it before they call.</p>
                             </div>
                             <div aria-hidden="true">
                                 <div class="rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-white/10 dark:bg-black/40">
@@ -563,7 +509,7 @@
                                     </dl>
                                     <div class="mt-3 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                                         <svg aria-hidden="true" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
-                                        Attached to every booking link
+                                        On the same page as your dates
                                     </div>
                                 </div>
                             </div>
@@ -625,7 +571,7 @@
                             <div class="lg:order-last">
                                 <h3 class="mb-4 text-2xl font-black tracking-tight text-gray-900 dark:text-white lg:text-3xl">{{ $circusActs[3]['title'] }}</h3>
                                 <p class="mb-4 text-lg text-gray-600 dark:text-gray-400">{{ $circusActs[3]['desc'] }}</p>
-                                <p class="text-gray-600 dark:text-gray-400">One extra team member is included free. Enterprise adds your whole crew plus <a href="{{ marketing_url('/features/availability') }}" class="es-circus-link font-medium hover:underline">availability</a> tracking for every booking.</p>
+                                <p class="text-gray-600 dark:text-gray-400">A free schedule is one account. Enterprise adds up to five crew members and turns on <a href="{{ marketing_url('/features/availability') }}" class="es-circus-link font-medium hover:underline">availability</a>, where each of them marks the days they cannot work.</p>
                             </div>
                             <div aria-hidden="true">
                                 <div class="rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-white/10 dark:bg-black/40">
@@ -647,7 +593,7 @@
                                             <svg aria-hidden="true" class="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
                                         </div>
                                     </div>
-                                    <div class="mt-3 text-xs text-gray-500 dark:text-gray-400">Availability management on Enterprise</div>
+                                    <div class="mt-3 text-xs text-gray-500 dark:text-gray-400">Crew members and availability on Enterprise</div>
                                 </div>
                             </div>
                         </div>
@@ -669,7 +615,7 @@
                             <div>
                                 <h3 class="mb-4 text-2xl font-black tracking-tight text-gray-900 dark:text-white lg:text-3xl">{{ $circusActs[4]['title'] }}</h3>
                                 <p class="mb-4 text-lg text-gray-600 dark:text-gray-400">{{ $circusActs[4]['desc'] }}</p>
-                                <p class="text-gray-600 dark:text-gray-400">Stripe pays you directly. Promo codes for your regulars, waitlists for the sold-out nights - all on Pro.</p>
+                                <p class="text-gray-600 dark:text-gray-400">Stripe pays you directly. The free plan covers 25 paid tickets a month per schedule; Pro lifts the cap and adds promo codes for your regulars and waitlists for the sold-out nights.</p>
                             </div>
                             <div aria-hidden="true">
                                 <div class="rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-white/10 dark:bg-black/40">
@@ -713,12 +659,12 @@
                                         <span class="truncate font-mono text-sm font-semibold text-gray-900 dark:text-white">your-troupe.eventschedule.com</span>
                                     </div>
                                     <div class="mb-3 flex flex-wrap gap-1.5">
-                                        <span class="rounded bg-gray-200 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-gray-600 dark:bg-white/10 dark:text-gray-300">Availability</span>
+                                        <span class="rounded bg-gray-200 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-gray-600 dark:bg-white/10 dark:text-gray-300">Dates</span>
                                         <span class="rounded bg-gray-200 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-gray-600 dark:bg-white/10 dark:text-gray-300">Videos</span>
                                         <span class="rounded bg-gray-200 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-gray-600 dark:bg-white/10 dark:text-gray-300">Tech specs</span>
                                         <span class="rounded bg-gray-200 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-gray-600 dark:bg-white/10 dark:text-gray-300">Rates</span>
                                     </div>
-                                    <div class="rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 px-4 py-2.5 text-center text-sm font-semibold text-white">Booking inquiry</div>
+                                    <div class="rounded-xl bg-gradient-to-r from-amber-700 to-orange-700 px-4 py-2.5 text-center text-sm font-semibold text-white">Booking inquiry</div>
                                 </div>
                             </div>
                         </div>
@@ -743,7 +689,7 @@
                     Three rings. One <span class="es-circus-gold">schedule.</span>
                 </h2>
                 <p class="text-lg text-gray-600 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.14s;">
-                    Sub-schedules split your calendar into rings fans can follow separately - or all at once.
+                    Sub-schedules split one calendar into rings. Each ring gets its own link and its own colour, and your schedule link still shows the lot.
                 </p>
             </div>
 
@@ -752,7 +698,7 @@
                     <div class="es-circus-medal es-circus-medal-lg mx-auto"><span class="es-circus-medal-core"><span class="es-circus-numeral">I</span></span></div>
                     <div class="es-circus-announce-badge mt-4 text-xs text-amber-700 dark:text-amber-400">Ring I</div>
                     <h3 class="mb-2 mt-2 text-xl font-bold text-gray-900 dark:text-white">Troupe Shows</h3>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">Public performances under one banner. The schedule fans follow.</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Public performances under one banner. The ring most people turn up for.</p>
                 </div>
                 <div class="rounded-3xl border border-gray-200 bg-white p-8 text-center shadow-sm dark:border-white/10 dark:bg-white/[0.04]" data-reveal="panel">
                     <div class="es-circus-medal es-circus-medal-lg mx-auto"><span class="es-circus-medal-core"><span class="es-circus-numeral">II</span></span></div>
@@ -764,7 +710,7 @@
                     <div class="es-circus-medal es-circus-medal-lg mx-auto"><span class="es-circus-medal-core"><span class="es-circus-numeral">III</span></span></div>
                     <div class="es-circus-announce-badge mt-4 text-xs text-amber-700 dark:text-amber-400">Ring III</div>
                     <h3 class="mb-2 mt-2 text-xl font-bold text-gray-900 dark:text-white">Corporate & Private</h3>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">Quotes, galas, and festival buyouts - visible only where you share it.</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Quotes, galas, and festival buyouts. Hold each one as a draft until the contract is signed.</p>
                 </div>
             </div>
 
@@ -780,47 +726,48 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 4. The ring goes online (streaming)                          -->
+    <!-- 4. The ring goes online (one link field)                     -->
     <!-- ============================================================ -->
     <section class="bg-[#f8efe6] py-20 dark:bg-[#0f0f14] lg:py-24">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-2xl text-center">
                 <p class="es-circus-announce mx-auto max-w-md" data-reveal>And now, the ring goes online</p>
                 <h2 class="es-balance mb-4 mt-5 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
-                    Stream your act to the <span class="es-circus-gold">world</span>
+                    A ring the size of <span class="es-circus-gold">one link</span>
                 </h2>
                 <p class="text-lg text-gray-600 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.14s;">
-                    Sell tickets to virtual audiences worldwide. No venue needed. Your performance, broadcast from anywhere.
+                    Event Schedule does not host the stream. Tick Online, paste the URL people join on, and the date, the running order and the tickets work exactly as they do for a room with a floor.
                 </p>
             </div>
 
             <div class="grid items-center gap-10 md:grid-cols-2">
-                <!-- Streaming stage mock -->
+                <!-- Online event mock: the link field and where the link shows up -->
                 <div class="es-bento group relative" data-tilt="4" data-reveal="panel">
                     <div class="es-tilt-inner relative overflow-hidden rounded-3xl border border-gray-200 bg-white p-6 dark:border-white/10 dark:bg-white/[0.04]" aria-hidden="true">
-                        <div class="mb-4 rounded-xl border border-gray-200 bg-gray-900 p-4 dark:border-white/10">
-                            <div class="relative flex aspect-video items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-rose-500/30 to-gray-900">
-                                <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(245,158,11,0.15),transparent_70%)]"></div>
-                                <div class="absolute left-2 top-2 flex items-center gap-1.5 rounded bg-red-600 px-2 py-1 text-xs font-bold text-white">
-                                    <span class="h-2 w-2 motion-safe:animate-pulse rounded-full bg-white"></span> LIVE
-                                </div>
-                                <div class="absolute bottom-2 right-2 flex items-center gap-1 rounded bg-black/60 px-2 py-1 text-xs text-white">
-                                    <svg aria-hidden="true" class="h-3 w-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-                                    <span data-count-to="847">847</span> watching
-                                </div>
+                        <div class="mb-4 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-white/10 dark:bg-black/40">
+                            <div class="mb-3 flex items-center justify-between">
+                                <span class="text-sm font-semibold text-gray-900 dark:text-white">Midnight Silks, from the studio</span>
+                                <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-amber-500 dark:bg-amber-400"></span> Online
+                                </span>
+                            </div>
+                            <div class="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Link people join on</div>
+                            <div dir="ltr" class="truncate rounded-lg border border-gray-200 bg-white px-3 py-2 font-mono text-xs text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-gray-200">https://zoom.us/j/8471234567</div>
+                            <div class="mt-2 text-[11px] text-gray-500 dark:text-gray-400">Zoom, Meet, Teams, YouTube Live, Twitch, or a page on your own site. It is a link, not an integration.</div>
+                        </div>
+                        <div class="mb-3 space-y-2">
+                            <div class="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-2.5 dark:border-white/10 dark:bg-white/5">
+                                <span class="mt-0.5 shrink-0 text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">Listing</span>
+                                <span class="text-xs text-gray-700 dark:text-gray-200">zoom.us <span class="text-gray-500 dark:text-gray-400">- the domain only, so nobody walks in uninvited</span></span>
+                            </div>
+                            <div class="flex items-start gap-3 rounded-lg border border-amber-300/60 bg-amber-50 p-2.5 dark:border-amber-400/30 dark:bg-amber-500/10">
+                                <span class="mt-0.5 shrink-0 text-[10px] font-bold uppercase tracking-wide text-amber-700 dark:text-amber-300">Ticket</span>
+                                <span class="text-xs text-gray-700 dark:text-gray-200">The full join link, printed where the venue address would be</span>
                             </div>
                         </div>
-                        <div class="mb-3 max-h-20 space-y-1.5 overflow-hidden rounded-lg border border-gray-200 bg-gray-50 p-2 text-xs dark:border-white/10 dark:bg-white/5">
-                            <div class="flex items-start gap-2"><span class="shrink-0 font-medium text-amber-600 dark:text-amber-400">CircusFan:</span><span class="text-gray-600 dark:text-gray-300">Amazing drop!</span></div>
-                            <div class="flex items-start gap-2"><span class="shrink-0 font-medium text-rose-600 dark:text-rose-400">AerialLover:</span><span class="text-gray-600 dark:text-gray-300">The silk work is incredible</span></div>
-                            <div class="flex items-start gap-2"><span class="shrink-0 font-medium text-emerald-600 dark:text-emerald-400">NewViewer:</span><span class="text-gray-600 dark:text-gray-300">First time seeing aerial live!</span></div>
-                        </div>
                         <div class="flex items-center justify-between rounded-lg border border-amber-300 bg-amber-100 px-3 py-2 dark:border-amber-400/20 dark:bg-amber-500/10">
-                            <span class="text-sm text-gray-700 dark:text-gray-200">Virtual Tickets Sold</span>
-                            <span class="font-bold text-amber-700 dark:text-amber-300"><span data-count-to="234">234</span></span>
-                        </div>
-                        <div class="absolute -right-3 -top-3 motion-safe:animate-pulse rounded-full bg-gradient-to-r from-emerald-600 to-emerald-500 px-3 py-1.5 text-xs font-bold text-white shadow-lg">
-                            $25 tip from Sarah!
+                            <span class="text-sm text-gray-700 dark:text-gray-200">Platform fee on every ticket</span>
+                            <span class="font-bold text-emerald-600 dark:text-emerald-400">$0</span>
                         </div>
                         <span class="es-circus-silk bg-gradient-to-b from-rose-500/45 via-rose-500/15 to-transparent" style="left:12%;width:0.25rem;height:9rem;--d:0.4s;" aria-hidden="true"></span>
                         <div class="es-glare" aria-hidden="true"></div>
@@ -835,8 +782,8 @@
                             <svg aria-hidden="true" class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         </div>
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Perform for global audiences</h3>
-                            <p class="text-gray-600 dark:text-gray-400">Reach fans across continents without leaving your studio</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Any platform you already use</h3>
+                            <p class="text-gray-600 dark:text-gray-400">One link field takes any URL, so there is no account to connect and no token to reconnect</p>
                         </div>
                     </div>
                     <div class="flex gap-4" data-reveal>
@@ -844,8 +791,8 @@
                             <svg aria-hidden="true" class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
                         </div>
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Sell virtual tickets</h3>
-                            <p class="text-gray-600 dark:text-gray-400">Monetize your streams with paid access - keep 100%</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Ticket it like any other show</h3>
+                            <p class="text-gray-600 dark:text-gray-400">Same ticket types, same zero platform fees, and the join link rides on the ticket. Free registration produces a ticket too</p>
                         </div>
                     </div>
                     <div class="flex gap-4" data-reveal>
@@ -853,8 +800,8 @@
                             <svg aria-hidden="true" class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                         </div>
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Schedule recurring shows</h3>
-                            <p class="text-gray-600 dark:text-gray-400">Build a regular online audience with scheduled streams</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Or run it both ways at once</h3>
+                            <p class="text-gray-600 dark:text-gray-400">Tick In person as well and the same date is a hybrid, with the room and the link on one listing</p>
                         </div>
                     </div>
                     <div data-reveal>
@@ -1088,7 +1035,7 @@
                     <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-7 text-center backdrop-blur-sm" data-reveal="panel">
                         <div class="es-circus-medal mx-auto mb-5"><span class="es-circus-medal-core"><span class="es-circus-numeral">III</span></span></div>
                         <h3 class="mb-2 text-lg font-semibold text-white">Build your following</h3>
-                        <p class="text-sm text-gray-400">Fans follow your schedule and get notified about performances in their area.</p>
+                        <p class="text-sm text-gray-400">Following gives you permission to email them. You write the newsletter and pick the moment it goes out.</p>
                     </div>
                 </div>
             </div>
@@ -1108,12 +1055,12 @@
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Event Graphics" description="Show posters generated from your events" :url="marketing_url('/features/event-graphics')" icon-color="amber">
+                    <x-feature-link-card name="Event Graphics" description="Show posters generated from your events, on Pro" :url="marketing_url('/features/event-graphics')" icon-color="amber">
                         <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Newsletters" description="Send event updates directly to followers' inboxes" :url="marketing_url('/features/newsletters')" icon-color="amber">
+                    <x-feature-link-card name="Newsletters" description="Write your own updates and send them to your followers" :url="marketing_url('/features/newsletters')" icon-color="amber">
                         <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
@@ -1180,31 +1127,55 @@
                 </p>
             </div>
 
+            @php
+                $faqs = [
+                    [
+                        'q' => 'Is Event Schedule free for circus performers?',
+                        'a' => 'Yes, for most of it. Sharing your performance schedule, sub-schedules, two-way calendar sync, an embeddable calendar, free registration with a capacity, the booking request form and appointment booking are all free forever. Selling paid tickets is free up to 25 a month per schedule, and Pro lifts that cap. Newsletters are free up to 10 recipients a month, counted per recipient rather than per send, with 100 on Pro and 1,000 on Enterprise.',
+                    ],
+                    [
+                        'q' => 'Can I manage tour dates and local shows in one schedule?',
+                        'a' => 'Yes. List all your performances in one place - touring shows, local gigs, festival appearances, and private events. Use sub-schedules to sort and colour-code by show type or tour leg, each with its own link. Your schedule link still shows everything in one calendar.',
+                    ],
+                    [
+                        'q' => 'How do audiences discover my performances?',
+                        'a' => 'Share your schedule link on social media, on your booking page, or embed the calendar on your website. Fans who follow you are giving you permission to email them, and there is no automatic alert: you write the newsletter and choose when it goes out, so followers hear from you when you have something to say.',
+                    ],
+                    [
+                        'q' => 'Can I sell tickets to my shows?',
+                        'a' => 'Yes. Connect your Stripe account and sell tickets directly from your schedule. Create as many ticket types as the night needs, each at its own fixed price, with its own inventory per date. Zero platform fees on every plan - you only pay Stripe\'s standard processing fees. There is no seating chart, so a tier like Ringside is a ticket type rather than a numbered seat.',
+                    ],
+                    [
+                        'q' => 'Can I sell class passes for my aerial or acro classes?',
+                        'a' => 'Yes. On the Pro plan you can sell multi-use passes alongside regular tickets - a 10-visit pass, an unlimited membership, a festival pass or a season pass on a recurring class. Passes are redeemable across the events you scope them to, usage is counted for you, and you can set a cancellation deadline for late drops. Zero platform fees apply to passes too.',
+                    ],
+                    [
+                        'q' => 'Can my whole troupe manage one schedule?',
+                        'a' => 'On Enterprise, yes. A free schedule is a single account. Enterprise adds team members, up to five on the hosted plans, so your rigger, stage manager, and performers can all update the calendar. Enterprise also turns on availability for talent schedules, where each member marks the days they cannot work and you see it against the calendar.',
+                    ],
+                ];
+            @endphp
+
             <div class="space-y-4" data-reveal-group="80">
-                @foreach ([
-                    ['Is Event Schedule free for circus performers?', 'Yes. Event Schedule is free forever for sharing your performance schedule, building a fan following, and syncing with Google Calendar. Ticketing is available on the Pro plan with zero platform fees on ticket sales, and newsletters are free with a monthly send limit.'],
-                    ['Can I manage tour dates and local shows in one schedule?', 'Yes. List all your performances in one place - touring shows, local gigs, festival appearances, and private events. Use sub-schedules to organize by show type or tour leg. Fans see everything in one calendar.'],
-                    ['How do audiences discover my performances?', 'Fans can follow your schedule and receive email notifications for new shows. Share your schedule link on social media, your booking page, or embed it on your website. Send newsletters to followers with upcoming tour dates.'],
-                    ['Can I sell tickets to my shows?', 'Yes. Connect your Stripe account and sell tickets directly from your schedule. Create different ticket types for different seating or experiences. Zero platform fees - you only pay Stripe\'s standard processing fees.'],
-                    ['Can I sell class passes for my aerial or acro classes?', 'Yes. On the Pro plan you can sell multi-use passes alongside regular tickets - like a 10-class pass or a monthly membership. Passes are redeemable across your events, usage is tracked automatically, and you can set a cancellation deadline for late drops. Zero platform fees apply to passes too.'],
-                    ['Can my whole troupe manage one schedule?', 'Yes. Every schedule includes one additional team member for free, and the Enterprise plan supports multiple team members - so your rigger, stage manager, and performers can all update the calendar. Enterprise also adds availability management to track who is free for each booking.'],
-                ] as [$q, $a])
+                @foreach ($faqs as $faq)
                     <details name="faq" data-reveal class="group/faq es-circus-hover overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
                         <summary class="flex cursor-pointer items-center justify-between gap-3 p-6">
                             <div class="flex items-center gap-3">
                                 <svg aria-hidden="true" class="h-4 w-4 shrink-0 text-amber-500 dark:text-amber-400" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8 5.8 21.3l2.4-7.4L2 9.4h7.6z"/></svg>
-                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $faq['q'] }}</h3>
                             </div>
                             <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{{ $a }}</p>
+                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{{ $faq['a'] }}</p>
                     </details>
                 @endforeach
             </div>
         </div>
     </section>
+
+    <x-seo.faq-schema :items="$faqs" />
 
     <!-- ============================================================ -->
     <!-- 11. Grand finale: take your bow                              -->
@@ -1237,7 +1208,7 @@
                                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
                             <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
-                        <a href="{{ app_url('/sign_up?type=talent') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-amber-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-orange-500/40">
+                        <a href="{{ app_url('/sign_up?type=talent') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-amber-700 to-orange-700 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-amber-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-orange-500/40">
                             <span class="relative z-10 flex items-center gap-2">
                                 Get Started Free
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">

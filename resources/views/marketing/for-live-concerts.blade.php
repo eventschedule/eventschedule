@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Free Event Schedule for Live Concerts | Promote Your Shows</x-slot>
-    <x-slot name="description">Stream live concerts to fans worldwide. Sell virtual tickets alongside venue tickets, email fans directly, and manage your schedule. Zero platform fees.</x-slot>
+    <x-slot name="description">Put a whole tour routing online at once: a room, a door time and an on-sale in every city. Sell livestream tickets beside room tickets, write to your followers yourself. Zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">For Live Concerts</x-slot>
 
     <x-slot name="structuredData">
@@ -616,7 +616,7 @@
             ],
             [
                 'q' => 'Can I sell virtual tickets and venue tickets for the same show?',
-                'a' => 'Yes. They are two named ticket types on the same date, so one can be "Standing" at thirty and the other "Livestream" at twelve, each with its own price, quantity and sales window. Selling is free up to 25 paid tickets a month and five dollars a month on Pro past that, Event Schedule charges zero platform fees on the sale either way, and buyers get the stream link on their own ticket page. The public event page names only the domain you are streaming on.',
+                'a' => 'Yes. They are two named ticket types on the same date, so one can be "Standing" at thirty and the other "Livestream" at twelve, each with its own price, quantity and sales window. Selling is free up to 25 paid tickets a month and five dollars a month on Pro past that, and Event Schedule charges zero platform fees on the sale either way. The full stream link lives on the buyer\'s own ticket page: the public event page shows the room, or the domain you are streaming on when the date has no room at all.',
             ],
             [
                 'q' => 'What streaming platforms does Event Schedule work with?',
@@ -624,7 +624,7 @@
             ],
             [
                 'q' => 'Is Event Schedule really free for streaming concerts?',
-                'a' => 'Yes. Unlimited dates, the whole routing on one address, recurring residencies with date exceptions, sub-schedules, two-way Google, Outlook and CalDAV sync, the embeddable calendar, free registration with a capacity limit, built-in analytics, ten newsletter emails a month, selling up to 25 paid tickets a month and scanning them at the door are all free forever. Unlimited ticket sales, passes and the live check-in dashboard are five dollars a month on Pro. There are zero platform fees on ticket sales at every tier, and past your own Stripe account the money is yours.',
+                'a' => 'Yes. Unlimited dates, the whole routing on one address, recurring residencies with date exceptions, sub-schedules, two-way Google, Outlook and CalDAV sync, the embeddable calendar, free registration with a capacity limit, built-in analytics, ten newsletter recipients a month, selling up to 25 paid tickets a month and scanning them at the door are all free forever. Unlimited ticket sales, passes and the live check-in dashboard are five dollars a month on Pro. There are zero platform fees on ticket sales at every tier, and past your own Stripe account the money is yours.',
             ],
             [
                 'q' => 'What happens when a date moves or gets pulled?',
@@ -963,7 +963,7 @@
                             <h3 class="es-stage-ink text-lg font-bold">Codes for the people you want back</h3>
                             <span class="es-stage-plan es-stage-plan-pro">Pro</span>
                         </div>
-                        <p class="es-stage-muted text-sm">Percentage or fixed discount codes with usage limits and an expiry, plus a rate that kicks in once somebody buys several at once.</p>
+                        <p class="es-stage-muted text-sm">Percentage or fixed discount codes with usage limits and an expiry. The volume rate that drops the price once somebody buys several at once sits on the ticket instead, and that part is free.</p>
                     </div>
                     <div class="es-stage-card p-6" data-reveal="panel">
                         <div class="mb-3 flex flex-wrap items-center gap-2">
@@ -1105,7 +1105,7 @@
                                 <span class="es-stage-plan">Free</span>
                             </div>
                             <p class="es-stage-muted mb-4">Embed the calendar in your own site so the routing lives where people look you up, and sync two ways with Google, Outlook and CalDAV so the dates land in the calendar the crew actually reads.</p>
-                            <p class="es-stage-muted text-sm">Any single date downloads as an .ics file, and a residency's individual dates do too, which is what a promoter forwards to a room's production manager.</p>
+                            <p class="es-stage-muted text-sm">Any single date downloads as an .ics file, and a residency's individual dates do too, which is what a promoter forwards to a room's production manager. A residency syncs across as one entry, though: the subscribe feed is what unrolls every night of it.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1117,10 +1117,10 @@
                     <div class="es-tilt-inner es-stage-card relative flex h-full flex-col overflow-hidden p-7">
                         <div class="relative z-10">
                             <div class="mb-4 flex flex-wrap items-center gap-2">
-                                <h3 class="es-stage-ink text-xl font-bold">Bands asking for the slot</h3>
+                                <h3 class="es-stage-ink text-xl font-bold">Promoters asking for a date</h3>
                                 <span class="es-stage-plan">Free</span>
                             </div>
-                            <p class="es-stage-muted">Turn on requests and the acts who want a support slot submit the date themselves. It arrives on your requests tab and you get the email, rather than digging it out of six inboxes.</p>
+                            <p class="es-stage-muted">Turn requests on and whoever wants to book you fills in the night, the room and their own contact details. It lands on your requests tab and you get the email, rather than digging it out of six inboxes.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1166,7 +1166,7 @@
                                 <h3 class="es-stage-ink text-xl font-bold">The announce graphic</h3>
                                 <span class="es-stage-plan es-stage-plan-pro">Pro</span>
                             </div>
-                            <p class="es-stage-muted">Generate a share image from a date in a story, square, portrait or landscape crop. It is built from the event, so the room, the date and the door time are already correct.</p>
+                            <p class="es-stage-muted">Generate one share image of the dates coming up, in a story, square, portrait or landscape crop. It is built from the flyers already on those events, up to twenty of them, so a date with no flyer of its own sits this one out.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
