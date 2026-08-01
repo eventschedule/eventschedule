@@ -13,6 +13,7 @@ use App\Services\AppointmentService;
 use App\Services\AuditService;
 use App\Services\WebhookService;
 use App\Traits\ReschedulesAppointments;
+use App\Utils\HoneypotUtils;
 use App\Utils\IcsUtils;
 use App\Utils\MoneyUtils;
 use App\Utils\TurnstileUtils;
@@ -91,9 +92,10 @@ class AppointmentController extends Controller
     /** POST /book/{typeSlug} - create the booking. Returns JSON (redirect_url | error | errors). */
     public function book(Request $request, $subdomain, $typeSlug)
     {
-        // Honeypot: silently bounce back to the chooser.
-        if ($request->filled('website')) {
-            return response()->json(['redirect_url' => route('appointments.book', ['subdomain' => $subdomain])]);
+        // Honeypot. An error rather than the old silent bounce to the chooser, which
+        // discarded a false positive's name, email and chosen slot without saying why.
+        if (HoneypotUtils::isTripped($request)) {
+            return response()->json(['error' => __('messages.invalid_request')], 422);
         }
 
         $role = $this->resolveRole($subdomain);

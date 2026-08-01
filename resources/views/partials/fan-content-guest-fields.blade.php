@@ -9,9 +9,15 @@
     forms repeat once per event part, and rendering a Turnstile widget in each would
     put dozens on a page. One shared widget (partials.fan-content-turnstile) fills
     every form's token on submit.
+
+    The honeypot lives here too, so it renders under exactly the same condition as the
+    server-side check in EventController::guestSubmitterAttributes(). Turnstile is off
+    whenever TURNSTILE_* is unset (every selfhost install) and on custom domains, so on
+    those the honeypot is the only anti-spam layer these forms have.
 --}}
 @php $fanGuestRole = $role ?? null; @endphp
 @if ($fanGuestRole && ! auth()->check() && ! $fanGuestRole->fan_content_require_account)
+<x-honeypot />
 <div class="flex flex-col sm:flex-row gap-2">
     <input type="text" name="guest_name" required maxlength="255"
            placeholder="{{ __('messages.name') }}" autocomplete="name"

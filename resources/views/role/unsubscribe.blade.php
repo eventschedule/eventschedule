@@ -16,6 +16,7 @@
         <!-- Manual unsubscribe form -->
         <form method="POST" action="{{ route('role.unsubscribe') }}">
             @csrf
+            <x-honeypot />
 
             <!-- Email Address -->
             <div>

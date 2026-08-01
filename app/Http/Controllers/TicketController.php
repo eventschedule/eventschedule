@@ -26,6 +26,7 @@ use App\Services\TicketVolumeDiscount;
 use App\Services\UsageTrackingService;
 use App\Services\WebhookService;
 use App\Utils\CsvUtils;
+use App\Utils\HoneypotUtils;
 use App\Utils\InvoiceNinja;
 use App\Utils\MoneyUtils;
 use App\Utils\QrCodeUtils;
@@ -947,8 +948,10 @@ class TicketController extends Controller
 
     public function checkout(TicketCheckoutRequest $request, $subdomain)
     {
-        if ($request->filled('website')) {
-            return back();
+        // Honeypot. withInput() matters: a bare back() on a false positive returns the
+        // buyer to an emptied form with no explanation, and the next click looks dead.
+        if (HoneypotUtils::isTripped($request)) {
+            return back()->withInput()->with('error', __('messages.invalid_request'));
         }
 
         // canSellTickets() below reads both relations; without this they lazy-load on the
@@ -1656,8 +1659,9 @@ class TicketController extends Controller
 
     public function rsvp(Request $request, $subdomain)
     {
-        if ($request->filled('website')) {
-            return back();
+        // Honeypot. See checkout() for why this returns the input.
+        if (HoneypotUtils::isTripped($request)) {
+            return back()->withInput()->with('error', __('messages.invalid_request'));
         }
 
         $rules = [

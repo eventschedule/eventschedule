@@ -41,6 +41,7 @@ use App\Services\UsageTrackingService;
 use App\Utils\ColorUtils;
 use App\Utils\DateUtils;
 use App\Utils\GeminiUtils;
+use App\Utils\HoneypotUtils;
 use App\Utils\ImageUtils;
 use App\Utils\OpenAIUtils;
 use App\Utils\PhoneUtils;
@@ -60,6 +61,7 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class RoleController extends Controller
 {
@@ -5356,7 +5358,15 @@ class RoleController extends Controller
             }
             $email = base64_decode($request->email);
         } else {
-            // Form-based unsubscription (manual entry, CSRF-protected)
+            // Form-based unsubscription (manual entry, CSRF-protected).
+            // Honeypot as a ValidationException, not a flash error: the page uses
+            // x-auth-layout, which renders only per-field errors.
+            if (HoneypotUtils::isTripped($request)) {
+                throw ValidationException::withMessages([
+                    'email' => __('messages.invalid_request'),
+                ]);
+            }
+
             $request->validate(['email' => 'required|email']);
             $email = $request->email;
         }

@@ -35,10 +35,7 @@
             <form method="post" action="{{ route('gift_card.purchase.store', ['subdomain' => $role->subdomain]) }}">
                 @csrf
 
-                {{-- Honeypot --}}
-                <div style="display:none" aria-hidden="true">
-                    <input type="text" name="website" value="" tabindex="-1" autocomplete="off">
-                </div>
+                <x-honeypot />
 
                 {{-- Amount --}}
                 <div class="mb-6">

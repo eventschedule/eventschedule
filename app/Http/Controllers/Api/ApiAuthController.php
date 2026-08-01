@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Notifications\SignupVerificationCode;
 use App\Rules\NoFakeEmail;
 use App\Services\AuditService;
+use App\Utils\HoneypotUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -22,8 +23,9 @@ class ApiAuthController extends Controller
             return response()->json(['error' => 'Registration codes are only required in hosted mode'], 400);
         }
 
-        // Honeypot check
-        if ($request->filled('website')) {
+        // Honeypot check. The body is a documented API contract (see the developer docs),
+        // so it stays as-is rather than moving to messages.invalid_request.
+        if (HoneypotUtils::isTripped($request)) {
             return response()->json(['error' => 'Invalid request'], 422);
         }
 
@@ -77,8 +79,9 @@ class ApiAuthController extends Controller
 
     public function register(Request $request)
     {
-        // Honeypot check
-        if ($request->filled('website')) {
+        // Honeypot check. The body is a documented API contract (see the developer docs),
+        // so it stays as-is rather than moving to messages.invalid_request.
+        if (HoneypotUtils::isTripped($request)) {
             return response()->json(['error' => 'Invalid request'], 422);
         }
 

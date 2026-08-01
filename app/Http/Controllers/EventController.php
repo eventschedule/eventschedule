@@ -45,6 +45,7 @@ use App\Services\UsageTrackingService;
 use App\Services\WebhookService;
 use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
+use App\Utils\HoneypotUtils;
 use App\Utils\ImageUtils;
 use App\Utils\MoneyUtils;
 use App\Utils\UrlUtils;
@@ -2205,6 +2206,11 @@ class EventController extends Controller
 
     public function guestParse(EventParseRequest $request, $subdomain)
     {
+        // Honeypot: bail before the request reaches Gemini, which costs real quota.
+        if (HoneypotUtils::isTripped($request)) {
+            return response()->json(['error' => __('messages.invalid_request')], 422);
+        }
+
         $details = request()->input('event_details');
         $file = null;
 
@@ -2302,6 +2308,12 @@ class EventController extends Controller
 
     public function guestImport(Request $request, $subdomain)
     {
+        // Honeypot. Checked here rather than in guestImportWithAccount() so it also covers
+        // the AI-import branch below, which curators without require_account use.
+        if (HoneypotUtils::isTripped($request)) {
+            return response()->json(['message' => __('messages.invalid_request')], 422);
+        }
+
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         if (! $role->acceptEventRequests()) {
@@ -2395,11 +2407,6 @@ class EventController extends Controller
     {
         if (is_demo_mode()) {
             return response()->json(['message' => __('messages.not_authorized')], 403);
-        }
-
-        // Honeypot
-        if ($request->filled('website')) {
-            return response()->json(['message' => __('messages.invalid_request')], 422);
         }
 
         // Server backstop for the curator-configured required submission fields (the form
@@ -2888,6 +2895,12 @@ class EventController extends Controller
 
     public function bookingRequest(Request $request, $subdomain)
     {
+        // Honeypot. Before the cap check and before createAndLoginUser() below, so a bot
+        // can neither burn the schedule's daily allowance nor mint an account.
+        if (HoneypotUtils::isTripped($request)) {
+            return back()->withInput()->with('error', __('messages.invalid_request'));
+        }
+
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         if (! $role->usesBookingForm() || ! $role->acceptEventRequests()) {
@@ -3130,6 +3143,12 @@ class EventController extends Controller
             return response()->json(['error' => __('messages.demo_mode_restriction')], 403);
         }
 
+        // Honeypot. 200 rather than an error status: the caller throws a generic
+        // "Request failed" on !response.ok, and only reads data.message on a 200.
+        if (HoneypotUtils::isTripped($request)) {
+            return response()->json(['success' => false, 'message' => __('messages.invalid_request')]);
+        }
+
         $file = $request->file('image');
 
         if (! $file) {
@@ -3228,6 +3247,13 @@ class EventController extends Controller
      */
     private function guestSubmitterAttributes(Request $request)
     {
+        // Honeypot. First, so submitPhoto bails before it writes the upload to temp.
+        // This runs under exactly the condition that renders partials.fan-content-guest-fields,
+        // so the field is always present when the check applies.
+        if (HoneypotUtils::isTripped($request)) {
+            return redirect()->back()->withInput()->with('error', __('messages.invalid_request'));
+        }
+
         $name = trim((string) $request->input('guest_name'));
         $email = trim((string) $request->input('guest_email'));
 

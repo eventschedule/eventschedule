@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\User;
 use App\Services\AuditService;
+use App\Utils\HoneypotUtils;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
@@ -40,6 +42,14 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
+        // Honeypot. A ValidationException rather than a flash error: x-auth-layout renders
+        // only per-field errors, so with('error') would be swallowed by the layout.
+        if (HoneypotUtils::isTripped($request)) {
+            throw ValidationException::withMessages([
+                'email' => __('messages.invalid_request'),
+            ]);
+        }
+
         $request->authenticate();
 
         $user = Auth::user();

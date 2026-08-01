@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\AuditService;
+use App\Utils\HoneypotUtils;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use PragmaRX\Google2FA\Google2FA;
 
@@ -37,6 +39,14 @@ class TwoFactorChallengeController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // Honeypot. A ValidationException rather than a flash error: x-auth-layout renders
+        // only per-field errors, so with('error') would be swallowed by the layout.
+        if (HoneypotUtils::isTripped($request)) {
+            throw ValidationException::withMessages([
+                'code' => __('messages.invalid_request'),
+            ]);
+        }
+
         $loginId = $request->session()->get('login.id');
         $loginExpires = $request->session()->get('login.expires');
 

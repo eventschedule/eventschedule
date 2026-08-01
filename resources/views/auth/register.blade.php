@@ -521,10 +521,7 @@
         </div>
         @endif
 
-        <!-- Honeypot field -->
-        <div class="hidden">
-            <input type="text" name="website" autocomplete="off" tabindex="-1">
-        </div>
+        <x-honeypot />
 
         <!-- Turnstile widget -->
         @if (\App\Utils\TurnstileUtils::isEnabled())

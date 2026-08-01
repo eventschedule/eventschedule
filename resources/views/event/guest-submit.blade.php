@@ -442,8 +442,7 @@
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">{{ __('messages.your_details') }}</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">{{ __('messages.your_details_help') }}</p>
 
-                {{-- Honeypot --}}
-                <input type="text" v-model="honeypot" name="website" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">
+                <x-honeypot vmodel="honeypot" />
 
                 {{-- Posting as (authenticated user with exactly one schedule) --}}
                 <p v-if="postingAsName" class="text-sm text-gray-700 dark:text-gray-300 mb-4">
@@ -1249,6 +1248,7 @@
                 try {
                     const formData = new FormData();
                     formData.append('image', file);
+                    formData.append('website', this.honeypot);
                     const response = await fetch('{{ route("event.guest_upload_image", ["subdomain" => $role->subdomain]) }}', {
                         method: 'POST',
                         headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
@@ -1361,6 +1361,7 @@
                 try {
                     const formData = new FormData();
                     formData.append('event_details', this.autoFillText);
+                    formData.append('website', this.honeypot);
                     if (this.autoFillImage) {
                         formData.append('details_image', this.autoFillImage);
                     }

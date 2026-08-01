@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\TicketWaitlist;
+use App\Utils\HoneypotUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 
@@ -12,6 +13,12 @@ class WaitlistController extends Controller
 {
     public function join(Request $request, $subdomain)
     {
+        // Honeypot. 200 rather than an error status: the caller throws a generic
+        // "Request failed" on !response.ok, and only renders data.message on a 200.
+        if (HoneypotUtils::isTripped($request)) {
+            return response()->json(['success' => false, 'message' => __('messages.invalid_request')]);
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',

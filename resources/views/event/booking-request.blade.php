@@ -131,6 +131,7 @@
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl p-6 sm:p-8 lg:p-16 pt-6 lg:pt-8 max-w-4xl mx-auto">
           <form id="booking-request-form" method="POST" action="{{ route('event.booking_request.store', ['subdomain' => $role->subdomain]) }}">
             @csrf
+            <x-honeypot />
 
             {{-- Event Details Section --}}
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.event_details') }}</h3>

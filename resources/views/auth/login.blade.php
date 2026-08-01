@@ -4,6 +4,7 @@
 
     <form method="POST" action="{{ route('login') }}" class="w-full">
         @csrf
+        <x-honeypot />
 
         <!-- Email Address -->
         <div>

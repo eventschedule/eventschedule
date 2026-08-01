@@ -155,7 +155,6 @@
                 'currentSlotTag' => __('messages.appointments_current_slot_tag'),
                 'retry' => __('messages.retry'),
                 'loading' => __('messages.loading'),
-                'today' => __('messages.today'),
                 'prevMonth' => __('messages.previous_month'),
                 'nextMonth' => __('messages.next_month'),
                 'timezone' => __('messages.timezone'),
@@ -200,6 +199,21 @@
         #booking-app .es-slot { border-color: var(--es-accent-readable); color: var(--es-accent-readable); }
         #booking-app .es-slot-armed { background-color: var(--es-accent); border-color: var(--es-accent); color: var(--es-accent-text); }
 
+        /* Compact fact chips for the rail. Custom dark palette, per the app's own scale: the guest
+           card is #252526 in dark mode, so the chip sits one shade above it. */
+        #booking-app .es-fact {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            border-radius: 9999px;
+            background-color: #f3f4f6;
+            padding: 0.125rem 0.5rem;
+            font-size: 0.75rem;
+            line-height: 1.25rem;
+            color: #2d2d30;
+        }
+        .dark #booking-app .es-fact { background-color: #2d2d30; color: #d1d5db; }
+
         /* No global outline reset here, but the UA ring is unreliable against an accent fill. */
         #booking-app button:focus-visible,
         #booking-app a:focus-visible,
@@ -212,35 +226,46 @@
     </style>
 
     <noscript>
-        <div class="max-w-4xl mx-auto px-4 py-8">
+        <div class="max-w-5xl mx-auto px-4 py-8">
             <div class="rounded-2xl border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-6 text-amber-800 dark:text-amber-200">
                 {{ __('messages.appointments_enable_js') }}
             </div>
         </div>
     </noscript>
 
-    <div id="booking-app" data-props="{{ json_encode($props) }}" class="max-w-4xl mx-auto px-4 py-8">
+    {{-- max-w-5xl, and the rail is a fixed 20rem rather than a third: the extra width all goes to the
+         picker, which is what turns the slot list into two readable columns. --}}
+    <div id="booking-app" data-props="{{ json_encode($props) }}" class="max-w-5xl mx-auto px-4 py-8">
         {{-- The guest page background comes from the schedule's own theme and does not follow dark
              mode - and it defaults to a photo or a random gradient - so the widget needs an opaque
              surface of its own in BOTH modes, and every child carries an explicit text color. --}}
         <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm overflow-hidden md:flex">
             {{-- Left panel --}}
-            <div class="md:w-1/3 p-6 border-b md:border-b-0 md:border-e border-gray-200 dark:border-gray-700">
+            {{-- A fixed 320px rail only from lg. Pinning it at md took 75px off the picker at a 768px
+                 viewport (rail 320 vs the 245 a third used to give it), which is where the two-column
+                 slot grid is tightest - the opposite of what widening the card was for. --}}
+            <div class="md:w-1/3 lg:w-80 lg:flex-shrink-0 p-6 border-b md:border-b-0 md:border-e border-gray-200 dark:border-gray-700">
                 <a :href="backUrl" class="text-xs text-gray-500 dark:text-gray-400 hover:underline"><span class="inline-block rtl:rotate-180">&larr;</span> @{{ mode === 'reschedule' ? t.rescheduleKeep : t.back }}</a>
                 <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100 mt-2">@{{ typeName }}</h1>
                 <p class="text-sm text-gray-600 dark:text-gray-400">@{{ scheduleName }}</p>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">@{{ duration }} @{{ t.minutes }} &middot; @{{ priceLabel }}</p>
-                {{-- Where the appointment happens. The guest could not see this at all before, so
-                     "is this a call or do I travel?" was only answered by the confirmation email. --}}
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1 flex items-start gap-1.5">
-                    <svg v-if="locationType === 'online'" class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                    <svg v-else-if="locationType === 'phone'" class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-                    <svg v-else class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                    <span>@{{ locationLabel }}<span v-if="locationDetail"> &middot; @{{ locationDetail }}</span></span>
-                </p>
+                {{-- One wrapped row of facts rather than four stacked lines. Below md the rail sits
+                     above the calendar, so every line here is a line the picker starts further down.
+                     Where the appointment happens is part of it: the guest could not see that at all
+                     before, so "is this a call or do I travel?" was only answered by the email. --}}
+                <div class="mt-2 flex flex-wrap items-center gap-1.5">
+                    <span class="es-fact">@{{ duration }} @{{ t.minutes }}</span>
+                    <span class="es-fact">@{{ priceLabel }}</span>
+                    <span class="es-fact">
+                        <svg v-if="locationType === 'online'" class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                        <svg v-else-if="locationType === 'phone'" class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                        <svg v-else class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        @{{ locationLabel }}
+                    </span>
+                    <span v-if="requiresApproval" class="es-fact">@{{ t.requiresConfirmation }}</span>
+                </div>
+                <p v-if="locationDetail" class="text-xs text-gray-500 dark:text-gray-400 mt-2">@{{ locationDetail }}</p>
                 <p v-if="locationNote" class="text-xs text-gray-500 dark:text-gray-400 mt-1">@{{ locationNote }}</p>
-                <p v-if="requiresApproval" class="inline-block mt-2 text-xs px-2 py-1 rounded-full border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300">@{{ t.requiresConfirmation }}</p>
-                <p v-if="t.minNoticeHint && mode !== 'reschedule'" class="text-xs text-gray-500 dark:text-gray-400 mt-2">@{{ t.minNoticeHint }}</p>
+                <p v-if="t.minNoticeHint && mode !== 'reschedule'" class="text-xs text-gray-500 dark:text-gray-400 mt-1">@{{ t.minNoticeHint }}</p>
 
                 {{-- What they are moving, and from when. Without this the picker gives no clue which
                      booking is in play or what time it currently holds. --}}
@@ -262,37 +287,42 @@
 
                 <p v-if="mode === 'reschedule' && ownerMode" class="mt-4 text-xs text-gray-500 dark:text-gray-400">@{{ t.ownerNote }}</p>
                 <p v-if="typeDescription" class="text-sm text-gray-600 dark:text-gray-300 mt-3">@{{ typeDescription }}</p>
-
-                {{-- Timezone. The full IANA list is ~430 unlabelled entries, so the common zones come
-                     first and the rest sit behind a filter. --}}
-                <div class="mt-6">
-                    <button type="button" @click="toggleTz" aria-controls="tz-panel" :aria-expanded="tzOpen ? 'true' : 'false'"
-                        class="inline-flex items-center gap-1 text-xs px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300">
-                        <span aria-hidden="true">&#127760;</span> <span aria-live="polite">@{{ t.timesShownIn }} @{{ tz }}</span>
-                    </button>
-                    <div v-if="tzOpen" id="tz-panel" class="mt-2">
-                        <label class="sr-only" for="tz-select">@{{ t.timezone }}</label>
-                        <select id="tz-select" v-model="tz" class="w-full text-sm px-2 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-                            <option v-for="z in tzChoices" :key="z" :value="z">@{{ tzLabel(z) }}</option>
-                        </select>
-                        <div v-if="!tzShowAll" class="mt-1">
-                            <button type="button" @click="tzShowAll = true" class="text-xs es-accent-text hover:underline">@{{ t.showAllTimezones }}</button>
-                        </div>
-                        <div v-else class="mt-2">
-                            <label class="sr-only" for="tz-filter">@{{ t.search }}</label>
-                            <input id="tz-filter" v-model="tzFilter" type="search" :placeholder="t.search"
-                                class="w-full text-sm px-2 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 dark:placeholder-gray-500">
-                        </div>
-                    </div>
-                    <p v-if="tz !== scheduleTz" class="text-xs text-gray-500 dark:text-gray-400 mt-1">@{{ t.scheduleIn }} @{{ scheduleTz }}</p>
-                </div>
             </div>
 
             {{-- Right panel --}}
-            <div class="md:w-2/3 p-6">
+            <div class="md:flex-1 min-w-0 p-6">
                 {{-- Step: date + time --}}
                 <div v-if="step === 'pick'">
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-3" aria-current="step">@{{ stepLabel(1) }}</p>
+                    <div class="mb-3 flex flex-wrap items-start justify-between gap-2">
+                        <p class="text-xs text-gray-500 dark:text-gray-400" aria-current="step">@{{ stepLabel(1) }}</p>
+
+                        {{-- Timezone. Moved out of the foot of the rail and next to the times it
+                             relabels: on a phone the rail stacks above the picker, so a control down
+                             there pushed the calendar most of a screen further down. The full IANA
+                             list is ~430 unlabelled entries, so the common zones come first and the
+                             rest sit behind a filter. --}}
+                        <div class="relative">
+                            <button type="button" @click="toggleTz" aria-controls="tz-panel" :aria-expanded="tzOpen ? 'true' : 'false'"
+                                class="inline-flex items-center gap-1 text-xs px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300">
+                                <span aria-hidden="true">&#127760;</span> <span aria-live="polite">@{{ t.timesShownIn }} @{{ tz }}</span>
+                            </button>
+                            <p v-if="tz !== scheduleTz" class="text-xs text-gray-500 dark:text-gray-400 mt-1 text-end">@{{ t.scheduleIn }} @{{ scheduleTz }}</p>
+                            <div v-if="tzOpen" id="tz-panel" class="absolute end-0 z-10 mt-2 w-72 max-w-[80vw] rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 p-3 shadow-lg">
+                                <label class="sr-only" for="tz-select">@{{ t.timezone }}</label>
+                                <select id="tz-select" v-model="tz" class="w-full text-sm px-2 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+                                    <option v-for="z in tzChoices" :key="z" :value="z">@{{ tzLabel(z) }}</option>
+                                </select>
+                                <div v-if="!tzShowAll" class="mt-1">
+                                    <button type="button" @click="tzShowAll = true" class="text-xs es-accent-text hover:underline">@{{ t.showAllTimezones }}</button>
+                                </div>
+                                <div v-else class="mt-2">
+                                    <label class="sr-only" for="tz-filter">@{{ t.search }}</label>
+                                    <input id="tz-filter" v-model="tzFilter" type="search" :placeholder="t.search"
+                                        class="w-full text-sm px-2 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 dark:placeholder-gray-500">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="sm:flex sm:gap-6">
                         {{-- Calendar --}}
                         <div class="sm:w-1/2">
@@ -368,8 +398,13 @@
                                 <template v-else v-for="group in ['morning','afternoon','evening']" :key="group">
                                     <div v-if="slotGroups[group].length" class="mb-3">
                                         <h3 v-if="showGroups" class="text-xs text-gray-500 dark:text-gray-400 uppercase mb-1">@{{ t[group] }}</h3>
-                                        <div class="space-y-2">
-                                            <div v-for="u in slotGroups[group]" :key="u" class="flex gap-2">
+                                        {{-- Two columns. Single-file, a 16-slot day ran about 700px
+                                             tall next to a ~330px calendar, so most of the panel was
+                                             empty on one side and a long scroll on the other. The
+                                             armed slot spans the row, keeping room for the inline
+                                             Next button. --}}
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <div v-for="u in slotGroups[group]" :key="u" :class="['flex gap-2', armed === u ? 'col-span-2' : '']">
                                                 {{-- The booking's own slot is offered back (the grid excludes its event so it
                                                      does not block itself), so it has to be LABELLED. Unmarked, it looked like
                                                      any other option, and picking it produced a review step reading
@@ -429,14 +464,14 @@
                     {{-- Owner moves get the same choice the event editor already offers when a time
                          changes: an optional note to the guest, or move without emailing at all. Inline
                          on the review step rather than as a modal - this step IS the confirmation. --}}
-                    <div v-if="ownerMode" class="mb-4 max-w-md">
+                    <div v-if="ownerMode" class="mb-4 max-w-xl">
                         <label for="reschedule-note" class="block text-sm font-medium text-gray-700 dark:text-gray-300">@{{ t.notifyMessageLabel }}</label>
                         <textarea id="reschedule-note" v-model="note" maxlength="280" rows="3" :placeholder="t.notifyMessagePlaceholder"
                             class="mt-1 block w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 dark:placeholder-gray-500"></textarea>
                         <div class="mt-1 text-xs text-gray-400 text-end">@{{ note.length }}/280</div>
                     </div>
 
-                    <div class="flex flex-wrap items-center gap-3 max-w-md">
+                    <div class="flex flex-wrap items-center gap-3 max-w-xl">
                         <a :href="backUrl" class="text-sm text-gray-500 dark:text-gray-400 hover:underline">@{{ t.rescheduleKeep }}</a>
                         {{-- Forward action last. Its label never says "pay". --}}
                         <button v-if="ownerMode" type="button" @click="submit(false)" :disabled="submitting"
@@ -452,7 +487,7 @@
                     <p class="text-xs text-gray-500 dark:text-gray-400 mb-2" aria-current="step">@{{ stepLabel(2) }}</p>
                     <button type="button" @click="backToPick" class="text-xs text-gray-500 dark:text-gray-400 hover:underline mb-3"><span class="inline-block rtl:rotate-180">&larr;</span> @{{ t.back }}</button>
                     <h2 class="mb-3 text-base font-semibold text-gray-900 dark:text-gray-100">@{{ t.yourDetails }}</h2>
-                    <div class="mb-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-700 text-sm flex items-start justify-between gap-3">
+                    <div class="mb-4 max-w-2xl p-3 rounded-lg bg-gray-50 dark:bg-gray-700 text-sm flex items-start justify-between gap-3">
                         <div>
                             <div class="font-semibold text-gray-900 dark:text-gray-100">@{{ selectedSlotLabel }}, @{{ localTime(selectedSlot) }}</div>
                             <div class="text-gray-500 dark:text-gray-400">@{{ tz }}</div>
@@ -461,28 +496,32 @@
                         <button type="button" @click="backToPick" class="text-xs es-accent-text hover:underline flex-shrink-0">@{{ t.change }}</button>
                     </div>
                     <div v-if="error" class="mb-3 p-2 rounded bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 text-sm" role="alert" aria-live="assertive">@{{ error }}</div>
-                    <form @submit.prevent="submit" class="space-y-3 max-w-md">
+                    {{-- max-w-md inside a two-thirds panel left most of this step empty; name and email
+                         also pair up once there is room for them. --}}
+                    <form @submit.prevent="submit" class="space-y-3 max-w-2xl">
                         <fieldset>
                             <legend class="sr-only">@{{ t.yourDetails }}</legend>
-                            <input type="text" style="display:none" v-model="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+                            <x-honeypot vmodel="website" />
 
                             <div class="space-y-3">
-                                <div>
-                                    <label for="booking-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@{{ t.name }}</label>
-                                    <input id="booking-name" v-model="form.name" autocomplete="name" required
-                                        :aria-invalid="fieldErrors.name ? 'true' : 'false'"
-                                        :aria-describedby="fieldErrors.name ? 'booking-name-error' : null"
-                                        class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 dark:placeholder-gray-500">
-                                    <span v-if="fieldErrors.name" id="booking-name-error" role="alert" class="block text-xs text-red-600 dark:text-red-400 mt-1">@{{ fieldErrors.name }}</span>
-                                </div>
+                                <div class="grid gap-3 sm:grid-cols-2">
+                                    <div>
+                                        <label for="booking-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@{{ t.name }}</label>
+                                        <input id="booking-name" v-model="form.name" autocomplete="name" required
+                                            :aria-invalid="fieldErrors.name ? 'true' : 'false'"
+                                            :aria-describedby="fieldErrors.name ? 'booking-name-error' : null"
+                                            class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 dark:placeholder-gray-500">
+                                        <span v-if="fieldErrors.name" id="booking-name-error" role="alert" class="block text-xs text-red-600 dark:text-red-400 mt-1">@{{ fieldErrors.name }}</span>
+                                    </div>
 
-                                <div>
-                                    <label for="booking-email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@{{ t.email }}</label>
-                                    <input id="booking-email" v-model="form.email" type="email" inputmode="email" autocomplete="email" required
-                                        :aria-invalid="fieldErrors.email ? 'true' : 'false'"
-                                        :aria-describedby="fieldErrors.email ? 'booking-email-error' : null"
-                                        class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 dark:placeholder-gray-500">
-                                    <span v-if="fieldErrors.email" id="booking-email-error" role="alert" class="block text-xs text-red-600 dark:text-red-400 mt-1">@{{ fieldErrors.email }}</span>
+                                    <div>
+                                        <label for="booking-email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@{{ t.email }}</label>
+                                        <input id="booking-email" v-model="form.email" type="email" inputmode="email" autocomplete="email" required
+                                            :aria-invalid="fieldErrors.email ? 'true' : 'false'"
+                                            :aria-describedby="fieldErrors.email ? 'booking-email-error' : null"
+                                            class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 dark:placeholder-gray-500">
+                                        <span v-if="fieldErrors.email" id="booking-email-error" role="alert" class="block text-xs text-red-600 dark:text-red-400 mt-1">@{{ fieldErrors.email }}</span>
+                                    </div>
                                 </div>
 
                                 <div v-if="askPhone">

@@ -761,7 +761,14 @@ class EventRepo
         // Individual tickets is Pro. Scrubbed rather than validated so a hand-posted flag on a free
         // schedule is ignored instead of failing the whole save. The RSVP variant of per-guest
         // registration stays free, which is why this only clears the flag when it is being turned on.
-        if (! $ticketExtrasAllowed && $event->tickets_enabled && $event->individual_tickets) {
+        //
+        // Gate on the STORED value, the same way the pass scrub below does. Clearing whenever the
+        // flag is simply true also wiped it for a lapsed Pro schedule on its very next save of any
+        // event - and it did so however the form was rendered, because the boolean loop above leaves
+        // an unposted flag at its stored value rather than at false. An event that already sold
+        // per-guest tickets would silently change how its checkout behaves. Clamped, never deleted.
+        if (! $ticketExtrasAllowed && $event->tickets_enabled && $event->individual_tickets
+            && ! $event->getOriginal('individual_tickets')) {
             $event->individual_tickets = false;
         }
 

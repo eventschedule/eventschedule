@@ -76,6 +76,7 @@
                     waitlistSubmitting: false,
                     waitlistMessage: '',
                     waitlistSuccess: false,
+                    website: '',
                     showPassword: false,
                     individualTickets: @json((bool) $event->individual_tickets),
                     individualTicketFields: @json((bool) $event->individual_ticket_fields),
@@ -718,6 +719,7 @@
                             event_date: @json($date ?? request()->date),
                             name: this.name.trim(),
                             email: this.email.trim(),
+                            website: this.website,
                         }),
                     })
                     .then(response => {
@@ -781,7 +783,9 @@
         <input type="hidden" name="event_id" value="{{ \App\Utils\UrlUtils::encodeId($event->id) }}">
         <input type="hidden" name="event_date" value="{{ $date }}">
         <input type="hidden" name="subdomain" value="{{ $subdomain }}">
-        <div class="hidden"><input type="text" name="website" autocomplete="off" tabindex="-1"></div>
+        {{-- vmodel: the waitlist panel below sits inside this form and posts by fetch,
+             so joinWaitlist() reads the same field rather than rendering a second one. --}}
+        <x-honeypot vmodel="website" />
         @if (request()->embed)
         <input type="hidden" name="embed" value="true">
         @endif

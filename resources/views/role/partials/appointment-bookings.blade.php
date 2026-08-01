@@ -48,27 +48,31 @@
 @endphp
 
 <div class="flex flex-wrap items-center justify-between gap-3">
-{{-- Same segmented control as the sub-view switcher, with the pending count where the owner
-     actually needs it. --}}
-<div class="inline-flex flex-wrap items-center gap-1 rounded-xl bg-gray-100 dark:bg-[#252526] p-1">
-    @foreach (['upcoming', 'pending', 'past', 'cancelled'] as $f)
-        <a href="{{ $filterUrl($f) }}"
-           @if ($filter === $f) aria-current="page" style="box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08);" @endif
-           class="rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200 {{ $filter === $f ? 'bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
-            {{ __('messages.appointments_filter_'.$f) }}
-            @if ($f === 'pending' && $pendingBookingCount > 0)
-                <span class="ms-1 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-xs font-bold text-white bg-red-500 rounded-full">{{ $pendingBookingCount }}</span>
-            @endif
-        </a>
-    @endforeach
-</div>
+    {{-- Same segmented control as the sub-view switcher, with the pending count where the owner
+         actually needs it. Scrolls sideways rather than wrapping, the way the AP tab nav does: four
+         pills plus a badge do not fit a phone, and a wrapped segmented control reads as two. --}}
+    <div class="max-w-full overflow-x-auto scrollbar-hide">
+        <div class="inline-flex items-center gap-1 rounded-xl bg-gray-100 dark:bg-[#252526] p-1">
+            @foreach (['upcoming', 'pending', 'past', 'cancelled'] as $f)
+                <a href="{{ $filterUrl($f) }}"
+                   @if ($filter === $f) aria-current="page" style="box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08);" @endif
+                   class="whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200 {{ $filter === $f ? 'bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
+                    {{ __('messages.appointments_filter_'.$f) }}
+                    @if ($f === 'pending' && $pendingBookingCount > 0)
+                        <span class="ms-1 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-xs font-bold text-white bg-red-500 rounded-full">{{ $pendingBookingCount }}</span>
+                    @endif
+                </a>
+            @endforeach
+        </div>
+    </div>
 
-    <form method="GET" action="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments']) }}" class="flex items-center gap-2">
+    <form method="GET" action="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments']) }}" class="flex w-full items-center gap-2 sm:w-auto">
         <input type="hidden" name="view" value="bookings">
         <input type="hidden" name="filter" value="{{ $filter }}">
         <label for="booking-search" class="sr-only">{{ __('messages.search') }}</label>
+        {{-- Fills the row on a phone instead of sitting at a fixed 11rem next to empty space. --}}
         <input type="search" id="booking-search" name="search" value="{{ request('search') }}" placeholder="{{ __('messages.name') }} / {{ __('messages.email') }}"
-               class="w-44 text-sm px-3 py-1.5 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+               class="min-w-0 flex-1 text-sm px-3 py-1.5 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] sm:w-56 sm:flex-none">
         <x-brand-button type="submit" class="!px-3 !py-1.5 !text-sm">{{ __('messages.search') }}</x-brand-button>
         @if (request('search'))
             <a href="{{ $filterUrl($filter) }}" class="text-sm text-gray-500 dark:text-gray-400 hover:underline">{{ __('messages.clear') }}</a>
@@ -95,7 +99,9 @@
             <tbody>
                 @foreach ($rows as $row)
                     @php $s = $row['sale']; $e = $row['event']; @endphp
-                    <tr class="border-t border-gray-100 dark:border-gray-700">
+                    {{-- align-top: one row carrying a long note used to vertically centre every other
+                         cell in that row against it. --}}
+                    <tr class="border-t border-gray-100 dark:border-gray-700 align-top">
                         <td class="p-3 whitespace-nowrap">
                             {{ $row['shown']['date'] }}
                             <div class="text-xs text-gray-500 dark:text-gray-400">{{ $row['shown']['time'] }}</div>
@@ -103,12 +109,14 @@
                         <td class="p-3">{{ $e->appointmentType?->name }}</td>
                         <td class="p-3">
                             {{ $s->name }}
-                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ $s->email }}</div>
+                            {{-- The phone was already a tel: link; the email was plain text. --}}
+                            <div class="text-xs"><a href="mailto:{{ $s->email }}" class="text-[var(--brand-blue)] hover:underline">{{ $s->email }}</a></div>
                             @if ($s->phone)
                                 <div class="text-xs"><a href="tel:{{ $s->phone }}" class="text-[var(--brand-blue)] hover:underline">{{ $s->phone }}</a></div>
                             @endif
                             @if ($row['notes'])
-                                <div class="text-xs text-gray-600 dark:text-gray-400 mt-1"><span class="font-medium">{{ __('messages.notes') }}:</span> {{ $row['notes'] }}</div>
+                                {{-- Capped, so a long note cannot push the actions column off-screen. --}}
+                                <div class="text-xs text-gray-600 dark:text-gray-400 mt-1 max-w-xs"><span class="font-medium">{{ __('messages.notes') }}:</span> {{ $row['notes'] }}</div>
                             @endif
                         </td>
                         <td class="p-3 whitespace-nowrap">{{ $row['amount'] }}</td>
@@ -131,28 +139,30 @@
     <div class="md:hidden space-y-4">
         @foreach ($rows as $row)
             @php $s = $row['sale']; $e = $row['event']; @endphp
-            <div class="ap-card rounded-xl p-5">
+            {{-- The type name and the amount moved up into the header row, which takes two lines out
+                 of the sub-panel and off the height of every card in the list. --}}
+            <div class="ap-card rounded-xl p-4">
                 <div class="flex items-start justify-between gap-3">
-                    <div>
+                    <div class="min-w-0">
                         <div class="font-semibold text-gray-900 dark:text-gray-100">{{ $row['shown']['date'] }}</div>
                         <div class="text-sm text-gray-500 dark:text-gray-400">{{ $row['shown']['time'] }}</div>
+                        <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ $e->appointmentType?->name }}</div>
                     </div>
                     <div class="flex flex-col items-end gap-1 flex-shrink-0">
                         <span class="inline-block px-2 py-1 rounded-full text-xs {{ $row['badge'] }}">{{ $row['label'] }}</span>
                         @if ($row['moved'])
                             <span class="inline-block px-2 py-1 rounded-full text-xs bg-blue-100 dark:bg-blue-900/30 text-[var(--brand-blue)] dark:text-blue-400">{{ __('messages.appointments_moved_badge') }}</span>
                         @endif
+                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ $row['amount'] }}</span>
                     </div>
                 </div>
 
-                <div class="mt-3 rounded-lg bg-gray-50 dark:bg-[#252526] p-3 space-y-1 text-sm">
-                    <div class="text-gray-900 dark:text-gray-100">{{ $e->appointmentType?->name }}</div>
+                <div class="mt-3 rounded-lg bg-gray-50 dark:bg-[#252526] px-3 py-2 space-y-1 text-sm">
                     <div class="text-gray-700 dark:text-gray-300">{{ $s->name }}</div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ $s->email }}</div>
+                    <div class="text-xs"><a href="mailto:{{ $s->email }}" class="text-[var(--brand-blue)] hover:underline">{{ $s->email }}</a></div>
                     @if ($s->phone)
                         <div class="text-xs"><a href="tel:{{ $s->phone }}" class="text-[var(--brand-blue)] hover:underline">{{ $s->phone }}</a></div>
                     @endif
-                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ $row['amount'] }}</div>
                     @if ($row['notes'])
                         <div class="text-xs text-gray-600 dark:text-gray-400 pt-1"><span class="font-medium">{{ __('messages.notes') }}:</span> {{ $row['notes'] }}</div>
                     @endif

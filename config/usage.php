@@ -33,4 +33,8 @@ return [
     'ticket_sale_monthly_limit_free' => (int) env('TICKET_SALE_MONTHLY_LIMIT_FREE', 25),
     'ticket_sale_user_monthly_limit_free' => (int) env('TICKET_SALE_USER_MONTHLY_LIMIT_FREE', 50),
     'appointment_type_limit_free' => (int) env('APPOINTMENT_TYPE_LIMIT_FREE', 1),
+
+    // Ceiling on each row table in the /admin/growth export. Hitting it is reported in
+    // meta.truncated rather than silently shortening the table.
+    'growth_row_cap' => (int) env('GROWTH_ROW_CAP', 20000),
 ];

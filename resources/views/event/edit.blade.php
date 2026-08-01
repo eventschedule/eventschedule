@@ -3279,20 +3279,30 @@
                                 </div>
 
                                 <!-- Individual Tickets -->
+                                {{-- Pro. The blanket non-Pro wrapper that used to freeze this whole
+                                     panel is gone (the free plan sells now), so the control carries
+                                     its own lock: disabled rather than hidden, so a free organizer
+                                     can see the feature exists instead of turning it on and watching
+                                     EventRepo::saveEvent() silently scrub it back off. --}}
                                 <div class="mb-6">
-                                    <div class="flex items-center gap-3">
-                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                    <div class="flex items-center gap-3" :class="isPro ? '' : 'opacity-60'">
+                                        <label class="relative w-11 h-6 flex-shrink-0" :class="isPro ? 'cursor-pointer' : 'cursor-not-allowed'">
                                             <input id="individual_tickets_checkbox" type="checkbox"
                                                 v-model="event.individual_tickets"
+                                                :disabled="!isPro"
                                                 class="sr-only peer">
                                             <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
                                             <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
                                         </label>
-                                        <label for="individual_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                        <label for="individual_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300" :class="isPro ? 'cursor-pointer' : 'cursor-not-allowed'">
                                             {{ __('messages.individual_tickets') }}
                                         </label>
+                                        <template v-if="!isPro"><x-lock-badge tier="pro" /></template>
                                     </div>
                                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.individual_tickets_description') }}</p>
+                                    <p class="text-xs mt-1 ms-14" v-if="!isPro">
+                                        <button type="button" data-modal-open="upgrade-tickets" class="font-medium text-[var(--brand-blue)] hover:underline">{{ __('messages.ticket_allowance_see_pro') }}</button>
+                                    </p>
                                     <input type="hidden" name="individual_tickets" :value="event.individual_tickets ? 1 : 0">
 
                                     <!-- Individual Ticket Fields sub-toggle -->
@@ -3564,17 +3574,28 @@
                                             </div>
                                         </div>
                                         <!-- Pass / subscription configuration -->
-                                        <div class="mt-4">
-                                            <label class="flex items-start gap-3 cursor-pointer">
+                                        {{-- Pro, and locked rather than hidden for the same reason as
+                                             the individual-tickets toggle above: turning it on below
+                                             Pro only to have EventRepo::saveEvent() reset it to the
+                                             stored value reads as the form losing the setting. An
+                                             already-sold pass keeps its switch usable so a lapsed Pro
+                                             schedule can still turn one OFF. --}}
+                                        <div class="mt-4" :class="(isPro || ticket.is_pass) ? '' : 'opacity-60'">
+                                            <label class="flex items-start gap-3" :class="(isPro || ticket.is_pass) ? 'cursor-pointer' : 'cursor-not-allowed'">
                                                 <button type="button" role="switch" :aria-checked="ticket.is_pass ? 'true' : 'false'" @click="toggleTicketPass(index)"
+                                                    :disabled="!isPro && !ticket.is_pass"
                                                     :class="['relative inline-flex h-6 w-11 flex-shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800', ticket.is_pass ? 'bg-[var(--brand-button-bg)]' : 'bg-gray-200 dark:bg-gray-700']">
                                                     <span :class="['inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform mt-0.5', ticket.is_pass ? 'translate-x-5' : 'translate-x-0.5']"></span>
                                                 </button>
                                                 <span>
                                                     <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.subscription_toggle_label') }}</span>
+                                                    <template v-if="!isPro"> <x-lock-badge tier="pro" /></template>
                                                     <span class="block text-xs text-gray-500 dark:text-gray-400">{{ __('messages.subscription_toggle_help') }}</span>
                                                 </span>
                                             </label>
+                                            <p class="text-xs mt-1 ms-14" v-if="!isPro && !ticket.is_pass">
+                                                <button type="button" data-modal-open="upgrade-tickets" class="font-medium text-[var(--brand-blue)] hover:underline">{{ __('messages.ticket_allowance_see_pro') }}</button>
+                                            </p>
 
                                             <div v-if="ticket.is_pass" class="mt-3 ms-14 space-y-4">
                                                 <!-- Subscription type -->
@@ -6268,6 +6289,13 @@
       },
       toggleTicketPass(index) {
         const t = this.tickets[index];
+        // Passes are Pro. The switch is already disabled below Pro, so this only catches a
+        // programmatic call - but turning one ON here would be reset by EventRepo::saveEvent()
+        // anyway, and a control that moves and then silently snaps back is worse than one that
+        // does not move. Turning an existing pass OFF stays allowed on any plan.
+        if (! this.isPro && ! t.is_pass) {
+          return;
+        }
         t.is_pass = !t.is_pass;
         if (t.is_pass) {
           // Default to a season pass on recurring events, otherwise a cross-event subscription.

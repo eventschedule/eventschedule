@@ -184,7 +184,9 @@ class AppointmentAdminTest extends TestCase
         $this->assertStringContainsString('value="08:00" selected', $html);
         $this->assertStringContainsString('value="13:00" selected', $html);
         $this->assertMatchesRegularExpression('/id="duration_minutes"[^>]*value="90"|value="90"[^>]*id="duration_minutes"/', $html);
-        $this->assertStringContainsString('value="phone" selected', $html);
+        // The location type is a segmented radio group now, matching the duration quick-picks and the
+        // payment methods, so it restores as a checked radio rather than a selected option.
+        $this->assertStringContainsString('value="phone" checked', $html);
         $this->assertStringContainsString('value="stripe" checked', $html);
 
         // Toggles: requires_approval was on, is_active was explicitly off.
@@ -439,5 +441,67 @@ class AppointmentAdminTest extends TestCase
             ->assertRedirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments']));
 
         $this->assertSame(1, AppointmentType::where('role_id', $role->id)->count(), 'still only one type');
+    }
+
+    /**
+     * "Copy to all days" overwrites every other day from the row it is clicked on. On a row with no
+     * hours that means clearing the entire week - no confirmation, no undo - so the control has to
+     * ship disabled there. It is an unlabelled icon on all seven rows, including the two the default
+     * week leaves empty, which is exactly where a stray click lands.
+     *
+     * The guard itself is in JS and out of reach here; what this locks down is the markup that stops
+     * the button being reachable in the first place.
+     */
+    public function test_copy_to_all_days_is_disabled_on_a_day_with_no_hours(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['timezone' => 'America/New_York']);
+
+        $html = $this->actingAs($owner)->get(
+            route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments']).'?new=1'
+        )->assertOk()->getContent();
+
+        $disabled = $this->copyButtonDisabledByDay($html);
+
+        $this->assertCount(7, $disabled, 'sanity check: one weekly row per day');
+        // A new type defaults to Mon-Fri 09:00-17:00.
+        $this->assertTrue($disabled['6'], 'Saturday is empty, so it must not be usable as a copy source');
+        $this->assertTrue($disabled['0'], 'Sunday is empty, so it must not be usable as a copy source');
+        $this->assertFalse($disabled['1'], 'Monday has hours, so copying from it is meaningful');
+        $this->assertFalse($disabled['5'], 'Friday has hours, so copying from it is meaningful');
+
+        // A stored type with an empty week can copy from nothing at all.
+        $this->actingAs($owner)->post(route('appointments.store', ['subdomain' => $role->subdomain]),
+            $this->payload(['weekly_windows' => json_encode(array_fill_keys(['0', '1', '2', '3', '4', '5', '6'], []))]))
+            ->assertSessionHasNoErrors();
+        $type = AppointmentType::where('role_id', $role->id)->firstOrFail();
+
+        $emptyWeek = $this->copyButtonDisabledByDay($this->actingAs($owner)->get(
+            route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments', 'edit' => $type->hashedId()])
+        )->assertOk()->getContent());
+
+        $this->assertCount(7, $emptyWeek);
+        $this->assertNotContains(false, $emptyWeek, 'with no hours anywhere, no day can be a copy source');
+    }
+
+    /**
+     * Maps each weekly row's data-day to whether its copy-to-days button carries `disabled`.
+     *
+     * @return array<string, bool>
+     */
+    private function copyButtonDisabledByDay(string $html): array
+    {
+        // data-day is only ever on a .day-row, so each captured value opens one row and the segment
+        // after it runs until the next row starts.
+        $parts = preg_split('/data-day="(\d)"/', $html, -1, PREG_SPLIT_DELIM_CAPTURE);
+
+        $out = [];
+        for ($i = 1; $i < count($parts); $i += 2) {
+            if (preg_match('/<button[^>]*class="copy-to-days[^"]*"[^>]*>/', $parts[$i + 1], $button)) {
+                $out[$parts[$i]] = str_contains($button[0], 'disabled>') || str_contains($button[0], 'disabled ');
+            }
+        }
+
+        return $out;
     }
 }

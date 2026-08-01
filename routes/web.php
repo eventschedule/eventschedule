@@ -657,6 +657,12 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
         Route::get('/admin/revenue', [AdminController::class, 'revenue'])->name('admin.revenue');
         Route::get('/admin/analytics', [AdminController::class, 'analytics'])->name('admin.analytics');
         Route::get('/admin/usage', [AdminController::class, 'usage'])->name('admin.usage');
+        // Growth reporting. Registered everywhere but runtime-404s off a hosted install
+        // (there are no tiers or subscriptions on a single-tenant selfhost, so the page
+        // would be misleading). Same registration-time reasoning as federation below:
+        // phpunit leaves IS_HOSTED unset, so a registration-time gate would be untestable.
+        Route::get('/admin/growth', [AdminController::class, 'growth'])->name('admin.growth');
+        Route::get('/admin/growth/export', [AdminController::class, 'growthExport'])->name('admin.growth.export');
         Route::get('/admin/boost', [AdminController::class, 'boost'])->name('admin.boost');
         Route::post('/admin/boost/grant-credit', [AdminController::class, 'boostGrantCredit'])->name('admin.boost.grant_credit');
         Route::post('/admin/boost/set-limit', [AdminController::class, 'boostSetLimit'])->name('admin.boost.set_limit');

@@ -222,25 +222,36 @@ class FreePlanLimitsTest extends TestCase
 
     public function test_the_window_starts_when_the_schedule_dropped_to_free(): void
     {
-        $role = $this->createFreeRole();
-        $event = $this->createEvent($role);
-        $ticket = $this->createTicket($event, ['price' => 20, 'quantity' => 500]);
+        // The clock is pinned because this fixture needs BOTH "earlier this month" dates to be in
+        // the past: freeSince() only treats plan_expires as a lapse once it is past, so on a real
+        // run during the first six days of a month the lapse date was still in the future, no
+        // candidate was found, the window fell back to the start of the month and the 200 tickets
+        // counted. That made the test fail for the first week of every month.
+        \Carbon\Carbon::setTestNow(now()->startOfMonth()->addDays(20));
 
-        // Sold while still on Pro, earlier this month.
-        $sale = $this->createSale($event, $role, ['status' => 'paid'], $ticket, 200);
-        $sale->paid_at = now()->startOfMonth()->addDay();
-        $sale->save();
+        try {
+            $role = $this->createFreeRole();
+            $event = $this->createEvent($role);
+            $ticket = $this->createTicket($event, ['price' => 20, 'quantity' => 500]);
 
-        // The plan lapsed after that.
-        $role->plan_expires = now()->startOfMonth()->addDays(5)->format('Y-m-d');
-        $role->save();
+            // Sold while still on Pro, earlier this month.
+            $sale = $this->createSale($event, $role, ['status' => 'paid'], $ticket, 200);
+            $sale->paid_at = now()->startOfMonth()->addDay();
+            $sale->save();
 
-        $this->assertSame(
-            0,
-            $role->fresh()->ticketsSoldThisMonth(),
-            'sales made while the schedule was paid do not count against its free allowance'
-        );
-        $this->assertTrue($role->fresh()->canSellPaidTickets());
+            // The plan lapsed after that.
+            $role->plan_expires = now()->startOfMonth()->addDays(5)->format('Y-m-d');
+            $role->save();
+
+            $this->assertSame(
+                0,
+                $role->fresh()->ticketsSoldThisMonth(),
+                'sales made while the schedule was paid do not count against its free allowance'
+            );
+            $this->assertTrue($role->fresh()->canSellPaidTickets());
+        } finally {
+            \Carbon\Carbon::setTestNow();
+        }
     }
 
     public function test_the_per_owner_backstop_blocks_spreading_across_schedules(): void
@@ -261,6 +272,81 @@ class FreePlanLimitsTest extends TestCase
         $this->assertSame(20, $a->fresh()->ticketsSoldThisMonth(), 'the per-schedule count stays per schedule');
         $this->assertSame(40, $a->fresh()->ownerTicketsSoldThisMonth());
         $this->assertFalse($a->fresh()->canSellPaidTickets(), 'the owner backstop bites');
+    }
+
+    /**
+     * The backstop exists so one free allowance cannot be multiplied across many free schedules.
+     * Sales on a schedule the owner PAYS for are not that, and counting them meant a single Pro
+     * schedule over the user limit silently killed paid checkout on every free schedule the same
+     * owner ran - while the meters, which all read ticketsSoldThisMonth(), still showed 0 of 25.
+     */
+    public function test_the_backstop_ignores_sales_on_the_owners_paid_schedules(): void
+    {
+        config(['usage.ticket_sale_user_monthly_limit_free' => 30]);
+
+        $owner = $this->createOwner();
+        $free = $this->createFreeRole($owner, 'talent');
+
+        $pro = $this->createFreeRole($owner, 'venue');
+        $pro->plan_type = 'pro';
+        $pro->plan_expires = now()->addYear()->format('Y-m-d');
+        $pro->save();
+        $this->assertTrue($pro->fresh()->isPro(), 'sanity check: the sibling really is Pro');
+
+        // Comfortably over the 30 backstop on its own.
+        $proEvent = $this->createEvent($pro);
+        $proTicket = $this->createTicket($proEvent, ['price' => 20, 'quantity' => 500]);
+        $this->createSale($proEvent, $pro, ['status' => 'paid'], $proTicket, 100);
+
+        $this->assertSame(0, $free->fresh()->ticketsSoldThisMonth());
+        $this->assertSame(
+            0,
+            $free->fresh()->ownerTicketsSoldThisMonth(),
+            'a paid schedule spends no part of the free schedule\'s backstop'
+        );
+        $this->assertTrue(
+            $free->fresh()->canSellPaidTickets(),
+            'the free schedule keeps its own allowance regardless of what the Pro one sells'
+        );
+    }
+
+    /**
+     * roles.user_id is nullable - a venue invented while entering an event is attached at null -
+     * and Laravel turns where(col, null) into whereNull. Without a guard the backstop query pools
+     * every unclaimed schedule on the install into one owner and binds all of their ids into the
+     * allowance subquery.
+     */
+    public function test_an_unclaimed_schedule_does_not_pool_every_other_unclaimed_schedule(): void
+    {
+        $mine = $this->createFreeRole();
+        $stranger = $this->createFreeRole();
+
+        // Built while the schedules still have an owner - events.user_id is NOT NULL.
+        $event = $this->createEvent($stranger);
+        $ticket = $this->createTicket($event, ['price' => 20, 'quantity' => 500]);
+        $this->createSale($event, $stranger, ['status' => 'paid'], $ticket, 40);
+
+        // Now orphan both, the way a venue invented while entering an event is stored.
+        foreach ([$mine, $stranger] as $role) {
+            $role->user_id = null;
+            $role->save();
+        }
+
+        $queries = [];
+        \Illuminate\Support\Facades\DB::listen(function ($query) use (&$queries) {
+            $queries[] = $query->sql;
+        });
+
+        $this->assertSame(
+            0,
+            $mine->fresh()->ownerTicketsSoldThisMonth(),
+            'an ownerless schedule is not charged for another ownerless schedule\'s sales'
+        );
+
+        $this->assertEmpty(
+            array_filter($queries, fn ($sql) => str_contains($sql, '`user_id` is null')),
+            'the ownerless path must never run a whereNull(user_id) scan over the roles table'
+        );
     }
 
     public function test_a_curator_is_not_charged_for_events_it_only_lists(): void
@@ -516,6 +602,43 @@ class FreePlanLimitsTest extends TestCase
         $this->assertFalse(
             (bool) $addon->fresh()->is_deleted,
             'an existing add-on is left dormant, never destroyed by a later save'
+        );
+    }
+
+    /**
+     * "Clamped, never deleted" has to hold for individual tickets too.
+     *
+     * The scrub used to clear the flag whenever it was true, which wiped it for a lapsed Pro
+     * schedule on its next save of any event - and it did so however the form was rendered, because
+     * saveEvent()'s boolean loop leaves an unposted flag at its stored value rather than at false.
+     * An event that had already sold per-guest tickets would silently change how its checkout
+     * behaves. Mirrors the pass scrub, which only ever refuses to turn one ON.
+     */
+    public function test_a_lapsed_pro_schedule_keeps_individual_tickets_it_already_had(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createFreeRole($owner);
+        $event = $this->createEvent($role, ['tickets_enabled' => true, 'individual_tickets' => true]);
+        $this->createTicket($event, ['price' => 20, 'type' => 'General']);
+
+        $this->assertTrue((bool) $event->fresh()->individual_tickets, 'sanity check: stored on');
+
+        // The form does not post the flag at all now that the control is locked below Pro.
+        $request = \Illuminate\Http\Request::create('/', 'POST', [
+            'name' => 'Lapsed Pro Event',
+            'starts_at' => now()->addDays(3)->format('Y-m-d H:i:s'),
+            'duration' => 2,
+            'schedule_type' => 'one_time',
+            'tickets_enabled' => 1,
+        ]);
+        $request->setUserResolver(fn () => $owner);
+        $this->app->instance('request', $request);
+
+        app(\App\Repos\EventRepo::class)->saveEvent($role, $request, $event->fresh(), false);
+
+        $this->assertTrue(
+            (bool) $event->fresh()->individual_tickets,
+            'a setting the schedule already had is kept when it drops to free, not destroyed'
         );
     }
 

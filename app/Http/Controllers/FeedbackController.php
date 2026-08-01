@@ -11,9 +11,11 @@ use App\Models\Sale;
 use App\Services\OneSignalService;
 use App\Services\WebhookService;
 use App\Utils\CsvUtils;
+use App\Utils\HoneypotUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class FeedbackController extends Controller
 {
@@ -61,6 +63,13 @@ class FeedbackController extends Controller
 
     public function store(Request $request, $eventId, $secret)
     {
+        // Honeypot. The page renders $errors->all(), so a ValidationException displays.
+        if (HoneypotUtils::isTripped($request)) {
+            throw ValidationException::withMessages([
+                'rating' => __('messages.invalid_request'),
+            ]);
+        }
+
         $event = Event::findOrFail(UrlUtils::decodeId($eventId));
         $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->where('status', 'paid')->where('is_deleted', false)->firstOrFail();
 

@@ -8,6 +8,7 @@ use App\Models\GiftCard;
 use App\Models\Role;
 use App\Services\AuditService;
 use App\Services\EmailService;
+use App\Utils\HoneypotUtils;
 use App\Utils\InvoiceNinja;
 use App\Utils\MoneyUtils;
 use App\Utils\UrlUtils;
@@ -33,9 +34,9 @@ class GiftCardController extends Controller
 
     public function purchase(GiftCardPurchaseRequest $request, $subdomain)
     {
-        // Honeypot field - bots fill it, humans never see it
-        if ($request->filled('website')) {
-            return redirect()->back();
+        // Honeypot. See TicketController::checkout() for why this returns the input.
+        if (HoneypotUtils::isTripped($request)) {
+            return redirect()->back()->withInput()->with('error', __('messages.invalid_request'));
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();

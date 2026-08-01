@@ -101,6 +101,8 @@ class RouteLoadTest extends TestCase
             '/privacy',
             '/terms-of-service',
             '/self-hosting-terms-of-service',
+            '/search',
+            '/accessibility',
 
             // Feature pages
             '/features/ticketing',
@@ -127,6 +129,8 @@ class RouteLoadTest extends TestCase
             '/features/custom-labels',
             '/features/feedback',
             '/features/availability',
+            '/features/gift-cards',
+            '/features/carpool',
 
             // Integration pages
             '/google-calendar',

@@ -13,7 +13,6 @@ use App\Models\BoostCampaign;
 use App\Models\Event;
 use App\Models\EventPart;
 use App\Models\EventRole;
-use App\Models\MarketingDailyStat;
 use App\Models\Newsletter;
 use App\Models\Referral;
 use App\Models\Role;
@@ -26,6 +25,7 @@ use App\Services\AuditService;
 use App\Services\BoostBillingService;
 use App\Services\DemoService;
 use App\Services\DigitalOceanService;
+use App\Services\GrowthExportService;
 use App\Services\OneSignalService;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
@@ -590,8 +590,9 @@ class AdminController extends Controller
             ->withQueryString();
 
         // Onboarding conversion funnel (marketing visit -> first event)
-        $funnel = $this->getFunnelData($startDate, $endDate, $previousStartDate, $previousEndDate);
-        $funnelTrend = $this->getFunnelTrendData($startDate, $endDate);
+        $growth = app(GrowthExportService::class);
+        $funnel = $growth->funnelData($startDate, $endDate, $previousStartDate, $previousEndDate);
+        $funnelTrend = $growth->funnelTrendData($startDate, $endDate);
         $onboardingProgress = $this->getOnboardingProgress();
 
         return view('admin.users', compact(
@@ -1153,6 +1154,57 @@ class AdminController extends Controller
     }
 
     /**
+     * Growth reporting: the onboarding funnel carried past "saved an event" into
+     * activation and monetization, plus the downloadable payload behind it.
+     *
+     * Hosted-only at runtime rather than at registration: a single-tenant selfhost has no
+     * tiers and no subscriptions (actualPlanTier() short-circuits to enterprise), so every
+     * monetization section would be empty or actively misleading.
+     */
+    public function growth(Request $request)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+        abort_unless(config('app.hosted'), 404);
+
+        $range = $request->input('range', 'last_30_days');
+        $dates = $this->getDateRange($range);
+
+        $growth = app(GrowthExportService::class);
+        $data = $growth->build($dates['start'], $dates['end'], $dates['previous_start'], $dates['previous_end']);
+
+        return view('admin.growth', ['range' => $range, 'data' => $data]);
+    }
+
+    /**
+     * Download the growth payload as JSON. Aggregate and pseudonymous by construction -
+     * see GrowthExportService, which hashes every id and strips referrer/landing URLs to
+     * host and path, because this file is meant to be shared outside the install.
+     */
+    public function growthExport(Request $request)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+        abort_unless(config('app.hosted'), 404);
+
+        $range = $request->input('range', 'last_30_days');
+        $dates = $this->getDateRange($range);
+
+        $data = app(GrowthExportService::class)
+            ->build($dates['start'], $dates['end'], $dates['previous_start'], $dates['previous_end']);
+
+        $filename = 'growth-'.now()->format('Y-m-d').'.json';
+
+        return response()->streamDownload(function () use ($data) {
+            echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+        }, $filename, [
+            'Content-Type' => 'application/json',
+        ]);
+    }
+
+    /**
      * Get date range based on selection.
      */
     private function getDateRange(string $range): array
@@ -1391,297 +1443,15 @@ class AdminController extends Controller
     }
 
     /**
-     * Base query for the onboarding funnel cohort: real (verified, non-demo) users who
-     * created their account within the given period.
-     */
-    private function funnelCohort(Carbon $startDate, Carbon $endDate)
-    {
-        return User::query()
-            ->whereNotNull('email_verified_at')
-            ->where('email', '!=', DemoService::DEMO_EMAIL)
-            // Attendee-intent signups (follow/ticket/request/...) never meant to
-            // create a schedule; NULL = pre-tracking rows, treated as organizer.
-            ->where(function ($query) {
-                $query->whereNull('signup_intent')->orWhere('signup_intent', 'organizer');
-            })
-            ->whereBetween('created_at', [$startDate, $endDate]);
-    }
-
-    /**
-     * Constraint for "has a real (non-demo) schedule", matching the demo exclusions used
-     * by the schedules metric in getTrendData().
-     */
-    private function funnelScheduleFilter(): \Closure
-    {
-        $demoRole = DemoService::DEMO_ROLE_SUBDOMAIN;
-
-        return function ($query) use ($demoRole) {
-            $query->where('subdomain', '!=', $demoRole)
-                ->where('subdomain', 'not like', 'demo-%');
-        };
-    }
-
-    /**
-     * Constraint for "has a real (non-demo) event", matching getTrendData(): an event is
-     * demo when any of its associated schedules is the demo schedule.
-     */
-    private function funnelEventFilter(): \Closure
-    {
-        $demoRole = DemoService::DEMO_ROLE_SUBDOMAIN;
-
-        return function ($query) use ($demoRole) {
-            $query->whereDoesntHave('roles', function ($roleQuery) use ($demoRole) {
-                $roleQuery->where('subdomain', $demoRole)
-                    ->orWhere('subdomain', 'like', 'demo-%');
-            });
-        };
-    }
-
-    /**
-     * Onboarding funnel: the 7 stage counts + conversions for the selected period, plus
-     * the north-star (signup -> first event) with its period-over-period change and the
-     * biggest onboarding leak. See the correctness rules in the funnel plan: stages 4/6 are
-     * OR-defined so the funnel stays monotonic across all creation paths and history; the
-     * anonymous traffic stages (1-2) are only shown for windows inside the tracked period.
-     */
-    private function getFunnelData(Carbon $startDate, Carbon $endDate, Carbon $prevStartDate, Carbon $prevEndDate): array
-    {
-        $scheduleFilter = $this->funnelScheduleFilter();
-        $eventFilter = $this->funnelEventFilter();
-
-        // Cohort stages (3, 5, 7): account created, saved a schedule, saved an event.
-        $accounts = $this->funnelCohort($startDate, $endDate)->count();
-
-        // Verified attendee-intent signups excluded from the cohort above, shown as a
-        // note under the account stage so the funnel number stays explainable.
-        $excludedIntents = User::query()
-            ->whereNotNull('email_verified_at')
-            ->where('email', '!=', DemoService::DEMO_EMAIL)
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->whereNotNull('signup_intent')
-            ->where('signup_intent', '!=', 'organizer')
-            ->select('signup_intent', DB::raw('COUNT(*) as total'))
-            ->groupBy('signup_intent')
-            ->orderByDesc('total')
-            ->pluck('total', 'signup_intent');
-        $savedSchedule = $this->funnelCohort($startDate, $endDate)->whereHas('createdRoles', $scheduleFilter)->count();
-        $savedEvent = $this->funnelCohort($startDate, $endDate)->whereHas('createdEvents', $eventFilter)->count();
-
-        // Stages 4/6 are OR-defined (reached the form OR completed the save) so a stage can
-        // never exceed the one above it, regardless of creation path or missing click history.
-        $reachedSchedule = $this->funnelCohort($startDate, $endDate)
-            ->where(function ($query) use ($scheduleFilter) {
-                $query->whereNotNull('schedule_form_viewed_at')
-                    ->orWhereHas('createdRoles', $scheduleFilter);
-            })->count();
-        $reachedEvent = $this->funnelCohort($startDate, $endDate)
-            ->where(function ($query) use ($eventFilter) {
-                $query->whereNotNull('event_form_viewed_at')
-                    ->orWhereHas('createdEvents', $eventFilter);
-            })->count();
-
-        // Traffic stages (1-2): anonymous, only meaningful for a window inside the tracked period.
-        $trackingStart = MarketingDailyStat::min('date');
-        $rangeTracked = $trackingStart !== null
-            && $startDate->toDateString() >= Carbon::parse($trackingStart)->toDateString();
-        $visitors = null;
-        $signupViews = null;
-        if ($rangeTracked) {
-            $sums = MarketingDailyStat::whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()])
-                ->selectRaw('COALESCE(SUM(visitors), 0) as v, COALESCE(SUM(signup_views), 0) as s')
-                ->first();
-            // Visitors are only recorded on the nexus; keep n/a on other deployments.
-            $visitors = config('app.is_nexus') ? (int) $sums->v : null;
-            $signupViews = (int) $sums->s;
-        }
-
-        $stages = [
-            ['key' => 'visited', 'group' => 'traffic', 'count' => $visitors],
-            ['key' => 'signup_view', 'group' => 'traffic', 'count' => $signupViews],
-            ['key' => 'account', 'group' => 'cohort', 'count' => $accounts],
-            ['key' => 'reached_schedule', 'group' => 'cohort', 'count' => $reachedSchedule],
-            ['key' => 'saved_schedule', 'group' => 'cohort', 'count' => $savedSchedule],
-            ['key' => 'reached_event', 'group' => 'cohort', 'count' => $reachedEvent],
-            ['key' => 'saved_event', 'group' => 'cohort', 'count' => $savedEvent],
-        ];
-
-        // Bar width denominator: stage-1 visitors when present, else the largest stage.
-        $available = array_values(array_filter(array_column($stages, 'count'), fn ($c) => $c !== null));
-        $maxCount = ! empty($available) ? max($available) : 0;
-        $widthDenom = ($visitors && $visitors > 0) ? $visitors : $maxCount;
-        if ($widthDenom < 1) {
-            $widthDenom = 1;
-        }
-
-        // Per-stage width + step conversion vs the previous stage that has a value.
-        // The 'account' stage is skipped: it is the first cohort stage, so comparing it to
-        // 'signup_view' would draw a conversion/drop across the anonymous-traffic -> signup-cohort
-        // divider (different populations, a cross-population ratio, not a real in-funnel drop).
-        $prevCount = null;
-        foreach ($stages as &$stage) {
-            $c = $stage['count'];
-            $stage['width'] = $c === null ? 0 : min(100, round($c / $widthDenom * 100, 1));
-            $stage['step_conv'] = null;
-            $stage['drop_count'] = null;
-            if ($c !== null && $prevCount !== null && $prevCount > 0 && $stage['key'] !== 'account') {
-                $stage['step_conv'] = round($c / $prevCount * 100, 1);
-                $stage['drop_count'] = max(0, $prevCount - $c);
-            }
-            if ($c !== null) {
-                $prevCount = $c;
-            }
-        }
-        unset($stage);
-
-        // Biggest onboarding leak: the worst adjacent drop among the cohort stages (3-7) by
-        // absolute users lost. Traffic stages are excluded (anonymous, different population).
-        $biggestDrop = null;
-        $cohortStages = array_values(array_filter($stages, fn ($s) => $s['group'] === 'cohort'));
-        for ($i = 1; $i < count($cohortStages); $i++) {
-            $from = $cohortStages[$i - 1];
-            $to = $cohortStages[$i];
-            if ($from['count'] === null || $to['count'] === null || $from['count'] <= 0) {
-                continue;
-            }
-            $lost = $from['count'] - $to['count'];
-            if ($lost <= 0) {
-                continue;
-            }
-            if ($biggestDrop === null || $lost > $biggestDrop['lost']) {
-                $biggestDrop = [
-                    'from_key' => $from['key'],
-                    'to_key' => $to['key'],
-                    'lost' => $lost,
-                    'drop_pct' => round($lost / $from['count'] * 100, 1),
-                ];
-            }
-        }
-
-        // North-star: signup -> first event (%), with period-over-period change (points).
-        $firstEventConv = $accounts > 0 ? round($savedEvent / $accounts * 100, 1) : null;
-        $prevAccounts = $this->funnelCohort($prevStartDate, $prevEndDate)->count();
-        $prevSavedEvent = $prevAccounts > 0
-            ? $this->funnelCohort($prevStartDate, $prevEndDate)->whereHas('createdEvents', $eventFilter)->count()
-            : 0;
-        $prevFirstEventConv = $prevAccounts > 0 ? round($prevSavedEvent / $prevAccounts * 100, 1) : null;
-        $firstEventConvChange = ($firstEventConv !== null && $prevFirstEventConv !== null)
-            ? round($firstEventConv - $prevFirstEventConv, 1)
-            : null;
-
-        // Overall visitor -> first event (%), only when traffic is tracked for the window.
-        $visitorToEventConv = ($visitors && $visitors > 0) ? round($savedEvent / $visitors * 100, 1) : null;
-
-        return [
-            'stages' => $stages,
-            'cohort_size' => $accounts,
-            'excluded_intents' => $excludedIntents,
-            'first_event_conv' => $firstEventConv,
-            'first_event_conv_change' => $firstEventConvChange,
-            'visitor_to_event_conv' => $visitorToEventConv,
-            'biggest_drop' => $biggestDrop,
-            'traffic_tracked' => $rangeTracked,
-            'tracking_started_at' => $trackingStart,
-        ];
-    }
-
-    /**
-     * Per-period conversion-rate series for the onboarding over-time chart. Set-based:
-     * one grouped query per stage. The most recent period is always incomplete (cohort
-     * maturation), so its index is returned for the view to mark it "in progress".
-     */
-    private function getFunnelTrendData(Carbon $startDate, Carbon $endDate): array
-    {
-        $daysDiff = $startDate->diffInDays($endDate);
-        if ($daysDiff <= 31) {
-            $formatKey = 'daily';
-            $labelFormat = 'M d';
-        } elseif ($daysDiff <= 90) {
-            $formatKey = 'weekly';
-            $labelFormat = 'W';
-        } else {
-            $formatKey = 'monthly';
-            $labelFormat = 'M Y';
-        }
-
-        // $column is always a hardcoded literal ('created_at' or 'date'), never user input;
-        // the format string is whitelisted by $formatKey (mirrors getTrendData()).
-        $expr = fn (string $column) => match ($formatKey) {
-            'daily' => DB::raw("DATE_FORMAT({$column}, '%Y-%m-%d') as period"),
-            'weekly' => DB::raw("DATE_FORMAT({$column}, '%Y-%u') as period"),
-            'monthly' => DB::raw("DATE_FORMAT({$column}, '%Y-%m') as period"),
-        };
-
-        $scheduleFilter = $this->funnelScheduleFilter();
-        $eventFilter = $this->funnelEventFilter();
-
-        $accountsTrend = $this->funnelCohort($startDate, $endDate)
-            ->select($expr('created_at'), DB::raw('COUNT(*) as count'))
-            ->groupBy('period')->orderBy('period')->get()->keyBy('period');
-        $scheduleTrend = $this->funnelCohort($startDate, $endDate)
-            ->whereHas('createdRoles', $scheduleFilter)
-            ->select($expr('created_at'), DB::raw('COUNT(*) as count'))
-            ->groupBy('period')->orderBy('period')->get()->keyBy('period');
-        $eventTrend = $this->funnelCohort($startDate, $endDate)
-            ->whereHas('createdEvents', $eventFilter)
-            ->select($expr('created_at'), DB::raw('COUNT(*) as count'))
-            ->groupBy('period')->orderBy('period')->get()->keyBy('period');
-        $trafficTrend = MarketingDailyStat::query()
-            ->select($expr('date'), DB::raw('SUM(visitors) as visitors'), DB::raw('SUM(signup_views) as signup_views'))
-            ->whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()])
-            ->groupBy('period')->orderBy('period')->get()->keyBy('period');
-
-        $allPeriods = collect()
-            ->merge($accountsTrend->keys())
-            ->merge($trafficTrend->keys())
-            ->unique()->sort()->values();
-
-        $labels = $allPeriods->map(function ($period) use ($labelFormat, $formatKey) {
-            if ($formatKey === 'weekly') {
-                $parts = explode('-', $period);
-                if (count($parts) === 2) {
-                    return 'Week '.ltrim($parts[1], '0');
-                }
-            }
-            try {
-                return Carbon::parse($period)->format($labelFormat);
-            } catch (\Exception $e) {
-                return $period;
-            }
-        })->toArray();
-
-        $isNexus = (bool) config('app.is_nexus');
-        $visitorToSignup = [];
-        $signupToSchedule = [];
-        $signupToEvent = [];
-        foreach ($allPeriods as $period) {
-            $acc = (int) ($accountsTrend[$period]->count ?? 0);
-            $sch = (int) ($scheduleTrend[$period]->count ?? 0);
-            $evt = (int) ($eventTrend[$period]->count ?? 0);
-            $vis = (int) ($trafficTrend[$period]->visitors ?? 0);
-            $visitorToSignup[] = ($isNexus && $vis > 0) ? round($acc / $vis * 100, 1) : null;
-            $signupToSchedule[] = $acc > 0 ? round($sch / $acc * 100, 1) : null;
-            $signupToEvent[] = $acc > 0 ? round($evt / $acc * 100, 1) : null;
-        }
-
-        return [
-            'labels' => $labels,
-            'visitor_to_signup' => $visitorToSignup,
-            'signup_to_schedule' => $signupToSchedule,
-            'signup_to_event' => $signupToEvent,
-            'last_index' => count($labels) - 1,
-            'has_traffic' => $isNexus && $trafficTrend->sum('visitors') > 0,
-        ];
-    }
-
-    /**
      * Per-user onboarding progress (a re-engagement work queue): recent real signups with
      * their schedule/event counts and click milestones. Uses its own page name so it does
      * not collide with the recent-signups paginator on the same view.
      */
     private function getOnboardingProgress()
     {
-        $scheduleFilter = $this->funnelScheduleFilter();
-        $eventFilter = $this->funnelEventFilter();
+        $growth = app(GrowthExportService::class);
+        $scheduleFilter = $growth->scheduleFilter();
+        $eventFilter = $growth->eventFilter();
 
         return User::query()
             ->whereNotNull('email_verified_at')

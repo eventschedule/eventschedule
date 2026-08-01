@@ -9,6 +9,7 @@
 
         <form method="POST" action="{{ route('two-factor.challenge') }}">
             @csrf
+            <x-honeypot />
 
             <div>
                 <x-input-label for="code" :value="__('messages.two_factor_code')" />
@@ -37,6 +38,7 @@
 
         <form method="POST" action="{{ route('two-factor.challenge') }}">
             @csrf
+            <x-honeypot />
 
             <div>
                 <x-input-label for="recovery_code" :value="__('messages.two_factor_recovery_code')" />

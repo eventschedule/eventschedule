@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Services\AuditService;
+use App\Utils\HoneypotUtils;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class NewPasswordController extends Controller
@@ -30,6 +32,14 @@ class NewPasswordController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // Honeypot. A ValidationException rather than a flash error: x-auth-layout renders
+        // only per-field errors, so with('error') would be swallowed by the layout.
+        if (HoneypotUtils::isTripped($request)) {
+            throw ValidationException::withMessages([
+                'email' => __('messages.invalid_request'),
+            ]);
+        }
+
         $request->validate([
             'token' => ['required'],
             'email' => ['required', 'email'],

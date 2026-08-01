@@ -35,7 +35,7 @@
         #appt-manage .es-accent-text { color: var(--es-accent-readable); }
     </style>
 
-    <div id="appt-manage" class="max-w-xl mx-auto px-4 py-10">
+    <div id="appt-manage" class="max-w-2xl mx-auto px-4 py-10">
         @if (session('message'))
             <div class="mb-4 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300">{{ session('message') }}</div>
         @endif
@@ -99,41 +99,62 @@
                     <h1 tabindex="-1" class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.appointments_youre_booked') }}</h1>
             @endswitch
 
-            <div class="mt-4 space-y-1 text-gray-700 dark:text-gray-300">
+            {{-- A labelled two-column grid rather than a stack of bare lines: the date and the time
+                 pair naturally, and the whole block loses a third of its height. --}}
+            <div class="mt-4 text-gray-700 dark:text-gray-300">
                 <div class="font-semibold text-lg text-gray-900 dark:text-gray-100">{{ $type?->name ?? $event->name }}</div>
-                <div>{{ $shown['date'] }}</div>
-                <div>{{ $shown['time'] }} ({{ $shown['tz'] }})</div>
-                @if ($inSchedule)
-                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.appointments_schedule_in') }} {{ $inSchedule['tz'] }} ({{ $inSchedule['time'] }})</div>
-                @endif
-                {{-- Labelled, and covering the phone case the confirmation email has always had. --}}
-                @if ($event->event_url)
-                    <div><span class="text-gray-500 dark:text-gray-400">{{ __('messages.online') }}:</span> <a href="{{ $event->event_url }}" class="break-all hover:underline" style="color: var(--es-accent-readable)">{{ $event->event_url }}</a></div>
-                @elseif ($type && $type->location_type === 'in_person' && $type->location_address)
-                    <div><span class="text-gray-500 dark:text-gray-400">{{ __('messages.location') }}:</span> {{ $type->location_address }}</div>
-                @elseif ($type && $type->location_type === 'phone' && ($type->location_phone || $sale->phone))
-                    <div><span class="text-gray-500 dark:text-gray-400">{{ __('messages.phone') }}:</span> {{ $type->location_phone ?: $sale->phone }}</div>
-                @endif
+                <dl class="mt-3 grid gap-x-6 gap-y-3 sm:grid-cols-2">
+                    <div>
+                        <dt class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.date') }}</dt>
+                        <dd>{{ $shown['date'] }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.time') }}</dt>
+                        <dd>{{ $shown['time'] }} ({{ $shown['tz'] }})</dd>
+                        @if ($inSchedule)
+                            <dd class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.appointments_schedule_in') }} {{ $inSchedule['tz'] }} ({{ $inSchedule['time'] }})</dd>
+                        @endif
+                    </div>
+                    {{-- Labelled, and covering the phone case the confirmation email has always had.
+                         Full width: a meeting URL is long and wraps with break-all. --}}
+                    @if ($event->event_url)
+                        <div class="sm:col-span-2">
+                            <dt class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.online') }}</dt>
+                            <dd><a href="{{ $event->event_url }}" class="break-all hover:underline" style="color: var(--es-accent-readable)">{{ $event->event_url }}</a></dd>
+                        </div>
+                    @elseif ($type && $type->location_type === 'in_person' && $type->location_address)
+                        <div class="sm:col-span-2">
+                            <dt class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.location') }}</dt>
+                            <dd>{{ $type->location_address }}</dd>
+                        </div>
+                    @elseif ($type && $type->location_type === 'phone' && ($type->location_phone || $sale->phone))
+                        <div class="sm:col-span-2">
+                            <dt class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.phone') }}</dt>
+                            <dd>{{ $type->location_phone ?: $sale->phone }}</dd>
+                        </div>
+                    @endif
+                </dl>
             </div>
 
-            {{-- Only for a confirmed booking: the pending state says outright that nothing is booked
-                 yet, so offering a calendar entry there would be misleading. --}}
-            @if ($state === 'confirmed')
-                <div class="mt-5">
-                    <x-appointment-add-to-calendar :event="$event" :sale="$sale" :role="$role" :primary="request()->boolean('new')" />
+            {{-- One action row instead of two stacked blocks. Add to calendar is only offered for a
+                 confirmed booking: the pending state says outright that nothing is booked yet, so a
+                 calendar entry there would be misleading. Reschedule sits beside it; Cancel stays a
+                 quiet red link below, destructive-last, so it cannot be mis-tapped. --}}
+            @if ($state === 'confirmed' || $canReschedule)
+                <div class="mt-5 flex flex-wrap items-center gap-3">
+                    @if ($state === 'confirmed')
+                        <x-appointment-add-to-calendar :event="$event" :sale="$sale" :role="$role" :primary="request()->boolean('new')" />
+                    @endif
+                    @if ($canReschedule)
+                        <a href="{{ $rescheduleUrl }}"
+                           class="inline-flex items-center rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-3 text-base font-semibold text-gray-700 dark:text-gray-300 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-700">
+                            {{ $state === 'pending' ? __('messages.appointments_change_time') : __('messages.appointments_reschedule') }}
+                        </a>
+                    @endif
                 </div>
             @endif
 
-            {{-- Reschedule sits with the constructive actions; Cancel stays a quiet red link below,
-                 destructive-last, so it cannot be mis-tapped. --}}
             @if ($canReschedule)
-                <div class="mt-5">
-                    <a href="{{ $rescheduleUrl }}"
-                       class="inline-flex items-center rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-3 text-base font-semibold text-gray-700 dark:text-gray-300 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-700">
-                        {{ $state === 'pending' ? __('messages.appointments_change_time') : __('messages.appointments_reschedule') }}
-                    </a>
-                </div>
-
                 {{-- Said BEFORE they commit: a confirmed booking on an approval type is about to be
                      released the moment they pick a new time. --}}
                 @if ($state === 'confirmed' && $type?->requires_approval)

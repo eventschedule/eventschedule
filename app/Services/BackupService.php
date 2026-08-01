@@ -845,9 +845,7 @@ class BackupService
             foreach ($scheduleData['appointment_types'] ?? [] as $typeData) {
                 try {
                     $type = $this->importAppointmentType($typeData, $role);
-                    // Null when the plan's allowance is already spent; the remaining types are
-                    // skipped rather than restored beyond what the schedule may create.
-                    if ($type && isset($typeData['_ref_id'])) {
+                    if (isset($typeData['_ref_id'])) {
                         $idMap['appointment_types'][$typeData['_ref_id']] = $type->id;
                     }
                 } catch (\Exception $e) {
@@ -921,11 +919,6 @@ class BackupService
                     foreach ($eventData['promo_codes'] ?? [] as $promoData) {
                         try {
                             $promo = $this->importPromoCode($promoData, $event, $idMap);
-
-                            // Null when the schedule's plan does not carry promo codes.
-                            if (! $promo) {
-                                continue;
-                            }
 
                             if (isset($promoData['_ref_id'])) {
                                 $idMap['promo_codes'][$promoData['_ref_id']] = $promo->id;
@@ -1428,10 +1421,14 @@ class BackupService
         $ticket->sales_start_at = $data['sales_start_at'] ?? null;
         $ticket->sales_end_at = $data['sales_end_at'] ?? null;
         $ticket->custom_fields = $data['custom_fields'] ?? null;
-        // Pro extras are scrubbed on import exactly as they are on save. Restore is available on
-        // every plan and takes an arbitrary uploaded payload, so without this a free schedule
-        // could restore unlimited passes.
-        $ticket->is_pass = $event->isPro() ? ($data['is_pass'] ?? false) : false;
+        // Deliberately NOT plan-gated, unlike the equivalent scrub in EventRepo::saveEvent(). A
+        // restore always lands on a schedule importRole() has just created, and ROLE_EXPORT_FIELDS
+        // carries no plan columns, so roles.plan_type falls back to its 'free' default - meaning a
+        // gate here fires on every hosted restore, including a paying customer reloading their own
+        // backup, and quietly turns their sold passes into ordinary tickets. Restoring is not a way
+        // to acquire the feature: PassBookingService::isBookable() still refuses to book a pass on a
+        // free schedule, so the flag is inert until the schedule is Pro again.
+        $ticket->is_pass = $data['is_pass'] ?? false;
         $ticket->pass_usage_type = $data['pass_usage_type'] ?? 'per_occurrence';
         $ticket->pass_max_uses = $data['pass_max_uses'] ?? null;
         $ticket->pass_valid_days = $data['pass_valid_days'] ?? null;
@@ -1449,15 +1446,12 @@ class BackupService
         return $ticket;
     }
 
-    private function importPromoCode(array $data, Event $event, array &$idMap): ?PromoCode
+    private function importPromoCode(array $data, Event $event, array &$idMap): PromoCode
     {
-        // Promo codes are Pro, and restore takes an arbitrary uploaded payload on any plan.
-        // Skipped rather than imported-and-inert so a free schedule does not accumulate rows it
-        // cannot see or manage.
-        if (! $event->isPro()) {
-            return null;
-        }
-
+        // No plan gate here - see the note on is_pass in importTicket(). A restored schedule is
+        // always brand new and therefore always free, so gating on it dropped every promo code from
+        // every hosted restore. Imported-and-inert is the right outcome: PromoCode::isValid() already
+        // refuses to apply one on a free schedule, and the codes light up again on upgrade.
         $validator = Validator::make($data, [
             'code' => 'required|string|max:50',
             'type' => 'required|in:percentage,fixed',
@@ -1535,14 +1529,18 @@ class BackupService
         return $giftCard;
     }
 
-    private function importAppointmentType(array $data, Role $role): ?AppointmentType
+    private function importAppointmentType(array $data, Role $role): AppointmentType
     {
-        // Honour the plan's appointment-type allowance, so a restore cannot hand a free
-        // schedule more bookable types than it may create through the UI.
-        if (! $role->canCreateAppointmentType()) {
-            return null;
-        }
-
+        // No allowance gate here - see the note on is_pass in importTicket(). A restored schedule is
+        // always brand new and therefore always free, so this dropped every type after the first on
+        // every hosted restore. Worse, importEvent() only remaps appointment_type_id when the type
+        // made it into $idMap, so the bookings for the dropped types came back as ORDINARY events -
+        // out of the Bookings tab, into the normal listings, and counting against the ticket
+        // allowance, which excludes bookings via whereNull('events.appointment_type_id').
+        //
+        // The allowance is applied where it belongs: Role::bookableAppointmentTypes() clamps what a
+        // guest may book, and AppointmentTypeController::planLimit() gates the two creation paths.
+        // The extra types restore intact, stay unbookable, and light up on upgrade.
         $validator = Validator::make($data, [
             'name' => 'required|string|max:255',
             'duration_minutes' => 'required|integer|min:1',

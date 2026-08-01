@@ -2,7 +2,7 @@
 @props(['active' => 'dashboard'])
 
 @php
-    $insightsActive = in_array($active, ['users', 'revenue', 'analytics', 'usage']);
+    $insightsActive = in_array($active, ['users', 'revenue', 'analytics', 'usage', 'growth']);
     $manageKeys = ['boost', 'newsletters'];
     if (config('app.hosted')) {
         $manageKeys = array_merge($manageKeys, ['schedules', 'domains', 'referrals', 'blog']);
@@ -67,6 +67,11 @@
                         <a href="{{ route('admin.usage') }}" class="{{ $active === 'usage' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.usage')
                         </a>
+                        @if (config('app.hosted'))
+                            <a href="{{ route('admin.growth') }}" class="{{ $active === 'growth' ? $dropdownItemActive : $dropdownItem }}">
+                                @lang('messages.growth')
+                            </a>
+                        @endif
                     </div>
                 </div>
             </div>

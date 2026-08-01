@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Rules\ValidTurnstile;
+use App\Utils\HoneypotUtils;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class PasswordResetLinkController extends Controller
@@ -27,6 +29,14 @@ class PasswordResetLinkController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // Honeypot. A ValidationException rather than a flash error: x-auth-layout renders
+        // only per-field errors, so with('error') would be swallowed by the layout.
+        if (HoneypotUtils::isTripped($request)) {
+            throw ValidationException::withMessages([
+                'email' => __('messages.invalid_request'),
+            ]);
+        }
+
         $request->validate([
             'email' => ['required', 'email'],
             'cf-turnstile-response' => [new ValidTurnstile],

@@ -11,6 +11,7 @@ use App\Notifications\SignupVerificationCode;
 use App\Rules\NoFakeEmail;
 use App\Rules\ValidTurnstile;
 use App\Services\AuditService;
+use App\Utils\HoneypotUtils;
 use App\Utils\TurnstileUtils;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Events\Verified;
@@ -106,7 +107,7 @@ class RegisteredUserController extends Controller
     public function sendVerificationCode(Request $request): JsonResponse
     {
         // Honeypot check
-        if ($request->filled('website')) {
+        if (HoneypotUtils::isTripped($request)) {
             return response()->json([
                 'success' => false,
                 'message' => __('messages.invalid_request'),
@@ -195,7 +196,9 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        if ($request->filled('website')) {
+        // Honeypot. A ValidationException rather than a flash error: x-auth-layout renders
+        // only per-field errors, so with('error') would be swallowed by the layout.
+        if (HoneypotUtils::isTripped($request)) {
             throw ValidationException::withMessages([
                 'email' => __('messages.invalid_request'),
             ]);

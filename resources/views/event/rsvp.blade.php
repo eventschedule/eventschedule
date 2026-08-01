@@ -48,6 +48,7 @@
                     waitlistSubmitting: false,
                     waitlistMessage: '',
                     waitlistSuccess: false,
+                    website: '',
                 };
             },
             created() {
@@ -261,6 +262,7 @@
                             event_date: @json($date ?? $event->saleEventDateFromStartsAt()),
                             name: this.name.trim(),
                             email: this.email.trim(),
+                            website: this.website,
                         }),
                     })
                     .then(response => {
@@ -288,6 +290,10 @@
     @if ($event->isRsvpFull($date ?? $event->saleEventDateFromStartsAt()))
         <div>
             <input type="hidden" name="_token" value="{{ csrf_token() }}">
+            {{-- The waitlist and the RSVP form are opposite branches of this @if, so the
+                 honeypot in the form below never renders here. joinWaitlist() posts by
+                 fetch, so this one is bound into Vue rather than submitted with a form. --}}
+            <x-honeypot vmodel="website" />
             <div v-if="!waitlistSuccess">
                 <div class="mb-6">
                     <label for="waitlist_name" class="text-gray-900 dark:text-gray-100">{{ __('messages.name') . ' *' }}</label>
@@ -334,7 +340,7 @@
         <input type="hidden" name="event_id" value="{{ \App\Utils\UrlUtils::encodeId($event->id) }}">
         <input type="hidden" name="event_date" value="{{ $date ?? $event->saleEventDateFromStartsAt() }}">
         <input type="hidden" name="subdomain" value="{{ $subdomain }}">
-        <div class="hidden"><input type="text" name="website" autocomplete="off" tabindex="-1"></div>
+        <x-honeypot />
         @if (request()->embed)
         <input type="hidden" name="embed" value="true">
         @endif

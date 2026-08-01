@@ -27,7 +27,9 @@
         #appt-chooser a:focus-visible { outline: 2px solid var(--es-accent-readable); outline-offset: 2px; }
     </style>
 
-    <div id="appt-chooser" class="max-w-2xl mx-auto px-4 py-10">
+    {{-- Wider, with the types two-up: showBook() redirects when there is only one type, so this page
+         always has at least two cards and a single column left half the width empty. --}}
+    <div id="appt-chooser" class="max-w-4xl mx-auto px-4 py-10">
         {{-- Everything sits on an opaque panel. The schedule background defaults to a photo or a
              random gradient and the guest layout pins body text to a dark gray, so content rendered
              straight onto that background is unreadable half the time. Same approach as the schedule
@@ -36,7 +38,7 @@
             <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{{ $role->customLabel('book_a_time') }}</h1>
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">{{ __('messages.appointments_with', ['schedule' => $role->name]) }}</p>
 
-            <div class="space-y-4">
+            <div class="grid gap-4 sm:grid-cols-2">
                 @foreach ($types as $type)
                     @php
                         $priceLabel = $type->isFree()

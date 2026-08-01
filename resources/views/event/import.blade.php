@@ -70,6 +70,13 @@
 
     @csrf
 
+    {{-- Guests only: this page is shared with the authenticated event.import flow, whose
+         payload must stay unchanged. The submit builds its JSON body by hand, so the value
+         is bound into Vue and sent explicitly rather than picked up from the form. --}}
+    @if (isset($isGuest) && $isGuest)
+    <x-honeypot vmodel="honeypot" />
+    @endif
+
         @php $use24hr = get_use_24_hour_time($role ?? null); @endphp
 
         <div v-if="!preview || !preview.parsed || preview.parsed.length === 0">
@@ -1079,6 +1086,7 @@
     var app = createApp({
         data() {
             return {
+                honeypot: '',
                 eventDetails: '',
                 preview: null,
                 isLoading: false,
@@ -1560,6 +1568,9 @@
                 try {
                     const formData = new FormData();
                     formData.append('event_details', this.eventDetails);
+                    @if (isset($isGuest) && $isGuest)
+                    formData.append('website', this.honeypot);
+                    @endif
                     if (this.detailsImage) {
                         formData.append('details_image', this.detailsImage);
                     }
@@ -2013,6 +2024,9 @@
                             current_role_group_id: parsed.group_id || null,
                             custom_field_values: parsed.custom_field_values || {},
                             category_id: parsed.category_id,
+                            @if (isset($isGuest) && $isGuest)
+                                website: this.honeypot,
+                            @endif
                             @if ($role->isCurator() && !isset($isGuest))
                                 curators: ['{{ \App\Utils\UrlUtils::encodeId($role->id) }}'],
                             @endif
@@ -2214,7 +2228,10 @@
                     // Create a FormData object to send the file
                     const formData = new FormData();
                     formData.append('image', file);
-                    
+                    @if (isset($isGuest) && $isGuest)
+                    formData.append('website', this.honeypot);
+                    @endif
+
                     // Upload the image to get a temporary URL
                     const response = await fetch('{{ isset($isGuest) && $isGuest ? route("event.guest_upload_image", ["subdomain" => $role->subdomain]) : route("event.upload_image", ["subdomain" => $role->subdomain]) }}', {
                         method: 'POST',

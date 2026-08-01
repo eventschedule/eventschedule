@@ -48,6 +48,7 @@
 
                 <form method="POST" action="{{ route('feedback.store', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $sale->secret]) }}">
                     @csrf
+                    <x-honeypot />
 
                     {{-- Star rating --}}
                     <div class="mb-6">

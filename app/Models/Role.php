@@ -2560,7 +2560,15 @@ class Role extends Model implements MustVerifyEmail
         );
     }
 
-    /** Paid tickets sold across every schedule this schedule's owner runs. */
+    /**
+     * Paid tickets sold across the owner's other CAPPED schedules, for the per-user backstop.
+     *
+     * Counts only schedules that are themselves subject to an allowance. The backstop exists so a
+     * per-schedule cap cannot be multiplied by spreading events over many free schedules; sales made
+     * on a schedule the owner PAYS for are not that. Counting those meant one Pro schedule doing more
+     * than the user limit silently blocked every free schedule the same owner ran - while the meters,
+     * which all read ticketsSoldThisMonth(), still showed nothing used.
+     */
     public function ownerTicketsSoldThisMonth(): int
     {
         // Memoized for the same reason ticketsSoldThisMonth() is, and it matters more: this one runs
@@ -2572,7 +2580,21 @@ class Role extends Model implements MustVerifyEmail
             return $this->ownerTicketsSoldThisMonthCache;
         }
 
-        $roles = static::where('user_id', $this->user_id)->get(['id', 'type']);
+        // roles.user_id is nullable - a venue or talent schedule invented while entering an event is
+        // attached at null - and Laravel turns where(col, null) into whereNull, so without this the
+        // query below would hydrate every unclaimed schedule on the install and bind all of their ids
+        // into ticketAllowanceEventQuery()'s whereIn. There is no "owner" to pool across anyway.
+        if (! $this->user_id) {
+            return $this->ownerTicketsSoldThisMonthCache = $this->ticketsSoldThisMonth();
+        }
+
+        // Full hydrate, not get(['id', 'type']): ticketSaleLimit() reaches isPro(), which needs the
+        // plan columns. Eager-load both relations it touches - subscriptions for isPro() and user for
+        // is_demo_role() - or every row lazy-loads its own pair.
+        $roles = static::where('user_id', $this->user_id)
+            ->with(['subscriptions', 'user'])
+            ->get()
+            ->filter(fn ($role) => $role->ticketSaleLimit() !== null);
 
         return $this->ownerTicketsSoldThisMonthCache = static::paidTicketsSoldSince(
             $roles->pluck('id')->all(),
