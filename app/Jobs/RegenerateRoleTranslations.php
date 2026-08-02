@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Log;
  * Translations live in `_en` columns (the column name is historical - the value is whatever
  * the schedule's target language is). When the owner picks a new target, every stored `_en`
  * value is now in the wrong language, so we null them and reset `translation_attempts`; the
- * hourly `app:translate` cron then regenerates them in the new target. A target change also
+ * scheduled `app:translate` cron then regenerates them in the new target. A target change also
  * invalidates any manual `_en` overrides, since those were written in the previous target.
  *
  * Sub-schedule (Group) names are the exception: they are translated inline (never by the cron),
@@ -159,7 +159,7 @@ class RegenerateRoleTranslations implements ShouldQueue
      * talent. Every role has a non-empty target (the column defaults to 'en'), so for any event that
      * has a venue, the venue decides - and a talent changing its own target leaves that event's
      * effective target untouched. Nulling those rows anyway would blank the guest page until the
-     * hourly cron re-translated them into the very same language, at full Gemini cost.
+     * cron re-translated them into the very same language, at full Gemini cost.
      *
      * Mirrors the curator early-return above: only the governing role resets.
      */

@@ -2838,6 +2838,8 @@ return [
     'no_usage_data' => 'Keine Nutzungsdaten für diesen Zeitraum.',
     'top_schedules_by_usage' => 'Top-Schedules nach Nutzung',
     'no_schedule_usage_data' => 'Keine Schedule-Nutzungsdaten für diesen Zeitraum.',
+    'translation_backlog' => 'Übersetzungsrückstand',
+    'translation_backlog_description' => 'Inhalte, die auf den geplanten Übersetzungslauf warten. Zeilen mit "Nie versucht" wurden noch nicht erreicht; eine Zahl, die nie sinkt, bedeutet also, dass der Cron nicht hinterherkommt.',
     'stuck_translation_records' => 'Feststeckende Übersetzungseinträge',
     'stuck_translation_description' => 'Einträge mit :threshold+ Übersetzungsversuchen, die noch unübersetzte Felder haben.',
     'no_stuck_translations' => 'Keine feststeckenden Übersetzungseinträge gefunden.',

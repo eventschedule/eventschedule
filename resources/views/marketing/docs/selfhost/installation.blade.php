@@ -364,11 +364,11 @@
                         <td>Every 5 minutes</td>
                     </tr>
                     <tr>
-                        <td>Google, Outlook and CalDAV calendar sync</td>
+                        <td>Google, Outlook and CalDAV calendar sync, AI translation</td>
                         <td>Every 15 minutes</td>
                     </tr>
                     <tr>
-                        <td>Release unpaid ticket reservations, expire waitlist offers, send feedback requests, appointment and carpool reminders, event graphic emails, AI translation</td>
+                        <td>Release unpaid ticket reservations, expire waitlist offers, send feedback requests, appointment and carpool reminders, event graphic emails</td>
                         <td>Hourly</td>
                     </tr>
                     <tr>

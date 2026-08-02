@@ -27,6 +27,7 @@ use App\Services\DemoService;
 use App\Services\DigitalOceanService;
 use App\Services\GrowthExportService;
 use App\Services\OneSignalService;
+use App\Services\TranslationQueue;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Auth\Events\Verified;
@@ -1137,6 +1138,11 @@ class AdminController extends Controller
             ->limit(20)
             ->get(['id', 'event_id', 'role_id', 'translation_attempts', 'last_translated_at', 'name_translated', 'description_translated']);
 
+        // What the cron still has to get through. The stuck lists above only surface rows that
+        // failed repeatedly; a row at zero attempts that the cron never reaches is invisible there,
+        // and that is the shape of failure that leaves a schedule untranslated indefinitely.
+        $translationBacklog = TranslationQueue::backlog();
+
         return view('admin.usage', compact(
             'categorySummaries',
             'operationBreakdown',
@@ -1148,6 +1154,7 @@ class AdminController extends Controller
             'stuckEventParts',
             'stuckEventRoles',
             'stuckThreshold',
+            'translationBacklog',
             'range',
             'categories'
         ));

@@ -2849,6 +2849,8 @@ return [
     'no_usage_data' => 'Selle perioodi kohta kasutusandmed puuduvad.',
     'top_schedules_by_usage' => 'Enim kasutatud kavad',
     'no_schedule_usage_data' => 'Selle perioodi kohta kavade kasutusandmed puuduvad.',
+    'translation_backlog' => 'Tõlkejärjekord',
+    'translation_backlog_description' => 'Sisu, mis ootab ajastatud tõlkekäivitust. Ridadeni "Pole kunagi proovitud" pole veel jõutud, seega tähendab number, mis kunagi ei lange, et cron ei jõua järele.',
     'stuck_translation_records' => 'Kinnijäänud tõlkekirjed',
     'stuck_translation_description' => 'Kirjed, millel on :threshold+ tõlkekatset, kuid mis sisaldavad endiselt tõlkimata välju.',
     'no_stuck_translations' => 'Kinnijäänud tõlkekirjeid ei leitud.',

@@ -2837,6 +2837,8 @@ return [
     'no_usage_data' => 'Aucune donnée d\'utilisation pour cette période.',
     'top_schedules_by_usage' => 'Calendriers les plus actifs par utilisation',
     'no_schedule_usage_data' => 'Aucune donnée d\'utilisation par calendrier pour cette période.',
+    'translation_backlog' => 'File d\'attente de traduction',
+    'translation_backlog_description' => 'Contenu en attente de l\'exécution planifiée de traduction. Les lignes "Jamais tenté" n\'ont pas encore été atteintes ; un nombre qui ne baisse jamais signifie donc que le cron ne suit pas.',
     'stuck_translation_records' => 'Enregistrements de traduction bloqués',
     'stuck_translation_description' => 'Enregistrements avec :threshold+ tentatives de traduction qui ont encore des champs non traduits.',
     'no_stuck_translations' => 'Aucun enregistrement de traduction bloqué trouvé.',

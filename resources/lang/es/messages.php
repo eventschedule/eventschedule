@@ -2834,6 +2834,8 @@ return [
     'no_usage_data' => 'No hay datos de uso para este período.',
     'top_schedules_by_usage' => 'Horarios con mayor uso',
     'no_schedule_usage_data' => 'No hay datos de uso por horario para este período.',
+    'translation_backlog' => 'Cola de traducción',
+    'translation_backlog_description' => 'Contenido en espera de la ejecución programada de traducción. Las filas "Nunca intentado" aún no se han alcanzado, por lo que un número que nunca baja significa que el cron no da abasto.',
     'stuck_translation_records' => 'Registros de traducción atascados',
     'stuck_translation_description' => 'Registros con :threshold+ intentos de traducción que aún tienen campos sin traducir.',
     'no_stuck_translations' => 'No se encontraron registros de traducción atascados.',

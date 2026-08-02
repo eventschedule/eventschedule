@@ -8,6 +8,16 @@ return [
     'invoice_ninja_daily_limit' => (int) env('USAGE_INVOICE_NINJA_DAILY_LIMIT', 200),
     'caldav_daily_limit' => (int) env('USAGE_CALDAV_DAILY_LIMIT', 500),
     'stuck_translation_attempts' => (int) env('USAGE_STUCK_THRESHOLD', 3),
+
+    // How long app:translate may run before it stops cleanly. It is invoked from a web request
+    // (AppController::translateData), so it has to finish inside the cron lock and inside whatever
+    // PHP-FPM / nginx allow. 0 disables the budget, which is the default for single-schedule runs.
+    'translation_max_seconds' => (int) env('USAGE_TRANSLATION_MAX_SECONDS', 240),
+
+    // A row that hit stuck_translation_attempts consecutive failures is retried once this long
+    // after its last attempt, so a transient Gemini outage or quota window cannot freeze a
+    // schedule permanently. Spend stays bounded at one retry per row per window.
+    'translation_retry_after_hours' => (int) env('USAGE_TRANSLATION_RETRY_HOURS', 24),
     'ai_image_daily_limit_trial' => (int) env('AI_IMAGE_DAILY_LIMIT_TRIAL', 3),
     'ai_image_daily_limit_paid' => (int) env('AI_IMAGE_DAILY_LIMIT_PAID', 10),
     'ai_parse_daily_limit_trial' => (int) env('AI_PARSE_DAILY_LIMIT_TRIAL', 10),

@@ -1,0 +1,364 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Role;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Artisan;
+use Tests\Feature\Concerns\CreatesScheduleData;
+use Tests\TestCase;
+
+/**
+ * Covers which rows `app:translate` picks up and in what order - the part that was broken when
+ * schedules with a non-English translation target sat untranslated indefinitely.
+ *
+ * Everything here runs through --dry-run (or through a row that provably needs no AI call), so no
+ * test in this file reaches the network. The Gemini call itself is not exercised.
+ */
+class TranslateCommandTest extends TestCase
+{
+    use CreatesScheduleData;
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // The command no-ops without a provider configured. Nothing here makes a call; the rows
+        // under test either run under --dry-run or have nothing left to translate.
+        config(['services.google.gemini_key' => 'test-key']);
+    }
+
+    private function dryRun(array $options = []): string
+    {
+        Artisan::call('app:translate', array_merge(['--dry-run' => true], $options));
+
+        return Artisan::output();
+    }
+
+    /** @return int[] ids listed for a pass, in the order the command would process them */
+    private function selectedIds(string $output, string $pass): array
+    {
+        preg_match_all('/\[dry-run\] '.preg_quote($pass, '/').' #(\d+)/', $output, $matches);
+
+        return array_map('intval', $matches[1]);
+    }
+
+    public function test_never_translated_schedules_are_processed_before_longest_waiting_ones(): void
+    {
+        $user = $this->createOwner();
+
+        // Created first (lowest id) but already attempted, so an id ordering would put it first.
+        $attempted = $this->createRole($user, 'venue', [
+            'name' => 'Attempted',
+            'language_code' => 'it',
+            'translation_language_code' => 'en',
+            'last_translated_at' => now()->subHour(),
+        ]);
+
+        $waitingLonger = $this->createRole($user, 'venue', [
+            'name' => 'Waiting Longer',
+            'language_code' => 'it',
+            'translation_language_code' => 'en',
+            'last_translated_at' => now()->subDays(3),
+        ]);
+
+        $neverTried = $this->createRole($user, 'venue', [
+            'name' => 'Never Tried',
+            'language_code' => 'it',
+            'translation_language_code' => 'en',
+            'last_translated_at' => null,
+        ]);
+
+        $ids = $this->selectedIds($this->dryRun(), 'roles');
+
+        // Never-attempted first, then longest-waiting. Under the old `orderBy('id')` this was
+        // exactly reversed, which is how the newest schedules were never reached.
+        $this->assertSame([$neverTried->id, $waitingLonger->id, $attempted->id], $ids);
+    }
+
+    public function test_targeting_a_schedule_includes_its_own_events(): void
+    {
+        $user = $this->createOwner();
+        $venue = $this->createRole($user, 'venue', [
+            'language_code' => 'en',
+            'translation_language_code' => 'he',
+        ]);
+        $event = $this->createEvent($venue, ['name' => 'Shabbat Eikev']);
+
+        $output = $this->dryRun(['--subdomain' => $venue->subdomain]);
+
+        // The role-scoped run used to skip the events pass entirely, so there was no way to fix a
+        // single schedule by hand.
+        $this->assertSame([$event->id], $this->selectedIds($output, 'events'));
+    }
+
+    public function test_unknown_subdomain_fails_without_translating_anything(): void
+    {
+        $exitCode = Artisan::call('app:translate', ['--dry-run' => true, '--subdomain' => 'no-such-schedule']);
+
+        $this->assertSame(1, $exitCode);
+        $this->assertStringContainsString('No schedule found with subdomain', Artisan::output());
+    }
+
+    public function test_schedule_needing_only_category_translation_is_selected(): void
+    {
+        $user = $this->createOwner();
+        $role = $this->createRole($user, 'venue', [
+            'name' => 'Torah Learning Center',
+            'name_en' => 'Already Translated',
+            'language_code' => 'en',
+            'translation_language_code' => 'he',
+            'event_categories' => [
+                ['id' => 1, 'name' => 'Education', 'name_en' => null],
+            ],
+        ]);
+
+        // event_categories is translated by the command but was missing from its selection query,
+        // so a schedule whose only untranslated content was its category names never got picked up.
+        $this->assertSame([$role->id], $this->selectedIds($this->dryRun(), 'roles'));
+    }
+
+    public function test_schedule_with_nothing_left_to_translate_is_parked_without_an_ai_call(): void
+    {
+        $user = $this->createOwner();
+
+        // Matches the selection query only through the coarse custom_labels prefilter, which stays
+        // true forever once the column is set. Every translatable value is already filled in, so
+        // reaching an AI call here would be the bug.
+        $role = $this->createRole($user, 'venue', [
+            'name' => 'Fully Translated',
+            'name_en' => 'Fully Translated EN',
+            'language_code' => 'it',
+            'translation_language_code' => 'en',
+            'custom_labels' => ['our_sponsors' => ['value' => 'Sponsor', 'value_en' => 'Sponsor EN']],
+            'last_translated_at' => null,
+        ]);
+
+        $this->assertSame([$role->id], $this->selectedIds($this->dryRun(), 'roles'));
+
+        Artisan::call('app:translate');
+
+        $role->refresh();
+
+        // Parked: the timestamp moves so fair ordering stops putting it ahead of real work, but
+        // nothing was attempted and nothing was counted against it.
+        $this->assertNotNull($role->last_translated_at);
+        $this->assertSame(0, (int) $role->translation_attempts);
+        $this->assertSame('Fully Translated EN', $role->name_en);
+        $this->assertSame('Sponsor EN', $role->custom_labels['our_sponsors']['value_en']);
+    }
+
+    public function test_repeatedly_failing_schedule_is_skipped_inside_its_cooldown(): void
+    {
+        $user = $this->createOwner();
+        $this->createRole($user, 'venue', [
+            'name' => 'Recently Failed',
+            'language_code' => 'it',
+            'translation_language_code' => 'en',
+            'translation_attempts' => config('usage.stuck_translation_attempts'),
+            'last_translated_at' => now()->subMinutes(5),
+        ]);
+
+        $this->assertSame([], $this->selectedIds($this->dryRun(), 'roles'));
+    }
+
+    public function test_repeatedly_failing_schedule_is_retried_once_past_the_cooldown(): void
+    {
+        $user = $this->createOwner();
+        $role = $this->createRole($user, 'venue', [
+            'name' => 'Failed Long Ago',
+            'language_code' => 'it',
+            'translation_language_code' => 'en',
+            'translation_attempts' => config('usage.stuck_translation_attempts'),
+            'last_translated_at' => now()->subHours((int) config('usage.translation_retry_after_hours') + 1),
+        ]);
+
+        // Without the cooldown a schedule that hit the attempt threshold - which a quota window or
+        // a run of API timeouts is enough to do - stayed frozen until someone edited it by hand.
+        $this->assertSame([$role->id], $this->selectedIds($this->dryRun(), 'roles'));
+    }
+
+    public function test_force_ignores_the_cooldown(): void
+    {
+        $user = $this->createOwner();
+        $role = $this->createRole($user, 'venue', [
+            'name' => 'Recently Failed',
+            'language_code' => 'it',
+            'translation_language_code' => 'en',
+            'translation_attempts' => config('usage.stuck_translation_attempts'),
+            'last_translated_at' => now()->subMinutes(5),
+        ]);
+
+        $this->assertSame([$role->id], $this->selectedIds($this->dryRun(['--force' => true]), 'roles'));
+    }
+
+    public function test_schedule_whose_target_matches_its_language_is_never_selected(): void
+    {
+        $user = $this->createOwner();
+        $this->createRole($user, 'venue', [
+            'name' => 'Monolingual',
+            'language_code' => 'en',
+            'translation_language_code' => 'en',
+        ]);
+
+        $this->assertSame([], $this->selectedIds($this->dryRun(), 'roles'));
+    }
+
+    public function test_events_pass_ignores_events_whose_schedules_want_no_translation(): void
+    {
+        $user = $this->createOwner();
+
+        $monolingual = $this->createRole($user, 'venue', [
+            'language_code' => 'en',
+            'translation_language_code' => 'en',
+        ]);
+        $this->createEvent($monolingual, ['name' => 'Untranslatable']);
+
+        $translating = $this->createRole($user, 'venue', [
+            'language_code' => 'en',
+            'translation_language_code' => 'he',
+        ]);
+        $wanted = $this->createEvent($translating, ['name' => 'Needs Hebrew']);
+
+        // The pass used to load every event on the platform that had ever lacked a translation.
+        $this->assertSame([$wanted->id], $this->selectedIds($this->dryRun(), 'events'));
+    }
+
+    public function test_scheduled_runs_are_budgeted_but_hand_run_schedules_are_not(): void
+    {
+        $user = $this->createOwner();
+        $role = $this->createRole($user, 'venue', [
+            'language_code' => 'it',
+            'translation_language_code' => 'en',
+        ]);
+
+        $this->assertStringContainsString('Time budget: 240s', $this->dryRun());
+
+        // A hand-run single schedule should finish the job rather than stop at the cron's budget.
+        $this->assertStringNotContainsString('Time budget', $this->dryRun(['--subdomain' => $role->subdomain]));
+    }
+
+    public function test_explicit_max_seconds_overrides_the_default(): void
+    {
+        $this->assertStringContainsString('Time budget: 30s', $this->dryRun(['--max-seconds' => 30]));
+        $this->assertStringNotContainsString('Time budget', $this->dryRun(['--max-seconds' => 0]));
+    }
+
+    public function test_command_no_ops_without_an_ai_provider(): void
+    {
+        config(['services.google.gemini_key' => null, 'services.openai.api_key' => null]);
+
+        $user = $this->createOwner();
+        $role = $this->createRole($user, 'venue', [
+            'name' => 'Waiting',
+            'language_code' => 'it',
+            'translation_language_code' => 'en',
+        ]);
+
+        Artisan::call('app:translate');
+
+        $this->assertStringContainsString('No AI API key found', Artisan::output());
+        $this->assertNull(Role::find($role->id)->last_translated_at);
+    }
+
+    public function test_rows_blanked_to_empty_strings_are_invisible_to_every_pass(): void
+    {
+        $user = $this->createOwner();
+        $venue = $this->createRole($user, 'venue', [
+            'language_code' => 'en',
+            'translation_language_code' => 'he',
+        ]);
+
+        // What the old code wrote whenever an event's source language equalled its target. Not NULL,
+        // so `whereNull('name_en')` cannot see it - this is why --reset has to exist.
+        $this->createEvent($venue, ['name' => 'Shabbat Eikev', 'name_en' => '']);
+
+        $this->assertSame([], $this->selectedIds($this->dryRun(['--subdomain' => $venue->subdomain]), 'events'));
+    }
+
+    public function test_reset_refuses_to_run_without_a_target(): void
+    {
+        $exitCode = Artisan::call('app:translate', ['--reset' => true]);
+
+        $this->assertSame(1, $exitCode);
+        $this->assertStringContainsString('--reset needs a target', Artisan::output());
+    }
+
+    public function test_reset_dry_run_reports_without_destroying_anything(): void
+    {
+        $user = $this->createOwner();
+        $venue = $this->createRole($user, 'venue', [
+            'language_code' => 'en',
+            'translation_language_code' => 'he',
+            'name_en' => 'stale translation',
+        ]);
+
+        $output = $this->dryRun(['--reset' => true, '--subdomain' => $venue->subdomain]);
+
+        $this->assertStringContainsString('[dry-run] --reset would discard', $output);
+        $this->assertSame('stale translation', $venue->fresh()->name_en);
+    }
+
+    public function test_reset_clears_stale_translations_and_attempt_counters(): void
+    {
+        $user = $this->createOwner();
+
+        // Monolingual on purpose: every pass short-circuits on source == target, so the whole run
+        // is network-free and what remains is purely the reset's own effect.
+        $venue = $this->createRole($user, 'venue', [
+            'language_code' => 'en',
+            'translation_language_code' => 'en',
+            'name_en' => 'stale translation',
+        ]);
+        $event = $this->createEvent($venue, [
+            'name' => 'Shabbat Eikev',
+            'name_en' => '',
+            'translation_attempts' => 3,
+        ]);
+
+        Artisan::call('app:translate', ['--reset' => true, '--subdomain' => $venue->subdomain]);
+
+        $this->assertStringContainsString('Reset translations for schedule', Artisan::output());
+        // The roles pass never touches a monolingual schedule, so a NULL here is the reset's doing.
+        $this->assertNull($venue->fresh()->name_en);
+        // The events pass re-blanks name_en on the same run (source == target), but it never touches
+        // the counter - so this is what proves the event rows were reset too.
+        $this->assertSame(0, (int) $event->fresh()->translation_attempts);
+    }
+
+    public function test_an_unresolvable_id_fails_instead_of_running_every_schedule(): void
+    {
+        $user = $this->createOwner();
+        $this->createRole($user, 'venue', [
+            'name' => 'Would Be Translated',
+            'language_code' => 'it',
+            'translation_language_code' => 'en',
+        ]);
+
+        foreach ([['--role_id' => 'garbage'], ['--event_id' => 'garbage']] as $options) {
+            $exitCode = Artisan::call('app:translate', array_merge(['--dry-run' => true], $options));
+            $output = Artisan::output();
+
+            $this->assertSame(1, $exitCode);
+            $this->assertStringContainsString('Could not resolve', $output);
+            // The real damage of the old behaviour: a typo silently fell through to a full run.
+            $this->assertStringNotContainsString('[dry-run] roles', $output);
+        }
+    }
+
+    public function test_dry_run_still_reports_without_an_ai_provider(): void
+    {
+        config(['services.google.gemini_key' => null, 'services.openai.api_key' => null]);
+
+        $user = $this->createOwner();
+        $role = $this->createRole($user, 'venue', [
+            'name' => 'Waiting',
+            'language_code' => 'it',
+            'translation_language_code' => 'en',
+        ]);
+
+        // Inspecting the queue must not require a configured provider - it makes no calls.
+        $this->assertSame([$role->id], $this->selectedIds($this->dryRun(), 'roles'));
+    }
+}

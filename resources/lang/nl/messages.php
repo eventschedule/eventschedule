@@ -2832,6 +2832,8 @@ return [
     'no_usage_data' => 'Geen gebruiksgegevens voor deze periode.',
     'top_schedules_by_usage' => 'Top schedules op basis van gebruik',
     'no_schedule_usage_data' => 'Geen schedule-gebruiksgegevens voor deze periode.',
+    'translation_backlog' => 'Vertaalwachtrij',
+    'translation_backlog_description' => 'Inhoud die wacht op de geplande vertaalronde. Rijen met "Nooit geprobeerd" zijn nog niet bereikt, dus een aantal dat nooit daalt betekent dat de cron het niet bijhoudt.',
     'stuck_translation_records' => 'Vastgelopen vertalingen',
     'stuck_translation_description' => 'Records met :threshold+ vertaalpogingen die nog onvertaalde velden hebben.',
     'no_stuck_translations' => 'Geen vastgelopen vertalingen gevonden.',

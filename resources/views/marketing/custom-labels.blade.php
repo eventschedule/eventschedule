@@ -664,7 +664,7 @@
             ],
             [
                 'q' => 'Do custom labels work with translations?',
-                'a' => 'Each override holds two forms: the wording you typed, and a second form in the language your schedule translates into. If you have a translation language set and an AI key configured, the hourly translation run fills that second form in for you, and on a schedule written in something other than English there is a field for writing it by hand instead. Be clear on what this is not: it is two forms per label, not a translation of the interface into every supported language. The shipped labels are already translated in all ' . count(config('app.supported_languages', [])) . ' languages Event Schedule speaks, and an override replaces that pair for your schedule.',
+                'a' => 'Each override holds two forms: the wording you typed, and a second form in the language your schedule translates into. If you have a translation language set and an AI key configured, the scheduled translation run fills that second form in for you, and on a schedule written in something other than English there is a field for writing it by hand instead. Be clear on what this is not: it is two forms per label, not a translation of the interface into every supported language. The shipped labels are already translated in all ' . count(config('app.supported_languages', [])) . ' languages Event Schedule speaks, and an override replaces that pair for your schedule.',
             ],
             [
                 'q' => 'Can I invent a label that does not exist yet?',
@@ -998,7 +998,7 @@
                     <ul class="es-ren-muted space-y-3" data-reveal-group="70">
                         <li class="flex gap-3" data-reveal>
                             <svg aria-hidden="true" class="es-ren-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span>Leave the second form empty and the hourly translation run fills it in, provided an AI key is configured.</span>
+                            <span>Leave the second form empty and the scheduled translation run fills it in, provided an AI key is configured.</span>
                         </li>
                         <li class="flex gap-3" data-reveal>
                             <svg aria-hidden="true" class="es-ren-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>

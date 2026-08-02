@@ -2833,6 +2833,8 @@ return [
     'no_usage_data' => 'Sem dados de uso para este período.',
     'top_schedules_by_usage' => 'Horários com maior uso',
     'no_schedule_usage_data' => 'Sem dados de uso por horário para este período.',
+    'translation_backlog' => 'Fila de tradução',
+    'translation_backlog_description' => 'Conteúdo aguardando a execução agendada de tradução. As linhas "Nunca tentado" ainda não foram alcançadas, portanto um número que nunca diminui significa que o cron não está dando conta.',
     'stuck_translation_records' => 'Registros de tradução travados',
     'stuck_translation_description' => 'Registros com :threshold+ tentativas de tradução que ainda possuem campos não traduzidos.',
     'no_stuck_translations' => 'Nenhum registro de tradução travado encontrado.',

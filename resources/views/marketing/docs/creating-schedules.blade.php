@@ -542,7 +542,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Translation</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">If your schedule <a href="#details-localization" class="doc-link">offers a second language</a>, custom category names and renamed defaults are translated into it overnight by the same pipeline that translates the rest of your content. Visitors reading in that language see the translated name; everyone else sees the source name you typed.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">If your schedule <a href="#details-localization" class="doc-link">offers a second language</a>, custom category names and renamed defaults are translated into it in the background by the same pipeline that translates the rest of your content. Visitors reading in that language see the translated name; everyone else sees the source name you typed.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Reset to defaults</h4>

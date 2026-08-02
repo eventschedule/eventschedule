@@ -115,7 +115,16 @@ class AppController extends Controller
             return response()->json(['error' => __('messages.unauthorized')], 403);
         }
 
-        $lock = Cache::lock('translate_data_lock', 300);
+        // The default max_execution_time is far shorter than this chain needs, so raise it to match
+        // the lock below. Deliberately not 0: many PHP-FPM pools leave request_terminate_timeout
+        // unset, so "no limit" really would mean a stuck request pinning a worker forever. This is
+        // only a backstop either way - PHP-FPM and the web server's proxy read timeout can still cut
+        // the request short, which is why every long-running command carries its own budget.
+        @set_time_limit(900);
+
+        // Must outlive the slowest tier below (app:translate is budgeted at 240s) or the next
+        // minute's cron tick acquires the lock and runs a second copy alongside this one.
+        $lock = Cache::lock('translate_data_lock', 900);
         if (! $lock->get()) {
             return response()->json(['message' => 'Already running'], 200);
         }
@@ -237,11 +246,10 @@ class AppController extends Controller
                 Cache::put('td_hourly', true, now()->addHour());
 
                 // Catch \Throwable (not just \Exception) so a fatal \Error in one
-                // command cannot abort the rest of the hourly block. The slow,
-                // external-API-bound app:translate runs LAST so that if it times out
-                // and the request is killed, the email-sending commands have already
-                // run (td_hourly is set up-front, so a mid-chain kill would otherwise
-                // skip everything after it until the next hour).
+                // command cannot abort the rest of the hourly block. td_hourly is set
+                // up-front, so a mid-chain kill skips everything after it until the next
+                // hour - which is why the slow external-API-bound commands run last, and
+                // why app:translate has its own tier below rather than sitting in here.
                 try {
                     \Artisan::call('app:release-tickets');
                 } catch (\Throwable $e) {
@@ -294,20 +302,35 @@ class AppController extends Controller
                     }
                 }
 
-                // Run the slow ones last, for the same reason: both make external calls
-                // (translation hits an API with per-item sleeps; federation:maintain
-                // downloads images and deletes from object storage), so a timeout in
-                // either must not starve the commands above.
-                try {
-                    \Artisan::call('app:translate');
-                } catch (\Throwable $e) {
-                    \Log::error('Scheduled command app:translate failed: '.$e->getMessage());
-                    report($e);
-                }
+                // Run the slow one last: federation:maintain downloads images and deletes
+                // from object storage, so a timeout in it must not starve the commands above.
                 try {
                     \Artisan::call('federation:maintain');
                 } catch (\Throwable $e) {
                     \Log::error('Scheduled command federation:maintain failed: '.$e->getMessage());
+                    report($e);
+                }
+            }
+
+            // === TRANSLATION (every 15 minutes) ===
+            // Its own tier, not part of the hourly block: app:translate is the slowest command
+            // here (an AI call plus a cooldown per row) and it used to sit near the end of the
+            // hourly chain, so any request killed earlier in that chain silently skipped
+            // translation for a whole hour - long enough that newer schedules were never reached.
+            //
+            // Claim a short window up-front so concurrent minute-ticks cannot double-run, then
+            // extend it to the full interval only once the command actually returns. A run killed
+            // mid-flight therefore retries on the next tick instead of losing the interval, and
+            // because the command orders rows longest-waiting first, each partial run still
+            // advances the queue.
+            if (! Cache::has('td_translate')) {
+                Cache::put('td_translate', true, now()->addMinutes(5));
+
+                try {
+                    \Artisan::call('app:translate', ['--max-seconds' => config('usage.translation_max_seconds', 240)]);
+                    Cache::put('td_translate', true, now()->addMinutes(15));
+                } catch (\Throwable $e) {
+                    \Log::error('Scheduled command app:translate failed: '.$e->getMessage());
                     report($e);
                 }
             }

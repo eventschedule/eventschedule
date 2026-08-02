@@ -2834,6 +2834,8 @@ return [
     'no_usage_data' => 'Nessun dato di utilizzo per questo periodo.',
     'top_schedules_by_usage' => 'Calendari più attivi per utilizzo',
     'no_schedule_usage_data' => 'Nessun dato di utilizzo per calendario per questo periodo.',
+    'translation_backlog' => 'Coda di traduzione',
+    'translation_backlog_description' => 'Contenuti in attesa dell\'esecuzione pianificata della traduzione. Le righe "Mai tentato" non sono ancora state raggiunte, quindi un numero che non cala mai significa che il cron non sta al passo.',
     'stuck_translation_records' => 'Record di traduzione bloccati',
     'stuck_translation_description' => 'Record con :threshold+ tentativi di traduzione che hanno ancora campi non tradotti.',
     'no_stuck_translations' => 'Nessun record di traduzione bloccato trovato.',

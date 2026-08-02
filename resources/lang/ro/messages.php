@@ -2812,6 +2812,8 @@ return [
     'no_usage_data' => 'Nicio dată de utilizare pentru această perioadă.',
     'top_schedules_by_usage' => 'Top Programe după Utilizare',
     'no_schedule_usage_data' => 'Nicio dată de utilizare per program pentru această perioadă.',
+    'translation_backlog' => 'Coadă de traducere',
+    'translation_backlog_description' => 'Conținut care așteaptă rularea programată a traducerii. Rândurile "Niciodată încercat" nu au fost încă atinse, deci un număr care nu scade niciodată înseamnă că cron-ul nu face față.',
     'stuck_translation_records' => 'Înregistrări de Traducere Blocate',
     'stuck_translation_description' => 'Înregistrări cu :threshold+ încercări de traducere care încă au câmpuri netraduse.',
     'no_stuck_translations' => 'Nicio înregistrare de traducere blocată găsită.',

@@ -364,7 +364,7 @@ class AppointmentService
             // Keyed on rescheduled_at, NOT updated_at. updated_at is set when the booking is created, so
             // it refused the most common move of all - a guest fixing a slot seconds after booking it -
             // with the actively false "this booking was just moved". It is also written by jobs that have
-            // nothing to do with rescheduling (the hourly Translate command has no is_private filter, and
+            // nothing to do with rescheduling (the Translate command has no is_private filter, and
             // inbound calendar sync calls save()), which turned a legitimate move into a random failure.
             if ($lockedEvent->rescheduled_at
                 && $lockedEvent->rescheduled_at->diffInMinutes(now()) < self::RESCHEDULE_COOLDOWN_MINUTES) {

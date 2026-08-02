@@ -203,7 +203,7 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Feature | Tested | Test |
 |---|---|---|
 | AI event parsing (text/image) | ✗ | — (needs Gemini) |
-| AI translation | ✗ | — (needs Gemini) |
+| AI translation | ✓ | tests/Feature/TranslateCommandTest.php (selection, ordering, cooldown, reset; the AI call itself still needs Gemini) |
 | AI flyer generation (Ent) | ✗ | — (needs OpenAI) |
 | AI style generation (Ent) | ✗ | — (needs OpenAI) |
 | AI schedule details generation (Ent) | ✗ | — (needs Gemini) |

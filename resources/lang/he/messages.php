@@ -2885,6 +2885,8 @@ return [
     'no_usage_data' => 'אין נתוני שימוש לתקופה זו.',
     'top_schedules_by_usage' => 'לוחות זמנים מובילים לפי שימוש',
     'no_schedule_usage_data' => 'אין נתוני שימוש לפי לוח זמנים לתקופה זו.',
+    'translation_backlog' => 'תור התרגום',
+    'translation_backlog_description' => 'תוכן הממתין להרצת התרגום המתוזמנת. שורות "מעולם לא נוסה" טרם הגיע אליהן התור, ולכן מספר שאינו יורד לעולם מעיד שהמשימה המתוזמנת אינה מדביקה את הקצב.',
     'stuck_translation_records' => 'רשומות תרגום תקועות',
     'stuck_translation_description' => 'רשומות עם :threshold+ ניסיונות תרגום שעדיין מכילות שדות לא מתורגמים.',
     'no_stuck_translations' => 'לא נמצאו רשומות תרגום תקועות.',

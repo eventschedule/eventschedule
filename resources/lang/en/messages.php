@@ -2883,6 +2883,8 @@ return [
     'no_usage_data' => 'No usage data for this period.',
     'top_schedules_by_usage' => 'Top Schedules by Usage',
     'no_schedule_usage_data' => 'No per-schedule usage data for this period.',
+    'translation_backlog' => 'Translation Backlog',
+    'translation_backlog_description' => 'Content waiting for the scheduled translation run. "Never attempted" rows have not been reached yet, so a number that never falls means the cron is not keeping up.',
     'stuck_translation_records' => 'Stuck Translation Records',
     'stuck_translation_description' => 'Records with :threshold+ translation attempts that still have untranslated fields.',
     'no_stuck_translations' => 'No stuck translation records found.',

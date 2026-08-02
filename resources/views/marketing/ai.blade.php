@@ -683,7 +683,7 @@
         // them returns null (no cap) when the install is selfhosted.
         $board = [
             ['Parse an event from text or an image', 'Every plan', '10 to 100 a day, by plan'],
-            ['Translate the whole schedule', 'Every plan', 'Hourly background job'],
+            ['Translate the whole schedule', 'Every plan', 'Scheduled background job'],
             ['Scan an agenda into event parts', 'Enterprise', '10 a day'],
             ['Write a schedule or event description', 'Enterprise', '50 a day'],
             ['Pass graphic email text through AI', 'Enterprise', '50 a day'],

@@ -38,9 +38,13 @@ Schedule::call(function () {
     Artisan::call('app:expire-waitlist');
 })->hourly()->name('app-expire-waitlist')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
 
+// Every 15 minutes rather than hourly: the command stops cleanly at its budget and resumes with
+// the longest-waiting rows, so more frequent short runs drain the queue faster than one long run
+// that may be killed. withoutOverlapping() is given an explicit expiry because its default is
+// 1440 minutes - a hard-killed run would otherwise leave the mutex in place for a full day.
 Schedule::call(function () {
-    Artisan::call('app:translate');
-})->hourly()->name('app-translate')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+    Artisan::call('app:translate', ['--max-seconds' => config('usage.translation_max_seconds', 240)]);
+})->everyFifteenMinutes()->name('app-translate')->withoutOverlapping(20)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     Artisan::call('google:refresh-webhooks');

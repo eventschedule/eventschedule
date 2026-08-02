@@ -163,6 +163,41 @@
             @endif
         </div>
 
+        {{-- Translation Backlog --}}
+        <div class="ap-card rounded-xl shadow p-6">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.translation_backlog')</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">@lang('messages.translation_backlog_description')</p>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pass</th>
+                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pending</th>
+                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Never Attempted</th>
+                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Longest Waiting</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        @foreach ($translationBacklog as $pass)
+                        <tr>
+                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-200">{{ $pass['label'] }}</td>
+                            <td class="px-4 py-3 text-sm text-end {{ $pass['pending'] > 0 ? 'text-gray-900 dark:text-gray-200 font-medium' : 'text-gray-400 dark:text-gray-500' }}">{{ number_format($pass['pending']) }}</td>
+                            <td class="px-4 py-3 text-sm text-end {{ $pass['never_attempted'] > 0 ? 'text-amber-600 dark:text-amber-400 font-medium' : 'text-gray-400 dark:text-gray-500' }}">{{ number_format($pass['never_attempted']) }}</td>
+                            <td class="px-4 py-3 text-sm text-end text-gray-500 dark:text-gray-400">
+                                @if ($pass['oldest'])
+                                    {{ \Carbon\Carbon::parse($pass['oldest'])->diffForHumans() }}
+                                @else
+                                    Never
+                                @endif
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         {{-- Stuck Translation Records --}}
         @php
             $hasStuckRecords = $stuckRoles->count() > 0 || $stuckEvents->count() > 0 || $stuckEventParts->count() > 0 || $stuckEventRoles->count() > 0;
