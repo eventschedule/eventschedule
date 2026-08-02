@@ -143,6 +143,8 @@
                                    document.getElementById('event_count_mobile')?.value ?? '';
                 const maxPerRow = document.getElementById('max_per_row')?.value ??
                                   document.getElementById('max_per_row_mobile')?.value ?? '';
+                const maxPerSchedule = document.getElementById('max_per_schedule')?.value ??
+                                       document.getElementById('max_per_schedule_mobile')?.value ?? '';
                 const imageSize = document.getElementById('image_size')?.value ??
                                   document.getElementById('image_size_mobile')?.value ?? 'auto';
                 const overlayText = document.getElementById('overlay_text')?.value ??
@@ -172,6 +174,7 @@
                     date_position: datePosition,
                     event_count: eventCount,
                     max_per_row: maxPerRow,
+                    max_per_schedule: maxPerSchedule,
                     image_size: imageSize,
                     overlay_text: overlayText,
                     header_text: headerText,
@@ -286,6 +289,13 @@
                     maxPerRowMobile.value = maxPerRowDesktop.value;
                 }
 
+                // Sync max per schedule
+                const maxPerScheduleDesktop = document.getElementById('max_per_schedule');
+                const maxPerScheduleMobile = document.getElementById('max_per_schedule_mobile');
+                if (maxPerScheduleDesktop && maxPerScheduleMobile) {
+                    maxPerScheduleMobile.value = maxPerScheduleDesktop.value;
+                }
+
                 // Sync image size
                 const imageSizeDesktop = document.getElementById('image_size');
                 const imageSizeMobile = document.getElementById('image_size_mobile');
@@ -379,6 +389,7 @@
                 const datePositionParam = formSettings.date_position ? '&date_position=' + encodeURIComponent(formSettings.date_position) : '';
                 const eventCountParam = formSettings.event_count ? '&event_count=' + encodeURIComponent(formSettings.event_count) : '';
                 const maxPerRowParam = formSettings.max_per_row ? '&max_per_row=' + encodeURIComponent(formSettings.max_per_row) : '';
+                const maxPerScheduleParam = formSettings.max_per_schedule ? '&max_per_schedule=' + encodeURIComponent(formSettings.max_per_schedule) : '';
                 const imageSizeParam = (formSettings.image_size && formSettings.image_size !== 'auto') ? '&image_size=' + encodeURIComponent(formSettings.image_size) : '';
                 const overlayTextParam = formSettings.overlay_text ? '&overlay_text=' + encodeURIComponent(formSettings.overlay_text) : '';
                 const headerTextParam = '&header_text=' + encodeURIComponent(formSettings.header_text || '');
@@ -389,7 +400,7 @@
                 const numberEventsParam = '&number_events=' + (formSettings.number_events ? '1' : '0');
                 const forceEnglishParam = '&force_english=' + (formSettings.force_english ? '1' : '0');
 
-                const baseUrl = '{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain]) }}' + layoutParam + directParam + aiPromptParam + textTemplateParam + excludeRecurringParam + datePositionParam + eventCountParam + maxPerRowParam + imageSizeParam + overlayTextParam + headerTextParam + footerTextParam + urlIncludeHttpsParam + urlIncludeIdParam + textShowAllParam + numberEventsParam + forceEnglishParam;
+                const baseUrl = '{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain]) }}' + layoutParam + directParam + aiPromptParam + textTemplateParam + excludeRecurringParam + datePositionParam + eventCountParam + maxPerRowParam + maxPerScheduleParam + imageSizeParam + overlayTextParam + headerTextParam + footerTextParam + urlIncludeHttpsParam + urlIncludeIdParam + textShowAllParam + numberEventsParam + forceEnglishParam;
 
                 let hasError = false;
 
@@ -443,6 +454,7 @@
                                     exclude_recurring: formSettings.exclude_recurring,
                                     text_show_all: formSettings.text_show_all,
                                     event_count: formSettings.event_count,
+                                    max_per_schedule: formSettings.max_per_schedule,
                                     number_events: formSettings.number_events,
                                     force_english: formSettings.force_english,
                                 }),
@@ -654,6 +666,14 @@
                     }
                 });
                 toggleMaxPerRowVisibility();
+
+                // Update max per schedule selects
+                ['max_per_schedule', 'max_per_schedule_mobile'].forEach(id => {
+                    const maxPerSchedule = document.getElementById(id);
+                    if (maxPerSchedule) {
+                        maxPerSchedule.value = currentSettings.max_per_schedule || '';
+                    }
+                });
 
                 // Update image size selects
                 ['image_size', 'image_size_mobile'].forEach(id => {
@@ -892,6 +912,9 @@
                 // Get max per row
                 const maxPerRow = document.getElementById('max_per_row') || document.getElementById('max_per_row_mobile');
 
+                // Get max per schedule
+                const maxPerSchedule = document.getElementById('max_per_schedule') || document.getElementById('max_per_schedule_mobile');
+
                 // Get image size
                 const imageSize = document.getElementById('image_size') || document.getElementById('image_size_mobile');
 
@@ -930,6 +953,7 @@
                     date_position: datePosition ? datePosition.value || null : null,
                     event_count: eventCount && eventCount.value ? parseInt(eventCount.value) : null,
                     max_per_row: maxPerRow && maxPerRow.value ? parseInt(maxPerRow.value) : null,
+                    max_per_schedule: maxPerSchedule && maxPerSchedule.value ? parseInt(maxPerSchedule.value) : null,
                     image_size: imageSize ? imageSize.value || 'auto' : 'auto',
                     overlay_text: overlayText ? overlayText.value : '',
                     header_text: headerText ? headerText.value : '',
@@ -1436,6 +1460,18 @@
                     }
                 });
 
+                // Add change listeners for max per schedule selects
+                ['max_per_schedule', 'max_per_schedule_mobile'].forEach(id => {
+                    const select = document.getElementById(id);
+                    if (select) {
+                        select.addEventListener('change', function() {
+                            const otherId = id === 'max_per_schedule' ? 'max_per_schedule_mobile' : 'max_per_schedule';
+                            const otherSelect = document.getElementById(otherId);
+                            if (otherSelect) otherSelect.value = this.value;
+                        });
+                    }
+                });
+
                 // Add change listeners for image size selects
                 ['image_size', 'image_size_mobile'].forEach(id => {
                     const select = document.getElementById(id);
@@ -1796,6 +1832,18 @@
                                 @endfor
                             </select>
                             <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.event_count_help') }}</p>
+                        </div>
+
+                        <!-- Max Per Schedule -->
+                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.max_per_schedule') }}</h4>
+                            <select id="max_per_schedule_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                <option value="">{{ __('messages.unlimited') }}</option>
+                                @for ($i = 1; $i <= 10; $i++)
+                                    <option value="{{ $i }}">{{ $i }}</option>
+                                @endfor
+                            </select>
+                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.max_per_schedule_help') }}</p>
                         </div>
 
                         <!-- Header Image -->
@@ -2182,6 +2230,18 @@
                                     @endfor
                                 </select>
                                 <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.event_count_help') }}</p>
+                            </div>
+
+                            <!-- Max Per Schedule -->
+                            <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.max_per_schedule') }}</h4>
+                                <select id="max_per_schedule" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                    <option value="">{{ __('messages.unlimited') }}</option>
+                                    @for ($i = 1; $i <= 10; $i++)
+                                        <option value="{{ $i }}">{{ $i }}</option>
+                                    @endfor
+                                </select>
+                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.max_per_schedule_help') }}</p>
                             </div>
 
                             <!-- Header Image -->

@@ -35,6 +35,10 @@ class GraphicEmailService
             // Use saved event_count setting (default 20, matching web preview)
             $eventLimit = GraphicController::resolveGraphicEventLimit($settings['event_count'] ?? null);
 
+            // Use saved max_per_schedule setting (empty = no cap, matching web preview)
+            $maxPerSchedule = GraphicController::resolveMaxPerSchedule($settings['max_per_schedule'] ?? null);
+            $poolLimit = GraphicController::resolveGraphicPoolLimit($eventLimit, $maxPerSchedule);
+
             // Build the base query for future events
             $baseQuery = function () use ($role, $excludeRecurring) {
                 return Event::with(['roles', 'tickets', 'venue'])
@@ -52,12 +56,17 @@ class GraphicEmailService
             };
 
             // Flyer events are always required for the graphic image
-            $events = $baseQuery()
-                ->whereNotNull('flyer_image_url')
-                ->where('flyer_image_url', '!=', '')
-                ->orderBy('starts_at')
-                ->limit($eventLimit)
-                ->get();
+            $events = GraphicController::applyPerScheduleCap(
+                $baseQuery()
+                    ->whereNotNull('flyer_image_url')
+                    ->where('flyer_image_url', '!=', '')
+                    ->orderBy('starts_at')
+                    ->orderBy('id')
+                    ->limit($poolLimit)
+                    ->get(),
+                $maxPerSchedule,
+                $role
+            )->take($eventLimit);
 
             if ($events->isEmpty()) {
                 return false;
@@ -68,12 +77,27 @@ class GraphicEmailService
             // Determine text events: when numbering is on, the text must match
             // the flyer-only list so badges and {number} stay in sync.
             $textShowAll = $settings['text_show_all'] ?? false;
+            // $events is the poster. Seeding the cap with it keeps the emailed text
+            // describing the same line-up as the attached image.
+            $posterEvents = $maxPerSchedule ? $events : null;
+
             if ($numberEvents) {
                 $textEvents = $events;
             } elseif ($textShowAll) {
-                $textEvents = $baseQuery()->orderBy('starts_at')->get();
+                $textEvents = GraphicController::applyPerScheduleCap(
+                    $baseQuery()->orderBy('starts_at')->orderBy('id')->get(), $maxPerSchedule, $role, $posterEvents
+                );
             } else {
-                $textEvents = $baseQuery()->orderBy('starts_at')->limit($eventLimit)->get();
+                $textEvents = GraphicController::takeWithPosterReserved(
+                    GraphicController::applyPerScheduleCap(
+                        $baseQuery()->orderBy('starts_at')->orderBy('id')->limit($poolLimit)->get(),
+                        $maxPerSchedule,
+                        $role,
+                        $posterEvents
+                    ),
+                    $eventLimit,
+                    $posterEvents
+                );
             }
 
             // Build options array for the generator (matching web preview)
@@ -81,7 +105,7 @@ class GraphicEmailService
             if (! in_array($layout, ['grid', 'row'])) {
                 $datePosition = null;
             }
-            $maxPerRow = $settings['max_per_row'] ?? null;
+            $maxPerRow = GraphicController::resolveMaxPerRow($settings['max_per_row'] ?? null);
             if (! in_array($layout, ['grid', 'row'])) {
                 $maxPerRow = null;
             }

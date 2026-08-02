@@ -1550,6 +1550,8 @@ return [
     'max_per_row' => 'Flyer pro Zeile',
     'no_limit' => 'Automatisch',
     'max_per_row_help' => 'Anzahl der Flyer pro Zeile vor dem Umbruch in die nächste Zeile',
+    'max_per_schedule' => 'Veranstaltungen pro Zeitplan',
+    'max_per_schedule_help' => 'Begrenzen Sie, wie viele Veranstaltungen jedes Talent und jeder Veranstaltungsort beisteuern kann, damit nicht ein einzelner die Grafik füllt. Die Grafik kann kürzer ausfallen als die Anzahl der Veranstaltungen',
     'graphic_image_size' => 'Bildgröße',
     'graphic_image_size_help' => 'Passt die Grafik an ein festes Format für soziale Medien an. Auto behält die natürliche Größe bei.',
     'graphic_size_auto' => 'Auto (an Inhalt anpassen)',

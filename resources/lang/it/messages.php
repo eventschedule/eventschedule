@@ -1555,6 +1555,8 @@ return [
     'max_per_row' => 'Volantini per riga',
     'no_limit' => 'Automatico',
     'max_per_row_help' => 'Numero di volantini per riga prima di andare a capo',
+    'max_per_schedule' => 'Eventi per programma',
+    'max_per_schedule_help' => 'Limita quanti eventi può contribuire ogni talento o luogo, così che uno solo non riempia la grafica. La grafica può contenere meno eventi del numero richiesto',
     'graphic_image_size' => 'Dimensione immagine',
     'graphic_image_size_help' => 'Adatta la grafica a una forma fissa per i social media. Auto mantiene la dimensione naturale.',
     'graphic_size_auto' => 'Auto (adatta al contenuto)',

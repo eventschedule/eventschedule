@@ -29,7 +29,11 @@
         // schedule, not draft, not private, not cancelled and not password
         // protected, earliest first, capped by event_count (1 to 20, default
         // 20). The text runs the same query without the flyer requirement, and
-        // "show all events" lifts the cap on the text only.
+        // "show all events" lifts the cap on the text only. max_per_schedule
+        // then caps how many of those events any one linked talent or venue may
+        // contribute (GraphicController::applyPerScheduleCap), backfilling from
+        // further down the calendar - but it counts venues as well as talents and
+        // is all-or-nothing, so a narrow line-up can still land under event_count.
         $ledger = [
             ['Has its own flyer image', 'yes', 'Required', 'no', 'Not needed'],
             ['Starts from now on, or is a multi-day event still running', 'yes', 'Required', 'yes', 'Required'],
@@ -101,7 +105,7 @@
             ],
             [
                 'q' => 'Which of my events end up on the graphic?',
-                'a' => 'Events that start from now on and have their own flyer image, earliest first, up to twenty, and you can lower that number. A multi-day event still running counts as upcoming. Drafts, private, unlisted and password protected events, and cancelled events are never included, and recurring events can be excluded with one setting. Events without a flyer still appear in the text, because the text does not need artwork.',
+                'a' => 'Events that start from now on and have their own flyer image, earliest first, up to twenty, and you can lower that number. You can also cap how many events any one talent or venue contributes, so a busy act or room does not take the whole poster. A multi-day event still running counts as upcoming. Drafts, private, unlisted and password protected events, and cancelled events are never included, and recurring events can be excluded with one setting. Events without a flyer still appear in the text, because the text does not need artwork.',
             ],
             [
                 'q' => 'What sizes can the image be?',
@@ -1007,6 +1011,11 @@
                                 <th scope="row" class="es-gal-ink font-semibold">How many</th>
                                 <td class="es-gal-muted">Up to 20, earliest first. Set any number from 1 to 20.</td>
                                 <td class="es-gal-muted">The same, or every upcoming event with Show all events on.</td>
+                            </tr>
+                            <tr>
+                                <th scope="row" class="es-gal-ink font-semibold">How many from one act or room</th>
+                                <td class="es-gal-muted">Uncapped, or set 1 to 10 and the freed slots go to other talents and venues, so the poster can be shorter if there are not many.</td>
+                                <td class="es-gal-muted">The same cap, so the caption matches the picture.</td>
                             </tr>
                         </tbody>
                     </table>

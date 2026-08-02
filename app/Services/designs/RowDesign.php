@@ -42,6 +42,22 @@ class RowDesign extends AbstractEventDesign
         $this->calculateFlyerDimensions();
 
         $eventCount = $this->events->count();
+
+        // Nothing to lay out. The row maths below indexes $rowAssignments[0], which does
+        // not exist with no events - count(null) is a fatal TypeError, not a warning.
+        // GridDesign and ListDesign both guard this; match ListDesign's placeholder
+        // canvas. maxPerRow and numRows are typed with no default and are read by the
+        // row-info getters, so they have to be set here too.
+        if ($eventCount === 0) {
+            $this->maxPerRow = 1;
+            $this->numRows = 0;
+            $this->rowAssignments = [];
+            $this->totalWidth = 800;
+            $this->totalHeight = 200;
+
+            return;
+        }
+
         $maxPerRowOption = (int) $this->getOption('max_per_row', self::DEFAULT_MAX_PER_ROW);
         $this->maxPerRow = max(1, min($maxPerRowOption, $eventCount)); // Clamp to valid range
 

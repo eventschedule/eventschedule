@@ -118,6 +118,9 @@
                 </tbody>
             </table>
         </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+            A fixed shape is a fixed number of pixels, so the more events you include the smaller each flyer is drawn inside it. Twenty events fill a grid roughly twice the width of a Square post, which halves every flyer and its text. If the artwork is coming out too small to read, lower <strong>Number of Events</strong> or switch back to Auto, which lets the graphic grow instead.
+        </p>
 
         <h3 class="doc-subheading">The rest of the Graphic tab</h3>
         <div class="doc-table-wrap">
@@ -148,6 +151,10 @@
                     <tr>
                         <td><strong class="text-gray-900 dark:text-white">Number of Events</strong></td>
                         <td>How many upcoming events to include, from 1 to 20. "All available" uses the maximum of 20.</td>
+                    </tr>
+                    <tr>
+                        <td><strong class="text-gray-900 dark:text-white">Events Per Schedule</strong></td>
+                        <td>Caps how many events any one talent or venue can contribute, from 1 to 10, so a single act or room cannot fill the graphic. It counts the talent and venue schedules attached to each event, not the schedule the graphic is for, and it fills the freed slots from further down the calendar. Because it counts venues too, the graphic can still come out shorter than Number of Events when your events do not spread across enough different talents and venues: a residency at one room with a cap of 2 gives you 2 events, however many are coming up. Applies to the image and the text alike. "Unlimited" is the default and changes nothing.</td>
                     </tr>
                 </tbody>
             </table>

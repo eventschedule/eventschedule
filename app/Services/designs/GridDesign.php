@@ -747,75 +747,34 @@ class GridDesign extends AbstractEventDesign
             return;
         }
 
-        if ($eventCount === 0) {
-            $this->gridCols = 1;
-            $this->gridRows = 1;
+        // Hand-picked shapes for small counts, where a chosen layout reads better than
+        // a formula: 5 looks better as 3x2 than 2x3, and 7 and 8 sit in a 3x3 with the
+        // gaps trailing rather than in a squarer grid.
+        $shapes = [
+            0 => [1, 1],
+            1 => [1, 1],
+            2 => [2, 1],
+            3 => [3, 1],
+            4 => [2, 2],
+            5 => [3, 2],
+            6 => [3, 2],
+            7 => [3, 3],
+            8 => [3, 3],
+        ];
+
+        if (isset($shapes[$eventCount])) {
+            [$this->gridCols, $this->gridRows] = $shapes[$eventCount];
 
             return;
         }
 
-        if ($eventCount === 1) {
-            $this->gridCols = 1;
-            $this->gridRows = 1;
-
-            return;
-        }
-
-        if ($eventCount === 2) {
-            $this->gridCols = 2;
-            $this->gridRows = 1;
-
-            return;
-        }
-
-        if ($eventCount === 3) {
-            $this->gridCols = 3;
-            $this->gridRows = 1;
-
-            return;
-        }
-
-        if ($eventCount === 4) {
-            $this->gridCols = 2;
-            $this->gridRows = 2;
-
-            return;
-        }
-
-        if ($eventCount === 5) {
-            // 3x2 layout with one empty space - looks better than 2x3
-            $this->gridCols = 3;
-            $this->gridRows = 2;
-
-            return;
-        }
-
-        if ($eventCount === 6) {
-            $this->gridCols = 3;
-            $this->gridRows = 2;
-
-            return;
-        }
-
-        if ($eventCount === 7) {
-            // 3x3 layout with two empty spaces - still looks balanced
-            $this->gridCols = 3;
-            $this->gridRows = 3;
-
-            return;
-        }
-
-        if ($eventCount === 8) {
-            // 3x3 layout with one empty space
-            $this->gridCols = 3;
-            $this->gridRows = 3;
-
-            return;
-        }
-
-        // For 9 events, use 3x3 grid
-        $this->gridCols = 3;
-        $this->gridRows = 3;
+        // 9 and up: balance into a near-square grid. gridRows * gridCols >= $eventCount
+        // MUST hold - generateEventLayout() is bounded by those two values, so a grid
+        // too small for the collection silently drops the overflow AND undersizes the
+        // canvas. This used to be a bare 3x3, which meant every count from 10 up lost
+        // its tail. At 9 the formula still yields the 3x3 it has always been.
+        $this->gridCols = (int) ceil(sqrt($eventCount));
+        $this->gridRows = (int) ceil($eventCount / $this->gridCols);
     }
 
     // Public getter methods for grid information

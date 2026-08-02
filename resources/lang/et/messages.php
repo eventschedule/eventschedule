@@ -1376,6 +1376,8 @@ return [
     'max_per_row' => 'Flaiereid rea kohta',
     'no_limit' => 'Automaatne',
     'max_per_row_help' => 'Flaierite arv rea kohta enne järgmisele reale liikumist',
+    'max_per_schedule' => 'Sündmusi ajakava kohta',
+    'max_per_schedule_help' => 'Piirake, mitu sündmust saab iga talent või toimumiskoht lisada, et üks neist ei täidaks kogu graafikat. Graafikule võib jääda vähem sündmusi, kui sündmuste arv ette näeb',
     'graphic_image_size' => 'Pildi suurus',
     'graphic_image_size_help' => 'Sobitab graafika sotsiaalmeedia jaoks kindla kujuga. Auto säilitab loomuliku suuruse.',
     'graphic_size_auto' => 'Auto (sobita sisuga)',

@@ -1553,6 +1553,8 @@ return [
     'max_per_row' => 'Flyers per rij',
     'no_limit' => 'Automatisch',
     'max_per_row_help' => 'Aantal flyers per rij voordat ze naar de volgende rij worden teruggelopen',
+    'max_per_schedule' => 'Evenementen per schema',
+    'max_per_schedule_help' => 'Beperk hoeveel evenementen elk talent of elke locatie kan bijdragen, zodat één ervan de grafiek niet vult. De grafiek kan minder evenementen bevatten dan het aantal evenementen',
     'graphic_image_size' => 'Afbeeldingsgrootte',
     'graphic_image_size_help' => 'Past de afbeelding aan een vaste vorm voor social media aan. Auto behoudt de natuurlijke grootte.',
     'graphic_size_auto' => 'Auto (aanpassen aan inhoud)',

@@ -1441,6 +1441,8 @@ return [
     'max_per_row' => 'Flyers Per Row',
     'no_limit' => 'Auto',
     'max_per_row_help' => 'Number of flyers per row before wrapping to the next row',
+    'max_per_schedule' => 'Events Per Schedule',
+    'max_per_schedule_help' => 'Limit how many events each talent or venue can contribute, so a single one does not fill the graphic. The graphic can come out shorter than Number of Events',
     'graphic_image_size' => 'Image Size',
     'graphic_image_size_help' => 'Fit the graphic to a fixed shape for social media. Auto keeps the natural size.',
     'graphic_size_auto' => 'Auto (fit to content)',

@@ -10,13 +10,25 @@ use App\Services\UsageTrackingService;
 use App\Utils\EventTextGenerator;
 use App\Utils\GeminiUtils;
 use App\Utils\OpenAIUtils;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class GraphicController extends Controller
 {
+    /**
+     * Widest candidate pool scanned when a per-schedule cap needs to backfill.
+     *
+     * The cap filters in PHP (MySQL cannot easily do "top N per group" through the
+     * event_role pivot), so the query has to hand it more rows than the graphic
+     * will use. Beyond this bound the cap only diversifies within the nearest
+     * upcoming events rather than loading an unbounded set with its relations.
+     */
+    private const GRAPHIC_CANDIDATE_POOL = 200;
+
     public function generateGraphic(Request $request, $subdomain)
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
@@ -105,6 +117,7 @@ class GraphicController extends Controller
             'date_position' => 'nullable|in:overlay,above',
             'event_count' => 'nullable|integer|min:1|max:20',
             'max_per_row' => 'nullable|integer|min:1|max:20',
+            'max_per_schedule' => 'nullable|integer|min:1|max:20',
             'image_size' => 'nullable|in:auto,square,portrait,story,landscape',
             'overlay_text' => 'nullable|string|max:200',
             'header_text' => 'nullable|string|max:200',
@@ -264,7 +277,7 @@ class GraphicController extends Controller
         }
 
         // Get max_per_row from request (applies to grid and row layouts; empty = default)
-        $maxPerRow = $request->get('max_per_row') ?: null;
+        $maxPerRow = self::resolveMaxPerRow($request->get('max_per_row'));
         if (! in_array($layout, ['grid', 'row'])) {
             $maxPerRow = null;
         }
@@ -294,6 +307,12 @@ class GraphicController extends Controller
         $eventCountSetting = $request->get('event_count');
         $eventLimit = self::resolveGraphicEventLimit($eventCountSetting);
 
+        // Get max_per_schedule from request (empty = no cap). Request-driven for the
+        // live preview - do NOT fall back to saved settings, or switching back to
+        // Unlimited would keep showing a previously-saved cap.
+        $maxPerSchedule = self::resolveMaxPerSchedule($request->get('max_per_schedule'));
+        $poolLimit = self::resolveGraphicPoolLimit($eventLimit, $maxPerSchedule);
+
         // Base query builder for future/ongoing events belonging to this schedule
         $baseQuery = function () use ($role, $request) {
             return Event::with(['roles', 'tickets', 'venue'])
@@ -314,6 +333,22 @@ class GraphicController extends Controller
         $flyerQuery = $baseQuery()
             ->whereNotNull('flyer_image_url')
             ->where('flyer_image_url', '!=', '');
+
+        // The flyer list is the poster. The text branches below need it too - either
+        // because numbering ties the caption to it, or (when a cap is set) to seed the
+        // caption's quota so it cannot describe a different line-up. Resolve it once.
+        $resolvedFlyerEvents = null;
+        $flyerEventList = function () use ($flyerQuery, $poolLimit, $eventLimit, $maxPerSchedule, $role, &$resolvedFlyerEvents) {
+            if ($resolvedFlyerEvents === null) {
+                $resolvedFlyerEvents = self::applyPerScheduleCap(
+                    (clone $flyerQuery)->orderBy('starts_at')->orderBy('id')->limit($poolLimit)->get(),
+                    $maxPerSchedule,
+                    $role
+                )->take($eventLimit);
+            }
+
+            return $resolvedFlyerEvents;
+        };
 
         // Determine if text should show all events
         $textShowAll = $request->has('text_show_all')
@@ -349,7 +384,7 @@ class GraphicController extends Controller
 
         // Generate image unless type=text
         if ($type !== 'text') {
-            $flyerEvents = (clone $flyerQuery)->orderBy('starts_at')->limit($eventLimit)->get();
+            $flyerEvents = $flyerEventList();
 
             if ($flyerEvents->isEmpty()) {
                 // Check if there are future events at all (just without flyers)
@@ -373,12 +408,31 @@ class GraphicController extends Controller
         if ($type !== 'image') {
             // When number_events is on, the text must match the flyer-only list so
             // the badge number and the {number} variable line up.
+            // Only resolve the poster when a cap is on: with no cap the caption needs
+            // no seed, and running the flyer query anyway would cost a pointless round
+            // trip on every text request.
+            $posterEvents = $maxPerSchedule ? $flyerEventList() : null;
+
             if ($numberEvents) {
-                $textEvents = (clone $flyerQuery)->orderBy('starts_at')->limit($eventLimit)->get();
+                $textEvents = $flyerEventList();
             } elseif ($textShowAll) {
-                $textEvents = $baseQuery()->orderBy('starts_at')->get();
+                // No take() here - "show all events" is exactly the option that lifts
+                // the count limit. The cap still applies; it is about which events, not
+                // how many.
+                $textEvents = self::applyPerScheduleCap(
+                    $baseQuery()->orderBy('starts_at')->orderBy('id')->get(), $maxPerSchedule, $role, $posterEvents
+                );
             } else {
-                $textEvents = $baseQuery()->orderBy('starts_at')->limit($eventLimit)->get();
+                $textEvents = self::takeWithPosterReserved(
+                    self::applyPerScheduleCap(
+                        $baseQuery()->orderBy('starts_at')->orderBy('id')->limit($poolLimit)->get(),
+                        $maxPerSchedule,
+                        $role,
+                        $posterEvents
+                    ),
+                    $eventLimit,
+                    $posterEvents
+                );
             }
 
             if ($textEvents->isEmpty()) {
@@ -446,6 +500,8 @@ class GraphicController extends Controller
 
         // Re-query events for metadata (same filters as generateGraphicData)
         $eventLimit = self::resolveGraphicEventLimit($request->input('event_count'));
+        $maxPerSchedule = self::resolveMaxPerSchedule($request->input('max_per_schedule'));
+        $poolLimit = self::resolveGraphicPoolLimit($eventLimit, $maxPerSchedule);
         $excludeRecurring = $request->boolean('exclude_recurring', false);
         $textShowAll = $request->boolean('text_show_all', false);
 
@@ -458,19 +514,45 @@ class GraphicController extends Controller
             ->whereNull('event_password')
             ->when($excludeRecurring, fn ($q) => $q->whereNull('days_of_week'));
 
+        // The poster's list, resolved from a clone before the numbering branch below
+        // mutates $baseQuery. Only needed to seed the cap so this metadata matches the
+        // caption the user is actually transforming.
+        $posterEvents = $maxPerSchedule ? self::applyPerScheduleCap(
+            (clone $baseQuery)->whereNotNull('flyer_image_url')
+                ->where('flyer_image_url', '!=', '')
+                ->orderBy('starts_at')
+                ->orderBy('id')
+                ->limit($poolLimit)
+                ->get(),
+            $maxPerSchedule,
+            $role
+        )->take($eventLimit) : null;
+
         // When numbering is on, the graphic uses the flyer-only list, so the
         // AI's metadata must match that filtered list (otherwise the
         // "Event N: ..." indices won't line up with the badges).
         if ($numberEvents) {
-            $events = $baseQuery->whereNotNull('flyer_image_url')
+            $events = $posterEvents ?? $baseQuery->whereNotNull('flyer_image_url')
                 ->where('flyer_image_url', '!=', '')
                 ->orderBy('starts_at')
+                ->orderBy('id')
                 ->limit($eventLimit)
                 ->get();
         } elseif ($textShowAll) {
-            $events = $baseQuery->orderBy('starts_at')->get();
+            $events = self::applyPerScheduleCap(
+                $baseQuery->orderBy('starts_at')->orderBy('id')->get(), $maxPerSchedule, $role, $posterEvents
+            );
         } else {
-            $events = $baseQuery->orderBy('starts_at')->limit($eventLimit)->get();
+            $events = self::takeWithPosterReserved(
+                self::applyPerScheduleCap(
+                    $baseQuery->orderBy('starts_at')->orderBy('id')->limit($poolLimit)->get(),
+                    $maxPerSchedule,
+                    $role,
+                    $posterEvents
+                ),
+                $eventLimit,
+                $posterEvents
+            );
         }
 
         $requestId = Str::uuid()->toString();
@@ -534,7 +616,7 @@ class GraphicController extends Controller
         }
 
         // Get max_per_row from settings (applies to grid and row layouts)
-        $maxPerRow = $graphicSettings['max_per_row'] ?? null;
+        $maxPerRow = self::resolveMaxPerRow($graphicSettings['max_per_row'] ?? null);
         if (! in_array($layout, ['grid', 'row'])) {
             $maxPerRow = null;
         }
@@ -549,6 +631,10 @@ class GraphicController extends Controller
 
         // Get event_count from settings
         $eventLimit = self::resolveGraphicEventLimit($graphicSettings['event_count'] ?? null);
+
+        // Get max_per_schedule from settings (empty = no cap)
+        $maxPerSchedule = self::resolveMaxPerSchedule($graphicSettings['max_per_schedule'] ?? null);
+        $poolLimit = self::resolveGraphicPoolLimit($eventLimit, $maxPerSchedule);
 
         $excludeRecurring = $graphicSettings['exclude_recurring'] ?? false;
 
@@ -570,9 +656,9 @@ class GraphicController extends Controller
             $query->whereNull('days_of_week');
         }
 
-        $events = $query->orderBy('starts_at')
-            ->limit($eventLimit)
-            ->get();
+        $events = self::applyPerScheduleCap(
+            $query->orderBy('starts_at')->orderBy('id')->limit($poolLimit)->get(), $maxPerSchedule, $role
+        )->take($eventLimit);
 
         if ($events->isEmpty()) {
             // Check if there are future events at all (just without flyers)
@@ -808,5 +894,172 @@ class GraphicController extends Controller
         }
 
         return min(20, max(1, (int) $value));
+    }
+
+    /**
+     * How many events a single talent/venue schedule may contribute (matches UI dropdown).
+     * Null means no cap, which is the default and leaves selection unchanged.
+     */
+    public static function resolveMaxPerSchedule(mixed $value): ?int
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        $value = (int) $value;
+
+        return $value > 0 ? min(20, $value) : null;
+    }
+
+    /**
+     * Flyers per row (matches the UI dropdown). Null means auto-balance.
+     *
+     * The preview endpoint takes this straight off the query string, so clamp it to the
+     * same range saveSettings() validates - otherwise the preview can render a shape the
+     * save path would reject. A no-op on the saved-settings paths, which are validated
+     * on the way in; used there anyway so the bound is explicit at the point of use.
+     */
+    public static function resolveMaxPerRow(mixed $value): ?int
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        $value = (int) $value;
+
+        return $value > 0 ? min(20, $value) : null;
+    }
+
+    /**
+     * How many candidate rows to fetch so a per-schedule cap has room to backfill.
+     */
+    public static function resolveGraphicPoolLimit(int $eventLimit, ?int $maxPerSchedule): int
+    {
+        return $maxPerSchedule ? max($eventLimit, self::GRAPHIC_CANDIDATE_POOL) : $eventLimit;
+    }
+
+    /**
+     * Drop events whose talent/venue schedules have already hit the per-schedule cap.
+     *
+     * The schedule the graphic is being generated for is skipped: every event on a
+     * venue's graphic is at that venue, so counting it would collapse the list to
+     * $cap events overall. Curators are skipped too - the cap is about the acts and
+     * rooms on the poster, not about who listed them.
+     *
+     * Events are walked in the order given (starts_at ascending) and one is kept only
+     * when every talent/venue it is linked to is still under the cap, which makes the
+     * cap a guarantee rather than a preference. A linked schedule counts whether or
+     * not its own pivot is accepted, because the graphic prints it either way.
+     *
+     * $preAdmitted is the list already chosen for the image. Those events are kept
+     * regardless of the cap and their quota is counted up front, so the cap alone can
+     * never evict a poster event from the caption: without it, a schedule's flyerless
+     * early dates would fill its quota in the caption pass and push out the very
+     * flyered dates the poster is showing. Pair it with takeWithPosterReserved() so the
+     * later truncation to event_count cannot undo that.
+     *
+     * Only poster events present in $events are seeded. The flyer pool and the base
+     * pool are both GRAPHIC_CANDIDATE_POOL rows, but the flyer one filters harder, so
+     * its window can reach past this one - charging quota for an event that cannot
+     * appear here would thin the caption for nothing, and with a single venue and a low
+     * cap it would empty it outright. The flip side is the honest bound: past
+     * GRAPHIC_CANDIDATE_POOL upcoming events the caption may omit a poster event.
+     *
+     * Because the caller caps $preAdmitted before passing it, seeding from it can
+     * never take a schedule past $cap.
+     */
+    public static function applyPerScheduleCap(Collection $events, ?int $cap, Role $role, ?Collection $preAdmitted = null): Collection
+    {
+        if (! $cap) {
+            return $events;
+        }
+
+        // Every graphic query eager-loads roles, so these are normally no-ops; they stop
+        // the walk below from silently going N+1 if a caller ever forgets. Only the
+        // Eloquent collection has it - a plain Support collection lazy-loads instead.
+        if ($events instanceof EloquentCollection) {
+            $events->loadMissing('roles');
+        }
+
+        if ($preAdmitted instanceof EloquentCollection) {
+            $preAdmitted->loadMissing('roles');
+        }
+
+        $counts = [];
+        $admitted = [];
+        $candidateIds = $preAdmitted ? $events->pluck('id')->flip() : null;
+
+        foreach ($preAdmitted ?? [] as $event) {
+            if (! $candidateIds->has($event->id)) {
+                continue;
+            }
+
+            $admitted[$event->id] = true;
+
+            foreach (self::cappedScheduleIds($event, $role) as $id) {
+                $counts[$id] = ($counts[$id] ?? 0) + 1;
+            }
+        }
+
+        return $events->filter(function ($event) use ($cap, $role, &$counts, $admitted) {
+            if (isset($admitted[$event->id])) {
+                return true;
+            }
+
+            $scheduleIds = self::cappedScheduleIds($event, $role);
+
+            foreach ($scheduleIds as $id) {
+                if (($counts[$id] ?? 0) >= $cap) {
+                    return false;
+                }
+            }
+
+            foreach ($scheduleIds as $id) {
+                $counts[$id] = ($counts[$id] ?? 0) + 1;
+            }
+
+            return true;
+        })->values();
+    }
+
+    /**
+     * Truncate to $limit while keeping every poster event that survived the cap.
+     *
+     * A plain take() would still cut them: a flyerless event that passed on some other
+     * schedule's untouched quota sorts earlier and eats the slot, leaving the caption
+     * describing events that are not on the picture. Poster events are reserved first,
+     * the rest fill what is left, then date order is restored.
+     *
+     * $preAdmitted is already limited to $limit by its own caller, so reserving it can
+     * never overflow the budget. With no cap it is null and this is a plain take().
+     */
+    public static function takeWithPosterReserved(Collection $events, int $limit, ?Collection $preAdmitted = null): Collection
+    {
+        if (! $preAdmitted || $events->count() <= $limit) {
+            return $events->take($limit);
+        }
+
+        $posterIds = $preAdmitted->pluck('id')->flip();
+
+        $poster = $events->filter(fn ($event) => $posterIds->has($event->id));
+        $rest = $events->reject(fn ($event) => $posterIds->has($event->id));
+
+        return $poster->concat($rest->take(max(0, $limit - $poster->count())))
+            ->sortBy([['starts_at', 'asc'], ['id', 'asc']])
+            ->values();
+    }
+
+    /**
+     * The schedules an event spends quota against: its linked talents and venues, minus
+     * the schedule the graphic is for. Deduplicated because event_role is written with
+     * attach() in places, so a stray duplicate row would otherwise burn two slots.
+     */
+    private static function cappedScheduleIds(Event $event, Role $role): array
+    {
+        return $event->roles
+            ->filter(fn ($linked) => $linked->id != $role->id && ($linked->isTalent() || $linked->isVenue()))
+            ->pluck('id')
+            ->unique()
+            ->all();
     }
 }

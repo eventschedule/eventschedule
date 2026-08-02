@@ -1546,6 +1546,8 @@ return [
     'max_per_row' => 'Flyers por fila',
     'no_limit' => 'Automático',
     'max_per_row_help' => 'Número de flyers por fila antes de pasar a la siguiente fila',
+    'max_per_schedule' => 'Eventos por horario',
+    'max_per_schedule_help' => 'Limite cuántos eventos puede aportar cada talento o lugar, para que uno solo no llene el gráfico. El gráfico puede quedar más corto que el número de eventos',
     'graphic_image_size' => 'Tamaño de imagen',
     'graphic_image_size_help' => 'Ajusta el gráfico a una forma fija para redes sociales. Auto mantiene el tamaño natural.',
     'graphic_size_auto' => 'Auto (ajustar al contenido)',

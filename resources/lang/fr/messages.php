@@ -1549,6 +1549,8 @@ return [
     'max_per_row' => 'Flyers par ligne',
     'no_limit' => 'Auto',
     'max_per_row_help' => 'Nombre de flyers par ligne avant de passer à la ligne suivante',
+    'max_per_schedule' => 'Événements par planning',
+    'max_per_schedule_help' => 'Limitez le nombre d\'événements que chaque intervenant ou lieu peut apporter, afin qu\'un seul ne remplisse pas le graphique. Le graphique peut contenir moins d\'événements que le nombre demandé',
     'graphic_image_size' => "Taille de l'image",
     'graphic_image_size_help' => 'Adapte le visuel à un format fixe pour les réseaux sociaux. Auto conserve la taille naturelle.',
     'graphic_size_auto' => 'Auto (adapter au contenu)',

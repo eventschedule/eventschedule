@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Characterization;
 
+use App\Models\Event;
 use App\Services\designs\GridDesign;
 use App\Services\designs\ListDesign;
 use App\Services\designs\RowDesign;
@@ -40,18 +41,42 @@ class EventGraphicStructuralTest extends TestCase
         $this->assertInstanceOf(RowDesign::class, new RowDesign($role, $events));
     }
 
+    /**
+     * Every design must survive an empty collection. RowDesign used to fatal here:
+     * its row maths indexes $rowAssignments[0], and with nothing to lay out that is
+     * count(null), a TypeError rather than a warning. Callers all guard isEmpty()
+     * today, so this pins the family invariant its two siblings already honoured.
+     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('layoutProvider')]
+    public function test_layout_survives_an_empty_event_collection(string $layout): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+
+        $generator = new EventGraphicGenerator($role, collect(), $layout);
+        $png = $generator->generate();
+
+        $info = getimagesizefromstring($png);
+        $this->assertNotFalse($info, "{$layout}: empty collection did not produce an image");
+        $this->assertSame('image/png', $info['mime']);
+        $this->assertGreaterThan(0, $info[0]);
+        $this->assertGreaterThan(0, $info[1]);
+    }
+
     #[\PHPUnit\Framework\Attributes\DataProvider('layoutProvider')]
     public function test_layout_generates_valid_png_for_one_and_several_events(string $layout): void
     {
         $owner = $this->createOwner();
         $role = $this->createRole($owner, 'venue');
 
-        foreach ([1, 3] as $count) {
+        // 12 is past the old hard-coded 3x3 ceiling, where the canvas used to be sized
+        // for 9 flyers while 12 were handed in.
+        foreach ([1, 3, 12] as $count) {
             $events = collect();
             for ($i = 0; $i < $count; $i++) {
                 $events->push($this->createEvent($role, [
                     'name' => "Graphic Event {$i}",
-                    'starts_at' => '2026-09-0'.($i + 1).' 18:00:00',
+                    'starts_at' => sprintf('2026-09-%02d 18:00:00', $i + 1),
                 ]));
             }
 
@@ -107,6 +132,131 @@ class EventGraphicStructuralTest extends TestCase
         $rgb = imagecolorsforindex($im, imagecolorat($im, 0, 0));
         imagedestroy($im);
         $this->assertGreaterThan(30, $rgb['red'] + $rgb['green'] + $rgb['blue'], "{$format}: padding corner is unfilled (black)");
+    }
+
+    /**
+     * The grid shape per event count. Everything from 9 up used to be a hard-coded
+     * 3x3, so the canvas was sized for 9 cells and generateEventLayout() - which is
+     * bounded by gridRows x gridCols - silently never drew the rest. Counts 0-9 are
+     * the original hand-picked shapes and must not drift.
+     */
+    public function test_grid_shape_per_event_count(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+
+        // Build the maximum set once and slice it - GridDesign only reads the count.
+        $events = collect();
+        for ($i = 0; $i < 20; $i++) {
+            $events->push($this->createEvent($role, [
+                'name' => "Grid Event {$i}",
+                'starts_at' => sprintf('2026-09-%02d 18:00:00', $i + 1),
+            ]));
+        }
+
+        $expected = [
+            0 => [1, 1], 1 => [1, 1], 2 => [2, 1], 3 => [3, 1], 4 => [2, 2],
+            5 => [3, 2], 6 => [3, 2], 7 => [3, 3], 8 => [3, 3], 9 => [3, 3],
+            10 => [4, 3], 11 => [4, 3], 12 => [4, 3],
+            13 => [4, 4], 14 => [4, 4], 15 => [4, 4], 16 => [4, 4],
+            17 => [5, 4], 18 => [5, 4], 19 => [5, 4], 20 => [5, 4],
+        ];
+
+        foreach ($expected as $count => [$cols, $rows]) {
+            $layout = (new GridDesign($role, $events->take($count)))->getCurrentGridLayout();
+
+            $this->assertSame($cols, $layout['cols'], "{$count} events: wrong column count");
+            $this->assertSame($rows, $layout['rows'], "{$count} events: wrong row count");
+
+            // The invariant the layout loop depends on: a grid smaller than the
+            // collection drops the overflow without any warning.
+            $this->assertGreaterThanOrEqual(
+                $count,
+                $layout['cols'] * $layout['rows'],
+                "{$count} events: grid holds only {$layout['cols']}x{$layout['rows']} cells"
+            );
+        }
+    }
+
+    /**
+     * The bug itself, asserted directly: generateEventLayout() is bounded by
+     * gridRows x gridCols, so with the old 3x3 fallback the 10th event onward was
+     * never handed to generateSingleFlyer() at all - no warning, no truncation
+     * notice, just nine tiles on a poster whose caption listed twenty.
+     */
+    public function test_every_event_is_drawn_not_just_the_first_nine(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+
+        $events = collect();
+        for ($i = 0; $i < 20; $i++) {
+            $events->push($this->createEvent($role, [
+                'name' => "Grid Event {$i}",
+                'starts_at' => sprintf('2026-09-%02d 18:00:00', $i + 1),
+            ]));
+        }
+
+        $design = new class($role, $events) extends GridDesign
+        {
+            /** @var list<string> */
+            public array $drawn = [];
+
+            protected function generateSingleFlyer(Event $event, int $row, int $col, int $eventNumber = 0): void
+            {
+                $this->drawn[] = $event->name;
+            }
+        };
+
+        $design->generate();
+
+        $this->assertSame(
+            $events->pluck('name')->all(),
+            $design->drawn,
+            'the grid drew '.count($design->drawn).' of 20 flyers, in order'
+        );
+    }
+
+    public function test_grid_canvas_grows_past_the_old_nine_event_ceiling(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+
+        $events = collect();
+        for ($i = 0; $i < 20; $i++) {
+            $events->push($this->createEvent($role, [
+                'name' => "Grid Event {$i}",
+                'starts_at' => sprintf('2026-09-%02d 18:00:00', $i + 1),
+            ]));
+        }
+
+        $nine = (new GridDesign($role, $events->take(9)))->getCurrentGridLayout();
+        $twenty = (new GridDesign($role, $events))->getCurrentGridLayout();
+
+        // Before the fix both were 3x3 and both canvases were identical.
+        $this->assertGreaterThan($nine['total_width'], $twenty['total_width']);
+        $this->assertGreaterThan($nine['total_height'], $twenty['total_height']);
+    }
+
+    public function test_max_per_row_override_still_fits_every_event(): void
+    {
+        // The Flyers Per Row branch was always correct - it is the auto path that was
+        // broken - so pin it against collateral damage from the auto-path rewrite.
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+
+        $events = collect();
+        for ($i = 0; $i < 20; $i++) {
+            $events->push($this->createEvent($role, [
+                'name' => "Grid Event {$i}",
+                'starts_at' => sprintf('2026-09-%02d 18:00:00', $i + 1),
+            ]));
+        }
+
+        $layout = (new GridDesign($role, $events, false, ['max_per_row' => 4]))->getCurrentGridLayout();
+
+        $this->assertSame(4, $layout['cols']);
+        $this->assertSame(5, $layout['rows']);
     }
 
     public static function socialFormatProvider(): array

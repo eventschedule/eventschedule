@@ -1385,6 +1385,8 @@ return [
     'max_per_row' => 'Afișe pe Rând',
     'no_limit' => 'Automat',
     'max_per_row_help' => 'Numărul de afișe pe rând înainte de a trece la rândul următor',
+    'max_per_schedule' => 'Evenimente per program',
+    'max_per_schedule_help' => 'Limitează câte evenimente poate contribui fiecare talent sau locație, astfel încât unul singur să nu umple graficul. Graficul poate conține mai puține evenimente decât numărul de evenimente',
     'graphic_image_size' => 'Dimensiunea imaginii',
     'graphic_image_size_help' => 'Adaptează grafica la o formă fixă pentru rețelele sociale. Auto păstrează dimensiunea naturală.',
     'graphic_size_auto' => 'Auto (potrivește la conținut)',
