@@ -7,6 +7,7 @@ use App\Models\EventPart;
 use App\Models\EventRole;
 use App\Models\Role;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 
 /**
  * The four selection queries behind `app:translate`.
@@ -58,10 +59,48 @@ class TranslationQueue
     }
 
     /**
+     * Narrow an Event query to the events still worth paying to translate.
+     *
+     * The three-branch shape is this codebase's settled idiom for "not over yet" - it appears
+     * verbatim in FederationService::federatableQuery(), MarketingController::publicUpcomingEventsQuery(),
+     * FeedController and PromotionService, the last of which states the rule outright: a recurring
+     * event has no single date and is always current; a one-off is done once its end time passes.
+     *
+     * Do NOT substitute Event::scopeUpcomingOrOngoing(). That scope deliberately omits days_of_week
+     * and every caller adds the branch itself. A recurring series has no end date SQL can read and
+     * its starts_at is the FIRST occurrence, never advanced - so without that branch a weekly class
+     * that began months ago reads as past forever, and translation would silently stop for nearly
+     * every recurring event on the platform.
+     */
+    private static function restrictToLiveEvents(Builder $query): Builder
+    {
+        // Start of yesterday rather than now(): starts_at is a naive datetime and schedules span
+        // roughly +/-14h of timezone, so a tighter bound drops events that locally have not happened.
+        $cutoff = Carbon::today()->subDay();
+
+        return $query
+            // Appointment bookings carry a guest's name and are never rendered in a second language,
+            // so translating them is pure spend. It also writes to rows the reschedule cooldown
+            // watches - see the note in AppointmentService about this command touching them.
+            ->whereNull('appointment_type_id')
+            ->where('is_cancelled', false)
+            ->where(function ($q) use ($cutoff) {
+                $q->where('starts_at', '>=', $cutoff)
+                    ->orWhereNotNull('days_of_week')
+                    ->orWhere(function ($q2) use ($cutoff) {
+                        // Multi-day events that started earlier but are still running. The
+                        // duration >= 24 guard mirrors Event::getIsMultiDayAttribute().
+                        $q2->where('duration', '>=', 24)
+                            ->whereRaw('DATE_ADD(starts_at, INTERVAL duration HOUR) >= ?', [$cutoff]);
+                    });
+            });
+    }
+
+    /**
      * Events missing a translation. Unscoped, this is gated on the schedules attached to the event
      * wanting a translation at all - without that gate the pass loads every event on the platform.
-     * A role- or event-scoped call skips the gate deliberately: it is the operator escape hatch and
-     * should surface everything for that target.
+     * An event-scoped call skips every gate deliberately: it is the operator escape hatch, so naming
+     * an event by id translates it even if it is long past.
      */
     public static function events(?int $eventId = null, ?int $roleId = null): Builder
     {
@@ -75,6 +114,8 @@ class TranslationQueue
         if ($eventId) {
             return $query->where('id', $eventId);
         }
+
+        self::restrictToLiveEvents($query);
 
         if ($roleId) {
             return $query->whereHas('roles', fn ($q) => $q->where('roles.id', $roleId));
@@ -104,8 +145,11 @@ class TranslationQueue
             });
 
         if ($eventId) {
-            $query->where('event_id', $eventId);
+            return $query->where('event_id', $eventId);
         }
+
+        // The pivot carries no dates, so the liveness test has to join to the parent event.
+        $query->whereHas('event', fn ($q) => self::restrictToLiveEvents($q));
 
         if ($roleId) {
             $query->where('role_id', $roleId);
@@ -130,6 +174,10 @@ class TranslationQueue
         if ($eventId) {
             return $query->where('event_id', $eventId);
         }
+
+        // event_parts stores only clock times (start_time / end_time varchars), never dates, so the
+        // liveness test has to join to the parent event.
+        $query->whereHas('event', fn ($q) => self::restrictToLiveEvents($q));
 
         if ($roleId) {
             return $query->whereHas('event.roles', fn ($q) => $q->where('roles.id', $roleId));

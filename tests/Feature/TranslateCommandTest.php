@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\EventPart;
+use App\Models\EventRole;
 use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
@@ -345,6 +347,131 @@ class TranslateCommandTest extends TestCase
             // The real damage of the old behaviour: a typo silently fell through to a full run.
             $this->assertStringNotContainsString('[dry-run] roles', $output);
         }
+    }
+
+    /** A venue that wants a translation, so its events reach the events pass at all. */
+    private function translatingVenue(): Role
+    {
+        return $this->createRole($this->createOwner(), 'venue', [
+            'language_code' => 'en',
+            'translation_language_code' => 'he',
+        ]);
+    }
+
+    public function test_recurring_events_are_kept_however_old_their_first_occurrence_is(): void
+    {
+        $venue = $this->translatingVenue();
+
+        // A recurring series has no end date SQL can read and its starts_at is the FIRST occurrence,
+        // never advanced - so a weekly class that began months ago still runs every week. Filtering
+        // on starts_at alone would silently stop translating nearly every recurring event.
+        $weekly = $this->createRecurringEvent($venue, [
+            'name' => 'Gemara Masechet Brachot',
+            'starts_at' => now()->subMonths(5)->format('Y-m-d H:i:s'),
+        ]);
+
+        $this->assertSame([$weekly->id], $this->selectedIds($this->dryRun(), 'events'));
+    }
+
+    public function test_events_that_are_over_are_not_selected(): void
+    {
+        $venue = $this->translatingVenue();
+        $this->createEvent($venue, [
+            'name' => 'Last Month Concert',
+            'starts_at' => now()->subMonth()->format('Y-m-d H:i:s'),
+            'duration' => 2,
+        ]);
+
+        $this->assertSame([], $this->selectedIds($this->dryRun(), 'events'));
+    }
+
+    public function test_an_event_earlier_today_is_still_selected(): void
+    {
+        $venue = $this->translatingVenue();
+
+        // starts_at is a naive datetime and schedules span roughly +/-14h of timezone, so the cutoff
+        // has a day of slack. An event whose start time passed an hour ago must not drop out.
+        $earlier = $this->createEvent($venue, [
+            'name' => 'This Morning',
+            'starts_at' => now()->subHour()->format('Y-m-d H:i:s'),
+        ]);
+
+        $this->assertSame([$earlier->id], $this->selectedIds($this->dryRun(), 'events'));
+    }
+
+    public function test_a_multi_day_event_still_running_is_selected(): void
+    {
+        $venue = $this->translatingVenue();
+        $festival = $this->createEvent($venue, [
+            'name' => 'Week Long Festival',
+            'starts_at' => now()->subDays(4)->format('Y-m-d H:i:s'),
+            'duration' => 24 * 7,
+        ]);
+
+        $this->assertSame([$festival->id], $this->selectedIds($this->dryRun(), 'events'));
+    }
+
+    public function test_appointment_bookings_and_cancelled_events_are_not_selected(): void
+    {
+        $venue = $this->translatingVenue();
+        $type = $this->createAppointmentType($venue);
+
+        // A private booking row carrying a guest's name - never rendered in a second language.
+        $this->createEvent($venue, [
+            'name' => 'Consultation with Dana Levi',
+            'appointment_type_id' => $type->id,
+            'is_private' => true,
+        ]);
+
+        $this->createEvent($venue, [
+            'name' => 'Cancelled Show',
+            'is_cancelled' => true,
+        ]);
+
+        $this->assertSame([], $this->selectedIds($this->dryRun(), 'events'));
+    }
+
+    public function test_naming_an_event_explicitly_translates_it_even_when_past(): void
+    {
+        $venue = $this->translatingVenue();
+        $past = $this->createEvent($venue, [
+            'name' => 'Last Month Concert',
+            'starts_at' => now()->subMonth()->format('Y-m-d H:i:s'),
+        ]);
+
+        // The operator escape hatch: naming a row by id overrides every gate.
+        $this->assertSame([$past->id], $this->selectedIds($this->dryRun(['--event_id' => $past->id]), 'events'));
+    }
+
+    public function test_agenda_parts_and_curator_rows_follow_their_parent_event(): void
+    {
+        $venue = $this->translatingVenue();
+
+        $past = $this->createEvent($venue, [
+            'name' => 'Last Month Concert',
+            'starts_at' => now()->subMonth()->format('Y-m-d H:i:s'),
+        ]);
+        $live = $this->createRecurringEvent($venue, [
+            'name' => 'Weekly Class',
+            'starts_at' => now()->subMonths(5)->format('Y-m-d H:i:s'),
+        ]);
+
+        // event_parts stores only clock times, and the curator pivot has no dates at all, so both
+        // have to inherit liveness from the parent event.
+        EventPart::create(['event_id' => $past->id, 'name' => 'Past Opening Act']);
+        $livePart = EventPart::create(['event_id' => $live->id, 'name' => 'Live Opening Act']);
+
+        $curator = $this->createCurator($this->createOwner(), ['language_code' => 'he']);
+        $past->roles()->attach($curator->id, ['is_accepted' => true]);
+        $live->roles()->attach($curator->id, ['is_accepted' => true]);
+
+        $output = $this->dryRun();
+
+        $this->assertSame([$livePart->id], $this->selectedIds($output, 'event-parts'));
+
+        $curatorIds = $this->selectedIds($output, 'curator-events');
+        $this->assertCount(1, $curatorIds);
+        $this->assertSame($live->id, EventRole::find($curatorIds[0])->event_id);
     }
 
     public function test_dry_run_still_reports_without_an_ai_provider(): void
