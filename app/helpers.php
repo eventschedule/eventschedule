@@ -305,6 +305,22 @@ if (! function_exists('content_dir')) {
     }
 }
 
+if (! function_exists('content_dir_for_language')) {
+    /**
+     * Base direction for a string whose language is already known.
+     *
+     * The content_dir() variant above infers the language from the schedule plus a
+     * "showing translation" boolean, which is wrong for an aggregated event whose language pair
+     * differs from the viewing schedule's - that is how Hebrew event names ended up tagged 'ltr'
+     * on a curator's English view. Once the resolver has picked a string it also knows which
+     * language it picked, so pass both and let the text itself decide when it can.
+     */
+    function content_dir_for_language(?string $text, ?string $lang): string
+    {
+        return detect_content_dir($text) ?: (in_array($lang, ['ar', 'he'], true) ? 'rtl' : 'ltr');
+    }
+}
+
 if (! function_exists('marketing_url')) {
     /**
      * Generate a URL for marketing pages

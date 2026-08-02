@@ -84,24 +84,20 @@
         $uniqueCategoryIds = array_unique($eventCategoryIds);
         $hasOnlineEvents = collect($events)->contains(fn($event) => !empty($event->event_url));
 
-        $eventToVueArray = function($event) use ($role, $subdomain, $route) {
+        $displayLang = isset($role) ? $role->displayLanguageCode() : 'en';
+
+        $eventToVueArray = function($event) use ($role, $subdomain, $route, $displayLang) {
             $groupId = isset($role) ? $event->getGroupIdForSubdomain($role->subdomain) : null;
-            $curatorTranslation = null;
-            if (isset($role) && $role->isCurator()) {
-                $curatorPivot = $event->roles->where('id', $role->id)->first();
-                if ($curatorPivot && $curatorPivot->pivot && $curatorPivot->pivot->name_translated) {
-                    $curatorTranslation = $curatorPivot->pivot;
-                }
-            }
+            $eventName = $event->nameInLanguage($displayLang, $role ?? null);
             return [
                 'id' => \App\Utils\UrlUtils::encodeId($event->id),
                 'group_id' => $groupId ? \App\Utils\UrlUtils::encodeId($groupId) : null,
                 'category_id' => $event->category_id,
                 'category_color' => $event->resolveCategoryColor(),
-                'name' => $curatorTranslation ? $curatorTranslation->name_translated : $event->translatedName(),
-                'dir' => content_dir($role ?? null, !$curatorTranslation && showing_translation($role ?? null) && (bool)$event->name_en),
-                'short_description' => $curatorTranslation && $curatorTranslation->short_description_translated ? $curatorTranslation->short_description_translated : $event->translatedShortDescription(),
-                'venue_name' => $event->getVenueDisplayName(),
+                'name' => $eventName,
+                'dir' => content_dir_for_language($eventName, $displayLang),
+                'short_description' => $event->shortDescriptionInLanguage($displayLang, $role ?? null),
+                'venue_name' => $event->getVenueDisplayName(true, $displayLang),
                 'venue_subdomain' => $event->venue?->subdomain ?: null,
                 'is_free' => $event->isFree(),
                 'starts_at' => $event->starts_at,
@@ -135,7 +131,7 @@
                     : null,
                 'parts' => $event->parts->map(fn($part) => [
                     'id' => \App\Utils\UrlUtils::encodeId($part->id),
-                    'name' => $part->translatedName(),
+                    'name' => $part->nameInLanguage($displayLang, $event->getTranslationLanguageCode()),
                     'start_time' => $part->start_time,
                     'end_time' => $part->end_time,
                 ])->values()->toArray(),
@@ -1977,7 +1973,9 @@ const calendarApp = createApp({
                 d: @json(__('messages.duration_day_short')),
                 m: @json(__('messages.duration_minute_short')),
             },
-            languageCode: '{{ $isAdminRoute && auth()->check() ? app()->getLocale() : (session()->has('translate') ? (isset($role) && $role->translation_language_code ? $role->translation_language_code : 'en') : (isset($role) && $role->language_code ? $role->language_code : 'en')) }}',
+            {{-- Also the language forwarded to the guest calendar endpoints, so their payload can no
+                 longer disagree with the server-rendered chrome around it. --}}
+            languageCode: '{{ $isAdminRoute && auth()->check() ? app()->getLocale() : (isset($role) ? $role->displayLanguageCode() : 'en') }}',
             userTimezone: '{{ auth()->check() && auth()->user()->timezone ? auth()->user()->timezone : null }}',
             popupTimeout: null,
             showFiltersDrawer: false,
@@ -3600,7 +3598,10 @@ const calendarApp = createApp({
                 const oldestEvent = this.pastEvents[this.pastEvents.length - 1];
                 if (!oldestEvent || !oldestEvent.starts_at) return;
                 const baseUrl = '{{ isset($subdomain) ? route("role.list_past_events", ["subdomain" => $subdomain]) : "" }}';
-                const url = baseUrl + '?before=' + encodeURIComponent(oldestEvent.starts_at);
+                let url = baseUrl + '?before=' + encodeURIComponent(oldestEvent.starts_at);
+                if (this.route === 'guest') {
+                    url += '&lang=' + encodeURIComponent(this.languageCode);
+                }
                 const response = await fetch(url);
                 const data = await response.json();
                 if (data.events && data.events.length > 0) {
@@ -3670,7 +3671,9 @@ const calendarApp = createApp({
             }
 
             const cacheKeySuffix = month + '_' + year;
-            const cacheKey = `es_cal_${this.route}_${this.subdomain}_${cacheKeySuffix}`;
+            // The language is part of the key: without it, toggling EN/HE repainted the previous
+            // language's names from cache before the fetch resolved.
+            const cacheKey = `es_cal_${this.route}_${this.subdomain}_${this.languageCode}_${cacheKeySuffix}`;
 
             // Show cached data immediately if available
             try {
@@ -3703,6 +3706,9 @@ const calendarApp = createApp({
                 }
                 const separator = url.includes('?') ? '&' : '?';
                 url += separator + 'month=' + month + '&year=' + year;
+                if (this.route === 'guest') {
+                    url += '&lang=' + encodeURIComponent(this.languageCode);
+                }
 
                 const response = await fetch(url);
                 const data = await response.json();
@@ -3740,7 +3746,7 @@ const calendarApp = createApp({
                 return this.fetchCalendarEventsForMonth(this.pageMonth, this.pageYear);
             }
 
-            const cacheKey = `es_cal_${this.route}_${this.subdomain}_list`;
+            const cacheKey = `es_cal_${this.route}_${this.subdomain}_${this.languageCode}_list`;
 
             // Show cached data immediately if available
             try {
@@ -3775,6 +3781,9 @@ const calendarApp = createApp({
                 // List layout: omit month/year and request the unbounded (row-capped) upcoming set
                 // so future-month events load in one fetch instead of just the current month.
                 url += separator + 'list=1';
+                if (this.route === 'guest') {
+                    url += '&lang=' + encodeURIComponent(this.languageCode);
+                }
 
                 const response = await fetch(url);
                 const data = await response.json();
@@ -4006,18 +4015,22 @@ document.addEventListener('DOMContentLoaded', function() {
     @if ($events->isNotEmpty() && $events->first() instanceof \App\Models\Event)
     <ul>
         @foreach ($events as $noscriptEvent)
+        @php
+            $noscriptLang = isset($role) ? $role->displayLanguageCode() : 'en';
+            $noscriptShort = $noscriptEvent->shortDescriptionInLanguage($noscriptLang, $role ?? null);
+        @endphp
         <li style="margin-bottom: 1rem;">
             <a href="{{ $noscriptEvent->getGuestUrl($role?->subdomain ?? $noscriptEvent->roles->first()?->subdomain) }}">
-                <strong>{{ $noscriptEvent->translatedName() }}</strong>
+                <strong>{{ $noscriptEvent->nameInLanguage($noscriptLang, $role ?? null) }}</strong>
             </a>
             <br>
             {{ $noscriptEvent->localStartsAt(true) }}
             @if ($noscriptEvent->venue)
                 - {{ $noscriptEvent->venue->getDisplayName() }}
             @endif
-            @if ($noscriptEvent->translatedShortDescription())
+            @if ($noscriptShort)
                 <br>
-                <span>{{ Str::limit($noscriptEvent->translatedShortDescription(), 100) }}</span>
+                <span>{{ Str::limit($noscriptShort, 100) }}</span>
             @endif
         </li>
         @endforeach

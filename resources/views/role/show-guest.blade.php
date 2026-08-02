@@ -162,10 +162,10 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                     <div class="p-4">
                       <a href="{{ $eventData['event']->getGuestUrl($role->subdomain) }}" class="block">
                         <h2 class="text-gray-900 dark:text-gray-100 font-semibold text-lg mb-2 line-clamp-1 group-hover/card:text-blue-600 transition-colors duration-200">
-                          {{ $eventData['event']->translatedName() }}
+                          {{ $eventData['event']->nameInLanguage($role->displayLanguageCode(), $role) }}
                         </h2>
                         <p class="text-gray-600 dark:text-gray-400 text-sm mb-1 group-hover/card:text-gray-700 dark:group-hover/card:text-gray-300 transition-colors duration-200">
-                          {{ $eventData['event']->getVenueDisplayName() }}
+                          {{ $eventData['event']->getVenueDisplayName(true, $role->displayLanguageCode()) }}
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 text-xs group-hover/card:text-gray-600 dark:group-hover/card:text-gray-300 transition-colors duration-200">
                           {{ $eventData['event']->localStartsAt(true, request()->date) }}

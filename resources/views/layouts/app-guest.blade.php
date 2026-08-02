@@ -12,6 +12,12 @@
             $otherRole = $event->getOtherRole($subdomain);
         }
         $jsonLdFlags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
+        // Event text resolved by language rather than by a "showing translation" boolean, which
+        // inverts for an aggregated event whose language pair differs from this schedule's.
+        // $role's OWN translated*() calls below need no such treatment - $guestLang came from it.
+        $guestLang = $role->displayLanguageCode();
+        $guestEventName = ($event && $event->exists) ? $event->nameInLanguage($guestLang, $role) : null;
+        $guestEventDescriptionHtml = ($event && $event->exists) ? $event->descriptionHtmlInLanguage($guestLang, $role) : null;
         $isUnverifiedRole = $role && $role->exists
             && !($role->email && $role->email_verified_at)
             && !($role->phone && $role->phone_verified_at);
@@ -58,7 +64,7 @@
         @elseif ($event && $event->exists && !$event->is_draft)
             @if ($galleryMode)
                 @php
-                    $galleryTitle = $event->translatedName() . ' - ' . __('messages.photo_gallery');
+                    $galleryTitle = $guestEventName . ' - ' . __('messages.photo_gallery');
                     $firstPhoto = $event->approvedPhotos->first();
                     if (!$firstPhoto) {
                         foreach ($event->parts as $part) {
@@ -72,7 +78,7 @@
                 <meta name="description" content="{{ $galleryTitle }}">
                 <meta property="og:type" content="website">
                 <meta property="og:title" content="{{ $galleryTitle }}">
-                <meta property="og:description" content="{{ $event->getMetaDescription($date) }}">
+                <meta property="og:description" content="{{ $event->getMetaDescription($date, $guestLang, $role) }}">
                 <meta property="og:image" content="{{ $galleryOgImage }}">
                 <meta property="og:image:width" content="1200">
                 <meta property="og:image:height" content="630">
@@ -80,7 +86,7 @@
                 <meta property="og:url" content="{{ $event->getCanonicalPhotoGalleryUrl($date) }}">
                 <meta property="og:site_name" content="{{ $role->translatedName() ?: config('app.name') }}">
                 <meta name="twitter:title" content="{{ $galleryTitle }}">
-                <meta name="twitter:description" content="{{ $event->getMetaDescription($date) }}">
+                <meta name="twitter:description" content="{{ $event->getMetaDescription($date, $guestLang, $role) }}">
                 <meta name="twitter:image" content="{{ $galleryOgImage }}">
                 <meta name="twitter:image:alt" content="{{ $galleryTitle }}">
                 <meta name="twitter:card" content="summary_large_image">
@@ -91,21 +97,21 @@
             @else
                 <link rel="canonical" href="{{ $event->getCanonicalUrl($date) }}">
             @endif
-            <meta name="description" content="{{ $event->getMetaDescription($date) }}">
+            <meta name="description" content="{{ $event->getMetaDescription($date, $guestLang, $role) }}">
             <meta property="og:type" content="event">
-            <meta property="og:title" content="{{ $event->translatedName() }}">
-            <meta property="og:description" content="{{ $event->getMetaDescription($date) }}">
+            <meta property="og:title" content="{{ $guestEventName }}">
+            <meta property="og:description" content="{{ $event->getMetaDescription($date, $guestLang, $role) }}">
             @php $eventOgImage = $event->getImageUrl() ?: (config('app.url') . '/images/social/home.png'); @endphp
             <meta property="og:image" content="{{ $eventOgImage }}">
             <meta property="og:image:width" content="1200">
             <meta property="og:image:height" content="630">
-            <meta property="og:image:alt" content="{{ $event->translatedName() }}">
+            <meta property="og:image:alt" content="{{ $guestEventName }}">
             <meta property="og:url" content="{{ $event->getCanonicalUrl($date) }}">
             <meta property="og:site_name" content="{{ $role->translatedName() ?: config('app.name') }}">
-            <meta name="twitter:title" content="{{ $event->translatedName() }}">
-            <meta name="twitter:description" content="{{ $event->getMetaDescription($date) }}">
+            <meta name="twitter:title" content="{{ $guestEventName }}">
+            <meta name="twitter:description" content="{{ $event->getMetaDescription($date, $guestLang, $role) }}">
             <meta name="twitter:image" content="{{ $eventOgImage }}">
-            <meta name="twitter:image:alt" content="{{ $event->translatedName() }}">
+            <meta name="twitter:image:alt" content="{{ $guestEventName }}">
             <meta name="twitter:card" content="summary_large_image">
             <meta name="twitter:site" content="@ScheduleEvent">
             @endif
@@ -285,12 +291,10 @@
 
         @if ($event && $event->exists && $event->starts_at && !$event->is_draft && !($passwordGate ?? false))
             @php
-                // Use translation if available, otherwise fall back to event methods
-                $eventName = (isset($translation) && $translation && $translation->name_translated) ? $translation->name_translated : $event->translatedName();
-                $eventDescriptionRaw = (isset($translation) && $translation && $translation->description_translated) ? ($translation->description_html_translated ?: $translation->description_translated) : $event->translatedDescription();
-                $eventDescription = trim(strip_tags($eventDescriptionRaw));
+                $eventName = $guestEventName;
+                $eventDescription = trim(strip_tags((string) $guestEventDescriptionHtml));
                 if (empty($eventDescription)) {
-                    $eventDescription = $event->translatedName() . ' - ' . __('messages.event');
+                    $eventDescription = $eventName . ' - ' . __('messages.event');
                 }
                 $eventUrl = $event->getCanonicalUrl($date ?? null);
                 $eventImage = $event->getImageUrl() ?: (config('app.url') . '/images/social/home.png');
@@ -440,7 +444,7 @@
                     {
                         "@type": "ListItem",
                         "position": {{ $breadcrumbRootsAtSchedule ? 2 : 3 }},
-                        "name": @json($event->translatedName(), $jsonLdFlags),
+                        "name": @json($guestEventName, $jsonLdFlags),
                         "item": "{{ $event->getCanonicalUrl($date ?? null) }}"
                     }
                 ]
@@ -478,8 +482,8 @@
                     if ($videoId) {
                         $videoSchemaItems[] = [
                             '@type' => 'VideoObject',
-                            'name' => $event->translatedName() . ($video->eventPart ? ' - ' . $video->eventPart->translatedName() : ''),
-                            'description' => trim(strip_tags($event->translatedDescription())) ?: $event->translatedName(),
+                            'name' => $guestEventName . ($video->eventPart ? ' - ' . $video->eventPart->nameInLanguage($guestLang, $event->getTranslationLanguageCode()) : ''),
+                            'description' => trim(strip_tags($guestEventDescriptionHtml)) ?: $guestEventName,
                             'thumbnailUrl' => 'https://img.youtube.com/vi/' . $videoId . '/hqdefault.jpg',
                             'uploadDate' => $video->created_at->toIso8601String(),
                             'contentUrl' => $video->youtube_url,
@@ -512,7 +516,7 @@
             fbq('track', 'PageView');
             fbq('track', 'ViewContent', {
                 content_ids: ['{{ $event->id }}'],
-                content_name: @json($event->translatedName()),
+                content_name: @json($guestEventName),
                 content_type: 'product',
                 content_category: '{{ $event->getSchemaAttendanceMode() === "https://schema.org/OnlineEventAttendanceMode" ? "online_event" : "event" }}'
             });

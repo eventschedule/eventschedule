@@ -64,7 +64,9 @@ class AppGuestLayout extends Component
     public function guestTitle(): string
     {
         $segment = $this->pageTitle
-            ?: (($this->event && $this->event->exists) ? $this->event->translatedName() : null);
+            ?: (($this->event && $this->event->exists)
+                ? $this->event->nameInLanguage($this->role->displayLanguageCode(), $this->role)
+                : null);
 
         $name = $this->role->translatedName() ?: config('app.name');
 

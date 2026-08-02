@@ -66,6 +66,7 @@ use Illuminate\Validation\ValidationException;
 class RoleController extends Controller
 {
     use Traits\CalendarDataTrait;
+    use Traits\ResolvesGuestLanguage;
 
     // Max events loaded whenever the month window is dropped, which is now both calendar-events
     // endpoints, guest and admin, in either layout. They display at most 100 upcoming events
@@ -1217,7 +1218,6 @@ class RoleController extends Controller
 
     public function viewGuest(Request $request, $subdomain, $slug = '', $id = null, $date = null)
     {
-        $translation = null;
         $user = auth()->user();
         $curatorRoles = $user ? $user->curators() : collect();
 
@@ -1406,14 +1406,6 @@ class RoleController extends Controller
                 if (! $event->days_of_week) {
                     $date = $startAtDate->format('Y-m-d');
                 }
-            }
-        }
-
-        // Get translation data for curator events
-        if ($event && $role->isCurator()) {
-            $eventRole = $event->roles->where('id', $role->id)->first();
-            if ($eventRole && $eventRole->pivot && $eventRole->pivot->name_translated) {
-                $translation = $eventRole->pivot;
             }
         }
 
@@ -1711,7 +1703,6 @@ class RoleController extends Controller
                 'date',
                 'curatorRoles',
                 'fonts',
-                'translation',
                 'selectedGroup',
                 'pastEvents',
                 'hasMorePastEvents',
@@ -1767,6 +1758,8 @@ class RoleController extends Controller
         if ($role->hide_past_events) {
             return response()->json(['events' => [], 'has_more' => false]);
         }
+
+        $displayLang = $this->resolveGuestDisplayLanguage($request, $role);
 
         $before = $request->input('before');
         if (! $before) {
@@ -1831,8 +1824,10 @@ class RoleController extends Controller
             $pastEvents = $pastEvents->take(50);
         }
 
-        $eventsData = $pastEvents->map(function ($event) use ($role, $subdomain) {
-            return $this->eventToVueArray($event, $role, $subdomain);
+        $pastEvents->loadMissing('creatorRole');
+
+        $eventsData = $pastEvents->map(function ($event) use ($role, $subdomain, $displayLang) {
+            return $this->eventToVueArray($event, $role, $subdomain, $displayLang);
         })->values()->toArray();
 
         return response()->json([
@@ -1918,9 +1913,12 @@ class RoleController extends Controller
         }
     }
 
-    private function eventToVueArray(Event $event, ?Role $role, ?string $subdomain): array
+    private function eventToVueArray(Event $event, ?Role $role, ?string $subdomain, ?string $displayLang = null): array
     {
         $groupId = $role ? $event->getGroupIdForSubdomain($role->subdomain) : null;
+
+        $displayLang = $displayLang ?: ($role ? $role->displayLanguageCode() : 'en');
+        $eventName = $event->nameInLanguage($displayLang, $role);
 
         $data = [
             'id' => UrlUtils::encodeId($event->id),
@@ -1928,9 +1926,9 @@ class RoleController extends Controller
             'category_id' => $event->category_id,
             'category_name' => $event->resolveCategoryName(),
             'category_color' => $event->resolveCategoryColor(),
-            'name' => $event->translatedName(),
-            'dir' => content_dir($role, showing_translation($role) && (bool) $event->name_en),
-            'venue_name' => $event->getVenueDisplayName(),
+            'name' => $eventName,
+            'dir' => content_dir_for_language($eventName, $displayLang),
+            'venue_name' => $event->getVenueDisplayName(true, $displayLang),
             'starts_at' => $event->starts_at,
             'days_of_week' => $event->days_of_week,
             'local_starts_at' => $event->localStartsAt(),
@@ -1948,7 +1946,7 @@ class RoleController extends Controller
             'is_online' => ! empty($event->event_url),
             'duration' => $event->duration,
             'parts' => $event->parts->map(fn ($part) => [
-                'name' => $part->name,
+                'name' => $part->nameInLanguage($displayLang, $event->getTranslationLanguageCode()),
                 'start_time' => $part->start_time,
                 'end_time' => $part->end_time,
             ])->values()->toArray(),
@@ -1998,6 +1996,8 @@ class RoleController extends Controller
         if (! $role || ! $role->isClaimed()) {
             return response()->json(['events' => [], 'eventsMap' => (object) [], 'pastEvents' => [], 'hasMorePastEvents' => false, 'filterMeta' => ['uniqueCategoryIds' => [], 'hasOnlineEvents' => false]]);
         }
+
+        $displayLang = $this->resolveGuestDisplayLanguage($request, $role);
 
         $month = DateUtils::normalizeMonth($request->month);
         $year = DateUtils::normalizeYear($request->year);
@@ -2120,7 +2120,7 @@ class RoleController extends Controller
             }
         }
 
-        return $this->buildCalendarResponse($events, $pastEvents, $hasMorePastEvents, $role, $subdomain, (int) $month, (int) $year, $timezone, $firstDayOfWeek, true);
+        return $this->buildCalendarResponse($events, $pastEvents, $hasMorePastEvents, $role, $subdomain, (int) $month, (int) $year, $timezone, $firstDayOfWeek, true, $displayLang);
     }
 
     public function adminCalendarEvents(Request $request, $subdomain): JsonResponse

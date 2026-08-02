@@ -832,12 +832,16 @@ class Role extends Model implements MustVerifyEmail
      * 3. Address (else if address has value)
      * 4. City (else)
      */
-    public function shortVenue($translate = true, $forceEnglish = false)
+    public function shortVenue($translate = true, $forceEnglish = false, ?string $want = null)
     {
         if ($forceEnglish) {
             $name = $this->englishName();
             $city = $this->englishCity();
             $address = $this->englishAddress1();
+        } elseif ($want !== null) {
+            $name = $this->textInLanguage('name', $want);
+            $city = $this->textInLanguage('city', $want);
+            $address = $this->textInLanguage('address1', $want);
         } else {
             $name = $translate ? $this->translatedName() : $this->name;
             $city = $translate ? $this->translatedCity() : $this->city;
@@ -1870,6 +1874,49 @@ class Role extends Model implements MustVerifyEmail
     public function offersTranslation(): bool
     {
         return $this->language_code !== ($this->translation_language_code ?: 'en');
+    }
+
+    /**
+     * The language the visitor is reading this schedule in right now: the target while the
+     * translation is being shown, otherwise the authored language.
+     *
+     * Guest surfaces should resolve event text against THIS, not against a "translated: yes/no"
+     * boolean. An aggregated event carries its own language pair (the venue's), which need not
+     * match the viewing schedule's - a `he`->`en` curator showing an `en`->`he` venue's event has
+     * the English text in `name` and the Hebrew in `name_en`, the exact opposite of its own rows.
+     * Asking for a language works in both cases; asking for "the translation" inverts in one.
+     */
+    public function displayLanguageCode(): string
+    {
+        return showing_translation($this)
+            ? ($this->translation_language_code ?: 'en')
+            : ($this->language_code ?: 'en');
+    }
+
+    /**
+     * This schedule's `$field` in the language `$want`.
+     *
+     * Needed wherever ANOTHER schedule's name is rendered on a guest page - the venue chip under
+     * an event, a talent credit - because `translatedName()` decides from
+     * `showing_translation($thatSchedule)`, which is the viewer's flag applied to a schedule whose
+     * language pair may be the reverse of the page's. On a `he`->`en` curator that made the
+     * `en`->`he` venue "Torah Learning Center" render as "מרכז ללימוד תורה" on the English view.
+     * Nothing changes for the viewing schedule itself, whose pair is where `$want` came from.
+     */
+    public function textInLanguage(string $field, string $want): ?string
+    {
+        $translated = $this->{$field.'_en'};
+
+        if ($translated && ($this->translation_language_code ?: 'en') === $want) {
+            return $translated;
+        }
+
+        return $this->{$field};
+    }
+
+    public function nameInLanguage(string $want): string
+    {
+        return (string) $this->textInLanguage('name', $want);
     }
 
     /**

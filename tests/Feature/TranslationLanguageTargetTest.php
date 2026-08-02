@@ -426,4 +426,320 @@ class TranslationLanguageTargetTest extends TestCase
         $this->assertSame('he', $event->venue->language_code);
         $this->assertSame('he', $event->getLanguageCode(), 'venue-first resolution rescues translation');
     }
+
+    // ---------------------------------------------------------------------------------------
+    // Resolving event text BY LANGUAGE rather than by a "showing translation" boolean.
+    //
+    // Reported on pardeshanna.com: a he->en curator aggregating an en->he venue served Hebrew
+    // names to ?lang=en and English names to the default Hebrew view. The event's `_en` column
+    // holds the translation into the EVENT's target (the venue's), which on a curator need not be
+    // the viewing schedule's target - so "show the translation" resolves to the wrong language.
+    // ---------------------------------------------------------------------------------------
+
+    /**
+     * The reported shape: curator he->en, venue en->he. `name` is English, `name_en` is Hebrew.
+     *
+     * @return array{0: Role, 1: Role, 2: Event}
+     */
+    private function createMismatchedCuratorFixture(): array
+    {
+        $user = $this->createOwner();
+
+        $curator = $this->createCurator($user, ['language_code' => 'he', 'translation_language_code' => 'en']);
+        $venue = $this->createRole($user, 'venue', ['language_code' => 'en', 'translation_language_code' => 'he']);
+
+        $event = $this->createEvent($venue, [
+            'name' => 'Gemara Masechet Brachot',
+            'short_description' => 'Weekly class',
+            'creator_role_id' => $venue->id,
+        ]);
+
+        // saveQuietly: the `saving` hook nulls `_en` whenever the source column is dirty.
+        $event->name_en = 'גמרא מסכת ברכות';
+        $event->short_description_en = 'שיעור שבועי';
+        $event->saveQuietly();
+
+        $event->roles()->attach($curator->id, ['is_accepted' => true]);
+
+        return [$curator, $venue, $event->fresh()];
+    }
+
+    public function test_curator_authored_view_shows_its_own_language_for_a_foreign_language_event(): void
+    {
+        [$curator, , $event] = $this->createMismatchedCuratorFixture();
+
+        // No translate session: the curator's authored language is Hebrew, and the Hebrew string
+        // lives in `name_en` because the venue's TARGET is Hebrew. Legacy returned the English name.
+        $this->assertSame('he', $curator->displayLanguageCode());
+        $this->assertSame('גמרא מסכת ברכות', $event->nameInLanguage('he', $curator));
+        $this->assertSame('שיעור שבועי', $event->shortDescriptionInLanguage('he', $curator));
+    }
+
+    public function test_curator_translated_view_shows_the_target_language_for_a_foreign_language_event(): void
+    {
+        [$curator, , $event] = $this->createMismatchedCuratorFixture();
+
+        session()->put('translate', true);
+
+        // The curator's target is English, and the English string is the AUTHORED one here.
+        // Legacy returned `name_en`, which is Hebrew - the reported bug.
+        $this->assertSame('en', $curator->displayLanguageCode());
+        $this->assertSame('Gemara Masechet Brachot', $event->nameInLanguage('en', $curator));
+        $this->assertSame('Weekly class', $event->shortDescriptionInLanguage('en', $curator));
+    }
+
+    public function test_calendar_events_endpoint_serves_each_language_without_a_session(): void
+    {
+        [$curator, , $event] = $this->createMismatchedCuratorFixture();
+
+        $start = \Carbon\Carbon::parse($event->starts_at);
+
+        $hebrew = $this->getJson(route('role.calendar_events', [
+            'subdomain' => $curator->subdomain, 'month' => $start->month, 'year' => $start->year, 'lang' => 'he',
+        ]))->assertOk()->json('events.0');
+
+        $this->assertSame('גמרא מסכת ברכות', $hebrew['name']);
+        $this->assertSame('rtl', $hebrew['dir']);
+
+        $english = $this->getJson(route('role.calendar_events', [
+            'subdomain' => $curator->subdomain, 'month' => $start->month, 'year' => $start->year, 'lang' => 'en',
+        ]))->assertOk()->json('events.0');
+
+        $this->assertSame('Gemara Masechet Brachot', $english['name']);
+        $this->assertSame('ltr', $english['dir'], 'direction follows the string actually chosen');
+    }
+
+    public function test_calendar_events_endpoint_does_not_write_the_translate_session(): void
+    {
+        [$curator, , $event] = $this->createMismatchedCuratorFixture();
+
+        $start = \Carbon\Carbon::parse($event->starts_at);
+
+        $this->getJson(route('role.calendar_events', [
+            'subdomain' => $curator->subdomain, 'month' => $start->month, 'year' => $start->year, 'lang' => 'en',
+        ]))->assertOk();
+
+        // A GET data endpoint must not flip the parent page's language.
+        $this->assertTrue(session()->missing('translate'));
+    }
+
+    public function test_calendar_events_endpoint_falls_back_to_the_translate_session_without_a_lang_param(): void
+    {
+        [$curator, , $event] = $this->createMismatchedCuratorFixture();
+
+        $start = \Carbon\Carbon::parse($event->starts_at);
+
+        // Already-cached JS that does not forward ?lang must keep working.
+        $this->withSession(['translate' => true])
+            ->getJson(route('role.calendar_events', [
+                'subdomain' => $curator->subdomain, 'month' => $start->month, 'year' => $start->year,
+            ]))
+            ->assertOk()
+            ->assertJsonPath('events.0.name', 'Gemara Masechet Brachot');
+    }
+
+    public function test_venue_name_follows_the_viewed_language_too(): void
+    {
+        [$curator, $venue, $event] = $this->createMismatchedCuratorFixture();
+
+        $venue->name = 'Torah Learning Center';
+        $venue->city = 'Pardes Hanna';
+        $venue->saveQuietly();
+        $venue->name_en = 'מרכז ללימוד תורה';
+        $venue->city_en = 'פרדס חנה';
+        $venue->saveQuietly();
+
+        $start = \Carbon\Carbon::parse($event->starts_at);
+
+        // The translate session is what production carries once the visitor has switched language,
+        // and it short-circuits showing_translation() to true for EVERY schedule regardless of its
+        // own target - which is how the en->he venue's Hebrew name reached the English view.
+        $this->withSession(['translate' => true])
+            ->getJson(route('role.calendar_events', [
+                'subdomain' => $curator->subdomain, 'month' => $start->month, 'year' => $start->year, 'lang' => 'en',
+            ]))->assertOk()->assertJsonPath('events.0.venue_name', 'Torah Learning Center | Pardes Hanna');
+
+        $this->withSession(['translate' => true])
+            ->getJson(route('role.calendar_events', [
+                'subdomain' => $curator->subdomain, 'month' => $start->month, 'year' => $start->year, 'lang' => 'he',
+            ]))->assertOk()->assertJsonPath('events.0.venue_name', 'מרכז ללימוד תורה | פרדס חנה');
+    }
+
+    public function test_calendar_events_endpoint_is_correct_with_a_stale_translate_session(): void
+    {
+        // Production state for the reported bug: the visitor switched to the target language, so
+        // the session flag is set AND ?lang rides along. Both must agree.
+        [$curator, , $event] = $this->createMismatchedCuratorFixture();
+
+        $start = \Carbon\Carbon::parse($event->starts_at);
+
+        $this->withSession(['translate' => true])
+            ->getJson(route('role.calendar_events', [
+                'subdomain' => $curator->subdomain, 'month' => $start->month, 'year' => $start->year, 'lang' => 'he',
+            ]))
+            ->assertOk()
+            ->assertJsonPath('events.0.name', 'גמרא מסכת ברכות')
+            ->assertJsonPath('events.0.dir', 'rtl');
+    }
+
+    private function setPivotTranslation(Event $event, Role $role, string $value): void
+    {
+        $pivot = \App\Models\EventRole::where('event_id', $event->id)->where('role_id', $role->id)->firstOrFail();
+        $pivot->name_translated = $value;
+        $pivot->save();
+
+        $event->load('roles');
+    }
+
+    public function test_curator_pivot_wins_only_for_the_curators_authored_language(): void
+    {
+        [$curator, , $event] = $this->createMismatchedCuratorFixture();
+
+        // The cron translates curator pivots into the curator's OWN authored language (Hebrew).
+        // Direct property assignment, like Translate.php: the column is not in EventRole::$fillable,
+        // so updateExistingPivot() would silently drop it.
+        $this->setPivotTranslation($event, $curator, 'גמרא (תרגום אוצר)');
+
+        $this->assertSame('גמרא (תרגום אוצר)', $event->nameInLanguage('he', $curator));
+        // Legacy used the pivot unconditionally, so the English view showed Hebrew even once the
+        // backlog filled. The pivot is not an English string and must not be served as one.
+        $this->assertSame('Gemara Masechet Brachot', $event->nameInLanguage('en', $curator));
+    }
+
+    public function test_empty_string_pivot_is_ignored(): void
+    {
+        [$curator, , $event] = $this->createMismatchedCuratorFixture();
+
+        // Translate.php writes '' as a "nothing to do" sentinel when source == target.
+        $this->setPivotTranslation($event, $curator, '');
+
+        $this->assertSame('גמרא מסכת ברכות', $event->nameInLanguage('he', $curator));
+    }
+
+    public function test_event_without_a_matching_language_falls_back_to_the_authored_original(): void
+    {
+        $user = $this->createOwner();
+
+        $curator = $this->createCurator($user, ['language_code' => 'he', 'translation_language_code' => 'en']);
+        $venue = $this->createRole($user, 'venue', ['language_code' => 'fr', 'translation_language_code' => 'de']);
+
+        $event = $this->createEvent($venue, ['name' => 'Concert de Noel', 'creator_role_id' => $venue->id]);
+        $event->name_en = 'Weihnachtskonzert';
+        $event->saveQuietly();
+        $event->roles()->attach($curator->id, ['is_accepted' => true]);
+        $event = $event->fresh();
+
+        // Neither stored string is Hebrew or English. The authored original beats surfacing the
+        // German one under an English label, which is what the legacy code did.
+        $this->assertSame('Concert de Noel', $event->nameInLanguage('he', $curator));
+        $this->assertSame('Concert de Noel', $event->nameInLanguage('en', $curator));
+    }
+
+    public function test_single_language_schedule_output_is_unchanged(): void
+    {
+        $user = $this->createOwner();
+        $venue = $this->createRole($user, 'venue', ['language_code' => 'he', 'translation_language_code' => 'en']);
+
+        $translated = $this->createEvent($venue, ['name' => 'מופע חורף', 'creator_role_id' => $venue->id]);
+        $translated->name_en = 'Winter Show';
+        $translated->saveQuietly();
+        $translated = $translated->fresh();
+
+        $untranslated = $this->createEvent($venue, ['name' => 'ערב שירה', 'creator_role_id' => $venue->id]);
+
+        foreach ([$translated, $untranslated] as $event) {
+            // Authored view.
+            $this->assertSame($event->translatedName(), $event->nameInLanguage('he', $venue));
+
+            // Translated view: compare against legacy under the session state legacy needs.
+            session()->put('translate', true);
+            $this->assertSame($event->translatedName(), $event->nameInLanguage('en', $venue));
+            session()->forget('translate');
+        }
+    }
+
+    public function test_calendar_events_endpoint_localizes_category_names(): void
+    {
+        $user = $this->createOwner();
+        $venue = $this->createRole($user, 'venue', ['language_code' => 'he', 'translation_language_code' => 'en']);
+
+        // category_id 1 is a system default ("Art & Culture"), translated through messages.*.
+        $event = $this->createEvent($venue, ['name' => 'מופע', 'category_id' => 1, 'creator_role_id' => $venue->id]);
+        $start = \Carbon\Carbon::parse($event->starts_at);
+
+        // No ?lang and no session: exactly what the old JS sent. The endpoint resolved no locale at
+        // all, so category names came back in the app default (English) on a Hebrew schedule.
+        $default = $this->getJson(route('role.calendar_events', [
+            'subdomain' => $venue->subdomain, 'month' => $start->month, 'year' => $start->year,
+        ]))->assertOk()->json('events.0.category_name');
+
+        $english = $this->getJson(route('role.calendar_events', [
+            'subdomain' => $venue->subdomain, 'month' => $start->month, 'year' => $start->year, 'lang' => 'en',
+        ]))->assertOk()->json('events.0.category_name');
+
+        $this->assertSame(__('messages.art_&_culture', [], 'he'), $default);
+        $this->assertSame(__('messages.art_&_culture', [], 'en'), $english);
+        $this->assertNotSame($default, $english);
+    }
+
+    public function test_event_part_uses_the_parent_events_language_pair(): void
+    {
+        [$curator, , $event] = $this->createMismatchedCuratorFixture();
+
+        $part = $event->parts()->create([
+            'name' => 'Opening Shiur',
+            'start_time' => '19:00',
+            'sort_order' => 0,
+        ]);
+        $part->name_en = 'שיעור פתיחה';
+        $part->saveQuietly();
+        $part = $part->fresh();
+
+        $target = $event->getTranslationLanguageCode();
+        $this->assertSame('he', $target);
+        $this->assertSame('שיעור פתיחה', $part->nameInLanguage('he', $target));
+        $this->assertSame('Opening Shiur', $part->nameInLanguage('en', $target));
+    }
+
+    public function test_guest_event_page_renders_the_viewed_language(): void
+    {
+        [$curator, , $event] = $this->createMismatchedCuratorFixture();
+
+        $url = route('event.view_guest', ['subdomain' => $curator->subdomain, 'slug' => $event->slug]);
+
+        // Default (Hebrew) view: the h1, <title> and og:title must all be Hebrew.
+        $this->get($url)
+            ->assertOk()
+            ->assertSee('גמרא מסכת ברכות', false)
+            ->assertDontSee('Gemara Masechet Brachot', false);
+
+        // Switching to the curator's target language sets the session and flips the whole page.
+        $this->get($url.'?lang=en')
+            ->assertOk()
+            ->assertSee('Gemara Masechet Brachot', false)
+            ->assertDontSee('גמרא מסכת ברכות', false);
+    }
+
+    public function test_guest_schedule_page_renders(): void
+    {
+        [$curator] = $this->createMismatchedCuratorFixture();
+
+        // The calendar itself is AJAX-rendered, but this guards the Blade edits around it.
+        $this->get(route('role.view_guest', ['subdomain' => $curator->subdomain]))->assertOk();
+        $this->get(route('role.view_guest', ['subdomain' => $curator->subdomain]).'?lang=en')->assertOk();
+    }
+
+    public function test_direction_follows_the_detected_script(): void
+    {
+        $user = $this->createOwner();
+        $venue = $this->createRole($user, 'venue', ['language_code' => 'he', 'translation_language_code' => 'en']);
+
+        // A Latin-script name on a Hebrew schedule reads left-to-right regardless of the label.
+        $event = $this->createEvent($venue, ['name' => 'Thriller Night', 'creator_role_id' => $venue->id]);
+        $start = \Carbon\Carbon::parse($event->starts_at);
+
+        $this->getJson(route('role.calendar_events', [
+            'subdomain' => $venue->subdomain, 'month' => $start->month, 'year' => $start->year, 'lang' => 'he',
+        ]))->assertOk()->assertJsonPath('events.0.dir', 'ltr');
+    }
 }

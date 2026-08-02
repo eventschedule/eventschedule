@@ -71,6 +71,26 @@ class EventPart extends Model
         return $value;
     }
 
+    /**
+     * A part's `_en` value is in the parent EVENT's target language - EventPart has no language
+     * columns of its own - so the caller passes that target in. Selecting by language rather than
+     * by a "showing translation" boolean keeps agenda rows in step with the event name above them
+     * on a curator page; see Event::textInLanguage() for why the boolean inverts there.
+     */
+    public function nameInLanguage(string $want, ?string $eventTargetLang): string
+    {
+        $value = ($this->name_en && $eventTargetLang === $want) ? $this->name_en : $this->name;
+
+        return str_ireplace('fuck', 'F@#%', (string) $value);
+    }
+
+    public function descriptionHtmlInLanguage(string $want, ?string $eventTargetLang): ?string
+    {
+        return ($this->description_html_en && $eventTargetLang === $want)
+            ? $this->description_html_en
+            : $this->description_html;
+    }
+
     public function event()
     {
         return $this->belongsTo(Event::class);

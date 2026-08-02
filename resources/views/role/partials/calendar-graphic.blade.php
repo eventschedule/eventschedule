@@ -1,3 +1,4 @@
+@php $graphicLang = $role->displayLanguageCode(); @endphp
 <div class="min-h-screen p-8">
     <div class="max-w-7xl mx-auto">
 
@@ -28,7 +29,7 @@
                         <!-- Event Image Section -->
                         <div class="w-52 h-52 flex-shrink-0 relative overflow-hidden">
                             <img src="{{ $event->getImageUrl() }}" 
-                                 alt="{{ $event->translatedName() }}" 
+                                 alt="{{ $event->nameInLanguage($graphicLang, $role ?? null) }}" 
                                  class="w-full h-full object-cover object-center">
                             <!-- Gradient Overlay -->
                             <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
@@ -41,9 +42,9 @@
                                 <!-- Event Name -->
                                 <div class="pt-1">
                                     <h3 class="text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight truncate" 
-                                        title="{{ $event->translatedName() }}"
+                                        title="{{ $event->nameInLanguage($graphicLang, $role ?? null) }}"
                                         dir="auto">
-                                        <x-user-text>{{ $event->translatedName() }}</x-user-text>
+                                        <x-user-text>{{ $event->nameInLanguage($graphicLang, $role ?? null) }}</x-user-text>
                                     </h3>
                                 </div>
 

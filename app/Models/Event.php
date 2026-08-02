@@ -1802,10 +1802,22 @@ class Event extends Model
         return null;
     }
 
+    /**
+     * Memoized: the resolver below asks for these once per field per event, and both walk the
+     * `venue` accessor and the `roles` collection.
+     */
+    protected ?string $languageCodeCache = null;
+
+    protected ?string $translationLanguageCodeCache = null;
+
     public function getLanguageCode()
     {
+        if ($this->languageCodeCache !== null) {
+            return $this->languageCodeCache;
+        }
+
         if ($this->venue && $this->venue->language_code) {
-            return $this->venue->language_code;
+            return $this->languageCodeCache = $this->venue->language_code;
         }
 
         $lang = 'en';
@@ -1817,7 +1829,7 @@ class Event extends Model
             }
         }
 
-        return $lang;
+        return $this->languageCodeCache = $lang;
     }
 
     /**
@@ -1827,8 +1839,12 @@ class Event extends Model
      */
     public function getTranslationLanguageCode()
     {
+        if ($this->translationLanguageCodeCache !== null) {
+            return $this->translationLanguageCodeCache;
+        }
+
         if ($this->venue && $this->venue->translation_language_code) {
-            return $this->venue->translation_language_code;
+            return $this->translationLanguageCodeCache = $this->venue->translation_language_code;
         }
 
         $lang = 'en';
@@ -1840,13 +1856,13 @@ class Event extends Model
             }
         }
 
-        return $lang;
+        return $this->translationLanguageCodeCache = $lang;
     }
 
-    public function getVenueDisplayName($translate = true)
+    public function getVenueDisplayName($translate = true, ?string $want = null)
     {
         if ($this->venue) {
-            return $this->venue->shortVenue($translate);
+            return $this->venue->shortVenue($translate, false, $want);
         }
 
         return $this->getEventUrlDomain();
@@ -2091,17 +2107,25 @@ class Event extends Model
         return str_replace([':role', ':venue'], [$this->name, $this->venue ? $this->venue->getDisplayName() : $this->getEventUrlDomain()], $title);
     }
 
-    public function getMetaDescription($date = null)
+    /**
+     * $want/$viewingRole let the guest layout resolve by language instead of by the translate
+     * boolean; omitting them keeps the legacy behavior for any caller without a viewing schedule.
+     */
+    public function getMetaDescription($date = null, ?string $want = null, ?Role $viewingRole = null)
     {
         if ($this->short_description) {
-            return \Illuminate\Support\Str::limit($this->translatedShortDescription(), 155);
+            $short = $want ? $this->shortDescriptionInLanguage($want, $viewingRole) : $this->translatedShortDescription();
+
+            return \Illuminate\Support\Str::limit($short, 155);
         }
 
         if ($this->description_html) {
-            return \Illuminate\Support\Str::limit(trim(strip_tags($this->translatedDescription())), 155);
+            $html = $want ? $this->descriptionHtmlInLanguage($want, $viewingRole) : $this->translatedDescription();
+
+            return \Illuminate\Support\Str::limit(trim(strip_tags($html)), 155);
         }
 
-        $str = $this->translatedName();
+        $str = $want ? $this->nameInLanguage($want, $viewingRole) : $this->translatedName();
 
         if ($this->venue) {
             $str .= ' '.__('messages.at').' '.$this->venue->getDisplayName();
@@ -2437,6 +2461,63 @@ class Event extends Model
         }
 
         return $value;
+    }
+
+    /**
+     * The best stored text for `$field` in the language `$want`, for a guest viewing this event on
+     * `$viewingRole`'s page.
+     *
+     * translatedName() and friends answer "show the translation, yes or no", which only works while
+     * the event's language pair matches the viewing schedule's. On a curator aggregating other
+     * schedules' events it does not: `name` is in the EVENT's authored language (the venue's, via
+     * getLanguageCode()) and `name_en` is in the EVENT's target (getTranslationLanguageCode()), so a
+     * `he`->`en` curator showing an `en`->`he` venue's event served Hebrew to the English view and
+     * English to the Hebrew view. Naming the language instead of a direction is correct either way,
+     * and needs no new columns: for the mismatched case both strings are already stored, just under
+     * the labels the other schedule assigned them.
+     *
+     * Resolution order, first hit wins:
+     *   1. the curator pivot, which holds the translation into the curator's OWN authored language
+     *   2. `{$field}_en`, when the event's target language is what we want
+     *   3. `{$field}` - either it is already the language we want, or nothing stored is, and the
+     *      authored original beats surfacing a surprise third language
+     */
+    public function textInLanguage(string $field, string $want, ?Role $viewingRole = null): ?string
+    {
+        $authored = $this->{$field};
+
+        if ($viewingRole && $viewingRole->isCurator() && $viewingRole->language_code === $want) {
+            $pivot = $this->roles->where('id', $viewingRole->id)->first()?->pivot;
+            // description resolves to description_html_translated: the callers of the description
+            // wrapper render HTML, and the pivot stores both the source and the derived HTML.
+            $pivotField = $field === 'description_html' ? 'description_html_translated' : $field.'_translated';
+            if ($pivot && ! empty($pivot->{$pivotField})) {
+                return $pivot->{$pivotField};
+            }
+        }
+
+        $translated = $this->{$field === 'description_html' ? 'description_html_en' : $field.'_en'};
+
+        if ($translated && $this->getTranslationLanguageCode() === $want) {
+            return $translated;
+        }
+
+        return $authored;
+    }
+
+    public function nameInLanguage(string $want, ?Role $viewingRole = null): string
+    {
+        return str_ireplace('fuck', 'F@#%', (string) $this->textInLanguage('name', $want, $viewingRole));
+    }
+
+    public function shortDescriptionInLanguage(string $want, ?Role $viewingRole = null): ?string
+    {
+        return $this->textInLanguage('short_description', $want, $viewingRole);
+    }
+
+    public function descriptionHtmlInLanguage(string $want, ?Role $viewingRole = null): ?string
+    {
+        return $this->textInLanguage('description_html', $want, $viewingRole);
     }
 
     public function englishName()

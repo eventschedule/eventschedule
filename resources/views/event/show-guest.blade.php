@@ -21,6 +21,15 @@
     @php
     $eventRole = $event->roles->where('id', $role->id)->first();
     $eventIsAccepted = $eventRole->pivot->is_accepted;
+
+    // Resolve every piece of event text once, against the language the visitor is reading. An
+    // aggregated event stores its two languages under the VENUE's labels, which need not match
+    // this schedule's, so "show the translation" is the wrong question - see Event::textInLanguage().
+    $displayLang = $role->displayLanguageCode();
+    $eventName = $event->nameInLanguage($displayLang, $role);
+    $eventShortDescription = $event->shortDescriptionInLanguage($displayLang, $role);
+    $eventDescriptionHtml = $event->descriptionHtmlInLanguage($displayLang, $role);
+    $eventTargetLang = $event->getTranslationLanguageCode();
     @endphp
 
     @php
@@ -144,7 +153,7 @@
         @if ($fallbackImage)
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
             <img src="{{ $fallbackImage }}"
-                 alt="{{ $event->translatedName() }}"
+                 alt="{{ $eventName }}"
                  class="w-full aspect-square object-cover"
                  fetchpriority="high"/>
         </div>
@@ -161,10 +170,10 @@
             @if ($each->header_image && ! in_array($each->header_image, ['none', 'logos'], true))
               <picture>
                 <source srcset="{{ asset('images/headers') }}/{{ $each->header_image }}.webp" type="image/webp">
-                <img class="block max-h-40 w-full object-cover" src="{{ asset('images/headers') }}/{{ $each->header_image }}.png" alt="{{ $each->translatedName() }}"/>
+                <img class="block max-h-40 w-full object-cover" src="{{ asset('images/headers') }}/{{ $each->header_image }}.png" alt="{{ $each->nameInLanguage($displayLang) }}"/>
               </picture>
             @elseif ($each->header_image_url)
-              <img class="block max-h-40 w-full object-cover" src="{{ $each->header_image_url }}" alt="{{ $each->translatedName() }}"/>
+              <img class="block max-h-40 w-full object-cover" src="{{ $each->header_image_url }}" alt="{{ $each->nameInLanguage($displayLang) }}"/>
             @endif
             <div class="px-5 pb-5">
               {{-- Profile image overlapping header --}}
@@ -192,10 +201,10 @@
                       }
                     @endphp
                     <a href="{{ $talentUrl }}">
-                      <img src="{{ $each->profile_image_url }}" alt="{{ $each->translatedName() }}" class="rounded-lg w-full h-full object-cover"/>
+                      <img src="{{ $each->profile_image_url }}" alt="{{ $each->nameInLanguage($displayLang) }}" class="rounded-lg w-full h-full object-cover"/>
                     </a>
                   @else
-                    <img src="{{ $each->profile_image_url }}" alt="{{ $each->translatedName() }}" class="rounded-lg w-full h-full object-cover"/>
+                    <img src="{{ $each->profile_image_url }}" alt="{{ $each->nameInLanguage($displayLang) }}" class="rounded-lg w-full h-full object-cover"/>
                   @endif
                 </div>
               @else
@@ -227,10 +236,10 @@
                     }
                   @endphp
                   <a href="{{ $talentUrl }}">
-                    <img src="{{ $each->profile_image_url }}" alt="{{ $each->translatedName() }}" class="w-full aspect-square object-cover rounded-xl mb-4"/>
+                    <img src="{{ $each->profile_image_url }}" alt="{{ $each->nameInLanguage($displayLang) }}" class="w-full aspect-square object-cover rounded-xl mb-4"/>
                   </a>
                 @else
-                  <img src="{{ $each->profile_image_url }}" alt="{{ $each->translatedName() }}" class="w-full aspect-square object-cover rounded-xl mb-4"/>
+                  <img src="{{ $each->profile_image_url }}" alt="{{ $each->nameInLanguage($displayLang) }}" class="w-full aspect-square object-cover rounded-xl mb-4"/>
                 @endif
               @endif
           @endif
@@ -262,17 +271,17 @@
                           }
                         @endphp
                       @endif
-                      <a href="{{ $talentUrl }}" class="group inline {{ $role->isRtl() ? 'rtl' : '' }}" dir="{{ content_dir($each, showing_translation($role) && (bool)$each->name_en) }}">
+                      <a href="{{ $talentUrl }}" class="group inline {{ $role->isRtl() ? 'rtl' : '' }}" dir="{{ content_dir_for_language($each->nameInLanguage($displayLang), $displayLang) }}">
                         <span class="inline text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:underline" style="font-family: '{{ str_replace('_', ' ', $each->font_family) }}', sans-serif;">
-                          {!! str_replace(' , ', '<br>', e($each->translatedName())) !!}
+                          {!! str_replace(' , ', '<br>', e($each->nameInLanguage($displayLang))) !!}
                           <svg class="inline-block w-5 h-5 {{ $role->isRtl() ? 'ms-1 scale-x-[-1]' : 'ms-1' }} align-text-bottom fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
                           </svg>
                         </span>
                       </a>
                     @else
-                      <p class="text-lg font-semibold text-gray-900 dark:text-gray-100" style="font-family: '{{ str_replace('_', ' ', $otherRole->font_family ?? 'sans-serif') }}', sans-serif;" dir="{{ content_dir($each, showing_translation($role) && (bool)$each->name_en) }}">
-                        {!! str_replace(' , ', '<br>', e($each->translatedName())) !!}
+                      <p class="text-lg font-semibold text-gray-900 dark:text-gray-100" style="font-family: '{{ str_replace('_', ' ', $otherRole->font_family ?? 'sans-serif') }}', sans-serif;" dir="{{ content_dir_for_language($each->nameInLanguage($displayLang), $displayLang) }}">
+                        {!! str_replace(' , ', '<br>', e($each->nameInLanguage($displayLang))) !!}
                       </p>
                     @endif
                   </div>
@@ -343,7 +352,7 @@
                   @endphp
                   @foreach ($sidebarVideoLinks as $sLink)
                       <div class="rounded-lg overflow-hidden">
-                        <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($sLink->url) }}" title="{{ $each->translatedName() }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                        <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($sLink->url) }}" title="{{ $each->nameInLanguage($displayLang) }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                       </div>
                   @endforeach
                 @endif
@@ -364,20 +373,20 @@
               @if ($event->venue->header_image && ! in_array($event->venue->header_image, ['none', 'logos'], true))
                 <picture>
                   <source srcset="{{ asset('images/headers') }}/{{ $event->venue->header_image }}.webp" type="image/webp">
-                  <img class="block max-h-40 w-full object-cover" src="{{ asset('images/headers') }}/{{ $event->venue->header_image }}.png" alt="{{ $event->venue->translatedName() }}" loading="lazy" decoding="async"/>
+                  <img class="block max-h-40 w-full object-cover" src="{{ asset('images/headers') }}/{{ $event->venue->header_image }}.png" alt="{{ $event->venue->nameInLanguage($displayLang) }}" loading="lazy" decoding="async"/>
                 </picture>
               @elseif ($event->venue->header_image_url)
-                <img class="block max-h-40 w-full object-cover" src="{{ $event->venue->header_image_url }}" alt="{{ $event->venue->translatedName() }}" loading="lazy" decoding="async"/>
+                <img class="block max-h-40 w-full object-cover" src="{{ $event->venue->header_image_url }}" alt="{{ $event->venue->nameInLanguage($displayLang) }}" loading="lazy" decoding="async"/>
               @endif
             </div>
           @endif
           <div class="p-5 relative z-10">
             @if ($event->venue->profile_image_url && $hasVenueHeader)
               <div class="rounded-lg w-[100px] h-[100px] -mt-[60px] bg-white/95 dark:bg-gray-900/95 flex items-center justify-center mb-3">
-                <img class="rounded-md w-[90px] h-[90px] object-cover" src="{{ $event->venue->profile_image_url }}" alt="{{ $event->venue->translatedName() }}" loading="lazy" decoding="async"/>
+                <img class="rounded-md w-[90px] h-[90px] object-cover" src="{{ $event->venue->profile_image_url }}" alt="{{ $event->venue->nameInLanguage($displayLang) }}" loading="lazy" decoding="async"/>
               </div>
             @elseif ($event->venue->profile_image_url)
-              <img class="w-full aspect-square object-cover rounded-xl mb-3" src="{{ $event->venue->profile_image_url }}" alt="{{ $event->venue->translatedName() }}" loading="lazy" decoding="async"/>
+              <img class="w-full aspect-square object-cover rounded-xl mb-3" src="{{ $event->venue->profile_image_url }}" alt="{{ $event->venue->nameInLanguage($displayLang) }}" loading="lazy" decoding="async"/>
             @endif
             <div class="flex flex-col gap-2">
               @if ($event->venue->name)
@@ -387,7 +396,7 @@
                   @endphp
                   <a href="{{ $venuePanelUrl }}" class="group inline-flex items-center gap-2 w-fit hover:opacity-80 transition-opacity duration-200 {{ $role->isRtl() ? 'rtl' : '' }}">
                     <span class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100 group-hover:underline" style="font-family: '{{ str_replace('_', ' ', $event->venue->font_family) }}', sans-serif;">
-                      {{ $event->venue->translatedName() }}
+                      {{ $event->venue->nameInLanguage($displayLang) }}
                     </span>
                     <svg class="w-5 h-5 fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" viewBox="0 0 24 24" aria-hidden="true">
                       <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
@@ -395,7 +404,7 @@
                   </a>
                 @else
                   <p class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100" style="font-family: '{{ str_replace('_', ' ', $event->venue->font_family) }}', sans-serif;">
-                    {{ $event->venue->translatedName() }}
+                    {{ $event->venue->nameInLanguage($displayLang) }}
                   </p>
                 @endif
               @else
@@ -403,14 +412,14 @@
                   {{ $event->venue->shortAddress() }}
                 </p>
               @endif
-              @if ($event->venue->translatedDescription())
-                @php $venueDir = content_dir($event->venue, false, $event->venue->translatedDescription()); @endphp
+              @if ($event->venue->textInLanguage("description_html", $displayLang))
+                @php $venueDir = content_dir_for_language($event->venue->textInLanguage("description_html", $displayLang), $displayLang); @endphp
                 <div x-data="{ expanded: false, needsExpand: false }" x-init="$nextTick(() => { let el = $refs.collapsed; needsExpand = el.scrollHeight > el.clientHeight })">
                   <div x-show="!expanded" x-ref="collapsed" class="text-sm text-gray-700 dark:text-gray-300 line-clamp-3 custom-content {{ $venueDir === 'rtl' ? 'rtl' : '' }}" dir="{{ $venueDir }}">
-                    {!! \App\Utils\UrlUtils::convertUrlsToLinks($event->venue->translatedDescription()) !!}
+                    {!! \App\Utils\UrlUtils::convertUrlsToLinks($event->venue->textInLanguage("description_html", $displayLang)) !!}
                   </div>
                   <div x-show="expanded" x-cloak class="text-sm text-gray-700 dark:text-gray-300 custom-content {{ $venueDir === 'rtl' ? 'rtl' : '' }}" dir="{{ $venueDir }}">
-                    {!! \App\Utils\UrlUtils::convertUrlsToLinks($event->venue->translatedDescription()) !!}
+                    {!! \App\Utils\UrlUtils::convertUrlsToLinks($event->venue->textInLanguage("description_html", $displayLang)) !!}
                   </div>
                   <button x-show="!expanded && needsExpand" :aria-expanded="expanded" @click="expanded = true" class="text-sm font-medium hover:underline mt-1 text-blue-600 dark:text-blue-400">
                     {{ $role->customLabel('read_more') }}
@@ -519,7 +528,7 @@
                 width="100%" height="200" style="border:0"
                 loading="lazy" allowfullscreen
                 referrerpolicy="no-referrer-when-downgrade"
-                title="{{ __('messages.map_of_venue', ['venue' => $event->venue->translatedName()]) }}"
+                title="{{ __('messages.map_of_venue', ['venue' => $event->venue->nameInLanguage($displayLang)]) }}"
                 src="https://www.google.com/maps/embed/v1/place?key={{ config('services.google.maps') }}&q={{ $event->venue->google_place_id ? 'place_id:' . $event->venue->google_place_id : urlencode($event->venue->bestAddress()) }}">
             </iframe>
           </div>
@@ -659,27 +668,24 @@
 
         @php
             $translateMode = showing_translation($role);
-            // When a curator translation is shown, its own role's language governs
-            // direction; otherwise the event's schedule does.
-            $contentRole = ($translation && $translation->role) ? $translation->role : $role;
         @endphp
 
         {{-- Event title --}}
         <h1
           class="text-gray-900 dark:text-gray-100 text-[28px] sm:text-[36px] lg:text-[44px] leading-snug font-bold {{ $role->isRtl() ? 'rtl text-right' : '' }}"
-          dir="{{ content_dir($contentRole, !$translation && $translateMode && (bool)$event->name_en) }}"
+          dir="{{ content_dir_for_language($eventName, $displayLang) }}"
         >
-          {!! str_replace(' , ', '<br>', e($translation ? $translation->name_translated : $event->translatedName())) !!}
+          {!! str_replace(' , ', '<br>', e($eventName)) !!}
           @if ($event->isPasswordProtected())
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline-block w-8 h-8 text-gray-400 ms-2 align-[-0.15em]"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
           @endif
         </h1>
 
         {{-- Short description --}}
-        @if ($event->short_description)
+        @if ($eventShortDescription)
         <p class="text-gray-600 dark:text-gray-400 text-lg mt-2 {{ $role->isRtl() ? 'rtl text-right' : '' }}"
-          dir="{{ content_dir($contentRole, !$translation && $translateMode && (bool)$event->short_description_en) }}">
-          {{ $translation && $translation->short_description_translated ? $translation->short_description_translated : $event->translatedShortDescription() }}
+          dir="{{ content_dir_for_language($eventShortDescription, $displayLang) }}">
+          {{ $eventShortDescription }}
         </p>
         @endif
 
@@ -753,7 +759,7 @@
             <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900
                         flex items-center justify-center shadow-sm">
               @if ($event->venue && $event->venue->profile_image_url)
-                <img src="{{ $event->venue->profile_image_url }}" alt="{{ $event->venue->translatedName() }}" class="w-11 h-11 rounded-lg object-cover" loading="lazy" decoding="async">
+                <img src="{{ $event->venue->profile_image_url }}" alt="{{ $event->venue->nameInLanguage($displayLang) }}" class="w-11 h-11 rounded-lg object-cover" loading="lazy" decoding="async">
               @else
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
                   <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
@@ -762,7 +768,7 @@
             </div>
             <div class="flex flex-col">
               <span>
-                @if ($event->venue && $event->venue->translatedName())
+                @if ($event->venue && $event->venue->nameInLanguage($displayLang))
                   @if ($event->venue->isClaimed())
                     @php
                       $venueUrl = route('role.view_guest', ['subdomain' => $event->venue->subdomain]);
@@ -785,13 +791,13 @@
                       }
                     @endphp
                     <a href="{{ $venueUrl }}" class="group inline-flex items-center gap-1 w-fit">
-                      <span dir="{{ content_dir($event->venue, $translateMode && (bool)$event->venue->name_en) }}" class="text-lg font-semibold text-gray-900 dark:text-white group-hover:underline">{!! str_replace(' , ', '<br>', e($event->venue->translatedName())) !!}</span>
+                      <span dir="{{ content_dir_for_language($event->venue->nameInLanguage($displayLang), $displayLang) }}" class="text-lg font-semibold text-gray-900 dark:text-white group-hover:underline">{!! str_replace(' , ', '<br>', e($event->venue->nameInLanguage($displayLang))) !!}</span>
                       <svg class="w-5 h-5 fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
                       </svg>
                     </a>
                   @else
-                    <span dir="{{ content_dir($event->venue, $translateMode && (bool)$event->venue->name_en) }}" class="text-lg font-semibold text-gray-900 dark:text-white">{!! str_replace(' , ', '<br>', e($event->venue->translatedName())) !!}</span>
+                    <span dir="{{ content_dir_for_language($event->venue->nameInLanguage($displayLang), $displayLang) }}" class="text-lg font-semibold text-gray-900 dark:text-white">{!! str_replace(' , ', '<br>', e($event->venue->nameInLanguage($displayLang))) !!}</span>
                   @endif
                 @else
                   <span class="text-lg font-semibold text-gray-900 dark:text-white">{{ $event->getEventUrlDomain() }}</span>
@@ -991,7 +997,7 @@
         {{-- Share button --}}
         @if (!$event->is_draft)
         <button type="button"
-                data-share-title="{{ $event->translatedName() }}"
+                data-share-title="{{ $eventName }}"
                 @click="
                   if (shareState !== 'idle') return;
                   if (navigator.share) {
@@ -1201,24 +1207,24 @@
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden"
              x-data="{ flyerOpen: false }"
              @keydown.escape.window="if (flyerOpen) { flyerOpen = false; document.body.style.overflow = ''; }">
-          <img src="{{ $event->flyer_image_url }}" alt="{{ $translation ? $translation->name_translated : $event->translatedName() }} - {{ __('messages.flyer') }}" class="w-full cursor-pointer" loading="lazy" decoding="async" @click="flyerOpen = true; document.body.style.overflow = 'hidden'"/>
+          <img src="{{ $event->flyer_image_url }}" alt="{{ $eventName }} - {{ __('messages.flyer') }}" class="w-full cursor-pointer" loading="lazy" decoding="async" @click="flyerOpen = true; document.body.style.overflow = 'hidden'"/>
           <template x-teleport="body">
             <div x-show="flyerOpen" x-cloak
                  @click.self="flyerOpen = false; document.body.style.overflow = ''"
                  class="fixed inset-0 z-[70] flex items-center justify-center bg-black/90"
                  style="font-family: sans-serif">
               <button @click="flyerOpen = false; document.body.style.overflow = ''" class="absolute top-3 {{ $role->isRtl() ? 'left-3' : 'right-3' }} text-white/80 hover:text-white text-4xl leading-none z-10 w-10 h-10 flex items-center justify-center">&times;</button>
-              <img src="{{ $event->flyer_image_url }}" class="max-w-[96vw] max-h-[90vh] object-contain pointer-events-none" alt="{{ $translation ? $translation->name_translated : $event->translatedName() }} - {{ __('messages.flyer') }}">
+              <img src="{{ $event->flyer_image_url }}" class="max-w-[96vw] max-h-[90vh] object-contain pointer-events-none" alt="{{ $eventName }} - {{ __('messages.flyer') }}">
             </div>
           </template>
         </div>
         @endif
 
         {{-- Description --}}
-        @if ($translation ? $translation->description_translated : $event->translatedDescription())
+        @if ($eventDescriptionHtml)
         @php
-          $descriptionHtml = $translation ? ($translation->description_html_translated ?: $translation->description_translated) : $event->translatedDescription();
-          $descriptionDir = content_dir($contentRole, !$translation && $translateMode && (bool)$event->description_html_en, $descriptionHtml);
+          $descriptionHtml = $eventDescriptionHtml;
+          $descriptionDir = content_dir_for_language($descriptionHtml, $displayLang);
         @endphp
         <article class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8">
           <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">
@@ -1236,7 +1242,7 @@
         @if ($event->agenda_image_url)
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
           <img src="{{ $event->agenda_image_url }}"
-            alt="{{ $translation ? $translation->name_translated : $event->translatedName() }} - {{ $role->customLabel('agenda') }}"
+            alt="{{ $eventName }} - {{ $role->customLabel('agenda') }}"
             class="w-full" loading="lazy" decoding="async"/>
         </div>
         @endif
@@ -1260,9 +1266,9 @@
                     {{ $part->start_time }}@if ($part->end_time) - {{ $part->end_time }}@endif
                   </span>
                   @endif
-                  <span dir="{{ content_dir($role, $translateMode && (bool)$part->name_en) }}" class="text-gray-900 dark:text-gray-100 font-medium">{!! str_replace(' , ', '<br>', e($part->translatedName())) !!}</span>
-                  @if ($part->translatedDescription())
-                  <div dir="{{ content_dir($role, $translateMode && (bool)$part->description_html_en, $part->translatedDescription()) }}" class="text-sm text-gray-500 dark:text-gray-400 mt-0.5 prose prose-sm dark:prose-invert max-w-none">{!! $part->translatedDescription() !!}</div>
+                  <span dir="{{ content_dir_for_language($part->nameInLanguage($displayLang, $eventTargetLang), $displayLang) }}" class="text-gray-900 dark:text-gray-100 font-medium">{!! str_replace(' , ', '<br>', e($part->nameInLanguage($displayLang, $eventTargetLang))) !!}</span>
+                  @if ($part->descriptionHtmlInLanguage($displayLang, $eventTargetLang))
+                  <div dir="{{ content_dir_for_language($part->descriptionHtmlInLanguage($displayLang, $eventTargetLang), $displayLang) }}" class="text-sm text-gray-500 dark:text-gray-400 mt-0.5 prose prose-sm dark:prose-invert max-w-none">{!! $part->descriptionHtmlInLanguage($displayLang, $eventTargetLang) !!}</div>
                   @endif
                   @if (!is_demo_role($role))
                   @php
@@ -1280,7 +1286,7 @@
                     @foreach ($partVideos as $video)
                     <div>
                       <div class="rounded-lg overflow-hidden">
-                        <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $part->translatedName() }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                        <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $part->nameInLanguage($displayLang, $eventTargetLang) }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                       </div>
                       <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $video->submitterName() }}</p>
                     </div>
@@ -1292,7 +1298,7 @@
                     @foreach ($partPhotos as $photo)
                     <div class="flex flex-col">
                       <button x-data @click="$dispatch('open-lightbox', { url: '{{ $photo->photo_url }}' })" class="block rounded-lg overflow-hidden max-w-full cursor-pointer hover:opacity-90 transition-opacity">
-                        <img src="{{ $photo->photo_url }}" alt="{{ $part->translatedName() }}" class="h-24 w-auto max-w-full rounded-lg object-cover" loading="lazy">
+                        <img src="{{ $photo->photo_url }}" alt="{{ $part->nameInLanguage($displayLang, $eventTargetLang) }}" class="h-24 w-auto max-w-full rounded-lg object-cover" loading="lazy">
                       </button>
                       <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $photo->submitterName() }}</p>
                     </div>
@@ -1322,7 +1328,7 @@
                   <div class="mt-2 space-y-2 opacity-60">
                     @foreach ($myPartPendingVideos as $video)
                     <div id="pending-video-{{ $video->id }}" class="rounded-lg overflow-hidden relative">
-                      <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $part->translatedName() }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                      <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $part->nameInLanguage($displayLang, $eventTargetLang) }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                       <span class="absolute top-2 {{ $role->isRtl() ? 'left-2' : 'right-2' }} inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
                     </div>
                     @endforeach
@@ -1332,7 +1338,7 @@
                   <div class="mt-2 flex flex-wrap gap-2 opacity-60">
                     @foreach ($myPartPendingPhotos as $photo)
                     <div id="pending-photo-{{ $photo->id }}" class="relative rounded-lg overflow-hidden flex-shrink-0">
-                      <img src="{{ $photo->photo_url }}" alt="{{ $part->translatedName() }}" class="h-24 w-auto rounded-lg object-cover" loading="lazy">
+                      <img src="{{ $photo->photo_url }}" alt="{{ $part->nameInLanguage($displayLang, $eventTargetLang) }}" class="h-24 w-auto rounded-lg object-cover" loading="lazy">
                       <span class="absolute top-1 {{ $role->isRtl() ? 'left-1' : 'right-1' }} inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
                     </div>
                     @endforeach
@@ -1454,9 +1460,9 @@
               <div class="flex items-start gap-3 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 {{ $role->isRtl() ? 'rtl' : '' }}">
                 <span class="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style="background-color: {{ $accentColor }};">{{ $index + 1 }}</span>
                 <div class="flex-1">
-                  <span dir="{{ content_dir($role, $translateMode && (bool)$part->name_en) }}" class="text-gray-900 dark:text-gray-100 font-medium">{!! str_replace(' , ', '<br>', e($part->translatedName())) !!}</span>
-                  @if ($part->translatedDescription())
-                  <div dir="{{ content_dir($role, $translateMode && (bool)$part->description_html_en, $part->translatedDescription()) }}" class="text-sm text-gray-500 dark:text-gray-400 block mt-0.5 prose prose-sm dark:prose-invert max-w-none">{!! $part->translatedDescription() !!}</div>
+                  <span dir="{{ content_dir_for_language($part->nameInLanguage($displayLang, $eventTargetLang), $displayLang) }}" class="text-gray-900 dark:text-gray-100 font-medium">{!! str_replace(' , ', '<br>', e($part->nameInLanguage($displayLang, $eventTargetLang))) !!}</span>
+                  @if ($part->descriptionHtmlInLanguage($displayLang, $eventTargetLang))
+                  <div dir="{{ content_dir_for_language($part->descriptionHtmlInLanguage($displayLang, $eventTargetLang), $displayLang) }}" class="text-sm text-gray-500 dark:text-gray-400 block mt-0.5 prose prose-sm dark:prose-invert max-w-none">{!! $part->descriptionHtmlInLanguage($displayLang, $eventTargetLang) !!}</div>
                   @endif
                   @if (!is_demo_role($role))
                   @php
@@ -1474,7 +1480,7 @@
                     @foreach ($partVideos as $video)
                     <div>
                       <div class="rounded-lg overflow-hidden">
-                        <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $part->translatedName() }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                        <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $part->nameInLanguage($displayLang, $eventTargetLang) }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                       </div>
                       <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $video->submitterName() }}</p>
                     </div>
@@ -1486,7 +1492,7 @@
                     @foreach ($partPhotos as $photo)
                     <div class="flex flex-col">
                       <button x-data @click="$dispatch('open-lightbox', { url: '{{ $photo->photo_url }}' })" class="block rounded-lg overflow-hidden max-w-full cursor-pointer hover:opacity-90 transition-opacity">
-                        <img src="{{ $photo->photo_url }}" alt="{{ $part->translatedName() }}" class="h-24 w-auto max-w-full rounded-lg object-cover" loading="lazy">
+                        <img src="{{ $photo->photo_url }}" alt="{{ $part->nameInLanguage($displayLang, $eventTargetLang) }}" class="h-24 w-auto max-w-full rounded-lg object-cover" loading="lazy">
                       </button>
                       <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $photo->submitterName() }}</p>
                     </div>
@@ -1516,7 +1522,7 @@
                   <div class="mt-2 space-y-2 opacity-60">
                     @foreach ($myPartPendingVideos as $video)
                     <div id="pending-video-{{ $video->id }}" class="rounded-lg overflow-hidden relative">
-                      <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $part->translatedName() }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                      <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $part->nameInLanguage($displayLang, $eventTargetLang) }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                       <span class="absolute top-2 {{ $role->isRtl() ? 'left-2' : 'right-2' }} inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
                     </div>
                     @endforeach
@@ -1526,7 +1532,7 @@
                   <div class="mt-2 flex flex-wrap gap-2 opacity-60">
                     @foreach ($myPartPendingPhotos as $photo)
                     <div id="pending-photo-{{ $photo->id }}" class="relative rounded-lg overflow-hidden flex-shrink-0">
-                      <img src="{{ $photo->photo_url }}" alt="{{ $part->translatedName() }}" class="h-24 w-auto rounded-lg object-cover" loading="lazy">
+                      <img src="{{ $photo->photo_url }}" alt="{{ $part->nameInLanguage($displayLang, $eventTargetLang) }}" class="h-24 w-auto rounded-lg object-cover" loading="lazy">
                       <span class="absolute top-1 {{ $role->isRtl() ? 'left-1' : 'right-1' }} inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
                     </div>
                     @endforeach
@@ -1823,7 +1829,7 @@
             @foreach ($eventLevelVideos as $video)
             <div>
               <div class="rounded-lg overflow-hidden">
-                <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $event->translatedName() }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $eventName }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
               </div>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $video->submitterName() }}</p>
             </div>
@@ -1835,7 +1841,7 @@
             @foreach ($eventLevelPhotos as $photo)
             <div class="flex flex-col">
               <button x-data @click="$dispatch('open-lightbox', { url: '{{ $photo->photo_url }}' })" class="block rounded-lg overflow-hidden max-w-full cursor-pointer hover:opacity-90 transition-opacity">
-                <img src="{{ $photo->photo_url }}" alt="{{ $event->translatedName() }}" class="h-32 sm:h-40 w-auto max-w-full rounded-lg object-cover" loading="lazy">
+                <img src="{{ $photo->photo_url }}" alt="{{ $eventName }}" class="h-32 sm:h-40 w-auto max-w-full rounded-lg object-cover" loading="lazy">
               </button>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $photo->submitterName() }}</p>
             </div>
@@ -1863,7 +1869,7 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 opacity-60">
             @foreach ($myEventLevelPendingVideos as $video)
             <div id="pending-video-{{ $video->id }}" class="rounded-lg overflow-hidden relative">
-              <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $event->translatedName() }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+              <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $eventName }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
               <span class="absolute top-2 {{ $role->isRtl() ? 'left-2' : 'right-2' }} inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
             </div>
             @endforeach
@@ -1873,7 +1879,7 @@
           <div class="flex flex-wrap gap-3 mb-4 opacity-60">
             @foreach ($myEventLevelPendingPhotos as $photo)
             <div id="pending-photo-{{ $photo->id }}" class="relative rounded-lg overflow-hidden max-w-full">
-              <img src="{{ $photo->photo_url }}" alt="{{ $event->translatedName() }}" class="h-32 sm:h-40 w-auto max-w-full rounded-lg object-cover" loading="lazy">
+              <img src="{{ $photo->photo_url }}" alt="{{ $eventName }}" class="h-32 sm:h-40 w-auto max-w-full rounded-lg object-cover" loading="lazy">
               <span class="absolute top-2 {{ $role->isRtl() ? 'left-2' : 'right-2' }} inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
             </div>
             @endforeach
@@ -2120,7 +2126,7 @@
       {{-- Mobile share button --}}
       @if (!$event->is_draft)
       <button type="button"
-              data-share-title="{{ $event->translatedName() }}"
+              data-share-title="{{ $eventName }}"
               @click="
                 if (shareState !== 'idle') return;
                 if (navigator.share) {

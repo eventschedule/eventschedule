@@ -12,17 +12,15 @@ use Illuminate\Support\Str;
 
 trait CalendarDataTrait
 {
-    protected function calendarEventToVueArray(Event $event, ?Role $role, ?string $subdomain, ?array $userAdminRoleIds = null, bool $guestView = false): array
+    protected function calendarEventToVueArray(Event $event, ?Role $role, ?string $subdomain, ?array $userAdminRoleIds = null, bool $guestView = false, ?string $displayLang = null): array
     {
         $groupId = $role ? $event->getGroupIdForSubdomain($role->subdomain) : null;
 
-        $curatorTranslation = null;
-        if ($role && $role->isCurator()) {
-            $curatorPivot = $event->roles->where('id', $role->id)->first();
-            if ($curatorPivot && $curatorPivot->pivot && $curatorPivot->pivot->name_translated) {
-                $curatorTranslation = $curatorPivot->pivot;
-            }
-        }
+        // The language the visitor is reading, resolved once. Event text is then selected BY
+        // language rather than by a "show the translation" boolean, which inverts for aggregated
+        // events whose own language pair differs from this schedule's - see Event::textInLanguage().
+        $displayLang = $displayLang ?: ($role ? $role->displayLanguageCode() : 'en');
+        $eventName = $event->nameInLanguage($displayLang, $role);
 
         $user = auth()->user();
         $canEdit = false;
@@ -37,12 +35,15 @@ trait CalendarDataTrait
             'id' => UrlUtils::encodeId($event->id),
             'group_id' => $groupId ? UrlUtils::encodeId($groupId) : null,
             'category_id' => $event->category_id,
-            'category_name' => $event->resolveCategoryName(),
+            // Explicit locale, not just app()->getLocale(): Role::getEventCategories() surfaces a
+            // CUSTOM category's translated name only when the locale equals that creator's target,
+            // which setLocale() alone cannot express for a foreign creator.
+            'category_name' => $event->resolveCategoryName($displayLang),
             'category_color' => $event->resolveCategoryColor(),
-            'name' => $curatorTranslation ? $curatorTranslation->name_translated : $event->translatedName(),
-            'dir' => content_dir($role, ! $curatorTranslation && showing_translation($role) && (bool) $event->name_en),
-            'short_description' => $curatorTranslation && $curatorTranslation->short_description_translated ? $curatorTranslation->short_description_translated : $event->translatedShortDescription(),
-            'venue_name' => $event->getVenueDisplayName(),
+            'name' => $eventName,
+            'dir' => content_dir_for_language($eventName, $displayLang),
+            'short_description' => $event->shortDescriptionInLanguage($displayLang, $role),
+            'venue_name' => $event->getVenueDisplayName(true, $displayLang),
             'venue_subdomain' => $event->venue?->subdomain ?: null,
             'is_free' => $event->isFree(),
             'starts_at' => $event->starts_at,
@@ -77,7 +78,7 @@ trait CalendarDataTrait
                 : null,
             'parts' => $event->parts->map(fn ($part) => [
                 'id' => UrlUtils::encodeId($part->id),
-                'name' => $part->translatedName(),
+                'name' => $part->nameInLanguage($displayLang, $event->getTranslationLanguageCode()),
                 'start_time' => $part->start_time,
                 'end_time' => $part->end_time,
             ])->values()->toArray(),
@@ -198,7 +199,7 @@ trait CalendarDataTrait
         ];
     }
 
-    protected function buildCalendarResponse($events, $pastEvents, bool $hasMorePastEvents, ?Role $role, ?string $subdomain, int $month, int $year, string $timezone, int $firstDayOfWeek = 0, bool $guestView = false): JsonResponse
+    protected function buildCalendarResponse($events, $pastEvents, bool $hasMorePastEvents, ?Role $role, ?string $subdomain, int $month, int $year, string $timezone, int $firstDayOfWeek = 0, bool $guestView = false, ?string $displayLang = null): JsonResponse
     {
         $month = DateUtils::normalizeMonth($month);
         $year = DateUtils::normalizeYear($year);
@@ -221,14 +222,16 @@ trait CalendarDataTrait
             $pastEvents->loadMissing('creatorRole');
         }
 
+        $displayLang = $displayLang ?: ($role ? $role->displayLanguageCode() : 'en');
+
         $eventsForVue = [];
         foreach ($events as $event) {
-            $eventsForVue[] = $this->calendarEventToVueArray($event, $role, $subdomain, $userAdminRoleIds, $guestView);
+            $eventsForVue[] = $this->calendarEventToVueArray($event, $role, $subdomain, $userAdminRoleIds, $guestView, $displayLang);
         }
 
         $pastEventsForVue = [];
         foreach ($pastEvents as $event) {
-            $pastEventsForVue[] = $this->calendarEventToVueArray($event, $role, $subdomain, $userAdminRoleIds, $guestView);
+            $pastEventsForVue[] = $this->calendarEventToVueArray($event, $role, $subdomain, $userAdminRoleIds, $guestView, $displayLang);
         }
 
         $eventsMap = $this->buildEventsMap($events, $startOfMonth, $endOfMonth);
