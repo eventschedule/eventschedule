@@ -1,4 +1,4 @@
-<x-app-guest-layout :role="$role" :event="$event" :fonts="$fonts" :noIndex="true">
+<x-app-guest-layout :role="$role" :event="$event" :fonts="$fonts" :noIndex="true" :page-title="($event ? $event->translatedName() . ' - ' : '') . __('messages.feedback')">
 
     @php
         $accentColor = $role->accent_color ?? '#4E81FA';

@@ -101,6 +101,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Email Verification
+    |--------------------------------------------------------------------------
+    |
+    | How many minutes a verification link stays valid, read by the VerifyEmail
+    | notification. Laravel's fallback is 60, which is short enough that signing up
+    | in the evening and clicking the link the next morning fails - and the resend
+    | path requires already being signed in. This key covers both user accounts and
+    | schedules; the link is single-purpose and hash-bound to the current address.
+    |
+    */
+
+    'verification' => [
+        'expire' => 60 * 24,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Password Confirmation Timeout
     |--------------------------------------------------------------------------
     |

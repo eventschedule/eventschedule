@@ -133,7 +133,7 @@
                     <tr>
                         <td><code class="doc-inline-code">APP_NAME</code></td>
                         <td><code class="doc-inline-code">Laravel</code></td>
-                        <td>Reaches the app only through the <code class="doc-inline-code">MAIL_FROM_NAME="${APP_NAME}"</code> reference in <code class="doc-inline-code">.env.example</code>, so it sets the sender name on outgoing email. It does <span class="font-semibold text-gray-900 dark:text-white">not</span> rename the product in the interface: page titles are literal, and <code class="doc-inline-code">config('app.name')</code> is a fixed <code class="doc-inline-code">Event Schedule</code> string in <code class="doc-inline-code">config/app.php</code>. Rename in-app wording with <a href="#translations" class="doc-link">custom translations</a> instead.</td>
+                        <td>Reaches the app only through the <code class="doc-inline-code">MAIL_FROM_NAME="${APP_NAME}"</code> reference in <code class="doc-inline-code">.env.example</code>, so it sets the sender name on outgoing email. It does <span class="font-semibold text-gray-900 dark:text-white">not</span> rename the product in the interface: admin and marketing page titles are literal, and <code class="doc-inline-code">config('app.name')</code> is a fixed <code class="doc-inline-code">Event Schedule</code> string in <code class="doc-inline-code">config/app.php</code>. Public schedule pages are already unbranded, since their title carries the schedule's own name. Rename in-app wording with <a href="#translations" class="doc-link">custom translations</a> instead.</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">APP_URL</code></td>

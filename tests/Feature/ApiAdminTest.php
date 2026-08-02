@@ -2,23 +2,26 @@
 
 namespace Tests\Feature;
 
+use App\Models\Role;
 use App\Models\User;
+use App\Notifications\VerifyEmail;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
 class ApiAdminTest extends TestCase
 {
-    use RefreshDatabase;
     use CreatesScheduleData;
+    use RefreshDatabase;
 
     /** Configure an API key on the user and return the raw key for the X-API-Key header. */
     private function apiKey(User $user): string
     {
-        $raw = 'testapikey_' . \Illuminate\Support\Str::random(24);
+        $raw = 'testapikey_'.\Illuminate\Support\Str::random(24);
         $user->api_key = substr(hash('sha256', $raw), 0, 8);
         $user->api_key_hash = Hash::make($raw);
         $user->save();
@@ -47,7 +50,7 @@ class ApiAdminTest extends TestCase
         $event = $this->createEvent($role, ['name' => 'Original Name']);
         $key = $this->apiKey($owner);
 
-        $this->putJson('/api/events/' . UrlUtils::encodeId($event->id), [
+        $this->putJson('/api/events/'.UrlUtils::encodeId($event->id), [
             'name' => 'Updated Via Api',
         ], ['X-API-Key' => $key])->assertSuccessful();
 
@@ -61,7 +64,7 @@ class ApiAdminTest extends TestCase
         $event = $this->createEvent($role);
         $key = $this->apiKey($owner);
 
-        $this->deleteJson('/api/events/' . UrlUtils::encodeId($event->id), [], ['X-API-Key' => $key])
+        $this->deleteJson('/api/events/'.UrlUtils::encodeId($event->id), [], ['X-API-Key' => $key])
             ->assertSuccessful();
 
         $this->assertNull(\App\Models\Event::find($event->id));
@@ -73,7 +76,7 @@ class ApiAdminTest extends TestCase
         $role = $this->createRole($owner);
         $key = $this->apiKey($owner);
 
-        $this->postJson('/api/schedules/' . $role->subdomain . '/groups', [
+        $this->postJson('/api/schedules/'.$role->subdomain.'/groups', [
             'name' => 'Main Stage',
         ], ['X-API-Key' => $key])->assertSuccessful();
 
@@ -86,11 +89,61 @@ class ApiAdminTest extends TestCase
         $role = $this->createRole($owner);
         $key = $this->apiKey($owner);
 
-        $this->putJson('/api/schedules/' . $role->subdomain, [
+        $this->putJson('/api/schedules/'.$role->subdomain, [
             'name' => 'Renamed Schedule',
         ], ['X-API-Key' => $key])->assertSuccessful();
 
         $this->assertDatabaseHas('roles', ['id' => $role->id, 'name' => 'Renamed Schedule']);
+    }
+
+    /**
+     * Role::boot() has no created hook, so the create-time verification email is an
+     * explicit call in each store() path. The API path used to omit it, leaving the
+     * schedule permanently unverified - and an unverified schedule never gets a public
+     * page, events or discovery - with its owner never told there was anything to do.
+     */
+    public function test_api_create_schedule_sends_the_verification_email(): void
+    {
+        Notification::fake();
+        config(['app.hosted' => true]);
+
+        $owner = $this->createOwner();
+        $key = $this->apiKey($owner);
+
+        $this->postJson('/api/schedules', [
+            'name' => 'Api Made Venue',
+            'type' => 'venue',
+            'email' => 'venue@gmail.com',
+        ], ['X-API-Key' => $key])->assertCreated();
+
+        $role = Role::where('name', 'Api Made Venue')->firstOrFail();
+
+        $this->assertNull($role->email_verified_at);
+        Notification::assertSentTo($role, VerifyEmail::class);
+    }
+
+    /**
+     * store() copies the owner's verification when the addresses match, so there is
+     * nothing to confirm and the email would be noise.
+     */
+    public function test_api_create_schedule_skips_the_email_when_it_reuses_the_owners_address(): void
+    {
+        Notification::fake();
+        config(['app.hosted' => true]);
+
+        $owner = $this->createOwner();
+        $key = $this->apiKey($owner);
+
+        $this->postJson('/api/schedules', [
+            'name' => 'Owner Email Venue',
+            'type' => 'venue',
+            'email' => $owner->email,
+        ], ['X-API-Key' => $key])->assertCreated();
+
+        $role = Role::where('name', 'Owner Email Venue')->firstOrFail();
+
+        $this->assertNotNull($role->email_verified_at);
+        Notification::assertNothingSent();
     }
 
     public function test_backup_export_creates_job(): void

@@ -1,4 +1,4 @@
-<x-app-guest-layout :role="$role" :fonts="$fonts" :has-inline-lang-toggle="$role->headerStyle() !== 'banner'" :ad-slot="true">
+<x-app-guest-layout :role="$role" :fonts="$fonts" :has-inline-lang-toggle="$role->headerStyle() !== 'banner'" :ad-slot="true" :banner-bar="true" :page-title="isset($selectedGroup) && $selectedGroup ? $selectedGroup->translatedName() : null">
 
   @php
    $isRtl = is_rtl();
@@ -64,7 +64,8 @@ html[data-es-view="list"] #calendar-panel-wrapper {
   </style>
 
   <main>
-    @include('role.partials.guest-banner')
+    {{-- The announcement bar renders in layouts/app-guest.blade.php, above the language
+         switcher: see AppGuestLayout::$bannerBar --}}
     {{-- Compact renders as a full-width bar at the very top, outside the content container --}}
     @if ($headerStyle !== 'banner')
         @include('role.partials.headers.' . $headerStyle)

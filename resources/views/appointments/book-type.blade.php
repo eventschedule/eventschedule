@@ -7,7 +7,7 @@
     $event = $event ?? null;
     $ownerMode = $ownerMode ?? false;
 @endphp
-<x-app-guest-layout :role="$role" :noIndex="$isReschedule">
+<x-app-guest-layout :role="$role" :noIndex="$isReschedule" :page-title="__('messages.appointments')">
     @php
         // A pale accent is unreadable as text on the card, and a pale accent behind hardcoded white
         // text is unreadable as a button label. Both directions get a contrast-checked value, driven

@@ -3460,8 +3460,6 @@ return [
     'admin_alert_boosts_disapproved' => '{1} :count kampaania tagasilükatud reklaamiga|[2,*] :count kampaaniat tagasilükatud reklaamidega',
     'admin_alert_domains_pending' => '{1} :count kohandatud domeen on veel seadistamisel|[2,*] :count kohandatud domeeni on veel seadistamisel',
     'admin_alert_translations_unshared' => '{1} :count veel jagamata tõlge|[2,*] :count veel jagamata tõlget',
-    'admin_alert_schedules_unverified' => '{1} :count kinnitamata ajakava|[2,*] :count kinnitamata ajakava',
-    'admin_alert_referrals_pending' => '{1} :count veel teisendamata soovitus|[2,*] :count veel teisendamata soovitust',
     'pending_action_show_more' => 'Näita veel :count',
     'event_templates' => 'Ürituse mallid',
     'templates_description' => 'Salvesta üritus korduvkasutatava mallina ja loo sellest sekunditega uusi üritusi.',

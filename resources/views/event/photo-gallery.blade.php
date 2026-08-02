@@ -1,4 +1,4 @@
-<x-app-guest-layout :role="$role" :event="$event" :date="$date" :fonts="$fonts" :otherRole="$otherRole" :galleryMode="true" :showMobileBackground="true">
+<x-app-guest-layout :role="$role" :event="$event" :date="$date" :fonts="$fonts" :otherRole="$otherRole" :galleryMode="true" :showMobileBackground="true" :page-title="$event->translatedName() . ' - ' . __('messages.photo_gallery')">
 
   <main>
     @php

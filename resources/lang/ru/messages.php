@@ -3522,8 +3522,6 @@ return [
     'admin_alert_boosts_disapproved' => '{1} :count кампания с отклонённым объявлением|[2,*] :count кампаний с отклонёнными объявлениями',
     'admin_alert_domains_pending' => '{1} :count свой домен ещё настраивается|[2,*] :count своих доменов ещё настраиваются',
     'admin_alert_translations_unshared' => '{1} :count ещё не отправленный перевод|[2,*] :count ещё не отправленных переводов',
-    'admin_alert_schedules_unverified' => '{1} :count неподтверждённое расписание|[2,*] :count неподтверждённых расписаний',
-    'admin_alert_referrals_pending' => '{1} :count реферал ещё не конвертирован|[2,*] :count рефералов ещё не конвертированы',
     'pending_action_show_more' => 'Показать ещё :count',
     'event_templates' => 'Шаблоны мероприятий',
     'templates_description' => 'Сохраните мероприятие как многоразовый шаблон и создавайте на его основе новые мероприятия за секунды.',

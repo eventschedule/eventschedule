@@ -3483,8 +3483,6 @@ return [
     'admin_alert_boosts_disapproved' => '{1} :count campanie cu un anunț respins|[2,*] :count campanii cu anunțuri respinse',
     'admin_alert_domains_pending' => '{1} :count domeniu personalizat încă în configurare|[2,*] :count domenii personalizate încă în configurare',
     'admin_alert_translations_unshared' => '{1} :count traducere încă nepartajată|[2,*] :count traduceri încă nepartajate',
-    'admin_alert_schedules_unverified' => '{1} :count program neverificat|[2,*] :count programe neverificate',
-    'admin_alert_referrals_pending' => '{1} :count recomandare încă neconvertită|[2,*] :count recomandări încă neconvertite',
     'pending_action_show_more' => 'Afișează încă :count',
     'event_templates' => 'Șabloane de eveniment',
     'templates_description' => 'Salvează un eveniment ca șablon reutilizabil, apoi creează evenimente noi din el în câteva secunde.',

@@ -8,7 +8,6 @@ use App\Models\User;
 use App\Services\AdminAlertService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
@@ -217,31 +216,28 @@ class AdminAlertsTest extends TestCase
         $this->assertNotContains('translation_suggestions', $types);
     }
 
-    public function test_unverified_schedules_surface_when_hosted(): void
+    /**
+     * The panel is for queues waiting on a site admin. An unverified schedule is
+     * waiting on its owner and never drains, so it lives on /admin/schedules as a stat
+     * instead - see AdminSchedulesUnverifiedCountTest.
+     */
+    public function test_unverified_schedules_are_not_an_alert(): void
     {
-        // The hosted-only admin routes are registered at boot from IS_HOSTED, which
-        // differs by environment (local .env sets it true, CI's .env.example false).
-        // Toggling the config at runtime cannot register a route, so skip rather than
-        // assert against a route that does not exist here.
-        if (! Route::has('admin.schedules')) {
-            $this->markTestSkipped('Hosted-only admin routes are not registered on this install.');
-        }
-
         $owner = $this->createOwner(true);
         $this->createRole($owner, 'venue', ['email_verified_at' => null]);
 
         config(['app.hosted' => true]);
         AdminAlertService::flush();
 
-        $this->assertSame(1, AdminAlertService::badges()['tab']['schedules']['count']);
+        $types = AdminAlertService::items()->pluck('type')->all();
+
+        $this->assertNotContains('schedules_unverified', $types);
+        $this->assertArrayNotHasKey('schedules', AdminAlertService::badges()['tab']);
     }
 
     public function test_hosted_only_queues_are_absent_on_a_selfhosted_install(): void
     {
-        $owner = $this->createOwner(true);
-        // A schedule that would raise the hosted "unverified" row, to prove the gate
-        // drops the row rather than there simply being nothing to count.
-        $this->createRole($owner, 'venue', ['email_verified_at' => null]);
+        $this->createOwner(true);
 
         config(['app.hosted' => false]);
         AdminAlertService::flush();
@@ -251,8 +247,6 @@ class AdminAlertsTest extends TestCase
         $this->assertNotContains('support_unread', $types);
         $this->assertNotContains('domains_pending', $types);
         $this->assertNotContains('domains_failed', $types);
-        $this->assertNotContains('schedules_unverified', $types);
-        $this->assertNotContains('referrals_pending', $types);
     }
 
     public function test_every_row_resolves_to_a_real_url(): void

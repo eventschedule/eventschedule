@@ -3496,8 +3496,6 @@ return [
     'admin_alert_boosts_disapproved' => '{1} :count קמפיין עם מודעה שנדחתה|[2,*] :count קמפיינים עם מודעות שנדחו',
     'admin_alert_domains_pending' => '{1} :count דומיין מותאם אישית עדיין בהגדרה|[2,*] :count דומיינים מותאמים אישית עדיין בהגדרה',
     'admin_alert_translations_unshared' => '{1} :count תרגום שטרם שותף|[2,*] :count תרגומים שטרם שותפו',
-    'admin_alert_schedules_unverified' => '{1} :count לוח זמנים לא מאומת|[2,*] :count לוחות זמנים לא מאומתים',
-    'admin_alert_referrals_pending' => '{1} :count הפניה שטרם הומרה|[2,*] :count הפניות שטרם הומרו',
     'pending_action_show_more' => 'הצג :count נוספים',
     'event_templates' => 'תבניות אירועים',
     'templates_description' => 'שמרו אירוע כתבנית לשימוש חוזר, וצרו ממנה אירועים חדשים תוך שניות.',

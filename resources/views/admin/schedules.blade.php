@@ -3,8 +3,10 @@
     <div class="space-y-4">
         @include('admin.partials._navigation', ['active' => 'schedules'])
 
-        {{-- Row 1: Plan Breakdown --}}
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {{-- Row 1: Plan Breakdown. The three plan counts are verified-only, so Unverified
+             completes the row: free + pro + enterprise + unverified is every non-demo
+             schedule with an owner. --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {{-- Free Count --}}
             <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
                 <div class="flex items-center gap-3 mb-3 self-start">
@@ -46,6 +48,22 @@
                 </div>
                 <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($enterpriseCount) }}</p>
             </div>
+
+            {{-- Unverified Count. Deliberately the only clickable card on this page: it
+                 replaces the dashboard alert row that used to deep-link here. --}}
+            <a href="{{ route('admin.schedules', ['verification' => 'unverified']) }}"
+               class="ap-card rounded-xl shadow p-6 flex flex-col items-center transition-all duration-200 hover:shadow-md">
+                <div class="flex items-center gap-3 mb-3 self-start">
+                    <div class="dashboard-icon p-2 rounded-xl bg-amber-50 dark:bg-amber-500/10"
+                         style="--icon-glow: rgba(245, 158, 11, 0.15)">
+                        <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-.34-.014-.677-.042-1.01zM12 9v2m0 4h.01" />
+                        </svg>
+                    </div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.unverified')</p>
+                </div>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($unverifiedCount) }}</p>
+            </a>
         </div>
 
         {{-- Row 2: Payment/Status Breakdown --}}

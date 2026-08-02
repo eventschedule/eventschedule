@@ -2,9 +2,8 @@
 
 @php
     // AdminAlertService::badges() entries: ['count' => int, 'color' => 'red'|'amber'|'blue'].
-    // Red is reserved for something broken - informational queues must not borrow it,
-    // or a permanently non-zero row (unverified schedules, uncredited referrals) would
-    // leave the nav looking broken forever.
+    // Red is reserved for something broken - slow-moving review queues must not borrow
+    // it, or a row that sits non-zero for days would leave the nav looking broken.
     $count = (int) ($badge['count'] ?? 0);
 
     $tone = match ($badge['color'] ?? 'red') {

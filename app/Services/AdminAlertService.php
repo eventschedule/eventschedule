@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\BoostCampaign;
 use App\Models\FederatedInstance;
-use App\Models\Referral;
 use App\Models\Role;
 use App\Models\Sale;
 use App\Models\SupportMessage;
@@ -31,8 +30,14 @@ class AdminAlertService
 {
     /**
      * Ordered alert definitions. Position in this array is the sort priority:
-     * breakage and held-up money first, then review queues, then informational rows
-     * that have no admin action but that operators asked to see.
+     * breakage and held-up money first, then the review queues.
+     *
+     * Every row here must be something a site admin can actually act on. A count that
+     * is really waiting on someone else - a schedule owner who never verified, a
+     * referred user who never converted - is a metric, not a queue: it never drains,
+     * it inflates the panel's header total (which is a plain sum of counts) and it
+     * pins a permanent nav badge, which is exactly the signal SEVERITY exists to
+     * protect. Those belong on their own admin page as a stat, not in here.
      */
     private const DEFINITIONS = [
         'jobs_failed',
@@ -49,8 +54,6 @@ class AdminAlertService
         'boosts_disapproved',
         'domains_pending',
         'translations_unshared',
-        'schedules_unverified',
-        'referrals_pending',
     ];
 
     /**
@@ -75,10 +78,9 @@ class AdminAlertService
     private static ?Collection $cache = null;
 
     /**
-     * The three `roles` counts resolved in one pass. `custom_domain_status`,
-     * `email_verified_at` and `phone_verified_at` are all unindexed, and the nav
-     * composer runs on every admin page, so three separate COUNTs meant three full
-     * scans of the tenant table per render.
+     * Both `roles` counts resolved in one pass. `custom_domain_status` is unindexed
+     * and the nav composer runs on every admin page, so two separate COUNTs meant two
+     * full scans of the tenant table per render.
      */
     private static ?object $roleCounts = null;
 
@@ -158,10 +160,6 @@ class AdminAlertService
             // The mirror image of translation_suggestions: on a selfhosted install
             // these are local fixes that have not been offered back to the nexus yet.
             'translations_unshared' => fn () => $isNexus ? 0 : TranslationOverride::unshared()->count(),
-
-            'schedules_unverified' => fn () => $isHosted ? (int) self::roleCounts()->schedules_unverified : 0,
-
-            'referrals_pending' => fn () => $isHosted ? Referral::where('status', 'pending')->count() : 0,
         ];
 
         $items = collect();
@@ -181,9 +179,9 @@ class AdminAlertService
      * Badge data for the admin nav, keyed by dropdown and by item:
      * ['nav' => [dropdown => ['count' => int, 'color' => string]], 'tab' => [item => ...]].
      *
-     * Each group carries the highest severity it contains. Without this a permanently
-     * non-zero informational row (unverified schedules, uncredited referrals) would
-     * paint the nav the same red as a failed queue and drain the signal from both.
+     * Each group carries the highest severity it contains. Without this a slow-moving
+     * blue review queue would paint the nav the same red as a failed job and drain the
+     * signal from both.
      */
     public static function badges(): array
     {
@@ -211,17 +209,14 @@ class AdminAlertService
     }
 
     /**
-     * All three `roles` tallies in one scan, memoized for the request.
+     * Both `roles` tallies in one scan, memoized for the request.
      *
-     * The domain predicates mirror AdminController::domains() exactly - base
+     * The predicates mirror AdminController::domains() exactly - base
      * `whereNotNull('custom_domain')` plus the status filter, and deliberately NO
      * custom_domain_mode filter, because the list the alert links to has none either.
      * (Filtering on mode here would undercount: RoleController's provisioning catch
      * block sets custom_domain_status = 'failed' even while switching a role away
      * from direct mode.)
-     *
-     * The verification predicate mirrors AdminController::schedules()'s base query
-     * plus its "verification=unverified" filter, demo exclusions and all.
      */
     private static function roleCounts(): object
     {
@@ -231,13 +226,7 @@ class AdminAlertService
 
         return self::$roleCounts = Role::selectRaw(
             "SUM(custom_domain IS NOT NULL AND custom_domain_status = 'failed') AS domains_failed,
-             SUM(custom_domain IS NOT NULL AND custom_domain_status = 'pending') AS domains_pending,
-             SUM(user_id IS NOT NULL
-                 AND email_verified_at IS NULL
-                 AND phone_verified_at IS NULL
-                 AND subdomain <> ?
-                 AND subdomain NOT LIKE 'demo-%') AS schedules_unverified",
-            [DemoService::DEMO_ROLE_SUBDOMAIN]
+             SUM(custom_domain IS NOT NULL AND custom_domain_status = 'pending') AS domains_pending"
         )->first();
     }
 
@@ -266,8 +255,6 @@ class AdminAlertService
             'boosts_disapproved' => ['manage', 'boost', 'admin.boost', [], '#boost-alerts', 'amber', 'Boost'],
             'domains_pending' => ['manage', 'domains', 'admin.domains', ['status' => 'pending'], '', 'amber', __('messages.domains')],
             'translations_unshared' => ['system', 'translations', 'admin.translations', [], '', 'blue', __('messages.translations')],
-            'schedules_unverified' => ['manage', 'schedules', 'admin.schedules', ['verification' => 'unverified'], '', 'amber', __('messages.schedules')],
-            'referrals_pending' => ['manage', 'referrals', 'admin.referrals', ['status' => 'pending'], '', 'blue', __('messages.referrals')],
         };
 
         // Several admin routes are registered only on hosted installs. The counts are

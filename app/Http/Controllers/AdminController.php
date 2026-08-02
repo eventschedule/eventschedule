@@ -1610,6 +1610,17 @@ class AdminController extends Controller
             ->whereBetween('plan_expires', [now()->format('Y-m-d'), now()->addDays(30)->format('Y-m-d')])
             ->count();
 
+        // The complement of the plan cards, which all use $verifiedNonDemoScope: free +
+        // pro + enterprise + unverified is every non-demo schedule with an owner, so the
+        // top row adds up. Mirrors the list query below plus its verification=unverified
+        // filter exactly, so the card and the page it links to can never disagree.
+        $unverifiedCount = Role::whereNotNull('user_id')
+            ->whereNull('email_verified_at')
+            ->whereNull('phone_verified_at')
+            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
+            ->where('subdomain', 'not like', 'demo-%')
+            ->count();
+
         // Build query for role list (excluding demo roles)
         $query = Role::whereNotNull('user_id')
             ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
@@ -1685,6 +1696,7 @@ class AdminController extends Controller
             'freeCount',
             'proCount',
             'enterpriseCount',
+            'unverifiedCount',
             'stripePaidCount',
             'manualPlanCount',
             'trialCount',

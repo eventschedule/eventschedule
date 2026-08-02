@@ -1,4 +1,4 @@
-<x-app-guest-layout :role="$role">
+<x-app-guest-layout :role="$role" :page-title="__('messages.view_gift_card')">
 
 @php
     $accentColor = $role->accent_color ?? '#4E81FA';

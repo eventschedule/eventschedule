@@ -3448,8 +3448,6 @@ return [
     'admin_alert_boosts_disapproved' => '{1} :count campagne avec une annonce refusée|[2,*] :count campagnes avec des annonces refusées',
     'admin_alert_domains_pending' => '{1} :count domaine personnalisé en cours de configuration|[2,*] :count domaines personnalisés en cours de configuration',
     'admin_alert_translations_unshared' => '{1} :count traduction pas encore partagée|[2,*] :count traductions pas encore partagées',
-    'admin_alert_schedules_unverified' => '{1} :count planning non vérifié|[2,*] :count plannings non vérifiés',
-    'admin_alert_referrals_pending' => '{1} :count parrainage pas encore converti|[2,*] :count parrainages pas encore convertis',
     'pending_action_show_more' => 'Afficher :count de plus',
     'event_templates' => 'Modèles d\'événement',
     'templates_description' => 'Enregistrez un événement comme modèle réutilisable, puis créez-en de nouveaux en quelques secondes.',

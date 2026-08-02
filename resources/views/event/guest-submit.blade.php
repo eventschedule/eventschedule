@@ -1,4 +1,4 @@
-<x-app-guest-layout :role="$role" :showMobileBackground="true">
+<x-app-guest-layout :role="$role" :showMobileBackground="true" :page-title="__('messages.submit_event')">
 
 @php
   $hasHeaderImage = ($role->header_image && ! in_array($role->header_image, ['none', 'logos'], true)) || $role->header_image_url;

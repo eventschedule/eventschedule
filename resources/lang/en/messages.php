@@ -3715,8 +3715,6 @@ return [
     'admin_alert_boosts_disapproved' => '{1} :count campaign with a disapproved ad|[2,*] :count campaigns with disapproved ads',
     'admin_alert_domains_pending' => '{1} :count custom domain still provisioning|[2,*] :count custom domains still provisioning',
     'admin_alert_translations_unshared' => '{1} :count translation not shared yet|[2,*] :count translations not shared yet',
-    'admin_alert_schedules_unverified' => '{1} :count unverified schedule|[2,*] :count unverified schedules',
-    'admin_alert_referrals_pending' => '{1} :count referral not converted yet|[2,*] :count referrals not converted yet',
     'event_templates' => 'Event Templates',
     'templates_description' => 'Save an event as a reusable template, then create new events from it in seconds.',
     'templates_pro_description' => 'Event templates are a Pro feature. Upgrade to save reusable presets and create new events in seconds.',

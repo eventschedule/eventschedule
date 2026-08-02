@@ -1,4 +1,4 @@
-<x-app-layout :title="($event && $event->exists ? $event->translatedName() . ' | ' : '') . $role->name . ' | Event Schedule'">
+<x-app-layout :title="$guestTitle()">
 
     <noscript>
       <div class="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 p-4 text-center text-base">
@@ -49,7 +49,7 @@
             <meta property="og:image:width" content="1200">
             <meta property="og:image:height" content="630">
             <meta property="og:url" content="{{ $event->getCanonicalUrl($date) }}">
-            <meta property="og:site_name" content="Event Schedule">
+            <meta property="og:site_name" content="{{ $role->translatedName() ?: config('app.name') }}">
             <meta name="twitter:title" content="{{ __('messages.event_password_required') }}">
             <meta name="twitter:description" content="{{ __('messages.event_password_required') }}">
             <meta name="twitter:image" content="{{ config('app.url') . '/images/social/home.png' }}">
@@ -78,7 +78,7 @@
                 <meta property="og:image:height" content="630">
                 <meta property="og:image:alt" content="{{ $galleryTitle }}">
                 <meta property="og:url" content="{{ $event->getCanonicalPhotoGalleryUrl($date) }}">
-                <meta property="og:site_name" content="Event Schedule">
+                <meta property="og:site_name" content="{{ $role->translatedName() ?: config('app.name') }}">
                 <meta name="twitter:title" content="{{ $galleryTitle }}">
                 <meta name="twitter:description" content="{{ $event->getMetaDescription($date) }}">
                 <meta name="twitter:image" content="{{ $galleryOgImage }}">
@@ -101,7 +101,7 @@
             <meta property="og:image:height" content="630">
             <meta property="og:image:alt" content="{{ $event->translatedName() }}">
             <meta property="og:url" content="{{ $event->getCanonicalUrl($date) }}">
-            <meta property="og:site_name" content="Event Schedule">
+            <meta property="og:site_name" content="{{ $role->translatedName() ?: config('app.name') }}">
             <meta name="twitter:title" content="{{ $event->translatedName() }}">
             <meta name="twitter:description" content="{{ $event->getMetaDescription($date) }}">
             <meta name="twitter:image" content="{{ $eventOgImage }}">
@@ -152,7 +152,7 @@
             <meta property="og:image:height" content="630">
             <meta property="og:type" content="website">
             <meta property="og:url" content="{{ $role->getCanonicalUrl() }}">
-            <meta property="og:site_name" content="Event Schedule">
+            <meta property="og:site_name" content="{{ $role->translatedName() ?: config('app.name') }}">
             <meta name="twitter:card" content="summary_large_image">
             <meta name="twitter:site" content="@ScheduleEvent">
         @endif
@@ -409,34 +409,44 @@
             </script>
         @endif
 
+        @php
+            // A schedule serving on its own active custom domain IS the site, so the breadcrumb
+            // roots at the schedule rather than at marketing_url(). Google discards a breadcrumb
+            // whose first item sits on a different domain, which is what the marketing root was on
+            // every custom domain. Same predicate the canonical uses, so the two always agree.
+            $breadcrumbRootsAtSchedule = $role->servesOnCustomDomain();
+        @endphp
+
         @if ($event && $event->exists && $event->starts_at && !$event->is_draft && !($passwordGate ?? false))
             <script type="application/ld+json" {!! nonce_attr() !!}>
             {
                 "@context": "https://schema.org",
                 "@type": "BreadcrumbList",
                 "itemListElement": [
+                    @if (! $breadcrumbRootsAtSchedule)
                     {
                         "@type": "ListItem",
                         "position": 1,
                         "name": @json(__('messages.home')),
                         "item": "{{ marketing_url() }}"
                     },
+                    @endif
                     {
                         "@type": "ListItem",
-                        "position": 2,
+                        "position": {{ $breadcrumbRootsAtSchedule ? 1 : 2 }},
                         "name": @json($role->translatedName(), $jsonLdFlags),
                         "item": "{{ $role->getCanonicalUrl() }}"
                     },
                     {
                         "@type": "ListItem",
-                        "position": 3,
+                        "position": {{ $breadcrumbRootsAtSchedule ? 2 : 3 }},
                         "name": @json($event->translatedName(), $jsonLdFlags),
                         "item": "{{ $event->getCanonicalUrl($date ?? null) }}"
                     }
                 ]
             }
             </script>
-        @elseif ($role->exists)
+        @elseif ($role->exists && ! $breadcrumbRootsAtSchedule)
             <script type="application/ld+json" {!! nonce_attr() !!}>
             {
                 "@context": "https://schema.org",
@@ -524,6 +534,14 @@
     @endphp
 
     <div id="main-content" tabindex="-1" class="flex-grow relative">
+        {{-- The owner's announcement bar, full-bleed against the top edge so it reads as a
+             page-level notice. Sitting above the language switcher also means the switcher's
+             own pt-4 supplies the gap beneath the bar. Opt-in per view: see
+             AppGuestLayout::$bannerBar. --}}
+        @if ($bannerBar)
+            @include('role.partials.guest-banner')
+        @endif
+
         @php
             $showMobileBanner = false;
             $mobileBannerUrl = '';
@@ -622,7 +640,7 @@
     @endphp
 
     @if (! request()->embed && $creditReason)
-    <div class="flex justify-{{ $isRtl ? 'start' : 'end' }} p-4">
+    <div class="flex justify-{{ $isRtl ? 'start' : 'end' }} p-4 {{ $role->show_accessibility_widget ? 'es-a11y-credit-clear' : '' }}">
         {{-- Per the AAL license, please do not remove the link to Event Schedule --}}
         <a href="{{ $creditUrl }}" target="_blank" rel="noopener" title="{{ __('messages.powered_by_event_schedule') }}"
            class="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm ring-1 ring-black/5 backdrop-blur transition-colors hover:bg-white hover:text-gray-900">

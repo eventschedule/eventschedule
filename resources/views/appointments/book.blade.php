@@ -1,4 +1,4 @@
-<x-app-guest-layout :role="$role">
+<x-app-guest-layout :role="$role" :page-title="__('messages.appointments')">
     @php
         $accent = $role->accent_color ?? '#4E81FA';
         $accentOnLight = \App\Utils\ColorUtils::readableAccentColor($accent, '#ffffff', '#111827');

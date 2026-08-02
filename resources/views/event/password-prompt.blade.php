@@ -1,4 +1,4 @@
-<x-app-guest-layout :role="$role" :event="$event" :date="$date" :fonts="$fonts" :password-gate="true">
+<x-app-guest-layout :role="$role" :event="$event" :date="$date" :fonts="$fonts" :password-gate="true" :page-title="__('messages.password')">
 
   <main>
     <div class="min-h-[60vh] flex items-center justify-center px-4">

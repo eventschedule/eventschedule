@@ -88,11 +88,14 @@
              - The tab icon: app-guest.blade.php uses profile_image_url
                as rel=icon when $role->isPro().
              - Monetization: Role::showAds() is false above free.
-           WHAT STAYS, and the page says all of it. Head metadata on
-           every install: the <title> in layouts/app is unconditionally
-           "... | Event Schedule", og:site_name is hard-coded in
-           app-guest.blade.php, and the BreadcrumbList JSON-LD names
-           marketing_url() as the site root. Then the credit chip, whose
+           WHAT STAYS, and the page says all of it. One line of head
+           metadata: the BreadcrumbList JSON-LD in app-guest.blade.php
+           names marketing_url() as the site root - and even that roots
+           at the schedule once Role::servesOnCustomDomain(), because a
+           breadcrumb rooted on another domain is discarded anyway. The
+           <title> and og:site_name both carry the schedule's own name
+           on every plan and every install; see
+           AppGuestLayout::guestTitle(). Then the credit chip, whose
            cases live in Role::creditChipReason(). Off the nexus it is
            UNCONDITIONAL - every schedule, every plan, whether the install
            is a plain selfhost ('selfhost') or an operator's own platform
@@ -617,7 +620,7 @@
             ],
             [
                 'q' => 'Is anything left?',
-                'a' => 'On a schedule hosted here, nothing in the body of the page and two things outside it. First, the metadata in the page head: the title in the browser tab still ends in "Event Schedule", the site name in a shared link preview still reads Event Schedule, and the breadcrumb data still names us as the site root. The tab icon itself becomes your logo. Second, if an admin granted your Enterprise plan by hand rather than you buying it, a small Event Schedule credit chip stays below the footer; customers who pay through Stripe never carry that chip, and neither do plans earned through the referral programme. On any install that is not eventschedule.com the chip is not an exception at all - see the two questions below.',
+                'a' => 'On a schedule hosted here, nothing in the body of the page and two things outside it. First, one line of metadata in the page head: the breadcrumb data still names eventschedule.com as the site root. The title in the browser tab and the site name in a shared link preview both read your schedule\'s name on every plan, free included, and the tab icon becomes your logo on Pro. Point a custom domain at the schedule and the breadcrumb roots at your own domain too, which leaves the head with nothing of ours in it. Second, if an admin granted your Enterprise plan by hand rather than you buying it, a small Event Schedule credit chip stays below the footer; customers who pay through Stripe never carry that chip, and neither do plans earned through the referral programme. On any install that is not eventschedule.com the chip is not an exception at all - see the two questions below.',
             ],
             [
                 'q' => 'Do I need to change my embed after upgrading?',
@@ -926,32 +929,33 @@
                         A page selling white-label that promises "no trace anywhere" gets found out on
                         the first afternoon. On a schedule you run here, nothing is left in the body of
                         your page and two things sit outside it. Here they are, and then what changes
-                        if you run the software yourself instead.
+                        if you run the software yourself instead, or point a domain of your own at it.
                     </p>
                 </div>
 
                 <div class="grid gap-5 md:grid-cols-2" data-reveal-group="100">
 
-                    <!-- The head metadata: title, share-card site name, breadcrumb root. -->
+                    <!-- The head metadata: the breadcrumb root is the one string left. -->
                     <div class="es-slate2-card flex flex-col p-6 sm:p-7" data-reveal>
                         <div class="mb-4 flex flex-wrap items-baseline justify-between gap-2">
                             <h3 class="text-lg font-bold text-white">The metadata in the page head</h3>
-                            <span class="es-slate2-pill es-slate2-pill-keep">Stays</span>
+                            <span class="es-slate2-pill es-slate2-pill-keep">One line</span>
                         </div>
 
                         <div class="es-slate2-tabbar mb-5" aria-hidden="true">
                             <span class="es-slate2-tab">
                                 <span class="es-slate2-tabicon"></span>
-                                <span class="es-slate2-engraved truncate">{{ $plateName }} <span class="es-slate2-lit">| Event Schedule</span></span>
+                                <span class="es-slate2-engraved truncate">{{ $plateName }}</span>
                             </span>
                         </div>
 
                         <p class="es-slate2-muted mt-auto text-sm">
-                            The icon on the tab becomes your uploaded logo on Pro. Three strings in the
-                            head do not change: the title still ends in "Event Schedule", the site name
-                            in a shared link preview still reads it, and the breadcrumb data still names
-                            us as the site root. None of it appears in the page, but it is there, and we
-                            are not going to pretend it is not.
+                            The tab reads your schedule's name and nothing else, and so does the site
+                            name on a shared link preview - on every plan, free included. The icon
+                            beside it becomes your uploaded logo on Pro. One string is left, and you
+                            will only ever meet it in the page source: the breadcrumb data names
+                            <span class="es-slate2-lit">eventschedule.com</span> as the site root. Point
+                            a domain of your own at the schedule and that roots at your domain too.
                         </p>
                     </div>
 

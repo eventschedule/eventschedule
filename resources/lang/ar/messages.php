@@ -3505,8 +3505,6 @@ return [
     'admin_alert_boosts_disapproved' => '{1} :count حملة بإعلان مرفوض|[2,*] :count حملات بإعلانات مرفوضة',
     'admin_alert_domains_pending' => '{1} :count نطاق مخصص قيد الإعداد|[2,*] :count نطاقات مخصصة قيد الإعداد',
     'admin_alert_translations_unshared' => '{1} :count ترجمة لم تتم مشاركتها بعد|[2,*] :count ترجمات لم تتم مشاركتها بعد',
-    'admin_alert_schedules_unverified' => '{1} :count جدول غير موثق|[2,*] :count جداول غير موثقة',
-    'admin_alert_referrals_pending' => '{1} :count إحالة لم تُحوَّل بعد|[2,*] :count إحالات لم تُحوَّل بعد',
     'pending_action_show_more' => 'عرض :count إضافية',
     'event_templates' => 'قوالب الفعاليات',
     'templates_description' => 'احفظ فعالية كقالب قابل لإعادة الاستخدام، ثم أنشئ منه فعاليات جديدة خلال ثوانٍ.',

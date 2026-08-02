@@ -499,7 +499,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::post('/{subdomain}/timezone-warning/fix-events', [RoleController::class, 'fixEventsTimezone'])->name('role.timezone_warning_fix_events');
     Route::get('/{subdomain}/add-event', [EventController::class, 'create'])->name('event.create');
     Route::get('/{subdomain}/verify/{hash}', [RoleController::class, 'verify'])->name('role.verification.verify');
-    Route::get('/{subdomain}/resend', [RoleController::class, 'resendVerify'])->name('role.verification.resend');
+    Route::get('/{subdomain}/resend', [RoleController::class, 'resendVerify'])->name('role.verification.resend')->middleware('throttle:5,1');
     Route::post('/{subdomain}/phone/send-code', [RoleController::class, 'phoneSendCode'])->name('role.phone.send_code')->middleware('throttle:5,1');
     Route::post('/{subdomain}/phone/verify-code', [RoleController::class, 'phoneVerifyCode'])->name('role.phone.verify_code')->middleware('throttle:10,1');
     Route::post('/{subdomain}/resend-invite/{hash}', [RoleController::class, 'resendInvite'])->name('role.resend_invite')->middleware('throttle:5,1');

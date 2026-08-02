@@ -1,4 +1,4 @@
-<x-app-guest-layout :role="$role" :noIndex="true">
+<x-app-guest-layout :role="$role" :noIndex="true" :page-title="__('messages.appointments')">
     @php
         $manageParams = ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $sale->secret];
 

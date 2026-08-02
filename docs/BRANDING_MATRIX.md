@@ -1,7 +1,7 @@
 # Branding Matrix
 
 Which Event Schedule branding a guest page shows, for every combination of deployment mode and
-plan tier. Three inputs decide it, read at eight render sites, so this file is the single place
+plan tier. Four inputs decide it, read at eleven render sites, so this file is the single place
 they are written down together. Keep it in sync when any of those sites change.
 
 ## The three inputs
@@ -11,6 +11,7 @@ they are written down together. Keep it in sync when any of those sites change.
 | `config('app.hosted')` | `IS_HOSTED`, `config/app.php` | A multi-tenant platform with live plan tiers and Stripe |
 | `config('app.is_nexus')` | `IS_NEXUS`, `config/app.php` | This install *is* eventschedule.com. Independent of `hosted` |
 | `Role::actualPlanTier()` | `app/Models/Role.php` | `'free' \| 'pro' \| 'enterprise'`; short-circuits to `'enterprise'` when not hosted |
+| `Role::servesOnCustomDomain()` | `app/Models/Role.php` | The schedule *is* the site: `custom_domain` + `direct` + `active`. Head metadata only |
 
 The three deployment modes those combine into:
 
@@ -58,7 +59,14 @@ They answer different questions, and `creditChipReason()` deliberately does **no
 | Embed snippet line, on the host's page | yes | -- | -- | yes | -- | -- |
 | Ticket/RSVP embed frame | yes | -- | -- | yes | -- | -- |
 | Newsletter email footer | yes | -- | -- | yes | -- | -- |
+| Head metadata: `<title>`, `og:site_name` | -- | -- | -- | -- | -- | -- |
+| Head metadata: `BreadcrumbList` root | `marketing_url()` | `marketing_url()` | `marketing_url()` | `marketing_url()` | `marketing_url()` | `marketing_url()` |
 | AP footer (not a guest surface) | support email | support email | support email | support email | support email | "Powered by eventschedule.com" + version |
+
+The two head-metadata rows do **not** turn on the plan - they turn on the domain, which is why they
+are flat across every column. `<title>` and `og:site_name` carry the schedule's own name
+everywhere, on every tier and every install. The breadcrumb root is the only platform string left in
+the head, and `servesOnCustomDomain()` removes that one too.
 
 ## Render sites
 
@@ -71,6 +79,9 @@ They answer different questions, and `creditChipReason()` deliberately does **no
 | Embed snippet line | `resources/views/components/embed-modal.blade.php`, `components/embed-ticket-modal.blade.php` | `$role->showBranding()` |
 | Ticket embed frame | `resources/views/event/show-guest-ticket-embed.blade.php` | `$role->showBranding()` |
 | Newsletter footer | `resources/views/emails/newsletter.blade.php` via `NewsletterService` | `$role->showBranding()` |
+| `<title>` | `App\View\Components\AppGuestLayout::guestTitle()` | none - never branded |
+| `og:site_name` | `resources/views/layouts/app-guest.blade.php` (4 branches) | none - never branded |
+| `BreadcrumbList` root | `resources/views/layouts/app-guest.blade.php` (2 branches) | `! $role->servesOnCustomDomain()` |
 | AP footer | `resources/views/layouts/app-admin.blade.php` | `! config('app.hosted')`, no plan check |
 
 ## Rules that are easy to break
@@ -87,10 +98,14 @@ They answer different questions, and `creditChipReason()` deliberately does **no
    snippet line and the ticket-frame footer instead, never inside the calendar iframe.
    `?embed=1` never renders `event/show-guest.blade.php` (see `RoleController::viewGuest`), so the
    event-page card needs no embed guard.
-4. **Custom domains keep their branding.** A lapsed Enterprise schedule keeps its custom domain and
-   drops to free, so the strip renders there. Deliberate: it is the only genuine external backlink
-   the hosted platform earns. Ads *are* suppressed on custom domains (AdSense policy), branding is
-   not - the asymmetry is intentional.
+4. **Custom domains keep their body branding.** A lapsed Enterprise schedule keeps its custom domain
+   and drops to free, so the strip renders there. Deliberate: it is the only genuine external
+   backlink the hosted platform earns. Ads *are* suppressed on custom domains (AdSense policy),
+   branding is not - the asymmetry is intentional. The one thing a custom domain *does* change is
+   the `BreadcrumbList` root, and that is a correctness fix rather than a concession: a breadcrumb
+   whose first item sits on another domain is discarded by Google, so the old `marketing_url()` root
+   bought nothing and cost the schedule its breadcrumb. Do not extend `servesOnCustomDomain()` to
+   any body surface.
 5. **The deployment-wide credit is guest pages only.** The newsletter footer, both embed snippets
    and the ticket-embed frame stay keyed on `showBranding()` everywhere, so a paid tenant on an
    operator's platform and every schedule on a selfhost install leave them unbranded. Putting our
@@ -109,6 +124,12 @@ conversion CTA, worth nothing as a backlink. Genuine external dofollow links com
 places only: embed snippets pasted on third-party sites, custom-domain guest pages, and selfhost
 installs. That is why the selfhost chip exists and why it is dofollow (`rel="noopener"`, no
 `nofollow`). The Invoice Ninja link is deliberately `nofollow`.
+
+The head metadata was never part of that. `<title>` and `og:site_name` are unlinked text, so they
+earned recall and no link equity, while occupying the highest-value slot on a tenant's page - a
+suffix repeated across every page of every schedule is also a standard trigger for Google rewriting
+the title. Dropping them costs the platform nothing measurable and hands each schedule a title that
+matches its own name, which is what `og:title` had been sending all along.
 
 Coverage: `tests/Feature/GuestBrandingTest.php` (matrix) and
 `tests/Feature/GrantedPlanCreditTest.php` (the nexus granted-plan case in depth).

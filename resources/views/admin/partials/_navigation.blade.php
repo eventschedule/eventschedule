@@ -104,7 +104,6 @@
                         @if (config('app.hosted'))
                         <a href="{{ route('admin.schedules') }}" class="{{ $active === 'schedules' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.schedules')
-                            <x-nav-badge :badge="$tabBadges['schedules'] ?? null" />
                         </a>
                         <a href="{{ route('admin.domains') }}" class="{{ $active === 'domains' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.domains')
@@ -112,7 +111,6 @@
                         </a>
                         <a href="{{ route('admin.referrals') }}" class="{{ $active === 'referrals' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.referrals')
-                            <x-nav-badge :badge="$tabBadges['referrals'] ?? null" />
                         </a>
                         @endif
                         <a href="{{ route('admin.newsletters.index') }}" class="{{ $active === 'newsletters' ? $dropdownItemActive : $dropdownItem }}">

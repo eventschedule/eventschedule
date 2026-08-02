@@ -3450,8 +3450,6 @@ return [
     'admin_alert_boosts_disapproved' => '{1} :count Kampagne mit abgelehnter Anzeige|[2,*] :count Kampagnen mit abgelehnten Anzeigen',
     'admin_alert_domains_pending' => '{1} :count eigene Domain wird noch eingerichtet|[2,*] :count eigene Domains werden noch eingerichtet',
     'admin_alert_translations_unshared' => '{1} :count noch nicht geteilte Übersetzung|[2,*] :count noch nicht geteilte Übersetzungen',
-    'admin_alert_schedules_unverified' => '{1} :count unbestätigter Zeitplan|[2,*] :count unbestätigte Zeitpläne',
-    'admin_alert_referrals_pending' => '{1} :count noch nicht eingelöste Empfehlung|[2,*] :count noch nicht eingelöste Empfehlungen',
     'event_templates' => 'Veranstaltungsvorlagen',
     'templates_description' => 'Speichere eine Veranstaltung als wiederverwendbare Vorlage und erstelle daraus in Sekunden neue Veranstaltungen.',
     'templates_pro_description' => 'Veranstaltungsvorlagen sind eine Pro-Funktion. Führe ein Upgrade durch, um wiederverwendbare Vorlagen zu speichern und in Sekunden neue Veranstaltungen zu erstellen.',

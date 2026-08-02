@@ -50,3 +50,22 @@ html.es-a11y-reduce-motion *::after {
 html.es-a11y-cta-offset .es-a11y-root {
     bottom: calc(var(--es-a11y-cta-clearance, 4.5rem) + 0.75rem);
 }
+
+/* Keep the "Powered by Event Schedule" credit chip clear of the widget. The chip is the last
+   in-flow element on a guest page (layouts/app-guest.blade.php), so at full scroll the fixed
+   widget lands on top of it. Reserve room underneath: 1.5rem for the widget's own bottom
+   offset + 3rem launcher pill + 0.75rem gap. padding, not margin - a bottom margin on the
+   last in-flow child collapses out to the body and adds no scroll height.
+   Compound selector for the same reason as the rule above: this file is imported before
+   @tailwind utilities, so a bare class would lose to the wrapper's .p-4. */
+html .es-a11y-credit-clear {
+    padding-bottom: 5.25rem;
+}
+
+/* On the event page the widget is itself lifted by the mobile CTA bar, so the chip has to
+   clear both. Gated on the class rather than on the var alone: the setter in
+   show-guest.blade.php drops .es-a11y-cta-offset but never clears --es-a11y-cta-clearance,
+   so reading the var unconditionally would leave stale padding after a resize to desktop. */
+html.es-a11y-cta-offset .es-a11y-credit-clear {
+    padding-bottom: calc(var(--es-a11y-cta-clearance, 0px) + 5.25rem);
+}

@@ -3445,8 +3445,6 @@ return [
     'admin_alert_boosts_disapproved' => '{1} :count campaña con un anuncio rechazado|[2,*] :count campañas con anuncios rechazados',
     'admin_alert_domains_pending' => '{1} :count dominio personalizado aún configurándose|[2,*] :count dominios personalizados aún configurándose',
     'admin_alert_translations_unshared' => '{1} :count traducción sin compartir|[2,*] :count traducciones sin compartir',
-    'admin_alert_schedules_unverified' => '{1} :count horario sin verificar|[2,*] :count horarios sin verificar',
-    'admin_alert_referrals_pending' => '{1} :count referido aún sin convertir|[2,*] :count referidos aún sin convertir',
     'pending_action_show_more' => 'Mostrar :count más',
     'event_templates' => 'Plantillas de eventos',
     'templates_description' => 'Guarda un evento como plantilla reutilizable y crea nuevos eventos a partir de ella en segundos.',

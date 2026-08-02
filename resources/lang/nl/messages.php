@@ -3443,8 +3443,6 @@ return [
     'admin_alert_boosts_disapproved' => '{1} :count campagne met een afgekeurde advertentie|[2,*] :count campagnes met afgekeurde advertenties',
     'admin_alert_domains_pending' => '{1} :count eigen domein wordt nog ingesteld|[2,*] :count eigen domeinen worden nog ingesteld',
     'admin_alert_translations_unshared' => '{1} :count nog niet gedeelde vertaling|[2,*] :count nog niet gedeelde vertalingen',
-    'admin_alert_schedules_unverified' => '{1} :count niet-geverifieerd schema|[2,*] :count niet-geverifieerde schema\'s',
-    'admin_alert_referrals_pending' => '{1} :count nog niet omgezette verwijzing|[2,*] :count nog niet omgezette verwijzingen',
     'pending_action_show_more' => 'Toon :count meer',
     'event_templates' => 'Evenementsjablonen',
     'templates_description' => 'Sla een evenement op als herbruikbaar sjabloon en maak er in enkele seconden nieuwe evenementen mee.',

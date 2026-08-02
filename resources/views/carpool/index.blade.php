@@ -1,4 +1,4 @@
-<x-app-guest-layout :role="$role" :fonts="$fonts">
+<x-app-guest-layout :role="$role" :fonts="$fonts" :page-title="($event ? $event->translatedName() . ' - ' : '') . __('messages.carpool')">
 
 <x-slot name="head">
     <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
