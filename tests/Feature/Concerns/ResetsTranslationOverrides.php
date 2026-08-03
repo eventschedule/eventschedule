@@ -5,9 +5,10 @@ namespace Tests\Feature\Concerns;
 use Illuminate\Support\Facades\File;
 
 /**
- * Keeps published translation-override files (redirected to
- * storage/framework/testing/lang by phpunit.xml) from bleeding between tests,
- * and flushes the translator's per-process cache of loaded groups.
+ * Keeps published translation-override files (redirected under
+ * storage/framework/testing/ by phpunit.xml, per session by tests/bootstrap.php)
+ * from bleeding between tests, and flushes the translator's per-process cache of
+ * loaded groups.
  */
 trait ResetsTranslationOverrides
 {

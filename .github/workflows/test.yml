@@ -99,6 +99,13 @@ jobs:
       - name: Run Feature & Unit tests
         run: php artisan test
 
+      # The suite above runs token-less, so it never reaches the half of
+      # tests/TestDatabase.php that connects, creates and drops schemas. This does.
+      # CI's MySQL user is root, so it can create under the prefix without a grant;
+      # TestDatabaseSchemaTest pins what the prune is allowed to match.
+      - name: Verify the per-session database path
+        run: TEST_DB_TOKEN=ci1 TEST_DB_PRUNE_DAYS=0 php artisan test --filter=TestDatabaseSchemaTest
+
   dusk:
     runs-on: ubuntu-latest
     services:

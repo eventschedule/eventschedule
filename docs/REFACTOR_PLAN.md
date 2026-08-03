@@ -130,7 +130,16 @@ Used whenever Blade output must be proven unchanged (P2 spot checks, F5, O1, and
 
 Everything else is held constant by pinning inputs: same DB rows, same APP_KEY (encoded IDs are APP_KEY-derived), frozen clock, and no `npm run build` between baseline and compare (Vite hashes must match). If a page still varies run-to-run, add ONE targeted regex and document it in the script header with the reason.
 
-**DB inputs:** the for-* marketing pages are DB-independent. Guest pages need fixture rows: run against the test DB (`DB_DATABASE=eventschedule_test php storage/refactor/html_snapshot.php ...`) after seeding fixed rows there; the script refuses to seed unless the connected DB name ends in `_test`.
+**DB inputs:** the for-* marketing pages are DB-independent. Guest pages need fixture rows: run against the test DB after seeding fixed rows there.
+
+Two things changed here on 2026-08-03 (see the P0 follow-up in Section 7) and the script must be built to match. The suite no longer runs against `eventschedule_test` inside a Claude session - it runs against `eventschedule_test_<token>` - and the script is invoked with plain `php`, so `tests/bootstrap.php` never runs and cannot hand it the right name. Pass the name explicitly and deliberately:
+
+```bash
+DB_DATABASE=eventschedule_test php storage/refactor/html_snapshot.php ...          # shared schema
+DB_DATABASE="eventschedule_test_$TEST_DB_TOKEN" php storage/refactor/... ...       # a session's schema
+```
+
+Its refuse-to-seed guard must use `Tests\TestDatabase::isDedicatedTestSchema()` rather than the "ends in `_test`" rule described here originally, which would reject every per-session name and contradict `tests/TestCase.php`.
 
 **Pass criterion:** zero-byte `diff -ru` after normalization, including the status manifest.
 
@@ -404,6 +413,17 @@ Standing decisions - do not revisit them mid-phase:
    And rewrite the `## Testing` section's warning paragraph to match.
 
 **Do NOT:** create `.env.testing` (a second, forgettable config source - phpunit.xml stays the single source of truth); add a `testing` connection to `config/database.php`; install paratest; touch `phpunit.dusk.xml` or `.env.dusk.local`.
+
+**Follow-up (2026-08-03) - per-session schemas.** P0 isolated tests from the dev database but left every concurrent run sharing `eventschedule_test`, so two sessions running the suite at once dropped each other's tables mid-transaction and hung the suite on a `lock_wait_timeout`. `phpunit.xml` now bootstraps `tests/bootstrap.php` -> `tests/TestDatabase.php`, which runs after PHPUnit applies the `<env>` block and before Laravel boots, and redirects `DB_DATABASE` to `eventschedule_test_<token>` (token from `CLAUDE_CODE_SESSION_ID`, or `TEST_DB_TOKEN`). It also gives each run its own `LANG_OVERRIDES_PATH` and sets `TEST_TOKEN` so `Storage::fake()` roots itself per run. With neither variable set nothing changes, which is why CI is untouched. Runs that do share a schema serialize on an `flock`; schemas idle for `TEST_DB_PRUNE_DAYS` (default 3) are dropped by the next run.
+
+Step 2's `force="true"` stays and still matters - the bootstrap derives the name from the forced value rather than trusting the shell, so an exported `DB_DATABASE=eventschedule` is still ignored. Step 3's guard was widened from `str_ends_with(..., '_test')` to `preg_match('/_test(_[a-z0-9]+)?$/', ...)` to admit the token suffix while still rejecting the dev database. The Do-NOT list above is unchanged and was respected. This needs a one-time root grant per machine:
+
+```sql
+GRANT ALL PRIVILEGES ON `eventschedule\_test\_%`.* TO 'eventschedule'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+The `\_` escapes are load-bearing: they make the underscores literal, so the pattern cannot match `eventschedule` or `eventschedule_test`.
 
 **Dusk policy for the whole campaign:** never run `php artisan dusk` locally - it swaps `.env` with `.env.dusk.local`, which points at the dev DB, and `DatabaseTruncation` wipes it. Dusk verification happens in CI on each phase PR. If a local Dusk run is ever genuinely needed: ask the owner, create `eventschedule_dusk`, and repoint `.env.dusk.local` first.
 
@@ -894,7 +914,7 @@ Update the row when a phase merges (and add known-reds/inventories as indented n
 
 | Phase | Status | Branch | Merged sha | Date | Notes |
 |-------|--------|--------|-----------|------|-------|
-| P0 | done | refactor/p00-test-db-isolation (deleted) | 9ad67a11 | 2026-07-11 | Suite green 2x (173 tests, 612 assertions, 3 documented skips - see TEST_COVERAGE.md); NO known reds. Dev DB proven untouched (table create-times + row counts identical). Extra: `<ini name="memory_limit" value="1G"/>` added to phpunit.xml - suite peaks ~165MB and the local CLI default (128M) made bare `php artisan test` exit 255 (pre-existing OOM noted in TEST_COVERAGE.md); CI already runs 1G. |
+| P0 | done | refactor/p00-test-db-isolation (deleted) | 9ad67a11 | 2026-07-11 | Suite green 2x (173 tests, 612 assertions, 3 documented skips - see TEST_COVERAGE.md); NO known reds. Dev DB proven untouched (table create-times + row counts identical). Extra: `<ini name="memory_limit" value="1G"/>` added to phpunit.xml - suite peaks ~165MB and the local CLI default (128M) made bare `php artisan test` exit 255 (pre-existing OOM noted in TEST_COVERAGE.md); CI already runs 1G. Extended 2026-08-03 with per-session schemas (`tests/TestDatabase.php`) so concurrent sessions stop clobbering `eventschedule_test` - see the P0 follow-up note. |
 | P1 | not started | | | | |
 | P2 | tests-first done (refactor pending) | merged to main @ 9ad67a11 | | 2026-07-11 | Golden fixtures committed (tests/fixtures/comparison_data.json + replacement_data.json, 16+12 keys, zero env-dependent URLs) + compare_*/replace_* route smokes in MarketingDataCharacterizationTest. |
 | P3 | tests-first done (refactor pending) | merged to main @ 9ad67a11 | | 2026-07-11 | EventGraphicStructuralTest: 3-class instantiation smoke (signature-collision fatal net) + per-layout valid-PNG/dimension checks for 1 and 3 events. Golden-image manifests stay session-local (Section 3.4). |

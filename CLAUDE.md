@@ -8,7 +8,7 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 
 ## Important Rules
 
-- **`php artisan test` is safe to run locally** - PHPUnit uses the dedicated `eventschedule_test` MySQL database (forced in `phpunit.xml`); it never touches the `eventschedule` dev database. `tests/TestCase.php` refuses to run against any non-`*_test` database.
+- **`php artisan test` is safe to run locally, including concurrently** - `tests/bootstrap.php` gives each session its own `eventschedule_test_<token>` schema (derived from `CLAUDE_CODE_SESSION_ID`, or `TEST_DB_TOKEN` to pick one by hand), so parallel runs cannot drop each other's tables. With neither variable set it falls back to the shared `eventschedule_test`, which is what CI uses. It never touches the `eventschedule` dev database: `phpunit.xml` forces `DB_DATABASE`, and `tests/TestCase.php` refuses to run against anything but a `*_test` schema. Two runs that do land on the same schema queue on a lock rather than corrupt it. See `tests/TestDatabase.php`.
 - **Never run `php artisan dusk` locally without asking first** - Dusk swaps `.env` with `.env.dusk.local` and wipes the database it points at. Browser tests run in CI.
 - **Never run `npm install` without asking first** - Confirm before installing dependencies
 - **Never run `composer install` without asking first** - Confirm before installing dependencies
@@ -105,9 +105,25 @@ php artisan storage:link
 
 ## Testing
 
-PHPUnit (Feature/Unit) tests run against the dedicated `eventschedule_test` MySQL database (forced in `phpunit.xml`) and are safe to run locally with `php artisan test`.
+PHPUnit (Feature/Unit) tests are safe to run locally with `php artisan test`, and safe to run in several sessions at once.
 
-**Warning: Dusk browser tests wipe the database `.env.dusk.local` points at.** Never run `php artisan dusk` locally without asking first; browser tests run in CI.
+`tests/bootstrap.php` runs before Laravel boots and points each run at its own schema:
+
+- **Per session.** `eventschedule_test_<token>`, where the token is the first 8 alphanumeric characters of `CLAUDE_CODE_SESSION_ID`. Set `TEST_DB_TOKEN` to choose one yourself (non-alphanumerics are stripped and it is capped at 16 characters, so `my-feature-one` becomes `myfeatureone`).
+- **No token set** (CI, or a plain terminal): the shared `eventschedule_test`, exactly as before. `env -u CLAUDE_CODE_SESSION_ID php artisan test` forces this, which is the escape hatch on a machine where the grant below is not available.
+- **Same schema twice at once**: the second run waits on a lock instead of dropping the first run's tables mid-transaction, which used to hang the suite on a `lock_wait_timeout` measured in years.
+- **Housekeeping.** Schemas unused for 3 days are dropped on the next run; override with `TEST_DB_PRUNE_DAYS`.
+
+Creating those schemas needs a one-time grant, already applied on this machine. On a new machine, as MySQL root:
+
+```sql
+GRANT ALL PRIVILEGES ON `eventschedule\_test\_%`.* TO 'eventschedule'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+The `\_` escapes are load-bearing: they make the underscores literal, so the pattern can only ever match `eventschedule_test_<something>`.
+
+**Warning: Dusk browser tests wipe the database `.env.dusk.local` points at.** Never run `php artisan dusk` locally without asking first; browser tests run in CI. Dusk is unaffected by all of the above.
 
 ```bash
 # Run Feature & Unit tests (safe locally)
