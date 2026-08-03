@@ -1112,7 +1112,10 @@ class TicketController extends Controller
         // The free-order check below must consider the whole group: a gift card can zero out the
         // primary seat while guest seats still owe, and marking the primary paid would cascade
         // paid status to the unpaid guests.
-        $total = $sale->legTotalPayment();
+        // Across a multi-event order this has to be the order total for the same reason: a gift
+        // card can zero out one leg while another still owes, and taking the free path would mark
+        // the order primary paid and cascade that to legs nobody has paid for.
+        $total = $sale->isOrderPrimary() ? $sale->orderTotalPayment() : $sale->legTotalPayment();
 
         AuditService::log(AuditService::SALE_CHECKOUT, $sale->user_id, 'Sale', $sale->id, null, null, 'event_id:'.$event->id);
 
@@ -2233,12 +2236,18 @@ class TicketController extends Controller
         // whole group, so the discount must be the group total too - using the primary's own
         // per-seat share here skews discountRatio and, combined with gift-card line scaling,
         // can drive a reconciled unit_amount negative (Stripe rejects it). Mirrors how
-        // $expectedTotal below uses legTotalPayment() for grouped primaries.
-        $discount = $sale->legTotalDiscount();
+        // $expectedTotal below uses the same scope.
+        //
+        // A multi-event order widens the scope again: one session pays for every leg, so the
+        // line items, the discount and the expected total all have to span the order, not the leg.
+        $isOrder = $sale->isOrderPrimary();
+        $discount = $isOrder ? $sale->orderTotalDiscount() : $sale->legTotalDiscount();
 
-        // For grouped sales, aggregate SaleTickets across all sales in the group
-        if ($sale->group_id && $sale->isPrimarySale()) {
-            $allGroupSales = Sale::where('group_id', $sale->group_id)->with('saleTickets.ticket')->get();
+        // Aggregate SaleTickets across the whole order, or the whole group.
+        if ($isOrder || ($sale->group_id && $sale->isPrimarySale())) {
+            $allGroupSales = $isOrder
+                ? Sale::where('order_id', $sale->order_id)->with('saleTickets.ticket')->get()
+                : Sale::where('group_id', $sale->group_id)->with('saleTickets.ticket')->get();
             $aggregatedTickets = [];
             foreach ($allGroupSales as $gs) {
                 foreach ($gs->saleTickets as $st) {
@@ -2278,8 +2287,8 @@ class TicketController extends Controller
             }
         }
 
-        $giftTotal = $sale->legTotalGiftCard();
-        $expectedTotal = $sale->legTotalPayment();
+        $giftTotal = $isOrder ? $sale->orderTotalGiftCard() : $sale->legTotalGiftCard();
+        $expectedTotal = $isOrder ? $sale->orderTotalPayment() : $sale->legTotalPayment();
 
         $lineItems = $this->buildStripeLineItems($stripeSaleTickets, $event, $promoCode, (float) $discount, $giftTotal, $expectedTotal);
 

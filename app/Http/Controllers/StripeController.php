@@ -160,7 +160,9 @@ class StripeController extends Controller
                         $webhookAmount = $paymentIntent->amount / MoneyUtils::getSmallestUnitMultiplier($currencyCode);
 
                         // For grouped purchases (individual tickets) the buyer pays the group total in one charge.
-                        $expectedAmount = $sale->legTotalPayment();
+                        $expectedAmount = $sale->isOrderPrimary()
+                            ? $sale->orderTotalPayment()
+                            : $sale->legTotalPayment();
                         $amountDifference = abs($webhookAmount - $expectedAmount);
 
                         // Allow small tolerance for floating point/rounding differences
@@ -262,7 +264,9 @@ class StripeController extends Controller
                             $webhookAmount = $session->amount_total / MoneyUtils::getSmallestUnitMultiplier($currencyCode);
 
                             // For grouped purchases (individual tickets) the buyer pays the group total in one charge.
-                            $expectedAmount = $sale->legTotalPayment();
+                            $expectedAmount = $sale->isOrderPrimary()
+                            ? $sale->orderTotalPayment()
+                            : $sale->legTotalPayment();
                             $amountDifference = abs($webhookAmount - $expectedAmount);
 
                             // Allow small tolerance for floating point/rounding differences

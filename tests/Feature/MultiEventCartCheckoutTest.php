@@ -150,6 +150,26 @@ class MultiEventCartCheckoutTest extends TestCase
         $this->assertSame(0, Sale::where('email', 'cart@example.com')->count());
     }
 
+    public function test_a_free_first_leg_does_not_settle_an_order_that_still_owes(): void
+    {
+        [$eventA, $eventB, $ticketA] = $this->twoEvents();
+
+        // Leg A is free, leg B is not. The free-order short circuit reads the total, and reading
+        // only the FIRST leg's total sees 0 - marking the order paid, cascading paid to leg B, and
+        // handing over tickets nobody paid for.
+        $ticketB = $this->createTicket($eventB, ['price' => 20, 'quantity' => 50]);
+
+        $this->checkout([$this->leg($eventA, $ticketA), $this->leg($eventB, $ticketB)]);
+
+        $sales = Sale::where('email', 'cart@example.com')->get();
+        $this->assertCount(2, $sales);
+
+        foreach ($sales as $sale) {
+            $this->assertNotSame('paid', $sale->status,
+                'an order with an unpaid leg must not be settled by its free one');
+        }
+    }
+
     public function test_a_single_leg_checkout_writes_no_order_id(): void
     {
         [$eventA, , $ticketA] = $this->twoEvents();
