@@ -578,7 +578,7 @@
             ],
             [
                 'q' => 'Do I need the Pro plan?',
-                'a' => 'Yes. Post-event feedback is a Pro feature at $5 a month, included on Enterprise, and selfhosted installations have it too. On the hosted platform it also needs your schedule\'s own email settings, because the request is sent from your address rather than ours. Once those are saved the toggle unlocks, and there is a button to send yourself a test card before you turn it loose on real attendees.',
+                'a' => 'Yes. Post-event feedback is a Pro feature at $'.$proMonthly.' a month, included on Enterprise, and selfhosted installations have it too. On the hosted platform it also needs your schedule\'s own email settings, because the request is sent from your address rather than ours. Once those are saved the toggle unlocks, and there is a button to send yourself a test card before you turn it loose on real attendees.',
             ],
             [
                 'q' => 'Can I get the feedback out of Event Schedule?',
@@ -1352,7 +1352,7 @@
                         Stop guessing how it went. <span class="es-comment-lit">Ask the room.</span>
                     </h2>
                     <p class="es-comment-band-muted mx-auto mb-10 max-w-2xl text-lg">
-                        Claim your schedule and publish your events for free, forever. Post-event feedback is on the Pro plan at $5 a month, with zero platform fees on anything you sell.
+                        Claim your schedule and publish your events for free, forever. Post-event feedback is on the Pro plan at ${{ $proMonthly }} a month, with zero platform fees on anything you sell.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

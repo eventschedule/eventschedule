@@ -511,17 +511,27 @@ class GrowthExportService
 
         $total = (clone $base)->count();
 
+        // recent_total powers retention. A schedule is "still publishing" only if it has
+        // touched an event lately - see retentionFrom(), which used to accept any page view
+        // and therefore reported ~100% retention forever.
+        $recentCutoff = now()->copy()->subDays(90)->toDateTimeString();
+
         $events = DB::table('event_role')
             ->join('events', 'events.id', '=', 'event_role.event_id')
             ->selectRaw('event_role.role_id, COUNT(*) as total, '
-                .'SUM(CASE WHEN events.is_draft = 0 AND events.is_private = 0 AND events.is_internal = 0 THEN 1 ELSE 0 END) as public_total')
+                .'SUM(CASE WHEN events.is_draft = 0 AND events.is_private = 0 AND events.is_internal = 0 THEN 1 ELSE 0 END) as public_total, '
+                .'SUM(CASE WHEN events.updated_at >= ? THEN 1 ELSE 0 END) as recent_total', [$recentCutoff])
             ->groupBy('event_role.role_id')
             ->get()->keyBy('role_id');
 
+        // paid_c is the commercial signal. COUNT(*) alone counts free RSVP/registration types
+        // too, so it says nothing about whether a schedule takes money - which made it useless
+        // for sizing anything gated on paid ticketing.
         $ticketTypes = DB::table('tickets')
             ->join('event_role', 'event_role.event_id', '=', 'tickets.event_id')
             ->where('tickets.is_deleted', false)
-            ->selectRaw('event_role.role_id, COUNT(*) as c')
+            ->selectRaw('event_role.role_id, COUNT(*) as c, '
+                .'SUM(CASE WHEN tickets.price > 0 THEN 1 ELSE 0 END) as paid_c')
             ->groupBy('event_role.role_id')
             ->get()->keyBy('role_id');
 
@@ -574,7 +584,9 @@ class GrowthExportService
                 $r->plan_source,
                 (int) ($events[$r->id]->total ?? 0),
                 (int) ($events[$r->id]->public_total ?? 0),
+                (int) ($events[$r->id]->recent_total ?? 0),
                 (int) ($ticketTypes[$r->id]->c ?? 0),
+                (int) ($ticketTypes[$r->id]->paid_c ?? 0),
                 array_sum($paidByMonth[$r->id] ?? []),
                 $perMonth,
                 (int) ($views[$r->id]->v ?? 0),
@@ -589,7 +601,8 @@ class GrowthExportService
 
         return [
             'columns' => ['sid', 'uid', 'created_month', 'type', 'plan', 'plan_source',
-                'events_total', 'events_public', 'ticket_types', 'paid_tickets_total',
+                'events_total', 'events_public', 'events_recent_90d', 'ticket_types',
+                'paid_ticket_types', 'paid_tickets_total',
                 'paid_tickets_recent', 'views_90d', 'followers', 'appointment_types',
                 'photos', 'newsletter_emails_this_month', 'features', 'days_to_upgrade'],
             'rows' => $rows,
@@ -721,11 +734,15 @@ class GrowthExportService
         foreach ($schedules['rows'] as $row) {
             $t = $row[$si['type']] ?? 'unknown';
             $byType[$t] ??= ['key' => $t, 'schedules' => 0, 'with_event' => 0, 'with_public_event' => 0,
-                'with_ticket_type' => 0, 'with_paid_sale' => 0, 'paid_plan' => 0];
+                'with_ticket_type' => 0, 'with_paid_ticket_type' => 0, 'with_paid_sale' => 0,
+                'paid_plan' => 0];
             $byType[$t]['schedules']++;
             $byType[$t]['with_event'] += $row[$si['events_total']] > 0 ? 1 : 0;
             $byType[$t]['with_public_event'] += $row[$si['events_public']] > 0 ? 1 : 0;
+            // with_ticket_type includes free RSVP/registration types; only with_paid_ticket_type
+            // says the schedule intends to take money.
             $byType[$t]['with_ticket_type'] += $row[$si['ticket_types']] > 0 ? 1 : 0;
+            $byType[$t]['with_paid_ticket_type'] += $row[$si['paid_ticket_types']] > 0 ? 1 : 0;
             $byType[$t]['with_paid_sale'] += $row[$si['paid_tickets_total']] > 0 ? 1 : 0;
             $byType[$t]['paid_plan'] += $row[$si['plan']] !== 'free' ? 1 : 0;
         }
@@ -825,7 +842,8 @@ class GrowthExportService
             foreach ($row[$i['features']] as $f) {
                 $acc[$side][$f] = ($acc[$side][$f] ?? 0) + 1;
             }
-            foreach (['events_total', 'events_public', 'ticket_types', 'paid_tickets_total',
+            foreach (['events_total', 'events_public', 'events_recent_90d', 'ticket_types',
+                'paid_ticket_types', 'paid_tickets_total',
                 'views_90d', 'followers'] as $metric) {
                 $acc[$side]['sum_'.$metric] = ($acc[$side]['sum_'.$metric] ?? 0) + (int) $row[$i[$metric]];
             }
@@ -865,10 +883,10 @@ class GrowthExportService
 
         // Only NULL plan_source is a genuine Stripe conversion; admin grants and referral
         // credits pay nothing and would inflate MRR.
-        $monthly = (float) config('services.stripe_platform.price_monthly_amount', 5);
-        $yearly = (float) config('services.stripe_platform.price_yearly_amount', 50);
-        $entMonthly = (float) config('services.stripe_platform.enterprise_price_monthly_amount', 15);
-        $entYearly = (float) config('services.stripe_platform.enterprise_price_yearly_amount', 150);
+        $monthly = (float) config('services.stripe_platform.price_monthly_amount', 9);
+        $yearly = (float) config('services.stripe_platform.price_yearly_amount', 90);
+        $entMonthly = (float) config('services.stripe_platform.enterprise_price_monthly_amount', 29);
+        $entYearly = (float) config('services.stripe_platform.enterprise_price_yearly_amount', 290);
         $mrr = 0.0;
 
         // lazy(), not get(): this is every schedule on the install, and actualPlanTier()
@@ -939,7 +957,15 @@ class GrowthExportService
             ->all();
     }
 
-    /** Are schedules still publishing months after they were created? */
+    /**
+     * Are schedules still publishing months after they were created?
+     *
+     * active_recently means the OWNER did something: touched an event, or sold a paid ticket,
+     * in the last 90 days. It deliberately no longer counts page views. Views measure whether
+     * anyone visited the public page - including crawlers and a single stray click - so every
+     * cohort scored ~100% retained and the metric could not fall, which made it worthless as a
+     * health signal. `visited_recently` keeps the old audience-side reading alongside it.
+     */
     private function retentionFrom(array $schedules): array
     {
         $i = array_flip($schedules['columns']);
@@ -947,11 +973,12 @@ class GrowthExportService
         foreach ($schedules['rows'] as $row) {
             $m = $row[$i['created_month']] ?? 'unknown';
             $by[$m] ??= ['month' => $m, 'schedules' => 0, 'with_event' => 0,
-                'active_recently' => 0, 'paid' => 0];
+                'active_recently' => 0, 'visited_recently' => 0, 'paid' => 0];
             $by[$m]['schedules']++;
             $by[$m]['with_event'] += $row[$i['events_total']] > 0 ? 1 : 0;
-            $by[$m]['active_recently'] += array_sum($row[$i['paid_tickets_recent']]) > 0
-                || $row[$i['views_90d']] > 0 ? 1 : 0;
+            $by[$m]['active_recently'] += $row[$i['events_recent_90d']] > 0
+                || array_sum($row[$i['paid_tickets_recent']]) > 0 ? 1 : 0;
+            $by[$m]['visited_recently'] += $row[$i['views_90d']] > 0 ? 1 : 0;
             $by[$m]['paid'] += $row[$i['plan']] !== 'free' ? 1 : 0;
         }
         ksort($by);
@@ -967,7 +994,10 @@ class GrowthExportService
         $stats = MarketingDailyStat::query()
             ->groupBy(DB::raw("DATE_FORMAT(date, '%Y-%m')"))
             ->selectRaw("DATE_FORMAT(date, '%Y-%m') as ym, SUM(visitors) as visitors, "
-                .'SUM(page_views) as page_views, SUM(signup_views) as signup_views')
+                .'SUM(page_views) as page_views, SUM(signup_views) as signup_views, '
+                .'SUM(docs_page_views) as docs_page_views, SUM(docs_visitors) as docs_visitors, '
+                .'SUM(signup_code_requests) as signup_code_requests, '
+                .'SUM(signup_code_verified) as signup_code_verified')
             ->orderBy('ym')
             ->get()->keyBy('ym');
 
@@ -981,13 +1011,28 @@ class GrowthExportService
 
         $months = $stats->keys()->merge($signups->keys())->unique()->sort()->values();
 
-        return $months->map(fn ($m) => [
-            'month' => $m,
-            'visitors' => $isNexus ? (int) ($stats[$m]->visitors ?? 0) : null,
-            'page_views' => $isNexus ? (int) ($stats[$m]->page_views ?? 0) : null,
-            'signup_views' => (int) ($stats[$m]->signup_views ?? 0),
-            'verified_signups' => (int) ($signups[$m]->c ?? 0),
-        ])->all();
+        return $months->map(function ($m) use ($stats, $signups, $isNexus) {
+            $visitors = (int) ($stats[$m]->visitors ?? 0);
+            $docsVisitors = (int) ($stats[$m]->docs_visitors ?? 0);
+
+            return [
+                'month' => $m,
+                'visitors' => $isNexus ? $visitors : null,
+                'page_views' => $isNexus ? (int) ($stats[$m]->page_views ?? 0) : null,
+                // Docs/selfhost readers are a subset of the totals above, not prospects for the
+                // hosted plans. Subtracting gives a lower bound on buyer-intent traffic - a
+                // lower bound rather than an exact figure because someone who reads both the
+                // docs and a product page is deduped into each bucket separately.
+                'docs_visitors' => $isNexus ? $docsVisitors : null,
+                'docs_page_views' => $isNexus ? (int) ($stats[$m]->docs_page_views ?? 0) : null,
+                'commercial_visitors' => $isNexus ? max(0, $visitors - $docsVisitors) : null,
+                'signup_views' => (int) ($stats[$m]->signup_views ?? 0),
+                // The 6-digit-code wall, which sits between signup_views and an account.
+                'signup_code_requests' => (int) ($stats[$m]->signup_code_requests ?? 0),
+                'signup_code_verified' => (int) ($stats[$m]->signup_code_verified ?? 0),
+                'verified_signups' => (int) ($signups[$m]->c ?? 0),
+            ];
+        })->all();
     }
 
     /** Median of an int list, or null when empty. */

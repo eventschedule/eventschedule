@@ -642,7 +642,7 @@
             ],
             [
                 'q' => 'Are custom fields free?',
-                'a' => 'The registration list itself is free forever, including a capacity limit and the count of places left on each date. The custom questions on that form are part of the Pro plan at $5 a month, which comes with a 7 day free trial. Event Schedule charges zero platform fees on ticket sales.',
+                'a' => 'The registration list itself is free forever, including a capacity limit and the count of places left on each date. The custom questions on that form are part of the Pro plan at $'.$proMonthly.' a month, which comes with a 7 day free trial. Event Schedule charges zero platform fees on ticket sales.',
             ],
             [
                 'q' => 'How many fields can I have?',
@@ -1038,7 +1038,7 @@
                             <h3 class="es-form-ink text-lg font-bold">Asking anything else</h3>
                             <span class="es-form-plan es-form-plan-pro">Pro</span>
                         </div>
-                        <p class="es-form-muted text-sm leading-relaxed">Custom questions on that same form are Pro, at $5 a month with a 7 day free trial. The form does not change shape, it just starts asking what you need.</p>
+                        <p class="es-form-muted text-sm leading-relaxed">Custom questions on that same form are Pro, at ${{ $proMonthly }} a month with a 7 day free trial. The form does not change shape, it just starts asking what you need.</p>
                     </div>
                     <div class="es-form-card p-6" data-reveal="panel">
                         <div class="mb-3 flex flex-wrap items-center gap-2">
@@ -1481,7 +1481,7 @@
                         Stop chasing answers. <span class="es-form-fill">Ask on the form.</span>
                     </h2>
                     <p class="es-form-muted mx-auto mb-10 max-w-2xl text-lg">
-                        Registration and capacity are free forever. Custom questions come with Pro at $5 a month, with a 7 day free trial and no platform fees on anything you sell.
+                        Registration and capacity are free forever. Custom questions come with Pro at ${{ $proMonthly }} a month, with a 7 day free trial and no platform fees on anything you sell.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

@@ -193,8 +193,8 @@
 
         // Prices come from config, never hard-coded: an env override used to
         // silently desync the marketing copy from what billing actually charges.
-        $proMonthly = (int) config('services.stripe_platform.price_monthly_amount', 5);
-        $entMonthly = (int) config('services.stripe_platform.enterprise_price_monthly_amount', 15);
+        $proMonthly = (int) config('services.stripe_platform.price_monthly_amount', 9);
+        $entMonthly = (int) config('services.stripe_platform.enterprise_price_monthly_amount', 29);
 
         $plans = [
             [

@@ -104,7 +104,7 @@
             {
                 "@type": "Offer",
                 "name": "Pro",
-                "price": "5.00",
+                "price": "{{ number_format($proMonthly, 2) }}",
                 "priceCurrency": "USD",
                 "description": "Everything in Free plus ticketing with QR check-in and a check-in dashboard, ticket waitlist, promo codes, custom fields, sale notifications, sales CSV export, Stripe payments, no Event Schedule branding, custom CSS, event graphics, the embeddable ticket widget, REST API and webhooks, and 100 newsletter emails a month.",
                 "availability": "https://schema.org/InStock"
@@ -112,7 +112,7 @@
             {
                 "@type": "Offer",
                 "name": "Enterprise",
-                "price": "15.00",
+                "price": "{{ number_format($entMonthly, 2) }}",
                 "priceCurrency": "USD",
                 "description": "Everything in Pro plus your own custom domain, up to five team members, internal and unlisted events, AI flyer and style generation, AI agenda scanning, WhatsApp event creation, 1,000 newsletter emails a month, and priority support.",
                 "availability": "https://schema.org/InStock"
@@ -897,7 +897,7 @@
                     <div class="es-swap-card p-6" data-reveal="panel">
                         <div class="mb-3 flex flex-wrap items-center gap-2">
                             <h3 class="es-swap-band-ink text-lg font-bold">Pro</h3>
-                            <span class="es-swap-plan es-swap-plan-pro">$5 a month</span>
+                            <span class="es-swap-plan es-swap-plan-pro">${{ $proMonthly }} a month</span>
                         </div>
                         <p class="es-swap-band-muted text-sm leading-relaxed">
                             Ticketing with QR check-in and the check-in dashboard. Custom fields on the form, waitlist, promo codes, sales export. Event graphics, the embeddable ticket widget, the REST API and webhooks. 100 newsletter emails a month.
@@ -906,7 +906,7 @@
                     <div class="es-swap-card p-6" data-reveal="panel">
                         <div class="mb-3 flex flex-wrap items-center gap-2">
                             <h3 class="es-swap-band-ink text-lg font-bold">Enterprise</h3>
-                            <span class="es-swap-plan es-swap-plan-pro">$15 a month</span>
+                            <span class="es-swap-plan es-swap-plan-pro">${{ $entMonthly }} a month</span>
                         </div>
                         <p class="es-swap-band-muted text-sm leading-relaxed">
                             Your own domain. Up to five team members. Internal and unlisted events. AI flyer and style generation, AI agenda scanning, WhatsApp event creation, and 1,000 newsletter emails a month.

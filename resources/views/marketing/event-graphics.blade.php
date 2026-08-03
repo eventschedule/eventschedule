@@ -1,6 +1,6 @@
 <x-marketing-layout>
     @php
-        $proMonthly = (int) config('services.stripe_platform.price_monthly_amount', 5);
+        $proMonthly = (int) config('services.stripe_platform.price_monthly_amount', 9);
         $trialDays = (int) config('app.trial_days', 7);
 
         // The wall in the hero: six upcoming events, each with its own flyer.

@@ -573,7 +573,7 @@
             ],
             [
                 'q' => 'Can I sell different ticket types for my conference?',
-                'a' => 'Yes, and selling starts on the free plan. Create as many named ticket types as the conference needs, each with its own price, quantity and sales window, and sell up to 25 paid tickets a month. Pro at $5 a month takes that ceiling off and adds discount codes, add-ons and individual tickets, which give every attendee their own confirmation email and QR code; custom questions collect what you need at checkout. Event Schedule charges zero platform fees at every plan level: you connect your own Stripe account and Stripe\'s processing fee is the only cut. For a free conference, registration with a capacity limit is unlimited on the free plan.',
+                'a' => 'Yes, and selling starts on the free plan. Create as many named ticket types as the conference needs, each with its own price, quantity and sales window, and sell up to 25 paid tickets a month. Pro at $'.$proMonthly.' a month takes that ceiling off and adds discount codes, add-ons and individual tickets, which give every attendee their own confirmation email and QR code; custom questions collect what you need at checkout. Event Schedule charges zero platform fees at every plan level: you connect your own Stripe account and Stripe\'s processing fee is the only cut. For a free conference, registration with a capacity limit is unlimited on the free plan.',
             ],
             [
                 'q' => 'How do attendees hear about the next edition?',
@@ -984,7 +984,7 @@
                         Name your prices. <span class="es-agenda-accent">Keep the money.</span>
                     </h2>
                     <p class="es-agenda-muted mb-6 text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
-                        A free conference needs nothing but registration and a capacity, and that is on the free plan. So is charging for one: named ticket types, each with its own price, quantity and sales window, and the first 25 paid tickets every month. Pro at five dollars takes the ceiling off and adds individual tickets, discount codes and add-ons. Event Schedule takes nothing from either.
+                        A free conference needs nothing but registration and a capacity, and that is on the free plan. So is charging for one: named ticket types, each with its own price, quantity and sales window, and the first 25 paid tickets every month. Pro at ${{ $proMonthly }} takes the ceiling off and adds individual tickets, discount codes and add-ons. Event Schedule takes nothing from either.
                     </p>
                     <ul class="es-agenda-muted space-y-3" data-reveal-group="70">
                         <li class="flex gap-3" data-reveal>
@@ -1426,7 +1426,7 @@
                         One event. <span class="es-agenda-lit">The whole day inside it.</span>
                     </h2>
                     <p class="es-agenda-muted mx-auto mb-10 max-w-2xl text-lg">
-                        Publishing the running order, the join link and the calendar sync is free forever. So is selling, for the first 25 tickets a month; five dollars lifts the ceiling. Event Schedule takes nothing out of what you sell either way.
+                        Publishing the running order, the join link and the calendar sync is free forever. So is selling, for the first 25 tickets a month; ${{ $proMonthly }} lifts the ceiling. Event Schedule takes nothing out of what you sell either way.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

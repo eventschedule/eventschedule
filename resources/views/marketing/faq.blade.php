@@ -512,10 +512,10 @@
 
         // Prices and the trial length come from the same config the /pricing page
         // reads, so the rate card cannot quietly disagree with it.
-        $proMonthly = (int) config('services.stripe_platform.price_monthly_amount', 5);
-        $proYearly = (int) config('services.stripe_platform.price_yearly_amount', 50);
-        $entMonthly = (int) config('services.stripe_platform.enterprise_price_monthly_amount', 15);
-        $entYearly = (int) config('services.stripe_platform.enterprise_price_yearly_amount', 150);
+        $proMonthly = (int) config('services.stripe_platform.price_monthly_amount', 9);
+        $proYearly = (int) config('services.stripe_platform.price_yearly_amount', 90);
+        $entMonthly = (int) config('services.stripe_platform.enterprise_price_monthly_amount', 29);
+        $entYearly = (int) config('services.stripe_platform.enterprise_price_yearly_amount', 290);
         $trialDays = (int) config('app.trial_days', 7);
 
         $faqGroups = [

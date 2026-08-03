@@ -24,10 +24,10 @@
     $isEnterprise = $tier === 'enterprise';
     $monthly = (int) config($isEnterprise
         ? 'services.stripe_platform.enterprise_price_monthly_amount'
-        : 'services.stripe_platform.price_monthly_amount', $isEnterprise ? 15 : 5);
+        : 'services.stripe_platform.price_monthly_amount', $isEnterprise ? 29 : 9);
     $yearly = (int) config($isEnterprise
         ? 'services.stripe_platform.enterprise_price_yearly_amount'
-        : 'services.stripe_platform.price_yearly_amount', $isEnterprise ? 150 : 50);
+        : 'services.stripe_platform.price_yearly_amount', $isEnterprise ? 290 : 90);
 
     // Nearly every free schedule is trial-eligible, and "start a free trial" converts far better
     // than "subscribe". Demo schedules see the explanation but never a way to buy.

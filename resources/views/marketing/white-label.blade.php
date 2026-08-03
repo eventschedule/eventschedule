@@ -25,7 +25,7 @@
         ],
         "offers": {
             "@type": "Offer",
-            "price": "5",
+            "price": "{{ $proMonthly }}",
             "priceCurrency": "USD",
             "description": "Available on Pro plan"
         }
@@ -858,7 +858,7 @@
 
                     <p class="mt-7" data-reveal>
                         <span class="es-slate2-plan es-slate2-plan-pro">Pro</span>
-                        <span class="es-slate2-muted ms-2 text-sm">Included on Pro at $5 a month, and on Enterprise.</span>
+                        <span class="es-slate2-muted ms-2 text-sm">Included on Pro at ${{ $proMonthly }} a month, and on Enterprise.</span>
                     </p>
                 </div>
 
@@ -1235,7 +1235,7 @@
 
             <div class="grid gap-5 md:grid-cols-3" data-reveal-group="110">
                 @foreach ([
-                    ['01', 'Upgrade the schedule', 'Pro at $5 a month, or Enterprise. The strip is gone on the next page load, with nothing else to do.'],
+                    ['01', 'Upgrade the schedule', 'Pro at ${{ $proMonthly }} a month, or Enterprise. The strip is gone on the next page load, with nothing else to do.'],
                     ['02', 'Re-copy your embed snippets', 'Only if you had already pasted one. Both snippets carry that line in your HTML, not ours. The widget footer inside the frame goes on its own.'],
                     ['03', 'Fill the space', 'Logo, colour, font and background are free. Custom labels, a banner and Custom CSS come with the same plan.'],
                 ] as [$n, $t, $d])
@@ -1387,7 +1387,7 @@
                         Take the name off <span class="es-slate2-grad">and put yours on</span>.
                     </h2>
                     <p class="es-slate2-muted mx-auto mb-10 max-w-xl text-lg sm:text-xl">
-                        Claim the schedule for nothing, style it for nothing, and pay five dollars a
+                        Claim the schedule for nothing, style it for nothing, and pay ${{ $proMonthly }} a
                         month when you want the last strip gone.
                     </p>
 

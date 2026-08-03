@@ -249,7 +249,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Is Event Schedule free?</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Yes, with no time limit and no credit card. The free plan covers unlimited events, your own schedule URL, calendar sync, analytics, RSVP with capacity limits, embedding your calendar, one appointment type, selling up to 25 paid tickets a month with no platform fee, and 10 newsletter emails a month (each recipient counts as one email, so one send to 100 followers uses 100). Pro is $5 a month and removes the ticket cap, Enterprise is $15 a month for custom domains and team features, and both start with a 7-day free trial.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Yes, with no time limit and no credit card. The free plan covers unlimited events, your own schedule URL, calendar sync, analytics, RSVP with capacity limits, embedding your calendar, one appointment type, selling up to 25 paid tickets a month with no platform fee, and 10 newsletter emails a month (each recipient counts as one email, so one send to 100 followers uses 100). Pro is ${{ $proMonthly }} a month and removes the ticket cap, Enterprise is ${{ $entMonthly }} a month for custom domains and team features, and both start with a 7-day free trial.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">My schedule page will not open. What is wrong?</h4>
@@ -322,7 +322,7 @@
                     "name": "Is Event Schedule free?",
                     "acceptedAnswer": {
                         "@type": "Answer",
-                        "text": "Yes, with no time limit and no credit card. The free plan covers unlimited events, your own schedule URL, calendar sync, analytics, RSVP with capacity limits, embedding your calendar, one appointment type, selling up to 25 paid tickets a month with no platform fee, and 10 newsletter emails a month (each recipient counts as one email). Pro is $5 a month and removes the ticket cap, Enterprise is $15 a month for custom domains and team features, and both start with a 7-day free trial."
+                        "text": "Yes, with no time limit and no credit card. The free plan covers unlimited events, your own schedule URL, calendar sync, analytics, RSVP with capacity limits, embedding your calendar, one appointment type, selling up to 25 paid tickets a month with no platform fee, and 10 newsletter emails a month (each recipient counts as one email). Pro is ${{ $proMonthly }} a month and removes the ticket cap, Enterprise is ${{ $entMonthly }} a month for custom domains and team features, and both start with a 7-day free trial."
                     }
                 },
                 {

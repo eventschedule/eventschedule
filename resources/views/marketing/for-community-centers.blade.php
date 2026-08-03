@@ -626,7 +626,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for community centers?',
-                'a' => 'Yes, and most of what a center needs is on the free plan: the public program calendar and its own link, recurring programs with date exceptions, sub-schedules, free RSVP sign-up with an optional capacity, the embeddable calendar, two-way Google, Outlook and CalDAV sync, iCal downloads, the downloadable QR code, built-in analytics, member photos and comments with an approval queue (25 photos on the free plan), and 10 newsletter emails a month. Newsletter allowances count each recipient as one email, so ten emails means ten people; Pro raises it to 100 a month and Enterprise to 1,000. Even selling a paid class is free, up to 25 paid tickets a month per schedule, and Event Schedule charges zero platform fees on the sale whatever plan you are on. Pro at $5 a month lifts that ceiling.',
+                'a' => 'Yes, and most of what a center needs is on the free plan: the public program calendar and its own link, recurring programs with date exceptions, sub-schedules, free RSVP sign-up with an optional capacity, the embeddable calendar, two-way Google, Outlook and CalDAV sync, iCal downloads, the downloadable QR code, built-in analytics, member photos and comments with an approval queue (25 photos on the free plan), and 10 newsletter emails a month. Newsletter allowances count each recipient as one email, so ten emails means ten people; Pro raises it to 100 a month and Enterprise to 1,000. Even selling a paid class is free, up to 25 paid tickets a month per schedule, and Event Schedule charges zero platform fees on the sale whatever plan you are on. Pro at $'.$proMonthly.' a month lifts that ceiling.',
             ],
             [
                 'q' => 'Can I organize classes, meetings, and events by category?',
@@ -1058,7 +1058,7 @@
 
             <p class="es-gather-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
                 <span class="es-gather-plan es-gather-plan-pro">Pro</span>
-                <span class="ms-2">At $5 a month Pro lifts the 25-a-month ceiling on paid tickets and adds
+                <span class="ms-2">At ${{ $proMonthly }} a month Pro lifts the 25-a-month ceiling on paid tickets and adds
                 passes, discount codes, the waitlist and the sales CSV. Free sign-up with a capacity is
                 never counted against that number, and for a lot of centers that is the whole requirement.</span>
             </p>

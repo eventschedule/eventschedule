@@ -657,7 +657,7 @@
             ],
             [
                 'q' => 'How do I get my own events on the rack?',
-                'a' => 'Create a schedule, confirm your email address, and publish a public event with a picture. That is free forever, and so are recurring dates, sub-schedules, two-way calendar sync, registration with a capacity limit, the embeddable calendar and 10 newsletter emails a month. Selling tickets is $5 a month on the Pro plan, and Event Schedule takes zero platform fees on what you sell.',
+                'a' => 'Create a schedule, confirm your email address, and publish a public event with a picture. That is free forever, and so are recurring dates, sub-schedules, two-way calendar sync, registration with a capacity limit, the embeddable calendar and 10 newsletter emails a month. Selling tickets is $'.$proMonthly.' a month on the Pro plan, and Event Schedule takes zero platform fees on what you sell.',
             ],
         ];
 

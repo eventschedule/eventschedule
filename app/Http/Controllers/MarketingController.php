@@ -691,7 +691,7 @@ class MarketingController extends Controller
 
             'eventschedule' => [
                 'name' => 'Event Schedule',
-                'monthly' => (int) config('services.stripe_platform.price_monthly_amount', 5),
+                'monthly' => (int) config('services.stripe_platform.price_monthly_amount', 9),
                 'percent' => 0.0,
                 'fixed' => 0.0,
                 'label' => '0% platform fee',

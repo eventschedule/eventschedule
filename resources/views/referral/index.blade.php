@@ -71,7 +71,7 @@
                             {{ ucfirst($credit->plan_type) }}
                         </span>
                         <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                            {{ $credit->plan_type === 'enterprise' ? '$15' : '$5' }} {{ __('messages.credit') }}
+                            ${{ $credit->plan_type === 'enterprise' ? $entMonthly : $proMonthly }} {{ __('messages.credit') }}
                         </span>
                     </div>
                     <form action="{{ route('referrals.apply_credit') }}" method="POST" class="flex items-center gap-2">
@@ -116,7 +116,9 @@
             </div>
             <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <p class="text-sm text-gray-600 dark:text-gray-400">
-                    {{ __('messages.referral_credit_values') }}
+                    {{-- Bare numbers: each translation keeps its own currency placement
+                         (English "$5", French "5 $"), so the symbol stays in the string. --}}
+                    {{ __('messages.referral_credit_values', ['pro' => $proMonthly, 'enterprise' => $entMonthly]) }}
                 </p>
             </div>
         </div>

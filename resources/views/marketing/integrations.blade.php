@@ -672,7 +672,7 @@
         $faqs = [
             [
                 'q' => 'Which integrations are free?',
-                'a' => 'Two-way calendar sync with Google Calendar, Outlook or Microsoft 365 and any CalDAV server is free on every plan, and so is the nearby-accommodation map. So are the two money ports: selling starts free at twenty-five paid tickets a month per schedule, with zero platform fees on every plan. Pro at $5 a month takes that ceiling off and adds webhooks, the REST API, web push, Eventbrite import and ad boosting. Creating events over WhatsApp is the one Enterprise port, at $15. Selfhosted installs resolve to the top tier, so every port is on from the first boot.',
+                'a' => 'Two-way calendar sync with Google Calendar, Outlook or Microsoft 365 and any CalDAV server is free on every plan, and so is the nearby-accommodation map. So are the two money ports: selling starts free at twenty-five paid tickets a month per schedule, with zero platform fees on every plan. Pro at $'.$proMonthly.' a month takes that ceiling off and adds webhooks, the REST API, web push, Eventbrite import and ad boosting. Creating events over WhatsApp is the one Enterprise port, at $'.$entMonthly.'. Selfhosted installs resolve to the top tier, so every port is on from the first boot.',
             ],
             [
                 'q' => 'Is the calendar sync really two-way?',
@@ -906,7 +906,7 @@
                     </table>
                 </div>
                 <p class="es-wire-muted mt-5 text-xs">
-                    Selfhosted installs resolve to the top tier, so every port above is on from the first boot. On the hosted platform, Pro is $5 a month and Enterprise, which the WhatsApp port needs, is $15.
+                    Selfhosted installs resolve to the top tier, so every port above is on from the first boot. On the hosted platform, Pro is ${{ $proMonthly }} a month and Enterprise, which the WhatsApp port needs, is ${{ $entMonthly }}.
                 </p>
             </div>
         </div>
@@ -1475,7 +1475,7 @@
                         Pick a port. <span class="es-wire-lit">Wire it up.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg es-wire-onband-muted">
-                        Calendar sync, the accommodation map and your first twenty-five ticket sales a month are free forever. Five dollars a month takes the ticket ceiling off and adds webhooks, the API, push and the imports. Nothing is taken from the door on any plan.
+                        Calendar sync, the accommodation map and your first twenty-five ticket sales a month are free forever. ${{ $proMonthly }} a month takes the ticket ceiling off and adds webhooks, the API, push and the imports. Nothing is taken from the door on any plan.
                     </p>
 
                     {{-- The last port on the panel is the reader's own, and it is the only

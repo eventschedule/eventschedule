@@ -27,9 +27,83 @@ class SendSubscriptionReminders extends Command
         }
 
         $this->sendTrialReminders();
+        $this->sendCompedWindDownReminders();
         $this->sendRenewalReminders();
 
         return 0;
+    }
+
+    /**
+     * Reminders for the wind-down trials set by app:wind-down-comped-plans.
+     *
+     * sendTrialReminders() above only sees Stripe `Subscription` rows with
+     * stripe_status = 'trialing'. A comped schedule has no subscription row at all - that is
+     * precisely how the wind-down identifies it - so without this those trials would end in
+     * silence.
+     *
+     * Three touches rather than one, because these people never chose to start a trial and
+     * are being asked to pay for something that was free. trial_reminder_sent_at holds the
+     * last touch, so each window fires at most once.
+     */
+    protected function sendCompedWindDownReminders(): void
+    {
+        $this->info('Checking for comped wind-down reminders...');
+
+        $windows = [14, 3, 1];
+        $sent = 0;
+
+        foreach ($windows as $daysOut) {
+            $target = Carbon::today()->addDays($daysOut);
+
+            $roles = Role::query()
+                ->where('plan_source', 'admin')
+                ->where('is_deleted', false)
+                ->whereNotNull('trial_ends_at')
+                ->whereBetween('trial_ends_at', [$target->copy()->startOfDay(), $target->copy()->endOfDay()])
+                ->whereDoesntHave('subscriptions')
+                ->get();
+
+            foreach ($roles as $role) {
+                if (! $role->user) {
+                    continue;
+                }
+
+                // Already reminded inside this window.
+                if ($role->trial_reminder_sent_at
+                    && $role->trial_reminder_sent_at->greaterThan(now()->subDays($daysOut))) {
+                    continue;
+                }
+
+                try {
+                    $isEnterprise = $role->plan_type === 'enterprise';
+                    $amount = (int) config($isEnterprise
+                        ? 'services.stripe_platform.enterprise_price_monthly_amount'
+                        : 'services.stripe_platform.price_monthly_amount', $isEnterprise ? 29 : 9);
+
+                    Mail::to($role->user->email)->send(new SubscriptionTrialEnding(
+                        $role,
+                        $amount,
+                        $isEnterprise ? 'Enterprise' : 'Pro',
+                        $role->trial_ends_at->format('F j, Y'),
+                        $role->hasDefaultPaymentMethod(),
+                    ));
+
+                    $role->trial_reminder_sent_at = now();
+                    $role->save();
+
+                    $this->info("Sent {$daysOut}-day wind-down reminder to {$role->subdomain}.");
+                    $sent++;
+                } catch (\Exception $e) {
+                    $this->error("Failed wind-down reminder for {$role->subdomain}: {$e->getMessage()}");
+                    Log::error('Failed to send comped wind-down reminder', [
+                        'role_id' => $role->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+        }
+
+        $this->info("Wind-down reminders: {$sent} sent.");
     }
 
     protected function sendTrialReminders(): void

@@ -76,12 +76,12 @@ return [
         'webhook_secret' => env('STRIPE_PLATFORM_WEBHOOK_SECRET'),
         'price_monthly' => env('STRIPE_PRICE_MONTHLY'),
         'price_yearly' => env('STRIPE_PRICE_YEARLY'),
-        'price_monthly_amount' => env('STRIPE_PRICE_MONTHLY_AMOUNT', '5'),
-        'price_yearly_amount' => env('STRIPE_PRICE_YEARLY_AMOUNT', '50'),
+        'price_monthly_amount' => env('STRIPE_PRICE_MONTHLY_AMOUNT', '9'),
+        'price_yearly_amount' => env('STRIPE_PRICE_YEARLY_AMOUNT', '90'),
         'enterprise_price_monthly' => env('STRIPE_ENTERPRISE_PRICE_MONTHLY'),
         'enterprise_price_yearly' => env('STRIPE_ENTERPRISE_PRICE_YEARLY'),
-        'enterprise_price_monthly_amount' => env('STRIPE_ENTERPRISE_PRICE_MONTHLY_AMOUNT', '15'),
-        'enterprise_price_yearly_amount' => env('STRIPE_ENTERPRISE_PRICE_YEARLY_AMOUNT', '150'),
+        'enterprise_price_monthly_amount' => env('STRIPE_ENTERPRISE_PRICE_MONTHLY_AMOUNT', '29'),
+        'enterprise_price_yearly_amount' => env('STRIPE_ENTERPRISE_PRICE_YEARLY_AMOUNT', '290'),
     ],
 
     'invoiceninja' => [

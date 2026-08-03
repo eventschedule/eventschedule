@@ -10,8 +10,40 @@
             $isOwner = auth()->user()->id == $role->user_id;
         @endphp
 
+        {{-- Wind-down notice for an admin-granted plan that is now on a dated runway.
+             These owners never started a trial - the plan was comped - so the generic
+             "your trial expires" banner below would read as a mistake. Explains what is
+             ending, what they keep for free, and what it costs to continue. --}}
+        @php
+            $isCompedWindDown = $role->plan_source === 'admin'
+                && $role->onGenericTrial()
+                && $isOwner;
+            $windDownPrice = (int) config($role->plan_type === 'enterprise'
+                ? 'services.stripe_platform.enterprise_price_monthly_amount'
+                : 'services.stripe_platform.price_monthly_amount',
+                $role->plan_type === 'enterprise' ? 29 : 9);
+        @endphp
+
+        @if ($isCompedWindDown)
+        <div class="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-900/20">
+            <div class="flex items-start gap-2">
+                <svg class="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <div>
+                    <p class="font-medium text-amber-800 dark:text-amber-200">
+                        {{ __('messages.comped_plan_ending_title', ['date' => $role->trial_ends_at->format('F j, Y')]) }}
+                    </p>
+                    <p class="mt-1 text-sm text-amber-700 dark:text-amber-300">
+                        {{ __('messages.comped_plan_ending_body', ['price' => '$'.$windDownPrice]) }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        @endif
+
         {{-- Trial Expiration Warning Banner --}}
-        @if ($role->onGenericTrial() && $role->trialDaysRemaining() <= 30 && $isOwner)
+        @if (! $isCompedWindDown && $role->onGenericTrial() && $role->trialDaysRemaining() <= 30 && $isOwner)
         <div class="mb-6 p-4 rounded-lg {{ $role->trialDaysRemaining() <= 7 ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800' : 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800' }}">
             <div class="flex items-start">
                 <svg class="w-5 h-5 {{ $role->trialDaysRemaining() <= 7 ? 'text-red-500' : 'text-yellow-500' }} mt-0.5 me-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">

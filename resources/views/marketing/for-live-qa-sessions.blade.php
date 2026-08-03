@@ -620,11 +620,11 @@
             ],
             [
                 'q' => 'Can I charge for live Q&A sessions?',
-                'a' => 'Yes, and you do not have to pay us before you start. Connect your own Stripe account and sell named ticket types for a premium AMA or a paid deep dive, each with its own price, quantity and sales window. The free plan sells up to 25 paid tickets a month per schedule, and scanning a ticket\'s QR code at the door is free on every plan; Pro, at five dollars a month, removes that ceiling and adds the rest of the door tooling, including the live check-in dashboard, discount codes, add-ons and a waitlist on a sold-out ticket type. Event Schedule charges zero platform fees at every plan level, free included, so past Stripe\'s own processing fee the money is yours. Free sessions do not need any of this: registration with a place limit is free.',
+                'a' => 'Yes, and you do not have to pay us before you start. Connect your own Stripe account and sell named ticket types for a premium AMA or a paid deep dive, each with its own price, quantity and sales window. The free plan sells up to 25 paid tickets a month per schedule, and scanning a ticket\'s QR code at the door is free on every plan; Pro, at $'.$proMonthly.' a month, removes that ceiling and adds the rest of the door tooling, including the live check-in dashboard, discount codes, add-ons and a waitlist on a sold-out ticket type. Event Schedule charges zero platform fees at every plan level, free included, so past Stripe\'s own processing fee the money is yours. Free sessions do not need any of this: registration with a place limit is free.',
             ],
             [
                 'q' => 'Is Event Schedule free for hosting Q&A sessions?',
-                'a' => 'Yes. Unlimited sessions, registration with a capacity limit, the agenda, recurring office hours, the embeddable calendar, the embeddable registration widget, two-way Google, Outlook and CalDAV sync, built-in analytics and newsletters are all free forever. Selling is free to start too, at 25 paid tickets a month. Polls, custom questions on the registration form and unlimited ticket sales are on the Pro plan at five dollars a month. There are zero platform fees on ticket sales on every plan.',
+                'a' => 'Yes. Unlimited sessions, registration with a capacity limit, the agenda, recurring office hours, the embeddable calendar, the embeddable registration widget, two-way Google, Outlook and CalDAV sync, built-in analytics and newsletters are all free forever. Selling is free to start too, at 25 paid tickets a month. Polls, custom questions on the registration form and unlimited ticket sales are on the Pro plan at $'.$proMonthly.' a month. There are zero platform fees on ticket sales on every plan.',
             ],
             [
                 'q' => 'Do my followers get an email when I schedule a new session?',
@@ -1154,7 +1154,7 @@
                             </table>
                         </div>
                         <p class="es-conv-muted mt-5 text-xs">
-                            Pro is five dollars a month, and on the ticketing row it is what lifts the free plan's ceiling of 25 paid tickets a month. Zero platform fees on ticket sales applies on every plan, including the free one.
+                            Pro is ${{ $proMonthly }} a month, and on the ticketing row it is what lifts the free plan's ceiling of 25 paid tickets a month. Zero platform fees on ticket sales applies on every plan, including the free one.
                         </p>
                     </div>
                 </div>
@@ -1525,7 +1525,7 @@
                         You already have the answers. <span class="es-conv-lit">Give them somewhere to ask.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg es-conv-onband">
-                        Publishing your sessions, the agenda and registration with a place limit are free forever, and so are your first 25 paid tickets a month. Five dollars a month buys polls and no ceiling on what you sell. Nothing is ever taken from the door.
+                        Publishing your sessions, the agenda and registration with a place limit are free forever, and so are your first 25 paid tickets a month. ${{ $proMonthly }} a month buys polls and no ceiling on what you sell. Nothing is ever taken from the door.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

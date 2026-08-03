@@ -436,7 +436,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for music venues?',
-                'a' => 'Yes. Publishing your listings, adding set times for every act on a bill, running recurring residencies, splitting rooms into sub-schedules, accepting booking requests, and two-way sync with Google, Outlook or CalDAV are all free forever. Ticketing with QR check-in, the check-in dashboard, event graphics and passes are on the Pro plan at $5 a month.',
+                'a' => 'Yes. Publishing your listings, adding set times for every act on a bill, running recurring residencies, splitting rooms into sub-schedules, accepting booking requests, and two-way sync with Google, Outlook or CalDAV are all free forever. Ticketing with QR check-in, the check-in dashboard, event graphics and passes are on the Pro plan at $'.$proMonthly.' a month.',
             ],
             [
                 'q' => 'Can I publish set times for each band on the bill?',

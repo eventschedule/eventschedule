@@ -1166,8 +1166,8 @@
         // reusing it here would read as a warning rather than a comparison.
         // Plan prices come from the same config keys /pricing reads, so the two pages
         // can never quote different numbers.
-        $hostedProMonthly = (int) config('services.stripe_platform.price_monthly_amount', 5);
-        $hostedEntMonthly = (int) config('services.stripe_platform.enterprise_price_monthly_amount', 15);
+        $hostedProMonthly = (int) config('services.stripe_platform.price_monthly_amount', 9);
+        $hostedEntMonthly = (int) config('services.stripe_platform.enterprise_price_monthly_amount', 29);
         $comparison = [
             [
                 'title' => 'Hosted',

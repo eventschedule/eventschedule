@@ -552,7 +552,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for workshop instructors?',
-                'a' => 'Yes. Publishing your classes, running one as a weekly series, capping the seats with free registration, sorting strands into sub-schedules, emailing the students who follow you and syncing two ways with Google, Outlook or CalDAV are all free forever. So is selling, up to 25 paid spots a month, and so is scanning the QR at the door on every plan. Lifting that ceiling, plus multi-class cards, custom questions at checkout and the live check-in screen, is the Pro plan at $5 a month, and Event Schedule charges zero platform fees on what you sell.',
+                'a' => 'Yes. Publishing your classes, running one as a weekly series, capping the seats with free registration, sorting strands into sub-schedules, emailing the students who follow you and syncing two ways with Google, Outlook or CalDAV are all free forever. So is selling, up to 25 paid spots a month, and so is scanning the QR at the door on every plan. Lifting that ceiling, plus multi-class cards, custom questions at checkout and the live check-in screen, is the Pro plan at $'.$proMonthly.' a month, and Event Schedule charges zero platform fees on what you sell.',
             ],
             [
                 'q' => 'Can I run different kinds of workshops on one schedule?',
@@ -1416,7 +1416,7 @@
                         Pin up the sheet. <span class="es-shop-lit">Fill the bench.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg es-shop-wall-muted">
-                        Publishing your classes, capping the seats and emailing the students who follow you are free forever, and so are the first 25 paid spots a month. Unlimited sales and class cards are five dollars a month, and nothing is taken off the top.
+                        Publishing your classes, capping the seats and emailing the students who follow you are free forever, and so are the first 25 paid spots a month. Unlimited sales and class cards are ${{ $proMonthly }} a month, and nothing is taken off the top.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

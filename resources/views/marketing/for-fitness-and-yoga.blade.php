@@ -619,7 +619,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for fitness and yoga instructors?',
-                'a' => 'Yes. Publishing your timetable, setting classes up as recurring events, free registration with a capacity limit per date, two-way Google, Outlook and CalDAV sync, the embeddable timetable, built-in analytics and newsletters to 10 recipients a month are all free forever, and so is selling up to 25 paid drop-ins a month. Scanning a QR code at the door is free on every plan too. Class passes, an unlimited number of paid visits and the live check-in dashboard are on the Pro plan at $5 a month, and Event Schedule charges zero platform fees on what you sell, free plan included.',
+                'a' => 'Yes. Publishing your timetable, setting classes up as recurring events, free registration with a capacity limit per date, two-way Google, Outlook and CalDAV sync, the embeddable timetable, built-in analytics and newsletters to 10 recipients a month are all free forever, and so is selling up to 25 paid drop-ins a month. Scanning a QR code at the door is free on every plan too. Class passes, an unlimited number of paid visits and the live check-in dashboard are on the Pro plan at $'.$proMonthly.' a month, and Event Schedule charges zero platform fees on what you sell, free plan included.',
             ],
             [
                 'q' => 'Can I schedule recurring weekly classes?',
@@ -631,7 +631,7 @@
             ],
             [
                 'q' => 'Can I sell class passes and drop-ins?',
-                'a' => 'Yes, through your own Stripe account. Single drop-ins sell on the free plan, up to 25 paid tickets a month, and the Pro plan at $5 a month takes that ceiling off. Passes are the Pro half: alongside a single drop-in you can sell a visit pass with a set number of visits, a membership that is unlimited until it expires, a festival pass good for each covered class once, or a season pass covering every occurrence of one recurring class. Set how long the pass lasts, whether it covers the whole schedule, one sub-schedule or named classes, and how many people it admits at each class. Event Schedule charges zero platform fees on either plan, so past Stripe\'s own processing the money is yours.',
+                'a' => 'Yes, through your own Stripe account. Single drop-ins sell on the free plan, up to 25 paid tickets a month, and the Pro plan at $'.$proMonthly.' a month takes that ceiling off. Passes are the Pro half: alongside a single drop-in you can sell a visit pass with a set number of visits, a membership that is unlimited until it expires, a festival pass good for each covered class once, or a season pass covering every occurrence of one recurring class. Set how long the pass lasts, whether it covers the whole schedule, one sub-schedule or named classes, and how many people it admits at each class. Event Schedule charges zero platform fees on either plan, so past Stripe\'s own processing the money is yours.',
             ],
             [
                 'q' => 'What happens when somebody cancels at the last minute?',
@@ -643,7 +643,7 @@
             ],
             [
                 'q' => 'Can my other teachers log in?',
-                'a' => 'The free plan is one login. Multiple team members, capped at five, are an Enterprise feature at $15 a month, as is the availability tab that tracks which team members are around on which days. If you only need the timetable to say who is teaching, put the instructor in the class itself and stay on the free plan.',
+                'a' => 'The free plan is one login. Multiple team members, capped at five, are an Enterprise feature at $'.$entMonthly.' a month, as is the availability tab that tracks which team members are around on which days. If you only need the timetable to say who is teaching, put the instructor in the class itself and stay on the free plan.',
             ],
         ];
 
@@ -1542,7 +1542,7 @@
                         Your classes. Your students. <span class="es-flow-lit">No middleman.</span>
                     </h2>
                     <p class="es-flow-muted mx-auto mb-10 max-w-2xl text-lg sm:text-xl">
-                        Publishing the timetable is free forever, and so is selling your first 25 drop-ins a month. Passes, an unlimited count and the check-in dashboard are five dollars a month, and nothing is taken off the door.
+                        Publishing the timetable is free forever, and so is selling your first 25 drop-ins a month. Passes, an unlimited count and the check-in dashboard are ${{ $proMonthly }} a month, and nothing is taken off the door.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

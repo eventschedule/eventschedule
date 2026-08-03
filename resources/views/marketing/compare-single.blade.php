@@ -170,7 +170,7 @@
             {
                 "@type": "Offer",
                 "name": "Pro",
-                "price": "5.00",
+                "price": "{{ number_format($proMonthly, 2) }}",
                 "priceCurrency": "USD",
                 "description": "Everything in Free plus ticketing with QR check-ins and live dashboard, ticket waitlist, sale notifications, sales CSV export, Stripe payments, remove branding, custom CSS, event graphics, REST API, and webhooks.",
                 "availability": "https://schema.org/InStock"
@@ -178,7 +178,7 @@
             {
                 "@type": "Offer",
                 "name": "Enterprise",
-                "price": "15.00",
+                "price": "{{ number_format($entMonthly, 2) }}",
                 "priceCurrency": "USD",
                 "description": "Everything in Pro plus AI style generation, AI content generation, AI flyer generation, WhatsApp event creation, custom domains, multiple team members, and priority support.",
                 "availability": "https://schema.org/InStock"

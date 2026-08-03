@@ -21,6 +21,10 @@ class MarketingDailyStat extends Model
         'visitors',
         'page_views',
         'signup_views',
+        'docs_page_views',
+        'docs_visitors',
+        'signup_code_requests',
+        'signup_code_verified',
     ];
 
     protected $casts = [
@@ -30,8 +34,19 @@ class MarketingDailyStat extends Model
     /**
      * The countable columns. Whitelisted so the value interpolated into the raw
      * statement below can never be user-influenced.
+     *
+     * docs_page_views / docs_visitors are a SUBSET of page_views / visitors, not a
+     * sibling bucket: buyer-intent traffic is (visitors - docs_visitors).
      */
-    public const COLUMNS = ['visitors', 'page_views', 'signup_views'];
+    public const COLUMNS = [
+        'visitors',
+        'page_views',
+        'signup_views',
+        'docs_page_views',
+        'docs_visitors',
+        'signup_code_requests',
+        'signup_code_verified',
+    ];
 
     /**
      * Atomically increment one of the daily counters for today (UTC).

@@ -19,7 +19,7 @@
         // calculator verbatim, so the three pages can never quote different totals.
         // Eventbrite's 3.7% + $1.79 bundles payment processing; ours does not, so
         // the Stripe fee is shown on our side rather than claimed as zero.
-        $proMonthly = (int) config('services.stripe_platform.price_monthly_amount', 5);
+        $proMonthly = (int) config('services.stripe_platform.price_monthly_amount', 9);
         $feeTickets = 200;
         $feePrice = 25;
         $feeRevenue = $feeTickets * $feePrice;

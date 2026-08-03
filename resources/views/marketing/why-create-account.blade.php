@@ -537,7 +537,7 @@
             ],
             [
                 'q' => 'Does an account cost anything?',
-                'a' => 'No. The account is free and asks for no card. What costs money is a schedule you run, once you want more than the free plan: the free plan sells up to 25 paid tickets a month and scans the QR code on every one of them at the door, Pro at $5 a month makes ticket sales unlimited and adds the live check-in dashboard, custom fields and a waitlist, and Enterprise at $15 a month adds multiple team members and custom domains. Event Schedule charges zero platform fees on ticket sales on every plan, the free one included, so past the payment processor the money is yours.',
+                'a' => 'No. The account is free and asks for no card. What costs money is a schedule you run, once you want more than the free plan: the free plan sells up to 25 paid tickets a month and scans the QR code on every one of them at the door, Pro at $'.$proMonthly.' a month makes ticket sales unlimited and adds the live check-in dashboard, custom fields and a waitlist, and Enterprise at $'.$entMonthly.' a month adds multiple team members and custom domains. Event Schedule charges zero platform fees on ticket sales on every plan, the free one included, so past the payment processor the money is yours.',
             ],
             [
                 'q' => 'What actually changes when I submit an event signed in?',
@@ -917,7 +917,7 @@
                      same baseline even though the paragraphs above them differ in length. --}}
                 <div class="es-key-card flex flex-col p-7" data-reveal="panel">
                     <h3 class="es-key-ink mb-3 text-lg font-bold">It is not a paywall</h3>
-                    <p class="es-key-muted mb-4 text-sm leading-relaxed">Every key on this page is on the free plan, and the account asks for no card at sign-up or afterwards. What the paid plans buy is capability for a schedule you run: the free plan already sells up to 25 paid tickets a month and scans them at the door, Pro at $5 a month takes that ceiling off and adds the live check-in dashboard, custom fields and a waitlist, and Enterprise at $15 a month adds multiple team members, custom domains and AI agenda scanning.</p>
+                    <p class="es-key-muted mb-4 text-sm leading-relaxed">Every key on this page is on the free plan, and the account asks for no card at sign-up or afterwards. What the paid plans buy is capability for a schedule you run: the free plan already sells up to 25 paid tickets a month and scans them at the door, Pro at ${{ $proMonthly }} a month takes that ceiling off and adds the live check-in dashboard, custom fields and a waitlist, and Enterprise at ${{ $entMonthly }} a month adds multiple team members, custom domains and AI agenda scanning.</p>
                     <div class="es-key-inset mt-auto p-4">
                         <p class="es-key-muted text-xs leading-relaxed">Newsletters, two-way calendar sync, analytics, the embeddable calendar and free registration with a capacity limit are all on the free plan. That is unusual enough to be worth stating outright rather than implying.</p>
                     </div>

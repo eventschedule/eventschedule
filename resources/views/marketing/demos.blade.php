@@ -596,7 +596,7 @@
         $faqs = [
             [
                 'q' => 'Can I create a schedule like these?',
-                'a' => 'Yes. Everything it takes to publish a schedule like the ones on this page is free forever: unlimited events, recurring dates, sub-schedules, your own colors and header image, free registration with a capacity, two-way calendar sync and an embeddable calendar. Selling starts free too, at 25 paid tickets a month per schedule, and scanning those codes at the door is free on every plan. Five dollars a month lifts the ceiling and adds the live check-in dashboard. Event Schedule charges no platform fees on ticket sales, on any plan.',
+                'a' => 'Yes. Everything it takes to publish a schedule like the ones on this page is free forever: unlimited events, recurring dates, sub-schedules, your own colors and header image, free registration with a capacity, two-way calendar sync and an embeddable calendar. Selling starts free too, at 25 paid tickets a month per schedule, and scanning those codes at the door is free on every plan. $'.$proMonthly.' a month lifts the ceiling and adds the live check-in dashboard. Event Schedule charges no platform fees on ticket sales, on any plan.',
             ],
             [
                 'q' => 'Are these real schedules?',
@@ -1097,7 +1097,7 @@
                         There is a space on this floor <span class="es-show-lit">with your name on it.</span>
                     </h2>
                     <p class="es-show-muted mx-auto mb-10 max-w-2xl text-lg sm:text-xl">
-                        Publishing a schedule and its dates is free forever, and so are the first 25 paid tickets you sell each month and scanning them in at the door. Five dollars a month lifts that ceiling and adds the live check-in dashboard, and nothing is taken from the door on any plan.
+                        Publishing a schedule and its dates is free forever, and so are the first 25 paid tickets you sell each month and scanning them in at the door. ${{ $proMonthly }} a month lifts that ceiling and adds the live check-in dashboard, and nothing is taken from the door on any plan.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

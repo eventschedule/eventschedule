@@ -235,6 +235,66 @@ class GrowthExportTest extends TestCase
         $this->assertSame(1, $row[$i['paid_tickets_total']], 'only the one real paid ticket counts');
     }
 
+    /**
+     * ticket_types counts every row in `tickets`, including the free RSVP/registration types
+     * that most schedules use. Only paid_ticket_types says a schedule intends to take money -
+     * the distinction that decides how large a paid-ticketing gate would actually be.
+     */
+    public function test_paid_ticket_types_excludes_free_and_rsvp_types(): void
+    {
+        $role = $this->freeRole();
+        $event = $this->createEvent($role);
+
+        $this->createTicket($event, ['price' => 15, 'quantity' => 100]);
+        $this->createTicket($event, ['price' => 0, 'quantity' => 100]);
+        $this->createTicket($event, ['price' => 0, 'quantity' => 100]);
+
+        $data = $this->build();
+        $i = array_flip($data['schedules']['columns']);
+        $row = $data['schedules']['rows'][0];
+
+        $this->assertSame(3, $row[$i['ticket_types']], 'every type counts toward ticket_types');
+        $this->assertSame(1, $row[$i['paid_ticket_types']], 'only the priced type is commercial');
+
+        $venue = collect($data['segments']['by_schedule_type'])->firstWhere('key', 'venue');
+        $this->assertSame(1, $venue['with_ticket_type']);
+        $this->assertSame(1, $venue['with_paid_ticket_type']);
+    }
+
+    /**
+     * Retention used to count ANY page view in 90 days as "active", so every cohort scored
+     * ~100% retained forever and the metric could never fall. It now means the owner did
+     * something: touched an event, or sold a paid ticket.
+     */
+    public function test_retention_activity_ignores_page_views(): void
+    {
+        // A schedule whose only signal is traffic on its public page.
+        $viewedOnly = $this->freeRole();
+        \App\Models\AnalyticsDaily::create([
+            'role_id' => $viewedOnly->id,
+            'date' => now()->subDays(2)->toDateString(),
+            'desktop_views' => 40,
+        ]);
+
+        $data = $this->build();
+        $i = array_flip($data['schedules']['columns']);
+        $row = collect($data['schedules']['rows'])->firstWhere($i['sid'], $data['schedules']['rows'][0][$i['sid']]);
+
+        $this->assertGreaterThan(0, $row[$i['views_90d']], 'the page views are still recorded');
+        $this->assertSame(0, $row[$i['events_recent_90d']], 'but nothing was published');
+
+        $month = collect($data['retention'])->firstWhere('month', $viewedOnly->created_at->format('Y-m'));
+        $this->assertSame(0, $month['active_recently'], 'views alone must not read as active');
+        $this->assertSame(1, $month['visited_recently'], 'the audience-side reading is kept separately');
+
+        // Publishing an event flips it to active.
+        $this->createEvent($viewedOnly);
+
+        $after = collect($this->build()['retention'])
+            ->firstWhere('month', $viewedOnly->created_at->format('Y-m'));
+        $this->assertSame(1, $after['active_recently']);
+    }
+
     public function test_revenue_is_reported_per_currency_not_summed(): void
     {
         $role = $this->freeRole();

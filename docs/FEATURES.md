@@ -12,8 +12,17 @@ This file is the single source of truth for which features belong to each plan t
 | Tier | Price (monthly) | Price (yearly) | Code method |
 |------|----------------|----------------|-------------|
 | Free | $0 | $0 | default (neither `isPro()` nor `isEnterprise()`) |
-| Pro | $5 | $50 | `$role->isPro()` (returns true for Pro AND Enterprise) |
-| Enterprise | $15 | $150 | `$role->isEnterprise()` |
+| Pro | $9 | $90 | `$role->isPro()` (returns true for Pro AND Enterprise) |
+| Enterprise | $29 | $290 | `$role->isEnterprise()` |
+
+Prices are set by `STRIPE_PRICE_MONTHLY_AMOUNT` / `STRIPE_PRICE_YEARLY_AMOUNT` /
+`STRIPE_ENTERPRISE_PRICE_MONTHLY_AMOUNT` / `STRIPE_ENTERPRISE_PRICE_YEARLY_AMOUNT`, with the
+defaults above in `config/services.php`. Never hardcode a price in a view: the marketing site
+and the referral page read them from a view composer in `AppServiceProvider`, and
+`tests/Feature/MarketingPriceTest.php` fails the build if a literal creeps back in.
+
+Existing subscribers keep whatever price their Stripe subscription was created at - Cashier
+pins the price on the subscription item, so a change here only affects new checkouts.
 
 Selfhosted deployments get all Enterprise features (`isPro()` and `isEnterprise()` both return `true`).
 

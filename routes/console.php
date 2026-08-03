@@ -154,6 +154,15 @@ Schedule::call(function () {
     }
 })->daily()->appendOutputTo(storage_path('logs/scheduler.log'));
 
+// Hourly rather than daily: the first nudge is due one hour after signup, and 91% of the
+// people who activate do so inside that first hour - a daily pass would reach the rest a day
+// late, long after the moment has gone.
+Schedule::call(function () {
+    if (config('app.hosted')) {
+        Artisan::call('app:send-onboarding-nudges', ['--apply' => true]);
+    }
+})->hourly()->name('send-onboarding-nudges')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+
 Schedule::call(function () {
     Artisan::call('app:notify-request-changes');
     Artisan::call('app:notify-fan-content-changes');

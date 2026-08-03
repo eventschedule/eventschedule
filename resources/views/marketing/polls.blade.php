@@ -547,7 +547,7 @@
             ],
             [
                 'q' => 'Is there a free version of polls?',
-                'a' => 'Polls are a Pro feature at $5 a month, included on Enterprise, and selfhosted installations get them too. If you want to ask your audience something on the free plan, newsletters are free at 10 emails a month, counted per recipient rather than per send, and collecting followers costs nothing on any plan.',
+                'a' => 'Polls are a Pro feature at $'.$proMonthly.' a month, included on Enterprise, and selfhosted installations get them too. If you want to ask your audience something on the free plan, newsletters are free at 10 emails a month, counted per recipient rather than per send, and collecting followers costs nothing on any plan.',
             ],
         ];
 
@@ -1325,7 +1325,7 @@
                         Stop guessing. <span class="es-vote-lit">Put it to a vote.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg es-vote-band-muted">
-                        Claim your schedule, publish your events, and add a poll to the next one. Publishing is free forever. Polls are on the Pro plan at $5 a month.
+                        Claim your schedule, publish your events, and add a poll to the next one. Publishing is free forever. Polls are on the Pro plan at ${{ $proMonthly }} a month.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

@@ -604,7 +604,7 @@
             ],
             [
                 'q' => 'Is one platform really cheaper than five?',
-                'a' => 'Publishing a schedule is free forever, and that free plan already covers the page, unlimited events, two-way Google, Outlook and CalDAV sync, RSVP with a capacity per date, selling up to 25 paid tickets a month, one appointment type, built-in analytics, the embeddable calendar and newsletters at ten emails a month. Pro is five dollars a month and takes the ceiling off the selling, then adds QR check-in, event graphics, more appointment types and the API. Enterprise is fifteen. Event Schedule charges zero platform fees on ticket sales on every plan, free included, so the door money is yours minus Stripe\'s processing fee.',
+                'a' => 'Publishing a schedule is free forever, and that free plan already covers the page, unlimited events, two-way Google, Outlook and CalDAV sync, RSVP with a capacity per date, selling up to 25 paid tickets a month, one appointment type, built-in analytics, the embeddable calendar and newsletters at ten emails a month. Pro is $'.$proMonthly.' a month and takes the ceiling off the selling, then adds QR check-in, event graphics, more appointment types and the API. Enterprise is $'.$entMonthly.'. Event Schedule charges zero platform fees on ticket sales on every plan, free included, so the door money is yours minus Stripe\'s processing fee.',
             ],
             [
                 'q' => 'What does Event Schedule not replace?',
@@ -697,7 +697,7 @@
                         </div>
                     </div>
                     <p class="es-belt-on-muted es-belt-xs mt-3 text-center">
-                        Twelve loops on one strap. Free to publish and to sell your first 25 tickets a month, five dollars a month for the paid half, and zero platform fees on every plan.
+                        Twelve loops on one strap. Free to publish and to sell your first 25 tickets a month, ${{ $proMonthly }} a month for the paid half, and zero platform fees on every plan.
                     </p>
                 </div>
             </div>
@@ -777,7 +777,7 @@
                     <div class="es-belt-out" data-reveal="panel">
                         <p class="es-belt-count mb-2"><span data-count-to="12">12</span> &rarr; 1</p>
                         <h3 class="es-belt-on mb-2 text-lg font-bold">Accounts</h3>
-                        <p class="es-belt-on-muted es-belt-small">Twelve sign-ups, twelve password resets, twelve sets of terms. Here it is one account, free to publish or five dollars a month.</p>
+                        <p class="es-belt-on-muted es-belt-small">Twelve sign-ups, twelve password resets, twelve sets of terms. Here it is one account, free to publish or ${{ $proMonthly }} a month.</p>
                     </div>
                     <div class="es-belt-out" data-reveal="panel">
                         <p class="es-belt-count mb-2"><span data-count-to="12">12</span> &rarr; 1</p>
@@ -885,7 +885,7 @@
                     </tbody>
                 </table>
                 <p class="es-belt-muted es-belt-xs mt-5">
-                    Free is free forever. Pro is $5 a month, Enterprise is $15, and a selfhosted install has every one of them switched on. Where a row shows more than one pill, the basic job is free and the paid pills mark the parts that are not.
+                    Free is free forever. Pro is ${{ $proMonthly }} a month, Enterprise is ${{ $entMonthly }}, and a selfhosted install has every one of them switched on. Where a row shows more than one pill, the basic job is free and the paid pills mark the parts that are not.
                 </p>
             </div>
 
@@ -981,7 +981,7 @@
 
                 <div class="es-belt-card flex flex-col p-7" data-reveal="panel">
                     <div class="mb-4 flex items-baseline gap-2">
-                        <span class="es-belt-ink text-3xl font-black">$5</span>
+                        <span class="es-belt-ink text-3xl font-black">${{ $proMonthly }}</span>
                         <span class="es-belt-tier es-belt-tier-pro">Pro</span>
                     </div>
                     <h3 class="es-belt-ink mb-3 text-lg font-bold">Sell without a ceiling</h3>
@@ -1000,7 +1000,7 @@
 
                 <div class="es-belt-card flex flex-col p-7" data-reveal="panel">
                     <div class="mb-4 flex items-baseline gap-2">
-                        <span class="es-belt-ink text-3xl font-black">$15</span>
+                        <span class="es-belt-ink text-3xl font-black">${{ $entMonthly }}</span>
                         <span class="es-belt-tier es-belt-tier-ent">Ent</span>
                     </div>
                     <h3 class="es-belt-ink mb-3 text-lg font-bold">Your domain, your team</h3>

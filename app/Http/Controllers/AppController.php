@@ -268,6 +268,14 @@ class AppController extends Controller
                     \Log::error('Scheduled command app:send-graphic-emails failed: '.$e->getMessage());
                     report($e);
                 }
+                // In the hourly block, not the daily one: the first nudge is due an hour
+                // after signup and the window it targets closes fast.
+                try {
+                    \Artisan::call('app:send-onboarding-nudges', ['--apply' => true]);
+                } catch (\Throwable $e) {
+                    \Log::error('Scheduled command app:send-onboarding-nudges failed: '.$e->getMessage());
+                    report($e);
+                }
                 try {
                     \Artisan::call('app:send-feedback-requests');
                 } catch (\Throwable $e) {

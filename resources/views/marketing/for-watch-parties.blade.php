@@ -610,7 +610,7 @@
             ],
             [
                 'q' => 'Can I charge for watch party access?',
-                'a' => 'Yes, and you can start charging on the free plan: 25 paid tickets a month per schedule, with free registration never counted against that. Create named ticket types with their own prices, quantities and sales windows, sell through your own Stripe account, and keep everything: Event Schedule takes zero platform fees on ticket sales at every plan level. Scanning tickets in at the door is free on every plan, and Pro at $5 a month removes the monthly cap and adds the live check-in dashboard, passes, promo codes and the ticket waitlist. Stripe charges its own processing fee (typically 2.9% + $0.30).',
+                'a' => 'Yes, and you can start charging on the free plan: 25 paid tickets a month per schedule, with free registration never counted against that. Create named ticket types with their own prices, quantities and sales windows, sell through your own Stripe account, and keep everything: Event Schedule takes zero platform fees on ticket sales at every plan level. Scanning tickets in at the door is free on every plan, and Pro at $'.$proMonthly.' a month removes the monthly cap and adds the live check-in dashboard, passes, promo codes and the ticket waitlist. Stripe charges its own processing fee (typically 2.9% + $0.30).',
             ],
             [
                 'q' => 'Can I schedule recurring watch parties?',
@@ -622,7 +622,7 @@
             ],
             [
                 'q' => 'Is Event Schedule free for hosting watch parties?',
-                'a' => 'Yes. Unlimited events and screening series, one join link per event, free registration with per-date caps, the published running order, built-in analytics, the embeddable calendar and two-way calendar sync are all free forever, and so are selling up to 25 paid tickets a month and scanning them in at the door. Pro at $5 a month lifts that cap and adds the live check-in dashboard and the rest of the door tooling, and there are zero platform fees on ticket sales at any level. You can also selfhost Event Schedule on your own server, where every Enterprise feature is included.',
+                'a' => 'Yes. Unlimited events and screening series, one join link per event, free registration with per-date caps, the published running order, built-in analytics, the embeddable calendar and two-way calendar sync are all free forever, and so are selling up to 25 paid tickets a month and scanning them in at the door. Pro at $'.$proMonthly.' a month lifts that cap and adds the live check-in dashboard and the rest of the door tooling, and there are zero platform fees on ticket sales at any level. You can also selfhost Event Schedule on your own server, where every Enterprise feature is included.',
             ],
         ];
 
@@ -1123,7 +1123,7 @@
                         Nothing is taken at the <span class="es-scr-accent">door.</span>
                     </h2>
                     <p class="es-scr-muted mb-6 text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
-                        A paid premiere, a benefit screening, a festival day pass. Selling starts on the free plan, twenty-five paid tickets a month, and five dollars a month takes the ceiling off and opens the door tooling. Payments run through your own Stripe account, and Event Schedule takes zero platform fees on every plan.
+                        A paid premiere, a benefit screening, a festival day pass. Selling starts on the free plan, twenty-five paid tickets a month, and ${{ $proMonthly }} a month takes the ceiling off and opens the door tooling. Payments run through your own Stripe account, and Event Schedule takes zero platform fees on every plan.
                     </p>
                     <ul class="es-scr-muted space-y-3" data-reveal-group="70">
                         <li class="flex gap-3" data-reveal>
@@ -1608,7 +1608,7 @@
                         House lights down. <span class="es-scr-lit">Roll it.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg es-scr-booth-muted">
-                        The running order, the door and the list are free forever, and so are your first twenty-five paid tickets a month. Five dollars a month takes the ceiling off, and nothing is taken at the door.
+                        The running order, the door and the list are free forever, and so are your first twenty-five paid tickets a month. ${{ $proMonthly }} a month takes the ceiling off, and nothing is taken at the door.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

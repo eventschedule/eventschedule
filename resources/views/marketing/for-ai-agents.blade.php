@@ -3,7 +3,7 @@
         // Single source for the price quoted in the JSON-LD offer and the FAQ,
         // read the same way /pricing reads it so an env override cannot desync
         // this page from billing.
-        $proMonthly = (int) config('services.stripe_platform.price_monthly_amount', 5);
+        $proMonthly = (int) config('services.stripe_platform.price_monthly_amount', 9);
     @endphp
 
     <x-slot name="title">REST API for AI Agents & Developers - Event Schedule</x-slot>

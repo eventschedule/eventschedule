@@ -927,7 +927,7 @@
                     <span class="es-ledg-plan es-ledg-plan-pro">Pro</span>
                     <span class="es-ledg-muted ml-2 text-sm">
                         No ceiling on ticket sales, plus the check-in dashboard, promo codes and gift
-                        cards, at $5 a month. Selfhosted installs get every Pro and Enterprise
+                        cards, at ${{ $proMonthly }} a month. Selfhosted installs get every Pro and Enterprise
                         feature, and no plan pays a platform fee on sales.
                     </span>
                 </p>

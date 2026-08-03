@@ -177,6 +177,17 @@ class RegisteredUserController extends Controller
         $tempUser->email = $email;
         Notification::route('mail', $email)->notifyNow(new SignupVerificationCode($code));
 
+        // Funnel step between "viewed /sign_up" and "verified account". Hosted signup makes
+        // people leave the tab for a 6-digit code, and nothing measured how many never came
+        // back. Deduped per day the same way signup_views is, so the ratio between them is
+        // apples-to-apples rather than inflated by resends.
+        $ip = request()->header('CF-Connecting-IP') ?? request()->ip();
+        if (! PageView::isBot(request()->userAgent())
+            && ! PageView::isSuspiciousRequest(request())
+            && PageView::isFirstDailyVisit('signup_code_request', $ip, request()->userAgent())) {
+            MarketingDailyStat::record('signup_code_requests');
+        }
+
         $response = [
             'success' => true,
             'message' => __('messages.code_sent'),
@@ -342,6 +353,10 @@ class RegisteredUserController extends Controller
                     'verification_code' => [__('messages.code_invalid')],
                 ]);
             }
+
+            // Closes the pair with signup_code_requests. Not deduped: the code is pulled from
+            // the cache above, so a success is already unique per signup.
+            MarketingDailyStat::record('signup_code_verified');
         }
 
         // Default to English if browser language is not supported

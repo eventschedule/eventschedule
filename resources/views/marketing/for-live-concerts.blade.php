@@ -616,7 +616,7 @@
             ],
             [
                 'q' => 'Can I sell virtual tickets and venue tickets for the same show?',
-                'a' => 'Yes. They are two named ticket types on the same date, so one can be "Standing" at thirty and the other "Livestream" at twelve, each with its own price, quantity and sales window. Selling is free up to 25 paid tickets a month and five dollars a month on Pro past that, and Event Schedule charges zero platform fees on the sale either way. The full stream link lives on the buyer\'s own ticket page: the public event page shows the room, or the domain you are streaming on when the date has no room at all.',
+                'a' => 'Yes. They are two named ticket types on the same date, so one can be "Standing" at thirty and the other "Livestream" at twelve, each with its own price, quantity and sales window. Selling is free up to 25 paid tickets a month and $'.$proMonthly.' a month on Pro past that, and Event Schedule charges zero platform fees on the sale either way. The full stream link lives on the buyer\'s own ticket page: the public event page shows the room, or the domain you are streaming on when the date has no room at all.',
             ],
             [
                 'q' => 'What streaming platforms does Event Schedule work with?',
@@ -624,7 +624,7 @@
             ],
             [
                 'q' => 'Is Event Schedule really free for streaming concerts?',
-                'a' => 'Yes. Unlimited dates, the whole routing on one address, recurring residencies with date exceptions, sub-schedules, two-way Google, Outlook and CalDAV sync, the embeddable calendar, free registration with a capacity limit, built-in analytics, ten newsletter recipients a month, selling up to 25 paid tickets a month and scanning them at the door are all free forever. Unlimited ticket sales, passes and the live check-in dashboard are five dollars a month on Pro. There are zero platform fees on ticket sales at every tier, and past your own Stripe account the money is yours.',
+                'a' => 'Yes. Unlimited dates, the whole routing on one address, recurring residencies with date exceptions, sub-schedules, two-way Google, Outlook and CalDAV sync, the embeddable calendar, free registration with a capacity limit, built-in analytics, ten newsletter recipients a month, selling up to 25 paid tickets a month and scanning them at the door are all free forever. Unlimited ticket sales, passes and the live check-in dashboard are $'.$proMonthly.' a month on Pro. There are zero platform fees on ticket sales at every tier, and past your own Stripe account the money is yours.',
             ],
             [
                 'q' => 'What happens when a date moves or gets pulled?',
@@ -825,7 +825,7 @@
                     <p class="es-stage-muted text-sm">Platform fees on every ticket you sell, on every plan. Your own Stripe account, your money.</p>
                 </div>
                 <div class="es-stage-card p-6 text-center" data-reveal="panel">
-                    <div class="es-stage-accent es-stage-num mb-1 text-3xl font-black">$5</div>
+                    <div class="es-stage-accent es-stage-num mb-1 text-3xl font-black">${{ $proMonthly }}</div>
                     <p class="es-stage-muted text-sm">A month for Pro. The free plan sells 25 paid tickets a month and scans the door already; Pro takes the ceiling off and adds passes and the check-in dashboard.</p>
                 </div>
                 <div class="es-stage-card p-6 text-center" data-reveal="panel">
@@ -1457,7 +1457,7 @@
                         Put the routing up. <span class="es-stage-lit">Keep the door.</span>
                     </h2>
                     <p class="es-stage-onmuted mx-auto mb-10 max-w-2xl text-lg sm:text-xl">
-                        Publishing the whole run is free forever, and so are your first 25 ticket sales a month and scanning them at the door. Five dollars a month takes the ceiling off and adds passes and the check-in dashboard, and nothing is taken from the sale.
+                        Publishing the whole run is free forever, and so are your first 25 ticket sales a month and scanning them at the door. ${{ $proMonthly }} a month takes the ceiling off and adds passes and the check-in dashboard, and nothing is taken from the sale.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

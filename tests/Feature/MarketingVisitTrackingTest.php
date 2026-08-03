@@ -71,6 +71,44 @@ class MarketingVisitTrackingTest extends TestCase
         $this->assertSame(3, $this->pageViews());
     }
 
+    /**
+     * Docs and selfhost readers are counted as a SUBSET of the totals, so buyer-intent traffic
+     * is (visitors - docs_visitors). Without this split a selfhoster reading /docs/installation
+     * sits in the same denominator as someone on /pricing, and the headline visitor -> signup
+     * rate cannot tell a conversion problem from a traffic-mix one.
+     */
+    public function test_docs_and_selfhost_traffic_is_counted_as_a_subset(): void
+    {
+        config(['app.is_nexus' => true]);
+
+        // A product page: counted in the totals, not in the docs bucket.
+        $this->track(routeName: 'marketing.pricing');
+        $this->assertSame(1, $this->visitors());
+        $this->assertSame(0, $this->docsVisitors());
+        $this->assertSame(0, $this->docsPageViews());
+
+        // A docs page from a different IP: counted in BOTH the totals and the docs bucket.
+        $this->track(['HTTP_CF_CONNECTING_IP' => '203.0.113.20'], 'marketing.docs.installation');
+        $this->assertSame(2, $this->visitors());
+        $this->assertSame(1, $this->docsVisitors());
+        $this->assertSame(1, $this->docsPageViews());
+
+        // The selfhost landing page counts as docs traffic too.
+        $this->track(['HTTP_CF_CONNECTING_IP' => '203.0.113.30'], 'marketing.selfhost');
+        $this->assertSame(3, $this->visitors());
+        $this->assertSame(2, $this->docsVisitors());
+
+        // Buyer-intent traffic is what is left.
+        $this->assertSame(1, $this->visitors() - $this->docsVisitors());
+
+        // The docs bucket dedupes on its own key, so a second docs view from an already-counted
+        // IP adds a page view but not a visitor - matching how the totals behave.
+        $this->track(['HTTP_CF_CONNECTING_IP' => '203.0.113.20'], 'marketing.docs.installation');
+        $this->assertSame(2, $this->docsVisitors());
+        $this->assertSame(3, $this->docsPageViews());
+        $this->assertLessThanOrEqual($this->visitors(), $this->docsVisitors());
+    }
+
     public function test_marketing_counter_ignores_guest_portal_routes(): void
     {
         config(['app.is_nexus' => true]);
@@ -134,5 +172,15 @@ class MarketingVisitTrackingTest extends TestCase
     private function pageViews(): int
     {
         return (int) ($this->stat()?->page_views ?? 0);
+    }
+
+    private function docsVisitors(): int
+    {
+        return (int) ($this->stat()?->docs_visitors ?? 0);
+    }
+
+    private function docsPageViews(): int
+    {
+        return (int) ($this->stat()?->docs_page_views ?? 0);
     }
 }

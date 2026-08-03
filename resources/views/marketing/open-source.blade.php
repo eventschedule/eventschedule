@@ -539,7 +539,7 @@
         // Every row is backed by a gate that tests config('app.hosted').
         $diffRows = [
             ['Selling tickets with Stripe payouts', 'Free, up to 25 paid tickets a month', 'Included, no cap'],
-            ['QR check-in, waitlists, promo codes and passes', 'Pro, five dollars a month', 'Included'],
+            ['QR check-in, waitlists, promo codes and passes', 'Pro, $'.$proMonthly.' a month', 'Included'],
             ['REST API and webhooks', 'Pro', 'Included'],
             ['Custom domain', 'Enterprise', 'The install is your domain'],
             ['Team members on one schedule', 'Up to five, on Enterprise', 'No cap'],
@@ -604,7 +604,7 @@
             ],
             [
                 'q' => 'Is the REST API free on eventschedule.com?',
-                'a' => 'No. API access is a Pro feature at five dollars a month, and the check runs on reads as well as writes: under app/Http/Controllers/Api a single-resource route answers 403 for a free schedule, and a list route filters non-Pro schedules out with the wherePro() scope. On a selfhosted install it is on by default, because a selfhost resolves to the top tier.',
+                'a' => 'No. API access is a Pro feature at $'.$proMonthly.' a month, and the check runs on reads as well as writes: under app/Http/Controllers/Api a single-resource route answers 403 for a free schedule, and a list route filters non-Pro schedules out with the wherePro() scope. On a selfhosted install it is on by default, because a selfhost resolves to the top tier.',
             ],
             [
                 'q' => 'What are the API rate limits?',
@@ -816,7 +816,7 @@
                             <span class="es-commit-plan es-commit-plan-pro">Yours</span>
                         </div>
                         <p class="es-commit-muted text-sm leading-relaxed">
-                            You take on the server, the database, the backups, the TLS certificate, the cron entry and the upgrade window. On eventschedule.com those are ours, and the bill is five dollars a month, or fifteen for the two Enterprise lines above. Selfhosting is not free, it is differently priced, and pretending otherwise would be the first false claim on this page.
+                            You take on the server, the database, the backups, the TLS certificate, the cron entry and the upgrade window. On eventschedule.com those are ours, and the bill is ${{ $proMonthly }} a month, or ${{ $entMonthly }} for the two Enterprise lines above. Selfhosting is not free, it is differently priced, and pretending otherwise would be the first false claim on this page.
                         </p>
                         <p class="mt-4">
                             <a href="{{ marketing_url('/selfhost') }}" class="es-commit-link inline-flex items-center gap-1 text-sm font-semibold transition-all hover:gap-2">
@@ -900,7 +900,7 @@
                     </div>
                     <h3 class="es-commit-ink mt-4 mb-3 text-lg font-bold">The gate</h3>
                     <p class="es-commit-muted text-sm leading-relaxed">
-                        On eventschedule.com the API is a Pro feature at five dollars a month, and the check runs on reads too: a single-resource route answers 403, a list route filters non-Pro schedules out. On a selfhost the same check passes by default.
+                        On eventschedule.com the API is a Pro feature at ${{ $proMonthly }} a month, and the check runs on reads too: a single-resource route answers 403, a list route filters non-Pro schedules out. On a selfhost the same check passes by default.
                     </p>
                     <p class="mt-auto pt-4">
                         <a href="{{ marketing_url('/docs/developer/api') }}" class="es-commit-link inline-flex items-center gap-1 text-sm font-semibold transition-all hover:gap-2">

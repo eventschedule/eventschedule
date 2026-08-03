@@ -141,5 +141,20 @@ class AppServiceProvider extends ServiceProvider
             $view->with('githubStars', \App\Utils\GitHubUtils::getStars());
         });
 
+        // Single source for every plan price the marketing site quotes. These used to be
+        // hardcoded in ~140 places across 50-odd pages, so changing STRIPE_PRICE_*_AMOUNT
+        // moved /pricing and left the rest of the site advertising the old number. The
+        // guard test in tests/Feature/MarketingPriceTest.php keeps it that way.
+        // referral.index is here for the same reason: it is the one AP view that hardcoded
+        // the credit values rather than reading config.
+        View::composer(['marketing.*', 'referral.index'], function ($view) {
+            $view->with([
+                'proMonthly' => (int) config('services.stripe_platform.price_monthly_amount', 9),
+                'proYearly' => (int) config('services.stripe_platform.price_yearly_amount', 90),
+                'entMonthly' => (int) config('services.stripe_platform.enterprise_price_monthly_amount', 29),
+                'entYearly' => (int) config('services.stripe_platform.enterprise_price_yearly_amount', 290),
+            ]);
+        });
+
     }
 }
