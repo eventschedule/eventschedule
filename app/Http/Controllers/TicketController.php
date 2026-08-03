@@ -1044,548 +1044,12 @@ class TicketController extends Controller
         // that could lead to overselling tickets
         try {
             $sale = DB::transaction(function () use ($request, $event, $user, $subdomain, $isPaymentLink) {
-                // Check ticket availability with row locking (skip for payment link mode)
-                if (! $isPaymentLink) {
-                    // Resolve event_date for one-time events (hidden field may be empty)
-                    $eventDate = $request->event_date;
-                    if (! $eventDate && $event->starts_at) {
-                        $eventDate = $event->saleEventDateFromStartsAt();
-                    }
+                $this->assertLegTicketsAvailable($request, $event, $isPaymentLink);
 
-                    // A season pass (valid for all dates) can't be combined with single-date
-                    // tickets in one order - the scan window would otherwise be ambiguous.
-                    $selectedTicketIds = collect($request->tickets ?? [])
-                        ->filter(fn ($q) => (int) $q > 0)
-                        ->keys()
-                        ->map(fn ($id) => UrlUtils::decodeId($id));
-                    $selectedTickets = $event->tickets->whereIn('id', $selectedTicketIds);
-                    if ($selectedTickets->contains(fn ($t) => $t->is_pass) && $selectedTickets->contains(fn ($t) => ! $t->is_pass)) {
-                        throw new \App\Exceptions\BusinessException(__('messages.pass_cannot_combine'));
-                    }
-
-                    foreach ($request->tickets as $ticketId => $quantity) {
-                        if ($quantity > 0) {
-                            // Lock the ticket row to prevent concurrent modifications
-                            $ticketModel = $event->tickets()->lockForUpdate()->find(UrlUtils::decodeId($ticketId));
-
-                            if (! $ticketModel) {
-                                throw new \App\Exceptions\BusinessException(__('messages.ticket_not_found'));
-                            }
-
-                            if ($ticketModel->isSalesEnded()) {
-                                throw new \App\Exceptions\BusinessException(__('messages.tickets_not_available'));
-                            }
-
-                            if ($ticketModel->isSalesNotStarted()) {
-                                throw new \App\Exceptions\BusinessException(__('messages.tickets_not_available'));
-                            }
-
-                            if ($ticketModel->max_per_order && $quantity > $ticketModel->max_per_order) {
-                                throw new \App\Exceptions\BusinessException(__('messages.exceeded_max_per_order', [
-                                    'max' => $ticketModel->max_per_order,
-                                ]));
-                            }
-
-                            if ($ticketModel->quantity > 0) {
-                                // Handle combined mode logic (passes always use their own pool, never combined)
-                                if (! $ticketModel->is_pass && $event->total_tickets_mode === 'combined' && $event->hasSameTicketQuantities()) {
-                                    // Lock all tickets for combined mode
-                                    $lockedTickets = $event->tickets()->lockForUpdate()->get();
-                                    $totalSold = $lockedTickets->filter(fn ($ticket) => ! $ticket->is_pass)->sum(function ($ticket) use ($eventDate) {
-                                        return $ticket->soldCountFor($eventDate);
-                                    });
-                                    // Pass holders who booked this occurrence in advance occupy shared seats too.
-                                    $totalSold += $eventDate ? $event->passReservedSeats($eventDate) : 0;
-                                    // In combined mode, the total quantity is the same as individual quantity
-                                    $totalQuantity = $event->getSameTicketQuantity();
-                                    $remainingTickets = $totalQuantity - $totalSold;
-
-                                    // Check if the total requested quantity exceeds remaining tickets
-                                    $totalRequested = array_sum($request->tickets);
-                                    if ($totalRequested > $remainingTickets) {
-                                        throw new \App\Exceptions\BusinessException(__('messages.tickets_not_available'));
-                                    }
-                                } else {
-                                    $soldCount = $ticketModel->soldCountFor($eventDate);
-                                    $remainingTickets = $ticketModel->quantity - $soldCount;
-
-                                    if ($quantity > $remainingTickets) {
-                                        throw new \App\Exceptions\BusinessException(__('messages.tickets_not_available'));
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    // Pass advance-bookings share the per-occurrence seat pool with regular
-                    // sales, so a non-pass order can't exceed what's left after reservations.
-                    // The combined+equal-quantity case is already capped per-ticket above; this
-                    // covers individual / single-ticket modes. No-op when nothing is reserved
-                    // (the house equals the sum of per-ticket limits).
-                    $orderIsPass = $selectedTickets->contains(fn ($t) => $t->is_pass);
-                    if (! $orderIsPass && $eventDate
-                        && ! ($event->total_tickets_mode === 'combined' && $event->hasSameTicketQuantities())) {
-                        $event->setRelation('tickets', $event->tickets()->lockForUpdate()->get());
-                        $houseRemaining = $event->occurrenceSeatsRemaining($eventDate);
-                        if ($houseRemaining !== null && array_sum($request->tickets) > $houseRemaining) {
-                            throw new \App\Exceptions\BusinessException(__('messages.tickets_not_available'));
-                        }
-                    }
-
-                    // Check add-on availability. Add-ons are Pro, and a lapsed schedule keeps its
-                    // rows (they are made dormant, never deleted), so the sell path needs its own
-                    // check rather than relying on the row's absence.
-                    $addonSelections = $event->isPro() ? $request->input('addons', []) : [];
-                    foreach ($addonSelections as $addonId => $addonQty) {
-                        $addonQty = (int) $addonQty;
-                        if ($addonQty > 0) {
-                            $addonModel = $event->addons()->lockForUpdate()->find(UrlUtils::decodeId($addonId));
-
-                            if (! $addonModel) {
-                                throw new \App\Exceptions\BusinessException(__('messages.ticket_not_found'));
-                            }
-
-                            if ($addonModel->max_per_order && $addonQty > $addonModel->max_per_order) {
-                                throw new \App\Exceptions\BusinessException(__('messages.exceeded_max_per_order', [
-                                    'max' => $addonModel->max_per_order,
-                                ]));
-                            }
-
-                            if ($addonModel->quantity > 0) {
-                                $soldCount = $addonModel->soldCountFor($eventDate);
-                                $remaining = $addonModel->quantity - $soldCount;
-
-                                if ($addonQty > $remaining) {
-                                    throw new \App\Exceptions\BusinessException(__('messages.tickets_not_available'));
-                                }
-                            }
-                        }
-                    }
-                }
-
-                $sale = new Sale;
-                $sale->name = $request->input('name');
-                $sale->email = $request->input('email');
-                $sale->phone = $request->input('phone') ? strip_tags(trim($request->input('phone'))) : null;
-                $sale->event_date = $request->input('event_date');
-                $sale->subdomain = $subdomain;
-                $sale->event_id = $event->id;
-                $sale->user_id = $user ? $user->id : null;
-                $sale->secret = strtolower(Str::random(32));
-                $sale->payment_method = $event->payment_method;
-
-                // Capture UTM attribution
-                $utmParams = $request->session()->get('utm_params', []);
-                if (empty($utmParams) && $request->cookie('utm_params')) {
-                    $utmParams = json_decode($request->cookie('utm_params'), true) ?? [];
-                }
-                $sale->utm_source = $utmParams['utm_source'] ?? null;
-                $sale->utm_medium = $utmParams['utm_medium'] ?? null;
-                $sale->utm_campaign = $utmParams['utm_campaign'] ?? null;
-                if (($utmParams['utm_source'] ?? null) === 'boost' && ($utmParams['utm_campaign'] ?? null)) {
-                    // Verify the campaign exists before assigning it: sales.boost_campaign_id
-                    // carries a foreign key, so a crafted utm_campaign that decodes to an unknown
-                    // id would fail the INSERT and take the whole checkout down with it.
-                    $sale->boost_campaign_id = \App\Models\BoostCampaign::whereKey(
-                        UrlUtils::decodeId($utmParams['utm_campaign'])
-                    )->value('id');
-                }
-                if (($utmParams['utm_source'] ?? null) === 'newsletter' && ($utmParams['utm_campaign'] ?? null)) {
-                    $sale->newsletter_id = UrlUtils::decodeId($utmParams['utm_campaign']);
-                }
-
-                if (! $sale->event_date) {
-                    $sale->event_date = $event->saleEventDateFromStartsAt();
-                }
-
-                // Store event-level custom field values using stable indices
-                // Fallback to iteration order for backward compatibility with fields without index
-                $eventCustomValues = $request->input('event_custom_values', []);
-                $eventCustomFields = $event->custom_fields ?? [];
-                $fallbackIndex = 1;
-                foreach ($eventCustomFields as $fieldKey => $fieldConfig) {
-                    $index = $fieldConfig['index'] ?? $fallbackIndex;
-                    $fallbackIndex++;
-                    if ($index >= 1 && $index <= 10) {
-                        $value = $eventCustomValues[$fieldKey] ?? null;
-                        // Handle multiselect values (submitted as array)
-                        if (is_array($value)) {
-                            $value = implode(', ', array_map('trim', $value));
-                        }
-                        // Sanitize custom field values to prevent stored XSS
-                        if ($value !== null) {
-                            $value = trim(strip_tags($value));
-                        }
-                        $sale->{"custom_value{$index}"} = $value;
-                    }
-                }
-
+                $sale = $this->newSaleForLeg($request, $event, $user, $subdomain);
                 $sale->save();
 
-                if ($isPaymentLink) {
-                    // Payment link mode: quantities selected on IN, SaleTickets created by webhook
-                    $sale->payment_amount = 0;
-                } else {
-                    // Check if individual tickets mode is active
-                    $guests = $request->input('guests', []);
-                    $isIndividualTickets = $event->individual_tickets && count($guests) > 1;
-
-                    if ($isIndividualTickets) {
-                        // Validate no duplicate emails among guests
-                        $guestEmails = collect($guests)->pluck('email')->filter()->map(fn ($e) => strtolower(trim($e)));
-                        if ($guestEmails->count() !== $guestEmails->unique()->count()) {
-                            throw new \App\Exceptions\BusinessException(__('messages.duplicate_guest_emails'));
-                        }
-
-                        // Build flat list of ticket assignments for guests
-                        $ticketAssignments = [];
-                        $seatPrices = [];
-                        $subtotal = 0;
-                        foreach ($request->tickets as $ticketId => $quantity) {
-                            if ($quantity > 0) {
-                                $decodedId = UrlUtils::decodeId($ticketId);
-                                $ticketModel = $event->tickets()->findOrFail($decodedId);
-                                $subtotal += $ticketModel->price * $quantity;
-                                for ($i = 0; $i < $quantity; $i++) {
-                                    $ticketAssignments[] = $decodedId;
-                                    $seatPrices[] = (float) $ticketModel->price;
-                                }
-                            }
-                        }
-
-                        // Validate guest count matches ticket count
-                        if (count($ticketAssignments) !== count($guests)) {
-                            throw new \App\Exceptions\BusinessException(__('messages.error'));
-                        }
-
-                        // Primary sale gets the first ticket (qty=1)
-                        $primarySaleTicketData = [
-                            'ticket_id' => $ticketAssignments[0],
-                            'quantity' => 1,
-                            'seats' => json_encode([1 => null]),
-                        ];
-
-                        // Store per-guest ticket custom fields for primary guest
-                        if ($event->individual_ticket_fields) {
-                            $guestTicketCustomValues = $request->input('guest_ticket_custom_values', []);
-                            $primaryTicketModel = $event->tickets()->find($ticketAssignments[0]);
-                            $primaryTicketCustomFields = $primaryTicketModel->custom_fields ?? [];
-                            $ticketFallbackIndex = 1;
-                            foreach ($primaryTicketCustomFields as $fieldKey => $fieldConfig) {
-                                $index = $fieldConfig['index'] ?? $ticketFallbackIndex;
-                                $ticketFallbackIndex++;
-                                if ($index >= 1 && $index <= 10) {
-                                    $value = $guestTicketCustomValues[0][$fieldKey] ?? null;
-                                    if (is_array($value)) {
-                                        $value = implode(', ', array_map('trim', $value));
-                                    }
-                                    if ($value !== null) {
-                                        $value = trim(strip_tags($value));
-                                    }
-                                    $primarySaleTicketData["custom_value{$index}"] = $value;
-                                }
-                            }
-                        }
-
-                        $sale->saleTickets()->create($primarySaleTicketData);
-
-                        $sale->group_id = $sale->id;
-                        // payment_amount allocated per-seat after volume + promo below
-                    } else {
-                        // Standard flow: create SaleTickets with full quantities
-                        $ticketCustomValues = $request->input('ticket_custom_values', []);
-
-                        foreach ($request->tickets as $ticketId => $quantity) {
-                            if ($quantity > 0) {
-                                $ticketModel = $event->tickets()->findOrFail(UrlUtils::decodeId($ticketId));
-                                $ticketCustomFields = $ticketModel->custom_fields ?? [];
-
-                                $saleTicketData = [
-                                    'sale_id' => $sale->id,
-                                    'ticket_id' => UrlUtils::decodeId($ticketId),
-                                    'quantity' => $quantity,
-                                    'seats' => json_encode(array_fill(1, $quantity, null)),
-                                ];
-
-                                // Store ticket-level custom field values using stable indices
-                                $ticketFallbackIndex = 1;
-                                foreach ($ticketCustomFields as $fieldKey => $fieldConfig) {
-                                    $index = $fieldConfig['index'] ?? $ticketFallbackIndex;
-                                    $ticketFallbackIndex++;
-                                    if ($index >= 1 && $index <= 10) {
-                                        $value = $ticketCustomValues[$ticketId][$fieldKey] ?? null;
-                                        if (is_array($value)) {
-                                            $value = implode(', ', array_map('trim', $value));
-                                        }
-                                        if ($value !== null) {
-                                            $value = trim(strip_tags($value));
-                                        }
-                                        $saleTicketData["custom_value{$index}"] = $value;
-                                    }
-                                }
-
-                                $sale->saleTickets()->create($saleTicketData);
-                            }
-                        }
-
-                        $subtotal = $sale->calculateTotal();
-                        $sale->payment_amount = $subtotal;
-                    }
-
-                    // Capture seat-only subtotal (before add-ons) for per-seat allocation
-                    $seatsSubtotal = $isIndividualTickets ? $subtotal : 0;
-
-                    // Create SaleTickets for add-ons (attach to primary sale only). Pro-gated, same
-                    // as the availability check above.
-                    $addonSelections = $event->isPro() ? $request->input('addons', []) : [];
-                    $hasAddons = false;
-                    $addonTotal = 0;
-                    foreach ($addonSelections as $addonId => $addonQty) {
-                        $addonQty = (int) $addonQty;
-                        if ($addonQty > 0) {
-                            $addonModel = $event->addons()->findOrFail(UrlUtils::decodeId($addonId));
-                            $sale->saleTickets()->create([
-                                'ticket_id' => $addonModel->id,
-                                'quantity' => $addonQty,
-                                'seats' => json_encode(array_fill(1, $addonQty, null)),
-                            ]);
-                            $hasAddons = true;
-                        }
-                    }
-
-                    // Add add-on total to subtotal if add-ons were added
-                    if ($hasAddons) {
-                        $sale->load('saleTickets.ticket');
-                        $addonTotal = $sale->saleTickets->filter(fn ($st) => $st->ticket->is_addon)
-                            ->sum(fn ($st) => $st->ticket->price * $st->quantity);
-                        $subtotal += $addonTotal;
-                    }
-                    if (! $isIndividualTickets) {
-                        $sale->payment_amount = $subtotal;
-                    }
-
-                    $sale->loadMissing(['saleTickets.ticket']);
-                    foreach ($sale->saleTickets as $st) {
-                        if ($st->ticket) {
-                            $st->ticket->setRelation('event', $event);
-                        }
-                    }
-
-                    $volumeTotal = $isIndividualTickets
-                        ? TicketVolumeDiscount::totalVolumeDiscountForTicketQuantities($event, $request->tickets)
-                        : TicketVolumeDiscount::totalVolumeDiscountForSaleTickets($sale->saleTickets);
-                    $subtotalAfterVolume = $subtotal - $volumeTotal;
-
-                    // Apply promo code if provided (eligible subtotal is post-volume; see PromoCode::calculateDiscount)
-                    $promoCodeId = null;
-                    $discountTotal = 0;
-                    if ($request->promo_code) {
-                        $promoCode = PromoCode::where('event_id', $event->id)
-                            ->whereRaw('LOWER(code) = ?', [strtolower($request->promo_code)])
-                            ->lockForUpdate()
-                            ->first();
-
-                        if ($promoCode && $promoCode->isValid()) {
-                            if ($isIndividualTickets) {
-                                // Calculate discount from all ticket selections
-                                $allSaleTickets = collect();
-                                foreach ($request->tickets as $ticketId => $quantity) {
-                                    if ($quantity > 0) {
-                                        $decodedId = UrlUtils::decodeId($ticketId);
-                                        $ticketModel = $event->tickets()->find($decodedId);
-                                        if ($ticketModel) {
-                                            $ticketModel->setRelation('event', $event);
-                                            $fakeSaleTicket = new \App\Models\SaleTicket(['ticket_id' => $decodedId, 'quantity' => $quantity]);
-                                            $fakeSaleTicket->setRelation('ticket', $ticketModel);
-                                            $allSaleTickets->push($fakeSaleTicket);
-                                        }
-                                    }
-                                }
-                                $promoCode->setRelation('event', $event);
-                                $discountAmount = $promoCode->calculateDiscount($allSaleTickets);
-                            } else {
-                                $promoCode->setRelation('event', $event);
-                                $discountAmount = $promoCode->calculateDiscount($sale->saleTickets);
-                            }
-                            if ($discountAmount > 0) {
-                                $promoCodeId = $promoCode->id;
-                                $discountTotal = (float) $discountAmount;
-                                $promoCode->increment('times_used');
-                            }
-                        }
-                    }
-
-                    // Apply a gift card if provided (deducted after volume + promo). Unlike promo
-                    // codes, an unusable code aborts the checkout - a gift card is a payment
-                    // instrument, and silently charging full price would surprise the buyer.
-                    $giftCardId = null;
-                    $giftCardApplied = 0.0;
-                    if ($request->gift_card_code) {
-                        $giftCard = GiftCard::whereIn('role_id', $event->roles()->pluck('roles.id'))
-                            ->where('code', GiftCard::normalizeCode($request->gift_card_code))
-                            ->lockForUpdate()
-                            ->first();
-
-                        // Cards are sold through the schedule owner's payment account but redemption
-                        // reduces the event owner's payout, so both must be the same user.
-                        if (! $giftCard || $event->user_id !== $giftCard->role->user_id
-                            || ! $giftCard->isRedeemable($event->ticket_currency_code)) {
-                            throw new \App\Exceptions\BusinessException(__('messages.gift_card_invalid'));
-                        }
-
-                        $orderTotal = max(0, $subtotalAfterVolume - $discountTotal);
-                        $giftCardApplied = min((float) $giftCard->remaining_amount, $orderTotal);
-
-                        // Stripe refuses charges below ~50 smallest currency units; leave either
-                        // nothing to pay or at least the minimum (the sliver stays on the card).
-                        if ($event->payment_method === 'stripe') {
-                            $minCharge = 50 / MoneyUtils::getSmallestUnitMultiplier($event->ticket_currency_code);
-                            $remainder = $orderTotal - $giftCardApplied;
-                            if ($remainder > 0 && $remainder < $minCharge) {
-                                $giftCardApplied = max(0, $orderTotal - $minCharge);
-                            }
-                        }
-
-                        if ($giftCardApplied > 0) {
-                            $giftCard->decrement('remaining_amount', $giftCardApplied);
-                            $giftCardId = $giftCard->id;
-                        }
-                    }
-
-                    // Per-seat allocation for individual tickets, group total for standard flow
-                    if ($isIndividualTickets) {
-                        $seatCount = count($ticketAssignments);
-                        $seatVolumeShares = array_fill(0, $seatCount, 0.0);
-                        $seatPromoShares = array_fill(0, $seatCount, 0.0);
-
-                        if ($seatsSubtotal > 0 && $seatCount > 0) {
-                            $volumeAccum = 0.0;
-                            $promoAccum = 0.0;
-                            for ($i = 0; $i < $seatCount - 1; $i++) {
-                                $share = $seatPrices[$i] / $seatsSubtotal;
-                                $seatVolumeShares[$i] = round((float) $volumeTotal * $share, 2);
-                                $seatPromoShares[$i] = round($discountTotal * $share, 2);
-                                $volumeAccum += $seatVolumeShares[$i];
-                                $promoAccum += $seatPromoShares[$i];
-                            }
-                            // Last seat absorbs rounding residual so group totals reconcile exactly
-                            $seatVolumeShares[$seatCount - 1] = round((float) $volumeTotal - $volumeAccum, 2);
-                            $seatPromoShares[$seatCount - 1] = round($discountTotal - $promoAccum, 2);
-                        }
-
-                        // Gift card allocation: greedy waterfall over per-seat nets (primary first).
-                        // Proportional shares could push a seat negative when a ticket-restricted
-                        // promo skews the nets; greedy sums exactly with no rounding residue.
-                        $primaryNet = $seatPrices[0] - $seatVolumeShares[0] - $seatPromoShares[0] + $addonTotal;
-                        $seatGiftShares = array_fill(0, $seatCount, 0.0);
-                        if ($giftCardApplied > 0) {
-                            $remainingGift = $giftCardApplied;
-                            $seatGiftShares[0] = round(min(max(0, $primaryNet), $remainingGift), 3);
-                            $remainingGift = round($remainingGift - $seatGiftShares[0], 3);
-                            for ($i = 1; $i < $seatCount && $remainingGift > 0; $i++) {
-                                $net = max(0, $seatPrices[$i] - $seatVolumeShares[$i] - $seatPromoShares[$i]);
-                                $seatGiftShares[$i] = round(min($net, $remainingGift), 3);
-                                $remainingGift = round($remainingGift - $seatGiftShares[$i], 3);
-                            }
-                        }
-
-                        // Primary holds seat[0] + all add-ons
-                        $sale->payment_amount = max(0, $primaryNet - $seatGiftShares[0]);
-                        $sale->volume_discount_amount = $seatVolumeShares[0] > 0 ? $seatVolumeShares[0] : null;
-                        $sale->discount_amount = $seatPromoShares[0] > 0 ? $seatPromoShares[0] : null;
-                        if ($promoCodeId) {
-                            $sale->promo_code_id = $promoCodeId;
-                        }
-                        if ($giftCardId && $seatGiftShares[0] > 0) {
-                            $sale->gift_card_id = $giftCardId;
-                            $sale->gift_card_amount = $seatGiftShares[0];
-                        }
-                    } else {
-                        $sale->volume_discount_amount = $volumeTotal > 0 ? $volumeTotal : null;
-                        if ($promoCodeId) {
-                            $sale->promo_code_id = $promoCodeId;
-                            $sale->discount_amount = $discountTotal;
-                        }
-                        if ($giftCardId) {
-                            $sale->gift_card_id = $giftCardId;
-                            $sale->gift_card_amount = $giftCardApplied;
-                        }
-                        $sale->payment_amount = max(0, $subtotalAfterVolume - $discountTotal - $giftCardApplied);
-                    }
-
-                    // Create guest sales for individual tickets
-                    if ($isIndividualTickets) {
-                        for ($g = 1; $g < count($guests); $g++) {
-                            $guestData = $guests[$g];
-                            $guestSale = new Sale;
-                            $guestSale->name = strip_tags(trim($guestData['name'] ?? ''));
-                            $guestSale->email = strip_tags(trim($guestData['email'] ?? ''));
-                            $guestSale->phone = ! empty($guestData['phone']) ? strip_tags(trim($guestData['phone'])) : null;
-                            $guestSale->event_date = $sale->event_date;
-                            $guestSale->subdomain = $subdomain;
-                            $guestSale->event_id = $event->id;
-                            $guestSale->user_id = null;
-                            $guestSale->secret = strtolower(Str::random(32));
-                            $guestSale->payment_method = $sale->payment_method;
-                            $guestSale->payment_amount = max(0, $seatPrices[$g] - $seatVolumeShares[$g] - $seatPromoShares[$g] - $seatGiftShares[$g]);
-                            $guestSale->status = $sale->status ?? 'unpaid';
-                            $guestSale->group_id = $sale->id;
-                            if ($promoCodeId) {
-                                $guestSale->promo_code_id = $promoCodeId;
-                            }
-                            if ($seatPromoShares[$g] > 0) {
-                                $guestSale->discount_amount = $seatPromoShares[$g];
-                            }
-                            if ($seatVolumeShares[$g] > 0) {
-                                $guestSale->volume_discount_amount = $seatVolumeShares[$g];
-                            }
-                            if ($giftCardId && $seatGiftShares[$g] > 0) {
-                                $guestSale->gift_card_id = $giftCardId;
-                                $guestSale->gift_card_amount = $seatGiftShares[$g];
-                            }
-
-                            // Copy event-level custom values from primary sale
-                            for ($cv = 1; $cv <= 10; $cv++) {
-                                $guestSale->{"custom_value{$cv}"} = $sale->{"custom_value{$cv}"};
-                            }
-
-                            $guestSale->save();
-
-                            // Assign ticket to guest
-                            if (isset($ticketAssignments[$g])) {
-                                $guestSaleTicketData = [
-                                    'ticket_id' => $ticketAssignments[$g],
-                                    'quantity' => 1,
-                                    'seats' => json_encode([1 => null]),
-                                ];
-
-                                // Store per-guest ticket custom fields
-                                if ($event->individual_ticket_fields) {
-                                    $guestTicketCustomValues = $request->input('guest_ticket_custom_values', []);
-                                    $guestTicketModel = $event->tickets()->find($ticketAssignments[$g]);
-                                    $guestTicketCustomFields = $guestTicketModel->custom_fields ?? [];
-                                    $guestTicketFallbackIndex = 1;
-                                    foreach ($guestTicketCustomFields as $fieldKey => $fieldConfig) {
-                                        $index = $fieldConfig['index'] ?? $guestTicketFallbackIndex;
-                                        $guestTicketFallbackIndex++;
-                                        if ($index >= 1 && $index <= 10) {
-                                            $value = $guestTicketCustomValues[$g][$fieldKey] ?? null;
-                                            if (is_array($value)) {
-                                                $value = implode(', ', array_map('trim', $value));
-                                            }
-                                            if ($value !== null) {
-                                                $value = trim(strip_tags($value));
-                                            }
-                                            $guestSaleTicketData["custom_value{$index}"] = $value;
-                                        }
-                                    }
-                                }
-
-                                $guestSale->saleTickets()->create($guestSaleTicketData);
-                            }
-                        }
-                    }
-                }
+                $this->priceSaleLeg($sale, $request, $event, $subdomain, $isPaymentLink);
 
                 $sale->save();
 
@@ -1655,6 +1119,575 @@ class TicketController extends Controller
                     return $this->paymentUrlCheckout($subdomain, $sale, $event, $isEmbed);
                 default:
                     return $this->cashCheckout($subdomain, $sale, $event, $isEmbed);
+            }
+        }
+    }
+
+    /**
+     * Row-lock every selected ticket and add-on for one event and refuse the order if any of them
+     * cannot cover the requested quantity. Throws BusinessException on a shortfall.
+     *
+     * Scoped to a single event on purpose: a cart spanning several events must call this once per
+     * leg, and must do so in a stable event order, or two overlapping carts deadlock on the locks.
+     */
+    private function assertLegTicketsAvailable($request, Event $event, bool $isPaymentLink): void
+    {
+        // Check ticket availability with row locking (skip for payment link mode)
+        if (! $isPaymentLink) {
+            // Resolve event_date for one-time events (hidden field may be empty)
+            $eventDate = $request->event_date;
+            if (! $eventDate && $event->starts_at) {
+                $eventDate = $event->saleEventDateFromStartsAt();
+            }
+
+            // A season pass (valid for all dates) can't be combined with single-date
+            // tickets in one order - the scan window would otherwise be ambiguous.
+            $selectedTicketIds = collect($request->tickets ?? [])
+                ->filter(fn ($q) => (int) $q > 0)
+                ->keys()
+                ->map(fn ($id) => UrlUtils::decodeId($id));
+            $selectedTickets = $event->tickets->whereIn('id', $selectedTicketIds);
+            if ($selectedTickets->contains(fn ($t) => $t->is_pass) && $selectedTickets->contains(fn ($t) => ! $t->is_pass)) {
+                throw new \App\Exceptions\BusinessException(__('messages.pass_cannot_combine'));
+            }
+
+            foreach ($request->tickets as $ticketId => $quantity) {
+                if ($quantity > 0) {
+                    // Lock the ticket row to prevent concurrent modifications
+                    $ticketModel = $event->tickets()->lockForUpdate()->find(UrlUtils::decodeId($ticketId));
+
+                    if (! $ticketModel) {
+                        throw new \App\Exceptions\BusinessException(__('messages.ticket_not_found'));
+                    }
+
+                    if ($ticketModel->isSalesEnded()) {
+                        throw new \App\Exceptions\BusinessException(__('messages.tickets_not_available'));
+                    }
+
+                    if ($ticketModel->isSalesNotStarted()) {
+                        throw new \App\Exceptions\BusinessException(__('messages.tickets_not_available'));
+                    }
+
+                    if ($ticketModel->max_per_order && $quantity > $ticketModel->max_per_order) {
+                        throw new \App\Exceptions\BusinessException(__('messages.exceeded_max_per_order', [
+                            'max' => $ticketModel->max_per_order,
+                        ]));
+                    }
+
+                    if ($ticketModel->quantity > 0) {
+                        // Handle combined mode logic (passes always use their own pool, never combined)
+                        if (! $ticketModel->is_pass && $event->total_tickets_mode === 'combined' && $event->hasSameTicketQuantities()) {
+                            // Lock all tickets for combined mode
+                            $lockedTickets = $event->tickets()->lockForUpdate()->get();
+                            $totalSold = $lockedTickets->filter(fn ($ticket) => ! $ticket->is_pass)->sum(function ($ticket) use ($eventDate) {
+                                return $ticket->soldCountFor($eventDate);
+                            });
+                            // Pass holders who booked this occurrence in advance occupy shared seats too.
+                            $totalSold += $eventDate ? $event->passReservedSeats($eventDate) : 0;
+                            // In combined mode, the total quantity is the same as individual quantity
+                            $totalQuantity = $event->getSameTicketQuantity();
+                            $remainingTickets = $totalQuantity - $totalSold;
+
+                            // Check if the total requested quantity exceeds remaining tickets
+                            $totalRequested = array_sum($request->tickets);
+                            if ($totalRequested > $remainingTickets) {
+                                throw new \App\Exceptions\BusinessException(__('messages.tickets_not_available'));
+                            }
+                        } else {
+                            $soldCount = $ticketModel->soldCountFor($eventDate);
+                            $remainingTickets = $ticketModel->quantity - $soldCount;
+
+                            if ($quantity > $remainingTickets) {
+                                throw new \App\Exceptions\BusinessException(__('messages.tickets_not_available'));
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Pass advance-bookings share the per-occurrence seat pool with regular
+            // sales, so a non-pass order can't exceed what's left after reservations.
+            // The combined+equal-quantity case is already capped per-ticket above; this
+            // covers individual / single-ticket modes. No-op when nothing is reserved
+            // (the house equals the sum of per-ticket limits).
+            $orderIsPass = $selectedTickets->contains(fn ($t) => $t->is_pass);
+            if (! $orderIsPass && $eventDate
+                && ! ($event->total_tickets_mode === 'combined' && $event->hasSameTicketQuantities())) {
+                $event->setRelation('tickets', $event->tickets()->lockForUpdate()->get());
+                $houseRemaining = $event->occurrenceSeatsRemaining($eventDate);
+                if ($houseRemaining !== null && array_sum($request->tickets) > $houseRemaining) {
+                    throw new \App\Exceptions\BusinessException(__('messages.tickets_not_available'));
+                }
+            }
+
+            // Check add-on availability. Add-ons are Pro, and a lapsed schedule keeps its
+            // rows (they are made dormant, never deleted), so the sell path needs its own
+            // check rather than relying on the row's absence.
+            $addonSelections = $event->isPro() ? $request->input('addons', []) : [];
+            foreach ($addonSelections as $addonId => $addonQty) {
+                $addonQty = (int) $addonQty;
+                if ($addonQty > 0) {
+                    $addonModel = $event->addons()->lockForUpdate()->find(UrlUtils::decodeId($addonId));
+
+                    if (! $addonModel) {
+                        throw new \App\Exceptions\BusinessException(__('messages.ticket_not_found'));
+                    }
+
+                    if ($addonModel->max_per_order && $addonQty > $addonModel->max_per_order) {
+                        throw new \App\Exceptions\BusinessException(__('messages.exceeded_max_per_order', [
+                            'max' => $addonModel->max_per_order,
+                        ]));
+                    }
+
+                    if ($addonModel->quantity > 0) {
+                        $soldCount = $addonModel->soldCountFor($eventDate);
+                        $remaining = $addonModel->quantity - $soldCount;
+
+                        if ($addonQty > $remaining) {
+                            throw new \App\Exceptions\BusinessException(__('messages.tickets_not_available'));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * The identity half of a sale row for one event: buyer details, attribution and the
+     * event-level custom field answers. Unsaved; the caller saves it, then prices it.
+     */
+    private function newSaleForLeg($request, Event $event, $user, string $subdomain): Sale
+    {
+        $sale = new Sale;
+        $sale->name = $request->input('name');
+        $sale->email = $request->input('email');
+        $sale->phone = $request->input('phone') ? strip_tags(trim($request->input('phone'))) : null;
+        $sale->event_date = $request->input('event_date');
+        $sale->subdomain = $subdomain;
+        $sale->event_id = $event->id;
+        $sale->user_id = $user ? $user->id : null;
+        $sale->secret = strtolower(Str::random(32));
+        $sale->payment_method = $event->payment_method;
+
+        // Capture UTM attribution
+        $utmParams = $request->session()->get('utm_params', []);
+        if (empty($utmParams) && $request->cookie('utm_params')) {
+            $utmParams = json_decode($request->cookie('utm_params'), true) ?? [];
+        }
+        $sale->utm_source = $utmParams['utm_source'] ?? null;
+        $sale->utm_medium = $utmParams['utm_medium'] ?? null;
+        $sale->utm_campaign = $utmParams['utm_campaign'] ?? null;
+        if (($utmParams['utm_source'] ?? null) === 'boost' && ($utmParams['utm_campaign'] ?? null)) {
+            // Verify the campaign exists before assigning it: sales.boost_campaign_id
+            // carries a foreign key, so a crafted utm_campaign that decodes to an unknown
+            // id would fail the INSERT and take the whole checkout down with it.
+            $sale->boost_campaign_id = \App\Models\BoostCampaign::whereKey(
+                UrlUtils::decodeId($utmParams['utm_campaign'])
+            )->value('id');
+        }
+        if (($utmParams['utm_source'] ?? null) === 'newsletter' && ($utmParams['utm_campaign'] ?? null)) {
+            $sale->newsletter_id = UrlUtils::decodeId($utmParams['utm_campaign']);
+        }
+
+        if (! $sale->event_date) {
+            $sale->event_date = $event->saleEventDateFromStartsAt();
+        }
+
+        // Store event-level custom field values using stable indices
+        // Fallback to iteration order for backward compatibility with fields without index
+        $eventCustomValues = $request->input('event_custom_values', []);
+        $eventCustomFields = $event->custom_fields ?? [];
+        $fallbackIndex = 1;
+        foreach ($eventCustomFields as $fieldKey => $fieldConfig) {
+            $index = $fieldConfig['index'] ?? $fallbackIndex;
+            $fallbackIndex++;
+            if ($index >= 1 && $index <= 10) {
+                $value = $eventCustomValues[$fieldKey] ?? null;
+                // Handle multiselect values (submitted as array)
+                if (is_array($value)) {
+                    $value = implode(', ', array_map('trim', $value));
+                }
+                // Sanitize custom field values to prevent stored XSS
+                if ($value !== null) {
+                    $value = trim(strip_tags($value));
+                }
+                $sale->{"custom_value{$index}"} = $value;
+            }
+        }
+
+        return $sale;
+    }
+
+    /**
+     * The money half: ticket rows, add-ons, volume discount, promo code, gift card and - in
+     * individual-tickets mode - the per-guest sale rows nested under this one.
+     *
+     * Mutates $sale in place and leaves it unsaved; the caller saves.
+     */
+    private function priceSaleLeg(Sale $sale, $request, Event $event, string $subdomain, bool $isPaymentLink): void
+    {
+        if ($isPaymentLink) {
+            // Payment link mode: quantities selected on IN, SaleTickets created by webhook
+            $sale->payment_amount = 0;
+        } else {
+            // Check if individual tickets mode is active
+            $guests = $request->input('guests', []);
+            $isIndividualTickets = $event->individual_tickets && count($guests) > 1;
+
+            if ($isIndividualTickets) {
+                // Validate no duplicate emails among guests
+                $guestEmails = collect($guests)->pluck('email')->filter()->map(fn ($e) => strtolower(trim($e)));
+                if ($guestEmails->count() !== $guestEmails->unique()->count()) {
+                    throw new \App\Exceptions\BusinessException(__('messages.duplicate_guest_emails'));
+                }
+
+                // Build flat list of ticket assignments for guests
+                $ticketAssignments = [];
+                $seatPrices = [];
+                $subtotal = 0;
+                foreach ($request->tickets as $ticketId => $quantity) {
+                    if ($quantity > 0) {
+                        $decodedId = UrlUtils::decodeId($ticketId);
+                        $ticketModel = $event->tickets()->findOrFail($decodedId);
+                        $subtotal += $ticketModel->price * $quantity;
+                        for ($i = 0; $i < $quantity; $i++) {
+                            $ticketAssignments[] = $decodedId;
+                            $seatPrices[] = (float) $ticketModel->price;
+                        }
+                    }
+                }
+
+                // Validate guest count matches ticket count
+                if (count($ticketAssignments) !== count($guests)) {
+                    throw new \App\Exceptions\BusinessException(__('messages.error'));
+                }
+
+                // Primary sale gets the first ticket (qty=1)
+                $primarySaleTicketData = [
+                    'ticket_id' => $ticketAssignments[0],
+                    'quantity' => 1,
+                    'seats' => json_encode([1 => null]),
+                ];
+
+                // Store per-guest ticket custom fields for primary guest
+                if ($event->individual_ticket_fields) {
+                    $guestTicketCustomValues = $request->input('guest_ticket_custom_values', []);
+                    $primaryTicketModel = $event->tickets()->find($ticketAssignments[0]);
+                    $primaryTicketCustomFields = $primaryTicketModel->custom_fields ?? [];
+                    $ticketFallbackIndex = 1;
+                    foreach ($primaryTicketCustomFields as $fieldKey => $fieldConfig) {
+                        $index = $fieldConfig['index'] ?? $ticketFallbackIndex;
+                        $ticketFallbackIndex++;
+                        if ($index >= 1 && $index <= 10) {
+                            $value = $guestTicketCustomValues[0][$fieldKey] ?? null;
+                            if (is_array($value)) {
+                                $value = implode(', ', array_map('trim', $value));
+                            }
+                            if ($value !== null) {
+                                $value = trim(strip_tags($value));
+                            }
+                            $primarySaleTicketData["custom_value{$index}"] = $value;
+                        }
+                    }
+                }
+
+                $sale->saleTickets()->create($primarySaleTicketData);
+
+                $sale->group_id = $sale->id;
+                // payment_amount allocated per-seat after volume + promo below
+            } else {
+                // Standard flow: create SaleTickets with full quantities
+                $ticketCustomValues = $request->input('ticket_custom_values', []);
+
+                foreach ($request->tickets as $ticketId => $quantity) {
+                    if ($quantity > 0) {
+                        $ticketModel = $event->tickets()->findOrFail(UrlUtils::decodeId($ticketId));
+                        $ticketCustomFields = $ticketModel->custom_fields ?? [];
+
+                        $saleTicketData = [
+                            'sale_id' => $sale->id,
+                            'ticket_id' => UrlUtils::decodeId($ticketId),
+                            'quantity' => $quantity,
+                            'seats' => json_encode(array_fill(1, $quantity, null)),
+                        ];
+
+                        // Store ticket-level custom field values using stable indices
+                        $ticketFallbackIndex = 1;
+                        foreach ($ticketCustomFields as $fieldKey => $fieldConfig) {
+                            $index = $fieldConfig['index'] ?? $ticketFallbackIndex;
+                            $ticketFallbackIndex++;
+                            if ($index >= 1 && $index <= 10) {
+                                $value = $ticketCustomValues[$ticketId][$fieldKey] ?? null;
+                                if (is_array($value)) {
+                                    $value = implode(', ', array_map('trim', $value));
+                                }
+                                if ($value !== null) {
+                                    $value = trim(strip_tags($value));
+                                }
+                                $saleTicketData["custom_value{$index}"] = $value;
+                            }
+                        }
+
+                        $sale->saleTickets()->create($saleTicketData);
+                    }
+                }
+
+                $subtotal = $sale->calculateTotal();
+                $sale->payment_amount = $subtotal;
+            }
+
+            // Capture seat-only subtotal (before add-ons) for per-seat allocation
+            $seatsSubtotal = $isIndividualTickets ? $subtotal : 0;
+
+            // Create SaleTickets for add-ons (attach to primary sale only). Pro-gated, same
+            // as the availability check above.
+            $addonSelections = $event->isPro() ? $request->input('addons', []) : [];
+            $hasAddons = false;
+            $addonTotal = 0;
+            foreach ($addonSelections as $addonId => $addonQty) {
+                $addonQty = (int) $addonQty;
+                if ($addonQty > 0) {
+                    $addonModel = $event->addons()->findOrFail(UrlUtils::decodeId($addonId));
+                    $sale->saleTickets()->create([
+                        'ticket_id' => $addonModel->id,
+                        'quantity' => $addonQty,
+                        'seats' => json_encode(array_fill(1, $addonQty, null)),
+                    ]);
+                    $hasAddons = true;
+                }
+            }
+
+            // Add add-on total to subtotal if add-ons were added
+            if ($hasAddons) {
+                $sale->load('saleTickets.ticket');
+                $addonTotal = $sale->saleTickets->filter(fn ($st) => $st->ticket->is_addon)
+                    ->sum(fn ($st) => $st->ticket->price * $st->quantity);
+                $subtotal += $addonTotal;
+            }
+            if (! $isIndividualTickets) {
+                $sale->payment_amount = $subtotal;
+            }
+
+            $sale->loadMissing(['saleTickets.ticket']);
+            foreach ($sale->saleTickets as $st) {
+                if ($st->ticket) {
+                    $st->ticket->setRelation('event', $event);
+                }
+            }
+
+            $volumeTotal = $isIndividualTickets
+                ? TicketVolumeDiscount::totalVolumeDiscountForTicketQuantities($event, $request->tickets)
+                : TicketVolumeDiscount::totalVolumeDiscountForSaleTickets($sale->saleTickets);
+            $subtotalAfterVolume = $subtotal - $volumeTotal;
+
+            // Apply promo code if provided (eligible subtotal is post-volume; see PromoCode::calculateDiscount)
+            $promoCodeId = null;
+            $discountTotal = 0;
+            if ($request->promo_code) {
+                $promoCode = PromoCode::where('event_id', $event->id)
+                    ->whereRaw('LOWER(code) = ?', [strtolower($request->promo_code)])
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($promoCode && $promoCode->isValid()) {
+                    if ($isIndividualTickets) {
+                        // Calculate discount from all ticket selections
+                        $allSaleTickets = collect();
+                        foreach ($request->tickets as $ticketId => $quantity) {
+                            if ($quantity > 0) {
+                                $decodedId = UrlUtils::decodeId($ticketId);
+                                $ticketModel = $event->tickets()->find($decodedId);
+                                if ($ticketModel) {
+                                    $ticketModel->setRelation('event', $event);
+                                    $fakeSaleTicket = new \App\Models\SaleTicket(['ticket_id' => $decodedId, 'quantity' => $quantity]);
+                                    $fakeSaleTicket->setRelation('ticket', $ticketModel);
+                                    $allSaleTickets->push($fakeSaleTicket);
+                                }
+                            }
+                        }
+                        $promoCode->setRelation('event', $event);
+                        $discountAmount = $promoCode->calculateDiscount($allSaleTickets);
+                    } else {
+                        $promoCode->setRelation('event', $event);
+                        $discountAmount = $promoCode->calculateDiscount($sale->saleTickets);
+                    }
+                    if ($discountAmount > 0) {
+                        $promoCodeId = $promoCode->id;
+                        $discountTotal = (float) $discountAmount;
+                        $promoCode->increment('times_used');
+                    }
+                }
+            }
+
+            // Apply a gift card if provided (deducted after volume + promo). Unlike promo
+            // codes, an unusable code aborts the checkout - a gift card is a payment
+            // instrument, and silently charging full price would surprise the buyer.
+            $giftCardId = null;
+            $giftCardApplied = 0.0;
+            if ($request->gift_card_code) {
+                $giftCard = GiftCard::whereIn('role_id', $event->roles()->pluck('roles.id'))
+                    ->where('code', GiftCard::normalizeCode($request->gift_card_code))
+                    ->lockForUpdate()
+                    ->first();
+
+                // Cards are sold through the schedule owner's payment account but redemption
+                // reduces the event owner's payout, so both must be the same user.
+                if (! $giftCard || $event->user_id !== $giftCard->role->user_id
+                    || ! $giftCard->isRedeemable($event->ticket_currency_code)) {
+                    throw new \App\Exceptions\BusinessException(__('messages.gift_card_invalid'));
+                }
+
+                $orderTotal = max(0, $subtotalAfterVolume - $discountTotal);
+                $giftCardApplied = min((float) $giftCard->remaining_amount, $orderTotal);
+
+                // Stripe refuses charges below ~50 smallest currency units; leave either
+                // nothing to pay or at least the minimum (the sliver stays on the card).
+                if ($event->payment_method === 'stripe') {
+                    $minCharge = 50 / MoneyUtils::getSmallestUnitMultiplier($event->ticket_currency_code);
+                    $remainder = $orderTotal - $giftCardApplied;
+                    if ($remainder > 0 && $remainder < $minCharge) {
+                        $giftCardApplied = max(0, $orderTotal - $minCharge);
+                    }
+                }
+
+                if ($giftCardApplied > 0) {
+                    $giftCard->decrement('remaining_amount', $giftCardApplied);
+                    $giftCardId = $giftCard->id;
+                }
+            }
+
+            // Per-seat allocation for individual tickets, group total for standard flow
+            if ($isIndividualTickets) {
+                $seatCount = count($ticketAssignments);
+                $seatVolumeShares = array_fill(0, $seatCount, 0.0);
+                $seatPromoShares = array_fill(0, $seatCount, 0.0);
+
+                if ($seatsSubtotal > 0 && $seatCount > 0) {
+                    $volumeAccum = 0.0;
+                    $promoAccum = 0.0;
+                    for ($i = 0; $i < $seatCount - 1; $i++) {
+                        $share = $seatPrices[$i] / $seatsSubtotal;
+                        $seatVolumeShares[$i] = round((float) $volumeTotal * $share, 2);
+                        $seatPromoShares[$i] = round($discountTotal * $share, 2);
+                        $volumeAccum += $seatVolumeShares[$i];
+                        $promoAccum += $seatPromoShares[$i];
+                    }
+                    // Last seat absorbs rounding residual so group totals reconcile exactly
+                    $seatVolumeShares[$seatCount - 1] = round((float) $volumeTotal - $volumeAccum, 2);
+                    $seatPromoShares[$seatCount - 1] = round($discountTotal - $promoAccum, 2);
+                }
+
+                // Gift card allocation: greedy waterfall over per-seat nets (primary first).
+                // Proportional shares could push a seat negative when a ticket-restricted
+                // promo skews the nets; greedy sums exactly with no rounding residue.
+                $primaryNet = $seatPrices[0] - $seatVolumeShares[0] - $seatPromoShares[0] + $addonTotal;
+                $seatGiftShares = array_fill(0, $seatCount, 0.0);
+                if ($giftCardApplied > 0) {
+                    $remainingGift = $giftCardApplied;
+                    $seatGiftShares[0] = round(min(max(0, $primaryNet), $remainingGift), 3);
+                    $remainingGift = round($remainingGift - $seatGiftShares[0], 3);
+                    for ($i = 1; $i < $seatCount && $remainingGift > 0; $i++) {
+                        $net = max(0, $seatPrices[$i] - $seatVolumeShares[$i] - $seatPromoShares[$i]);
+                        $seatGiftShares[$i] = round(min($net, $remainingGift), 3);
+                        $remainingGift = round($remainingGift - $seatGiftShares[$i], 3);
+                    }
+                }
+
+                // Primary holds seat[0] + all add-ons
+                $sale->payment_amount = max(0, $primaryNet - $seatGiftShares[0]);
+                $sale->volume_discount_amount = $seatVolumeShares[0] > 0 ? $seatVolumeShares[0] : null;
+                $sale->discount_amount = $seatPromoShares[0] > 0 ? $seatPromoShares[0] : null;
+                if ($promoCodeId) {
+                    $sale->promo_code_id = $promoCodeId;
+                }
+                if ($giftCardId && $seatGiftShares[0] > 0) {
+                    $sale->gift_card_id = $giftCardId;
+                    $sale->gift_card_amount = $seatGiftShares[0];
+                }
+            } else {
+                $sale->volume_discount_amount = $volumeTotal > 0 ? $volumeTotal : null;
+                if ($promoCodeId) {
+                    $sale->promo_code_id = $promoCodeId;
+                    $sale->discount_amount = $discountTotal;
+                }
+                if ($giftCardId) {
+                    $sale->gift_card_id = $giftCardId;
+                    $sale->gift_card_amount = $giftCardApplied;
+                }
+                $sale->payment_amount = max(0, $subtotalAfterVolume - $discountTotal - $giftCardApplied);
+            }
+
+            // Create guest sales for individual tickets
+            if ($isIndividualTickets) {
+                for ($g = 1; $g < count($guests); $g++) {
+                    $guestData = $guests[$g];
+                    $guestSale = new Sale;
+                    $guestSale->name = strip_tags(trim($guestData['name'] ?? ''));
+                    $guestSale->email = strip_tags(trim($guestData['email'] ?? ''));
+                    $guestSale->phone = ! empty($guestData['phone']) ? strip_tags(trim($guestData['phone'])) : null;
+                    $guestSale->event_date = $sale->event_date;
+                    $guestSale->subdomain = $subdomain;
+                    $guestSale->event_id = $event->id;
+                    $guestSale->user_id = null;
+                    $guestSale->secret = strtolower(Str::random(32));
+                    $guestSale->payment_method = $sale->payment_method;
+                    $guestSale->payment_amount = max(0, $seatPrices[$g] - $seatVolumeShares[$g] - $seatPromoShares[$g] - $seatGiftShares[$g]);
+                    $guestSale->status = $sale->status ?? 'unpaid';
+                    $guestSale->group_id = $sale->id;
+                    if ($promoCodeId) {
+                        $guestSale->promo_code_id = $promoCodeId;
+                    }
+                    if ($seatPromoShares[$g] > 0) {
+                        $guestSale->discount_amount = $seatPromoShares[$g];
+                    }
+                    if ($seatVolumeShares[$g] > 0) {
+                        $guestSale->volume_discount_amount = $seatVolumeShares[$g];
+                    }
+                    if ($giftCardId && $seatGiftShares[$g] > 0) {
+                        $guestSale->gift_card_id = $giftCardId;
+                        $guestSale->gift_card_amount = $seatGiftShares[$g];
+                    }
+
+                    // Copy event-level custom values from primary sale
+                    for ($cv = 1; $cv <= 10; $cv++) {
+                        $guestSale->{"custom_value{$cv}"} = $sale->{"custom_value{$cv}"};
+                    }
+
+                    $guestSale->save();
+
+                    // Assign ticket to guest
+                    if (isset($ticketAssignments[$g])) {
+                        $guestSaleTicketData = [
+                            'ticket_id' => $ticketAssignments[$g],
+                            'quantity' => 1,
+                            'seats' => json_encode([1 => null]),
+                        ];
+
+                        // Store per-guest ticket custom fields
+                        if ($event->individual_ticket_fields) {
+                            $guestTicketCustomValues = $request->input('guest_ticket_custom_values', []);
+                            $guestTicketModel = $event->tickets()->find($ticketAssignments[$g]);
+                            $guestTicketCustomFields = $guestTicketModel->custom_fields ?? [];
+                            $guestTicketFallbackIndex = 1;
+                            foreach ($guestTicketCustomFields as $fieldKey => $fieldConfig) {
+                                $index = $fieldConfig['index'] ?? $guestTicketFallbackIndex;
+                                $guestTicketFallbackIndex++;
+                                if ($index >= 1 && $index <= 10) {
+                                    $value = $guestTicketCustomValues[$g][$fieldKey] ?? null;
+                                    if (is_array($value)) {
+                                        $value = implode(', ', array_map('trim', $value));
+                                    }
+                                    if ($value !== null) {
+                                        $value = trim(strip_tags($value));
+                                    }
+                                    $guestSaleTicketData["custom_value{$index}"] = $value;
+                                }
+                            }
+                        }
+
+                        $guestSale->saleTickets()->create($guestSaleTicketData);
+                    }
+                }
             }
         }
     }
