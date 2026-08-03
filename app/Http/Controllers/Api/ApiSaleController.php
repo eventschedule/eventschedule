@@ -176,8 +176,14 @@ class ApiSaleController extends Controller
         }
 
         if (! $actionPerformed) {
+            // Report the status the refusal was actually based on. The decision is made against a
+            // lockForUpdate re-read inside the trait, so quoting the copy we held before the
+            // request can contradict itself - "cannot mark_paid, status is unpaid" - when a webhook
+            // paid the sale in between. fresh(), not refresh(), so a vanished row does not throw.
+            $current = $sale->fresh() ?? $sale;
+
             return response()->json([
-                'error' => 'Action "'.$request->action.'" cannot be performed on a sale with status "'.$sale->status.'"',
+                'error' => 'Action "'.$request->action.'" cannot be performed on a sale with status "'.$current->status.'"',
             ], 422);
         }
 
@@ -231,8 +237,13 @@ class ApiSaleController extends Controller
             return response()->json(['error' => 'Cannot delete non-primary grouped sales'], 403);
         }
 
-        $previousStatus = $this->deleteSale($sale) ?? $sale->status;
-        $sale->refresh();
+        $prev = $this->deleteSale($sale);
+        $previousStatus = $prev ?? $sale->status;
+
+        // Only refresh when the locked read found the row; refresh() ends in firstOrFail().
+        if ($prev !== null) {
+            $sale->refresh();
+        }
 
         AuditService::log(AuditService::SALE_CHECKIN, auth()->id(), 'Sale', $sale->id,
             ['status' => $previousStatus],

@@ -2114,7 +2114,7 @@ class TicketController extends Controller
         // whole group, so the discount must be the group total too - using the primary's own
         // per-seat share here skews discountRatio and, combined with gift-card line scaling,
         // can drive a reconciled unit_amount negative (Stripe rejects it). Mirrors how
-        // $expectedTotal below uses groupTotalPayment() for grouped primaries.
+        // $expectedTotal below uses legTotalPayment() for grouped primaries.
         $discount = $sale->legTotalDiscount();
 
         // For grouped sales, aggregate SaleTickets across all sales in the group

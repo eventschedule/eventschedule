@@ -2953,12 +2953,20 @@ class AdminController extends Controller
 
         DB::transaction(function () use ($sale) {
             $sale = Sale::lockForUpdate()->find($sale->id);
+
+            // Book the whole group, not just the buyer's own seat. A grouped order is exactly the
+            // kind that lands here: StripeController compares the charge against legTotalPayment(),
+            // so it is the group total that failed the tolerance check and produced the mismatch.
+            // Read both before the save - the status change cascades 'paid' to the guest rows.
+            $analyticsAmount = $sale->legTotalPayment();
+            $promoTotal = $sale->legTotalDiscount();
+
             $sale->status = 'paid';
             $sale->save();
 
-            AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
-            if ($sale->discount_amount > 0) {
-                AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
+            AnalyticsEventsDaily::incrementSale($sale->event_id, $analyticsAmount);
+            if ($promoTotal > 0) {
+                AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $promoTotal);
             }
         });
 

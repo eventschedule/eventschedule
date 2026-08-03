@@ -126,6 +126,47 @@ class ApiSaleActionsTest extends TestCase
         $this->assertTrue((bool) $guest->is_deleted, 'is_deleted must cascade to guest rows');
     }
 
+    public function test_api_mark_paid_of_a_grouped_order_books_the_whole_group(): void
+    {
+        [$primary, $event, $key] = $this->createGroupedPaidOrder(30.0);
+
+        // Back to the pre-payment state: nothing booked yet, which is what mark_paid acts on.
+        Sale::where('group_id', $primary->id)->update(['status' => 'unpaid']);
+
+        $this->assertSame(0.0, $this->revenueFor($event->id));
+
+        $this->withHeaders(['X-API-Key' => $key])
+            ->putJson('/api/sales/'.UrlUtils::encodeId($primary->id), ['action' => 'mark_paid'])
+            ->assertStatus(200);
+
+        // The order is worth 60.00. Booking only the primary's own 30.00 under-reports revenue,
+        // and the guest row is marked paid by the cascade so nothing else ever books its share.
+        $this->assertSame(60.0, $this->revenueFor($event->id));
+        $this->assertSame('paid', Sale::where('email', 'guest2@example.com')->firstOrFail()->status);
+    }
+
+    public function test_admin_approving_an_amount_mismatch_grouped_order_books_the_whole_group(): void
+    {
+        [$primary, $event] = $this->createGroupedPaidOrder(30.0);
+
+        // A grouped order is exactly what lands in amount_mismatch: StripeController compares the
+        // charge against the GROUP total, so it is the group total that failed the check.
+        Sale::where('group_id', $primary->id)->update(['status' => 'amount_mismatch']);
+
+        $admin = $this->createOwner();
+        $admin->is_admin = true;
+        $admin->save();
+
+        // The admin middleware also gates on a password re-confirmation for the session.
+        $this->withSession(['admin_password_confirmed_at' => now()->timestamp])
+            ->actingAs($admin)
+            ->post(route('admin.sale.approve', ['sale' => $primary->id]))
+            ->assertRedirect();
+
+        $this->assertSame('paid', $primary->fresh()->status);
+        $this->assertSame(60.0, $this->revenueFor($event->id));
+    }
+
     public function test_api_refund_rejects_a_sale_that_is_not_paid(): void
     {
         [$primary, , $key] = $this->createGroupedPaidOrder();
