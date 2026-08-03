@@ -43,6 +43,7 @@ class Sale extends Model
         'volume_discount_amount',
         'feedback_sent_at',
         'group_id',
+        'order_id',
         'guest_timezone',
         'reminder_sent_at',
         'confirmed_at',
@@ -90,23 +91,26 @@ class Sale extends Model
                     ->whereIn('status', ['waiting', 'notified'])
                     ->update(['status' => 'purchased']);
 
-                // Cascade paid status to grouped sales
-                if ($sale->group_id && $sale->isPrimarySale()) {
+                // Cascade paid status to the rest of the order, or of the group.
+                //
+                // An order primary covers everything in one query because guest rows carry
+                // order_id too, so this never nests an order cascade around a group one.
+                $siblings = $sale->statusCascadeQuery();
+
+                if ($siblings) {
                     // Raw update, so paid_at has to be set explicitly here - the saving() hook
                     // that normally stamps it does not run for a query-builder update.
-                    Sale::where('group_id', $sale->group_id)
-                        ->where('id', '!=', $sale->id)
-                        ->where('status', '!=', 'paid')
+                    (clone $siblings)->where('status', '!=', 'paid')
                         ->update(['status' => 'paid', 'paid_at' => $sale->paid_at ?? now()]);
 
-                    // Clear waitlist entries for guest emails (raw update above skips booted hooks)
-                    $guestEmails = Sale::where('group_id', $sale->group_id)
-                        ->where('id', '!=', $sale->id)
-                        ->pluck('email');
-                    if ($guestEmails->isNotEmpty()) {
-                        TicketWaitlist::where('event_id', $sale->event_id)
-                            ->where('event_date', $sale->event_date)
-                            ->whereIn('email', $guestEmails)
+                    // Clear their waitlist entries (the raw update above skips booted hooks).
+                    // Matched per row's OWN event and date: inside a group those equal the
+                    // primary's, but the legs of a multi-event order sit on different events.
+                    $rows = (clone $siblings)->get(['email', 'event_id', 'event_date']);
+                    foreach ($rows->groupBy(fn ($row) => $row->event_id.'|'.$row->event_date) as $occurrence) {
+                        TicketWaitlist::where('event_id', $occurrence->first()->event_id)
+                            ->where('event_date', $occurrence->first()->event_date)
+                            ->whereIn('email', $occurrence->pluck('email'))
                             ->whereIn('status', ['waiting', 'notified'])
                             ->update(['status' => 'purchased']);
                     }
@@ -165,17 +169,23 @@ class Sale extends Model
                     NotifyWaitlist::dispatch($sale->event_id, $sale->event_date);
                 }
 
-                // Cascade cancel/refund/expired to grouped sales
-                if ($sale->group_id && $sale->isPrimarySale() && ! static::$cascadingGroup) {
+                // Cascade cancel/refund/expired to the rest of the order, or of the group.
+                //
+                // Unlike the paid cascade this saves each row so its own booted hooks run and
+                // release that row's inventory - which is why the order case must select every row
+                // in one flat query: $cascadingGroup is a single process-global flag, so a group
+                // cascade nested inside an order cascade would be silently swallowed.
+                $siblings = $sale->statusCascadeQuery();
+
+                if ($siblings && ! static::$cascadingGroup) {
                     static::$cascadingGroup = true;
                     try {
-                        $groupedSales = Sale::where('group_id', $sale->group_id)
-                            ->where('id', '!=', $sale->id)
+                        $affected = $siblings
                             ->whereNotIn('status', ['cancelled', 'refunded', 'expired'])
                             ->get();
-                        foreach ($groupedSales as $groupSale) {
-                            $groupSale->status = $sale->status;
-                            $groupSale->save();
+                        foreach ($affected as $sibling) {
+                            $sibling->status = $sale->status;
+                            $sibling->save();
                         }
                     } finally {
                         static::$cascadingGroup = false;
@@ -252,6 +262,91 @@ class Sale extends Model
     public function isPrimarySale()
     {
         return $this->group_id && $this->group_id === $this->id;
+    }
+
+    /**
+     * Every row a buyer paid for in one checkout, across all of its events.
+     *
+     * Guest rows carry order_id too, not just the leg primaries, so this is the complete set and
+     * never needs a second hop through group_id.
+     */
+    public function orderSales()
+    {
+        return $this->hasMany(Sale::class, 'order_id', 'order_id');
+    }
+
+    /** The row that anchors a multi-event order: same self-referencing idiom as isPrimarySale(). */
+    public function isOrderPrimary(): bool
+    {
+        return $this->order_id && $this->order_id === $this->id;
+    }
+
+    /**
+     * The rows a status change on this sale carries with it, or null when it drives no cascade.
+     *
+     * The order branch deliberately selects the whole order in ONE flat query rather than walking
+     * leg primaries and letting each cascade its own guests. Guest rows carry order_id, so they are
+     * already in this set - and the nested alternative does not work: static::$cascadingGroup is a
+     * single process-global flag, so the inner group cascades would be suppressed by the outer
+     * order one and those rows would never change status.
+     *
+     * A leg primary that is not the order primary still cascades its own guests, which is what
+     * makes cancelling one leg of an order work.
+     *
+     * With order_id null everywhere - every sale written before this feature - this returns exactly
+     * what the old `group_id && isPrimarySale()` condition did.
+     */
+    protected function statusCascadeQuery(): ?\Illuminate\Database\Eloquent\Builder
+    {
+        if ($this->isOrderPrimary()) {
+            return static::where('order_id', $this->order_id)->where('id', '!=', $this->id);
+        }
+
+        if ($this->group_id && $this->isPrimarySale()) {
+            return static::where('group_id', $this->group_id)->where('id', '!=', $this->id);
+        }
+
+        return null;
+    }
+
+    /*
+     * Order totals. Use these only where the money genuinely spans events - what the buyer was
+     * charged in one Stripe session, and the reconciliation that checks it. Anything attributed to
+     * a single event (analytics, a schedule's revenue) wants legTotal*() instead, or one event's
+     * figures end up carrying another's.
+     */
+
+    public function orderTotalPayment(): float
+    {
+        if (! $this->order_id) {
+            return $this->legTotalPayment();
+        }
+
+        return (float) Sale::where('order_id', $this->order_id)
+            ->where('is_deleted', false)
+            ->sum('payment_amount');
+    }
+
+    public function orderTotalDiscount(): float
+    {
+        if (! $this->order_id) {
+            return $this->legTotalDiscount();
+        }
+
+        return (float) Sale::where('order_id', $this->order_id)
+            ->where('is_deleted', false)
+            ->sum('discount_amount');
+    }
+
+    public function orderTotalGiftCard(): float
+    {
+        if (! $this->order_id) {
+            return $this->legTotalGiftCard();
+        }
+
+        return (float) Sale::where('order_id', $this->order_id)
+            ->where('is_deleted', false)
+            ->sum('gift_card_amount');
     }
 
     /*
