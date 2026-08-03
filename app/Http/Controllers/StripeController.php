@@ -160,7 +160,7 @@ class StripeController extends Controller
                         $webhookAmount = $paymentIntent->amount / MoneyUtils::getSmallestUnitMultiplier($currencyCode);
 
                         // For grouped purchases (individual tickets) the buyer pays the group total in one charge.
-                        $expectedAmount = $sale->isPrimarySale() ? $sale->groupTotalPayment() : (float) $sale->payment_amount;
+                        $expectedAmount = $sale->legTotalPayment();
                         $amountDifference = abs($webhookAmount - $expectedAmount);
 
                         // Allow small tolerance for floating point/rounding differences
@@ -196,7 +196,7 @@ class StripeController extends Controller
                             ['status' => 'unpaid'], ['status' => 'paid'], 'stripe:event_id:'.$sale->event_id);
 
                         AnalyticsEventsDaily::incrementSale($sale->event_id, $webhookAmount);
-                        $promoTotal = $sale->isPrimarySale() ? $sale->groupTotalDiscount() : (float) ($sale->discount_amount ?? 0);
+                        $promoTotal = $sale->legTotalDiscount();
                         if ($promoTotal > 0) {
                             AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $promoTotal);
                         }
@@ -262,7 +262,7 @@ class StripeController extends Controller
                             $webhookAmount = $session->amount_total / MoneyUtils::getSmallestUnitMultiplier($currencyCode);
 
                             // For grouped purchases (individual tickets) the buyer pays the group total in one charge.
-                            $expectedAmount = $sale->isPrimarySale() ? $sale->groupTotalPayment() : (float) $sale->payment_amount;
+                            $expectedAmount = $sale->legTotalPayment();
                             $amountDifference = abs($webhookAmount - $expectedAmount);
 
                             // Allow small tolerance for floating point/rounding differences
@@ -301,7 +301,7 @@ class StripeController extends Controller
 
                             // Record sale in analytics
                             AnalyticsEventsDaily::incrementSale($sale->event_id, $webhookAmount);
-                            $promoTotal = $sale->isPrimarySale() ? $sale->groupTotalDiscount() : (float) ($sale->discount_amount ?? 0);
+                            $promoTotal = $sale->legTotalDiscount();
                             if ($promoTotal > 0) {
                                 AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $promoTotal);
                             }

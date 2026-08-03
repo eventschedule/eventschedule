@@ -79,9 +79,7 @@ class TicketPurchase extends Mailable
 
         // Gift card feedback for the buyer: their deduction plus the balance left on the
         // card at send time (the live balance stays on the card page).
-        $giftCardAmount = $this->sale->isPrimarySale()
-            ? $this->sale->groupTotalGiftCard()
-            : (float) ($this->sale->gift_card_amount ?? 0);
+        $giftCardAmount = $this->sale->legTotalGiftCard();
         $giftCard = $this->sale->giftCard;
         if (! $giftCard && $giftCardAmount > 0 && $this->sale->group_id) {
             $giftCard = Sale::where('group_id', $this->sale->group_id)

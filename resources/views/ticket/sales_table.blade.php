@@ -96,9 +96,9 @@
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
                                     @php
-                                        $rowAmount = $sale->isPrimarySale() ? $sale->groupTotalPayment() : (float) $sale->payment_amount;
-                                        $rowDiscount = $sale->isPrimarySale() ? $sale->groupTotalDiscount() : (float) ($sale->discount_amount ?? 0);
-                                        $rowGiftCard = $sale->isPrimarySale() ? $sale->groupTotalGiftCard() : (float) ($sale->gift_card_amount ?? 0);
+                                        $rowAmount = $sale->legTotalPayment();
+                                        $rowDiscount = $sale->legTotalDiscount();
+                                        $rowGiftCard = $sale->legTotalGiftCard();
                                     @endphp
                                     @if ($sale->isRsvp())
                                     <span class="font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.registered') }}</span>
@@ -455,9 +455,9 @@
                     <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
                         <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.total') }}</div>
                         @php
-                            $mobileRowAmount = $sale->isPrimarySale() ? $sale->groupTotalPayment() : (float) $sale->payment_amount;
-                            $mobileRowDiscount = $sale->isPrimarySale() ? $sale->groupTotalDiscount() : (float) ($sale->discount_amount ?? 0);
-                            $mobileRowGiftCard = $sale->isPrimarySale() ? $sale->groupTotalGiftCard() : (float) ($sale->gift_card_amount ?? 0);
+                            $mobileRowAmount = $sale->legTotalPayment();
+                            $mobileRowDiscount = $sale->legTotalDiscount();
+                            $mobileRowGiftCard = $sale->legTotalGiftCard();
                         @endphp
                         @if ($sale->isRsvp())
                         <div class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ __('messages.registered') }}</div>

@@ -1604,7 +1604,7 @@ class TicketController extends Controller
         // The free-order check below must consider the whole group: a gift card can zero out the
         // primary seat while guest seats still owe, and marking the primary paid would cascade
         // paid status to the unpaid guests.
-        $total = ($sale->group_id && $sale->isPrimarySale()) ? $sale->groupTotalPayment() : $sale->payment_amount;
+        $total = $sale->legTotalPayment();
 
         AuditService::log(AuditService::SALE_CHECKOUT, $sale->user_id, 'Sale', $sale->id, null, null, 'event_id:'.$event->id);
 
@@ -2080,7 +2080,7 @@ class TicketController extends Controller
         // per-seat share here skews discountRatio and, combined with gift-card line scaling,
         // can drive a reconciled unit_amount negative (Stripe rejects it). Mirrors how
         // $expectedTotal below uses groupTotalPayment() for grouped primaries.
-        $discount = $sale->isPrimarySale() ? $sale->groupTotalDiscount() : (float) ($sale->discount_amount ?? 0);
+        $discount = $sale->legTotalDiscount();
 
         // For grouped sales, aggregate SaleTickets across all sales in the group
         if ($sale->group_id && $sale->isPrimarySale()) {
@@ -2110,14 +2110,22 @@ class TicketController extends Controller
             $stripeSaleTickets = $sale->saleTickets;
         }
 
+        // Pre-bind the event so the pricing helpers below (lineSubtotalAfterVolumeDiscount(),
+        // PromoCode::appliesToTicket()) do not lazy-load it once per ticket.
+        //
+        // The event_id guard is what makes this safe to aggregate over: today every row above
+        // belongs to $event, so the guard changes nothing. Once a single payment can span events,
+        // an unguarded bind would silently re-parent the other legs' tickets to this one and price
+        // them against the wrong event's volume discounts and promo codes - a wrong total, with
+        // nothing in the logs to say so.
         foreach ($stripeSaleTickets as $saleTicket) {
-            if ($saleTicket->ticket) {
+            if ($saleTicket->ticket && (int) $saleTicket->ticket->event_id === (int) $event->id) {
                 $saleTicket->ticket->setRelation('event', $event);
             }
         }
 
-        $giftTotal = $sale->isPrimarySale() ? $sale->groupTotalGiftCard() : (float) ($sale->gift_card_amount ?? 0);
-        $expectedTotal = $sale->isPrimarySale() ? $sale->groupTotalPayment() : (float) $sale->payment_amount;
+        $giftTotal = $sale->legTotalGiftCard();
+        $expectedTotal = $sale->legTotalPayment();
 
         $lineItems = $this->buildStripeLineItems($stripeSaleTickets, $event, $promoCode, (float) $discount, $giftTotal, $expectedTotal);
 
@@ -2278,9 +2286,7 @@ class TicketController extends Controller
                 ];
             }
 
-            $promoDiscount = $isGroupedPrimary
-                ? $sale->groupTotalDiscount()
-                : (float) ($sale->discount_amount ?? 0);
+            $promoDiscount = $sale->legTotalDiscount();
             if ($promoDiscount > 0 && $sale->promoCode) {
                 $lineItems[] = [
                     'product_key' => __('messages.discount'),
@@ -2290,9 +2296,7 @@ class TicketController extends Controller
                 ];
             }
 
-            $giftTotal = $isGroupedPrimary
-                ? $sale->groupTotalGiftCard()
-                : (float) ($sale->gift_card_amount ?? 0);
+            $giftTotal = $sale->legTotalGiftCard();
             if ($giftTotal > 0) {
                 // The primary can carry no share while a guest does; resolve the card from any group row
                 $giftCardRef = $sale->giftCard
@@ -2560,9 +2564,9 @@ class TicketController extends Controller
             AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
                 ['status' => 'unpaid'], ['status' => 'paid'], 'payment_url:event_id:'.$sale->event_id);
 
-            $analyticsAmount = $sale->isPrimarySale() ? $sale->groupTotalPayment() : (float) $sale->payment_amount;
+            $analyticsAmount = $sale->legTotalPayment();
             AnalyticsEventsDaily::incrementSale($sale->event_id, $analyticsAmount);
-            $promoTotal = $sale->isPrimarySale() ? $sale->groupTotalDiscount() : (float) ($sale->discount_amount ?? 0);
+            $promoTotal = $sale->legTotalDiscount();
             if ($promoTotal > 0) {
                 AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $promoTotal);
             }
@@ -2899,8 +2903,8 @@ class TicketController extends Controller
                     if (! $locked || $locked->status !== 'unpaid') {
                         return null;
                     }
-                    $analyticsAmount = $locked->isPrimarySale() ? $locked->groupTotalPayment() : (float) $locked->payment_amount;
-                    $promoTotal = $locked->isPrimarySale() ? $locked->groupTotalDiscount() : (float) ($locked->discount_amount ?? 0);
+                    $analyticsAmount = $locked->legTotalPayment();
+                    $promoTotal = $locked->legTotalDiscount();
 
                     $locked->status = 'paid';
                     $locked->transaction_reference = __('messages.manual_payment');
@@ -2926,8 +2930,8 @@ class TicketController extends Controller
                         return null;
                     }
                     $analyticsDate = $locked->created_at->toDateString();
-                    $analyticsAmount = $locked->isPrimarySale() ? $locked->groupTotalPayment() : (float) $locked->payment_amount;
-                    $promoTotal = $locked->isPrimarySale() ? $locked->groupTotalDiscount() : (float) ($locked->discount_amount ?? 0);
+                    $analyticsAmount = $locked->legTotalPayment();
+                    $promoTotal = $locked->legTotalDiscount();
 
                     $locked->status = 'refunded';
                     $locked->save();
@@ -2956,8 +2960,8 @@ class TicketController extends Controller
                         return null;
                     }
                     $wasPaid = $locked->status === 'paid';
-                    $analyticsAmount = $locked->isPrimarySale() ? $locked->groupTotalPayment() : (float) $locked->payment_amount;
-                    $promoTotal = $locked->isPrimarySale() ? $locked->groupTotalDiscount() : (float) ($locked->discount_amount ?? 0);
+                    $analyticsAmount = $locked->legTotalPayment();
+                    $promoTotal = $locked->legTotalDiscount();
                     $pre = $locked->status;
 
                     $locked->status = 'cancelled';
@@ -2992,8 +2996,8 @@ class TicketController extends Controller
                     // Cancel first to release ticket inventory (triggers Sale::booted hook)
                     if (in_array($locked->status, ['unpaid', 'paid'])) {
                         $wasPaid = $locked->status === 'paid';
-                        $analyticsAmount = $locked->isPrimarySale() ? $locked->groupTotalPayment() : (float) $locked->payment_amount;
-                        $promoTotal = $locked->isPrimarySale() ? $locked->groupTotalDiscount() : (float) ($locked->discount_amount ?? 0);
+                        $analyticsAmount = $locked->legTotalPayment();
+                        $promoTotal = $locked->legTotalDiscount();
 
                         $locked->status = 'cancelled';
                         $locked->save();

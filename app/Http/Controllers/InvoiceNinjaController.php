@@ -133,7 +133,7 @@ class InvoiceNinjaController extends Controller
             $webhookAmount = $payload['paymentables'][0]['amount'];
 
             // For grouped purchases (individual tickets) the buyer pays the group total in one invoice.
-            $expectedAmount = $sale->isPrimarySale() ? $sale->groupTotalPayment() : (float) $sale->payment_amount;
+            $expectedAmount = $sale->legTotalPayment();
             $amountDifference = abs($webhookAmount - $expectedAmount);
 
             // Allow small tolerance for floating point differences (e.g., 0.01)
@@ -168,7 +168,7 @@ class InvoiceNinjaController extends Controller
                 ['status' => 'unpaid'], ['status' => 'paid'], 'invoiceninja:event_id:'.$sale->event_id);
 
             AnalyticsEventsDaily::incrementSale($sale->event_id, $webhookAmount);
-            $promoTotal = $sale->isPrimarySale() ? $sale->groupTotalDiscount() : (float) ($sale->discount_amount ?? 0);
+            $promoTotal = $sale->legTotalDiscount();
             if ($promoTotal > 0) {
                 AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $promoTotal);
             }
@@ -271,9 +271,9 @@ class InvoiceNinjaController extends Controller
             AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
                 ['status' => 'unpaid'], ['status' => 'paid'], 'invoiceninja_purchase:event_id:'.$sale->event_id);
 
-            $analyticsAmount = $sale->isPrimarySale() ? $sale->groupTotalPayment() : (float) $sale->payment_amount;
+            $analyticsAmount = $sale->legTotalPayment();
             AnalyticsEventsDaily::incrementSale($sale->event_id, $analyticsAmount);
-            $promoTotal = $sale->isPrimarySale() ? $sale->groupTotalDiscount() : (float) ($sale->discount_amount ?? 0);
+            $promoTotal = $sale->legTotalDiscount();
             if ($promoTotal > 0) {
                 AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $promoTotal);
             }

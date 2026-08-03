@@ -288,7 +288,7 @@
                 <div>
                   <p class="text-[10px] text-white/50 print-text-gray uppercase tracking-wide font-medium">{{ __('messages.guests') }}</p>
                   @php $headerPassTicket = $sale->saleTickets->first(fn ($st) => $st->ticket && $st->ticket->is_pass); @endphp
-                  <p class="text-[13px] text-white print-text-dark font-semibold">{{ $headerPassTicket ? $headerPassTicket->ticket->admitsPerEvent() : ($sale->isRsvp() ? 1 : ($sale->isPrimarySale() ? $sale->groupTotalQuantity() : $sale->quantity())) }}</p>
+                  <p class="text-[13px] text-white print-text-dark font-semibold">{{ $headerPassTicket ? $headerPassTicket->ticket->admitsPerEvent() : ($sale->isRsvp() ? 1 : ($sale->legTotalQuantity())) }}</p>
                 </div>
               </div>
             </div>
@@ -379,8 +379,8 @@
             @endforeach
           </div>
           @php
-            $ticketDiscountTotal = $sale->isPrimarySale() ? $sale->groupTotalDiscount() : (float) ($sale->discount_amount ?? 0);
-            $ticketGiftCardTotal = $sale->isPrimarySale() ? $sale->groupTotalGiftCard() : (float) ($sale->gift_card_amount ?? 0);
+            $ticketDiscountTotal = $sale->legTotalDiscount();
+            $ticketGiftCardTotal = $sale->legTotalGiftCard();
           @endphp
           @if ($ticketDiscountTotal > 0 || $ticketGiftCardTotal > 0)
             <div class="mt-[12px] pt-[12px] border-t border-white/10 print:border-slate-200 space-y-[6px]">

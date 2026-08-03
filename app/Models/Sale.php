@@ -254,6 +254,51 @@ class Sale extends Model
         return $this->group_id && $this->group_id === $this->id;
     }
 
+    /*
+     * groupTotal*() vs legTotal*(): read this before using either.
+     *
+     * groupTotal*() is the sum over a whole group. Calling it on a GUEST row returns the whole
+     * group's total, which is almost never what a caller wants - add it up across the group and
+     * you count the money once per row.
+     *
+     * legTotal*() is "the amount this row is answerable for", which is what nearly every call site
+     * actually means: the group total on a primary, its own value on a guest row or an ungrouped
+     * sale. It is the concept the `isPrimarySale() ? groupTotalX() : own_value` ternary used to
+     * spell out by hand at twenty-odd sites.
+     *
+     * The distinction only earns its keep once a sale can also belong to a multi-event ORDER, at
+     * which point "the group total" and "what the buyer paid" stop being the same number. Reach for
+     * legTotal*() by default; a site that genuinely means the whole order should say so explicitly.
+     */
+
+    public function legTotalPayment(): float
+    {
+        return $this->isPrimarySale()
+            ? $this->groupTotalPayment()
+            : (float) $this->payment_amount;
+    }
+
+    public function legTotalDiscount(): float
+    {
+        return $this->isPrimarySale()
+            ? $this->groupTotalDiscount()
+            : (float) ($this->discount_amount ?? 0);
+    }
+
+    public function legTotalGiftCard(): float
+    {
+        return $this->isPrimarySale()
+            ? $this->groupTotalGiftCard()
+            : (float) ($this->gift_card_amount ?? 0);
+    }
+
+    public function legTotalQuantity(): int
+    {
+        return $this->isPrimarySale()
+            ? $this->groupTotalQuantity()
+            : (int) $this->quantity();
+    }
+
     public function groupTotalPayment()
     {
         if (! $this->group_id) {
