@@ -144,6 +144,11 @@
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
                                             @lang('messages.domain_failed')
                                         </span>
+                                        @if ($role->custom_domain_error)
+                                            <div class="mt-1 max-w-xs text-xs text-gray-500 dark:text-gray-400 truncate" title="{{ $role->custom_domain_error }}">
+                                                {{ $role->custom_domain_error }}
+                                            </div>
+                                        @endif
                                     @else
                                         <span class="text-xs text-gray-400">-</span>
                                     @endif
@@ -169,7 +174,7 @@
                                     <form method="POST" action="{{ route('admin.domains.reprovision', $role) }}" class="inline">
                                         @csrf
                                         <button type="submit" class="text-xs text-[var(--brand-blue)] hover:underline"
-                                            data-confirm="Re-provision this domain?">
+                                            data-confirm="{{ __('messages.reprovision_confirm') }}">
                                             @lang('messages.reprovision')
                                         </button>
                                     </form>
@@ -177,7 +182,7 @@
                                     <form method="POST" action="{{ route('admin.domains.remove', $role) }}" class="inline">
                                         @csrf
                                         <button type="submit" class="text-xs text-red-600 hover:underline"
-                                            data-confirm="Remove this domain configuration?">
+                                            data-confirm="{{ __('messages.domain_remove_confirm') }}">
                                             @lang('messages.remove')
                                         </button>
                                     </form>

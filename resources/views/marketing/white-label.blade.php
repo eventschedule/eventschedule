@@ -21,7 +21,7 @@
             "Your own logo becomes the browser tab icon",
             "Public pages are never monetized above the free tier",
             "Nothing to configure: the check reads your plan",
-            "Any install other than eventschedule.com, selfhosted or your own platform, is white-labeled on every plan apart from a small corner credit the license asks for"
+            "Any install other than eventschedule.com, selfhosted or your own platform, is white-labeled apart from a small corner credit the license asks for, and no page carries more than one credit"
         ],
         "offers": {
             "@type": "Offer",
@@ -97,15 +97,21 @@
            on every plan and every install; see
            AppGuestLayout::guestTitle(). Then the credit chip, whose
            cases live in Role::creditChipReason(). Off the nexus it is
-           UNCONDITIONAL - every schedule, every plan, whether the install
+           the normal case rather than an exception, whether the install
            is a plain selfhost ('selfhost') or an operator's own platform
-           ('saas') - because the Attribution Assurance License credit is
+           ('saas'), because the Attribution Assurance License credit is
            owed by whoever redistributes the software, not by the tenant
-           who happens to be paying. On the nexus the one case is an
-           admin-granted Enterprise plan ('granted_plan'). Section 03's
-           closing line, section 05, and BOTH the selfhost FAQ and the
-           operator FAQ have to keep saying so - a page selling
-           white-label that overclaims gets found out on day one.
+           who happens to be paying. ONE QUALIFICATION, added when the
+           double credit came out: the chip stands down wherever
+           showBranding() puts the footer strip on the page, so an
+           operator's free tier shows their strip and no chip, and the
+           chip lands on the tiers they charge for. On the nexus the one
+           case is an admin-granted Enterprise plan ('granted_plan'),
+           which is the same shape - not free tier, so no strip, so the
+           chip fills in. Section 03's closing line, section 05, and BOTH
+           the selfhost FAQ and the operator FAQ have to keep saying so -
+           a page selling white-label that overclaims gets found out on
+           day one.
 
            NOT USED HERE: a "before / after" toggle or a struck-through
            line. The removal is not an animation and there is no state
@@ -620,7 +626,7 @@
             ],
             [
                 'q' => 'Is anything left?',
-                'a' => 'On a schedule hosted here, nothing in the body of the page and two things outside it. First, one line of metadata in the page head: the breadcrumb data still names eventschedule.com as the site root. The title in the browser tab and the site name in a shared link preview both read your schedule\'s name on every plan, free included, and the tab icon becomes your logo on Pro. Point a custom domain at the schedule and the breadcrumb roots at your own domain too, which leaves the head with nothing of ours in it. Second, if an admin granted your Enterprise plan by hand rather than you buying it, a small Event Schedule credit chip stays below the footer; customers who pay through Stripe never carry that chip, and neither do plans earned through the referral programme. On any install that is not eventschedule.com the chip is not an exception at all - see the two questions below.',
+                'a' => 'On a schedule hosted here, nothing in the body of the page and two things outside it. First, one line of metadata in the page head: the breadcrumb data still names eventschedule.com as the site root. The title in the browser tab and the site name in a shared link preview both read your schedule\'s name on every plan, free included, and the tab icon becomes your logo on Pro. Point a custom domain at the schedule and the breadcrumb roots at your own domain too, which leaves the head with nothing of ours in it. Second, if an admin granted your Enterprise plan by hand rather than you buying it, a small Event Schedule credit chip stays below the footer; customers who pay through Stripe never carry that chip, and neither do plans earned through the referral programme. On any install that is not eventschedule.com the chip is the normal case rather than an exception, on every plan except a free one that is already carrying the operator\'s own strip - see the two questions below.',
             ],
             [
                 'q' => 'Do I need to change my embed after upgrading?',
@@ -632,7 +638,7 @@
             ],
             [
                 'q' => 'I run my own platform on this software. Are my customers white-labeled?',
-                'a' => 'Nearly. Everything that carries our name on a free schedule here comes off yours the same way, and the strip at the foot of your free tier points at your marketing site rather than ours, because it is your growth CTA rather than ours. The one thing that does not come off is the small corner credit: on any install that is not eventschedule.com it sits on every public page on every plan, including the tiers you charge for. The licence asks for the attribution from whoever redistributes the software, and your customer\'s subscription is an arrangement between the two of you, so upgrading them is not ours to be paid by. It is a single small chip in the corner, it links to us rather than to anything of yours, and it is the whole of what running the platform for free costs you.',
+                'a' => 'Nearly. Everything that carries our name on a free schedule here comes off yours the same way, and the strip at the foot of your free tier points at your marketing site rather than ours, because it is your growth CTA rather than ours. The one thing that does not come off is the small corner credit, and it sits on the tiers you charge for. The licence asks for the attribution from whoever redistributes the software, and your customer\'s subscription is an arrangement between the two of you, so upgrading them is not ours to be paid by. Your free tier is the exception, and only because it is already carrying your strip: a page shows one credit or the other, never both. It is a single small chip in the corner, it links to us rather than to anything of yours, and it is the whole of what running the platform for free costs you.',
             ],
             [
                 'q' => 'Can I put my own branding in the space?',
@@ -987,9 +993,11 @@
                     That is the end of the list for a schedule hosted here. Run the software somewhere
                     else and the chip above stops being an exception: on any install that is not
                     eventschedule.com, whether you selfhost for yourself or run a platform of your own
-                    for other people, it sits in the corner of every public page on every plan. The
-                    licence puts it there rather than the plan, so there is nothing to upgrade past -
-                    section 05 has the detail. One thing beside all of it: mail leaves our server
+                    for other people, it sits in the corner of the public pages. On a selfhost that is
+                    every page. On a platform of your own it is every page you charge for, because a
+                    free schedule there is already carrying your own footer strip and the two are never
+                    shown at once. The licence puts the chip there rather than the plan, so there is
+                    nothing to upgrade past - section 05 has the detail. One thing beside all of it: mail leaves our server
                     unless you point the schedule at your own SMTP settings, which any plan can do.
                     If any of it matters for your case,
                     <a href="{{ marketing_url('/contact') }}" class="es-slate2-lit font-medium underline">ask us</a>
@@ -1176,8 +1184,9 @@
                 <p class="es-slate2-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
                     A selfhosted installation is white-labeled by default. There is no plan to buy,
                     no strip to remove, and every schedule on it behaves like a paid one. One credit
-                    stays, in the corner, because the licence asks for it - and it stays on the same
-                    terms if you turn the install into a platform for other people.
+                    stays, in the corner, because the licence asks for it. Turn the install into a
+                    platform for other people and it stays on every schedule you charge for, while a
+                    free one carries your own footer strip in its place.
                 </p>
             </div>
 
@@ -1187,7 +1196,7 @@
                 @foreach ([
                     ['Six of the seven, gone','The branding check answers no on a single-tenant install, so the footer strip, the event-page card, both embed lines, the newsletter line and ads are never rendered in the first place.', ''],
                     ['The seventh: one credit, one corner', 'A small "Event Schedule" chip sits in the corner of your public pages. It is the Attribution Assurance License credit - the licence gives you the whole application and asks for the mention in return - so it is not gated on a plan and there is no setting that removes it. Nothing else on the page, and nothing in your email or your embeds, carries our name.', ''],
-                    ['Running it for other people is the same deal', 'Switch the same install into multi-tenant mode and every schedule on it carries that one corner chip, on the tiers you charge for as well as your free one. The credit is owed by whoever redistributes the software, and what your customers pay you is between you and them. Your free tier also keeps a footer strip, but it points at your marketing site rather than ours.', ''],
+                    ['Running it for other people, one credit a page', 'Switch the same install into multi-tenant mode and every schedule you charge for carries that one corner chip. The credit is owed by whoever redistributes the software, and what your customers pay you is between you and them. Your free tier keeps a footer strip instead, pointed at your marketing site rather than ours: a page shows one credit or the other, never both.', ''],
                     ['Every feature, not just this one', 'A selfhosted install resolves to the Enterprise tier throughout, so Custom CSS, custom labels and the banner come with it. The AI style generator is there too, but it calls an AI provider, so it stays hidden until you put your own API key in the environment file.', ''],
                     ['Your servers, your data', 'Run it on your own hardware for a client, a festival or a chain of rooms. The source is open, so the branding check and everything around it is there to read.', 'md:col-span-2'],
                 ] as [$t, $d, $span])

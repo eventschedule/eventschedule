@@ -317,7 +317,7 @@ DO_APP_HOSTNAME=your-app.ondigitalocean.app</code></pre>
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Domain stuck on "Setting up..."</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Check the DO Status column first. If it is blank, the API credentials are missing or wrong and nothing was ever registered. If it shows a phase but the stored status has not moved, confirm your scheduler is running, since only <code class="doc-inline-code">app:sync-domain-statuses</code> promotes a domain to active. Otherwise verify the CNAME record: propagation can take up to 48 hours, and past that, re-provision from the admin panel.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Check the DO Status column first. If it is blank the domain was never registered on your app, and by far the most common reason is DNS: DigitalOcean will not accept a domain whose CNAME does not resolve to your app yet. Verify the record before anything else, remembering propagation can take up to 48 hours. A blank column can also mean the API credentials are missing or wrong. If it shows a phase but the stored status has not moved, confirm your scheduler is running, since only <code class="doc-inline-code">app:sync-domain-statuses</code> promotes a domain to active.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">SSL certificate not provisioning</h4>
@@ -325,7 +325,7 @@ DO_APP_HOSTNAME=your-app.ondigitalocean.app</code></pre>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Domain shows "Setup failed"</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Either the API call failed at save time, or the sync no longer finds the domain on your app. Check the DigitalOcean dashboard for error details. Common causes: an invalid hostname, the domain already registered against another app, or an API token missing the <strong>update</strong> scope. Fix the cause, then re-provision.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Either the API call failed at save time, or the sync no longer finds the domain on your app. DigitalOcean's own reason is shown directly under the Setup failed badge in the admin panel, so start there. Common causes: a CNAME that does not resolve yet, an invalid hostname, the domain already registered against another app, or an API token missing the <strong>update</strong> scope. Fix the cause, then re-provision. If re-provisioning reports the domain is already registered, the entry is present and correct on your app, so the remaining fix is the DNS record or removing the domain and adding it back.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">404 on the custom domain</h4>

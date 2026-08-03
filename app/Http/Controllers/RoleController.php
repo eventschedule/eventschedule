@@ -4047,27 +4047,48 @@ class RoleController extends Controller
 
         if ($doService->isConfigured()) {
             try {
-                // Remove old domain from DO if it was direct mode and domain/mode changed
-                if ($oldCustomDomainMode === 'direct' && $oldCustomDomainHost &&
-                    ($oldCustomDomainHost !== $newCustomDomainHost || $newCustomDomainMode !== 'direct')) {
-                    $doService->removeDomain($oldCustomDomainHost);
-                    \Illuminate\Support\Facades\Cache::forget("custom_domain:{$oldCustomDomainHost}");
-                }
+                // Remove the old domain from DO if it was direct mode and the domain/mode changed
+                $removeHost = ($oldCustomDomainMode === 'direct' && $oldCustomDomainHost &&
+                    ($oldCustomDomainHost !== $newCustomDomainHost || $newCustomDomainMode !== 'direct'))
+                    ? $oldCustomDomainHost
+                    : null;
 
-                // Add new domain to DO if direct mode
-                if ($newCustomDomainMode === 'direct' && $newCustomDomainHost &&
+                // Add the new domain to DO if direct mode
+                $addHost = ($newCustomDomainMode === 'direct' && $newCustomDomainHost &&
                     ($oldCustomDomainHost !== $newCustomDomainHost || $oldCustomDomainMode !== 'direct'
-                     || $oldCustomDomainStatus === 'failed')) {
+                     || $oldCustomDomainStatus === 'failed'))
+                    ? $newCustomDomainHost
+                    : null;
+
+                // Both sides go in one spec write. Two separate calls would redeploy the App
+                // Platform app twice on a single domain change, with the owner's request held open
+                // across both of them.
+                if ($removeHost || $addHost) {
                     // Clear any stale cache for the new domain (e.g., previously assigned to a different schedule)
-                    \Illuminate\Support\Facades\Cache::forget("custom_domain:{$newCustomDomainHost}");
-                    $success = $doService->addDomain($newCustomDomainHost);
-                    $role->update(['custom_domain_status' => $success ? 'pending' : 'failed']);
-                    \Illuminate\Support\Facades\Cache::forget("custom_domain:{$newCustomDomainHost}");
+                    foreach (array_filter([$removeHost, $addHost]) as $host) {
+                        \Illuminate\Support\Facades\Cache::forget("custom_domain:{$host}");
+                    }
+
+                    $success = $doService->syncDomains(
+                        $addHost ? [$addHost] : [],
+                        $removeHost ? [$removeHost] : [],
+                    );
+
+                    if ($addHost) {
+                        $role->update([
+                            'custom_domain_status' => $success ? 'pending' : 'failed',
+                            'custom_domain_error' => $success ? null : $doService->lastError(),
+                        ]);
+                    }
+
+                    foreach (array_filter([$removeHost, $addHost]) as $host) {
+                        \Illuminate\Support\Facades\Cache::forget("custom_domain:{$host}");
+                    }
                 }
 
                 // Clear status and cache if switching away from direct mode
                 if ($newCustomDomainMode !== 'direct' && $oldCustomDomainMode === 'direct') {
-                    $role->update(['custom_domain_status' => null]);
+                    $role->update(['custom_domain_status' => null, 'custom_domain_error' => null]);
                     if ($oldCustomDomainHost) {
                         \Illuminate\Support\Facades\Cache::forget("custom_domain:{$oldCustomDomainHost}");
                     }
@@ -4077,7 +4098,11 @@ class RoleController extends Controller
                     'role_id' => $role->id,
                     'error' => $e->getMessage(),
                 ]);
-                $role->update(['custom_domain_status' => 'failed']);
+                report($e);
+                $role->update([
+                    'custom_domain_status' => 'failed',
+                    'custom_domain_error' => \Illuminate\Support\Str::limit($e->getMessage(), 240),
+                ]);
                 if ($newCustomDomainHost) {
                     \Illuminate\Support\Facades\Cache::forget("custom_domain:{$newCustomDomainHost}");
                 }

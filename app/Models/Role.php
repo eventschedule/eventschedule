@@ -76,6 +76,7 @@ class Role extends Model implements MustVerifyEmail
         'custom_domain_mode',
         'custom_domain_host',
         'custom_domain_status',
+        'custom_domain_error',
         'event_layout',
         'sync_direction',
         'request_terms',
@@ -1741,6 +1742,10 @@ class Role extends Model implements MustVerifyEmail
         // nothing to say there. Selfhost attribution is the credit chip instead; see
         // creditChipReason(). This branch used to read `! $this->isWhiteLabeled()`, which
         // was unconditionally false when unhosted, so the behaviour is unchanged.
+        //
+        // creditChipReason() calls this now, so the strip wins wherever it renders and the chip
+        // fills in elsewhere. Keep this branch answering false: it is what stops a selfhost from
+        // being read as a strip-bearing install and losing its attribution.
         if (! config('app.hosted')) {
             return false;
         }
@@ -1749,8 +1754,9 @@ class Role extends Model implements MustVerifyEmail
     }
 
     /**
-     * Why this schedule's guest pages carry the small "Event Schedule" credit chip, or
-     * null when they do not:
+     * Why this schedule's guest pages carry the small "Event Schedule" credit chip, or null when
+     * they do not - either because none is owed, or because the footer strip is already carrying
+     * one:
      *
      *  - 'selfhost'     the Attribution Assurance License credit on a single-tenant install.
      *  - 'saas'         the same credit on an operator's own multi-tenant platform.
@@ -1758,14 +1764,21 @@ class Role extends Model implements MustVerifyEmail
      *                   through Stripe buy white-label and never carry it, and neither do
      *                   plans earned through the referral programme.
      *
-     * Deliberately NOT keyed on the plan tier outside the nexus, and so deliberately not a
-     * function of showBranding(). The two predicates answer different questions: the footer
-     * strip is a growth CTA that belongs to whoever runs the platform, so it turns on the
-     * tenant's tier; this chip is the license credit, owed by whoever redistributes the
-     * software, so it turns on the deployment. An operator's paying tenant is as much a part
-     * of that redistribution as their free one, and the tenant's subscription is between them
-     * and the operator. eventschedule.com is the one install that sells white-label, so it is
-     * the one install where the chip depends on the plan at all.
+     * Keyed on the deployment rather than the plan, then stood down wherever the footer strip
+     * already renders. The two predicates start from different questions: the strip is a growth
+     * CTA that belongs to whoever runs the platform, so it turns on the tenant's tier; this chip
+     * is the license credit, owed by whoever redistributes the software, so it turns on the
+     * deployment. An operator's paying tenant is as much a part of that redistribution as their
+     * free one, and the tenant's subscription is between them and the operator. What the two
+     * share is a page, and a page carries one credit: where showBranding() has already put the
+     * strip there, this answers null.
+     *
+     * On an operator's platform that lands the chip on the tiers they charge for and leaves their
+     * free tier showing their own strip alone. Two consequences that read like bugs and are not:
+     * upgrading a tenant there ADDS the chip rather than removing it, and an operator's free tier
+     * carries no Event Schedule attribution at all, because their strip links marketing_url().
+     * eventschedule.com is still the one install that sells white-label, so it is the one install
+     * where the chip turns on the plan for any reason other than the strip.
      *
      * Both halves of the granted-plan test are load-bearing. plan_source alone would keep
      * branding someone who was granted a plan and later subscribed, if any Stripe path ever
@@ -1781,6 +1794,15 @@ class Role extends Model implements MustVerifyEmail
         // every public page on an install that is meant to always carry it.
         if (! config('app.hosted')) {
             return 'selfhost';
+        }
+
+        // The strip is already crediting this page, and the two are alternatives rather than a
+        // pair - see docs/BRANDING_MATRIX.md rule 2. Deliberately below the selfhost branch:
+        // showBranding() is hardcoded false when unhosted, so today either order behaves the same
+        // and no test can tell them apart, but if that branch ever changes, this order is what
+        // keeps the attribution on an install that is meant to always carry it.
+        if ($this->showBranding()) {
+            return null;
         }
 
         if (! config('app.is_nexus')) {

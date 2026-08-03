@@ -92,6 +92,10 @@ class AuditService
     const GIFT_CARD_REFUNDED = 'gift_card.refunded';
 
     // Admin actions
+    // Generic admin edit, used by the amount-mismatch review queue. Referenced by name before it
+    // existed, which made every one of those actions fatal on an undefined constant.
+    const ADMIN_UPDATE = 'admin.update';
+
     const ADMIN_PLAN_UPDATE = 'admin.plan_update';
 
     const ADMIN_EMAIL_VERIFY = 'admin.email_verify';
@@ -131,6 +135,10 @@ class AuditService
     const ADMIN_FEDERATION_DELETE = 'admin.federation_delete';
 
     const ADMIN_FEDERATION_BLOCK_EVENT = 'admin.federation_block_event';
+
+    const ADMIN_DOMAIN_REPROVISION = 'admin.domain_reprovision';
+
+    const ADMIN_DOMAIN_REMOVE = 'admin.domain_remove';
 
     // Subscription actions
     const SUBSCRIPTION_CREATE = 'subscription.create';

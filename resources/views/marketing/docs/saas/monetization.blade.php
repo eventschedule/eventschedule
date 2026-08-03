@@ -73,8 +73,11 @@
             <div class="doc-callout-title">One credit is not an upsell</div>
             <p>The small "Event Schedule" chip in the corner of public pages is the Attribution
             Assurance License credit, and on any install other than eventschedule.com it stays on
-            every schedule regardless of plan. Do not sell its removal as a paid feature: upgrading
-            a customer does not take it off, and there is no setting that does.</p>
+            every schedule you charge for. Do not sell its removal as a paid feature: there is no
+            setting that takes it off, and upgrading a customer does not either. Worth knowing which
+            way round it runs: a free schedule shows your footer strip and no chip, so an upgrade
+            swaps your strip for our chip rather than clearing the page. Say so on your own pricing
+            page before a customer finds it.</p>
         </div>
 
         <div class="doc-callout doc-callout-info">

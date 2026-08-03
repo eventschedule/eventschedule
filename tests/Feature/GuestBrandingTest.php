@@ -16,6 +16,10 @@ use Tests\TestCase;
  * the grid, including the selfhost row that carried nothing at all until Role::creditChipReason()
  * existed.
  *
+ * The grid has one invariant across every cell: a page carries the strip or the chip, never both.
+ * The row that shows it is an operator's own platform, where the chip lands on the tiers they
+ * charge for and the free tier keeps the strip alone.
+ *
  * Routes are registered at boot from the environment's IS_HOSTED, so overriding app.hosted here
  * changes what the views decide but not the URL shape. Feature tests run path-based either way
  * (app.is_testing), so every assertion below reads rendered HTML and none reads a path.
@@ -100,16 +104,19 @@ class GuestBrandingTest extends TestCase
 
     // ------------------------------------------------------ selfhosted SaaS
 
-    public function test_saas_free_gets_both_the_strip_and_the_chip(): void
+    public function test_saas_free_gets_the_strip_instead_of_the_chip(): void
     {
-        // Deliberate, not a double-branding bug: the strip promotes the operator through
-        // marketing_url(), the chip is our license attribution and stays pointed at us.
+        // A page carries one credit. The strip is already on this one, so the chip stands down,
+        // and on an operator's install the strip promotes the operator through marketing_url() -
+        // so a free schedule there carries no Event Schedule attribution at all. Deliberate; the
+        // white-label and SaaS pages say so.
         $this->deploy('saas');
 
         $content = $this->guestPage($this->freeRole());
 
         $this->assertStringContainsString(self::STRIP, $content);
-        $this->assertStringContainsString(self::CHIP_SAAS, $content);
+        // The broad tag rather than CHIP_SAAS, so a chip with any reason fails this.
+        $this->assertStringNotContainsString('utm_medium=footer', $content);
         // The sponsor credit is the nexus's own, not an operator's to carry.
         $this->assertStringNotContainsString(self::SPONSOR, $content);
     }
@@ -119,7 +126,9 @@ class GuestBrandingTest extends TestCase
         // The tenant's subscription is between them and the operator. Our credit is owed by
         // whoever redistributes the software, so it does not come off when a tenant upgrades -
         // only eventschedule.com sells white-label. The strip does come off: it is the
-        // operator's growth CTA and belongs to the free tier.
+        // operator's growth CTA and belongs to the free tier. Which means the chip renders here
+        // BECAUSE the strip does not, and this test plus the one above are the whole rule for an
+        // operator's platform: upgrading a tenant swaps their strip for our chip.
         $this->deploy('saas');
 
         $content = $this->guestPage($this->paidRole());
@@ -182,6 +191,36 @@ class GuestBrandingTest extends TestCase
             self::CHIP_SELFHOST,
             $this->guestPage($this->paidRole(), '?embed=1')
         );
+    }
+
+    // ---------------------------------------------------------- the invariant
+
+    public function test_no_guest_page_ever_carries_both_credits(): void
+    {
+        // The whole rule in one assertion, over every cell of the grid. The rows above pin what
+        // each deployment shows; this pins what none of them shows, so reintroducing the pairing
+        // at either render site fails here even if someone updates the row it belongs to.
+        //
+        // The roles are built once and the deployment re-read around them: nothing in either
+        // predicate is memoized, and neither reads a stored column that config() would change.
+        $free = $this->freeRole();
+        $paid = $this->paidRole();
+
+        foreach (['nexus', 'saas', 'selfhost'] as $mode) {
+            $this->deploy($mode);
+
+            foreach (['free' => $free, 'paid' => $paid] as $tier => $role) {
+                $content = $this->guestPage($role);
+
+                $hasStrip = str_contains($content, self::STRIP);
+                $hasChip = str_contains($content, 'utm_medium=footer');
+
+                $this->assertFalse(
+                    $hasStrip && $hasChip,
+                    "A {$mode} {$tier} guest page carried both the strip and the chip."
+                );
+            }
+        }
     }
 
     // ------------------------------------------------- the event-page card
@@ -255,6 +294,23 @@ class GuestBrandingTest extends TestCase
         $this->assertFalse($paid->showBranding());
     }
 
+    public function test_the_chip_stands_down_where_the_strip_renders(): void
+    {
+        // The coupling itself, at the unit level, so reverting only the Blade gate is still caught
+        // here. On a selfhost there is no strip to defer to, which is why the guard sits below
+        // the hosted branch rather than above it.
+        $this->deploy('saas');
+        $free = $this->freeRole();
+
+        $this->assertTrue($free->showBranding());
+        $this->assertNull($free->creditChipReason());
+
+        $this->deploy('selfhost');
+
+        $this->assertFalse($free->showBranding());
+        $this->assertSame('selfhost', $free->creditChipReason());
+    }
+
     public function test_credit_chip_reason_names_the_case(): void
     {
         $free = $this->freeRole();
@@ -269,13 +325,17 @@ class GuestBrandingTest extends TestCase
         $this->assertNull($paid->creditChipReason());
         $this->assertSame('granted_plan', $granted->creditChipReason());
 
-        // Off the nexus the tier stops mattering, and so does plan_source - that column only
-        // means anything on the one install that hands plans out.
+        // Off the nexus the tier stops deciding whether a credit is OWED, and plan_source still
+        // means nothing - that column only counts on the one install that hands plans out. What
+        // the tier still decides is who carries it: a free schedule answers null because its
+        // strip is already crediting the page.
         $this->deploy('saas');
-        $this->assertSame('saas', $free->creditChipReason());
+        $this->assertNull($free->creditChipReason());
         $this->assertSame('saas', $paid->creditChipReason());
         $this->assertSame('saas', $granted->creditChipReason());
 
+        // On a selfhost the tier genuinely does not matter, because the guard above sits below
+        // the selfhost branch and showBranding() is false there anyway.
         $this->deploy('selfhost');
         $this->assertSame('selfhost', $free->creditChipReason());
         $this->assertSame('selfhost', $paid->creditChipReason());

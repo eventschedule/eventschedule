@@ -334,7 +334,7 @@
             </div>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mb-4">A single-tenant <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> install has no plan tiers at all, so the strip, the event-page card, the embed and newsletter lines and ads are all absent by default, with nothing to buy. If instead you run your own multi-tenant platform on Event Schedule, those surfaces follow each tenant's tier exactly as they do on eventschedule.com, because the strip is the growth prompt of whoever runs the platform.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">One small "Event Schedule" credit stays in the corner of public pages on every install that is not eventschedule.com itself. It is the attribution the Attribution Assurance License asks for in return for the application, so it is not tied to a plan and there is no setting that removes it. That applies whether you selfhost for yourself or run a platform of your own, where every schedule carries it on every tier.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">One small "Event Schedule" credit stays in the corner of public pages on every install that is not eventschedule.com itself. It is the attribution the Attribution Assurance License asks for in return for the application, so there is no setting that removes it. On a single-tenant selfhost it is on every page. On a platform of your own it is on every schedule you charge for, and a free schedule there carries the operator's footer strip in its place, because a page never shows both credits at once.</p>
     </section>
 
     <!-- Custom CSS -->

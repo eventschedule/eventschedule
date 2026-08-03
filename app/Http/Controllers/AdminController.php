@@ -3274,22 +3274,37 @@ class AdminController extends Controller
             return redirect()->back()->with('error', 'DigitalOcean service not configured.');
         }
 
-        try {
-            $doService->removeDomain($role->custom_domain_host);
-            $doService->addDomain($role->custom_domain_host);
-            $role->update(['custom_domain_status' => 'pending']);
-            Cache::forget("custom_domain:{$role->custom_domain_host}");
-        } catch (\Exception $e) {
-            Log::error('Failed to re-provision domain', [
-                'role_id' => $role->id,
-                'hostname' => $role->custom_domain_host,
-                'error' => $e->getMessage(),
-            ]);
+        // One spec write, not a remove followed by an add: each one redeploys the App Platform app,
+        // and the second used to run while the container serving this very request was being
+        // replaced, which is what answered the admin with a 503.
+        $success = $doService->syncDomains([$role->custom_domain_host]);
 
-            return redirect()->back()->with('error', 'Re-provision failed. Check logs for details.');
+        try {
+            $role->update([
+                'custom_domain_status' => $success ? 'pending' : 'failed',
+                'custom_domain_error' => $success ? null : $doService->lastError(),
+            ]);
+            Cache::forget("custom_domain:{$role->custom_domain_host}");
+
+            AuditService::log(AuditService::ADMIN_DOMAIN_REPROVISION, auth()->id(), 'Role', $role->id, null, null, "Re-provisioned domain: {$role->custom_domain_host}");
+        } catch (\Illuminate\Database\QueryException $e) {
+            // The DigitalOcean side may well have succeeded; app:sync-domain-statuses reconciles
+            // the stored status either way. Never surface the driver's message.
+            report($e);
+
+            return redirect()->back()->with('error', __('messages.reprovision_failed'));
         }
 
-        AuditService::log(AuditService::ADMIN_UPDATE, auth()->id(), 'Role', $role->id, null, null, "Re-provisioned domain: {$role->custom_domain_host}");
+        if (! $success) {
+            return redirect()->back()->with('error', __('messages.reprovision_failed'));
+        }
+
+        // Nothing to write means the domain was already registered, so re-provisioning cannot move
+        // it along. Say that instead of implying work happened: from here the fix is a DNS check,
+        // or Remove followed by adding it back.
+        if ($doService->lastWasNoop()) {
+            return redirect()->back()->with('success', __('messages.reprovision_already_registered'));
+        }
 
         return redirect()->back()->with('success', __('messages.reprovision_success'));
     }
@@ -3319,6 +3334,7 @@ class AdminController extends Controller
                     'hostname' => $hostname,
                     'error' => $e->getMessage(),
                 ]);
+                report($e);
             }
         }
 
@@ -3327,11 +3343,12 @@ class AdminController extends Controller
             'custom_domain_mode' => null,
             'custom_domain_host' => null,
             'custom_domain_status' => null,
+            'custom_domain_error' => null,
         ]);
 
         Cache::forget("custom_domain:{$hostname}");
 
-        AuditService::log(AuditService::ADMIN_UPDATE, auth()->id(), 'Role', $role->id, null, null, "Removed domain: {$hostname}");
+        AuditService::log(AuditService::ADMIN_DOMAIN_REMOVE, auth()->id(), 'Role', $role->id, null, null, "Removed domain: {$hostname}");
 
         return redirect()->back()->with('success', __('messages.domain_removed'));
     }

@@ -1069,7 +1069,7 @@
                                 </div>
                                 <div>
                                     <h3 class="font-semibold text-white">A small backlink</h3>
-                                    <p class="text-sm text-gray-400">Public schedule pages carry a small, discreet link back to eventschedule.com - every customer, on every tier you sell, including the paid ones. That link is how the project grows, which keeps the software maintained for everyone.</p>
+                                    <p class="text-sm text-gray-400">Public schedule pages carry a small, discreet link back to eventschedule.com, on every tier you sell, the paid ones included. Your free tier carries your own footer strip in its place, so no page shows two credits. That link is how the project grows, which keeps the software maintained for everyone.</p>
                                 </div>
                             </div>
                         </div>
@@ -1117,7 +1117,11 @@
                             <div class="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
                                 <span class="text-[10px] text-gray-400">© TicketPilot</span>
                                 {{-- The real attribution shown on public schedule pages (see
-                                     layouts/app-guest.blade.php): a small flat brand credit. --}}
+                                     layouts/app-guest.blade.php): a small flat brand credit.
+                                     This tenant has to stay a PAID one, and the $22/$15 ticket
+                                     prices above are what say so. Role::creditChipReason() stands
+                                     the chip down wherever the footer strip renders, so a free
+                                     tenant here would show the operator's strip and no chip. --}}
                                 <span id="es-backlink-chip" class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-1.5 py-0.5 text-[9px] font-medium text-gray-500 ring-1 ring-black/5">
                                     <span class="flex h-3 w-3 items-center justify-center rounded-[3px] bg-gradient-to-br from-[#4E81FA] to-[#22D3EE] text-[6px] font-black leading-none text-white">ES</span>
                                     Event Schedule
@@ -1491,7 +1495,7 @@
         $faqs = [
             [
                 'q' => 'What is white-label ticketing software?',
-                'a' => 'White-label ticketing software is an event ticketing platform you rebrand and sell as your own product. Event Schedule goes further than most: you selfhost the entire open source platform, so customers sign up on your domain and pay through your Stripe account. The only trace of us is a small attribution link on public schedule pages.',
+                'a' => 'White-label ticketing software is an event ticketing platform you rebrand and sell as your own product. Event Schedule goes further than most: you selfhost the entire open source platform, so customers sign up on your domain and pay through your Stripe account. The only trace of us is a small attribution link on the public pages of the customers you charge.',
             ],
             [
                 'q' => 'How do I start an online ticketing business?',
@@ -1499,7 +1503,7 @@
             ],
             [
                 'q' => 'How does the free white-label license work?',
-                'a' => 'Event Schedule is open source under the Attribution Assurance License (AAL). You can run it commercially at no cost as long as you keep the attribution, which appears as a small link on public schedule pages. There are no license fees, no revenue share, and no per-ticket fees.',
+                'a' => 'Event Schedule is open source under the Attribution Assurance License (AAL). You can run it commercially at no cost as long as you keep the attribution, which appears as a small link on public schedule pages, on the tiers you charge for. There are no license fees, no revenue share, and no per-ticket fees.',
             ],
             [
                 'q' => 'Can I set my own subscription prices?',

@@ -157,14 +157,15 @@
         <h3 class="doc-subheading">Branding Customization</h3>
 
         <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">One credit stays</div>
+            <div class="doc-callout-title">One credit a page</div>
             <p>Your app name, logos and domain make the platform yours, and your free tier's footer
             strip points at your <code class="doc-inline-code">APP_MARKETING_URL</code> rather than
             ours. One thing is not yours to repoint: a small "Event Schedule" chip in the corner of
-            every customer's public pages, on every plan including the ones you charge for. It is the
+            the public pages of every customer you charge. It is the
             attribution the <a href="https://github.com/eventschedule/eventschedule/blob/main/LICENSE" target="_blank" rel="noopener" class="doc-link">Attribution Assurance License</a>
             asks for in return for the software, so it links to eventschedule.com and
-            <code class="doc-inline-code">APP_MARKETING_URL</code> does not change it.</p>
+            <code class="doc-inline-code">APP_MARKETING_URL</code> does not change it. A free schedule
+            shows your footer strip instead of the chip, so no page carries two credits.</p>
         </div>
         <div class="doc-code-block">
             <div class="doc-code-header">
