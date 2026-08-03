@@ -610,6 +610,8 @@ return [
     'pass_toggle_label' => 'Season pass (valid for all dates)',
     'pass_toggle_help' => 'One QR valid for every date of this recurring event, checked in once per occurrence. The price covers the whole series.',
     'pass_cannot_combine' => 'A season pass cannot be purchased together with single-date tickets. Please buy them in separate orders.',
+    'cart_events_incompatible' => 'These events cannot be purchased together. They use a different organizer, currency or payment method.',
+    'cart_payment_method_unsupported' => 'These events cannot be purchased together with this payment method.',
     'scanning_at_event' => 'Scanning at event',
     'scanning_at' => 'Scanning at',
     'subscription' => 'Subscription',

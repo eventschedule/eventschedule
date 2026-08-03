@@ -387,6 +387,8 @@ return [
     'pass_toggle_label' => 'Passe (válido para todas as datas)',
     'pass_toggle_help' => 'Um QR válido para todas as datas deste evento recorrente, com uma entrada por ocorrência. O preço cobre toda a série.',
     'pass_cannot_combine' => 'Um passe não pode ser comprado juntamente com bilhetes de data única. Compre-os em pedidos separados.',
+    'cart_events_incompatible' => 'Estes eventos não podem ser comprados juntos. Utilizam um organizador, uma moeda ou um método de pagamento diferente.',
+    'cart_payment_method_unsupported' => 'Estes eventos não podem ser comprados juntos com este método de pagamento.',
     'attendee' => 'Participante',
     'invoiceninja_connected' => 'Invoice Ninja conectado com sucesso!',
     'error_invoiceninja_connection' => 'Erro: Falha ao conectar ao Invoice Ninja',

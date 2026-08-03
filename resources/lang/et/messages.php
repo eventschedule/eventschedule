@@ -655,6 +655,8 @@ return [
     'pass_toggle_label' => 'Hooajapilet (kehtib kõigil kuupäevadel)',
     'pass_toggle_help' => 'Üks QR-kood kehtib selle korduva sündmuse igal kuupäeval, kasutatav korra iga toimumiskorra kohta. Hind katab kogu sarja.',
     'pass_cannot_combine' => 'Hooajapiletit ei saa osta koos ühe kuupäeva piletitega. Palun osta need eraldi tellimustena.',
+    'cart_events_incompatible' => 'Neid sündmusi ei saa koos osta. Neil on erinev korraldaja, valuuta või makseviis.',
+    'cart_payment_method_unsupported' => 'Neid sündmusi ei saa selle makseviisiga koos osta.',
     'attendee' => 'Osaleja',
     'invoiceninja_connected' => 'Arve Ninja ühendamine õnnestus!',
     'error_invoiceninja_connection' => 'Viga: Invoice Ninjaga ühenduse loomine ebaõnnestus',

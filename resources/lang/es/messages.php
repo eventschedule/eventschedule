@@ -607,6 +607,8 @@ return [
     'pass_toggle_label' => 'Abono (válido para todas las fechas)',
     'pass_toggle_help' => 'Un QR válido para todas las fechas de este evento recurrente, con un acceso por fecha. El precio cubre toda la serie.',
     'pass_cannot_combine' => 'Un abono no se puede comprar junto con entradas de fecha única. Cómpralos en pedidos separados.',
+    'cart_events_incompatible' => 'Estos eventos no se pueden comprar juntos. Utilizan un organizador, una moneda o un método de pago diferente.',
+    'cart_payment_method_unsupported' => 'Estos eventos no se pueden comprar juntos con este método de pago.',
     'attendee' => 'Asistente',
     'invoiceninja_connected' => '¡Invoice Ninja conectado con éxito!',
     'error_invoiceninja_connection' => 'Error: No se pudo conectar a Invoice Ninja',

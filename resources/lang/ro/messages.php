@@ -662,6 +662,8 @@ return [
     'pass_toggle_label' => 'Abonament (valabil pentru toate datele)',
     'pass_toggle_help' => 'Un cod QR valabil pentru fiecare dată a acestui eveniment recurent, utilizabil o dată per ocazie. Prețul acoperă toată seria.',
     'pass_cannot_combine' => 'Un abonament nu poate fi cumpărat împreună cu bilete pentru o singură dată. Cumpărați-le în comenzi separate.',
+    'cart_events_incompatible' => 'Aceste evenimente nu pot fi cumpărate împreună. Folosesc un organizator, o monedă sau o metodă de plată diferită.',
+    'cart_payment_method_unsupported' => 'Aceste evenimente nu pot fi cumpărate împreună cu această metodă de plată.',
     'attendee' => 'Participant',
     'invoiceninja_connected' => 'Invoice Ninja conectat cu succes!',
     'error_invoiceninja_connection' => 'Eroare: Conectarea la Invoice Ninja a eșuat',

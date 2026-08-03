@@ -581,6 +581,8 @@ return [
     'pass_toggle_label' => 'Dauerkarte (gültig für alle Termine)',
     'pass_toggle_help' => 'Ein QR-Code, gültig für jeden Termin dieser wiederkehrenden Veranstaltung, einmal pro Termin einlösbar. Der Preis gilt für die gesamte Reihe.',
     'pass_cannot_combine' => 'Eine Dauerkarte kann nicht zusammen mit Einzelterminkarten gekauft werden. Bitte separat bestellen.',
+    'cart_events_incompatible' => 'Diese Veranstaltungen können nicht zusammen gekauft werden. Sie verwenden einen anderen Veranstalter, eine andere Währung oder eine andere Zahlungsmethode.',
+    'cart_payment_method_unsupported' => 'Diese Veranstaltungen können mit dieser Zahlungsmethode nicht zusammen gekauft werden.',
     'attendee' => 'Teilnehmer',
     'invoiceninja_connected' => 'Invoice Ninja erfolgreich verbunden!',
     'error_invoiceninja_connection' => 'Fehler: Verbindung zu Invoice Ninja fehlgeschlagen',

@@ -18,6 +18,42 @@ class TicketCheckoutRequest extends FormRequest
                 'tickets' => array_filter($this->tickets, fn ($qty) => $qty > 0),
             ]);
         }
+
+        if (is_array($this->input('legs'))) {
+            $this->merge([
+                'legs' => array_map(function ($leg) {
+                    if (isset($leg['tickets']) && is_array($leg['tickets'])) {
+                        $leg['tickets'] = array_filter($leg['tickets'], fn ($qty) => $qty > 0);
+                    }
+
+                    return $leg;
+                }, $this->input('legs')),
+            ]);
+        }
+    }
+
+    /** True when the buyer is paying for several events in one checkout. */
+    private function isMultiLeg(): bool
+    {
+        return is_array($this->input('legs')) && $this->input('legs') !== [];
+    }
+
+    /**
+     * The events this checkout touches. One for a single-event purchase, several for a cart.
+     *
+     * Rules that are per-event on the form - the phone field in particular - become the union
+     * across legs: if any event asks, the buyer is asked; if any requires, it is required.
+     */
+    private function checkoutEvents(): \Illuminate\Support\Collection
+    {
+        $ids = $this->isMultiLeg()
+            ? collect($this->input('legs'))->pluck('event_id')
+            : collect([$this->event_id]);
+
+        return $ids->filter()
+            ->map(fn ($id) => Event::find(UrlUtils::decodeId($id)))
+            ->filter()
+            ->values();
     }
 
     /**
@@ -33,22 +69,31 @@ class TicketCheckoutRequest extends FormRequest
             'cf-turnstile-response' => [new ValidTurnstile],
         ];
 
-        $event = Event::find(UrlUtils::decodeId($this->event_id));
+        $events = $this->checkoutEvents();
+        $event = $events->first();
 
-        if ($event && $event->ask_phone) {
-            $rules['phone'] = $event->require_phone
+        if ($events->contains(fn ($candidate) => $candidate->ask_phone)) {
+            $rules['phone'] = $events->contains(fn ($candidate) => $candidate->require_phone)
                 ? ['required', 'string', 'max:50']
                 : ['nullable', 'string', 'max:50'];
         }
 
-        // Payment link mode: tickets are selected on Invoice Ninja, not here
-        $isPaymentLink = $event
-            && $event->payment_method === 'invoiceninja'
-            && $event->user->invoiceninja_mode === 'payment_link';
+        if ($this->isMultiLeg()) {
+            $rules['legs'] = ['required', 'array', 'min:1'];
+            $rules['legs.*.event_id'] = ['required', 'string'];
+            $rules['legs.*.tickets'] = ['required', 'array', 'min:1'];
+            $rules['legs.*.tickets.*'] = ['integer', 'min:1'];
+        } else {
+            // Payment link mode: tickets are selected on Invoice Ninja, not here. It cannot appear
+            // in a cart at all - cartEligibilityError() refuses Invoice Ninja outright.
+            $isPaymentLink = $event
+                && $event->payment_method === 'invoiceninja'
+                && $event->user->invoiceninja_mode === 'payment_link';
 
-        if (! $isPaymentLink) {
-            $rules['tickets'] = ['required', 'array'];
-            $rules['tickets.*'] = ['integer', 'min:1'];
+            if (! $isPaymentLink) {
+                $rules['tickets'] = ['required', 'array'];
+                $rules['tickets.*'] = ['integer', 'min:1'];
+            }
         }
 
         $rules['addons'] = ['nullable', 'array'];

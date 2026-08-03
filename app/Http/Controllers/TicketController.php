@@ -956,55 +956,73 @@ class TicketController extends Controller
             return back()->withInput()->with('error', __('messages.invalid_request'));
         }
 
-        // canSellTickets() below reads both relations; without this they lazy-load on the
-        // checkout POST.
-        $event = Event::with(['tickets', 'roles'])->findOrFail(UrlUtils::decodeId($request->event_id));
-
         $role = Role::subdomain($subdomain)->firstOrFail();
-        if (! $event->roles()->wherePivot('role_id', $role->id)->exists()) {
-            abort(403);
-        }
-
         $user = auth()->user();
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
-        if ($event->is_draft && ! $isMemberOrAdmin) {
-            abort(404);
-        }
-        if ($event->is_private
-            && ! $isMemberOrAdmin
-            && ! ($event->isPasswordProtected() && session()->has('event_password_'.$event->id))
-        ) {
-            abort(404);
+
+        // One leg per event in the cart. A request without legs[] is a single leg built from the
+        // flat fields, which is every request the single-event form has ever sent.
+        $legs = $this->resolveCheckoutLegs($request);
+
+        foreach ($legs as $index => $leg) {
+            // canSellTickets() below reads both relations; without this they lazy-load on the
+            // checkout POST.
+            $event = Event::with(['tickets', 'roles'])->findOrFail(UrlUtils::decodeId($leg['event_id']));
+
+            if (! $event->roles()->wherePivot('role_id', $role->id)->exists()) {
+                abort(403);
+            }
+
+            if ($event->is_draft && ! $isMemberOrAdmin) {
+                abort(404);
+            }
+            if ($event->is_private
+                && ! $isMemberOrAdmin
+                && ! ($event->isPasswordProtected() && session()->has('event_password_'.$event->id))
+            ) {
+                abort(404);
+            }
+
+            // Verify event can sell tickets (checks past dates, tickets_enabled, and plan allowance)
+            if (! $event->canSellTickets($leg['event_date'])) {
+                return back()->withInput()->with('error', __('messages.tickets_not_available'));
+            }
+
+            // Per-row allowance check. canSellTickets() above answers "is this event selling at all",
+            // which stays true while a free tier remains; this refuses the individual PAID rows the
+            // schedule's monthly allowance can no longer cover, so a cart of free tiers still goes
+            // through on a capped schedule.
+            //
+            // Whose allowance, whether offline payment is exempt and whether the 48-hour grace applies
+            // are all decided inside Ticket::isSellable() -> Event::hasTicketAllowance(), which is the
+            // same code the guest form filters on. Keeping one definition is what stops the buy button
+            // and the write path disagreeing.
+            //
+            // Checked once, up front, then the whole cart is allowed through - the same way
+            // canSendNewsletter() lets an entire newsletter overshoot. Refusing a guest mid-cart
+            // because the organizer is one short is worse than a small, bounded overage. Across a
+            // multi-event order that bound widens once per leg, which is accepted for the same reason.
+            $unsellable = collect($leg['tickets'])
+                ->filter(fn ($quantity) => (int) $quantity > 0)
+                ->keys()
+                ->map(fn ($hash) => $event->tickets->firstWhere('id', UrlUtils::decodeId($hash)))
+                ->filter()
+                ->contains(fn ($ticket) => ! $ticket->isSellable($leg['event_date']));
+
+            if ($unsellable) {
+                return back()->withInput()->with('error', __('messages.tickets_not_available'));
+            }
+
+            $legs[$index]['event'] = $event;
         }
 
-        // Verify event can sell tickets (checks past dates, tickets_enabled, and plan allowance)
-        if (! $event->canSellTickets($request->event_date)) {
-            return back()->withInput()->with('error', __('messages.tickets_not_available'));
+        if ($error = $this->cartEligibilityError($legs)) {
+            return back()->withInput()->with('error', $error);
         }
 
-        // Per-row allowance check. canSellTickets() above answers "is this event selling at all",
-        // which stays true while a free tier remains; this refuses the individual PAID rows the
-        // schedule's monthly allowance can no longer cover, so a cart of free tiers still goes
-        // through on a capped schedule.
-        //
-        // Whose allowance, whether offline payment is exempt and whether the 48-hour grace applies
-        // are all decided inside Ticket::isSellable() -> Event::hasTicketAllowance(), which is the
-        // same code the guest form filters on. Keeping one definition is what stops the buy button
-        // and the write path disagreeing.
-        //
-        // Checked once, up front, then the whole cart is allowed through - the same way
-        // canSendNewsletter() lets an entire newsletter overshoot. Refusing a guest mid-cart
-        // because the organizer is one short is worse than a small, bounded overage.
-        $unsellable = collect($request->input('tickets', []))
-            ->filter(fn ($quantity) => (int) $quantity > 0)
-            ->keys()
-            ->map(fn ($hash) => $event->tickets->firstWhere('id', UrlUtils::decodeId($hash)))
-            ->filter()
-            ->contains(fn ($ticket) => ! $ticket->isSellable($request->event_date));
-
-        if ($unsellable) {
-            return back()->withInput()->with('error', __('messages.tickets_not_available'));
-        }
+        // Order-level fields below read from the first leg's event, which the guard above has
+        // proven shares its owner, currency and payment method with every other leg.
+        $event = $legs[0]['event'];
 
         if (! $user && $request->create_account && config('app.hosted')) {
 
@@ -1042,18 +1060,42 @@ class TicketController extends Controller
 
         // Use database transaction with row locking to prevent race conditions
         // that could lead to overselling tickets
+        // Deterministic lock order. Each leg row-locks its own tickets inside the one transaction,
+        // so two overlapping carts holding the same two events in opposite orders would deadlock.
+        usort($legs, fn ($a, $b) => $a['event']->id <=> $b['event']->id);
+
         try {
-            $sale = DB::transaction(function () use ($request, $event, $user, $subdomain, $isPaymentLink) {
-                $this->assertLegTicketsAvailable($request, $event, $isPaymentLink);
+            $sale = DB::transaction(function () use ($request, $legs, $user, $subdomain, $isPaymentLink) {
+                $sales = [];
 
-                $sale = $this->newSaleForLeg($request, $event, $user, $subdomain);
-                $sale->save();
+                foreach ($legs as $leg) {
+                    $this->assertLegTicketsAvailable($leg, $leg['event'], $isPaymentLink);
 
-                $this->priceSaleLeg($sale, $request, $event, $subdomain, $isPaymentLink);
+                    $legSale = $this->newSaleForLeg($request, $leg, $leg['event'], $user, $subdomain);
+                    $legSale->save();
 
-                $sale->save();
+                    $this->priceSaleLeg($legSale, $request, $leg, $leg['event'], $subdomain, $isPaymentLink);
 
-                return $sale;
+                    $legSale->save();
+
+                    $sales[] = $legSale;
+                }
+
+                // A single-event checkout stays exactly as it was: no order_id, nothing to group.
+                if (count($sales) > 1) {
+                    $legIds = array_map(fn ($legSale) => $legSale->id, $sales);
+                    $primaryId = $sales[0]->id;
+
+                    // Guest rows carry order_id too - priceSaleLeg() nested them under their leg
+                    // via group_id, and the cascades need one flat set.
+                    Sale::where(function ($query) use ($legIds) {
+                        $query->whereIn('id', $legIds)->orWhereIn('group_id', $legIds);
+                    })->update(['order_id' => $primaryId]);
+
+                    $sales[0]->order_id = $primaryId;
+                }
+
+                return $sales[0];
             });
         } catch (\Illuminate\Database\QueryException $e) {
             report($e);
@@ -1124,25 +1166,102 @@ class TicketController extends Controller
     }
 
     /**
+     * Normalise a checkout request into one leg per event.
+     *
+     * Without legs[] this returns a single leg built from the flat fields - every request the
+     * single-event form has ever sent - so the multi-leg path is additive rather than a rewrite of
+     * the wire format.
+     *
+     * Order-level fields (name, email, phone, gift card, account creation) stay on the request;
+     * only what differs per event lives here.
+     */
+    private function resolveCheckoutLegs($request): array
+    {
+        $raw = $request->input('legs');
+
+        if (! is_array($raw) || $raw === []) {
+            $raw = [[
+                'event_id' => $request->input('event_id'),
+                'event_date' => $request->input('event_date'),
+                'tickets' => $request->input('tickets', []),
+                'addons' => $request->input('addons', []),
+                'guests' => $request->input('guests', []),
+                'event_custom_values' => $request->input('event_custom_values', []),
+                'ticket_custom_values' => $request->input('ticket_custom_values', []),
+                'guest_ticket_custom_values' => $request->input('guest_ticket_custom_values', []),
+                'promo_code' => $request->input('promo_code'),
+            ]];
+        }
+
+        return array_map(fn ($leg) => [
+            'event_id' => $leg['event_id'] ?? null,
+            'event_date' => $leg['event_date'] ?? null,
+            'tickets' => array_filter((array) ($leg['tickets'] ?? []), fn ($qty) => (int) $qty > 0),
+            'addons' => (array) ($leg['addons'] ?? []),
+            'guests' => (array) ($leg['guests'] ?? []),
+            'event_custom_values' => (array) ($leg['event_custom_values'] ?? []),
+            'ticket_custom_values' => (array) ($leg['ticket_custom_values'] ?? []),
+            'guest_ticket_custom_values' => (array) ($leg['guest_ticket_custom_values'] ?? []),
+            'promo_code' => $leg['promo_code'] ?? null,
+        ], array_values($raw));
+    }
+
+    /**
+     * Why a cart cannot be paid for in one go, or null when it can.
+     *
+     * One Stripe Checkout Session cannot span Connect accounts, currencies or payment rails, and
+     * those three live on the EVENT: events.user_id resolves the destination account,
+     * ticket_currency_code the currency, payment_method the rail. A curator schedule genuinely
+     * aggregates events from different owners, so none of this is theoretical.
+     *
+     * Invoice Ninja is excluded outright: payment-link mode stores its subscription on the event
+     * and redirects to that event's purchase page, so it cannot represent an order.
+     */
+    private function cartEligibilityError(array $legs): ?string
+    {
+        if (count($legs) < 2) {
+            return null;
+        }
+
+        $first = $legs[0]['event'];
+
+        foreach ($legs as $leg) {
+            $event = $leg['event'];
+
+            if ($event->user_id !== $first->user_id
+                || $event->ticket_currency_code !== $first->ticket_currency_code
+                || $event->payment_method !== $first->payment_method) {
+                return __('messages.cart_events_incompatible');
+            }
+        }
+
+        if (! in_array($first->payment_method, ['stripe', 'cash'], true)) {
+            return __('messages.cart_payment_method_unsupported');
+        }
+
+        return null;
+    }
+
+    /**
      * Row-lock every selected ticket and add-on for one event and refuse the order if any of them
      * cannot cover the requested quantity. Throws BusinessException on a shortfall.
      *
      * Scoped to a single event on purpose: a cart spanning several events must call this once per
      * leg, and must do so in a stable event order, or two overlapping carts deadlock on the locks.
      */
-    private function assertLegTicketsAvailable($request, Event $event, bool $isPaymentLink): void
+    private function assertLegTicketsAvailable(array $leg, Event $event, bool $isPaymentLink): void
     {
         // Check ticket availability with row locking (skip for payment link mode)
         if (! $isPaymentLink) {
             // Resolve event_date for one-time events (hidden field may be empty)
-            $eventDate = $request->event_date;
+            $eventDate = $leg['event_date'];
             if (! $eventDate && $event->starts_at) {
                 $eventDate = $event->saleEventDateFromStartsAt();
             }
 
             // A season pass (valid for all dates) can't be combined with single-date
             // tickets in one order - the scan window would otherwise be ambiguous.
-            $selectedTicketIds = collect($request->tickets ?? [])
+            $selectedTicketIds = collect($leg['tickets'])
                 ->filter(fn ($q) => (int) $q > 0)
                 ->keys()
                 ->map(fn ($id) => UrlUtils::decodeId($id));
@@ -1151,7 +1270,7 @@ class TicketController extends Controller
                 throw new \App\Exceptions\BusinessException(__('messages.pass_cannot_combine'));
             }
 
-            foreach ($request->tickets as $ticketId => $quantity) {
+            foreach ($leg['tickets'] as $ticketId => $quantity) {
                 if ($quantity > 0) {
                     // Lock the ticket row to prevent concurrent modifications
                     $ticketModel = $event->tickets()->lockForUpdate()->find(UrlUtils::decodeId($ticketId));
@@ -1189,7 +1308,7 @@ class TicketController extends Controller
                             $remainingTickets = $totalQuantity - $totalSold;
 
                             // Check if the total requested quantity exceeds remaining tickets
-                            $totalRequested = array_sum($request->tickets);
+                            $totalRequested = array_sum($leg['tickets']);
                             if ($totalRequested > $remainingTickets) {
                                 throw new \App\Exceptions\BusinessException(__('messages.tickets_not_available'));
                             }
@@ -1215,7 +1334,7 @@ class TicketController extends Controller
                 && ! ($event->total_tickets_mode === 'combined' && $event->hasSameTicketQuantities())) {
                 $event->setRelation('tickets', $event->tickets()->lockForUpdate()->get());
                 $houseRemaining = $event->occurrenceSeatsRemaining($eventDate);
-                if ($houseRemaining !== null && array_sum($request->tickets) > $houseRemaining) {
+                if ($houseRemaining !== null && array_sum($leg['tickets']) > $houseRemaining) {
                     throw new \App\Exceptions\BusinessException(__('messages.tickets_not_available'));
                 }
             }
@@ -1223,7 +1342,7 @@ class TicketController extends Controller
             // Check add-on availability. Add-ons are Pro, and a lapsed schedule keeps its
             // rows (they are made dormant, never deleted), so the sell path needs its own
             // check rather than relying on the row's absence.
-            $addonSelections = $event->isPro() ? $request->input('addons', []) : [];
+            $addonSelections = $event->isPro() ? $leg['addons'] : [];
             foreach ($addonSelections as $addonId => $addonQty) {
                 $addonQty = (int) $addonQty;
                 if ($addonQty > 0) {
@@ -1256,13 +1375,13 @@ class TicketController extends Controller
      * The identity half of a sale row for one event: buyer details, attribution and the
      * event-level custom field answers. Unsaved; the caller saves it, then prices it.
      */
-    private function newSaleForLeg($request, Event $event, $user, string $subdomain): Sale
+    private function newSaleForLeg($request, array $leg, Event $event, $user, string $subdomain): Sale
     {
         $sale = new Sale;
         $sale->name = $request->input('name');
         $sale->email = $request->input('email');
         $sale->phone = $request->input('phone') ? strip_tags(trim($request->input('phone'))) : null;
-        $sale->event_date = $request->input('event_date');
+        $sale->event_date = $leg['event_date'];
         $sale->subdomain = $subdomain;
         $sale->event_id = $event->id;
         $sale->user_id = $user ? $user->id : null;
@@ -1295,7 +1414,7 @@ class TicketController extends Controller
 
         // Store event-level custom field values using stable indices
         // Fallback to iteration order for backward compatibility with fields without index
-        $eventCustomValues = $request->input('event_custom_values', []);
+        $eventCustomValues = $leg['event_custom_values'];
         $eventCustomFields = $event->custom_fields ?? [];
         $fallbackIndex = 1;
         foreach ($eventCustomFields as $fieldKey => $fieldConfig) {
@@ -1324,14 +1443,14 @@ class TicketController extends Controller
      *
      * Mutates $sale in place and leaves it unsaved; the caller saves.
      */
-    private function priceSaleLeg(Sale $sale, $request, Event $event, string $subdomain, bool $isPaymentLink): void
+    private function priceSaleLeg(Sale $sale, $request, array $leg, Event $event, string $subdomain, bool $isPaymentLink): void
     {
         if ($isPaymentLink) {
             // Payment link mode: quantities selected on IN, SaleTickets created by webhook
             $sale->payment_amount = 0;
         } else {
             // Check if individual tickets mode is active
-            $guests = $request->input('guests', []);
+            $guests = $leg['guests'];
             $isIndividualTickets = $event->individual_tickets && count($guests) > 1;
 
             if ($isIndividualTickets) {
@@ -1345,7 +1464,7 @@ class TicketController extends Controller
                 $ticketAssignments = [];
                 $seatPrices = [];
                 $subtotal = 0;
-                foreach ($request->tickets as $ticketId => $quantity) {
+                foreach ($leg['tickets'] as $ticketId => $quantity) {
                     if ($quantity > 0) {
                         $decodedId = UrlUtils::decodeId($ticketId);
                         $ticketModel = $event->tickets()->findOrFail($decodedId);
@@ -1371,7 +1490,7 @@ class TicketController extends Controller
 
                 // Store per-guest ticket custom fields for primary guest
                 if ($event->individual_ticket_fields) {
-                    $guestTicketCustomValues = $request->input('guest_ticket_custom_values', []);
+                    $guestTicketCustomValues = $leg['guest_ticket_custom_values'];
                     $primaryTicketModel = $event->tickets()->find($ticketAssignments[0]);
                     $primaryTicketCustomFields = $primaryTicketModel->custom_fields ?? [];
                     $ticketFallbackIndex = 1;
@@ -1397,9 +1516,9 @@ class TicketController extends Controller
                 // payment_amount allocated per-seat after volume + promo below
             } else {
                 // Standard flow: create SaleTickets with full quantities
-                $ticketCustomValues = $request->input('ticket_custom_values', []);
+                $ticketCustomValues = $leg['ticket_custom_values'];
 
-                foreach ($request->tickets as $ticketId => $quantity) {
+                foreach ($leg['tickets'] as $ticketId => $quantity) {
                     if ($quantity > 0) {
                         $ticketModel = $event->tickets()->findOrFail(UrlUtils::decodeId($ticketId));
                         $ticketCustomFields = $ticketModel->custom_fields ?? [];
@@ -1441,7 +1560,7 @@ class TicketController extends Controller
 
             // Create SaleTickets for add-ons (attach to primary sale only). Pro-gated, same
             // as the availability check above.
-            $addonSelections = $event->isPro() ? $request->input('addons', []) : [];
+            $addonSelections = $event->isPro() ? $leg['addons'] : [];
             $hasAddons = false;
             $addonTotal = 0;
             foreach ($addonSelections as $addonId => $addonQty) {
@@ -1476,16 +1595,16 @@ class TicketController extends Controller
             }
 
             $volumeTotal = $isIndividualTickets
-                ? TicketVolumeDiscount::totalVolumeDiscountForTicketQuantities($event, $request->tickets)
+                ? TicketVolumeDiscount::totalVolumeDiscountForTicketQuantities($event, $leg['tickets'])
                 : TicketVolumeDiscount::totalVolumeDiscountForSaleTickets($sale->saleTickets);
             $subtotalAfterVolume = $subtotal - $volumeTotal;
 
             // Apply promo code if provided (eligible subtotal is post-volume; see PromoCode::calculateDiscount)
             $promoCodeId = null;
             $discountTotal = 0;
-            if ($request->promo_code) {
+            if ($leg['promo_code']) {
                 $promoCode = PromoCode::where('event_id', $event->id)
-                    ->whereRaw('LOWER(code) = ?', [strtolower($request->promo_code)])
+                    ->whereRaw('LOWER(code) = ?', [strtolower($leg['promo_code'])])
                     ->lockForUpdate()
                     ->first();
 
@@ -1493,7 +1612,7 @@ class TicketController extends Controller
                     if ($isIndividualTickets) {
                         // Calculate discount from all ticket selections
                         $allSaleTickets = collect();
-                        foreach ($request->tickets as $ticketId => $quantity) {
+                        foreach ($leg['tickets'] as $ticketId => $quantity) {
                             if ($quantity > 0) {
                                 $decodedId = UrlUtils::decodeId($ticketId);
                                 $ticketModel = $event->tickets()->find($decodedId);
@@ -1665,7 +1784,7 @@ class TicketController extends Controller
 
                         // Store per-guest ticket custom fields
                         if ($event->individual_ticket_fields) {
-                            $guestTicketCustomValues = $request->input('guest_ticket_custom_values', []);
+                            $guestTicketCustomValues = $leg['guest_ticket_custom_values'];
                             $guestTicketModel = $event->tickets()->find($ticketAssignments[$g]);
                             $guestTicketCustomFields = $guestTicketModel->custom_fields ?? [];
                             $guestTicketFallbackIndex = 1;

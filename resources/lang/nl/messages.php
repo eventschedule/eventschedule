@@ -386,6 +386,8 @@ return [
     'pass_toggle_label' => 'Seizoenskaart (geldig voor alle data)',
     'pass_toggle_help' => 'Eén QR geldig voor elke datum van dit terugkerende evenement, één keer per keer in te checken. De prijs geldt voor de hele reeks.',
     'pass_cannot_combine' => 'Een seizoenskaart kan niet samen met tickets voor één datum worden gekocht. Koop ze in aparte bestellingen.',
+    'cart_events_incompatible' => 'Deze evenementen kunnen niet samen worden gekocht. Ze gebruiken een andere organisator, valuta of betaalmethode.',
+    'cart_payment_method_unsupported' => 'Deze evenementen kunnen niet samen worden gekocht met deze betaalmethode.',
     'attendee' => 'Deelnemer',
     'invoiceninja_connected' => 'Invoice Ninja succesvol verbonden!',
     'error_invoiceninja_connection' => 'Fout: Verbinding met Invoice Ninja mislukt',
