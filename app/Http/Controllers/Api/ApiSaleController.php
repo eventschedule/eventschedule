@@ -18,6 +18,8 @@ use Illuminate\Validation\ValidationException;
 
 class ApiSaleController extends Controller
 {
+    use \App\Traits\HandlesSaleStatusActions;
+
     protected const MAX_PER_PAGE = 500;
 
     protected const DEFAULT_PER_PAGE = 100;
@@ -151,63 +153,26 @@ class ApiSaleController extends Controller
 
         switch ($request->action) {
             case 'mark_paid':
-                if ($sale->status === 'unpaid') {
-                    DB::transaction(function () use ($sale) {
-                        $sale = Sale::lockForUpdate()->find($sale->id);
-                        if ($sale->status !== 'unpaid') {
-                            return;
-                        }
-                        $sale->status = 'paid';
-                        $sale->transaction_reference = 'Manual payment (API)';
-                        $sale->save();
-
-                        AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
-                        if ($sale->discount_amount > 0) {
-                            AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
-                        }
-                    });
-                    $actionPerformed = true;
-                }
+                $prev = $this->markSalePaid($sale, 'Manual payment (API)');
                 break;
 
             case 'refund':
-                if ($sale->status === 'paid') {
-                    DB::transaction(function () use ($sale) {
-                        $analyticsDate = $sale->created_at->toDateString();
-                        $sale->status = 'refunded';
-                        $sale->save();
-
-                        if ($sale->payment_method !== 'rsvp') {
-                            AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount, $analyticsDate);
-
-                            if ($sale->discount_amount > 0) {
-                                AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount, $analyticsDate);
-                            }
-                        }
-                    });
-                    $actionPerformed = true;
-                }
+                $prev = $this->refundSale($sale);
                 break;
 
             case 'cancel':
-                if (in_array($sale->status, ['unpaid', 'paid'])) {
-                    $wasPaid = $sale->status === 'paid';
-                    DB::transaction(function () use ($sale, $wasPaid) {
-                        $sale->status = 'cancelled';
-                        $sale->save();
-
-                        if ($wasPaid && $sale->payment_method !== 'rsvp') {
-                            $analyticsDate = $sale->created_at->toDateString();
-                            AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount, $analyticsDate);
-
-                            if ($sale->discount_amount > 0) {
-                                AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount, $analyticsDate);
-                            }
-                        }
-                    });
-                    $actionPerformed = true;
-                }
+                $prev = $this->cancelSale($sale);
                 break;
+
+            default:
+                $prev = null;
+        }
+
+        if ($prev !== null) {
+            $previousStatus = $prev;
+            $actionPerformed = true;
+            // The transition happened on the locked copy inside the transaction.
+            $sale->refresh();
         }
 
         if (! $actionPerformed) {
@@ -233,12 +198,7 @@ class ApiSaleController extends Controller
             default => null,
         };
         if ($webhookEvent) {
-            WebhookService::dispatch($webhookEvent, $sale);
-            if ($sale->group_id && $sale->isPrimarySale()) {
-                foreach (Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->get() as $gs) {
-                    WebhookService::dispatch($webhookEvent, $gs);
-                }
-            }
+            $this->dispatchSaleWebhookAcrossGroup($webhookEvent, $sale);
         }
 
         $sale->load(['saleTickets.ticket', 'event']);
@@ -271,36 +231,8 @@ class ApiSaleController extends Controller
             return response()->json(['error' => 'Cannot delete non-primary grouped sales'], 403);
         }
 
-        $previousStatus = $sale->status;
-
-        DB::transaction(function () use ($sale) {
-            // Cancel first to release ticket inventory (triggers Sale::booted hook)
-            if (in_array($sale->status, ['unpaid', 'paid'])) {
-                $wasPaid = $sale->status === 'paid';
-                $sale->status = 'cancelled';
-                $sale->save();
-
-                // Decrement analytics only for previously paid sales
-                // Skip RSVP sales - handled by Sale::booted hook
-                if ($wasPaid && $sale->payment_method !== 'rsvp') {
-                    $analyticsDate = $sale->created_at->toDateString();
-                    AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount, $analyticsDate);
-
-                    if ($sale->discount_amount > 0) {
-                        AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount, $analyticsDate);
-                    }
-                }
-            }
-
-            $sale->is_deleted = true;
-            $sale->save();
-
-            if ($sale->group_id && $sale->isPrimarySale()) {
-                Sale::where('group_id', $sale->group_id)
-                    ->where('id', '!=', $sale->id)
-                    ->update(['is_deleted' => true]);
-            }
-        });
+        $previousStatus = $this->deleteSale($sale) ?? $sale->status;
+        $sale->refresh();
 
         AuditService::log(AuditService::SALE_CHECKIN, auth()->id(), 'Sale', $sale->id,
             ['status' => $previousStatus],

@@ -42,6 +42,8 @@ use Stripe\StripeClient;
 
 class TicketController extends Controller
 {
+    use \App\Traits\HandlesSaleStatusActions;
+
     public function tickets()
     {
         $user = auth()->user();
@@ -2898,25 +2900,7 @@ class TicketController extends Controller
 
         switch ($request->action) {
             case 'mark_paid':
-                $prev = DB::transaction(function () use ($sale) {
-                    $locked = Sale::lockForUpdate()->find($sale->id);
-                    if (! $locked || $locked->status !== 'unpaid') {
-                        return null;
-                    }
-                    $analyticsAmount = $locked->legTotalPayment();
-                    $promoTotal = $locked->legTotalDiscount();
-
-                    $locked->status = 'paid';
-                    $locked->transaction_reference = __('messages.manual_payment');
-                    $locked->save();
-
-                    AnalyticsEventsDaily::incrementSale($locked->event_id, $analyticsAmount);
-                    if ($promoTotal > 0) {
-                        AnalyticsEventsDaily::incrementPromoSale($locked->event_id, $promoTotal);
-                    }
-
-                    return 'unpaid';
-                });
+                $prev = $this->markSalePaid($sale, __('messages.manual_payment'));
                 if ($prev !== null) {
                     $previousStatus = $prev;
                     $actionPerformed = true;
@@ -2924,29 +2908,7 @@ class TicketController extends Controller
                 break;
 
             case 'refund':
-                $prev = DB::transaction(function () use ($sale) {
-                    $locked = Sale::lockForUpdate()->find($sale->id);
-                    if (! $locked || $locked->status !== 'paid') {
-                        return null;
-                    }
-                    $analyticsDate = $locked->created_at->toDateString();
-                    $analyticsAmount = $locked->legTotalPayment();
-                    $promoTotal = $locked->legTotalDiscount();
-
-                    $locked->status = 'refunded';
-                    $locked->save();
-
-                    // Skip analytics decrement for RSVP sales - handled by Sale::booted hook
-                    if ($locked->payment_method !== 'rsvp') {
-                        AnalyticsEventsDaily::decrementSale($locked->event_id, $analyticsAmount, $analyticsDate);
-
-                        if ($promoTotal > 0) {
-                            AnalyticsEventsDaily::decrementPromoSale($locked->event_id, $promoTotal, $analyticsDate);
-                        }
-                    }
-
-                    return 'paid';
-                });
+                $prev = $this->refundSale($sale);
                 if ($prev !== null) {
                     $previousStatus = $prev;
                     $actionPerformed = true;
@@ -2954,31 +2916,7 @@ class TicketController extends Controller
                 break;
 
             case 'cancel':
-                $prev = DB::transaction(function () use ($sale) {
-                    $locked = Sale::lockForUpdate()->find($sale->id);
-                    if (! $locked || ! in_array($locked->status, ['unpaid', 'paid'])) {
-                        return null;
-                    }
-                    $wasPaid = $locked->status === 'paid';
-                    $analyticsAmount = $locked->legTotalPayment();
-                    $promoTotal = $locked->legTotalDiscount();
-                    $pre = $locked->status;
-
-                    $locked->status = 'cancelled';
-                    $locked->save();
-
-                    // Skip analytics decrement for RSVP sales - handled by Sale::booted hook
-                    if ($wasPaid && $locked->payment_method !== 'rsvp') {
-                        $analyticsDate = $locked->created_at->toDateString();
-                        AnalyticsEventsDaily::decrementSale($locked->event_id, $analyticsAmount, $analyticsDate);
-
-                        if ($promoTotal > 0) {
-                            AnalyticsEventsDaily::decrementPromoSale($locked->event_id, $promoTotal, $analyticsDate);
-                        }
-                    }
-
-                    return $pre;
-                });
+                $prev = $this->cancelSale($sale);
                 if ($prev !== null) {
                     $previousStatus = $prev;
                     $actionPerformed = true;
@@ -2986,46 +2924,7 @@ class TicketController extends Controller
                 break;
 
             case 'delete':
-                $prev = DB::transaction(function () use ($sale) {
-                    $locked = Sale::lockForUpdate()->find($sale->id);
-                    if (! $locked) {
-                        return null;
-                    }
-                    $pre = $locked->status;
-
-                    // Cancel first to release ticket inventory (triggers Sale::booted hook)
-                    if (in_array($locked->status, ['unpaid', 'paid'])) {
-                        $wasPaid = $locked->status === 'paid';
-                        $analyticsAmount = $locked->legTotalPayment();
-                        $promoTotal = $locked->legTotalDiscount();
-
-                        $locked->status = 'cancelled';
-                        $locked->save();
-
-                        // Decrement analytics only for previously paid sales
-                        // Skip RSVP sales - handled by Sale::booted hook
-                        if ($wasPaid && $locked->payment_method !== 'rsvp') {
-                            $analyticsDate = $locked->created_at->toDateString();
-                            AnalyticsEventsDaily::decrementSale($locked->event_id, $analyticsAmount, $analyticsDate);
-
-                            if ($promoTotal > 0) {
-                                AnalyticsEventsDaily::decrementPromoSale($locked->event_id, $promoTotal, $analyticsDate);
-                            }
-                        }
-                    }
-
-                    $locked->is_deleted = true;
-                    $locked->save();
-
-                    // Cascade is_deleted to grouped guest sales
-                    if ($locked->group_id && $locked->isPrimarySale()) {
-                        Sale::where('group_id', $locked->group_id)
-                            ->where('id', '!=', $locked->id)
-                            ->update(['is_deleted' => true]);
-                    }
-
-                    return $pre;
-                });
+                $prev = $this->deleteSale($sale);
                 if ($prev !== null) {
                     $previousStatus = $prev;
                     $actionPerformed = true;
@@ -3072,12 +2971,7 @@ class TicketController extends Controller
                 default => null,
             };
             if ($webhookEvent) {
-                WebhookService::dispatch($webhookEvent, $sale);
-                if ($sale->group_id && $sale->isPrimarySale()) {
-                    foreach (Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->get() as $gs) {
-                        WebhookService::dispatch($webhookEvent, $gs);
-                    }
-                }
+                $this->dispatchSaleWebhookAcrossGroup($webhookEvent, $sale);
             }
 
             if ($request->action === 'mark_paid') {
