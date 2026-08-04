@@ -56,19 +56,13 @@
 
             <form method="post" action="{{ route('event.checkout', ['subdomain' => $role->subdomain]) }}" class="mt-5">
                 @csrf
-                {{-- OPEN ITEM - this form has no honeypot, and per CLAUDE.md a public form should.
-                     It cannot simply be added: HoneypotTest pins two page-level invariants that a
-                     second honeypot here breaks. One is a real hazard rather than a counting
-                     detail - a signed-in visitor must see NO name="website" anywhere on the page,
-                     because a password manager will happily fill a decoy and trip the check on a
-                     legitimate submission. The other ties the count of name="website" to the count
-                     of name="guest_name", so the page's honeypots are all fan forms by
-                     construction.
-
-                     Deciding how the cart fits those two invariants is a security call, not a
-                     drive-by edit, so it is deliberately left undone rather than resolved by
-                     loosening the test. Until then this POST is protected by CSRF and the
-                     throttle:10,1 on the checkout route, but not by the honeypot. --}}
+                {{-- Signed-out only. A password manager will happily fill a decoy field, so handing
+                     one to an authenticated buyer trips the check on a legitimate submission -
+                     which is why HoneypotTest asserts a signed-in visitor sees no name="website"
+                     anywhere on the page. --}}
+                @guest
+                    <x-honeypot />
+                @endguest
                 <input type="hidden" name="cart_checkout" value="1">
                 <template v-for="(leg, index) in legs">
                     <input type="hidden" :name="'legs[' + index + '][event_id]'" :value="leg.event_id">

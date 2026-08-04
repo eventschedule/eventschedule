@@ -560,9 +560,14 @@ class AnalyticsService
             $modifier($query);
         }
 
+        // COUNT of PURCHASES, not of rows. One checkout writes a row per named guest, and now also
+        // a row per event in a cart, so a plain COUNT(*) reports a single four-guest purchase as
+        // four sales - inflating the conversion counts behind the boost and newsletter stats while
+        // the revenue sums stay right. Counting distinct order/group anchors collapses each
+        // checkout back to one, and an ungrouped sale is its own anchor via its id.
         return $query
             ->groupBy('events.ticket_currency_code')
-            ->selectRaw('events.ticket_currency_code as currency_code, COUNT(*) as sales_count, COALESCE(SUM(sales.'.$column.'), 0) as amount')
+            ->selectRaw('events.ticket_currency_code as currency_code, COUNT(DISTINCT COALESCE(sales.order_id, sales.group_id, sales.id)) as sales_count, COALESCE(SUM(sales.'.$column.'), 0) as amount')
             ->orderByDesc('amount')
             ->get()
             ->map(fn ($row) => [

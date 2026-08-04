@@ -1224,6 +1224,7 @@
                         </div>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">Returns a single sale by its encoded ID, including a row per ticket type and add-on with <code class="doc-inline-code">ticket_id</code>, <code class="doc-inline-code">type</code>, <code class="doc-inline-code">quantity</code>, <code class="doc-inline-code">price</code> and the <code class="doc-inline-code">is_addon</code> and <code class="doc-inline-code">is_pass</code> flags. Requires owner or admin access on the event's schedule and a Pro or Enterprise plan.</p>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">An order bought for several named guests is stored as one row per guest, all sharing a <code class="doc-inline-code">group_id</code>. The row with <code class="doc-inline-code">is_primary</code> set to true holds the totals for the whole order; the other rows report zero so you do not double-count when you add them up. Every row in a group belongs to the same event.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">A purchase that covered several events shares an <code class="doc-inline-code">order_id</code> instead, one row per event, with <code class="doc-inline-code">is_order_primary</code> on the anchoring row. The two nest: a leg of an order can itself be split across named guests, so a row may carry both.</p>
                     </div>
                     <div class="api-endpoint-code">
                         <div class="doc-code-block">

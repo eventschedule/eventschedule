@@ -160,6 +160,7 @@
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Group orders send one delivery per ticket holder</div>
             <p>When one buyer checks out for several named guests, each row in the order gets its own <code class="doc-inline-code">sale.*</code> delivery. The primary row carries the totals for the whole group; the guest rows report <code class="doc-inline-code">payment_amount</code> as <code class="doc-inline-code">0</code> so you do not count the money twice. Use <code class="doc-inline-code">is_primary</code> and <code class="doc-inline-code">group_id</code> in the payload to tell them apart.</p>
+            <p>A purchase that covered several events carries <code class="doc-inline-code">order_id</code> as well, shared by every row in the order, with <code class="doc-inline-code">is_order_primary</code> set on the one row that anchors it. Money is still reported per group, not per order, so summing <code class="doc-inline-code">payment_amount</code> across an <code class="doc-inline-code">order_id</code> gives the order total without double-counting.</p>
         </div>
     </section>
 

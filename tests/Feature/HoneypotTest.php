@@ -276,8 +276,15 @@ class HoneypotTest extends TestCase
         $html = $this->get($this->guestEventUrl($role, $event))->assertOk()->getContent();
 
         $this->assertGreaterThan(0, substr_count($html, 'name="guest_name"'));
+
+        // The guest cart posts to checkout and carries a honeypot of its own without being a fan
+        // form, so it is the one honeypot on this page with no matching guest_name. Counted
+        // explicitly rather than relaxing this to >=, which would let a fan form lose its honeypot
+        // unnoticed - the exact regression this test exists to catch.
+        $cartHoneypots = 1;
+
         $this->assertSame(
-            substr_count($html, 'name="guest_name"'),
+            substr_count($html, 'name="guest_name"') + $cartHoneypots,
             substr_count($html, 'name="website"'),
             'every signed-out fan form must carry a honeypot'
         );
