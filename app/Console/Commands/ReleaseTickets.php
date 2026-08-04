@@ -43,14 +43,40 @@ class ReleaseTickets extends Command
             })
             ->get();
 
+        // A leg of a multi-event order can never expire on its own. The buyer pays once, so
+        // releasing one event's seats while the rest of the order stays unpaid leaves an order
+        // that can never complete - and hands those seats to someone else while the buyer's
+        // payment session is still open. Expiry is driven from the order primary instead, so the
+        // whole order goes when the SHORTEST leg's window elapses.
+        $handled = [];
+
         foreach ($expiredSales as $sale) {
-            \DB::transaction(function () use ($sale) {
-                $sale->status = 'expired';
-                $sale->save();
+            $targetId = $sale->order_id ?: $sale->id;
+
+            if (isset($handled[$targetId])) {
+                continue;
+            }
+            $handled[$targetId] = true;
+
+            // Re-read under lock: the target may be a different row than the one selected, and a
+            // second elapsed leg of the same order must not expire it twice.
+            $expired = \DB::transaction(function () use ($targetId) {
+                $target = Sale::lockForUpdate()->find($targetId);
+
+                if (! $target || $target->status !== 'unpaid') {
+                    return null;
+                }
+
+                $target->status = 'expired';
+                $target->save();
+
+                return $target;
             });
 
-            AuditService::log(AuditService::SALE_EXPIRED, null, 'Sale', $sale->id,
-                ['status' => 'unpaid'], ['status' => 'expired'], 'auto_expire:event_id:'.$sale->event_id);
+            if ($expired) {
+                AuditService::log(AuditService::SALE_EXPIRED, null, 'Sale', $expired->id,
+                    ['status' => 'unpaid'], ['status' => 'expired'], 'auto_expire:event_id:'.$expired->event_id);
+            }
         }
 
         $this->releaseGiftCardHolds();
@@ -109,28 +135,48 @@ class ReleaseTickets extends Command
                         $sub->selectRaw('1')->from('sales as gs')
                             ->whereColumn('gs.group_id', 'sales.id')
                             ->where('gs.gift_card_amount', '>', 0);
+                    })
+                    // Across a multi-event order the card is applied leg by leg, so the share may
+                    // sit on a leg other than the one being examined. Without this, a leg whose
+                    // own share happened to be zero never releases the hold and the balance stays
+                    // locked up indefinitely.
+                    ->orWhereExists(function ($sub) {
+                        $sub->selectRaw('1')->from('sales as os')
+                            ->whereColumn('os.order_id', 'sales.order_id')
+                            ->whereNotNull('os.order_id')
+                            ->where('os.gift_card_amount', '>', 0);
                     });
             })
             ->get();
 
+        $handled = [];
+
         foreach ($heldSales as $sale) {
+            // Same rule as the window loop above: an order expires as a unit, from its primary.
+            $targetId = $sale->order_id ?: $sale->id;
+
+            if (isset($handled[$targetId])) {
+                continue;
+            }
+            $handled[$targetId] = true;
+
             // Re-fetch under a lock and re-check status: a webhook may have marked the sale paid
             // between the query above and here - flipping paid->expired would wrongly restore the
             // gift balance (double-credit) and release tickets on an order that was actually paid.
-            $expired = \DB::transaction(function () use ($sale) {
-                $locked = Sale::lockForUpdate()->find($sale->id);
+            $expired = \DB::transaction(function () use ($targetId) {
+                $locked = Sale::lockForUpdate()->find($targetId);
                 if (! $locked || $locked->status !== 'unpaid') {
-                    return false;
+                    return null;
                 }
                 $locked->status = 'expired';
                 $locked->save();
 
-                return true;
+                return $locked;
             });
 
             if ($expired) {
-                AuditService::log(AuditService::SALE_EXPIRED, null, 'Sale', $sale->id,
-                    ['status' => 'unpaid'], ['status' => 'expired'], 'gift_card_hold:event_id:'.$sale->event_id);
+                AuditService::log(AuditService::SALE_EXPIRED, null, 'Sale', $expired->id,
+                    ['status' => 'unpaid'], ['status' => 'expired'], 'gift_card_hold:event_id:'.$expired->event_id);
             }
         }
     }

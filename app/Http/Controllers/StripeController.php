@@ -156,6 +156,20 @@ class StripeController extends Controller
                             return;
                         }
 
+                        // A released sale must never be revived. Expiry already gave the seats back and
+                        // restored any gift-card balance, and marking paid does not re-take them - so
+                        // flipping expired -> paid oversells the event and double-spends the card. A
+                        // multi-event order widens the window: one leg's expiry window can elapse while
+                        // the order's single Stripe session is still open.
+                        if (in_array($sale->status, ['expired', 'cancelled', 'refunded'], true)) {
+                            \Log::warning('Stripe webhook for a released sale - not marking paid', [
+                                'sale_id' => $sale->id,
+                                'status' => $sale->status,
+                            ]);
+
+                            return;
+                        }
+
                         $currencyCode = $sale->event?->ticket_currency_code ?? 'USD';
                         $webhookAmount = $paymentIntent->amount / MoneyUtils::getSmallestUnitMultiplier($currencyCode);
 
@@ -257,6 +271,20 @@ class StripeController extends Controller
                         \DB::transaction(function () use ($sale, $session, &$didTransitionToPaid) {
                             $sale = Sale::lockForUpdate()->find($sale->id);
                             if ($sale->status === 'paid') {
+                                return;
+                            }
+
+                            // A released sale must never be revived. Expiry already gave the seats back and
+                            // restored any gift-card balance, and marking paid does not re-take them - so
+                            // flipping expired -> paid oversells the event and double-spends the card. A
+                            // multi-event order widens the window: one leg's expiry window can elapse while
+                            // the order's single Stripe session is still open.
+                            if (in_array($sale->status, ['expired', 'cancelled', 'refunded'], true)) {
+                                \Log::warning('Stripe webhook for a released sale - not marking paid', [
+                                    'sale_id' => $sale->id,
+                                    'status' => $sale->status,
+                                ]);
+
                                 return;
                             }
 

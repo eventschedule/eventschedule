@@ -122,6 +122,26 @@ class SaleOrderCascadeTest extends TestCase
         $this->assertSame('paid', $guestA->fresh()->status);
     }
 
+    public function test_an_order_expires_as_a_unit_when_the_shortest_leg_window_elapses(): void
+    {
+        [$legA, $guestA, $legB, , $eventB] = $this->createTwoLegOrder();
+
+        // Only leg B's event opts into expiry. Judged leg by leg, B would expire and give its
+        // seats back while A stays unpaid forever - an order that can never complete, and seats
+        // resold while the buyer's payment session is still open.
+        $eventB->expire_unpaid_tickets = 1;
+        $eventB->save();
+
+        Sale::whereIn('id', [$legA->id, $guestA->id, $legB->id])
+            ->update(['created_at' => now()->subHours(3)]);
+
+        $this->artisan('app:release-tickets')->assertExitCode(0);
+
+        $this->assertSame('expired', $legB->fresh()->status, 'the leg whose window elapsed');
+        $this->assertSame('expired', $legA->fresh()->status, 'the order primary must go with it');
+        $this->assertSame('expired', $guestA->fresh()->status, 'and so must its guest row');
+    }
+
     public function test_order_totals_span_legs_while_leg_totals_do_not(): void
     {
         [$legA] = $this->createTwoLegOrder();
