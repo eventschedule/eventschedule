@@ -394,6 +394,7 @@ class BackupService
                 '_promo_code_ref_id' => $sale->promo_code_id,
                 '_gift_card_ref_id' => $sale->gift_card_id,
                 '_group_ref_id' => $sale->group_id,
+                '_order_ref_id' => $sale->order_id,
                 '_newsletter_ref_id' => $sale->newsletter_id,
                 'name' => $sale->name,
                 'email' => $sale->email,
@@ -1059,16 +1060,34 @@ class BackupService
                 ]);
             }
 
-            // Second pass: fix Sale group_id self-references
+            // Second pass: fix the Sale group_id and order_id self-references.
+            //
+            // order_id points at a sale that may live under a DIFFERENT event, and for a cart
+            // spanning two schedules under a different schedule node entirely. Remapping only when
+            // the target made it into $idMap is what stops a restored order pointing at a stale or
+            // foreign id; a leg whose order primary was not in this archive is simply left
+            // standalone, which is the same fallback group_id already takes.
             foreach ($events as $eventData) {
                 foreach ($eventData['sales'] ?? [] as $saleData) {
+                    if (! isset($idMap['sales'][$saleData['_ref_id'] ?? null])) {
+                        continue;
+                    }
+
+                    $newSaleId = $idMap['sales'][$saleData['_ref_id']];
+                    $updates = [];
+
                     $groupRefId = $saleData['_group_ref_id'] ?? null;
-                    if ($groupRefId && isset($idMap['sales'][$saleData['_ref_id'] ?? null])) {
-                        $newSaleId = $idMap['sales'][$saleData['_ref_id']];
-                        $newGroupId = $idMap['sales'][$groupRefId] ?? null;
-                        if ($newGroupId) {
-                            Sale::where('id', $newSaleId)->update(['group_id' => $newGroupId]);
-                        }
+                    if ($groupRefId && ($newGroupId = $idMap['sales'][$groupRefId] ?? null)) {
+                        $updates['group_id'] = $newGroupId;
+                    }
+
+                    $orderRefId = $saleData['_order_ref_id'] ?? null;
+                    if ($orderRefId && ($newOrderId = $idMap['sales'][$orderRefId] ?? null)) {
+                        $updates['order_id'] = $newOrderId;
+                    }
+
+                    if ($updates) {
+                        Sale::where('id', $newSaleId)->update($updates);
                     }
                 }
             }
@@ -1309,7 +1328,7 @@ class BackupService
         $event = new Event;
 
         $excludeFields = array_merge(self::EVENT_EXPORT_EXCLUDE, [
-            '_ref_id', '_group_ref_id', '_is_accepted', '_flyer_image',
+            '_ref_id', '_group_ref_id', '_order_ref_id', '_is_accepted', '_flyer_image',
             'tickets', 'promo_codes', 'sales', 'parts', 'polls',
             'comments', 'videos', 'feedbacks', 'waitlists', 'photos',
             'days_of_week', 'recurring_include_dates', 'recurring_exclude_dates',
