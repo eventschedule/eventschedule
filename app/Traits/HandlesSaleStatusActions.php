@@ -147,8 +147,14 @@ trait HandlesSaleStatusActions
             $locked->is_deleted = true;
             $locked->save();
 
-            // Cascade to the guest rows nested under this primary.
-            if ($locked->group_id && $locked->isPrimarySale()) {
+            // Cascade the delete. An order primary takes the whole order - guest rows carry
+            // order_id too, so this is one flat set. Deleting only this leg would leave the others
+            // live: still holding inventory, still in attendee lists, still counted.
+            if ($locked->isOrderPrimary()) {
+                Sale::where('order_id', $locked->order_id)
+                    ->where('id', '!=', $locked->id)
+                    ->update(['is_deleted' => true]);
+            } elseif ($locked->group_id && $locked->isPrimarySale()) {
                 Sale::where('group_id', $locked->group_id)
                     ->where('id', '!=', $locked->id)
                     ->update(['is_deleted' => true]);

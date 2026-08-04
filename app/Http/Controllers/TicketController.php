@@ -829,7 +829,7 @@ class TicketController extends Controller
             fwrite($handle, "\xEF\xBB\xBF");
 
             // Header row
-            $headers = ['Name', 'Email', 'Phone', 'Event', 'Event Date', 'Tickets', 'Add-ons', 'Quantity', 'Amount', 'Currency', 'Promo Code', 'Discount', 'Gift Card', 'Gift Card Amount', 'Transaction Reference', 'Payment Method', 'Status', 'Date', 'Group ID', 'Check-in Status', 'Check-in Time', 'Pass Type', 'Pass Visits Used', 'Pass Expires'];
+            $headers = ['Name', 'Email', 'Phone', 'Event', 'Event Date', 'Tickets', 'Add-ons', 'Quantity', 'Amount', 'Currency', 'Promo Code', 'Discount', 'Gift Card', 'Gift Card Amount', 'Transaction Reference', 'Payment Method', 'Status', 'Date', 'Group ID', 'Order ID', 'Check-in Status', 'Check-in Time', 'Pass Type', 'Pass Visits Used', 'Pass Expires'];
             $headers = array_merge($headers, $customFieldNames);
             fputcsv($handle, $headers);
 
@@ -867,6 +867,7 @@ class TicketController extends Controller
                     $sale->status,
                     $sale->created_at->timezone($sale->event->creatorRole?->timezone ?? config('app.timezone'))->format('Y-m-d H:i'),
                     $sale->group_id ? UrlUtils::encodeId($sale->group_id) : '',
+                    $sale->order_id ? UrlUtils::encodeId($sale->order_id) : '',
                 ];
 
                 // Check-in: find the first non-null timestamp across all SaleTicket seats

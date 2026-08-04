@@ -508,6 +508,13 @@ class Sale extends Model
             $data->discount_amount = $this->discount_amount !== null ? (float) $this->discount_amount : null;
             $data->gift_card_amount = $this->gift_card_amount !== null ? (float) $this->gift_card_amount : null;
         }
+        // Rows a buyer paid for in one checkout that spanned several events share this. Exposed as
+        // its own field rather than by widening payment_amount: the primary/guest contract above
+        // is what stops a subscriber double-counting, and inflating a leg primary's total to the
+        // order's would break it for anyone summing across an order.
+        $data->order_id = $this->order_id ? UrlUtils::encodeId($this->order_id) : null;
+        $data->is_order_primary = $this->isOrderPrimary();
+
         $data->transaction_reference = $this->transaction_reference;
 
         // Include secret when explicitly requested (e.g. webhook payloads) or when the authenticated user is authorized
