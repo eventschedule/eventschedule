@@ -3821,6 +3821,7 @@ return [
     'update_your_calendar' => 'Update your calendar',
     'update_your_calendar_note' => 'Subscribed calendars update automatically. A re-imported file may create a duplicate.',
     'organizer_note' => 'Note from the organizer',
+    'event_cancelled_rest_of_order_stands' => 'The other events in this purchase are not affected - your tickets for them are still valid.',
     'event_cancelled_subject' => 'Cancelled: :event',
     'event_cancelled_heading' => 'Event Cancelled',
     'event_cancelled_body' => 'Unfortunately, :event has been cancelled.',

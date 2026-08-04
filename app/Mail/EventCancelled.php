@@ -21,6 +21,7 @@ class EventCancelled extends Mailable
         protected string $eventUrl,
         protected ?string $note = null,
         protected ?string $recipientName = null,
+        protected bool $partOfOrder = false,
     ) {}
 
     public function envelope(): Envelope
@@ -55,6 +56,7 @@ class EventCancelled extends Mailable
                 'note' => $this->note,
                 'recipientName' => $this->recipientName,
                 'eventUrl' => $this->eventUrl,
+                'partOfOrder' => $this->partOfOrder,
                 'isRtl' => in_array(app()->getLocale(), ['ar', 'he']),
             ],
         );

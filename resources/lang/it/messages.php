@@ -3677,6 +3677,7 @@ return [
     'update_your_calendar' => 'Aggiorna il tuo calendario',
     'update_your_calendar_note' => 'I calendari a cui sei abbonato si aggiornano automaticamente. Reimportare il file potrebbe creare un duplicato.',
     'organizer_note' => 'Nota dell\'organizzatore',
+    'event_cancelled_rest_of_order_stands' => 'Gli altri eventi di questo acquisto non sono interessati: i tuoi biglietti restano validi.',
     'event_cancelled_subject' => 'Annullato: :event',
     'event_cancelled_heading' => 'Evento annullato',
     'event_cancelled_body' => 'Purtroppo :event è stato annullato.',

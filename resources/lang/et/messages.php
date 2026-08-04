@@ -3696,6 +3696,7 @@ return [
     'update_your_calendar' => 'Uuendage oma kalendrit',
     'update_your_calendar_note' => 'Tellitud kalendrid uuenevad automaatselt. Faili uuesti importimine võib luua duplikaadi.',
     'organizer_note' => 'Märkus korraldajalt',
+    'event_cancelled_rest_of_order_stands' => 'Selle ostu teised sündmused ei ole mõjutatud - sinu piletid nendele kehtivad endiselt.',
     'event_cancelled_subject' => 'Tühistatud: :event',
     'event_cancelled_heading' => 'Üritus tühistatud',
     'event_cancelled_body' => 'Kahjuks on :event tühistatud.',

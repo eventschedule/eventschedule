@@ -3,6 +3,9 @@
 {{ __('messages.hello') }}@if (! empty($recipientName)), {{ $recipientName }}@endif,
 
 {{ __('messages.event_cancelled_body', ['event' => $event->name]) }}
+@if (! empty($partOfOrder))
+{{ __('messages.event_cancelled_rest_of_order_stands') }}
+@endif
 @if (! empty($note))
 
 {{ __('messages.organizer_note') }}:

@@ -3684,6 +3684,7 @@ return [
     'update_your_calendar' => 'Mettez à jour votre agenda',
     'update_your_calendar_note' => 'Les agendas auxquels vous êtes abonné se mettent à jour automatiquement. Réimporter le fichier peut créer un doublon.',
     'organizer_note' => 'Note de l\'organisateur',
+    'event_cancelled_rest_of_order_stands' => 'Les autres événements de cet achat ne sont pas concernés : vos billets pour ceux-ci restent valables.',
     'event_cancelled_subject' => 'Annulé : :event',
     'event_cancelled_heading' => 'Événement annulé',
     'event_cancelled_body' => 'Malheureusement, :event a été annulé.',

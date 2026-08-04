@@ -3681,6 +3681,7 @@ return [
     'update_your_calendar' => 'Aktualisieren Sie Ihren Kalender',
     'update_your_calendar_note' => 'Abonnierte Kalender werden automatisch aktualisiert. Eine erneut importierte Datei kann ein Duplikat erstellen.',
     'organizer_note' => 'Notiz vom Veranstalter',
+    'event_cancelled_rest_of_order_stands' => 'Die anderen Veranstaltungen dieses Kaufs sind nicht betroffen - Ihre Tickets dafür bleiben gültig.',
     'event_cancelled_subject' => 'Abgesagt: :event',
     'event_cancelled_heading' => 'Veranstaltung abgesagt',
     'event_cancelled_body' => 'Leider wurde :event abgesagt.',

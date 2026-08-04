@@ -57,7 +57,9 @@ class EventChangeNotifier
             $eventUrl = $event->getGuestUrl(false, $sale->event_date, true);
 
             SendQueuedEmail::dispatch(
-                new EventCancelled($event, $role, $eventUrl, $note, $sale->name),
+                // A leg of a multi-event order: say the rest of the purchase stands, or the
+                // buyer has no way to tell whether one cancellation voided everything.
+                new EventCancelled($event, $role, $eventUrl, $note, $sale->name, (bool) $sale->order_id),
                 $sale->email,
                 $role->id,
                 $locale

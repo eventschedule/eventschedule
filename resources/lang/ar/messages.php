@@ -3678,6 +3678,7 @@ return [
     'update_your_calendar' => 'حدّث تقويمك',
     'update_your_calendar_note' => 'تُحدَّث التقاويم المشترَك بها تلقائيًا. وقد يؤدي إعادة استيراد الملف إلى إنشاء نسخة مكررة.',
     'organizer_note' => 'ملاحظة من المنظّم',
+    'event_cancelled_rest_of_order_stands' => 'الفعاليات الأخرى في هذا الشراء غير متأثرة - تذاكرك لها لا تزال صالحة.',
     'event_cancelled_subject' => 'ملغاة: :event',
     'event_cancelled_heading' => 'تم إلغاء الفعالية',
     'event_cancelled_body' => 'للأسف، تم إلغاء :event.',

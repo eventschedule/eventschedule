@@ -15,7 +15,10 @@
 
         <p style="font-size: 16px;">{{ __('messages.event_cancelled_body', ['event' => $event->name]) }}</p>
 
-        @if (! empty($note))
+                @if (! empty($partOfOrder))
+            <p style="font-size: 15px; color: #333;">{{ __('messages.event_cancelled_rest_of_order_stands') }}</p>
+        @endif
+@if (! empty($note))
         <div style="background-color: #fff; padding: 15px 20px; border-radius: 8px; margin: 20px 0; border-{{ ($isRtl ?? false) ? 'right' : 'left' }}: 4px solid #9ca3af;">
             <p style="margin: 0 0 6px 0; font-size: 13px; color: #666; font-weight: bold;">{{ __('messages.organizer_note') }}</p>
             <p style="margin: 0; font-size: 15px; color: #333;">{!! nl2br(e($note)) !!}</p>

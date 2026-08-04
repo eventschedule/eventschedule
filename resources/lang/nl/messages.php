@@ -3677,6 +3677,7 @@ return [
     'update_your_calendar' => 'Werk je kalender bij',
     'update_your_calendar_note' => 'Geabonneerde kalenders worden automatisch bijgewerkt. Het bestand opnieuw importeren kan een duplicaat aanmaken.',
     'organizer_note' => 'Notitie van de organisator',
+    'event_cancelled_rest_of_order_stands' => 'De andere evenementen in deze aankoop zijn niet getroffen - je tickets daarvoor blijven geldig.',
     'event_cancelled_subject' => 'Geannuleerd: :event',
     'event_cancelled_heading' => 'Evenement geannuleerd',
     'event_cancelled_body' => 'Helaas is :event geannuleerd.',

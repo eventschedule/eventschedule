@@ -3716,6 +3716,7 @@ return [
     'update_your_calendar' => 'Actualizează-ți calendarul',
     'update_your_calendar_note' => 'Calendarele la care ești abonat se actualizează automat. Reimportarea fișierului poate crea un duplicat.',
     'organizer_note' => 'Notă de la organizator',
+    'event_cancelled_rest_of_order_stands' => 'Celelalte evenimente din această achiziție nu sunt afectate - biletele tale pentru ele rămân valabile.',
     'event_cancelled_subject' => 'Anulat: :event',
     'event_cancelled_heading' => 'Eveniment anulat',
     'event_cancelled_body' => 'Din păcate, :event a fost anulat.',

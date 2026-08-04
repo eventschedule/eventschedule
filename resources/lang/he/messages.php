@@ -3672,6 +3672,7 @@ return [
     'update_your_calendar' => 'עדכן את היומן שלך',
     'update_your_calendar_note' => 'יומנים שנרשמת אליהם מתעדכנים אוטומטית. ייבוא מחדש של הקובץ עלול ליצור כפילות.',
     'organizer_note' => 'הערה מהמארגן',
+    'event_cancelled_rest_of_order_stands' => 'האירועים האחרים ברכישה זו אינם מושפעים - הכרטיסים שלכם אליהם עדיין תקפים.',
     'event_cancelled_subject' => 'בוטל: :event',
     'event_cancelled_heading' => 'האירוע בוטל',
     'event_cancelled_body' => 'לצערנו, :event בוטל.',

@@ -3698,6 +3698,7 @@ return [
     'update_your_calendar' => 'Обновите свой календарь',
     'update_your_calendar_note' => 'Календари с подпиской обновляются автоматически. Повторный импорт файла может создать дубликат.',
     'organizer_note' => 'Примечание от организатора',
+    'event_cancelled_rest_of_order_stands' => 'Другие события в этой покупке не затронуты - ваши билеты на них остаются действительными.',
     'event_cancelled_subject' => 'Отменено: :event',
     'event_cancelled_heading' => 'Событие отменено',
     'event_cancelled_body' => 'К сожалению, событие :event отменено.',

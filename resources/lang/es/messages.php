@@ -3677,6 +3677,7 @@ return [
     'update_your_calendar' => 'Actualiza tu calendario',
     'update_your_calendar_note' => 'Los calendarios suscritos se actualizan automáticamente. Volver a importar el archivo puede crear un duplicado.',
     'organizer_note' => 'Nota del organizador',
+    'event_cancelled_rest_of_order_stands' => 'Los demás eventos de esta compra no se ven afectados: tus entradas para ellos siguen siendo válidas.',
     'event_cancelled_subject' => 'Cancelado: :event',
     'event_cancelled_heading' => 'Evento cancelado',
     'event_cancelled_body' => 'Lamentablemente, :event se ha cancelado.',
