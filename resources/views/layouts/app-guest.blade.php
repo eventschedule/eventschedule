@@ -596,6 +596,8 @@
         {{ $slot }}
     </div>
 
+    @include('partials.guest-cart', ['role' => $role])
+
     {{-- Monetization slot. Deliberately outside #main-content (and so outside the
          #calendar-app Vue mount), directly above the free-tier branding footer that it
          shares a gate with. Opt-in per view: see AppGuestLayout::$adSlot. --}}

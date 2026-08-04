@@ -232,6 +232,25 @@ class MultiEventCartCheckoutTest extends TestCase
         }
     }
 
+    public function test_the_cart_widget_renders_outside_the_ticket_selector_mount(): void
+    {
+        [$eventA] = $this->twoEvents();
+
+        $html = $this->get(route('event.view_guest', [
+            'subdomain' => $this->role->subdomain,
+            'slug' => $eventA->slug,
+        ]))->assertOk()->assertSee('es-cart-app', false)->getContent();
+
+        // Vue compiles the template of whatever it mounts, so a cart nested inside #ticket-selector
+        // would be consumed by that app instead of its own. Assert the ordering rather than trust
+        // where the include happens to sit in the layout.
+        $this->assertGreaterThan(
+            strpos($html, 'id="ticket-selector"'),
+            strpos($html, 'id="es-cart-app"'),
+            'the cart mount must come after the ticket selector mount closes'
+        );
+    }
+
     public function test_a_single_leg_checkout_writes_no_order_id(): void
     {
         [$eventA, , $ticketA] = $this->twoEvents();

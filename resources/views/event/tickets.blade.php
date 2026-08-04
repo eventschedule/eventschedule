@@ -1,3 +1,11 @@
+@php
+    // Whether this event may be put in a cart at all. Mirrors the server-side guard in
+    // TicketController::cartEligibilityError(): only rails that can settle a whole order in one go.
+    // Embeds are excluded - an embedded widget is one event on someone else's page, and its cart
+    // would live in that page's storage where the buyer can never reach the rest of it.
+    $cartEligible = in_array($event->payment_method, ['stripe', 'cash'], true) && ! request()->embed;
+@endphp
+
 <x-slot name="head">
   <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
   @if ($event->country_code_phone)
@@ -71,6 +79,10 @@
                     isStripePayment: @json($event->payment_method === 'stripe'),
                     giftCardMinCharge: @json(50 / \App\Utils\MoneyUtils::getSmallestUnitMultiplier($event->ticket_currency_code)),
                     isPaymentLinkMode: @json($event->payment_method === 'invoiceninja' && $event->user->invoiceninja_mode === 'payment_link'),
+                    {{-- Mirrors TicketController::cartEligibilityError(): a cart can only hold
+                         events that could be paid for in one session. --}}
+                    cartEligible: @json($cartEligible),
+                    addedToCart: false,
                     isSubmitting: false,
                     allSoldOut: @json($event->allTicketsSoldOut($date ?? request()->date)),
                     waitlistSubmitting: false,
@@ -274,6 +286,9 @@
                 },
                 storageKey() {
                     return 'checkout_form_' + @json(\App\Utils\UrlUtils::encodeId($event->id));
+                },
+                selectedTicketCount() {
+                    return this.tickets.reduce((total, ticket) => total + (ticket.selectedQty || 0), 0);
                 }
             },
             methods: {
@@ -439,6 +454,44 @@
                         this.email = this.guests[0].email || this.email;
                         this.phone = this.guests[0].phone || this.phone;
                     }
+                },
+                /**
+                 * Hand this event's selection to the cart widget in the guest layout.
+                 *
+                 * Only what the server needs to re-resolve and re-price the leg is stored, plus a
+                 * label for the panel. Nothing about price is trusted on the way back in: checkout
+                 * re-reads every ticket from the database.
+                 */
+                addToCart() {
+                    var leg = {
+                        event_id: @json(\App\Utils\UrlUtils::encodeId($event->id)),
+                        event_date: this.event_date,
+                        event_name: @json($event->translatedName()),
+                        tickets: {},
+                        addons: {},
+                        promo_code: this.promoCode || null,
+                    };
+
+                    this.tickets.forEach(function (ticket) {
+                        if (ticket.selectedQty > 0) {
+                            leg.tickets[ticket.id] = ticket.selectedQty;
+                        }
+                    });
+                    this.addons.forEach(function (addon) {
+                        if (addon.selectedQty > 0) {
+                            leg.addons[addon.id] = addon.selectedQty;
+                        }
+                    });
+
+                    if (Object.keys(leg.tickets).length === 0) {
+                        return;
+                    }
+
+                    window.dispatchEvent(new CustomEvent('es-cart-add', { detail: leg }));
+
+                    this.addedToCart = true;
+                    var self = this;
+                    setTimeout(function () { self.addedToCart = false; }, 2500);
                 },
                 saveFormState() {
                     try {
@@ -1371,6 +1424,19 @@
             @if (! request()->embed)
             <button type="button" @click="hideForm" class="mt-4 px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
                 {{ strtoupper(__('messages.cancel')) }}
+            </button>
+            @endif
+
+            @if ($cartEligible)
+            {{-- Adds this event to the cart instead of paying for it now, so the buyer can carry on
+                 browsing. The cart widget in the guest layout owns the storage and the checkout. --}}
+            <button type="button"
+                v-if="cartEligible && selectedTicketCount > 0"
+                @click="addToCart"
+                class="mt-4 inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-lg border-2 transition-all duration-200 hover:scale-105"
+                style="border-color: {{ $accentColor }}; color: {{ $accentColor }};">
+                <span v-if="addedToCart">{{ strtoupper(__('messages.added_to_cart')) }}</span>
+                <span v-else>{{ strtoupper(__('messages.add_to_cart')) }}</span>
             </button>
             @endif
 
