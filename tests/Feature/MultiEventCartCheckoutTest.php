@@ -170,6 +170,68 @@ class MultiEventCartCheckoutTest extends TestCase
         }
     }
 
+    public function test_a_cart_lands_on_an_order_page_listing_every_event(): void
+    {
+        [$eventA, $eventB, $ticketA, $ticketB] = $this->twoEvents();
+
+        $response = $this->checkout([$this->leg($eventA, $ticketA), $this->leg($eventB, $ticketB)]);
+
+        $primary = Sale::where('email', 'cart@example.com')->orderBy('id')->first();
+        $response->assertRedirect(route('ticket.order', [
+            'order_id' => UrlUtils::encodeId($primary->id),
+            'secret' => $primary->secret,
+        ]));
+
+        // Both events must be reachable from it; a single ticket page would hide the other.
+        $this->get(route('ticket.order', [
+            'order_id' => UrlUtils::encodeId($primary->id),
+            'secret' => $primary->secret,
+        ]))->assertOk()
+            ->assertSee($eventA->name)
+            ->assertSee($eventB->name);
+    }
+
+    public function test_the_order_page_refuses_a_wrong_secret(): void
+    {
+        [$eventA, $eventB, $ticketA, $ticketB] = $this->twoEvents();
+        $this->checkout([$this->leg($eventA, $ticketA), $this->leg($eventB, $ticketB)]);
+
+        $primary = Sale::where('email', 'cart@example.com')->orderBy('id')->first();
+
+        $this->get(route('ticket.order', [
+            'order_id' => UrlUtils::encodeId($primary->id),
+            'secret' => 'not-the-secret',
+        ]))->assertNotFound();
+    }
+
+    public function test_abandoning_the_payment_expires_the_whole_order(): void
+    {
+        [$eventA, $eventB, $ticketA] = $this->twoEvents();
+        $ticketB = $this->createTicket($eventB, ['price' => 20, 'quantity' => 50]);
+
+        $this->checkout([$this->leg($eventA, $ticketA), $this->leg($eventB, $ticketB)]);
+
+        $sales = Sale::where('email', 'cart@example.com')->orderBy('id')->get();
+        $primary = $sales->first();
+
+        // The Stripe cancel_url carries the order primary, and expiring it cascades - so the
+        // abandoned order releases every leg's seats, not just the first one's.
+        // Both extras go through route() as query params. Appending "?secret=" by hand produces a
+        // second "?" - the path-based checkout.cancel has no {date} segment, so date is already a
+        // query param - and the secret is then never parsed, which reads as a 403 rather than a
+        // failed cascade.
+        $this->get(route('checkout.cancel', [
+            'subdomain' => $this->role->subdomain,
+            'sale_id' => UrlUtils::encodeId($primary->id),
+            'date' => $primary->event_date,
+            'secret' => $primary->secret,
+        ]))->assertRedirect();
+
+        foreach ($sales as $sale) {
+            $this->assertSame('expired', $sale->fresh()->status);
+        }
+    }
+
     public function test_a_single_leg_checkout_writes_no_order_id(): void
     {
         [$eventA, , $ticketA] = $this->twoEvents();

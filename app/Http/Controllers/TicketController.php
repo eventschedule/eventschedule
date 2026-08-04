@@ -1149,7 +1149,11 @@ class TicketController extends Controller
 
             (new EmailService)->sendSaleConfirmationEmails($sale);
 
-            $ticketViewUrl = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
+            // A multi-event order lands on its own page: redirecting to one leg's ticket would
+            // leave the buyer with no sign that the others exist.
+            $ticketViewUrl = $sale->isOrderPrimary()
+                ? route('ticket.order', ['order_id' => UrlUtils::encodeId($sale->id), 'secret' => $sale->secret])
+                : route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
             if ($isEmbed) {
                 $ticketViewUrl .= '?embed=true';
             }
@@ -2084,7 +2088,11 @@ class TicketController extends Controller
 
         (new EmailService)->sendSaleConfirmationEmails($sale);
 
-        $ticketViewUrl = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
+        // A multi-event order lands on its own page: redirecting to one leg's ticket would
+        // leave the buyer with no sign that the others exist.
+        $ticketViewUrl = $sale->isOrderPrimary()
+            ? route('ticket.order', ['order_id' => UrlUtils::encodeId($sale->id), 'secret' => $sale->secret])
+            : route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
         if ($request->boolean('embed')) {
             $ticketViewUrl .= '?embed=true';
         }
@@ -3010,6 +3018,42 @@ class TicketController extends Controller
         return response(QrCodeUtils::png($url))
             ->header('Content-Type', 'image/png')
             ->header('X-Content-Type-Options', 'nosniff');
+    }
+
+    /**
+     * The landing page for a checkout that spanned several events.
+     *
+     * Every leg keeps its own ticket page and its own scannable QR - an event's door needs a code
+     * for that event - so this exists to tell the buyer the other legs are there at all. Without
+     * it a three-event purchase redirects to one ticket and the other two are only ever seen in
+     * their confirmation emails.
+     *
+     * Authorised by the order primary's own secret, which already opens that leg's ticket page, so
+     * this grants nothing new.
+     */
+    public function viewOrder($orderId, $secret)
+    {
+        $primary = Sale::where('id', UrlUtils::decodeId($orderId))
+            ->where('secret', $secret)
+            ->where('is_deleted', false)
+            ->firstOrFail();
+
+        abort_unless($primary->isOrderPrimary(), 404);
+
+        $sales = Sale::with('event')
+            ->where('order_id', $primary->order_id)
+            ->where('is_deleted', false)
+            // Guest rows are per-attendee copies of a leg, not separate events; the buyer wants one
+            // entry per event they bought.
+            ->where(function ($query) {
+                $query->whereNull('group_id')->orWhereColumn('group_id', 'id');
+            })
+            ->orderBy('event_date')
+            ->get();
+
+        $role = $primary->event?->role();
+
+        return view('ticket.order', compact('primary', 'sales', 'role'));
     }
 
     public function view($eventId, $secret)

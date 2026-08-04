@@ -280,6 +280,9 @@ Route::get('/translate_data', [AppController::class, 'translateData'])->name('tr
 
 Route::get('/ticket/qr_code/{event_id}/{secret}', [TicketController::class, 'qrCode'])->name('ticket.qr_code')->middleware('throttle:100,1');
 Route::get('/ticket/view/{event_id}/{secret}', [TicketController::class, 'view'])->name('ticket.view')->middleware('throttle:100,1');
+// One checkout that spanned several events. Keyed on the order primary's own secret, so it grants
+// no more than the ticket page that secret already opens.
+Route::get('/ticket/order/{order_id}/{secret}', [TicketController::class, 'viewOrder'])->name('ticket.order')->middleware('throttle:100,1');
 Route::post('/rsvp/cancel/{sale_id}', [TicketController::class, 'cancelRsvp'])->name('rsvp.cancel')->middleware('throttle:10,1');
 // Appointment manage/cancel via the sale secret ({event_id} is UrlUtils-encoded, like ticket.view).
 Route::get('/appointment/view/{event_id}/{secret}', [AppointmentController::class, 'manage'])->name('appointments.manage')->middleware('throttle:100,1,appt_manage');
