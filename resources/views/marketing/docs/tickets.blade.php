@@ -410,6 +410,20 @@
     </section>
 
     <!-- Free Tickets -->
+    <section id="cart" class="doc-section">
+        <h3 class="doc-subheading">Buying Several Events at Once</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">A visitor browsing your schedule can collect tickets to more than one event and pay for the lot in a single checkout. On any event with tickets they choose their quantities and select <strong class="text-gray-900 dark:text-white">Add to cart</strong> instead of Checkout, then carry on browsing. A cart button appears in the corner with a running count; opening it lists everything gathered so far, and one Checkout pays for all of it.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Afterwards the buyer lands on a page listing every event they bought, each linking to its own ticket. There is no combined ticket: every event is scanned with its own code, because each door only knows about its own event. The confirmation emails arrive one per event for the same reason.</p>
+
+        <div class="doc-callout doc-callout-info mb-6">
+            <div class="doc-callout-title">What can share a cart</div>
+            <p>A single payment cannot be split across payment accounts, currencies or payment rails, so a cart only holds events that agree on all three: the same owner, the same ticket currency, and the same payment method. The cart says so when an event cannot join. Stripe and cash are supported; Invoice Ninja and Payment URL are not, since both send the buyer to a page built for one event.</p>
+        </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Two dates of the same recurring event count as two entries, so a visitor can take Friday and Saturday in one order. Nothing about the cart is trusted at checkout: every ticket is re-read and re-priced from your event, and if any part of the order can no longer be filled the whole thing is refused rather than charging for a partial order.</p>
+    </section>
+
     <section id="free-events" class="doc-section">
         <h3 class="doc-subheading">Free Tickets</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">If you need multiple ticket types (e.g. General and VIP) or promo codes for a free event, use the <a href="#ticketing" class="doc-link">Tickets</a> mode and set the price to zero:</p>
