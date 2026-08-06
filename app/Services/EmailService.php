@@ -343,6 +343,32 @@ class EmailService
             return;
         }
 
+        // Everything below belongs to ONE event: the ticket email carries that event's QR, the
+        // push its name, and the new-sale notice goes to that event's schedule. A checkout that
+        // spanned several events therefore has to run it once per leg - driving it from the order
+        // primary alone sends the buyer a ticket for the leg that happens to anchor the order and
+        // never tells them about the events they also paid for.
+        //
+        // orderLegs() is just [$sale] for an ordinary sale, so the single-event path is untouched.
+        foreach ($sale->orderLegs() as $leg) {
+            // A leg released before the payment landed keeps its own status - the paid cascade
+            // deliberately skips cancelled/refunded/expired rows - so it gets no ticket.
+            if ($leg->status !== 'paid') {
+                continue;
+            }
+
+            $this->sendLegConfirmationEmails($leg);
+        }
+    }
+
+    /**
+     * The buyer's ticket and the owner's new-sale notice for ONE event's sale.
+     *
+     * Split out of sendSaleConfirmationEmails() so a multi-event order can run it per leg; the
+     * group (individual-tickets) fan-out inside a single leg is unchanged.
+     */
+    private function sendLegConfirmationEmails(Sale $sale): void
+    {
         try {
             $event = $sale->event;
             if (! $event) {

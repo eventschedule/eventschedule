@@ -199,8 +199,12 @@ class StripeController extends Controller
                             return;
                         }
 
-                        // Preserve per-seat payment_amount on grouped primaries; only overwrite for ungrouped sales
-                        if (! $sale->isPrimarySale()) {
+                        // Preserve per-seat payment_amount on grouped primaries; only overwrite for
+                        // ungrouped sales. An ORDER primary is excluded for the same reason:
+                        // $webhookAmount is the WHOLE order's total here, so writing it onto the
+                        // one leg that anchors the order would count every other leg twice in
+                        // orderTotalPayment(), the AP sales table and the revenue reports.
+                        if (! $sale->isPrimarySale() && ! $sale->isOrderPrimary()) {
                             $sale->payment_amount = $webhookAmount;
                         }
                         $sale->status = 'paid';
@@ -211,22 +215,40 @@ class StripeController extends Controller
                         AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
                             ['status' => 'unpaid'], ['status' => 'paid'], 'stripe:event_id:'.$sale->event_id);
 
-                        AnalyticsEventsDaily::incrementSale($sale->event_id, $webhookAmount);
-                        $promoTotal = $sale->legTotalDiscount();
-                        if ($promoTotal > 0) {
-                            AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $promoTotal);
-                        }
-                        UsageTrackingService::track(UsageTrackingService::STRIPE_PAYMENT);
+                        // Analytics, the Meta conversion and the sale.paid deliveries are each
+                        // attributed to ONE event, so a payment spanning several is posted leg by
+                        // leg. Posting $webhookAmount against $sale->event_id credits the anchoring
+                        // leg's event with the entire order and the rest with nothing - and it
+                        // never washes out, because the decrement side in
+                        // HandlesSaleStatusActions works per leg. orderLegs() is just [$sale] for
+                        // an ordinary sale, so nothing changes off the cart path.
+                        foreach ($sale->orderLegs() as $leg) {
+                            // A leg released before the payment landed keeps its own status - the
+                            // paid cascade deliberately skips cancelled/refunded/expired rows - so
+                            // it earns its event nothing and gets no delivery. Read after the save,
+                            // so these statuses are the post-cascade ones.
+                            if ($leg->status !== 'paid') {
+                                continue;
+                            }
 
-                        // Send conversion event to Meta CAPI if event has active boost
-                        $this->sendMetaConversion($sale, $webhookAmount);
+                            $legTotal = $leg->legTotalPayment();
 
-                        WebhookService::dispatch('sale.paid', $sale);
-                        if ($sale->group_id && $sale->isPrimarySale()) {
-                            foreach (Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->get() as $gs) {
+                            AnalyticsEventsDaily::incrementSale($leg->event_id, $legTotal);
+                            $promoTotal = $leg->legTotalDiscount();
+                            if ($promoTotal > 0) {
+                                AnalyticsEventsDaily::incrementPromoSale($leg->event_id, $promoTotal);
+                            }
+
+                            // Send conversion event to Meta CAPI if event has active boost
+                            $this->sendMetaConversion($leg, $legTotal);
+
+                            WebhookService::dispatch('sale.paid', $leg);
+                            foreach ($leg->guestSales()->get() as $gs) {
                                 WebhookService::dispatch('sale.paid', $gs);
                             }
                         }
+
+                        UsageTrackingService::track(UsageTrackingService::STRIPE_PAYMENT);
                     });
 
                     if ($didTransitionToPaid) {
@@ -317,8 +339,12 @@ class StripeController extends Controller
                                 return;
                             }
 
-                            // Preserve per-seat payment_amount on grouped primaries; only overwrite for ungrouped sales
-                            if (! $sale->isPrimarySale()) {
+                            // Preserve per-seat payment_amount on grouped primaries; only overwrite
+                            // for ungrouped sales. An ORDER primary is excluded for the same
+                            // reason: $webhookAmount is the WHOLE order's total here, so writing it
+                            // onto the one leg that anchors the order would count every other leg
+                            // twice in orderTotalPayment(), the AP sales table and the reports.
+                            if (! $sale->isPrimarySale() && ! $sale->isOrderPrimary()) {
                                 $sale->payment_amount = $webhookAmount;
                             }
                             $sale->status = 'paid';
@@ -331,19 +357,30 @@ class StripeController extends Controller
 
                             UsageTrackingService::track(UsageTrackingService::STRIPE_PAYMENT);
 
-                            // Record sale in analytics
-                            AnalyticsEventsDaily::incrementSale($sale->event_id, $webhookAmount);
-                            $promoTotal = $sale->legTotalDiscount();
-                            if ($promoTotal > 0) {
-                                AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $promoTotal);
-                            }
+                            // Record the sale in analytics leg by leg - see the matching comment in
+                            // the payment_intent.succeeded branch above. Each of these side effects
+                            // belongs to one event, and orderLegs() is just [$sale] unless this
+                            // payment covered several.
+                            foreach ($sale->orderLegs() as $leg) {
+                                // Released legs are skipped by the paid cascade, so they earn
+                                // nothing here either - see the matching guard above.
+                                if ($leg->status !== 'paid') {
+                                    continue;
+                                }
 
-                            // Send conversion event to Meta CAPI if event has active boost
-                            $this->sendMetaConversion($sale, $webhookAmount);
+                                $legTotal = $leg->legTotalPayment();
 
-                            WebhookService::dispatch('sale.paid', $sale);
-                            if ($sale->group_id && $sale->isPrimarySale()) {
-                                foreach (Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->get() as $gs) {
+                                AnalyticsEventsDaily::incrementSale($leg->event_id, $legTotal);
+                                $promoTotal = $leg->legTotalDiscount();
+                                if ($promoTotal > 0) {
+                                    AnalyticsEventsDaily::incrementPromoSale($leg->event_id, $promoTotal);
+                                }
+
+                                // Send conversion event to Meta CAPI if event has active boost
+                                $this->sendMetaConversion($leg, $legTotal);
+
+                                WebhookService::dispatch('sale.paid', $leg);
+                                foreach ($leg->guestSales()->get() as $gs) {
                                     WebhookService::dispatch('sale.paid', $gs);
                                 }
                             }

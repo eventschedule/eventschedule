@@ -1021,6 +1021,16 @@ class TicketController extends Controller
             return back()->withInput()->with('error', $error);
         }
 
+        // Deterministic lock order. Each leg row-locks its own tickets inside the one transaction,
+        // so two overlapping carts holding the same two events in opposite orders would deadlock.
+        //
+        // Sorted HERE, before $event is taken, so that $event is the same leg the transaction below
+        // returns as the order primary. Sorting afterwards left the two pointing at different
+        // events whenever the cart's first event was not the lowest-id one, and every order-level
+        // side effect keyed on $event - the audit log, the free-path analytics - was then filed
+        // against an event the sale had nothing to do with.
+        usort($legs, fn ($a, $b) => $a['event']->id <=> $b['event']->id);
+
         // Order-level fields below read from the first leg's event, which the guard above has
         // proven shares its owner, currency and payment method with every other leg.
         $event = $legs[0]['event'];
@@ -1061,13 +1071,12 @@ class TicketController extends Controller
 
         // Use database transaction with row locking to prevent race conditions
         // that could lead to overselling tickets
-        // Deterministic lock order. Each leg row-locks its own tickets inside the one transaction,
-        // so two overlapping carts holding the same two events in opposite orders would deadlock.
-        usort($legs, fn ($a, $b) => $a['event']->id <=> $b['event']->id);
-
         try {
             $sale = DB::transaction(function () use ($request, $legs, $user, $subdomain, $isPaymentLink) {
                 $sales = [];
+
+                // Locked once for the whole order, then drawn down leg by leg. See the method.
+                $giftCard = $this->resolveOrderGiftCard($request, $legs);
 
                 foreach ($legs as $leg) {
                     $this->assertLegTicketsAvailable($leg, $leg['event'], $isPaymentLink);
@@ -1075,7 +1084,7 @@ class TicketController extends Controller
                     $legSale = $this->newSaleForLeg($request, $leg, $leg['event'], $user, $subdomain);
                     $legSale->save();
 
-                    $this->priceSaleLeg($legSale, $request, $leg, $leg['event'], $subdomain, $isPaymentLink);
+                    $this->priceSaleLeg($legSale, $request, $leg, $leg['event'], $subdomain, $isPaymentLink, $giftCard);
 
                     $legSale->save();
 
@@ -1120,10 +1129,12 @@ class TicketController extends Controller
 
         AuditService::log(AuditService::SALE_CHECKOUT, $sale->user_id, 'Sale', $sale->id, null, null, 'event_id:'.$event->id);
 
-        // Dispatch sale.created webhook (outside transaction)
-        WebhookService::dispatch('sale.created', $sale);
-        if ($sale->group_id && $sale->isPrimarySale()) {
-            foreach (Sale::where('group_id', $sale->id)->where('id', '!=', $sale->id)->get() as $gs) {
+        // Dispatch sale.created webhook (outside transaction). One delivery per row, across every
+        // leg of the order - a subscriber told only about the anchoring leg never learns the other
+        // events were bought at all.
+        foreach ($sale->orderLegs() as $leg) {
+            WebhookService::dispatch('sale.created', $leg);
+            foreach ($leg->guestSales()->get() as $gs) {
                 WebhookService::dispatch('sale.created', $gs);
             }
         }
@@ -1134,31 +1145,25 @@ class TicketController extends Controller
             $sale->status = 'paid';
             $sale->save();
 
-            // Record free ticket sale in analytics (0 revenue)
-            AnalyticsEventsDaily::incrementSale($event->id, 0);
-            if ($sale->discount_amount > 0) {
-                AnalyticsEventsDaily::incrementPromoSale($event->id, $sale->discount_amount);
-            }
+            // Record the free ticket sale in analytics (0 revenue) - once per EVENT, so a free
+            // multi-event order registers against every event in it rather than only the one that
+            // happens to anchor the order.
+            foreach ($sale->orderLegs() as $leg) {
+                AnalyticsEventsDaily::incrementSale($leg->event_id, 0);
+                $legPromo = $leg->legTotalDiscount();
+                if ($legPromo > 0) {
+                    AnalyticsEventsDaily::incrementPromoSale($leg->event_id, $legPromo);
+                }
 
-            WebhookService::dispatch('sale.paid', $sale);
-            if ($sale->group_id && $sale->isPrimarySale()) {
-                foreach (Sale::where('group_id', $sale->id)->where('id', '!=', $sale->id)->get() as $gs) {
+                WebhookService::dispatch('sale.paid', $leg);
+                foreach ($leg->guestSales()->get() as $gs) {
                     WebhookService::dispatch('sale.paid', $gs);
                 }
             }
 
             (new EmailService)->sendSaleConfirmationEmails($sale);
 
-            // A multi-event order lands on its own page: redirecting to one leg's ticket would
-            // leave the buyer with no sign that the others exist.
-            $ticketViewUrl = $sale->isOrderPrimary()
-                ? route('ticket.order', ['order_id' => UrlUtils::encodeId($sale->id), 'secret' => $sale->secret])
-                : route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
-            if ($isEmbed) {
-                $ticketViewUrl .= '?embed=true';
-            }
-
-            return redirect($ticketViewUrl);
+            return redirect($this->purchaseLandingUrl($sale, $event, $isEmbed));
         } else {
             switch ($event->payment_method) {
                 case 'stripe':
@@ -1446,12 +1451,50 @@ class TicketController extends Controller
     }
 
     /**
+     * The gift card this checkout is paying with, locked for the transaction, or null when no code
+     * was supplied. Throws BusinessException when a code was given but cannot be used.
+     *
+     * Resolved ONCE for the whole order rather than per leg. A card is an order-level payment
+     * instrument, and re-validating it on every leg meant that the moment one leg spent the last of
+     * the balance the next leg saw a depleted card, judged it invalid and threw - rolling back a
+     * checkout that was entirely legitimate. Legs now just draw down whatever is left.
+     *
+     * Owner and currency are read from the first leg, which cartEligibilityError() has proven every
+     * other leg matches. The card itself may belong to any leg's schedule.
+     */
+    private function resolveOrderGiftCard($request, array $legs): ?GiftCard
+    {
+        if (! $request->gift_card_code) {
+            return null;
+        }
+
+        $event = $legs[0]['event'];
+        $roleIds = collect($legs)
+            ->flatMap(fn ($leg) => $leg['event']->roles()->pluck('roles.id'))
+            ->unique();
+
+        $giftCard = GiftCard::whereIn('role_id', $roleIds)
+            ->where('code', GiftCard::normalizeCode($request->gift_card_code))
+            ->lockForUpdate()
+            ->first();
+
+        // Cards are sold through the schedule owner's payment account but redemption
+        // reduces the event owner's payout, so both must be the same user.
+        if (! $giftCard || $event->user_id !== $giftCard->role->user_id
+            || ! $giftCard->isRedeemable($event->ticket_currency_code)) {
+            throw new \App\Exceptions\BusinessException(__('messages.gift_card_invalid'));
+        }
+
+        return $giftCard;
+    }
+
+    /**
      * The money half: ticket rows, add-ons, volume discount, promo code, gift card and - in
      * individual-tickets mode - the per-guest sale rows nested under this one.
      *
      * Mutates $sale in place and leaves it unsaved; the caller saves.
      */
-    private function priceSaleLeg(Sale $sale, $request, array $leg, Event $event, string $subdomain, bool $isPaymentLink): void
+    private function priceSaleLeg(Sale $sale, $request, array $leg, Event $event, string $subdomain, bool $isPaymentLink, ?GiftCard $giftCard = null): void
     {
         if ($isPaymentLink) {
             // Payment link mode: quantities selected on IN, SaleTickets created by webhook
@@ -1646,24 +1689,14 @@ class TicketController extends Controller
                 }
             }
 
-            // Apply a gift card if provided (deducted after volume + promo). Unlike promo
-            // codes, an unusable code aborts the checkout - a gift card is a payment
-            // instrument, and silently charging full price would surprise the buyer.
+            // Draw down the gift card resolved for the whole order (deducted after volume + promo).
+            // The card is validated once, up front, in resolveOrderGiftCard(); each leg simply
+            // spends whatever is left, and a leg that finds nothing left just pays its own way.
             $giftCardId = null;
             $giftCardApplied = 0.0;
-            if ($request->gift_card_code) {
-                $giftCard = GiftCard::whereIn('role_id', $event->roles()->pluck('roles.id'))
-                    ->where('code', GiftCard::normalizeCode($request->gift_card_code))
-                    ->lockForUpdate()
-                    ->first();
-
-                // Cards are sold through the schedule owner's payment account but redemption
-                // reduces the event owner's payout, so both must be the same user.
-                if (! $giftCard || $event->user_id !== $giftCard->role->user_id
-                    || ! $giftCard->isRedeemable($event->ticket_currency_code)) {
-                    throw new \App\Exceptions\BusinessException(__('messages.gift_card_invalid'));
-                }
-
+            if ($giftCard) {
+                // Re-read through the locked instance: earlier legs of this order have already
+                // decremented it in memory and in the row.
                 $orderTotal = max(0, $subtotalAfterVolume - $discountTotal);
                 $giftCardApplied = min((float) $giftCard->remaining_amount, $orderTotal);
 
@@ -2088,14 +2121,7 @@ class TicketController extends Controller
 
         (new EmailService)->sendSaleConfirmationEmails($sale);
 
-        // A multi-event order lands on its own page: redirecting to one leg's ticket would
-        // leave the buyer with no sign that the others exist.
-        $ticketViewUrl = $sale->isOrderPrimary()
-            ? route('ticket.order', ['order_id' => UrlUtils::encodeId($sale->id), 'secret' => $sale->secret])
-            : route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
-        if ($request->boolean('embed')) {
-            $ticketViewUrl .= '?embed=true';
-        }
+        $ticketViewUrl = $this->purchaseLandingUrl($sale, $event, $request->boolean('embed'));
 
         return redirect($ticketViewUrl);
     }
@@ -2602,14 +2628,27 @@ class TicketController extends Controller
         return redirect($user->payment_url);
     }
 
+    /**
+     * Where a buyer lands after a purchase: the order page when the checkout covered several
+     * events, that leg's own ticket otherwise.
+     *
+     * Every leg keeps its own ticket page and its own scannable QR, so the order page is the only
+     * surface that says the other legs exist at all. Dropping a multi-event buyer on one ticket
+     * hides the rest of what they just paid for - which is why every post-purchase redirect goes
+     * through here rather than building a ticket.view URL by hand.
+     */
+    private function purchaseLandingUrl($sale, $event, bool $isEmbed = false): string
+    {
+        $url = $sale->isOrderPrimary()
+            ? route('ticket.order', ['order_id' => UrlUtils::encodeId($sale->id), 'secret' => $sale->secret])
+            : route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
+
+        return $isEmbed ? $url.'?embed=true' : $url;
+    }
+
     private function cashCheckout($subdomain, $sale, $event, $isEmbed = false)
     {
-        $url = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
-        if ($isEmbed) {
-            $url .= '?embed=true';
-        }
-
-        return redirect($url);
+        return redirect($this->purchaseLandingUrl($sale, $event, $isEmbed));
     }
 
     public function success($subdomain, $sale_id)
@@ -2646,12 +2685,7 @@ class TicketController extends Controller
                     'session_id' => request()->session_id,
                 ]);
 
-                $mismatchUrl = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
-                if (request()->boolean('embed')) {
-                    $mismatchUrl .= '?embed=true';
-                }
-
-                return redirect($mismatchUrl);
+                return redirect($this->purchaseLandingUrl($sale, $event, request()->boolean('embed')));
             }
 
             // Store the transaction reference so the webhook can find this sale,
@@ -2666,12 +2700,7 @@ class TicketController extends Controller
             \Log::warning('Stripe session retrieval failed in success(): '.$e->getMessage());
         }
 
-        $successUrl = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
-        if (request()->boolean('embed')) {
-            $successUrl .= '?embed=true';
-        }
-
-        return redirect($successUrl);
+        return redirect($this->purchaseLandingUrl($sale, $event, request()->boolean('embed')));
     }
 
     public function cancel($subdomain, $sale_id)
@@ -3051,7 +3080,11 @@ class TicketController extends Controller
             ->orderBy('event_date')
             ->get();
 
-        $role = $primary->event?->role();
+        // Not Event::role(), which is talent-only and returns null on a venue- or curator-hosted
+        // event - the order page would then lose the schedule name from its title. Same fallback
+        // chain Event::parsedTicketNotesHtml() uses for exactly this reason.
+        $event = $primary->event;
+        $role = $event ? ($event->getRoleWithEmailSettings() ?? $event->roles->first()) : null;
 
         return view('ticket.order', compact('primary', 'sales', 'role'));
     }
@@ -3177,7 +3210,7 @@ class TicketController extends Controller
                 default => null,
             };
             if ($webhookEvent) {
-                $this->dispatchSaleWebhookAcrossGroup($webhookEvent, $sale);
+                $this->dispatchSaleWebhookAcrossOrder($webhookEvent, $sale);
             }
 
             if ($request->action === 'mark_paid') {

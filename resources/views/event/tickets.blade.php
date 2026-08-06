@@ -467,6 +467,11 @@
                         event_id: @json(\App\Utils\UrlUtils::encodeId($event->id)),
                         event_date: this.event_date,
                         event_name: @json($event->translatedName()),
+                        // So the cart knows whether to ask for a phone. The server unions these
+                        // across legs in TicketCheckoutRequest and enforces them there; these
+                        // copies only decide whether the field is rendered.
+                        ask_phone: @json((bool) $event->ask_phone),
+                        require_phone: @json((bool) $event->require_phone),
                         tickets: {},
                         addons: {},
                         promo_code: this.promoCode || null,

@@ -30,6 +30,46 @@ use Illuminate\Support\Facades\DB;
  */
 trait HandlesSaleStatusActions
 {
+    /**
+     * The per-event figures a status change on this sale is answerable for.
+     *
+     * One entry for an ordinary sale. One entry PER LEG for an order primary, because the status
+     * change cascades to every leg (Sale::statusCascadeQuery) while analytics_events_daily is keyed
+     * by event: crediting or decrementing only the anchoring leg's event leaves the other events'
+     * revenue stranded on the books, with nothing later to net it out.
+     *
+     * Read this BEFORE the save. legTotal*() filters is_deleted, so in deleteSale() in particular
+     * the numbers are gone by the time the rows are flagged.
+     *
+     * Legs that are ALREADY released are dropped: both cascades skip cancelled/refunded/expired
+     * rows, so such a leg does not transition with the rest and must not be credited or debited a
+     * second time. The subject sale itself is never dropped - every caller has already asserted it
+     * is unpaid or paid.
+     */
+    private function saleAnalyticsLegs(Sale $sale): array
+    {
+        return $sale->orderLegs()
+            ->reject(fn (Sale $leg) => in_array($leg->status, ['cancelled', 'refunded', 'expired'], true))
+            ->map(fn (Sale $leg) => [
+                'event_id' => $leg->event_id,
+                'amount' => $leg->legTotalPayment(),
+                'promo' => $leg->legTotalDiscount(),
+                'date' => $leg->created_at?->toDateString(),
+            ])
+            ->all();
+    }
+
+    private function decrementSaleAnalytics(array $legs): void
+    {
+        foreach ($legs as $leg) {
+            AnalyticsEventsDaily::decrementSale($leg['event_id'], $leg['amount'], $leg['date']);
+
+            if ($leg['promo'] > 0) {
+                AnalyticsEventsDaily::decrementPromoSale($leg['event_id'], $leg['promo'], $leg['date']);
+            }
+        }
+    }
+
     protected function markSalePaid(Sale $sale, string $reference): ?string
     {
         return DB::transaction(function () use ($sale, $reference) {
@@ -38,16 +78,18 @@ trait HandlesSaleStatusActions
                 return null;
             }
 
-            $analyticsAmount = $locked->legTotalPayment();
-            $promoTotal = $locked->legTotalDiscount();
+            $legs = $this->saleAnalyticsLegs($locked);
 
             $locked->status = 'paid';
             $locked->transaction_reference = $reference;
             $locked->save();
 
-            AnalyticsEventsDaily::incrementSale($locked->event_id, $analyticsAmount);
-            if ($promoTotal > 0) {
-                AnalyticsEventsDaily::incrementPromoSale($locked->event_id, $promoTotal);
+            foreach ($legs as $leg) {
+                AnalyticsEventsDaily::incrementSale($leg['event_id'], $leg['amount']);
+
+                if ($leg['promo'] > 0) {
+                    AnalyticsEventsDaily::incrementPromoSale($leg['event_id'], $leg['promo']);
+                }
             }
 
             return 'unpaid';
@@ -62,20 +104,14 @@ trait HandlesSaleStatusActions
                 return null;
             }
 
-            $analyticsDate = $locked->created_at->toDateString();
-            $analyticsAmount = $locked->legTotalPayment();
-            $promoTotal = $locked->legTotalDiscount();
+            $legs = $this->saleAnalyticsLegs($locked);
 
             $locked->status = 'refunded';
             $locked->save();
 
             // RSVP sales are decremented by the Sale::booted hook instead.
             if ($locked->payment_method !== 'rsvp') {
-                AnalyticsEventsDaily::decrementSale($locked->event_id, $analyticsAmount, $analyticsDate);
-
-                if ($promoTotal > 0) {
-                    AnalyticsEventsDaily::decrementPromoSale($locked->event_id, $promoTotal, $analyticsDate);
-                }
+                $this->decrementSaleAnalytics($legs);
             }
 
             return 'paid';
@@ -92,19 +128,13 @@ trait HandlesSaleStatusActions
 
             $pre = $locked->status;
             $wasPaid = $pre === 'paid';
-            $analyticsAmount = $locked->legTotalPayment();
-            $promoTotal = $locked->legTotalDiscount();
+            $legs = $this->saleAnalyticsLegs($locked);
 
             $locked->status = 'cancelled';
             $locked->save();
 
             if ($wasPaid && $locked->payment_method !== 'rsvp') {
-                $analyticsDate = $locked->created_at->toDateString();
-                AnalyticsEventsDaily::decrementSale($locked->event_id, $analyticsAmount, $analyticsDate);
-
-                if ($promoTotal > 0) {
-                    AnalyticsEventsDaily::decrementPromoSale($locked->event_id, $promoTotal, $analyticsDate);
-                }
+                $this->decrementSaleAnalytics($legs);
             }
 
             return $pre;
@@ -128,19 +158,13 @@ trait HandlesSaleStatusActions
             // Cancel first so Sale::booted releases the ticket inventory.
             if (in_array($locked->status, ['unpaid', 'paid'])) {
                 $wasPaid = $locked->status === 'paid';
-                $analyticsAmount = $locked->legTotalPayment();
-                $promoTotal = $locked->legTotalDiscount();
+                $legs = $this->saleAnalyticsLegs($locked);
 
                 $locked->status = 'cancelled';
                 $locked->save();
 
                 if ($wasPaid && $locked->payment_method !== 'rsvp') {
-                    $analyticsDate = $locked->created_at->toDateString();
-                    AnalyticsEventsDaily::decrementSale($locked->event_id, $analyticsAmount, $analyticsDate);
-
-                    if ($promoTotal > 0) {
-                        AnalyticsEventsDaily::decrementPromoSale($locked->event_id, $promoTotal, $analyticsDate);
-                    }
+                    $this->decrementSaleAnalytics($legs);
                 }
             }
 
@@ -167,13 +191,28 @@ trait HandlesSaleStatusActions
     /**
      * One delivery per row, so a subscriber iterating a group sees every seat. The money-carrying
      * primary is dispatched first; guest rows report zero amounts (see Sale::toApiData).
+     *
+     * Spans the whole ORDER as well, because the status change did: a subscriber that only ever
+     * heard about the anchoring leg cannot act on the events it never saw - and the webhook docs
+     * tell them to sum payment_amount across an order_id, which needs every row.
+     *
+     * Call this with $sale already refreshed, so its status is the post-action one.
      */
-    protected function dispatchSaleWebhookAcrossGroup(string $webhookEvent, Sale $sale): void
+    protected function dispatchSaleWebhookAcrossOrder(string $webhookEvent, Sale $sale): void
     {
-        WebhookService::dispatch($webhookEvent, $sale);
+        // includeDeleted: 'sale.deleted' is dispatched after deleteSale() has flagged every row, so
+        // the live-rows-only default would leave a deleted order with no delivery at all.
+        foreach ($sale->orderLegs(includeDeleted: true) as $leg) {
+            // A leg released before this action kept its own status - both cascades skip
+            // cancelled/refunded/expired rows - so announcing e.g. sale.refunded for it would tell
+            // the subscriber something untrue. The subject itself always fires.
+            if ($leg->id !== $sale->id && $leg->status !== $sale->status) {
+                continue;
+            }
 
-        if ($sale->group_id && $sale->isPrimarySale()) {
-            foreach (Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->get() as $guestSale) {
+            WebhookService::dispatch($webhookEvent, $leg);
+
+            foreach ($leg->guestSales()->get() as $guestSale) {
                 WebhookService::dispatch($webhookEvent, $guestSale);
             }
         }

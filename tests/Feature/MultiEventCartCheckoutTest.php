@@ -251,6 +251,108 @@ class MultiEventCartCheckoutTest extends TestCase
         );
     }
 
+    public function test_a_paid_cart_also_lands_on_the_order_page(): void
+    {
+        [$eventA, $eventB, $ticketA] = $this->twoEvents();
+
+        // Priced, so checkout takes the payment rail instead of the free short circuit. This is the
+        // path a real cart uses, and it used to drop the buyer on one leg's ticket with no sign the
+        // others existed - the free path was the only one that reached the order page.
+        $ticketA->price = 15;
+        $ticketA->save();
+        $ticketB = $this->createTicket($eventB, ['price' => 20, 'quantity' => 50]);
+
+        $response = $this->checkout([$this->leg($eventA, $ticketA), $this->leg($eventB, $ticketB)]);
+
+        $primary = Sale::where('email', 'cart@example.com')->orderBy('id')->first();
+        $this->assertNotNull($primary);
+        $response->assertRedirect(route('ticket.order', [
+            'order_id' => UrlUtils::encodeId($primary->id),
+            'secret' => $primary->secret,
+        ]));
+    }
+
+    public function test_a_multi_event_order_sends_a_ticket_email_for_every_leg(): void
+    {
+        [$eventA, $eventB, $ticketA, $ticketB] = $this->twoEvents();
+
+        $this->checkout([$this->leg($eventA, $ticketA), $this->leg($eventB, $ticketB)]);
+
+        $sales = Sale::where('email', 'cart@example.com')->orderBy('id')->get();
+        $this->assertCount(2, $sales);
+
+        // Recorded at the seam rather than through the mail transport, whose own gates (test
+        // domains, demo schedules, configured sender) would decide the outcome instead.
+        $recorder = new class extends \App\Services\EmailService
+        {
+            public array $ticketed = [];
+
+            public function sendTicketEmail(Sale $sale, ?\App\Models\Role $role = null, bool $queue = true): string|true
+            {
+                $this->ticketed[] = $sale->id;
+
+                return true;
+            }
+        };
+
+        $recorder->sendSaleConfirmationEmails($sales->first()->fresh());
+
+        // One ticket per event. Driving this from the order primary alone sent the buyer the first
+        // leg's ticket and never told them about the second event they had paid for.
+        $this->assertEqualsCanonicalizing($sales->pluck('id')->all(), $recorder->ticketed);
+    }
+
+    public function test_a_cart_refused_by_validation_shows_the_reason(): void
+    {
+        // session('error') is already toasted on every guest page (app-guest nests inside
+        // layouts/app), so the eligibility refusals above were visible. VALIDATION errors are not
+        // toasted anywhere - and the cart collected only name and email while
+        // TicketCheckoutRequest unions require_phone across legs, so a cart holding a
+        // phone-required event was refused with nothing whatsoever on screen.
+        [$eventA, $eventB, $ticketA, $ticketB] = $this->twoEvents(['ask_phone' => true, 'require_phone' => true]);
+
+        $this->checkout([$this->leg($eventA, $ticketA), $this->leg($eventB, $ticketB)])
+            ->assertSessionHasErrors('phone');
+
+        $this->get(route('role.view_guest', ['subdomain' => $this->role->subdomain]))
+            ->assertOk()
+            ->assertSee('es-cart-error', false);
+    }
+
+    public function test_the_event_page_tells_the_cart_whether_to_ask_for_a_phone(): void
+    {
+        [$eventA] = $this->twoEvents();
+        $eventA->ask_phone = true;
+        $eventA->require_phone = true;
+        $eventA->save();
+
+        // The cart lives in the guest layout and knows nothing about any event's settings, so the
+        // event page has to hand it these with the leg. Without them the phone field never renders
+        // and the checkout cannot satisfy the rule the server applies.
+        $this->get(route('event.view_guest', [
+            'subdomain' => $this->role->subdomain,
+            'slug' => $eventA->slug,
+        ]))->assertOk()
+            ->assertSee('ask_phone: true', false)
+            ->assertSee('require_phone: true', false);
+    }
+
+    public function test_a_cart_can_check_out_an_event_that_requires_a_phone(): void
+    {
+        [$eventA, $eventB, $ticketA, $ticketB] = $this->twoEvents(['ask_phone' => true, 'require_phone' => true]);
+
+        $this->post(route('event.checkout', ['subdomain' => $this->role->subdomain]), [
+            'name' => 'Cart Buyer',
+            'email' => 'cart@example.com',
+            'phone' => '+1 555 0100',
+            'legs' => [$this->leg($eventA, $ticketA), $this->leg($eventB, $ticketB)],
+        ]);
+
+        $sales = Sale::where('email', 'cart@example.com')->get();
+        $this->assertCount(2, $sales, 'a phone-required event must be purchasable from the cart');
+        $this->assertNotEmpty($sales->first()->phone);
+    }
+
     public function test_a_single_leg_checkout_writes_no_order_id(): void
     {
         [$eventA, , $ticketA] = $this->twoEvents();

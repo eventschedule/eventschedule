@@ -18,9 +18,13 @@
             @foreach ($sales as $sale)
                 @php
                     $legEvent = $sale->event;
+                    // A leg the organizer cancelled, refunded or let expire is still part of what
+                    // the buyer purchased, so it stays listed - but it is no longer a ticket, and
+                    // linking it would hand out a QR for a seat that has already been released.
+                    $isReleased = in_array($sale->status, ['cancelled', 'refunded', 'expired']);
                 @endphp
-                <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($legEvent->id), 'secret' => $sale->secret]) }}"
-                   class="ap-card rounded-xl p-5 flex flex-col sm:flex-row sm:items-center gap-3 hover:shadow-md transition-all duration-200">
+                <a @if (! $isReleased) href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($legEvent->id), 'secret' => $sale->secret]) }}" @endif
+                   class="ap-card rounded-xl p-5 flex flex-col sm:flex-row sm:items-center gap-3 transition-all duration-200 {{ $isReleased ? 'opacity-60' : 'hover:shadow-md' }}">
                     <div class="flex-1">
                         <div class="font-medium text-gray-900 dark:text-gray-100">
                             {{ $legEvent->translatedName() }}
@@ -30,12 +34,18 @@
                         </div>
                     </div>
                     <div class="sm:mt-0 mt-2 sm:text-end">
-                        <span class="inline-flex items-center gap-1 text-sm font-medium text-[var(--brand-blue)]">
-                            {{ __('messages.view_ticket') }}
-                            <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </span>
+                        @if ($isReleased)
+                            <span class="inline-flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
+                                {{ __('messages.'.$sale->status) }}
+                            </span>
+                        @else
+                            <span class="inline-flex items-center gap-1 text-sm font-medium text-[var(--brand-blue)]">
+                                {{ __('messages.view_ticket') }}
+                                <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </span>
+                        @endif
                     </div>
                 </a>
             @endforeach

@@ -204,7 +204,7 @@ class ApiSaleController extends Controller
             default => null,
         };
         if ($webhookEvent) {
-            $this->dispatchSaleWebhookAcrossGroup($webhookEvent, $sale);
+            $this->dispatchSaleWebhookAcrossOrder($webhookEvent, $sale);
         }
 
         $sale->load(['saleTickets.ticket', 'event']);

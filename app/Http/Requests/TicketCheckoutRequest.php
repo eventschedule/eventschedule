@@ -79,7 +79,10 @@ class TicketCheckoutRequest extends FormRequest
         }
 
         if ($this->isMultiLeg()) {
-            $rules['legs'] = ['required', 'array', 'min:1'];
+            // Capped: checkoutEvents() below resolves one Event per leg, and checkout() then
+            // row-locks every leg's tickets inside a single transaction. Unbounded, one request
+            // could hold ticket locks across arbitrarily many events for as long as it ran.
+            $rules['legs'] = ['required', 'array', 'min:1', 'max:20'];
             $rules['legs.*.event_id'] = ['required', 'string'];
             $rules['legs.*.tickets'] = ['required', 'array', 'min:1'];
             $rules['legs.*.tickets.*'] = ['integer', 'min:1'];

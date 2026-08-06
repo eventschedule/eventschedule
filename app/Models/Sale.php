@@ -98,15 +98,23 @@ class Sale extends Model
                 $siblings = $sale->statusCascadeQuery();
 
                 if ($siblings) {
+                    // Never revive a row that was already released. Expiry, cancellation and refund
+                    // each gave the seats back and restored any gift-card balance, and this raw
+                    // update does not re-take them - so paying over the top of one oversells the
+                    // event. Reachable on an order: an owner can cancel a single leg while the rest
+                    // is still unpaid and the buyer's payment session is open. Mirrors the
+                    // whereNotIn on the cancel cascade below.
+                    $payable = (clone $siblings)->whereNotIn('status', ['cancelled', 'refunded', 'expired']);
+
                     // Raw update, so paid_at has to be set explicitly here - the saving() hook
                     // that normally stamps it does not run for a query-builder update.
-                    (clone $siblings)->where('status', '!=', 'paid')
+                    (clone $payable)->where('status', '!=', 'paid')
                         ->update(['status' => 'paid', 'paid_at' => $sale->paid_at ?? now()]);
 
                     // Clear their waitlist entries (the raw update above skips booted hooks).
                     // Matched per row's OWN event and date: inside a group those equal the
                     // primary's, but the legs of a multi-event order sit on different events.
-                    $rows = (clone $siblings)->get(['email', 'event_id', 'event_date']);
+                    $rows = (clone $payable)->get(['email', 'event_id', 'event_date']);
                     foreach ($rows->groupBy(fn ($row) => $row->event_id.'|'.$row->event_date) as $occurrence) {
                         TicketWaitlist::where('event_id', $occurrence->first()->event_id)
                             ->where('event_date', $occurrence->first()->event_date)
@@ -279,6 +287,35 @@ class Sale extends Model
     public function isOrderPrimary(): bool
     {
         return $this->order_id && $this->order_id === $this->id;
+    }
+
+    /**
+     * One row per EVENT this checkout covered: the leg primaries of the order, or just this sale
+     * when it does not anchor one.
+     *
+     * This is the set every per-EVENT side effect has to walk once a single payment can span
+     * several events. Analytics, confirmation emails and sale.* webhooks are each attributed to one
+     * event, so driving them from the order primary alone credits one event with the whole order
+     * and leaves the rest with nothing.
+     *
+     * Guest rows are excluded on purpose - a guest's money already sits inside its leg primary's
+     * legTotal*() - which makes summing legTotalPayment() over this set exactly orderTotalPayment().
+     * Same primaries-and-ungrouped predicate TicketController::viewOrder() uses.
+     *
+     * $includeDeleted exists for the one caller that runs AFTER the rows are flagged: the
+     * sale.deleted webhook. Live-rows-only there would deliver nothing at all.
+     */
+    public function orderLegs(bool $includeDeleted = false): \Illuminate\Support\Collection
+    {
+        if (! $this->isOrderPrimary()) {
+            return collect([$this]);
+        }
+
+        return static::where('order_id', $this->order_id)
+            ->when(! $includeDeleted, fn ($query) => $query->where('is_deleted', false))
+            ->where(fn ($query) => $query->whereNull('group_id')->orWhereColumn('group_id', 'id'))
+            ->orderBy('id')
+            ->get();
     }
 
     /**

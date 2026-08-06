@@ -10,6 +10,16 @@
     and then re-resolves and re-prices every leg from the database. Stored prices are for display
     only and are never trusted.
 --}}
+@php
+    // Why the cart renders its own errors. session('error') is already toasted for every guest page
+    // (app-guest nests inside layouts/app, which raises a Toastify for it), but VALIDATION errors
+    // are not toasted anywhere - so a checkout refused by the request rules came back with nothing
+    // on screen at all. Both are shown here, beside the form that produced them and on whichever
+    // page the buyer was bounced back to, which the toast alone cannot do.
+    $cartError = session('error');
+    $cartFieldErrors = $errors->any() ? $errors->all() : [];
+    $cartHasError = $cartError || $cartFieldErrors;
+@endphp
 @if (! request()->embed)
 <div id="es-cart-app" class="print:hidden">
     <template v-if="legs.length > 0">
@@ -35,6 +45,22 @@
                     </svg>
                 </button>
             </div>
+
+            @if ($cartHasError)
+                <div id="es-cart-error" class="mb-4 flex items-start gap-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 p-3">
+                    <svg class="w-5 h-5 shrink-0 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                    </svg>
+                    <div class="text-sm text-red-700 dark:text-red-300 space-y-1">
+                        @if ($cartError)
+                            <p>{{ $cartError }}</p>
+                        @endif
+                        @foreach ($cartFieldErrors as $cartFieldError)
+                            <p>{{ $cartFieldError }}</p>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
 
             <ul class="space-y-3 max-h-64 overflow-y-auto">
                 <li v-for="(leg, index) in legs" :key="leg.event_id + '|' + leg.event_date"
@@ -84,6 +110,16 @@
                 <input id="es-cart-email" name="email" type="email" v-model="email" required
                     class="w-full mb-4 rounded-lg border-gray-300 dark:border-[#2d2d30] dark:bg-[#252526] dark:text-gray-300 text-sm">
 
+                {{-- Shown when ANY leg asks for a phone and required when ANY leg requires one -
+                     the same union TicketCheckoutRequest applies across legs. Without the field the
+                     cart could not satisfy a require_phone event at all: checkout failed validation
+                     and the redirect back showed nothing, so the button just appeared dead. --}}
+                <template v-if="asksPhone">
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1" for="es-cart-phone">{{ __('messages.phone') }}</label>
+                    <input id="es-cart-phone" name="phone" type="tel" v-model="phone" :required="requiresPhone"
+                        class="w-full mb-4 rounded-lg border-gray-300 dark:border-[#2d2d30] dark:bg-[#252526] dark:text-gray-300 text-sm">
+                </template>
+
                 <button type="submit"
                     class="w-full rounded-lg bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white font-semibold px-4 py-3 transition-all duration-200">
                     {{ strtoupper(__('messages.checkout')) }}
@@ -103,7 +139,26 @@ window.addEventListener('DOMContentLoaded', function () {
 
     Vue.createApp({
         data: function () {
-            return { legs: [], open: false, name: '', email: '' };
+            return {
+                legs: [],
+                // Opened when the last checkout was refused, so the message below is on screen
+                // rather than hidden behind the cart button.
+                open: @json((bool) $cartHasError),
+                name: '',
+                email: '',
+                phone: '',
+            };
+        },
+        computed: {
+            // Union across legs, matching TicketCheckoutRequest::rules(). Legs stored before this
+            // field existed carry neither flag, so they simply do not ask - and the server-side
+            // rule still refuses, now visibly.
+            asksPhone: function () {
+                return this.legs.some(function (leg) { return leg.ask_phone; });
+            },
+            requiresPhone: function () {
+                return this.legs.some(function (leg) { return leg.require_phone; });
+            },
         },
         created: function () {
             this.legs = this.read();
