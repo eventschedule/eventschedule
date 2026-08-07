@@ -616,6 +616,7 @@ return [
     'pass_cannot_combine' => 'Un abono no se puede comprar junto con entradas de fecha única. Cómpralos en pedidos separados.',
     'cart_events_incompatible' => 'Estos eventos no se pueden comprar juntos. Utilizan un organizador, una moneda o un método de pago diferente.',
     'cart_event_unavailable' => ':event ya no está disponible y no se puede comprar. Quítalo de tu carrito para continuar.',
+    'cart_event_needs_own_checkout' => ':event emite una entrada por cada invitado con nombre, así que debe comprarse en su propia página. Quítalo de tu carrito para continuar.',
     'cart_total_estimate' => 'Los precios finales se confirman al finalizar la compra.',
     'cart_payment_method_unsupported' => 'Estos eventos no se pueden comprar juntos con este método de pago.',
     'attendee' => 'Asistente',

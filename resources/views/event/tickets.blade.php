@@ -58,6 +58,15 @@
                         return $data;
                     })),
                     eventCustomFields: @json($event->custom_fields ?? []),
+                    {{-- The occurrence this page is showing. The single-event form posts it from
+                         the hidden field below, but addToCart() reads it from here - and until this
+                         property existed it read `undefined`, so JSON.stringify dropped the key and
+                         every cart leg went to the server with an empty date. For a recurring event
+                         that meant two dates could not coexist in the cart (the dedupe compared
+                         undefined to undefined), canSellTickets() skipped its past-occurrence guard,
+                         and the sale was stamped with the series start instead of the date the buyer
+                         picked. Same expression the waitlist fetch below already uses. --}}
+                    event_date: @json($date ?? request()->date),
                     eventCustomValues: @json(old('event_custom_values', [])),
                     eventMultiselectValues: {},
                     name: @json(old('name', auth()->check() ? auth()->user()->name : '')),

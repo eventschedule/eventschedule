@@ -71,24 +71,44 @@ html.es-a11y-cta-offset .es-a11y-credit-clear {
 }
 
 /* The guest cart shares this bottom corner, so it has to clear the same furniture.
-   --es-a11y-cta-clearance is published by show-guest.blade.php as the mobile CTA bar's measured
-   height and is 0 everywhere else, so one expression covers both the event page and the rest.
    Compound selectors for the same specificity reason as the rules above: this file is imported
    before @tailwind utilities, so a bare class would lose to Tailwind's .bottom-*. */
 html .es-cart-fab {
-    bottom: calc(var(--es-a11y-cta-clearance, 0px) + 1rem);
+    bottom: 1rem;
 }
 
 html .es-cart-panel {
+    bottom: 5rem;
+}
+
+/* Lifted over the mobile CTA bar, gated on the CLASS and not on the variable alone - exactly as the
+   credit-chip rules above are, and for the same reason: the setter in show-guest.blade.php drops
+   .es-a11y-cta-offset when the bar goes away but never clears --es-a11y-cta-clearance. Reading the
+   variable unconditionally left the cart button floating a bar's height above the viewport bottom
+   for the rest of the session once the bar hid, which it does when the ticket form opens as well as
+   on a resize to desktop. */
+html.es-a11y-cta-offset .es-cart-fab {
+    bottom: calc(var(--es-a11y-cta-clearance, 0px) + 1rem);
+}
+
+html.es-a11y-cta-offset .es-cart-panel {
     bottom: calc(var(--es-a11y-cta-clearance, 0px) + 5rem);
 }
 
 /* When the owner has enabled the accessibility widget, its launcher occupies this corner at
    bottom-6 with a higher z-index, so the cart stacks above it rather than underneath. */
 html .es-cart-above-a11y .es-cart-fab {
-    bottom: calc(var(--es-a11y-cta-clearance, 0px) + 5.25rem);
+    bottom: 5.25rem;
 }
 
 html .es-cart-above-a11y .es-cart-panel {
+    bottom: 9.25rem;
+}
+
+html.es-a11y-cta-offset .es-cart-above-a11y .es-cart-fab {
+    bottom: calc(var(--es-a11y-cta-clearance, 0px) + 5.25rem);
+}
+
+html.es-a11y-cta-offset .es-cart-above-a11y .es-cart-panel {
     bottom: calc(var(--es-a11y-cta-clearance, 0px) + 9.25rem);
 }

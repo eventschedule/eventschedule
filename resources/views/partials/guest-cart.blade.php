@@ -16,12 +16,20 @@
     // are not toasted anywhere - so a checkout refused by the request rules came back with nothing
     // on screen at all. Both are shown here, beside the form that produced them and on whichever
     // page the buyer was bounced back to, which the toast alone cannot do.
-    $cartError = session('error');
-    $cartFieldErrors = $errors->any() ? $errors->all() : [];
-    $cartHasError = $cartError || $cartFieldErrors;
     // Keys ("<encoded event id>|<date>") of legs checkout refused, so the panel can point at the
     // one that is actually at fault instead of leaving the buyer to bisect their own cart.
     $cartInvalidLegs = session('cart_invalid_legs', []);
+
+    // Only claim an error when this cart produced it. $errors is the shared bag and the
+    // single-event checkout form posts to the same route from this same page, so reading it
+    // unconditionally popped the cart open and printed that form's errors inside a shopping
+    // popover, for a buyer who had never touched the cart. `cart` is the named bag
+    // refuseCartLeg() and the request use; session('cart_submitted') covers a validation failure,
+    // which Laravel puts in the default bag before any of our code runs.
+    $cartOwnsErrors = session('cart_submitted') || $cartInvalidLegs;
+    $cartError = $cartOwnsErrors ? session('error') : null;
+    $cartFieldErrors = $cartOwnsErrors && $errors->any() ? $errors->all() : [];
+    $cartHasError = $cartError || $cartFieldErrors;
 @endphp
 @if (! request()->embed)
 <div id="es-cart-app" class="print:hidden {{ $role->show_accessibility_widget ? 'es-cart-above-a11y' : '' }}">
@@ -102,7 +110,8 @@
                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.cart_total_estimate') }}</p>
             </div>
 
-            <form method="post" action="{{ route('event.checkout', ['subdomain' => $role->subdomain]) }}" class="mt-5">
+            <form method="post" action="{{ route('event.checkout', ['subdomain' => $role->subdomain]) }}" class="mt-5"
+                  @submit="onSubmit">
                 @csrf
                 {{-- Signed-out only. A password manager will happily fill a decoy field, so handing
                      one to an authenticated buyer trips the check on a legitimate submission -
@@ -143,10 +152,19 @@
 
                 {{-- The server has applied order-level gift cards since resolveOrderGiftCard(), but
                      the cart had no way to send one, so a cart buyer could not spend a card the
-                     single-event form would have taken. --}}
-                <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1" for="es-cart-gift-card">{{ __('messages.gift_card_code') }}</label>
-                <input id="es-cart-gift-card" name="gift_card_code" v-model="giftCardCode" maxlength="20"
-                    class="w-full mb-4 rounded-lg border-gray-300 dark:border-[#2d2d30] dark:bg-[#252526] dark:text-gray-300 text-sm">
+                     single-event form would have taken.
+
+                     Gated on the schedule accepting them at all, the same test the single-event
+                     form applies per event - otherwise a schedule that has never issued a card
+                     offers a field that can only ever fail. Unlike that form there is no
+                     pre-validation round trip here, so a wrong code is refused at checkout: that is
+                     why the panel restores old() below, or a typo would also wipe the name, email
+                     and phone the buyer had typed. --}}
+                @if ($role->giftCardsEnabled())
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1" for="es-cart-gift-card">{{ __('messages.gift_card_code') }}</label>
+                    <input id="es-cart-gift-card" name="gift_card_code" v-model="giftCardCode" maxlength="20"
+                        class="w-full mb-4 rounded-lg border-gray-300 dark:border-[#2d2d30] dark:bg-[#252526] dark:text-gray-300 text-sm">
+                @endif
 
                 @if (! auth()->check() && config('app.hosted'))
                     {{-- Matches the single-event form, which asks a signed-out hosted buyer to
@@ -196,34 +214,53 @@ window.addEventListener('DOMContentLoaded', function () {
                 // Opened when the last checkout was refused, so the message below is on screen
                 // rather than hidden behind the cart button.
                 open: @json((bool) $cartHasError),
-                name: '',
-                email: '',
-                phone: '',
-                giftCardCode: '',
+                // Restored from old() so a refused checkout - a wrong gift-card code, an
+                // unavailable leg, a failed challenge - does not also throw away everything the
+                // buyer typed. withInput() was already being sent; nothing was reading it.
+                name: @json(old('name', '')),
+                email: @json(old('email', '')),
+                phone: @json(old('phone', '')),
+                giftCardCode: @json(old('gift_card_code', '')),
                 turnstileToken: '',
                 turnstileWidgetId: null,
             };
         },
         computed: {
-            // Union across legs, matching TicketCheckoutRequest::rules(). Legs stored before this
-            // field existed carry neither flag, so they simply do not ask - and the server-side
-            // rule still refuses, now visibly.
+            // Union across legs, matching TicketCheckoutRequest::rules().
+            //
+            // A leg stored before these flags existed counts as "asks": the server unions
+            // require_phone from the live event regardless, so hiding the field for such a leg
+            // produced "The phone field is required" with no field anywhere on screen and no way
+            // out but deleting and re-adding it. Showing an optional field costs nothing.
             asksPhone: function () {
-                return this.legs.some(function (leg) { return leg.ask_phone; });
+                return this.legs.some(function (leg) {
+                    return leg.ask_phone || ! ('ask_phone' in leg);
+                });
             },
             requiresPhone: function () {
                 return this.legs.some(function (leg) { return leg.require_phone; });
             },
-            // null when any leg predates the stored prices, rather than showing a total that is
-            // quietly missing an event. Legs stored before this field existed have no price.
+            // null rather than a figure that would mislead: when a leg predates the stored prices,
+            // and when the legs are not all in one currency. Adding a EUR leg to a USD one and
+            // printing the sum in whichever currency came first is worse than printing nothing -
+            // checkout refuses a mixed-currency cart anyway, but only after the buyer has been
+            // shown a number.
             orderTotal: function () {
                 var total = 0;
+                var currency = null;
 
                 for (var i = 0; i < this.legs.length; i++) {
                     var price = this.legPrice(this.legs[i]);
                     if (price === null) {
                         return null;
                     }
+
+                    if (currency === null) {
+                        currency = this.legs[i].currency;
+                    } else if (this.legs[i].currency !== currency) {
+                        return null;
+                    }
+
                     total += price;
                 }
 
@@ -245,10 +282,25 @@ window.addEventListener('DOMContentLoaded', function () {
         },
         watch: {
             // The panel (and so the widget container) only exists once there is something in the
-            // cart, so the first leg added is the earliest point this can render.
+            // cart, so the first leg added is the earliest point this can render - and emptying the
+            // cart destroys that container with it. Without the teardown the widget id outlived its
+            // iframe, so refilling the cart hit the "already rendered" guard, left an empty
+            // container, and submitted a blank token. Since ValidTurnstile became implicit that is
+            // a hard rejection with no widget on screen to solve, recoverable only by reloading.
             'legs.length': function (count) {
                 if (count > 0) {
                     this.$nextTick(this.renderTurnstile);
+
+                    return;
+                }
+
+                if (this.turnstileWidgetId !== null) {
+                    if (typeof turnstile !== 'undefined') {
+                        try { turnstile.remove(this.turnstileWidgetId); } catch (e) {}
+                    }
+
+                    this.turnstileWidgetId = null;
+                    this.turnstileToken = '';
                 }
             },
         },
@@ -318,6 +370,22 @@ window.addEventListener('DOMContentLoaded', function () {
                         return true;
                     },
                 });
+                @endif
+            },
+            /**
+             * Hold the submit until the challenge has produced a token.
+             *
+             * The single-event form does the same (validateForm in event/tickets.blade.php). Without
+             * it an impatient click posts an empty cf-turnstile-response, which is now a hard
+             * rejection rather than a silent pass - so the buyer would be bounced for doing nothing
+             * wrong. Only guards the token: everything else is the server's job.
+             */
+            onSubmit: function (event) {
+                @if (\App\Utils\TurnstileUtils::isActiveForRequest())
+                if (! this.turnstileToken) {
+                    event.preventDefault();
+                    window.alert(@json(__('messages.turnstile_verification_failed')));
+                }
                 @endif
             },
             add: function (leg) {

@@ -419,7 +419,10 @@
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">What can share a cart</div>
             <p>A single payment cannot be split across payment accounts, currencies or payment rails, so a cart only holds events that agree on all three: the same owner, the same ticket currency, and the same payment method. The cart says so when an event cannot join. Stripe and cash are supported; Invoice Ninja and Payment URL are not, since both send the buyer to a page built for one event.</p>
+            <p>Events using individual tickets keep their own checkout. The cart collects one name and email for the whole purchase and has nowhere to put a guest list, so carting one would lose exactly the attendee details that setting exists to collect.</p>
         </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The cart panel shows a running total as events are added, and a gift card can be applied to the whole order at checkout. Prices shown in the panel are for orientation: every ticket is re-read and re-priced from your event when the buyer checks out.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">Two dates of the same recurring event count as two entries, so a visitor can take Friday and Saturday in one order. Nothing about the cart is trusted at checkout: every ticket is re-read and re-priced from your event, and if any part of the order can no longer be filled the whole thing is refused rather than charging for a partial order.</p>
     </section>

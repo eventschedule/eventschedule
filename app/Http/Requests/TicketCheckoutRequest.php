@@ -39,6 +39,20 @@ class TicketCheckoutRequest extends FormRequest
     }
 
     /**
+     * Validation fails before the controller runs, so the cart's marker has to be set here too -
+     * otherwise a refused cart checkout looks, to the panel, exactly like the single-event form on
+     * the same page failing, and the panel would either steal those errors or ignore its own.
+     */
+    protected function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
+    {
+        if ($this->isMultiLeg()) {
+            session()->flash('cart_submitted', true);
+        }
+
+        parent::failedValidation($validator);
+    }
+
+    /**
      * The events this checkout touches. One for a single-event purchase, several for a cart.
      *
      * Rules that are per-event on the form - the phone field in particular - become the union

@@ -35,16 +35,25 @@
                 return;
             }
 
-            // Matched on event AND date, not just the key, so a leg the buyer added but did not
-            // buy survives - including the other date of a recurring event. A stored leg with no
-            // date is a one-time event, whose sale row carries a date derived server-side, so it
-            // can never match on equality and is matched on the event alone.
+            // Matched on event AND date, so a leg the buyer added but did not buy survives -
+            // including the other date of a recurring event.
+            //
+            // The date comparison is deliberately symmetric. A one-time event's sale carries a date
+            // derived server-side while the stored leg may have none, and vice versa, so treating a
+            // missing date on EITHER side as "matches" is the only rule that both clears what was
+            // bought and keeps what was not. An earlier one-sided version dropped any dateless entry
+            // for that event, and kept a purchased leg whose own date was empty - the second being a
+            // failure of the double-charge this file exists to prevent.
             var remaining = stored.filter(function (entry) {
                 if (entry.event_id !== leg.event_id) {
                     return true;
                 }
 
-                return entry.event_date ? entry.event_date !== leg.event_date : false;
+                if (! entry.event_date || ! leg.event_date) {
+                    return false;
+                }
+
+                return entry.event_date !== leg.event_date;
             });
 
             if (remaining.length === stored.length) {

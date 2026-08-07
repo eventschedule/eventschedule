@@ -395,6 +395,7 @@ return [
     'pass_cannot_combine' => 'Een seizoenskaart kan niet samen met tickets voor één datum worden gekocht. Koop ze in aparte bestellingen.',
     'cart_events_incompatible' => 'Deze evenementen kunnen niet samen worden gekocht. Ze gebruiken een andere organisator, valuta of betaalmethode.',
     'cart_event_unavailable' => ':event is niet meer beschikbaar en kan niet worden gekocht. Verwijder het uit je winkelwagen om door te gaan.',
+    'cart_event_needs_own_checkout' => ':event geeft een ticket per genodigde uit en moet daarom op de eigen pagina worden gekocht. Verwijder het uit je winkelwagen om door te gaan.',
     'cart_total_estimate' => 'De definitieve prijzen worden bij het afrekenen bevestigd.',
     'cart_payment_method_unsupported' => 'Deze evenementen kunnen niet samen worden gekocht met deze betaalmethode.',
     'attendee' => 'Deelnemer',

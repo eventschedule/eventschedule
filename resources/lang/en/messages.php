@@ -619,6 +619,7 @@ return [
     'pass_cannot_combine' => 'A season pass cannot be purchased together with single-date tickets. Please buy them in separate orders.',
     'cart_events_incompatible' => 'These events cannot be purchased together. They use a different organizer, currency or payment method.',
     'cart_event_unavailable' => ':event is no longer available and cannot be purchased. Remove it from your cart to continue.',
+    'cart_event_needs_own_checkout' => ':event issues a ticket per named guest, so it has to be bought on its own page. Remove it from your cart to continue.',
     'cart_total_estimate' => 'Final prices are confirmed at checkout.',
     'cart_payment_method_unsupported' => 'These events cannot be purchased together with this payment method.',
     'scanning_at_event' => 'Scanning at event',

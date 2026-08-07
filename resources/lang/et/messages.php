@@ -664,6 +664,7 @@ return [
     'pass_cannot_combine' => 'Hooajapiletit ei saa osta koos ühe kuupäeva piletitega. Palun osta need eraldi tellimustena.',
     'cart_events_incompatible' => 'Neid sündmusi ei saa koos osta. Neil on erinev korraldaja, valuuta või makseviis.',
     'cart_event_unavailable' => ':event ei ole enam saadaval ja seda ei saa osta. Eemalda see ostukorvist, et jätkata.',
+    'cart_event_needs_own_checkout' => ':event väljastab pileti iga nimeliselt märgitud külalise kohta, seega tuleb see osta selle enda lehelt. Eemalda see ostukorvist, et jätkata.',
     'cart_total_estimate' => 'Lõplikud hinnad kinnitatakse kassas.',
     'cart_payment_method_unsupported' => 'Neid sündmusi ei saa selle makseviisiga koos osta.',
     'attendee' => 'Osaleja',

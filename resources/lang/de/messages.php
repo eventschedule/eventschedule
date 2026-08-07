@@ -590,6 +590,7 @@ return [
     'pass_cannot_combine' => 'Eine Dauerkarte kann nicht zusammen mit Einzelterminkarten gekauft werden. Bitte separat bestellen.',
     'cart_events_incompatible' => 'Diese Veranstaltungen können nicht zusammen gekauft werden. Sie verwenden einen anderen Veranstalter, eine andere Währung oder eine andere Zahlungsmethode.',
     'cart_event_unavailable' => ':event ist nicht mehr verfügbar und kann nicht gekauft werden. Entfernen Sie es aus Ihrem Warenkorb, um fortzufahren.',
+    'cart_event_needs_own_checkout' => 'Für :event wird pro namentlich genanntem Gast ein Ticket ausgestellt, daher muss die Veranstaltung auf ihrer eigenen Seite gekauft werden. Entfernen Sie sie aus Ihrem Warenkorb, um fortzufahren.',
     'cart_total_estimate' => 'Die endgültigen Preise werden beim Bezahlen bestätigt.',
     'cart_payment_method_unsupported' => 'Diese Veranstaltungen können mit dieser Zahlungsmethode nicht zusammen gekauft werden.',
     'attendee' => 'Teilnehmer',

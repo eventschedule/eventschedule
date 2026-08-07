@@ -425,8 +425,10 @@ class MultiEventCartCheckoutTest extends TestCase
         // The cart collects one name and email for the whole purchase, so carting a per-attendee
         // event silently turned it into one anonymous multi-seat sale and lost the guest list the
         // organizer turned this on to collect.
+        // Its own message: the event is available, it just cannot be carted, so telling the buyer it
+        // is "no longer available" would send them to delete something they can still buy.
         $this->checkout([$this->leg($eventA, $ticketA), $this->leg($eventB, $ticketB)])
-            ->assertSessionHas('error', __('messages.cart_event_unavailable', ['event' => $eventB->name]));
+            ->assertSessionHas('error', __('messages.cart_event_needs_own_checkout', ['event' => $eventB->name]));
 
         $this->assertSame(0, Sale::where('email', 'cart@example.com')->count());
 
@@ -437,6 +439,61 @@ class MultiEventCartCheckoutTest extends TestCase
             'subdomain' => $this->role->subdomain,
             'slug' => $eventB->slug,
         ]))->assertOk()->assertDontSee(strtoupper(__('messages.add_to_cart')), false);
+    }
+
+    public function test_the_event_page_hands_the_cart_the_occurrence_the_buyer_is_viewing(): void
+    {
+        [$eventA] = $this->twoEvents();
+
+        // The leg is built from the ticket selector's own state. Until event_date was a property of
+        // that state, addToCart() read undefined, JSON.stringify dropped the key, and every cart leg
+        // reached the server with an empty date - so a recurring event sold its series start rather
+        // than the occurrence on screen. Asserted on the rendered state, which is what the browser
+        // actually sends, rather than on a hand-built payload.
+        $date = \Carbon\Carbon::parse($eventA->starts_at)->format('Y-m-d');
+
+        $html = $this->get(route('event.view_guest', [
+            'subdomain' => $this->role->subdomain,
+            'slug' => $eventA->slug,
+        ]).'?date='.$date)->assertOk()->getContent();
+
+        // Anchored to its neighbour in the data block. A bare search for the date would also match
+        // the waitlist fetch further down the same file, which renders event_date from Blade and
+        // would keep this test green with the property missing.
+        $this->assertMatchesRegularExpression(
+            '/event_date:\s*"'.preg_quote($date, '/').'",\s*eventCustomValues/',
+            $html,
+            'the ticket selector must carry the occurrence in its own state, not just in Blade'
+        );
+    }
+
+    public function test_a_recurring_events_second_date_keeps_its_own_occurrence(): void
+    {
+        $owner = $this->createOwner();
+        $this->role = $this->createRole($owner);
+
+        $friday = \Carbon\Carbon::now()->next(\Carbon\Carbon::FRIDAY)->format('Y-m-d');
+        $saturday = \Carbon\Carbon::now()->next(\Carbon\Carbon::SATURDAY)->format('Y-m-d');
+
+        $event = $this->createEvent($this->role, [
+            'tickets_enabled' => true, 'payment_method' => 'cash', 'ticket_currency_code' => 'USD',
+            'days_of_week' => '0000011',
+        ]);
+        $ticket = $this->createTicket($event, ['price' => 0, 'quantity' => 50]);
+
+        // Server-side half of the occurrence contract: two dated legs for one event stay two
+        // distinct sales. The client-side half - that the browser actually puts a date on the wire
+        // - is pinned by the test above; this one posts the dates itself and so cannot see it.
+        $this->checkout([
+            ['event_id' => UrlUtils::encodeId($event->id), 'event_date' => $friday, 'tickets' => [UrlUtils::encodeId($ticket->id) => 1]],
+            ['event_id' => UrlUtils::encodeId($event->id), 'event_date' => $saturday, 'tickets' => [UrlUtils::encodeId($ticket->id) => 1]],
+        ]);
+
+        $sales = Sale::where('email', 'cart@example.com')->get();
+
+        $this->assertCount(2, $sales, 'two occurrences are two sales');
+        $this->assertEqualsCanonicalizing([$friday, $saturday], $sales->pluck('event_date')->all(),
+            'each leg must keep the occurrence the buyer picked');
     }
 
     public function test_a_single_leg_checkout_writes_no_order_id(): void

@@ -977,6 +977,15 @@ class TicketController extends Controller
         // normalised into one leg here and must keep its aborts.
         $isCart = is_array($request->input('legs')) && $request->input('legs') !== [];
 
+        // Marks this request as the cart's, so the panel only claims errors it actually caused.
+        // $errors is a shared bag and the single-event form on the same page posts to this same
+        // route, so without a marker its validation errors surfaced inside the cart popover.
+        // Flashed once here rather than at each refusal, so no bail-out path can forget it; on a
+        // successful checkout it rides to the ticket page, which does not render the cart.
+        if ($isCart) {
+            session()->flash('cart_submitted', true);
+        }
+
         foreach ($legs as $index => $leg) {
             // canSellTickets() below reads both relations; without this they lazy-load on the
             // checkout POST.
@@ -1003,7 +1012,10 @@ class TicketController extends Controller
             // only catches a hand-built request - but it is the difference between refusing and
             // quietly discarding the attendee details the organizer asked for.
             if ($isCart && $event->individual_tickets) {
-                return $this->refuseCartLeg($leg, $event->translatedName());
+                // Its own message: the event is perfectly available, it just cannot be carted, and
+                // "no longer available" would send the buyer to delete something they can still buy
+                // from its own page.
+                return $this->refuseCartLeg($leg, $event->translatedName(), 'messages.cart_event_needs_own_checkout');
             }
 
             // Verify event can sell tickets (checks past dates, tickets_enabled, and plan allowance)
@@ -1255,11 +1267,11 @@ class TicketController extends Controller
      * it the buyer is told only that "something" is unavailable, and since the cart persists they
      * have to remove legs one at a time to find out which - if they even realise that is the fix.
      */
-    private function refuseCartLeg(array $leg, ?string $eventName)
+    private function refuseCartLeg(array $leg, ?string $eventName, string $messageKey = 'messages.cart_event_unavailable')
     {
         return back()
             ->withInput()
-            ->with('error', __('messages.cart_event_unavailable', [
+            ->with('error', __($messageKey, [
                 'event' => $eventName ?: __('messages.event'),
             ]))
             ->with('cart_invalid_legs', [$leg['event_id'].'|'.(string) $leg['event_date']]);

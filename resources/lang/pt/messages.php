@@ -396,6 +396,7 @@ return [
     'pass_cannot_combine' => 'Um passe não pode ser comprado juntamente com bilhetes de data única. Compre-os em pedidos separados.',
     'cart_events_incompatible' => 'Estes eventos não podem ser comprados juntos. Utilizam um organizador, uma moeda ou um método de pagamento diferente.',
     'cart_event_unavailable' => ':event já não está disponível e não pode ser comprado. Remova-o do seu carrinho para continuar.',
+    'cart_event_needs_own_checkout' => ':event emite um bilhete por convidado indicado, por isso tem de ser comprado na sua própria página. Remova-o do carrinho para continuar.',
     'cart_total_estimate' => 'Os preços finais são confirmados no checkout.',
     'cart_payment_method_unsupported' => 'Estes eventos não podem ser comprados juntos com este método de pagamento.',
     'attendee' => 'Participante',

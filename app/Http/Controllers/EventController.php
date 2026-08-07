@@ -163,7 +163,13 @@ class EventController extends Controller
         // cascades on delete, so this would destroy the buyers' sale rows outright - no refund
         // trail, no inventory release, no notice to anyone who paid. Cancelling the event keeps
         // the records and lets the owner notify attendees; deleting is for events nobody bought.
-        if ($event->sales()->where('status', 'paid')->exists()) {
+        //
+        // Not just 'paid'. 'amount_mismatch' means money was taken and is waiting on an admin, and
+        // an 'unpaid' leg may belong to a cart order whose Stripe session is still open - deleting
+        // that event nulls the survivors' order_id (the new foreign key) and leaves the buyer able
+        // to complete a payment for a sale row that no longer exists. Refunded and cancelled rows
+        // are the refund trail this guard exists to keep.
+        if ($event->sales()->exists()) {
             return redirect()->back()->with('error', __('messages.cannot_delete_event_with_sales'));
         }
 

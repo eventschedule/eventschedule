@@ -185,6 +185,16 @@ class MultiEventOrderLifecycleTest extends TestCase
         // work per leg - decremented it anyway, taking the difference out of other buyers' sales.
         $this->assertEqualsWithDelta(50.0, $this->revenueFor($eventA->id), 0.001);
         $this->assertEqualsWithDelta(30.0, $this->revenueFor($eventB->id), 0.001);
+
+        // Approving again is a no-op. This exercises the status check BEFORE the transaction; the
+        // matching re-check inside the lock guards the genuinely concurrent case - two admins whose
+        // requests both read 'amount_mismatch' before either commits - which sequential test
+        // requests cannot reproduce, so nothing here pins it.
+        $this->post(route('admin.sale.approve', ['sale' => $legA->id]));
+
+        $this->assertEqualsWithDelta(50.0, $this->revenueFor($eventA->id), 0.001,
+            'a second approval must not book the order again');
+        $this->assertEqualsWithDelta(30.0, $this->revenueFor($eventB->id), 0.001);
     }
 
     public function test_a_cancelled_order_returns_the_promo_code_it_took(): void

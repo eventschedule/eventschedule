@@ -2952,8 +2952,17 @@ class AdminController extends Controller
             return redirect()->back()->with('error', __('messages.sale_not_found'));
         }
 
-        DB::transaction(function () use ($sale) {
+        $approved = DB::transaction(function () use ($sale) {
             $sale = Sale::lockForUpdate()->find($sale->id);
+
+            // Re-assert the precondition INSIDE the lock, the way HandlesSaleStatusActions and
+            // ReleaseTickets both do. The outer check happens before the transaction, so two admins
+            // (or one double-click) both passed it and both ran this body: analytics counted twice,
+            // webhooks fired twice, and - now that this method sends the confirmation - the buyer
+            // received their tickets twice.
+            if (! $sale || $sale->status !== 'amount_mismatch') {
+                return false;
+            }
 
             // Book the whole purchase, not just the buyer's own seat, and book it per EVENT.
             //
@@ -2981,10 +2990,17 @@ class AdminController extends Controller
                     AnalyticsEventsDaily::incrementPromoSale($leg['event_id'], $leg['promo']);
                 }
             }
+
+            return true;
         });
 
+        if (! $approved) {
+            return redirect()->back()->with('error', __('messages.sale_not_found'));
+        }
+
         // The buyer paid and is now booked, so they get their tickets and subscribers get told -
-        // neither of which happened before, leaving an approved sale invisible to both.
+        // neither of which happened before, leaving an approved sale invisible to both. Guarded on
+        // $approved so a losing double-submit sends nothing.
         $sale->refresh();
         foreach ($sale->orderLegs() as $leg) {
             WebhookService::dispatch('sale.paid', $leg);

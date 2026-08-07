@@ -398,6 +398,7 @@ return [
     'pass_cannot_combine' => 'Un abbonamento non può essere acquistato insieme a biglietti per una singola data. Acquistali in ordini separati.',
     'cart_events_incompatible' => 'Questi eventi non possono essere acquistati insieme. Utilizzano un organizzatore, una valuta o un metodo di pagamento diverso.',
     'cart_event_unavailable' => ':event non è più disponibile e non può essere acquistato. Rimuovilo dal carrello per continuare.',
+    'cart_event_needs_own_checkout' => ':event emette un biglietto per ogni ospite indicato, quindi va acquistato dalla sua pagina. Rimuovilo dal carrello per continuare.',
     'cart_total_estimate' => 'I prezzi definitivi vengono confermati al momento del pagamento.',
     'cart_payment_method_unsupported' => 'Questi eventi non possono essere acquistati insieme con questo metodo di pagamento.',
     'attendee' => 'Partecipante',
