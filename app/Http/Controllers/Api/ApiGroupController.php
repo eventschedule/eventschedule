@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Group;
 use App\Utils\GeminiUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class ApiGroupController extends Controller
@@ -72,7 +72,6 @@ class ApiGroupController extends Controller
 
         $groupData = [
             'name' => $request->name,
-            'slug' => Str::slug($request->name),
             'color' => $request->color,
         ];
 
@@ -82,12 +81,13 @@ class ApiGroupController extends Controller
                 $translations = GeminiUtils::translateGroupNames([$request->name], $role->language_code, $role->translation_language_code);
                 if (isset($translations[$request->name])) {
                     $groupData['name_en'] = $translations[$request->name];
-                    $groupData['slug'] = Str::slug($translations[$request->name]);
                 }
             } catch (\Exception $e) {
                 \Log::error('Failed to translate group name via API: '.$e->getMessage());
             }
         }
+
+        $groupData['slug'] = Group::cleanSlug($role->id, $request->name, $groupData['name_en'] ?? null);
 
         $group = $role->groups()->create($groupData);
 
@@ -134,7 +134,6 @@ class ApiGroupController extends Controller
 
         if ($request->has('name')) {
             $group->name = $request->name;
-            $group->slug = Str::slug($request->name);
 
             // Auto-translate into the schedule's target language when it differs from the authored language
             if ($role->language_code && $role->language_code !== $role->translation_language_code) {
@@ -142,12 +141,13 @@ class ApiGroupController extends Controller
                     $translations = GeminiUtils::translateGroupNames([$request->name], $role->language_code, $role->translation_language_code);
                     if (isset($translations[$request->name])) {
                         $group->name_en = $translations[$request->name];
-                        $group->slug = Str::slug($translations[$request->name]);
                     }
                 } catch (\Exception $e) {
                     \Log::error('Failed to translate group name via API: '.$e->getMessage());
                 }
             }
+
+            $group->slug = Group::cleanSlug($role->id, $group->name, $group->name_en, null, $group->id);
         }
 
         if ($request->has('color')) {

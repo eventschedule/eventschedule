@@ -38,6 +38,13 @@ Schedule::call(function () {
     Artisan::call('app:expire-waitlist');
 })->hourly()->name('app-expire-waitlist')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
 
+// Every five minutes: this is what makes curator sources correct, rather than the single
+// hook in EventRepo::saveEvent() which only makes them immediate. Two set queries over
+// schedules that actually have sources, so a quiet install does almost no work.
+Schedule::call(function () {
+    Artisan::call('app:sync-curator-sources');
+})->everyFiveMinutes()->name('app-sync-curator-sources')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+
 // Every 15 minutes rather than hourly: the command stops cleanly at its budget and resumes with
 // the longest-waiting rows, so more frequent short runs drain the queue faster than one long run
 // that may be killed. withoutOverlapping() is given an explicit expiry because its default is

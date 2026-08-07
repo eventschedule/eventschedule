@@ -12,6 +12,7 @@ use App\Services\AuditService;
 use App\Services\BoostBillingService;
 use App\Services\MetaAdsService;
 use App\Services\WebhookService;
+use App\Utils\GeminiUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -764,13 +765,21 @@ class ApiEventController extends Controller
         }
 
         // Handle category name to category_id conversion against this schedule's effective list.
+        //
+        // Matched on normalizeForMatch(), not Str::slug(): Str::slug returns "" for Hebrew, CJK and
+        // anything else it cannot transliterate, so on a schedule with non-Latin categories every
+        // name compared equal to every other and the first one always won - the API answered 201
+        // with the event filed under a category the caller never asked for.
         if ($request->has('category') && ! $request->has('category_id')) {
-            $categorySlug = Str::slug($request->category);
+            $wanted = GeminiUtils::normalizeForMatch($request->category);
 
-            foreach ($role->getEventCategories() as $entry) {
-                if (Str::slug($entry['name']) === $categorySlug) {
-                    $request->merge(['category_id' => $entry['id']]);
-                    break;
+            // An input that normalizes away entirely must not match anything.
+            if ($wanted !== '') {
+                foreach ($role->getEventCategories() as $entry) {
+                    if (GeminiUtils::normalizeForMatch($entry['name']) === $wanted) {
+                        $request->merge(['category_id' => $entry['id']]);
+                        break;
+                    }
                 }
             }
 

@@ -517,8 +517,18 @@ class Role extends Model implements MustVerifyEmail
     public function events()
     {
         return $this->belongsToMany(Event::class)
-            ->withPivot('id', 'name_translated', 'description_translated', 'description_html_translated', 'is_accepted', 'group_id', 'google_event_id', 'caldav_event_uid', 'caldav_event_etag')
+            ->withPivot('id', 'name_translated', 'description_translated', 'description_html_translated', 'is_accepted', 'is_auto_sourced', 'group_id', 'google_event_id', 'caldav_event_uid', 'caldav_event_etag')
             ->using(EventRole::class);
+    }
+
+    /**
+     * Talent/venue schedules this curator pulls events from. The reverse of
+     * default_curator_ids, which lives on the source and only reaches curators the
+     * same user owns.
+     */
+    public function sources()
+    {
+        return $this->hasMany(RoleSource::class, 'role_id');
     }
 
     /** Per-request cache for whether this schedule has any pass ticket. */
@@ -1107,6 +1117,22 @@ class Role extends Model implements MustVerifyEmail
         return ($this->email_verified_at != null || $this->phone_verified_at != null) && $this->user_id != null;
     }
 
+    /**
+     * The set of schedules /admin/schedules can actually show: real, owned schedules,
+     * never the demo ones.
+     *
+     * Shared with the search-subdomains autocomplete that feeds that page's filter box.
+     * When the two drifted apart, the picker offered auto-created schedules (which have no
+     * user_id - see EventRepo::saveEvent) that the table could never return, so picking one
+     * and filtering produced an empty list.
+     */
+    public function scopeAdminListable($query)
+    {
+        return $query->whereNotNull('user_id')
+            ->where('subdomain', '!=', \App\Services\DemoService::DEMO_ROLE_SUBDOMAIN)
+            ->where('subdomain', 'not like', 'demo-%');
+    }
+
     // Query-level mirror of isClaimed(): has an owner + a verified contact channel.
     // Keep in sync with isClaimed().
     public function scopeClaimed($query)
@@ -1354,7 +1380,8 @@ class Role extends Model implements MustVerifyEmail
      * True when Str::slug dropped more than half of the source's letters/digits - the signal that a
      * non-Latin script survived slugification only as separators (or nothing at all).
      */
-    private static function isLossySlug($source, $slug): bool
+    /** Shared with Group::cleanSlug(), which needs the same "did slugifying lose the name" test. */
+    public static function isLossySlug($source, $slug): bool
     {
         $sourceChars = mb_strlen(preg_replace('/[^\p{L}\p{N}]/u', '', (string) $source));
         $slugChars = strlen(preg_replace('/[^a-z0-9]/', '', (string) $slug));

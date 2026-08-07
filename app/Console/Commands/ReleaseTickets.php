@@ -51,7 +51,7 @@ class ReleaseTickets extends Command
         $handled = [];
 
         foreach ($expiredSales as $sale) {
-            $targetId = $sale->order_id ?: $sale->id;
+            $targetId = $this->expiryTargetId($sale);
 
             if (isset($handled[$targetId])) {
                 continue;
@@ -153,7 +153,7 @@ class ReleaseTickets extends Command
 
         foreach ($heldSales as $sale) {
             // Same rule as the window loop above: an order expires as a unit, from its primary.
-            $targetId = $sale->order_id ?: $sale->id;
+            $targetId = $this->expiryTargetId($sale);
 
             if (isset($handled[$targetId])) {
                 continue;
@@ -179,5 +179,32 @@ class ReleaseTickets extends Command
                     ['status' => 'unpaid'], ['status' => 'expired'], 'gift_card_hold:event_id:'.$expired->event_id);
             }
         }
+    }
+
+    /**
+     * The row whose expiry releases this sale: its order's anchor, or itself.
+     *
+     * Falls back to the sale itself when the anchor has vanished. sales.order_id now carries an
+     * ON DELETE SET NULL self-reference, so that should no longer happen - but rows written before
+     * that migration can still hold a dangling id, and this loop is the only thing that ever
+     * returns their seats and gift-card holds. Silently resolving to a missing row meant they were
+     * skipped on every run, forever.
+     */
+    private function expiryTargetId(Sale $sale): int
+    {
+        if (! $sale->order_id || $sale->order_id === $sale->id) {
+            return $sale->id;
+        }
+
+        if (! Sale::whereKey($sale->order_id)->exists()) {
+            \Log::warning('Sale points at a missing order anchor; expiring it on its own', [
+                'sale_id' => $sale->id,
+                'order_id' => $sale->order_id,
+            ]);
+
+            return $sale->id;
+        }
+
+        return $sale->order_id;
     }
 }

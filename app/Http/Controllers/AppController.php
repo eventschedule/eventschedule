@@ -181,6 +181,13 @@ class AppController extends Controller
                         report($e);
                     }
                 }
+
+                try {
+                    \Artisan::call('app:sync-curator-sources');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command app:sync-curator-sources failed: '.$e->getMessage());
+                    report($e);
+                }
             }
 
             // === EVERY 15 MINUTES ===

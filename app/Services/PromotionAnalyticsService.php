@@ -126,10 +126,15 @@ class PromotionAnalyticsService
     {
         $sales = Sale::where('boost_campaign_id', $campaign->id)
             ->where('status', 'paid')
+            ->where('is_deleted', false)
             ->get();
 
         return [
-            'count' => $sales->count(),
+            // Conversions are PURCHASES, not rows. newSaleForLeg() stamps the campaign onto every
+            // leg of a cart from the same session UTM, so counting rows read one boosted checkout
+            // as several and halved the campaign's apparent cost per conversion. Revenue stays a
+            // straight sum: each row's payment_amount is its own share, so it never double-counts.
+            'count' => $sales->map(fn ($sale) => $sale->order_id ?: ($sale->group_id ?: $sale->id))->unique()->count(),
             'revenue' => round((float) $sales->sum('payment_amount'), 2),
         ];
     }

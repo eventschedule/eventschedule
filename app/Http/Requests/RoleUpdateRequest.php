@@ -55,6 +55,15 @@ class RoleUpdateRequest extends FormRequest
                 ['string', 'max:50']
             ),
             'phone' => ['nullable', 'string', 'max:20', 'regex:/^\+[1-9]\d{1,14}$/'],
+            // Curator event sources. Bounded here rather than trimmed in the controller so
+            // an over-long list is refused with a message instead of coming back silently
+            // short - one source can move thousands of event links.
+            'source_schedules' => ['nullable', 'array', 'max:'.(int) config('usage.curator_source_limit', 100)],
+            'source_schedules.*' => ['nullable', 'string', 'max:255'],
+            // Typed as string because saveEventSources hands each element to
+            // UrlUtils::decodeId(), whose Sqids::decode(string) type hint fatals on an array.
+            'source_groups' => ['nullable', 'array'],
+            'source_groups.*' => ['nullable', 'string', 'max:255'],
             'custom_domain' => [
                 'nullable', 'string', 'url', 'max:255',
                 Rule::unique('roles', 'custom_domain')->ignore($role->id),

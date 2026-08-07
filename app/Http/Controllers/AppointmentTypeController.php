@@ -8,7 +8,6 @@ use App\Models\Sale;
 use App\Traits\ReschedulesAppointments;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -28,7 +27,7 @@ class AppointmentTypeController extends Controller
         $type = new AppointmentType;
         $type->role_id = $role->id;
         $this->fill($type, $data);
-        $type->slug = $this->uniqueSlug($role, $data['name']);
+        $type->slug = AppointmentType::uniqueSlug($role, $data['name']);
         $type->save();
 
         return $this->back($role, __('messages.appointments_type_saved'));
@@ -88,7 +87,7 @@ class AppointmentTypeController extends Controller
 
         $copy = $type->replicate();
         $copy->name = $type->name.' ('.__('messages.copy').')';
-        $copy->slug = $this->uniqueSlug($role, $copy->name);
+        $copy->slug = AppointmentType::uniqueSlug($role, $copy->name);
         $copy->is_active = false;
         $copy->save();
 
@@ -448,18 +447,6 @@ class AppointmentTypeController extends Controller
         // contradiction.
         $type->require_phone = $type->ask_phone && request()->boolean('require_phone');
         $type->is_active = request()->boolean('is_active');
-    }
-
-    protected function uniqueSlug(Role $role, string $name): string
-    {
-        $base = Str::slug($name) ?: 'appointment';
-        $slug = $base;
-        $i = 2;
-        while (AppointmentType::where('role_id', $role->id)->where('slug', $slug)->exists()) {
-            $slug = $base.'-'.$i++;
-        }
-
-        return $slug;
     }
 
     protected function back(Role $role, string $message)

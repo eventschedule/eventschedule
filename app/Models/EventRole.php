@@ -14,6 +14,7 @@ class EventRole extends Pivot
         'event_id',
         'role_id',
         'is_accepted',
+        'is_auto_sourced',
         'group_id',
         'google_event_id',
         'caldav_event_uid',
@@ -24,6 +25,7 @@ class EventRole extends Pivot
 
     protected $casts = [
         'last_translated_at' => 'datetime',
+        'is_auto_sourced' => 'boolean',
     ];
 
     public function role()

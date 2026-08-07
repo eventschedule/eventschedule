@@ -101,6 +101,7 @@ class GenerateDocScreenshots extends Command
         $originalPasswordHash = $user->password;
         $originalEmail = $user->email;
         $originalIsAdmin = $user->is_admin;
+        $originalEmailVerifiedAt = $user->email_verified_at;
         $user->password = Hash::make(self::TEMP_PASSWORD);
         $user->email = self::TEMP_EMAIL;
         if (config('app.is_testing')) {
@@ -116,7 +117,7 @@ class GenerateDocScreenshots extends Command
         $logFile = storage_path('logs/laravel.log');
         $logBackup = null;
         if (file_exists($logFile)) {
-            $logBackup = $logFile . '.bak';
+            $logBackup = $logFile.'.bak';
             copy($logFile, $logBackup);
             file_put_contents($logFile, '');
             $this->line('Cleared laravel.log for clean screenshots.');
@@ -130,7 +131,7 @@ class GenerateDocScreenshots extends Command
             foreach ($maskedEmails as $email) {
                 $referralUsers[] = User::create([
                     'name' => explode('@', $email)[0],
-                    'email' => 'ref-demo-' . uniqid() . '@temp.local',
+                    'email' => 'ref-demo-'.uniqid().'@temp.local',
                     'password' => Hash::make('temp'),
                 ]);
             }
@@ -191,6 +192,13 @@ class GenerateDocScreenshots extends Command
             $user->is_admin = $originalIsAdmin;
             $user->save();
 
+            // Putting the email back clears email_verified_at again (the User model does that on
+            // any email change), so the account was left unverified and bounced to /verify-email
+            // on the next login. Same reason line 112 above re-verifies after switching to the
+            // temp address.
+            $user->email_verified_at = $originalEmailVerifiedAt;
+            $user->saveQuietly();
+
             // Restore log file
             if ($logBackup && file_exists($logBackup)) {
                 copy($logBackup, $logFile);
@@ -222,6 +230,7 @@ class GenerateDocScreenshots extends Command
                 ['id' => 'creating-schedules--section-subschedules', 'route' => '/simpsons/edit', 'section' => 'section-subschedules'],
                 ['id' => 'creating-schedules--section-settings', 'route' => '/simpsons/edit', 'section' => 'section-settings'],
                 ['id' => 'creating-schedules--section-engagement', 'route' => '/simpsons/edit', 'section' => 'section-engagement'],
+                ['id' => 'creating-schedules--section-sources', 'route' => '/simpsons/edit', 'section' => 'section-sources'],
                 ['id' => 'creating-schedules--section-auto-import', 'route' => '/simpsons/edit', 'section' => 'section-auto-import'],
                 ['id' => 'creating-schedules--section-integrations', 'route' => '/simpsons/edit', 'section' => 'section-integrations'],
                 ['id' => 'creating-schedules--section-email-settings', 'route' => '/simpsons/edit', 'script' => "document.querySelector('a[data-section=\"section-integrations\"]').click(); setTimeout(() => document.querySelector('.integration-tab[data-tab=\"email\"]').click(), 500)"],

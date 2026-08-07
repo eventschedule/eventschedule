@@ -3,9 +3,20 @@
 namespace App\Rules;
 
 use App\Utils\TurnstileUtils;
-use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Contracts\Validation\ImplicitRule;
 
-class ValidTurnstile implements Rule
+/**
+ * ImplicitRule, not Rule: a plain Rule is SKIPPED when the attribute is absent or an empty string
+ * (Validator::presentOrRuleIsImplicit), so simply omitting cf-turnstile-response bypassed
+ * verification entirely on every form using this. The check has to run precisely when the token is
+ * missing, which is what implicit means.
+ *
+ * Safe for all six call sites: each has a form that renders the widget, and passes() still returns
+ * true up front whenever Turnstile is not in play (no keys, custom domain, testing), so a null
+ * token only fails where a real token was genuinely expected. TurnstileUtils::verify() is
+ * null-safe and treats an empty token as invalid.
+ */
+class ValidTurnstile implements ImplicitRule
 {
     /**
      * Determine if the validation rule passes.

@@ -19,11 +19,18 @@
     $cartError = session('error');
     $cartFieldErrors = $errors->any() ? $errors->all() : [];
     $cartHasError = $cartError || $cartFieldErrors;
+    // Keys ("<encoded event id>|<date>") of legs checkout refused, so the panel can point at the
+    // one that is actually at fault instead of leaving the buyer to bisect their own cart.
+    $cartInvalidLegs = session('cart_invalid_legs', []);
 @endphp
 @if (! request()->embed)
-<div id="es-cart-app" class="print:hidden">
+<div id="es-cart-app" class="print:hidden {{ $role->show_accessibility_widget ? 'es-cart-above-a11y' : '' }}">
     <template v-if="legs.length > 0">
-        <div class="fixed bottom-4 {{ $role->isRtl() ? 'left-4' : 'right-4' }} z-40">
+        {{-- Bottom-right is a crowded corner. The guest event page pins a full-width mobile CTA bar
+             at bottom-0, and the accessibility launcher (when the owner enables it) sits at
+             bottom-6 in this same corner with a higher z-index. es-cart-fab lifts this clear of
+             both, reusing the --es-a11y-cta-clearance the CTA bar already publishes. --}}
+        <div class="es-cart-fab fixed {{ $role->isRtl() ? 'left-4' : 'right-4' }} z-40">
             <button type="button" @click="open = !open"
                 class="flex items-center gap-2 rounded-full bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-5 py-3 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
                 :aria-expanded="open ? 'true' : 'false'"
@@ -36,7 +43,7 @@
         </div>
 
         <div v-show="open" id="es-cart-panel"
-             class="fixed bottom-20 {{ $role->isRtl() ? 'left-4' : 'right-4' }} z-40 w-[min(22rem,calc(100vw-2rem))] rounded-2xl bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2d2d30] shadow-2xl p-5">
+             class="es-cart-panel fixed {{ $role->isRtl() ? 'left-4' : 'right-4' }} z-40 w-[min(22rem,calc(100vw-2rem))] max-h-[min(80vh,44rem)] overflow-y-auto rounded-2xl bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2d2d30] shadow-2xl p-5">
             <div class="flex items-center justify-between mb-3">
                 <h2 class="font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.your_cart') }}</h2>
                 <button type="button" @click="open = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200" aria-label="{{ __('messages.close') }}">
@@ -64,21 +71,36 @@
 
             <ul class="space-y-3 max-h-64 overflow-y-auto">
                 <li v-for="(leg, index) in legs" :key="leg.event_id + '|' + leg.event_date"
-                    class="flex items-start justify-between gap-3">
+                    class="flex items-start justify-between gap-3 rounded-lg"
+                    :class="isInvalid(leg) ? 'bg-red-50 dark:bg-red-900/20 p-2 -m-2' : ''">
                     <div class="min-w-0">
                         {{-- Vue interpolation, not server-rendered: the name comes from localStorage
                              and is bound as text, so it is never compiled as a template. --}}
-                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">@{{ leg.event_name }}</div>
+                        <div class="text-sm font-medium truncate"
+                             :class="isInvalid(leg) ? 'text-red-700 dark:text-red-300' : 'text-gray-900 dark:text-gray-100'">@{{ leg.event_name }}</div>
                         <div class="text-xs text-gray-500 dark:text-gray-400">
                             @{{ leg.event_date }} &middot; @{{ ticketCount(leg) }} {{ __('messages.tickets') }}
+                            <template v-if="legPrice(leg) !== null">&middot; @{{ formatMoney(legPrice(leg), leg.currency) }}</template>
                         </div>
                     </div>
                     <button type="button" @click="remove(index)"
-                        class="text-xs text-red-600 hover:text-red-800 dark:text-red-400 shrink-0">
+                        class="text-xs shrink-0"
+                        :class="isInvalid(leg) ? 'font-semibold text-red-700 dark:text-red-300 hover:text-red-900' : 'text-red-600 hover:text-red-800 dark:text-red-400'">
                         {{ __('messages.remove') }}
                     </button>
                 </li>
             </ul>
+
+            {{-- The buyer was previously asked to check out without ever being shown a number. These
+                 prices come from localStorage and are for orientation only - checkout re-reads and
+                 re-prices every ticket from the database, so nothing here is trusted. --}}
+            <div v-if="orderTotal !== null" class="mt-4 pt-3 border-t border-gray-200 dark:border-[#2d2d30]">
+                <div class="flex items-center justify-between text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    <span>{{ __('messages.total') }}</span>
+                    <span>@{{ formatMoney(orderTotal, legs[0] && legs[0].currency) }}</span>
+                </div>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.cart_total_estimate') }}</p>
+            </div>
 
             <form method="post" action="{{ route('event.checkout', ['subdomain' => $role->subdomain]) }}" class="mt-5">
                 @csrf
@@ -89,7 +111,6 @@
                 @guest
                     <x-honeypot />
                 @endguest
-                <input type="hidden" name="cart_checkout" value="1">
                 <template v-for="(leg, index) in legs">
                     <input type="hidden" :name="'legs[' + index + '][event_id]'" :value="leg.event_id">
                     <input type="hidden" :name="'legs[' + index + '][event_date]'" :value="leg.event_date">
@@ -120,6 +141,36 @@
                         class="w-full mb-4 rounded-lg border-gray-300 dark:border-[#2d2d30] dark:bg-[#252526] dark:text-gray-300 text-sm">
                 </template>
 
+                {{-- The server has applied order-level gift cards since resolveOrderGiftCard(), but
+                     the cart had no way to send one, so a cart buyer could not spend a card the
+                     single-event form would have taken. --}}
+                <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1" for="es-cart-gift-card">{{ __('messages.gift_card_code') }}</label>
+                <input id="es-cart-gift-card" name="gift_card_code" v-model="giftCardCode" maxlength="20"
+                    class="w-full mb-4 rounded-lg border-gray-300 dark:border-[#2d2d30] dark:bg-[#252526] dark:text-gray-300 text-sm">
+
+                @if (! auth()->check() && config('app.hosted'))
+                    {{-- Matches the single-event form, which asks a signed-out hosted buyer to
+                         accept the terms before taking their money. --}}
+                    <label class="flex items-start gap-2 mb-4 text-xs text-gray-600 dark:text-gray-400">
+                        <input type="checkbox" name="terms" value="1" required
+                            class="mt-0.5 h-4 w-4 rounded border-gray-300 dark:border-[#2d2d30] dark:bg-[#252526] text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                        <span>{!! str_replace([':terms', ':privacy'], [
+                            '<a href="'.marketing_url('/terms-of-service').'" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">'.__('messages.terms_of_service').'</a>',
+                            '<a href="'.marketing_url('/privacy').'" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">'.__('messages.privacy_policy').'</a>',
+                        ], __('messages.i_accept_the_terms_and_privacy')) !!}</span>
+                    </label>
+                @endif
+
+                @if (\App\Utils\TurnstileUtils::isActiveForRequest())
+                    {{-- Rendered explicitly rather than by Cloudflare's auto-scan: this panel lives
+                         inside a v-if, so the container does not exist at DOMContentLoaded when the
+                         auto-scan runs. Same reason event/tickets.blade.php renders its widget by
+                         hand. The token is submitted through a bound hidden input because the
+                         widget's own input would be outside Vue's control. --}}
+                    <div id="es-cart-turnstile" class="mb-4"></div>
+                    <input type="hidden" name="cf-turnstile-response" :value="turnstileToken">
+                @endif
+
                 <button type="submit"
                     class="w-full rounded-lg bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white font-semibold px-4 py-3 transition-all duration-200">
                     {{ strtoupper(__('messages.checkout')) }}
@@ -136,6 +187,7 @@ window.addEventListener('DOMContentLoaded', function () {
     }
 
     var storageKey = 'es_cart_' + @json($role->subdomain);
+    var invalidLegs = @json(array_values((array) $cartInvalidLegs));
 
     Vue.createApp({
         data: function () {
@@ -147,6 +199,9 @@ window.addEventListener('DOMContentLoaded', function () {
                 name: '',
                 email: '',
                 phone: '',
+                giftCardCode: '',
+                turnstileToken: '',
+                turnstileWidgetId: null,
             };
         },
         computed: {
@@ -159,6 +214,21 @@ window.addEventListener('DOMContentLoaded', function () {
             requiresPhone: function () {
                 return this.legs.some(function (leg) { return leg.require_phone; });
             },
+            // null when any leg predates the stored prices, rather than showing a total that is
+            // quietly missing an event. Legs stored before this field existed have no price.
+            orderTotal: function () {
+                var total = 0;
+
+                for (var i = 0; i < this.legs.length; i++) {
+                    var price = this.legPrice(this.legs[i]);
+                    if (price === null) {
+                        return null;
+                    }
+                    total += price;
+                }
+
+                return total;
+            },
         },
         created: function () {
             this.legs = this.read();
@@ -167,6 +237,20 @@ window.addEventListener('DOMContentLoaded', function () {
             window.addEventListener('es-cart-add', function (event) {
                 self.add(event.detail);
             });
+        },
+        mounted: function () {
+            if (this.legs.length) {
+                this.$nextTick(this.renderTurnstile);
+            }
+        },
+        watch: {
+            // The panel (and so the widget container) only exists once there is something in the
+            // cart, so the first leg added is the earliest point this can render.
+            'legs.length': function (count) {
+                if (count > 0) {
+                    this.$nextTick(this.renderTurnstile);
+                }
+            },
         },
         methods: {
             read: function () {
@@ -183,6 +267,58 @@ window.addEventListener('DOMContentLoaded', function () {
                 try {
                     localStorage.setItem(storageKey, JSON.stringify(this.legs));
                 } catch (e) {}
+            },
+            /**
+             * Render the Turnstile widget once the panel exists.
+             *
+             * Cloudflare's auto-scan runs at DOMContentLoaded, when this panel is still behind a
+             * v-if and its container does not exist - hence explicit render, the same thing
+             * event/tickets.blade.php does for the single-event form.
+             *
+             * The whole body is compiled away when Turnstile is not active for this request. Not
+             * just dead code: the Cloudflare URL below would otherwise appear in the source of
+             * every guest page, including the appointment reschedule page, which deliberately
+             * forces Turnstile off and asserts the host never appears there.
+             */
+            renderTurnstile: function () {
+                @if (\App\Utils\TurnstileUtils::isActiveForRequest())
+                var container = document.getElementById('es-cart-turnstile');
+                if (! container || this.turnstileWidgetId !== null) {
+                    return;
+                }
+
+                if (typeof turnstile === 'undefined') {
+                    // Injected rather than emitted as a tag, so the event page - whose head
+                    // already loads it - does not pull it down twice. CSP allows the host
+                    // (script-src lists challenges.cloudflare.com, no strict-dynamic).
+                    if (! document.getElementById('es-turnstile-api')) {
+                        var api = document.createElement('script');
+                        api.id = 'es-turnstile-api';
+                        api.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+                        api.async = true;
+                        api.defer = true;
+                        document.head.appendChild(api);
+                    }
+
+                    setTimeout(this.renderTurnstile, 100);
+
+                    return;
+                }
+
+                var self = this;
+                this.turnstileWidgetId = turnstile.render('#es-cart-turnstile', {
+                    sitekey: @json(\App\Utils\TurnstileUtils::getSiteKey()),
+                    size: 'flexible',
+                    retry: 'auto',
+                    'refresh-expired': 'auto',
+                    callback: function (token) { self.turnstileToken = token; },
+                    'error-callback': function () {
+                        self.turnstileToken = '';
+
+                        return true;
+                    },
+                });
+                @endif
             },
             add: function (leg) {
                 // One entry per event AND date: two dates of a recurring event are separate legs,
@@ -208,6 +344,39 @@ window.addEventListener('DOMContentLoaded', function () {
                 return Object.values(leg.tickets || {}).reduce(function (total, qty) {
                     return total + Number(qty);
                 }, 0);
+            },
+            // Sum of the unit prices the event page recorded alongside the quantities. null when
+            // this leg carries none, which is how a leg stored before prices existed reads.
+            legPrice: function (leg) {
+                if (! leg.prices) {
+                    return null;
+                }
+
+                var total = 0;
+                var ids = Object.keys(leg.tickets || {});
+
+                for (var i = 0; i < ids.length; i++) {
+                    var unit = leg.prices[ids[i]];
+                    if (unit === undefined || unit === null) {
+                        return null;
+                    }
+                    total += Number(unit) * Number(leg.tickets[ids[i]]);
+                }
+
+                return total;
+            },
+            formatMoney: function (amount, currency) {
+                try {
+                    return new Intl.NumberFormat(undefined, {
+                        style: 'currency',
+                        currency: currency || 'USD',
+                    }).format(amount);
+                } catch (e) {
+                    return (currency ? currency + ' ' : '') + Number(amount).toFixed(2);
+                }
+            },
+            isInvalid: function (leg) {
+                return invalidLegs.indexOf(leg.event_id + '|' + (leg.event_date || '')) !== -1;
             },
         },
     }).mount('#es-cart-app');

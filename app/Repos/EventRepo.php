@@ -26,6 +26,7 @@ use App\Utils\SlugPatternUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -832,7 +833,9 @@ class EventRepo
         // Handle slug update for existing events
         if (! $isNewEvent) {
             if ($request->filled('slug')) {
-                $event->slug = Str::slug($request->slug) ?: $event->getOriginal('slug');
+                // Romanize before falling back, otherwise typing a Hebrew custom slug reports
+                // success and silently changes nothing.
+                $event->slug = \App\Utils\SlugUtils::slugOrRomanize($request->slug) ?: $event->getOriginal('slug');
             } elseif ($currentRole?->slug_pattern
                 && self::slugPatternFieldsChanged($currentRole->slug_pattern, $event)) {
                 $event->slug = SlugPatternUtils::generateSlug(
@@ -1196,6 +1199,18 @@ class EventRepo
             $roleIds = array_values(array_unique($roleIds));
         }
 
+        // sync() below detaches any curator that is visible to the saving user but absent from
+        // curators[], which for a co-owned curator happens on every programmatic save. The rows
+        // it drops are rebuilt by CuratorSourceService further down, so snapshot their
+        // is_accepted first: a false there is a removal the curator made on purpose (Uncurate,
+        // or unticking this box on an earlier save) and re-linking must not undo it.
+        $autoSourcedBefore = $event->exists
+            ? DB::table('event_role')
+                ->where('event_id', $event->id)
+                ->where('is_auto_sourced', true)
+                ->pluck('is_accepted', 'role_id')
+            : collect();
+
         $event->roles()->sync($roleIds);
 
         $curatorGroups = $request->input('curator_groups', []);
@@ -1223,6 +1238,8 @@ class EventRepo
                 $event->roles()->updateExistingPivot($role->id, ['group_id' => $groupId]);
             }
         }
+
+        $this->syncCuratorSources($event, $request, $currentRole, $userVisibleIds, $selectedCurators, $autoSourcedBefore);
 
         if ($request->hasFile('flyer_image')) {
             $file = $request->file('flyer_image');
@@ -2001,6 +2018,78 @@ class EventRepo
     private static function normalizeUrl(?string $url): string
     {
         return rtrim(strtolower(trim((string) $url)), '/');
+    }
+
+    /**
+     * Relink this event onto the curators that pull from its schedules, and preserve any
+     * removal the curator made by hand.
+     *
+     * This is the one hook CuratorSourceService needs. Everything else it covers on its own
+     * from app:sync-curator-sources; here it also repairs the rows roles()->sync() just
+     * detached, which is why it has to run after that and after the accept loop.
+     *
+     * @param  \Illuminate\Support\Collection  $autoSourcedBefore  role_id => is_accepted, as of before sync()
+     */
+    protected function syncCuratorSources(Event $event, $request, ?Role $currentRole, array $userVisibleIds, array $selectedCurators, $autoSourcedBefore): void
+    {
+        app(\App\Services\CuratorSourceService::class)->syncEvent($event);
+
+        $tombstoned = [];
+
+        // A removal made on an earlier request. Restore it however this one arrived: without
+        // this a plain API update - which sends no curators[] at all - detaches the curator,
+        // syncEvent() relinks it accepted, and a removal from days ago quietly reverses.
+        //
+        // Unless the user has just ticked that curator back on, which is the only way to undo a
+        // removal. Read from the submitted tab, so a request that never rendered it (the API,
+        // importers, calendar sync) cannot clear a removal by omission.
+        $reTicked = $request->boolean('curators_submitted') ? $selectedCurators : [];
+
+        foreach ($autoSourcedBefore as $roleId => $wasAccepted) {
+            if ($wasAccepted !== null && ! $wasAccepted && ! in_array((int) $roleId, $reTicked)) {
+                $tombstoned[] = (int) $roleId;
+            }
+        }
+
+        // A removal made on this request. The schedules tab is only authoritative when it was
+        // actually rendered, so without the marker (the API, importers, calendar sync) an absent
+        // curators[] means "not managed here" rather than "unticked". Read the relinked rows back
+        // rather than the pre-save snapshot, so a hand-curated row the source has now adopted is
+        // caught too.
+        if ($request->boolean('curators_submitted')) {
+            // The schedule being edited is deliberately left out of that tab
+            // (event/edit.blade.php filters it from $schedules), so it is absent from
+            // curators[] on every save and must never be read as an untick - otherwise
+            // saving a sourced event from the curator's own form drops it off that
+            // curator. Same guard the detach loop above uses.
+            $unticked = array_values(array_diff(
+                $userVisibleIds,
+                $selectedCurators,
+                array_filter([$currentRole?->id])
+            ));
+
+            if ($unticked) {
+                $tombstoned = array_merge($tombstoned, DB::table('event_role')
+                    ->where('event_id', $event->id)
+                    ->whereIn('role_id', $unticked)
+                    ->where('is_auto_sourced', true)
+                    ->pluck('role_id')
+                    ->map(fn ($id) => (int) $id)
+                    ->all());
+            }
+        }
+
+        $tombstoned = array_unique($tombstoned);
+
+        if (! $tombstoned) {
+            return;
+        }
+
+        DB::table('event_role')
+            ->where('event_id', $event->id)
+            ->whereIn('role_id', $tombstoned)
+            ->where('is_auto_sourced', true)
+            ->update(['is_accepted' => false]);
     }
 
     public function getEvent($subdomain, $slug, $date = null, $eventId = null, ?Role $role = null)

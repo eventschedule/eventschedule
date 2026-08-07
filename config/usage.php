@@ -47,4 +47,10 @@ return [
     // Ceiling on each row table in the /admin/growth export. Hitting it is reported in
     // meta.truncated rather than silently shortening the table.
     'growth_row_cap' => (int) env('GROWTH_ROW_CAP', 20000),
+
+    // How many talent/venue schedules one curator may pull events from, and how many
+    // event links a single reconcile pass may write. Hitting the batch ceiling is logged
+    // and the remainder is picked up by the next run rather than dropped.
+    'curator_source_limit' => (int) env('CURATOR_SOURCE_LIMIT', 100),
+    'curator_source_batch' => (int) env('CURATOR_SOURCE_BATCH', 50000),
 ];

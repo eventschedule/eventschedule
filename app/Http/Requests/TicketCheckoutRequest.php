@@ -50,7 +50,10 @@ class TicketCheckoutRequest extends FormRequest
             ? collect($this->input('legs'))->pluck('event_id')
             : collect([$this->event_id]);
 
-        return $ids->filter()
+        // Scalars only: this runs while the rules are still being built, so nothing has rejected a
+        // crafted legs[0][event_id][]=x yet, and UrlUtils::decodeId() is untyped - an array reaches
+        // Sqids and throws a TypeError, turning a bad request into a 500.
+        return $ids->filter(fn ($id) => is_string($id) || is_numeric($id))
             ->map(fn ($id) => Event::find(UrlUtils::decodeId($id)))
             ->filter()
             ->values();

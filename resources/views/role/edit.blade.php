@@ -258,8 +258,12 @@
                 setupSubdomainAutocomplete(el);
             });
 
+            document.querySelectorAll('[data-source-search]').forEach(function(el) {
+                setupSourceAutocomplete(el);
+            });
+
             document.addEventListener('click', function(e) {
-                document.querySelectorAll('[data-subdomain-dropdown]').forEach(function(dropdown) {
+                document.querySelectorAll('[data-subdomain-dropdown], [data-source-dropdown]').forEach(function(dropdown) {
                     if (!dropdown.parentElement.contains(e.target)) {
                         dropdown.classList.add('hidden');
                         dropdown.innerHTML = '';
@@ -1024,6 +1028,14 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
                                 </svg>
                                 {{ __('messages.gift_cards') }}
+                            </a>
+                            @endif
+                            @if ($role->exists && $role->isCurator())
+                            <a href="#section-sources" class="section-nav-link" data-section="section-sources">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+                                </svg>
+                                {{ __('messages.event_sources') }}
                             </a>
                             @endif
                             @if (! config('app.hosted'))
@@ -4232,6 +4244,101 @@
                 </script>
                 @endif
 
+                @if ($role->exists && $role->isCurator())
+                @php
+                    $sourceRows = old('source_schedules') !== null
+                        ? collect(old('source_schedules'))->map(fn ($subdomain, $i) => [
+                            'subdomain' => $subdomain,
+                            'group_id' => old('source_groups')[$i] ?? '',
+                        ])->filter(fn ($row) => filled($row['subdomain']))->values()->all()
+                        : ($sourceSchedules ?? collect())->map(fn ($source) => [
+                            'subdomain' => $source->sourceRole->subdomain,
+                            'group_id' => $source->group_id ? \App\Utils\UrlUtils::encodeId($source->group_id) : '',
+                        ])->all();
+                    $sourceNames = ($sourceSchedules ?? collect())->mapWithKeys(fn ($s) => [$s->sourceRole->subdomain => $s->sourceRole->name])->all();
+                    $curatorGroupOptions = $role->groups->mapWithKeys(fn ($g) => [\App\Utils\UrlUtils::encodeId($g->id) => $g->name])->all();
+                @endphp
+                <button type="button" class="mobile-section-header" data-section="section-sources">
+                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+                        </svg>
+                        {{ __('messages.event_sources') }}
+                    </span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div id="section-sources" class="section-content lg:mt-0">
+                    <div class="max-w-xl">
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+                            </svg>
+                            {{ __('messages.event_sources') }}
+                        </h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ __('messages.event_sources_help') }}</p>
+
+                        <div class="mb-6">
+                            <div id="source-schedule-items"
+                                 data-groups="{{ json_encode($curatorGroupOptions) }}"
+                                 data-group-none="{{ __('messages.none') }}">
+                                @foreach($sourceRows as $row)
+                                    <div class="mb-2 relative" data-source-row>
+                                        <div class="flex items-center">
+                                            <input type="text" data-source-search
+                                                   value="{{ isset($sourceNames[$row['subdomain']]) ? $sourceNames[$row['subdomain']] . ' (' . $row['subdomain'] . ')' : $row['subdomain'] }}"
+                                                   placeholder="{{ __('messages.search_schedules_autocomplete') }}"
+                                                   class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm bg-gray-50 dark:bg-gray-800"
+                                                   readonly autocomplete="off" />
+                                            <button type="button" data-action="remove-parent-item"
+                                                    class="ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">&times;</button>
+                                        </div>
+                                        <input type="hidden" name="source_schedules[]" value="{{ $row['subdomain'] }}" />
+                                        @if (count($curatorGroupOptions))
+                                        <select name="source_groups[]"
+                                                class="mt-2 block w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                            <option value="">{{ __('messages.none') }}</option>
+                                            @foreach($curatorGroupOptions as $groupHash => $groupName)
+                                            <option value="{{ $groupHash }}" {{ $row['group_id'] === $groupHash ? 'selected' : '' }}>{{ $groupName }}</option>
+                                            @endforeach
+                                        </select>
+                                        @else
+                                        <input type="hidden" name="source_groups[]" value="" />
+                                        @endif
+                                        <div data-source-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50"></div>
+                                    </div>
+                                @endforeach
+                            </div>
+                            {{-- Always submitted, so clearing the list to empty is distinguishable from a
+                                 save that never rendered this section. --}}
+                            <input type="hidden" name="source_schedules_submitted" value="1" />
+                            <button type="button" data-action="add-source-schedule" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
+                                + {{ __('messages.add_schedule') }}
+                            </button>
+                            <x-input-error class="mt-2" :messages="$errors->get('source_schedules')" />
+                        </div>
+
+                        @if (isset($suggestedSources) && $suggestedSources->count())
+                        <div class="mb-6">
+                            <x-input-label :value="__('messages.suggested_sources')" />
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 mb-3">{{ __('messages.suggested_sources_help') }}</p>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($suggestedSources as $suggestion)
+                                <button type="button" data-action="add-suggested-source"
+                                        data-subdomain="{{ $suggestion->subdomain }}"
+                                        data-name="{{ $suggestion->name }}"
+                                        class="inline-flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#252526] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2d2d30] transition-all duration-200">
+                                    + <span dir="auto">{{ $suggestion->name }}</span>
+                                </button>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+                @endif
+
                 @if (! config('app.hosted'))
                 <button type="button" class="mobile-section-header" data-section="section-auto-import">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -5528,6 +5635,118 @@ function escapeHtml(str) {
     var div = document.createElement('div');
     div.appendChild(document.createTextNode(str));
     return div.innerHTML;
+}
+
+// Event sources: the talent/venue schedules this curator pulls events from. Same shape as the
+// approved-subdomains picker above, plus an optional sub-schedule per row.
+function addSourceScheduleField(subdomain, name) {
+    const container = document.getElementById('source-schedule-items');
+    if (!container) return;
+
+    const groups = JSON.parse(container.dataset.groups || '{}');
+    const div = document.createElement('div');
+    div.className = 'mb-2 relative';
+    div.setAttribute('data-source-row', '');
+
+    let groupField = '<input type="hidden" name="source_groups[]" value="" />';
+    if (Object.keys(groups).length) {
+        let options = '<option value="">' + escapeHtml(container.dataset.groupNone) + '</option>';
+        Object.keys(groups).forEach(function(hash) {
+            options += '<option value="' + escapeHtml(hash) + '">' + escapeHtml(groups[hash]) + '</option>';
+        });
+        groupField = '<select name="source_groups[]" class="mt-2 block w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">' + options + '</select>';
+    }
+
+    const picked = !!subdomain;
+    div.innerHTML = `
+        <div class="flex items-center">
+            <input type="text" data-source-search placeholder="{{ __('messages.search_schedules_autocomplete') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm" autocomplete="off" />
+            <button type="button" data-action="remove-parent-item"
+                class="ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">&times;</button>
+        </div>
+        <input type="hidden" name="source_schedules[]" value="" />
+        ${groupField}
+        <div data-source-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50"></div>
+    `;
+    container.appendChild(div);
+
+    const searchInput = div.querySelector('[data-source-search]');
+    setupSourceAutocomplete(searchInput);
+
+    if (picked) {
+        // Suggested-source chip: fill it in as though it had been picked from the dropdown.
+        div.querySelector('input[name="source_schedules[]"]').value = subdomain;
+        searchInput.value = (name || subdomain) + ' (' + subdomain + ')';
+        searchInput.readOnly = true;
+        searchInput.classList.add('bg-gray-50', 'dark:bg-gray-800');
+    } else {
+        searchInput.focus();
+    }
+}
+
+function setupSourceAutocomplete(inputEl) {
+    if (!inputEl) return;
+    const wrapper = inputEl.closest('[data-source-row]') || inputEl.closest('.relative');
+    const hiddenInput = wrapper.querySelector('input[name="source_schedules[]"]');
+    const dropdown = wrapper.querySelector('[data-source-dropdown]');
+    let debounceTimer = null;
+    const currentSubdomain = '{{ $role->subdomain ?? '' }}';
+
+    inputEl.addEventListener('input', function() {
+        const q = this.value.trim();
+        clearTimeout(debounceTimer);
+
+        if (q.length < 2) {
+            dropdown.classList.add('hidden');
+            dropdown.innerHTML = '';
+            return;
+        }
+
+        debounceTimer = setTimeout(function() {
+            const selected = [currentSubdomain];
+            document.querySelectorAll('#source-schedule-items input[name="source_schedules[]"]').forEach(function(h) {
+                if (h !== hiddenInput && h.value) {
+                    selected.push(h.value);
+                }
+            });
+            var excludeParams = '';
+            selected.forEach(function(s) {
+                excludeParams += '&exclude[]=' + encodeURIComponent(s);
+            });
+            // Only talent and venue schedules can be a source; a curator pulling from a
+            // curator would chain aggregations.
+            const url = '{{ route("role.search-subdomains") }}' + '?q=' + encodeURIComponent(q) + '&types=talent,venue' + excludeParams;
+            fetch(url, {
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(results) {
+                dropdown.innerHTML = '';
+                if (results.length === 0) {
+                    dropdown.classList.add('hidden');
+                    return;
+                }
+                results.forEach(function(item) {
+                    const row = document.createElement('div');
+                    row.className = 'px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700';
+                    const nameText = item.name || item.subdomain;
+                    const cityText = item.city ? ' <span class="text-xs text-gray-400">' + escapeHtml(item.city) + '</span>' : '';
+                    row.innerHTML = '<div class="font-medium text-sm text-gray-900 dark:text-gray-100" dir="auto">' + escapeHtml(nameText) + cityText + '</div>'
+                        + '<div class="text-xs text-gray-500 dark:text-gray-400">' + escapeHtml(item.subdomain) + '</div>';
+                    row.addEventListener('click', function() {
+                        hiddenInput.value = item.subdomain;
+                        inputEl.value = nameText + ' (' + item.subdomain + ')';
+                        inputEl.readOnly = true;
+                        inputEl.classList.add('bg-gray-50', 'dark:bg-gray-800');
+                        dropdown.classList.add('hidden');
+                        dropdown.innerHTML = '';
+                    });
+                    dropdown.appendChild(row);
+                });
+                dropdown.classList.remove('hidden');
+            });
+        }, 300);
+    });
 }
 
 function addImportCityField() {
@@ -8027,6 +8246,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
             case 'add-approved-subdomain':
                 addApprovedSubdomainField();
+                break;
+            case 'add-source-schedule':
+                addSourceScheduleField();
+                break;
+            case 'add-suggested-source':
+                addSourceScheduleField(btn.dataset.subdomain, btn.dataset.name);
+                btn.remove();
                 break;
             case 'add-import-city':
                 addImportCityField();

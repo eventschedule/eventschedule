@@ -1,6 +1,9 @@
 <x-app-layout :title="$event->translatedName() . ' - ' . __('messages.tickets') . ($role ? ' | ' . $role->translatedName() : '')">
 
-    <x-slot name="footCode">@include('partials.site-foot-code')</x-slot>
+    <x-slot name="footCode">
+        @include('partials.site-foot-code')
+        @include('partials.cart-clear')
+    </x-slot>
 
     <x-slot name="head">
         @include('partials.site-head-code')

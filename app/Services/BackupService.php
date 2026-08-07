@@ -224,6 +224,12 @@ class BackupService
             'gift_cards' => $this->exportGiftCards($role),
             'appointment_types' => $this->exportAppointmentTypes($role),
         ];
+
+        // Curator event sources are deliberately NOT carried in a backup. A restore always
+        // creates a new schedule whose events are fresh copies, so re-establishing a live
+        // link to the source as well would list every event twice - once as the imported
+        // copy, once as the live original. The exported events already hold the calendar;
+        // the source list is re-added by hand on the restored schedule.
     }
 
     private function exportAppointmentTypes(Role $role): array
@@ -401,6 +407,11 @@ class BackupService
                 'phone' => $sale->phone,
                 'event_date' => $sale->event_date,
                 'status' => $sale->status,
+                // Exported so a deleted sale does not come back to life on restore. Without it
+                // every row restored with the column default (false), resurrecting rows the owner
+                // had removed - and, once order_id was remapped, silently rejoining them to their
+                // order.
+                'is_deleted' => (bool) $sale->is_deleted,
                 'payment_method' => $sale->payment_method,
                 'payment_amount' => $sale->payment_amount,
                 'transaction_reference' => $sale->transaction_reference,
@@ -1203,8 +1214,14 @@ class BackupService
             throw new \InvalidArgumentException('Invalid schedule data: '.$validator->errors()->first());
         }
 
-        // Generate unique subdomain
-        $baseSubdomain = $data['subdomain'] ?? Str::slug($data['name']);
+        // Generate unique subdomain. cleanSubdomain() rather than a bare Str::slug(): the loop
+        // below guarantees uniqueness but not non-emptiness, and "" is a perfectly unique first
+        // value - a Hebrew-named schedule restored that way is reachable at no URL at all.
+        $baseSubdomain = trim((string) ($data['subdomain'] ?? ''));
+
+        if ($baseSubdomain === '') {
+            $baseSubdomain = Role::cleanSubdomain($data['name'] ?? '', $data['name_en'] ?? null);
+        }
         $subdomain = $baseSubdomain;
         $counter = 1;
         while (Role::where('subdomain', $subdomain)->exists()) {
@@ -1306,7 +1323,9 @@ class BackupService
         $group->role_id = $role->id;
         $group->name = $data['name'] ?? '';
         $group->name_en = $data['name_en'] ?? null;
-        $group->slug = $data['slug'] ?? Str::slug($data['name'] ?? '');
+        // Cleaned rather than trusted: an older backup can carry an empty slug, and the
+        // restored schedule needs its own uniqueness anyway.
+        $group->slug = Group::cleanSlug($role->id, $group->name, $group->name_en, $data['slug'] ?? null);
         $group->color = $data['color'] ?? null;
         $group->saveQuietly();
 
@@ -1572,7 +1591,10 @@ class BackupService
         $type = new AppointmentType;
         $type->role_id = $role->id;
         $type->name = $data['name'];
-        $type->slug = $data['slug'] ?? Str::slug($data['name']);
+        // Cleaned rather than trusted: a backup taken from an affected schedule carries an
+        // empty slug, which `??` would happily restore. The column has no unique index, so a
+        // collision is silent and the guest is booked onto the wrong type.
+        $type->slug = AppointmentType::uniqueSlug($role, $data['name'], $data['slug'] ?? null);
         $type->description = $data['description'] ?? null;
         $type->duration_minutes = $data['duration_minutes'];
         $type->slot_interval_minutes = $data['slot_interval_minutes'] ?? null;
@@ -1610,7 +1632,11 @@ class BackupService
         $validator = Validator::make($data, [
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
-            'status' => 'required|in:unpaid,paid,cancelled,refunded,expired',
+            // amount_mismatch is a live sales.status (a payment webhook writes it when the charge
+            // does not reconcile). Leaving it out threw the row away on restore - and if that row
+            // anchored a multi-event order, every other leg lost its order_id and the order
+            // dissolved.
+            'status' => 'required|in:unpaid,paid,cancelled,refunded,expired,amount_mismatch',
         ]);
 
         if ($validator->fails()) {
@@ -1627,6 +1653,7 @@ class BackupService
         $sale->event_date = $data['event_date'] ?? null;
         $sale->subdomain = $role->subdomain;
         $sale->status = $data['status'];
+        $sale->is_deleted = (bool) ($data['is_deleted'] ?? false);
         $sale->payment_method = $data['payment_method'] ?? null;
         $sale->payment_amount = $data['payment_amount'] ?? null;
         $sale->transaction_reference = $data['transaction_reference'] ?? null;

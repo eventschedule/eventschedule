@@ -148,7 +148,12 @@ class Sale extends Model
                     }
                 }
 
-                if ($sale->promo_code_id) {
+                // Give the redemption back once per LEG, matching how checkout takes it:
+                // priceSaleLeg() increments times_used once per leg, but this hook runs for every
+                // row, and the cancel cascade saves each guest row individually so its inventory is
+                // released. Ungated, a four-seat order took 1 and gave back 4, driving the counter
+                // negative and letting a max_uses-capped code be redeemed past its cap.
+                if ($sale->promo_code_id && (! $sale->group_id || $sale->isPrimarySale())) {
                     PromoCode::where('id', $sale->promo_code_id)
                         ->lockForUpdate()
                         ->decrement('times_used');
@@ -190,6 +195,13 @@ class Sale extends Model
                     try {
                         $affected = $siblings
                             ->whereNotIn('status', ['cancelled', 'refunded', 'expired'])
+                            // Expiry releases what nobody has paid for; cancel and refund
+                            // deliberately do reach a paid row. Without this an order whose legs
+                            // diverged - the buyer paid one leg in cash at the door while the rest
+                            // stayed unpaid - had the collected leg flipped to 'expired' by the
+                            // ReleaseTickets cron: seats handed back, gift-card share re-credited,
+                            // no refund, and the revenue left on the books.
+                            ->when($sale->status === 'expired', fn ($query) => $query->where('status', 'unpaid'))
                             ->get();
                         foreach ($affected as $sibling) {
                             $sibling->status = $sale->status;

@@ -965,28 +965,52 @@ class TicketController extends Controller
         // flat fields, which is every request the single-event form has ever sent.
         $legs = $this->resolveCheckoutLegs($request);
 
+        // A cart is held in the browser and is built to outlive the visit, so by the time it is
+        // submitted a leg's event may have been unpublished, made private, taken off the schedule
+        // or deleted. On the single-event path those states cannot be reached with a stale form, so
+        // they still abort; from a cart they are ordinary and have to come back as something the
+        // buyer can act on. Aborting sent them a bare 404 with no idea which of their events was at
+        // fault - and the cart still held it, so every retry 404'd again.
+        //
+        // Keyed on the request carrying legs[], not on the leg COUNT: a one-item cart posts through
+        // the same panel and deserves the same treatment, while the flat single-event form is
+        // normalised into one leg here and must keep its aborts.
+        $isCart = is_array($request->input('legs')) && $request->input('legs') !== [];
+
         foreach ($legs as $index => $leg) {
             // canSellTickets() below reads both relations; without this they lazy-load on the
             // checkout POST.
-            $event = Event::with(['tickets', 'roles'])->findOrFail(UrlUtils::decodeId($leg['event_id']));
+            $event = Event::with(['tickets', 'roles'])->find(UrlUtils::decodeId($leg['event_id']));
 
-            if (! $event->roles()->wherePivot('role_id', $role->id)->exists()) {
-                abort(403);
+            $unavailable = ! $event
+                || ! $event->roles()->wherePivot('role_id', $role->id)->exists()
+                || ($event->is_draft && ! $isMemberOrAdmin)
+                || ($event->is_private
+                    && ! $isMemberOrAdmin
+                    && ! ($event->isPasswordProtected() && session()->has('event_password_'.$event->id)));
+
+            if ($unavailable) {
+                if ($isCart) {
+                    return $this->refuseCartLeg($leg, $event?->translatedName());
+                }
+
+                abort($event && ! $event->roles()->wherePivot('role_id', $role->id)->exists() ? 403 : 404);
             }
 
-            if ($event->is_draft && ! $isMemberOrAdmin) {
-                abort(404);
-            }
-            if ($event->is_private
-                && ! $isMemberOrAdmin
-                && ! ($event->isPasswordProtected() && session()->has('event_password_'.$event->id))
-            ) {
-                abort(404);
+            // Per-attendee events cannot be bought from the cart: it collects one name and email
+            // for the whole purchase and carries no guest list, so the order would silently become
+            // one anonymous multi-seat sale. The Add to cart button is hidden for them, so this
+            // only catches a hand-built request - but it is the difference between refusing and
+            // quietly discarding the attendee details the organizer asked for.
+            if ($isCart && $event->individual_tickets) {
+                return $this->refuseCartLeg($leg, $event->translatedName());
             }
 
             // Verify event can sell tickets (checks past dates, tickets_enabled, and plan allowance)
             if (! $event->canSellTickets($leg['event_date'])) {
-                return back()->withInput()->with('error', __('messages.tickets_not_available'));
+                return $isCart
+                    ? $this->refuseCartLeg($leg, $event->translatedName())
+                    : back()->withInput()->with('error', __('messages.tickets_not_available'));
             }
 
             // Per-row allowance check. canSellTickets() above answers "is this event selling at all",
@@ -1011,7 +1035,9 @@ class TicketController extends Controller
                 ->contains(fn ($ticket) => ! $ticket->isSellable($leg['event_date']));
 
             if ($unsellable) {
-                return back()->withInput()->with('error', __('messages.tickets_not_available'));
+                return $isCart
+                    ? $this->refuseCartLeg($leg, $event->translatedName())
+                    : back()->withInput()->with('error', __('messages.tickets_not_available'));
             }
 
             $legs[$index]['event'] = $event;
@@ -1163,7 +1189,7 @@ class TicketController extends Controller
 
             (new EmailService)->sendSaleConfirmationEmails($sale);
 
-            return redirect($this->purchaseLandingUrl($sale, $event, $isEmbed));
+            return $this->redirectToPurchaseLanding($sale, $event, $isEmbed);
         } else {
             switch ($event->payment_method) {
                 case 'stripe':
@@ -1207,7 +1233,10 @@ class TicketController extends Controller
         }
 
         return array_map(fn ($leg) => [
-            'event_id' => $leg['event_id'] ?? null,
+            // Scalar or nothing: an array here would reach UrlUtils::decodeId() and throw.
+            'event_id' => is_array($leg) && (is_string($leg['event_id'] ?? null) || is_numeric($leg['event_id'] ?? null))
+                ? $leg['event_id']
+                : null,
             'event_date' => $leg['event_date'] ?? null,
             'tickets' => array_filter((array) ($leg['tickets'] ?? []), fn ($qty) => (int) $qty > 0),
             'addons' => (array) ($leg['addons'] ?? []),
@@ -1217,6 +1246,23 @@ class TicketController extends Controller
             'guest_ticket_custom_values' => (array) ($leg['guest_ticket_custom_values'] ?? []),
             'promo_code' => $leg['promo_code'] ?? null,
         ], array_values($raw));
+    }
+
+    /**
+     * Refuse a cart because one leg cannot be sold, naming the event and pointing the cart at it.
+     *
+     * The flashed key is what lets the panel mark the offending entry and offer to drop it. Without
+     * it the buyer is told only that "something" is unavailable, and since the cart persists they
+     * have to remove legs one at a time to find out which - if they even realise that is the fix.
+     */
+    private function refuseCartLeg(array $leg, ?string $eventName)
+    {
+        return back()
+            ->withInput()
+            ->with('error', __('messages.cart_event_unavailable', [
+                'event' => $eventName ?: __('messages.event'),
+            ]))
+            ->with('cart_invalid_legs', [$leg['event_id'].'|'.(string) $leg['event_date']]);
     }
 
     /**
@@ -2121,9 +2167,7 @@ class TicketController extends Controller
 
         (new EmailService)->sendSaleConfirmationEmails($sale);
 
-        $ticketViewUrl = $this->purchaseLandingUrl($sale, $event, $request->boolean('embed'));
-
-        return redirect($ticketViewUrl);
+        return $this->redirectToPurchaseLanding($sale, $event, $request->boolean('embed'));
     }
 
     /**
@@ -2646,9 +2690,32 @@ class TicketController extends Controller
         return $isEmbed ? $url.'?embed=true' : $url;
     }
 
+    /**
+     * Redirect to the purchase landing page, telling the guest cart what was just bought.
+     *
+     * The cart lives in localStorage and is rendered only by the guest layout; both landing pages
+     * go through x-app-layout, so the widget is not there to empty itself. Left alone, the cart
+     * still holds the completed purchase on the buyer's next visit to the schedule, with a live
+     * CHECKOUT button that would charge them for it a second time.
+     *
+     * Flashed rather than cleared unconditionally on the ticket page: a ticket link is permanent
+     * and gets opened long after the fact, and re-opening an old ticket must not silently empty a
+     * cart the buyer has since refilled.
+     */
+    private function redirectToPurchaseLanding($sale, $event, bool $isEmbed = false)
+    {
+        session()->flash('cart_purchased', $sale->orderLegs()->map(fn ($leg) => [
+            'subdomain' => $leg->subdomain,
+            'event_id' => UrlUtils::encodeId($leg->event_id),
+            'event_date' => (string) $leg->event_date,
+        ])->values()->all());
+
+        return redirect($this->purchaseLandingUrl($sale, $event, $isEmbed));
+    }
+
     private function cashCheckout($subdomain, $sale, $event, $isEmbed = false)
     {
-        return redirect($this->purchaseLandingUrl($sale, $event, $isEmbed));
+        return $this->redirectToPurchaseLanding($sale, $event, $isEmbed);
     }
 
     public function success($subdomain, $sale_id)
@@ -2685,7 +2752,7 @@ class TicketController extends Controller
                     'session_id' => request()->session_id,
                 ]);
 
-                return redirect($this->purchaseLandingUrl($sale, $event, request()->boolean('embed')));
+                return $this->redirectToPurchaseLanding($sale, $event, request()->boolean('embed'));
             }
 
             // Store the transaction reference so the webhook can find this sale,
@@ -2700,7 +2767,7 @@ class TicketController extends Controller
             \Log::warning('Stripe session retrieval failed in success(): '.$e->getMessage());
         }
 
-        return redirect($this->purchaseLandingUrl($sale, $event, request()->boolean('embed')));
+        return $this->redirectToPurchaseLanding($sale, $event, request()->boolean('embed'));
     }
 
     public function cancel($subdomain, $sale_id)

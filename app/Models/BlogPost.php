@@ -87,7 +87,9 @@ class BlogPost extends Model
 
     public function generateSlug()
     {
-        $slug = Str::slug($this->title);
+        // The uniqueness loop below cannot save an empty slug - "" is a perfectly unique first
+        // value - and this column is unique() and is the /blog/{slug} URL.
+        $slug = \App\Utils\SlugUtils::slugOrRomanize($this->title, 'post-'.Str::random(6));
         $originalSlug = $slug;
         $count = 1;
 

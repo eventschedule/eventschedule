@@ -28,6 +28,7 @@ use App\Services\DigitalOceanService;
 use App\Services\GrowthExportService;
 use App\Services\OneSignalService;
 use App\Services\TranslationQueue;
+use App\Services\WebhookService;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Auth\Events\Verified;
@@ -1621,10 +1622,10 @@ class AdminController extends Controller
             ->where('subdomain', 'not like', 'demo-%')
             ->count();
 
-        // Build query for role list (excluding demo roles)
-        $query = Role::whereNotNull('user_id')
-            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
-            ->where('subdomain', 'not like', 'demo-%')
+        // Build query for role list (excluding demo roles). adminListable() is the shared
+        // definition the search-subdomains autocomplete behind the filter box also uses, so
+        // the picker can never offer a schedule this list is unable to return.
+        $query = Role::adminListable()
             ->with(['user', 'subscriptions']);
 
         // Search filter
@@ -2954,21 +2955,44 @@ class AdminController extends Controller
         DB::transaction(function () use ($sale) {
             $sale = Sale::lockForUpdate()->find($sale->id);
 
-            // Book the whole group, not just the buyer's own seat. A grouped order is exactly the
-            // kind that lands here: StripeController compares the charge against legTotalPayment(),
-            // so it is the group total that failed the tolerance check and produced the mismatch.
-            // Read both before the save - the status change cascades 'paid' to the guest rows.
-            $analyticsAmount = $sale->legTotalPayment();
-            $promoTotal = $sale->legTotalDiscount();
+            // Book the whole purchase, not just the buyer's own seat, and book it per EVENT.
+            //
+            // A grouped order is exactly the kind that lands here: StripeController compares the
+            // charge against the group - or, for a cart, the whole ORDER - so it is that wider
+            // total which failed the tolerance check and produced the mismatch. The save below
+            // cascades 'paid' across every leg, so every leg's event has to be credited; crediting
+            // only this one leaves the others at zero while a later refund (which does work per
+            // leg) decrements them anyway, clawing the difference out of other buyers' sales.
+            //
+            // Read before the save, for the same reason the trait does.
+            $legs = $sale->orderLegs()->map(fn ($leg) => [
+                'event_id' => $leg->event_id,
+                'amount' => $leg->legTotalPayment(),
+                'promo' => $leg->legTotalDiscount(),
+            ])->all();
 
             $sale->status = 'paid';
             $sale->save();
 
-            AnalyticsEventsDaily::incrementSale($sale->event_id, $analyticsAmount);
-            if ($promoTotal > 0) {
-                AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $promoTotal);
+            foreach ($legs as $leg) {
+                AnalyticsEventsDaily::incrementSale($leg['event_id'], $leg['amount']);
+
+                if ($leg['promo'] > 0) {
+                    AnalyticsEventsDaily::incrementPromoSale($leg['event_id'], $leg['promo']);
+                }
             }
         });
+
+        // The buyer paid and is now booked, so they get their tickets and subscribers get told -
+        // neither of which happened before, leaving an approved sale invisible to both.
+        $sale->refresh();
+        foreach ($sale->orderLegs() as $leg) {
+            WebhookService::dispatch('sale.paid', $leg);
+            foreach ($leg->guestSales()->get() as $guestSale) {
+                WebhookService::dispatch('sale.paid', $guestSale);
+            }
+        }
+        (new \App\Services\EmailService)->sendSaleConfirmationEmails($sale);
 
         AuditService::log(AuditService::ADMIN_UPDATE, auth()->id(), 'Sale', $sale->id, null, null, 'Approved amount_mismatch sale');
 

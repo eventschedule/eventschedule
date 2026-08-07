@@ -632,10 +632,17 @@ class AnalyticsService
 
         // Count all paid sales separately so zero-payment sales (e.g. 100%-off promos)
         // aren't dropped along with their currency group in $revenueByCurrency.
+        //
+        // PURCHASES, not rows - the same collapse salesByCurrency() above does, and for the same
+        // reason: one checkout writes a row per named guest and a row per event in a cart, so a
+        // plain count reported a single purchase as four and inflated conversion_rate with it.
+        // The two figures sit side by side on the analytics page and used to disagree.
         $totalSales = (int) Sale::whereIn('event_id', $eventIds->toArray())
             ->where('status', 'paid')
+            ->where('is_deleted', false)
             ->whereBetween('created_at', [$start, $end])
-            ->count();
+            ->distinct()
+            ->count(DB::raw('COALESCE(sales.order_id, sales.group_id, sales.id)'));
 
         $totalViews = (int) ($stats->total_views ?? 0);
         $totalRevenue = (float) array_sum(array_column($revenueByCurrency, 'amount'));

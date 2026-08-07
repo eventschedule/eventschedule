@@ -1638,7 +1638,7 @@
                                             }
                                         }
                                     @endphp
-                                    <option value="{{ \App\Utils\UrlUtils::encodeId($group->id) }}" {{ old('current_role_group_id', $selectedGroupId) == \App\Utils\UrlUtils::encodeId($group->id) ? 'selected' : '' }}>{{ $group->translatedName() }}</option>
+                                    <option v-pre value="{{ \App\Utils\UrlUtils::encodeId($group->id) }}" {{ old('current_role_group_id', $selectedGroupId) == \App\Utils\UrlUtils::encodeId($group->id) ? 'selected' : '' }}>{{ $group->translatedName() }}</option>
                                 @endforeach
                             </select>
                             <x-input-error class="mt-2" :messages="$errors->get('current_role_group_id')" />
@@ -2769,12 +2769,21 @@
                         </h2>
 
                         <div class="mb-6">
+                            {{-- Marks this section as rendered, so EventRepo can tell an unticked box
+                                 from a save that never showed the section (API, importers, calendar
+                                 sync). Without it an auto-sourced curator could not be removed here. --}}
+                            <input type="hidden" name="curators_submitted" value="1">
                             <x-input-label class="mb-2" for="curators" :value="__(count($schedules) > 1 ? 'messages.add_to_schedules' : 'messages.add_to_schedule')" />
 
                             @foreach($schedules as $schedule)
                             @php
                                 $isClonedSchedule = isset($clonedCurators) && $clonedCurators->contains(function($c) use ($schedule) { return $c->id == $schedule->id; });
-                                $isScheduleChecked = (! $event->exists && ($role->subdomain == $schedule->subdomain || session('pending_request') == $schedule->subdomain)) || $event->curators->contains($schedule->id) || $isClonedSchedule;
+                                // $event->curators has no is_accepted filter, so a row the
+                                // schedule declined would otherwise render ticked - claiming the
+                                // event is on a schedule it was deliberately removed from.
+                                $attachedRow = $event->exists ? $event->curators->firstWhere('id', $schedule->id) : null;
+                                $isAttachedAndNotDeclined = $attachedRow && $attachedRow->pivot->is_accepted !== 0 && $attachedRow->pivot->is_accepted !== false;
+                                $isScheduleChecked = (! $event->exists && ($role->subdomain == $schedule->subdomain || session('pending_request') == $schedule->subdomain)) || $isAttachedAndNotDeclined || $isClonedSchedule;
                             @endphp
                             <div class="mb-4">
                                 <div class="flex items-center mb-2 h-6">
@@ -2786,7 +2795,10 @@
                                            class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded"
                                            @change="toggleCuratorGroupSelection('{{ $schedule->encodeId() }}')">
                                     <label for="curator_{{ $schedule->encodeId() }}" class="ms-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
-                                        {{ $schedule->name }}
+                                        {{-- Inside the #app Vue mount, and $schedules includes schedules
+                                             owned by other people (followed + accept_requests), so this
+                                             name would otherwise be compiled as a Vue template. --}}
+                                        <x-user-text>{{ $schedule->name }}</x-user-text>
                                     </label>
                                     <div class="ms-2 flex-shrink-0">
                                         @if($schedule->accept_requests && $schedule->request_terms)
@@ -2797,7 +2809,9 @@
                                                 </svg>
                                             </button>
                                             <div class="absolute bottom-full start-1/2 transform -translate-x-1/2 mb-2 px-4 py-3 bg-gray-900 dark:bg-gray-700 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 w-[28rem] max-w-lg z-10">
-                                                <div class="leading-relaxed"
+                                                {{-- v-pre rather than <x-user-text>: this emits <br> tags, so
+                                                 the slot would double-escape them. --}}
+                                                <div v-pre class="leading-relaxed"
                                                      dir="{{ is_rtl() ? 'rtl' : 'ltr' }}"
                                                      style="{{ is_rtl() ? 'text-align: right;' : 'text-align: left;' }}">{!! nl2br(e($schedule->translatedRequestTerms())) !!}</div>
                                                 <div class="absolute top-full start-1/2 transform -translate-x-1/2 w-0 h-0 border-s-4 border-e-4 border-t-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></div>
@@ -2827,7 +2841,8 @@
                                                     $selectedGroupId = $clonedCuratorGroups[$schedule->encodeId()];
                                                 }
                                             @endphp
-                                            <option value="{{ \App\Utils\UrlUtils::encodeId($group->id) }}" {{ old('curator_groups.' . $schedule->encodeId(), $selectedGroupId) == \App\Utils\UrlUtils::encodeId($group->id) ? 'selected' : '' }}>{{ $group->translatedName() }}</option>
+                                            {{-- v-pre: another user's sub-schedule name, inside the Vue mount. --}}
+                                            <option v-pre value="{{ \App\Utils\UrlUtils::encodeId($group->id) }}" {{ old('curator_groups.' . $schedule->encodeId(), $selectedGroupId) == \App\Utils\UrlUtils::encodeId($group->id) ? 'selected' : '' }}>{{ $group->translatedName() }}</option>
                                         @endforeach
                                     </select>
                                 </div>

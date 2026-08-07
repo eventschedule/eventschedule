@@ -20,6 +20,7 @@ use App\Models\BoostCampaign;
 use App\Models\DismissedTimezoneWarning;
 use App\Models\DismissedVenueMergeSuggestion;
 use App\Models\Event;
+use App\Models\Group;
 use App\Models\PageView;
 use App\Models\Role;
 use App\Models\RoleUser;
@@ -31,6 +32,7 @@ use App\Repos\EventRepo;
 use App\Services\AnalyticsService;
 use App\Services\AuditService;
 use App\Services\BoostBillingService;
+use App\Services\CuratorSourceService;
 use App\Services\DemoService;
 use App\Services\DigitalOceanService;
 use App\Services\EmailService;
@@ -3156,19 +3158,21 @@ class RoleController extends Controller
             // Create groups with translations
             foreach ($groupsData as $groupData) {
                 if (! empty($groupData['name'])) {
-                    $groupCreateData = [
-                        'name' => $groupData['name'],
-                        'slug' => Str::slug($groupData['name']),
-                    ];
+                    $groupCreateData = ['name' => $groupData['name']];
 
                     // Preserve manually entered English name or add automatic translation
                     if (isset($groupData['name_en'])) {
                         $groupCreateData['name_en'] = $groupData['name_en'];
-                        $groupCreateData['slug'] = Str::slug($groupData['name_en']);
                     } elseif (isset($translations[$groupData['name']])) {
                         $groupCreateData['name_en'] = $translations[$groupData['name']];
-                        $groupCreateData['slug'] = Str::slug($translations[$groupData['name']]);
                     }
+
+                    // Prefers the English name, then the original, then romanizes - never "".
+                    $groupCreateData['slug'] = Group::cleanSlug(
+                        $role->id,
+                        $groupData['name'],
+                        $groupCreateData['name_en'] ?? null
+                    );
 
                     $role->groups()->create($groupCreateData);
                 }
@@ -3345,6 +3349,32 @@ class RoleController extends Controller
             $availableCurators = auth()->user()->allCurators();
         }
 
+        // Event sources: the talent/venue schedules this curator pulls events from.
+        $sourceSchedules = collect();
+        $suggestedSources = collect();
+        if ($role->exists && $role->isCurator()) {
+            $sourceSchedules = $role->sources()
+                ->with('sourceRole')
+                ->get()
+                ->filter(fn ($source) => $source->sourceRole !== null)
+                ->sortBy(fn ($source) => $source->sourceRole->name)
+                ->values();
+
+            // Schedules this curator has already shared events with, minus the ones it
+            // already pulls from. Same event_role self-join the AI import venue list uses.
+            $alreadySourced = $sourceSchedules->pluck('source_role_id')->all();
+            $connectedIds = $role->connectedRoleIds('venue')
+                ->merge($role->connectedRoleIds('talent'))
+                ->reject(fn ($id) => in_array($id, $alreadySourced));
+
+            if ($connectedIds->isNotEmpty()) {
+                $suggestedSources = Role::whereIn('id', $connectedIds)
+                    ->orderBy('name')
+                    ->limit(12)
+                    ->get(['id', 'subdomain', 'name']);
+            }
+        }
+
         $pivot = $role->users()->where('user_id', auth()->id())->first()?->pivot;
         $notificationSettings = array_merge(
             ['new_sale' => false, 'new_request' => true, 'new_fan_content' => false, 'new_feedback' => false, 'new_poll_option' => false],
@@ -3407,6 +3437,8 @@ class RoleController extends Controller
             'fonts' => $fonts,
             'approvedSubdomainNames' => $approvedSubdomainNames,
             'availableCurators' => $availableCurators,
+            'sourceSchedules' => $sourceSchedules,
+            'suggestedSources' => $suggestedSources,
             'notificationSettings' => $notificationSettings,
             'userCalendarId' => $pivot?->google_calendar_id,
             'userMicrosoftCalendarId' => $pivot?->microsoft_calendar_id,
@@ -3440,6 +3472,9 @@ class RoleController extends Controller
                 'sync_direction' => $role->sync_direction,
                 'caldav_sync_direction' => $role->caldav_sync_direction,
                 'email_settings' => null,
+                // Adding a source rewrites thousands of event links, which is exactly the
+                // kind of change demo mode exists to prevent.
+                'source_schedules_submitted' => 0,
             ]);
             // Remove image uploads
             $request->files->remove('profile_image');
@@ -4139,7 +4174,6 @@ class RoleController extends Controller
                     // Update existing
                     $updateData = [
                         'name' => $groupData['name'],
-                        'slug' => $groupData['slug'] ?? Str::slug($groupData['name']),
                         'color' => $groupData['color'] ?? null,
                     ];
 
@@ -4148,9 +4182,17 @@ class RoleController extends Controller
                         $updateData['name_en'] = $groupData['name_en'];
                     } elseif (isset($translations[$groupData['name']])) {
                         $updateData['name_en'] = $translations[$groupData['name']];
-                        // Use English name for slug if translation is available
-                        $updateData['slug'] = Str::slug($translations[$groupData['name']]);
                     }
+
+                    // A slug the user typed is honoured but still cleaned - it was stored raw
+                    // before, so a non-Latin one persisted unusable.
+                    $updateData['slug'] = Group::cleanSlug(
+                        $role->id,
+                        $groupData['name'],
+                        $updateData['name_en'] ?? null,
+                        $groupData['slug'] ?? null,
+                        (int) $key
+                    );
 
                     $role->groups()->where('id', $key)->update($updateData);
                     $submittedIds[] = $key;
@@ -4158,18 +4200,22 @@ class RoleController extends Controller
                     // New group
                     $createData = [
                         'name' => $groupData['name'],
-                        'slug' => Str::slug($groupData['name']),
                         'color' => $groupData['color'] ?? null,
                     ];
 
                     // Preserve manually entered English name or add automatic translation
                     if (isset($groupData['name_en'])) {
                         $createData['name_en'] = $groupData['name_en'];
-                        $createData['slug'] = Str::slug($groupData['name_en']);
                     } elseif (isset($translations[$groupData['name']])) {
                         $createData['name_en'] = $translations[$groupData['name']];
-                        $createData['slug'] = Str::slug($translations[$groupData['name']]);
                     }
+
+                    $createData['slug'] = Group::cleanSlug(
+                        $role->id,
+                        $groupData['name'],
+                        $createData['name_en'] ?? null,
+                        $groupData['slug'] ?? null
+                    );
 
                     $newGroup = $role->groups()->create($createData);
                     $submittedIds[] = $newGroup->id;
@@ -4182,6 +4228,11 @@ class RoleController extends Controller
         if (! empty($toDelete)) {
             $role->groups()->whereIn('id', $toDelete)->delete();
         }
+
+        // After the group sync on purpose: a source can be filed under a sub-schedule created
+        // in this same save, and role_sources.group_id is ON DELETE SET NULL, so running before
+        // the delete above would hand back a group id that is about to disappear.
+        $this->saveEventSources($role, $request);
 
         if ($request->hasFile('profile_image')) {
             $file = $request->file('profile_image');
@@ -5515,6 +5566,74 @@ class RoleController extends Controller
         return response()->json($roles);
     }
 
+    /**
+     * Persist the curator's event sources and relink its calendar.
+     *
+     * Adding a source can move thousands of event_role rows, so this both audit-logs each
+     * change and leans on CuratorSourceService's set queries rather than looping rows.
+     */
+    protected function saveEventSources(Role $role, Request $request): void
+    {
+        if (! $request->boolean('source_schedules_submitted') || ! $role->isCurator()) {
+            return;
+        }
+
+        $subdomains = array_map('trim', (array) $request->input('source_schedules', []));
+        $groups = (array) $request->input('source_groups', []);
+
+        $ownGroupIds = $role->groups()->pluck('id')->all();
+        $desired = [];
+
+        // The count is bounded by RoleUpdateRequest so an over-long list is refused outright
+        // rather than trimmed here, where the user would get no feedback.
+        foreach ($subdomains as $index => $subdomain) {
+            if ($subdomain === '') {
+                continue;
+            }
+
+            $source = Role::subdomain($subdomain)->where('is_deleted', false)->first();
+
+            // Only talent and venue schedules, and never the curator itself: a curator
+            // pulling from a curator would chain one aggregation onto another.
+            if (! $source || $source->id === $role->id || ! in_array($source->type, ['talent', 'venue'])) {
+                continue;
+            }
+
+            $groupId = ! empty($groups[$index]) ? UrlUtils::decodeId($groups[$index]) : null;
+
+            $desired[$source->id] = in_array($groupId, $ownGroupIds) ? $groupId : null;
+        }
+
+        $existing = $role->sources()->get()->keyBy('source_role_id');
+
+        foreach ($existing as $sourceRoleId => $source) {
+            if (! array_key_exists($sourceRoleId, $desired)) {
+                $source->delete();
+                AuditService::log('source.removed', auth()->id(), 'Role', $role->id, ['source_role_id' => $sourceRoleId], null);
+            }
+        }
+
+        $curatorSources = app(CuratorSourceService::class);
+
+        foreach ($desired as $sourceRoleId => $groupId) {
+            $current = $existing->get($sourceRoleId);
+
+            if (! $current) {
+                $role->sources()->create(['source_role_id' => $sourceRoleId, 'group_id' => $groupId]);
+                AuditService::log('source.added', auth()->id(), 'Role', $role->id, null, ['source_role_id' => $sourceRoleId]);
+            } elseif ($current->group_id != $groupId) {
+                $current->update(['group_id' => $groupId]);
+                // Existing links keep the old sub-schedule unless they are moved explicitly.
+                $curatorSources->refileSource($role, $sourceRoleId, $groupId);
+            }
+        }
+
+        // pruneDeclined: editing the source list is the one moment a per-event removal should be
+        // cleared, so re-adding a source restores everything it covers. Events still covered by a
+        // remaining source are unaffected - they never become ineligible.
+        $curatorSources->reconcile($role, null, true);
+    }
+
     public function searchSubdomains(Request $request): JsonResponse
     {
         $q = trim($request->get('q', ''));
@@ -5524,12 +5643,23 @@ class RoleController extends Controller
             return response()->json([]);
         }
 
+        // A name typed by the user is a LIKE pattern until these are escaped, so "50%" would
+        // otherwise match everything. Mirrors AdminController::schedules().
+        $q = str_replace(['%', '_'], ['\\%', '\\_'], $q);
+
+        // Callers that pick from a list the page can also render must say which list, or the
+        // dropdown offers schedules that filter to nothing (see admin/schedules).
+        $types = array_filter(array_map('trim', explode(',', (string) $request->get('types', ''))));
+
         $roles = Role::where(function ($query) use ($q) {
             $query->where('subdomain', 'like', "{$q}%")
                 ->orWhere('name', 'like', "%{$q}%");
         })
+            ->where('is_deleted', false)
             ->when(! empty($exclude), fn ($query) => $query->whereNotIn('subdomain', $exclude))
+            ->when(! empty($types), fn ($query) => $query->whereIn('type', $types))
             ->when($request->boolean('claimed'), fn ($query) => $query->claimed())
+            ->when($request->boolean('admin_listable'), fn ($query) => $query->adminListable())
             ->limit(10)
             ->get(['subdomain', 'name', 'city']);
 

@@ -580,7 +580,7 @@ class Event extends Model
         // Load venue from event_role table where the role is a venue
         return $this->belongsToMany(Role::class, 'event_role', 'event_id', 'role_id')
             ->where('roles.type', 'venue')
-            ->withPivot('id', 'name_translated', 'short_description_translated', 'description_translated', 'description_html_translated', 'is_accepted', 'group_id', 'google_event_id', 'caldav_event_uid', 'caldav_event_etag')
+            ->withPivot('id', 'name_translated', 'short_description_translated', 'description_translated', 'description_html_translated', 'is_accepted', 'is_auto_sourced', 'group_id', 'google_event_id', 'caldav_event_uid', 'caldav_event_etag')
             ->using(EventRole::class);
     }
 
@@ -741,7 +741,7 @@ class Event extends Model
     public function roles()
     {
         return $this->belongsToMany(Role::class)
-            ->withPivot('id', 'name_translated', 'short_description_translated', 'description_translated', 'description_html_translated', 'is_accepted', 'group_id', 'google_event_id', 'caldav_event_uid', 'caldav_event_etag')
+            ->withPivot('id', 'name_translated', 'short_description_translated', 'description_translated', 'description_html_translated', 'is_accepted', 'is_auto_sourced', 'group_id', 'google_event_id', 'caldav_event_uid', 'caldav_event_etag')
             ->using(EventRole::class);
     }
 
@@ -1040,9 +1040,15 @@ class Event extends Model
         });
     }
 
+    /**
+     * Every attached schedule, not just curators, and with no is_accepted filter - callers that
+     * care about visibility have to read the pivot. It is loaded here so they can: the event
+     * form uses it to avoid ticking a schedule that declined the event.
+     */
     public function curators()
     {
-        return $this->belongsToMany(Role::class, 'event_role', 'event_id', 'role_id');
+        return $this->belongsToMany(Role::class, 'event_role', 'event_id', 'role_id')
+            ->withPivot('is_accepted', 'is_auto_sourced');
     }
 
     public function hashedId()

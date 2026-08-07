@@ -40,6 +40,20 @@ class AppGuestLayout extends Component
          */
         public bool $bannerBar = false,
         /**
+         * Whether this page carries the guest cart (floating button, panel and checkout form).
+         *
+         * Opt-in, and defaults to false, for the same reason as the two above: seventeen views
+         * render through this layout, and most of them are task pages - checkout, appointment
+         * booking and rescheduling, gift-card purchase, feedback, guest submission - where a
+         * shopping cart is noise. It belongs on the browsing surfaces, the schedule and event
+         * pages, which are also the only pages a refused checkout can bounce back to.
+         *
+         * Not merely cosmetic: the cart renders a Turnstile widget when Turnstile is active, and
+         * the appointment reschedule page deliberately forces Turnstile off on its secret-bearing
+         * URL.
+         */
+        public bool $cart = false,
+        /**
          * The leading segment of the <title>, before the schedule name.
          *
          * Defaults to the event name when the page has an event. Pass it explicitly to name a page

@@ -1,6 +1,9 @@
 <x-app-layout :title="__('messages.your_tickets') . ($role ? ' | ' . $role->translatedName() : '')">
 
-    <x-slot name="footCode">@include('partials.site-foot-code')</x-slot>
+    <x-slot name="footCode">
+        @include('partials.site-foot-code')
+        @include('partials.cart-clear')
+    </x-slot>
 
     <x-slot name="head">
         @include('partials.site-head-code')
@@ -21,7 +24,14 @@
                     // A leg the organizer cancelled, refunded or let expire is still part of what
                     // the buyer purchased, so it stays listed - but it is no longer a ticket, and
                     // linking it would hand out a QR for a seat that has already been released.
-                    $isReleased = in_array($sale->status, ['cancelled', 'refunded', 'expired']);
+                    // A leg is deleted outright rather than released is not listed at all: both
+                    // queries above filter is_deleted, which is the owner erasing the record.
+                    //
+                    // A cancelled EVENT counts too: the sale keeps its paid status, so without this
+                    // the buyer saw a live ticket with a working code for an event that is not
+                    // happening.
+                    $isReleased = in_array($sale->status, ['cancelled', 'refunded', 'expired'])
+                        || $legEvent->is_cancelled;
                 @endphp
                 <a @if (! $isReleased) href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($legEvent->id), 'secret' => $sale->secret]) }}" @endif
                    class="ap-card rounded-xl p-5 flex flex-col sm:flex-row sm:items-center gap-3 transition-all duration-200 {{ $isReleased ? 'opacity-60' : 'hover:shadow-md' }}">
@@ -36,7 +46,9 @@
                     <div class="sm:mt-0 mt-2 sm:text-end">
                         @if ($isReleased)
                             <span class="inline-flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
-                                {{ __('messages.'.$sale->status) }}
+                                {{ $legEvent->is_cancelled && $sale->status === 'paid'
+                                    ? __('messages.event_cancelled_heading')
+                                    : __('messages.'.$sale->status) }}
                             </span>
                         @else
                             <span class="inline-flex items-center gap-1 text-sm font-medium text-[var(--brand-blue)]">

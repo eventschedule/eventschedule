@@ -36,6 +36,7 @@
             <x-doc-nav-link href="#engagement-sponsors">Sponsors</x-doc-nav-link>
             <x-doc-nav-link href="#engagement-accommodation">Accommodation</x-doc-nav-link>
         </x-doc-nav-group>
+        <x-doc-nav-link href="#event-sources">Event Sources</x-doc-nav-link>
         <x-doc-nav-link href="#auto-import">Auto Import</x-doc-nav-link>
         <x-doc-nav-group label="Integrations" href="#integrations">
             <x-doc-nav-link href="#integrations-email">Email Settings</x-doc-nav-link>
@@ -1101,6 +1102,48 @@
     </section>
 
     <!-- Auto Import -->
+    <!-- Event Sources -->
+    <section id="event-sources" class="doc-section">
+        <h2 class="doc-heading">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+            </svg>
+            Event Sources <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 ml-2">Curator</span>
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">List the talent and venue schedules you want to follow and everything they publish shows up on your calendar on its own. It covers what they have already run as well as what is coming, and each new event appears within a few minutes of going live. This is the fastest way to stand up a city guide or a festival hub: pick your rooms and your acts once, and stop copying listings by hand.</p>
+
+        <x-doc-screenshot id="creating-schedules--section-sources" alt="Event sources settings" />
+
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Schedules</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Search by name or address and pick the talent or venue schedule you want. Only talent and venue schedules can be a source, so one curator never chains onto another.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Anything the schedule has chosen not to publish stays private: drafts, internal events, unlisted events and anything it has not accepted are all left out.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sub-schedule</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Optional. File everything from one source under a <a href="#customize-subschedules" class="doc-link">sub-schedule</a> so visitors can filter by it. Changing it moves that source's existing events too.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Suggested</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Schedules you already share events with, offered as one-click shortcuts.</p>
+            </div>
+        </div>
+
+        <h3 class="doc-subheading">Setting up event sources</h3>
+        <ol class="doc-list doc-list-numbered mb-6">
+            <li>Open <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Edit Schedule</strong> on a curator schedule and choose <strong class="text-gray-900 dark:text-white">Event Sources</strong>.</li>
+            <li>Click <strong class="text-gray-900 dark:text-white">+ Add Schedule</strong> and search for the talent or venue you want to follow.</li>
+            <li>Optionally choose a sub-schedule to file that source's events under.</li>
+            <li>Save. Their events, past and upcoming, appear on your calendar right away.</li>
+        </ol>
+
+        <div class="doc-callout doc-callout-tip">
+            <div class="doc-callout-title">Tip</div>
+            <p>Sourced events count as fully yours: they show on your calendar and public page, in your <a href="/docs/event-graphics" class="doc-link">event graphics</a>, and in your iCal and RSS feeds. To drop a single one, open it and choose Remove from schedule; it stays gone even though the source is still connected. Removing the source itself takes its events with it and leaves anything you added by hand untouched.</p>
+        </div>
+    </section>
+
     <section id="auto-import" class="doc-section">
         <h2 class="doc-heading">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">

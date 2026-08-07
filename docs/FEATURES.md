@@ -45,6 +45,7 @@ All users get these features with no subscription required.
 | Built-in analytics | Schedule analytics dashboard |
 | Configurable dashboard | Customize which panels appear on the dashboard |
 | Sub-schedules | Group events into sub-schedules |
+| Curator event sources | A curator lists talent/venue schedules and every event they publish, past and upcoming, is linked onto it automatically (`role_sources` + `CuratorSourceService`; reconciled by `app:sync-curator-sources`). The pull-side counterpart to the existing `roles.default_curator_ids` push, and ungated for the same reason |
 | Online events | Virtual event support |
 | Recurring events | Day-of-week recurring patterns with date exceptions (include/exclude specific dates) |
 | Newsletter management | Full newsletter creation and management UI (sending limits vary by tier) |

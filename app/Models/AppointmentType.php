@@ -4,9 +4,56 @@ namespace App\Models;
 
 use App\Utils\UrlUtils;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class AppointmentType extends Model
 {
+    /**
+     * A URL-safe, non-empty, per-schedule-unique booking slug.
+     *
+     * The slug is the `/book/{typeSlug}` path segment and the column carries no unique index,
+     * so a duplicate does not error - `AppointmentController::resolveBookableType()` just
+     * takes the first match and the guest is quietly booked onto the wrong type, at the wrong
+     * duration and price. Str::slug() returns "" for Hebrew, CJK and similar, which made every
+     * non-Latin type on a schedule collide exactly that way.
+     *
+     * Romanizes before giving up, so Hebrew types get readable slugs rather than a run of
+     * `appointment`, `appointment-2`, `appointment-3`.
+     */
+    public static function uniqueSlug(Role $role, ?string $name, ?string $preferred = null): string
+    {
+        $base = '';
+
+        foreach ([$preferred, $name] as $candidate) {
+            $candidate = trim((string) $candidate);
+
+            if ($candidate === '') {
+                continue;
+            }
+
+            $base = Str::slug($candidate);
+
+            if ($base === '') {
+                $base = Str::slug(Role::transliterateToAscii($candidate));
+            }
+
+            if ($base !== '') {
+                break;
+            }
+        }
+
+        $base = rtrim(Str::limit($base, 180, ''), '-') ?: 'appointment';
+
+        $slug = $base;
+        $i = 2;
+
+        while (self::where('role_id', $role->id)->where('slug', $slug)->exists()) {
+            $slug = $base.'-'.$i++;
+        }
+
+        return $slug;
+    }
+
     protected $fillable = [
         'role_id',
         'name',

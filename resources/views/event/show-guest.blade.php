@@ -1,4 +1,4 @@
-<x-app-guest-layout :role="$role" :event="$event" :date="$date" :fonts="$fonts" :showMobileBackground="true" :otherRole="$otherRole" :ad-slot="true">
+<x-app-guest-layout :role="$role" :event="$event" :date="$date" :fonts="$fonts" :showMobileBackground="true" :otherRole="$otherRole" :ad-slot="true" :cart="true">
 
   <style {!! nonce_attr() !!}>
     /* GP Dropdown Menus */
@@ -2215,7 +2215,11 @@
   </div>
 
   {{-- Lift the accessibility widget above the sticky mobile CTA bar so it does not cover the button --}}
-  @if ($role->show_accessibility_widget)
+  {{-- Publishes the sticky mobile CTA bar's measured height as --es-a11y-cta-clearance.
+       Deliberately NOT gated on show_accessibility_widget any more: the guest cart's floating
+       button shares this corner and reads the same variable, and the accessibility widget is off
+       by default, so gating it left the cart sitting inside the bar on every mobile event page.
+       Harmless when the widget is off - .es-a11y-cta-offset then matches no a11y element. --}}
   <script {!! nonce_attr() !!}>
   (function() {
       var bar = document.getElementById('mobile-cta-bar');
@@ -2240,7 +2244,6 @@
       }
   })();
   </script>
-  @endif
 
   @if ($role->isPro() && $event->polls->count() > 0)
   <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!}></script>

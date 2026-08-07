@@ -208,7 +208,9 @@ class AppointmentService
             $event->user_id = $role->user_id;
             $event->appointment_type_id = $type->id;
             // Random-suffixed slug: the page is unlisted-by-link and shows the guest name/notes.
-            $event->slug = Str::slug($type->name).'-'.strtolower(Str::random(10));
+            // Romanized first, so a non-Latin type name gives the guest a readable link rather
+            // than a bare leading hyphen.
+            $event->slug = \App\Utils\SlugUtils::slugOrRomanize($type->name, 'appointment').'-'.strtolower(Str::random(10));
             if (! empty($data['notes'])) {
                 $event->description = __('messages.appointments_notes_from', ['name' => $data['name']]).': '.trim($data['notes']);
             }

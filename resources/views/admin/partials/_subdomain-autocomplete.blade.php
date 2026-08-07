@@ -22,7 +22,10 @@
             }
 
             debounceTimer = setTimeout(function() {
-                fetch('{{ route("role.search-subdomains") }}' + '?q=' + encodeURIComponent(q), {
+                // admin_listable keeps the dropdown to the same set the schedules table can
+                // render. Without it, unclaimed auto-created schedules show up here and then
+                // filter to nothing.
+                fetch('{{ route("role.search-subdomains") }}' + '?q=' + encodeURIComponent(q) + '&admin_listable=1', {
                     headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
                 })
                 .then(function(res) { return res.json(); })

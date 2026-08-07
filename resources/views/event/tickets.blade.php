@@ -1,9 +1,16 @@
 @php
     // Whether this event may be put in a cart at all. Mirrors the server-side guard in
-    // TicketController::cartEligibilityError(): only rails that can settle a whole order in one go.
+    // TicketController::checkout(): only rails that can settle a whole order in one go.
     // Embeds are excluded - an embedded widget is one event on someone else's page, and its cart
     // would live in that page's storage where the buyer can never reach the rest of it.
-    $cartEligible = in_array($event->payment_method, ['stripe', 'cash'], true) && ! request()->embed;
+    //
+    // Per-attendee events are excluded too: the cart collects one name and email for the whole
+    // purchase and has nowhere to put a guest list, so carting one would quietly turn it into a
+    // single anonymous multi-seat sale and lose exactly the attendee details the organizer turned
+    // this on to collect. Those events keep the full form on this page.
+    $cartEligible = in_array($event->payment_method, ['stripe', 'cash'], true)
+        && ! $event->individual_tickets
+        && ! request()->embed;
 @endphp
 
 <x-slot name="head">
@@ -472,6 +479,11 @@
                         // copies only decide whether the field is rendered.
                         ask_phone: @json((bool) $event->ask_phone),
                         require_phone: @json((bool) $event->require_phone),
+                        // Display only, so the panel can show a running total instead of asking
+                        // the buyer to check out blind. Checkout re-reads every price from the
+                        // database and never looks at these.
+                        currency: @json($event->ticket_currency_code),
+                        prices: {},
                         tickets: {},
                         addons: {},
                         promo_code: this.promoCode || null,
@@ -480,6 +492,7 @@
                     this.tickets.forEach(function (ticket) {
                         if (ticket.selectedQty > 0) {
                             leg.tickets[ticket.id] = ticket.selectedQty;
+                            leg.prices[ticket.id] = Number(ticket.price) || 0;
                         }
                     });
                     this.addons.forEach(function (addon) {

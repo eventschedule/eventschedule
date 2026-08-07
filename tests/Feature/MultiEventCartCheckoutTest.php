@@ -353,6 +353,92 @@ class MultiEventCartCheckoutTest extends TestCase
         $this->assertNotEmpty($sales->first()->phone);
     }
 
+    public function test_a_completed_purchase_tells_the_cart_to_drop_what_was_bought(): void
+    {
+        [$eventA, $eventB, $ticketA, $ticketB] = $this->twoEvents();
+
+        $this->checkout([$this->leg($eventA, $ticketA), $this->leg($eventB, $ticketB)])
+            ->assertSessionHas('cart_purchased');
+
+        // The landing pages render through x-app-layout, where the cart widget does not exist, so
+        // it cannot empty itself. Left holding the completed purchase it offered a CHECKOUT button
+        // on the buyer's next visit that would have charged them a second time.
+        $primary = Sale::where('email', 'cart@example.com')->orderBy('id')->first();
+        $purchased = collect(session('cart_purchased'));
+
+        $this->assertCount(2, $purchased, 'every leg of the order must be cleared');
+        $this->assertEqualsCanonicalizing(
+            [UrlUtils::encodeId($eventA->id), UrlUtils::encodeId($eventB->id)],
+            $purchased->pluck('event_id')->all()
+        );
+
+        $this->get(route('ticket.order', [
+            'order_id' => UrlUtils::encodeId($primary->id),
+            'secret' => $primary->secret,
+        ]))->assertOk()->assertSee('es_cart_', false);
+    }
+
+    public function test_an_abandoned_payment_keeps_the_cart(): void
+    {
+        [$eventA, $eventB, $ticketA] = $this->twoEvents();
+        $ticketB = $this->createTicket($eventB, ['price' => 20, 'quantity' => 50]);
+
+        $this->checkout([$this->leg($eventA, $ticketA), $this->leg($eventB, $ticketB)]);
+
+        $primary = Sale::where('email', 'cart@example.com')->orderBy('id')->first();
+
+        // Abandoning at the payment step must leave the cart intact - the buyer is expected to come
+        // back and try again, and an emptied cart would make that impossible.
+        $this->get(route('checkout.cancel', [
+            'subdomain' => $this->role->subdomain,
+            'sale_id' => UrlUtils::encodeId($primary->id),
+            'date' => $primary->event_date,
+            'secret' => $primary->secret,
+        ]))->assertRedirect();
+
+        $this->assertNull(session('cart_purchased'), 'an abandoned payment must not clear the cart');
+    }
+
+    public function test_a_cart_naming_an_unavailable_event_does_not_404(): void
+    {
+        [$eventA, $eventB, $ticketA, $ticketB] = $this->twoEvents();
+
+        // Unpublished after the buyer added it - the cart is built to outlive the visit, so this is
+        // ordinary. It used to abort(404) with an unstyled page and no clue which event was at
+        // fault, while the cart went on holding it so every retry 404'd again.
+        $eventB->is_draft = true;
+        $eventB->save();
+
+        $response = $this->checkout([$this->leg($eventA, $ticketA), $this->leg($eventB, $ticketB)]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('error', __('messages.cart_event_unavailable', ['event' => $eventB->name]));
+        $response->assertSessionHas('cart_invalid_legs', [UrlUtils::encodeId($eventB->id).'|'.\Carbon\Carbon::parse($eventB->starts_at)->format('Y-m-d')]);
+
+        $this->assertSame(0, Sale::where('email', 'cart@example.com')->count());
+    }
+
+    public function test_a_per_attendee_event_cannot_be_carted(): void
+    {
+        [$eventA, $eventB, $ticketA, $ticketB] = $this->twoEvents(['individual_tickets' => true]);
+
+        // The cart collects one name and email for the whole purchase, so carting a per-attendee
+        // event silently turned it into one anonymous multi-seat sale and lost the guest list the
+        // organizer turned this on to collect.
+        $this->checkout([$this->leg($eventA, $ticketA), $this->leg($eventB, $ticketB)])
+            ->assertSessionHas('error', __('messages.cart_event_unavailable', ['event' => $eventB->name]));
+
+        $this->assertSame(0, Sale::where('email', 'cart@example.com')->count());
+
+        // ...and the button is not offered in the first place. Asserted on the button's own label
+        // rather than the handler name: the addToCart() method is always defined, only the button
+        // that calls it is gated.
+        $this->get(route('event.view_guest', [
+            'subdomain' => $this->role->subdomain,
+            'slug' => $eventB->slug,
+        ]))->assertOk()->assertDontSee(strtoupper(__('messages.add_to_cart')), false);
+    }
+
     public function test_a_single_leg_checkout_writes_no_order_id(): void
     {
         [$eventA, , $ticketA] = $this->twoEvents();

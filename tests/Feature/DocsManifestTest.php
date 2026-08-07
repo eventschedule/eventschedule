@@ -20,6 +20,38 @@ class DocsManifestTest extends TestCase
         $this->assertNotEmpty(DocsUtils::groups(), 'config/docs.php has no groups.');
     }
 
+    /**
+     * anchorsFor() strips <x-doc-screenshot> because there `id` names an image file rather than
+     * an anchor - which left nothing asserting the file is actually present. A referenced image
+     * that does not exist renders as a broken-image icon on a public docs page, in both themes.
+     */
+    public function test_every_referenced_doc_screenshot_exists(): void
+    {
+        $missing = [];
+
+        // array_merge, not +: both globs are numerically indexed, so the union operator would
+        // silently drop the leading entries of the second list.
+        $files = array_merge(
+            glob(resource_path('views/marketing/docs/*.blade.php')),
+            glob(resource_path('views/marketing/docs/**/*.blade.php'))
+        );
+
+        foreach ($files as $file) {
+            preg_match_all('#<x-doc-screenshot\b[^>]*\bid="([^"]+)"#', file_get_contents($file), $matches);
+
+            foreach ($matches[1] as $id) {
+                foreach (["{$id}.png", "{$id}-dark.png"] as $variant) {
+                    if (! is_file(public_path('images/docs/'.$variant))) {
+                        $missing[] = $variant.' (referenced by '.basename($file).')';
+                    }
+                }
+            }
+        }
+
+        $this->assertSame([], array_values(array_unique($missing)),
+            'Generate them with: php artisan app:generate-doc-screenshots --page=<page>');
+    }
+
     public function test_every_page_has_the_required_keys(): void
     {
         foreach (DocsUtils::pages() as $key => $page) {

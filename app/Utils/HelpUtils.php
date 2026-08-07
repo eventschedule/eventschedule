@@ -40,6 +40,7 @@ class HelpUtils
                 'engagement-tab-sponsors' => '/docs/creating-schedules#engagement-sponsors',
                 'engagement-tab-accommodation' => '/docs/creating-schedules#engagement-accommodation',
                 'section-gift-cards' => '/docs/gift-cards',
+                'section-sources' => '/docs/creating-schedules#event-sources',
                 'section-auto-import' => '/docs/creating-schedules#auto-import',
                 'section-integrations' => '/docs/creating-schedules#integrations',
                 'integration-tab-email' => '/docs/creating-schedules#integrations-email',

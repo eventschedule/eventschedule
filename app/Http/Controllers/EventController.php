@@ -159,6 +159,14 @@ class EventController extends Controller
                 ->with('message', __('messages.appointments_cancelled_message'));
         }
 
+        // Same reasoning as the appointment branch above, for ticketed events: sales.event_id
+        // cascades on delete, so this would destroy the buyers' sale rows outright - no refund
+        // trail, no inventory release, no notice to anyone who paid. Cancelling the event keeps
+        // the records and lets the owner notify attendees; deleting is for events nobody bought.
+        if ($event->sales()->where('status', 'paid')->exists()) {
+            return redirect()->back()->with('error', __('messages.cannot_delete_event_with_sales'));
+        }
+
         AuditService::log(AuditService::EVENT_DELETE, $user->id, 'Event', $event->id, null, null, $event->name);
 
         // Cancel active boost campaigns before deletion (prevents orphaned Meta campaigns)
@@ -1542,7 +1550,20 @@ class EventController extends Controller
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
-        $role->events()->detach($event->id);
+
+        // An auto-sourced row would be relinked by the next app:sync-curator-sources pass, so
+        // record the removal as a decline instead of detaching. is_accepted = false is already
+        // the app's "declined" state and every read site honours it.
+        $isAutoSourced = $role->events()
+            ->wherePivot('event_id', $event->id)
+            ->wherePivot('is_auto_sourced', true)
+            ->exists();
+
+        if ($isAutoSourced) {
+            $role->events()->updateExistingPivot($event->id, ['is_accepted' => false]);
+        } else {
+            $role->events()->detach($event->id);
+        }
 
         return back()->with('message', __('messages.uncurate_event'));
     }
@@ -3045,7 +3066,9 @@ class EventController extends Controller
         }
 
         $eventName = $request->event_name ?: __('messages.booking_request');
-        $event->slug = Str::slug($eventName).'-'.strtolower(Str::random(6));
+        // Both inputs can collapse under Str::slug alone: a non-Latin event_name, and the
+        // translated fallback above when the locale is Hebrew or similar.
+        $event->slug = \App\Utils\SlugUtils::slugOrRomanize($eventName, 'booking').'-'.strtolower(Str::random(6));
         $event->save();
 
         // Anti-abuse: count this booking-request event toward the schedule's daily cap.
@@ -3733,7 +3756,8 @@ class EventController extends Controller
             return redirect()->back()->with('error', __('messages.no_photos_to_download'));
         }
 
-        $zipFilename = 'photos-'.Str::slug($event->name).'-'.now()->format('Y-m-d').'.zip';
+        // Romanized so a non-Latin event name does not download as "photos--2026-08-07.zip".
+        $zipFilename = 'photos-'.\App\Utils\SlugUtils::slugOrRomanize($event->name, 'event').'-'.now()->format('Y-m-d').'.zip';
         $zipPath = storage_path('app/temp/'.$zipFilename);
 
         if (! is_dir(storage_path('app/temp'))) {
@@ -3757,7 +3781,7 @@ class EventController extends Controller
                 $contents = Storage::get($storagePath);
                 if ($contents) {
                     $extension = pathinfo($rawPath, PATHINFO_EXTENSION) ?: 'jpg';
-                    $zip->addFromString(($index + 1).'-'.Str::slug($event->name).'.'.$extension, $contents);
+                    $zip->addFromString(($index + 1).'-'.\App\Utils\SlugUtils::slugOrRomanize($event->name, 'event').'.'.$extension, $contents);
                 }
             } catch (\Exception $e) {
                 report($e);
