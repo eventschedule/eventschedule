@@ -596,19 +596,58 @@ class SitemapTest extends TestCase
         );
     }
 
-    /** Walking every event in the database must not write one log line per unroutable event. */
+    /**
+     * Walking every event in the database must not write one log line per unroutable event.
+     *
+     * eventQuery() now requires the accepted pivot's schedule to have an owner, so an event
+     * whose only accepted schedule is an ownerless placeholder is excluded by the query rather
+     * than skipped mid-walk - a better outcome, but it means the section only exists at all
+     * when something routable is in it. Hence the routable sibling.
+     */
     public function test_unroutable_events_are_skipped_without_logging_an_error(): void
     {
         $owner = $this->createOwner();
+        $routableRole = $this->createRole($owner, 'talent');
+        $routable = $this->createEvent($routableRole, ['name' => 'Routable', 'creator_role_id' => $routableRole->id]);
+
         $role = $this->createRole($owner, 'venue');
         $event = $this->createEvent($role, ['creator_role_id' => null]);
         DB::table('roles')->where('id', $role->id)->update(['user_id' => null]);
 
         Log::spy();
 
-        $this->assertStringNotContainsString($event->slug, $this->xml('/sitemap-events-1.xml'));
+        $xml = $this->xml('/sitemap-events-1.xml');
+
+        $this->assertStringContainsString($routable->slug, $xml);
+        $this->assertStringNotContainsString($event->slug, $xml);
 
         Log::shouldNotHaveReceived('error');
+    }
+
+    /** An event accepted only on a schedule nobody owns has no routable URL, so it stays out. */
+    public function test_events_accepted_only_on_an_ownerless_schedule_are_excluded(): void
+    {
+        $owner = $this->createOwner();
+        $routableRole = $this->createRole($owner, 'talent');
+        $routable = $this->createEvent($routableRole, ['name' => 'Routable', 'creator_role_id' => $routableRole->id]);
+
+        // The shape a guest submission leaves behind: pending on the claimed schedule it was
+        // submitted to, accepted on the placeholder venue the importer auto-created.
+        $placeholder = $this->createRole($owner, 'venue');
+        DB::table('roles')->where('id', $placeholder->id)->update(['user_id' => null]);
+        $orphan = $this->createEvent($routableRole, [
+            'name' => 'Orphan',
+            'creator_role_id' => $routableRole->id,
+        ]);
+        // createEvent() cannot express a null pivot - its `$attrs['is_accepted'] ?? true`
+        // reads null as absent - so demote it afterwards.
+        $orphan->roles()->updateExistingPivot($routableRole->id, ['is_accepted' => null]);
+        $orphan->roles()->attach($placeholder->id, ['is_accepted' => true]);
+
+        $xml = $this->xml('/sitemap-events-1.xml');
+
+        $this->assertStringContainsString($routable->slug, $xml);
+        $this->assertStringNotContainsString($orphan->slug, $xml);
     }
 
     public function test_hidden_events_are_excluded(): void

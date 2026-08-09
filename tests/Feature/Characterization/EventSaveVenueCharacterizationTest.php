@@ -112,14 +112,13 @@ class EventSaveVenueCharacterizationTest extends TestCase
             'level' => 'follower',
         ]);
 
-        // roles.require_approval defaults to TRUE, so a brand-new venue does
-        // NOT auto-accept the event: the pivot stays un-accepted (null). This
-        // is the known is_accepted visibility behavior - the event shows on
-        // the creator's schedule but not on the new venue's own page.
+        // A brand-new venue has no user_id, so nobody could ever accept the event on its
+        // behalf and a pending row there would be permanent. Role::autoAcceptsEventFrom()
+        // rule 2 accepts it instead, so the event shows on the new venue's own page.
         $this->assertDatabaseHas('event_role', [
             'event_id' => $this->latestEvent()->id,
             'role_id' => $venue->id,
-            'is_accepted' => null,
+            'is_accepted' => 1,
         ]);
     }
 
@@ -142,11 +141,13 @@ class EventSaveVenueCharacterizationTest extends TestCase
             'venue_city' => 'Springfield',
         ])->assertRedirect();
 
-        // No new roles row; the existing venue was attached instead.
+        // No new roles row; the existing venue was attached instead. The match is unclaimed,
+        // so the pivot is auto-accepted (Role::autoAcceptsEventFrom() rule 2).
         $this->assertSame($rolesBefore, Role::count());
         $this->assertDatabaseHas('event_role', [
             'event_id' => $this->latestEvent()->id,
             'role_id' => $existing->id,
+            'is_accepted' => 1,
         ]);
 
         // Matched-existing venues are auto-followed so they appear in the

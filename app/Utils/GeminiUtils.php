@@ -856,6 +856,9 @@ class GeminiUtils
                     $user = auth()->user();
                     $data[$key]['venue_is_editable'] = ! $venue->isClaimed() ||
                         ($user && $venue->members()->where('user_id', $user->id)->exists());
+                    // Same rule as the is_claimable flag on the venue dropdown entries, so an
+                    // AI-matched venue nobody owns can be claimed straight from the match.
+                    $data[$key]['venue_is_claimable'] = $venue->user_id === null;
                 }
             }
 

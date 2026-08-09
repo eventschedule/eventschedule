@@ -1169,7 +1169,14 @@ class Role extends Model implements MustVerifyEmail
         return ! $this->isClaimed() && $user->isFollowing($this->subdomain);
     }
 
-    public function autoCurateEvent(Event $event): void
+    /**
+     * Push this schedule's events onto the curators its owner picked in default_curator_ids.
+     *
+     * $actingUser is the authenticated submitter, so a curator they run accepts immediately
+     * instead of queueing a request they would only have to approve themselves. Optional so
+     * an unauthenticated caller (webhooks, console) simply gets no membership credit.
+     */
+    public function autoCurateEvent(Event $event, ?User $actingUser = null): void
     {
         $curatorIds = $this->default_curator_ids;
         if (empty($curatorIds)) {
@@ -1186,8 +1193,7 @@ class Role extends Model implements MustVerifyEmail
                 continue;
             }
 
-            $isAccepted = ! $curator->require_approval
-                || ($curator->approved_subdomains && in_array($this->subdomain, $curator->approved_subdomains));
+            $isAccepted = $curator->autoAcceptsEventFrom($actingUser, $this);
 
             $event->roles()->attach($curator->id, ['is_accepted' => $isAccepted ?: null]);
         }
@@ -1883,6 +1889,47 @@ class Role extends Model implements MustVerifyEmail
         }
 
         return true;
+    }
+
+    /**
+     * Whether an event attaching to this schedule lands accepted (event_role.is_accepted =
+     * true) rather than pending (null). Four ways acceptance is already implied, so no human
+     * ever has to click Approve:
+     *
+     *  1. The submitter runs this schedule - approving your own event is a no-op.
+     *  2. Nobody owns this schedule. It is a placeholder somebody invented while entering an
+     *     event, so no member could ever accept on its behalf and a pending row here is
+     *     permanent - it hides the event on the placeholder's own guest page forever.
+     *  3. The owner turned Require approval off while still accepting requests.
+     *  4. The submitting schedule is on this schedule's pre-approved list.
+     *
+     * Rule 2 keys on user_id, NOT isClaimed(), on purpose: a schedule whose owner merely has
+     * an unverified email still HAS an owner watching the Requests tab, and the hosted
+     * Role::updating hook nulls email_verified_at on every email change - under isClaimed()
+     * each of those edits would quietly turn a moderated schedule into an auto-accepting one
+     * until the verify link was clicked. Same predicate logoWallRoles() already reads as
+     * consent. acceptEventRequests() is rightly laxer: it answers "may I submit at all".
+     *
+     * $actingUser must be the AUTHENTICATED submitter or null - never EventRepo::saveEvent()'s
+     * schedule-owner fallback, or every guest post auto-accepts onto its target schedule.
+     */
+    public function autoAcceptsEventFrom(?User $actingUser = null, ?Role $fromRole = null): bool
+    {
+        if ($actingUser && $actingUser->isMember($this->subdomain)) {
+            return true;
+        }
+
+        if (! $this->user_id) {
+            return true;
+        }
+
+        if ($this->acceptEventRequests() && ! $this->require_approval) {
+            return true;
+        }
+
+        return (bool) ($fromRole
+            && $this->approved_subdomains
+            && in_array($fromRole->subdomain, $this->approved_subdomains));
     }
 
     public function isRtl()

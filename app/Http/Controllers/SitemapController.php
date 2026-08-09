@@ -505,10 +505,20 @@ class SitemapController extends Controller
             ->whereNull('event_password')
             // A correlated EXISTS rather than whereHas: this subquery is re-planned on every
             // chunk, and event_role.event_id is already indexed.
+            //
+            // The role-side predicate has to live INSIDE this subquery so it binds to the same
+            // pivot row as is_accepted, the way publicUpcomingEventsQuery() and
+            // FederationService::federatableQuery() do it. Without it, an event whose only
+            // accepted pivot is an ownerless placeholder schedule qualifies - and
+            // RoleController::viewGuest() redirects anything that fails isClaimed(), so the
+            // URL we would emit is a redirect or a soft 404.
             ->whereExists(fn ($q) => $q->select(DB::raw(1))
                 ->from('event_role')
+                ->join('roles', 'roles.id', '=', 'event_role.role_id')
                 ->whereColumn('event_role.event_id', 'events.id')
-                ->where('event_role.is_accepted', true));
+                ->where('event_role.is_accepted', true)
+                ->where('roles.is_deleted', false)
+                ->whereNotNull('roles.user_id'));
     }
 
     private function blogQuery()

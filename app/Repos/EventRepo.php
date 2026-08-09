@@ -311,7 +311,66 @@ class EventRepo
         }
     }
 
-    public function saveEvent($currentRole, $request, $event = null, $followNewRoles = true, ?string $timezoneOverride = null)
+    /**
+     * Honour the "I manage this venue" checkbox: make $authUser the owner of $venue.
+     *
+     * Returns the claiming user when the claim actually happened (null otherwise), so callers
+     * can reuse it as the $matchingUser signal that suppresses the redundant follower attach.
+     *
+     * Only ever claims a venue nobody owns. A venue with a user_id belongs to someone and a
+     * ticked checkbox must never take it from them, however the venue was resolved - created
+     * here, matched by the normalized dedup, or picked from the dropdown.
+     */
+    private function claimVenueOwnership(Role $venue, ?User $authUser): ?User
+    {
+        // Gated on the authenticated user, not saveEvent()'s schedule-owner fallback, so a
+        // crafted guest request cannot grant ownership.
+        if (! $authUser || $venue->user_id) {
+            return null;
+        }
+
+        // Overwrite the AI-parsed venue contact with the auth user's own verified contact so
+        // isClaimed() returns true and the editability gate locks out unrelated followers.
+        $venue->user_id = $authUser->id;
+
+        if ($authUser->email) {
+            $venue->email = $authUser->email;
+            $venue->email_verified_at = $authUser->email_verified_at;
+        }
+
+        if ($authUser->phone) {
+            $venue->phone = $authUser->phone;
+            $venue->phone_verified_at = $authUser->phone_verified_at;
+        }
+
+        // Save quietly: the auth user's contact was copied verbatim (already lowercased /
+        // normalized on the User), so bypass the Role::updating hook that would otherwise null
+        // the just-copied email_verified_at / phone_verified_at and send a redundant
+        // verification email because the email/phone became dirty - defeating the claim.
+        $venue->saveQuietly();
+
+        // syncWithoutDetaching, not attach: two of the three call sites can reach a venue this
+        // user already follows, and role_user carries unique(user_id, role_id) - a bare
+        // attach() would throw there. The upsert is also what promotes follower -> owner.
+        $authUser->roles()->syncWithoutDetaching([
+            $venue->id => ['level' => 'owner', 'created_at' => now()],
+        ]);
+
+        if (! $authUser->default_role_id) {
+            $authUser->default_role_id = $venue->id;
+            $authUser->save();
+        }
+
+        return $authUser;
+    }
+
+    /**
+     * $allowExistingVenueClaim lets this caller honour "I manage this venue" for a venue that
+     * ALREADY EXISTS (ownerless ones only - see claimVenueOwnership()). It is a capability the
+     * caller grants explicitly, and it defaults to false, because there is nothing about the
+     * request itself that can tell the two cases apart safely - see the gate below.
+     */
+    public function saveEvent($currentRole, $request, $event = null, $followNewRoles = true, ?string $timezoneOverride = null, bool $allowExistingVenueClaim = false)
     {
         $this->validatePassConfiguration($request);
 
@@ -351,6 +410,20 @@ class EventRepo
         if (! $user) {
             $user = $currentRole->user;
         }
+
+        // The "I manage this venue" checkbox. A brand-new venue is the submitter's own creation,
+        // so any signed-in user may claim it (unchanged). Claiming a venue that ALREADY EXISTS
+        // is a capability the CALLER grants, never something inferred from $currentRole: the
+        // public submission paths save onto the submitter's OWN talent schedule, which
+        // createTalentSchedule() hands them owner on, so "is an editor of $currentRole" is
+        // unconditionally true there and would gate nothing. Only EventController::import()
+        // passes the flag, and it is already isEditor()-gated on the schedule in the URL.
+        //
+        // Demo mode is excluded outright: DemoAutoLogin signs any anonymous visitor into the
+        // shared demo account, and a claim writes a globally shared roles row that
+        // DemoService::resetDemoData() would never undo.
+        $wantsClaim = $request->boolean('claim_venue_ownership') && $request->user() && ! is_demo_mode();
+        $mayClaimExisting = $wantsClaim && $allowExistingVenueClaim;
 
         if ($request->venue_name || $request->venue_address1 || $request->venue_address2 || $request->venue_city || $request->venue_state || $request->venue_postal_code || $request->venue_email || $request->venue_phone || $request->venue_website) {
             // Safety-net dedup: if no venue was selected, try a normalized lookup
@@ -411,63 +484,38 @@ class EventRepo
                 $venue->save();
                 $venue->refresh();
 
-                $matchingUser = false;
+                // Authenticated user explicitly claimed ownership via the AI import checkbox.
+                // Wins over the email/phone auto-match below.
+                $matchingUser = $wantsClaim
+                    ? $this->claimVenueOwnership($venue, $request->user())
+                    : null;
 
-                if ($request->boolean('claim_venue_ownership') && $request->user()) {
-                    // Authenticated user explicitly claimed ownership via the AI import checkbox.
-                    // Wins over email/phone auto-match below. Gated on $request->user() (not the
-                    // schedule-owner fallback) so a crafted guest request can't grant ownership.
-                    // Overwrite the AI-parsed venue contact with the auth user's own verified
-                    // contact so isClaimed() returns true and the editability gate locks out
-                    // unrelated followers.
-                    $authUser = $request->user();
-                    $matchingUser = $authUser;
-                    $venue->user_id = $authUser->id;
-                    if ($authUser->email) {
-                        $venue->email = $authUser->email;
-                        $venue->email_verified_at = $authUser->email_verified_at;
-                    }
-                    if ($authUser->phone) {
-                        $venue->phone = $authUser->phone;
-                        $venue->phone_verified_at = $authUser->phone_verified_at;
-                    }
-                    // Save quietly: the auth user's contact was copied verbatim (already
-                    // lowercased/normalized on the User), so bypass the Role::updating hook
-                    // that would otherwise null the just-copied email_verified_at /
-                    // phone_verified_at and send a redundant verification email because the
-                    // email/phone became dirty - defeating the claim.
-                    $venue->saveQuietly();
+                if (! $matchingUser) {
+                    if ($venue->email && $matchingUser = User::whereEmail($venue->email)->first()) {
+                        $venue->user_id = $matchingUser->id;
+                        $venue->email_verified_at = $matchingUser->email_verified_at;
+                        if ($venue->phone && $matchingUser->phone === $venue->phone) {
+                            $venue->phone_verified_at = $matchingUser->phone_verified_at;
+                        }
+                        $venue->save();
 
-                    $authUser->roles()->attach($venue->id, ['level' => 'owner', 'created_at' => now()]);
+                        $matchingUser->roles()->attach($venue->id, ['level' => 'owner', 'created_at' => now()]);
 
-                    if (! $authUser->default_role_id) {
-                        $authUser->default_role_id = $venue->id;
-                        $authUser->save();
-                    }
-                } elseif ($venue->email && $matchingUser = User::whereEmail($venue->email)->first()) {
-                    $venue->user_id = $matchingUser->id;
-                    $venue->email_verified_at = $matchingUser->email_verified_at;
-                    if ($venue->phone && $matchingUser->phone === $venue->phone) {
+                        if (! $matchingUser->default_role_id) {
+                            $matchingUser->default_role_id = $venue->id;
+                            $matchingUser->save();
+                        }
+                    } elseif ($venue->phone && $matchingUser = User::where('phone', $venue->phone)->whereNotNull('phone_verified_at')->first()) {
+                        $venue->user_id = $matchingUser->id;
                         $venue->phone_verified_at = $matchingUser->phone_verified_at;
-                    }
-                    $venue->save();
+                        $venue->save();
 
-                    $matchingUser->roles()->attach($venue->id, ['level' => 'owner', 'created_at' => now()]);
+                        $matchingUser->roles()->attach($venue->id, ['level' => 'owner', 'created_at' => now()]);
 
-                    if (! $matchingUser->default_role_id) {
-                        $matchingUser->default_role_id = $venue->id;
-                        $matchingUser->save();
-                    }
-                } elseif ($venue->phone && $matchingUser = User::where('phone', $venue->phone)->whereNotNull('phone_verified_at')->first()) {
-                    $venue->user_id = $matchingUser->id;
-                    $venue->phone_verified_at = $matchingUser->phone_verified_at;
-                    $venue->save();
-
-                    $matchingUser->roles()->attach($venue->id, ['level' => 'owner', 'created_at' => now()]);
-
-                    if (! $matchingUser->default_role_id) {
-                        $matchingUser->default_role_id = $venue->id;
-                        $matchingUser->save();
+                        if (! $matchingUser->default_role_id) {
+                            $matchingUser->default_role_id = $venue->id;
+                            $matchingUser->save();
+                        }
                     }
                 }
 
@@ -475,10 +523,20 @@ class EventRepo
                     $user->roles()->attach($venue->id, ['level' => 'follower', 'created_at' => now()]);
                 }
             } elseif ($matchedExisting) {
+                // The claim checkbox has to be honoured here too: the user ticked "I manage
+                // this venue" and the dedup happened to land them on an existing UNCLAIMED
+                // row, which is exactly the venue they meant. Without this the tick was
+                // silently dropped and they were left a mere follower, so every event they
+                // imported sat pending on a venue they thought was theirs.
+                $claimer = $mayClaimExisting
+                    ? $this->claimVenueOwnership($venue, $request->user())
+                    : null;
+
                 // Venue was found via the normalized safety-net lookup (not via
                 // a user-picked venue_id). Attach as follower so it appears in
-                // the user's dropdown for future imports.
-                if ($followNewRoles) {
+                // the user's dropdown for future imports - skipped when they just
+                // became its owner.
+                if ($followNewRoles && (! $claimer || $claimer->id != $user->id)) {
                     $alreadyFollows = $user->roles()->where('roles.id', $venue->id)->exists();
                     if (! $alreadyFollows) {
                         $user->roles()->attach($venue->id, ['level' => 'follower', 'created_at' => now()]);
@@ -526,6 +584,19 @@ class EventRepo
                     $venue->country_code = strtolower($request->venue_country_code);
                 }
                 $venue->save();
+
+                // Honour the claim checkbox here too - this branch is already gated on an
+                // unclaimed venue. It must run AFTER the field edits above: the claim
+                // overwrites the contact with the claimer's own verified values and saves
+                // quietly, so a later write of the parsed venue_email would re-dirty email and
+                // trip the Role::updating hook that nulls email_verified_at, undoing it.
+                //
+                // Reachable only because the import client resends venue_name/address/city for
+                // a selected venue, which is what satisfies the outer gate above. A caller that
+                // sent venue_id alone would never get here.
+                if ($mayClaimExisting) {
+                    $this->claimVenueOwnership($venue, $request->user());
+                }
             }
         }
 
@@ -1215,11 +1286,13 @@ class EventRepo
 
         $curatorGroups = $request->input('curator_groups', []);
 
+        // Only an actually-authenticated user counts as the submitter: $user falls back to
+        // $currentRole->user above for guest posts, and treating that owner as the submitter
+        // would auto-accept every guest submission onto the schedule it was sent to.
+        $actingUser = auth()->user() ? $user : null;
+
         foreach ($roles as $role) {
-            if ((auth()->user() && $user->isMember($role->subdomain))
-                || ($role->accept_requests && ! $role->require_approval)
-                || ($currentRole && $role->approved_subdomains
-                    && in_array($currentRole->subdomain, $role->approved_subdomains))) {
+            if ($role->autoAcceptsEventFrom($actingUser, $currentRole)) {
                 $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);
             }
 

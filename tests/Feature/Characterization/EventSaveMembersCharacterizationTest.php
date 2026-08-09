@@ -50,10 +50,12 @@ class EventSaveMembersCharacterizationTest extends TestCase
             'level' => 'follower',
         ]);
 
-        // Talent schedule is attached to the event.
+        // Talent schedule is attached to the event, and auto-accepted: the placeholder has no
+        // user_id, so nobody could ever accept on its behalf (Role::autoAcceptsEventFrom()).
         $this->assertDatabaseHas('event_role', [
             'event_id' => $this->latestEvent()->id,
             'role_id' => $talent->id,
+            'is_accepted' => 1,
         ]);
     }
 

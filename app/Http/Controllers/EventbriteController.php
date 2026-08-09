@@ -302,7 +302,7 @@ class EventbriteController extends Controller
                 }
             }
 
-            $role->autoCurateEvent($event);
+            $role->autoCurateEvent($event, auth()->user());
 
             // Get venue data for deduplication
             $venueData = null;

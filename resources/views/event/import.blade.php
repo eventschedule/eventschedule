@@ -542,19 +542,23 @@
                                         placeholder="{{ $role->isCurator() ? $role->city : '' }}"
                                         autocomplete="off" />
                                 </div>
-
-                                @auth
-                                <div class="mt-4 flex items-center">
-                                    <input :id="'claim_venue_' + idx" type="checkbox"
-                                        v-model="eventClaimVenue[idx]"
-                                        v-bind:disabled="savedEvents[idx]"
-                                        class="h-4 w-4 rounded border-gray-300 text-[var(--brand-blue)] focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]/50">
-                                    <label :for="'claim_venue_' + idx" class="ms-2 text-sm text-gray-700 dark:text-gray-300">
-                                        {{ __('messages.claim_new_venue_ownership') }}
-                                    </label>
-                                </div>
-                                @endauth
                             </div>
+
+                            @auth
+                            {{-- Rendered once for the whole venue section so it covers a brand-new
+                                 venue AND an existing venue nobody has claimed yet. canClaimVenue()
+                                 is the only place that rule lives on the client; the payload
+                                 re-checks it, and EventRepo::claimVenueOwnership() enforces it. --}}
+                            <div v-if="canClaimVenue(idx)" class="mt-4 flex items-center">
+                                <input :id="'claim_venue_' + idx" type="checkbox"
+                                    v-model="eventClaimVenue[idx]"
+                                    v-bind:disabled="savedEvents[idx]"
+                                    class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-900 text-[var(--brand-blue)] focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]/50">
+                                <label :for="'claim_venue_' + idx" class="ms-2 text-sm text-gray-700 dark:text-gray-300">
+                                    {{ __('messages.claim_new_venue_ownership') }}
+                                </label>
+                            </div>
+                            @endauth
                         </div>
 
                         <!-- Configurable Import Fields -->
@@ -1119,7 +1123,7 @@
                 venues: @json($venues ?? []),
                 eventVenueTypes: [],      // 'use_existing' | 'create_new' per event
                 eventSelectedVenues: [],  // selected venue object per event
-                eventClaimVenue: [],      // bool per event: claim ownership of newly created venue
+                eventClaimVenue: [],      // bool per event: claim ownership of a venue nobody owns yet
                 // Time picker dropdown
                 activeTimeDropdown: null,
                 highlightedTimeIndex: {},
@@ -1705,6 +1709,7 @@
                                     id: event.venue_id,
                                     name: event.matched_venue_name,
                                     subdomain: event.venue_subdomain,
+                                    is_claimable: !!event.venue_is_claimable,
                                     _matched: true  // Flag to identify matched venues
                                 };
                                 this.venues.push(matchedVenue);
@@ -1856,14 +1861,34 @@
                 return true;
             },
 
+            canClaimVenue(idx) {
+                // Brand-new venue: unchanged, the user typed it in themselves.
+                if (this.eventVenueTypes[idx] !== 'use_existing') {
+                    return true;
+                }
+                // Claiming a venue that already exists is admin-portal only: the public request
+                // page can create and sign in an account mid-submission, so a seconds-old
+                // account must not be able to take over an ownerless venue. saveEvent()
+                // enforces this server-side too.
+                if ({{ isset($isGuest) && $isGuest ? 'true' : 'false' }}) {
+                    return false;
+                }
+                // Only venues nobody owns yet.
+                const venue = this.eventSelectedVenues[idx];
+                return !!venue && !!venue.is_claimable;
+            },
+
             onVenueTypeChange(idx) {
                 if (this.eventVenueTypes[idx] === 'create_new') {
                     this.eventSelectedVenues[idx] = null;
                 }
+                // The tick belongs to whichever venue was showing when it was made.
+                this.eventClaimVenue[idx] = false;
             },
 
             onVenueSelect(idx, venue) {
                 this.eventSelectedVenues[idx] = venue;
+                this.eventClaimVenue[idx] = false;
                 if (venue) {
                     this.preview.parsed[idx].venue_id = venue.id;
                     this.preview.parsed[idx].venue_name = venue.name;
@@ -1875,6 +1900,7 @@
             clearSelectedVenue(idx) {
                 this.eventSelectedVenues[idx] = null;
                 this.eventVenueTypes[idx] = 'create_new';
+                this.eventClaimVenue[idx] = false;
                 this.preview.parsed[idx].venue_id = null;
             },
 
@@ -2005,7 +2031,7 @@
                             venue_country_code: parsed.event_country_code || '{{ $role->country_code }}',
                             venue_id: venueId,
                             venue_language_code: '{{ $role->language_code }}',
-                            claim_venue_ownership: !!this.eventClaimVenue[idx],
+                            claim_venue_ownership: this.canClaimVenue(idx) && !!this.eventClaimVenue[idx],
                             members: members,
                             name: eventName,
                             name_en: parsed.event_name_en,

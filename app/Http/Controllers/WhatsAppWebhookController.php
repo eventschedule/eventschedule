@@ -140,7 +140,7 @@ class WhatsAppWebhookController extends Controller
             }
 
             // Auto-curate into default curator schedules
-            $role->autoCurateEvent($event);
+            $role->autoCurateEvent($event, auth()->user());
 
             // Build confirmation message
             $timezone = $role->timezone ?: $user->timezone ?: 'UTC';

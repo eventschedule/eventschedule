@@ -1456,7 +1456,7 @@ class EventController extends Controller
             $role->save();
         }
 
-        $role->autoCurateEvent($event);
+        $role->autoCurateEvent($event, $request->user());
 
         session()->forget('pending_request');
         session()->forget('pending_request_allow_guest');
@@ -1654,6 +1654,10 @@ class EventController extends Controller
                     'city' => $item->city,
                     'is_member' => $item->pivot && in_array($item->pivot->level, ['owner', 'admin', 'viewer'], true),
                     'is_connected' => $item->pivot === null,
+                    // Whether the page may offer "I manage this venue, make me the owner".
+                    // user_id, not isClaimed(), so it matches EventRepo::claimVenueOwnership()'s
+                    // guard exactly - anything laxer offers a checkbox the server would refuse.
+                    'is_claimable' => $item->user_id === null,
                 ];
             })->toArray());
         }
@@ -2281,7 +2285,10 @@ class EventController extends Controller
         // Attach newly created / safety-net-matched venues to the importing user as
         // follower so they appear in the venue dropdowns on future visits, matching
         // manual create, calendar sync, and the automated curator import.
-        $event = $this->eventRepo->saveEvent($role, $request, null, true);
+        //
+        // This is the only endpoint whose UI offers "I manage this venue" for a venue that
+        // already exists, and the isEditor() check above is what earns it that capability.
+        $event = $this->eventRepo->saveEvent($role, $request, null, true, allowExistingVenueClaim: true);
 
         if ($request->social_image) {
             $tempDir = storage_path('app/temp');
@@ -2297,7 +2304,7 @@ class EventController extends Controller
             }
         }
 
-        $role->autoCurateEvent($event);
+        $role->autoCurateEvent($event, $request->user());
 
         // Get venue data to return to client for future imports
         $venueData = null;
@@ -2320,6 +2327,10 @@ class EventController extends Controller
                 'city' => $venue->city,
                 'is_member' => $isMember,
                 'is_connected' => ! $hasPivot,
+                // Read back from the DB rather than the in-memory instance: a venue this very
+                // request just claimed must come back non-claimable so the next event in the
+                // session does not re-offer the checkbox.
+                'is_claimable' => Role::whereKey($venue->id)->whereNull('user_id')->exists(),
             ];
         }
 
@@ -2411,7 +2422,7 @@ class EventController extends Controller
 
         $this->attachGuestFlyerImage($request, $event);
 
-        $role->autoCurateEvent($event);
+        $role->autoCurateEvent($event, $request->user());
 
         // Clear the pending request session
         session()->forget(['pending_request', 'pending_request_allow_guest', 'pending_request_form']);
@@ -2616,7 +2627,7 @@ class EventController extends Controller
             }
 
             // Cascade to the talent's own default curators, matching the other import paths.
-            $talent->autoCurateEvent($event);
+            $talent->autoCurateEvent($event, $user);
         } catch (QueryException $e) {
             report($e);
 
@@ -3107,7 +3118,7 @@ class EventController extends Controller
         }
 
         // Auto-curate event
-        $role->autoCurateEvent($event);
+        $role->autoCurateEvent($event, $request->user());
 
         // Clear the pending request session
         session()->forget('pending_request');
