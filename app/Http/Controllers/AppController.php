@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class AppController extends Controller
 {
@@ -483,6 +484,121 @@ class AppController extends Controller
             : $disallowRules."\nSitemap: ".sitemap_url()."\n# AI/LLM-friendly docs: ".config('app.url')."/llms.txt\n";
 
         return response($content, 200)->header('Content-Type', 'text/plain');
+    }
+
+    /**
+     * The web app manifest, which is per host rather than per install.
+     *
+     * Served from a route rather than as public/manifest.webmanifest because it cannot be one
+     * file: layouts/app.blade.php is the shell for the guest portal as well as the admin portal,
+     * so a single static manifest naming "Event Schedule" with our logo turned every schedule's
+     * site into an installable app branded as OURS. Android honours that - once a visitor adds
+     * the schedule to their home screen, every link they open on that host is handed to the
+     * installed app, which shows its launch splash first: our 512px logo on white, for a couple
+     * of seconds, every time. A schedule owner's audience has no idea who we are.
+     *
+     * The historic /manifest.webmanifest path is kept on purpose. Home-screen apps installed
+     * while the static file was live keep polling that URL, so they re-brand themselves to the
+     * schedule on their next update check instead of carrying our logo indefinitely. A new path
+     * would leave every existing install exactly as it is today.
+     *
+     * $subdomain is bound by the guest routes only. A custom domain reaches them too, because
+     * ResolveCustomDomain rewrites the host to {subdomain}.{base} before routing.
+     */
+    public function manifest(?string $subdomain = null)
+    {
+        $manifest = $subdomain
+            ? $this->scheduleManifest($subdomain)
+            : $this->platformManifest();
+
+        return response()->json($manifest, 200, [
+            // Set before JsonResponse would apply its own, so this wins.
+            'Content-Type' => 'application/manifest+json',
+            'Cache-Control' => 'public, max-age=3600',
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * The manifest for one schedule's guest portal.
+     *
+     * start_url and scope are relative so the same document works on all three URL shapes
+     * without knowing which it is on: resolved against the manifest's own URL they give "/" on a
+     * subdomain and on a custom domain, and "/{subdomain}/" on a path-routed selfhost install.
+     * An absolute URL would have to be rewritten per host, and ResolveCustomDomain only rewrites
+     * text/html and application/json bodies - not application/manifest+json.
+     */
+    private function scheduleManifest(string $subdomain): array
+    {
+        $role = Role::subdomain($subdomain)->first();
+
+        if (! $role) {
+            abort(404);
+        }
+
+        $name = $role->translatedName() ?: $subdomain;
+
+        $manifest = [
+            'name' => $name,
+            'short_name' => Str::limit($name, 12, ''),
+            'start_url' => './',
+            'scope' => './',
+            'display' => 'standalone',
+            'background_color' => '#ffffff',
+            'lang' => $role->language_code,
+            'dir' => $role->isRtl() ? 'rtl' : 'ltr',
+        ];
+
+        // Omitted rather than defaulted: falling back to our brand blue would tint the mobile
+        // address bar on a page that is meant to carry no branding of ours.
+        if ($role->accent_color) {
+            $manifest['theme_color'] = $role->accent_color;
+        }
+
+        // The schedule's own logo or nothing at all - never /images/logo.png, which is the whole
+        // bug. Uploads are stored as-is (RoleController::update does no resizing), so the real
+        // dimensions are unknown and "any" is the only honest value; if a browser then declines
+        // to treat the page as installable, the result is the pre-manifest behaviour, which is
+        // what was asked for. A schedule with no logo advertises no icons for the same reason.
+        if ($role->profile_image_url) {
+            $manifest['icons'] = [[
+                'src' => $role->profile_image_url,
+                'sizes' => 'any',
+                'purpose' => 'any',
+            ]];
+        }
+
+        return $manifest;
+    }
+
+    /**
+     * The manifest for the platform's own surfaces - the admin portal, and the apex.
+     *
+     * This is where the Event Schedule identity belongs. On a selfhost or a self-hosted SaaS the
+     * install is the operator's, so it carries their name and logo from config, the same way the
+     * rest of the app does.
+     */
+    private function platformManifest(): array
+    {
+        $isNexus = config('app.is_nexus');
+
+        return [
+            'name' => $isNexus ? 'Event Schedule' : config('app.name'),
+            'short_name' => Str::limit($isNexus ? 'Schedule' : config('app.name'), 12, ''),
+            'start_url' => '/',
+            'scope' => '/',
+            'display' => 'standalone',
+            'background_color' => '#ffffff',
+            'theme_color' => '#4E81FA',
+            'icons' => $isNexus
+                ? [
+                    ['src' => '/images/apple-touch-icon.png', 'sizes' => '180x180', 'type' => 'image/png', 'purpose' => 'any'],
+                    ['src' => '/images/logo.png', 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'any'],
+                    ['src' => '/images/logo.png', 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'any'],
+                ]
+                : [
+                    ['src' => config('app.logo_light'), 'sizes' => 'any', 'purpose' => 'any'],
+                ],
+        ];
     }
 
     public function mapImage(Request $request)

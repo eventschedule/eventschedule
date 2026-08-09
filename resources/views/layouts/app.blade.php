@@ -8,8 +8,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
     <link rel="icon" href="{{ asset('images/favicon.png') }}">
-    <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
-    <meta name="theme-color" content="#4E81FA">
+    {{-- <link rel="manifest"> and <meta name="theme-color"> are deliberately NOT here. They name
+         and colour the site as an app, and this layout is the shell for the guest portal as well
+         as the admin portal, so a single value here brands every schedule's site as ours: it made
+         each of them installable as an app called "Event Schedule", whose launch splash is our
+         logo. Each inner layout supplies its own instead - see AppController::manifest(). --}}
     {{-- Host-aware: this layout's head renders on guest pages too, custom domains included. --}}
     <link rel="sitemap" type="application/xml" href="{{ sitemap_url() }}">
 

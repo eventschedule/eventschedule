@@ -71,6 +71,12 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::get('/sitemap.xml', [SitemapController::class, 'schedule'])
             ->name('sitemap.schedule')
             ->withoutMiddleware('web');
+        // This schedule's own web app manifest. It has to be registered per tenant host, ahead of
+        // the domain-less platform manifest below, or every schedule's site is installable as an
+        // app called "Event Schedule" showing our logo as its splash - see AppController::manifest.
+        Route::get('/manifest.webmanifest', [AppController::class, 'manifest'])
+            ->name('role.manifest')
+            ->withoutMiddleware('web');
         Route::get('/api/past-events', [RoleController::class, 'listPastEvents'])->name('role.list_past_events');
         Route::get('/api/calendar-events', [RoleController::class, 'calendarEvents'])->name('role.calendar_events');
         Route::get('/request', [RoleController::class, 'request'])->name('role.request');
@@ -166,6 +172,19 @@ if (config('app.hosted') && ! config('app.is_testing')) {
 } else {
     Route::post('/test_database', [AppController::class, 'testDatabase'])->name('app.test_database');
 }
+
+// The platform's own web app manifest, for the admin portal and the apex. Deliberately below the
+// tenant group above rather than beside /robots.txt at the top of this file: a domain-less route
+// registered first matches on tenant subdomains too, and would hand every schedule the Event
+// Schedule identity - which is the thing AppController::manifest() exists to stop.
+// withoutMiddleware('web') on all three registrations for the same reason the sitemap routes use
+// it, plus one this file did not have before: until now /manifest.webmanifest was a static file
+// that never reached Laravel, so putting it in the web group would start counting a browser's
+// manifest fetch as a marketing visit (TrackMarketingVisit) and attach a session cookie that stops
+// the CDN caching it.
+Route::get('/manifest.webmanifest', [AppController::class, 'manifest'])
+    ->name('app.manifest')
+    ->withoutMiddleware('web');
 
 // Self-update is available on any non-nexus install (selfhosted or a self-hosted SaaS).
 // On a multi-tenant self-hosted SaaS it is operator-only (the 'admin' middleware,
@@ -1577,6 +1596,12 @@ if (config('app.is_testing') || config('app.env') == 'local' || ! config('app.ho
 if (! config('app.hosted') || config('app.is_testing')) {
     Route::get('/{subdomain}/sitemap.xml', [SitemapController::class, 'schedule'])
         ->name('sitemap.schedule')
+        ->withoutMiddleware('web');
+    // Nested under the tenant path, and registered ahead of the /{subdomain}/{slug} catch-all at
+    // the bottom of this group, so a guest page advertises the schedule's own manifest rather
+    // than the platform one - see AppController::manifest.
+    Route::get('/{subdomain}/manifest.webmanifest', [AppController::class, 'manifest'])
+        ->name('role.manifest')
         ->withoutMiddleware('web');
     Route::get('/{subdomain}/api/past-events', [RoleController::class, 'listPastEvents'])->name('role.list_past_events');
     Route::get('/{subdomain}/api/calendar-events', [RoleController::class, 'calendarEvents'])->name('role.calendar_events');

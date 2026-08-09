@@ -14,6 +14,10 @@
             <link rel="apple-touch-icon" href="{{ $role->profile_image_url }}">
         @endif
 
+        {{-- A ticket belongs to the schedule that sold it, so this page names their app, not ours.
+             Renders nothing when role() came back null, which is the safe half of the trade. --}}
+        @include('partials.web-app-manifest', ['manifestRole' => $role])
+
         <link href="/vendor/manrope/manrope.css" rel="stylesheet">
         <style {!! nonce_attr() !!}>
             /* Animations */

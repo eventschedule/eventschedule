@@ -7,6 +7,10 @@
 
     <x-slot name="head">
         @include('partials.site-head-code')
+
+        {{-- The order belongs to the schedule that sold it; $role is nullable here for the same
+             reason as on the ticket page, and a null role deliberately renders nothing. --}}
+        @include('partials.web-app-manifest', ['manifestRole' => $role])
     </x-slot>
 
     <div class="max-w-2xl mx-auto px-4 py-10">

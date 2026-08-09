@@ -172,6 +172,11 @@
             <link rel="apple-touch-icon" href="{{ $role->profile_image_url }}">
         @endif
 
+        {{-- This schedule's own manifest, never the platform one. Not plan-gated, unlike the
+             favicon above: that gate chooses between a tenant's logo and a neutral default,
+             whereas the alternative here is showing OUR logo full screen to their audience. --}}
+        @include('partials.web-app-manifest', ['manifestRole' => $role])
+
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         @foreach($fonts as $font)

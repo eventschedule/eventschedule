@@ -1,4 +1,10 @@
 <x-app-layout>
+    {{-- This view renders through the shared shell without going via app-admin, so it carries the
+         platform manifest itself. --}}
+    <x-slot name="head">
+        @include('partials.web-app-manifest', ['platformApp' => true])
+    </x-slot>
+
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             {{ __('messages.templates') }}

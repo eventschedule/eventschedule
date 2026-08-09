@@ -1,4 +1,11 @@
 <x-app-layout :title="__('messages.get_started') . ' | Event Schedule'">
+
+    {{-- This view renders through the shared shell without going via app-admin, so it carries the
+         platform manifest itself. --}}
+    <x-slot name="head">
+        @include('partials.web-app-manifest', ['platformApp' => true])
+    </x-slot>
+
     <div class="flex flex-col items-center px-4 pt-8 pb-12 sm:px-6 lg:px-8">
         {{-- Deliberately not a link: the dashboard would forward zero-schedule users straight back here --}}
         <x-application-logo />

@@ -3,6 +3,11 @@
 <x-app-layout :theme-variants="true" :title="(request()->path() != '/' ? implode(' > ', array_map('ucwords', array_slice(explode('/', str_replace(['-', '_'], ' ', request()->path())), 0, 2))) : '') . ' | Event Schedule'">
 
     <x-slot name="head">
+        {{-- The admin portal is the one surface that genuinely is the Event Schedule app, so it
+             is the one that carries the platform manifest and brand colour. The guest portal
+             renders through the same shell and supplies its schedule's own. --}}
+        @include('partials.web-app-manifest', ['platformApp' => true])
+
         <script {!! nonce_attr() !!}>
             $(document).ready(function() {
                 const sidebar = document.getElementById('sidebar');
