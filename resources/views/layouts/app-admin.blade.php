@@ -1,4 +1,6 @@
-<x-app-layout :title="(request()->path() != '/' ? implode(' > ', array_map('ucwords', array_slice(explode('/', str_replace(['-', '_'], ' ', request()->path())), 0, 2))) : '') . ' | Event Schedule'">
+{{-- theme-variants opts this layout in to the six palettes. The guest portal
+     renders through the same <x-app-layout> shell and deliberately does not. --}}
+<x-app-layout :theme-variants="true" :title="(request()->path() != '/' ? implode(' > ', array_map('ucwords', array_slice(explode('/', str_replace(['-', '_'], ' ', request()->path())), 0, 2))) : '') . ' | Event Schedule'">
 
     <x-slot name="head">
         <script {!! nonce_attr() !!}>

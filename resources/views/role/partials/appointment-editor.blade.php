@@ -31,19 +31,19 @@
     // One segmented-control language for every small enum on this form: the duration quick-picks, the
     // free/paid switch, the location type and the payment method. Same shell and same pressed look as
     // the tab's sub-view switcher.
-    $segShell = 'inline-flex flex-wrap items-center gap-1 rounded-xl bg-gray-100 dark:bg-[#252526] p-1';
+    $segShell = 'inline-flex flex-wrap items-center gap-1 rounded-xl bg-gray-100 dark:bg-gray-800 p-1';
     $segIdle = 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300';
-    $segOn = 'bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-white shadow-sm';
+    $segOn = 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm';
     $segItem = 'rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200';
     $segPressed = 'box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08);';
     // Radio variant: the input stays a real radio (keyboard, screen reader, form posting all intact)
     // and only the sibling span is painted.
     $segRadio = $segItem.' block cursor-pointer '.$segIdle
-        .' peer-checked:bg-white dark:peer-checked:bg-[#1e1e1e] peer-checked:text-gray-900 dark:peer-checked:text-white'
+        .' peer-checked:bg-white dark:peer-checked:bg-gray-900 peer-checked:text-gray-900 dark:peer-checked:text-white'
         .' peer-checked:shadow-[inset_0_2px_4px_rgba(0,0,0,0.08)]'
         .' peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--brand-blue)]';
 
-    $iconBtn = 'inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#2d2d30] hover:text-gray-700 dark:hover:text-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)]';
+    $iconBtn = 'inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)]';
     $rowClass = 'flex flex-wrap items-center gap-2 py-2 border-b border-gray-100 dark:border-gray-700 last:border-b-0';
 @endphp
 
@@ -536,7 +536,7 @@
             form.querySelectorAll('.duration-chip').forEach(function (chip) {
                 var on = chip.dataset.duration === String(parseInt(durationInput.value, 10));
                 chip.classList.toggle('bg-white', on);
-                chip.classList.toggle('dark:bg-[#1e1e1e]', on);
+                chip.classList.toggle('dark:bg-gray-900', on);
                 chip.classList.toggle('text-gray-900', on);
                 chip.classList.toggle('dark:text-white', on);
                 chip.classList.toggle('shadow-sm', on);
@@ -595,7 +595,7 @@
             form.querySelectorAll('.price-mode-chip').forEach(function (chip) {
                 var on = chip.dataset.priceMode === priceMode;
                 chip.classList.toggle('bg-white', on);
-                chip.classList.toggle('dark:bg-[#1e1e1e]', on);
+                chip.classList.toggle('dark:bg-gray-900', on);
                 chip.classList.toggle('text-gray-900', on);
                 chip.classList.toggle('dark:text-white', on);
                 chip.classList.toggle('shadow-sm', on);

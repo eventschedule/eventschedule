@@ -20,10 +20,10 @@
   <style {!! nonce_attr() !!}>
   .iti { display: block; }
   .iti input.iti__tel-input { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; font-size: 1rem !important; line-height: 1.5rem !important; height: auto !important; }
-  .dark .iti { --iti-dropdown-bg: #1e1e1e; --iti-hover-color: #2d2d30; --iti-border-color: #2d2d30; --iti-dialcode-color: #9ca3af; --iti-arrow-color: #d1d5db; }
-  .dark .iti__dropdown-content { color: #d1d5db; }
-  .dark .iti__selected-dial-code { color: #d1d5db; }
-  .dark .iti__search-input { background: #1e1e1e; color: #d1d5db; border-color: #2d2d30; }
+  .dark .iti { --iti-dropdown-bg: rgb(var(--ap-bg)); --iti-hover-color: rgb(var(--ap-border)); --iti-border-color: rgb(var(--ap-border)); --iti-dialcode-color: rgb(var(--ap-ink-3)); --iti-arrow-color: rgb(var(--ap-ink-2)); }
+  .dark .iti__dropdown-content { color: rgb(var(--ap-ink-2)); }
+  .dark .iti__selected-dial-code { color: rgb(var(--ap-ink-2)); }
+  .dark .iti__search-input { background: rgb(var(--ap-bg)); color: rgb(var(--ap-ink-2)); border-color: rgb(var(--ap-border)); }
   </style>
   <script src="{{ asset('vendor/intl-tel-input/js/intlTelInput.min.js') }}" {!! nonce_attr() !!}></script>
   @endif

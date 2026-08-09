@@ -5,15 +5,15 @@
     .gp-dropdown { border: 1px solid rgba(0,0,0,0.08); }
     .gp-dropdown .py-1 { padding: 4px; }
     .gp-dropdown-item:hover { background-color: #f3f4f6; }
-    .dark .gp-dropdown { background-color: #1e1e1e; border-color: rgba(255,255,255,0.06); }
+    .dark .gp-dropdown { background-color: rgb(var(--ap-bg)); border-color: rgba(255,255,255,0.06); }
     .dark .gp-dropdown-item:hover { background-color: rgba(255,255,255,0.08); }
     /* GP Mobile Bottom Sheet */
     .gp-bottom-sheet { background-color: #fff; }
     .gp-bottom-sheet-handle { background-color: #d1d5db; }
     .gp-bottom-sheet-item:hover { background-color: #f3f4f6; }
-    .dark .gp-bottom-sheet { background-color: #1e1e1e; }
+    .dark .gp-bottom-sheet { background-color: rgb(var(--ap-bg)); }
     .dark .gp-bottom-sheet-handle { background-color: rgba(255,255,255,0.12); }
-    .dark .gp-bottom-sheet-item { color: #d1d5db; }
+    .dark .gp-bottom-sheet-item { color: rgb(var(--ap-ink-2)); }
     .dark .gp-bottom-sheet-item:hover { background-color: rgba(255,255,255,0.08); }
   </style>
 

@@ -23,14 +23,14 @@
                     <div class="flex flex-wrap items-center gap-2 shrink-0">
                         @if (config('app.is_nexus'))
                             <a href="{{ route('admin.translations.suggestions') }}"
-                                class="inline-flex items-center px-4 py-3 text-base font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-[#2d2d30] transition-all duration-200">
+                                class="inline-flex items-center px-4 py-3 text-base font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200">
                                 @{{ msg.reviewSuggestions }}
                                 <span v-if="pendingSuggestions > 0"
                                     class="ms-1.5 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-xs font-bold text-white bg-red-500 rounded-full">@{{ pendingSuggestions }}</span>
                             </a>
                         @else
                             <button v-if="unsharedCount > 0" type="button" @click="openShareModal"
-                                class="inline-flex items-center px-4 py-3 text-base font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-[#2d2d30] transition-all duration-200">
+                                class="inline-flex items-center px-4 py-3 text-base font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200">
                                 <svg class="w-5 h-5 me-1.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
                                 </svg>
@@ -39,7 +39,7 @@
                         @endif
                         <button type="button" @click="copyAsPhp" :disabled="!hasOverrides"
                             :title="hasOverrides ? msg.copyAsPhp : msg.noCustomizationsToCopy"
-                            class="inline-flex items-center px-4 py-3 text-base font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-[#2d2d30] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                            class="inline-flex items-center px-4 py-3 text-base font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
                             <svg v-if="!copiedPhp" class="w-5 h-5 me-1.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
                             </svg>
@@ -125,7 +125,7 @@
                     <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">@{{ msg.noMatchingKeys }}</h3>
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">@{{ msg.noMatchingKeysHint }}</p>
                     <button v-if="searchQuery || statusFilter !== 'all'" type="button" @click="clearFilters"
-                        class="mt-4 px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2d2d30] transition-all duration-200">
+                        class="mt-4 px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200">
                         @{{ msg.clear }}
                     </button>
                 </div>
@@ -177,7 +177,7 @@
                                     <td class="px-6 py-4 text-end">
                                         <button v-if="row.override !== null && !isDemo" type="button" @click="revertRow(row)"
                                             :aria-label="msg.revertToDefault + ': ' + row.key" :title="msg.revertToDefault"
-                                            class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2d2d30] transition-all duration-200">
+                                            class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
                                             </svg>
@@ -192,11 +192,11 @@
                         <p class="text-sm text-gray-500 dark:text-gray-400" aria-live="polite">@{{ showingText }}</p>
                         <div class="flex gap-2">
                             <button type="button" @click="prevPage" :disabled="page === 1"
-                                class="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2d2d30] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                                class="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
                                 @{{ msg.previous }}
                             </button>
                             <button type="button" @click="nextPage" :disabled="page >= totalPages"
-                                class="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2d2d30] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                                class="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
                                 @{{ msg.next }}
                             </button>
                         </div>
@@ -229,7 +229,7 @@
 
             {{-- Bottom action dock --}}
             <div v-if="dockVisible"
-                class="fixed bottom-0 start-0 end-0 lg:start-72 z-40 border-t border-gray-200 dark:border-[#2d2d30] bg-white dark:bg-[#1e1e1e] shadow-lg px-4 sm:px-6 lg:px-8 py-3"
+                class="fixed bottom-0 start-0 end-0 lg:start-72 z-40 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg px-4 sm:px-6 lg:px-8 py-3"
                 role="region" aria-live="polite">
                 {{-- Unsaved changes --}}
                 <div v-if="dockState === 'save'" class="flex items-center justify-between gap-4">
@@ -257,7 +257,7 @@
                     <div class="flex items-center gap-2 shrink-0">
                         <button type="button" @click="notNow" class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-all duration-200">@{{ msg.notNow }}</button>
                         <button type="button" @click="alwaysShare"
-                            class="px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2d2d30] transition-all duration-200">@{{ msg.alwaysShare }}</button>
+                            class="px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200">@{{ msg.alwaysShare }}</button>
                         <button type="button" @click="shareNow"
                             class="px-3 py-2 text-sm font-medium rounded-lg text-white bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] transition-all duration-200">@{{ msg.shareNow }}</button>
                     </div>
@@ -266,7 +266,7 @@
                 <div v-else-if="dockState === 'notice'" class="flex items-center justify-between gap-4">
                     <p class="text-sm" :class="notice.tone === 'error' ? 'text-red-600 dark:text-red-400' : 'text-green-700 dark:text-green-400'">@{{ notice.text }}</p>
                     <button v-if="notice.retry" type="button" @click="retryNotice"
-                        class="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2d2d30] transition-all duration-200">
+                        class="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200">
                         @{{ msg.tryAgain }}
                     </button>
                 </div>
@@ -276,7 +276,7 @@
                 {{-- Share modal --}}
                 <div v-if="showShareModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
                     @click.self="closeShareModal" role="dialog" aria-modal="true" :aria-label="msg.shareModalTitle">
-                    <div class="bg-white dark:bg-[#1e1e1e] rounded-xl shadow-xl max-w-3xl w-full mx-4 max-h-[85vh] flex flex-col">
+                    <div class="bg-white dark:bg-gray-900 rounded-xl shadow-xl max-w-3xl w-full mx-4 max-h-[85vh] flex flex-col">
                         <div class="flex items-center justify-between px-5 pt-5 pb-3">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">@{{ msg.shareModalTitle }}</h3>
                             <button ref="shareModalClose" type="button" @click="closeShareModal" :aria-label="msg.close"
@@ -301,7 +301,7 @@
                                     <label :for="'share-' + item.hash" class="min-w-0 flex-1 cursor-pointer">
                                         <div class="flex flex-wrap items-center gap-2">
                                             <span class="font-mono text-xs text-gray-900 dark:text-gray-100" dir="ltr">@{{ item.key }}</span>
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-[#2d2d30] text-gray-600 dark:text-gray-400">@{{ item.locale }} &middot; @{{ item.group }}</span>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">@{{ item.locale }} &middot; @{{ item.group }}</span>
                                         </div>
                                         <div class="mt-1 grid sm:grid-cols-[1fr,auto,1fr] items-center gap-2 text-sm">
                                             <span class="text-gray-500 dark:text-gray-400 line-clamp-2" dir="auto">@{{ item.before }}</span>
@@ -326,7 +326,7 @@
                             <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">@{{ msg.consentDisclosure }}</p>
                             <div class="flex justify-end gap-2">
                                 <button type="button" @click="closeShareModal"
-                                    class="px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2d2d30] transition-all duration-200">
+                                    class="px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200">
                                     @{{ msg.cancel }}
                                 </button>
                                 <button type="button" @click="shareSelected" :disabled="sharing || checkedShareCount === 0"

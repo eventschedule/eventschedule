@@ -11,10 +11,10 @@
                 </div>
 
                 {{-- Status filter --}}
-                <div class="flex items-center gap-1 rounded-xl bg-gray-100 dark:bg-[#252526] p-1">
+                <div class="flex items-center gap-1 rounded-xl bg-gray-100 dark:bg-gray-800 p-1">
                     @foreach (['pending', 'approved', 'suspended', 'all'] as $key)
                         <a href="{{ route('admin.federation', ['status' => $key]) }}"
-                           class="rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200 {{ $status === $key ? 'bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}"
+                           class="rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200 {{ $status === $key ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}"
                            @if ($status === $key) style="box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08);" @endif>
                             @lang('messages.federation_status_'.$key)
                             @if ($key === 'pending' && $pendingCount > 0)
@@ -97,7 +97,7 @@
                         {{-- What is actually being approved. Approving on a name alone is
                              approving unseen third-party content onto this domain. --}}
                         @if (! empty($samples[$instance->id]) && count($samples[$instance->id]))
-                            <div class="mt-4 rounded-lg bg-gray-50 dark:bg-[#252526] p-4">
+                            <div class="mt-4 rounded-lg bg-gray-50 dark:bg-gray-800 p-4">
                                 <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">@lang('messages.federation_sample_listings')</p>
                                 <ul class="space-y-2">
                                     @foreach ($samples[$instance->id] as $sample)

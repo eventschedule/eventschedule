@@ -22,8 +22,8 @@
       margin-top: 2px;
     }
     .dark .time-dropdown {
-      background: #1e1e1e;
-      border-color: #2d2d30;
+      background: rgb(var(--ap-bg));
+      border-color: rgb(var(--ap-border));
     }
     .time-dropdown.open {
       display: block;
@@ -35,7 +35,7 @@
       color: #111827;
     }
     .dark .time-dropdown-item {
-      color: #d1d5db;
+      color: rgb(var(--ap-ink-2));
     }
     .time-dropdown-item:hover,
     .time-dropdown-item.highlighted {
@@ -44,7 +44,7 @@
     }
     .dark .time-dropdown-item:hover,
     .dark .time-dropdown-item.highlighted {
-      background: #2d2d30;
+      background: rgb(var(--ap-border));
       color: #fff;
     }
     .time-dropdown-item.hidden {

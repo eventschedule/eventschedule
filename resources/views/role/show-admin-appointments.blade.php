@@ -88,7 +88,7 @@
         default => __('messages.appointments_in_person'),
     };
 
-    $chipClass = 'inline-flex items-center rounded-full bg-gray-100 dark:bg-[#2d2d30] px-2 py-0.5 text-xs text-gray-600 dark:text-gray-300';
+    $chipClass = 'inline-flex items-center rounded-full bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-xs text-gray-600 dark:text-gray-300';
     $menuItemClass = 'flex w-full items-center gap-2 px-4 py-2.5 text-start text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors';
     $warnClass = 'flex items-start gap-2 rounded-lg border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-2 text-xs text-amber-800 dark:text-amber-200';
     $secondaryBtnClass = 'ap-secondary-btn inline-flex items-center justify-center rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)]';
@@ -118,11 +118,11 @@
              beside the button it gates rather than below the list. --}}
         @if (! $editorOpen)
             <div class="flex flex-wrap items-center gap-3">
-                <div class="inline-flex items-center gap-1 rounded-xl bg-gray-100 dark:bg-[#252526] p-1">
+                <div class="inline-flex items-center gap-1 rounded-xl bg-gray-100 dark:bg-gray-800 p-1">
                     @foreach ([['types', __('messages.appointment_types'), 0], ['bookings', __('messages.bookings'), $pendingBookingCount]] as [$key, $label, $badge])
                         <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments'] + ($key === 'bookings' ? ['view' => 'bookings'] : [])) }}"
                            @if ($view === $key) aria-current="page" style="box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08);" @endif
-                           class="rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200 {{ $view === $key ? 'bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
+                           class="rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200 {{ $view === $key ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
                             {{ $label }}
                             @if ($badge > 0)
                                 <span class="ms-1 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-xs font-bold text-white bg-red-500 rounded-full">{{ $badge }}</span>

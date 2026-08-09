@@ -1,10 +1,11 @@
 <x-docs-page
     key="account-settings"
     description="Learn how to manage your profile, payment methods, API access, backups and connected calendars in Event Schedule."
-    lede="Everything on the Settings page: your profile, the payment method your tickets are sold through, API and webhook access, connected calendars, backups and account security."
+    lede="Everything on the Settings page: your profile, how the admin portal looks, the payment method your tickets are sold through, API and webhook access, connected calendars, backups and account security."
 >
     <x-slot:toc>
         <x-doc-nav-link href="#profile">Profile Information</x-doc-nav-link>
+        <x-doc-nav-link href="#appearance">Appearance</x-doc-nav-link>
         <x-doc-nav-group label="Payment Methods" href="#payments">
             <x-doc-nav-link href="#stripe">Stripe</x-doc-nav-link>
             <x-doc-nav-link href="#invoice-ninja">Invoice Ninja</x-doc-nav-link>
@@ -102,6 +103,54 @@
                 </tbody>
             </table>
         </div>
+    </section>
+
+    <!-- Appearance -->
+    <section id="appearance" class="doc-section">
+        <h2 class="doc-heading">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z" />
+            </svg>
+            Appearance
+        </h2>
+
+        <p class="doc-paragraph">
+            The <span class="font-semibold text-gray-900 dark:text-white">Appearance</span> tab in Settings controls how the
+            admin portal looks. You can also change it from the theme controls at the bottom of the sidebar, on any page.
+        </p>
+
+        <p class="doc-paragraph">
+            <span class="font-semibold text-gray-900 dark:text-white">Theme</span> chooses Light, Dark, or System. System
+            follows your device's own light/dark setting and updates the moment your device switches.
+        </p>
+
+        <p class="doc-paragraph">
+            <span class="font-semibold text-gray-900 dark:text-white">Palette</span> then picks the exact colours. There are
+            three light palettes and three dark ones, and you set each side independently - the palette row shows the three
+            options for whichever mode you are currently viewing, so switch Theme to Dark to choose your dark palette.
+        </p>
+
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr><th>Palette</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><span class="font-semibold text-gray-900 dark:text-white">Sand</span></td><td>Light. Warm beige page with white panels.</td></tr>
+                    <tr><td><span class="font-semibold text-gray-900 dark:text-white">Mist</span></td><td>Light. Cool blue-grey page with white panels. The default.</td></tr>
+                    <tr><td><span class="font-semibold text-gray-900 dark:text-white">Paper</span></td><td>Light. Crisp white page with softly recessed panels.</td></tr>
+                    <tr><td><span class="font-semibold text-gray-900 dark:text-white">Espresso</span></td><td>Dark. Warm deep brown.</td></tr>
+                    <tr><td><span class="font-semibold text-gray-900 dark:text-white">Midnight</span></td><td>Dark. Cool charcoal-navy. The default.</td></tr>
+                    <tr><td><span class="font-semibold text-gray-900 dark:text-white">Carbon</span></td><td>Dark. True black, easiest on OLED screens.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p class="doc-paragraph">
+            Your choice is stored in your browser rather than on your account, so it applies to the device you set it on.
+            Set it again on your phone or another computer to match. Public schedule pages are unaffected - they keep the
+            colours the schedule owner configured.
+        </p>
     </section>
 
     <!-- Payment Methods -->

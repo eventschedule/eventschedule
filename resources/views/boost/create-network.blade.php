@@ -143,14 +143,14 @@
                     <input v-for="code in selectedCountries" :key="code"
                            type="hidden" name="visitor_countries[]" :value="code">
 
-                    <div class="mt-2 rounded-xl border border-gray-200 dark:border-[#2d2d30] overflow-hidden">
-                        <div class="border-b border-gray-200 dark:border-[#2d2d30] p-2">
+                    <div class="mt-2 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        <div class="border-b border-gray-200 dark:border-gray-700 p-2">
                             <x-text-input type="search" v-model="countrySearch" class="block w-full text-sm"
                                 :placeholder="__('messages.search')" autocomplete="off" />
                         </div>
                         <div class="max-h-48 overflow-y-auto p-2" v-cloak>
                             <label v-for="c in filteredCountries" :key="c.code"
-                                   class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2d2d30] transition-all duration-200">
+                                   class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200">
                                 <input type="checkbox" :value="c.code" v-model="selectedCountries"
                                        class="rounded text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                                 <span>@{{ c.name }}</span>
@@ -174,15 +174,15 @@
                 <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                     @lang('messages.promotion_preview')
                 </h2>
-                <div class="mt-3 rounded-xl bg-gray-50 dark:bg-[#252526] p-4">
-                    <div class="overflow-hidden rounded-2xl bg-white dark:bg-[#1e1e1e] shadow-sm ring-1 ring-black/5 dark:ring-white/10">
+                <div class="mt-3 rounded-xl bg-gray-50 dark:bg-gray-800 p-4">
+                    <div class="overflow-hidden rounded-2xl bg-white dark:bg-gray-900 shadow-sm ring-1 ring-black/5 dark:ring-white/10">
                         <div class="flex items-stretch gap-4 p-4">
                             @if ($event->flyer_image_url)
                             <img src="{{ $event->flyer_image_url }}" alt="" width="96" height="96"
-                                 class="h-24 w-24 flex-none rounded-xl object-cover bg-gray-100 dark:bg-[#2d2d30]">
+                                 class="h-24 w-24 flex-none rounded-xl object-cover bg-gray-100 dark:bg-gray-700">
                             @endif
                             <div class="flex min-w-0 flex-col">
-                                <span class="mb-1.5 inline-flex self-start items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-gray-500 dark:bg-[#2d2d30] dark:text-gray-400">
+                                <span class="mb-1.5 inline-flex self-start items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-gray-500 dark:bg-gray-700 dark:text-gray-400">
                                     @lang('messages.promoted')
                                 </span>
                                 {{-- eventName comes from data() rather than being inlined here.

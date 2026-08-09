@@ -51,7 +51,7 @@
         </div>
 
         <div v-show="open" id="es-cart-panel"
-             class="es-cart-panel fixed {{ $role->isRtl() ? 'left-4' : 'right-4' }} z-40 w-[min(22rem,calc(100vw-2rem))] max-h-[min(80vh,44rem)] overflow-y-auto rounded-2xl bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2d2d30] shadow-2xl p-5">
+             class="es-cart-panel fixed {{ $role->isRtl() ? 'left-4' : 'right-4' }} z-40 w-[min(22rem,calc(100vw-2rem))] max-h-[min(80vh,44rem)] overflow-y-auto rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xl p-5">
             <div class="flex items-center justify-between mb-3">
                 <h2 class="font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.your_cart') }}</h2>
                 <button type="button" @click="open = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200" aria-label="{{ __('messages.close') }}">
@@ -102,7 +102,7 @@
             {{-- The buyer was previously asked to check out without ever being shown a number. These
                  prices come from localStorage and are for orientation only - checkout re-reads and
                  re-prices every ticket from the database, so nothing here is trusted. --}}
-            <div v-if="orderTotal !== null" class="mt-4 pt-3 border-t border-gray-200 dark:border-[#2d2d30]">
+            <div v-if="orderTotal !== null" class="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between text-sm font-semibold text-gray-900 dark:text-gray-100">
                     <span>{{ __('messages.total') }}</span>
                     <span>@{{ formatMoney(orderTotal, legs[0] && legs[0].currency) }}</span>
@@ -134,11 +134,11 @@
 
                 <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1" for="es-cart-name">{{ __('messages.name') }}</label>
                 <input id="es-cart-name" name="name" v-model="name" required
-                    class="w-full mb-3 rounded-lg border-gray-300 dark:border-[#2d2d30] dark:bg-[#252526] dark:text-gray-300 text-sm">
+                    class="w-full mb-3 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 text-sm">
 
                 <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1" for="es-cart-email">{{ __('messages.email') }}</label>
                 <input id="es-cart-email" name="email" type="email" v-model="email" required
-                    class="w-full mb-4 rounded-lg border-gray-300 dark:border-[#2d2d30] dark:bg-[#252526] dark:text-gray-300 text-sm">
+                    class="w-full mb-4 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 text-sm">
 
                 {{-- Shown when ANY leg asks for a phone and required when ANY leg requires one -
                      the same union TicketCheckoutRequest applies across legs. Without the field the
@@ -147,7 +147,7 @@
                 <template v-if="asksPhone">
                     <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1" for="es-cart-phone">{{ __('messages.phone') }}</label>
                     <input id="es-cart-phone" name="phone" type="tel" v-model="phone" :required="requiresPhone"
-                        class="w-full mb-4 rounded-lg border-gray-300 dark:border-[#2d2d30] dark:bg-[#252526] dark:text-gray-300 text-sm">
+                        class="w-full mb-4 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 text-sm">
                 </template>
 
                 {{-- The server has applied order-level gift cards since resolveOrderGiftCard(), but
@@ -163,7 +163,7 @@
                 @if ($role->giftCardsEnabled())
                     <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1" for="es-cart-gift-card">{{ __('messages.gift_card_code') }}</label>
                     <input id="es-cart-gift-card" name="gift_card_code" v-model="giftCardCode" maxlength="20"
-                        class="w-full mb-4 rounded-lg border-gray-300 dark:border-[#2d2d30] dark:bg-[#252526] dark:text-gray-300 text-sm">
+                        class="w-full mb-4 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 text-sm">
                 @endif
 
                 @if (! auth()->check() && config('app.hosted'))
@@ -171,7 +171,7 @@
                          accept the terms before taking their money. --}}
                     <label class="flex items-start gap-2 mb-4 text-xs text-gray-600 dark:text-gray-400">
                         <input type="checkbox" name="terms" value="1" required
-                            class="mt-0.5 h-4 w-4 rounded border-gray-300 dark:border-[#2d2d30] dark:bg-[#252526] text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                            class="mt-0.5 h-4 w-4 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-800 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                         <span>{!! str_replace([':terms', ':privacy'], [
                             '<a href="'.marketing_url('/terms-of-service').'" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">'.__('messages.terms_of_service').'</a>',
                             '<a href="'.marketing_url('/privacy').'" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">'.__('messages.privacy_policy').'</a>',

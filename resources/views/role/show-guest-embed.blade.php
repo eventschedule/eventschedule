@@ -14,8 +14,8 @@
             border: 1px solid #d1d5db !important;
           }
           .dark .calendar-panel-border {
-            background: #252526 !important;
-            border-color: #2d2d30 !important;
+            background: rgb(var(--ap-surface)) !important;
+            border-color: rgb(var(--ap-border)) !important;
           }
           .calendar-panel-border-transparent {
             background: transparent !important;

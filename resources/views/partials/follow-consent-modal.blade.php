@@ -162,12 +162,12 @@ document.addEventListener('DOMContentLoaded', function() {
     aria-modal="true"
     aria-labelledby="follow-consent-title"
     aria-describedby="follow-consent-desc">
-    <div class="bg-white dark:bg-[#1e1e1e] rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-200 dark:border-[#2d2d30]"
+    <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-200 dark:border-gray-700"
         @click.stop>
 
         <div class="px-6 pt-6 pb-2 flex items-center gap-3">
             <img v-if="scheduleImage" :src="scheduleImage" :alt="scheduleName"
-                class="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-gray-200 dark:border-[#2d2d30]">
+                class="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-gray-200 dark:border-gray-700">
             <h3 id="follow-consent-title" class="text-lg font-semibold text-gray-900 dark:text-gray-100 flex-1">
                 {{ __('messages.follow_consent_title') }} <span v-text="scheduleName"></span>
             </h3>
@@ -195,19 +195,19 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="px-6 pb-4">
             <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
                 <input type="checkbox" v-model="dontAskAgain"
-                    class="rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:bg-[#2d2d30]">
+                    class="rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:bg-gray-700">
                 <span>{{ __('messages.follow_consent_dont_ask_again') }}</span>
             </label>
         </div>
 
-        <div class="px-6 pb-6 pt-2 flex justify-end gap-3 border-t border-gray-100 dark:border-[#2d2d30] bg-gray-50 dark:bg-[#252526]">
+        <div class="px-6 pb-6 pt-2 flex justify-end gap-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
             <button type="button" @click="close" :disabled="submitting"
-                class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-[#1e1e1e] border border-gray-300 dark:border-[#2d2d30] rounded-lg hover:bg-gray-50 dark:hover:bg-[#2d2d30] focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-[#1e1e1e] transition-colors disabled:opacity-50">
+                class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors disabled:opacity-50">
                 {{ __('messages.cancel') }}
             </button>
             <button type="button" ref="confirmButtonRef" @click="confirm" :disabled="submitting"
                 :style="{ backgroundColor: accentColor, color: contrastColor, borderColor: accentColor }"
-                class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-[#1e1e1e] transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90">
+                class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90">
                 <svg v-if="submitting" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>

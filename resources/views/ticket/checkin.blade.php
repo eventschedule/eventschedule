@@ -9,7 +9,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ __('messages.checkin_dashboard') }}</h2>
             <div class="flex gap-2">
-                <a href="{{ route('sales') }}" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-[#2d2d30] border border-gray-300 dark:border-[#2d2d30] rounded-lg hover:bg-gray-50 dark:hover:bg-[#3d3d40] transition-colors">
+                <a href="{{ route('sales') }}" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-[#3d3d40] transition-colors">
                     <svg class="w-4 h-4 me-1.5" fill="currentColor" viewBox="0 0 24 24"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"/></svg>
                     {{ __('messages.sales') }}
                 </a>
@@ -25,7 +25,7 @@
             <div class="flex-1">
                 <x-event-selector />
             </div>
-            <select v-if="availableDates.length > 0" v-model="selectedDate" @change="fetchStats" class="sm:w-48 rounded-lg border-gray-300 dark:border-[#2d2d30] dark:bg-[#1e1e1e] dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+            <select v-if="availableDates.length > 0" v-model="selectedDate" @change="fetchStats" class="sm:w-48 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                 <option v-for="date in availableDates" :key="date" :value="date">@{{ date }}</option>
             </select>
         </div>
@@ -50,37 +50,37 @@
         <div v-if="stats && !loading">
 
             <!-- Overall progress -->
-            <div class="bg-white dark:bg-[#1e1e1e] rounded-xl shadow-sm border border-gray-200 dark:border-[#2d2d30] p-6 mb-6">
+            <div class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">{{ __('messages.checked_in') }}</h3>
                     <span class="text-2xl font-bold text-gray-800 dark:text-gray-100">
                         @{{ stats.total_checked_in }} / @{{ stats.total_sold }}
                     </span>
                 </div>
-                <div class="w-full bg-gray-200 dark:bg-[#2d2d30] rounded-full h-4">
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4">
                     <div class="bg-[var(--brand-button-bg)] h-4 rounded-full transition-all duration-500"
                         :style="{ width: progressPercent + '%' }"></div>
                 </div>
-                <p class="mt-2 text-sm text-gray-500 dark:text-[#9ca3af]">@{{ progressPercent }}%</p>
-                <p v-if="stats.total_admitted > stats.total_checked_in" class="mt-1 text-sm text-gray-500 dark:text-[#9ca3af]">@{{ stats.total_admitted }} {{ __('messages.admitted_incl_guests') }}</p>
+                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">@{{ progressPercent }}%</p>
+                <p v-if="stats.total_admitted > stats.total_checked_in" class="mt-1 text-sm text-gray-500 dark:text-gray-400">@{{ stats.total_admitted }} {{ __('messages.admitted_incl_guests') }}</p>
                 <p v-if="stats.pass_reserved > 0" class="mt-1 text-sm text-[var(--brand-blue)]">{{ __('messages.pass_seats_reserved') }}: @{{ stats.pass_reserved }}</p>
             </div>
 
             <!-- Per ticket type cards -->
             <div v-if="stats.tickets.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                 <div v-for="ticket in stats.tickets" :key="ticket.type"
-                    class="bg-white dark:bg-[#1e1e1e] rounded-xl shadow-sm border border-gray-200 dark:border-[#2d2d30] p-4">
+                    class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                     <div class="flex items-center justify-between mb-2">
-                        <h4 class="font-medium text-gray-700 dark:text-[#d1d5db]">@{{ ticket.type }}</h4>
-                        <span class="text-sm font-semibold text-gray-600 dark:text-[#9ca3af]">
+                        <h4 class="font-medium text-gray-700 dark:text-gray-300">@{{ ticket.type }}</h4>
+                        <span class="text-sm font-semibold text-gray-600 dark:text-gray-400">
                             @{{ ticket.checked_in }} / @{{ ticket.sold }}
                         </span>
                     </div>
-                    <div class="w-full bg-gray-200 dark:bg-[#2d2d30] rounded-full h-2.5">
+                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
                         <div class="bg-[var(--brand-button-bg)] h-2.5 rounded-full transition-all duration-500"
                             :style="{ width: ticketPercent(ticket) + '%' }"></div>
                     </div>
-                    <p v-if="ticket.admitted > ticket.checked_in" class="mt-1.5 text-xs text-gray-500 dark:text-[#9ca3af]">@{{ ticket.admitted }} {{ __('messages.admitted_incl_guests') }}</p>
+                    <p v-if="ticket.admitted > ticket.checked_in" class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">@{{ ticket.admitted }} {{ __('messages.admitted_incl_guests') }}</p>
                 </div>
             </div>
 
@@ -91,16 +91,16 @@
 
             <!-- Recent activity -->
             <div v-if="stats.recent_checkins.length > 0"
-                class="bg-white dark:bg-[#1e1e1e] rounded-xl shadow-sm border border-gray-200 dark:border-[#2d2d30] p-6">
+                class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                 <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">{{ __('messages.recent_checkins') }}</h3>
-                <div class="divide-y divide-gray-100 dark:divide-[#2d2d30]">
+                <div class="divide-y divide-gray-100 dark:divide-gray-700">
                     <div v-for="(checkin, index) in stats.recent_checkins" :key="index"
                         class="flex items-center justify-between py-3 first:pt-0 last:pb-0">
                         <div>
-                            <p class="font-medium text-gray-800 dark:text-[#d1d5db]">@{{ checkin.name }}</p>
-                            <p class="text-sm text-gray-500 dark:text-[#9ca3af]">@{{ checkin.ticket_type }}</p>
+                            <p class="font-medium text-gray-800 dark:text-gray-300">@{{ checkin.name }}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">@{{ checkin.ticket_type }}</p>
                         </div>
-                        <span class="text-sm text-gray-400 dark:text-[#9ca3af] whitespace-nowrap ms-4">@{{ relativeTime(checkin.timestamp) }}</span>
+                        <span class="text-sm text-gray-400 dark:text-gray-400 whitespace-nowrap ms-4">@{{ relativeTime(checkin.timestamp) }}</span>
                     </div>
                 </div>
             </div>

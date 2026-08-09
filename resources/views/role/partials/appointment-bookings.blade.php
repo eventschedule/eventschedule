@@ -52,11 +52,11 @@
          actually needs it. Scrolls sideways rather than wrapping, the way the AP tab nav does: four
          pills plus a badge do not fit a phone, and a wrapped segmented control reads as two. --}}
     <div class="max-w-full overflow-x-auto scrollbar-hide">
-        <div class="inline-flex items-center gap-1 rounded-xl bg-gray-100 dark:bg-[#252526] p-1">
+        <div class="inline-flex items-center gap-1 rounded-xl bg-gray-100 dark:bg-gray-800 p-1">
             @foreach (['upcoming', 'pending', 'past', 'cancelled'] as $f)
                 <a href="{{ $filterUrl($f) }}"
                    @if ($filter === $f) aria-current="page" style="box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08);" @endif
-                   class="whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200 {{ $filter === $f ? 'bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
+                   class="whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200 {{ $filter === $f ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
                     {{ __('messages.appointments_filter_'.$f) }}
                     @if ($f === 'pending' && $pendingBookingCount > 0)
                         <span class="ms-1 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-xs font-bold text-white bg-red-500 rounded-full">{{ $pendingBookingCount }}</span>
@@ -157,7 +157,7 @@
                     </div>
                 </div>
 
-                <div class="mt-3 rounded-lg bg-gray-50 dark:bg-[#252526] px-3 py-2 space-y-1 text-sm">
+                <div class="mt-3 rounded-lg bg-gray-50 dark:bg-gray-800 px-3 py-2 space-y-1 text-sm">
                     <div class="text-gray-700 dark:text-gray-300">{{ $s->name }}</div>
                     <div class="text-xs"><a href="mailto:{{ $s->email }}" class="text-[var(--brand-blue)] hover:underline">{{ $s->email }}</a></div>
                     @if ($s->phone)

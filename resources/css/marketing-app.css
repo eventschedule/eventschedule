@@ -9,6 +9,18 @@
  * brand-styled components (e.g. <x-brand-button>, <x-link>) render correctly on
  * the marketing site, which loads this bundle instead of app.css. Without these,
  * the cookie banner's gradient Accept button has no background (white-on-white).
+ *
+ * The --ap-* block below is a second, larger instance of that same sync burden.
+ * tailwind.config.js now resolves the gray ramp and `white` through those
+ * variables, and this is a separate Vite entry that emits its own copy of the
+ * utilities - so without these declarations every bg-gray-* / text-gray-* /
+ * bg-white on the marketing site would resolve to an undefined variable and
+ * render as nothing. The values are today's fixed ramp, i.e. exactly what the
+ * marketing site has always rendered.
+ *
+ * Marketing deliberately does NOT get the six theme variants (see the AP token
+ * comment in app.css), so only the fallback tier is mirrored here - no
+ * html[data-theme] blocks, no gray-bridge alias blocks.
  */
 :root {
     --brand-blue: #4E81FA;
@@ -29,6 +41,57 @@
      * Buttons, borders and large display type keep --brand-blue.
      */
     --wp-link: #2563eb;
+
+    /* --ap-* fallback. Generated from app.css tier 1 by
+       scratchpad/sync_mirror.py - do not hand-edit. Marketing sets no
+       data-theme, so these are the only values it ever resolves. */
+    --ap-bg: 249 250 251;
+    --ap-surface: 255 255 255;
+    --ap-surface-alt: 249 250 251;
+    --ap-border: 229 231 235;
+    --ap-border-strong: 209 213 219;
+    --ap-ink: 30 30 30;
+    --ap-ink-2: 45 45 48;
+    --ap-ink-3: 107 114 128;
+    --ap-ink-4: 156 163 175;
+    --ap-rail: 30 30 30;
+    --ap-rail-ink: 209 213 219;
+    --ap-rail-ink-2: 156 163 175;
+    --ap-rail-deep: 26 26 26;
+    --ap-rail-hover: 38 38 38;
+    --ap-rail-active: 40 40 40;
+    --ap-surface-hover: 243 244 246;
+    --ap-surface-active: 234 236 239;
+    --ap-surface-sunken: 243 244 246;
+    --ap-card-from: 255 255 255;
+    --ap-card-mid: 254 254 254;
+    --ap-card-to: 249 250 251;
+    --ap-hairline: rgba(0, 0, 0, 0.06);
+    --ap-tint-1: rgba(0, 0, 0, 0.02);
+    --ap-tint-sunken: rgba(0, 0, 0, 0.02);
+    --ap-panel-header: rgba(0, 0, 0, 0.02);
+    --ap-tint-2: rgba(0, 0, 0, 0.04);
+    --ap-inset-input: inset 0 1px 3px rgba(0, 0, 0, 0.12);
+    --ap-inset-track: inset 0 1px 3px rgba(0, 0, 0, 0.15);
+    --ap-inset-pressed: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+    --ap-shadow-card: inset 0 1px 0 0 rgba(255, 255, 255, 0.7), 0 1px 2px 0 rgba(0, 0, 0, 0.06), 0 4px 12px -2px rgba(0, 0, 0, 0.05);
+    --ap-shadow-modal: 0 1px 2px 0 rgba(0, 0, 0, 0.06), 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    --ap-shadow-dropdown: 0 4px 16px -2px rgba(0, 0, 0, 0.08), 0 10px 25px rgba(0, 0, 0, 0.06);
+    --ap-shadow-auth: 0 1px 2px 0 rgba(0, 0, 0, 0.06), 0 8px 24px -4px rgba(0, 0, 0, 0.08);
+    --ap-shadow-btn: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --ap-scrollbar-thumb: rgba(0, 0, 0, 0.15);
+    --ap-scrollbar-thumb-hover: rgba(0, 0, 0, 0.25);
+    --ap-white: 255 255 255;
+    --ap-gray-50: 249 250 251;
+    --ap-gray-100: 243 244 246;
+    --ap-gray-200: 229 231 235;
+    --ap-gray-300: 209 213 219;
+    --ap-gray-400: 156 163 175;
+    --ap-gray-500: 107 114 128;
+    --ap-gray-600: 62 62 66;
+    --ap-gray-700: 45 45 48;
+    --ap-gray-800: 37 37 38;
+    --ap-gray-900: 30 30 30;
 }
 .dark {
     /* Brand blue's dark-mode value already clears AA on the dark grounds. */
@@ -42,4 +105,54 @@
     --brand-button-bg-light: #5A8DFF;
     --brand-button-bg: #4E81FA;
     --brand-button-bg-hover: #3D6FE8;
+
+    /* --ap-* fallback. Generated from app.css tier 1 by
+       scratchpad/sync_mirror.py - do not hand-edit. Marketing sets no
+       data-theme, so these are the only values it ever resolves. */
+    --ap-bg: 30 30 30;
+    --ap-surface: 37 37 38;
+    --ap-surface-alt: 42 42 45;
+    --ap-border: 45 45 48;
+    --ap-border-strong: 62 62 66;
+    --ap-ink: 243 244 246;
+    --ap-ink-2: 209 213 219;
+    --ap-ink-3: 156 163 175;
+    --ap-ink-4: 107 114 128;
+    --ap-rail-ink: 209 213 219;
+    --ap-rail-ink-2: 156 163 175;
+    --ap-rail-deep: 26 26 26;
+    --ap-rail-hover: 38 38 38;
+    --ap-rail-active: 40 40 40;
+    --ap-surface-hover: 48 48 51;
+    --ap-surface-active: 35 35 35;
+    --ap-surface-sunken: 26 26 26;
+    --ap-card-from: 46 46 49;
+    --ap-card-mid: 42 42 45;
+    --ap-card-to: 37 37 38;
+    --ap-hairline: rgba(255, 255, 255, 0.1);
+    --ap-tint-1: rgba(255, 255, 255, 0.03);
+    --ap-tint-sunken: rgba(0, 0, 0, 0.15);
+    --ap-panel-header: linear-gradient(to bottom, rgba(255, 255, 255, 0.02), transparent);
+    --ap-tint-2: rgba(255, 255, 255, 0.05);
+    --ap-inset-input: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+    --ap-inset-track: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+    --ap-inset-pressed: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+    --ap-shadow-card: inset 0 1px 0 0 rgba(255, 255, 255, 0.06), inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 2px 8px 0 rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.2);
+    --ap-shadow-modal: inset 0 1px 0 0 rgba(255, 255, 255, 0.06), inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 0, 0, 0.25);
+    --ap-shadow-dropdown: inset 0 1px 0 0 rgba(255, 255, 255, 0.06), inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 10px 25px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 0, 0, 0.2);
+    --ap-shadow-auth: inset 0 1px 0 0 rgba(255, 255, 255, 0.06), inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 0, 0, 0.25);
+    --ap-shadow-btn: inset 0 1px 0 0 rgba(255, 255, 255, 0.04), 0 1px 2px rgba(0, 0, 0, 0.2);
+    --ap-scrollbar-thumb: rgba(255, 255, 255, 0.15);
+    --ap-scrollbar-thumb-hover: rgba(255, 255, 255, 0.25);
+}
+
+/*
+ * Native <select> chevron. @tailwindcss/forms inlines colors.gray.500 into an
+ * SVG data URI, which cannot resolve a page-level var() - see the longer note
+ * in app.css. Marketing has no theme variants, so one literal rule suffices.
+ * The :not() chain reproduces the plugin's own exclusions for [multiple] and
+ * sized selects.
+ */
+select:not([multiple]):not([size]:not([size="1"])) {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
 }

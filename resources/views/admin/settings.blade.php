@@ -110,7 +110,7 @@
 
                 {{-- Connection state, echoed back by the network on every call so there
                      is nothing to poll. --}}
-                <div class="mb-6 rounded-lg bg-gray-50 dark:bg-[#252526] p-4">
+                <div class="mb-6 rounded-lg bg-gray-50 dark:bg-gray-800 p-4">
                     <div class="flex flex-wrap items-center justify-between gap-3">
                         <div>
                             <p class="text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.federation_connection')</p>
@@ -250,7 +250,7 @@
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@lang('messages.monetization_personalized_help')</p>
                 </div>
 
-                <div class="mb-6 border-t border-gray-200 dark:border-[#2d2d30] pt-6">
+                <div class="mb-6 border-t border-gray-200 dark:border-gray-700 pt-6">
                     <x-toggle
                         id="ads_native_enabled"
                         name="ads_native_enabled"

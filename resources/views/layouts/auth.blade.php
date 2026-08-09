@@ -29,39 +29,7 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <!-- Dark Mode Detection -->
-    <script {!! nonce_attr() !!}>
-        // Apply dark mode based on localStorage theme preference, falling back to system preference
-        (function() {
-            var storedTheme;
-            try { storedTheme = localStorage.getItem('theme'); } catch (e) {}
-
-            function getEffectiveTheme() {
-                if (storedTheme === 'dark') return 'dark';
-                if (storedTheme === 'light') return 'light';
-                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            }
-
-            function applyTheme() {
-                if (getEffectiveTheme() === 'dark') {
-                    document.documentElement.classList.add('dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                }
-            }
-
-            // Apply immediately to prevent flash
-            applyTheme();
-
-            // Watch for system theme changes
-            var mq = window.matchMedia('(prefers-color-scheme: dark)');
-            if (mq.addEventListener) {
-                mq.addEventListener('change', applyTheme);
-            } else if (mq.addListener) {
-                mq.addListener(applyTheme); // iOS Safari < 14, legacy API
-            }
-        })();
-    </script>
+    @include('partials.theme-script', ['variants' => true])
 
     {{ isset($head) ? $head : '' }}
 </head>

@@ -16,8 +16,8 @@
             border: 1px solid #d1d5db;
         }
         .dark .ticket-embed-card {
-            background: #252526;
-            border-color: #2d2d30;
+            background: rgb(var(--ap-surface));
+            border-color: rgb(var(--ap-border));
         }
     </style>
 

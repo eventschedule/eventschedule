@@ -473,7 +473,7 @@
                                     <td class="py-2 pe-4 text-gray-900 dark:text-white">{{ $signup->name }}</td>
                                     <td class="py-2 pe-4">
                                         @if($signup->signup_intent)
-                                            <span class="inline-block px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-[#2d2d30] text-gray-600 dark:text-gray-300 whitespace-nowrap">{{ __('messages.signup_intent_' . $signup->signup_intent) }}</span>
+                                            <span class="inline-block px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 whitespace-nowrap">{{ __('messages.signup_intent_' . $signup->signup_intent) }}</span>
                                         @else
                                             <span class="text-gray-600 dark:text-gray-400">-</span>
                                         @endif

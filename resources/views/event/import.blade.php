@@ -24,7 +24,7 @@
         margin-top: 2px;
     }
     .dark .time-dropdown-import {
-        background: linear-gradient(to bottom, #2d2d30, #282828);
+        background: linear-gradient(to bottom, rgb(var(--ap-border)), rgb(var(--ap-rail-active)));
         border-color: rgba(255, 255, 255, 0.06);
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
     }
@@ -39,7 +39,7 @@
         transition: all 0.15s ease;
     }
     .dark .time-dropdown-item-import {
-        color: #d1d5db;
+        color: rgb(var(--ap-ink-2));
     }
     .time-dropdown-item-import:hover,
     .time-dropdown-item-import.highlighted {
@@ -48,7 +48,7 @@
     }
     .dark .time-dropdown-item-import:hover,
     .dark .time-dropdown-item-import.highlighted {
-        background: linear-gradient(to bottom, #3e3e42, #383838);
+        background: linear-gradient(to bottom, rgb(var(--ap-border-strong)), #383838);
         color: #fff;
     }
     .time-input-wrapper {

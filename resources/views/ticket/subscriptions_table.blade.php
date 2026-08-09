@@ -23,15 +23,15 @@
     </div>
 @else
 <div class="ap-card rounded-xl overflow-hidden">
-    <div class="flex flex-wrap items-center gap-x-6 gap-y-1 p-4 border-b border-gray-200 dark:border-[#2d2d30] text-sm">
+    <div class="flex flex-wrap items-center gap-x-6 gap-y-1 p-4 border-b border-gray-200 dark:border-gray-700 text-sm">
         <span class="text-gray-700 dark:text-gray-300"><span class="font-semibold">{{ $subscriptions->count() }}</span> {{ __('messages.subscriptions') }}</span>
         <span class="text-gray-700 dark:text-gray-300"><span class="font-semibold">{{ $totalVisits }}</span> {{ __('messages.visits_redeemed') }}</span>
     </div>
 
-    <div class="divide-y divide-gray-200 dark:divide-[#2d2d30]">
+    <div class="divide-y divide-gray-200 dark:divide-gray-700">
         @foreach ($subscriptions as $sub)
             <details class="group">
-                <summary class="flex items-center gap-4 p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-[#252526] transition-colors list-none">
+                <summary class="flex items-center gap-4 p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors list-none">
                     <svg class="w-4 h-4 text-gray-400 flex-shrink-0 transition-transform group-open:rotate-90" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                     <div class="flex-1 min-w-0">
                         <div class="font-medium text-gray-900 dark:text-gray-100 truncate">{{ $sub['name'] }}</div>
@@ -56,7 +56,7 @@
                             </thead>
                             <tbody class="text-gray-700 dark:text-gray-300">
                                 @foreach ($sub['usages'] as $usage)
-                                    <tr class="border-t border-gray-100 dark:border-[#2d2d30]">
+                                    <tr class="border-t border-gray-100 dark:border-gray-700">
                                         <td class="py-1.5 pe-4">{{ $usage['event'] }}</td>
                                         <td class="py-1.5 pe-4 whitespace-nowrap">{{ $usage['date'] }}</td>
                                         <td class="py-1.5 pe-4 whitespace-nowrap text-gray-500 dark:text-gray-400">{{ $usage['time'] }}</td>

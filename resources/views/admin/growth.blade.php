@@ -69,7 +69,7 @@
                                 </span>
                                 <span class="text-gray-500 dark:text-gray-400">{{ number_format($count) }}</span>
                             </div>
-                            <div class="h-2 rounded-full bg-gray-100 dark:bg-[#2d2d30] overflow-hidden">
+                            <div class="h-2 rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
                                 <div class="h-full rounded-full {{ $atCap ? 'bg-amber-500' : 'bg-[var(--brand-button-bg)]' }}"
                                      style="width: {{ $count > 0 ? max(2, round($count / $bucketMax * 100, 1)) : 0 }}%"></div>
                             </div>

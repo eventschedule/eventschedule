@@ -166,7 +166,7 @@
                         </td>
                     </tr>
                     <tr class="hidden">
-                        <td colspan="4" class="px-4 py-3 bg-gray-50 dark:bg-[#252526] sm:px-6">
+                        <td colspan="4" class="px-4 py-3 bg-gray-50 dark:bg-gray-800 sm:px-6">
                             <div class="space-y-1">
                                 @foreach ($group->sales as $sale)
                                 <div class="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-300">

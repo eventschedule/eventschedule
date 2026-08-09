@@ -365,7 +365,7 @@
         }
 
         .dark .event-popup-detail {
-            color: #d1d5db;
+            color: rgb(var(--ap-ink-2));
         }
 
         .event-popup-icon {
@@ -376,7 +376,7 @@
         }
 
         .dark .event-popup-icon {
-            color: #9ca3af;
+            color: rgb(var(--ap-ink-3));
         }
 
         .event-popup-description {
@@ -391,7 +391,7 @@
         }
 
         .dark .event-popup-description {
-            color: #d1d5db;
+            color: rgb(var(--ap-ink-2));
         }
 
         /* EasyMDE Toolbar Fixes */
@@ -478,7 +478,7 @@
 
         /* EasyMDE Dark Mode Styles - Using custom Tailwind colors */
         .dark .editor-toolbar {
-            background-color: #1e1e1e !important; /* gray-900 */
+            background-color: rgb(var(--ap-bg)) !important; /* gray-900 */
             border: none !important;
         }
 
@@ -491,18 +491,18 @@
 
         .dark .editor-toolbar button:hover,
         .dark .editor-toolbar a:hover {
-            background-color: #1e1e1e !important; /* gray-900 */
+            background-color: rgb(var(--ap-bg)) !important; /* gray-900 */
             color: #f9f9f9 !important; /* gray-50 */
         }
 
         .dark .editor-toolbar button.active,
         .dark .editor-toolbar a.active {
-            background-color: #3e3e42 !important; /* gray-600 */
+            background-color: rgb(var(--ap-border-strong)) !important; /* gray-600 */
             color: #f9f9f9 !important; /* gray-50 */
         }
 
         .dark .editor-toolbar .separator {
-            border-left: 1px solid #3e3e42 !important; /* gray-600 */
+            border-left: 1px solid rgb(var(--ap-border-strong)) !important; /* gray-600 */
         }
 
         .dark .editor-toolbar button:before,
@@ -529,7 +529,7 @@
         }
 
         .dark .CodeMirror {
-            background-color: #252526 !important; /* gray-800 - match standard text inputs */
+            background-color: rgb(var(--ap-surface)) !important; /* gray-800 - match standard text inputs */
             color: #f9f9f9 !important; /* gray-50 */
             border: none !important;
         }
@@ -539,18 +539,18 @@
         }
 
         .dark .CodeMirror-selected {
-            background-color: #3e3e42 !important; /* gray-600 */
+            background-color: rgb(var(--ap-border-strong)) !important; /* gray-600 */
         }
 
         .dark .CodeMirror-line::selection,
         .dark .CodeMirror-line > span::selection,
         .dark .CodeMirror-line > span > span::selection {
-            background-color: #3e3e42 !important; /* gray-600 */
+            background-color: rgb(var(--ap-border-strong)) !important; /* gray-600 */
         }
 
         .dark .CodeMirror-gutters {
-            background-color: #2d2d30 !important; /* gray-700 */
-            border-right: 1px solid #3e3e42 !important; /* gray-600 */
+            background-color: rgb(var(--ap-border)) !important; /* gray-700 */
+            border-right: 1px solid rgb(var(--ap-border-strong)) !important; /* gray-600 */
         }
 
         .dark .CodeMirror-linenumber {
@@ -558,11 +558,11 @@
         }
 
         .dark .CodeMirror-focused .CodeMirror-selected {
-            background-color: #3e3e42 !important; /* gray-600 */
+            background-color: rgb(var(--ap-border-strong)) !important; /* gray-600 */
         }
 
         .dark .EasyMDEContainer {
-            border: 1px solid #2d2d30 !important; /* gray-700 - match form inputs */
+            border: 1px solid rgb(var(--ap-border)) !important; /* gray-700 - match form inputs */
             border-radius: 0.5rem !important; /* rounded-lg */
         }
 
@@ -736,115 +736,7 @@
 
     </script>
 
-    <script {!! nonce_attr() !!}>
-        // Theme Management
-        (function() {
-            const THEME_STORAGE_KEY = 'theme';
-            const THEMES = {
-                LIGHT: 'light',
-                DARK: 'dark',
-                SYSTEM: 'system'
-            };
-
-            function safeGetItem(key) {
-                try { return localStorage.getItem(key); } catch (e) { return null; }
-            }
-            function safeSetItem(key, value) {
-                try { localStorage.setItem(key, value); } catch (e) {}
-            }
-
-            function getSystemTheme() {
-                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            }
-
-            function applyTheme(theme) {
-                const html = document.documentElement;
-                const actualTheme = theme === THEMES.SYSTEM ? getSystemTheme() : theme;
-
-                if (actualTheme === 'dark') {
-                    html.classList.add('dark');
-                } else {
-                    html.classList.remove('dark');
-                }
-            }
-
-            function initTheme() {
-                // Check for ?dark=true URL parameter (useful for embeds)
-                const urlParams = new URLSearchParams(window.location.search);
-                if (urlParams.get('dark') === 'true') {
-                    applyTheme(THEMES.DARK);
-                    return;
-                }
-
-                const storedTheme = safeGetItem(THEME_STORAGE_KEY);
-                const theme = storedTheme || THEMES.SYSTEM;
-
-                // Apply theme immediately to prevent flash
-                applyTheme(theme);
-
-                // Watch for system theme changes if in system mode
-                if (theme === THEMES.SYSTEM) {
-                    watchSystemTheme();
-                }
-            }
-
-            function watchSystemTheme() {
-                const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-                const onChange = function(e) {
-                    const currentTheme = safeGetItem(THEME_STORAGE_KEY);
-                    if (currentTheme === THEMES.SYSTEM) {
-                        applyTheme(THEMES.SYSTEM);
-                    }
-                };
-                if (mediaQuery.addEventListener) {
-                    mediaQuery.addEventListener('change', onChange);
-                } else if (mediaQuery.addListener) {
-                    mediaQuery.addListener(onChange); // iOS Safari < 14, legacy API
-                }
-            }
-
-            function setThemeInternal(theme) {
-                safeSetItem(THEME_STORAGE_KEY, theme);
-                applyTheme(theme);
-
-                if (theme === THEMES.SYSTEM) {
-                    watchSystemTheme();
-                }
-            }
-
-            // Initialize theme on page load
-            initTheme();
-
-            // Expose setTheme globally for theme toggle
-            window.setTheme = function(theme) {
-                setThemeInternal(theme);
-                // Update buttons after a short delay to ensure DOM is ready
-                setTimeout(function() {
-                    if (typeof window.updateThemeButtons === 'function') {
-                        window.updateThemeButtons();
-                    }
-                }, 10);
-            };
-            window.getCurrentTheme = function() {
-                return safeGetItem(THEME_STORAGE_KEY) || THEMES.SYSTEM;
-            };
-            
-            // Update buttons after theme system is initialized
-            // Use requestAnimationFrame for immediate update on next paint
-            requestAnimationFrame(function() {
-                if (typeof window.updateThemeButtons === 'function') {
-                    window.updateThemeButtons();
-                } else {
-                    // If navigation script hasn't loaded yet, try again after a short delay
-                    setTimeout(function() {
-                        if (typeof window.updateThemeButtons === 'function') {
-                            window.updateThemeButtons();
-                        }
-                    }, 10);
-                }
-            });
-        })();
-    </script>
+    @include('partials.theme-script', ['variants' => $themeVariants ?? false])
 
     {{ isset($head) ? $head : '' }}
 

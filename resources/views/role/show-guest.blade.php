@@ -420,7 +420,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
 }
 .dark #carousel-prev:hover,
 .dark #carousel-next:hover {
-  background-color: #252526 !important;
+  background-color: rgb(var(--ap-surface)) !important;
 }
 
 /* Disabled state for navigation buttons */

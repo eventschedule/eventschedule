@@ -44,7 +44,7 @@
                         data-rename-url="{{ route('event_template.update', ['subdomain' => $role->subdomain, 'hash' => $template->encodeId()]) }}"
                         data-rename-name="{{ $template->name }}"
                         title="{{ __('messages.rename_template') }}"
-                        class="js-rename-template-open inline-flex items-center justify-center p-2.5 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#2d2d30] hover:text-gray-700 dark:hover:text-gray-200 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)]">
+                        class="js-rename-template-open inline-flex items-center justify-center p-2.5 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)]">
                         <span class="sr-only">{{ __('messages.rename_template') }}</span>
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" />

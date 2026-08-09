@@ -50,7 +50,7 @@
                         <span class="font-medium">{{ __('messages.merge_venues_will_merge_into') }}</span>
                         <span class="font-semibold text-gray-900 dark:text-gray-100" data-target-name="{{ $groupHash }}">{{ $defaultTarget->getDisplayName(false) }}</span>
                         <span class="text-xs text-gray-500 dark:text-gray-400" data-target-subdomain="{{ $groupHash }}">/{{ $defaultTarget->subdomain }}</span>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700 dark:bg-[#2d2d30] dark:text-gray-300" data-target-deleted="{{ $groupHash }}" @if(! $defaultTarget->is_deleted) style="display:none" @endif>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300" data-target-deleted="{{ $groupHash }}" @if(! $defaultTarget->is_deleted) style="display:none" @endif>
                             {{ __('messages.deleted_tag') }}
                         </span>
                         <span data-target-city="{{ $groupHash }}" @if(! $defaultTarget->city) style="display:none" @endif>@if ($defaultTarget->city), {{ $defaultTarget->city }}@endif</span>
@@ -68,7 +68,7 @@
 
                         <div class="space-y-2">
                             @foreach ($group as $venue)
-                                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-[#2d2d30] hover:bg-gray-50 dark:hover:bg-[#2d2d30] cursor-pointer transition-colors">
+                                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
                                     <input type="radio" name="target_choice_{{ $groupHash }}" value="{{ $venue->id }}"
                                            data-group-radio="{{ $groupHash }}"
                                            data-venue-name="{{ $venue->getDisplayName(false) }}"
@@ -91,7 +91,7 @@
                                             @endif
                                             <span class="text-xs text-gray-500 dark:text-gray-400">/{{ $venue->subdomain }}</span>
                                             @if ($venue->is_deleted)
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700 dark:bg-[#2d2d30] dark:text-gray-300">
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
                                                     {{ __('messages.deleted_tag') }}
                                                 </span>
                                             @endif
@@ -110,7 +110,7 @@
                                 {{ str_replace([':venues', ':events'], [count($group) - 1, collect($group)->where('id', '!=', $defaultTarget->id)->sum('future_event_count')], __('messages.merge_venues_summary')) }}
                             </div>
                             <div class="flex flex-col-reverse sm:flex-row gap-2">
-                                <button type="button" class="dismiss-group-btn px-4 py-3 text-base text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2d2d30] rounded-lg transition-colors"
+                                <button type="button" class="dismiss-group-btn px-4 py-3 text-base text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                                         data-group-hash="{{ $groupHash }}">
                                     {{ __('messages.merge_venues_not_duplicates_button') }}
                                 </button>

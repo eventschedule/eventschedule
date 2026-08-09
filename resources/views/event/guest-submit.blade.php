@@ -117,7 +117,7 @@
                     <span class="flex-1">{{ __('messages.auto_fill_applied') }}</span>
                     <button type="button" @click="reopenAutoFill" class="underline hover:no-underline shrink-0">{{ __('messages.auto_fill_start_over') }}</button>
                   </div>
-                  <div v-else class="relative rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-[#252526] p-4 transition-all duration-200"
+                  <div v-else class="relative rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 p-4 transition-all duration-200"
                     :style="autoFillDragging ? { borderColor: '{{ $accentColor }}' } : {}"
                     @dragenter.prevent="autoFillDragEnter"
                     @dragover.prevent

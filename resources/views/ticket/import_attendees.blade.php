@@ -9,9 +9,9 @@
             [v-cloak] { display: none !important; }
             .iti { display: block !important; width: 100% !important; }
             .iti:not(.iti--country-only) > .iti__country-container { padding: 0 0 0 4px !important; }
-            .dark .iti { --iti-dropdown-bg: #1e1e1e; --iti-hover-color: #2d2d30; --iti-border-color: #2d2d30; --iti-dialcode-color: #d1d5db; --iti-arrow-color: #d1d5db; }
-            .dark .iti__dropdown-content, .dark .iti__selected-dial-code { color: #d1d5db; }
-            .dark .iti__search-input { background: #1e1e1e; color: #d1d5db; border-color: #2d2d30; }
+            .dark .iti { --iti-dropdown-bg: rgb(var(--ap-bg)); --iti-hover-color: rgb(var(--ap-border)); --iti-border-color: rgb(var(--ap-border)); --iti-dialcode-color: rgb(var(--ap-ink-2)); --iti-arrow-color: rgb(var(--ap-ink-2)); }
+            .dark .iti__dropdown-content, .dark .iti__selected-dial-code { color: rgb(var(--ap-ink-2)); }
+            .dark .iti__search-input { background: rgb(var(--ap-bg)); color: rgb(var(--ap-ink-2)); border-color: rgb(var(--ap-border)); }
         </style>
     </x-slot>
 
@@ -58,19 +58,19 @@
                         class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-base cursor-pointer">
                         <option>{{ $event ? $event->translatedName() : __('messages.select_event_to_begin') }}</option>
                     </select>
-                    <div v-cloak v-if="dropdownOpen" class="absolute z-50 mt-1 rounded-lg border border-gray-200 dark:border-[#2d2d30] bg-white dark:bg-[#1e1e1e] shadow-lg max-h-72 overflow-y-auto" style="min-width: 280px">
+                    <div v-cloak v-if="dropdownOpen" class="absolute z-50 mt-1 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg max-h-72 overflow-y-auto" style="min-width: 280px">
                         <button v-for="event in events" :key="event.id" @click="onEventChange(event.id)" type="button"
-                            class="w-full flex items-center gap-3 px-3 py-2 text-start hover:bg-gray-100 dark:hover:bg-[#2d2d30] transition-colors"
-                            :class="event.id === selectedEventId ? 'bg-gray-50 dark:bg-[#2d2d30]/50' : ''">
+                            class="w-full flex items-center gap-3 px-3 py-2 text-start hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            :class="event.id === selectedEventId ? 'bg-gray-50 dark:bg-gray-700/50' : ''">
                             <img v-if="event.image_url" :src="event.image_url" class="w-10 h-10 rounded object-cover flex-shrink-0">
-                            <span v-else class="w-10 h-10 rounded bg-gray-100 dark:bg-[#2d2d30] flex items-center justify-center flex-shrink-0">
+                            <span v-else class="w-10 h-10 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
                                 <svg class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                             </span>
                             <span class="flex-1 min-w-0">
                                 <span class="block truncate text-gray-900 dark:text-gray-100 text-sm font-medium">@{{ event.name }}</span>
-                                <span v-if="event.starts_at" class="block truncate text-gray-500 dark:text-[#9ca3af] text-xs">@{{ event.starts_at }}</span>
+                                <span v-if="event.starts_at" class="block truncate text-gray-500 dark:text-gray-400 text-xs">@{{ event.starts_at }}</span>
                             </span>
                             <svg v-if="event.id === selectedEventId" class="w-5 h-5 text-[var(--brand-blue)] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -194,7 +194,7 @@
                                     <tr v-if="expanded.includes(index) && ticketCustomFieldsFor(entry.ticket_id).length">
                                         <td></td>
                                         <td :colspan="visibleColSpan" class="py-2 pr-2">
-                                            <div class="bg-gray-50 dark:bg-[#252526] rounded-lg p-3">
+                                            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
                                                 <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">{{ __('messages.ticket_custom_fields') }}</p>
                                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                     <div v-for="cf in ticketCustomFieldsFor(entry.ticket_id)" :key="'tcf-'+cf.index">

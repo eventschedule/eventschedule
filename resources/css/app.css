@@ -13,6 +13,38 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ──────────────────────────────────────────────────────────────────────────
+ * Theme tokens
+ *
+ * Ported from the Flutter client's InTheme design system
+ * (/Users/hillel/Code/admin/lib/app/design_tokens.dart): three light palettes
+ * (Sand / Mist / Paper) and three dark ones (Espresso / Midnight / Carbon),
+ * selected by a `data-theme` attribute on <html>.
+ *
+ * Surfaces are stored as space-separated RGB channels so Tailwind's
+ * `<alpha-value>` placeholder keeps working (`bg-gray-800/50` must not break).
+ * Read them as rgb(var(--ap-surface)).
+ *
+ * Four tiers, and the order below is load-bearing:
+ *
+ *   1. :root / .dark        today's palette, verbatim. Any page that does NOT
+ *                           set data-theme - marketing, docs, the guest portal
+ *                           - therefore renders exactly as it always has.
+ *   2. html[data-theme=…]   the six variants. (0,1,1) outranks tier 1's (0,1,0).
+ *   3. brightness blocks    shadows, tints and gradient stops. Folded into the
+ *                           :root / .dark blocks, since every variant is either
+ *                           light (no .dark) or dark (.dark).
+ *   4. gray bridge          maps Tailwind's gray ramp onto the tokens. The ramp
+ *                           is read in OPPOSITE directions by brightness, so
+ *                           there are two alias blocks. They are (0,2,1) and so
+ *                           outrank tier 2 - which is why they only ever declare
+ *                           the aliased shades, never the interpolated ones.
+ *
+ * The AP sidebar is dark in every variant, light ones included. That is the
+ * Flutter design's `rail` contract - hence the separate --ap-rail* family.
+ * ────────────────────────────────────────────────────────────────────────── */
+
+/* ── Tier 1 · light fallback (today's values) ───────────────────────────── */
 :root {
     --brand-blue: #4E81FA;
     --brand-blue-light: #5A8DFF;
@@ -23,7 +55,79 @@
     --brand-button-bg-light: #5A8DFF;
     --brand-button-bg: #4E81FA;
     --brand-button-bg-hover: #3D6FE8;
+
+    /* Semantic surfaces */
+    --ap-bg: 249 250 251;
+    --ap-surface: 255 255 255;
+    --ap-surface-alt: 249 250 251;
+    --ap-border: 229 231 235;
+    --ap-border-strong: 209 213 219;
+    --ap-ink: 30 30 30;
+    --ap-ink-2: 45 45 48;
+    --ap-ink-3: 107 114 128;
+    --ap-ink-4: 156 163 175;
+    --ap-rail: 30 30 30;
+    /* --ap-rail-ink is part of the ported palette (each variant carries the
+       Flutter `railInk` value) but nothing consumes it yet - the sidebar's
+       primary text still comes from the gray ramp. Kept for completeness. */
+    --ap-rail-ink: 209 213 219;
+    --ap-rail-ink-2: 156 163 175;
+
+    /* Rail sub-scale + interaction surfaces. The Flutter set names one `rail`
+       colour; the AP sidebar needs a gradient and hover/active states on top of
+       it, so those are derived here. Rail values are deliberately NOT
+       overridden in .dark - the sidebar is identical in both modes today. */
+    --ap-rail-deep: 26 26 26;
+    --ap-rail-hover: 38 38 38;
+    --ap-rail-active: 40 40 40;
+    --ap-surface-hover: 243 244 246;
+    --ap-surface-active: 234 236 239;
+    --ap-surface-sunken: 243 244 246;
+
+    /* Panel gradient stops (from → mid@30% → to) */
+    --ap-card-from: 255 255 255;
+    --ap-card-mid: 254 254 254;
+    --ap-card-to: 249 250 251;
+
+    /* Composites */
+    --ap-hairline: rgba(0, 0, 0, 0.06);
+    --ap-tint-1: rgba(0, 0, 0, 0.02);
+    --ap-tint-sunken: rgba(0, 0, 0, 0.02);
+    --ap-panel-header: rgba(0, 0, 0, 0.02);
+    --ap-tint-2: rgba(0, 0, 0, 0.04);
+    --ap-inset-input: inset 0 1px 3px rgba(0, 0, 0, 0.12);
+    --ap-inset-track: inset 0 1px 3px rgba(0, 0, 0, 0.15);
+    --ap-inset-pressed: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+    --ap-shadow-card: inset 0 1px 0 0 rgba(255, 255, 255, 0.7),
+                      0 1px 2px 0 rgba(0, 0, 0, 0.06),
+                      0 4px 12px -2px rgba(0, 0, 0, 0.05);
+    --ap-shadow-modal: 0 1px 2px 0 rgba(0, 0, 0, 0.06),
+                       0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    --ap-shadow-dropdown: 0 4px 16px -2px rgba(0, 0, 0, 0.08),
+                          0 10px 25px rgba(0, 0, 0, 0.06);
+    --ap-shadow-auth: 0 1px 2px 0 rgba(0, 0, 0, 0.06),
+                      0 8px 24px -4px rgba(0, 0, 0, 0.08);
+    --ap-shadow-btn: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --ap-scrollbar-thumb: rgba(0, 0, 0, 0.15);
+    --ap-scrollbar-thumb-hover: rgba(0, 0, 0, 0.25);
+
+    /* Tailwind gray bridge. Spelled out here because the tier-4 alias blocks
+       are scoped to [data-theme] and never match on a fallback page. Today's
+       ramp is identical in both modes, so .dark does not redeclare it. */
+    --ap-white: 255 255 255;
+    --ap-gray-50: 249 250 251;
+    --ap-gray-100: 243 244 246;
+    --ap-gray-200: 229 231 235;
+    --ap-gray-300: 209 213 219;
+    --ap-gray-400: 156 163 175;
+    --ap-gray-500: 107 114 128;
+    --ap-gray-600: 62 62 66;
+    --ap-gray-700: 45 45 48;
+    --ap-gray-800: 37 37 38;
+    --ap-gray-900: 30 30 30;
 }
+
+/* ── Tier 1 · dark fallback (today's values) ────────────────────────────── */
 .dark {
     --brand-blue: #6B9AFF;
     --brand-blue-light: #7AA8FF;
@@ -34,6 +138,290 @@
     --brand-button-bg-light: #5A8DFF;
     --brand-button-bg: #4E81FA;
     --brand-button-bg-hover: #3D6FE8;
+
+    --ap-bg: 30 30 30;
+    --ap-surface: 37 37 38;
+    --ap-surface-alt: 42 42 45;
+    --ap-border: 45 45 48;
+    --ap-border-strong: 62 62 66;
+    --ap-ink: 243 244 246;
+    --ap-ink-2: 209 213 219;
+    --ap-ink-3: 156 163 175;
+    --ap-ink-4: 107 114 128;
+    --ap-rail-ink: 209 213 219;
+    --ap-rail-ink-2: 156 163 175;
+
+    --ap-rail-deep: 26 26 26;
+    --ap-rail-hover: 38 38 38;
+    --ap-rail-active: 40 40 40;
+    --ap-surface-hover: 48 48 51;
+    --ap-surface-active: 35 35 35;
+    --ap-surface-sunken: 26 26 26;
+    --ap-card-from: 46 46 49;
+    --ap-card-mid: 42 42 45;
+    --ap-card-to: 37 37 38;
+
+    --ap-hairline: rgba(255, 255, 255, 0.1);
+    --ap-tint-1: rgba(255, 255, 255, 0.03);
+    --ap-tint-sunken: rgba(0, 0, 0, 0.15);
+    --ap-panel-header: linear-gradient(to bottom, rgba(255, 255, 255, 0.02), transparent);
+    --ap-tint-2: rgba(255, 255, 255, 0.05);
+    --ap-inset-input: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+    --ap-inset-track: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+    --ap-inset-pressed: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+    --ap-shadow-card: inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
+                      inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+                      0 2px 8px 0 rgba(0, 0, 0, 0.3),
+                      0 0 0 1px rgba(0, 0, 0, 0.2);
+    --ap-shadow-modal: inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
+                       inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+                       0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                       0 0 0 1px rgba(0, 0, 0, 0.25);
+    --ap-shadow-dropdown: inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
+                          inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+                          0 10px 25px rgba(0, 0, 0, 0.4),
+                          0 0 0 1px rgba(0, 0, 0, 0.2);
+    --ap-shadow-auth: inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
+                      inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+                      0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                      0 0 0 1px rgba(0, 0, 0, 0.25);
+    --ap-shadow-btn: inset 0 1px 0 0 rgba(255, 255, 255, 0.04),
+                     0 1px 2px rgba(0, 0, 0, 0.2);
+    --ap-scrollbar-thumb: rgba(255, 255, 255, 0.15);
+    --ap-scrollbar-thumb-hover: rgba(255, 255, 255, 0.25);
+}
+
+/* ── Tier 2 · the six palettes ──────────────────────────────────────────── */
+
+/* Light · Sand - warm beige (design_tokens.dart:146) */
+html[data-theme="sand"] {
+    --ap-bg: 246 244 239;
+    --ap-surface: 255 255 255;
+    --ap-surface-alt: 251 249 244;
+    --ap-border: 232 227 216;
+    --ap-border-strong: 214 207 191;
+    --ap-ink: 26 24 20;
+    --ap-ink-2: 74 69 64;
+    --ap-ink-3: 133 127 115;
+    --ap-ink-4: 181 174 159;
+    --ap-rail: 21 20 15;
+    --ap-rail-ink: 232 229 220;
+    --ap-rail-ink-2: 138 134 120;
+    --ap-rail-deep: 16 15 11;
+    --ap-rail-hover: 33 31 24;
+    --ap-rail-active: 38 36 28;
+    --ap-surface-hover: 244 241 233;
+    --ap-surface-active: 236 232 221;
+    --ap-surface-sunken: 244 241 233;
+    --ap-card-from: 255 255 255;
+    --ap-card-mid: 253 252 250;
+    --ap-card-to: 251 249 244;
+    --ap-gray-700: 55 51 46;
+    --ap-gray-800: 40 38 33;
+}
+
+/* Light · Mist - cool blue-grey (design_tokens.dart:181) */
+html[data-theme="mist"] {
+    --ap-bg: 236 238 242;
+    --ap-surface: 255 255 255;
+    --ap-surface-alt: 245 247 250;
+    --ap-border: 221 226 234;
+    --ap-border-strong: 191 199 211;
+    --ap-ink: 22 23 26;
+    --ap-ink-2: 68 70 73;
+    --ap-ink-3: 122 126 133;
+    --ap-ink-4: 173 178 186;
+    --ap-rail: 21 20 15;
+    --ap-rail-ink: 232 229 220;
+    --ap-rail-ink-2: 138 134 120;
+    --ap-rail-deep: 16 15 11;
+    --ap-rail-hover: 33 31 24;
+    --ap-rail-active: 38 36 28;
+    --ap-surface-hover: 235 238 243;
+    --ap-surface-active: 226 230 237;
+    --ap-surface-sunken: 235 238 243;
+    --ap-card-from: 255 255 255;
+    --ap-card-mid: 250 251 253;
+    --ap-card-to: 245 247 250;
+    --ap-gray-700: 50 51 54;
+    --ap-gray-800: 36 37 40;
+}
+
+/* Light · Paper - crisp near-white. Note bg is LIGHTER than surface: cards sit
+   slightly darker than the page and lean on --ap-shadow-* for separation. */
+html[data-theme="paper"] {
+    --ap-bg: 255 255 255;
+    --ap-surface: 250 250 249;
+    --ap-surface-alt: 244 244 243;
+    --ap-border: 229 229 228;
+    --ap-border-strong: 206 205 203;
+    --ap-ink: 24 24 26;
+    --ap-ink-2: 69 69 74;
+    --ap-ink-3: 124 124 130;
+    --ap-ink-4: 179 179 185;
+    --ap-rail: 21 20 15;
+    --ap-rail-ink: 232 229 220;
+    --ap-rail-ink-2: 138 134 120;
+    --ap-rail-deep: 16 15 11;
+    --ap-rail-hover: 33 31 24;
+    --ap-rail-active: 38 36 28;
+    --ap-surface-hover: 240 240 239;
+    --ap-surface-active: 232 232 231;
+    --ap-surface-sunken: 240 240 239;
+    --ap-card-from: 250 250 249;
+    --ap-card-mid: 247 247 246;
+    --ap-card-to: 244 244 243;
+    --ap-gray-700: 51 51 55;
+    --ap-gray-800: 38 38 40;
+}
+
+/* Dark · Espresso - warm deep brown (design_tokens.dart:254) */
+html[data-theme="espresso"] {
+    --ap-bg: 21 20 15;
+    --ap-surface: 31 30 24;
+    --ap-surface-alt: 40 38 31;
+    --ap-border: 46 43 34;
+    --ap-border-strong: 58 54 43;
+    --ap-ink: 246 244 239;
+    --ap-ink-2: 200 194 181;
+    --ap-ink-3: 133 127 115;
+    --ap-ink-4: 90 85 75;
+    --ap-rail: 10 9 7;
+    --ap-rail-ink: 232 229 220;
+    --ap-rail-ink-2: 138 134 120;
+    --ap-rail-deep: 6 5 4;
+    --ap-rail-hover: 26 24 19;
+    --ap-rail-active: 31 29 23;
+    --ap-surface-hover: 48 46 37;
+    --ap-surface-active: 24 23 18;
+    --ap-surface-sunken: 21 20 15;
+    --ap-card-from: 40 38 31;
+    --ap-card-mid: 36 34 28;
+    --ap-card-to: 31 30 24;
+    --ap-gray-50: 249 248 245;
+    --ap-gray-200: 225 222 213;
+    --ap-gray-500: 107 102 91;
+}
+
+/* Dark · Midnight - cool charcoal-navy (design_tokens.dart:289) */
+html[data-theme="midnight"] {
+    --ap-bg: 15 17 21;
+    --ap-surface: 24 27 33;
+    --ap-surface-alt: 31 35 43;
+    --ap-border: 38 42 50;
+    --ap-border-strong: 52 57 74;
+    --ap-ink: 236 238 242;
+    --ap-ink-2: 183 188 200;
+    --ap-ink-3: 122 126 136;
+    --ap-ink-4: 79 83 92;
+    --ap-rail: 6 8 16;
+    --ap-rail-ink: 230 232 237;
+    --ap-rail-ink-2: 131 136 160;
+    --ap-rail-deep: 3 5 11;
+    --ap-rail-hover: 22 25 34;
+    --ap-rail-active: 27 30 40;
+    --ap-surface-hover: 40 45 55;
+    --ap-surface-active: 19 21 26;
+    --ap-surface-sunken: 15 17 21;
+    --ap-card-from: 31 35 43;
+    --ap-card-mid: 28 31 38;
+    --ap-card-to: 24 27 33;
+    --ap-gray-50: 243 244 247;
+    --ap-gray-200: 212 216 223;
+    --ap-gray-500: 96 100 110;
+}
+
+/* Dark · Carbon - OLED-friendly true black (design_tokens.dart:324) */
+html[data-theme="carbon"] {
+    --ap-bg: 0 0 0;
+    --ap-surface: 14 14 14;
+    --ap-surface-alt: 22 22 22;
+    --ap-border: 31 31 31;
+    --ap-border-strong: 46 46 46;
+    --ap-ink: 242 242 242;
+    --ap-ink-2: 184 184 184;
+    --ap-ink-3: 125 125 125;
+    --ap-ink-4: 78 78 78;
+    --ap-rail: 0 0 0;
+    --ap-rail-ink: 230 230 230;
+    --ap-rail-ink-2: 133 133 133;
+    --ap-rail-deep: 0 0 0;
+    --ap-rail-hover: 20 20 20;
+    --ap-rail-active: 26 26 26;
+    --ap-surface-hover: 31 31 31;
+    --ap-surface-active: 10 10 10;
+    --ap-surface-sunken: 0 0 0;
+    --ap-card-from: 22 22 22;
+    --ap-card-mid: 18 18 18;
+    --ap-card-to: 14 14 14;
+    --ap-gray-50: 247 247 247;
+    --ap-gray-200: 216 216 216;
+    --ap-gray-500: 97 97 97;
+}
+
+/* ── Tier 4 · Tailwind gray bridge ──────────────────────────────────────── */
+
+/* Light variants: 50-300 are surfaces, 400-900 climb the ink ramp.
+   700 and 800 are interpolated and come from the variant block above. */
+html[data-theme]:not(.dark) {
+    --ap-white: var(--ap-surface);
+    --ap-gray-50: var(--ap-bg);
+    --ap-gray-100: var(--ap-surface-alt);
+    --ap-gray-200: var(--ap-border);
+    --ap-gray-300: var(--ap-border-strong);
+    --ap-gray-400: var(--ap-ink-4);
+    --ap-gray-500: var(--ap-ink-3);
+    --ap-gray-600: var(--ap-ink-2);
+    --ap-gray-900: var(--ap-ink);
+}
+
+/* Dark variants: the ramp inverts - 100-400 are ink, 600-900 are surfaces.
+   50, 200 and 500 are interpolated and come from the variant block above.
+   --ap-white stays pure so `text-white` on a brand button stays crisp. */
+html.dark[data-theme] {
+    --ap-white: 255 255 255;
+    --ap-gray-100: var(--ap-ink);
+    --ap-gray-300: var(--ap-ink-2);
+    --ap-gray-400: var(--ap-ink-3);
+    --ap-gray-600: var(--ap-border-strong);
+    --ap-gray-700: var(--ap-border);
+    --ap-gray-800: var(--ap-surface);
+    --ap-gray-900: var(--ap-bg);
+}
+
+/* ── Native <select> chevron ─────────────────────────────────────────────
+ * @tailwindcss/forms inlines colors.gray.500 into an SVG *data URI* for the
+ * dropdown arrow (node_modules/@tailwindcss/forms/src/index.js, the
+ * `base: ['select']` rule). Its resolveColor() only substitutes <alpha-value>,
+ * so once gray.500 is `rgb(var(--ap-gray-500) / …)` the data URI carries a
+ * var() it can never resolve - a data URI is an isolated document with no
+ * access to the page's custom properties - and the arrow disappears.
+ *
+ * So the arrow is re-declared here with a literal stroke, once per palette.
+ * Each colour is that palette's gray-500, which is what the plugin would have
+ * produced. The :not() chain reproduces the plugin's own exclusions: it clears
+ * the arrow for [multiple] and for any sized select (its rule at :169).
+ * ─────────────────────────────────────────────────────────────────────── */
+select:not([multiple]):not([size]:not([size="1"])) {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+}
+html[data-theme="sand"] select:not([multiple]):not([size]:not([size="1"])) {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23857f73' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+}
+html[data-theme="mist"] select:not([multiple]):not([size]:not([size="1"])) {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%237a7e85' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+}
+html[data-theme="paper"] select:not([multiple]):not([size]:not([size="1"])) {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%237c7c82' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+}
+html[data-theme="espresso"] select:not([multiple]):not([size]:not([size="1"])) {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b665b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+}
+html[data-theme="midnight"] select:not([multiple]):not([size]:not([size="1"])) {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2360646e' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+}
+html[data-theme="carbon"] select:not([multiple]):not([size]:not([size="1"])) {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23616161' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
 }
 
 [x-cloak] {
@@ -161,7 +549,7 @@
 
 /* Flatpickr dark mode */
 .dark .flatpickr-calendar {
-    background: linear-gradient(135deg, #2a2a2d 0%, #272729 30%, #252526 100%);
+    background: linear-gradient(135deg, rgb(var(--ap-surface-alt)) 0%, rgb(var(--ap-surface-alt)) 30%, rgb(var(--ap-surface)) 100%);
     box-shadow:
         inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
         0 4px 16px rgba(0, 0, 0, 0.4),
@@ -169,25 +557,25 @@
     border-radius: 8px;
 }
 .dark .flatpickr-calendar.arrowTop:before {
-    border-bottom-color: #2d2d30;
+    border-bottom-color: rgb(var(--ap-border));
 }
 .dark .flatpickr-calendar.arrowTop:after {
-    border-bottom-color: #2a2a2d;
+    border-bottom-color: rgb(var(--ap-surface-alt));
 }
 .dark .flatpickr-calendar.arrowBottom:before {
-    border-top-color: #2d2d30;
+    border-top-color: rgb(var(--ap-border));
 }
 .dark .flatpickr-calendar.arrowBottom:after {
-    border-top-color: #2a2a2d;
+    border-top-color: rgb(var(--ap-surface-alt));
 }
 .dark .flatpickr-months .flatpickr-month {
-    color: #d1d5db;
-    fill: #d1d5db;
+    color: rgb(var(--ap-ink-2));
+    fill: rgb(var(--ap-ink-2));
 }
 .dark .flatpickr-months .flatpickr-prev-month,
 .dark .flatpickr-months .flatpickr-next-month {
-    color: #d1d5db;
-    fill: #d1d5db;
+    color: rgb(var(--ap-ink-2));
+    fill: rgb(var(--ap-ink-2));
 }
 .dark .flatpickr-months .flatpickr-prev-month:hover,
 .dark .flatpickr-months .flatpickr-next-month:hover {
@@ -205,13 +593,13 @@
     color: rgba(255, 255, 255, 0.5);
 }
 .dark .flatpickr-current-month .flatpickr-monthDropdown-months {
-    background: #252526;
+    background: rgb(var(--ap-surface));
 }
 .dark .flatpickr-current-month .flatpickr-monthDropdown-months:hover {
     background: rgba(255, 255, 255, 0.05);
 }
 .dark .flatpickr-current-month .flatpickr-monthDropdown-months .flatpickr-monthDropdown-month {
-    background-color: #252526;
+    background-color: rgb(var(--ap-surface));
 }
 .dark .flatpickr-calendar .numInputWrapper span {
     border-color: rgba(255, 255, 255, 0.15);
@@ -232,16 +620,16 @@
     background: rgba(255, 255, 255, 0.05);
 }
 .dark .flatpickr-current-month .numInputWrapper span.arrowUp:after {
-    border-bottom-color: #d1d5db;
+    border-bottom-color: rgb(var(--ap-ink-2));
 }
 .dark .flatpickr-current-month .numInputWrapper span.arrowDown:after {
-    border-top-color: #d1d5db;
+    border-top-color: rgb(var(--ap-ink-2));
 }
 .dark span.flatpickr-weekday {
-    color: #9ca3af;
+    color: rgb(var(--ap-ink-3));
 }
 .dark .flatpickr-day {
-    color: #d1d5db;
+    color: rgb(var(--ap-ink-2));
 }
 .dark .flatpickr-day.inRange,
 .dark .flatpickr-day.prevMonthDay.inRange,
@@ -253,8 +641,8 @@
 .dark .flatpickr-day:focus,
 .dark .flatpickr-day.prevMonthDay:focus,
 .dark .flatpickr-day.nextMonthDay:focus {
-    background: #2d2d30;
-    border-color: #2d2d30;
+    background: rgb(var(--ap-border));
+    border-color: rgb(var(--ap-border));
 }
 .dark .flatpickr-day.today {
     border-color: var(--brand-blue);
@@ -293,7 +681,7 @@
     box-shadow: -10px 0 0 var(--brand-button-bg);
 }
 .dark .flatpickr-day.inRange {
-    box-shadow: -5px 0 0 #2d2d30, 5px 0 0 #2d2d30;
+    box-shadow: -5px 0 0 rgb(var(--ap-border)), 5px 0 0 rgb(var(--ap-border));
 }
 .dark .flatpickr-day.week.selected {
     box-shadow: -5px 0 0 var(--brand-button-bg), 5px 0 0 var(--brand-button-bg);
@@ -312,18 +700,18 @@
     color: rgba(255, 255, 255, 0.1);
 }
 .dark .dayContainer + .dayContainer {
-    box-shadow: -1px 0 0 #2d2d30;
+    box-shadow: -1px 0 0 rgb(var(--ap-border));
 }
 .dark .flatpickr-calendar.hasTime .flatpickr-time {
-    border-top-color: #2d2d30;
+    border-top-color: rgb(var(--ap-border));
 }
 .dark .flatpickr-time input {
-    color: #d1d5db;
+    color: rgb(var(--ap-ink-2));
     box-shadow: none;
 }
 .dark .flatpickr-time .flatpickr-time-separator,
 .dark .flatpickr-time .flatpickr-am-pm {
-    color: #d1d5db;
+    color: rgb(var(--ap-ink-2));
 }
 .dark .flatpickr-time input:hover,
 .dark .flatpickr-time .flatpickr-am-pm:hover,
@@ -355,112 +743,94 @@
     background-size: 200% 100%;
 }
 
+/* ──────────────────────────────────────────────────────────────────────────
+ * AP components
+ *
+ * Every rule below reads the --ap-* tokens, so there are no `.dark` twins:
+ * the tokens already differ by brightness, and by variant on top of that.
+ *
+ * Gradient bottoms use color-mix(… 88%, #000) rather than another token. That
+ * ratio is not arbitrary - it reproduces today's pairs exactly (rgb(var(--ap-bg))→rgb(var(--ap-rail-deep))
+ * for the sidebar, rgb(var(--ap-rail-active))→rgb(var(--ap-surface-active)) for the active nav item).
+ * ────────────────────────────────────────────────────────────────────────── */
+
 /* AP header gradient for subtle depth */
 .header-gradient {
-    background: linear-gradient(to bottom, #ffffff, #f9fafb);
-}
-.dark .header-gradient {
-    background: linear-gradient(to bottom, #282828, #252526);
+    background: linear-gradient(to bottom, rgb(var(--ap-card-from)), rgb(var(--ap-card-to)));
 }
 
 /* Sidebar nav active item gradient */
 .dark-nav-active {
-    background: linear-gradient(to bottom, #282828, #232323) !important;
+    background: linear-gradient(to bottom, rgb(var(--ap-rail-active)),
+                color-mix(in srgb, rgb(var(--ap-rail-active)) 88%, #000)) !important;
 }
 
 /* Input field depth - recessed feel */
 input[type="text"], input[type="email"], input[type="password"],
 input[type="number"], input[type="url"], input[type="tel"],
 input[type="search"], textarea, select {
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.12);
+    box-shadow: var(--ap-inset-input);
     transition: box-shadow 0.2s ease, border-color 0.2s ease;
-}
-.dark input[type="text"], .dark input[type="email"], .dark input[type="password"],
-.dark input[type="number"], .dark input[type="url"], .dark input[type="tel"],
-.dark input[type="search"], .dark textarea, .dark select {
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 /* Toggle track depth */
 .peer ~ div:first-of-type {
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15);
-}
-.dark .peer ~ div:first-of-type {
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--ap-inset-track);
 }
 
 /* Toggle checked glow */
 .peer:checked ~ div:first-of-type {
-    box-shadow:
-        inset 0 1px 3px rgba(0, 0, 0, 0.15),
-        0 0 8px var(--brand-blue-a30);
-}
-.dark .peer:checked ~ div:first-of-type {
-    box-shadow:
-        inset 0 1px 3px rgba(0, 0, 0, 0.4),
-        0 0 10px var(--brand-blue-a30);
+    box-shadow: var(--ap-inset-track), 0 0 8px var(--brand-blue-a30);
 }
 
 /* Sidebar schedule badge gradient */
 .schedule-badge {
-    background: linear-gradient(to bottom, #2d2d30, #252526) !important;
+    background: linear-gradient(to bottom, rgb(var(--ap-rail-hover)),
+                color-mix(in srgb, rgb(var(--ap-rail-hover)) 88%, #000)) !important;
     border-color: rgba(255, 255, 255, 0.08);
 }
 
 /* Sidebar nav hover gradient */
 .dark-nav-hover:hover {
-    background: linear-gradient(to bottom, #262626, #222222) !important;
+    background: linear-gradient(to bottom, rgb(var(--ap-rail-hover)),
+                color-mix(in srgb, rgb(var(--ap-rail-hover)) 88%, #000)) !important;
 }
 
 /* Sidebar background gradient */
 .sidebar-gradient {
-    background: linear-gradient(to bottom, #1e1e1e, #1A1A1A) !important;
+    background: linear-gradient(to bottom, rgb(var(--ap-rail)), rgb(var(--ap-rail-deep))) !important;
 }
 
 /* Card top highlight */
 .card-highlight {
-    border-top: 1px solid rgba(0, 0, 0, 0.04);
-}
-.dark .card-highlight {
-    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    border-top: 1px solid var(--ap-hairline);
 }
 
 /* Get Started panel */
 .get-started-container {
-    background: linear-gradient(135deg, #ffffff 0%, #fefefe 30%, #f9fafb 100%);
+    background: linear-gradient(135deg, rgb(var(--ap-card-from)) 0%,
+                rgb(var(--ap-card-mid)) 30%, rgb(var(--ap-card-to)) 100%);
     position: relative;
-    box-shadow:
-        0 1px 2px 0 rgba(0, 0, 0, 0.06),
-        0 4px 12px -2px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--ap-shadow-card);
 }
-.dark .get-started-container {
-    background: linear-gradient(135deg, #2e2e31 0%, #2a2a2d 30%, #252526 100%);
-    border: 1px solid transparent;
-    box-shadow:
-        inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.03),
-        0 2px 8px 0 rgba(0, 0, 0, 0.3),
-        0 0 0 1px rgba(0, 0, 0, 0.2);
-}
-.dark .get-started-container::before {
+.get-started-container::before {
     content: '';
     position: absolute;
     top: 0;
     left: 10%;
     right: 10%;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    background: linear-gradient(90deg, transparent, var(--ap-hairline), transparent);
     border-radius: 9999px;
     z-index: 1;
     pointer-events: none;
 }
+/* Hover RECESSES this card - note the pressed inset shadow below. It must use
+   the sunken surface, not --ap-surface-hover, or in dark mode the surface
+   lightens while the shadow still reads as pushed-in. */
 .get-started-card:hover {
-    background: #f3f4f6;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
-}
-.dark .get-started-card:hover {
-    background: #1A1A1A;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+    background: rgb(var(--ap-surface-sunken));
+    box-shadow: var(--ap-inset-pressed);
 }
 .get-started-container [aria-hidden="true"] > div {
     transition: opacity 0.2s;
@@ -474,21 +844,10 @@ div:has(+ div + .get-started-card:hover) > div {
 
 /* Dashboard panels */
 .dashboard-panel {
-    background: linear-gradient(135deg, #ffffff 0%, #fefefe 30%, #f9fafb 100%);
+    background: linear-gradient(135deg, rgb(var(--ap-card-from)) 0%,
+                rgb(var(--ap-card-mid)) 30%, rgb(var(--ap-card-to)) 100%);
     position: relative;
-    box-shadow:
-        inset 0 1px 0 0 rgba(255, 255, 255, 0.7),
-        0 1px 2px 0 rgba(0, 0, 0, 0.06),
-        0 4px 12px -2px rgba(0, 0, 0, 0.05);
-}
-.dark .dashboard-panel {
-    background: linear-gradient(135deg, #2e2e31 0%, #2a2a2d 30%, #252526 100%);
-    border-color: transparent;
-    box-shadow:
-        inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.03),
-        0 2px 8px 0 rgba(0, 0, 0, 0.3),
-        0 0 0 1px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--ap-shadow-card);
 }
 .dashboard-panel::before {
     content: '';
@@ -497,22 +856,18 @@ div:has(+ div + .get-started-card:hover) > div {
     left: 10%;
     right: 10%;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.06), transparent);
+    background: linear-gradient(90deg, transparent, var(--ap-hairline), transparent);
     border-radius: 9999px;
     z-index: 1;
     pointer-events: none;
 }
-.dark .dashboard-panel::before {
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-}
 
-/* Dashboard panel header - layered depth */
+/* Dashboard panel header - layered depth.
+   --ap-panel-header rather than a flat tint: dark mode needs the top-lit fade
+   (a gradient to transparent), which a single colour cannot express. */
 .dashboard-panel-header {
-    background: rgba(0, 0, 0, 0.02);
+    background: var(--ap-panel-header);
     position: relative;
-}
-.dark .dashboard-panel-header {
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.02), transparent);
 }
 .dashboard-panel-header::after {
     content: '';
@@ -521,23 +876,13 @@ div:has(+ div + .get-started-card:hover) > div {
     left: 1.25rem;
     right: 1.25rem;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.08), transparent);
-}
-.dark .dashboard-panel-header::after {
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+    background: linear-gradient(90deg, transparent, var(--ap-hairline), transparent);
 }
 
 /* Dashboard stat icon depth + ambient glow */
 .dashboard-icon {
-    box-shadow:
-        inset 0 1px 2px rgba(0, 0, 0, 0.06),
-        0 0 12px var(--icon-glow, transparent);
+    box-shadow: var(--ap-inset-pressed), 0 0 12px var(--icon-glow, transparent);
     position: relative;
-}
-.dark .dashboard-icon {
-    box-shadow:
-        inset 0 1px 3px rgba(0, 0, 0, 0.3),
-        0 0 12px var(--icon-glow, rgba(255, 255, 255, 0.03));
 }
 
 /* Dashboard stat value depth */
@@ -561,21 +906,10 @@ div:has(+ div + .get-started-card:hover) > div {
 
 /* AP card/panel gradient */
 .ap-card {
-    background: linear-gradient(135deg, #ffffff 0%, #fefefe 30%, #f9fafb 100%);
+    background: linear-gradient(135deg, rgb(var(--ap-card-from)) 0%,
+                rgb(var(--ap-card-mid)) 30%, rgb(var(--ap-card-to)) 100%);
     position: relative;
-    box-shadow:
-        inset 0 1px 0 0 rgba(255, 255, 255, 0.7),
-        0 1px 2px 0 rgba(0, 0, 0, 0.06),
-        0 4px 12px -2px rgba(0, 0, 0, 0.05);
-}
-.dark .ap-card {
-    background: linear-gradient(135deg, #2e2e31 0%, #2a2a2d 30%, #252526 100%);
-    border-color: transparent;
-    box-shadow:
-        inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.03),
-        0 2px 8px 0 rgba(0, 0, 0, 0.3),
-        0 0 0 1px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--ap-shadow-card);
 }
 .ap-card::before {
     content: '';
@@ -584,21 +918,15 @@ div:has(+ div + .get-started-card:hover) > div {
     left: 10%;
     right: 10%;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.06), transparent);
+    background: linear-gradient(90deg, transparent, var(--ap-hairline), transparent);
     border-radius: 9999px;
     z-index: 1;
     pointer-events: none;
 }
-.dark .ap-card::before {
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-}
 
 /* AP tab containers */
 .ap-tab-container {
-    border-color: #e5e7eb;
-}
-.dark .ap-tab-container {
-    border-color: rgba(255, 255, 255, 0.06);
+    border-color: rgb(var(--ap-border));
 }
 .ap-tab-container button, .ap-tab-container a {
     transition: all 0.2s ease;
@@ -607,36 +935,24 @@ div:has(+ div + .get-started-card:hover) > div {
 /* Section content panels */
 .section-content {
     padding: 1rem;
-    background: linear-gradient(135deg, #ffffff 0%, #fefefe 30%, #f9fafb 100%);
+    background: linear-gradient(135deg, rgb(var(--ap-card-from)) 0%,
+                rgb(var(--ap-card-mid)) 30%, rgb(var(--ap-card-to)) 100%);
     position: relative;
-    box-shadow:
-        0 1px 2px 0 rgba(0, 0, 0, 0.06),
-        0 4px 12px -2px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--ap-shadow-card);
 }
 @media (min-width: 640px) {
     .section-content {
         padding: 2rem;
         border-radius: 0.75rem;
     }
-}
-.dark .section-content {
-    background: linear-gradient(135deg, #2e2e31 0%, #2a2a2d 30%, #252526 100%);
-    border-color: transparent;
-    box-shadow:
-        inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.03),
-        0 2px 8px 0 rgba(0, 0, 0, 0.3),
-        0 0 0 1px rgba(0, 0, 0, 0.2);
-}
-@media (min-width: 640px) {
-    .dark .section-content::before {
+    .section-content::before {
         content: '';
         position: absolute;
         top: 0;
         left: 10%;
         right: 10%;
         height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        background: linear-gradient(90deg, transparent, var(--ap-hairline), transparent);
         border-radius: 9999px;
         z-index: 1;
         pointer-events: none;
@@ -645,29 +961,19 @@ div:has(+ div + .get-started-card:hover) > div {
 
 /* AP modal gradient */
 .ap-modal {
-    background: linear-gradient(135deg, #ffffff 0%, #fefefe 30%, #f9fafb 100%);
+    background: linear-gradient(135deg, rgb(var(--ap-card-from)) 0%,
+                rgb(var(--ap-card-mid)) 30%, rgb(var(--ap-card-to)) 100%);
     position: relative;
-    box-shadow:
-        0 1px 2px 0 rgba(0, 0, 0, 0.06),
-        0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--ap-shadow-modal);
 }
-.dark .ap-modal {
-    background: linear-gradient(135deg, #2e2e31 0%, #2a2a2d 30%, #252526 100%);
-    border-color: transparent;
-    box-shadow:
-        inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.03),
-        0 25px 50px -12px rgba(0, 0, 0, 0.5),
-        0 0 0 1px rgba(0, 0, 0, 0.25);
-}
-.dark .ap-modal::before {
+.ap-modal::before {
     content: '';
     position: absolute;
     top: 0;
     left: 10%;
     right: 10%;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    background: linear-gradient(90deg, transparent, var(--ap-hairline), transparent);
     border-radius: 9999px;
     z-index: 1;
     pointer-events: none;
@@ -675,34 +981,25 @@ div:has(+ div + .get-started-card:hover) > div {
 
 /* AP dropdown gradient */
 .ap-dropdown {
-    background: linear-gradient(135deg, #ffffff 0%, #fefefe 30%, #fafafa 100%);
+    background: linear-gradient(135deg, rgb(var(--ap-card-from)) 0%,
+                rgb(var(--ap-card-mid)) 30%, rgb(var(--ap-card-to)) 100%);
     position: relative;
-    box-shadow:
-        0 4px 16px -2px rgba(0, 0, 0, 0.08),
-        0 10px 25px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--ap-shadow-dropdown);
 }
-.dark .ap-dropdown {
-    background: linear-gradient(135deg, #2e2e31 0%, #2a2a2d 30%, #282828 100%);
-    box-shadow:
-        inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.03),
-        0 10px 25px rgba(0, 0, 0, 0.4),
-        0 0 0 1px rgba(0, 0, 0, 0.2);
-}
-.dark .ap-dropdown::before {
+.ap-dropdown::before {
     content: '';
     position: absolute;
     top: 0;
     left: 10%;
     right: 10%;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    background: linear-gradient(90deg, transparent, var(--ap-hairline), transparent);
     border-radius: 9999px;
     z-index: 1;
     pointer-events: none;
 }
-.dark .ap-dropdown a:hover, .dark .ap-dropdown button:hover {
-    background: rgba(255, 255, 255, 0.05);
+.ap-dropdown a:hover, .ap-dropdown button:hover {
+    background: var(--ap-tint-2);
 }
 
 /* Sidebar section nav */
@@ -714,96 +1011,61 @@ div:has(+ div + .get-started-card:hover) > div {
     font-size: 1.125rem;
     line-height: 1.75rem;
     font-weight: 500;
-    color: #2d2d30;
+    color: rgb(var(--ap-ink-2));
     border-start-end-radius: 0.5rem;
     border-end-end-radius: 0.5rem;
     border-inline-start: 4px solid transparent;
 }
-.dark .section-nav-link {
-    color: #d1d5db;
-}
 .section-nav-link:hover:not(.nav-active) {
-    background: linear-gradient(to bottom, #f3f4f6, #eef0f3) !important;
+    background: linear-gradient(to bottom, rgb(var(--ap-surface-hover)),
+                rgb(var(--ap-surface-active))) !important;
 }
 .section-nav-link.nav-active {
-    background: linear-gradient(to bottom, #f0f1f3, #eaecef) !important;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06);
+    background: linear-gradient(to bottom, rgb(var(--ap-surface-active)),
+                color-mix(in srgb, rgb(var(--ap-surface-active)) 96%, #000)) !important;
+    box-shadow: var(--ap-inset-pressed);
     border-inline-start-color: var(--brand-blue);
-    color: #111827;
-    font-weight: 700;
-}
-.dark .section-nav-link:hover:not(.nav-active) {
-    background: linear-gradient(to bottom, #262626, #222222) !important;
-}
-.dark .section-nav-link.nav-active {
-    background: linear-gradient(to bottom, #282828, #232323) !important;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
-    border-inline-start-color: var(--brand-blue);
-    color: #ffffff;
+    color: rgb(var(--ap-ink));
     font-weight: 700;
 }
 
 /* Admin navigation dropdowns */
 .admin-dropdown {
-    background: linear-gradient(135deg, #ffffff 0%, #fefefe 30%, #fafafa 100%);
+    background: linear-gradient(135deg, rgb(var(--ap-card-from)) 0%,
+                rgb(var(--ap-card-mid)) 30%, rgb(var(--ap-card-to)) 100%);
     position: relative;
-    box-shadow:
-        0 4px 16px -2px rgba(0, 0, 0, 0.08),
-        0 10px 25px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--ap-shadow-dropdown);
 }
-.dark .admin-dropdown {
-    background: linear-gradient(135deg, #2e2e31 0%, #2a2a2d 30%, #282828 100%);
-    box-shadow:
-        inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.03),
-        0 10px 25px rgba(0, 0, 0, 0.4),
-        0 0 0 1px rgba(0, 0, 0, 0.2);
-}
-.dark .admin-dropdown::before {
+.admin-dropdown::before {
     content: '';
     position: absolute;
     top: 0;
     left: 10%;
     right: 10%;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    background: linear-gradient(90deg, transparent, var(--ap-hairline), transparent);
     border-radius: 9999px;
     z-index: 1;
     pointer-events: none;
 }
 .admin-dropdown a:hover {
-    background: rgba(0, 0, 0, 0.04) !important;
-}
-.dark .admin-dropdown a:hover {
-    background: rgba(255, 255, 255, 0.05) !important;
+    background: var(--ap-tint-2) !important;
 }
 
 /* AP secondary button/link gradient */
 .ap-secondary-btn {
-    background: linear-gradient(135deg, #ffffff 0%, #fefefe 30%, #fafafa 100%);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-.dark .ap-secondary-btn {
-    background: linear-gradient(135deg, #2e2e31 0%, #2a2a2d 30%, #282828 100%);
-    border-color: rgba(255, 255, 255, 0.08);
-    box-shadow:
-        inset 0 1px 0 0 rgba(255, 255, 255, 0.04),
-        0 1px 2px rgba(0, 0, 0, 0.2);
+    background: linear-gradient(135deg, rgb(var(--ap-card-from)) 0%,
+                rgb(var(--ap-card-mid)) 30%, rgb(var(--ap-card-to)) 100%);
+    box-shadow: var(--ap-shadow-btn);
 }
 .ap-secondary-btn:hover {
-    background: linear-gradient(135deg, #f8f9fa 0%, #f3f4f6 30%, #eef0f3 100%);
-}
-.dark .ap-secondary-btn:hover {
-    background: linear-gradient(135deg, #353538 0%, #303033 30%, #2d2d30 100%);
+    background: linear-gradient(135deg, rgb(var(--ap-surface-hover)) 0%,
+                rgb(var(--ap-surface-hover)) 30%, rgb(var(--ap-surface-active)) 100%);
 }
 .ap-secondary-btn:active {
-    background: linear-gradient(135deg, #f0f1f3 0%, #eaecef 100%);
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
-    transform: scale(0.98);
-}
-.dark .ap-secondary-btn:active {
-    background: linear-gradient(135deg, #282828 0%, #252526 100%);
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+    background: linear-gradient(135deg, rgb(var(--ap-surface-active)) 0%,
+                color-mix(in srgb, rgb(var(--ap-surface-active)) 94%, #000) 100%);
+    box-shadow: var(--ap-inset-pressed);
     transform: scale(0.98);
 }
 
@@ -814,98 +1076,80 @@ div:has(+ div + .get-started-card:hover) > div {
     align-items: center;
     justify-content: space-between;
     padding: 0.75rem 1rem;
-    border: 1px solid #e5e7eb;
+    border: 1px solid rgb(var(--ap-border));
     border-radius: 0.5rem;
     margin-bottom: 0.5rem;
-    background: linear-gradient(135deg, #ffffff 0%, #fefefe 30%, #fafafa 100%);
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    background: linear-gradient(135deg, rgb(var(--ap-card-from)) 0%,
+                rgb(var(--ap-card-mid)) 30%, rgb(var(--ap-card-to)) 100%);
+    box-shadow: var(--ap-shadow-btn);
 }
 @media (min-width: 1024px) {
     .mobile-section-header {
         display: none;
     }
 }
-.dark .mobile-section-header {
-    background: linear-gradient(135deg, #2e2e31 0%, #2a2a2d 30%, #282828 100%);
-    border-color: rgba(255, 255, 255, 0.06);
-    box-shadow:
-        inset 0 1px 0 0 rgba(255, 255, 255, 0.04),
-        0 1px 2px rgba(0, 0, 0, 0.2);
-}
 .mobile-section-header:hover {
-    background: linear-gradient(135deg, #f8f9fa 0%, #f3f4f6 30%, #eef0f3 100%);
+    background: linear-gradient(135deg, rgb(var(--ap-surface-hover)) 0%,
+                rgb(var(--ap-surface-hover)) 30%, rgb(var(--ap-surface-active)) 100%);
 }
 .mobile-section-header.active {
-    background: linear-gradient(135deg, #f3f4f6 0%, #f0f1f3 30%, #eaecef 100%);
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06);
-}
-.dark .mobile-section-header:hover {
-    background: linear-gradient(135deg, #353538 0%, #303033 30%, #2d2d30 100%);
-}
-.dark .mobile-section-header.active {
-    background: linear-gradient(135deg, #2a2a2d 0%, #262628 30%, #232323 100%);
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, rgb(var(--ap-surface-active)) 0%,
+                color-mix(in srgb, rgb(var(--ap-surface-active)) 94%, #000) 100%);
+    box-shadow: var(--ap-inset-pressed);
 }
 
-/* Table refinement inside cards */
+/* Table refinement inside cards.
+   The header is RECESSED from the card, so it uses --ap-tint-sunken (a black
+   overlay in both modes). --ap-tint-1 lightens in dark mode and would flip the
+   header from sitting below the card to sitting above it. Row hover below is
+   the opposite case and correctly lightens. */
 .ap-card thead th {
-    background: rgba(0, 0, 0, 0.02);
-    border-color: rgba(0, 0, 0, 0.06);
+    background: var(--ap-tint-sunken);
+    border-color: var(--ap-hairline);
 }
 .ap-card tbody tr {
-    border-color: rgba(0, 0, 0, 0.06);
+    border-color: var(--ap-hairline);
 }
 .ap-card tbody tr:hover {
-    background: rgba(0, 0, 0, 0.02);
-}
-.dark .ap-card thead th {
-    background: rgba(0, 0, 0, 0.15);
-    border-color: rgba(255, 255, 255, 0.06);
-}
-.dark .ap-card tbody tr {
-    border-color: rgba(255, 255, 255, 0.06);
-}
-.dark .ap-card tbody tr:hover {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--ap-tint-1);
 }
 
 /* Auth page card gradient */
 .auth-card {
-    background: linear-gradient(135deg, #ffffff 0%, #fefefe 30%, #f9fafb 100%);
+    background: linear-gradient(135deg, rgb(var(--ap-card-from)) 0%,
+                rgb(var(--ap-card-mid)) 30%, rgb(var(--ap-card-to)) 100%);
     position: relative;
-    border-color: rgba(0, 0, 0, 0.06);
-    box-shadow:
-        0 1px 2px 0 rgba(0, 0, 0, 0.06),
-        0 8px 24px -4px rgba(0, 0, 0, 0.08);
+    border-color: var(--ap-hairline);
+    box-shadow: var(--ap-shadow-auth);
 }
-.dark .auth-card {
-    background: linear-gradient(135deg, #2e2e31 0%, #2a2a2d 30%, #252526 100%);
-    border-color: transparent;
-    box-shadow:
-        inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.03),
-        0 25px 50px -12px rgba(0, 0, 0, 0.5),
-        0 0 0 1px rgba(0, 0, 0, 0.25);
-}
-.dark .auth-card::before {
+.auth-card::before {
     content: '';
     position: absolute;
     top: 0;
     left: 10%;
     right: 10%;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    background: linear-gradient(90deg, transparent, var(--ap-hairline), transparent);
     border-radius: 9999px;
     z-index: 1;
     pointer-events: none;
 }
 
+/* In dark mode panels carry no border - the shadow does the separation. Kept
+   dark-scoped because light panels rely on their `border border-gray-200`
+   markup class, which an unconditional reset would silently erase. */
+.dark .ap-card,
+.dark .dashboard-panel,
+.dark .section-content,
+.dark .ap-modal,
+.dark .auth-card,
+.dark .get-started-container {
+    border-color: transparent;
+}
+
 /* Dropdown link hover refinement */
 .ap-dropdown-link:hover {
-    background: rgba(0, 0, 0, 0.04) !important;
-}
-.dark .ap-dropdown-link:hover {
-    background: rgba(255, 255, 255, 0.05) !important;
+    background: var(--ap-tint-2) !important;
 }
 
 /* Keep visited links blue (prevent browser default purple) */
@@ -920,7 +1164,7 @@ a.text-blue-600:visited { color: rgb(37 99 235); }
 
 /* Dark mode scrollbars */
 .dark {
-    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+    scrollbar-color: var(--ap-scrollbar-thumb) transparent;
     scrollbar-width: thin;
 }
 .dark ::-webkit-scrollbar {
@@ -931,11 +1175,11 @@ a.text-blue-600:visited { color: rgb(37 99 235); }
     background: transparent;
 }
 .dark ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--ap-scrollbar-thumb);
     border-radius: 4px;
 }
 .dark ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.25);
+    background: var(--ap-scrollbar-thumb-hover);
 }
 
 @keyframes cookie-banner-in {

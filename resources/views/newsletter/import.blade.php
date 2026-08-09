@@ -200,7 +200,7 @@
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
                             <template x-for="(header, index) in csvHeaders" :key="index">
-                                <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-[#252526]">
+                                <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
                                     <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 truncate" x-text="header || '-'"></p>
                                     <p class="text-sm text-gray-700 dark:text-gray-300 mt-1 mb-3 truncate" :title="(csvPreview[0] && csvPreview[0][index]) || ''" x-text="(csvPreview[0] && csvPreview[0][index]) || '-'"></p>
                                     <select :value="columnMappings[index]" @change="columnMappings[index] = $event.target.value"

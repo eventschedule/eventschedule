@@ -5477,6 +5477,7 @@ class MarketingController extends Controller
 
             // Account Settings
             ['page' => 'Account Settings', 'section' => 'Profile Information', 'description' => 'Manage name, email, timezone, language, and profile image.', 'url' => $r['account_settings'].'#profile', 'category' => 'User Guide', 'keywords' => 'name email timezone language profile'],
+            ['page' => 'Account Settings', 'section' => 'Appearance', 'description' => 'Choose light or dark mode and pick from three light and three dark colour palettes.', 'url' => $r['account_settings'].'#appearance', 'category' => 'User Guide', 'keywords' => 'appearance theme dark mode light palette colours colors sand mist paper espresso midnight carbon'],
             ['page' => 'Account Settings', 'section' => 'Payment Methods', 'description' => 'Configure payment methods for ticket sales.', 'url' => $r['account_settings'].'#payments', 'category' => 'User Guide', 'keywords' => 'payment method stripe invoice'],
             ['page' => 'Account Settings', 'section' => 'Stripe', 'description' => 'Connect Stripe for payment processing.', 'url' => $r['account_settings'].'#stripe', 'category' => 'User Guide', 'keywords' => 'stripe connect payment'],
             ['page' => 'Account Settings', 'section' => 'Invoice Ninja', 'description' => 'Set up Invoice Ninja as a payment gateway.', 'url' => $r['account_settings'].'#invoice-ninja', 'category' => 'User Guide', 'keywords' => 'invoice ninja payment'],

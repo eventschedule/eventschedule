@@ -282,10 +282,10 @@
         .gp-lang-active { background-color: #fff; color: #111827; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
         .gp-lang-inactive { color: #6b7280; }
         .gp-lang-inactive:hover { color: #374151; }
-        .dark .gp-lang-switcher { background: linear-gradient(135deg, #2d2d30, #252526); border: 1px solid rgba(255,255,255,0.06); }
-        .dark .gp-lang-active { background-color: #1A1A1A; color: #d1d5db; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
-        .dark .gp-lang-inactive { color: #9ca3af; }
-        .dark .gp-lang-inactive:hover { color: #d1d5db; background-color: rgba(255,255,255,0.1); }
+        .dark .gp-lang-switcher { background: linear-gradient(135deg, rgb(var(--ap-border)), rgb(var(--ap-surface))); border: 1px solid rgba(255,255,255,0.06); }
+        .dark .gp-lang-active { background-color: rgb(var(--ap-rail-deep)); color: rgb(var(--ap-ink-2)); box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
+        .dark .gp-lang-inactive { color: rgb(var(--ap-ink-3)); }
+        .dark .gp-lang-inactive:hover { color: rgb(var(--ap-ink-2)); background-color: rgba(255,255,255,0.1); }
 
         </style>
 

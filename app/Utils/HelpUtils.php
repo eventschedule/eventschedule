@@ -115,6 +115,7 @@ class HelpUtils
             'doc' => '/docs/account-settings',
             'anchors' => [
                 'section-profile' => '/docs/account-settings#profile',
+                'section-appearance' => '/docs/account-settings#appearance',
                 'section-payment-methods' => '/docs/account-settings#payments',
                 'payment-tab-stripe' => '/docs/account-settings#stripe',
                 'payment-tab-invoiceninja' => '/docs/account-settings#invoice-ninja',

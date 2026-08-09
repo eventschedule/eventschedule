@@ -16,9 +16,9 @@
             @endif
 
             {{-- Event info card --}}
-            <div class="bg-white dark:bg-[#2d2d30] rounded-lg shadow-sm border border-gray-200 dark:border-[#2d2d30] p-6 mb-6">
+            <div class="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
                 <h1 class="text-xl font-semibold text-gray-900 dark:text-white mb-1">{{ $event->name }}</h1>
-                <p class="text-sm text-gray-500 dark:text-[#9ca3af]">
+                <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ $event->is_multi_day ? $event->getDateRangeDisplay($sale->event_date) : $event->getStartDateTime($sale->event_date, true)->translatedFormat('F j, Y') }}
                     &middot;
                     {{ $event->getStartEndTime($sale->event_date) }}
@@ -26,7 +26,7 @@
             </div>
 
             {{-- Thank you card --}}
-            <div class="bg-white dark:bg-[#2d2d30] rounded-lg shadow-sm border border-gray-200 dark:border-[#2d2d30] p-6 text-center">
+            <div class="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 text-center">
                 <div class="mb-4">
                     <svg class="w-12 h-12 mx-auto text-green-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -34,7 +34,7 @@
                 </div>
 
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ __('messages.feedback_thank_you') }}</h2>
-                <p class="text-sm text-gray-500 dark:text-[#9ca3af] mb-4">{{ __('messages.feedback_thank_you_message') }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.feedback_thank_you_message') }}</p>
 
                 {{-- Show submitted rating --}}
                 <div class="flex justify-center gap-1 mb-4">
@@ -46,7 +46,7 @@
                 </div>
 
                 @if ($existingFeedback->comment)
-                <div class="text-sm text-gray-600 dark:text-[#d1d5db] bg-gray-50 dark:bg-[#1e1e1e] rounded-lg p-3 text-start" dir="auto">
+                <div class="text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 rounded-lg p-3 text-start" dir="auto">
                     {{ $existingFeedback->comment }}
                 </div>
                 @endif
@@ -60,9 +60,9 @@
                 if ($event->isFanVideosEnabled()) $types[] = mb_strtolower(__('messages.fan_videos_enabled'));
                 if ($event->isFanCommentsEnabled()) $types[] = mb_strtolower(__('messages.fan_comments_enabled'));
             @endphp
-            <div class="bg-white dark:bg-[#2d2d30] rounded-lg shadow-sm border border-gray-200 dark:border-[#2d2d30] p-6 mt-6">
+            <div class="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mt-6">
                 <p class="text-sm font-semibold text-gray-900 dark:text-white mb-1">{{ __('messages.feedback_share_content') }}</p>
-                <p class="text-sm text-gray-500 dark:text-[#9ca3af] mb-4">{{ __('messages.feedback_share_content_description', ['types' => implode(', ', $types)]) }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.feedback_share_content_description', ['types' => implode(', ', $types)]) }}</p>
                 <a href="{{ $event->getGuestUrl() }}#event-media-section"
                     class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 hover:opacity-90"
                     style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">

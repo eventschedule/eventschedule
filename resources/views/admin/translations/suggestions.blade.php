@@ -20,12 +20,12 @@
                     </div>
                     <div class="flex flex-wrap items-center gap-2 shrink-0">
                         <a href="{{ route('admin.translations') }}"
-                            class="inline-flex items-center px-4 py-3 text-base font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-[#2d2d30] transition-all duration-200">
+                            class="inline-flex items-center px-4 py-3 text-base font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200">
                             @{{ msg.back }}
                         </a>
                         <button type="button" @click="copyApprovedAsPhp" :disabled="!canCopyApproved"
                             :title="canCopyApproved ? msg.copyApprovedAsPhp : msg.copyApprovedHint"
-                            class="inline-flex items-center px-4 py-3 text-base font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-[#2d2d30] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                            class="inline-flex items-center px-4 py-3 text-base font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
                             <svg v-if="!copiedPhp" class="w-5 h-5 me-1.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
                             </svg>
@@ -143,7 +143,7 @@
                                     <td class="px-6 py-4">
                                         <span class="font-mono text-xs text-gray-900 dark:text-gray-100 break-all" dir="ltr">@{{ row.key }}</span>
                                         <div class="mt-1.5 flex flex-wrap gap-1">
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-[#2d2d30] text-gray-600 dark:text-gray-400">@{{ row.locale }} &middot; @{{ row.group }}</span>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">@{{ row.locale }} &middot; @{{ row.group }}</span>
                                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
                                                 :title="msg.suggestedByNInstalls.replace(':count', row.instance_count)">
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -151,7 +151,7 @@
                                                 </svg>
                                                 @{{ row.instance_count }}
                                             </span>
-                                            <span v-if="row.app_versions.length" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-[#2d2d30] text-gray-600 dark:text-gray-400"
+                                            <span v-if="row.app_versions.length" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
                                                 :title="msg.appVersions">@{{ row.app_versions.join(', ') }}</span>
                                         </div>
                                         <div class="mt-1.5 flex flex-wrap gap-1">
@@ -162,7 +162,7 @@
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="grid gap-2 sm:grid-cols-2">
-                                            <div class="rounded-lg bg-gray-50 dark:bg-[#252526] p-2.5">
+                                            <div class="rounded-lg bg-gray-50 dark:bg-gray-800 p-2.5">
                                                 <p class="text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">@{{ msg.shippedText }}</p>
                                                 <p class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words" dir="auto">@{{ row.nexus_shipped || row.en }}</p>
                                                 <p v-if="row.nexus_override" class="mt-1 text-xs text-gray-400 dark:text-gray-500 whitespace-pre-wrap break-words" dir="auto">@{{ msg.currentOverride }}: @{{ row.nexus_override }}</p>
@@ -177,7 +177,7 @@
                                                         class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm"></textarea>
                                                     <div class="mt-2 flex justify-end gap-2">
                                                         <button type="button" @click="cancelEdit"
-                                                            class="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2d2d30] transition-all duration-200">@{{ msg.cancel }}</button>
+                                                            class="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200">@{{ msg.cancel }}</button>
                                                         <button type="button" @click="approveRow(row, editDraft)" :disabled="acting"
                                                             class="px-3 py-1.5 text-xs font-medium rounded-lg text-white bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] transition-all duration-200 disabled:opacity-50">@{{ msg.approve }}</button>
                                                     </div>
@@ -189,7 +189,7 @@
                                         <span :class="{
                                             'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300': row.status === 'pending',
                                             'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300': row.status === 'approved',
-                                            'bg-gray-100 text-gray-800 dark:bg-[#2d2d30] dark:text-gray-300': row.status === 'rejected',
+                                            'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300': row.status === 'rejected',
                                         }" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
                                             @{{ statusLabel(row.status) }}
                                         </span>
@@ -213,11 +213,11 @@
                         <p class="text-sm text-gray-500 dark:text-gray-400" aria-live="polite">@{{ showingText }}</p>
                         <div class="flex gap-2">
                             <button type="button" @click="page > 1 && page--" :disabled="page === 1"
-                                class="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2d2d30] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                                class="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
                                 @{{ msg.previous }}
                             </button>
                             <button type="button" @click="page < totalPages && page++" :disabled="page >= totalPages"
-                                class="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2d2d30] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                                class="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
                                 @{{ msg.next }}
                             </button>
                         </div>

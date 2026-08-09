@@ -14,8 +14,8 @@
      aria-live="polite"
      aria-label="{{ __('messages.cookie_consent_banner_label') }}"
      class="fixed inset-x-4 bottom-4 sm:left-auto sm:right-4 sm:max-w-md z-50
-            rounded-xl border border-gray-200 dark:border-[#2d2d30]
-            bg-white dark:bg-[#1e1e1e] text-gray-800 dark:text-gray-200 shadow-lg p-4">
+            rounded-xl border border-gray-200 dark:border-gray-700
+            bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 shadow-lg p-4">
     <p class="text-sm leading-relaxed mb-3">
         {{ __('messages.cookie_consent_message') }}
         <x-link :href="marketing_url('/privacy')">{{ __('messages.cookie_consent_learn_more') }}</x-link>

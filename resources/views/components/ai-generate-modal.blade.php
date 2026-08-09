@@ -175,7 +175,7 @@
 
             <div class="max-h-[60vh] overflow-y-auto ltr:pr-1 rtl:pl-1 space-y-3 mb-4">
                 <template x-for="key in elements" :key="key">
-                    <div class="rounded-xl border border-gray-200 dark:border-[#2d2d30] bg-gray-50 dark:bg-[#252526] p-3 transition-all duration-200">
+                    <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 transition-all duration-200">
                         {{-- Card header --}}
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-xs font-medium text-gray-500 dark:text-gray-400" x-text="fieldLabels[key] || key"></span>
@@ -260,7 +260,7 @@
                                             <div :class="!expandedPreviews[key] && isLongContent(key) ? 'max-h-[120px] overflow-hidden' : ''"
                                                 class="max-w-none text-sm text-gray-800 dark:text-gray-200" x-html="renderMarkdown(previewResults[previewConfig[key].data_key] || '')"></div>
                                             <div x-show="!expandedPreviews[key] && isLongContent(key)" x-cloak
-                                                class="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-gray-50 dark:from-[#252526] to-transparent"></div>
+                                                class="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-gray-50 dark:from-gray-800 to-transparent"></div>
                                         </div>
                                         <button type="button" x-show="isLongContent(key)" x-cloak @click="expandedPreviews[key] = !expandedPreviews[key]"
                                             class="mt-1 text-xs text-[var(--brand-blue)] hover:underline" x-text="expandedPreviews[key] ? '{{ __('messages.show_less') }}' : '{{ __('messages.show_more') }}'"></button>

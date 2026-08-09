@@ -360,7 +360,7 @@ return [
             'blurb' => 'Manage your profile, payments, and API access.',
             'icon' => 'account',
             'published' => '2024-01-01',
-            'modified' => '2026-03-08',
+            'modified' => '2026-08-09',
         ],
 
         'referral-program' => [

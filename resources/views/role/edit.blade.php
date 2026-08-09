@@ -42,7 +42,7 @@
         }
 
         .dark #preview {
-            border-color: #2d2d30;
+            border-color: rgb(var(--ap-border));
         }
 
         .color-nav-button {
@@ -74,16 +74,16 @@
         .dark .color-nav-button {
             border-color: rgba(255, 255, 255, 0.15);
             background: linear-gradient(to bottom, #3a3a3d, #333336);
-            color: #d1d5db;
+            color: rgb(var(--ap-ink-2));
         }
 
         .dark .color-nav-button:hover:not(:disabled) {
             border-color: rgba(255, 255, 255, 0.25);
-            background: linear-gradient(to bottom, #454548, #3e3e42);
+            background: linear-gradient(to bottom, #454548, rgb(var(--ap-border-strong)));
         }
 
         .dark .color-nav-button:active:not(:disabled) {
-            background: linear-gradient(to bottom, #2d2d30, #282828);
+            background: linear-gradient(to bottom, rgb(var(--ap-border)), rgb(var(--ap-rail-active)));
         }
 
         .section-nav-link.validation-error {
@@ -2036,7 +2036,7 @@
                                         <input type="hidden" name="logo_wall_order" id="logo_wall_order_input" value="" />
                                         <ul id="logo-wall-list" class="mt-2 space-y-1">
                                             @foreach ($logoWallRoles as $wallRole)
-                                            <li class="flex items-center gap-3 p-2 rounded-lg bg-gray-50 dark:bg-[#252526] border border-gray-200 dark:border-gray-700"
+                                            <li class="flex items-center gap-3 p-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
                                                 data-role-id="{{ \App\Utils\UrlUtils::encodeId($wallRole->id) }}">
                                                 <span class="drag-handle cursor-grab text-gray-400 dark:text-gray-500 flex-shrink-0">
                                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -3134,7 +3134,7 @@
                                             {{ __('messages.push_enable_device') }}
                                         </button>
                                         <button type="button" id="push-test-btn"
-                                            class="inline-flex items-center justify-center px-4 py-3 text-base font-semibold rounded-lg border border-gray-300 dark:border-[#2d2d30] text-gray-700 dark:text-gray-200 bg-white dark:bg-[#1e1e1e] hover:bg-gray-50 dark:hover:bg-[#2d2d30] focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] transition-all duration-200 hidden">
+                                            class="inline-flex items-center justify-center px-4 py-3 text-base font-semibold rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] transition-all duration-200 hidden">
                                             {{ __('messages.push_send_test') }}
                                         </button>
                                     </div>
@@ -4173,7 +4173,7 @@
                                     value="{{ route('gift_card.purchase', ['subdomain' => $role->subdomain]) }}"
                                     class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm text-sm bg-gray-50 dark:bg-gray-800">
                                 <button type="button" id="copy-gift-card-url"
-                                    class="shrink-0 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2d2d30] transition-all duration-200">
+                                    class="shrink-0 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200">
                                     {{ __('messages.copy') }}
                                 </button>
                             </div>
@@ -4328,7 +4328,7 @@
                                 <button type="button" data-action="add-suggested-source"
                                         data-subdomain="{{ $suggestion->subdomain }}"
                                         data-name="{{ $suggestion->name }}"
-                                        class="inline-flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#252526] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2d2d30] transition-all duration-200">
+                                        class="inline-flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200">
                                     + <span dir="auto">{{ $suggestion->name }}</span>
                                 </button>
                                 @endforeach

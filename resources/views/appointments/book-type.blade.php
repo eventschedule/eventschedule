@@ -212,7 +212,7 @@
             line-height: 1.25rem;
             color: #2d2d30;
         }
-        .dark #booking-app .es-fact { background-color: #2d2d30; color: #d1d5db; }
+        .dark #booking-app .es-fact { background-color: rgb(var(--ap-border)); color: rgb(var(--ap-ink-2)); }
 
         /* No global outline reset here, but the UA ring is unreliable against an accent fill. */
         #booking-app button:focus-visible,

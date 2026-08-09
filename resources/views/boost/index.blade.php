@@ -157,7 +157,7 @@
             },
             template: `
 <div>
-    <button @click="openModal" class="inline-flex items-center gap-2 px-4 py-3 bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] border border-transparent rounded-lg font-semibold text-base text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-[#1e1e1e] transition ease-in-out duration-150 hover:scale-105 hover:shadow-lg whitespace-nowrap">
+    <button @click="openModal" class="inline-flex items-center gap-2 px-4 py-3 bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] border border-transparent rounded-lg font-semibold text-base text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition ease-in-out duration-150 hover:scale-105 hover:shadow-lg whitespace-nowrap">
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
             <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4M19.22 2C19.06 2 18.88 2 18.7 2.04C16.56 2.11 13.5 3.31 10.77 6.04C8.95 7.87 7.57 10.04 6.63 12.46C6.37 13.1 6.55 13.85 7.07 14.33L9.65 16.91C10.13 17.42 10.87 17.61 11.53 17.35C13.95 16.42 16.12 15.04 17.95 13.22C20.67 10.5 21.88 7.44 21.95 5.3C22.04 3.5 20.87 2 19.22 2M14.54 9.46C13.76 8.68 13.76 7.41 14.54 6.63S16.59 5.85 17.37 6.63C18.14 7.41 18.15 8.68 17.37 9.46C16.59 10.24 15.32 10.24 14.54 9.46M8.88 16.53L7.47 15.12L8.88 16.53M6.24 22L8.4 20.46L7.18 19.28L6.24 22M2 18L3.54 15.6L4.72 16.82L2 18Z"/>
         </svg>
@@ -165,7 +165,7 @@
     </button>
 
     <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" @click.self="closeModal">
-        <div class="bg-white dark:bg-[#1e1e1e] rounded-xl shadow-xl max-w-md w-full mx-4" @click.stop>
+        <div class="bg-white dark:bg-gray-900 rounded-xl shadow-xl max-w-md w-full mx-4" @click.stop>
             <div class="flex items-center justify-between px-5 pt-5 pb-3">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.boost_event') }}</h3>
                 <button @click="closeModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
@@ -181,13 +181,13 @@
                 <div class="flex flex-col gap-2 px-5 pb-5 pt-2 sm:flex-row sm:justify-end">
                     @if (\App\Services\PromotionService::isEnabled())
                     <button @click="boostEvent('network')" :disabled="!selectedEvent"
-                        class="inline-flex items-center justify-center gap-2 px-5 py-2 bg-white dark:bg-[#2d2d30] hover:bg-gray-50 dark:hover:bg-[#3a3a3d] border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-sm text-gray-700 dark:text-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-[#1e1e1e] transition ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
+                        class="inline-flex items-center justify-center gap-2 px-5 py-2 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-[#3a3a3d] border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-sm text-gray-700 dark:text-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
                         {{ __('messages.promotion_channel_network') }}
                     </button>
                     @endif
                     @if (\App\Services\MetaAdsService::isBoostConfigured())
                     <button @click="boostEvent('meta')" :disabled="!selectedEvent"
-                        class="inline-flex items-center justify-center gap-2 px-5 py-2 bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] border border-transparent rounded-lg font-semibold text-sm text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-[#1e1e1e] transition ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
+                        class="inline-flex items-center justify-center gap-2 px-5 py-2 bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] border border-transparent rounded-lg font-semibold text-sm text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
                         {{ __('messages.promotion_channel_meta') }}
                     </button>
                     @endif

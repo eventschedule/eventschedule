@@ -24,17 +24,17 @@
     </div>
 @else
 <div class="ap-card rounded-xl overflow-hidden">
-    <div class="flex flex-wrap items-center gap-x-6 gap-y-1 p-4 border-b border-gray-200 dark:border-[#2d2d30] text-sm">
+    <div class="flex flex-wrap items-center gap-x-6 gap-y-1 p-4 border-b border-gray-200 dark:border-gray-700 text-sm">
         <span class="text-gray-700 dark:text-gray-300"><span class="font-semibold">{{ $giftCards->count() }}</span> {{ __('messages.gift_cards') }}</span>
         @if ($outstanding->isNotEmpty())
         <span class="text-gray-700 dark:text-gray-300"><span class="font-semibold">{{ $outstanding->implode(' + ') }}</span> {{ __('messages.gift_card_outstanding_balance') }}</span>
         @endif
     </div>
 
-    <div class="divide-y divide-gray-200 dark:divide-[#2d2d30]">
+    <div class="divide-y divide-gray-200 dark:divide-gray-700">
         @foreach ($giftCards as $card)
             <details class="group">
-                <summary class="flex items-center gap-4 p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-[#252526] transition-colors list-none">
+                <summary class="flex items-center gap-4 p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors list-none">
                     <svg class="w-4 h-4 text-gray-400 flex-shrink-0 transition-transform group-open:rotate-90" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                     <div class="flex-1 min-w-0">
                         <div class="font-mono font-medium text-gray-900 dark:text-gray-100 truncate" dir="ltr">{{ $card['code'] }}</div>
@@ -74,7 +74,7 @@
                             </thead>
                             <tbody class="text-gray-700 dark:text-gray-300">
                                 @foreach ($card['redemptions'] as $redemption)
-                                    <tr class="border-t border-gray-100 dark:border-[#2d2d30]">
+                                    <tr class="border-t border-gray-100 dark:border-gray-700">
                                         <td class="py-1.5 pe-4">{{ $redemption['event'] }}</td>
                                         <td class="py-1.5 pe-4 whitespace-nowrap">{{ $redemption['date'] }}</td>
                                         <td class="py-1.5 pe-4 whitespace-nowrap text-end">-{{ \App\Utils\MoneyUtils::format($redemption['amount'], $card['currency_code']) }}</td>

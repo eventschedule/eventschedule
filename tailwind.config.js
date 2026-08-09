@@ -17,17 +17,31 @@ export default {
                 sans: ['Inter', ...defaultTheme.fontFamily.sans],
             },
             colors: {
+                // The gray ramp and white resolve through CSS variables so the
+                // whole app follows the active theme without touching a single
+                // template. The variables are defined in resources/css/app.css
+                // (and mirrored as a fallback in marketing-app.css); a page that
+                // sets no data-theme gets today's values verbatim.
+                //
+                // Channels are space-separated so `<alpha-value>` works and
+                // opacity utilities like `bg-gray-800/50` keep functioning.
+                //
+                // Careful: @tailwindcss/forms inlines colors.gray.500 into an
+                // SVG data URI for the native <select> chevron, and a data URI
+                // cannot resolve a page-level var(). app.css re-declares that
+                // background-image with a literal stroke - do not remove it.
+                white: 'rgb(var(--ap-white) / <alpha-value>)',
                 gray: {
-                    50: '#f9fafb',
-                    100: '#f3f4f6',
-                    200: '#e5e7eb',
-                    300: '#d1d5db',
-                    400: '#9ca3af',
-                    500: '#6b7280',
-                    600: '#3e3e42',
-                    700: '#2d2d30',
-                    800: '#252526',
-                    900: '#1e1e1e',
+                    50: 'rgb(var(--ap-gray-50) / <alpha-value>)',
+                    100: 'rgb(var(--ap-gray-100) / <alpha-value>)',
+                    200: 'rgb(var(--ap-gray-200) / <alpha-value>)',
+                    300: 'rgb(var(--ap-gray-300) / <alpha-value>)',
+                    400: 'rgb(var(--ap-gray-400) / <alpha-value>)',
+                    500: 'rgb(var(--ap-gray-500) / <alpha-value>)',
+                    600: 'rgb(var(--ap-gray-600) / <alpha-value>)',
+                    700: 'rgb(var(--ap-gray-700) / <alpha-value>)',
+                    800: 'rgb(var(--ap-gray-800) / <alpha-value>)',
+                    900: 'rgb(var(--ap-gray-900) / <alpha-value>)',
                 },
                 green: {
                     400: '#5edd8d',

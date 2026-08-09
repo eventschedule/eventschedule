@@ -15,9 +15,9 @@
             @endif
 
             {{-- Event info card --}}
-            <div class="bg-white dark:bg-[#2d2d30] rounded-xl shadow-sm border border-gray-200 dark:border-[#2d2d30] p-6 mb-6">
+            <div class="bg-white dark:bg-gray-700 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
                 <h1 class="text-xl font-semibold text-gray-900 dark:text-white mb-1">{{ $event->name }}</h1>
-                <p class="text-sm text-gray-500 dark:text-[#9ca3af]">
+                <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ $event->is_multi_day ? $event->getDateRangeDisplay($sale->event_date) : $event->getStartDateTime($sale->event_date, true)->translatedFormat('F j, Y') }}
                     &middot;
                     {{ $event->getStartEndTime($sale->event_date) }}
@@ -25,9 +25,9 @@
             </div>
 
             {{-- Feedback form --}}
-            <div class="bg-white dark:bg-[#2d2d30] rounded-xl shadow-sm border border-gray-200 dark:border-[#2d2d30] p-6">
+            <div class="bg-white dark:bg-gray-700 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ __('messages.feedback_how_was') }}</h2>
-                <p class="text-sm text-gray-500 dark:text-[#9ca3af] mb-6">{{ __('messages.feedback_rate_event') }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ __('messages.feedback_rate_event') }}</p>
 
                 @if ($role->feedback_public)
                 <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg flex items-start gap-2">
@@ -52,11 +52,11 @@
 
                     {{-- Star rating --}}
                     <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-[#d1d5db] mb-3">{{ __('messages.rating') }} <span class="text-red-500">*</span></label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.rating') }} <span class="text-red-500">*</span></label>
                         <div class="flex gap-2" id="star-rating">
                             @for ($i = 1; $i <= 5; $i++)
                             <button type="button" data-rating="{{ $i }}"
-                                class="star-btn p-1 rounded-lg transition-all duration-150 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-[#2d2d30]"
+                                class="star-btn p-1 rounded-lg transition-all duration-150 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-700"
                                 style="min-width: 44px; min-height: 44px;"
                                 aria-label="{{ $i }} {{ __('messages.stars') }}">
                                 <svg class="w-8 h-8 star-icon transition-colors duration-150" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -70,16 +70,16 @@
 
                     {{-- Comment --}}
                     <div class="mb-6">
-                        <label for="comment" class="block text-sm font-medium text-gray-700 dark:text-[#d1d5db] mb-2">{{ __('messages.comment') }} <span class="text-gray-400 dark:text-[#9ca3af] font-normal">({{ __('messages.optional') }})</span></label>
+                        <label for="comment" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.comment') }} <span class="text-gray-400 dark:text-gray-400 font-normal">({{ __('messages.optional') }})</span></label>
                         <textarea id="comment" name="comment" rows="4" maxlength="2000" dir="auto"
-                            class="w-full rounded-lg border border-gray-300 dark:border-[#2d2d30] bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-[#d1d5db] px-3 py-2 text-sm focus:ring-2 focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] resize-y"
+                            class="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] resize-y"
                             placeholder="{{ __('messages.feedback_comment_placeholder') }}">{{ old('comment') }}</textarea>
-                        <p class="mt-1 text-xs text-gray-400 dark:text-[#9ca3af]"><span id="char-count">0</span>/2000</p>
+                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-400"><span id="char-count">0</span>/2000</p>
                     </div>
 
                     {{-- Submit --}}
                     <button type="submit" id="submit-btn"
-                        class="w-full px-4 py-3 text-base font-medium text-white rounded-lg transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-[#2d2d30] opacity-50 cursor-not-allowed"
+                        class="w-full px-4 py-3 text-base font-medium text-white rounded-lg transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-700 opacity-50 cursor-not-allowed"
                         style="background-color: {{ $accentColor }}; --tw-ring-color: {{ $accentColor }};"
                         disabled>
                         {{ __('messages.feedback_submit') }}

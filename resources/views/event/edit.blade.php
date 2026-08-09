@@ -51,15 +51,15 @@
       min-height: 40px;
     }
     .dark .iti {
-      --iti-dropdown-bg: #1e1e1e;
-      --iti-hover-color: #2d2d30;
-      --iti-border-color: #2d2d30;
-      --iti-dialcode-color: #9ca3af;
-      --iti-arrow-color: #d1d5db;
+      --iti-dropdown-bg: rgb(var(--ap-bg));
+      --iti-hover-color: rgb(var(--ap-border));
+      --iti-border-color: rgb(var(--ap-border));
+      --iti-dialcode-color: rgb(var(--ap-ink-3));
+      --iti-arrow-color: rgb(var(--ap-ink-2));
     }
-    .dark .iti__dropdown-content { color: #d1d5db; }
-    .dark .iti__selected-dial-code { color: #d1d5db; }
-    .dark .iti__search-input { background: #1e1e1e; color: #d1d5db; border-color: #2d2d30; }
+    .dark .iti__dropdown-content { color: rgb(var(--ap-ink-2)); }
+    .dark .iti__selected-dial-code { color: rgb(var(--ap-ink-2)); }
+    .dark .iti__search-input { background: rgb(var(--ap-bg)); color: rgb(var(--ap-ink-2)); border-color: rgb(var(--ap-border)); }
     .iti:not(.iti--country-only) > .iti__country-container { padding: 0 0 0 4px !important; }
     
     /* Hide all sections except the first one by default */
@@ -119,7 +119,7 @@
       margin-top: 2px;
     }
     .dark .time-dropdown {
-      background: linear-gradient(to bottom, #2d2d30, #282828);
+      background: linear-gradient(to bottom, rgb(var(--ap-border)), rgb(var(--ap-rail-active)));
       border-color: rgba(255, 255, 255, 0.06);
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
     }
@@ -134,7 +134,7 @@
       transition: all 0.15s ease;
     }
     .dark .time-dropdown-item {
-      color: #d1d5db;
+      color: rgb(var(--ap-ink-2));
     }
     .time-dropdown-item:hover,
     .time-dropdown-item.highlighted {
@@ -143,7 +143,7 @@
     }
     .dark .time-dropdown-item:hover,
     .dark .time-dropdown-item.highlighted {
-      background: linear-gradient(to bottom, #3e3e42, #383838);
+      background: linear-gradient(to bottom, rgb(var(--ap-border-strong)), #383838);
       color: #fff;
     }
     .time-dropdown-item.hidden {
@@ -4089,7 +4089,7 @@
                                     @else
                                     <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.add_ons_help') }}</p>
 
-                                    <div v-for="(addon, aIndex) in addons" :key="addon._key" class="mb-4 p-4 bg-gray-50 dark:bg-[#252526] rounded-lg">
+                                    <div v-for="(addon, aIndex) in addons" :key="addon._key" class="mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.name') }} *</label>
@@ -4950,7 +4950,7 @@
                 <label for="notify_message_field" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.notify_message_label') }}</label>
                 <textarea id="notify_message_field" ref="notifyMessageField" v-model="notifyMessage" maxlength="280" rows="3"
                     placeholder="{{ __('messages.notify_message_placeholder') }}"
-                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-[#2d2d30] dark:bg-[#1e1e1e] dark:text-gray-100 text-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)]"></textarea>
+                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 text-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)]"></textarea>
                 <div class="mt-1 text-xs text-gray-400 text-end">@{{ notifyMessage.length }}/280</div>
             </div>
 
@@ -4966,7 +4966,7 @@
             </div>
 
             <div class="mt-6 flex items-center justify-end gap-3">
-                <button type="button" @click="confirmNotify(false)" :disabled="isSaving" class="px-4 py-3 text-base rounded-lg border border-gray-300 dark:border-[#2d2d30] text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#252526] transition-colors disabled:opacity-50">{{ __('messages.dont_notify') }}</button>
+                <button type="button" @click="confirmNotify(false)" :disabled="isSaving" class="px-4 py-3 text-base rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50">{{ __('messages.dont_notify') }}</button>
                 <button type="button" @click="confirmNotify(true)" :disabled="isSaving" class="px-4 py-3 text-base rounded-lg text-white bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] transition-colors disabled:opacity-50">{{ __('messages.notify_attendees_button') }}</button>
             </div>
         </div>
@@ -5017,12 +5017,12 @@
                 <label for="cancel_message_field" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.notify_message_label') }}</label>
                 <textarea id="cancel_message_field" ref="cancelMessageField" v-model="cancelMessage" maxlength="280" rows="3"
                     placeholder="{{ __('messages.cancel_message_placeholder') }}"
-                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-[#2d2d30] dark:bg-[#1e1e1e] dark:text-gray-100 text-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)]"></textarea>
+                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 text-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)]"></textarea>
                 <div class="mt-1 text-xs text-gray-400 text-end">@{{ cancelMessage.length }}/280</div>
             </div>
 
             <div class="mt-6 flex items-center justify-end gap-3">
-                <button type="button" @click="closeCancelModal()" class="px-4 py-3 text-base rounded-lg border border-gray-300 dark:border-[#2d2d30] text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#252526] transition-colors">{{ __('messages.keep_event') }}</button>
+                <button type="button" @click="closeCancelModal()" class="px-4 py-3 text-base rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">{{ __('messages.keep_event') }}</button>
                 <button type="button" @click="submitCancel()" :disabled="isSubmittingCancel" class="px-4 py-3 text-base rounded-lg text-white bg-red-600 hover:bg-red-700 transition-colors disabled:opacity-50">
                     <span v-if="cancelWillNotify()">{{ __('messages.cancel_and_notify') }}</span>
                     <span v-else>{{ __('messages.cancel_event') }}</span>

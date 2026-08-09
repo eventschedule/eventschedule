@@ -25,8 +25,8 @@
             }
             .dark #html5-qrcode-button-camera-start,
             .dark #html5-qrcode-button-camera-stop {
-                background-color: #2d2d30;
-                color: #d1d5db;
+                background-color: rgb(var(--ap-border));
+                color: rgb(var(--ap-ink-2));
             }
             .dark #html5-qrcode-button-camera-start:hover,
             .dark #html5-qrcode-button-camera-stop:hover {
@@ -40,7 +40,7 @@
     </x-slot>
 
     <div id="app" class="max-w-2xl mx-auto px-4">
-        <div class="bg-white dark:bg-[#1e1e1e] rounded-xl shadow-lg dark:shadow-none dark:border dark:border-[#2d2d30] p-6">
+        <div class="bg-white dark:bg-gray-900 rounded-xl shadow-lg dark:shadow-none dark:border dark:border-gray-700 p-6">
             <h2 class="text-2xl font-bold text-center text-gray-800 dark:text-gray-100 mb-6">{{ __('messages.scan_ticket') }}</h2>
 
             <!-- Event context: which event the operator is scanning at (governs subscription redemption) -->
@@ -48,7 +48,7 @@
             <div class="mb-5">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{{ __('messages.scanning_at_event') }}</label>
                 <x-event-selector />
-                <p v-if="selectedEvent" class="mt-1.5 text-xs text-gray-500 dark:text-[#9ca3af]">
+                <p v-if="selectedEvent" class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
                     {{ __('messages.scanning_at') }}: <span class="font-medium text-gray-700 dark:text-gray-300">@{{ selectedEvent.name }}</span><template v-if="selectedEvent.starts_at"> &middot; @{{ selectedEvent.starts_at }}</template>
                 </p>
             </div>
@@ -91,17 +91,17 @@
 
                     <div v-if="eventDetails && !errorMessage" class="mt-4 text-start">
                         <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100">@{{ eventDetails.event }}</h3>
-                        <p v-if="eventDetails.date" class="text-gray-600 dark:text-[#9ca3af] mt-1">
+                        <p v-if="eventDetails.date" class="text-gray-600 dark:text-gray-400 mt-1">
                             <span v-if="isPass && passStatus === 'no_event_today'" class="font-medium">{{ __('messages.pass_next_event') }}: </span>@{{ eventDetails.date }}
                         </p>
 
-                        <div class="mt-6 pb-2 text-gray-700 dark:text-[#d1d5db]">
+                        <div class="mt-6 pb-2 text-gray-700 dark:text-gray-300">
                             <p><span class="font-medium">{{ __('messages.attendee') }}:</span> @{{ eventDetails.attendee }}</p>
                         </div>
 
                         <!-- Pass / subscription: redemption context -->
                         <template v-if="isPass">
-                            <div class="mt-2 text-gray-700 dark:text-[#d1d5db] space-y-1">
+                            <div class="mt-2 text-gray-700 dark:text-gray-300 space-y-1">
                                 <p v-if="passStatus === 'already_today' && eventDetails.checked_in_at">{{ __('messages.pass_entered_at') }} @{{ eventDetails.checked_in_at }}</p>
                                 <p v-if="passStatus === 'too_early' && eventDetails.check_in_opens">{{ __('messages.pass_check_in_opens_at') }} @{{ eventDetails.check_in_opens }}</p>
                                 <p v-if="passUsesLabel" class="text-sm font-medium">@{{ passUsesLabel }}</p>
@@ -110,7 +110,7 @@
                                     <p v-if="passStatus === 'valid' && admitsRemaining > 0" class="text-sm text-green-700 dark:text-green-300">{{ __('messages.pass_scan_again_for_guest') }}</p>
                                     <p v-else-if="passStatus === 'valid' && admitsRemaining === 0" class="text-sm text-green-700 dark:text-green-300">{{ __('messages.pass_all_guests_admitted') }}</p>
                                 </template>
-                                <p v-if="eventDetails.valid_until" class="text-sm text-gray-500 dark:text-[#9ca3af]">{{ __('messages.pass_valid_until') }} @{{ eventDetails.valid_until }}</p>
+                                <p v-if="eventDetails.valid_until" class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.pass_valid_until') }} @{{ eventDetails.valid_until }}</p>
                             </div>
                         </template>
 
@@ -118,7 +118,7 @@
                         <template v-else>
                             <div class="mt-4">
                                 <div v-for="ticket in eventDetails.tickets" :key="ticket.type" class="mb-3">
-                                    <h4 class="font-medium text-gray-700 dark:text-[#d1d5db]">@{{ ticket.type }} {{ __('messages.ticket') }}</h4>
+                                    <h4 class="font-medium text-gray-700 dark:text-gray-300">@{{ ticket.type }} {{ __('messages.ticket') }}</h4>
                                     <div class="flex flex-wrap gap-2 mt-2">
                                         <div v-for="(status, seat) in ticket.seats"
                                              :key="seat"

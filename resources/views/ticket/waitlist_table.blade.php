@@ -18,7 +18,7 @@
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-[#1e1e1e]">
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900">
                         @foreach($entries as $entry)
                         <tr>
                             <td class="whitespace-nowrap py-4 ps-4 pe-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:ps-6">
@@ -64,7 +64,7 @@
     <!-- Mobile Card View -->
     <div class="md:hidden space-y-4">
         @foreach($entries as $entry)
-        <div class="bg-white dark:bg-[#1e1e1e] rounded-xl shadow-sm border border-gray-200 dark:border-[#2d2d30] p-4">
+        <div class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div class="flex justify-between items-start mb-2">
                 <div>
                     <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $entry->name }}</p>

@@ -55,11 +55,11 @@
             <div class="space-y-4">
                 @foreach ($pendingPromotions as $promo)
                 @php $ad = $promo->ads->first(); @endphp
-                <div class="rounded-xl border border-gray-200 dark:border-[#2d2d30] p-4">
+                <div class="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
                     <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                         <div class="flex items-start gap-4 min-w-0">
                             @if ($ad?->image_url)
-                            <img src="{{ $ad->image_url }}" alt="" class="h-16 w-16 flex-none rounded-lg object-cover bg-gray-100 dark:bg-[#252526]">
+                            <img src="{{ $ad->image_url }}" alt="" class="h-16 w-16 flex-none rounded-lg object-cover bg-gray-100 dark:bg-gray-800">
                             @endif
                             <div class="min-w-0">
                                 <p class="font-semibold text-gray-900 dark:text-gray-100 truncate">{{ $ad?->headline ?? $promo->event?->name }}</p>

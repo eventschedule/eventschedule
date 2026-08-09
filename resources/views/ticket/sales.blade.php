@@ -370,7 +370,7 @@ function loadFeedback(url) {
     })
     .catch(error => {
         document.getElementById('feedback-table').innerHTML =
-            '<div class="text-center py-8 text-gray-500 dark:text-[#9ca3af]">{{ __("messages.an_error_occurred") }}</div>';
+            '<div class="text-center py-8 text-gray-500 dark:text-gray-400">{{ __("messages.an_error_occurred") }}</div>';
     });
 }
 

@@ -1,6 +1,6 @@
 @props(['tier' => 'pro', 'learnMoreUrl' => null, 'subdomain' => null])
 
-<div {{ $attributes->merge(['class' => 'text-center py-10 px-6 rounded-xl bg-gray-50 dark:bg-[#252526] border border-gray-200 dark:border-[#2d2d30]']) }}>
+<div {{ $attributes->merge(['class' => 'text-center py-10 px-6 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700']) }}>
     <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 dark:bg-white/[0.05] border border-gray-200 dark:border-white/[0.08]">
         @if (isset($icon))
             {{ $icon }}

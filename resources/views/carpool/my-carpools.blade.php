@@ -4,7 +4,7 @@
         <meta name="robots" content="noindex, nofollow">
     </x-slot>
 
-    <div id="main-content" tabindex="-1" class="min-h-screen bg-gray-50 dark:bg-[#1e1e1e] py-8 px-4 sm:px-6 lg:px-8">
+    <div id="main-content" tabindex="-1" class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">
         <div class="max-w-2xl mx-auto">
 
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">{{ __('messages.my_carpools') }}</h1>
@@ -31,12 +31,12 @@
                     $subdomain = $role ? $role->subdomain : null;
                 @endphp
                 @if ($offer->event)
-                <div class="bg-white dark:bg-[#2d2d30] rounded-xl shadow-sm border border-gray-200 dark:border-[#2d2d30] p-4 mb-3">
+                <div class="bg-white dark:bg-gray-700 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-3">
                     <div class="flex items-start justify-between">
                         <div>
                             <p class="font-medium text-gray-900 dark:text-white">{{ $offer->event->name }}</p>
-                            <p class="text-sm text-gray-500 dark:text-[#9ca3af]">{{ $offer->city }} &middot; {{ $offer->directionLabel() }}</p>
-                            <div class="flex gap-3 mt-1 text-xs text-gray-500 dark:text-[#9ca3af]">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $offer->city }} &middot; {{ $offer->directionLabel() }}</p>
+                            <div class="flex gap-3 mt-1 text-xs text-gray-500 dark:text-gray-400">
                                 <span>{{ __('messages.carpool_pending_count', ['count' => $offer->pendingRequests->count()]) }}</span>
                                 <span>{{ __('messages.carpool_approved_count', ['count' => $offer->approvedRequests->count()]) }}</span>
                             </div>
@@ -58,7 +58,7 @@
                 </div>
                 @endif
                 @empty
-                <p class="text-sm text-gray-500 dark:text-[#9ca3af]">{{ __('messages.carpool_no_offers_yet') }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.carpool_no_offers_yet') }}</p>
                 @endforelse
             </div>
 
@@ -78,11 +78,11 @@
                     $subdomain = $role ? $role->subdomain : null;
                 @endphp
                 @if ($offer && $offer->event)
-                <div class="bg-white dark:bg-[#2d2d30] rounded-xl shadow-sm border border-gray-200 dark:border-[#2d2d30] p-4 mb-3">
+                <div class="bg-white dark:bg-gray-700 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-3">
                     <div class="flex items-start justify-between">
                         <div>
                             <p class="font-medium text-gray-900 dark:text-white">{{ $offer->event->name }}</p>
-                            <p class="text-sm text-gray-500 dark:text-[#9ca3af]">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
                                 {{ __('messages.carpool_driver') }}: {{ $offer->user->name }} &middot; {{ $offer->city }}
                             </p>
                         </div>
@@ -107,7 +107,7 @@
                 </div>
                 @endif
                 @empty
-                <p class="text-sm text-gray-500 dark:text-[#9ca3af]">{{ __('messages.carpool_no_requests_yet') }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.carpool_no_requests_yet') }}</p>
                 @endforelse
             </div>
 

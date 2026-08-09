@@ -33,8 +33,8 @@
                         :class="[
                             'p-4 cursor-pointer border-b border-gray-100 dark:border-gray-700/50 transition-all duration-200',
                             selectedConversation && selectedConversation.id === conv.id
-                                ? 'bg-gray-100 dark:bg-[#2d2d30]'
-                                : 'hover:bg-gray-50 dark:hover:bg-[#252526]'
+                                ? 'bg-gray-100 dark:bg-gray-700'
+                                : 'hover:bg-gray-50 dark:hover:bg-gray-800'
                         ]">
                         <div class="flex items-center justify-between mb-1">
                             <span class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">@{{ conv.user_name || conv.user_email }}</span>
@@ -62,7 +62,7 @@
                                 <div class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">@{{ conversationUser.name || conversationUser.email }}</div>
                                 <a :href="'/admin/users?search=' + encodeURIComponent(conversationUser.email)" class="text-xs text-[var(--brand-blue)] hover:underline truncate block">@{{ conversationUser.email }}</a>
                                 <div v-if="conversationUser.roles && conversationUser.roles.length" class="flex flex-wrap gap-1 mt-1">
-                                    <a v-for="role in conversationUser.roles" :key="role.subdomain" :href="'/' + role.subdomain" target="_blank" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-[#2d2d30] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#3d3d40] transition-colors">@{{ role.name }}</a>
+                                    <a v-for="role in conversationUser.roles" :key="role.subdomain" :href="'/' + role.subdomain" target="_blank" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#3d3d40] transition-colors">@{{ role.name }}</a>
                                 </div>
                             </div>
                         </div>
@@ -83,7 +83,7 @@
                                     'max-w-[75%] rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap break-words',
                                     msg.is_from_admin
                                         ? 'bg-[var(--brand-button-bg)] text-white'
-                                        : 'bg-gray-100 dark:bg-[#2d2d30] text-gray-900 dark:text-gray-100'
+                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                                 ]" v-html="linkify(msg.body)"></div>
                             </div>
                         </template>
@@ -92,7 +92,7 @@
                     {{-- Input --}}
                     <div class="p-4 border-t border-gray-200 dark:border-gray-700">
                         <div class="flex gap-2">
-                            <textarea v-model="adminReplyText" @keydown.enter.exact.prevent="sendAdminReply" rows="1" placeholder="Type a reply..." class="flex-1 resize-none rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-gray-100 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:border-transparent"></textarea>
+                            <textarea v-model="adminReplyText" @keydown.enter.exact.prevent="sendAdminReply" rows="1" placeholder="Type a reply..." class="flex-1 resize-none rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:border-transparent"></textarea>
                             <button @click="sendAdminReply" :disabled="!adminReplyText.trim()" class="px-4 py-2.5 rounded-xl bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
                                 Send
                             </button>

@@ -26,7 +26,7 @@
                         'active' => 'bg-green-100 text-green-800 dark:bg-green-500/10 dark:text-green-400',
                         'pending_review' => 'bg-amber-100 text-amber-800 dark:bg-amber-500/10 dark:text-amber-400',
                         'rejected', 'failed' => 'bg-red-100 text-red-800 dark:bg-red-500/10 dark:text-red-400',
-                        default => 'bg-gray-100 text-gray-700 dark:bg-[#2d2d30] dark:text-gray-300',
+                        default => 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
                     };
                 @endphp
                 <span class="rounded-full px-3 py-1 text-sm font-medium {{ $statusColor }}">
@@ -81,7 +81,7 @@
                 <span>{{ $campaign->getCurrencySymbol() }}{{ number_format($summary['spend'], 2) }} @lang('messages.spent')</span>
                 <span>{{ $campaign->getCurrencySymbol() }}{{ number_format($summary['remaining'], 2) }} @lang('messages.promotion_remaining')</span>
             </div>
-            <div class="h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-[#2d2d30]">
+            <div class="h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
                 <div class="h-full rounded-full bg-[var(--brand-button-bg)]" style="width: {{ $summary['utilization'] }}%"></div>
             </div>
 
@@ -128,7 +128,7 @@
             <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">@lang('messages.promotion_countries')</h2>
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="border-b border-gray-200 dark:border-[#2d2d30]">
+                    <tr class="border-b border-gray-200 dark:border-gray-700">
                         <th class="py-2 text-start font-medium text-gray-500 dark:text-gray-400">@lang('messages.country')</th>
                         <th class="py-2 text-end font-medium text-gray-500 dark:text-gray-400">@lang('messages.promotion_impressions')</th>
                         {{-- Per-country clicks were already being recorded and aggregated, then
@@ -139,7 +139,7 @@
                 </thead>
                 <tbody>
                     @foreach ($countries as $country)
-                    <tr class="border-b border-gray-100 dark:border-[#2d2d30] last:border-0">
+                    <tr class="border-b border-gray-100 dark:border-gray-700 last:border-0">
                         <td class="py-2 text-gray-700 dark:text-gray-300">{{ $country['name'] }}</td>
                         <td class="py-2 text-end text-gray-500 dark:text-gray-400">{{ number_format($country['impressions']) }}</td>
                         <td class="py-2 text-end text-gray-500 dark:text-gray-400">{{ number_format($country['clicks']) }}</td>
@@ -161,7 +161,7 @@
             <table class="w-full text-sm">
                 <tbody>
                     @foreach ($placements['by_type'] as $row)
-                    <tr class="border-b border-gray-100 dark:border-[#2d2d30] last:border-0">
+                    <tr class="border-b border-gray-100 dark:border-gray-700 last:border-0">
                         <td class="py-2 text-gray-700 dark:text-gray-300">{{ __('messages.'.$row['type']) }}</td>
                         <td class="py-2 text-end text-gray-500 dark:text-gray-400">{{ number_format($row['impressions']) }}</td>
                     </tr>

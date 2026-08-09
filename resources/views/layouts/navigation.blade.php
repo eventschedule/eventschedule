@@ -297,46 +297,58 @@
         </li>
 
         <li>
-            <div class="-mx-2 py-2">
-                <div class="theme-switcher-container flex gap-1 rounded-lg bg-gray-800/50 p-1.5 w-full" role="radiogroup" aria-label="Theme selection">
-                    <button
-                        type="button"
-                        id="theme-light"
-                        data-theme="light"
-                        class="theme-btn js-theme-btn flex-1 rounded-md px-2 py-1.5 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-700 hover:scale-105 active:scale-95 transition-all duration-200"
-                        aria-label="Light theme"
-                        title="{{ __('messages.theme_light') }}"
-                        aria-pressed="false">
-                        <svg class="h-4 w-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                        </svg>
-                    </button>
-                    <div class="theme-separator w-px self-stretch my-1.5 bg-white/[0.08] transition-opacity duration-200"></div>
-                    <button
-                        type="button"
-                        id="theme-dark"
-                        data-theme="dark"
-                        class="theme-btn js-theme-btn flex-1 rounded-md px-2 py-1.5 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-700 hover:scale-105 active:scale-95 transition-all duration-200"
-                        aria-label="Dark theme"
-                        title="{{ __('messages.theme_dark') }}"
-                        aria-pressed="false">
-                        <svg class="h-4 w-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                        </svg>
-                    </button>
-                    <div class="theme-separator w-px self-stretch my-1.5 bg-white/[0.08] transition-opacity duration-200"></div>
-                    <button
-                        type="button"
-                        id="theme-system"
-                        data-theme="system"
-                        class="theme-btn js-theme-btn flex-1 rounded-md px-2 py-1.5 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-700 hover:scale-105 active:scale-95 transition-all duration-200"
-                        aria-label="System theme"
-                        title="{{ __('messages.theme_system') }}"
-                        aria-pressed="false">
-                        <svg class="h-4 w-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                    </button>
+            <div class="-mx-2 py-2 space-y-1.5">
+                {{-- Mode: Light / Dark / System --}}
+                <div class="theme-switcher-container flex gap-1 rounded-lg p-1.5 w-full" role="radiogroup" aria-label="{{ __('messages.appearance') }}">
+                    @foreach ([
+                        'light' => 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z',
+                        'dark' => 'M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z',
+                        'system' => 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
+                    ] as $mode => $iconPath)
+                        @if (! $loop->first)
+                            <div class="theme-separator w-px self-stretch my-1.5 bg-white/[0.08] transition-opacity duration-200"></div>
+                        @endif
+                        <button
+                            type="button"
+                            data-theme="{{ $mode }}"
+                            class="theme-btn js-theme-mode-btn flex-1 rounded-md px-2 py-1.5 text-sm font-medium text-gray-400 hover:text-white hover:scale-105 active:scale-95 transition-all duration-200"
+                            aria-label="{{ __('messages.theme_' . $mode) }}"
+                            title="{{ __('messages.theme_' . $mode) }}"
+                            role="radio"
+                            aria-checked="false">
+                            <svg class="h-4 w-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $iconPath }}" />
+                            </svg>
+                        </button>
+                    @endforeach
+                </div>
+
+                {{-- Palette. Only the three variants for the brightness currently in
+                     effect are shown - the port of activeBrightness() in the Flutter
+                     app's theme_tile.dart. Under System that follows the OS, so the JS
+                     re-runs this on the matchMedia change event too. --}}
+                <div class="theme-switcher-container flex gap-1 rounded-lg p-1.5 w-full" role="radiogroup" aria-label="{{ __('messages.palette') }}">
+                    @foreach ([
+                        ['sand', 'light', '#F6F4EF', '#FFFFFF'],
+                        ['mist', 'light', '#ECEEF2', '#FFFFFF'],
+                        ['paper', 'light', '#FFFFFF', '#FAFAF9'],
+                        ['espresso', 'dark', '#15140F', '#1F1E18'],
+                        ['midnight', 'dark', '#0F1115', '#181B21'],
+                        ['carbon', 'dark', '#000000', '#0E0E0E'],
+                    ] as [$variant, $brightness, $swatchBg, $swatchSurface])
+                        <button
+                            type="button"
+                            data-variant="{{ $variant }}"
+                            data-brightness="{{ $brightness }}"
+                            class="theme-btn js-theme-variant-btn flex-1 rounded-md px-1.5 py-1.5 hover:scale-105 active:scale-95 transition-all duration-200 hidden"
+                            aria-label="{{ __('messages.variant_' . $variant) }}"
+                            title="{{ __('messages.variant_' . $variant) }}"
+                            role="radio"
+                            aria-checked="false">
+                            <span class="theme-swatch" style="--sw-bg: {{ $swatchBg }}; --sw-surface: {{ $swatchSurface }}"></span>
+                            <span class="mt-1 block truncate text-[10px] font-medium leading-tight">{{ __('messages.variant_' . $variant) }}</span>
+                        </button>
+                    @endforeach
                 </div>
             </div>
         </li>
@@ -345,101 +357,123 @@
 
 <style {!! nonce_attr() !!}>
     .theme-switcher-container {
-        background: linear-gradient(to bottom, #2d2d30, #252526) !important;
+        background: linear-gradient(to bottom, rgb(var(--ap-rail-hover)),
+                    color-mix(in srgb, rgb(var(--ap-rail-hover)) 88%, #000)) !important;
         border: 1px solid rgba(255, 255, 255, 0.06);
     }
     .theme-btn { position: relative; }
     .theme-btn.active {
-        background: #1A1A1A !important;
+        background: rgb(var(--ap-rail-deep)) !important;
         color: #ffffff !important;
         box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
     }
     .theme-btn.active:hover {
-        background: #1c1c1c !important;
+        background: color-mix(in srgb, rgb(var(--ap-rail-deep)) 94%, #fff) !important;
         color: #ffffff !important;
     }
     .theme-btn:not(.active) {
         background-color: transparent !important;
-        color: #9ca3af !important;
+        color: rgb(var(--ap-rail-ink-2)) !important;
     }
     .theme-btn:not(.active):hover {
         background-color: rgba(255, 255, 255, 0.1) !important;
         color: #ffffff !important;
     }
+    /* Two-tone chip: page ground over card surface, so each palette reads at a glance. */
+    .theme-swatch {
+        display: block;
+        width: 100%;
+        height: 14px;
+        border-radius: 4px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: linear-gradient(135deg, var(--sw-bg) 0%, var(--sw-bg) 50%,
+                    var(--sw-surface) 50%, var(--sw-surface) 100%);
+    }
 </style>
 
 <script {!! nonce_attr() !!}>
     function updateThemeButtons() {
-        // Get current theme - use localStorage directly as fallback
-        let theme = 'system';
+        var mode = 'system';
         if (window.getCurrentTheme) {
-            theme = window.getCurrentTheme();
+            mode = window.getCurrentTheme();
         } else {
-            try { theme = localStorage.getItem('theme') || 'system'; } catch (e) {}
+            try { mode = localStorage.getItem('theme') || 'system'; } catch (e) {}
         }
-        
-        // Get all theme buttons
-        const buttons = document.querySelectorAll('.theme-btn');
-        
-        buttons.forEach(button => {
-            const buttonTheme = button.getAttribute('data-theme');
-            if (buttonTheme === theme) {
-                button.classList.add('active');
-                button.setAttribute('aria-pressed', 'true');
-            } else {
-                button.classList.remove('active');
-                button.setAttribute('aria-pressed', 'false');
-            }
+
+        document.querySelectorAll('.js-theme-mode-btn').forEach(function(button) {
+            var active = button.getAttribute('data-theme') === mode;
+            button.classList.toggle('active', active);
+            button.setAttribute('aria-checked', active ? 'true' : 'false');
         });
 
-        // Hide separators adjacent to active button
+        // Show only the palettes for the brightness actually rendering, and mark
+        // the selected one. Falls back to reading the dark class if the head
+        // script has not defined the helpers yet.
+        var brightness = window.getThemeBrightness
+            ? window.getThemeBrightness()
+            : (document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        var current = window.getThemeVariant ? window.getThemeVariant(brightness) : null;
+
+        document.querySelectorAll('.js-theme-variant-btn').forEach(function(button) {
+            var forThisBrightness = button.getAttribute('data-brightness') === brightness;
+            button.classList.toggle('hidden', !forThisBrightness);
+            var active = forThisBrightness && button.getAttribute('data-variant') === current;
+            button.classList.toggle('active', active);
+            button.setAttribute('aria-checked', active ? 'true' : 'false');
+        });
+
+        // Hide separators touching the active button.
         document.querySelectorAll('.theme-separator').forEach(function(sep) {
             var prev = sep.previousElementSibling;
             var next = sep.nextElementSibling;
             sep.style.opacity = (prev && prev.classList.contains('active')) ||
-                                 (next && next.classList.contains('active')) ? '0' : '1';
+                                (next && next.classList.contains('active')) ? '0' : '1';
         });
     }
-    
-    // Make function globally available
+
     window.updateThemeButtons = updateThemeButtons;
 
-    // Attach click listeners to theme buttons
-    document.querySelectorAll('.js-theme-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            setTheme(this.getAttribute('data-theme'));
-            updateThemeButtons();
+    // Delegated, and bound once. This partial is included twice (desktop and
+    // mobile sidebars), and pickers can also render later in the page body -
+    // the profile Appearance tab does - so direct per-button listeners would
+    // both double-bind here and miss anything parsed after this script.
+    if (!window.__themePickerBound) {
+        window.__themePickerBound = true;
+        document.addEventListener('click', function(e) {
+            var modeBtn = e.target.closest('.js-theme-mode-btn');
+            if (modeBtn) {
+                setTheme(modeBtn.getAttribute('data-theme'));
+                updateThemeButtons();
+                return;
+            }
+            var variantBtn = e.target.closest('.js-theme-variant-btn');
+            if (variantBtn && typeof window.setThemeVariant === 'function') {
+                window.setThemeVariant(
+                    variantBtn.getAttribute('data-brightness'),
+                    variantBtn.getAttribute('data-variant')
+                );
+                updateThemeButtons();
+            }
         });
-    });
-    
-    // Update buttons immediately on page load
-    function initThemeButtons() {
-        const buttons = document.querySelectorAll('.theme-btn');
-        if (buttons.length === 3) {
-            // Buttons are already in DOM, update immediately
-            updateThemeButtons();
-        } else if (document.readyState === 'loading') {
-            // DOM is still loading, wait for it
-            document.addEventListener('DOMContentLoaded', function() {
+
+        // Cross-tab sync: mode and either palette choice.
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'theme' || e.key === 'themeLight' || e.key === 'themeDark') {
                 updateThemeButtons();
-            });
-        } else {
-            // DOM is ready but buttons might not be rendered yet, use requestAnimationFrame
-            requestAnimationFrame(function() {
-                updateThemeButtons();
-            });
-        }
+            }
+        });
     }
-    
-    // Initialize immediately
-    initThemeButtons();
-    
-    // Listen for storage changes (when theme changes in another tab/window)
-    window.addEventListener('storage', function(e) {
-        if (e.key === 'theme') {
-            updateThemeButtons();
-        }
-    });
+
+    // Paint this sidebar's own buttons now, then sync again once the document is
+    // complete. The second pass is not optional: pickers further down the page -
+    // the profile Appearance tab - have not been parsed at this point, and
+    // without it their palette row stays entirely hidden.
+    updateThemeButtons();
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', updateThemeButtons);
+    } else {
+        requestAnimationFrame(updateThemeButtons);
+    }
 </script>
 
 @once

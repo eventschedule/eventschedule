@@ -35,7 +35,7 @@
 <div class="pt-5 container mx-auto">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-    <div class="ap-card divide-y divide-gray-100 dark:divide-[#2d2d30] overflow-hidden rounded-lg text-sm shadow ring-1 ring-black/5 dark:ring-[#2d2d30]">
+    <div class="ap-card divide-y divide-gray-100 dark:divide-gray-700 overflow-hidden rounded-lg text-sm shadow ring-1 ring-black/5 dark:ring-gray-700">
         <div class="relative flex items-center py-6 px-4 gap-x-6">
             <div class="flex-auto ps-4">
                 <h4 class="font-bold mb-2 flex justify-between items-center text-gray-900 dark:text-gray-100">
@@ -85,7 +85,7 @@
         </div>
     </div>
 
-    <div class="ap-card divide-y divide-gray-100 dark:divide-[#2d2d30] overflow-hidden rounded-lg text-sm shadow ring-1 ring-black/5 dark:ring-[#2d2d30]">
+    <div class="ap-card divide-y divide-gray-100 dark:divide-gray-700 overflow-hidden rounded-lg text-sm shadow ring-1 ring-black/5 dark:ring-gray-700">
         <div class="relative flex items-center py-6 px-4 gap-x-6">
             <div class="flex-auto ps-4">
                 <h4 class="font-bold mb-2 flex justify-between items-center text-gray-900 dark:text-gray-100">
@@ -135,7 +135,7 @@
         </div>
     </div>
 
-    <div class="ap-card divide-y divide-gray-100 dark:divide-[#2d2d30] overflow-hidden rounded-lg text-sm shadow ring-1 ring-black/5 dark:ring-[#2d2d30]">
+    <div class="ap-card divide-y divide-gray-100 dark:divide-gray-700 overflow-hidden rounded-lg text-sm shadow ring-1 ring-black/5 dark:ring-gray-700">
         <div class="relative flex items-center py-6 px-4 gap-x-6">
             <div class="flex-auto ps-4">
                 <h4 class="font-bold mb-2 flex justify-between items-center text-gray-900 dark:text-gray-100">
