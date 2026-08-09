@@ -588,8 +588,8 @@
            campaign probe does NOT measure (it scores text nodes only). At 0.45
            alpha the edge computed 2.16:1 on the white sheet; 0.7 computes
            3.58:1 on #ffffff and 0.6 computes 4.45:1 on the #12141a sheet.
-           NOTE: this button only renders when config('services.google.analytics')
-           is set, so it is absent from a local render and cannot be probed here.
+           NOTE: this button only renders when consent_required() is true, so it is
+           absent from a local render and cannot be probed here.
            If you re-ink it, recompute both edges by hand. */
         .es-fine-btn {
             display: inline-flex;
@@ -1004,16 +1004,22 @@
                                                     We use Google Analytics 4 to understand how visitors use the site. Tracking is opt-in: when you first visit, all analytics, advertising, and personalization signals are set to <em>denied</em> via Google Consent Mode v2. Nothing is read or written to your browser until you click "Allow" in the cookie banner. If you click "Decline", or never respond, we do not set any analytics cookies and only cookieless pings are sent.
                                                 </p>
                                                 <p>
+                                                    Separately from Google, we keep our own visit statistics, and those are deliberately built so that no individual can be picked out of them. We store only daily totals: views per device type, per referring source, per country, per campaign tag. There is no per-visitor record anywhere in the system. To avoid counting the same person twice in a day, and to filter out bots, your IP address and browser user-agent are combined into a one-way hash using a secret key and a salt that changes every day; that hash lives only in a temporary cache entry that expires at midnight and is never written to our database. Because none of this reads or writes anything on your device, it needs no cookie and no consent.
+                                                </p>
+                                                <p>
                                                     We honor the <a href="https://globalprivacycontrol.org/" target="_blank" rel="noopener" class="es-fine-link">Global Privacy Control<svg class="es-fine-ext" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5h6v6M19 5L9 15M15 19H5V9" /></svg></a> signal: if your browser sends GPC, we treat that as a "Decline" automatically and the banner does not appear.
                                                 </p>
                                                 <p>
-                                                    Your choice is stored in your browser's <code class="es-fine-code">localStorage</code> under the key <code class="es-fine-code">cookie_consent</code> (values: <code class="es-fine-code">granted</code> or <code class="es-fine-code">denied</code>). It is local to your browser; we do not store it on our servers.
+                                                    Your choice is stored in your browser's <code class="es-fine-code">localStorage</code> under the key <code class="es-fine-code">cookie_consent</code> (values: <code class="es-fine-code">granted</code> or <code class="es-fine-code">denied</code>), and mirrored into a cookie of the same name so our server can honor it too. It records nothing but the choice itself, and we do not store it against any account.
                                                 </p>
                                                 <p>
                                                     If you accept, Google Analytics sets first-party cookies named <code class="es-fine-code">_ga</code> and <code class="es-fine-code">_ga_&lt;measurement-id&gt;</code>, used to distinguish unique visitors and sessions. We also set <code class="es-fine-code">ads_data_redaction</code> on every page so any beacons that do fire are stripped of advertising identifiers.
                                                 </p>
+                                                <p>
+                                                    Accepting also lets us set three first-party <strong>attribution</strong> cookies, <code class="es-fine-code">utm_params</code>, <code class="es-fine-code">utm_referrer_url</code> and <code class="es-fine-code">utm_landing_page</code>, which last 30 days. They remember which link, campaign or referring site brought you here, so that if you later create an account or buy a ticket we can credit it to the right source. They hold campaign tags and page addresses, never anything you typed. If you decline, or never answer, they are not set, and any copy left from an earlier visit is deleted on your next request. Attribution then lasts only for the current browsing session, carried by the session cookie that signs you in and keeps your cart, which is required for the site to work and so is not part of this choice.
+                                                </p>
 
-                                                {{-- A reading aid, not a clause: the four exact strings named above,
+                                                {{-- A reading aid, not a clause: the exact strings named above,
                                                      collected so they can be found in a browser inspector. It asserts
                                                      nothing the paragraphs do not already say. --}}
                                                 <div class="es-fine-aside">
@@ -1023,6 +1029,9 @@
                                                         <span class="es-fine-chip">_ga</span>
                                                         <span class="es-fine-chip">_ga_&lt;measurement-id&gt;</span>
                                                         <span class="es-fine-chip">ads_data_redaction</span>
+                                                        <span class="es-fine-chip">utm_params</span>
+                                                        <span class="es-fine-chip">utm_referrer_url</span>
+                                                        <span class="es-fine-chip">utm_landing_page</span>
                                                     </p>
                                                 </div>
 
@@ -1030,7 +1039,7 @@
                                                     Some event pages show an <strong>accommodation map</strong> of hotels and rentals near the venue, provided by <a href="https://www.stay22.com" target="_blank" rel="noopener" class="es-fine-link">Stay22<svg class="es-fine-ext" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5h6v6M19 5L9 15M15 19H5V9" /></svg></a>. It appears only where the schedule owner has switched it on, and bookings made through it may earn a commission for that schedule or for us. Stay22 sets its own third-party cookies to attribute those bookings, so the map is <em>never</em> loaded until you have either accepted cookies or explicitly asked to see it. If you have already clicked "Allow", it loads with the page. Otherwise you see a short notice and a button, and nothing at all is requested from Stay22 until you click that button. If your browser sends Global Privacy Control, the map is never loaded and no button is offered.
                                                 </p>
                                                 <p>
-                                                    You can withdraw consent at any time. Use the "Cookie preferences" button in the next section to reopen the banner and change your choice. Withdrawing consent is as easy as giving it (GDPR Article 7(3)), and it also removes any accommodation map already loaded on the page.
+                                                    You can withdraw consent at any time. Use the "Cookie preferences" button in the next section to reopen the banner and change your choice. Withdrawing consent is as easy as giving it (GDPR Article 7(3)); it also removes any accommodation map already loaded on the page, and clears the attribution cookies described above.
                                                 </p>
                                                 @break
 
@@ -1038,7 +1047,7 @@
                                                 <p>
                                                     {{ __('messages.cookie_consent_privacy_body') }}
                                                 </p>
-                                                @if (config('services.google.analytics'))
+                                                @if (consent_required())
                                                     <button type="button" data-cookie-consent-reopen class="es-fine-btn">
                                                         <svg class="h-4 w-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                                                             <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />

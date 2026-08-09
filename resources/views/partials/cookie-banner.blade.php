@@ -2,8 +2,12 @@
     Cookie consent banner. Hidden on first render; resources/js/cookie-consent.js
     shows it when localStorage has no 'cookie_consent' entry, and Allow/Decline
     write the choice + flip Consent Mode v2.
+
+    consent_required() covers Google Analytics, ads, Stay22 and COOKIE_CONSENT_BANNER.
+    Where it is false nothing on the page needs consent: the UTM attribution cookies are
+    then never written either, so there is nothing to ask about.
 --}}
-@if (config('services.google.analytics') && (! auth()->user() || ! auth()->user()->isAdmin()))
+@if (consent_required() && (! auth()->user() || ! auth()->user()->isAdmin()))
 <div data-cookie-consent
      hidden
      role="region"

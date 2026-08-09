@@ -53,6 +53,29 @@ if (! function_exists('inject_csp_nonce')) {
     }
 }
 
+if (! function_exists('consent_required')) {
+    /**
+     * Whether this install has anything a visitor must consent to.
+     *
+     * Drives the cookie banner, and by extension the 30-day UTM attribution cookies in
+     * CaptureUtmParameters, which are written only once the banner has been accepted. An
+     * install with no third party configured and no COOKIE_CONSENT_BANNER shows no banner
+     * and sets no non-essential cookie at all: attribution falls back to the session, which
+     * rides the strictly-necessary session cookie and needs no consent.
+     *
+     * Every check here is env-only on purpose. This runs on every page render, including
+     * pages that must not touch the database, so do not reach for AdsService::setting()
+     * or the settings table.
+     */
+    function consent_required(): bool
+    {
+        return (bool) config('services.google.analytics')
+            || (bool) config('ads.enabled')
+            || (bool) config('stay22.enabled')
+            || (bool) config('app.cookie_consent_banner');
+    }
+}
+
 if (! function_exists('get_translated_categories')) {
     /**
      * Returns an [id => translated name] map of categories.

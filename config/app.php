@@ -37,6 +37,13 @@ return [
     'report_errors' => (bool) env('REPORT_ERRORS', false),
     'is_testing' => (bool) env('APP_TESTING', false),
 
+    // Force the cookie consent banner on even when nothing else needs it. The banner
+    // normally appears only when a consent-gated feature is configured (Google Analytics,
+    // ADS_ENABLED, STAY22_ENABLED) - see consent_required(). Turn this on if you want the
+    // 30-day UTM attribution cookies, which are written only after a visitor accepts.
+    // Leaving it off means a bare install shows no banner and sets no attribution cookies.
+    'cookie_consent_banner' => (bool) env('COOKIE_CONSENT_BANNER', false),
+
     // URLs per child sitemap file. The sitemaps.org limit is 50,000; the default leaves plenty of
     // headroom, including for a schedules page where each schedule also emits its sub-schedules.
     // Tests lower this to exercise pagination without seeding thousands of rows.

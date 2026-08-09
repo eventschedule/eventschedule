@@ -8,6 +8,13 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CaptureUtmParameters
 {
+    /**
+     * The cross-session attribution cookies, and how long they live once consented to.
+     */
+    private const ATTRIBUTION_COOKIES = ['utm_params', 'utm_referrer_url', 'utm_landing_page'];
+
+    private const COOKIE_MINUTES = 60 * 24 * 30;
+
     public function handle(Request $request, Closure $next): Response
     {
         // The guest appointment surfaces authenticate on a 32-char secret in the PATH, and this
@@ -26,6 +33,8 @@ class CaptureUtmParameters
                 $request->session()->put('referral_code', $refCode);
             }
         }
+
+        $consented = $this->hasConsent($request);
 
         // Attribution is first-touch, with one deliberate exception: a paid on-network
         // placement overrides whatever came before it. Without this, a visitor who once
@@ -57,29 +66,23 @@ class CaptureUtmParameters
 
             // Also store in a long-lived cookie as fallback for cross-session attribution
             $response = $next($request);
-            if (method_exists($response, 'cookie')) {
-                $response->cookie('utm_params', json_encode($utmParams), 60 * 24 * 30, '/', null, true, true, false, 'Lax');
-            }
+            $this->rememberAttribution($response, $consented, 'utm_params', json_encode($utmParams));
 
             $referer = $request->header('Referer');
             if ($referer && ! $this->isSameDomain($referer, $request)) {
                 $referrerUrl = mb_substr(trim($referer), 0, 2048);
                 $request->session()->put('utm_referrer_url', $referrerUrl);
-                if (method_exists($response, 'cookie')) {
-                    $response->cookie('utm_referrer_url', $referrerUrl, 60 * 24 * 30, '/', null, true, true, false, 'Lax');
-                }
+                $this->rememberAttribution($response, $consented, 'utm_referrer_url', $referrerUrl);
             }
 
             // Capture landing page on first visit (GET only)
             if ($request->isMethod('GET') && ! $request->session()->has('utm_landing_page')) {
                 $landingPage = mb_substr($request->path(), 0, 2048);
                 $request->session()->put('utm_landing_page', $landingPage);
-                if (method_exists($response, 'cookie')) {
-                    $response->cookie('utm_landing_page', $landingPage, 60 * 24 * 30, '/', null, true, true, false, 'Lax');
-                }
+                $this->rememberAttribution($response, $consented, 'utm_landing_page', $landingPage);
             }
 
-            return $response;
+            return $this->forgetAttributionCookies($request, $response, $consented);
         }
 
         $response = $next($request);
@@ -90,9 +93,7 @@ class CaptureUtmParameters
             if ($referer && ! $this->isSameDomain($referer, $request)) {
                 $referrerUrl = mb_substr(trim($referer), 0, 2048);
                 $request->session()->put('utm_referrer_url', $referrerUrl);
-                if (method_exists($response, 'cookie')) {
-                    $response->cookie('utm_referrer_url', $referrerUrl, 60 * 24 * 30, '/', null, true, true, false, 'Lax');
-                }
+                $this->rememberAttribution($response, $consented, 'utm_referrer_url', $referrerUrl);
             }
         }
 
@@ -100,8 +101,61 @@ class CaptureUtmParameters
         if ($request->isMethod('GET') && ! $request->session()->has('utm_landing_page')) {
             $landingPage = mb_substr($request->path(), 0, 2048);
             $request->session()->put('utm_landing_page', $landingPage);
-            if (method_exists($response, 'cookie')) {
-                $response->cookie('utm_landing_page', $landingPage, 60 * 24 * 30, '/', null, true, true, false, 'Lax');
+            $this->rememberAttribution($response, $consented, 'utm_landing_page', $landingPage);
+        }
+
+        return $this->forgetAttributionCookies($request, $response, $consented);
+    }
+
+    /**
+     * Has the visitor accepted cookies?
+     *
+     * The choice really lives in localStorage, which is invisible from here, so
+     * resources/js/cookie-consent.js mirrors it into an unencrypted `cookie_consent`
+     * cookie (exempted in bootstrap/app.php) purely so this check is possible.
+     *
+     * Where consent_required() is false no banner is ever shown, so this is always false
+     * and the attribution cookies are simply never written. That is deliberate: an install
+     * with nothing consent-gated turned on should not have to ask about cookies it can
+     * manage without.
+     */
+    private function hasConsent(Request $request): bool
+    {
+        return $request->cookie('cookie_consent') === 'granted';
+    }
+
+    /**
+     * Write one of the 30-day attribution cookies, if the visitor allowed it.
+     *
+     * These are marketing cookies, not strictly necessary ones, so ePrivacy Art. 5(3) puts
+     * them behind consent. The matching session entry is written either way and every
+     * consumer reads `session(...) ?? $request->cookie(...)` (TicketController,
+     * EventController), so declining costs cross-session attribution only - attribution
+     * within the visit still works, carried by the strictly-necessary session cookie.
+     */
+    private function rememberAttribution(Response $response, bool $consented, string $name, string $value): void
+    {
+        if (! $consented || ! method_exists($response, 'cookie')) {
+            return;
+        }
+
+        $response->cookie($name, $value, self::COOKIE_MINUTES, '/', null, true, true, false, 'Lax');
+    }
+
+    /**
+     * Expire attribution cookies the visitor has not consented to: ones set before this was
+     * gated, and ones left behind when consent was withdrawn. Only touched when the request
+     * actually carries one, so the ordinary request adds no headers at all.
+     */
+    private function forgetAttributionCookies(Request $request, Response $response, bool $consented): Response
+    {
+        if ($consented) {
+            return $response;
+        }
+
+        foreach (self::ATTRIBUTION_COOKIES as $name) {
+            if ($request->cookies->has($name)) {
+                $response->headers->clearCookie($name, '/', null, true, true, 'Lax');
             }
         }
 

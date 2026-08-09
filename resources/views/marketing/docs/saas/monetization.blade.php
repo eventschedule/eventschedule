@@ -135,6 +135,19 @@
             applies, but it is never loaded on page load. A visitor who has not accepted cookies sees
             an explanation and a button, and nothing reaches Stay22 until they click it.
         </p>
+        <p>
+            The consent banner that all of this hangs off appears as soon as any of these is on, so
+            turning on <code class="doc-inline-code">ADS_ENABLED</code> brings it with you. Accepting
+            also enables three first-party attribution cookies,
+            <code class="doc-inline-code">utm_params</code>,
+            <code class="doc-inline-code">utm_referrer_url</code> and
+            <code class="doc-inline-code">utm_landing_page</code>, which remember for 30 days which
+            campaign brought a visitor in so a later signup or sale can be credited to it. They are
+            never written before a visitor accepts, and are cleared if consent is withdrawn. If you
+            run no ads and no analytics but still want cross-visit attribution, set
+            <code class="doc-inline-code">COOKIE_CONSENT_BANNER=true</code> to show the banner on its
+            own. List all of these in your cookie notice.
+        </p>
     </section>
 
     <!-- Turning it on -->

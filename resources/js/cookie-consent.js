@@ -3,6 +3,9 @@ const GRANTED = 'granted';
 const DENIED = 'denied';
 const VALUES = new Set([GRANTED, DENIED]);
 
+/** 180 days, in seconds. */
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 180;
+
 const banner = () => document.querySelector('[data-cookie-consent]');
 
 /**
@@ -26,12 +29,28 @@ const read = () => {
     }
 };
 
+/**
+ * Mirror the choice into a cookie so the SERVER can honour it too: CaptureUtmParameters
+ * writes the 30-day attribution cookies only once this reads 'granted'. localStorage stays
+ * the source of truth for the in-page consumers, so this is a mirror, not a replacement.
+ * The cookie is exempt from Laravel's cookie encryption (bootstrap/app.php) because Laravel
+ * cannot decrypt a cookie the browser wrote; the value is a public two-value enum.
+ * Host-only, like the utm_* cookies it gates and like localStorage itself.
+ */
+const writeCookie = (value) => {
+    const secure = location.protocol === 'https:' ? '; Secure' : '';
+    const age = value === null ? 0 : COOKIE_MAX_AGE;
+    document.cookie = `${STORAGE_KEY}=${value ?? ''}; path=/; max-age=${age}; SameSite=Lax${secure}`;
+};
+
 const write = (value) => {
     try { localStorage.setItem(STORAGE_KEY, value); } catch (_) {}
+    writeCookie(value);
 };
 
 const clear = () => {
     try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
+    writeCookie(null);
 };
 
 const updateGtag = (value) => {
@@ -65,7 +84,18 @@ const hide = () => {
 export const readConsent = read;
 
 const init = () => {
-    if (read() === null) show();
+    const stored = read();
+
+    if (stored === null) {
+        show();
+
+        return;
+    }
+
+    // Re-assert the mirror: a visitor who answered before the cookie existed has the choice
+    // in localStorage only, and would silently lose the attribution cookies they consented
+    // to. This also rolls the 180-day window forward on every visit.
+    writeCookie(stored);
 };
 
 if (document.readyState === 'loading') {

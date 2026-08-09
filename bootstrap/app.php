@@ -31,6 +31,14 @@ return Application::configure(basePath: dirname(__DIR__))
         // Reading env() here would return null once the config is cached, dropping proxy
         // trust and causing infinite redirect loops behind a reverse proxy / Cloudflare.
 
+        // cookie-consent.js writes this one from the browser, so Laravel has nothing to
+        // decrypt; without the exemption $request->cookie('cookie_consent') is always null
+        // and CaptureUtmParameters can never see that consent was granted. The value is a
+        // public 'granted'/'denied' enum, so leaving it in the clear costs nothing.
+        $middleware->encryptCookies(except: [
+            'cookie_consent',
+        ]);
+
         $middleware->validateCsrfTokens(except: [
             'google-calendar/webhook',
             'microsoft-calendar/webhook',
