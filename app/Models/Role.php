@@ -1324,6 +1324,7 @@ class Role extends Model implements MustVerifyEmail
             'requests',
             'profile',
             'followers',
+            'following',
             'team',
             'plan',
             'home',

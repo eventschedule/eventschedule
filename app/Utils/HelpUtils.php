@@ -152,6 +152,9 @@ class HelpUtils
         '{subdomain}/scan-agenda' => '/docs/scan-agenda',
         '{subdomain}/events-graphic*' => '/docs/event-graphics',
         'events' => '/docs/getting-started',
+        // Ahead of 'following' so the account-wide merge page keeps the merge doc rather than
+        // falling through to the Following page's own entry.
+        'following/merge-venues*' => '/docs/creating-schedules#merge',
         'following' => '/docs/sharing',
         'tickets' => '/docs/tickets',
         'sales' => '/docs/tickets#managing-sales',

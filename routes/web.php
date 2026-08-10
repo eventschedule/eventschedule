@@ -350,6 +350,12 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::get('/admin-edit-event/{hash}', [EventController::class, 'editAdmin'])->name('event.edit_admin');
     Route::get('/following', [RoleController::class, 'following'])->name('following');
     Route::post('/following/bulk-unfollow', [RoleController::class, 'bulkUnfollow'])->name('following.bulk-unfollow');
+    // Account-wide duplicate venues. Must stay ahead of /{subdomain}/merge-venues below, which
+    // has the same segment count and would otherwise match with subdomain = "following".
+    Route::get('/following/merge-venues', [RoleController::class, 'mergeMyVenues'])->name('following.merge_venues');
+    Route::get('/following/merge-venues/preview', [RoleController::class, 'mergeMyVenuesPreview'])->name('following.merge_venues_preview');
+    Route::post('/following/merge-venues', [RoleController::class, 'mergeMyVenuesGroup'])->name('following.merge_venues_group');
+    Route::post('/following/merge-venues/dismiss', [RoleController::class, 'dismissMyVenueMergeSuggestion'])->name('following.merge_venues_dismiss');
     Route::get('/tickets', [TicketController::class, 'tickets'])->name('tickets');
     Route::get('/my-carpools', [CarpoolController::class, 'myCarpools'])->name('my_carpools');
     Route::get('/sales', [TicketController::class, 'sales'])->name('sales');

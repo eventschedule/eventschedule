@@ -751,14 +751,7 @@ class CalDAVService
             ]);
 
             // Handle location if present
-            if ($eventData['location']) {
-                $venue = $this->convertLocationToVenue($role, $eventData['location']);
-                if ($venue && ! $event->roles()->where('type', 'venue')->exists()) {
-                    $event->roles()->attach($venue->id, [
-                        'is_accepted' => $role->user?->isMember($venue->subdomain) ?? false,
-                    ]);
-                }
-            }
+            $this->attachLocationVenue($event, $role, $eventData['location']);
 
             return $event;
         });
@@ -815,16 +808,7 @@ class CalDAVService
             }
 
             // Handle location if present (adds a venue but never duplicates one)
-            $venueAttached = false;
-            if ($eventData['location']) {
-                $venue = $this->convertLocationToVenue($role, $eventData['location']);
-                if ($venue && ! $event->roles()->where('type', 'venue')->exists()) {
-                    $event->roles()->attach($venue->id, [
-                        'is_accepted' => $role->user?->isMember($venue->subdomain) ?? false,
-                    ]);
-                    $venueAttached = true;
-                }
-            }
+            $venueAttached = $this->attachLocationVenue($event, $role, $eventData['location']);
 
             // Attaching a venue is a real change but does not dirty the Event row, so count
             // it explicitly; otherwise a location-only update is neither saved-as-changed nor

@@ -404,7 +404,17 @@ class EventRepo
         $creatorRoleId = $currentRole ? $currentRole->id : null;
 
         if ($request->venue_id) {
-            $venue = Role::where('is_deleted', false)->findOrFail(UrlUtils::decodeId($request->venue_id));
+            // An id that matches no schedule at all is a malformed request and still 404s.
+            $venue = Role::findOrFail(UrlUtils::decodeId($request->venue_id));
+
+            // But a venue that merely went away since the form rendered is not: Event::roles()
+            // has no is_deleted filter, so an edit form opened before the venue was merged or
+            // deleted still posts its id, and 404-ing there would cost the user the whole save.
+            // Drop it and let the posted venue_* fields resolve instead - after a merge the
+            // normalized lookup below lands the event on the venue that survived.
+            if ($venue->is_deleted) {
+                $venue = null;
+            }
         }
 
         if (! $user) {

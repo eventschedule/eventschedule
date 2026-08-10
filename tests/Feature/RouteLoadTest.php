@@ -262,6 +262,7 @@ class RouteLoadTest extends TestCase
             '/new/curator',
             '/settings',
             '/following',
+            '/following/merge-venues',
             '/tickets',
             '/my-carpools',
             '/sales',

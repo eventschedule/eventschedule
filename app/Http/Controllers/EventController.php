@@ -49,6 +49,7 @@ use App\Utils\HoneypotUtils;
 use App\Utils\ImageUtils;
 use App\Utils\MoneyUtils;
 use App\Utils\UrlUtils;
+use App\Utils\VenueUtils;
 use Carbon\Carbon;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Database\QueryException;
@@ -476,6 +477,45 @@ class EventController extends Controller
         return response($mailable->render());
     }
 
+    /**
+     * The venue schedules the event form's picker offers, plus how many duplicate groups were
+     * collapsed out of it.
+     *
+     * Imports and calendar sync invent venue schedules, so the same room routinely appears
+     * several times - and two rows with the same name and no email render as byte-identical
+     * options, which is what users report as "the venue is listed twice". VenueUtils collapses
+     * a group only when every loser is an empty shell, so two genuinely different venues that
+     * share a name and city both survive.
+     *
+     * $selected is appended back if the collapse dropped it: the picker is hidden while a venue
+     * is chosen, but Remove reveals it against this same server-rendered list, and the venue
+     * just removed has to still be re-pickable.
+     *
+     * @return array{0: array, 1: int}
+     */
+    private function venueOptions($roles, ?Role $selected): array
+    {
+        $venues = $roles->filter(function ($item) {
+            if ($item->pivot->level == 'follower' && ! $item->acceptEventRequests()) {
+                return false;
+            }
+
+            return $item->isVenue();
+        });
+
+        [$venues, $duplicateGroupCount] = VenueUtils::collapseDuplicates($venues);
+
+        if ($selected && ! $venues->contains('id', $selected->id)) {
+            $venues->push($selected);
+        }
+
+        $venues = array_values(
+            $venues->map(fn ($item) => $item->toData())->sortBy('name')->toArray()
+        );
+
+        return [$venues, $duplicateGroupCount];
+    }
+
     public function create(Request $request, $subdomain)
     {
         restore_pending_action();
@@ -649,15 +689,7 @@ class EventController extends Controller
 
         $roles = $user->roles()->get();
 
-        $venues = $roles->filter(function ($item) {
-            if ($item->pivot->level == 'follower' && ! $item->acceptEventRequests()) {
-                return false;
-            }
-
-            return $item->isVenue();
-        })->map(function ($item) {
-            return $item->toData();
-        });
+        [$venues, $duplicateVenueGroupCount] = $this->venueOptions($roles, $venue);
 
         $members = $roles->filter(function ($item) {
             return $item->isTalent();
@@ -665,7 +697,6 @@ class EventController extends Controller
             return $item->toData();
         });
 
-        $venues = array_values($venues->sortBy('name')->toArray());
         $members = array_values($members->sortBy('name')->toArray());
 
         $currencies = file_get_contents(base_path('storage/currencies.json'));
@@ -703,6 +734,7 @@ class EventController extends Controller
             'title' => __('messages.add_event'),
             'selectedVenue' => $venue,
             'venues' => $venues,
+            'duplicateVenueGroupCount' => $duplicateVenueGroupCount,
             'selectedMembers' => $selectedMembers,
             'members' => $members,
             'currencies' => $currencies,
@@ -831,15 +863,7 @@ class EventController extends Controller
 
         $roles = $user->roles()->get();
 
-        $venues = $roles->filter(function ($item) {
-            if ($item->pivot->level == 'follower' && ! $item->acceptEventRequests()) {
-                return false;
-            }
-
-            return $item->isVenue();
-        })->map(function ($item) {
-            return $item->toData();
-        });
+        [$venues, $duplicateVenueGroupCount] = $this->venueOptions($roles, $venue);
 
         $members = $roles->filter(function ($item) {
             return $item->isTalent();
@@ -847,7 +871,6 @@ class EventController extends Controller
             return $item->toData();
         });
 
-        $venues = array_values($venues->sortBy('name')->toArray());
         $members = array_values($members->sortBy('name')->toArray());
 
         $currencies = file_get_contents(base_path('storage/currencies.json'));
@@ -871,6 +894,7 @@ class EventController extends Controller
             'title' => $title,
             'selectedVenue' => $venue,
             'venues' => $venues,
+            'duplicateVenueGroupCount' => $duplicateVenueGroupCount,
             'selectedMembers' => $selectedMembers,
             'members' => $members,
             'currencies' => $currencies,

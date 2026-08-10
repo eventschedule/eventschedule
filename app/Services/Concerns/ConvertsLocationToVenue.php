@@ -2,6 +2,7 @@
 
 namespace App\Services\Concerns;
 
+use App\Models\Event;
 use App\Models\Role;
 use App\Utils\GeminiUtils;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +20,45 @@ use Illuminate\Support\Facades\Log;
  */
 trait ConvertsLocationToVenue
 {
+    /**
+     * Resolve an inbound location onto a venue and attach it to the event. Returns whether a
+     * venue was attached (the update paths count that as a change even when the Event row
+     * itself is clean).
+     *
+     * The "does this event already have a venue" test has to happen BEFORE the conversion,
+     * because convertLocationToVenue() PERSISTS a venue and follower-attaches the user. Two
+     * ways that used to leave an orphan - a venue Role with no events, cluttering the user's
+     * venue dropdown and their Following list:
+     *
+     *  1. The schedule being synced is itself a venue, so it is already attached to the event
+     *     as its venue and nothing we make here can ever be used. One orphan per distinct
+     *     location string, starting the moment the schedule's calendar is first synced.
+     *  2. The location changed on an event that already has a venue. We do not re-point the
+     *     event (that would fight a venue the user set by hand), so again nothing is used.
+     */
+    protected function attachLocationVenue(Event $event, Role $role, ?string $location): bool
+    {
+        if (! $location) {
+            return false;
+        }
+
+        if ($event->roles()->where('roles.type', 'venue')->exists()) {
+            return false;
+        }
+
+        $venue = $this->convertLocationToVenue($role, $location);
+
+        if (! $venue) {
+            return false;
+        }
+
+        $event->roles()->attach($venue->id, [
+            'is_accepted' => $role->user?->isMember($venue->subdomain) ?? false,
+        ]);
+
+        return true;
+    }
+
     protected function convertLocationToVenue(Role $role, string $location): ?Role
     {
         // Guard: cannot create venue without a user
@@ -52,14 +92,19 @@ trait ConvertsLocationToVenue
                 fn ($n) => strlen($n) >= 2
             )));
 
-            // Reuse an existing venue among the importing user's own venues (owned or followed),
-            // matched on the normalized name/address. Rank claimed venues first so events attach to
-            // the real venue rather than an auto-created stub. User::roles() bakes in orderBy('name'),
-            // so reorder() before the ranking.
+            // Reuse an existing venue among the importing user's own venues, matched on the
+            // normalized name/address. Rank claimed venues first so events attach to the real venue
+            // rather than an auto-created stub. User::roles() bakes in orderBy('name'), so reorder()
+            // before the ranking.
+            //
+            // Levels: owner/admin/follower, deliberately NOT viewer. The caller stamps the pivot
+            // is_accepted from User::isMember(), which counts viewer - so matching a viewer's
+            // read-only venue here would publish the event straight onto that venue's public page.
+            // Leaving them on the create path keeps a viewer's import in their own stub instead.
             $venue = null;
             if ($names && $role->user) {
                 $venue = $role->user->roles()
-                    ->wherePivotIn('level', ['owner', 'follower'])
+                    ->wherePivotIn('level', ['owner', 'admin', 'follower'])
                     ->where('roles.type', 'venue')
                     ->where(function ($q) use ($names, $normFull) {
                         $q->whereIn('roles.name_normalized', $names);

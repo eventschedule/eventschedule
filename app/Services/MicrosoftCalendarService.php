@@ -879,15 +879,7 @@ class MicrosoftCalendarService
             'microsoft_calendar_id' => $calendarId,
         ]);
 
-        $location = $item['location']['displayName'] ?? null;
-        if ($location) {
-            $venue = $this->convertLocationToVenue($role, $location);
-            if ($venue && ! $event->roles()->where('type', 'venue')->exists()) {
-                $event->roles()->attach($venue->id, [
-                    'is_accepted' => $role->user->isMember($venue->subdomain),
-                ]);
-            }
-        }
+        $this->attachLocationVenue($event, $role, $item['location']['displayName'] ?? null);
 
         return $event;
     }
@@ -934,17 +926,7 @@ class MicrosoftCalendarService
             $event->duration = $days > 1 ? $days * 24 : 0;
         }
 
-        $venueAttached = false;
-        $location = $item['location']['displayName'] ?? null;
-        if ($location) {
-            $venue = $this->convertLocationToVenue($role, $location);
-            if ($venue && ! $event->roles()->where('type', 'venue')->exists()) {
-                $event->roles()->attach($venue->id, [
-                    'is_accepted' => $role->user->isMember($venue->subdomain),
-                ]);
-                $venueAttached = true;
-            }
-        }
+        $venueAttached = $this->attachLocationVenue($event, $role, $item['location']['displayName'] ?? null);
 
         // Attaching a venue is a real change but does not dirty the Event row.
         if (! $event->isDirty()) {

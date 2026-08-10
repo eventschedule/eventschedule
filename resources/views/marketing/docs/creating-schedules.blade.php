@@ -87,7 +87,7 @@
             </table>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mt-6">The type is chosen when you create the schedule and it changes which sections the edit page offers. Only <strong class="text-gray-900 dark:text-white">Venue</strong> schedules get the <a href="#address" class="doc-link">Address</a> section and the <a href="#merge" class="doc-link">Merge Venue</a> tool; only <strong class="text-gray-900 dark:text-white">Curator</strong> schedules get the bulk <a href="#merge" class="doc-link">Merge Duplicate Venues</a> page; and <strong class="text-gray-900 dark:text-white">Talent</strong> schedules see a shorter <a href="#engagement-requests" class="doc-link">Requests</a> tab, because a booking request to a performer is always reviewed by hand.</p>
+        <p class="text-gray-600 dark:text-gray-300 mt-6">The type is chosen when you create the schedule and it changes which sections the edit page offers. Only <strong class="text-gray-900 dark:text-white">Venue</strong> schedules get the <a href="#address" class="doc-link">Address</a> section and the <a href="#merge" class="doc-link">Merge Venue</a> tool; only <strong class="text-gray-900 dark:text-white">Curator</strong> schedules get the per-schedule banner for the bulk <a href="#merge" class="doc-link">Merge Duplicate Venues</a> page, which is otherwise reached from Following; and <strong class="text-gray-900 dark:text-white">Talent</strong> schedules see a shorter <a href="#engagement-requests" class="doc-link">Requests</a> tab, because a booking request to a performer is always reviewed by hand.</p>
     </section>
 
     <!-- Details -->
@@ -329,12 +329,18 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">If some events already exist on the target, you are told how many before you commit. Those are not duplicated: where the same event sits on both schedules, the two entries are combined and any detail the target is missing is filled in from the schedule you are merging away.</p>
 
         <h3 class="doc-subheading">Merge Duplicate Venues</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Curator schedules get a bulk version. When several venues in your upcoming events look like the same place, a banner on the <strong class="text-gray-900 dark:text-white">Schedule</strong> tab offers to merge them and opens a page that groups the look-alikes together. Each group shows how many future events sit on each venue, with the most-used one preselected as the target.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">There is also a bulk version that groups look-alike venues together and merges a whole group at once. Each group shows how many events sit on each venue, with the most-used one preselected as the one to keep.</p>
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Merge</strong> - fold the rest of the group into the selected target.</li>
             <li><strong class="text-gray-900 dark:text-white">Not duplicates</strong> - for venues that only look alike. The group is dismissed for good and stops being suggested.</li>
         </ul>
-        <p class="text-gray-600 dark:text-gray-300">Work through the groups in any order, and skip any you are unsure about. Nothing is merged until you press the button on that group.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Work through the groups in any order, and skip any you are unsure about. Nothing is merged until you press the button on that group.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">You can reach it two ways:</p>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">From Following</strong> - covers every venue you are connected to, however you got there. This is the one that finds venues an import or a calendar sync invented and never attached to anything, including ones already deleted.</li>
+            <li><strong class="text-gray-900 dark:text-white">From a Curator schedule</strong> - a banner on the <strong class="text-gray-900 dark:text-white">Schedule</strong> tab, scoped to the venues in that schedule's upcoming events.</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300">Duplicates are also collapsed in the venue picker when you add an event, so you only see one option per place. That is only done where it is safe: two venues that share a name but each carry their own contact details or address both stay on the list.</p>
     </section>
 
     <!-- Style -->

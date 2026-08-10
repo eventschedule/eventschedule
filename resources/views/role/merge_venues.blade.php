@@ -6,13 +6,13 @@
             <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">
                 {{ __('messages.merge_venues_title') }}
             </h2>
-            <x-secondary-link :href="route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'])">
+            <x-secondary-link :href="$backUrl">
                 {{ __('messages.back') }}
             </x-secondary-link>
         </div>
 
         <p class="text-sm text-gray-600 dark:text-gray-400">
-            {{ __('messages.merge_venues_intro') }}
+            {{ __('messages.' . $introKey) }}
         </p>
 
         @if (empty($groups))
@@ -21,26 +21,15 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
                 <p class="text-gray-700 dark:text-gray-300">
-                    {{ __('messages.merge_venues_empty_state') }}
+                    {{ __('messages.' . $emptyStateKey) }}
                 </p>
             </div>
         @else
             @foreach ($groups as $groupIndex => $group)
                 @php
                     // Default target preselection: claimed > non-deleted > most future events > lowest id.
-                    $sorted = collect($group)->sort(function ($a, $b) {
-                        $aClaimed = $a->isClaimed() ? 1 : 0;
-                        $bClaimed = $b->isClaimed() ? 1 : 0;
-                        if ($aClaimed !== $bClaimed) return $bClaimed - $aClaimed;
-                        $aLive = $a->is_deleted ? 0 : 1;
-                        $bLive = $b->is_deleted ? 0 : 1;
-                        if ($aLive !== $bLive) return $bLive - $aLive;
-                        if ($a->future_event_count !== $b->future_event_count) {
-                            return $b->future_event_count - $a->future_event_count;
-                        }
-                        return $a->id - $b->id;
-                    })->values();
-                    $defaultTarget = $sorted->first();
+                    // Shared with the event form's venue picker so both surfaces keep the same venue.
+                    $defaultTarget = \App\Utils\VenueUtils::pickBest($group);
                     $groupHash = $group[0]->ids_hash;
                 @endphp
 
@@ -56,7 +45,7 @@
                         <span data-target-city="{{ $groupHash }}" @if(! $defaultTarget->city) style="display:none" @endif>@if ($defaultTarget->city), {{ $defaultTarget->city }}@endif</span>
                     </div>
 
-                    <form method="POST" action="{{ route('role.merge_venues_group', ['subdomain' => $role->subdomain]) }}"
+                    <form method="POST" action="{{ $mergeUrl }}"
                           class="merge-group-form" data-group-hash="{{ $groupHash }}">
                         @csrf
                         <input type="hidden" name="target_id" value="{{ $defaultTarget->id }}" data-target-input="{{ $groupHash }}">
@@ -98,7 +87,7 @@
                                         </div>
                                         <div class="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
                                             {{ implode(', ', array_filter([$venue->city, $venue->country_code ? strtoupper($venue->country_code) : null])) }}
-                                            <span class="ms-2">{{ str_replace(':count', $venue->future_event_count, __('messages.merge_venues_future_events_count')) }}</span>
+                                            <span class="ms-2">{{ str_replace(':count', $venue->future_event_count, __('messages.' . $eventCountKey)) }}</span>
                                         </div>
                                     </div>
                                 </label>
@@ -121,7 +110,7 @@
                         </div>
                     </form>
 
-                    <form method="POST" action="{{ route('role.merge_venues_dismiss', ['subdomain' => $role->subdomain]) }}"
+                    <form method="POST" action="{{ $dismissUrl }}"
                           class="hidden dismiss-form" data-group-hash="{{ $groupHash }}">
                         @csrf
                         @foreach ($group as $venue)
@@ -140,7 +129,7 @@
         var previewSummaryTemplate = @json(__('messages.merge_venues_preview_summary'));
         var reviveSuffixTemplate = @json(__('messages.merge_venues_preview_revive_suffix'));
         var errorMsg = @json(__('messages.an_error_occurred'));
-        var previewUrl = @json(route('role.merge_venues_preview', ['subdomain' => $role->subdomain]));
+        var previewUrl = @json($previewUrl);
 
         // Sync radio selection -> hidden target_id, hidden source_ids, header pieces, and summary line.
         document.querySelectorAll('[data-group-radio]').forEach(function (radio) {

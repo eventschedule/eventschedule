@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Services\AuditService;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -30,6 +31,65 @@ class ScheduleFeaturesTest extends TestCase
 
         $this->assertDatabaseHas('event_role', ['event_id' => $event->id, 'role_id' => $target->id]);
         $this->assertDatabaseMissing('event_role', ['event_id' => $event->id, 'role_id' => $source->id]);
+    }
+
+    public function test_schedule_merge_keeps_the_stronger_pivot_level(): void
+    {
+        $owner = $this->createOwner();
+        $source = $this->createRole($owner, 'venue');
+        // The target is a stub the user merely follows, so before the fix the merge demoted
+        // them from owner to follower on the venue they kept.
+        $target = $this->createRole($owner, 'venue', ['email_verified_at' => null]);
+        \App\Models\Role::where('id', $source->id)->update(['email_verified_at' => null]);
+        \App\Models\Role::where('id', $target->id)->update(['user_id' => null]);
+        DB::table('role_user')->where('role_id', $target->id)->update(['level' => 'follower']);
+        $source->refresh();
+
+        $this->actingAs($owner)->post(route('role.merge', ['subdomain' => $source->subdomain]), [
+            'target_subdomain' => $target->subdomain,
+        ]);
+
+        $this->assertDatabaseHas('role_user', [
+            'role_id' => $target->id,
+            'user_id' => $owner->id,
+            'level' => 'owner',
+        ]);
+
+        // An unclaimed target absorbing an owned source inherits the owner too.
+        $this->assertSame($owner->id, $target->fresh()->user_id);
+    }
+
+    public function test_schedule_merge_repoints_outlook_sync_rows(): void
+    {
+        $owner = $this->createOwner();
+        $source = $this->createRole($owner, 'venue');
+        $target = $this->createRole($owner, 'venue');
+        \App\Models\Role::where('id', $source->id)->update(['email_verified_at' => null]);
+        $source->refresh();
+        $event = $this->createEvent($source);
+
+        DB::table('microsoft_calendar_syncs')->insert([
+            'user_id' => $owner->id,
+            'event_id' => $event->id,
+            'role_id' => $source->id,
+            'microsoft_event_id' => 'graph-event-1',
+            'microsoft_calendar_id' => 'graph-calendar-1',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->actingAs($owner)->post(route('role.merge', ['subdomain' => $source->subdomain]), [
+            'target_subdomain' => $target->subdomain,
+        ]);
+
+        $this->assertDatabaseHas('microsoft_calendar_syncs', [
+            'event_id' => $event->id,
+            'role_id' => $target->id,
+        ]);
+        $this->assertDatabaseMissing('microsoft_calendar_syncs', [
+            'event_id' => $event->id,
+            'role_id' => $source->id,
+        ]);
     }
 
     public function test_promote_co_owned_acceptance_accepts_curator_events_on_owned_venue(): void
@@ -94,6 +154,29 @@ class ScheduleFeaturesTest extends TestCase
         $this->assertDatabaseHas('event_role', ['event_id' => $eventB->id, 'role_id' => $target->id, 'is_accepted' => 1]);
     }
 
+    public function test_curator_merge_venues_page_renders_its_groups(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createRole($owner, 'curator');
+        $target = $this->createRole($owner, 'venue', ['name' => 'Dup Venue']);
+        $source = $this->createRole($owner, 'venue', ['name' => 'Dup Venue', 'email_verified_at' => null]);
+
+        $eventA = $this->createEvent($curator);
+        $eventA->roles()->attach($source->id, ['is_accepted' => false]);
+        $eventB = $this->createEvent($curator);
+        $eventB->roles()->attach($target->id, ['is_accepted' => false]);
+
+        // The merge view is shared with the account-wide page and takes its URLs and copy keys
+        // as variables now, so it has to be rendered on this path too, not only posted to.
+        $response = $this->actingAs($owner)
+            ->get(route('role.merge_venues', ['subdomain' => $curator->subdomain]))
+            ->assertOk();
+
+        $this->assertCount(1, $response->viewData('groups'));
+        $response->assertSee(__('messages.merge_venues_intro'));
+        $response->assertSee(route('role.merge_venues_group', ['subdomain' => $curator->subdomain]));
+    }
+
     public function test_calendar_import_dedupes_venue_string_variants(): void
     {
         $owner = $this->createOwner();
@@ -139,6 +222,85 @@ class ScheduleFeaturesTest extends TestCase
 
         $this->assertEquals($existing->id, $matched->id);
         $this->assertEquals(1, \App\Models\Role::where('type', 'venue')->where('user_id', $owner->id)->count());
+    }
+
+    /** Anonymous holder for the calendar-sync trait, so the attach decision can be driven directly. */
+    private function locationVenueSyncer(): object
+    {
+        return new class
+        {
+            use \App\Services\Concerns\ConvertsLocationToVenue;
+
+            public function run($event, $role, $location)
+            {
+                return $this->attachLocationVenue($event, $role, $location);
+            }
+        };
+    }
+
+    public function test_calendar_import_creates_no_venue_when_syncing_a_venue_schedule(): void
+    {
+        $owner = $this->createOwner();
+        $venueSchedule = $this->createRole($owner, 'venue', ['name' => 'Zappa Club']);
+        $event = $this->createEvent($venueSchedule);
+
+        // The schedule IS the venue, so the location can never be attached. Creating a venue
+        // here left an orphan - zero events, follower-attached - in the user's venue dropdown.
+        $attached = $this->locationVenueSyncer()->run($event, $venueSchedule, 'Derech Shlomo 24, Tel Aviv');
+
+        $this->assertFalse($attached);
+        $this->assertSame(1, \App\Models\Role::where('type', 'venue')->count());
+    }
+
+    public function test_calendar_import_creates_no_venue_when_the_event_already_has_one(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createCurator($owner);
+        $venue = $this->createRole($owner, 'venue', ['name' => 'Barby']);
+
+        $event = $this->createEvent($curator);
+        $event->roles()->attach($venue->id, ['is_accepted' => true]);
+
+        // A changed location on an already-placed event: we do not re-point the event, so
+        // resolving the new string may only ever be a no-op, never a new record.
+        $attached = $this->locationVenueSyncer()->run($event, $curator, 'Somewhere Else, Haifa');
+
+        $this->assertFalse($attached);
+        $this->assertSame(1, \App\Models\Role::where('type', 'venue')->count());
+        $this->assertSame($venue->id, $event->fresh()->venue->id);
+    }
+
+    public function test_calendar_import_still_attaches_a_location_venue_for_a_curator(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createCurator($owner);
+        $event = $this->createEvent($curator);
+
+        $attached = $this->locationVenueSyncer()->run($event, $curator, 'The Anchor, Haifa');
+
+        $this->assertTrue($attached);
+
+        $venue = \App\Models\Role::where('type', 'venue')->sole();
+        $this->assertSame('The Anchor, Haifa', $venue->name);
+        $this->assertSame($venue->id, $event->fresh()->venue->id);
+    }
+
+    public function test_calendar_import_matches_a_venue_the_user_administers(): void
+    {
+        $owner = $this->createOwner();
+        $admin = $this->createOwner();
+        $curator = $this->createRole($admin, 'curator');
+        $venue = $this->createRole($owner, 'venue', ['name' => "Mike's Place"]);
+
+        // The curator's user only administers the venue. Before, only owner/follower pivots were
+        // searched, so their sync recreated a venue they already had access to.
+        $this->followRole($admin, $venue, 'admin');
+
+        $event = $this->createEvent($curator);
+        $this->locationVenueSyncer()->run($event, $curator, "Mike's Place, Tel Aviv");
+
+        $this->assertSame(1, \App\Models\Role::where('type', 'venue')->count());
+        $this->assertSame($venue->id, $event->fresh()->venue->id);
     }
 
     public function test_save_youtube_video_for_talent(): void

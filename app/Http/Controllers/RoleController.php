@@ -50,6 +50,7 @@ use App\Utils\PhoneUtils;
 use App\Utils\QrCodeUtils;
 use App\Utils\SlugPatternUtils;
 use App\Utils\UrlUtils;
+use App\Utils\VenueUtils;
 use Carbon\Carbon;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
@@ -625,6 +626,27 @@ class RoleController extends Controller
             ->where('role_id', $source->id)
             ->update(['role_id' => $target->id]);
 
+        // Same treatment for Outlook. microsoft_calendar_syncs has its own
+        // (user_id, event_id, role_id) unique, and its cascadeOnDelete never fires because the
+        // source is only soft-deleted - so without this the rows dangle on a dead schedule and
+        // the next Graph sync loses its event ids.
+        $microsoftCollisionIds = DB::table('microsoft_calendar_syncs as src')
+            ->join('microsoft_calendar_syncs as tgt', function ($j) {
+                $j->on('src.user_id', '=', 'tgt.user_id')
+                    ->on('src.event_id', '=', 'tgt.event_id');
+            })
+            ->where('src.role_id', $source->id)
+            ->where('tgt.role_id', $target->id)
+            ->pluck('src.id');
+
+        if ($microsoftCollisionIds->isNotEmpty()) {
+            DB::table('microsoft_calendar_syncs')->whereIn('id', $microsoftCollisionIds)->delete();
+        }
+
+        DB::table('microsoft_calendar_syncs')
+            ->where('role_id', $source->id)
+            ->update(['role_id' => $target->id]);
+
         // Re-point events.creator_role_id so CheckData doesn't later "auto-fix"
         // by picking an arbitrary role on the event.
         DB::table('events')
@@ -632,10 +654,33 @@ class RoleController extends Controller
             ->update(['creator_role_id' => $target->id]);
 
         // Move role_user (followers/owners) that don't already exist on target.
-        $targetUserIds = DB::table('role_user')
+        $targetLevels = DB::table('role_user')
             ->where('role_id', $target->id)
-            ->pluck('user_id')
-            ->all();
+            ->pluck('level', 'user_id');
+
+        $targetUserIds = $targetLevels->keys()->all();
+
+        // A user on BOTH schedules keeps the stronger of the two levels. Without this the
+        // target's level always won, so merging a venue you own into one you merely follow
+        // demoted you to follower on the survivor and took away your own edit rights.
+        $sourceOverlap = DB::table('role_user')
+            ->where('role_id', $source->id)
+            ->when(! empty($targetUserIds), function ($q) use ($targetUserIds) {
+                $q->whereIn('user_id', $targetUserIds);
+            })
+            ->get(['user_id', 'level']);
+
+        if (! empty($targetUserIds)) {
+            foreach ($sourceOverlap as $row) {
+                $targetLevel = $targetLevels[$row->user_id] ?? null;
+                if ($this->isStrongerLevel($row->level, $targetLevel)) {
+                    DB::table('role_user')
+                        ->where('role_id', $target->id)
+                        ->where('user_id', $row->user_id)
+                        ->update(['level' => $row->level]);
+                }
+            }
+        }
 
         DB::table('role_user')
             ->where('role_id', $source->id)
@@ -645,6 +690,14 @@ class RoleController extends Controller
             ->update(['role_id' => $target->id]);
 
         DB::table('role_user')->where('role_id', $source->id)->delete();
+
+        // An unclaimed target absorbing an owned source keeps the owner. Otherwise the survivor
+        // stays ownerless forever: isClaimed() never turns true, and the AI import's
+        // is_claimable flag (keyed on user_id) would offer someone else's venue to anyone.
+        if (! $target->user_id && $source->user_id) {
+            $target->user_id = $source->user_id;
+            $target->save();
+        }
 
         // Re-point carpool_offers.role_id so offers attached to the source venue
         // continue to surface against the merged-into venue. Source is only
@@ -658,6 +711,14 @@ class RoleController extends Controller
         $source->save();
 
         return $eventCount;
+    }
+
+    /** True when $level grants strictly more than $against. Unknown/missing levels rank lowest. */
+    private function isStrongerLevel(?string $level, ?string $against): bool
+    {
+        $rank = ['follower' => 1, 'viewer' => 2, 'admin' => 3, 'owner' => 4];
+
+        return ($rank[$level] ?? 0) > ($rank[$against] ?? 0);
     }
 
     private function canMergeRoles(Role $source, Role $target, $user, bool $allowDeletedSource = false, bool $allowDeletedTarget = false): bool
@@ -787,18 +848,11 @@ class RoleController extends Controller
             ->where('type', 'venue')
             ->get(['id', 'subdomain', 'name', 'city', 'country_code', 'email_verified_at', 'phone_verified_at', 'user_id', 'is_deleted']);
 
-        $grouped = [];
         foreach ($venues as $venue) {
-            $normName = GeminiUtils::normalizeForMatch($venue->name);
-            if ($normName === '') {
-                continue;
-            }
-            $normCity = GeminiUtils::normalizeForMatch($venue->city);
-            $country = $venue->country_code ? strtolower($venue->country_code) : '';
             $venue->future_event_count = (int) ($countsByVenue[$venue->id] ?? 0);
-            $key = $normName.'|'.$normCity.'|'.$country;
-            $grouped[$key][] = $venue;
         }
+
+        $grouped = VenueUtils::groupDuplicates($venues);
 
         $dismissedHashes = [];
         if ($userId) {
@@ -972,8 +1026,14 @@ class RoleController extends Controller
         $groups = $this->venueDuplicateGroups($role, auth()->user()->id);
 
         return view('role/merge_venues', [
-            'role' => $role,
             'groups' => $groups,
+            'backUrl' => route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']),
+            'mergeUrl' => route('role.merge_venues_group', ['subdomain' => $role->subdomain]),
+            'previewUrl' => route('role.merge_venues_preview', ['subdomain' => $role->subdomain]),
+            'dismissUrl' => route('role.merge_venues_dismiss', ['subdomain' => $role->subdomain]),
+            'introKey' => 'merge_venues_intro',
+            'emptyStateKey' => 'merge_venues_empty_state',
+            'eventCountKey' => 'merge_venues_future_events_count',
         ]);
     }
 
@@ -1216,6 +1276,240 @@ class RoleController extends Controller
         ]);
 
         return redirect()->route('role.merge_venues', ['subdomain' => $subdomain]);
+    }
+
+    /**
+     * Duplicate-venue groups across everything the user is connected to, rather than across one
+     * schedule's upcoming events.
+     *
+     * The per-schedule version keys off event_role, so it can only ever see venues that carry
+     * events. The venues that actually pile up are the opposite: stubs invented by an import or
+     * a calendar sync that were never attached to anything, which is exactly what clutters the
+     * venue picker and the Following list. Soft-deleted venues are included on purpose - they
+     * still hold event_role rows, so a "deleted" duplicate is precisely what needs merging.
+     *
+     * Each venue is decorated with $venue->future_event_count (its TOTAL event count here) and
+     * $venue->ids_hash, which the shared merge view and the dismissal check both read.
+     *
+     * @return array<int, array<int, Role>>
+     */
+    private function userVenueDuplicateGroups(User $user): array
+    {
+        $roleIds = DB::table('role_user')->where('user_id', $user->id)->pluck('role_id');
+
+        if ($roleIds->isEmpty()) {
+            return [];
+        }
+
+        // Not $user->roles(): that filters is_deleted, and soft-deleted duplicates are half the
+        // point of this page.
+        $venues = Role::whereIn('id', $roleIds)
+            ->where('type', 'venue')
+            ->withCount('events')
+            ->get(['id', 'subdomain', 'name', 'address1', 'city', 'country_code', 'email', 'phone', 'email_verified_at', 'phone_verified_at', 'user_id', 'is_deleted']);
+
+        foreach ($venues as $venue) {
+            $venue->future_event_count = (int) $venue->events_count;
+        }
+
+        $dismissedHashes = DismissedVenueMergeSuggestion::where('user_id', $user->id)
+            ->whereNull('role_id')
+            ->pluck('venue_ids_hash')
+            ->all();
+
+        $groups = [];
+        foreach (VenueUtils::duplicateGroups($venues) as $group) {
+            $ids = array_map(fn ($v) => $v->id, $group);
+            $hash = DismissedVenueMergeSuggestion::hashForVenueIds($ids);
+
+            if (in_array($hash, $dismissedHashes, true)) {
+                continue;
+            }
+
+            // canMergeRoles needs a legal target: isEditableBy only grants a follower rights on
+            // an UNCLAIMED venue, so a group whose only viable survivor is someone else's claimed
+            // venue can never be merged. Showing it would just be a button that always fails.
+            $target = VenueUtils::pickBest($group);
+            $mergeable = collect($group)
+                ->filter(fn (Role $source) => $source->id !== $target->id
+                    && $this->canMergeRoles($source, $target, $user, true, true))
+                ->values();
+
+            if ($mergeable->isEmpty()) {
+                continue;
+            }
+
+            foreach ($group as $venue) {
+                $venue->ids_hash = $hash;
+            }
+
+            $groups[] = $group;
+        }
+
+        return $groups;
+    }
+
+    public function mergeMyVenues()
+    {
+        if (is_demo_mode()) {
+            return redirect()->route('home')->with('error', __('messages.demo_mode_restriction'));
+        }
+
+        return view('role/merge_venues', $this->myVenueMergeViewData(
+            $this->userVenueDuplicateGroups(auth()->user())
+        ));
+    }
+
+    /** Shared view payload so one merge view serves both the curator page and this one. */
+    private function myVenueMergeViewData(array $groups): array
+    {
+        return [
+            'groups' => $groups,
+            'backUrl' => route('following'),
+            'mergeUrl' => route('following.merge_venues_group'),
+            'previewUrl' => route('following.merge_venues_preview'),
+            'dismissUrl' => route('following.merge_venues_dismiss'),
+            'introKey' => 'merge_venues_intro_all',
+            'emptyStateKey' => 'merge_venues_empty_state_all',
+            'eventCountKey' => 'merge_venues_events_count',
+        ];
+    }
+
+    public function mergeMyVenuesPreview(Request $request)
+    {
+        if (is_demo_mode()) {
+            return response()->json(['error' => __('messages.demo_mode_restriction')], 403);
+        }
+
+        $targetId = (int) $request->input('target_id');
+        $sourceIds = array_filter(array_map('intval', (array) $request->input('source_ids', [])));
+
+        if (! $targetId || empty($sourceIds) || in_array($targetId, $sourceIds, true)) {
+            return response()->json(['error' => __('messages.not_authorized')], 422);
+        }
+
+        $groups = $this->userVenueDuplicateGroups(auth()->user());
+        if (! $this->idsBelongToSingleGroup($groups, array_merge([$targetId], $sourceIds))) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $target = Role::where('id', $targetId)->where('type', 'venue')->firstOrFail();
+
+        // Every event, not just the upcoming ones: this page is not scoped to a schedule, so
+        // there is no "on this schedule" window to match.
+        $sourceEventIds = DB::table('event_role')
+            ->whereIn('role_id', $sourceIds)
+            ->pluck('event_id')
+            ->unique();
+
+        $targetEventIds = DB::table('event_role')
+            ->where('role_id', $target->id)
+            ->pluck('event_id')
+            ->unique();
+
+        return response()->json([
+            'source_count' => count($sourceIds),
+            'total_events' => $sourceEventIds->count(),
+            'overlap_events' => $sourceEventIds->intersect($targetEventIds)->count(),
+            'target_name' => $target->getDisplayName(false),
+            'target_is_deleted' => (bool) $target->is_deleted,
+        ]);
+    }
+
+    public function mergeMyVenuesGroup(Request $request)
+    {
+        if (is_demo_mode()) {
+            return redirect()->route('following.merge_venues')
+                ->with('error', __('messages.demo_mode_restriction'));
+        }
+
+        $user = auth()->user();
+        $targetId = (int) $request->input('target_id');
+        $sourceIds = array_filter(array_map('intval', (array) $request->input('source_ids', [])));
+
+        if (! $targetId || empty($sourceIds) || in_array($targetId, $sourceIds, true)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $groups = $this->userVenueDuplicateGroups($user);
+        if (! $this->idsBelongToSingleGroup($groups, array_merge([$targetId], $sourceIds))) {
+            return redirect()->route('following.merge_venues')
+                ->with('error', __('messages.not_authorized'));
+        }
+
+        $target = Role::where('id', $targetId)->where('type', 'venue')->firstOrFail();
+        $sources = Role::whereIn('id', $sourceIds)->where('type', 'venue')->get();
+
+        // Partition rather than reject the batch, matching the curator flow: one venue someone
+        // claimed between render and submit should not cost the user the other four merges.
+        // allowDeleted* on both sides because soft-deleted duplicates are the point of the page,
+        // and isEditableBy() goes through User::roles(), which filters them out.
+        [$validated, $skipped] = $sources->partition(
+            fn (Role $source) => $this->canMergeRoles($source, $target, $user, true, true)
+        );
+
+        if ($validated->isEmpty()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $eventCount = 0;
+        DB::transaction(function () use ($validated, $target, &$eventCount) {
+            foreach ($validated as $source) {
+                $eventCount += $this->performMerge($source, $target);
+            }
+
+            if ($target->is_deleted) {
+                $target->is_deleted = false;
+                $target->save();
+            }
+        });
+
+        if ($skipped->isNotEmpty()) {
+            $message = str_replace(
+                [':done', ':total', ':skipped', ':target'],
+                [$validated->count(), $sources->count(), $skipped->count(), $target->getDisplayName(false)],
+                __('messages.merge_venues_partial_result')
+            );
+        } else {
+            $message = str_replace(
+                [':count', ':target'],
+                [$eventCount, $target->getDisplayName(false)],
+                __('messages.merged_into_count')
+            );
+        }
+
+        $next = count($this->userVenueDuplicateGroups($user)) > 0
+            ? route('following.merge_venues')
+            : route('following');
+
+        return redirect($next)->with('message', $message);
+    }
+
+    public function dismissMyVenueMergeSuggestion(Request $request)
+    {
+        if (is_demo_mode()) {
+            return redirect()->route('following.merge_venues')
+                ->with('error', __('messages.demo_mode_restriction'));
+        }
+
+        $venueIds = array_filter(array_map('intval', (array) $request->input('venue_ids', [])));
+        if (count($venueIds) < 2) {
+            return redirect()->back();
+        }
+
+        $groups = $this->userVenueDuplicateGroups(auth()->user());
+        if (! $this->idsBelongToSingleGroup($groups, $venueIds)) {
+            return redirect()->route('following.merge_venues')
+                ->with('error', __('messages.not_authorized'));
+        }
+
+        DismissedVenueMergeSuggestion::firstOrCreate([
+            'user_id' => auth()->user()->id,
+            'role_id' => null,
+            'venue_ids_hash' => DismissedVenueMergeSuggestion::hashForVenueIds($venueIds),
+        ]);
+
+        return redirect()->route('following.merge_venues');
     }
 
     public function viewGuest(Request $request, $subdomain, $slug = '', $id = null, $date = null)
@@ -2890,30 +3184,13 @@ class RoleController extends Controller
             ->whereNotNull('google_calendar_id')
             ->pluck('google_calendar_id', 'role_id');
 
-        // Detect possible duplicate venues among followed roles. Group by
-        // normalized name+city+country; any group with >1 unclaimed entry is
-        // a candidate for the merge tool.
+        // Possible duplicate venues, counted from exactly what the merge page this banner links
+        // to will offer - so the number cannot disagree with the page, and "Not duplicates"
+        // there actually silences it here. Not scoped to followed venues: duplicates land at
+        // whatever level the flow that created them used.
         $duplicateVenueCount = 0;
-        $allFollowedVenues = Role::whereIn('id', $roleIds)
-            ->where('type', 'venue')
-            ->where('is_deleted', false)
-            ->get(['id', 'name', 'city', 'country_code', 'email_verified_at', 'phone_verified_at', 'user_id']);
-
-        $grouped = [];
-        foreach ($allFollowedVenues as $v) {
-            $normName = \App\Utils\GeminiUtils::normalizeForMatch($v->name);
-            if ($normName === '') {
-                continue;
-            }
-            $normCity = \App\Utils\GeminiUtils::normalizeForMatch($v->city);
-            $country = $v->country_code ? strtolower($v->country_code) : '';
-            $key = $normName.'|'.$normCity.'|'.$country;
-            $grouped[$key][] = $v;
-        }
-        foreach ($grouped as $group) {
-            if (count($group) > 1) {
-                $duplicateVenueCount += count($group);
-            }
+        foreach ($this->userVenueDuplicateGroups($user) as $group) {
+            $duplicateVenueCount += count($group);
         }
 
         $data = [
