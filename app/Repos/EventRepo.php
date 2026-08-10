@@ -403,6 +403,11 @@ class EventRepo
         // Set creator_role_id to the current role
         $creatorRoleId = $currentRole ? $currentRole->id : null;
 
+        // Set when the posted venue went away between the form rendering and this save. The
+        // posted venue_* fields may still resolve onto a live venue (that is what happens after a
+        // merge), but they must never be allowed to RE-CREATE the venue that was just deleted.
+        $postedVenueIsGone = false;
+
         if ($request->venue_id) {
             // An id that matches no schedule at all is a malformed request and still 404s.
             $venue = Role::findOrFail(UrlUtils::decodeId($request->venue_id));
@@ -414,6 +419,7 @@ class EventRepo
             // normalized lookup below lands the event on the venue that survived.
             if ($venue->is_deleted) {
                 $venue = null;
+                $postedVenueIsGone = true;
             }
         }
 
@@ -469,7 +475,11 @@ class EventRepo
                 }
             }
 
-            if (! $venue) {
+            if (! $venue && $postedVenueIsGone) {
+                // The form posted a venue that has since been deleted, and nothing live matches
+                // its details. Save the event without a venue rather than resurrecting the row
+                // the user just got rid of - the venue_* fields here are a stale echo of it.
+            } elseif (! $venue) {
                 $venue = new Role;
                 $venue->name = $request->venue_name ?? null;
                 $venue->name_en = $request->venue_name_en ?? null;

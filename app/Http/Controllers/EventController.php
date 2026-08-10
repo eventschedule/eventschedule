@@ -18,6 +18,7 @@ use App\Mail\EventChanged;
 use App\Mail\EventDeclined;
 use App\Models\AnalyticsEventsDaily;
 use App\Models\BoostCampaign;
+use App\Models\DismissedVenueMergeSuggestion;
 use App\Models\Event;
 use App\Models\EventComment;
 use App\Models\EventPart;
@@ -503,9 +504,19 @@ class EventController extends Controller
             return $item->isVenue();
         });
 
-        [$venues, $duplicateGroupCount] = VenueUtils::collapseDuplicates($venues);
+        // Groups the user marked "Not duplicates" on the merge page stay expanded here, or we
+        // would keep hiding a venue they explicitly kept - and the merge page has stopped
+        // offering it, so they would have no way to get it back.
+        $dismissedHashes = DismissedVenueMergeSuggestion::where('user_id', auth()->id())
+            ->whereNull('role_id')
+            ->pluck('venue_ids_hash')
+            ->all();
 
-        if ($selected && ! $venues->contains('id', $selected->id)) {
+        [$venues, $duplicateGroupCount] = VenueUtils::collapseDuplicates($venues, $dismissedHashes);
+
+        // Never re-offer a venue that has been merged away or deleted: Event::venue() has no
+        // is_deleted filter, so $selected can be a dead row on the edit form.
+        if ($selected && ! $selected->is_deleted && ! $venues->contains('id', $selected->id)) {
             $venues->push($selected);
         }
 

@@ -653,6 +653,17 @@ class RoleController extends Controller
             ->where('creator_role_id', $source->id)
             ->update(['creator_role_id' => $target->id]);
 
+        // Whether the source's nominal owner actually runs it, decided BEFORE the pivots move.
+        // canMergeRoles only requires the source to be UNCLAIMED, and an unclaimed role can still
+        // carry someone else's user_id - ConvertsLocationToVenue stamps user_id on every venue it
+        // invents while attaching that user only as a follower. Without this test, merging a venue
+        // you happen to follow could hand its stranger owner your survivor.
+        $sourceHasRealOwner = $source->user_id && DB::table('role_user')
+            ->where('role_id', $source->id)
+            ->where('user_id', $source->user_id)
+            ->whereIn('level', ['owner', 'admin'])
+            ->exists();
+
         // Move role_user (followers/owners) that don't already exist on target.
         $targetLevels = DB::table('role_user')
             ->where('role_id', $target->id)
@@ -663,14 +674,12 @@ class RoleController extends Controller
         // A user on BOTH schedules keeps the stronger of the two levels. Without this the
         // target's level always won, so merging a venue you own into one you merely follow
         // demoted you to follower on the survivor and took away your own edit rights.
-        $sourceOverlap = DB::table('role_user')
-            ->where('role_id', $source->id)
-            ->when(! empty($targetUserIds), function ($q) use ($targetUserIds) {
-                $q->whereIn('user_id', $targetUserIds);
-            })
-            ->get(['user_id', 'level']);
-
         if (! empty($targetUserIds)) {
+            $sourceOverlap = DB::table('role_user')
+                ->where('role_id', $source->id)
+                ->whereIn('user_id', $targetUserIds)
+                ->get(['user_id', 'level']);
+
             foreach ($sourceOverlap as $row) {
                 $targetLevel = $targetLevels[$row->user_id] ?? null;
                 if ($this->isStrongerLevel($row->level, $targetLevel)) {
@@ -691,10 +700,10 @@ class RoleController extends Controller
 
         DB::table('role_user')->where('role_id', $source->id)->delete();
 
-        // An unclaimed target absorbing an owned source keeps the owner. Otherwise the survivor
-        // stays ownerless forever: isClaimed() never turns true, and the AI import's
+        // An unclaimed target absorbing a genuinely owned source keeps the owner. Otherwise the
+        // survivor stays ownerless forever: isClaimed() never turns true, and the AI import's
         // is_claimable flag (keyed on user_id) would offer someone else's venue to anyone.
-        if (! $target->user_id && $source->user_id) {
+        if (! $target->user_id && $sourceHasRealOwner) {
             $target->user_id = $source->user_id;
             $target->save();
         }
@@ -713,10 +722,20 @@ class RoleController extends Controller
         return $eventCount;
     }
 
-    /** True when $level grants strictly more than $against. Unknown/missing levels rank lowest. */
+    /**
+     * True when $level grants strictly more than $against. Unknown/missing levels rank lowest.
+     *
+     * viewer and follower rank EQUAL on purpose - neither is strictly better than the other here.
+     * A viewer is on the team but read-only, while a follower gets edit rights on an UNCLAIMED
+     * role (Role::isEditableBy) and is the only level that appears on the Following page
+     * (User::following). Ranking viewer above follower would have a merge quietly relabel a
+     * followed venue as viewer, dropping it off Following and, when it is unclaimed, taking away
+     * the edit rights this promotion exists to protect. Equal means the target keeps its own
+     * level, which is the pre-existing behaviour, and only a genuine owner/admin promotion wins.
+     */
     private function isStrongerLevel(?string $level, ?string $against): bool
     {
-        $rank = ['follower' => 1, 'viewer' => 2, 'admin' => 3, 'owner' => 4];
+        $rank = ['follower' => 1, 'viewer' => 1, 'admin' => 2, 'owner' => 3];
 
         return ($rank[$level] ?? 0) > ($rank[$against] ?? 0);
     }
@@ -1302,11 +1321,16 @@ class RoleController extends Controller
         }
 
         // Not $user->roles(): that filters is_deleted, and soft-deleted duplicates are half the
-        // point of this page.
+        // point of this page. No column list either - withCount() has already set the query's
+        // columns, so Builder::onceWithColumns() would ignore one, and the whole row is needed
+        // by the view anyway.
+        // COUNT(DISTINCT event_id), not withCount's count(*): event_role holds one row per
+        // (event, role, sub-schedule), so a plain count double-counts an event filed under two
+        // sub-schedules. Matches what venueDuplicateGroups() does on the curator page.
         $venues = Role::whereIn('id', $roleIds)
             ->where('type', 'venue')
-            ->withCount('events')
-            ->get(['id', 'subdomain', 'name', 'address1', 'city', 'country_code', 'email', 'phone', 'email_verified_at', 'phone_verified_at', 'user_id', 'is_deleted']);
+            ->withCount(['events' => fn ($q) => $q->select(DB::raw('count(distinct events.id)'))])
+            ->get();
 
         foreach ($venues as $venue) {
             $venue->future_event_count = (int) $venue->events_count;
@@ -1317,6 +1341,13 @@ class RoleController extends Controller
             ->pluck('venue_ids_hash')
             ->all();
 
+        // The two facts canMergeRoles() would re-query per venue, fetched once. This method runs
+        // on every /following load, so a per-member isEditor()/isFollowing() pair would be N+1
+        // against exactly the users who have the most duplicates.
+        $levelsByRoleId = DB::table('role_user')
+            ->where('user_id', $user->id)
+            ->pluck('level', 'role_id');
+
         $groups = [];
         foreach (VenueUtils::duplicateGroups($venues) as $group) {
             $ids = array_map(fn ($v) => $v->id, $group);
@@ -1326,14 +1357,22 @@ class RoleController extends Controller
                 continue;
             }
 
-            // canMergeRoles needs a legal target: isEditableBy only grants a follower rights on
-            // an UNCLAIMED venue, so a group whose only viable survivor is someone else's claimed
+            // A group needs a legal target: isEditableBy only grants a follower rights on an
+            // UNCLAIMED venue, so a group whose only viable survivor is someone else's claimed
             // venue can never be merged. Showing it would just be a button that always fails.
+            //
+            // Mirrors canMergeRoles + isEditableBy in memory. Deciding what to DISPLAY is all
+            // this does - mergeMyVenuesGroup() still runs the real canMergeRoles() per pair on
+            // re-fetched rows, so that stays the authority at the mutation point.
             $target = VenueUtils::pickBest($group);
-            $mergeable = collect($group)
-                ->filter(fn (Role $source) => $source->id !== $target->id
-                    && $this->canMergeRoles($source, $target, $user, true, true))
-                ->values();
+            $editable = fn (Role $venue) => in_array($levelsByRoleId[$venue->id] ?? null, ['owner', 'admin'], true)
+                || (! $venue->isClaimed() && ($levelsByRoleId[$venue->id] ?? null) === 'follower');
+
+            $mergeable = $editable($target)
+                ? collect($group)->filter(fn (Role $source) => $source->id !== $target->id
+                    && ! $source->isClaimed()
+                    && $editable($source))->values()
+                : collect();
 
             if ($mergeable->isEmpty()) {
                 continue;
@@ -3188,9 +3227,15 @@ class RoleController extends Controller
         // to will offer - so the number cannot disagree with the page, and "Not duplicates"
         // there actually silences it here. Not scoped to followed venues: duplicates land at
         // whatever level the flow that created them used.
+        //
+        // Only when the banner can actually render: the view hides it while a filter is set, and
+        // the ajax branch returns the table partial, which has no banner. The filter box types
+        // straight into that ajax branch, so without this the scan ran on every keystroke.
         $duplicateVenueCount = 0;
-        foreach ($this->userVenueDuplicateGroups($user) as $group) {
-            $duplicateVenueCount += count($group);
+        if (! request()->ajax() && ! $filter) {
+            foreach ($this->userVenueDuplicateGroups($user) as $group) {
+                $duplicateVenueCount += count($group);
+            }
         }
 
         $data = [

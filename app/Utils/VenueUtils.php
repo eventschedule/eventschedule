@@ -2,6 +2,7 @@
 
 namespace App\Utils;
 
+use App\Models\DismissedVenueMergeSuggestion;
 use App\Models\Role;
 use Illuminate\Support\Collection;
 
@@ -72,8 +73,10 @@ class VenueUtils
      * one (it has a real operator behind it), a live one over a soft-deleted one, then the one
      * carrying the most events, then the oldest.
      *
-     * Reads $venue->future_event_count when the caller decorated the group with it, so the
-     * merge screen's preselection and the picker's collapse rank identically.
+     * Reads $venue->future_event_count only when the caller decorated the group with it - the
+     * merge screens do, the event picker does not, so there every venue scores 0 and the tie
+     * falls through to lowest id. That only ever decides between venues already tied on the two
+     * criteria that matter, so the surfaces still agree on which venue is the real one.
      */
     public static function pickBest(array $group): Role
     {
@@ -110,15 +113,28 @@ class VenueUtils
      * real venues that happen to share a name and city (a second room, a franchise branch) both
      * stay on the list.
      *
+     * $dismissedHashes are the groups the user already told us are NOT duplicates, via "Not
+     * duplicates" on the merge page. Those must stay expanded: the merge page has stopped
+     * offering them, so collapsing here would hide a venue the user explicitly kept and give
+     * them no way to get it back.
+     *
+     * The same goes for a group whose survivor the user cannot merge into - somebody else's
+     * claimed venue that they merely follow. The merge page skips those (no legal target), so
+     * collapsing here would again hide a row with no way to get it back.
+     *
+     * @param  array<int, string>  $dismissedHashes  DismissedVenueMergeSuggestion::hashForVenueIds() values
      * @return array{0: Collection<int, Role>, 1: int} the kept venues and how many groups collapsed
      */
-    public static function collapseDuplicates(iterable $venues): array
+    public static function collapseDuplicates(iterable $venues, array $dismissedHashes = []): array
     {
+        // Materialise: $venues is walked twice below, and an `iterable` may be a one-shot Generator.
+        $venues = collect($venues);
+
         $kept = collect();
         $collapsed = 0;
 
         foreach (self::groupDuplicates($venues) as $group) {
-            if (count($group) < 2 || ! self::isSafeToCollapse($group)) {
+            if (count($group) < 2 || self::isDismissed($group, $dismissedHashes) || ! self::isSafeToCollapse($group)) {
                 $kept = $kept->concat($group);
 
                 continue;
@@ -138,6 +154,18 @@ class VenueUtils
         return [$kept->values(), $collapsed];
     }
 
+    /** @param  array<int, string>  $dismissedHashes */
+    private static function isDismissed(array $group, array $dismissedHashes): bool
+    {
+        if (empty($dismissedHashes)) {
+            return false;
+        }
+
+        $hash = DismissedVenueMergeSuggestion::hashForVenueIds(array_map(fn (Role $v) => $v->id, $group));
+
+        return in_array($hash, $dismissedHashes, true);
+    }
+
     private static function isSafeToCollapse(array $group): bool
     {
         $claimed = collect($group)->filter(fn (Role $v) => $v->isClaimed())->count();
@@ -147,6 +175,14 @@ class VenueUtils
         }
 
         $survivor = self::pickBest($group);
+
+        // Mirrors Role::isEditableBy: a follower may only edit an UNCLAIMED role. If the survivor
+        // is somebody else's claimed venue, no merge into it is ever possible, so the merge page
+        // will not list this group - and hiding a row behind it would strand that row.
+        if ($survivor->isClaimed() && ! in_array($survivor->pivot?->level, ['owner', 'admin'], true)) {
+            return false;
+        }
+
         $survivorAddress = GeminiUtils::normalizeForMatch($survivor->address1);
 
         foreach ($group as $venue) {
@@ -160,7 +196,9 @@ class VenueUtils
 
             $address = GeminiUtils::normalizeForMatch($venue->address1);
 
-            if ($address !== '' && $survivorAddress !== '' && $address !== $survivorAddress) {
+            // Any address the survivor does not also carry is information that would vanish from
+            // the list, since the option label falls back to address1 when a venue has no name.
+            if ($address !== '' && $address !== $survivorAddress) {
                 return false;
             }
         }

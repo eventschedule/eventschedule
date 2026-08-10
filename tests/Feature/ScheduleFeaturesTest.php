@@ -59,6 +59,56 @@ class ScheduleFeaturesTest extends TestCase
         $this->assertSame($owner->id, $target->fresh()->user_id);
     }
 
+    public function test_schedule_merge_never_relabels_a_follower_as_viewer(): void
+    {
+        $owner = $this->createOwner();
+        $teammate = $this->createOwner();
+        $source = $this->createRole($owner, 'venue', ['email_verified_at' => null]);
+        $target = $this->createRole($owner, 'venue', ['email_verified_at' => null]);
+        $source->refresh();
+
+        // The level sweep runs over every user with a pivot on both schedules, not just the one
+        // clicking merge. This teammate is read-only on the source and follows the target.
+        // viewer must NOT outrank follower: only a follower gets edit rights on an unclaimed
+        // role (Role::isEditableBy) and only a follower appears on the Following page
+        // (User::following), so promoting them to viewer would quietly take both away.
+        $this->followRole($teammate, $source, 'viewer');
+        $this->followRole($teammate, $target, 'follower');
+
+        $this->actingAs($owner)->post(route('role.merge', ['subdomain' => $source->subdomain]), [
+            'target_subdomain' => $target->subdomain,
+        ]);
+
+        $this->assertDatabaseHas('role_user', [
+            'role_id' => $target->id,
+            'user_id' => $teammate->id,
+            'level' => 'follower',
+        ]);
+    }
+
+    public function test_schedule_merge_does_not_hand_over_a_stranger_owner_id(): void
+    {
+        $owner = $this->createOwner();
+        $stranger = $this->createOwner();
+
+        // An unclaimed venue can still carry someone else's user_id: ConvertsLocationToVenue
+        // stamps it on every venue it invents while attaching that user only as a follower.
+        $source = $this->createRole($stranger, 'venue', ['email_verified_at' => null]);
+        DB::table('role_user')->where('role_id', $source->id)->update(['level' => 'follower']);
+        $this->followRole($owner, $source);
+
+        $target = $this->createRole($owner, 'venue', ['email_verified_at' => null]);
+        \App\Models\Role::where('id', $target->id)->update(['user_id' => null]);
+        $source->refresh();
+
+        $this->actingAs($owner)->post(route('role.merge', ['subdomain' => $source->subdomain]), [
+            'target_subdomain' => $target->subdomain,
+        ]);
+
+        // The survivor must not end up nominally owned by a user who never ran the source.
+        $this->assertNull($target->fresh()->user_id);
+    }
+
     public function test_schedule_merge_repoints_outlook_sync_rows(): void
     {
         $owner = $this->createOwner();

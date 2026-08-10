@@ -183,6 +183,129 @@ class VenueDuplicatesTest extends TestCase
         $this->assertSame(0, $this->get(route('following'))->viewData('duplicateVenueCount'));
     }
 
+    public function test_dismissing_a_group_stops_the_picker_hiding_the_venue(): void
+    {
+        $owner = $this->createOwner();
+        $talent = $this->createRole($owner, 'talent');
+        $real = $this->createRole($owner, 'venue', ['name' => 'Beit Haamudim', 'city' => 'Tel Aviv', 'country_code' => 'il']);
+        $stub = $this->stubVenue('Beit Haamudim', ['city' => 'Tel Aviv', 'country_code' => 'il']);
+        $this->followRole($owner, $stub);
+
+        $this->actingAs($owner);
+        $this->assertSame(['Beit Haamudim'], $this->venueNamesOnCreateForm($talent));
+
+        $this->post(route('following.merge_venues_dismiss'), [
+            'venue_ids' => [$real->id, $stub->id],
+        ])->assertRedirect();
+
+        // "Not duplicates" removed the group from the merge page, so the picker must stop
+        // collapsing it - otherwise the venue the user kept is hidden with no way back
+        // (/search-roles matches on exact email or phone, and a stub has neither).
+        $response = $this->get(route('event.create', ['subdomain' => $talent->subdomain]));
+        $ids = collect($response->viewData('venues'))->pluck('id')->all();
+
+        $this->assertContains(UrlUtils::encodeId($real->id), $ids);
+        $this->assertContains(UrlUtils::encodeId($stub->id), $ids);
+        // And the hint must not point at a merge page that will say "none found".
+        $this->assertSame(0, $response->viewData('duplicateVenueGroupCount'));
+    }
+
+    public function test_the_picker_drops_a_selected_venue_that_was_deleted(): void
+    {
+        $owner = $this->createOwner();
+        $talent = $this->createRole($owner, 'talent');
+        $gone = $this->stubVenue('Merged Away', ['city' => 'Tel Aviv', 'country_code' => 'il', 'is_deleted' => true]);
+
+        // Event::venue() has no is_deleted filter, so a merged-away venue still loads as the
+        // event's venue. It must not be re-offered as something you can pick again.
+        $event = $this->createEvent($talent);
+        $event->roles()->attach($gone->id, ['is_accepted' => true]);
+
+        $response = $this->actingAs($owner)
+            ->get(route('event.edit', ['subdomain' => $talent->subdomain, 'hash' => UrlUtils::encodeId($event->id)]))
+            ->assertOk();
+
+        $this->assertNotContains(
+            UrlUtils::encodeId($gone->id),
+            collect($response->viewData('venues'))->pluck('id')->all()
+        );
+    }
+
+    public function test_the_picker_keeps_a_stub_it_could_never_merge_away(): void
+    {
+        $owner = $this->createOwner();
+        $stranger = $this->createOwner();
+        $talent = $this->createRole($owner, 'talent');
+
+        // Somebody else's claimed venue plus the user's own stub. The merge page will not offer
+        // this group (a follower cannot edit a claimed venue), so collapsing here would strand
+        // the stub: hidden from the picker and unmergeable on the merge page.
+        $theirs = $this->createRole($stranger, 'venue', ['name' => 'Hoodna', 'city' => 'Tel Aviv', 'country_code' => 'il']);
+        $stub = $this->stubVenue('Hoodna', ['city' => 'Tel Aviv', 'country_code' => 'il']);
+        $this->followRole($owner, $theirs);
+        $this->followRole($owner, $stub);
+
+        $this->actingAs($owner);
+        $ids = collect($this->get(route('event.create', ['subdomain' => $talent->subdomain]))->viewData('venues'))
+            ->pluck('id')->all();
+
+        $this->assertContains(UrlUtils::encodeId($stub->id), $ids);
+        $this->assertContains(UrlUtils::encodeId($theirs->id), $ids);
+    }
+
+    public function test_the_picker_keeps_a_stub_carrying_its_own_address(): void
+    {
+        $owner = $this->createOwner();
+        $talent = $this->createRole($owner, 'talent');
+        $this->createRole($owner, 'venue', ['name' => 'Rothschild 12', 'city' => 'Tel Aviv', 'country_code' => 'il']);
+        // The option label falls back to address1 when a venue has no name, so hiding the only
+        // row that carries an address loses information the user can see.
+        $withAddress = $this->stubVenue('Rothschild 12', ['city' => 'Tel Aviv', 'country_code' => 'il', 'address1' => '12 Rothschild Blvd']);
+        $this->followRole($owner, $withAddress);
+
+        $this->actingAs($owner);
+
+        $this->assertSame(['Rothschild 12', 'Rothschild 12'], $this->venueNamesOnCreateForm($talent));
+    }
+
+    public function test_saving_does_not_resurrect_a_deleted_venue(): void
+    {
+        $owner = $this->createOwner();
+        $talent = $this->createRole($owner, 'talent');
+        $deleted = $this->stubVenue('Gone For Good', ['city' => 'Tel Aviv', 'country_code' => 'il', 'is_deleted' => true]);
+
+        // A form opened before the delete still posts the id AND the venue_* echo of its details.
+        // Nothing live matches, so the create branch would have minted the venue straight back.
+        $this->postCreateEvent($owner, $talent, [
+            'venue_id' => UrlUtils::encodeId($deleted->id),
+            'venue_name' => 'Gone For Good',
+            'venue_city' => 'Tel Aviv',
+            'venue_country_code' => 'il',
+        ])->assertRedirect();
+
+        $this->assertSame(1, Role::where('type', 'venue')->count());
+        $this->assertNull(\App\Models\Event::latest('id')->firstOrFail()->venue);
+    }
+
+    public function test_following_page_skips_the_duplicate_scan_it_cannot_show(): void
+    {
+        $owner = $this->createOwner();
+        $this->createRole($owner, 'venue', ['name' => 'Pasaz', 'city' => 'Tel Aviv', 'country_code' => 'il']);
+        $stub = $this->stubVenue('Pasaz', ['city' => 'Tel Aviv', 'country_code' => 'il']);
+        $this->followRole($owner, $stub);
+
+        $this->actingAs($owner);
+        $this->assertSame(2, $this->get(route('following'))->viewData('duplicateVenueCount'));
+
+        // The banner is hidden while a filter is set, and the ajax branch renders the table
+        // partial which has no banner - so the scan must not run for either.
+        $this->assertSame(0, $this->get(route('following', ['filter' => 'pas']))->viewData('duplicateVenueCount'));
+        $this->assertSame(
+            0,
+            $this->get(route('following'), ['X-Requested-With' => 'XMLHttpRequest'])->viewData('duplicateVenueCount')
+        );
+    }
+
     public function test_a_group_with_no_legal_target_is_not_offered(): void
     {
         $owner = $this->createOwner();

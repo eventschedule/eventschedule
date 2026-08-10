@@ -152,8 +152,10 @@ class HelpUtils
         '{subdomain}/scan-agenda' => '/docs/scan-agenda',
         '{subdomain}/events-graphic*' => '/docs/event-graphics',
         'events' => '/docs/getting-started',
-        // Ahead of 'following' so the account-wide merge page keeps the merge doc rather than
-        // falling through to the Following page's own entry.
+        // Explicit rather than load-bearing: '{subdomain}/merge-venues*' above already matches
+        // this page, because resolvePattern() substitutes '*' for {subdomain} when there is no
+        // route parameter. Kept so the mapping survives if that fallback ever tightens, and so
+        // the page is not silently relying on it.
         'following/merge-venues*' => '/docs/creating-schedules#merge',
         'following' => '/docs/sharing',
         'tickets' => '/docs/tickets',
