@@ -2,11 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\SendQueuedEmail;
 use App\Mail\OnboardingNudge;
 use App\Models\User;
 use App\Services\DemoService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Queue;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -156,6 +158,77 @@ class OnboardingNudgeTest extends TestCase
         $this->artisan('app:send-onboarding-nudges')->assertExitCode(0);
 
         Mail::assertNothingSent();
+        $this->assertSame(0, $user->refresh()->onboarding_nudge_stage);
+    }
+
+    /**
+     * The one that matters most. `onboarding_nudge_stage` defaults to 0, so without an upper
+     * bound on created_at the first --apply run matches every account ever created - and since
+     * the stages run in descending order they would each get the STAGE 3 "last note" copy.
+     */
+    public function test_an_account_older_than_the_window_is_never_nudged(): void
+    {
+        $ancient = $this->stalled(24 * 400);
+
+        $this->nudge();
+
+        Mail::assertNothingSent();
+        $this->assertSame(0, $ancient->refresh()->onboarding_nudge_stage);
+    }
+
+    /** The boundary, so the window cannot be quietly narrowed to nothing. */
+    public function test_an_account_just_inside_the_window_is_still_nudged(): void
+    {
+        $recent = $this->stalled(24 * 13);
+
+        $this->nudge();
+
+        Mail::assertSent(OnboardingNudge::class, 1);
+        $this->assertSame(3, $recent->refresh()->onboarding_nudge_stage);
+    }
+
+    /**
+     * The dry run is what an operator reads to decide whether to enable this at all, so it has
+     * to report the number of PEOPLE, not the number of stage queries they happen to match.
+     */
+    public function test_the_dry_run_counts_each_account_once(): void
+    {
+        $this->stalled(80); // matches the stage 3, 2 and 1 queries
+
+        $this->artisan('app:send-onboarding-nudges')
+            ->expectsOutputToContain('DRY RUN - 1 would be sent.')
+            ->assertExitCode(0);
+    }
+
+    /** The 12 translations shipped with this command are worth nothing if it always sends English. */
+    public function test_the_nudge_is_queued_in_the_recipients_language(): void
+    {
+        Queue::fake();
+
+        $this->stalled(2, ['language_code' => 'fr']);
+
+        $this->nudge();
+
+        Queue::assertPushed(SendQueuedEmail::class, function ($job) {
+            $locale = new \ReflectionProperty($job, 'locale');
+            $locale->setAccessible(true);
+
+            return $locale->getValue($job) === 'fr';
+        });
+    }
+
+    /**
+     * The stage is claimed before the send so two concurrent runners cannot both email the same
+     * person - which means a failed send has to put it back, or that account's nudge is eaten.
+     */
+    public function test_a_failed_send_releases_the_claim(): void
+    {
+        $user = $this->stalled(2);
+
+        Queue::shouldReceive('connection')->andThrow(new \RuntimeException('queue down'));
+
+        $this->nudge();
+
         $this->assertSame(0, $user->refresh()->onboarding_nudge_stage);
     }
 

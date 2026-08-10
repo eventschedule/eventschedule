@@ -108,6 +108,38 @@ class EventFormTemplateInjectionTest extends TestCase
         $this->assertGuarded($mounted, self::PAYLOAD, 'schedule name / request terms / sub-schedule name');
     }
 
+    /**
+     * The guest cart added a second Vue mount, #es-cart-app, on every browsing surface of the
+     * guest portal - and its error panel is server-rendered Blade inside that mount.
+     *
+     * The value is attacker-controlled: TicketController::refuseCartLeg() interpolates
+     * $event->translatedName() into the flashed message, so an event named with a Vue mustache
+     * executes on the schedule's own origin as soon as a visitor's cart is refused for that leg.
+     */
+    public function test_the_guest_cart_error_is_not_compiled_by_vue(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+
+        $html = $this->withSession([
+            'cart_submitted' => true,
+            'cart_invalid_legs' => ['abc|'],
+            'error' => __('messages.cart_event_unavailable', ['event' => self::PAYLOAD]),
+        ])
+            ->get(route('role.view_guest', ['subdomain' => $role->subdomain]))
+            ->assertOk()
+            ->getContent();
+
+        $start = strpos($html, '<div id="es-cart-app"');
+        $this->assertNotFalse($start, 'the guest cart should still mount Vue on #es-cart-app');
+        $mounted = substr($html, $start);
+
+        $this->assertStringContainsString(e(self::PAYLOAD), $mounted,
+            'the cart error panel should be rendered, otherwise this test proves nothing');
+
+        $this->assertGuarded($mounted, self::PAYLOAD, 'guest cart error message');
+    }
+
     public function test_the_editing_schedules_own_sub_schedule_names_are_guarded_too(): void
     {
         $owner = $this->createOwner();

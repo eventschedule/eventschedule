@@ -294,6 +294,7 @@ class Translate extends Command
             } catch (\Throwable $e) {
                 $this->error("Failed to translate schedule ID: {$role->id} - {$e->getMessage()}");
                 report($e);
+                $this->recordFailure($role, $role->id);
             }
         }
 
@@ -384,6 +385,7 @@ class Translate extends Command
             } catch (\Throwable $e) {
                 $this->error("Failed to translate event ID: {$event->id} - {$e->getMessage()}");
                 report($e);
+                $this->recordFailure($event, $event->creator_role_id ?? 0);
             }
         }
 
@@ -474,6 +476,7 @@ class Translate extends Command
             } catch (\Throwable $e) {
                 $this->error("Failed to translate curator event ID: {$id} - {$e->getMessage()}");
                 report($e);
+                $this->recordFailure($eventRole, $eventRole->role_id);
             }
         }
 
@@ -559,6 +562,7 @@ class Translate extends Command
             } catch (\Throwable $e) {
                 $this->error("Failed to translate event part ID: {$id} - {$e->getMessage()}");
                 report($e);
+                $this->recordFailure($part, $part->event->creator_role_id ?? 0);
             }
         }
 
@@ -810,6 +814,35 @@ class Translate extends Command
         $model->last_translated_at = now();
 
         UsageTrackingService::track(UsageTrackingService::GEMINI_TRANSLATE, $usageRoleId);
+    }
+
+    /**
+     * Stamp and save a row whose translation threw part-way through.
+     *
+     * The per-item catches used to only log. That left translation_attempts at 0 and
+     * last_translated_at NULL - and selectIds() orders never-translated rows FIRST - so a row
+     * that throws was re-selected and re-billed on EVERY run, indefinitely, while
+     * applyRetryScope()'s attempt ceiling and the admin stuck-records panel (which keys on
+     * translation_attempts) both stayed blind to it. GeminiUtils returns null for quota and 503
+     * but rethrows a safety block, an INTERNAL, a malformed body and any non-quota 4xx, all of
+     * which are already-billed calls.
+     *
+     * Saving here also keeps the fields that DID translate before the throw: they were paid for,
+     * and the previous behaviour discarded them. Every pass loads the full row, so the derived
+     * *_html columns still re-derive correctly on save.
+     *
+     * recordOutcome() runs exactly once per row either way - the throw happens before the
+     * success path reaches it - so this is not a second usage charge for the same pass.
+     */
+    private function recordFailure($model, $usageRoleId): void
+    {
+        try {
+            $this->recordOutcome($model, 0, $usageRoleId);
+            $model->save();
+        } catch (\Throwable $e) {
+            // A row we cannot even stamp is not worth aborting the rest of the pass for.
+            report($e);
+        }
     }
 
     /**

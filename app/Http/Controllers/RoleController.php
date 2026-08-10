@@ -715,11 +715,97 @@ class RoleController extends Controller
             ->where('role_id', $source->id)
             ->update(['role_id' => $target->id]);
 
+        // Re-point users whose landing schedule was the source. Every read site re-filters
+        // is_deleted, so leaving it would not error - it would silently drop them to "no
+        // default schedule" instead of following the venue they merged into.
+        DB::table('users')
+            ->where('default_role_id', $source->id)
+            ->update(['default_role_id' => $target->id]);
+
+        $affectedCurators = $this->repointRoleSources($source, $target);
+
         // Soft-delete the source.
         $source->is_deleted = true;
         $source->save();
 
+        // Rebuild the affected curators' auto-sourced links now rather than leaving a gap until
+        // the next five-minute pass, so the merge is not briefly visible as missing events.
+        if ($affectedCurators) {
+            $curatorSources = app(CuratorSourceService::class);
+
+            foreach (Role::whereIn('id', $affectedCurators)->where('is_deleted', false)->get() as $curator) {
+                $curatorSources->reconcile($curator);
+            }
+        }
+
         return $eventCount;
+    }
+
+    /**
+     * Carry role_sources across a merge, in both directions.
+     *
+     * A curator may list a VENUE as an event source (saveEventSources accepts talent and venue),
+     * so a merged-away venue can be somebody's source. The FK is onDelete('cascade'), but the
+     * source is only soft-deleted here, so nothing fires - the same reason carpool_offers above
+     * needs an explicit re-point. Left alone, CuratorSourceService::applyEligibility() stops
+     * matching the row (it requires source_role.is_deleted = false), and the next
+     * app:sync-curator-sources pass DELETES every is_auto_sourced event_role row that source was
+     * feeding while linkMissing() adds nothing back, because the survivor is not in role_sources.
+     * The curator's calendar silently empties for that venue.
+     *
+     * Two curators can be merged as well, hence the second pass over role_id.
+     *
+     * @return array<int, int> curator role ids whose links need rebuilding
+     */
+    private function repointRoleSources(Role $source, Role $target): array
+    {
+        $affected = [];
+
+        // The source as somebody's SOURCE.
+        $asSource = DB::table('role_sources')->where('source_role_id', $source->id)->get();
+        $curatorsAlreadyOnTarget = DB::table('role_sources')
+            ->where('source_role_id', $target->id)
+            ->pluck('role_id')
+            ->all();
+
+        foreach ($asSource as $row) {
+            $affected[(int) $row->role_id] = true;
+
+            // Self-referential (the target's own curator row), or a duplicate of a row the
+            // curator already holds - the unique is (role_id, source_role_id), so these have to
+            // be dropped rather than updated.
+            if ((int) $row->role_id === (int) $target->id
+                || in_array($row->role_id, $curatorsAlreadyOnTarget)) {
+                DB::table('role_sources')->where('id', $row->id)->delete();
+
+                continue;
+            }
+
+            DB::table('role_sources')->where('id', $row->id)->update(['source_role_id' => $target->id]);
+            $curatorsAlreadyOnTarget[] = $row->role_id;
+        }
+
+        // The source as a CURATOR in its own right.
+        $asCurator = DB::table('role_sources')->where('role_id', $source->id)->get();
+        $sourcesAlreadyOnTarget = DB::table('role_sources')
+            ->where('role_id', $target->id)
+            ->pluck('source_role_id')
+            ->all();
+
+        foreach ($asCurator as $row) {
+            if ((int) $row->source_role_id === (int) $target->id
+                || in_array($row->source_role_id, $sourcesAlreadyOnTarget)) {
+                DB::table('role_sources')->where('id', $row->id)->delete();
+
+                continue;
+            }
+
+            DB::table('role_sources')->where('id', $row->id)->update(['role_id' => $target->id]);
+            $sourcesAlreadyOnTarget[] = $row->source_role_id;
+            $affected[(int) $target->id] = true;
+        }
+
+        return array_keys($affected);
     }
 
     /**

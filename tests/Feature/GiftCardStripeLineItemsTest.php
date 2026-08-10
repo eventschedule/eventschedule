@@ -62,14 +62,31 @@ class GiftCardStripeLineItemsTest extends TestCase
         return $st;
     }
 
-    /** @return array<int, array> */
+    /**
+     * The single-leg case: one promo and one discount, both belonging to $this->event.
+     *
+     * @return array<int, array>
+     */
     private function build($saleTickets, ?PromoCode $promo, float $discount, float $giftTotal, float $expectedTotal): array
+    {
+        return $this->buildLegs($saleTickets, [
+            ['promo' => $promo, 'discount' => $discount, 'event_id' => $this->event->id],
+        ], $giftTotal, $expectedTotal);
+    }
+
+    /**
+     * The multi-event case: one Stripe session, one promo context per leg.
+     *
+     * @param  array<int, array{promo: ?PromoCode, discount: float, event_id: int}>  $promoLegs
+     * @return array<int, array>
+     */
+    private function buildLegs($saleTickets, array $promoLegs, float $giftTotal, float $expectedTotal): array
     {
         $controller = app(TicketController::class);
         $method = new \ReflectionMethod($controller, 'buildStripeLineItems');
         $method->setAccessible(true);
 
-        return $method->invoke($controller, collect($saleTickets), $this->event, $promo, $discount, $giftTotal, $expectedTotal);
+        return $method->invoke($controller, collect($saleTickets), $this->event, $promoLegs, $giftTotal, $expectedTotal);
     }
 
     private function assertLineItemsValid(array $lineItems, float $expectedTotal): void
@@ -173,6 +190,95 @@ class GiftCardStripeLineItemsTest extends TestCase
         $t = $this->fixedVolumeTicket(25, 2);
         $items = $this->build([$this->saleTicket($t, 7)], null, 0, 0, 173);
         $this->assertLineItemsValid($items, 173);
+    }
+
+    /**
+     * A cart is ONE Stripe session spanning several events, and each leg carries its own promo
+     * code and its own discount_amount. Resolving the code from the anchor leg while summing the
+     * discount across the order meant a code on any other leg was never applied: the session was
+     * built at full price against a net expected total, the per-unit rounding reconciliation
+     * could not close a gap that large, and the webhook parked the paid sale in amount_mismatch.
+     */
+    public function test_a_promo_on_a_non_anchor_leg_is_still_applied(): void
+    {
+        $other = $this->createEvent($this->event->roles->first(), [
+            'tickets_enabled' => true,
+            'ticket_currency_code' => 'USD',
+        ]);
+
+        // Leg A anchors the order (lowest event id) and carries no code; leg B has 10% off.
+        $legA = $this->ticket(10);
+        $legB = $this->createTicket($other, ['price' => 50, 'quantity' => 100]);
+        $legB->setRelation('event', $other);
+
+        $promo = $this->percentagePromo(10);
+        $promo->event_id = $other->id;
+
+        $items = $this->buildLegs(
+            [$this->saleTicket($legA, 1), $this->saleTicket($legB, 1)],
+            [
+                ['promo' => null, 'discount' => 0.0, 'event_id' => $this->event->id],
+                ['promo' => $promo, 'discount' => 5.0, 'event_id' => $other->id],
+            ],
+            0,
+            55 // $10 + ($50 - $5)
+        );
+
+        $this->assertLineItemsValid($items, 55);
+    }
+
+    /** The mirror: one leg's discount must not be spent against another leg's tickets. */
+    public function test_a_promo_is_not_applied_to_another_legs_tickets(): void
+    {
+        $other = $this->createEvent($this->event->roles->first(), [
+            'tickets_enabled' => true,
+            'ticket_currency_code' => 'USD',
+        ]);
+
+        $legA = $this->ticket(100);
+        $legB = $this->createTicket($other, ['price' => 100, 'quantity' => 100]);
+        $legB->setRelation('event', $other);
+
+        $promo = $this->percentagePromo(50);
+
+        // 50% off leg A only. Leg B must stay at its full $100.
+        $items = $this->buildLegs(
+            [$this->saleTicket($legA, 1), $this->saleTicket($legB, 1)],
+            [
+                ['promo' => $promo, 'discount' => 50.0, 'event_id' => $this->event->id],
+                ['promo' => null, 'discount' => 0.0, 'event_id' => $other->id],
+            ],
+            0,
+            150
+        );
+
+        $this->assertLineItemsValid($items, 150);
+
+        $units = array_map(fn ($i) => $i['price_data']['unit_amount'], $items);
+        sort($units);
+        $this->assertSame([5000, 10000], $units, 'leg A halves, leg B keeps its full price');
+    }
+
+    /**
+     * A leg whose recorded discount exceeds what its code is eligible for used to drive the ratio
+     * negative, and a negative unit_amount is rejected by Stripe outright - a 500 with the sale
+     * rows, seat holds and promo times_used already committed.
+     */
+    public function test_an_oversized_discount_never_produces_a_negative_unit_amount(): void
+    {
+        $t = $this->ticket(10);
+        $promo = $this->percentagePromo(100);
+
+        $items = $this->buildLegs(
+            [$this->saleTicket($t, 1)],
+            [['promo' => $promo, 'discount' => 60.0, 'event_id' => $this->event->id]],
+            0,
+            0
+        );
+
+        foreach ($items as $item) {
+            $this->assertGreaterThanOrEqual(0, $item['price_data']['unit_amount']);
+        }
     }
 
     private function percentagePromo(float $value): PromoCode

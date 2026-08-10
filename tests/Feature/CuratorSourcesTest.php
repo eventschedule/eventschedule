@@ -32,6 +32,28 @@ class CuratorSourcesTest extends TestCase
         return app(CuratorSourceService::class);
     }
 
+    /**
+     * An unclaimed, contact-less venue - what an import or a calendar sync leaves behind, and
+     * the only shape the merge tool will destroy (canMergeRoles refuses a claimed source).
+     */
+    protected function stubVenue(string $name, array $attrs = []): Role
+    {
+        $venue = new Role;
+        $venue->subdomain = 'stub'.strtolower(\Illuminate\Support\Str::random(10));
+        $venue->type = 'venue';
+        $venue->name = $name;
+        $venue->email = null;
+        $venue->phone = null;
+
+        foreach ($attrs as $key => $value) {
+            $venue->{$key} = $value;
+        }
+
+        $venue->save();
+
+        return $venue->fresh();
+    }
+
     protected function addSource(Role $curator, Role $source, $group = null): RoleSource
     {
         return RoleSource::create([
@@ -59,6 +81,72 @@ class CuratorSourcesTest extends TestCase
             ->where('role_id', $role->id)
             ->where('event_id', $event->id)
             ->first();
+    }
+
+    /**
+     * A curator may source a VENUE, and venues are what the merge tool merges. performMerge()
+     * only soft-deletes the source, so role_sources' onDelete('cascade') never fires - and
+     * applyEligibility() requires source_role.is_deleted = false, so the next reconcile used to
+     * delete every auto-sourced row the venue was feeding and add nothing back.
+     */
+    public function test_merging_a_sourced_venue_keeps_the_curators_events(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createCurator($owner);
+
+        $survivor = $this->createRole($owner, 'venue', ['name' => 'Ozen Bar', 'city' => 'Tel Aviv', 'country_code' => 'il']);
+        $duplicate = $this->stubVenue('Ozen Bar', ['city' => 'Tel Aviv', 'country_code' => 'il']);
+        $this->followRole($owner, $duplicate);
+
+        // The stub is unclaimed (user_id null), so the event carries the account owner.
+        $event = $this->createEvent($duplicate, ['user_id' => $owner->id]);
+
+        $this->addSource($curator, $duplicate);
+        $this->service()->reconcile($curator);
+
+        $this->assertSame([$event->id], $this->acceptedEventIds($curator), 'precondition: the curator has the event');
+
+        $this->actingAs($owner)->post(route('following.merge_venues_group'), [
+            'target_id' => $survivor->id,
+            'source_ids' => [$duplicate->id],
+        ])->assertRedirect();
+
+        // The source now points at the survivor, so the event survives the reconcile that the
+        // scheduler runs every five minutes.
+        $this->service()->reconcile();
+
+        $this->assertSame([$event->id], $this->acceptedEventIds($curator));
+        $this->assertDatabaseHas('role_sources', [
+            'role_id' => $curator->id,
+            'source_role_id' => $survivor->id,
+        ]);
+    }
+
+    /** The unique is (role_id, source_role_id), so a curator already on both sides must not collide. */
+    public function test_merging_a_venue_a_curator_already_sources_drops_the_duplicate_row(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createCurator($owner);
+
+        $survivor = $this->createRole($owner, 'venue', ['name' => 'Ozen Bar', 'city' => 'Tel Aviv', 'country_code' => 'il']);
+        $duplicate = $this->stubVenue('Ozen Bar', ['city' => 'Tel Aviv', 'country_code' => 'il']);
+        $this->followRole($owner, $duplicate);
+
+        $event = $this->createEvent($duplicate, ['user_id' => $owner->id]);
+
+        $this->addSource($curator, $survivor);
+        $this->addSource($curator, $duplicate);
+        $this->service()->reconcile($curator);
+
+        $this->actingAs($owner)->post(route('following.merge_venues_group'), [
+            'target_id' => $survivor->id,
+            'source_ids' => [$duplicate->id],
+        ])->assertRedirect();
+
+        $this->service()->reconcile();
+
+        $this->assertSame(1, RoleSource::where('role_id', $curator->id)->count());
+        $this->assertSame([$event->id], $this->acceptedEventIds($curator));
     }
 
     public function test_adding_a_source_pulls_in_past_and_future_events(): void

@@ -2194,23 +2194,71 @@ class TicketController extends Controller
      *                                       each with its ticket relation and event set.
      * @return array<int, array> Stripe line_items
      */
-    private function buildStripeLineItems($stripeSaleTickets, $event, $promoCode, float $discount, float $giftTotal, float $expectedTotal): array
+    /**
+     * The promo discount ratio to apply to each ticket line, keyed by ticket id.
+     *
+     * One entry per leg that actually carries a code, scoped by event: a leg's discount is only
+     * ever spent against that same leg's eligible subtotal, so a code on one event can neither
+     * be lost (because the anchor happened to carry no code) nor bleed into another event's
+     * pricing. Tickets with no entry are billed at full post-volume price.
+     *
+     * The ratio is clamped at zero. It can only go negative when a leg's recorded
+     * discount_amount exceeds the subtotal its code is actually eligible for - a data problem
+     * rather than a pricing one - and a negative unit_amount is rejected by Stripe outright,
+     * which used to surface as a 500 with the sale rows already committed.
+     *
+     * @param  array<int, array{promo: ?\App\Models\PromoCode, discount: float, event_id: int}>  $promoLegs
+     * @return array<int, float> ticket_id => ratio
+     */
+    private function promoRatiosByTicket($stripeSaleTickets, array $promoLegs): array
     {
-        // Calculate discount ratio for eligible tickets (exclude add-ons); base is post-volume line totals
-        $eligibleSubtotal = 0;
-        if ($promoCode && $discount > 0) {
+        $ratios = [];
+
+        foreach ($promoLegs as $leg) {
+            $promo = $leg['promo'] ?? null;
+            $discount = (float) ($leg['discount'] ?? 0);
+
+            if (! $promo || $discount <= 0) {
+                continue;
+            }
+
+            $eligible = [];
+            $eligibleSubtotal = 0.0;
+
             foreach ($stripeSaleTickets as $saleTicket) {
-                if ($saleTicket->ticket->is_addon) {
+                if ($saleTicket->ticket->is_addon
+                    || (int) $saleTicket->ticket->event_id !== (int) $leg['event_id']
+                    || ! $promo->appliesToTicket($saleTicket->ticket_id)) {
                     continue;
                 }
-                if ($promoCode->appliesToTicket($saleTicket->ticket_id)) {
-                    $eligibleSubtotal += $saleTicket->ticket->lineSubtotalAfterVolumeDiscount((int) $saleTicket->quantity);
-                }
+
+                $eligible[] = $saleTicket->ticket_id;
+                $eligibleSubtotal += $saleTicket->ticket->lineSubtotalAfterVolumeDiscount((int) $saleTicket->quantity);
+            }
+
+            if ($eligibleSubtotal <= 0) {
+                continue;
+            }
+
+            $ratio = max(0, ($eligibleSubtotal - $discount) / $eligibleSubtotal);
+
+            foreach ($eligible as $ticketId) {
+                $ratios[$ticketId] = $ratio;
             }
         }
-        $discountRatio = ($eligibleSubtotal > 0 && $discount > 0)
-            ? ($eligibleSubtotal - $discount) / $eligibleSubtotal
-            : 1;
+
+        return $ratios;
+    }
+
+    private function buildStripeLineItems($stripeSaleTickets, $event, array $promoLegs, float $giftTotal, float $expectedTotal): array
+    {
+        // Discount ratio per eligible ticket line (add-ons excluded); base is post-volume line
+        // totals. Resolved PER LEG rather than once for the session: a cart is one Stripe session
+        // spanning several events, each with its own promo code and its own discount_amount, so a
+        // single ratio built from one leg's code and the whole order's discount either applies no
+        // discount at all (the code sits on a leg that is not the anchor -> overcharge, then
+        // amount_mismatch) or spends one leg's discount against another leg's eligible subtotal.
+        $ratioByTicketId = $this->promoRatiosByTicket($stripeSaleTickets, $promoLegs);
 
         // A gift card is tender for the whole order (add-ons included), so scale every
         // line proportionally. Absorbing the deduction into one line could push its
@@ -2224,9 +2272,7 @@ class TicketController extends Controller
                     $preGiftTotal += $saleTicket->ticket->price * $qty;
                 } else {
                     $lineAmount = $saleTicket->ticket->lineSubtotalAfterVolumeDiscount($qty);
-                    if ($promoCode && $discount > 0 && $promoCode->appliesToTicket($saleTicket->ticket_id)) {
-                        $lineAmount *= $discountRatio;
-                    }
+                    $lineAmount *= $ratioByTicketId[$saleTicket->ticket_id] ?? 1;
                     $preGiftTotal += $lineAmount;
                 }
             }
@@ -2245,9 +2291,7 @@ class TicketController extends Controller
             } else {
                 $linePostVolume = $saleTicket->ticket->lineSubtotalAfterVolumeDiscount($qty);
                 $unitPrice = $qty > 0 ? $linePostVolume / $qty : 0;
-                if ($promoCode && $discount > 0 && $promoCode->appliesToTicket($saleTicket->ticket_id)) {
-                    $unitPrice = $unitPrice * $discountRatio;
-                }
+                $unitPrice = $unitPrice * ($ratioByTicketId[$saleTicket->ticket_id] ?? 1);
             }
             if ($giftRatio < 1) {
                 $unitPrice = $unitPrice * $giftRatio;
@@ -2322,17 +2366,25 @@ class TicketController extends Controller
 
     private function stripeCheckout($subdomain, $sale, $event, $isEmbed = false)
     {
-        $promoCode = $sale->promo_code_id ? $sale->promoCode : null;
         // For a grouped (individual-tickets) primary the line items are aggregated across the
         // whole group, so the discount must be the group total too - using the primary's own
-        // per-seat share here skews discountRatio and, combined with gift-card line scaling,
-        // can drive a reconciled unit_amount negative (Stripe rejects it). Mirrors how
+        // per-seat share here skews the ratio and, combined with gift-card line scaling, can
+        // drive a reconciled unit_amount negative (Stripe rejects it). Mirrors how
         // $expectedTotal below uses the same scope.
         //
         // A multi-event order widens the scope again: one session pays for every leg, so the
-        // line items, the discount and the expected total all have to span the order, not the leg.
+        // line items and the expected total have to span the order, not the leg. The PROMO does
+        // not: each leg carries its own code and its own discount_amount, so the pair is kept
+        // per leg and matched to that leg's tickets by event - see promoRatiosByTicket().
         $isOrder = $sale->isOrderPrimary();
-        $discount = $isOrder ? $sale->orderTotalDiscount() : $sale->legTotalDiscount();
+
+        $promoLegs = ($isOrder ? $sale->orderLegs() : collect([$sale]))
+            ->map(fn (Sale $leg) => [
+                'promo' => $leg->promo_code_id ? $leg->promoCode : null,
+                'discount' => (float) $leg->legTotalDiscount(),
+                'event_id' => (int) $leg->event_id,
+            ])
+            ->all();
 
         // Aggregate SaleTickets across the whole order, or the whole group.
         if ($isOrder || ($sale->group_id && $sale->isPrimarySale())) {
@@ -2381,7 +2433,7 @@ class TicketController extends Controller
         $giftTotal = $isOrder ? $sale->orderTotalGiftCard() : $sale->legTotalGiftCard();
         $expectedTotal = $isOrder ? $sale->orderTotalPayment() : $sale->legTotalPayment();
 
-        $lineItems = $this->buildStripeLineItems($stripeSaleTickets, $event, $promoCode, (float) $discount, $giftTotal, $expectedTotal);
+        $lineItems = $this->buildStripeLineItems($stripeSaleTickets, $event, $promoLegs, $giftTotal, $expectedTotal);
 
         $data = [
             'sale_id' => UrlUtils::encodeId($sale->id),
@@ -2392,6 +2444,27 @@ class TicketController extends Controller
         // Determine if using Stripe Connect (hosted mode) or direct payments (self-hosted)
         $useConnect = config('app.hosted') && $event->user->stripe_account_id;
 
+        try {
+            $session = $this->createStripeSession($useConnect, $lineItems, $sale, $event, $data, $isEmbed);
+        } catch (\Exception $e) {
+            // The sale rows, the seat holds and any promo times_used are already committed by
+            // now, so an uncaught throw here answered a paid checkout with a 500 and left the
+            // inventory decremented. Report it and hand the buyer their cart back instead.
+            report($e);
+
+            return back()->withInput()->with('error', __('messages.error'));
+        }
+
+        return redirect($session->url);
+    }
+
+    /**
+     * Create the Stripe Checkout Session, on the event owner's Connect account when hosted or on
+     * the platform account otherwise. Split out of stripeCheckout() only so the call has one
+     * catchable seam; the two payloads are unchanged.
+     */
+    private function createStripeSession(bool $useConnect, array $lineItems, $sale, $event, array $data, bool $isEmbed)
+    {
         if ($useConnect) {
             // Hosted mode: Use Stripe Connect with event creator's account
             $stripe = new StripeClient(config('services.stripe.key'));
@@ -2439,7 +2512,7 @@ class TicketController extends Controller
             ]);
         }
 
-        return redirect($session->url);
+        return $session;
     }
 
     private function invoiceninjaCheckout($subdomain, $sale, $event, $isEmbed = false)

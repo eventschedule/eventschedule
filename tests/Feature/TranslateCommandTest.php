@@ -151,6 +151,68 @@ class TranslateCommandTest extends TestCase
         $this->assertSame('Sponsor EN', $role->custom_labels['our_sponsors']['value_en']);
     }
 
+    /**
+     * A throwing AI call used to leave the row completely unstamped.
+     *
+     * GeminiUtils returns null for quota and 503 but RETHROWS a safety block, an INTERNAL, a
+     * malformed body and any non-quota 4xx - all already-billed calls - and the per-item catch
+     * only logged. That left translation_attempts at 0 and last_translated_at NULL, so
+     * selectIds()'s "never translated first" ordering re-selected and re-bought the same row on
+     * every run for ever, invisible to both the retry ceiling and the admin stuck-records panel.
+     *
+     * The catch now routes through recordFailure(); this pins its contract. (The four catch
+     * blocks that call it are wired by inspection - the provider is raw curl, so a test cannot
+     * drive a real throw without making a network call.)
+     */
+    public function test_a_thrown_translation_stamps_the_row_and_keeps_what_was_paid_for(): void
+    {
+        $user = $this->createOwner();
+        $role = $this->createRole($user, 'venue', [
+            'name' => 'Mezcaleria',
+            'language_code' => 'es',
+            'translation_language_code' => 'en',
+        ]);
+
+        // What the loop holds in memory when a later field throws: one field already translated
+        // and paid for, nothing persisted yet.
+        $role->name_en = 'Mezcal Bar';
+
+        $command = new \App\Console\Commands\Translate;
+        $method = new \ReflectionMethod($command, 'recordFailure');
+        $method->setAccessible(true);
+        $method->invoke($command, $role, $role->id);
+
+        $fresh = $role->fresh();
+
+        $this->assertSame(1, (int) $fresh->translation_attempts, 'the failure has to count towards the retry ceiling');
+        $this->assertNotNull($fresh->last_translated_at, 'an unstamped row sorts first on every subsequent run, for ever');
+        $this->assertSame('Mezcal Bar', $fresh->name_en, 'a field that translated before the throw was already billed');
+    }
+
+    /** The consequence that costs money: a stamped failure stops being re-selected immediately. */
+    public function test_a_stamped_failure_is_not_re_selected_on_the_next_run(): void
+    {
+        $user = $this->createOwner();
+
+        // One short of the ceiling, so it is THIS failure being counted that parks the row.
+        // Starting at the ceiling would make the test pass with or without the fix.
+        $role = $this->createRole($user, 'venue', [
+            'name' => 'Mezcaleria',
+            'language_code' => 'es',
+            'translation_language_code' => 'en',
+            'translation_attempts' => (int) config('usage.stuck_translation_attempts') - 1,
+        ]);
+
+        $this->assertSame([$role->id], $this->selectedIds($this->dryRun(), 'roles'), 'precondition: it is selectable now');
+
+        $command = new \App\Console\Commands\Translate;
+        $method = new \ReflectionMethod($command, 'recordFailure');
+        $method->setAccessible(true);
+        $method->invoke($command, $role, $role->id);
+
+        $this->assertSame([], $this->selectedIds($this->dryRun(), 'roles'));
+    }
+
     public function test_repeatedly_failing_schedule_is_skipped_inside_its_cooldown(): void
     {
         $user = $this->createOwner();
