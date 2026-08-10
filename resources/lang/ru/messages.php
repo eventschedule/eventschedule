@@ -275,6 +275,7 @@ return [
     'merge_venues_summary' => ':venues мест, :events мероприятий',
     'merge_venues_empty_state' => 'Дубликаты мест в этом расписании не найдены.',
     'merge_venues_not_duplicates_button' => 'Не дубликаты',
+    'merge_venues_not_duplicates_confirm' => 'Больше не предлагать их как дубликаты? Это действие нельзя отменить.',
     'merge_venues_banner' => ':count групп мест в вашем расписании выглядят как дубликаты. Объедините их.',
     'merge_venues_intro_all' => 'Эти расписания мест выглядят как дубликаты друг друга. Выберите в каждой группе то, которое нужно оставить, и объедините.',
     'merge_venues_empty_state_all' => 'Дубликаты мест не найдены.',

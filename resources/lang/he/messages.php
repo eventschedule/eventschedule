@@ -723,6 +723,7 @@ return [
     'merge_venues_summary' => ':venues מקומות, :events אירועים',
     'merge_venues_empty_state' => 'לא נמצאו מקומות כפולים בלוח זמנים זה.',
     'merge_venues_not_duplicates_button' => 'לא כפילויות',
+    'merge_venues_not_duplicates_confirm' => 'להפסיק להציע אותם ככפילויות? לא ניתן לבטל את הפעולה.',
     'merge_venues_banner' => ':count קבוצות של מקומות בלוח הזמנים שלך נראות ככפילויות. מזג אותן.',
     'merge_venues_intro_all' => 'לוחות הזמנים האלה של מקומות נראים ככפילויות זה של זה. בחרו בכל קבוצה את זה שברצונכם לשמור ומזגו.',
     'merge_venues_empty_state_all' => 'לא נמצאו מקומות כפולים.',

@@ -275,6 +275,7 @@ return [
     'merge_venues_summary' => ':venues kohta, :events sündmust',
     'merge_venues_empty_state' => 'Selles ajakavas duplikaatkohti ei leitud.',
     'merge_venues_not_duplicates_button' => 'Pole duplikaadid',
+    'merge_venues_not_duplicates_confirm' => 'Kas lõpetada nende pakkumine duplikaatidena? Seda ei saa tagasi võtta.',
     'merge_venues_banner' => ':count gruppi kohti sinu ajakavas näevad välja nagu duplikaadid. Ühenda need.',
     'merge_venues_intro_all' => 'Need toimumiskohtade ajakavad tunduvad üksteise duplikaadid. Vali igas rühmas see, mille soovid alles jätta, ja ühenda.',
     'merge_venues_empty_state_all' => 'Duplikaatkohti ei leitud.',

@@ -47,7 +47,15 @@ class CuratorSourceService
         return $query
             ->join('roles as source_role', function ($join) {
                 $join->on('source_role.id', '=', 'rs.source_role_id')
-                    ->where('source_role.is_deleted', '=', false);
+                    ->where('source_role.is_deleted', '=', false)
+                    // The SOURCE's type is re-checked for exactly the reason the curator's is
+                    // below: type is fillable and RoleController::update() mass-fills from the
+                    // request, so a talent or venue can be flipped to a curator while its
+                    // role_sources rows survive. saveEventSources() refuses that combination when
+                    // the source is added - a curator pulling from a curator chains one
+                    // aggregation onto another, and the parent fills with events from schedules
+                    // it never listed - and this refuses it on every pass afterwards.
+                    ->whereIn('source_role.type', ['talent', 'venue']);
             })
             ->join('roles as curator_role', function ($join) {
                 $join->on('curator_role.id', '=', 'rs.role_id')
@@ -128,6 +136,8 @@ class CuratorSourceService
      */
     protected function unlinkStale(?int $curatorId, ?int $eventId, bool $pruneDeclined = false): int
     {
+        $batch = (int) config('usage.curator_source_batch', 50000);
+
         $ids = DB::table('event_role as er')
             ->where('er.is_auto_sourced', true)
             ->when(! $pruneDeclined, fn ($q) => $q->where(function ($q) {
@@ -160,7 +170,19 @@ class CuratorSourceService
 
                 $this->applyEligibility($q, 'e');
             })
+            // Same ceiling linkMissing() uses. Only the DELETE was chunked before, so the id
+            // set itself was materialised in full - a curator dropping several large sources
+            // pulled every affected event_role id into memory at once. The remainder is picked
+            // up by the next pass, which runs every five minutes.
+            ->limit($batch)
             ->pluck('er.id');
+
+        if ($ids->count() >= $batch) {
+            Log::info('Curator source unlink hit its batch ceiling; the rest follows next pass', [
+                'batch' => $batch,
+                'curator_id' => $curatorId,
+            ]);
+        }
 
         $removed = 0;
 

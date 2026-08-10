@@ -228,6 +228,7 @@ return [
     'merge_venues_summary' => ':venues أماكن، :events أحداث',
     'merge_venues_empty_state' => 'لم يتم العثور على أماكن مكررة في هذا الجدول.',
     'merge_venues_not_duplicates_button' => 'ليست مكررة',
+    'merge_venues_not_duplicates_confirm' => 'هل تريد التوقف عن عرض هذه كتكرارات؟ لا يمكن التراجع عن ذلك.',
     'merge_venues_banner' => ':count مجموعات من الأماكن في جدولك تبدو وكأنها مكررة. قم بدمجها.',
     'merge_venues_intro_all' => 'تبدو جداول الأماكن هذه مكررة. اختر الجدول الذي تريد الاحتفاظ به في كل مجموعة ثم ادمج.',
     'merge_venues_empty_state_all' => 'لم يتم العثور على أماكن مكررة.',

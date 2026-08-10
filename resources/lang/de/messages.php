@@ -230,6 +230,7 @@ return [
     'merge_venues_summary' => ':venues Veranstaltungsorte, :events Veranstaltungen',
     'merge_venues_empty_state' => 'Keine doppelten Veranstaltungsorte in diesem Zeitplan gefunden.',
     'merge_venues_not_duplicates_button' => 'Keine Duplikate',
+    'merge_venues_not_duplicates_confirm' => 'Diese nicht mehr als Duplikate vorschlagen? Das lässt sich nicht rückgängig machen.',
     'merge_venues_banner' => ':count Gruppen von Veranstaltungsorten in Ihrem Zeitplan sehen wie Duplikate aus. Führen Sie sie zusammen.',
     'merge_venues_intro_all' => 'Diese Veranstaltungsort-Zeitpläne sehen wie Duplikate voneinander aus. Wähle in jeder Gruppe den zu behaltenden aus und führe sie zusammen.',
     'merge_venues_empty_state_all' => 'Keine doppelten Veranstaltungsorte gefunden.',

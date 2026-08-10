@@ -641,6 +641,114 @@ class CuratorSourcesTest extends TestCase
             'the reconcile pass must not undo Uncurate');
     }
 
+    /**
+     * The realistic shape: the curator belongs to SOMEBODY ELSE, so it is not in the venue
+     * owner's availableEventSchedules() and never appears on their schedules tab.
+     *
+     * saveEvent's preservation loop appends such attached-but-invisible schedules to
+     * $selectedCurators so a save cannot silently detach them, and syncCuratorSources() then read
+     * that same mutated array to decide whether the user had re-ticked the curator. It always
+     * looked re-ticked, so the tombstone was skipped - and the accept loop had already flipped
+     * the row back to accepted, putting the event back on the curator's public page against
+     * their explicit removal, permanently.
+     */
+    public function test_a_removal_survives_the_event_owner_saving_the_form(): void
+    {
+        $venueOwner = $this->createOwner();
+        $venue = $this->createRole($venueOwner, 'venue');
+        $event = $this->createEvent($venue);
+
+        // A curator owned by someone else, taking submissions without approval.
+        $curatorOwner = $this->createOwner();
+        $curator = $this->createCurator($curatorOwner, ['accept_requests' => true, 'require_approval' => false]);
+
+        $this->addSource($curator, $venue);
+        $this->service()->reconcile($curator);
+        $this->assertSame([$event->id], $this->acceptedEventIds($curator));
+
+        $this->actingAs($curatorOwner)->delete(route('event.uncurate', [
+            'subdomain' => $curator->subdomain,
+            'hash' => $event->hashedId(),
+        ]));
+        $this->assertSame([], $this->acceptedEventIds($curator), 'precondition: the curator removed it');
+
+        // The venue owner edits their own event. They cannot see that curator at all, but the
+        // form posts the marker, so this is the "the tab was rendered" path.
+        $this->putUpdateEvent($venueOwner, $venue, $event, ['curators_submitted' => 1]);
+
+        $this->assertSame([], $this->acceptedEventIds($curator),
+            'a save by the event owner must not undo the curator removal');
+
+        $this->service()->reconcile();
+        $this->assertSame([], $this->acceptedEventIds($curator),
+            'nor may the next reconcile pass');
+    }
+
+    /**
+     * saveEventSources() refuses a curator as a source, because a curator pulling from a curator
+     * chains one aggregation onto another. But `type` is fillable and RoleController::update()
+     * mass-fills the request, so a talent could be flipped to a curator afterwards while its
+     * role_sources rows survived - and the reconcile queries only ever re-checked the type on the
+     * curator side, never on the source.
+     */
+    public function test_a_source_flipped_to_a_curator_stops_feeding_its_parent(): void
+    {
+        $owner = $this->createOwner();
+        $talent = $this->createRole($owner, 'talent');
+        $parent = $this->createCurator($owner);
+
+        $event = $this->createEvent($talent);
+
+        $this->addSource($parent, $talent);
+        $this->service()->reconcile($parent);
+        $this->assertSame([$event->id], $this->acceptedEventIds($parent));
+
+        $talent->type = 'curator';
+        $talent->save();
+
+        $this->service()->reconcile();
+
+        $this->assertSame([], $this->acceptedEventIds($parent),
+            'a source that is now a curator must not chain its own aggregation upwards');
+    }
+
+    /**
+     * A programmatic save (the API sends no curators[]) detaches a visible curator, and
+     * linkMissing() rebuilds the row from five columns only - so everything else on the pivot was
+     * silently reset, including translations that had already been bought from the AI provider
+     * and the CalDAV keys used for dedup.
+     */
+    public function test_a_programmatic_save_keeps_the_curator_pivots_translations(): void
+    {
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner, 'venue');
+        $curator = $this->createCurator($owner);
+        $event = $this->createEvent($venue);
+
+        $this->addSource($curator, $venue);
+        $this->service()->reconcile($curator);
+
+        DB::table('event_role')
+            ->where('event_id', $event->id)
+            ->where('role_id', $curator->id)
+            ->update([
+                'name_translated' => 'Nombre traducido',
+                'description_translated' => 'Descripcion traducida',
+                'caldav_event_uid' => 'uid-123',
+            ]);
+
+        // The AP form path, with the schedules tab never rendered - the same shape the API sends.
+        // Same name on purpose: renaming an event legitimately invalidates its translations, and
+        // this is about a save that changes nothing losing them anyway.
+        $this->putUpdateEvent($owner, $venue, $event, ['name' => $event->name]);
+
+        $pivot = $this->pivot($curator, $event);
+
+        $this->assertSame('Nombre traducido', $pivot->name_translated, 'a paid translation must survive a save');
+        $this->assertSame('Descripcion traducida', $pivot->description_translated);
+        $this->assertSame('uid-123', $pivot->caldav_event_uid);
+    }
+
     public function test_uncurate_still_detaches_a_hand_curated_event(): void
     {
         $owner = $this->createOwner();

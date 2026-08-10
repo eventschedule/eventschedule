@@ -275,6 +275,7 @@ return [
     'merge_venues_summary' => ':venues venues, :events events',
     'merge_venues_empty_state' => 'No duplicate venues found on this schedule.',
     'merge_venues_not_duplicates_button' => 'Not duplicates',
+    'merge_venues_not_duplicates_confirm' => 'Stop offering these as duplicates? This cannot be undone.',
     'merge_venues_banner' => ':count groups of venues on your schedule look like duplicates. Merge them.',
     'merge_venues_intro_all' => 'These venue schedules look like duplicates of each other. Pick the one to keep in each group and merge.',
     'merge_venues_empty_state_all' => 'No duplicate venues found.',

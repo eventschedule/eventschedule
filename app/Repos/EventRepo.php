@@ -1178,6 +1178,16 @@ class EventRepo
             return UrlUtils::decodeId($id);
         }, $selectedCurators);
 
+        // What the user ACTUALLY ticked, before the preservation loop below starts appending
+        // attached-but-invisible schedules to $selectedCurators. syncCuratorSources() reads this
+        // to decide whether a curator's earlier removal has been undone, and re-ticking is the
+        // only way to undo one - so it has to be the submitted tab, not the post-preservation
+        // array. Reading the mutated array meant a curator the saving user cannot even see (the
+        // normal case for a cross-user source) counted as "just re-ticked", the tombstone was
+        // skipped and the accept loop had already flipped the row back to accepted: the event
+        // reappeared on the curator's public page against their explicit removal, for good.
+        $tickedCurators = $selectedCurators;
+
         $existingAttachedIds = ($event && $event->exists)
             ? $event->roles()->pluck('roles.id')->toArray()
             : [];
@@ -1302,6 +1312,19 @@ class EventRepo
                 ->pluck('is_accepted', 'role_id')
             : collect();
 
+        // is_accepted is not the only thing worth keeping. linkMissing() rebuilds a dropped row
+        // from five columns, so everything else on the pivot is silently reset: the curator's
+        // hand-filed sub-schedule reverts to the source's default, the paid-for translations are
+        // discarded and re-bought, and the CalDAV dedup keys are lost. Snapshot them and put them
+        // back after the relink.
+        $pivotBefore = $event->exists
+            ? DB::table('event_role')
+                ->where('event_id', $event->id)
+                ->where('is_auto_sourced', true)
+                ->get()
+                ->keyBy('role_id')
+            : collect();
+
         $event->roles()->sync($roleIds);
 
         $curatorGroups = $request->input('curator_groups', []);
@@ -1316,23 +1339,32 @@ class EventRepo
                 $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);
             }
 
-            // If this is a curator and curator_groups is provided, add it to the pivot
+            // If this is a curator and curator_groups is provided, add it to the pivot.
+            // The group has to belong to the schedule it is being filed under - both sibling
+            // writers check (EventController's guest request, RoleController::saveEventSources) -
+            // or a hand-crafted save writes another schedule's groups.id onto this pivot.
             if ($role && $role->isCurator()) {
                 $curatorEncodedId = UrlUtils::encodeId($role->id);
                 if (isset($curatorGroups[$curatorEncodedId]) && $curatorGroups[$curatorEncodedId]) {
                     $groupId = UrlUtils::decodeId($curatorGroups[$curatorEncodedId]);
-                    $event->roles()->updateExistingPivot($role->id, ['group_id' => $groupId]);
+                    if ($this->groupBelongsToRole($groupId, $role->id)) {
+                        $event->roles()->updateExistingPivot($role->id, ['group_id' => $groupId]);
+                    }
                 }
             }
 
             // If this is the current role and current_role_group_id is provided, add it to the pivot
             if ($role && $role->id === $currentRole->id && $request->has('current_role_group_id') && $request->current_role_group_id) {
                 $groupId = UrlUtils::decodeId($request->current_role_group_id);
-                $event->roles()->updateExistingPivot($role->id, ['group_id' => $groupId]);
+                if ($this->groupBelongsToRole($groupId, $role->id)) {
+                    $event->roles()->updateExistingPivot($role->id, ['group_id' => $groupId]);
+                }
             }
         }
 
-        $this->syncCuratorSources($event, $request, $currentRole, $userVisibleIds, $selectedCurators, $autoSourcedBefore);
+        $this->syncCuratorSources($event, $request, $currentRole, $userVisibleIds, $tickedCurators, $autoSourcedBefore);
+
+        $this->restoreAutoSourcedPivots($event, $pivotBefore);
 
         if ($request->hasFile('flyer_image')) {
             $file = $request->file('flyer_image');
@@ -2123,7 +2155,66 @@ class EventRepo
      *
      * @param  \Illuminate\Support\Collection  $autoSourcedBefore  role_id => is_accepted, as of before sync()
      */
-    protected function syncCuratorSources(Event $event, $request, ?Role $currentRole, array $userVisibleIds, array $selectedCurators, $autoSourcedBefore): void
+    /**
+     * Put back the pivot columns a detach-and-relink cycle would otherwise have reset.
+     *
+     * CuratorSourceService::linkMissing() rebuilds a dropped auto-sourced row from
+     * (event_id, role_id, is_accepted, is_auto_sourced, group_id) only, so a row that was
+     * detached by sync() and re-added comes back stripped of everything else on the pivot.
+     * Only rows that came back are touched, and only columns that are now empty, so a value the
+     * relink DID carry (group_id, taken from the source's configured sub-schedule) still wins.
+     *
+     * @param  \Illuminate\Support\Collection  $pivotBefore  keyed by role_id
+     */
+    protected function restoreAutoSourcedPivots(Event $event, $pivotBefore): void
+    {
+        if ($pivotBefore->isEmpty()) {
+            return;
+        }
+
+        $columns = [
+            'name_translated',
+            'description_translated',
+            'description_html_translated',
+            'short_description_translated',
+            'google_event_id',
+            'caldav_event_uid',
+            'caldav_event_etag',
+        ];
+
+        $rows = DB::table('event_role')
+            ->where('event_id', $event->id)
+            ->whereIn('role_id', $pivotBefore->keys()->all())
+            ->get();
+
+        foreach ($rows as $row) {
+            $before = $pivotBefore->get($row->role_id);
+
+            if (! $before) {
+                continue;
+            }
+
+            $restore = [];
+
+            foreach ($columns as $column) {
+                if (property_exists($before, $column) && $before->{$column} !== null && $row->{$column} === null) {
+                    $restore[$column] = $before->{$column};
+                }
+            }
+
+            if ($restore) {
+                DB::table('event_role')->where('id', $row->id)->update($restore);
+            }
+        }
+    }
+
+    /** A sub-schedule may only be used by the schedule that owns it. */
+    protected function groupBelongsToRole($groupId, int $roleId): bool
+    {
+        return $groupId && \App\Models\Group::where('id', $groupId)->where('role_id', $roleId)->exists();
+    }
+
+    protected function syncCuratorSources(Event $event, $request, ?Role $currentRole, array $userVisibleIds, array $tickedCurators, $autoSourcedBefore): void
     {
         app(\App\Services\CuratorSourceService::class)->syncEvent($event);
 
@@ -2136,7 +2227,7 @@ class EventRepo
         // Unless the user has just ticked that curator back on, which is the only way to undo a
         // removal. Read from the submitted tab, so a request that never rendered it (the API,
         // importers, calendar sync) cannot clear a removal by omission.
-        $reTicked = $request->boolean('curators_submitted') ? $selectedCurators : [];
+        $reTicked = $request->boolean('curators_submitted') ? $tickedCurators : [];
 
         foreach ($autoSourcedBefore as $roleId => $wasAccepted) {
             if ($wasAccepted !== null && ! $wasAccepted && ! in_array((int) $roleId, $reTicked)) {
@@ -2157,7 +2248,7 @@ class EventRepo
             // curator. Same guard the detach loop above uses.
             $unticked = array_values(array_diff(
                 $userVisibleIds,
-                $selectedCurators,
+                $tickedCurators,
                 array_filter([$currentRole?->id])
             ));
 

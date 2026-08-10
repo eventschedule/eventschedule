@@ -67,6 +67,73 @@ class VenueDuplicatesTest extends TestCase
         );
     }
 
+    /**
+     * The shape calendar sync ACTUALLY produces, which every other test in this file skips:
+     * ConvertsLocationToVenue names the venue after the whole inbound location string and never
+     * sets a city. Keyed on the full name plus the city, that stub could never share a group with
+     * the real venue - so the merge tool could not clean up the duplicates the sync it ships
+     * beside was creating.
+     */
+    public function test_a_sync_stub_named_after_the_whole_location_groups_with_the_real_venue(): void
+    {
+        $owner = $this->createOwner();
+        $talent = $this->createRole($owner, 'talent');
+        $real = $this->createRole($owner, 'venue', ['name' => 'The Anchor', 'city' => 'Haifa', 'country_code' => 'il']);
+
+        // No city, and the city is baked into the name - exactly what the sync path writes.
+        $stub = $this->stubVenue('The Anchor, Haifa', ['country_code' => 'il']);
+        $this->followRole($owner, $stub);
+
+        $this->actingAs($owner);
+
+        $this->assertSame(['The Anchor'], $this->venueNamesOnCreateForm($talent));
+
+        $response = $this->get(route('event.create', ['subdomain' => $talent->subdomain]));
+        $this->assertSame(1, $response->viewData('duplicateVenueGroupCount'));
+    }
+
+    /**
+     * The city left the grouping key, so it has to hold the line here instead: two venues that
+     * both name a city, and name different ones, are a second room or a franchise branch.
+     */
+    public function test_two_venues_in_different_cities_are_never_collapsed(): void
+    {
+        $owner = $this->createOwner();
+        $talent = $this->createRole($owner, 'talent');
+        $this->createRole($owner, 'venue', ['name' => 'Barby', 'city' => 'Tel Aviv', 'country_code' => 'il']);
+        $other = $this->stubVenue('Barby', ['city' => 'Haifa', 'country_code' => 'il']);
+        $this->followRole($owner, $other);
+
+        $this->actingAs($owner);
+
+        $this->assertSame(['Barby', 'Barby'], $this->venueNamesOnCreateForm($talent),
+            'a different city means a different place, so both stay pickable');
+    }
+
+    /**
+     * isSafeToCollapse only checked the survivor's level when the survivor was CLAIMED, while the
+     * merge page's own predicate is unconditional (owner/admin, or follower on an unclaimed
+     * role). An unclaimed survivor the user is merely a `viewer` on therefore collapsed in the
+     * picker while the merge page skipped the group, stranding the row with no way back.
+     */
+    public function test_the_picker_keeps_a_group_the_merge_page_cannot_offer(): void
+    {
+        $owner = $this->createOwner();
+        $talent = $this->createRole($owner, 'talent');
+
+        $survivor = $this->stubVenue('Ozen Bar', ['city' => 'Tel Aviv', 'country_code' => 'il']);
+        $loser = $this->stubVenue('Ozen Bar', ['city' => 'Tel Aviv', 'country_code' => 'il']);
+
+        // Read-only on the survivor: neither owner/admin nor follower, so no merge into it is
+        // possible and the merge page will not list the group.
+        $this->followRole($owner, $survivor, 'viewer');
+        $this->followRole($owner, $loser);
+
+        $this->actingAs($owner);
+
+        $this->assertSame(['Ozen Bar', 'Ozen Bar'], $this->venueNamesOnCreateForm($talent));
+    }
+
     public function test_create_form_keeps_two_real_venues_that_share_a_name(): void
     {
         $owner = $this->createOwner();

@@ -255,6 +255,7 @@ return [
     'merge_venues_summary' => ':venues lieux, :events événements',
     'merge_venues_empty_state' => 'Aucun lieu en double trouvé sur ce calendrier.',
     'merge_venues_not_duplicates_button' => 'Pas des doublons',
+    'merge_venues_not_duplicates_confirm' => 'Ne plus proposer ces lieux comme doublons ? Cette action est irréversible.',
     'merge_venues_banner' => ':count groupes de lieux sur votre calendrier semblent être des doublons. Fusionnez-les.',
     'merge_venues_intro_all' => 'Ces calendriers de lieux semblent être des doublons les uns des autres. Choisissez celui à conserver dans chaque groupe, puis fusionnez.',
     'merge_venues_empty_state_all' => 'Aucun lieu en double trouvé.',

@@ -129,6 +129,7 @@
         var previewSummaryTemplate = @json(__('messages.merge_venues_preview_summary'));
         var reviveSuffixTemplate = @json(__('messages.merge_venues_preview_revive_suffix'));
         var errorMsg = @json(__('messages.an_error_occurred'));
+        var dismissConfirmMsg = @json(__('messages.merge_venues_not_duplicates_confirm'));
         var previewUrl = @json($previewUrl);
 
         // Sync radio selection -> hidden target_id, hidden source_ids, header pieces, and summary line.
@@ -222,8 +223,12 @@
         });
 
         // "Not duplicates" -> submit the hidden dismiss form.
+        // Confirmed, like Merge is: nothing ever deletes a dismissal, so a misclick removes the
+        // group from this page permanently and there is no undo anywhere in the app.
         document.querySelectorAll('.dismiss-group-btn').forEach(function (btn) {
             btn.addEventListener('click', function () {
+                if (!confirm(dismissConfirmMsg)) return;
+
                 var hash = btn.getAttribute('data-group-hash');
                 var dismissForm = document.querySelector('.dismiss-form[data-group-hash="' + hash + '"]');
                 if (dismissForm) dismissForm.submit();

@@ -353,6 +353,58 @@ class ScheduleFeaturesTest extends TestCase
         $this->assertSame($venue->id, $event->fresh()->venue->id);
     }
 
+    /**
+     * false is the DECLINED state, not "undecided": guest listings filter is_accepted = true and
+     * the Requests tab filters whereNull, so a false row is invisible on the venue's page AND
+     * missing from the queue its owner approves from, with nothing that revisits it.
+     *
+     * The old expression was isMember(), which counts owner/admin/viewer, while the venue lookup
+     * deliberately includes FOLLOWER - so a venue the user merely follows always landed there.
+     */
+    public function test_calendar_import_leaves_a_followed_venue_pending_not_declined(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createCurator($owner);
+
+        // Somebody else's claimed venue, which this user follows and which moderates submissions.
+        $venueOwner = $this->createOwner();
+        $venue = $this->createRole($venueOwner, 'venue', [
+            'name' => 'Barby',
+            'accept_requests' => true,
+            'require_approval' => true,
+        ]);
+        $this->followRole($owner, $venue, 'follower');
+
+        $event = $this->createEvent($curator);
+        $this->assertTrue($this->locationVenueSyncer()->run($event, $curator, 'Barby'));
+
+        $pivot = \Illuminate\Support\Facades\DB::table('event_role')
+            ->where('event_id', $event->id)
+            ->where('role_id', $venue->id)
+            ->first();
+
+        $this->assertNull($pivot->is_accepted,
+            'pending, so the venue owner is asked - false would hide it from them for good');
+    }
+
+    /** The other half of the same rule: a venue the user is a member of still auto-accepts. */
+    public function test_calendar_import_auto_accepts_onto_the_users_own_venue(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createCurator($owner);
+        $venue = $this->createRole($owner, 'venue', ['name' => 'Barby']);
+
+        $event = $this->createEvent($curator);
+        $this->locationVenueSyncer()->run($event, $curator, 'Barby');
+
+        $pivot = \Illuminate\Support\Facades\DB::table('event_role')
+            ->where('event_id', $event->id)
+            ->where('role_id', $venue->id)
+            ->first();
+
+        $this->assertEquals(1, $pivot->is_accepted);
+    }
+
     public function test_save_youtube_video_for_talent(): void
     {
         $owner = $this->createOwner();

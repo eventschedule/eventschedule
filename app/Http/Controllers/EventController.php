@@ -1567,8 +1567,17 @@ class EventController extends Controller
             return redirect()->back()->with('error', __('messages.event_already_curated'));
         }
 
-        // Add the event to the curator's schedule
-        $role->events()->attach($event->id, ['is_accepted' => auth()->user() && auth()->user()->isEditor($subdomain) ? true : null]);
+        // Add the event to the curator's schedule.
+        //
+        // Through autoAcceptsEventFrom() rather than an inline isEditor() test, because the gate
+        // above only needs acceptEventRequests() - which is unconditionally true for an unclaimed
+        // schedule - so any signed-in visitor could reach this on an ownerless placeholder. The
+        // inline rule then wrote is_accepted = null there, and accept() requires isEditor(), which
+        // an ownerless role has nobody to satisfy: a pending row no human could ever clear.
+        // Rule 2 of autoAcceptsEventFrom (no user_id means auto-accept) is what closes that.
+        $role->events()->attach($event->id, [
+            'is_accepted' => $role->autoAcceptsEventFrom(auth()->user(), null) ?: null,
+        ]);
 
         if ($request->ajax()) {
             return response()->json([

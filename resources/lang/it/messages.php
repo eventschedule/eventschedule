@@ -677,6 +677,7 @@ return [
     'merge_venues_summary' => ':venues sedi, :events eventi',
     'merge_venues_empty_state' => 'Nessuna sede duplicata trovata in questa pianificazione.',
     'merge_venues_not_duplicates_button' => 'Non duplicati',
+    'merge_venues_not_duplicates_confirm' => 'Smettere di proporli come duplicati? L\'operazione non è reversibile.',
     'merge_venues_banner' => ':count gruppi di sedi nella tua pianificazione sembrano essere duplicati. Uniscili.',
     'merge_venues_intro_all' => 'Queste pianificazioni di sedi sembrano duplicati l\'una dell\'altra. Scegli quale conservare in ogni gruppo e unisci.',
     'merge_venues_empty_state_all' => 'Nessuna sede duplicata trovata.',

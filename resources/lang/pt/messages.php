@@ -675,6 +675,7 @@ return [
     'merge_venues_summary' => ':venues locais, :events eventos',
     'merge_venues_empty_state' => 'Nenhum local duplicado encontrado nesta programação.',
     'merge_venues_not_duplicates_button' => 'Não são duplicados',
+    'merge_venues_not_duplicates_confirm' => 'Deixar de sugerir estes como duplicados? Esta ação não pode ser anulada.',
     'merge_venues_banner' => ':count grupos de locais em sua programação parecem ser duplicados. Mescle-os.',
     'merge_venues_intro_all' => 'Estas programações de locais parecem duplicadas umas das outras. Escolha qual manter em cada grupo e junte-as.',
     'merge_venues_empty_state_all' => 'Nenhum local duplicado encontrado.',

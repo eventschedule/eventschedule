@@ -275,6 +275,7 @@ return [
     'merge_venues_summary' => ':venues locații, :events evenimente',
     'merge_venues_empty_state' => 'Nu au fost găsite locații duplicate în acest program.',
     'merge_venues_not_duplicates_button' => 'Nu sunt duplicate',
+    'merge_venues_not_duplicates_confirm' => 'Nu mai propuneți acestea ca duplicate? Această acțiune nu poate fi anulată.',
     'merge_venues_banner' => ':count grupuri de locații din programul tău par a fi duplicate. Combină-le.',
     'merge_venues_intro_all' => 'Aceste programe de locații par duplicate unele pentru altele. Alege în fiecare grup pe care să îl păstrezi și îmbină-le.',
     'merge_venues_empty_state_all' => 'Nu au fost găsite locații duplicate.',

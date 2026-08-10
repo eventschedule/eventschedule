@@ -52,8 +52,17 @@ trait ConvertsLocationToVenue
             return false;
         }
 
+        // false is the DECLINED state, not "not yet decided": guest listings filter
+        // is_accepted = true and the Requests tab filters whereNull, so a false row is invisible
+        // on the venue's page AND absent from the queue its owner would approve from, with
+        // nothing that ever revisits it. isMember() counts owner/admin/viewer while the lookup
+        // above deliberately includes follower, so a venue the user merely FOLLOWS - the common
+        // case now that matching reaches real venues rather than fresh stubs - landed there.
+        //
+        // autoAcceptsEventFrom() is the one acceptance rule in the app; `?: null` turns its
+        // "no" into pending, so the venue's owner is asked instead of silently overruled.
         $event->roles()->attach($venue->id, [
-            'is_accepted' => $role->user?->isMember($venue->subdomain) ?? false,
+            'is_accepted' => $venue->autoAcceptsEventFrom($role->user, $role) ?: null,
         ]);
 
         return true;

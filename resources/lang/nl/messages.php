@@ -669,6 +669,7 @@ return [
     'merge_venues_summary' => ':venues locaties, :events evenementen',
     'merge_venues_empty_state' => 'Geen dubbele locaties gevonden in deze planning.',
     'merge_venues_not_duplicates_button' => 'Geen duplicaten',
+    'merge_venues_not_duplicates_confirm' => 'Deze niet meer als duplicaten voorstellen? Dit kan niet ongedaan worden gemaakt.',
     'merge_venues_banner' => ':count groepen locaties in je planning lijken duplicaten. Voeg ze samen.',
     'merge_venues_intro_all' => 'Deze locatieplanningen lijken duplicaten van elkaar. Kies in elke groep welke je wilt behouden en voeg ze samen.',
     'merge_venues_empty_state_all' => 'Geen dubbele locaties gevonden.',
