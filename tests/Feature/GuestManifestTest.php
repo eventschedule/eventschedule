@@ -116,6 +116,29 @@ class GuestManifestTest extends TestCase
         $this->get('/nosuchschedule/manifest.webmanifest')->assertNotFound();
     }
 
+    /**
+     * An unclaimed placeholder has no guest page - viewGuest redirects it away and the sitemap
+     * filters it out - but the manifest route did not filter at all, so it answered 200 with the
+     * schedule's name and logo URL, cached publicly for an hour and enumerable by subdomain.
+     */
+    public function test_an_unclaimed_schedule_is_not_served_a_manifest(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue', ['name' => 'Placeholder Venue']);
+        \App\Models\Role::where('id', $role->id)->update(['user_id' => null, 'email_verified_at' => null]);
+
+        $this->get('/'.$role->subdomain.'/manifest.webmanifest')->assertNotFound();
+    }
+
+    public function test_a_deleted_schedule_is_not_served_a_manifest(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue', ['name' => 'Gone Venue']);
+        \App\Models\Role::where('id', $role->id)->update(['is_deleted' => true]);
+
+        $this->get('/'.$role->subdomain.'/manifest.webmanifest')->assertNotFound();
+    }
+
     /** The apex keeps ours: the admin portal genuinely is the Event Schedule app. */
     public function test_the_platform_manifest_is_still_served_at_the_root(): void
     {

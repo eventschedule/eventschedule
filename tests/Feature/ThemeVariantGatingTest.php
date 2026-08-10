@@ -44,6 +44,39 @@ class ThemeVariantGatingTest extends TestCase
         $this->assertStringContainsString('var VARIANTS = true', $content);
     }
 
+    /**
+     * These go through the shared shell rather than app-admin, so they had to opt in themselves
+     * and did not - leaving a signed-in user on the tier-1 ramp while every other admin page
+     * followed their chosen palette. getting-started is the worst of them: a brand-new user lands
+     * there and then on a dashboard that looks different.
+     */
+    public function test_admin_pages_on_the_bare_shell_still_opt_in(): void
+    {
+        // A brand-new account, with no schedule yet - which is exactly who /getting-started is
+        // for, and who then lands on a dashboard that would have looked different.
+        $newcomer = $this->createOwner();
+
+        $this->assertStringContainsString(
+            'var VARIANTS = true',
+            $this->actingAs($newcomer)->get('/getting-started')->assertOk()->getContent(),
+            '/getting-started must follow the palette the dashboard is about to use'
+        );
+
+        // The site-admin newsletter templates page, the only one of its seven siblings that
+        // renders through the bare shell.
+        $admin = $this->createOwner(admin: true);
+
+        $this->assertStringContainsString(
+            'var VARIANTS = true',
+            $this->actingAs($admin)
+                ->withSession(['admin_password_confirmed_at' => now()->timestamp])
+                ->get(route('admin.newsletters.templates'))
+                ->assertOk()
+                ->getContent(),
+            'the admin newsletter templates page must follow the palette too'
+        );
+    }
+
     public function test_guest_portal_never_opts_in_despite_sharing_the_shell(): void
     {
         $owner = $this->createOwner();

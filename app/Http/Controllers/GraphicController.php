@@ -358,8 +358,7 @@ class GraphicController extends Controller
         // Generate output in English instead of the schedule language. Only valid when the
         // schedule's translation target is English (the _en columns hold English); for any other
         // target the "force English" export does not apply, so treat it as off.
-        $forceEnglish = ! $role->isEnglish()
-            && ($role->translation_language_code ?: 'en') === 'en'
+        $forceEnglish = $role->canForceEnglish()
             && ($request->has('force_english')
                 ? $request->boolean('force_english')
                 : (bool) ($graphicSettings['force_english'] ?? false));
@@ -492,7 +491,7 @@ class GraphicController extends Controller
         $aiPrompt = trim($request->input('ai_prompt', ''));
         $aiModel = $request->input('ai_model', '');
         $numberEvents = $request->boolean('number_events', false);
-        $forceEnglish = ! $role->isEnglish() && ($role->translation_language_code ?: 'en') === 'en' && $request->boolean('force_english', false);
+        $forceEnglish = $role->canForceEnglish() && $request->boolean('force_english', false);
 
         if (empty($aiPrompt) || empty($text)) {
             return response()->json(['error' => 'Missing text or AI prompt']);
@@ -687,7 +686,10 @@ class GraphicController extends Controller
             'header_text' => $graphicSettings['header_text'] ?? '',
             'footer_text' => $graphicSettings['footer_text'] ?? '',
             'number_events' => $numberEvents,
-            'force_english' => ! $role->isEnglish()
+            // canForceEnglish(), not just isEnglish(): the stored flag is stale once the
+            // schedule's translation target stops being English, and the UI toggle hides itself
+            // at that point so the owner cannot clear it.
+            'force_english' => $role->canForceEnglish()
                 && (bool) ($graphicSettings['force_english'] ?? false),
         ];
 

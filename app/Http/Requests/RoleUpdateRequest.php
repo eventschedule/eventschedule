@@ -68,7 +68,7 @@ class RoleUpdateRequest extends FormRequest
                 'nullable', 'string', 'url', 'max:255',
                 Rule::unique('roles', 'custom_domain')->ignore($role->id),
                 function ($attribute, $value, $fail) {
-                    if ($value && str_contains(parse_url($value, PHP_URL_HOST) ?? '', 'eventschedule.com')) {
+                    if ($value && Role::isReservedCustomDomainHost(parse_url($value, PHP_URL_HOST))) {
                         $fail(__('messages.invalid_custom_domain'));
                     }
                 },

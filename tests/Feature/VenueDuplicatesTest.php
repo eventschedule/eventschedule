@@ -213,8 +213,8 @@ class VenueDuplicatesTest extends TestCase
         $event->roles()->attach($orphan->id, ['is_accepted' => true]);
 
         $this->actingAs($owner)->post(route('following.merge_venues_group'), [
-            'target_id' => $real->id,
-            'source_ids' => [$orphan->id],
+            'target_id' => UrlUtils::encodeId($real->id),
+            'source_ids' => [UrlUtils::encodeId($orphan->id)],
         ])->assertRedirect();
 
         $this->assertDatabaseHas('roles', ['id' => $orphan->id, 'is_deleted' => true]);
@@ -239,7 +239,7 @@ class VenueDuplicatesTest extends TestCase
         $this->assertSame(2, $this->get(route('following'))->viewData('duplicateVenueCount'));
 
         $this->post(route('following.merge_venues_dismiss'), [
-            'venue_ids' => [$real->id, $stub->id],
+            'venue_ids' => [UrlUtils::encodeId($real->id), UrlUtils::encodeId($stub->id)],
         ])->assertRedirect(route('following.merge_venues'));
 
         $this->assertDatabaseHas('dismissed_venue_merge_suggestions', [
@@ -262,7 +262,7 @@ class VenueDuplicatesTest extends TestCase
         $this->assertSame(['Beit Haamudim'], $this->venueNamesOnCreateForm($talent));
 
         $this->post(route('following.merge_venues_dismiss'), [
-            'venue_ids' => [$real->id, $stub->id],
+            'venue_ids' => [UrlUtils::encodeId($real->id), UrlUtils::encodeId($stub->id)],
         ])->assertRedirect();
 
         // "Not duplicates" removed the group from the merge page, so the picker must stop

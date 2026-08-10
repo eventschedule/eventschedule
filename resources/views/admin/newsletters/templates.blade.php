@@ -1,4 +1,7 @@
-<x-app-layout>
+{{-- theme-variants: this view goes through the shared shell rather than app-admin, so it
+     has to opt into the six palettes itself. Without it the page renders on the tier-1 ramp
+     while every other admin page follows the user's chosen palette. --}}
+<x-app-layout :theme-variants="true">
     {{-- This view renders through the shared shell without going via app-admin, so it carries the
          platform manifest itself. --}}
     <x-slot name="head">

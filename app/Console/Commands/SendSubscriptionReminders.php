@@ -69,8 +69,8 @@ class SendSubscriptionReminders extends Command
                 }
 
                 // Already reminded inside this window.
-                if ($role->trial_reminder_sent_at
-                    && $role->trial_reminder_sent_at->greaterThan(now()->subDays($daysOut))) {
+                if ($role->winddown_reminder_sent_at
+                    && $role->winddown_reminder_sent_at->greaterThan(now()->subDays($daysOut))) {
                     continue;
                 }
 
@@ -82,13 +82,25 @@ class SendSubscriptionReminders extends Command
 
                     Mail::to($role->user->email)->send(new SubscriptionTrialEnding(
                         $role,
-                        $amount,
+                        // Formatted, like getAmountForSubscription() does for every other caller.
+                        // A bare int coerced to "9" and the copy renders it verbatim: "will be
+                        // charged 9."
+                        '$'.$amount,
                         $isEnterprise ? 'Enterprise' : 'Pro',
                         $role->trial_ends_at->format('F j, Y'),
                         $role->hasDefaultPaymentMethod(),
+                        // Wind-down copy: there is no subscription here, so neither "your card
+                        // will be charged" nor "add a payment method" is true. The owner has to
+                        // start a subscription, and being told otherwise lets the plan lapse
+                        // while they believe they have acted.
+                        windDown: true,
                     ));
 
-                    $role->trial_reminder_sent_at = now();
+                    // Its own column. trial_reminder_sent_at is read by the Stripe path below with
+                    // NO time window - any value at all means "already sent, forever" - so
+                    // stamping it here permanently suppressed the genuine "your trial ends
+                    // tomorrow" email for every schedule this wound down.
+                    $role->winddown_reminder_sent_at = now();
                     $role->save();
 
                     $this->info("Sent {$daysOut}-day wind-down reminder to {$role->subdomain}.");

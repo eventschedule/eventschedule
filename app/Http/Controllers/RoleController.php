@@ -193,12 +193,25 @@ class RoleController extends Controller
 
         $emails = $role->members()->pluck('email');
 
-        // Clean up custom domain from DigitalOcean before deleting role
+        // Clean up custom domain from DigitalOcean before deleting role.
+        //
+        // syncDomains() reports failure by RETURNING FALSE, not by throwing, so the catch here
+        // never fired for the ordinary failures. Deleting the schedule regardless is still the
+        // right call - the user asked for it, and the row is going away either way - but a
+        // failure has to be loud, because it strands the hostname in the DO app spec with
+        // nothing left in the database to retry from.
         if ($role->custom_domain_mode === 'direct' && $role->custom_domain_host) {
             try {
                 $doService = app(DigitalOceanService::class);
                 if ($doService->isConfigured()) {
-                    $doService->removeDomain($role->custom_domain_host);
+                    if (! $doService->removeDomain($role->custom_domain_host)) {
+                        \Log::error('Custom domain left in the DO app spec after a schedule delete', [
+                            'role_id' => $role->id,
+                            'hostname' => $role->custom_domain_host,
+                            'error' => $doService->lastError(),
+                        ]);
+                    }
+
                     \Illuminate\Support\Facades\Cache::forget("custom_domain:{$role->custom_domain_host}");
                 }
             } catch (\Exception $e) {
@@ -1171,8 +1184,8 @@ class RoleController extends Controller
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
-        $targetId = (int) $request->input('target_id');
-        $sourceIds = array_filter(array_map('intval', (array) $request->input('source_ids', [])));
+        $targetId = (int) UrlUtils::decodeId($request->input('target_id'));
+        $sourceIds = array_filter(array_map(fn ($id) => (int) UrlUtils::decodeId($id), (array) $request->input('source_ids', [])));
 
         if (! $targetId || empty($sourceIds) || in_array($targetId, $sourceIds, true)) {
             return response()->json(['error' => __('messages.not_authorized')], 422);
@@ -1237,8 +1250,8 @@ class RoleController extends Controller
         }
 
         $user = auth()->user();
-        $targetId = (int) $request->input('target_id');
-        $sourceIds = array_filter(array_map('intval', (array) $request->input('source_ids', [])));
+        $targetId = (int) UrlUtils::decodeId($request->input('target_id'));
+        $sourceIds = array_filter(array_map(fn ($id) => (int) UrlUtils::decodeId($id), (array) $request->input('source_ids', [])));
 
         if (! $targetId || empty($sourceIds) || in_array($targetId, $sourceIds, true)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
@@ -1361,7 +1374,7 @@ class RoleController extends Controller
                 ->with('error', __('messages.not_authorized'));
         }
 
-        $venueIds = array_filter(array_map('intval', (array) $request->input('venue_ids', [])));
+        $venueIds = array_filter(array_map(fn ($id) => (int) UrlUtils::decodeId($id), (array) $request->input('venue_ids', [])));
         if (count($venueIds) < 2) {
             return redirect()->back();
         }
@@ -1506,8 +1519,8 @@ class RoleController extends Controller
             return response()->json(['error' => __('messages.demo_mode_restriction')], 403);
         }
 
-        $targetId = (int) $request->input('target_id');
-        $sourceIds = array_filter(array_map('intval', (array) $request->input('source_ids', [])));
+        $targetId = (int) UrlUtils::decodeId($request->input('target_id'));
+        $sourceIds = array_filter(array_map(fn ($id) => (int) UrlUtils::decodeId($id), (array) $request->input('source_ids', [])));
 
         if (! $targetId || empty($sourceIds) || in_array($targetId, $sourceIds, true)) {
             return response()->json(['error' => __('messages.not_authorized')], 422);
@@ -1549,8 +1562,8 @@ class RoleController extends Controller
         }
 
         $user = auth()->user();
-        $targetId = (int) $request->input('target_id');
-        $sourceIds = array_filter(array_map('intval', (array) $request->input('source_ids', [])));
+        $targetId = (int) UrlUtils::decodeId($request->input('target_id'));
+        $sourceIds = array_filter(array_map(fn ($id) => (int) UrlUtils::decodeId($id), (array) $request->input('source_ids', [])));
 
         if (! $targetId || empty($sourceIds) || in_array($targetId, $sourceIds, true)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
@@ -1617,7 +1630,7 @@ class RoleController extends Controller
                 ->with('error', __('messages.demo_mode_restriction'));
         }
 
-        $venueIds = array_filter(array_map('intval', (array) $request->input('venue_ids', [])));
+        $venueIds = array_filter(array_map(fn ($id) => (int) UrlUtils::decodeId($id), (array) $request->input('venue_ids', [])));
         if (count($venueIds) < 2) {
             return redirect()->back();
         }
@@ -4521,6 +4534,15 @@ class RoleController extends Controller
                         $role->update([
                             'custom_domain_status' => $success ? 'pending' : 'failed',
                             'custom_domain_error' => $success ? null : $doService->lastError(),
+                        ]);
+                    } elseif (! $success) {
+                        // Remove-only. Nothing above records the outcome in that case, so a
+                        // failed removal was silent: the hostname stayed in the DO app spec
+                        // while the owner saw a successful save.
+                        \Log::error('Custom domain left in the DO app spec after a remove', [
+                            'role_id' => $role->id,
+                            'hostname' => $removeHost,
+                            'error' => $doService->lastError(),
                         ]);
                     }
 

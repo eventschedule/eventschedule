@@ -2538,6 +2538,10 @@ return [
     'subscription_trial_ending_continue_no_card' => 'Without a payment method on file, your schedule will be downgraded to the free plan when the trial ends.',
     'subscription_trial_ending_cancel_no_card' => 'Add a payment method from your plan settings to keep your :plan features.',
     'subscription_trial_ending_manage_no_card' => 'Add Payment Method',
+    'subscription_winddown_body' => 'Расписание «:schedule» (тариф :plan) работает на бесплатно предоставленном тарифе, который заканчивается :date. Чтобы сохранить возможности тарифа :plan, оформите подписку за :amount в месяц.',
+    'subscription_winddown_continue' => 'После окончания бесплатного тарифа расписание перейдёт на бесплатный план. Автоматически ничего не списывается: подписка начинается только по вашей инициативе.',
+    'subscription_winddown_cancel' => 'Оформить подписку можно в любой момент в настройках тарифа.',
+    'subscription_winddown_manage' => 'Оформить подписку',
 
     // Subscription annual renewal email
     'subscription_renewal_subject' => 'Your Annual Plan Renews Soon',
@@ -2640,6 +2644,7 @@ return [
     'reprovision_confirm' => 'Выполнить повторную настройку домена? Приложение будет ненадолго переразвёрнуто.',
     'domain_remove_confirm' => 'Удалить настройки этого домена?',
     'domain_removed' => 'Domain removed from server',
+    'domain_remove_failed' => 'Не удалось удалить домен с хостинговой платформы. Ничего не изменено - попробуйте ещё раз.',
     'invalid_custom_domain' => 'Cannot use an eventschedule.com domain as a custom domain',
     'custom_domain_mode_requires_domain' => 'A custom domain URL is required when selecting a domain mode',
     'custom_domain_already_taken' => 'This custom domain is already in use by another schedule',

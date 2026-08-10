@@ -9,6 +9,11 @@
 --}}
 @if (consent_required() && (! auth()->user() || ! auth()->user()->isAdmin()))
 <div data-cookie-consent
+     {{-- The domain the consent cookie must be written on, so the choice spans the install the
+          same way the attribution cookies it gates do. Empty on a custom domain (where
+          ResolveCustomDomain nulls session.domain) and on a bare selfhost, which is what keeps
+          the cookie host-only there. --}}
+     data-cookie-domain="{{ config('session.domain') }}"
      hidden
      role="region"
      aria-live="polite"

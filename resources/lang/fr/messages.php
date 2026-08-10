@@ -2464,6 +2464,10 @@ return [
     'subscription_trial_ending_continue_no_card' => 'Sans moyen de paiement enregistré, votre calendrier sera rétrogradé au plan gratuit à la fin de l\'essai.',
     'subscription_trial_ending_cancel_no_card' => 'Ajoutez un moyen de paiement depuis les paramètres de votre plan pour conserver vos fonctionnalités :plan.',
     'subscription_trial_ending_manage_no_card' => 'Ajouter un moyen de paiement',
+    'subscription_winddown_body' => 'L\'agenda ":schedule" (formule :plan) bénéficie d\'une formule offerte qui se termine le :date. Pour conserver les fonctionnalités :plan ensuite, démarrez un abonnement à :amount par mois.',
+    'subscription_winddown_continue' => 'À la fin de la formule offerte, votre agenda passe à la formule gratuite. Rien n\'est prélevé automatiquement : un abonnement ne démarre que si vous le lancez.',
+    'subscription_winddown_cancel' => 'Vous pouvez démarrer un abonnement à tout moment depuis les paramètres de votre formule.',
+    'subscription_winddown_manage' => 'Démarrer l\'abonnement',
 
     // Subscription annual renewal email
     'subscription_renewal_subject' => 'Votre plan annuel sera bientôt renouvelé',
@@ -2566,6 +2570,7 @@ return [
     'reprovision_confirm' => 'Re-provisionner ce domaine ? L\'application sera brièvement redéployée.',
     'domain_remove_confirm' => 'Supprimer la configuration de ce domaine ?',
     'domain_removed' => 'Domaine supprimé du serveur',
+    'domain_remove_failed' => 'Le domaine n\'a pas pu être supprimé de la plateforme d\'hébergement. Rien n\'a été modifié, veuillez réessayer.',
     'invalid_custom_domain' => 'Impossible d\'utiliser un domaine eventschedule.com comme domaine personnalisé',
     'custom_domain_mode_requires_domain' => 'Une URL de domaine personnalisé est requise lors de la sélection d\'un mode de domaine',
     'custom_domain_already_taken' => 'Ce domaine personnalisé est déjà utilisé par un autre calendrier',

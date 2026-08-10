@@ -265,4 +265,91 @@ class CustomDomainProvisioningTest extends TestCase
         $this->assertStringContainsString('Unable to authenticate you', (string) $service->lastError());
         $this->assertSame(0, $this->specWrites());
     }
+
+    /**
+     * syncDomains() reports failure by RETURNING FALSE, never by throwing, so the try/catch the
+     * remove path relied on was unreachable. Discarding the bool meant a failed removal nulled
+     * every custom_domain* column and flashed success while the hostname stayed live in the DO
+     * app spec - with nothing left in the database to retry from.
+     */
+    public function test_a_failed_removal_keeps_the_domain_on_the_role(): void
+    {
+        $this->fakeDigitalOceanApp([
+            ['domain' => 'eventschedule.com', 'type' => 'PRIMARY', 'zone' => ''],
+            ['domain' => 'tenant-domain.test', 'type' => 'PRIMARY', 'zone' => ''],
+        ], putStatus: 422, putBody: ['message' => 'spec is invalid']);
+
+        $role = $this->createDirectDomainRole();
+
+        $this->actingAs($this->createOwner(admin: true))
+            ->withSession(['admin_password_confirmed_at' => now()->timestamp])
+            ->post(route('admin.domains.remove', $role))
+            ->assertSessionHas('error');
+
+        $role->refresh();
+
+        $this->assertSame('https://tenant-domain.test', $role->custom_domain,
+            'the record is the only way back to a hostname still live in the app spec');
+        $this->assertSame('failed', $role->custom_domain_status);
+    }
+
+    /**
+     * getApp() returns [] for any 2xx whose body lacks an `app` key - a proxy answering with
+     * HTML, a 204, an envelope change. With an empty spec the PUT replaced the whole production
+     * app spec with one containing nothing but `domains`: no services, no envs, no ingress.
+     */
+    public function test_a_2xx_without_an_app_spec_writes_nothing(): void
+    {
+        Http::fake([
+            'api.digitalocean.com/v2/apps/*' => Http::response(['unexpected' => 'envelope'], 200),
+        ]);
+
+        $service = app(DigitalOceanService::class);
+
+        $this->assertFalse($service->addDomain('tenant.test'));
+        $this->assertSame(0, $this->specWrites(), 'an empty spec must never be written back');
+    }
+
+    /**
+     * A tenant claiming the platform apex is refused at the form, but the ADD is a silent no-op
+     * (the apex is already in the spec, so nothing changes and syncDomains returns true) - which
+     * is exactly why nothing surfaced until the schedule was deleted and removeDomain() dropped
+     * the operator's own hostname out of the app spec.
+     */
+    public function test_the_platform_hostname_can_never_be_removed_from_the_spec(): void
+    {
+        config(['app.url' => 'https://myschedules.io']);
+        $this->fakeDigitalOceanApp([['domain' => 'myschedules.io', 'type' => 'PRIMARY', 'zone' => '']]);
+
+        $service = app(DigitalOceanService::class);
+
+        $this->assertFalse($service->removeDomain('myschedules.io'));
+        $this->assertSame(0, $this->specWrites());
+        $this->assertSame(
+            ['myschedules.io'],
+            array_column($this->domains, 'domain'),
+            'the platform apex must still be in the spec'
+        );
+    }
+
+    /**
+     * And the rule the form applies refuses it up front, on ANY base domain rather than just
+     * eventschedule.com - which is the whole gap for an operator running their own platform.
+     */
+    public function test_the_platform_hostname_is_reserved_on_any_install(): void
+    {
+        config(['app.url' => 'https://myschedules.io']);
+
+        $this->assertTrue(Role::isReservedCustomDomainHost('myschedules.io'));
+        $this->assertTrue(Role::isReservedCustomDomainHost('MySchedules.IO'), 'case must not matter');
+        $this->assertTrue(Role::isReservedCustomDomainHost('tenant.myschedules.io'));
+
+        // Still ours, whatever app.url says.
+        $this->assertTrue(Role::isReservedCustomDomainHost('foo.eventschedule.com'));
+
+        // A genuine tenant domain is untouched.
+        $this->assertFalse(Role::isReservedCustomDomainHost('gigs.example.org'));
+        $this->assertFalse(Role::isReservedCustomDomainHost('notmyschedules.io'));
+        $this->assertFalse(Role::isReservedCustomDomainHost(null));
+    }
 }

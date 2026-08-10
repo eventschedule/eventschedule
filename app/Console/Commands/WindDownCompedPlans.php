@@ -150,6 +150,19 @@ class WindDownCompedPlans extends Command
                     ->from('subscriptions')
                     ->whereColumn('subscriptions.role_id', 'roles.id');
             })
+            // A redeemed referral stacks 30 days onto whatever plan the schedule already had,
+            // and ReferralController sets plan_source with ??= - deliberately, because
+            // overwriting 'admin' would strip the comped credit chip from an admin grant. So a
+            // role that earned a month still reads plan_source = 'admin', and without this the
+            // wind-down would pull plan_expires back past the month somebody actually earned.
+            // Same shape as the subscriptions guard above: the docblock's promise to leave
+            // earned plans alone has to be enforced on the referral row, not on plan_source.
+            ->whereNotExists(function ($query) {
+                $query->select(DB::raw(1))
+                    ->from('referrals')
+                    ->whereColumn('referrals.credited_role_id', 'roles.id')
+                    ->where('referrals.status', 'credited');
+            })
             ->get(['id', 'subdomain', 'plan_type', 'plan_expires', 'trial_ends_at']);
     }
 

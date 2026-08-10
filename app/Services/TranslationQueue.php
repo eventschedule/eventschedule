@@ -36,6 +36,11 @@ class TranslationQueue
                     ->orWhere(fn ($q) => $q->whereNotNull('description')->where('description', '!=', '')->whereNull('description_en'))
                     ->orWhere(fn ($q) => $q->whereNotNull('short_description')->where('short_description', '!=', '')->whereNull('short_description_en'))
                     ->orWhere(fn ($q) => $q->whereNotNull('address1')->where('address1', '!=', '')->whereNull('address1_en'))
+                    // address2 is in Translate::ROLE_TEXT_FIELDS and Role::updating() clears
+                    // address2_en when it changes, but this chain had no branch for it - so a
+                    // schedule whose only untranslated text was its second address line was
+                    // never selected, and translatedAddress2() stayed untranslated for good.
+                    ->orWhere(fn ($q) => $q->whereNotNull('address2')->where('address2', '!=', '')->whereNull('address2_en'))
                     ->orWhere(fn ($q) => $q->whereNotNull('city')->where('city', '!=', '')->whereNull('city_en'))
                     ->orWhere(fn ($q) => $q->whereNotNull('state')->where('state', '!=', '')->whereNull('state_en'))
                     ->orWhere(fn ($q) => $q->whereNotNull('request_terms')->where('request_terms', '!=', '')->whereNull('request_terms_en'))

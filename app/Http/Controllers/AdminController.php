@@ -3380,15 +3380,22 @@ class AdminController extends Controller
 
         $doService = app(DigitalOceanService::class);
         if ($doService->isConfigured() && $role->custom_domain_mode === 'direct') {
-            try {
-                $doService->removeDomain($hostname);
-            } catch (\Exception $e) {
+            // The bool is the only failure signal there is. syncDomains() catches
+            // LockTimeoutException and \Exception internally - including getApp()'s
+            // RuntimeException - and returns false, so the try/catch this used to rely on was
+            // unreachable. Discarding it meant a failed removal nulled every custom_domain*
+            // column and flashed success while the hostname stayed live in the DO app spec,
+            // with nothing left in the database pointing at it to retry from.
+            if (! $doService->removeDomain($hostname)) {
                 Log::error('Failed to remove domain from DO', [
                     'role_id' => $role->id,
                     'hostname' => $hostname,
-                    'error' => $e->getMessage(),
+                    'error' => $doService->lastError(),
                 ]);
-                report($e);
+
+                $role->forceFill(['custom_domain_status' => 'failed'])->save();
+
+                return redirect()->back()->with('error', __('messages.domain_remove_failed'));
             }
         }
 

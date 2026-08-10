@@ -23,19 +23,29 @@ class SubscriptionTrialEnding extends Mailable
 
     protected bool $hasCard;
 
-    public function __construct(Role $role, string $amount, string $planLabel, string $trialEndDate, bool $hasCard = true)
+    /**
+     * True for a comped plan being wound down by app:wind-down-comped-plans rather than a real
+     * Stripe trial. Both of the existing copy families are wrong for it: there is no
+     * subscription, so no card will be charged, and adding a payment method achieves nothing -
+     * the owner has to start a subscription, so an email telling them otherwise lets the plan
+     * lapse while they believe they have acted.
+     */
+    protected bool $windDown;
+
+    public function __construct(Role $role, string $amount, string $planLabel, string $trialEndDate, bool $hasCard = true, bool $windDown = false)
     {
         $this->role = $role;
         $this->amount = $amount;
         $this->planLabel = $planLabel;
         $this->trialEndDate = $trialEndDate;
         $this->hasCard = $hasCard;
+        $this->windDown = $windDown;
     }
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: $this->hasCard
+            subject: $this->hasCard && ! $this->windDown
                 ? __('messages.subscription_trial_ending_subject')
                 : __('messages.subscription_trial_ending_subject_no_card'),
         );
@@ -56,7 +66,8 @@ class SubscriptionTrialEnding extends Mailable
                 'planLabel' => $this->planLabel,
                 'trialEndDate' => $this->trialEndDate,
                 'portalUrl' => $portalUrl,
-                'hasCard' => $this->hasCard,
+                'hasCard' => $this->hasCard && ! $this->windDown,
+                'windDown' => $this->windDown,
             ]
         );
     }

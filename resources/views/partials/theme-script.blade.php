@@ -73,6 +73,12 @@
             else if (mq.addListener) { mq.addListener(onChange); } // iOS Safari < 14
         }
 
+        // Re-apply from whatever is in storage right now, WITHOUT writing to it. The cross-tab
+        // `storage` listener in layouts/navigation needs this: it only had setTheme(), which
+        // writes and would echo the event back, so it settled for repainting the buttons - and
+        // the other tab then highlighted a palette while still rendering the old one.
+        window.applyTheme = function() { apply(mode()); };
+
         window.getCurrentTheme = function() { return mode(); };
         window.getThemeBrightness = function() { return brightness(); };
         window.getThemeVariant = function(b) { return variantFor(b || brightness()); };

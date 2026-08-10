@@ -168,6 +168,7 @@ class Role extends Model implements MustVerifyEmail
         'agenda_save_image' => 'boolean',
         'default_curator_ids' => 'array',
         'trial_reminder_sent_at' => 'datetime',
+        'winddown_reminder_sent_at' => 'datetime',
         'renewal_reminder_sent_at' => 'datetime',
         'custom_labels' => 'array',
         'hide_past_events' => 'boolean',
@@ -1958,9 +1959,52 @@ class Role extends Model implements MustVerifyEmail
      * Used to gate the "generate graphics text in English" option, which
      * is a no-op (and hidden) for English schedules.
      */
+    /**
+     * Hostnames a tenant may never claim as a custom domain.
+     *
+     * The old check was the literal string 'eventschedule.com', which left an operator running
+     * their own SaaS with no guard at all. ResolveCustomDomain already refuses to SERVE the base
+     * domain, so the traffic was never at risk - but nothing stopped a tenant storing it, and
+     * deleting that schedule later called removeDomain() on it and dropped the operator's own
+     * hostname out of the DigitalOcean app spec. The add is a silent no-op (the apex is already
+     * in the spec), which is why nothing surfaced until the delete.
+     */
+    public static function isReservedCustomDomainHost(?string $host): bool
+    {
+        $host = strtolower(trim((string) $host));
+
+        if ($host === '') {
+            return false;
+        }
+
+        if (str_contains($host, 'eventschedule.com')) {
+            return true;
+        }
+
+        $base = strtolower(_base_domain() ?: '');
+
+        return $base !== '' && ($host === $base || str_ends_with($host, '.'.$base));
+    }
+
     public function isEnglish(): bool
     {
         return strtolower($this->language_code ?? 'en') === 'en';
+    }
+
+    /**
+     * Whether the "Force English" graphic export can mean anything for this schedule.
+     *
+     * The `_en` columns hold whatever the schedule's translation TARGET is, not English, so the
+     * option only does what it says when that target IS English. The preview and the AI-text
+     * endpoint checked this; the download endpoint and the scheduled graphic email did not, and
+     * the toggle hides itself once the target changes - so a schedule that turned it on while
+     * targeting English and later switched to, say, French kept a stale `true` that nothing could
+     * clear, and rendered French text with English date formatting in the download and in every
+     * subscriber's email while the preview stayed correct.
+     */
+    public function canForceEnglish(): bool
+    {
+        return ! $this->isEnglish() && ($this->translation_language_code ?: 'en') === 'en';
     }
 
     /**

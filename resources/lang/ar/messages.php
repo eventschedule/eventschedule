@@ -2522,6 +2522,10 @@ return [
     'subscription_trial_ending_continue_no_card' => 'Without a payment method on file, your schedule will be downgraded to the free plan when the trial ends.',
     'subscription_trial_ending_cancel_no_card' => 'Add a payment method from your plan settings to keep your :plan features.',
     'subscription_trial_ending_manage_no_card' => 'Add Payment Method',
+    'subscription_winddown_body' => 'جدول ":schedule" (خطة :plan) على خطة مجانية تنتهي في :date. للاحتفاظ بميزات :plan بعد ذلك، ابدأ اشتراكًا بمبلغ :amount شهريًا.',
+    'subscription_winddown_continue' => 'عند انتهاء الخطة المجانية، ينتقل جدولك إلى الخطة المجانية. لن يتم خصم أي مبلغ تلقائيًا - لا يبدأ الاشتراك إلا إذا بدأته بنفسك.',
+    'subscription_winddown_cancel' => 'يمكنك بدء اشتراك في أي وقت من إعدادات خطتك.',
+    'subscription_winddown_manage' => 'ابدأ الاشتراك',
 
     // Subscription annual renewal email
     'subscription_renewal_subject' => 'Your Annual Plan Renews Soon',
@@ -2624,6 +2628,7 @@ return [
     'reprovision_confirm' => 'هل تريد إعادة تهيئة هذا النطاق؟ سيؤدي ذلك إلى إعادة نشر التطبيق لفترة وجيزة.',
     'domain_remove_confirm' => 'هل تريد إزالة إعدادات هذا النطاق؟',
     'domain_removed' => 'Domain removed from server',
+    'domain_remove_failed' => 'تعذّر إزالة النطاق من منصة الاستضافة. لم يتم تغيير أي شيء - يرجى المحاولة مرة أخرى.',
     'invalid_custom_domain' => 'Cannot use an eventschedule.com domain as a custom domain',
     'custom_domain_mode_requires_domain' => 'A custom domain URL is required when selecting a domain mode',
     'custom_domain_already_taken' => 'This custom domain is already in use by another schedule',

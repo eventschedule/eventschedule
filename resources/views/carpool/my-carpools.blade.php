@@ -1,4 +1,5 @@
-<x-app-layout :title="__('messages.my_carpools')">
+{{-- theme-variants: see admin/newsletters/templates.blade.php. --}}
+<x-app-layout :theme-variants="true" :title="__('messages.my_carpools')">
 
     <x-slot name="meta">
         <meta name="robots" content="noindex, nofollow">

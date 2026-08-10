@@ -69,6 +69,17 @@ class SlugPatternUtils
             }
         }
 
+        // Romanize before giving up. Str::slug() returns "" for Hebrew, CJK and Thai, and this
+        // is the app's primary event-slug generator - Role::cleanSubdomain, Group::cleanSlug and
+        // AppointmentType::uniqueSlug all romanize, and so does the backfill migration that
+        // repaired the empty slugs. Without it an install with no AI key gave those events an
+        // opaque five-character slug, so a repaired row and a row created today disagreed.
+        $slug = SlugUtils::slugOrRomanize($eventName);
+
+        if ($slug) {
+            return $slug;
+        }
+
         // Final fallback: random string
         return strtolower(Str::random(5));
     }

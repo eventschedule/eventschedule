@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Models\RoleSource;
 use App\Services\CuratorSourceService;
+use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -107,8 +108,8 @@ class CuratorSourcesTest extends TestCase
         $this->assertSame([$event->id], $this->acceptedEventIds($curator), 'precondition: the curator has the event');
 
         $this->actingAs($owner)->post(route('following.merge_venues_group'), [
-            'target_id' => $survivor->id,
-            'source_ids' => [$duplicate->id],
+            'target_id' => UrlUtils::encodeId($survivor->id),
+            'source_ids' => [UrlUtils::encodeId($duplicate->id)],
         ])->assertRedirect();
 
         // The source now points at the survivor, so the event survives the reconcile that the
@@ -139,8 +140,8 @@ class CuratorSourcesTest extends TestCase
         $this->service()->reconcile($curator);
 
         $this->actingAs($owner)->post(route('following.merge_venues_group'), [
-            'target_id' => $survivor->id,
-            'source_ids' => [$duplicate->id],
+            'target_id' => UrlUtils::encodeId($survivor->id),
+            'source_ids' => [UrlUtils::encodeId($duplicate->id)],
         ])->assertRedirect();
 
         $this->service()->reconcile();

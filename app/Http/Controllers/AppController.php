@@ -529,7 +529,15 @@ class AppController extends Controller
      */
     private function scheduleManifest(string $subdomain): array
     {
-        $role = Role::subdomain($subdomain)->first();
+        // Filtered like its siblings in this route group: SitemapController uses
+        // claimed()->where('is_deleted', false) and RoleController::viewGuest redirects an
+        // unclaimed schedule away. Unfiltered, a placeholder a curator created - which has no
+        // guest page at all - still answered 200 with its name and logo URL, cached publicly
+        // for an hour and enumerable by subdomain.
+        $role = Role::subdomain($subdomain)
+            ->claimed()
+            ->where('is_deleted', false)
+            ->first();
 
         if (! $role) {
             abort(404);

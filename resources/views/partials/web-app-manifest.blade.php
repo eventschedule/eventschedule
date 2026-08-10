@@ -22,9 +22,27 @@
 @php
     $manifestRole = $manifestRole ?? null;
     $platformApp = $platformApp ?? false;
+
+    // CSP sends manifest-src 'self', so a cross-origin href is refused by the browser outright.
+    // In hosted mode role.manifest lives inside Route::domain(), so route() always emits an
+    // absolute tenant URL - while ticket.view and ticket.order are domain-less and render on
+    // whatever host generated the link, which for a mailed ticket is the app subdomain. Only
+    // advertise the manifest when it is same-origin; a missing manifest just costs an install
+    // prompt, whereas a blocked one is a console error on every ticket page.
+    $manifestUrl = null;
+
+    if ($manifestRole) {
+        $manifestUrl = route('role.manifest', ['subdomain' => $manifestRole->subdomain]);
+
+        if (parse_url($manifestUrl, PHP_URL_HOST) !== request()->getHost()) {
+            $manifestUrl = null;
+        }
+    }
 @endphp
 @if ($manifestRole)
-    <link rel="manifest" href="{{ route('role.manifest', ['subdomain' => $manifestRole->subdomain]) }}">
+    @if ($manifestUrl)
+        <link rel="manifest" href="{{ $manifestUrl }}">
+    @endif
     <meta name="theme-color" content="{{ $manifestRole->accent_color ?: '#4E81FA' }}">
 @elseif ($platformApp)
     <link rel="manifest" href="{{ route('app.manifest') }}">

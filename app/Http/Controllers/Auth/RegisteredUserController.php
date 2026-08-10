@@ -354,9 +354,16 @@ class RegisteredUserController extends Controller
                 ]);
             }
 
-            // Closes the pair with signup_code_requests. Not deduped: the code is pulled from
-            // the cache above, so a success is already unique per signup.
-            MarketingDailyStat::record('signup_code_verified');
+            // Closes the pair with signup_code_requests, and has to be deduped the SAME way or
+            // the two are not a pair. That counter is unique per IP + user agent per day, so
+            // counting every success made the ratio a comparison between different denominators:
+            // two people behind one NAT on the same browser version contribute one request and
+            // two verifications, and the code-wall conversion rate reads over 100%.
+            $ip = request()->header('CF-Connecting-IP') ?? request()->ip();
+
+            if (PageView::isFirstDailyVisit('signup_code_verified', $ip, request()->userAgent())) {
+                MarketingDailyStat::record('signup_code_verified');
+            }
         }
 
         // Default to English if browser language is not supported

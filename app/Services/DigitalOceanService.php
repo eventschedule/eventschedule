@@ -146,6 +146,22 @@ class DigitalOceanService
     {
         $app = $this->getApp();
         $spec = $app['spec'] ?? [];
+
+        // getApp() returns [] for any 2xx whose body lacks an `app` key - a proxy answering with
+        // HTML, a 204, an envelope change upstream. With an empty spec the PUT below would
+        // replace the production app spec with one containing nothing but `domains`: no services,
+        // no envs, no ingress. Keyed on the spec being empty rather than on the domain list,
+        // because a genuinely domain-less app has $current === [] legitimately.
+        if (empty($spec) || ! isset($spec['name'])) {
+            Log::error('DigitalOcean returned no usable app spec; refusing to write domains', [
+                'add' => $add,
+                'remove' => $remove,
+            ]);
+            $this->lastError = 'DigitalOcean returned no usable app spec.';
+
+            return false;
+        }
+
         $current = $spec['domains'] ?? [];
 
         // A hostname on both sides means "make sure this is registered" (the re-provision case, and
@@ -153,6 +169,30 @@ class DigitalOceanService
         // for no reason and cost a deployment, so the add wins.
         $addLower = array_map('strtolower', $add);
         $removeLower = array_diff(array_map('strtolower', $remove), $addLower);
+
+        // Last line of defence for the platform's own hostname. RoleUpdateRequest rejects it at
+        // the form, but the add is a silent no-op (the apex is already in the spec, so $changed
+        // stays false and this returns true), which is exactly why nothing surfaced until a
+        // delete tried to remove it and took the whole platform offline.
+        $base = strtolower(_base_domain() ?: '');
+
+        if ($base !== '') {
+            $protected = fn (string $host) => $host === $base || str_ends_with($host, '.'.$base);
+
+            foreach ($removeLower as $host) {
+                if ($protected($host)) {
+                    Log::error('Refusing to remove the platform hostname from the app spec', [
+                        'hostname' => $host,
+                    ]);
+                    $this->lastError = 'That hostname belongs to the platform.';
+
+                    return false;
+                }
+            }
+
+            $addLower = array_values(array_filter($addLower, fn ($host) => ! $protected($host)));
+            $add = array_values(array_filter($add, fn ($host) => ! $protected(strtolower($host))));
+        }
 
         $changed = false;
         $domains = [];

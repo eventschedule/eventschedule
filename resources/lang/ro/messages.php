@@ -2492,6 +2492,10 @@ return [
     'subscription_trial_ending_continue_no_card' => 'Without a payment method on file, your schedule will be downgraded to the free plan when the trial ends.',
     'subscription_trial_ending_cancel_no_card' => 'Add a payment method from your plan settings to keep your :plan features.',
     'subscription_trial_ending_manage_no_card' => 'Add Payment Method',
+    'subscription_winddown_body' => 'Programul ":schedule" (planul :plan) este pe un plan oferit gratuit care se încheie pe :date. Pentru a păstra funcțiile :plan după aceea, începeți un abonament de :amount pe lună.',
+    'subscription_winddown_continue' => 'Când planul oferit se încheie, programul dvs. trece la planul gratuit. Nu se percepe nimic automat - un abonament începe doar dacă îl porniți dvs.',
+    'subscription_winddown_cancel' => 'Puteți începe un abonament oricând din setările planului.',
+    'subscription_winddown_manage' => 'Începeți abonamentul',
 
     // Subscription annual renewal email
     'subscription_renewal_subject' => 'Planul Tău Anual Se Reînnoiește Curând',
@@ -2646,6 +2650,7 @@ return [
     'reprovision_confirm' => 'Re-provizionați acest domeniu? Aplicația va fi redistribuită pentru scurt timp.',
     'domain_remove_confirm' => 'Eliminați configurația acestui domeniu?',
     'domain_removed' => 'Domeniu eliminat de pe server',
+    'domain_remove_failed' => 'Domeniul nu a putut fi eliminat de pe platforma de găzduire. Nu s-a modificat nimic - încercați din nou.',
     'invalid_custom_domain' => 'Nu se poate folosi un domeniu eventschedule.com ca domeniu personalizat',
     'custom_domain_mode_requires_domain' => 'Un URL de domeniu personalizat este necesar când se selectează un mod de domeniu',
     'custom_domain_already_taken' => 'Acest domeniu personalizat este deja folosit de un alt program',

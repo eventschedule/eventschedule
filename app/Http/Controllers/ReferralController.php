@@ -79,7 +79,12 @@ class ReferralController extends Controller
                     ->where('status', 'qualified')
                     ->firstOrFail();
 
-                $creditAmount = $referral->plan_type === 'enterprise' ? -1500 : -500;
+                // In cents, from the same config the referral page and the credit email quote.
+                // Hardcoded, a price change moved what we advertise without moving what we
+                // actually credit.
+                $creditAmount = -100 * (int) ($referral->plan_type === 'enterprise'
+                    ? config('services.stripe_platform.enterprise_price_monthly_amount', 29)
+                    : config('services.stripe_platform.price_monthly_amount', 9));
 
                 if ($role->hasActiveSubscription()) {
                     $role->applyBalance($creditAmount, __('messages.referral_credit'));

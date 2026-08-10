@@ -1953,7 +1953,7 @@
 
                         {{-- The "force English" export uses the _en columns + an English date locale, so it only
                              applies when the schedule's translation target is English. Hidden for other targets. --}}
-                        @if (! $role->isEnglish() && ($role->translation_language_code ?: 'en') === 'en')
+                        @if ($role->canForceEnglish())
                         <!-- Generate Text in English -->
                         <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
                             <x-toggle name="force_english_mobile" label="{{ __('messages.force_english_text') }}" />
@@ -2351,7 +2351,7 @@
 
                             {{-- The "force English" export uses the _en columns + an English date locale, so it only
                                  applies when the schedule's translation target is English. Hidden for other targets. --}}
-                            @if (! $role->isEnglish() && ($role->translation_language_code ?: 'en') === 'en')
+                            @if ($role->canForceEnglish())
                             <!-- Generate Text in English -->
                             <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
                                 <x-toggle name="force_english" label="{{ __('messages.force_english_text') }}" />

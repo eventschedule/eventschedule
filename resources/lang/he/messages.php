@@ -2512,6 +2512,10 @@ return [
     'subscription_trial_ending_continue_no_card' => 'Without a payment method on file, your schedule will be downgraded to the free plan when the trial ends.',
     'subscription_trial_ending_cancel_no_card' => 'Add a payment method from your plan settings to keep your :plan features.',
     'subscription_trial_ending_manage_no_card' => 'Add Payment Method',
+    'subscription_winddown_body' => 'הלוח ":schedule" (מסלול :plan) נמצא במסלול ללא תשלום שמסתיים ב-:date. כדי לשמור על יכולות :plan לאחר מכן, התחילו מנוי בעלות :amount לחודש.',
+    'subscription_winddown_continue' => 'בתום המסלול ללא תשלום הלוח שלכם יעבור למסלול החינמי. לא ייגבה תשלום אוטומטי - מנוי מתחיל רק אם תתחילו אותו.',
+    'subscription_winddown_cancel' => 'אפשר להתחיל מנוי בכל עת מהגדרות המסלול.',
+    'subscription_winddown_manage' => 'התחלת מנוי',
 
     // Subscription annual renewal email
     'subscription_renewal_subject' => 'Your Annual Plan Renews Soon',
@@ -2614,6 +2618,7 @@ return [
     'reprovision_confirm' => 'להקצות מחדש את הדומיין הזה? האפליקציה תעלה מחדש לזמן קצר.',
     'domain_remove_confirm' => 'להסיר את הגדרות הדומיין הזה?',
     'domain_removed' => 'Domain removed from server',
+    'domain_remove_failed' => 'לא ניתן היה להסיר את הדומיין מפלטפורמת האחסון. דבר לא שונה - נסו שוב.',
     'invalid_custom_domain' => 'Cannot use an eventschedule.com domain as a custom domain',
     'custom_domain_mode_requires_domain' => 'A custom domain URL is required when selecting a domain mode',
     'custom_domain_already_taken' => 'This custom domain is already in use by another schedule',

@@ -138,6 +138,53 @@ class UtmConsentCookieTest extends TestCase
         $this->get('/')->assertOk()->assertSee('data-cookie-consent', false);
     }
 
+    /**
+     * A Set-Cookie deletion only matches on (name, DOMAIN, path).
+     *
+     * rememberAttribution() writes these through Laravel's CookieJar with a null domain, and the
+     * jar substitutes config('session.domain') - which on hosted is '.<base domain>'. The
+     * withdrawal used Symfony's clearCookie(), which takes the null literally and emits a
+     * host-only expiry, so it never matched the cookie it was trying to delete and the visitor
+     * kept being tracked for the full 30 days. Every other test here runs with session.domain
+     * unset, where both sides are null and the mismatch is invisible.
+     */
+    public function test_withdrawal_clears_on_the_same_domain_the_cookie_was_set_on(): void
+    {
+        config(['session.domain' => '.eventschedule.com']);
+
+        // The CookieJar takes its defaults at resolve time, which already happened.
+        app('cookie')->setDefaultPathAndDomain('/', '.eventschedule.com', true, 'Lax');
+
+        // No consent cookie, so this request is a withdrawal: the stale attribution cookie must
+        // be expired. withCookie, not withUnencryptedCookie - EncryptCookies drops a cookie it
+        // cannot decrypt, and forgetAttributionCookies only acts on one the request carries.
+        $response = $this->withCookie('utm_params', json_encode(['utm_source' => 'news']))->get('/');
+        $cleared = $this->cookie($response, 'utm_params');
+
+        $this->assertExpired($cleared, 'utm_params');
+        $this->assertSame('.eventschedule.com', $cleared->getDomain(),
+            'the delete has to name the same domain the jar wrote the cookie on, or it matches nothing');
+    }
+
+    /** The other half of the pair: what the jar actually writes it on. */
+    public function test_the_attribution_cookie_is_written_on_the_session_domain(): void
+    {
+        config(['session.domain' => '.eventschedule.com']);
+        app('cookie')->setDefaultPathAndDomain('/', '.eventschedule.com', true, 'Lax');
+
+        $response = $this->withUnencryptedCookie('cookie_consent', 'granted')->get('/?utm_source=news');
+
+        $this->assertSame('.eventschedule.com', $this->cookie($response, 'utm_params')?->getDomain());
+    }
+
+    /** The consent cookie itself has to span the install the same way, or the server never sees it. */
+    public function test_the_banner_publishes_the_domain_the_consent_cookie_belongs_on(): void
+    {
+        config(['app.cookie_consent_banner' => true, 'session.domain' => '.eventschedule.com']);
+
+        $this->get('/')->assertOk()->assertSee('data-cookie-domain=".eventschedule.com"', false);
+    }
+
     private function assertExpired(?Cookie $cookie, string $name): void
     {
         $this->assertNotNull($cookie, 'The response must carry a delete for the stale '.$name.' cookie');

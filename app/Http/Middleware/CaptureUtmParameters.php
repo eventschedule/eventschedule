@@ -149,13 +149,21 @@ class CaptureUtmParameters
      */
     private function forgetAttributionCookies(Request $request, Response $response, bool $consented): Response
     {
-        if ($consented) {
+        if ($consented || ! method_exists($response, 'cookie')) {
             return $response;
         }
 
         foreach (self::ATTRIBUTION_COOKIES as $name) {
             if ($request->cookies->has($name)) {
-                $response->headers->clearCookie($name, '/', null, true, true, 'Lax');
+                // Through the CookieJar, NOT Symfony's clearCookie(). A Set-Cookie deletion only
+                // matches on (name, DOMAIN, path), and rememberAttribution() writes these with a
+                // null domain that the jar substitutes config('session.domain') into - which on
+                // hosted is '.<base domain>'. clearCookie() takes the null literally and emits a
+                // host-only expiry, so withdrawing consent looked like it worked while the real
+                // cookie kept being sent for its full 30 days. Reading the config through the jar
+                // also keeps this correct on a custom domain, where ResolveCustomDomain nulls
+                // session.domain per request.
+                $response->cookie(cookie()->forget($name));
             }
         }
 

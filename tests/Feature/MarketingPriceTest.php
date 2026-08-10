@@ -100,6 +100,51 @@ class MarketingPriceTest extends TestCase
             ."change moves this copy too:\n".implode("\n", $offenders));
     }
 
+    /**
+     * The comparison and replacement pages build their tables, FAQs and JSON-LD in PHP arrays
+     * inside MarketingController, which this test only scanned views for - so ~94 quotes of the
+     * old $5/mo survived a price change and shipped on the same documents whose offers block
+     * already emitted the new one. The composer does not reach the controller, so it reads
+     * config directly there; either way a literal must not come back.
+     */
+    public function test_no_hardcoded_plan_price_in_the_marketing_controller(): void
+    {
+        $path = app_path('Http/Controllers/MarketingController.php');
+        $offenders = [];
+
+        foreach (explode("\n", File::get($path)) as $index => $line) {
+            $number = $index + 1;
+
+            // Competitors' prices are quoted on purpose ("From $50/mo", "Canva Pro costs
+            // $15/month"), so only OUR plan numbers are matched.
+            if (preg_match('~\$(5|15|50|150)(/mo|/month|/year|/yr|\b)~', $line)
+                && preg_match('~\b(Event Schedule|our|Pro plan|Enterprise plan|flat)\b~i', $line)
+                && ! str_contains($line, 'planPrice(')) {
+                $offenders[] = "MarketingController.php:{$number}: ".trim(mb_substr($line, 0, 120));
+            }
+        }
+
+        $this->assertSame([], $offenders,
+            "Hardcoded plan price in MarketingController. Use \$this->planPrice():\n"
+            .implode("\n", $offenders));
+    }
+
+    /** And it has to actually move when the config does. */
+    public function test_the_comparison_pages_quote_the_configured_price(): void
+    {
+        config(['services.stripe_platform.price_monthly_amount' => '77']);
+
+        $controller = app(\App\Http\Controllers\MarketingController::class);
+        $method = new \ReflectionMethod($controller, 'planPrice');
+        $method->setAccessible(true);
+
+        $this->assertSame(77, $method->invoke($controller, false));
+        $this->assertSame(
+            (int) config('services.stripe_platform.enterprise_price_monthly_amount'),
+            $method->invoke($controller, true)
+        );
+    }
+
     public function test_no_hardcoded_plan_price_in_structured_data(): void
     {
         $offenders = [];

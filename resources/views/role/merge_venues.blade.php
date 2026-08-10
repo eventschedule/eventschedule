@@ -48,17 +48,17 @@
                     <form method="POST" action="{{ $mergeUrl }}"
                           class="merge-group-form" data-group-hash="{{ $groupHash }}">
                         @csrf
-                        <input type="hidden" name="target_id" value="{{ $defaultTarget->id }}" data-target-input="{{ $groupHash }}">
+                        <input type="hidden" name="target_id" value="{{ \App\Utils\UrlUtils::encodeId($defaultTarget->id) }}" data-target-input="{{ $groupHash }}">
                         @foreach ($group as $venue)
                             @if ($venue->id !== $defaultTarget->id)
-                                <input type="hidden" name="source_ids[]" value="{{ $venue->id }}" data-source-input="{{ $groupHash }}-{{ $venue->id }}">
+                                <input type="hidden" name="source_ids[]" value="{{ \App\Utils\UrlUtils::encodeId($venue->id) }}" data-source-input="{{ $groupHash }}-{{ $venue->id }}">
                             @endif
                         @endforeach
 
                         <div class="space-y-2">
                             @foreach ($group as $venue)
                                 <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
-                                    <input type="radio" name="target_choice_{{ $groupHash }}" value="{{ $venue->id }}"
+                                    <input type="radio" name="target_choice_{{ $groupHash }}" value="{{ \App\Utils\UrlUtils::encodeId($venue->id) }}"
                                            data-group-radio="{{ $groupHash }}"
                                            data-venue-name="{{ $venue->getDisplayName(false) }}"
                                            data-venue-subdomain="{{ $venue->subdomain }}"
@@ -114,7 +114,7 @@
                           class="hidden dismiss-form" data-group-hash="{{ $groupHash }}">
                         @csrf
                         @foreach ($group as $venue)
-                            <input type="hidden" name="venue_ids[]" value="{{ $venue->id }}">
+                            <input type="hidden" name="venue_ids[]" value="{{ \App\Utils\UrlUtils::encodeId($venue->id) }}">
                         @endforeach
                     </form>
                 </div>

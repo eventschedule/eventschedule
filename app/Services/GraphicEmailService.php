@@ -112,7 +112,10 @@ class GraphicEmailService
             $overlayText = $settings['overlay_text'] ?? '';
 
             // Generate output in English instead of the schedule language (no-op for English schedules)
-            $forceEnglish = ! $role->isEnglish() && (bool) ($settings['force_english'] ?? false);
+            // canForceEnglish(): the `_en` columns hold the schedule's translation TARGET, so a
+            // stale flag left over from when that target was English sent subscribers a graphic
+            // in the wrong language with English dates.
+            $forceEnglish = $role->canForceEnglish() && (bool) ($settings['force_english'] ?? false);
 
             $options = [
                 'date_position' => $datePosition,

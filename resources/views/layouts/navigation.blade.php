@@ -459,6 +459,13 @@
         // Cross-tab sync: mode and either palette choice.
         window.addEventListener('storage', function(e) {
             if (e.key === 'theme' || e.key === 'themeLight' || e.key === 'themeDark') {
+                // Repaint the PAGE first. updateThemeButtons() only reads state and toggles
+                // button classes, so on its own it left the other tab highlighting the
+                // newly-chosen palette while still rendering the old one - and because it
+                // derives which palette row to show from the live `dark` class, it read the
+                // stale brightness too. applyTheme() re-applies from storage without writing
+                // back, which setTheme() would (echoing the event round again).
+                if (typeof window.applyTheme === 'function') window.applyTheme();
                 updateThemeButtons();
             }
         });

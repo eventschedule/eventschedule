@@ -688,13 +688,27 @@ class Translate extends Command
             $translations = GeminiUtils::translateCustomFieldOptions(array_values($optionValues), $from, $to);
 
             if (! empty($translations)) {
-                $successes++;
+                // Only write a dropdown whose options ALL came back. The old code counted any
+                // non-empty response as a success and fell back to `?? $option`, so a response
+                // whose keys were re-cased or trimmed - the exact failure translateBatch() guards
+                // against a few lines below - wrote the untranslated SOURCE into options_en.
+                // roleNeedsTranslation() then saw a non-empty options_en for ever: permanently
+                // untranslated, never retried, and invisible to the stuck-records panel. A
+                // partial write is worse than none, because it locks the bad values in.
                 foreach ($dropdownKeys as $key) {
+                    $options = $this->splitOptions($fields[$key]['options']);
                     $translated = [];
-                    foreach ($this->splitOptions($fields[$key]['options']) as $option) {
-                        $translated[] = $translations[$option] ?? $option;
+
+                    foreach ($options as $option) {
+                        if (! isset($translations[$option])) {
+                            continue 2;
+                        }
+
+                        $translated[] = $translations[$option];
                     }
+
                     $fields[$key]['options_en'] = implode(', ', $translated);
+                    $successes++;
                 }
             }
         }

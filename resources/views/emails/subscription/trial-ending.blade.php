@@ -13,21 +13,21 @@
     <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">
         <p style="font-size: 16px; margin-top: 0;">{{ __('messages.hello') }} {{ $role->user?->name ?? '' }},</p>
 
-        <p>{{ __($hasCard ? 'messages.subscription_trial_ending_body' : 'messages.subscription_trial_ending_body_no_card', ['schedule' => $role->name, 'plan' => $planLabel, 'date' => $trialEndDate, 'amount' => $amount]) }}</p>
+        <p>{{ __(($windDown ?? false) ? 'messages.subscription_winddown_body' : ($hasCard ? 'messages.subscription_trial_ending_body' : 'messages.subscription_trial_ending_body_no_card'), ['schedule' => $role->name, 'plan' => $planLabel, 'date' => $trialEndDate, 'amount' => $amount]) }}</p>
 
         <div style="background-color: white; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #4E81FA;">
-            <p style="margin: 0; color: #333;">{{ __($hasCard ? 'messages.subscription_trial_ending_continue' : 'messages.subscription_trial_ending_continue_no_card', ['plan' => $planLabel]) }}</p>
+            <p style="margin: 0; color: #333;">{{ __(($windDown ?? false) ? 'messages.subscription_winddown_continue' : ($hasCard ? 'messages.subscription_trial_ending_continue' : 'messages.subscription_trial_ending_continue_no_card'), ['plan' => $planLabel]) }}</p>
         </div>
 
         <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107;">
-            <p style="margin: 0; color: #856404;">{{ __($hasCard ? 'messages.subscription_trial_ending_cancel' : 'messages.subscription_trial_ending_cancel_no_card', ['plan' => $planLabel]) }}</p>
+            <p style="margin: 0; color: #856404;">{{ __(($windDown ?? false) ? 'messages.subscription_winddown_cancel' : ($hasCard ? 'messages.subscription_trial_ending_cancel' : 'messages.subscription_trial_ending_cancel_no_card'), ['plan' => $planLabel]) }}</p>
         </div>
 
         <p>{{ __('messages.subscription_trial_ending_help') }}</p>
 
         @if ($portalUrl)
         <div style="text-align: center; margin: 25px 0;">
-            <a href="{{ $portalUrl }}" style="display: inline-block; background-color: #4E81FA; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">{{ __($hasCard ? 'messages.subscription_trial_ending_manage' : 'messages.subscription_trial_ending_manage_no_card') }}</a>
+            <a href="{{ $portalUrl }}" style="display: inline-block; background-color: #4E81FA; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">{{ __(($windDown ?? false) ? 'messages.subscription_winddown_manage' : ($hasCard ? 'messages.subscription_trial_ending_manage' : 'messages.subscription_trial_ending_manage_no_card')) }}</a>
         </div>
         @endif
 

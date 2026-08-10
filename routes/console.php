@@ -2,6 +2,7 @@
 
 use App\Jobs\ProcessScheduledNewsletters;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schedule;
@@ -50,7 +51,22 @@ Schedule::call(function () {
 // that may be killed. withoutOverlapping() is given an explicit expiry because its default is
 // 1440 minutes - a hard-killed run would otherwise leave the mutex in place for a full day.
 Schedule::call(function () {
-    Artisan::call('app:translate', ['--max-seconds' => config('usage.translation_max_seconds', 240)]);
+    // The same lock AppController::translateData() holds, not just withoutOverlapping(). That
+    // mutex only serialises the scheduler against itself, so an install running BOTH a crontab
+    // schedule:run and an external cron against /translate_data ran two copies side by side -
+    // and because both order rows longest-waiting first, every translation in the overlap was
+    // bought from the AI provider twice.
+    $lock = Cache::lock('translate_data_lock', 900);
+
+    if (! $lock->get()) {
+        return;
+    }
+
+    try {
+        Artisan::call('app:translate', ['--max-seconds' => config('usage.translation_max_seconds', 240)]);
+    } finally {
+        $lock->release();
+    }
 })->everyFifteenMinutes()->name('app-translate')->withoutOverlapping(20)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {

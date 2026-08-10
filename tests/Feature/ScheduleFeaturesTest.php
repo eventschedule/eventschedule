@@ -195,8 +195,8 @@ class ScheduleFeaturesTest extends TestCase
         $eventB->roles()->attach($target->id, ['is_accepted' => false]);
 
         $this->actingAs($owner)->post(route('role.merge_venues_group', ['subdomain' => $curator->subdomain]), [
-            'target_id' => $target->id,
-            'source_ids' => [$source->id],
+            'target_id' => UrlUtils::encodeId($target->id),
+            'source_ids' => [UrlUtils::encodeId($source->id)],
         ]);
 
         // Source event moved onto the target, and both are now accepted on the target venue.

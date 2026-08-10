@@ -35,12 +35,22 @@ const read = () => {
  * the source of truth for the in-page consumers, so this is a mirror, not a replacement.
  * The cookie is exempt from Laravel's cookie encryption (bootstrap/app.php) because Laravel
  * cannot decrypt a cookie the browser wrote; the value is a public two-value enum.
- * Host-only, like the utm_* cookies it gates and like localStorage itself.
+ *
+ * Written on config('session.domain') when the server supplies one, so it spans the install
+ * exactly like the utm_* cookies it gates. Host-only was wrong on hosted: the attribution
+ * cookies are set on '.<base>' by Laravel's CookieJar, so a choice made on the apex was
+ * invisible on app.<base> - where the server then read "no consent" and tried to expire those
+ * cookies on every single request. Empty on a custom domain and on a bare selfhost, which
+ * keeps it host-only there.
  */
+const cookieDomain = () => banner()?.dataset.cookieDomain || '';
+
 const writeCookie = (value) => {
     const secure = location.protocol === 'https:' ? '; Secure' : '';
     const age = value === null ? 0 : COOKIE_MAX_AGE;
-    document.cookie = `${STORAGE_KEY}=${value ?? ''}; path=/; max-age=${age}; SameSite=Lax${secure}`;
+    const domain = cookieDomain();
+    const scope = domain ? `; domain=${domain}` : '';
+    document.cookie = `${STORAGE_KEY}=${value ?? ''}; path=/${scope}; max-age=${age}; SameSite=Lax${secure}`;
 };
 
 const write = (value) => {

@@ -113,6 +113,35 @@ class WindDownCompedPlansTest extends TestCase
         $this->assertNull($role->trial_ends_at);
     }
 
+    /**
+     * A redeemed referral stacks 30 days onto whatever plan the schedule already had, and
+     * ReferralController sets plan_source with ??= - on purpose, because overwriting 'admin'
+     * would strip the comped credit chip from an admin grant. So a role that earned a month
+     * still reads plan_source = 'admin', and the wind-down happily pulled plan_expires back
+     * past the month somebody had actually earned. The docblock promises otherwise.
+     */
+    public function test_a_month_earned_by_referral_is_not_taken_back(): void
+    {
+        $role = $this->comped();
+
+        DB::table('referrals')->insert([
+            'referrer_user_id' => $role->user_id,
+            'referred_user_id' => $role->user_id,
+            'credited_role_id' => $role->id,
+            'plan_type' => 'pro',
+            'status' => 'credited',
+            'credited_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->windDown(['--apply' => true]);
+
+        $role->refresh();
+        $this->assertNull($role->trial_ends_at);
+        $this->assertSame(now()->addYears(3)->format('Y-m-d'), $role->plan_expires);
+    }
+
     public function test_stripe_customers_and_referral_rewards_are_untouched(): void
     {
         $referral = $this->comped(['plan_source' => 'referral']);
