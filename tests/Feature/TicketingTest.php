@@ -100,6 +100,48 @@ class TicketingTest extends TestCase
         $this->assertNotNull($seats[1], 'seat 1 should have a check-in timestamp');
     }
 
+    /**
+     * The status branches used to name unpaid/cancelled/refunded and let anything else through,
+     * so an EXPIRED sale scanned in successfully. Expiry hands the seats back for resale
+     * (Sale::booted decrements updateSold) while leaving is_deleted false and the secret working,
+     * so the original buyer's QR still opened a seat somebody else had since bought.
+     *
+     * amount_mismatch is refused too, but with its own wording: the money really was captured and
+     * it is an admin who has not reconciled it, so "not paid" would be both wrong and unfair to
+     * the person at the door.
+     */
+    public function test_only_a_paid_sale_can_be_scanned_in(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner);
+        $event = $this->createEvent($role, ['starts_at' => now()->format('Y-m-d H:i:s')]);
+        $ticket = $this->createTicket($event, ['price' => 10]);
+
+        $expected = [
+            'expired' => __('messages.this_ticket_is_expired'),
+            'amount_mismatch' => __('messages.this_ticket_is_pending_review'),
+        ];
+
+        foreach ($expected as $status => $message) {
+            $sale = $this->createSale($event, $role, [
+                'status' => $status,
+                'event_date' => now()->format('Y-m-d'),
+                'email' => $status.'@example.com',
+            ], $ticket, 1);
+
+            $response = $this->actingAs($owner)->post(route('ticket.scanned', [
+                'event_id' => UrlUtils::encodeId($event->id),
+                'secret' => $sale->secret,
+            ]))->assertOk();
+
+            $this->assertSame($message, $response->json('error'), "a {$status} sale must be refused at the door");
+
+            $saleTicket = \App\Models\SaleTicket::where('sale_id', $sale->id)->first();
+            $seats = json_decode($saleTicket->seats, true);
+            $this->assertNull($seats[1] ?? null, "a {$status} sale must not be checked in");
+        }
+    }
+
     public function test_checkin_stats_endpoint(): void
     {
         $owner = $this->createOwner();

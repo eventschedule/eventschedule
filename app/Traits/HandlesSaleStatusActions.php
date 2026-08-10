@@ -45,6 +45,11 @@ trait HandlesSaleStatusActions
      * rows, so such a leg does not transition with the rest and must not be credited or debited a
      * second time. The subject sale itself is never dropped - every caller has already asserted it
      * is unpaid or paid.
+     *
+     * Each leg carries its own PRE-CHANGE status, because an order's legs do not have to agree.
+     * A buyer can pay one leg in cash at the door while the rest stay unpaid (Sale.php's expiry
+     * cascade documents exactly that case), and the two adjustments below key off it: crediting
+     * or debiting from the SUBJECT's status books revenue for legs that never moved.
      */
     private function saleAnalyticsLegs(Sale $sale): array
     {
@@ -55,13 +60,49 @@ trait HandlesSaleStatusActions
                 'amount' => $leg->legTotalPayment(),
                 'promo' => $leg->legTotalDiscount(),
                 'date' => $leg->created_at?->toDateString(),
+                'status' => $leg->status,
             ])
             ->all();
     }
 
+    /**
+     * Book revenue for the legs a paid transition actually moves.
+     *
+     * The paid cascade is `where('status', '!=', 'paid')`, so a leg that is already paid does not
+     * transition - it was credited when it was paid, and crediting it again here books the same
+     * money twice on that event. Reachable whenever an owner marks one leg paid on its own (a
+     * cart leg primary has no group_id, so handleAction permits it) and then marks the anchor paid.
+     */
+    private function incrementSaleAnalytics(array $legs): void
+    {
+        foreach ($legs as $leg) {
+            if ($leg['status'] === 'paid') {
+                continue;
+            }
+
+            AnalyticsEventsDaily::incrementSale($leg['event_id'], $leg['amount']);
+
+            if ($leg['promo'] > 0) {
+                AnalyticsEventsDaily::incrementPromoSale($leg['event_id'], $leg['promo']);
+            }
+        }
+    }
+
+    /**
+     * Reverse revenue for the legs that were actually carrying it.
+     *
+     * Mirror of the above, and the reason this is per leg rather than gated on the subject: the
+     * cancel and refund cascades deliberately DO reach a paid sibling (only expiry is narrowed to
+     * unpaid), so cancelling an unpaid anchor released a paid leg while leaving its revenue on the
+     * books - and cancelling a paid anchor debited unpaid legs that had never been credited.
+     */
     private function decrementSaleAnalytics(array $legs): void
     {
         foreach ($legs as $leg) {
+            if ($leg['status'] !== 'paid') {
+                continue;
+            }
+
             AnalyticsEventsDaily::decrementSale($leg['event_id'], $leg['amount'], $leg['date']);
 
             if ($leg['promo'] > 0) {
@@ -84,13 +125,7 @@ trait HandlesSaleStatusActions
             $locked->transaction_reference = $reference;
             $locked->save();
 
-            foreach ($legs as $leg) {
-                AnalyticsEventsDaily::incrementSale($leg['event_id'], $leg['amount']);
-
-                if ($leg['promo'] > 0) {
-                    AnalyticsEventsDaily::incrementPromoSale($leg['event_id'], $leg['promo']);
-                }
-            }
+            $this->incrementSaleAnalytics($legs);
 
             return 'unpaid';
         });
@@ -127,13 +162,12 @@ trait HandlesSaleStatusActions
             }
 
             $pre = $locked->status;
-            $wasPaid = $pre === 'paid';
             $legs = $this->saleAnalyticsLegs($locked);
 
             $locked->status = 'cancelled';
             $locked->save();
 
-            if ($wasPaid && $locked->payment_method !== 'rsvp') {
+            if ($locked->payment_method !== 'rsvp') {
                 $this->decrementSaleAnalytics($legs);
             }
 
@@ -157,13 +191,12 @@ trait HandlesSaleStatusActions
 
             // Cancel first so Sale::booted releases the ticket inventory.
             if (in_array($locked->status, ['unpaid', 'paid'])) {
-                $wasPaid = $locked->status === 'paid';
                 $legs = $this->saleAnalyticsLegs($locked);
 
                 $locked->status = 'cancelled';
                 $locked->save();
 
-                if ($wasPaid && $locked->payment_method !== 'rsvp') {
+                if ($locked->payment_method !== 'rsvp') {
                     $this->decrementSaleAnalytics($legs);
                 }
             }

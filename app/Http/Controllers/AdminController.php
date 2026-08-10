@@ -2974,11 +2974,17 @@ class AdminController extends Controller
             // leg) decrements them anyway, clawing the difference out of other buyers' sales.
             //
             // Read before the save, for the same reason the trait does.
-            $legs = $sale->orderLegs()->map(fn ($leg) => [
-                'event_id' => $leg->event_id,
-                'amount' => $leg->legTotalPayment(),
-                'promo' => $leg->legTotalDiscount(),
-            ])->all();
+            // Same rule as HandlesSaleStatusActions: a leg the paid cascade will not move must
+            // not be credited. Released legs are dropped outright (an owner is free to cancel one
+            // leg while the anchor sits in amount_mismatch), and an already-paid leg keeps the
+            // revenue it was credited when it was paid.
+            $legs = $sale->orderLegs()
+                ->reject(fn ($leg) => in_array($leg->status, ['cancelled', 'refunded', 'expired', 'paid'], true))
+                ->map(fn ($leg) => [
+                    'event_id' => $leg->event_id,
+                    'amount' => $leg->legTotalPayment(),
+                    'promo' => $leg->legTotalDiscount(),
+                ])->all();
 
             $sale->status = 'paid';
             $sale->save();

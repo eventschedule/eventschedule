@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\AnalyticsEventsDaily;
 use App\Models\PromoCode;
 use App\Models\Sale;
+use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
@@ -195,6 +196,93 @@ class MultiEventOrderLifecycleTest extends TestCase
         $this->assertEqualsWithDelta(50.0, $this->revenueFor($eventA->id), 0.001,
             'a second approval must not book the order again');
         $this->assertEqualsWithDelta(30.0, $this->revenueFor($eventB->id), 0.001);
+    }
+
+    /**
+     * An order's legs do not have to agree: a cart leg primary has no group_id, so the AP lets an
+     * owner mark one leg paid on its own - the cash-at-the-door case Sale.php's expiry cascade
+     * already documents. Marking the anchor paid afterwards then cascades only to rows that are
+     * NOT already paid, so crediting every leg booked that leg's revenue a second time.
+     */
+    public function test_marking_the_anchor_paid_does_not_re_credit_a_leg_already_paid(): void
+    {
+        [$legA, $legB, $eventA, $eventB, $role] = $this->createTwoLegOrder();
+
+        $this->actingAs($role->users()->first());
+
+        $this->post(route('sales.action', ['sale_id' => UrlUtils::encodeId($legB->id)]), ['action' => 'mark_paid']);
+        $this->assertEqualsWithDelta(30.0, $this->revenueFor($eventB->id), 0.001, 'precondition: leg B is booked once');
+
+        $this->post(route('sales.action', ['sale_id' => UrlUtils::encodeId($legA->id)]), ['action' => 'mark_paid']);
+
+        $this->assertEqualsWithDelta(50.0, $this->revenueFor($eventA->id), 0.001);
+        $this->assertEqualsWithDelta(30.0, $this->revenueFor($eventB->id), 0.001,
+            'leg B was already paid, so the paid cascade skipped it and it must not be booked twice');
+    }
+
+    /**
+     * The mirror. The cancel cascade deliberately DOES reach a paid sibling (only expiry is
+     * narrowed to unpaid), but the reversal was gated on the SUBJECT's status - so cancelling an
+     * unpaid anchor released the paid leg and left its revenue on the books for good.
+     */
+    public function test_cancelling_an_unpaid_anchor_reverses_the_paid_legs_revenue(): void
+    {
+        [$legA, $legB, , $eventB, $role] = $this->createTwoLegOrder();
+
+        $this->actingAs($role->users()->first());
+
+        $this->post(route('sales.action', ['sale_id' => UrlUtils::encodeId($legB->id)]), ['action' => 'mark_paid']);
+        $this->assertEqualsWithDelta(30.0, $this->revenueFor($eventB->id), 0.001);
+
+        $this->post(route('sales.action', ['sale_id' => UrlUtils::encodeId($legA->id)]), ['action' => 'cancel']);
+
+        $this->assertSame('cancelled', $legB->fresh()->status, 'precondition: the cascade releases the paid leg');
+        $this->assertEqualsWithDelta(0.0, $this->revenueFor($eventB->id), 0.001,
+            'a cancelled sale must not leave revenue behind');
+    }
+
+    /** And the other direction: an unpaid leg was never credited, so it must not be debited. */
+    public function test_cancelling_a_paid_anchor_does_not_debit_an_unpaid_leg(): void
+    {
+        [$legA, , $eventA, $eventB, $role] = $this->createTwoLegOrder();
+
+        $this->actingAs($role->users()->first());
+
+        // Only the anchor is paid; the cascade marks leg B paid too, so both are booked.
+        $this->post(route('sales.action', ['sale_id' => UrlUtils::encodeId($legA->id)]), ['action' => 'mark_paid']);
+        $this->assertEqualsWithDelta(50.0, $this->revenueFor($eventA->id), 0.001);
+        $this->assertEqualsWithDelta(30.0, $this->revenueFor($eventB->id), 0.001);
+
+        $this->post(route('sales.action', ['sale_id' => UrlUtils::encodeId($legA->id)]), ['action' => 'cancel']);
+
+        $this->assertEqualsWithDelta(0.0, $this->revenueFor($eventA->id), 0.001);
+        $this->assertEqualsWithDelta(0.0, $this->revenueFor($eventB->id), 0.001);
+    }
+
+    /**
+     * approveSale() re-derived the per-leg loop and dropped the released-leg filter the trait
+     * documents, so a leg the owner had already cancelled was credited anyway - the paid cascade
+     * correctly leaves it cancelled, so nothing ever nets it out.
+     */
+    public function test_approving_a_mismatched_order_skips_a_leg_the_owner_cancelled(): void
+    {
+        [$legA, $legB, $eventA, $eventB, $role] = $this->createTwoLegOrder();
+
+        $this->actingAs($role->users()->first());
+        $this->post(route('sales.action', ['sale_id' => UrlUtils::encodeId($legB->id)]), ['action' => 'cancel']);
+        $this->assertSame('cancelled', $legB->fresh()->status);
+
+        $legA->refresh();
+        $legA->status = 'amount_mismatch';
+        $legA->saveQuietly();
+
+        $admin = $this->createOwner(true);
+        $this->withSession(['admin_password_confirmed_at' => now()->timestamp])->actingAs($admin);
+        $this->post(route('admin.sale.approve', ['sale' => $legA->id]));
+
+        $this->assertEqualsWithDelta(50.0, $this->revenueFor($eventA->id), 0.001);
+        $this->assertEqualsWithDelta(0.0, $this->revenueFor($eventB->id), 0.001,
+            'a cancelled leg does not transition with the order, so it must not be credited');
     }
 
     public function test_a_cancelled_order_returns_the_promo_code_it_took(): void

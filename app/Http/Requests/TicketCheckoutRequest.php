@@ -84,6 +84,9 @@ class TicketCheckoutRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255'],
             'cf-turnstile-response' => [new ValidTurnstile],
+            // The single-event path reaches Carbon the same way the legs do, via
+            // canSellTickets(), so it needs the same scalar guard.
+            'event_date' => ['nullable', 'string', 'max:10'],
         ];
 
         $events = $this->checkoutEvents();
@@ -103,6 +106,13 @@ class TicketCheckoutRequest extends FormRequest
             $rules['legs.*.event_id'] = ['required', 'string'];
             $rules['legs.*.tickets'] = ['required', 'array', 'min:1'];
             $rules['legs.*.tickets.*'] = ['integer', 'min:1'];
+            // Nullable: a one-time event legitimately posts none, and resolveCheckoutLegs()
+            // falls back to the event's own start date. Typed, because it is handed straight to
+            // Carbon by canSellTickets() -> getStartDateTime() BEFORE checkout()'s try block, so
+            // an array here was an uncaught TypeError. resolveCheckoutLegs already guards
+            // event_id against exactly this; event_date was missed.
+            $rules['legs.*.event_date'] = ['nullable', 'string', 'max:10'];
+            $rules['legs.*.promo_code'] = ['nullable', 'string', 'max:50'];
         } else {
             // Payment link mode: tickets are selected on Invoice Ninja, not here. It cannot appear
             // in a cart at all - cartEligibilityError() refuses Invoice Ninja outright.

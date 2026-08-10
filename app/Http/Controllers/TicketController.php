@@ -3142,12 +3142,25 @@ class TicketController extends Controller
             return response()->json(['error' => __('messages.this_ticket_check_in_period_has_ended')], 200);
         }
 
-        if ($sale->status == 'unpaid') {
-            return response()->json(['error' => __('messages.this_ticket_is_not_paid')], 200);
-        } elseif ($sale->status == 'cancelled') {
-            return response()->json(['error' => __('messages.this_ticket_is_cancelled')], 200);
-        } elseif ($sale->status == 'refunded') {
-            return response()->json(['error' => __('messages.this_ticket_is_refunded')], 200);
+        // An allowlist, not a list of known-bad statuses. The old branches covered
+        // unpaid/cancelled/refunded and let everything else through, so an EXPIRED sale scanned
+        // in successfully - and expiry releases the seats for resale (Sale::booted decrements
+        // updateSold) while leaving is_deleted false and the secret working, so the original
+        // buyer's QR still opened a seat somebody else had since bought.
+        if ($sale->status !== 'paid') {
+            // amount_mismatch gets its own message on purpose: the money really was captured, it
+            // is a site admin who has not reconciled it yet, and telling the door "not paid"
+            // would turn an internal backlog into a guest being turned away.
+            $error = match ($sale->status) {
+                'unpaid' => __('messages.this_ticket_is_not_paid'),
+                'cancelled' => __('messages.this_ticket_is_cancelled'),
+                'refunded' => __('messages.this_ticket_is_refunded'),
+                'expired' => __('messages.this_ticket_is_expired'),
+                'amount_mismatch' => __('messages.this_ticket_is_pending_review'),
+                default => __('messages.this_ticket_is_not_valid'),
+            };
+
+            return response()->json(['error' => $error], 200);
         }
 
         $data = new \stdClass;

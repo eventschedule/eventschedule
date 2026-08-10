@@ -496,6 +496,24 @@ class MultiEventCartCheckoutTest extends TestCase
             'each leg must keep the occurrence the buyer picked');
     }
 
+    /**
+     * event_date is handed straight to Carbon by canSellTickets() -> getStartDateTime(), and that
+     * happens BEFORE checkout()'s try block, so a non-scalar was an uncaught TypeError rather
+     * than a validation failure. event_id was hardened against exactly this; event_date was not.
+     */
+    public function test_a_non_scalar_event_date_is_rejected_not_fatal(): void
+    {
+        [$eventA, $eventB, $ticketA, $ticketB] = $this->twoEvents();
+
+        $leg = $this->leg($eventA, $ticketA);
+        $leg['event_date'] = ['2026-08-10'];
+
+        $this->checkout([$leg, $this->leg($eventB, $ticketB)])
+            ->assertSessionHasErrors('legs.0.event_date');
+
+        $this->assertSame(0, Sale::where('email', 'cart@example.com')->count());
+    }
+
     public function test_a_single_leg_checkout_writes_no_order_id(): void
     {
         [$eventA, , $ticketA] = $this->twoEvents();
