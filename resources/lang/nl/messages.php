@@ -427,7 +427,6 @@ return [
     'this_ticket_is_cancelled' => 'Dit ticket is geannuleerd',
     'this_ticket_is_expired' => 'Dit ticket is verlopen',
     'this_ticket_is_pending_review' => 'Dit ticket wacht op controle van de betaling',
-    'this_ticket_is_not_valid' => 'Dit ticket is niet geldig',
     'this_ticket_is_refunded' => 'Dit ticket is terugbetaald',
     'this_ticket_is_not_paid' => 'Dit ticket is niet betaald',
     'this_reservation_has_expired' => 'Deze reservering is verlopen',

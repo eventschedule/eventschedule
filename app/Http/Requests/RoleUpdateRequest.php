@@ -67,8 +67,23 @@ class RoleUpdateRequest extends FormRequest
             'custom_domain' => [
                 'nullable', 'string', 'url', 'max:255',
                 Rule::unique('roles', 'custom_domain')->ignore($role->id),
-                function ($attribute, $value, $fail) {
-                    if ($value && Role::isReservedCustomDomainHost(parse_url($value, PHP_URL_HOST))) {
+                function ($attribute, $value, $fail) use ($role) {
+                    if (! $value) {
+                        return;
+                    }
+
+                    $host = parse_url($value, PHP_URL_HOST);
+
+                    // Grandfathered: a value the role ALREADY carries passes. The custom_domain
+                    // input is rendered on every settings page and posted on every save, so
+                    // rejecting a stored reserved host would block the owner from changing their
+                    // name or timezone - on a field they never touched - until they cleared it.
+                    // Only a change is refused.
+                    if ($host !== null && strcasecmp((string) $host, (string) $role->custom_domain_host) === 0) {
+                        return;
+                    }
+
+                    if (Role::isReservedCustomDomainHost($host)) {
                         $fail(__('messages.invalid_custom_domain'));
                     }
                 },

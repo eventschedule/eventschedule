@@ -710,7 +710,6 @@ return [
     'this_ticket_is_cancelled' => 'Acest bilet este anulat',
     'this_ticket_is_expired' => 'Acest bilet a expirat',
     'this_ticket_is_pending_review' => 'Acest bilet așteaptă verificarea plății',
-    'this_ticket_is_not_valid' => 'Acest bilet nu este valid',
     'this_ticket_is_refunded' => 'Acest bilet este rambursat',
     'this_ticket_is_not_paid' => 'Acest bilet nu este plătit',
     'this_reservation_has_expired' => 'Această rezervare a expirat',

@@ -628,7 +628,6 @@ return [
     'this_ticket_is_cancelled' => 'Dieses Ticket wurde storniert',
     'this_ticket_is_expired' => 'Dieses Ticket ist abgelaufen',
     'this_ticket_is_pending_review' => 'Dieses Ticket wartet auf die Zahlungsprüfung',
-    'this_ticket_is_not_valid' => 'Dieses Ticket ist ungültig',
     'this_ticket_is_refunded' => 'Dieses Ticket wurde erstattet',
     'this_ticket_is_not_paid' => 'Dieses Ticket wurde nicht bezahlt',
     'this_reservation_has_expired' => 'Diese Reservierung ist abgelaufen',

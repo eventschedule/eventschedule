@@ -428,7 +428,6 @@ return [
     'this_ticket_is_cancelled' => 'Este ingresso está cancelado',
     'this_ticket_is_expired' => 'Este bilhete expirou',
     'this_ticket_is_pending_review' => 'Este bilhete aguarda revisão do pagamento',
-    'this_ticket_is_not_valid' => 'Este bilhete não é válido',
     'this_ticket_is_refunded' => 'Este ingresso foi reembolsado',
     'this_ticket_is_not_paid' => 'Este ingresso não está pago',
     'this_reservation_has_expired' => 'Esta reserva expirou',

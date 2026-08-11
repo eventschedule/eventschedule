@@ -15,6 +15,14 @@ use Tests\TestCase;
  * Golden-file pattern: the fixture is written when absent (inspect + commit
  * it), asserted against byte-for-byte when present. After P2 moves the arrays
  * to app/Services/Marketing/, these tests must still pass unchanged.
+ *
+ * NOTE: the fixtures contain the plan price, which the controller now reads from
+ * services.stripe_platform.*_amount rather than hardcoding. Changing that config
+ * therefore fails these two tests until the fixtures are regenerated (delete them
+ * and re-run). That is a deliberate trade: byte-for-byte is the point of a
+ * characterization fixture, and normalising the price out would blind it to the
+ * next accidental copy edit. Regenerating is one command; check the diff touches
+ * ONLY price strings before committing it.
  */
 class MarketingDataCharacterizationTest extends TestCase
 {

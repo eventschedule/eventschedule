@@ -309,7 +309,6 @@ return [
     'this_ticket_is_cancelled' => 'כרטיס זה בוטל',
     'this_ticket_is_expired' => 'תוקף הכרטיס הזה פג',
     'this_ticket_is_pending_review' => 'הכרטיס הזה ממתין לבדיקת התשלום',
-    'this_ticket_is_not_valid' => 'הכרטיס הזה אינו תקף',
     'this_ticket_is_refunded' => 'כרטיס זה הוחזר',
     'this_ticket_is_not_paid' => 'כרטיס זה לא שולם',
     'this_reservation_has_expired' => 'הזמנה זו פג תוקפה',

@@ -735,22 +735,20 @@ class RoleController extends Controller
             ->where('default_role_id', $source->id)
             ->update(['default_role_id' => $target->id]);
 
-        $affectedCurators = $this->repointRoleSources($source, $target);
+        $this->repointRoleSources($source, $target);
 
         // Soft-delete the source.
         $source->is_deleted = true;
         $source->save();
 
-        // Rebuild the affected curators' auto-sourced links now rather than leaving a gap until
-        // the next five-minute pass, so the merge is not briefly visible as missing events.
-        if ($affectedCurators) {
-            $curatorSources = app(CuratorSourceService::class);
-
-            foreach (Role::whereIn('id', $affectedCurators)->where('is_deleted', false)->get() as $curator) {
-                $curatorSources->reconcile($curator);
-            }
-        }
-
+        // Deliberately no eager reconcile here. Re-pointing role_sources above is what makes the
+        // data correct: the curator's own is_auto_sourced rows are untouched by a venue merge,
+        // and the events they point at have just been moved onto the target, which the
+        // eligibility rule reads - so there is no window in which the curator is missing events.
+        // Running CuratorSourceService::reconcile() as well would put an insert and a delete of
+        // up to curator_source_batch rows EACH, per source, inside the caller's transaction and
+        // hold row locks on event_role for the length of an HTTP request. The five-minute pass
+        // picks up anything genuinely outstanding.
         return $eventCount;
     }
 
@@ -767,12 +765,9 @@ class RoleController extends Controller
      * The curator's calendar silently empties for that venue.
      *
      * Two curators can be merged as well, hence the second pass over role_id.
-     *
-     * @return array<int, int> curator role ids whose links need rebuilding
      */
-    private function repointRoleSources(Role $source, Role $target): array
+    private function repointRoleSources(Role $source, Role $target): void
     {
-        $affected = [];
 
         // The source as somebody's SOURCE.
         $asSource = DB::table('role_sources')->where('source_role_id', $source->id)->get();
@@ -782,8 +777,6 @@ class RoleController extends Controller
             ->all();
 
         foreach ($asSource as $row) {
-            $affected[(int) $row->role_id] = true;
-
             // Self-referential (the target's own curator row), or a duplicate of a row the
             // curator already holds - the unique is (role_id, source_role_id), so these have to
             // be dropped rather than updated.
@@ -815,10 +808,7 @@ class RoleController extends Controller
 
             DB::table('role_sources')->where('id', $row->id)->update(['role_id' => $target->id]);
             $sourcesAlreadyOnTarget[] = $row->source_role_id;
-            $affected[(int) $target->id] = true;
         }
-
-        return array_keys($affected);
     }
 
     /**

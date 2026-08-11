@@ -767,7 +767,6 @@ return [
     'this_ticket_is_cancelled' => 'This ticket is cancelled',
     'this_ticket_is_expired' => 'This ticket has expired',
     'this_ticket_is_pending_review' => 'This ticket is awaiting payment review',
-    'this_ticket_is_not_valid' => 'This ticket is not valid',
     'this_ticket_is_refunded' => 'This ticket is refunded',
     'this_ticket_is_not_paid' => 'This ticket is not paid',
     'this_reservation_has_expired' => 'This reservation has expired',

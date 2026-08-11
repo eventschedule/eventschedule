@@ -658,7 +658,6 @@ return [
     'this_ticket_is_cancelled' => 'Ce billet est annulé',
     'this_ticket_is_expired' => 'Ce billet a expiré',
     'this_ticket_is_pending_review' => 'Ce billet est en attente de vérification du paiement',
-    'this_ticket_is_not_valid' => 'Ce billet n\'est pas valide',
     'this_ticket_is_refunded' => 'Ce billet est remboursé',
     'this_ticket_is_not_paid' => 'Ce billet n\'est pas payé',
     'this_reservation_has_expired' => 'Cette réservation a expiré',

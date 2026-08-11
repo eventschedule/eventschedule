@@ -316,20 +316,35 @@ class CustomDomainProvisioningTest extends TestCase
      * is exactly why nothing surfaced until the schedule was deleted and removeDomain() dropped
      * the operator's own hostname out of the app spec.
      */
-    public function test_the_platform_hostname_can_never_be_removed_from_the_spec(): void
+    public function test_the_platform_hostname_is_left_in_the_spec_rather_than_removed(): void
     {
         config(['app.url' => 'https://myschedules.io']);
         $this->fakeDigitalOceanApp([['domain' => 'myschedules.io', 'type' => 'PRIMARY', 'zone' => '']]);
 
         $service = app(DigitalOceanService::class);
 
-        $this->assertFalse($service->removeDomain('myschedules.io'));
+        // A no-op, not a failure: we never added it, so not removing it is the right outcome.
+        // Returning false made a legacy row unremovable while the delete went ahead anyway.
+        $this->assertTrue($service->removeDomain('myschedules.io'));
         $this->assertSame(0, $this->specWrites());
         $this->assertSame(
             ['myschedules.io'],
             array_column($this->domains, 'domain'),
             'the platform apex must still be in the spec'
         );
+    }
+
+    /** Adding it, though, must fail loudly - silence sent the owner to a certificate that never comes. */
+    public function test_registering_the_platform_hostname_fails_rather_than_no_ops(): void
+    {
+        config(['app.url' => 'https://myschedules.io']);
+        $this->fakeDigitalOceanApp([['domain' => 'myschedules.io', 'type' => 'PRIMARY', 'zone' => '']]);
+
+        $service = app(DigitalOceanService::class);
+
+        $this->assertFalse($service->addDomain('myschedules.io'));
+        $this->assertStringContainsString('platform', (string) $service->lastError());
+        $this->assertSame(0, $this->specWrites());
     }
 
     /**

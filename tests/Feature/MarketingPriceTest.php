@@ -112,14 +112,31 @@ class MarketingPriceTest extends TestCase
         $path = app_path('Http/Controllers/MarketingController.php');
         $offenders = [];
 
+        // Competitors' prices are quoted on purpose and must stay literal. They are stripped by
+        // exact phrase rather than inferred from marker words: an earlier version of this test
+        // required a word like "Event Schedule" or "flat" on the same line, which 39 of the 94
+        // literals it exists to catch would have failed - including every comparison-table row,
+        // where the price sits alone in an array of strings with no prose around it.
+        $competitorPrices = [
+            '$50', '$59', '$99', '$1.79', '$5,999', '$0.28',
+            'Canva Pro costs $15/month', 'From $15/mo (Pro)',
+            '$5 to $15/month', '$5 to $15/mo',
+        ];
+
         foreach (explode("\n", File::get($path)) as $index => $line) {
             $number = $index + 1;
+            $trimmed = ltrim($line);
 
-            // Competitors' prices are quoted on purpose ("From $50/mo", "Canva Pro costs
-            // $15/month"), so only OUR plan numbers are matched.
-            if (preg_match('~\$(5|15|50|150)(/mo|/month|/year|/yr|\b)~', $line)
-                && preg_match('~\b(Event Schedule|our|Pro plan|Enterprise plan|flat)\b~i', $line)
-                && ! str_contains($line, 'planPrice(')) {
+            // Comments explain the prices; they do not render.
+            if (str_starts_with($trimmed, '*') || str_starts_with($trimmed, '//') || str_starts_with($trimmed, '/*')) {
+                continue;
+            }
+
+            // A line can legitimately carry a competitor number AND one of ours, so strip the
+            // known competitor phrases before looking for a literal of our own.
+            $stripped = str_replace($competitorPrices, '', $line);
+
+            if (preg_match('~\$(5|15|50|150)\b~', $stripped)) {
                 $offenders[] = "MarketingController.php:{$number}: ".trim(mb_substr($line, 0, 120));
             }
         }

@@ -178,11 +178,27 @@ class UtmConsentCookieTest extends TestCase
     }
 
     /** The consent cookie itself has to span the install the same way, or the server never sees it. */
-    public function test_the_banner_publishes_the_domain_the_consent_cookie_belongs_on(): void
+    public function test_the_page_publishes_the_domain_the_consent_cookie_belongs_on(): void
     {
         config(['app.cookie_consent_banner' => true, 'session.domain' => '.eventschedule.com']);
 
-        $this->get('/')->assertOk()->assertSee('data-cookie-domain=".eventschedule.com"', false);
+        $this->get('/')->assertOk()
+            ->assertSee('<meta name="cookie-domain" content=".eventschedule.com">', false);
+    }
+
+    /**
+     * And it must be published even where the BANNER is not. cookie-consent.js re-asserts the
+     * stored choice on every page load, so a page without the domain writes a second, host-only
+     * cookie_consent beside the domain-scoped one - both get sent, PHP keeps whichever comes
+     * last, and a later withdrawal clears only one of them.
+     */
+    public function test_the_domain_is_published_even_when_the_banner_is_hidden(): void
+    {
+        config(['app.cookie_consent_banner' => false, 'session.domain' => '.eventschedule.com']);
+
+        $this->get('/')->assertOk()
+            ->assertDontSee('data-cookie-consent', false)
+            ->assertSee('<meta name="cookie-domain" content=".eventschedule.com">', false);
     }
 
     private function assertExpired(?Cookie $cookie, string $name): void

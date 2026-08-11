@@ -703,7 +703,6 @@ return [
     'this_ticket_is_cancelled' => 'See pilet on tühistatud',
     'this_ticket_is_expired' => 'See pilet on aegunud',
     'this_ticket_is_pending_review' => 'See pilet ootab makse ülevaatamist',
-    'this_ticket_is_not_valid' => 'See pilet ei kehti',
     'this_ticket_is_refunded' => 'See pilet tagastatakse',
     'this_ticket_is_not_paid' => 'Seda piletit ei maksta',
     'this_reservation_has_expired' => 'See broneering on aegunud',

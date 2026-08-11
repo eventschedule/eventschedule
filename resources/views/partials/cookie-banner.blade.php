@@ -7,13 +7,19 @@
     Where it is false nothing on the page needs consent: the UTM attribution cookies are
     then never written either, so there is nothing to ask about.
 --}}
+{{-- The domain the consent cookie must be written on, so the choice spans the install the same
+     way the attribution cookies it gates do. Empty on a custom domain (where ResolveCustomDomain
+     nulls session.domain) and on a bare selfhost, which is what keeps the cookie host-only there.
+
+     Emitted UNCONDITIONALLY, outside the banner. cookie-consent.js re-asserts the stored choice
+     on every page load, and the banner is not rendered for an admin - so hanging the domain off
+     the banner meant those page loads wrote a second, host-only cookie_consent beside the
+     domain-scoped one. Two same-named cookies are both sent, PHP keeps whichever comes last, and
+     a later withdrawal through the banner clears only one of them: consent state becomes
+     order-dependent, which is the whole thing this was meant to make deterministic. --}}
+<meta name="cookie-domain" content="{{ config('session.domain') }}">
 @if (consent_required() && (! auth()->user() || ! auth()->user()->isAdmin()))
 <div data-cookie-consent
-     {{-- The domain the consent cookie must be written on, so the choice spans the install the
-          same way the attribution cookies it gates do. Empty on a custom domain (where
-          ResolveCustomDomain nulls session.domain) and on a bare selfhost, which is what keeps
-          the cookie host-only there. --}}
-     data-cookie-domain="{{ config('session.domain') }}"
      hidden
      role="region"
      aria-live="polite"

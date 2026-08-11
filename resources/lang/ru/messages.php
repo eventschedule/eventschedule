@@ -763,7 +763,6 @@ return [
     'this_ticket_is_cancelled' => 'Этот билет аннулирован',
     'this_ticket_is_expired' => 'Срок действия этого билета истёк',
     'this_ticket_is_pending_review' => 'Этот билет ожидает проверки платежа',
-    'this_ticket_is_not_valid' => 'Этот билет недействителен',
     'this_ticket_is_refunded' => 'Этот билет подлежит возврату',
     'this_ticket_is_not_paid' => 'Этот билет не оплачен',
     'this_reservation_has_expired' => 'Срок этой брони истёк',

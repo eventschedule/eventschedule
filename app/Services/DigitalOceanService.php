@@ -170,18 +170,25 @@ class DigitalOceanService
         $addLower = array_map('strtolower', $add);
         $removeLower = array_diff(array_map('strtolower', $remove), $addLower);
 
-        // Last line of defence for the platform's own hostname. RoleUpdateRequest rejects it at
-        // the form, but the add is a silent no-op (the apex is already in the spec, so $changed
-        // stays false and this returns true), which is exactly why nothing surfaced until a
-        // delete tried to remove it and took the whole platform offline.
+        // Last line of defence for the platform's own hostname, treated as "not ours to manage"
+        // rather than as one error for both directions:
+        //
+        //  - ADD is refused LOUDLY. The apex is already in the spec, so filtering it silently
+        //    left $changed false and returned success - the admin panel then said "already
+        //    registered" and the owner's row went to `pending` for a certificate that will never
+        //    be issued.
+        //  - REMOVE is skipped as a no-op. We never added it, so not removing it is the correct
+        //    outcome, not a failure. Returning false here made a legacy row unremovable while
+        //    RoleController::delete went ahead and deleted it anyway, which is precisely the
+        //    "nothing left to retry from" state this is supposed to prevent.
         $base = strtolower(_base_domain() ?: '');
 
         if ($base !== '') {
             $protected = fn (string $host) => $host === $base || str_ends_with($host, '.'.$base);
 
-            foreach ($removeLower as $host) {
+            foreach ($addLower as $host) {
                 if ($protected($host)) {
-                    Log::error('Refusing to remove the platform hostname from the app spec', [
+                    Log::error('Refusing to register the platform hostname as a custom domain', [
                         'hostname' => $host,
                     ]);
                     $this->lastError = 'That hostname belongs to the platform.';
@@ -190,8 +197,15 @@ class DigitalOceanService
                 }
             }
 
-            $addLower = array_values(array_filter($addLower, fn ($host) => ! $protected($host)));
-            $add = array_values(array_filter($add, fn ($host) => ! $protected(strtolower($host))));
+            $skipped = array_values(array_filter($removeLower, $protected));
+
+            if ($skipped) {
+                Log::info('Leaving the platform hostname in the app spec; it was never ours to remove', [
+                    'hostnames' => $skipped,
+                ]);
+            }
+
+            $removeLower = array_values(array_diff($removeLower, $skipped));
         }
 
         $changed = false;

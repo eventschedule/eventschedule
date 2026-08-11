@@ -43,7 +43,11 @@ const read = () => {
  * cookies on every single request. Empty on a custom domain and on a bare selfhost, which
  * keeps it host-only there.
  */
-const cookieDomain = () => banner()?.dataset.cookieDomain || '';
+// From a meta tag rather than the banner: init() re-asserts the stored choice on every page
+// load, including pages where the banner is not rendered (an admin session, or an install that
+// turned consent_required() off after visitors had answered). Reading it off the banner meant
+// those loads wrote a second, host-only cookie beside the domain-scoped one.
+const cookieDomain = () => document.querySelector('meta[name="cookie-domain"]')?.content || '';
 
 const writeCookie = (value) => {
     const secure = location.protocol === 'https:' ? '; Secure' : '';

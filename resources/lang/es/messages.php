@@ -654,7 +654,6 @@ return [
     'this_ticket_is_cancelled' => 'Esta entrada está cancelada',
     'this_ticket_is_expired' => 'Esta entrada ha caducado',
     'this_ticket_is_pending_review' => 'Esta entrada está pendiente de revisión del pago',
-    'this_ticket_is_not_valid' => 'Esta entrada no es válida',
     'this_ticket_is_refunded' => 'Esta entrada está reembolsada',
     'this_ticket_is_not_paid' => 'Esta entrada no está pagada',
     'this_reservation_has_expired' => 'Esta reserva ha expirado',

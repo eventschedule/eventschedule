@@ -680,7 +680,6 @@ return [
     'this_ticket_is_cancelled' => 'تم إلغاء هذه التذكرة',
     'this_ticket_is_expired' => 'انتهت صلاحية هذه التذكرة',
     'this_ticket_is_pending_review' => 'هذه التذكرة في انتظار مراجعة الدفع',
-    'this_ticket_is_not_valid' => 'هذه التذكرة غير صالحة',
     'this_ticket_is_refunded' => 'تم استرداد هذه التذكرة',
     'this_ticket_is_not_paid' => 'هذه التذكرة غير مدفوعة',
     'this_reservation_has_expired' => 'انتهت صلاحية هذا الحجز',

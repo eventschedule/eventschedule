@@ -430,7 +430,6 @@ return [
     'this_ticket_is_cancelled' => 'Questo biglietto è stato annullato',
     'this_ticket_is_expired' => 'Questo biglietto è scaduto',
     'this_ticket_is_pending_review' => 'Questo biglietto è in attesa di verifica del pagamento',
-    'this_ticket_is_not_valid' => 'Questo biglietto non è valido',
     'this_ticket_is_refunded' => 'Questo biglietto è stato rimborsato',
     'this_ticket_is_not_paid' => 'Questo biglietto non è stato pagato',
     'this_reservation_has_expired' => 'Questa prenotazione è scaduta',
