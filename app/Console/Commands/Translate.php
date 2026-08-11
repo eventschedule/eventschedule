@@ -11,10 +11,13 @@ use App\Services\TranslationQueue;
 use App\Services\UsageTrackingService;
 use App\Utils\GeminiUtils;
 use App\Utils\MarkdownUtils;
+use App\Utils\TextUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 /**
  * Fills the `_en` columns (which hold whatever each schedule's translation TARGET language is,
@@ -57,6 +60,33 @@ class Translate extends Command
         'name', 'description', 'short_description', 'address1', 'address2',
         'city', 'state', 'request_terms', 'banner_message', 'sponsor_section_title',
     ];
+
+    /**
+     * Longest value the translation target for each SOURCE field can hold.
+     *
+     * Only the varchar(255) targets are listed; an absent field means a TEXT target and no ceiling.
+     * A field name means the same width in every table these passes write - events.name_en,
+     * event_parts.name_en, event_role.name_translated and roles.name_en are all varchar(255) - so
+     * one flat map keyed by the field the loops already iterate over covers every call site.
+     * TranslateCommandTest asserts that against the live schema, so a new column cannot quietly
+     * appear without an entry here.
+     */
+    private const TARGET_MAX_LENGTH = [
+        'name' => 255,
+        'address1' => 255,
+        'address2' => 255,
+        'city' => 255,
+        'state' => 255,
+        'sponsor_section_title' => 255,
+    ];
+
+    /**
+     * A result longer than its source by more than this is the model having answered the wrong
+     * question - describing or expanding the text instead of translating it - rather than a
+     * translation that ran long. The value that reached production was a 19-character venue name
+     * that came back as a 322-character description of the venue.
+     */
+    private const MAX_EXPANSION_RATIO = 3;
 
     private bool $debug = false;
 
@@ -364,7 +394,7 @@ class Translate extends Command
 
                 foreach (['name', 'description', 'short_description'] as $field) {
                     if ($event->{$field} && ! $event->{"{$field}_en"}) {
-                        $value = $this->translateText($event->{$field}, $fromLang, $toLang, $glossary, $calls, $successes);
+                        $value = $this->translateText($event->{$field}, $fromLang, $toLang, $glossary, $calls, $successes, $field);
                         if ($value !== null) {
                             $event->{"{$field}_en"} = $value;
                             $this->debugLine("Event {$event->id} {$field}: '{$event->{$field}}' -> '{$value}'");
@@ -452,7 +482,7 @@ class Translate extends Command
                 foreach (['name', 'description', 'short_description'] as $field) {
                     $target = "{$field}_translated";
                     if ($eventRole->event->{$field} && ! $eventRole->{$target}) {
-                        $value = $this->translateText($eventRole->event->{$field}, $fromLang, $toLang, [], $calls, $successes);
+                        $value = $this->translateText($eventRole->event->{$field}, $fromLang, $toLang, [], $calls, $successes, $field);
                         if ($value !== null) {
                             $eventRole->{$target} = $value;
                             if ($field === 'description') {
@@ -541,7 +571,7 @@ class Translate extends Command
 
                 foreach (['name', 'description'] as $field) {
                     if ($part->{$field} && ! $part->{"{$field}_en"}) {
-                        $value = $this->translateText($part->{$field}, $fromLang, $toLang, $glossary, $calls, $successes);
+                        $value = $this->translateText($part->{$field}, $fromLang, $toLang, $glossary, $calls, $successes, $field);
                         if ($value !== null) {
                             $part->{"{$field}_en"} = $value;
                             $this->debugLine("Event part {$part->id} {$field} -> '{$value}'");
@@ -587,7 +617,7 @@ class Translate extends Command
         // Translate the name first so every later field can reuse it as a glossary entry and stay
         // consistent with how the schedule is titled.
         if ($role->name && ! $role->name_en) {
-            $value = $this->translateText($role->name, $fromLang, $toLang, [], $calls, $successes);
+            $value = $this->translateText($role->name, $fromLang, $toLang, [], $calls, $successes, 'name');
             if ($value !== null) {
                 $role->name_en = $value;
             }
@@ -604,7 +634,7 @@ class Translate extends Command
             }
 
             if ($role->{$field} && ! $role->{"{$field}_en"}) {
-                $value = $this->translateText($role->{$field}, $fromLang, $toLang, $glossary, $calls, $successes);
+                $value = $this->translateText($role->{$field}, $fromLang, $toLang, $glossary, $calls, $successes, $field);
                 if ($value !== null) {
                     $role->{"{$field}_en"} = $value;
                     $this->debugLine("Schedule {$role->id} {$field} -> '{$value}'");
@@ -796,23 +826,98 @@ class Translate extends Command
      * GeminiUtils::translate() returns null on quota, timeout and 503, which is indistinguishable
      * from a genuinely empty translation. Persisting that would leave the column non-selectable
      * (or wipe a good value), so a failure returns null and the caller leaves the column alone.
+     *
+     * $field is REQUIRED, not defaulted, so a call site added later cannot silently opt out of the
+     * length guard: it names the source field, which is how acceptTranslation() finds the ceiling.
      */
-    private function translateText(?string $text, string $from, string $to, array $glossary, int &$calls, int &$successes): ?string
+    private function translateText(?string $text, string $from, string $to, array $glossary, int &$calls, int &$successes, string $field): ?string
     {
         if (! $text) {
             return null;
         }
 
         $calls++;
-        $value = GeminiUtils::translate($text, $from, $to, $glossary);
+        $maxLength = self::TARGET_MAX_LENGTH[$field] ?? null;
+        $value = GeminiUtils::translate($text, $from, $to, $glossary, [
+            // Tell the model what it is looking at. A bare proper noun with no context is what
+            // invited the "describe the venue" answer in the first place. Anything else with a
+            // ceiling is a short field (address, city, state, a heading); the rest is prose.
+            'kind' => $field === 'name' ? 'name' : ($maxLength !== null ? 'short' : 'body'),
+            'max_length' => $maxLength,
+        ]);
 
+        // Strictly before the guard below: a null here still means quota/timeout/503, exactly as
+        // the docblock says, and must not be conflated with a value we chose to reject.
         if (! is_string($value) || trim($value) === '') {
+            return null;
+        }
+
+        $accepted = $this->acceptTranslation($text, $value, $maxLength);
+
+        if ($accepted === null) {
+            $this->reportRejectedTranslation($field, $text, $value);
+
             return null;
         }
 
         $successes++;
 
-        return $value;
+        return $accepted;
+    }
+
+    /**
+     * Decide what to do with a translation that does not fit its column.
+     *
+     * Two failure modes, and they need opposite answers. A model that answered from world
+     * knowledge instead of translating ("Vakantiepark Sandur" -> a 322-character paragraph about
+     * the park) must be REJECTED: storing the first 255 characters of that as an event's English
+     * name is worse than leaving it untranslated, because the row then drops out of the
+     * whereNull() queue and nothing ever revisits it. A genuine translation that simply ran a
+     * little long is CLAMPED, because throwing it away buys the same call again every run.
+     *
+     * The ratio splits them, and the arithmetic is tidier than it looks: rejecting needs the value
+     * to beat BOTH the ceiling and 3x the source, so against a 255-character column a source of 85
+     * characters or fewer can never be clamped, only rejected. Clamping applies above that, which
+     * is exactly the case where the "name" was really a paragraph to begin with.
+     *
+     * Pure on purpose: no $this->warn()/error(), because the tests drive this through reflection
+     * on a bare `new Translate`, whose output stream is never set.
+     */
+    private function acceptTranslation(string $source, string $value, ?int $maxLength): ?string
+    {
+        if ($maxLength === null || mb_strlen($value) <= $maxLength) {
+            return $value;
+        }
+
+        if (mb_strlen($value) > mb_strlen($source) * self::MAX_EXPANSION_RATIO) {
+            return null;
+        }
+
+        return TextUtils::clamp($value, $maxLength);
+    }
+
+    /**
+     * A rejected translation is a paid-for call that produced nothing, so it must be visible.
+     *
+     * Log::warning, not debugLine(): that one is gated on --debug, which neither entry point
+     * passes. Console output would not survive either - routes/console.php and
+     * AppController::translateData() both Artisan::call() this command without echoing
+     * Artisan::output() - so $this->warn() is only for a hand-run, and the log line is what
+     * production actually sees.
+     */
+    private function reportRejectedTranslation(string $field, string $source, string $value): void
+    {
+        $context = [
+            'field' => $field,
+            'source_length' => mb_strlen($source),
+            'value_length' => mb_strlen($value),
+            'source' => Str::limit($source, 120),
+            'value' => Str::limit($value, 200),
+        ];
+
+        Log::warning('Translate: rejected an over-long translation', $context);
+
+        $this->warn("Rejected an over-long {$field} translation: {$context['source_length']} chars in, {$context['value_length']} out.");
     }
 
     /**
@@ -847,14 +952,40 @@ class Translate extends Command
      *
      * recordOutcome() runs exactly once per row either way - the throw happens before the
      * success path reaches it - so this is not a second usage charge for the same pass.
+     *
+     * When the save itself throws - because the poison is an attribute the model is holding - the
+     * stamp still has to land, or the leak above reopens. See the fallback below.
      */
     private function recordFailure($model, $usageRoleId): void
     {
         try {
             $this->recordOutcome($model, 0, $usageRoleId);
             $model->save();
+
+            return;
         } catch (\Throwable $e) {
             // A row we cannot even stamp is not worth aborting the rest of the pass for.
+            report($e);
+        }
+
+        // The save threw on a value the model is STILL holding, so repeating it would throw again
+        // and the row would go out unstamped - straight back to the front of the never-translated
+        // ordering, re-selected and re-bought on every run for ever, with both the attempt ceiling
+        // and the stuck-records panel blind to it. That is the exact leak this method exists to
+        // close, and it reached production as a translation too long for its varchar column
+        // (MySQL 1406). So write ONLY the two counter columns, through the query builder, where
+        // nothing the model holds travels with them and no model event fires to re-derive an
+        // `_html` column from a bad value. The fields that DID translate are lost in this branch
+        // alone; the save above still keeps them in every case where the row is savable at all.
+        //
+        // MySQL only (CLAUDE.md): a statement-level error such as 1406 rolls back the statement
+        // and leaves the transaction usable, so this second write can still land.
+        try {
+            $model->newQuery()->whereKey($model->getKey())->update([
+                'translation_attempts' => (int) $model->translation_attempts,
+                'last_translated_at' => $model->last_translated_at,
+            ]);
+        } catch (\Throwable $e) {
             report($e);
         }
     }

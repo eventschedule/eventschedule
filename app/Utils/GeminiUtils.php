@@ -10,6 +10,36 @@ use Illuminate\Support\Str;
 
 class GeminiUtils
 {
+    /**
+     * Longest value each parseEvent() field can hold, taken from the column it ends up in.
+     *
+     * A field absent from this map targets a TEXT column and needs no ceiling: event_details ->
+     * events.description, plus short_description and registration_url. category_name is the odd
+     * one out at 100, not 255.
+     */
+    private const PARSED_MAX_LENGTH = [
+        'event_name' => 255,              // events.name
+        'event_name_en' => 255,           // events.name_en
+        'event_short_name' => 255,        // feeds events.slug
+        'event_short_name_en' => 255,
+        'event_address' => 255,           // roles.address1
+        'event_address_en' => 255,
+        'event_city' => 255,              // roles.city
+        'event_city_en' => 255,
+        'event_state' => 255,             // roles.state
+        'event_state_en' => 255,
+        'event_postal_code' => 255,       // roles.postal_code
+        'venue_name' => 255,              // roles.name
+        'venue_name_en' => 255,           // roles.name_en
+        'venue_email' => 255,             // roles.email
+        'venue_website' => 255,           // roles.website
+        'performer_name' => 255,
+        'performer_name_en' => 255,
+        'performer_email' => 255,
+        'performer_website' => 255,
+        'category_name' => 100,           // events.category_name
+    ];
+
     public static function normalizeForMatch(?string $value): string
     {
         if ($value === null) {
@@ -123,9 +153,12 @@ class GeminiUtils
                     'parts' => [],
                 ],
             ],
-            'generationConfig' => [
-                'response_mime_type' => 'application/json',
-            ],
+            // Callers may add to this (translate() pins temperature to 0); they cannot drop the
+            // JSON mime type, which every response parser in this file depends on.
+            'generationConfig' => array_merge(
+                $options['generation_config'] ?? [],
+                ['response_mime_type' => 'application/json'],
+            ),
         ];
 
         // Add image data if provided
@@ -728,6 +761,31 @@ class GeminiUtils
 
         $data = array_values($combinedData);
 
+        // Nothing constrains how long a parsed value comes back, and most of these land in
+        // varchar columns under a strict connection, where an over-long value is a QueryException
+        // rather than a truncation - a 500 on the WhatsApp webhook, a dropped event in the curator
+        // import cron. Clamp before the venue matching below, so what gets matched on is what gets
+        // stored. No plausibility check here, unlike the translation guard: these fields are
+        // extracted rather than translated, so there is no source string to weigh a length against.
+        foreach ($data as $key => $item) {
+            foreach (self::PARSED_MAX_LENGTH as $field => $maxLength) {
+                if (isset($item[$field]) && is_string($item[$field])) {
+                    $data[$key][$field] = TextUtils::clamp($item[$field], $maxLength);
+                }
+            }
+
+            // Performers are their own roles rows, so their names hit roles.name / name_en.
+            if (is_array($item['performers'] ?? null)) {
+                foreach ($item['performers'] as $index => $performer) {
+                    foreach (['name', 'name_en'] as $field) {
+                        if (isset($performer[$field]) && is_string($performer[$field])) {
+                            $data[$key]['performers'][$index][$field] = TextUtils::clamp($performer[$field], 255);
+                        }
+                    }
+                }
+            }
+        }
+
         foreach ($data as $key => $item) {
             // Check if the registration url is a redirect
             if (! empty($item['registration_url'])) {
@@ -1043,13 +1101,75 @@ class GeminiUtils
         return $normalized;
     }
 
-    public static function translate($text, $from = 'auto', $to = 'en', $glossary = [])
+    /**
+     * Translate one string.
+     *
+     * Returns '' for empty input (the translate command relies on empty-string semantics to park
+     * same-language rows) and null for anything unusable: quota, timeout, 503, or a response this
+     * cannot confidently read. Every caller already treats null as "leave the column alone".
+     *
+     * $options: 'kind' ('name' or 'body') and 'max_length' shape the PROMPT only. Deciding what to
+     * do with an over-long result belongs to the caller, which is the only thing that knows the
+     * destination column - see Translate::acceptTranslation().
+     */
+    public static function translate($text, $from = 'auto', $to = 'en', $glossary = [], array $options = [])
     {
         if (empty($text)) {
             return '';
         }
 
+        $prompt = self::buildTranslatePrompt((string) $text, (string) $from, (string) $to, $glossary, $options);
+
+        $response = self::sendRequest($prompt, null, 'translation', [
+            // Translation is a determinism task. At the model default a flash model drifts from
+            // "translate this" into "answer about this", which is how a venue name came back as a
+            // paragraph describing the venue.
+            'generation_config' => ['temperature' => 0],
+        ]);
+
+        // Handle quota exceeded or other errors gracefully
+        if ($response === null || empty($response)) {
+            return null;
+        }
+
+        $response = $response[0];
+
+        $value = self::extractTranslation($response, (string) $to, array_keys(config('app.supported_languages', [])));
+
+        if ($value === null) {
+            \Log::info('Error: translation response: '.json_encode($response));
+
+            return null;
+        }
+
+        // Not a rejection - the caller owns that decision - but the shape of the raw response is
+        // the one thing that makes a recurrence diagnosable. The incident this guards against was
+        // undecidable after the fact: nothing recorded whether the model or the parser produced
+        // the overrun.
+        if (mb_strlen($value) > mb_strlen((string) $text) * 3) {
+            \Log::warning('Translation is much longer than its source', [
+                'from' => $from,
+                'to' => $to,
+                'source_length' => mb_strlen((string) $text),
+                'result_length' => mb_strlen($value),
+                'source' => mb_substr((string) $text, 0, 120),
+                'result' => mb_substr($value, 0, 200),
+                'raw_shape' => is_array($response) ? array_keys($response) : gettype($response),
+            ]);
+        }
+
+        return $value;
+    }
+
+    /**
+     * Assemble the translation prompt.
+     *
+     * Split out from translate() so it can be tested without a network call.
+     */
+    public static function buildTranslatePrompt(string $text, string $from, string $to, array $glossary = [], array $options = []): string
+    {
         $config = config('ai_prompts.translate');
+
         $glossaryInstruction = '';
         if (! empty($glossary)) {
             $glossaryLines = [];
@@ -1059,45 +1179,116 @@ class GeminiUtils
             $glossaryInstruction = $config['glossary_header'].implode("\n", $glossaryLines)."\n";
         }
 
-        $prompt = str_replace([':from', ':to', ':glossary'], [$from, $to, $glossaryInstruction], $config['base'])."\n{$text}";
+        $kind = $options['kind'] ?? null;
+        $kindInstruction = $kind ? ($config['kind_'.$kind] ?? '') : '';
 
-        $response = self::sendRequest($prompt, null, 'translation');
+        $lengthInstruction = '';
+        $hint = self::translationLengthHint($text, $options['max_length'] ?? null);
+        if ($hint !== null) {
+            // Substituted into the fragment BEFORE the fragment is spliced in below. ':length' and
+            // ':max_length' cannot collide (matching ':length' inside ':max_length' would need a
+            // colon immediately before 'length', and there is an underscore there), but the order
+            // is subtle enough to be worth doing explicitly.
+            $lengthInstruction = str_replace(':max_length', (string) $hint, $config['length']);
+        }
 
-        // Handle quota exceeded or other errors gracefully
-        if ($response === null || empty($response)) {
+        // ':glossary' stays LAST: str_replace applies the pairs in order, so anything substituted
+        // earlier gets rescanned by the later passes. The glossary carries user-authored schedule
+        // names, and one containing ':to' would otherwise be rewritten.
+        $prompt = str_replace(
+            [':from', ':to', ':kind', ':length', ':glossary'],
+            [self::translationSourceName($from), self::languageName($to), $kindInstruction, $lengthInstruction, $glossaryInstruction],
+            $config['base']
+        );
+
+        return $prompt."\n".$text;
+    }
+
+    /**
+     * How long the result is allowed to be, as an instruction to the model.
+     *
+     * Derived from the SOURCE, not from the column: telling a model that a 19-character venue name
+     * may run to 255 characters invites it to use them. The floor keeps a two-word title from being
+     * given an impossible budget, and the column width is still the hard ceiling.
+     */
+    private static function translationLengthHint(string $text, ?int $maxLength): ?int
+    {
+        if ($maxLength === null) {
             return null;
         }
 
-        $response = $response[0];
+        return min($maxLength, max(60, (int) ceil(mb_strlen($text) * 2.5)));
+    }
 
-        $value = null;
+    /** 'auto' is a real value here, and "translate from auto" reads as nonsense to a model. */
+    private static function translationSourceName(string $from): string
+    {
+        return ($from === 'auto' || $from === '') ? 'its original language' : self::languageName($from);
+    }
 
-        if (is_array($response)) {
-            if (isset($response['translation'])) {
-                $value = $response['translation'];
-            }
-            if (isset($response['en'])) {
-                $value = $response['en'];
-            }
-            // If still array, try to extract a string
-            if (is_array($value)) {
-                $value = implode(' ', array_filter($value, 'is_string'));
-            }
-            // If value is still null, try to implode all string values in $response
-            if (! $value) {
-                $value = implode(' ', array_filter($response, 'is_string'));
-            }
-        } elseif (is_string($response)) {
-            $value = $response;
+    /**
+     * Pull the translation out of whatever shape the provider returned.
+     *
+     * Pure, so it can be tested without a network call - pass $languageCodes in rather than reading
+     * config here.
+     *
+     * The contract asks for a bare JSON string, and Gemini can honour it. OpenAI cannot: its
+     * response_format is json_object, which forbids a bare string, so on that path the model is
+     * forced to invent a wrapper key. Hence the key search rather than a single lookup.
+     *
+     * Two behaviours here are deliberate corrections. 'translation' now beats the target-language
+     * key instead of losing to it, and the old last-resort branch - implode every string value in
+     * the object, space separated - is gone: gluing an explanation onto a translation produces a
+     * plausible-looking value that nothing downstream can tell apart from a real one. Returning
+     * null instead is already handled everywhere, and means "leave the column alone".
+     */
+    public static function extractTranslation(mixed $response, string $to = 'en', array $languageCodes = [], int $depth = 0): ?string
+    {
+        if (is_string($response)) {
+            // Compared against '' rather than `?: null`, which would also discard "0".
+            $trimmed = trim($response);
+
+            return $trimmed === '' ? null : $trimmed;
         }
 
-        // If value is still not a string, log and set to null
-        if (! is_string($value) || ! $value) {
-            \Log::info('Error: translation response: '.json_encode($response).' => '.$value);
-            $value = null;
+        if (! is_array($response) || $depth > 1) {
+            return null;
         }
 
-        return $value;
+        $keys = array_merge(
+            ['translation', $to],
+            ['text', 'translated_text', 'translated', 'result', 'output', 'value']
+        );
+
+        foreach ($keys as $key) {
+            if (! isset($response[$key])) {
+                continue;
+            }
+
+            $value = self::extractTranslation($response[$key], $to, $languageCodes, $depth + 1);
+
+            if ($value !== null) {
+                return $value;
+            }
+        }
+
+        // Last resort: a wrapper whose key we do not recognise. Exactly one usable string is an
+        // unambiguous rewrap; two or more is a model that answered with commentary alongside the
+        // translation, and picking one of those at random is worse than admitting failure.
+        $candidates = [];
+        foreach ($response as $key => $value) {
+            // A response keyed by a language that is NOT the target is the wrong language, not a
+            // wrapper - writing it into the column would silently store, say, Dutch as French.
+            if (is_string($key) && $key !== $to && in_array($key, $languageCodes, true)) {
+                continue;
+            }
+
+            if (is_string($value) && trim($value) !== '') {
+                $candidates[] = trim($value);
+            }
+        }
+
+        return count($candidates) === 1 ? $candidates[0] : null;
     }
 
     /**
@@ -1139,7 +1330,17 @@ class GeminiUtils
                 $translations = $response[0];
 
                 if (is_array($translations)) {
-                    return $translations;
+                    // Every caller writes these into groups.name_en, which is varchar(255) under a
+                    // strict connection, and every one of them saves OUTSIDE the try that wraps
+                    // this call - so an over-long value is a 500 on the public API rather than a
+                    // handled failure. Clamping here covers all six writers at once
+                    // (ApiGroupController, RoleController x3, RegenerateRoleTranslations) and also
+                    // bounds the value they feed to Group::cleanSlug(). array_map over a single
+                    // array keeps the source-text keys the callers index by.
+                    return array_map(
+                        fn ($value) => is_string($value) ? TextUtils::clamp($value, 255) : $value,
+                        $translations
+                    );
                 }
             }
         } catch (\Exception $e) {

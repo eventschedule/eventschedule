@@ -46,6 +46,30 @@ class TranslateCommandTest extends TestCase
         return array_map('intval', $matches[1]);
     }
 
+    /**
+     * Drive a private method on a bare command instance.
+     *
+     * The provider is raw curl, so the length guard cannot be reached through translateText()
+     * without a network call. It is a pure function for exactly this reason. Note the instance has
+     * no output stream, so anything reached from here must not call $this->warn()/error().
+     */
+    private function invokePrivate(string $method, array $args)
+    {
+        $reflection = new \ReflectionMethod(\App\Console\Commands\Translate::class, $method);
+        $reflection->setAccessible(true);
+
+        return $reflection->invokeArgs(new \App\Console\Commands\Translate, $args);
+    }
+
+    /** The value from the production incident: a 19-character venue name, described rather than translated. */
+    private function hallucinatedParagraph(): string
+    {
+        return 'Residential Park Sandur is a quiet park in Drenthe. There are a total of 308 homes, '
+            .'most of which are privately owned. The park has various facilities, such as a subtropical '
+            .'swimming pool, recreational beach, and golf course. This makes Residential Park Sandur an '
+            .'ideal destination for both relaxation and active pursuits.';
+    }
+
     public function test_never_translated_schedules_are_processed_before_longest_waiting_ones(): void
     {
         $user = $this->createOwner();
@@ -211,6 +235,156 @@ class TranslateCommandTest extends TestCase
         $method->invoke($command, $role, $role->id);
 
         $this->assertSame([], $this->selectedIds($this->dryRun(), 'roles'));
+    }
+
+    /**
+     * The case the test above cannot reach: the row is unsavable BECAUSE of what the AI returned.
+     *
+     * A translation longer than its varchar(255) column raises MySQL 1406, and the catch that
+     * handles it calls recordFailure() with the model STILL holding that value - so the stamping
+     * save() re-sends it and throws again. That throw is swallowed, the row goes out with
+     * translation_attempts unchanged and last_translated_at unstamped, and since selectIds() puts
+     * never-translated rows first it comes back to the front of the queue on every single run, is
+     * re-bought from the AI provider, and is invisible to both the retry ceiling and the admin
+     * stuck-records panel. This is the money leak; the fallback exists so the stamp lands anyway.
+     */
+    public function test_a_row_whose_save_throws_is_still_stamped_and_stops_being_re_selected(): void
+    {
+        $user = $this->createOwner();
+
+        $role = $this->createRole($user, 'venue', [
+            'name' => 'Vakantiepark Sandur',
+            'language_code' => 'nl',
+            'translation_language_code' => 'en',
+            'translation_attempts' => (int) config('usage.stuck_translation_attempts') - 1,
+        ]);
+
+        $this->assertSame([$role->id], $this->selectedIds($this->dryRun(), 'roles'), 'precondition: it is selectable now');
+
+        $poison = $this->hallucinatedParagraph();
+        $this->assertGreaterThan(255, mb_strlen($poison), 'precondition: the value has to overflow the column');
+
+        $role->name_en = $poison;
+
+        $this->invokePrivate('recordFailure', [$role, $role->id]);
+
+        $fresh = $role->fresh();
+
+        $this->assertSame(
+            (int) config('usage.stuck_translation_attempts'),
+            (int) $fresh->translation_attempts,
+            'an uncounted failure never reaches the ceiling, so the row is re-bought for ever'
+        );
+        $this->assertNotNull($fresh->last_translated_at, 'an unstamped row sorts first on every subsequent run');
+        $this->assertNull($fresh->name_en, 'the value that caused the throw must not have been persisted');
+
+        $this->assertSame([], $this->selectedIds($this->dryRun(), 'roles'), 'the consequence that costs money');
+    }
+
+    /**
+     * The guard that stops the poison being created in the first place.
+     *
+     * events.name is varchar(255) too, so the source of a 322-character result was necessarily
+     * short: the model wrote a description of the venue instead of translating its name. Storing
+     * the first 255 characters of that would be worse than storing nothing, because the row then
+     * leaves the whereNull() queue and nothing ever revisits it.
+     */
+    public function test_a_translation_that_expands_a_short_name_into_a_paragraph_is_rejected(): void
+    {
+        $value = $this->hallucinatedParagraph();
+
+        $this->assertGreaterThan(255, mb_strlen($value), 'precondition: this only matters if it overflows');
+
+        $this->assertNull($this->invokePrivate('acceptTranslation', ['Vakantiepark Sandur', $value, 255]));
+    }
+
+    /**
+     * The other half of the rule, and the reason it is not simply "reject anything over 255".
+     *
+     * A name that was already close to the column width and translated a little long is a real
+     * translation. Discarding it buys the same call again on every run until the retry ceiling
+     * parks the row, so it gets clamped instead.
+     */
+    public function test_a_translation_that_only_just_overshoots_the_column_is_clamped_not_discarded(): void
+    {
+        $source = str_repeat('a', 250);
+        $value = str_repeat('b', 270);
+
+        $clamped = $this->invokePrivate('acceptTranslation', [$source, $value, 255]);
+
+        $this->assertNotNull($clamped, 'a translation this close to its source is genuine');
+        $this->assertSame(255, mb_strlen($clamped));
+        $this->assertStringStartsWith(mb_substr($value, 0, 255), $clamped);
+    }
+
+    /**
+     * The guard must be invisible everywhere it is not needed.
+     *
+     * The second half pins a scope decision: description, short_description, request_terms and
+     * banner_message all target TEXT columns, so they pass no ceiling and are never rejected. A
+     * later "let us guard everything" change has to argue with this.
+     */
+    public function test_the_guard_leaves_a_fitting_value_and_a_text_column_alone(): void
+    {
+        $this->assertSame(
+            'Residential Park Sandur',
+            $this->invokePrivate('acceptTranslation', ['Vakantiepark Sandur', 'Residential Park Sandur', 255])
+        );
+
+        $paragraph = $this->hallucinatedParagraph();
+
+        $this->assertSame(
+            $paragraph,
+            $this->invokePrivate('acceptTranslation', ['Vakantiepark Sandur', $paragraph, null]),
+            'a TEXT target has no ceiling, so nothing is rejected or clamped'
+        );
+    }
+
+    /**
+     * TARGET_MAX_LENGTH is keyed by SOURCE field, which is only safe while every table agrees on
+     * the width for a given field name - and only complete while no new varchar target appears
+     * without an entry. Assert both against the live schema rather than by inspection.
+     */
+    public function test_every_varchar_translation_target_declares_a_ceiling(): void
+    {
+        $declared = (new \ReflectionClass(\App\Console\Commands\Translate::class))->getConstant('TARGET_MAX_LENGTH');
+
+        // Every (table, source field, target column) triple the four passes write.
+        $targets = [
+            ['events', 'name', 'name_en'],
+            ['events', 'description', 'description_en'],
+            ['events', 'short_description', 'short_description_en'],
+            ['event_parts', 'name', 'name_en'],
+            ['event_parts', 'description', 'description_en'],
+            ['event_role', 'name', 'name_translated'],
+            ['event_role', 'description', 'description_translated'],
+            ['event_role', 'short_description', 'short_description_translated'],
+            ['roles', 'name', 'name_en'],
+            ['roles', 'description', 'description_en'],
+            ['roles', 'short_description', 'short_description_en'],
+            ['roles', 'address1', 'address1_en'],
+            ['roles', 'address2', 'address2_en'],
+            ['roles', 'city', 'city_en'],
+            ['roles', 'state', 'state_en'],
+            ['roles', 'request_terms', 'request_terms_en'],
+            ['roles', 'banner_message', 'banner_message_en'],
+            ['roles', 'sponsor_section_title', 'sponsor_section_title_en'],
+        ];
+
+        foreach ($targets as [$table, $field, $column]) {
+            $schema = collect(\Illuminate\Support\Facades\Schema::getColumns($table))->firstWhere('name', $column);
+
+            $this->assertNotNull($schema, "{$table}.{$column} is missing from the schema");
+
+            $where = "{$table}.{$column} (source field '{$field}')";
+
+            if (preg_match('/^varchar\((\d+)\)$/', $schema['type'], $matches)) {
+                $this->assertArrayHasKey($field, $declared, "{$where} is a varchar with no ceiling declared");
+                $this->assertSame((int) $matches[1], $declared[$field], "{$where} declares the wrong ceiling");
+            } else {
+                $this->assertArrayNotHasKey($field, $declared, "{$where} is not a varchar, so it must declare no ceiling");
+            }
+        }
     }
 
     /**

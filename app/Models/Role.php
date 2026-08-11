@@ -1285,7 +1285,7 @@ class Role extends Model implements MustVerifyEmail
             //    lossy) and falls through to transliteration.
             if (! $resolved) {
                 try {
-                    $translated = GeminiUtils::translate($name, 'auto', 'en');
+                    $translated = GeminiUtils::translate($name, 'auto', 'en', [], ['kind' => 'name']);
                     if ($translated) {
                         $translatedSlug = Str::slug($translated);
                         if (strlen($translatedSlug) > 2 && ! self::isLossySlug($translated, $translatedSlug)) {

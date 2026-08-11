@@ -60,8 +60,9 @@ class SlugPatternUtils
             return $slug;
         }
 
-        // Try translating to English
-        $translated = GeminiUtils::translate($eventName, 'auto', 'en');
+        // Try translating to English. 'name' so the model is told this is a title and does not
+        // describe what it recognises - a paragraph here becomes a paragraph-long slug.
+        $translated = GeminiUtils::translate($eventName, 'auto', 'en', [], ['kind' => 'name']);
         if ($translated) {
             $slug = Str::slug($translated);
             if ($slug) {
