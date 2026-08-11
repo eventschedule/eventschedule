@@ -3271,6 +3271,83 @@
                                     <textarea id="payment_instructions" name="payment_instructions" v-model="event.payment_instructions" rows="4" data-content-dir="{{ content_dir($role) }}"
                                         class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"></textarea>
                                 </div>
+
+                                {{-- Installments. Event-level and here rather than per ticket row: the
+                                     split is computed on the post-discount ORDER total, so a per-ticket
+                                     flag would have states that silently do nothing (on for one ticket
+                                     and off for another, buyer picks both, option vanishes). This is
+                                     also where an organizer already is when thinking about how they get
+                                     paid. Stripe only - nothing else can charge a saved card. --}}
+                                <div class="mb-6" v-show="event.payment_method == 'stripe'">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="min-w-0">
+                                            <label for="installments_enabled" class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                                {{ __('messages.installments_label') }}
+                                                @if (! $role->isPro())
+                                                    <x-lock-badge tier="pro" />
+                                                @endif
+                                            </label>
+                                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.installments_help') }}</p>
+                                        </div>
+                                        <button type="button" role="switch" id="installments_enabled"
+                                            :aria-checked="event.installments_enabled ? 'true' : 'false'"
+                                            :disabled="!isPro && !event.installments_enabled"
+                                            @click="(isPro || event.installments_enabled) && (event.installments_enabled = !event.installments_enabled)"
+                                            :class="[event.installments_enabled ? 'bg-[var(--brand-button-bg)]' : 'bg-gray-200 dark:bg-gray-700', (!isPro && !event.installments_enabled) ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer']"
+                                            class="relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                                            <span aria-hidden="true" :class="event.installments_enabled ? 'translate-x-5' : 'translate-x-0'"
+                                                class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200"></span>
+                                        </button>
+                                    </div>
+
+                                    {{-- The v-else is load-bearing: with only the v-if inputs, switching
+                                         the toggle OFF posts nothing at all and the stored values
+                                         survive the save. Same idiom as the pass block. --}}
+                                    <template v-if="event.installments_enabled">
+                                        <input type="hidden" name="installments_enabled" value="1">
+                                    </template>
+                                    <input v-else type="hidden" name="installments_enabled" value="0">
+
+                                    <div v-if="event.installments_enabled" class="mt-4 pl-1 border-l-2 border-gray-100 dark:border-gray-700">
+                                        <div class="pl-4 grid grid-cols-1 min-[900px]:grid-cols-3 gap-4">
+                                            <div>
+                                                <x-input-label for="installment_count" :value="__('messages.installment_count')" />
+                                                <select id="installment_count" name="installment_count" v-model.number="event.installment_count"
+                                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                                    <option v-for="n in [2,3,4,5,6,8,10,12]" :key="n" :value="n">@{{ n }}</option>
+                                                </select>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.installment_count_help') }}</p>
+                                            </div>
+                                            <div>
+                                                <x-input-label for="installment_final_days_before" :value="__('messages.installment_final_days_before')" />
+                                                <input id="installment_final_days_before" name="installment_final_days_before" type="number" min="7" max="365"
+                                                    v-model.number="event.installment_final_days_before"
+                                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm" />
+                                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.installment_final_days_before_help') }}</p>
+                                            </div>
+                                            <div>
+                                                <x-input-label for="installment_min_order_amount" :value="__('messages.installment_min_order_amount')" />
+                                                <input id="installment_min_order_amount" name="installment_min_order_amount" type="number" min="0" step="0.01"
+                                                    v-model="event.installment_min_order_amount"
+                                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm" />
+                                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.installment_min_order_amount_help') }}</p>
+                                            </div>
+                                        </div>
+
+                                        {{-- Live preview rather than a save-time validation error. By the
+                                             time a validation message fires the organizer has already
+                                             made their choices; this tells them, while they are choosing,
+                                             that four monthly payments on a November event sold in August
+                                             would land the last one after the doors open. --}}
+                                        <div class="pl-4 mt-4">
+                                            <div v-if="installmentPreviewFits === false" class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2">
+                                                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>
+                                                <div class="text-sm text-amber-800 dark:text-amber-200">@{{ installmentPreviewText }}</div>
+                                            </div>
+                                            <p v-else-if="installmentPreviewText" class="text-sm text-gray-600 dark:text-gray-400">@{{ installmentPreviewText }}</p>
+                                        </div>
+                                    </div>
+                                </div>
                                 </div>
 
                                 <!-- Options Tab -->
@@ -5073,6 +5150,10 @@
           sell_after_start: {{ $event->sell_after_start ? 'true' : 'false' }},
           show_unavailable_tickets: {{ $event->show_unavailable_tickets ? 'true' : 'false' }},
           sponsor_mode: @json($event->sponsor_mode ?? 'default'),
+          installments_enabled: {{ $event->installments_enabled ? 'true' : 'false' }},
+          installment_count: {{ (int) ($event->installment_count ?: 4) }},
+          installment_final_days_before: {{ (int) ($event->installment_final_days_before ?? 14) }},
+          installment_min_order_amount: @json($event->installment_min_order_amount),
         },
         initiallyHidden: @json($event->exists && ($event->is_draft || $event->is_private)),
         isPro: @json($role->isPro()),
@@ -7117,6 +7198,62 @@
       },
     },
     computed: {
+      /**
+       * Does the payment schedule finish with enough runway before the event?
+       *
+       * Returns null when there is nothing to judge (no start date yet), true when it fits and
+       * false when the last payment would land too late. Mirrors
+       * InstallmentService::scheduleFitsBeforeEvent(); the server re-checks regardless, since the
+       * API and the importers never see this form.
+       */
+      installmentSchedulePreview() {
+        if (! this.event.installments_enabled || ! this.event.starts_at) return null;
+
+        const count = parseInt(this.event.installment_count) || 0;
+        if (count < 2) return null;
+
+        const start = new Date(this.event.starts_at.replace(' ', 'T') + 'Z');
+        if (isNaN(start.getTime())) return null;
+
+        // Month-end clamping, matching addMonthsNoOverflow: 31 Jan + 1 month is 28 Feb, and the
+        // step is always measured from the original day so it does not accumulate drift.
+        const today = new Date();
+        const addMonths = (d, n) => {
+          const day = d.getUTCDate();
+          const target = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + n, 1));
+          const lastDay = new Date(Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0)).getUTCDate();
+          target.setUTCDate(Math.min(day, lastDay));
+          return target;
+        };
+
+        const last = addMonths(today, count - 1);
+        const days = Math.max(7, parseInt(this.event.installment_final_days_before) || 14);
+        const deadline = new Date(start.getTime() - days * 86400000);
+
+        return { last: last, deadline: deadline, fits: last <= deadline, start: start, count: count };
+      },
+      installmentPreviewFits() {
+        const p = this.installmentSchedulePreview;
+        return p === null ? null : p.fits;
+      },
+      installmentPreviewText() {
+        const p = this.installmentSchedulePreview;
+        if (p === null) return '';
+
+        const fmt = (d) => d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+
+        if (! p.fits) {
+          return @json(__('messages.installments_does_not_fit'))
+            .replace(':count', p.count)
+            .replace(':last', fmt(p.last))
+            .replace(':event', fmt(p.start));
+        }
+
+        return @json(__('messages.installment_preview'))
+          .replace(':first', @json(__('messages.due_today')))
+          .replace(':count', p.count - 1)
+          .replace(':last', fmt(p.last));
+      },
       visibility: {
         get() {
           if (this.event.is_internal) return 'internal';

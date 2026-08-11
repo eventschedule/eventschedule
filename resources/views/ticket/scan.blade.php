@@ -83,9 +83,13 @@
                         </span>
 
                         <p :class="['font-medium text-center', toneTextClass]">
-                            <template v-if="errorMessage">@{{ errorMessage }}</template>
+                            <template v-if="paymentStatus === 'overdue'">@{{ overdueTitle }}</template>
+                            <template v-else-if="errorMessage">@{{ errorMessage }}</template>
                             <template v-else-if="isPass">@{{ passTitle }}</template>
                             <template v-else>{{ __('messages.ticket_scanned_successfully') }}</template>
+                        </p>
+                        <p v-if="paymentStatus === 'overdue'" :class="['text-sm text-center mt-1', toneTextClass]">
+                            @{{ overdueSub }}
                         </p>
                     </div>
 
@@ -158,6 +162,10 @@
                     scanResult: null,
                     eventDetails: null,
                     errorMessage: null,
+                    paymentStatus: null,
+                    amountDue: null,
+                    amountPaid: null,
+                    amountTotal: null,
                     lastScanUrl: null,
                     events: @json($events ?? []),
                     selectedEventId: @json($selectedEventId ?? ''),
@@ -182,6 +190,10 @@
                     return this.isPass ? this.eventDetails.pass_status : null;
                 },
                 resultTone() {
+                    // An overdue balance is a money problem, not a fake ticket. Amber is already
+                    // this scanner's "admit, but look at this" tone (used for a part-used seat and
+                    // an already-scanned pass), so it carries the right meaning to the door.
+                    if (this.paymentStatus === 'overdue') return 'warning';
                     if (this.errorMessage) return 'error';
                     if (this.isPass) {
                         if (this.passStatus === 'valid') return 'success';
@@ -206,6 +218,14 @@
                         info: 'text-blue-800 dark:text-blue-300',
                         success: 'text-green-800 dark:text-green-300',
                     }[this.resultTone];
+                },
+                overdueTitle() {
+                    return @json(__('messages.installment_door_title')).replace(':amount', this.amountDue || '');
+                },
+                overdueSub() {
+                    return @json(__('messages.installment_door_sub'))
+                        .replace(':paid', this.amountPaid || '')
+                        .replace(':total', this.amountTotal || '');
                 },
                 passTitle() {
                     // A fully-admitted multi-admit pass reads "all admissions used",
@@ -277,6 +297,8 @@
                 onScanSuccess(decodedText, decodedResult) {
                     this.qrScanner.clear();
                     this.scanResult = decodedText;
+                    this.paymentStatus = null;
+                    this.amountDue = null;
                     this.errorMessage = null;
 
                     let url;
@@ -321,7 +343,15 @@
                         return response.json();
                     })
                     .then(data => {
-                        if (data.error) {
+                        if (data.payment_status === 'overdue') {
+                            // Not an error: keep eventDetails populated so the door still sees who
+                            // is standing in front of them and how much is outstanding.
+                            this.paymentStatus = 'overdue';
+                            this.amountDue = data.amount_due;
+                            this.amountPaid = data.amount_paid;
+                            this.amountTotal = data.amount_total;
+                            this.eventDetails = data;
+                        } else if (data.error) {
                             this.errorMessage = data.error;
                         } else {
                             this.eventDetails = data;
@@ -346,6 +376,8 @@
                     this.scanResult = null;
                     this.eventDetails = null;
                     this.errorMessage = null;
+                    this.paymentStatus = null;
+                    this.amountDue = null;
                     this.initializeScanner();
                 },
                 initializeScanner() {

@@ -126,6 +126,23 @@ class Sale extends Model
             }
 
             if ($sale->isDirty('status') && in_array($sale->status, ['cancelled', 'refunded', 'expired'])) {
+                // Stop charging the buyer's card. This hook rather than the trait methods,
+                // because all of the ways a sale can die converge here and only here: the admin
+                // handleAction, the API, deleteSale(), the ReleaseTickets expiry, and the
+                // group/order cascades below - the last of which is a raw query-builder update
+                // that fires no model events, so the cascade re-saves each sibling individually
+                // to land back in this branch.
+                //
+                // Refunding does NOT move money in this app (refundSale() only flips status; the
+                // organizer refunds by hand on their own Stripe dashboard), so cancelling the
+                // remaining installments is the entire job. Miss it and a refunded four-part plan
+                // keeps debiting the card monthly for seats that are already back in inventory.
+                // One query, not two: cancelPlan() is nullable-typed and no-ops on null, so the
+                // exists() guard only cost an extra round trip per row - and the group/order
+                // cascade re-saves every sibling individually.
+                app(\App\Services\InstallmentService::class)
+                    ->cancelPlan($sale->installmentPlan, 'sale_'.$sale->status);
+
                 // Appointment bookings: releasing the sale frees the slot by soft-cancelling the
                 // backing event. The service is re-entrant safe (skips an already-cancelled event)
                 // and defers the calendar-sync delete + guest mail to DB::afterCommit.
@@ -266,6 +283,32 @@ class Sale extends Model
     public function feedback()
     {
         return $this->hasOne(EventFeedback::class);
+    }
+
+    public function installmentPlan()
+    {
+        return $this->hasOne(SaleInstallmentPlan::class);
+    }
+
+    /**
+     * Whether this sale is being paid off over time. The sale itself is `paid` from the first
+     * installment, so status alone cannot tell you.
+     */
+    public function hasInstallmentPlan(): bool
+    {
+        return $this->installmentPlan()->exists();
+    }
+
+    /**
+     * The one place that decides a ticket has stopped being valid for non-payment.
+     *
+     * Kept off `status` deliberately: flipping the sale out of `paid` would take the seat back
+     * out of inventory, break the check-in counts and un-book the revenue, for what is really
+     * just an unpaid balance. Read by the scanner and the buyer's ticket page.
+     */
+    public function isInstallmentDelinquent(): bool
+    {
+        return $this->installmentPlan?->isDelinquent() ?? false;
     }
 
     public function groupedSales()

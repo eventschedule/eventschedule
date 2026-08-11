@@ -79,7 +79,7 @@ class NewsletterSegment extends Model
             $query->where('created_at', '>=', $criteria['date_from']);
         }
         if (! empty($criteria['date_to'])) {
-            $query->where('created_at', '<=', $criteria['date_to'] . ' 23:59:59');
+            $query->where('created_at', '<=', $criteria['date_to'].' 23:59:59');
         }
 
         return $query->select('user_id', 'email', 'name')
@@ -215,7 +215,7 @@ class NewsletterSegment extends Model
             $query->where('created_at', '>=', $criteria['date_from']);
         }
         if (! empty($criteria['date_to'])) {
-            $query->where('created_at', '<=', $criteria['date_to'] . ' 23:59:59');
+            $query->where('created_at', '<=', $criteria['date_to'].' 23:59:59');
         }
 
         return $query->select('id', 'email', 'name')

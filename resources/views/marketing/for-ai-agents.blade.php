@@ -33,7 +33,7 @@
             "API key authentication through the X-API-Key header",
             "Recurring events with a seven-bit day-of-week mask and three ways to end",
             "Ticket types, agenda parts, members and a venue in the same create call",
-            "HMAC-SHA256 signed webhooks for twelve event types",
+            "HMAC-SHA256 signed webhooks for fourteen event types",
             "300 GET and 30 write requests per minute, per IP",
             "Encoded string IDs rather than sequential integers",
             "Zero platform fees on ticket sales"
@@ -574,7 +574,7 @@
             ],
             [
                 'q' => 'Are there webhooks, or do I have to poll?',
-                'a' => 'There are webhooks, on the Pro plan. Twelve event types cover sales, event changes, door scans, pass bookings and feedback. Each delivery is signed with HMAC-SHA256 in an X-Webhook-Signature header so you can verify it came from us, payloads match the shapes the API returns, and there is a delivery log in your settings for debugging.',
+                'a' => 'There are webhooks, on the Pro plan. Fourteen event types cover sales, event changes, door scans, pass bookings and feedback. Each delivery is signed with HMAC-SHA256 in an X-Webhook-Signature header so you can verify it came from us, payloads match the shapes the API returns, and there is a delivery log in your settings for debugging.',
             ],
             [
                 'q' => 'Which IDs does the API use?',
@@ -1017,7 +1017,7 @@
                     <div data-reveal>
                         <div class="es-cons-term overflow-hidden">
                             <div class="es-cons-bar">
-                                <span class="es-cons-mono es-cons-lit text-xs font-bold uppercase tracking-[0.2em]">Twelve event types</span>
+                                <span class="es-cons-mono es-cons-lit text-xs font-bold uppercase tracking-[0.2em]">Fourteen event types</span>
                                 <span class="es-cons-plan es-cons-plan-pro ms-auto">pro</span>
                             </div>
                             <ul>

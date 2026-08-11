@@ -243,6 +243,13 @@ class EventController extends Controller
         // Cancel active boost campaigns (don't keep advertising a cancelled event)
         $this->cancelActiveBoosts($event);
 
+        // Stop charging installment plans. Cancelling an event deliberately leaves its sales
+        // `paid` (see the note in ticket/order.blade.php), so nothing here reaches
+        // Sale::booted()'s cancel branch - which means without this the buyer's card keeps being
+        // debited monthly for an event that is not happening. Same reasoning as the boost
+        // cancellation directly above: unwind the live money before flipping the flag.
+        $this->cancelActiveInstallmentPlans($event);
+
         $event->forceFill([
             'is_cancelled' => true,
             'cancelled_at' => now(),
@@ -393,6 +400,40 @@ class EventController extends Controller
                     'error' => $e->getMessage(),
                 ]);
             }
+        }
+    }
+
+    /**
+     * Stop the off-session charges for every installment plan on this event.
+     *
+     * A cancelled event keeps its sales `paid` by design, so none of them pass through
+     * Sale::booted()'s cancel branch. Without this the scheduled installments stay live and
+     * app:charge-installments goes on debiting real cards, month after month, for an event that
+     * has been called off. Failures are logged rather than thrown: the cancellation itself must
+     * still complete.
+     */
+    private function cancelActiveInstallmentPlans(Event $event): void
+    {
+        try {
+            $saleIds = Sale::where('event_id', $event->id)
+                ->where('is_deleted', false)
+                ->pluck('id');
+
+            $cancelled = app(\App\Services\InstallmentService::class)
+                ->cancelPlansForSales($saleIds, 'event_cancelled');
+
+            if ($cancelled) {
+                \Log::info('Cancelled installment plans for cancelled event', [
+                    'event_id' => $event->id,
+                    'plans' => $cancelled,
+                ]);
+            }
+        } catch (\Exception $e) {
+            report($e);
+            \Log::error('Failed to cancel installment plans for cancelled event', [
+                'event_id' => $event->id,
+                'error' => $e->getMessage(),
+            ]);
         }
     }
 
@@ -624,6 +665,10 @@ class EventController extends Controller
                 $event->payment_method = $defaultTickets['payment_method'] ?? 'cash';
                 $event->payment_instructions = $defaultTickets['payment_instructions'] ?? null;
                 $event->expire_unpaid_tickets = $defaultTickets['expire_unpaid_tickets'] ?? false;
+                $event->installments_enabled = $defaultTickets['installments_enabled'] ?? false;
+                $event->installment_count = $defaultTickets['installment_count'] ?? null;
+                $event->installment_final_days_before = $defaultTickets['installment_final_days_before'] ?? 14;
+                $event->installment_min_order_amount = $defaultTickets['installment_min_order_amount'] ?? null;
                 $event->ticket_notes = $defaultTickets['ticket_notes'] ?? null;
                 $event->terms_url = $defaultTickets['terms_url'] ?? null;
                 $event->total_tickets_mode = $defaultTickets['total_tickets_mode'] ?? 'individual';
@@ -993,6 +1038,10 @@ class EventController extends Controller
                 'payment_method' => $event->payment_method,
                 'payment_instructions' => $event->payment_instructions,
                 'expire_unpaid_tickets' => $event->expire_unpaid_tickets,
+                'installments_enabled' => $event->installments_enabled,
+                'installment_count' => $event->installment_count,
+                'installment_final_days_before' => $event->installment_final_days_before,
+                'installment_min_order_amount' => $event->installment_min_order_amount,
                 'ticket_notes' => $event->ticket_notes,
                 'terms_url' => $event->terms_url,
                 'total_tickets_mode' => $event->total_tickets_mode,
@@ -1435,6 +1484,10 @@ class EventController extends Controller
                 'payment_method' => $event->payment_method,
                 'payment_instructions' => $event->payment_instructions,
                 'expire_unpaid_tickets' => $event->expire_unpaid_tickets,
+                'installments_enabled' => $event->installments_enabled,
+                'installment_count' => $event->installment_count,
+                'installment_final_days_before' => $event->installment_final_days_before,
+                'installment_min_order_amount' => $event->installment_min_order_amount,
                 'ticket_notes' => $event->ticket_notes,
                 'terms_url' => $event->terms_url,
                 'total_tickets_mode' => $event->total_tickets_mode,

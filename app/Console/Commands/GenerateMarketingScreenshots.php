@@ -168,13 +168,13 @@ class GenerateMarketingScreenshots extends Command
         $browser->pause(3000);
 
         // Extract the first event URL from the Vue app's allEvents data
-        $eventUrl = $browser->script("
+        $eventUrl = $browser->script('
             var events = window.calendarVueApp.allEvents;
             if (events && events.length > 0) {
                 return events[0].url;
             }
             return null;
-        ")[0] ?? null;
+        ')[0] ?? null;
 
         if (! $eventUrl) {
             $this->warn("    No events found for {$subdomain}");

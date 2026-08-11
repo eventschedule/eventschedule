@@ -11,6 +11,30 @@
     $cartEligible = in_array($event->payment_method, ['stripe', 'cash'], true)
         && ! $event->individual_tickets
         && ! request()->embed;
+
+    // Does a full payment schedule still finish before this occurrence, with the organizer's
+    // collection runway to spare? Computed server-side because it needs the schedule's timezone
+    // and, for a recurring event, the OCCURRENCE the buyer is looking at rather than starts_at
+    // (which is the recurrence anchor and sits in the past). The Vue side only reads the answer.
+    $installmentsFitEvent = false;
+    if ($event->installments_enabled && $event->installment_count) {
+        $installmentsFitEvent = app(\App\Services\InstallmentService::class)->scheduleFitsBeforeEvent(
+            $event,
+            app(\App\Services\InstallmentService::class)->buildSchedule(
+                1000.0, (int) $event->installment_count, $event->ticket_currency_code ?: 'USD'
+            ),
+            $date ?? request()->date,
+        );
+    }
+
+    // Shown in the "to change or cancel, contact ..." line. Without an exit route a buyer who
+    // wants out calls their bank instead of the organizer, and a stop-payment is a chargeback.
+    // A configured from_address is outward-facing by design. The owner's ACCOUNT login email is
+    // not - roles.show_email exists precisely to gate publishing an organizer's address - and this
+    // page is the public guest ticket page, crawlable, with no installments_enabled guard on the
+    // computation. Falling through to the platform address instead.
+    $installmentSupportEmail = $event->getRoleWithEmailSettings()?->getEmailSettings()['from_address']
+        ?? config('mail.from.address');
 @endphp
 
 <x-slot name="head">
@@ -100,6 +124,16 @@
                     cartEligible: @json($cartEligible),
                     addedToCart: false,
                     isSubmitting: false,
+                    {{-- Installments. payMonthly defaults to FALSE: pay-in-full is the default
+                         choice and a credit arrangement is never pre-selected. --}}
+                    payMonthly: false,
+                    installmentConsent: false,
+                    installmentsEnabled: @json((bool) $event->installments_enabled),
+                    installmentCount: @json((int) ($event->installment_count ?: 0)),
+                    installmentMinOrder: @json($event->installment_min_order_amount ? (float) $event->installment_min_order_amount : 0),
+                    installmentsFitEvent: @json($installmentsFitEvent ?? false),
+                    scheduleName: @json($role->name),
+                    supportEmail: @json($installmentSupportEmail),
                     allSoldOut: @json($event->allTicketsSoldOut($date ?? request()->date)),
                     waitlistSubmitting: false,
                     waitlistMessage: '',
@@ -228,6 +262,82 @@
                 @endif
             },
             computed: {
+                /**
+                 * Whether the monthly option can be shown for the CURRENT cart.
+                 *
+                 * Recomputed off totalAmount on purpose: a promo code or gift card applied after
+                 * the buyer picked monthly can drag a part below Stripe's per-charge floor, and
+                 * the option has to disappear visibly rather than fail on submit. The server
+                 * re-checks all of this in TicketController::checkout() regardless.
+                 */
+                installmentsOffered() {
+                    if (! this.installmentsEnabled || ! this.isStripePayment) return false;
+                    if (! this.installmentsFitEvent) return false;
+                    if (this.installmentCount < 2) return false;
+                    if (this.totalSelectedTickets < 1) return false;
+                    // A pass has its own validity clock and is capped at one per order.
+                    if (this.tickets.some(t => t.selectedQty > 0 && t.is_pass)) return false;
+                    if (this.installmentMinOrder > 0 && this.totalAmount < this.installmentMinOrder) return false;
+
+                    return this.installmentSchedule.every(a => a >= this.giftCardMinCharge);
+                },
+                /** Was it offered before discounts were applied? Drives the explanatory notice. */
+                installmentsWereOffered() {
+                    return this.installmentsEnabled && this.isStripePayment
+                        && this.installmentsFitEvent && this.installmentCount >= 2;
+                },
+                /**
+                 * The split, in whole currency units, mirroring InstallmentService::buildSchedule():
+                 * work in the smallest unit so the parts re-sum exactly, and put the remainder on
+                 * the first payment, which is the one the buyer is about to authorise.
+                 */
+                installmentSchedule() {
+                    const n = this.installmentCount;
+                    if (n < 2) return [];
+
+                    const mult = Math.round(1 / this.smallestUnit);
+                    const totalUnits = Math.round(this.totalAmount * mult);
+                    const base = Math.floor(totalUnits / n);
+                    const remainder = totalUnits - base * n;
+
+                    return Array.from({ length: n }, (_, i) => (base + (i === 0 ? remainder : 0)) / mult);
+                },
+                smallestUnit() {
+                    return this.currencyDecimals === 0 ? 1 : 0.01;
+                },
+                installmentDates() {
+                    const out = [];
+                    const today = new Date();
+                    for (let i = 0; i < this.installmentCount; i++) {
+                        const day = today.getDate();
+                        const t = new Date(today.getFullYear(), today.getMonth() + i, 1);
+                        const lastDay = new Date(t.getFullYear(), t.getMonth() + 1, 0).getDate();
+                        t.setDate(Math.min(day, lastDay));
+                        out.push(t.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }));
+                    }
+                    return out;
+                },
+                installmentSummary() {
+                    if (! this.installmentSchedule.length) return '';
+                    return @json(__('messages.pay_monthly_detail'))
+                        .replace(':first', this.formatPrice(this.installmentSchedule[0]))
+                        .replace(':count', this.installmentCount - 1)
+                        .replace(':amount', this.formatPrice(this.installmentSchedule[this.installmentSchedule.length - 1]));
+                },
+                payNowLabel() {
+                    return @json(__('messages.pay_amount_now'))
+                        .replace(':amount', this.formatPrice(this.installmentSchedule[0] || 0))
+                        .toUpperCase();
+                },
+                noExtraCostText() {
+                    return @json(__('messages.installments_no_extra_cost')).replace(':total', this.formatPrice(this.totalAmount));
+                },
+                consentText() {
+                    return @json(__('messages.installments_consent')).replace(':schedule', this.scheduleName);
+                },
+                cancelNoteText() {
+                    return @json(__('messages.installments_cancel_note')).replace(':email', this.supportEmail || '');
+                },
                 subtotalAmount() {
                     var ticketTotal = this.tickets.reduce((total, ticket) => {
                         return total + (ticket.price * ticket.selectedQty);
@@ -331,6 +441,20 @@
                         ? @json(__('messages.pass_late_cancel_note_block'))
                         : @json(__('messages.pass_late_cancel_note_forfeit'));
                     return window + ' ' + note;
+                },
+                installmentsTeaserFor(ticket) {
+                    if (! this.installmentsWereOffered || ! ticket.price || ticket.is_pass) return '';
+                    if (this.installmentMinOrder > 0 && ticket.price < this.installmentMinOrder) return '';
+
+                    const n = this.installmentCount;
+                    const mult = Math.round(1 / this.smallestUnit);
+                    const per = Math.floor(Math.round(ticket.price * mult) / n) / mult;
+
+                    if (per < this.giftCardMinCharge) return '';
+
+                    return @json(__('messages.installments_teaser'))
+                        .replace(':count', n)
+                        .replace(':amount', this.formatPrice(per));
                 },
                 volumeDiscountForTicketLine(ticket) {
                     var rule = ticket.volume_discount;
@@ -1187,6 +1311,11 @@
                     <p v-if="ticket.description" class="text-sm text-gray-600 dark:text-gray-400" v-html="ticket.description"></p>
                     <p :class="{'text-lg': tickets.length === 1, 'text-sm': tickets.length > 1}" class="font-medium text-gray-900 dark:text-gray-100"><template v-if="!ticket.price">{{ __('messages.free') }}</template><template v-else>@{{ formatPrice(ticket.price) }}</template></p>
                     <p v-if="ticket.price && ticket.volume_discount && ticket.volume_discount.min_quantity" class="text-xs text-gray-600 dark:text-gray-400 mt-1">@{{ volumeDiscountHintText(ticket) }}</p>
+                    {{-- The affordability hook, on the price line where the sticker shock is. This
+                         is what BNPL checkouts put next to a price and the reason the option
+                         converts at all; the decision itself stays down by the total, where the
+                         post-discount figure is finally known. --}}
+                    <p v-if="installmentsTeaserFor(ticket)" class="text-xs text-gray-600 dark:text-gray-400 mt-1">@{{ installmentsTeaserFor(ticket) }}</p>
                 </div>
                 <div>
                     <p v-if="ticket.sales_ended" class="text-lg font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sales_ended') }}</p>
@@ -1382,6 +1511,71 @@
         </p>
         @endif
 
+        {{-- Installments. Rendered HERE, below the promo and gift-card block, because the split is
+             computed on the post-discount total: anything shown above this point would change
+             under the buyer as soon as they applied a code.
+
+             Two radio cards rather than a checkbox, and PAY IN FULL IS SELECTED BY DEFAULT.
+             Pre-selecting a credit arrangement is a dark pattern, and for the European audience
+             this is aimed at, a regulatory problem too. --}}
+        <div v-if="installmentsOffered && !isPaymentLinkMode && !isAllSoldOut && totalSelectedTickets > 0" class="mb-6">
+            <label class="flex items-start gap-3 p-4 rounded-lg border cursor-pointer mb-2"
+                :class="!payMonthly ? 'border-2' : 'border-gray-200 dark:border-gray-600'"
+                :style="!payMonthly ? 'border-color: {{ $accentColor }}' : ''">
+                <input type="radio" name="installments_choice" :value="false" v-model="payMonthly" class="mt-1" style="color: {{ $accentColor }};">
+                <span class="flex-1 flex justify-between items-center">
+                    <span class="text-gray-900 dark:text-gray-100 font-medium">@lang('messages.pay_in_full')</span>
+                    <span class="text-gray-900 dark:text-gray-100 font-medium">@{{ formatPrice(totalAmount) }}</span>
+                </span>
+            </label>
+
+            <label class="flex items-start gap-3 p-4 rounded-lg border cursor-pointer"
+                :class="payMonthly ? 'border-2' : 'border-gray-200 dark:border-gray-600'"
+                :style="payMonthly ? 'border-color: {{ $accentColor }}' : ''">
+                <input type="radio" name="installments_choice" :value="true" v-model="payMonthly" class="mt-1" style="color: {{ $accentColor }};">
+                <span class="flex-1">
+                    <span class="flex justify-between items-center">
+                        <span class="text-gray-900 dark:text-gray-100 font-medium">@lang('messages.pay_monthly')</span>
+                        <span class="text-gray-900 dark:text-gray-100 font-medium">@{{ formatPrice(installmentSchedule[0]) }}</span>
+                    </span>
+                    <span class="block text-sm text-gray-500 dark:text-gray-400 mt-1">@{{ installmentSummary }}</span>
+                </span>
+            </label>
+
+            <div v-if="payMonthly" class="mt-3 p-4 rounded-lg bg-white dark:bg-gray-700/50">
+                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">@lang('messages.your_payment_schedule')</p>
+                <div v-for="(row, i) in installmentSchedule" :key="i" class="flex justify-between text-sm py-1">
+                    <span class="text-gray-600 dark:text-gray-400">@{{ i === 0 ? @json(__('messages.due_today')) : installmentDates[i] }}</span>
+                    <span class="text-gray-900 dark:text-gray-100">@{{ formatPrice(row) }}</span>
+                </div>
+
+                {{-- The highest-conversion sentence in the feature. Without it every buyer assumes
+                     there is a catch, and it is verifiably true: the platform takes no fee on
+                     ticket sales and no surcharge is added here. --}}
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                    @{{ noExtraCostText }}
+                </p>
+
+                <label class="flex items-start gap-2 mt-3 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
+                    <input type="checkbox" name="installments_consent" value="1" v-model="installmentConsent" class="mt-1 rounded" style="color: {{ $accentColor }};">
+                    <span>@{{ consentText }}</span>
+                </label>
+
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">@{{ cancelNoteText }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">@lang('messages.installments_door_note')</p>
+            </div>
+
+            <input type="hidden" name="installments" :value="payMonthly ? '1' : ''">
+        </div>
+
+        {{-- A promo code or gift card applied AFTER choosing to pay monthly can drag the order
+             under Stripe's per-charge floor. Without this the buyer posts a form the server
+             rejects and gets a bare "error" with no explanation. --}}
+        <div v-if="installmentsWereOffered && !installmentsOffered && totalSelectedTickets > 0"
+            class="mb-6 rounded-lg p-3 text-sm bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 text-amber-800 dark:text-amber-200">
+            @lang('messages.installments_unavailable')
+        </div>
+
         <!-- Total -->
         <div v-if="!isPaymentLinkMode && !isAllSoldOut" class="mb-6 bg-white dark:bg-gray-700/50 rounded-lg p-4">
             <template v-if="volumeDiscountTotal > 0 || discountAmount > 0 || giftCardApplied > 0">
@@ -1402,9 +1596,20 @@
                     <span class="text-sm text-green-600 dark:text-green-400">-@{{ formatPrice(giftCardApplied) }}</span>
                 </div>
             </template>
-            <div class="flex justify-between items-center" :class="{ 'pt-2 mt-1 border-t border-gray-200 dark:border-gray-600': volumeDiscountTotal > 0 || discountAmount > 0 || giftCardApplied > 0 }">
-                <span class="text-gray-600 dark:text-gray-400">@lang('messages.total')</span>
-                <span class="text-xl font-bold text-gray-900 dark:text-gray-100">@{{ formatPrice(totalAmount) }}</span>
+            {{-- On a monthly plan the buyer is about to be charged one instalment, not the total.
+                 Leading with the total and then landing them on a Stripe page showing a quarter
+                 of it is where disputes start, so the total is demoted and "due today" leads. --}}
+            <div v-if="payMonthly && installmentsOffered" class="flex justify-between items-center mb-1">
+                <span class="text-gray-600 dark:text-gray-400 text-sm">@lang('messages.total')</span>
+                <span class="text-sm text-gray-900 dark:text-gray-100">@{{ formatPrice(totalAmount) }}</span>
+            </div>
+            <div class="flex justify-between items-center" :class="{ 'pt-2 mt-1 border-t border-gray-200 dark:border-gray-600': volumeDiscountTotal > 0 || discountAmount > 0 || giftCardApplied > 0 || (payMonthly && installmentsOffered) }">
+                <span class="text-gray-600 dark:text-gray-400">
+                    @{{ payMonthly && installmentsOffered ? @json(__('messages.due_today')) : @json(__('messages.total')) }}
+                </span>
+                <span class="text-xl font-bold text-gray-900 dark:text-gray-100">
+                    @{{ formatPrice(payMonthly && installmentsOffered ? installmentSchedule[0] : totalAmount) }}
+                </span>
             </div>
         </div>
 
@@ -1458,7 +1663,7 @@
             {{-- Adds this event to the cart instead of paying for it now, so the buyer can carry on
                  browsing. The cart widget in the guest layout owns the storage and the checkout. --}}
             <button type="button"
-                v-if="cartEligible && selectedTicketCount > 0"
+                v-if="cartEligible && selectedTicketCount > 0 && !(payMonthly && installmentsOffered)"
                 @click="addToCart"
                 class="mt-4 inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-lg border-2 transition-all duration-200 hover:scale-105"
                 style="border-color: {{ $accentColor }}; color: {{ $accentColor }};">
@@ -1467,11 +1672,17 @@
             </button>
             @endif
 
+            {{-- The label names the amount actually about to be taken. "CHECKOUT" followed by a
+                 Stripe page showing a quarter of the total is where disputes start. The consent
+                 checkbox gates the button rather than only being disclosed on Stripe's page,
+                 because that fires after the buyer has already committed here and leaves us
+                 holding no record of the mandate. --}}
             <button type="submit"
-                v-bind:disabled="isSubmitting"
+                v-bind:disabled="isSubmitting || (payMonthly && installmentsOffered && !installmentConsent)"
                 class="mt-4 inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-lg font-semibold text-lg shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm"
                 style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
                 <span v-if="isSubmitting">{{ strtoupper(__('messages.processing')) }}</span>
+                <span v-else-if="payMonthly && installmentsOffered">@{{ payNowLabel }}</span>
                 <span v-else>{{ strtoupper(__('messages.checkout')) }}</span>
             </button>
         </div>
@@ -1485,7 +1696,10 @@
         @endif
 
         @if ($event->expire_unpaid_tickets > 0)
-            <div class="mt-8">
+            {{-- Suppressed on a monthly plan: the sale is marked paid on the first installment,
+                 so "payment must be completed within N hours" is simply untrue there and would
+                 read as a threat to a buyer who has just committed to three more payments. --}}
+            <div class="mt-8" v-if="!(payMonthly && installmentsOffered)">
                 @if ($event->expire_unpaid_tickets == 1)
                     {{ __('messages.payment_must_be_completed_within_hour') }}
                 @else

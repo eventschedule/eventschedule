@@ -82,6 +82,13 @@ class AuditService
 
     const SALE_EXPIRED = 'sale.expired';
 
+    // Installment plan actions. Prefixed `sale.` on purpose: RoleController::auditLog() scopes a
+    // schedule owner's log to `sale.%` rows carrying an `event_id:<id>` metadata suffix, so any
+    // other prefix would be invisible to the organizer whose buyer was just charged.
+    const SALE_INSTALLMENT_PAID = 'sale.installment_paid';
+
+    const SALE_INSTALLMENT_FAILED = 'sale.installment_failed';
+
     // Gift card actions
     const GIFT_CARD_CREATED = 'gift_card.created';
 

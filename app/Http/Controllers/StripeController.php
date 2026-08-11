@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\AnalyticsEventsDaily;
 use App\Models\GiftCard;
 use App\Models\Sale;
+use App\Models\SaleInstallment;
+use App\Models\SaleInstallmentPlan;
 use App\Services\AuditService;
 use App\Services\EmailService;
 use App\Services\MetaAdsService;
@@ -126,6 +128,29 @@ class StripeController extends Controller
             case 'payment_intent.succeeded':
                 // Stripe Connect payments (hosted mode)
                 $paymentIntent = $event->data->object;
+
+                // Installments branch FIRST, before the sale lookup below.
+                //
+                // Not merely before the amount reconciliation: TicketController::success() stamps
+                // installment 1's PaymentIntent onto sales.transaction_reference, so the lookup
+                // on the next line WILL match a sale, and the reconciliation lives inside that
+                // `if ($sale)`. Anything placed in there is already fighting committed code, and
+                // a 1-of-4 payment would be reconciled against the full order total and land the
+                // sale in amount_mismatch - killing a valid ticket.
+                if (isset($paymentIntent->metadata->installment_id)
+                    || isset($paymentIntent->metadata->installment_plan_payoff)) {
+                    $this->handleInstallmentPayment(
+                        $paymentIntent->metadata,
+                        $paymentIntent->amount,
+                        $paymentIntent->currency ?? null,
+                        $paymentIntent->id,
+                        $verifiedViaConnect,
+                        $event->account ?? null,
+                        $paymentIntent,
+                    );
+                    break;
+                }
+
                 $sale = Sale::where('payment_method', 'stripe')
                     ->where('transaction_reference', $paymentIntent->id)
                     ->first();
@@ -272,6 +297,39 @@ class StripeController extends Controller
             case 'checkout.session.completed':
                 // Direct Stripe payments (selfhosted mode)
                 $session = $event->data->object;
+
+                // The buyer replaced the card on their plan. A setup-mode session is never
+                // `payment_status === 'paid'`, so it matched no branch here at all and the whole
+                // "update card" flow was a no-op: the buyer saw Stripe's success page and our
+                // confirmation banner while the cron carried on charging the dead card until the
+                // plan went delinquent and their ticket was refused at the door.
+                if (isset($session->metadata->installment_plan_card_update)) {
+                    $this->handleInstallmentCardUpdate(
+                        $session,
+                        $verifiedViaConnect,
+                        $event->account ?? null,
+                    );
+                    break;
+                }
+
+                // The selfhost / platform rail settles here, not on payment_intent.succeeded, and
+                // the block below reconciles session->amount_total against the FULL order total.
+                // Without this branch every selfhosted installment purchase would be flagged
+                // amount_mismatch, which is exactly the failure the design exists to avoid.
+                if ($session->payment_status === 'paid'
+                    && (isset($session->metadata->installment_id)
+                        || isset($session->metadata->installment_plan_payoff))) {
+                    $this->handleInstallmentPayment(
+                        $session->metadata,
+                        $session->amount_total,
+                        $session->currency ?? null,
+                        $session->payment_intent ?? $session->id,
+                        $verifiedViaConnect,
+                        $event->account ?? null,
+                    );
+                    break;
+                }
+
                 if ($session->payment_status === 'paid' && isset($session->metadata->sale_id)) {
                     $saleId = UrlUtils::decodeId($session->metadata->sale_id);
                     $sale = Sale::find($saleId);
@@ -486,6 +544,187 @@ class StripeController extends Controller
 
         if ($didActivate) {
             (new EmailService)->sendGiftCardEmails($giftCard->refresh());
+        }
+    }
+
+    /**
+     * Settle an installment payment, or a payoff of the whole remaining balance.
+     *
+     * Mirrors handleGiftCardPayment()'s security properties, because the same attack applies: the
+     * Connect webhook secret only proves the event came from SOME connected account, so without
+     * matching the account a hostile user could pay themselves on their own Connect account with
+     * a victim's installment_id in metadata and have the victim's balance credited.
+     *
+     * Never writes sales.status = 'amount_mismatch'. That status feeds the operator's /admin
+     * review queue, and flipping a sale that is already 3/4 paid out of `paid` would kill the
+     * buyer's QR at the door and let approveSale() re-credit analytics with the whole order total
+     * that installment 1 already booked. A bad installment amount is recorded on the installment
+     * row and surfaces on the organizer's Installments tab instead.
+     *
+     * @param  mixed  $metadata  Stripe metadata object from the PaymentIntent or Session
+     * @param  mixed  $paymentIntentObject  Full PaymentIntent, when available, for card details
+     */
+    private function handleInstallmentPayment(
+        $metadata,
+        $rawAmount,
+        ?string $payloadCurrency,
+        ?string $reference,
+        bool $verifiedViaConnect,
+        ?string $eventAccount,
+        $paymentIntentObject = null,
+    ): void {
+        $isPayoff = isset($metadata->installment_plan_payoff);
+
+        $plan = null;
+        $installment = null;
+
+        if ($isPayoff) {
+            $planId = UrlUtils::decodeId($metadata->installment_plan_payoff);
+            $plan = SaleInstallmentPlan::find($planId);
+        } else {
+            // Ids reaching the app from outside are always encoded (CLAUDE.md), and this one is
+            // attacker-supplied in the sense that it round-trips through Stripe metadata.
+            $installmentId = UrlUtils::decodeId($metadata->installment_id);
+            $installment = SaleInstallment::find($installmentId);
+            $plan = $installment?->plan;
+        }
+
+        if (! $plan) {
+            \Log::warning('Stripe installment webhook: plan not found', ['reference' => $reference]);
+
+            return;
+        }
+
+        $merchantAccount = $plan->stripe_account_id;
+
+        // Direction 1: a Connect merchant's object confirmed by the PLATFORM key. Both secrets are
+        // configured in hosted mode, so this direction is live and must be rejected too - the
+        // gift-card handler learned this the hard way.
+        if ($merchantAccount && ! $verifiedViaConnect) {
+            \Log::warning('Stripe webhook key mismatch: platform key used for Connect installment', [
+                'plan_id' => $plan->id,
+                'reference' => $reference,
+            ]);
+
+            return;
+        }
+
+        // Direction 2: a Connect-verified event whose account is not this plan's merchant.
+        if ($verifiedViaConnect && (! $merchantAccount || $eventAccount !== $merchantAccount)) {
+            \Log::error('Stripe installment webhook: connected account mismatch - NOT credited', [
+                'plan_id' => $plan->id,
+                'event_account' => $eventAccount,
+                'reference' => $reference,
+            ]);
+
+            return;
+        }
+
+        if ($payloadCurrency && strcasecmp($payloadCurrency, $plan->currency) !== 0) {
+            \Log::error('Stripe installment webhook: currency mismatch - NOT credited', [
+                'plan_id' => $plan->id,
+                'expected_currency' => $plan->currency,
+                'webhook_currency' => $payloadCurrency,
+                'reference' => $reference,
+            ]);
+
+            return;
+        }
+
+        $paidAmount = $rawAmount / MoneyUtils::getSmallestUnitMultiplier($plan->currency);
+
+        // Everything above is authentication; the money itself is settled by the one shared
+        // implementation, which app:charge-installments also calls so a missing or delayed webhook
+        // can no longer leave a charged card unrecorded.
+        $payoffIds = null;
+        if ($isPayoff && isset($metadata->installment_ids)) {
+            $payoffIds = array_filter(array_map(
+                fn ($id) => UrlUtils::decodeId($id),
+                explode(',', (string) $metadata->installment_ids)
+            ));
+        }
+
+        app(\App\Services\InstallmentService::class)->settle(
+            $plan,
+            $installment,
+            $isPayoff,
+            $paidAmount,
+            $reference,
+            $paymentIntentObject,
+            $payoffIds,
+        );
+    }
+
+    /**
+     * Swap the card a plan's future installments are charged to.
+     *
+     * Same account guards as a payment: the SetupIntent was created on the organizer's connected
+     * account, so an event confirmed by a different account has no business rewriting this plan's
+     * payment method.
+     */
+    private function handleInstallmentCardUpdate($session, bool $verifiedViaConnect, ?string $eventAccount): void
+    {
+        $plan = SaleInstallmentPlan::find(UrlUtils::decodeId($session->metadata->installment_plan_card_update));
+
+        if (! $plan) {
+            \Log::warning('Stripe card-update webhook: plan not found', ['session' => $session->id ?? null]);
+
+            return;
+        }
+
+        $merchantAccount = $plan->stripe_account_id;
+
+        if ($merchantAccount && ! $verifiedViaConnect) {
+            \Log::warning('Stripe webhook key mismatch: platform key used for a Connect card update', [
+                'plan_id' => $plan->id,
+            ]);
+
+            return;
+        }
+
+        if ($verifiedViaConnect && (! $merchantAccount || $eventAccount !== $merchantAccount)) {
+            \Log::error('Stripe card-update webhook: connected account mismatch - NOT applied', [
+                'plan_id' => $plan->id,
+                'event_account' => $eventAccount,
+            ]);
+
+            return;
+        }
+
+        try {
+            [$stripe, $options] = app(\App\Services\InstallmentService::class)->stripeContextFor($plan);
+            $setupIntent = $stripe->setupIntents->retrieve($session->setup_intent, [], $options);
+
+            if (($setupIntent->status ?? null) !== 'succeeded' || ! $setupIntent->payment_method) {
+                return;
+            }
+
+            $paymentMethod = $stripe->paymentMethods->retrieve($setupIntent->payment_method, [], $options);
+
+            $plan->forceFill([
+                'stripe_customer_id' => $setupIntent->customer ?: $plan->stripe_customer_id,
+                'stripe_payment_method_id' => $setupIntent->payment_method,
+                'card_brand' => $paymentMethod->card->brand ?? $plan->card_brand,
+                'card_last4' => $paymentMethod->card->last4 ?? $plan->card_last4,
+                'card_exp_month' => $paymentMethod->card->exp_month ?? $plan->card_exp_month,
+                'card_exp_year' => $paymentMethod->card->exp_year ?? $plan->card_exp_year,
+            ])->save();
+
+            // A new card is exactly the remedy for the state that parked these rows, so put them
+            // back in the ladder rather than leaving the buyer stuck after doing what we asked.
+            SaleInstallment::where('sale_installment_plan_id', $plan->id)
+                ->whereIn('status', ['awaiting_customer', 'failed'])
+                ->update(['status' => 'scheduled', 'attempts' => 0, 'next_attempt_at' => null, 'last_error' => null]);
+
+            if ($plan->status === 'delinquent') {
+                $plan->forceFill(['status' => 'active', 'delinquent_at' => null])->save();
+            }
+        } catch (\Exception $e) {
+            report($e);
+            \Log::error('Could not apply an installment card update', [
+                'plan_id' => $plan->id,
+                'error' => $e->getMessage(),
+            ]);
         }
     }
 

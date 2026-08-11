@@ -3281,6 +3281,18 @@
                                 :disabled="$emailDisabled" />
                         </div>
 
+                        {{-- Defaults ON, unlike the others. A failed installment is money that did
+                             not arrive; an organizer who never opened this page still needs to
+                             hear about it. Routine "due tomorrow" notices are aggregated into one
+                             daily digest, so this cannot flood them. --}}
+                        <div class="mb-6">
+                            <x-toggle name="notification_installment_due"
+                                label="{{ __('messages.notification_installment_due') }}"
+                                checked="{{ old('notification_installment_due', $notificationSettings['installment_due'] ?? true) }}"
+                                help="{{ __('messages.notification_installment_due_help') }}"
+                                :disabled="$emailDisabled" />
+                        </div>
+
                         </div>
                         <!-- End Tab Content: Notifications -->
 

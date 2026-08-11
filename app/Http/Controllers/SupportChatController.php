@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Mail\SupportMessageNotification;
-use App\Services\OneSignalService;
 use App\Models\SupportConversation;
 use App\Models\SupportMessage;
 use App\Models\User;
+use App\Services\OneSignalService;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;

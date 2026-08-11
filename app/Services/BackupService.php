@@ -433,6 +433,33 @@ class BackupService
                 $saleData[$field] = $sale->$field;
             }
 
+            // Installment plan, as a RECORD only. The plan's own secret and its Stripe customer /
+            // payment-method ids are deliberately omitted, exactly as $sale->secret is above: a
+            // backup file must never carry a live payment link, and the stored card belongs to
+            // the exporting owner's connected account, which the importer is not. The per-payment
+            // transaction references are kept because they are what an organizer needs to
+            // reconcile or refund by hand.
+            if ($plan = $sale->installmentPlan) {
+                $saleData['installment_plan'] = [
+                    'currency' => $plan->currency,
+                    'total_amount' => $plan->total_amount,
+                    'amount_paid' => $plan->amount_paid,
+                    'installment_count' => $plan->installment_count,
+                    'card_brand' => $plan->card_brand,
+                    'card_last4' => $plan->card_last4,
+                    'mandate_accepted_at' => $plan->mandate_accepted_at?->toDateTimeString(),
+                    'created_at' => $plan->created_at?->toDateTimeString(),
+                    'installments' => $plan->installments->map(fn ($i) => [
+                        'sequence' => $i->sequence,
+                        'amount' => $i->amount,
+                        'due_at' => $i->due_at?->toDateTimeString(),
+                        'status' => $i->status,
+                        'paid_at' => $i->paid_at?->toDateTimeString(),
+                        'transaction_reference' => $i->transaction_reference,
+                    ])->toArray(),
+                ];
+            }
+
             $saleData['sale_tickets'] = $sale->saleTickets->map(function ($st) {
                 $stData = [
                     '_ticket_ref_id' => $st->ticket_id,
@@ -1703,7 +1730,64 @@ class BackupService
             Sale::where('id', $sale->id)->update(['created_at' => $data['created_at']]);
         }
 
+        $this->importInstallmentPlan($data, $sale);
+
         return $sale;
+    }
+
+    /**
+     * Restore an installment plan as HISTORY, never as a live mandate.
+     *
+     * Every plan and installment comes back `cancelled`, with no Stripe customer or payment
+     * method. A restore lands on a different schedule, owned by a different Stripe connected
+     * account, and the buyer agreed to be charged by the original organizer - not this one.
+     * Importing the rows in their original `scheduled` state would have the next cron run email
+     * real buyers about payments on a schedule that never sold them anything, and, once a card
+     * was somehow attached, charge them.
+     */
+    private function importInstallmentPlan(array $data, Sale $sale): void
+    {
+        $planData = $data['installment_plan'] ?? null;
+
+        if (! is_array($planData) || empty($planData['installments'])) {
+            return;
+        }
+
+        $plan = new \App\Models\SaleInstallmentPlan;
+        $plan->sale_id = $sale->id;
+        $plan->currency = $planData['currency'] ?? 'USD';
+        $plan->total_amount = $planData['total_amount'] ?? 0;
+        $plan->amount_paid = $planData['amount_paid'] ?? 0;
+        $plan->installment_count = $planData['installment_count'] ?? count($planData['installments']);
+        $plan->status = 'cancelled';
+        $plan->card_brand = $planData['card_brand'] ?? null;
+        $plan->card_last4 = $planData['card_last4'] ?? null;
+        $plan->mandate_accepted_at = $planData['mandate_accepted_at'] ?? null;
+        $plan->secret = Str::random(32);
+        $plan->saveQuietly();
+
+        if (! empty($planData['created_at'])) {
+            \App\Models\SaleInstallmentPlan::where('id', $plan->id)
+                ->update(['created_at' => $planData['created_at']]);
+        }
+
+        foreach ($planData['installments'] as $row) {
+            if (! is_array($row) || ! isset($row['sequence'])) {
+                continue;
+            }
+
+            $installment = new \App\Models\SaleInstallment;
+            $installment->sale_installment_plan_id = $plan->id;
+            $installment->sequence = (int) $row['sequence'];
+            $installment->amount = $row['amount'] ?? 0;
+            $installment->due_at = $row['due_at'] ?? now();
+            // A payment that really happened stays `paid` so the record reads truthfully;
+            // anything still outstanding is cancelled so nothing can ever charge it.
+            $installment->status = ($row['status'] ?? null) === 'paid' ? 'paid' : 'cancelled';
+            $installment->paid_at = $row['paid_at'] ?? null;
+            $installment->transaction_reference = $row['transaction_reference'] ?? null;
+            $installment->saveQuietly();
+        }
     }
 
     private function importSaleTicket(array $data, Sale $sale, array &$idMap): void

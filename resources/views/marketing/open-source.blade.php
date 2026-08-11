@@ -1113,7 +1113,7 @@
                             </div>
                             <h3 class="es-commit-ink mb-4 text-xl font-bold">Webhooks, signed</h3>
                             <p class="es-commit-muted mb-4">
-                                Twelve event types, from <span class="es-commit-mono es-commit-accent">sale.created</span> through <span class="es-commit-mono es-commit-accent">ticket.scanned</span> to <span class="es-commit-mono es-commit-accent">feedback.submitted</span>. Each delivery carries an HMAC-SHA256 signature computed over the exact body, so you can verify it came from your install and not from somebody who guessed your endpoint.
+                                Fourteen event types, from <span class="es-commit-mono es-commit-accent">sale.created</span> through <span class="es-commit-mono es-commit-accent">ticket.scanned</span> to <span class="es-commit-mono es-commit-accent">feedback.submitted</span>. Each delivery carries an HMAC-SHA256 signature computed over the exact body, so you can verify it came from your install and not from somebody who guessed your endpoint.
                             </p>
                             <p class="es-commit-muted text-sm">
                                 Three attempts, backing off thirty then sixty seconds. The secret is stored encrypted.

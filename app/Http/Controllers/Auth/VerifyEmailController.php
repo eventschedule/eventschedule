@@ -38,7 +38,7 @@ class VerifyEmailController extends Controller
 
                 $user->roles()->attach($role->id, ['level' => 'owner', 'created_at' => now()]);
 
-                if (!$user->default_role_id) {
+                if (! $user->default_role_id) {
                     $user->default_role_id = $role->id;
                     $user->save();
                 }

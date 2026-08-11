@@ -79,9 +79,9 @@ class NewsletterTrackingController extends Controller
             if ($fragment !== null) {
                 $url = preg_replace('/#.*$/', '', $url);
             }
-            $url .= (str_contains($url, '?') ? '&' : '?') . $utmParams;
+            $url .= (str_contains($url, '?') ? '&' : '?').$utmParams;
             if ($fragment !== null) {
-                $url .= '#' . $fragment;
+                $url .= '#'.$fragment;
             }
         }
 

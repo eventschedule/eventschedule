@@ -101,6 +101,13 @@ Schedule::call(function () {
     Artisan::call('app:send-appointment-reminders');
 })->hourly()->name('send-appointment-reminders')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
 
+// withoutOverlapping() is not decoration here: this command initiates card charges, so two
+// concurrent runs would attempt the same installment. The Stripe idempotency key is the second
+// line of defence; this is the first.
+Schedule::call(function () {
+    Artisan::call('app:charge-installments');
+})->hourly()->name('charge-installments')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+
 Schedule::call(function () {
     Artisan::call('federation:push');
 })->hourly()->name('federation-push')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));

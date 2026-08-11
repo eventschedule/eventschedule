@@ -238,6 +238,39 @@
             </div>
           @endif
 
+          {{-- ON HOLD: its own amber tier, distinct from both the yellow "unpaid" and the red
+               "void" ones above. Those both say "you have no ticket"; this one says the ticket is
+               real and one payment behind, and that paying restores it at once. The sale is still
+               `paid`, so it never reaches the banner above. --}}
+          @php
+            $installmentPlan = $sale->installmentPlan;
+            $planOnHold = $installmentPlan && $installmentPlan->isDelinquent();
+          @endphp
+          @if ($planOnHold)
+            <div class="relative z-10 mb-[16px] rounded-xl border border-amber-400/70 print:border-amber-300 bg-amber-500/25 print:bg-amber-50 p-[14px] sm:p-[16px]">
+              <div class="flex items-start gap-[12px]">
+                <svg width="22" height="22" viewBox="0 0 20 20" class="flex-shrink-0 mt-[2px]" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" class="fill-amber-300 print:fill-amber-700"/>
+                </svg>
+                <div class="flex-1 min-w-0">
+                  <p class="text-[14px] font-bold uppercase tracking-wide text-amber-100 print:text-amber-800">
+                    {{ __('messages.ticket_payment_overdue') }}
+                  </p>
+                  <p class="text-[12px] mt-[2px] text-amber-50 print:text-amber-700">
+                    {{ __('messages.ticket_on_hold_sub', ['amount' => \App\Utils\MoneyUtils::format($installmentPlan->amountRemaining(), $installmentPlan->currency)]) }}
+                  </p>
+                  <a href="{{ route('installment.view', ['plan_id' => \App\Utils\UrlUtils::encodeId($installmentPlan->id), 'secret' => $installmentPlan->secret]) }}"
+                     class="inline-flex items-center gap-[6px] mt-[10px] px-[14px] py-[8px] rounded-lg bg-amber-400 hover:bg-amber-300 text-amber-900 text-[13px] font-semibold transition-colors print:hidden">
+                    {{ __('messages.pay_now') }}
+                    <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+          @endif
+
           <div class="grid grid-cols-[1fr,auto] gap-[20px] items-start">
             {{-- Left: Info badges --}}
             <div class="space-y-[12px]">
@@ -303,17 +336,20 @@
             {{-- Right: QR Code --}}
             <div class="flex flex-col items-center">
               <div class="relative bg-white rounded-2xl p-[8px] shadow-lg shadow-black/20 print:shadow-md">
-                <img class="w-[120px] h-[120px] {{ $sale->status !== 'paid' ? 'opacity-40 grayscale' : '' }}" src="{{ route('ticket.qr_code', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $sale->secret]) }}" alt="QR Code" />
-                @if ($sale->status !== 'paid')
+                <img class="w-[120px] h-[120px] {{ ($sale->status !== 'paid' || $planOnHold) ? 'opacity-40 grayscale' : '' }}" src="{{ route('ticket.qr_code', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $sale->secret]) }}" alt="QR Code" />
+                @if ($sale->status !== 'paid' || $planOnHold)
                   <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <span class="rotate-[-20deg] px-[8px] py-[2px] text-[14px] font-extrabold tracking-wider rounded shadow {{ $isUnpaid ? 'bg-yellow-400 text-yellow-900' : 'bg-red-500 text-white' }}">
-                      {{ $isUnpaid ? __('messages.unpaid') : __('messages.void') }}
+                    {{-- Amber ON HOLD, not red VOID: the ticket is real and one payment behind. --}}
+                    <span class="rotate-[-20deg] px-[8px] py-[2px] text-[14px] font-extrabold tracking-wider rounded shadow {{ $planOnHold ? 'bg-amber-400 text-amber-900' : ($isUnpaid ? 'bg-yellow-400 text-yellow-900' : 'bg-red-500 text-white') }}">
+                      {{ $planOnHold ? __('messages.ticket_on_hold') : ($isUnpaid ? __('messages.unpaid') : __('messages.void')) }}
                     </span>
                   </div>
                 @endif
               </div>
               <p class="text-[10px] text-white/40 print-text-gray mt-[8px] text-center font-medium">
-                @if ($sale->status === 'paid')
+                @if ($planOnHold)
+                  {{ __('messages.installment_on_hold_door') }}
+                @elseif ($sale->status === 'paid')
                   {{ __('messages.scan_for_entry') }}
                 @elseif ($isUnpaid)
                   {{ __('messages.payment_required_to_enter') }}
@@ -575,6 +611,23 @@
           </div>
         </div>
         @endif
+        @endif
+
+        {{-- Payment plan. The page is already authenticated by $sale->secret, so the panel simply
+             renders here for anyone holding the ticket link.
+
+             The error slot is unconditional: this page's only other session('error') block is
+             nested inside the pass-booking @if, which is empty for an ordinary installment ticket -
+             so every bail from InstallmentController::pay(), including a genuine Stripe failure,
+             was swallowed and the buyer saw the page silently reload. --}}
+        @if ($installmentPlan && session('error'))
+          <div class="glass rounded-2xl p-[16px] mb-[16px] border border-red-400/40 bg-red-500/15">
+            <p class="text-[13px] text-red-100 print:text-red-800">{{ session('error') }}</p>
+          </div>
+        @endif
+
+        @if ($installmentPlan && $installmentPlan->status !== 'cancelled')
+          @include('partials.installment-plan-panel', ['plan' => $installmentPlan, 'variant' => 'dark'])
         @endif
 
         {{-- Custom Fields Section --}}

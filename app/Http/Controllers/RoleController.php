@@ -329,6 +329,34 @@ class RoleController extends Controller
             }
         }
 
+        // Stop off-session installment charges before the schedule goes away.
+        //
+        // Only a TALENT schedule's single-member events are deleted above, so a venue's or
+        // curator's events and sales outlive $role->delete() with their plans intact - and the
+        // owner can no longer even see them to stop the charges. Same discipline as the boost
+        // loop directly above: unwind live money before deleting.
+        try {
+            $saleIds = Sale::whereIn('event_id', $role->events()->pluck('events.id'))
+                ->where('is_deleted', false)
+                ->pluck('id');
+
+            $cancelledPlans = app(\App\Services\InstallmentService::class)
+                ->cancelPlansForSales($saleIds, 'schedule_deleted');
+
+            if ($cancelledPlans) {
+                \Log::info('Cancelled installment plans during schedule deletion', [
+                    'role_id' => $role->id,
+                    'plans' => $cancelledPlans,
+                ]);
+            }
+        } catch (\Exception $e) {
+            report($e);
+            \Log::error('Failed to cancel installment plans during schedule deletion', [
+                'role_id' => $role->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
         $role->delete();
 
         try {
@@ -3788,7 +3816,7 @@ class RoleController extends Controller
 
         $pivot = $role->users()->where('user_id', auth()->id())->first()?->pivot;
         $notificationSettings = array_merge(
-            ['new_sale' => false, 'new_request' => true, 'new_fan_content' => false, 'new_feedback' => false, 'new_poll_option' => false],
+            ['new_sale' => false, 'new_request' => true, 'new_fan_content' => false, 'new_feedback' => false, 'new_poll_option' => false, 'installment_due' => true],
             json_decode($pivot?->notification_settings ?? '{}', true)
         );
 
@@ -4481,6 +4509,7 @@ class RoleController extends Controller
             'new_fan_content' => (bool) $request->input('notification_new_fan_content'),
             'new_feedback' => (bool) $request->input('notification_new_feedback'),
             'new_poll_option' => (bool) $request->input('notification_new_poll_option'),
+            'installment_due' => (bool) $request->input('notification_installment_due'),
         ];
         $role->users()->updateExistingPivot(auth()->id(), [
             'notification_settings' => json_encode($notificationSettings),

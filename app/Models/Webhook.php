@@ -30,6 +30,8 @@ class Webhook extends Model
         'sale.paid',
         'sale.refunded',
         'sale.cancelled',
+        'installment.paid',
+        'installment.failed',
         'event.created',
         'event.updated',
         'event.deleted',

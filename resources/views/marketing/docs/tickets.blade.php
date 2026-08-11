@@ -16,6 +16,7 @@
             <x-doc-nav-link href="#invoiceninja-modes">Invoice Ninja Modes</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-link href="#options">Options</x-doc-nav-link>
+        <x-doc-nav-link href="#installments">Installment Payments</x-doc-nav-link>
         <x-doc-nav-link href="#promo-codes">Promo Codes</x-doc-nav-link>
         <x-doc-nav-link href="#add-ons">Add-ons</x-doc-nav-link>
         <x-doc-nav-group label="Managing Sales" href="#managing-sales">
@@ -665,6 +666,64 @@
                     </tr>
                 </tbody>
             </table>
+        </div>
+    </section>
+
+    <!-- Installments -->
+    <section id="installments" class="doc-section">
+        <h2 class="doc-heading">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Installment Payments <x-doc-badge plan="pro" />
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Let buyers spread the cost of an expensive ticket over monthly payments. Useful for courses, retreats and multi-day events announced well in advance: a buyer pays the first installment at checkout and gets their ticket straight away, and the rest is charged automatically to the same card each month.</p>
+
+        <div class="doc-fields">
+            <h3 class="doc-subheading">Setting it up</h3>
+            <p class="text-gray-600 dark:text-gray-300 mb-4">Open your event, go to <strong class="text-gray-900 dark:text-white">Tickets</strong> then the <strong class="text-gray-900 dark:text-white">Payment</strong> tab, and turn on <strong class="text-gray-900 dark:text-white">Let buyers pay in monthly installments</strong>. The option appears only when the event is paid through Stripe, because Stripe is the only payment method that can charge a saved card automatically.</p>
+            <table class="doc-table">
+                <thead>
+                    <tr><th>Setting</th><th>What it does</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Number of payments</td>
+                        <td>How many equal monthly payments the order total is split into. The first is taken at checkout.</td>
+                    </tr>
+                    <tr>
+                        <td>Last payment due before the event</td>
+                        <td>How much runway you want to chase a failed payment before the doors open. We recommend at least 14 days. The editor shows you live whether the schedule you have chosen actually finishes in time, and warns you if it would not.</td>
+                    </tr>
+                    <tr>
+                        <td>Only offer installments on orders over</td>
+                        <td>Optional. Keeps the option off small orders, so you can offer it on a full course but not a single tasting. Leave it blank to offer it on every order.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="doc-fields" id="installments-buyer">
+            <h3 class="doc-subheading">What the buyer sees</h3>
+            <p class="text-gray-600 dark:text-gray-300 mb-4">At checkout the buyer chooses between paying in full and paying monthly. Paying in full is selected by default. If they choose monthly they see every payment date and amount before committing, confirm that they authorise the future charges, and are charged only the first payment. There is no interest and no fee: the total is the same either way.</p>
+            <p class="text-gray-600 dark:text-gray-300 mb-4">Their ticket is valid from the first payment. Two days before each following payment we email them a reminder naming the card and the amount, and they can pay early, clear the whole balance or change their card at any time from their ticket page.</p>
+        </div>
+
+        <div class="doc-fields" id="installments-tracking">
+            <h3 class="doc-subheading">Tracking payments</h3>
+            <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Installments</strong> tab on your Sales page lists everyone paying monthly, how far through they are, what has been collected, what is outstanding, and what to expect month by month. Overdue plans sort to the top.</p>
+            <p class="text-gray-600 dark:text-gray-300 mb-4">You get one daily summary of the payments due tomorrow, rather than an email per buyer, and an immediate email whenever a payment fails.</p>
+            <div class="doc-callout">
+                <p><strong>Sales totals count the full ticket price at the moment of purchase</strong>, because the ticket is issued then. So your Sales and Analytics figures will run ahead of the money actually in your account while plans are still running. The Installments tab is the one that shows what has genuinely been collected.</p>
+            </div>
+        </div>
+
+        <div class="doc-fields" id="installments-missed">
+            <h3 class="doc-subheading">When a payment fails</h3>
+            <p class="text-gray-600 dark:text-gray-300 mb-4">We retry a declined card three times over about a week, emailing the buyer each time and telling them plainly that their ticket is still valid. If their bank asks them to confirm the payment (common in Europe) we send a different email asking them to approve it, and do not count it as a decline.</p>
+            <p class="text-gray-600 dark:text-gray-300 mb-4">If the balance is still unpaid after that, the ticket goes <strong class="text-gray-900 dark:text-white">on hold</strong>: it stops scanning at the door until they pay, and paying makes it valid again immediately. A week before the event everyone with an outstanding balance gets a final notice, and you get a list of them, so nobody is surprised at the door.</p>
+            <p class="text-gray-600 dark:text-gray-300 mb-4">Scanning a ticket that is on hold shows your door staff the attendee's name and the amount outstanding rather than a flat rejection, so they can take payment or let the guest in at your discretion.</p>
+            <p class="text-gray-600 dark:text-gray-300">Cancelling or refunding an order, cancelling the event, or deleting the schedule all stop the remaining payments immediately. Refunding the money already collected is done from your own Stripe dashboard; the Installments tab lists every payment reference so you can find them.</p>
         </div>
     </section>
 

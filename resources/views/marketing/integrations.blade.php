@@ -18,7 +18,7 @@
             "CalDAV two-way sync with any CalDAV server",
             "Stripe payments on your own connected account with zero platform fees",
             "Invoice Ninja invoicing or payment links",
-            "Signed outbound webhooks on twelve event types",
+            "Signed outbound webhooks on fourteen event types",
             "REST API for schedules, sub-schedules, events and sales",
             "OneSignal browser and mobile web push",
             "Nearby accommodation map on public event pages",
@@ -629,7 +629,7 @@
             ],
             [
                 'Webhooks', 'out', 'Pro',
-                'Twelve event types, POSTed as JSON to your URL with an HMAC-SHA256 signature. Five-second timeout, three tries, and every attempt logged.',
+                'Fourteen event types, POSTed as JSON to your URL with an HMAC-SHA256 signature. Five-second timeout, three tries, and every attempt logged.',
             ],
             [
                 'REST API', 'in', 'Pro',
@@ -684,7 +684,7 @@
             ],
             [
                 'q' => 'Can I connect a tool that is not on this page?',
-                'a' => 'That is what the terminal block is for. A webhook POSTs to any URL you own on twelve event types, signed with HMAC-SHA256 so you can verify it came from us, and the REST API lets your own code read and write schedules, events and sales with a key in an X-API-Key header. There is no Zapier or Make app; those two ports are the general-purpose route, and both are on the Pro plan.',
+                'a' => 'That is what the terminal block is for. A webhook POSTs to any URL you own on fourteen event types, signed with HMAC-SHA256 so you can verify it came from us, and the REST API lets your own code read and write schedules, events and sales with a key in an X-API-Key header. There is no Zapier or Make app; those two ports are the general-purpose route, and both are on the Pro plan.',
             ],
             [
                 'q' => 'Do you integrate with Zoom, YouTube or Twitch?',
@@ -1157,7 +1157,7 @@
                             <h3 class="text-xl font-bold es-wire-onband">Webhooks</h3>
                             <span class="es-wire-plan es-wire-plan-pro">Pro</span>
                         </div>
-                        <p class="mb-5 text-sm es-wire-onband-muted">Twelve event types, POSTed as JSON to a URL you own. Subscribe to all of them or pick the ones you care about.</p>
+                        <p class="mb-5 text-sm es-wire-onband-muted">Fourteen event types, POSTed as JSON to a URL you own. Subscribe to all of them or pick the ones you care about.</p>
                         <div class="mb-6 flex flex-wrap gap-1.5" aria-hidden="true">
                             @foreach ($hookTypes as $hookType)
                                 <span class="es-wire-slug">{{ $hookType }}</span>
@@ -1340,7 +1340,7 @@
                         <h3 class="es-wire-ink text-lg font-bold">No Zapier or Make app</h3>
                     </div>
                     <p class="es-wire-muted text-sm">
-                        There is no listing in either directory. The general-purpose route is the terminal block above: a signed webhook out on twelve event types, and the REST API in. Both accept a plain HTTP client, so an automation tool that can POST and receive JSON can be wired up without a connector.
+                        There is no listing in either directory. The general-purpose route is the terminal block above: a signed webhook out on fourteen event types, and the REST API in. Both accept a plain HTTP client, so an automation tool that can POST and receive JSON can be wired up without a connector.
                     </p>
                 </div>
 

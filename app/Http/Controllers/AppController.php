@@ -303,6 +303,15 @@ class AppController extends Controller
                     report($e);
                 }
                 try {
+                    // Bounded explicitly: this whole hourly block shares one 900s budget, and a
+                    // synchronous run of Stripe charges is the one thing here that can consume it
+                    // all and starve the commands queued behind. It resumes next hour.
+                    \Artisan::call('app:charge-installments', ['--max-seconds' => 120]);
+                } catch (\Throwable $e) {
+                    \Log::error('Scheduled command app:charge-installments failed: '.$e->getMessage());
+                    report($e);
+                }
+                try {
                     \Artisan::call('federation:push');
                 } catch (\Throwable $e) {
                     \Log::error('Scheduled command federation:push failed: '.$e->getMessage());

@@ -13,12 +13,14 @@ use App\Models\GiftCard;
 use App\Models\PromoCode;
 use App\Models\Role;
 use App\Models\Sale;
+use App\Models\SaleInstallmentPlan;
 use App\Models\SaleTicket;
 use App\Models\TicketWaitlist;
 use App\Models\User;
 use App\Rules\NoFakeEmail;
 use App\Services\AuditService;
 use App\Services\EmailService;
+use App\Services\InstallmentService;
 use App\Services\PassBookingService;
 use App\Services\PassRedemptionService;
 use App\Services\RoleMailerService;
@@ -195,7 +197,13 @@ class TicketController extends Controller
 
             $ticketQuotas = $this->getTicketQuotas();
 
-            return view('ticket.sales', compact('sales', 'count', 'waitlistCount', 'waitlistEntries', 'hasPro', 'groupCounts', 'sortBy', 'sortDir', 'subscriptions', 'subscriptionsCount', 'giftCards', 'giftCardsCount', 'ticketQuotas'));
+            $installmentData = $this->getInstallmentsData();
+            $installments = $installmentData['installments'];
+            $installmentsCount = $installments->count();
+            $installmentTotals = $installmentData['installmentTotals'];
+            $installmentForecast = $installmentData['installmentForecast'];
+
+            return view('ticket.sales', compact('sales', 'count', 'waitlistCount', 'waitlistEntries', 'hasPro', 'groupCounts', 'sortBy', 'sortDir', 'subscriptions', 'subscriptionsCount', 'giftCards', 'giftCardsCount', 'ticketQuotas', 'installments', 'installmentsCount', 'installmentTotals', 'installmentForecast'));
         }
     }
 
@@ -348,6 +356,108 @@ class TicketController extends Controller
                 ])->values(),
             ];
         })->sortBy('name')->values();
+    }
+
+    /**
+     * The Installments tab.
+     *
+     * Scoped like the rest of this page: every event the signed-in user owns, across all of their
+     * schedules. Two things it returns beyond the plan rows themselves:
+     *
+     * - Per-CURRENCY totals. /sales aggregates across schedules, so an organizer with a Rome event
+     *   and a London one has two currencies and a single summed figure would simply be wrong. The
+     *   gift-cards partial already solves this the same way.
+     * - A cash-flow forecast by month, which is the thing an organizer selling months ahead
+     *   actually wants to know and what turns this from a page you visit when something breaks
+     *   into one you open on purpose.
+     */
+    private function getInstallmentsData(): array
+    {
+        $user = auth()->user();
+
+        $plans = SaleInstallmentPlan::query()
+            ->whereHas('sale', function ($q) use ($user) {
+                // Paid sales only, matching getSubscriptionsData(). An abandoned Stripe session
+                // leaves an `active` plan on an `unpaid` sale, and without this it showed as a
+                // live plan reading "On track, 0 / 4" and its scheduled rows inflated the
+                // "Expected by month" forecast with money nobody ever committed to paying.
+                $q->where('is_deleted', false)
+                    ->where('status', 'paid')
+                    ->whereHas('event', fn ($eq) => $eq->where('user_id', $user->id));
+            })
+            ->with(['installments', 'sale:id,name,email,event_id,secret', 'sale.event:id,name'])
+            ->get();
+
+        $rows = $plans->map(function ($plan) {
+            $next = $plan->nextDueInstallment();
+            $overdue = $plan->isDelinquent()
+                || $plan->installments->contains(fn ($i) => $i->isOverdue());
+
+            return [
+                'name' => $plan->sale?->name,
+                'email' => $plan->sale?->email,
+                'event' => $plan->sale?->event?->name,
+                'currency' => $plan->currency,
+                'progress' => $plan->paidCount().' / '.$plan->installment_count,
+                'collected' => (float) $plan->amount_paid,
+                'outstanding' => $plan->amountRemaining(),
+                'next_due' => $next?->due_at?->format('M j, Y'),
+                'next_amount' => $next ? (float) $next->amount : null,
+                // 'delinquent' is a schema value; the organizer reads "overdue".
+                'status' => $plan->status === 'delinquent' ? 'overdue' : $plan->status,
+                'is_overdue' => $overdue,
+                'card' => $plan->card_brand && $plan->card_last4
+                    ? __('messages.installment_card_on_file', ['brand' => ucfirst($plan->card_brand), 'last4' => $plan->card_last4])
+                    : null,
+                'card_expiring' => $plan->cardExpiresBeforeFinalPayment(),
+                'error' => $next?->humanErrorKey() ? __($next->humanErrorKey()) : null,
+                // Every payment reference the organizer needs to refund by hand on their own
+                // Stripe dashboard: nothing in this app refunds a Connect ticket sale, and the
+                // sale's single transaction_reference cannot identify N charges.
+                'payments' => $plan->installments->map(fn ($i) => [
+                    'sequence' => $i->sequence,
+                    'amount' => (float) $i->amount,
+                    'due_at' => $i->due_at?->format('M j, Y'),
+                    'status' => $i->status,
+                    'reference' => $i->transaction_reference,
+                ])->values(),
+            ];
+        })
+            // An action queue, not a ledger: the rows that need doing something about come first.
+            ->sortBy(fn ($r) => [$r['is_overdue'] ? 0 : 1, $r['next_due'] ?? '9999'])
+            ->values();
+
+        $totals = $plans->groupBy('currency')->map(fn ($group, $currency) => [
+            'currency' => $currency,
+            'count' => $group->count(),
+            'collected' => (float) $group->sum(fn ($p) => (float) $p->amount_paid),
+            'outstanding' => (float) $group->sum(fn ($p) => $p->amountRemaining()),
+        ])->values();
+
+        $forecast = $plans->flatMap(fn ($p) => $p->installments
+            ->where('status', 'scheduled')
+            ->map(fn ($i) => [
+                'month' => $i->due_at?->format('Y-m'),
+                'label' => $i->due_at?->format('M Y'),
+                'amount' => (float) $i->amount,
+                'currency' => $p->currency,
+            ]))
+            ->filter(fn ($r) => $r['month'])
+            ->groupBy(fn ($r) => $r['currency'].'|'.$r['month'])
+            ->map(fn ($group) => [
+                'label' => $group->first()['label'],
+                'currency' => $group->first()['currency'],
+                'amount' => $group->sum('amount'),
+                'count' => $group->count(),
+            ])
+            ->sortBy('label')
+            ->values();
+
+        return [
+            'installments' => $rows,
+            'installmentTotals' => $totals,
+            'installmentForecast' => $forecast,
+        ];
     }
 
     private function salesQuery(?string $filter, bool $primaryOnly = true, bool $includePast = false)
@@ -1203,6 +1313,33 @@ class TicketController extends Controller
 
             return $this->redirectToPurchaseLanding($sale, $event, $isEmbed);
         } else {
+            // Installment plan, created HERE rather than inside the pricing transaction above.
+            // A gift card can zero an order, in which case the branch above marks the sale paid
+            // and returns - a plan created earlier would be left `active` forever, with
+            // installments that are never charged, against a sale that owes nothing.
+            //
+            // Every eligibility condition is re-derived from the database. The guest form's copy
+            // of this logic is a convenience for the buyer, never the authority.
+            if ($request->filled('installments')
+                && $event->payment_method === 'stripe'
+                && count($legs) === 1) {
+
+                $installments = app(InstallmentService::class);
+                $currency = $event->ticket_currency_code ?: 'USD';
+                $hasPass = $sale->saleTickets->contains(fn ($st) => $st->ticket?->is_pass);
+
+                $reason = $hasPass
+                    ? 'messages.installments_not_offered'
+                    : $installments->ineligibleReason($event, (float) $total, $currency, $sale->event_date);
+
+                if ($reason === null) {
+                    $installments->createPlan(
+                        $sale, $event, (float) $total, $currency,
+                        $request->ip(), $request->boolean('installments_consent'),
+                    );
+                }
+            }
+
             switch ($event->payment_method) {
                 case 'stripe':
                     return $this->stripeCheckout($subdomain, $sale, $event, $isEmbed);
@@ -2470,7 +2607,43 @@ class TicketController extends Controller
         $giftTotal = $isOrder ? $sale->orderTotalGiftCard() : $sale->legTotalGiftCard();
         $expectedTotal = $isOrder ? $sale->orderTotalPayment() : $sale->legTotalPayment();
 
-        $lineItems = $this->buildStripeLineItems($stripeSaleTickets, $event, $promoLegs, $giftTotal, $expectedTotal);
+        // An installment order charges only the FIRST payment now, as a single line item.
+        //
+        // buildStripeLineItems() exists to spread promo and gift-card ratios across per-ticket
+        // lines so the session total reconciles exactly; re-deriving that against a quarter of
+        // the order would fight the very reconciliation it was built to satisfy, and a rounding
+        // slip there drives a unit price negative and 500s the checkout. The itemised breakdown
+        // lives on our own confirmation page and email instead.
+        $plan = $sale->installmentPlan;
+
+        if ($plan && $plan->status === 'active') {
+            $first = $plan->installments()->where('sequence', 1)->first();
+
+            if ($first) {
+                $currency = $plan->currency;
+                $lineItems = [[
+                    'price_data' => [
+                        'currency' => strtolower($currency),
+                        'product_data' => [
+                            'name' => $event->name.' - '.__('messages.installment_line_item', [
+                                'number' => 1,
+                                'count' => $plan->installment_count,
+                            ]),
+                        ],
+                        'unit_amount' => (int) round((float) $first->amount * MoneyUtils::getSmallestUnitMultiplier($currency)),
+                    ],
+                    'quantity' => 1,
+                ]];
+            } else {
+                $plan = null;
+            }
+        } else {
+            $plan = null;
+        }
+
+        if (! $plan) {
+            $lineItems = $this->buildStripeLineItems($stripeSaleTickets, $event, $promoLegs, $giftTotal, $expectedTotal);
+        }
 
         $data = [
             'sale_id' => UrlUtils::encodeId($sale->id),
@@ -2482,7 +2655,7 @@ class TicketController extends Controller
         $useConnect = config('app.hosted') && $event->user->stripe_account_id;
 
         try {
-            $session = $this->createStripeSession($useConnect, $lineItems, $sale, $event, $data, $isEmbed);
+            $session = $this->createStripeSession($useConnect, $lineItems, $sale, $event, $data, $isEmbed, $plan);
         } catch (\Exception $e) {
             // The sale rows, the seat holds and any promo times_used are already committed by
             // now, so an uncaught throw here answered a paid checkout with a 500 and left the
@@ -2500,21 +2673,59 @@ class TicketController extends Controller
      * the platform account otherwise. Split out of stripeCheckout() only so the call has one
      * catchable seam; the two payloads are unchanged.
      */
-    private function createStripeSession(bool $useConnect, array $lineItems, $sale, $event, array $data, bool $isEmbed)
+    private function createStripeSession(bool $useConnect, array $lineItems, $sale, $event, array $data, bool $isEmbed, $plan = null)
     {
+        // An installment session has to leave a REUSABLE payment method behind on the connected
+        // account, or there is nothing for app:charge-installments to charge next month. Nothing
+        // else in this app has ever needed that: every other ticket charge is one-shot and
+        // on-session.
+        //
+        // setup_future_usage forces customer creation on its own; customer_creation is set
+        // explicitly so the intent is legible. The mandate is also spelled out on Stripe's own
+        // page via custom_text - belt and braces alongside the consent checkbox we collect
+        // ourselves, which is the part we actually keep a record of.
+        $installmentExtras = [];
+
+        if ($plan) {
+            $first = $plan->installments()->where('sequence', 1)->first();
+
+            $installmentExtras = [
+                'customer_creation' => 'always',
+                'payment_intent_data' => [
+                    'setup_future_usage' => 'off_session',
+                    'metadata' => [
+                        'sale_id' => UrlUtils::encodeId($sale->id),
+                        'installment_id' => UrlUtils::encodeId($first->id),
+                    ],
+                ],
+                'custom_text' => [
+                    'submit' => [
+                        'message' => __('messages.installments_stripe_mandate', [
+                            'count' => $plan->installment_count - 1,
+                            'amount' => MoneyUtils::format($first->amount, $plan->currency),
+                        ]),
+                    ],
+                ],
+            ];
+        }
+
         if ($useConnect) {
             // Hosted mode: Use Stripe Connect with event creator's account
             $stripe = new StripeClient(config('services.stripe.key'));
 
             $session = $stripe->checkout->sessions->create(
-                [
+                array_replace([
                     'line_items' => $lineItems,
                     'mode' => 'payment',
                     'customer_email' => $sale->email,
-                    'metadata' => [
+                    // Filtered on null only. A bare array_filter() drops every falsy value, so a
+                    // buyer named "0" lost customer_name from the metadata on ordinary,
+                    // non-installment checkouts too.
+                    'metadata' => array_filter([
                         'customer_name' => $sale->name,
                         'sale_id' => UrlUtils::encodeId($sale->id),
-                    ],
+                        'installment_id' => $plan ? UrlUtils::encodeId($plan->installments()->where('sequence', 1)->value('id')) : null,
+                    ], fn ($v) => $v !== null),
                     'payment_intent_data' => [
                         'metadata' => [
                             'sale_id' => UrlUtils::encodeId($sale->id),
@@ -2522,7 +2733,7 @@ class TicketController extends Controller
                     ],
                     'success_url' => custom_domain_url(route('checkout.success', $data).(str_contains(route('checkout.success', $data), '?') ? '&' : '?').'session_id={CHECKOUT_SESSION_ID}'.($isEmbed ? '&embed=true' : '')),
                     'cancel_url' => custom_domain_url(route('checkout.cancel', $data).(str_contains(route('checkout.cancel', $data), '?') ? '&' : '?').'secret='.$sale->secret),
-                ],
+                ], $installmentExtras),
                 [
                     'stripe_account' => $event->user->stripe_account_id,
                 ],
@@ -2531,14 +2742,18 @@ class TicketController extends Controller
             // Self-hosted mode: Use direct Stripe payments with platform keys
             $stripe = new StripeClient(config('services.stripe_platform.secret'));
 
-            $session = $stripe->checkout->sessions->create([
+            $session = $stripe->checkout->sessions->create(array_replace([
                 'line_items' => $lineItems,
                 'mode' => 'payment',
                 'customer_email' => $sale->email,
-                'metadata' => [
+                // The selfhost/platform rail settles on checkout.session.completed, so the
+                // installment id has to be on the SESSION metadata too - the webhook branch there
+                // reads it from here.
+                'metadata' => array_filter([
                     'customer_name' => $sale->name,
                     'sale_id' => UrlUtils::encodeId($sale->id),
-                ],
+                    'installment_id' => $plan ? UrlUtils::encodeId($plan->installments()->where('sequence', 1)->value('id')) : null,
+                ], fn ($v) => $v !== null),
                 'payment_intent_data' => [
                     'metadata' => [
                         'sale_id' => UrlUtils::encodeId($sale->id),
@@ -2546,7 +2761,7 @@ class TicketController extends Controller
                 ],
                 'success_url' => custom_domain_url(route('checkout.success', $data).(str_contains(route('checkout.success', $data), '?') ? '&' : '?').'session_id={CHECKOUT_SESSION_ID}&direct=1'.($isEmbed ? '&embed=true' : '')),
                 'cancel_url' => custom_domain_url(route('checkout.cancel', $data).(str_contains(route('checkout.cancel', $data), '?') ? '&' : '?').'secret='.$sale->secret),
-            ]);
+            ], $installmentExtras));
         }
 
         return $session;
@@ -3198,6 +3413,28 @@ class TicketController extends Controller
             };
 
             return response()->json(['error' => $error], 200);
+        }
+
+        // Behind on an installment plan. The sale is still `paid` - the seat is taken, the money
+        // mostly collected - so this never reaches the allowlist above.
+        //
+        // Deliberately NOT returned as `error`: the scanner paints any error red and hides the
+        // whole details block with it, so the door would see a red X, one sentence, and no
+        // attendee name or amount. This returns a distinct payment_status the scanner renders
+        // amber, with the name and the balance, and an "admit anyway" override - because turning a
+        // paying guest away over one late instalment is the organizer's call to make, not the
+        // software's.
+        if ($sale->isInstallmentDelinquent()) {
+            $plan = $sale->installmentPlan;
+
+            return response()->json([
+                'payment_status' => 'overdue',
+                'attendee' => $sale->name,
+                'event' => $event->name,
+                'amount_due' => MoneyUtils::format($plan->amountRemaining(), $plan->currency),
+                'amount_paid' => MoneyUtils::format($plan->amount_paid, $plan->currency),
+                'amount_total' => MoneyUtils::format($plan->total_amount, $plan->currency),
+            ], 200);
         }
 
         $data = new \stdClass;

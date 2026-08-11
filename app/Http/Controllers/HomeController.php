@@ -305,6 +305,34 @@ class HomeController extends Controller
 
         $rolesById = app('userRoles')->keyBy('id');
 
+        // Overdue installment payments.
+        //
+        // Scoped by events.user_id - schedules the user OWNS - to match the Installments tab it
+        // links to. Scoping it by editable schedules instead would give an editor a badge that
+        // opens an empty page.
+        //
+        // Counts only genuinely overdue plans, never the whole live book: the panel's header
+        // badge is a plain sum, so a count that never drains reads as a permanent to-do. That is
+        // exactly why schedules_unverified was removed from the admin panel.
+        $overduePlans = \App\Models\SaleInstallmentPlan::query()
+            ->where('status', 'delinquent')
+            ->whereHas('sale', function ($q) {
+                $q->where('is_deleted', false)
+                    ->whereHas('event', fn ($eq) => $eq->where('user_id', auth()->id())->where('is_cancelled', false));
+            })
+            ->count();
+
+        if ($overduePlans > 0) {
+            $items->push([
+                'type' => 'installments_overdue',
+                'count' => $overduePlans,
+                'title' => trans_choice('messages.pending_action_installments_overdue', $overduePlans, ['count' => $overduePlans]),
+                'subtitle' => __('messages.installments'),
+                'url' => route('sales', ['tab' => 'installments']),
+                'color' => 'amber',
+            ]);
+        }
+
         // 1) Pending event requests (per schedule) - event_role.is_accepted IS NULL.
         // count(distinct event_id) mirrors the Requests tab's whereHas (distinct-event)
         // semantics exactly, regardless of how many pivot rows an event has per role.
@@ -497,7 +525,7 @@ class HomeController extends Controller
      */
     private function sortPendingActionItems($items)
     {
-        $priority = ['requests' => 0, 'fan_content' => 1, 'polls' => 2, 'carpool' => 3];
+        $priority = ['installments_overdue' => 0, 'requests' => 1, 'fan_content' => 2, 'polls' => 3, 'carpool' => 4];
 
         return $items
             ->sortBy(fn ($item) => sprintf('%d-%010d', $priority[$item['type']] ?? 9, 1_000_000_000 - $item['count']))

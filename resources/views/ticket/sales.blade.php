@@ -1,6 +1,6 @@
 <x-app-admin-layout>
 
-    @if ($waitlistCount > 0 || $hasPro || ($subscriptionsCount ?? 0) > 0 || ($giftCardsCount ?? 0) > 0)
+    @if ($waitlistCount > 0 || $hasPro || ($subscriptionsCount ?? 0) > 0 || ($giftCardsCount ?? 0) > 0 || ($installmentsCount ?? 0) > 0)
     <div class="ap-tab-container mb-6 border-b border-gray-200 dark:border-gray-700">
         <nav class="-mb-px flex gap-6">
             <button type="button" id="tab-sales"
@@ -25,6 +25,13 @@
                 {{ __('messages.subscriptions') }}@if (($subscriptionsCount ?? 0) > 0) ({{ $subscriptionsCount }})@endif
             </button>
             @endif
+            @if ($hasPro || ($installmentsCount ?? 0) > 0)
+            <button type="button" id="tab-installments"
+                class="sales-tab whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300">
+                {{ __('messages.installments') }}@if (($installmentsCount ?? 0) > 0) ({{ $installmentsCount }})@endif
+            </button>
+            @endif
+
             @if ($hasPro || ($giftCardsCount ?? 0) > 0)
             <button type="button" id="tab-gift-cards"
                 class="sales-tab whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300">
@@ -151,6 +158,16 @@
     </div>
     @endif
 
+    @if ($hasPro || ($installmentsCount ?? 0) > 0)
+    <div id="installments-panel" style="display: none;">
+        @include('ticket.installments_table', [
+            'installments' => $installments ?? collect(),
+            'installmentTotals' => $installmentTotals ?? collect(),
+            'installmentForecast' => $installmentForecast ?? collect(),
+        ])
+    </div>
+    @endif
+
     @if ($hasPro || ($giftCardsCount ?? 0) > 0)
     <div id="gift-cards-panel" style="display: none;">
         @include('ticket.gift_cards_table', ['giftCards' => $giftCards ?? collect()])
@@ -167,7 +184,7 @@ var waitlistSortDir = 'desc';
 var feedbackSortBy = '';
 var feedbackSortDir = 'desc';
 
-@if ($waitlistCount > 0 || $hasPro || ($subscriptionsCount ?? 0) > 0 || ($giftCardsCount ?? 0) > 0)
+@if ($waitlistCount > 0 || $hasPro || ($subscriptionsCount ?? 0) > 0 || ($giftCardsCount ?? 0) > 0 || ($installmentsCount ?? 0) > 0)
 // Tab switching
 const activeClass = 'border-[var(--brand-blue)] text-[var(--brand-blue)]';
 const inactiveClass = 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300';
@@ -196,6 +213,10 @@ function setActiveTab(activeId) {
     if (giftCardsPanel) {
         giftCardsPanel.style.display = activeId === 'tab-gift-cards' ? '' : 'none';
     }
+    var installmentsPanel = document.getElementById('installments-panel');
+    if (installmentsPanel) {
+        installmentsPanel.style.display = activeId === 'tab-installments' ? '' : 'none';
+    }
 }
 
 document.getElementById('tab-sales').addEventListener('click', function() {
@@ -205,6 +226,12 @@ document.getElementById('tab-sales').addEventListener('click', function() {
 @if ($hasPro || ($subscriptionsCount ?? 0) > 0)
 document.getElementById('tab-subscriptions').addEventListener('click', function() {
     setActiveTab('tab-subscriptions');
+});
+@endif
+
+@if ($hasPro || ($installmentsCount ?? 0) > 0)
+document.getElementById('tab-installments').addEventListener('click', function() {
+    setActiveTab('tab-installments');
 });
 @endif
 
@@ -448,6 +475,8 @@ if (tab === 'feedback' && document.getElementById('tab-feedback')) {
     document.getElementById('tab-subscriptions').click();
 } else if (tab === 'gift-cards' && document.getElementById('tab-gift-cards')) {
     document.getElementById('tab-gift-cards').click();
+} else if (tab === 'installments' && document.getElementById('tab-installments')) {
+    document.getElementById('tab-installments').click();
 }
 @endif
 

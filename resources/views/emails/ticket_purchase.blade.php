@@ -62,6 +62,36 @@
         </div>
         @endif
 
+        {{-- Payment plan. This is the buyer's FIRST email after paying, so without it the message
+             reads "thank you for your purchase" and says nothing about the three further charges
+             coming to their card. --}}
+        @php $plan = $sale->installmentPlan; @endphp
+        @if ($plan && $plan->status !== 'cancelled')
+        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4E81FA;">
+            <h3 style="margin-top: 0; color: #4E81FA;">{{ __('messages.payment_plan') }}</h3>
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                @foreach ($plan->installments as $row)
+                    <tr>
+                        <td style="padding: 6px 0; color: #555;">{{ $row->due_at?->translatedFormat('j M Y') }}</td>
+                        <td style="padding: 6px 0; text-align: right; color: #333;">{{ \App\Utils\MoneyUtils::format($row->amount, $plan->currency) }}</td>
+                        <td style="padding: 6px 0 6px 12px; text-align: right; color: {{ $row->status === 'paid' ? '#16a34a' : '#999' }};">
+                            {{ $row->status === 'paid' ? __('messages.paid') : __('messages.scheduled') }}
+                        </td>
+                    </tr>
+                @endforeach
+            </table>
+            <p style="margin: 14px 0 0 0; padding-top: 12px; border-top: 1px solid #eee; font-size: 14px; color: #333;">
+                <strong>{{ __('messages.total') }} {{ \App\Utils\MoneyUtils::format($plan->total_amount, $plan->currency) }}.</strong>
+                {{ __('messages.installments_no_interest_short') }}
+            </p>
+            @if (! empty($plan->id))
+            <p style="margin: 10px 0 0 0; font-size: 13px;">
+                <a href="{{ route('installment.view', ['plan_id' => \App\Utils\UrlUtils::encodeId($plan->id), 'secret' => $plan->secret]) }}" style="color: #4E81FA;">{{ __('messages.payment_plan') }}</a>
+            </p>
+            @endif
+        </div>
+        @endif
+
         <!--
         <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
             <h3 style="margin-top: 0; color: #4E81FA; margin-bottom: 15px;">{{ __('messages.ticket_qr_code') ?: 'Your Ticket QR Code' }}</h3>

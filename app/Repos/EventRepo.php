@@ -844,10 +844,42 @@ class EventRepo
             'individual_tickets', 'individual_ticket_fields',
             'sell_after_start', 'show_unavailable_tickets',
             'is_draft', 'is_private', 'is_internal',
+            'installments_enabled',
         ] as $boolField) {
             if ($request->has($boolField)) {
                 $event->$boolField = $request->boolean($boolField);
             }
+        }
+
+        // Installments are Pro, and scrubbed on the same terms as individual tickets and passes:
+        // clear it only when the flag is being turned ON by a non-Pro schedule. A lapsed Pro
+        // schedule keeps collecting on plans its buyers already agreed to - the mandate was given
+        // to the organizer, and stopping mid-plan would punish the buyer for the organizer's
+        // billing.
+        if (! $ticketExtrasAllowed && $event->installments_enabled && ! $event->getOriginal('installments_enabled')) {
+            $event->installments_enabled = false;
+        }
+
+        // Clamp the collection runway. A zero here would let the final payment fall due the day
+        // before the doors open with no time to chase a decline, which is precisely how a buyer
+        // ends up refused at the door over a card problem nobody could act on.
+        // Clamped whether or not the toggle is on. Gating the whole block on installments_enabled
+        // meant posting `installments_enabled=0` alongside an out-of-range value bypassed it
+        // entirely - and MySQL runs in strict mode, so an unsignedSmallInteger overflow is a 500
+        // on save rather than a silent clamp.
+
+        $count = (int) $event->installment_count;
+        $event->installment_count = max(
+            \App\Services\InstallmentService::MIN_COUNT,
+            min(\App\Services\InstallmentService::MAX_COUNT, $count ?: 4)
+        );
+        $event->installment_final_days_before = min(365, max(
+            \App\Services\InstallmentService::MIN_FINAL_DAYS_BEFORE,
+            (int) $event->installment_final_days_before
+        ));
+
+        if ($event->installment_min_order_amount !== null) {
+            $event->installment_min_order_amount = min(9999999, max(0, (float) $event->installment_min_order_amount));
         }
 
         // Individual tickets is Pro. Scrubbed rather than validated so a hand-posted flag on a free

@@ -140,6 +140,8 @@
                     <tr><td class="font-mono text-sm">sale.paid</td><td>A sale is confirmed as paid, by Stripe, by Invoice Ninja, by being marked paid on the Sales page, or immediately after <code class="doc-inline-code">sale.created</code> for a free order or RSVP.</td></tr>
                     <tr><td class="font-mono text-sm">sale.refunded</td><td>A sale is refunded from the Sales page or the API.</td></tr>
                     <tr><td class="font-mono text-sm">sale.cancelled</td><td>A sale is cancelled, either by the owner or by the ticket holder from their ticket page.</td></tr>
+                    <tr><td class="font-mono text-sm">installment.paid</td><td>One payment of an installment plan is collected. Fires once per installment, so a four-part plan sends four of these. The payload is the sale.</td></tr>
+                    <tr><td class="font-mono text-sm">installment.failed</td><td>An installment payment was declined. Sent on each failed attempt, not only the final one.</td></tr>
                     <tr><td class="font-mono text-sm">event.created</td><td>An event is published. Publishing an existing draft counts as a creation.</td></tr>
                     <tr><td class="font-mono text-sm">event.updated</td><td>A published event is saved with changes, including an appointment being rescheduled.</td></tr>
                     <tr><td class="font-mono text-sm">event.deleted</td><td>A published event is deleted. The payload is captured before the row is removed.</td></tr>

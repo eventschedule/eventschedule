@@ -83,6 +83,19 @@
             <p style="margin: 0; font-size: 14px; color: #333;">
                 <strong>{{ __('messages.status') }}:</strong> {{ $paymentStatus }}
             </p>
+
+            {{-- Without this the organizer reads "Paid, EUR 1,200" when EUR 300 arrived. The
+                 total above is the ticket price, which is genuinely what was sold; this line says
+                 how much of it has actually been collected so far. --}}
+            @php $plan = $sale->installmentPlan; @endphp
+            @if ($plan && $plan->status !== 'cancelled')
+                <p style="margin: 8px 0 0 0; font-size: 14px; color: #b45309;">
+                    <strong>{{ __('messages.payment_plan') }}:</strong>
+                    {{ __('messages.installments_progress', ['paid' => $plan->paidCount(), 'count' => $plan->installment_count]) }}
+                    &middot; {{ \App\Utils\MoneyUtils::format($plan->amount_paid, $plan->currency) }} {{ __('messages.installments_collected') }}
+                    &middot; {{ \App\Utils\MoneyUtils::format($plan->amountRemaining(), $plan->currency) }} {{ __('messages.installments_outstanding') }}
+                </p>
+            @endif
         </div>
 
         <div style="text-align: center; margin: 30px 0;">

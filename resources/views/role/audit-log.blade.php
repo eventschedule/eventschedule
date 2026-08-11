@@ -98,6 +98,8 @@
                                         'sale.refund' => __('messages.refunded'),
                                         'sale.checkin' => __('messages.checked_in'),
                                         'sale.expired' => __('messages.expired'),
+                                        'sale.installment_paid' => __('messages.audit_installment_paid'),
+                                        'sale.installment_failed' => __('messages.audit_installment_failed'),
                                         default => $log->action,
                                     };
                                     $actionColor = match(explode('.', $log->action)[0] ?? '') {
@@ -110,6 +112,8 @@
                                             'sale.cancel' => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
                                             'sale.refund' => 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300',
                                             'sale.expired' => 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+                                            'sale.installment_paid' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+                                            'sale.installment_failed' => 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
                                             default => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
                                         },
                                         default => 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300',

@@ -26,6 +26,7 @@ use App\Http\Controllers\GoogleCalendarController;
 use App\Http\Controllers\GoogleCalendarWebhookController;
 use App\Http\Controllers\GraphicController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\InstallmentController;
 use App\Http\Controllers\InvoiceNinjaController;
 use App\Http\Controllers\MarketingController;
 use App\Http\Controllers\MetaAdsWebhookController;
@@ -330,6 +331,16 @@ Route::post('/ticket/cancel-booking/{event_id}/{secret}', [TicketController::cla
 Route::post('/pass/resend-link', [TicketController::class, 'resendPassLink'])->name('pass.resend_link')->middleware('throttle:5,1');
 
 Route::get('/gift-card/view/{gift_card_id}/{secret}', [GiftCardController::class, 'view'])->name('gift_card.view')->middleware('throttle:100,1');
+
+// The buyer's payment-plan page, authenticated by the PLAN's secret (not the sale's, so a
+// forwarded ticket link cannot reach it). Flat, outside the tenant groups, so it resolves the same
+// on custom domains, subdomains and selfhost path routing.
+//
+// Distinct throttle prefixes, for the reason spelled out in the appointment block above: an
+// unauthenticated limiter key carries no route name, so sharing a prefix would put the buyer's own
+// page reloads in the same bucket as the payment POST and let browsing lock them out of paying.
+Route::get('/installment/view/{plan_id}/{secret}', [InstallmentController::class, 'view'])->name('installment.view')->middleware('throttle:100,1,instal_view');
+Route::post('/installment/pay/{plan_id}/{secret}', [InstallmentController::class, 'pay'])->name('installment.pay')->middleware('throttle:10,1,instal_pay');
 
 Route::get('/feedback/{event_id}/{secret}', [FeedbackController::class, 'show'])->name('feedback.show')->middleware('throttle:60,1');
 Route::post('/feedback/{event_id}/{secret}', [FeedbackController::class, 'store'])->name('feedback.store')->middleware('throttle:10,1');

@@ -87,7 +87,22 @@ class TicketCheckoutRequest extends FormRequest
             // The single-event path reaches Carbon the same way the legs do, via
             // canSellTickets(), so it needs the same scalar guard.
             'event_date' => ['nullable', 'string', 'max:10'],
+            // Presence means "pay monthly". Everything about whether that is ALLOWED is decided
+            // server-side in checkout(); this only keeps a hand-posted value to a scalar.
+            'installments' => ['nullable', 'string', 'max:1'],
+
         ];
+
+        // The mandate has to be genuinely given, not merely displayed. The checkbox used to carry
+        // no name at all, so it was never submitted and only disabled the button in the browser -
+        // while createPlan() stamped mandate_accepted_at unconditionally. That made the one
+        // artefact defending a disputed charge a record we could not stand behind.
+        //
+        // Applied conditionally rather than as `nullable|accepted|required_with`: `nullable` does
+        // NOT exempt `accepted`, so that form rejected every ordinary checkout in the app.
+        if ($this->filled('installments')) {
+            $rules['installments_consent'] = ['accepted'];
+        }
 
         $events = $this->checkoutEvents();
         $event = $events->first();

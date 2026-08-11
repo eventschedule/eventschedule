@@ -61,7 +61,7 @@ class FeedbackNotification extends Mailable
 
     public function content(): Content
     {
-        $salesUrl = route('sales') . '?tab=feedback';
+        $salesUrl = route('sales').'?tab=feedback';
 
         return new Content(
             view: 'emails.feedback_notification',
