@@ -25,14 +25,15 @@ class VenueUtils
      * Group venues that share a normalized name + country. Venues with an unusable name are
      * dropped rather than lumped into one meaningless group.
      *
+     * @param  bool  $forCollapse  use the narrow key, for the caller that HIDES rather than offers
      * @return array<string, array<int, Role>> keyed by the grouping key, insertion-ordered
      */
-    public static function groupDuplicates(iterable $venues): array
+    public static function groupDuplicates(iterable $venues, bool $forCollapse = false): array
     {
         $grouped = [];
 
         foreach ($venues as $venue) {
-            $key = self::groupKey($venue);
+            $key = $forCollapse ? self::collapseKey($venue) : self::groupKey($venue);
 
             if ($key === null) {
                 continue;
@@ -81,6 +82,34 @@ class VenueUtils
         $country = $venue->country_code ? strtolower($venue->country_code) : '';
 
         return $normName.'|'.$country;
+    }
+
+    /**
+     * The key used when the answer HIDES a venue rather than offering to merge it.
+     *
+     * Full name, city and country - what groupKey() was before the widening. The two callers
+     * want opposite things and must not share a key: the merge page only ever *offers*, behind a
+     * confirmation, so grouping loosely there costs a user one glance. collapseDuplicates()
+     * *removes* a row from the event form's venue picker, and /search-roles matches on exact
+     * email or phone, so a contactless venue hidden that way cannot be searched back up.
+     *
+     * Keeping this narrow is what makes the widening safe. On the wide key alone,
+     * "The Bar, Upstairs" and "The Bar, Garden" - or any hand-entered "Name, City" beside a plain
+     * "Name" in a different city - land in one group with nothing left to tell them apart, since
+     * city and address1 are exactly the fields such a venue leaves blank.
+     */
+    public static function collapseKey(Role $venue): ?string
+    {
+        $normName = GeminiUtils::normalizeForMatch($venue->name);
+
+        if ($normName === '') {
+            return null;
+        }
+
+        $normCity = GeminiUtils::normalizeForMatch($venue->city);
+        $country = $venue->country_code ? strtolower($venue->country_code) : '';
+
+        return $normName.'|'.$normCity.'|'.$country;
     }
 
     /**
@@ -160,7 +189,10 @@ class VenueUtils
         $kept = collect();
         $collapsed = 0;
 
-        foreach (self::groupDuplicates($venues) as $group) {
+        // The NARROW key - see collapseKey(). The merge page groups on the wider one, because
+        // there the answer is an offer behind a confirmation; here it removes a row the user has
+        // no way to search back up.
+        foreach (self::groupDuplicates($venues, forCollapse: true) as $group) {
             if (count($group) < 2 || self::isDismissed($group, $dismissedHashes) || ! self::isSafeToCollapse($group)) {
                 $kept = $kept->concat($group);
 
@@ -173,7 +205,7 @@ class VenueUtils
 
         // Venues whose name normalizes to nothing never made it into a group.
         foreach ($venues as $venue) {
-            if (self::groupKey($venue) === null) {
+            if (self::collapseKey($venue) === null) {
                 $kept->push($venue);
             }
         }
@@ -221,7 +253,6 @@ class VenueUtils
         }
 
         $survivorAddress = GeminiUtils::normalizeForMatch($survivor->address1);
-        $survivorCity = GeminiUtils::normalizeForMatch($survivor->city);
 
         foreach ($group as $venue) {
             if ($venue->id === $survivor->id) {
@@ -232,21 +263,19 @@ class VenueUtils
                 return false;
             }
 
-            // The city left the grouping key so that a sync stub (which never has one) can group
-            // with the real venue at all. It earns its keep here instead: two venues that BOTH
-            // name a city, and name different ones, are a franchise or a second room rather than
-            // a duplicate. They stay on the merge page, where the user confirms; they are never
-            // silently collapsed out of the picker.
-            $city = GeminiUtils::normalizeForMatch($venue->city);
-
-            if ($city !== '' && $survivorCity !== '' && $city !== $survivorCity) {
-                return false;
-            }
-
             $address = GeminiUtils::normalizeForMatch($venue->address1);
 
-            // Any address the survivor does not also carry is information that would vanish from
-            // the list, since the option label falls back to address1 when a venue has no name.
+            // An address that merely restates the venue's own name carries nothing the name does
+            // not already say, so it is not "information that would vanish". This is the exact
+            // shape ConvertsLocationToVenue writes - it stamps the inbound location string into
+            // BOTH name and address1 - and treating it as a real address meant the picker could
+            // never collapse the duplicates calendar sync creates, which is the whole feature.
+            if ($address !== '' && $address === GeminiUtils::normalizeForMatch($venue->name)) {
+                continue;
+            }
+
+            // Any other address the survivor does not also carry is information that would vanish
+            // from the list, since the option label falls back to address1 when a venue has no name.
             if ($address !== '' && $address !== $survivorAddress) {
                 return false;
             }

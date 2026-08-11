@@ -51,12 +51,18 @@ Schedule::call(function () {
 // that may be killed. withoutOverlapping() is given an explicit expiry because its default is
 // 1440 minutes - a hard-killed run would otherwise leave the mutex in place for a full day.
 Schedule::call(function () {
-    // The same lock AppController::translateData() holds, not just withoutOverlapping(). That
-    // mutex only serialises the scheduler against itself, so an install running BOTH a crontab
-    // schedule:run and an external cron against /translate_data ran two copies side by side -
-    // and because both order rows longest-waiting first, every translation in the overlap was
+    // A lock scoped to app:translate ALONE, shared with AppController::translateData(), because
+    // withoutOverlapping() only serialises the scheduler against itself: an install running BOTH
+    // a crontab schedule:run and an external cron against /translate_data ran two copies side by
+    // side, and since both order rows longest-waiting first, every translation in the overlap was
     // bought from the AI provider twice.
-    $lock = Cache::lock('translate_data_lock', 900);
+    //
+    // NOT translate_data_lock. That one is held by translateData() around its entire
+    // once-a-minute chain - newsletters, queue:work, every reminder - so taking it here for a
+    // 240s translation would stall all of that for minutes at a time on exactly the installs
+    // this is meant to help. The TTL is a backstop for a hard-killed run, sized just above the
+    // command's own budget rather than at a quarter of an hour.
+    $lock = Cache::lock('app_translate_lock', 600);
 
     if (! $lock->get()) {
         return;

@@ -56,13 +56,21 @@ trait ConvertsLocationToVenue
         // is_accepted = true and the Requests tab filters whereNull, so a false row is invisible
         // on the venue's page AND absent from the queue its owner would approve from, with
         // nothing that ever revisits it. isMember() counts owner/admin/viewer while the lookup
-        // above deliberately includes follower, so a venue the user merely FOLLOWS - the common
-        // case now that matching reaches real venues rather than fresh stubs - landed there.
+        // above deliberately includes follower, so a venue the user merely FOLLOWS landed there.
         //
-        // autoAcceptsEventFrom() is the one acceptance rule in the app; `?: null` turns its
-        // "no" into pending, so the venue's owner is asked instead of silently overruled.
+        // isEditableBy() first, because pending is only a better answer than declined when
+        // somebody can actually clear it. It cannot here: accept() requires isEditor(), and an
+        // UNCLAIMED venue has no owner or admin - the app's own rule (Role::isEditableBy) is that
+        // a follower may edit such a role, so their own imported event belongs on it. That covers
+        // both the stub this import just created and one an earlier import left behind.
+        //
+        // Otherwise autoAcceptsEventFrom(), the one acceptance rule in the app; `?: null` turns
+        // its "no" into pending, so a CLAIMED third party's venue is asked rather than overruled.
+        $accepted = $venue->isEditableBy($role->user)
+            || $venue->autoAcceptsEventFrom($role->user, $role);
+
         $event->roles()->attach($venue->id, [
-            'is_accepted' => $venue->autoAcceptsEventFrom($role->user, $role) ?: null,
+            'is_accepted' => $accepted ?: null,
         ]);
 
         return true;

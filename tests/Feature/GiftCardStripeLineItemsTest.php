@@ -227,6 +227,33 @@ class GiftCardStripeLineItemsTest extends TestCase
         $this->assertLineItemsValid($items, 55);
     }
 
+    /**
+     * A cart holds ONE ENTRY PER EVENT AND DATE, so two dates of a recurring event are two legs
+     * of one order sharing a single ticket_id - and stripeCheckout aggregates the line items by
+     * ticket_id. Resolving a ratio per leg and keying it by ticket therefore had the second leg
+     * overwrite the first, spending only half the order's discount: the session was built $5 over
+     * a $90 order, the per-unit reconciliation could not close it, and the paid sale landed in
+     * amount_mismatch. The pre-rework code got this case right.
+     */
+    public function test_two_dates_of_one_event_spend_the_whole_orders_discount(): void
+    {
+        $ticket = $this->ticket(50);
+        $promo = $this->percentagePromo(10);
+
+        // One leg per date, each recording its own $5 discount against the same event.
+        $items = $this->buildLegs(
+            [$this->saleTicket($ticket, 2)],
+            [
+                ['promo' => $promo, 'discount' => 5.0, 'event_id' => $this->event->id],
+                ['promo' => $promo, 'discount' => 5.0, 'event_id' => $this->event->id],
+            ],
+            0,
+            90 // 2 x $50 less $10 of discount
+        );
+
+        $this->assertLineItemsValid($items, 90);
+    }
+
     /** The mirror: one leg's discount must not be spent against another leg's tickets. */
     public function test_a_promo_is_not_applied_to_another_legs_tickets(): void
     {

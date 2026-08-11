@@ -218,10 +218,70 @@ class OnboardingNudgeTest extends TestCase
     }
 
     /**
-     * The stage is claimed before the send so two concurrent runners cannot both email the same
-     * person - which means a failed send has to put it back, or that account's nudge is eaten.
+     * The per-run cap must be a cap on PEOPLE, not on each stage query.
+     *
+     * Applied per stage, the accounts that missed the stage-3 cut fell straight into the stage-2
+     * query in the same run, and the next lot into stage 1 - so those cohorts received all three
+     * nudges, ending with "this is the last email we will send", within three hours of each
+     * other. It also made the dry run report a third of what --apply would send.
      */
-    public function test_a_failed_send_releases_the_claim(): void
+    public function test_one_run_nudges_each_account_at_most_once(): void
+    {
+        // A run budget of one, and three accounts all past the 72h mark so every one of them
+        // matches every stage query. Applied per stage, accounts 2 and 3 would fall through to
+        // the stage 2 and stage 1 queries in this same run.
+        config(['usage.onboarding_nudge_batch' => 1]);
+
+        foreach (range(1, 3) as $i) {
+            $this->stalled(80, ['email' => "stalled{$i}@gmail.com"]);
+        }
+
+        $this->nudge();
+
+        Mail::assertSent(OnboardingNudge::class, 1);
+
+        // Every account that was reached got the stage that fits, and nothing got two.
+        Mail::assertSent(OnboardingNudge::class, function ($mail) {
+            $stage = new \ReflectionProperty($mail, 'stage');
+            $stage->setAccessible(true);
+
+            return $stage->getValue($mail) === 3;
+        });
+
+        $stages = User::whereIn('email', ['stalled1@gmail.com', 'stalled2@gmail.com', 'stalled3@gmail.com'])
+            ->pluck('onboarding_nudge_stage')
+            ->all();
+
+        foreach ($stages as $stage) {
+            $this->assertContains($stage, [0, 3],
+                'an account is either untouched this run or has had exactly the stage that fits');
+        }
+    }
+
+    /** The dry run has to report the number --apply would actually send. */
+    public function test_the_dry_run_matches_what_apply_would_send(): void
+    {
+        config(['usage.onboarding_nudge_batch' => 2]);
+
+        foreach (range(1, 3) as $i) {
+            $this->stalled(80, ['email' => "stalled{$i}@gmail.com"]);
+        }
+
+        // Both numbers are the run budget, not a multiple of it.
+        $this->artisan('app:send-onboarding-nudges')
+            ->expectsOutputToContain('DRY RUN - 2 would be sent.')
+            ->assertExitCode(0);
+
+        $this->nudge();
+
+        Mail::assertSent(OnboardingNudge::class, 2);
+    }
+
+    /**
+     * A failed send must NOT put the stage back. The column is the only record that a stage was
+     * delivered, so rewinding it lets a concurrent runner's successful send be re-sent.
+     */
+    public function test_a_failed_send_does_not_rewind_a_recorded_stage(): void
     {
         $user = $this->stalled(2);
 
@@ -229,7 +289,8 @@ class OnboardingNudgeTest extends TestCase
 
         $this->nudge();
 
-        $this->assertSame(0, $user->refresh()->onboarding_nudge_stage);
+        $this->assertSame(1, $user->refresh()->onboarding_nudge_stage,
+            'the claim stands: only ever moves forward');
     }
 
     /** The unsubscribe link has to actually work, or the mail is not sendable in good faith. */

@@ -387,6 +387,66 @@ class ScheduleFeaturesTest extends TestCase
             'pending, so the venue owner is asked - false would hide it from them for good');
     }
 
+    /**
+     * The venue the sync just invented for this user must not land pending.
+     *
+     * convertLocationToVenue() sets user_id but attaches the user only as a `follower`, so
+     * autoAcceptsEventFrom() answers no on every rule: not a member (follower is not
+     * owner/admin/viewer), user_id IS set so the ownerless rule misses, and require_approval
+     * defaults to TRUE so accept_requests does not save it. That leaves is_accepted = NULL on a
+     * venue whose only human is a follower - and accept() requires isEditor(), so nobody can ever
+     * clear it. One stuck row per synced event with a new location, forever.
+     */
+    public function test_calendar_import_accepts_onto_the_stub_it_just_created(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createCurator($owner);
+        $event = $this->createEvent($curator);
+
+        $this->assertTrue($this->locationVenueSyncer()->run($event, $curator, 'The Anchor, Haifa'));
+
+        $venue = \App\Models\Role::where('type', 'venue')->sole();
+
+        $pivot = \Illuminate\Support\Facades\DB::table('event_role')
+            ->where('event_id', $event->id)
+            ->where('role_id', $venue->id)
+            ->first();
+
+        $this->assertEquals(1, $pivot->is_accepted,
+            "the user's own imported event belongs on the venue the import made for them");
+    }
+
+    /**
+     * The same rule for an UNCLAIMED venue somebody else's import left behind, which this user
+     * merely follows. Role::isEditableBy already says a follower may edit an unclaimed role, so
+     * their own event belongs on it - and pending would be a dead end, because accept() requires
+     * isEditor() and an unclaimed venue has no owner or admin to satisfy it.
+     */
+    public function test_calendar_import_accepts_onto_an_unclaimed_venue_the_user_follows(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createCurator($owner);
+
+        // A stub somebody else's import left behind: it carries THEIR user_id (so the ownerless
+        // rule does not fire) but was never verified, so it is unclaimed and has no owner or
+        // admin. This user only follows it.
+        $stranger = $this->createOwner();
+        $venue = $this->createRole($stranger, 'venue', ['name' => 'Barby', 'email_verified_at' => null]);
+        DB::table('role_user')->where('role_id', $venue->id)->update(['level' => 'follower']);
+        $this->followRole($owner, $venue);
+
+        $event = $this->createEvent($curator);
+        $this->locationVenueSyncer()->run($event, $curator, 'Barby');
+
+        $pivot = DB::table('event_role')
+            ->where('event_id', $event->id)
+            ->where('role_id', $venue->id)
+            ->first();
+
+        $this->assertEquals(1, $pivot->is_accepted,
+            'pending here is a dead end: no owner or admin exists to accept it');
+    }
+
     /** The other half of the same rule: a venue the user is a member of still auto-accepts. */
     public function test_calendar_import_auto_accepts_onto_the_users_own_venue(): void
     {

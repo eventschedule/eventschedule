@@ -342,12 +342,24 @@ class AppController extends Controller
             if (! Cache::has('td_translate')) {
                 Cache::put('td_translate', true, now()->addMinutes(5));
 
-                try {
-                    \Artisan::call('app:translate', ['--max-seconds' => config('usage.translation_max_seconds', 240)]);
-                    Cache::put('td_translate', true, now()->addMinutes(15));
-                } catch (\Throwable $e) {
-                    \Log::error('Scheduled command app:translate failed: '.$e->getMessage());
-                    report($e);
+                // A lock scoped to app:translate ALONE, shared with the crontab scheduler in
+                // routes/console.php. An install that runs both entry points otherwise buys every
+                // translation in the overlap twice, because both order rows longest-waiting first.
+                // Deliberately not translate_data_lock, which this method already holds around
+                // its whole once-a-minute chain: borrowing that one would let a 240s translation
+                // run block newsletters, queue:work and every reminder.
+                $translateLock = Cache::lock('app_translate_lock', 600);
+
+                if ($translateLock->get()) {
+                    try {
+                        \Artisan::call('app:translate', ['--max-seconds' => config('usage.translation_max_seconds', 240)]);
+                        Cache::put('td_translate', true, now()->addMinutes(15));
+                    } catch (\Throwable $e) {
+                        \Log::error('Scheduled command app:translate failed: '.$e->getMessage());
+                        report($e);
+                    } finally {
+                        $translateLock->release();
+                    }
                 }
             }
 

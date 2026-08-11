@@ -213,6 +213,28 @@ class TranslateCommandTest extends TestCase
         $this->assertSame([], $this->selectedIds($this->dryRun(), 'roles'));
     }
 
+    /**
+     * The two entry points must serialise on a lock that covers app:translate and NOTHING ELSE.
+     *
+     * translate_data_lock is held by AppController::translateData() around its whole
+     * once-a-minute chain - newsletters, queue:work, every reminder - so using it here would mean
+     * a 240s translation stalls all of that for minutes at a time, on exactly the installs that
+     * run both entry points and therefore need the mutex in the first place.
+     */
+    public function test_the_two_translate_entry_points_share_a_translate_only_lock(): void
+    {
+        $console = file_get_contents(base_path('routes/console.php'));
+        $controller = file_get_contents(app_path('Http/Controllers/AppController.php'));
+
+        $this->assertStringContainsString("Cache::lock('app_translate_lock'", $console);
+        $this->assertStringContainsString("Cache::lock('app_translate_lock'", $controller);
+
+        // The scheduler must not reach for the broad one.
+        $schedulerBlock = substr($console, strpos($console, "name('app-translate')") - 1200, 1200);
+        $this->assertStringNotContainsString("Cache::lock('translate_data_lock'", $schedulerBlock,
+            'the 15-minute translate task must not hold the lock that guards the per-minute chain');
+    }
+
     public function test_repeatedly_failing_schedule_is_skipped_inside_its_cooldown(): void
     {
         $user = $this->createOwner();

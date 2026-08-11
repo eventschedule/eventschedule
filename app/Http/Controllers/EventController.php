@@ -1569,14 +1569,20 @@ class EventController extends Controller
 
         // Add the event to the curator's schedule.
         //
-        // Through autoAcceptsEventFrom() rather than an inline isEditor() test, because the gate
-        // above only needs acceptEventRequests() - which is unconditionally true for an unclaimed
-        // schedule - so any signed-in visitor could reach this on an ownerless placeholder. The
-        // inline rule then wrote is_accepted = null there, and accept() requires isEditor(), which
-        // an ownerless role has nobody to satisfy: a pending row no human could ever clear.
-        // Rule 2 of autoAcceptsEventFrom (no user_id means auto-accept) is what closes that.
+        // The editor test is kept as the rule for a CLAIMED curator, exactly as before: this
+        // endpoint's own gate only requires acceptEventRequests(), so any signed-in visitor
+        // reaches it, and routing that through autoAcceptsEventFrom() would auto-publish for a
+        // mere `viewer` (isMember counts viewer, isEditor does not) and for any visitor at all
+        // whenever require_approval is off. Those are somebody else's public pages.
+        //
+        // The one case the old inline rule got wrong was an OWNERLESS placeholder: it wrote
+        // is_accepted = null there, and accept() requires isEditor(), which a role with no owner
+        // has nobody to satisfy - a pending row no human could ever clear. An ownerless schedule
+        // has no one to ask, so there is nothing to hold the event back for.
+        $accepted = (auth()->user() && auth()->user()->isEditor($subdomain)) || ! $role->user_id;
+
         $role->events()->attach($event->id, [
-            'is_accepted' => $role->autoAcceptsEventFrom(auth()->user(), null) ?: null,
+            'is_accepted' => $accepted ?: null,
         ]);
 
         if ($request->ajax()) {

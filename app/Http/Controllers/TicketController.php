@@ -2210,11 +2210,48 @@ class TicketController extends Controller
      * @param  array<int, array{promo: ?\App\Models\PromoCode, discount: float, event_id: int}>  $promoLegs
      * @return array<int, float> ticket_id => ratio
      */
+    /**
+     * One promo context per EVENT, with the discounts of every leg on that event summed.
+     *
+     * A cart holds one entry per event AND date, so two dates of a recurring event are two legs
+     * of the same order carrying the same ticket ids - and the line items are aggregated by
+     * ticket id, so there is only ever one ratio to apply to them. Keeping the legs separate had
+     * the second silently overwrite the first's ratio and spend half the order's discount.
+     *
+     * Summing is the right merge: both legs resolve the SAME PromoCode row (priceSaleLeg looks it
+     * up with `where('event_id', $event->id)`), and each records its own share in
+     * discount_amount, which is what orderTotalPayment() - the figure the session must match -
+     * already nets out.
+     *
+     * @param  array<int, array{promo: ?\App\Models\PromoCode, discount: float, event_id: int}>  $promoLegs
+     * @return array<int, array{promo: ?\App\Models\PromoCode, discount: float, event_id: int}>
+     */
+    private function promoLegsByEvent(array $promoLegs): array
+    {
+        $merged = [];
+
+        foreach ($promoLegs as $leg) {
+            $eventId = (int) ($leg['event_id'] ?? 0);
+
+            if (! isset($merged[$eventId])) {
+                $merged[$eventId] = $leg;
+                $merged[$eventId]['discount'] = (float) ($leg['discount'] ?? 0);
+
+                continue;
+            }
+
+            $merged[$eventId]['discount'] += (float) ($leg['discount'] ?? 0);
+            $merged[$eventId]['promo'] = $merged[$eventId]['promo'] ?? ($leg['promo'] ?? null);
+        }
+
+        return array_values($merged);
+    }
+
     private function promoRatiosByTicket($stripeSaleTickets, array $promoLegs): array
     {
         $ratios = [];
 
-        foreach ($promoLegs as $leg) {
+        foreach ($this->promoLegsByEvent($promoLegs) as $leg) {
             $promo = $leg['promo'] ?? null;
             $discount = (float) ($leg['discount'] ?? 0);
 

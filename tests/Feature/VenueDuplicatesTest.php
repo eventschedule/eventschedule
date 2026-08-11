@@ -20,13 +20,21 @@ class VenueDuplicatesTest extends TestCase
     use RefreshDatabase;
     use SavesEventsOverHttp;
 
-    /** An unclaimed, contact-less venue: what an import or a calendar sync leaves behind. */
+    /**
+     * An unclaimed, contact-less venue: what an import or a calendar sync leaves behind.
+     *
+     * address1 defaults to the NAME because that is what ConvertsLocationToVenue writes - it
+     * stamps the whole inbound location string into both columns. Leaving it null made every
+     * test here model a venue the sync path never produces, which is how a picker assertion that
+     * does not hold in production came to pass.
+     */
     private function stubVenue(string $name, array $attrs = []): Role
     {
         $venue = new Role;
         $venue->subdomain = 'stub'.strtolower(\Illuminate\Support\Str::random(10));
         $venue->type = 'venue';
         $venue->name = $name;
+        $venue->address1 = $name;
         $venue->email = null;
         $venue->phone = null;
 
@@ -68,13 +76,19 @@ class VenueDuplicatesTest extends TestCase
     }
 
     /**
-     * The shape calendar sync ACTUALLY produces, which every other test in this file skips:
-     * ConvertsLocationToVenue names the venue after the whole inbound location string and never
-     * sets a city. Keyed on the full name plus the city, that stub could never share a group with
-     * the real venue - so the merge tool could not clean up the duplicates the sync it ships
-     * beside was creating.
+     * The shape calendar sync ACTUALLY produces: ConvertsLocationToVenue names the venue after
+     * the whole inbound location string and never sets a city, so the duplicate is
+     * "The Anchor, Haifa" beside a real venue called "The Anchor".
+     *
+     * The MERGE PAGE groups them - that is the cure the release was missing, and it is the safe
+     * place to widen, because it only offers behind a confirmation.
+     *
+     * The picker deliberately does NOT collapse them: it hides a row the user cannot search back
+     * up, so it keys on the full name plus city (see VenueUtils::collapseKey). Both venues stay
+     * selectable until the user merges them. Asserting otherwise here is what let an earlier
+     * version of this test claim a behaviour production never had.
      */
-    public function test_a_sync_stub_named_after_the_whole_location_groups_with_the_real_venue(): void
+    public function test_a_sync_stub_named_after_the_whole_location_is_offered_on_the_merge_page(): void
     {
         $owner = $this->createOwner();
         $talent = $this->createRole($owner, 'talent');
@@ -86,15 +100,52 @@ class VenueDuplicatesTest extends TestCase
 
         $this->actingAs($owner);
 
-        $this->assertSame(['The Anchor'], $this->venueNamesOnCreateForm($talent));
+        $groups = $this->get(route('following.merge_venues'))->assertOk()->viewData('groups');
 
-        $response = $this->get(route('event.create', ['subdomain' => $talent->subdomain]));
-        $this->assertSame(1, $response->viewData('duplicateVenueGroupCount'));
+        $this->assertCount(1, $groups, 'the merge page must offer the pair the sync created');
+        $this->assertEqualsCanonicalizing(
+            [$real->id, $stub->id],
+            array_map(fn ($v) => $v->id, $groups[0])
+        );
+
+        // …and the picker still lists both, because hiding one is not reversible from there.
+        $this->assertSame(['The Anchor', 'The Anchor, Haifa'], $this->venueNamesOnCreateForm($talent));
     }
 
     /**
-     * The city left the grouping key, so it has to hold the line here instead: two venues that
-     * both name a city, and name different ones, are a second room or a franchise branch.
+     * The widened key must never reach the picker.
+     *
+     * "The Bar, Upstairs" and "The Bar, Garden" share a leading segment, and a hand-entered venue
+     * leaves exactly the two fields that could tell them apart - city and address1 - blank. On
+     * the wide key they group with nothing left to distinguish them, and collapsing would hide a
+     * room the user typed in by hand with no way to search it back up (/search-roles matches on
+     * exact email or phone only).
+     */
+    public function test_the_picker_never_collapses_on_the_widened_key(): void
+    {
+        $owner = $this->createOwner();
+        $talent = $this->createRole($owner, 'talent');
+
+        $upstairs = $this->createRole($owner, 'venue', ['name' => 'The Bar, Upstairs', 'country_code' => 'il']);
+        \App\Models\Role::where('id', $upstairs->id)->update(['address1' => null]);
+
+        $garden = $this->stubVenue('The Bar, Garden', ['country_code' => 'il']);
+        \App\Models\Role::where('id', $garden->id)->update(['address1' => null]);
+        $this->followRole($owner, $garden);
+
+        $this->actingAs($owner);
+
+        $this->assertSame(['The Bar, Garden', 'The Bar, Upstairs'], $this->venueNamesOnCreateForm($talent),
+            'two rooms the user named by hand must both stay pickable');
+
+        // The merge page may still offer them - it asks before doing anything.
+        $groups = $this->get(route('following.merge_venues'))->assertOk()->viewData('groups');
+        $this->assertCount(1, $groups);
+    }
+
+    /**
+     * Two venues that name different cities are a second room or a franchise branch, and the
+     * picker's narrow key keeps them apart before any guard has to.
      */
     public function test_two_venues_in_different_cities_are_never_collapsed(): void
     {

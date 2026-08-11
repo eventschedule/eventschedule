@@ -729,6 +729,13 @@ class CuratorSourcesTest extends TestCase
         $this->addSource($curator, $venue);
         $this->service()->reconcile($curator);
 
+        // role_id is not fillable on Group.
+        $group = new \App\Models\Group;
+        $group->role_id = $curator->id;
+        $group->name = 'Jazz Nights';
+        $group->slug = 'jazz-nights';
+        $group->save();
+
         DB::table('event_role')
             ->where('event_id', $event->id)
             ->where('role_id', $curator->id)
@@ -736,6 +743,9 @@ class CuratorSourcesTest extends TestCase
                 'name_translated' => 'Nombre traducido',
                 'description_translated' => 'Descripcion traducida',
                 'caldav_event_uid' => 'uid-123',
+                // The curator filed this event under one of its own sub-schedules by hand. The
+                // source carries no group, so the relink writes null over it.
+                'group_id' => $group->id,
             ]);
 
         // The AP form path, with the schedules tab never rendered - the same shape the API sends.
@@ -748,6 +758,8 @@ class CuratorSourcesTest extends TestCase
         $this->assertSame('Nombre traducido', $pivot->name_translated, 'a paid translation must survive a save');
         $this->assertSame('Descripcion traducida', $pivot->description_translated);
         $this->assertSame('uid-123', $pivot->caldav_event_uid);
+        $this->assertEquals($group->id, $pivot->group_id,
+            'the sub-schedule the curator filed it under is a choice, not a derived value');
     }
 
     public function test_uncurate_still_detaches_a_hand_curated_event(): void

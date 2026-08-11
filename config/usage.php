@@ -48,6 +48,11 @@ return [
     // meta.truncated rather than silently shortening the table.
     'growth_row_cap' => (int) env('GROWTH_ROW_CAP', 20000),
 
+    // Accounts one onboarding-nudge run may reach. A cap on PEOPLE for the whole run, not on
+    // each stage query: per stage, the overflow from stage 3 fell into the stage 2 query in the
+    // same run and those accounts received the entire sequence within hours.
+    'onboarding_nudge_batch' => (int) env('ONBOARDING_NUDGE_BATCH', 500),
+
     // How many talent/venue schedules one curator may pull events from, and how many
     // event links a single reconcile pass may write. Hitting the batch ceiling is logged
     // and the remainder is picked up by the next run rather than dropped.

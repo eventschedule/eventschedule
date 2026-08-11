@@ -1353,8 +1353,15 @@ class EventRepo
                 }
             }
 
-            // If this is the current role and current_role_group_id is provided, add it to the pivot
-            if ($role && $role->id === $currentRole->id && $request->has('current_role_group_id') && $request->current_role_group_id) {
+            // current_role_group_id names a sub-schedule of whichever attached role OWNS it, and
+            // that is not always the subdomain being edited: event/edit.blade.php renders the
+            // options from $effectiveRole->groups (the event's creator role) and reads the value
+            // back with getGroupIdForSubdomain($effectiveRole->subdomain). Matching on
+            // $currentRole meant that whenever the two differed - an event created under a talent
+            // and opened from a venue the user also administers - the ownership check failed and
+            // the user's choice was silently discarded. Groups are per-role, so at most one
+            // attached role can own the posted id, and writing it there is what the form reads.
+            if ($role && $request->has('current_role_group_id') && $request->current_role_group_id) {
                 $groupId = UrlUtils::decodeId($request->current_role_group_id);
                 if ($this->groupBelongsToRole($groupId, $role->id)) {
                     $event->roles()->updateExistingPivot($role->id, ['group_id' => $groupId]);
@@ -2173,6 +2180,12 @@ class EventRepo
         }
 
         $columns = [
+            // group_id first, because it is the one a user actually chose. linkMissing() rebuilds
+            // the row with rs.group_id - the SOURCE's configured sub-schedule, usually null - so
+            // without this the curator's per-event filing silently reverts on any save that does
+            // not carry curators[]. The null-check below is what keeps a genuinely configured
+            // rs.group_id winning over a stale snapshot.
+            'group_id',
             'name_translated',
             'description_translated',
             'description_html_translated',
@@ -2185,6 +2198,11 @@ class EventRepo
         $rows = DB::table('event_role')
             ->where('event_id', $event->id)
             ->whereIn('role_id', $pivotBefore->keys()->all())
+            // Only the auto-sourced rows. A row that came back HAND-CURATED (ticked in the
+            // schedules tab, so sync() re-attached it with is_auto_sourced = 0) is a different
+            // row conceptually, and grafting the old auto-sourced values onto it is not what
+            // this method is for.
+            ->where('is_auto_sourced', true)
             ->get();
 
         foreach ($rows as $row) {

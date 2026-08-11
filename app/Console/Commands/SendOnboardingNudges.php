@@ -50,7 +50,10 @@ class SendOnboardingNudges extends Command
      * Ceiling on one run, so a backlog drains over several passes instead of in one burst.
      * The command is scheduled hourly, so the remainder is picked up 60 minutes later.
      */
-    private const BATCH = 500;
+    private function batch(): int
+    {
+        return max(1, (int) config('usage.onboarding_nudge_batch', 500));
+    }
 
     public function handle(): int
     {
@@ -63,26 +66,44 @@ class SendOnboardingNudges extends Command
         $apply = (bool) $this->option('apply');
         $sent = 0;
 
-        // Dry-run only. Nothing is persisted on that path, so without this the same account
-        // matches the stage 3, 2 and 1 queries in one pass and is reported three times - and
-        // this is precisely the command an operator runs to check the blast radius first.
-        $reported = [];
+        // ONE budget for the whole run, not one per stage.
+        //
+        // Per stage, a stage-3 overflow spilled straight into the stage-2 query in the same run:
+        // with 1,500 due accounts, the 500 that missed the stage-3 cut were handed stage 2 and
+        // the next 500 stage 1, so those cohorts received all three nudges - including the "last
+        // email we will send" - inside three hours. It also made the dry run report 500 while
+        // --apply sent 1,500, in the very number an operator reads to decide whether to enable
+        // this. Draining in signup order across runs is the behaviour that was wanted.
+        $budget = $this->batch();
+
+        // Each account is handled at most once per run, whichever stage claims it first.
+        $handled = [];
 
         // Descending, so an account that has been sitting for days receives the stage that
         // matches where it actually is rather than starting at stage 1 and taking three more
         // days to catch up.
         foreach (array_reverse(self::STAGES, true) as $stage => $hours) {
-            $users = $this->dueForStage($stage, $hours);
+            if ($budget <= 0) {
+                break;
+            }
+
+            $users = $this->dueForStage($stage, $hours, $budget);
 
             foreach ($users as $user) {
-                if (! $apply) {
-                    if (isset($reported[$user->id])) {
-                        continue;
-                    }
+                if ($budget <= 0) {
+                    break;
+                }
 
-                    $reported[$user->id] = true;
+                if (isset($handled[$user->id])) {
+                    continue;
+                }
+
+                $handled[$user->id] = true;
+
+                if (! $apply) {
                     $this->line("  would send stage {$stage} to {$user->email}");
                     $sent++;
+                    $budget--;
 
                     continue;
                 }
@@ -92,8 +113,6 @@ class SendOnboardingNudges extends Command
                 // AppController::translateData) hold different mutexes, so a concurrent run can
                 // otherwise read the same rows and email everyone twice. A conditional UPDATE is
                 // atomic, so exactly one runner claims each row.
-                $previous = (int) $user->onboarding_nudge_stage;
-
                 $claimed = User::where('id', $user->id)
                     ->where('onboarding_nudge_stage', '<', $stage)
                     ->update(['onboarding_nudge_stage' => $stage]);
@@ -101,6 +120,8 @@ class SendOnboardingNudges extends Command
                 if ($claimed === 0) {
                     continue;
                 }
+
+                $budget--;
 
                 try {
                     // Queued, and with the recipient's own language. Sending inline blocked the
@@ -117,12 +138,12 @@ class SendOnboardingNudges extends Command
                     $this->info("Sent stage {$stage} nudge to {$user->email}.");
                     $sent++;
                 } catch (\Exception $e) {
-                    // Release the claim, or a queue that was briefly unavailable silently eats
-                    // this account's nudge for good.
-                    User::where('id', $user->id)
-                        ->where('onboarding_nudge_stage', $stage)
-                        ->update(['onboarding_nudge_stage' => $previous]);
-
+                    // The claim STANDS. Restoring the pre-claim value would move the column
+                    // backwards, and it is the only record that a stage was sent: a concurrent
+                    // runner that has already delivered stage 1 would have its record erased and
+                    // send it again on the next tick. "Only ever moves forward" is the property
+                    // that makes a double-fired scheduler safe, and it is worth more than
+                    // retrying one nudge - the sequence simply continues at the next stage.
                     $this->error("Failed nudge for {$user->email}: {$e->getMessage()}");
                     Log::error('Failed to send onboarding nudge', [
                         'user_id' => $user->id,
@@ -143,7 +164,7 @@ class SendOnboardingNudges extends Command
      * Verified organizer-intent accounts, old enough for this stage, young enough to still be
      * worth reaching, and still with no schedule.
      */
-    private function dueForStage(int $stage, int $hours)
+    private function dueForStage(int $stage, int $hours, int $limit)
     {
         return User::query()
             ->whereNotNull('email_verified_at')
@@ -167,7 +188,7 @@ class SendOnboardingNudges extends Command
             // Oldest first, so a backlog drains in signup order rather than leaving the
             // earliest stalled accounts at the back of every run.
             ->orderBy('created_at')
-            ->limit(self::BATCH)
+            ->limit($limit)
             ->get();
     }
 }
