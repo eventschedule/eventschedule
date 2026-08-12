@@ -48,9 +48,11 @@ return [
         'maps' => env('MAPS_API_KEY'),
         'analytics' => env('ANALYTICS_ID'),
         'gemini_key' => env('GEMINI_API_KEY'),
-        'gemini_translation_model' => env('GEMINI_TRANSLATION_MODEL', 'gemini-2.5-flash'),
-        'gemini_content_model' => env('GEMINI_CONTENT_MODEL', 'gemini-2.5-flash'),
-        'gemini_image_model' => env('GEMINI_IMAGE_MODEL', 'imagen-4.0-ultra-generate-001'),
+        // ?: because .env.example ships these empty; a default argument would not fire and
+        // the model name would be sent to the API blank. Same reason as the plan prices below.
+        'gemini_translation_model' => env('GEMINI_TRANSLATION_MODEL') ?: 'gemini-2.5-flash',
+        'gemini_content_model' => env('GEMINI_CONTENT_MODEL') ?: 'gemini-2.5-flash',
+        'gemini_image_model' => env('GEMINI_IMAGE_MODEL') ?: 'imagen-4.0-ultra-generate-001',
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT_URI'),
@@ -76,12 +78,14 @@ return [
         'webhook_secret' => env('STRIPE_PLATFORM_WEBHOOK_SECRET'),
         'price_monthly' => env('STRIPE_PRICE_MONTHLY'),
         'price_yearly' => env('STRIPE_PRICE_YEARLY'),
-        'price_monthly_amount' => env('STRIPE_PRICE_MONTHLY_AMOUNT', '9'),
-        'price_yearly_amount' => env('STRIPE_PRICE_YEARLY_AMOUNT', '90'),
+        // ?: not a second arg: .env.example ships these present-but-empty, and env() returns
+        // '' for that, so a default argument never fires and (int) '' prices the plan at $0.
+        'price_monthly_amount' => env('STRIPE_PRICE_MONTHLY_AMOUNT') ?: '9',
+        'price_yearly_amount' => env('STRIPE_PRICE_YEARLY_AMOUNT') ?: '90',
         'enterprise_price_monthly' => env('STRIPE_ENTERPRISE_PRICE_MONTHLY'),
         'enterprise_price_yearly' => env('STRIPE_ENTERPRISE_PRICE_YEARLY'),
-        'enterprise_price_monthly_amount' => env('STRIPE_ENTERPRISE_PRICE_MONTHLY_AMOUNT', '29'),
-        'enterprise_price_yearly_amount' => env('STRIPE_ENTERPRISE_PRICE_YEARLY_AMOUNT', '290'),
+        'enterprise_price_monthly_amount' => env('STRIPE_ENTERPRISE_PRICE_MONTHLY_AMOUNT') ?: '29',
+        'enterprise_price_yearly_amount' => env('STRIPE_ENTERPRISE_PRICE_YEARLY_AMOUNT') ?: '290',
     ],
 
     'invoiceninja' => [
@@ -114,9 +118,9 @@ return [
 
     'openai' => [
         'api_key' => env('OPENAI_API_KEY'),
-        'translation_model' => env('OPENAI_TRANSLATION_MODEL', 'gpt-4o'),
-        'content_model' => env('OPENAI_CONTENT_MODEL', 'o3'),
-        'image_model' => env('OPENAI_IMAGE_MODEL', 'gpt-image-1.5'),
+        'translation_model' => env('OPENAI_TRANSLATION_MODEL') ?: 'gpt-4o',
+        'content_model' => env('OPENAI_CONTENT_MODEL') ?: 'o3',
+        'image_model' => env('OPENAI_IMAGE_MODEL') ?: 'gpt-image-1.5',
     ],
 
     'meta' => [

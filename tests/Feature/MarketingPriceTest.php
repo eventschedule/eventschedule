@@ -149,17 +149,20 @@ class MarketingPriceTest extends TestCase
     /** And it has to actually move when the config does. */
     public function test_the_comparison_pages_quote_the_configured_price(): void
     {
-        config(['services.stripe_platform.price_monthly_amount' => '77']);
+        config([
+            'services.stripe_platform.price_monthly_amount' => '77',
+            'services.stripe_platform.enterprise_price_monthly_amount' => '88',
+        ]);
 
         $controller = app(\App\Http\Controllers\MarketingController::class);
         $method = new \ReflectionMethod($controller, 'planPrice');
         $method->setAccessible(true);
 
+        // Both halves assert a literal. Comparing the enterprise half against
+        // config() instead restates the implementation, so it passed even while
+        // an empty STRIPE_ENTERPRISE_PRICE_MONTHLY_AMOUNT priced the plan at 0.
         $this->assertSame(77, $method->invoke($controller, false));
-        $this->assertSame(
-            (int) config('services.stripe_platform.enterprise_price_monthly_amount'),
-            $method->invoke($controller, true)
-        );
+        $this->assertSame(88, $method->invoke($controller, true));
     }
 
     public function test_no_hardcoded_plan_price_in_structured_data(): void
