@@ -29,6 +29,7 @@ use App\Models\TicketWaitlist;
 use App\Utils\CountryUtils;
 use App\Utils\CssUtils;
 use App\Utils\MarkdownUtils;
+use App\Utils\TextUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
@@ -1306,6 +1307,11 @@ class BackupService
         // normalization here. An old or self-hosted backup can carry an alpha-3 value
         // ("ISR") that would otherwise persist un-normalized and crash the country picker.
         $role->country_code = CountryUtils::normalizeCountryCode($role->country_code);
+
+        // Same reason: the hook is also where roles.website is unwrapped and clamped to its
+        // varchar(255). A backup carrying a link-shim URL longer than that would be a 1406 on
+        // restore, failing the whole import.
+        $role->website = TextUtils::clamp(UrlUtils::normalizeWebsiteUrl($role->website), 255);
 
         if ($role->custom_css) {
             $role->custom_css = CssUtils::sanitizeCss($role->custom_css);

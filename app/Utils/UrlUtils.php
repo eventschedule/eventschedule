@@ -220,6 +220,186 @@ class UrlUtils
         return rtrim($url, '/');
     }
 
+    /** Link shims that carry their real destination in a query parameter, in preference order. */
+    private const REDIRECT_SHIM_PARAMS = [
+        'l.facebook.com' => ['u'],
+        'lm.facebook.com' => ['u'],
+        'm.facebook.com' => ['u'],
+        'l.messenger.com' => ['u'],
+        'l.instagram.com' => ['u'],
+    ];
+
+    /** Query parameters that identify a campaign rather than a page. */
+    private const TRACKING_PARAMS = [
+        'fbclid', 'gclid', 'msclkid', 'igshid', 'mc_cid', 'mc_eid', '_ga', 'ref_src', 'ref_url',
+    ];
+
+    /**
+     * Follow a link-shim URL to the destination it wraps, without a network hop.
+     *
+     * Copying a link out of Facebook's UI yields `https://l.facebook.com/l.php?u=<the real url>&h=...`,
+     * and Google search results hand out `google.com/url?q=<the real url>`. Both are far longer than
+     * what they stand for - the shim behind EVENTSCHEDULE-PHP-40 was 390 characters for a 23-character
+     * site - and neither is a link anyone means to publish.
+     *
+     * Anything that is not an absolute http(s) URL is returned UNCHANGED rather than repaired: a
+     * schedule's stored website is legitimately allowed to be scheme-less ("example.com"), which
+     * clean() and detectPlatform() both handle deliberately.
+     */
+    public static function unwrapRedirect(?string $url): ?string
+    {
+        if ($url === null) {
+            return null;
+        }
+
+        $url = trim($url);
+
+        if ($url === '') {
+            return null;
+        }
+
+        // Bounded: Facebook can wrap an already-wrapped link, but a shim that resolves to itself
+        // must not spin. Three hops is past anything seen in the wild.
+        for ($hop = 0; $hop < 3; $hop++) {
+            $target = self::shimTarget($url);
+
+            if ($target === null) {
+                break;
+            }
+
+            $url = $target;
+        }
+
+        return $url;
+    }
+
+    /**
+     * The destination a shim URL points at, or null when $url is not a shim we recognize.
+     */
+    private static function shimTarget(string $url): ?string
+    {
+        if (! self::isAbsoluteHttpUrl($url)) {
+            return null;
+        }
+
+        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
+        $host = preg_replace('/^www\./', '', $host);
+
+        $params = self::REDIRECT_SHIM_PARAMS[$host] ?? null;
+
+        // Google wraps on a specific path only - google.com itself is an ordinary destination.
+        if ($params === null && preg_match('/^google\.[a-z.]{2,}$/', $host)) {
+            if (parse_url($url, PHP_URL_PATH) === '/url') {
+                $params = ['q', 'url'];
+            }
+        }
+
+        if ($params === null) {
+            return null;
+        }
+
+        parse_str((string) parse_url($url, PHP_URL_QUERY), $query);
+
+        foreach ($params as $param) {
+            $target = $query[$param] ?? null;
+
+            // parse_str has already decoded the value. Only promote another absolute http(s)
+            // URL: a crafted `?u=javascript:...` must stay wrapped, not become the stored value.
+            if (is_string($target) && self::isAbsoluteHttpUrl($target)) {
+                return $target;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Clean a user-supplied website: unwrap any link shim, then drop campaign parameters.
+     *
+     * Used for roles.website, which is a varchar(255) under a strict connection - an over-long
+     * value is a QueryException (MySQL 1406), not a truncation. Deliberately NOT used for
+     * registration_url: that is a ticket-sales link, where utm_* is the seller's attribution and
+     * dropping it would lose them the sale's source. Use unwrapRedirect() alone there.
+     *
+     * Returns its input byte-for-byte whenever there was nothing to unwrap and nothing to strip,
+     * so a stored "https://example.org" is never rewritten to "https://example.org/", and any
+     * query parameter that survives the strip is passed through exactly as it was written.
+     */
+    public static function normalizeWebsiteUrl(?string $url): ?string
+    {
+        $url = self::unwrapRedirect($url);
+
+        if ($url === null || ! self::isAbsoluteHttpUrl($url)) {
+            return $url;
+        }
+
+        $query = parse_url($url, PHP_URL_QUERY);
+
+        if ($query === null || $query === false || $query === '') {
+            return $url;
+        }
+
+        // Filtered as raw text rather than round-tripped through parse_str/http_build_query,
+        // which is not faithful: it renames keys containing a dot or a space (a.b -> a_b),
+        // collapses repeated keys (?a=1&a=2 -> ?a=2), and rewrites ?a[]=1 as ?a%5B0%5D=1.
+        // Splitting on '&' keeps every surviving segment byte-for-byte.
+        $kept = [];
+        $dropped = 0;
+
+        foreach (explode('&', $query) as $segment) {
+            if ($segment === '') {
+                continue;
+            }
+
+            if (self::isTrackingParam(urldecode(explode('=', $segment, 2)[0]))) {
+                $dropped++;
+
+                continue;
+            }
+
+            $kept[] = $segment;
+        }
+
+        if ($dropped === 0) {
+            return $url;
+        }
+
+        // Spliced onto the original rather than rebuilt from parse_url(), so scheme case, host
+        // case, port, path encoding and the presence of a trailing slash all survive untouched.
+        // Safe to cut at the first '?': a '?' that follows a '#' belongs to the fragment, and
+        // parse_url would not have reported a query at all in that case.
+        $rebuilt = substr($url, 0, (int) strpos($url, '?'));
+
+        if ($kept) {
+            $rebuilt .= '?'.implode('&', $kept);
+        }
+
+        $fragment = parse_url($url, PHP_URL_FRAGMENT);
+
+        if ($fragment !== null && $fragment !== false) {
+            $rebuilt .= '#'.$fragment;
+        }
+
+        return $rebuilt === '' ? null : $rebuilt;
+    }
+
+    private static function isTrackingParam(string $key): bool
+    {
+        $key = strtolower($key);
+
+        return str_starts_with($key, 'utm_') || in_array($key, self::TRACKING_PARAMS, true);
+    }
+
+    /**
+     * Scheme-less values ("example.com"), mailto:, tel: and free text are all legitimate stored
+     * websites, and a protocol-relative "//host/path" parses with a host - so the scheme is what
+     * has to be tested, never the presence of a host.
+     */
+    private static function isAbsoluteHttpUrl(string $url): bool
+    {
+        return (bool) preg_match('#^https?://#i', $url);
+    }
+
     public static function cleanSlug($slug)
     {
         $slug = preg_replace('/[^a-zA-Z0-9]/', '', trim($slug));

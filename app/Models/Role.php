@@ -287,6 +287,20 @@ class Role extends Model implements MustVerifyEmail
                 $model->country_code = \App\Utils\CountryUtils::normalizeCountryCode($model->country_code);
             }
 
+            // roles.website is a varchar(255) under a strict connection, so an over-long value is
+            // a QueryException (MySQL 1406), not a truncation - pasting a 390-character Facebook
+            // link shim into the venue Website field used to 500 the event create form and cost
+            // the user the whole event. Unwrapping the shim is what makes the value fit, and it
+            // stores the site the paste actually stood for; the clamp is the last resort.
+            //
+            // Guarded on dirty, like the *_normalized block below: the column can only overflow on
+            // a fresh assignment, and re-cleaning an untouched legacy value would rewrite stored
+            // data during an unrelated save. saveQuietly() fires no events and so skips this
+            // entirely - see BackupService::importRole(), which re-applies it by hand.
+            if (! $model->exists || $model->isDirty('website')) {
+                $model->website = \App\Utils\TextUtils::clamp(UrlUtils::normalizeWebsiteUrl($model->website), 255);
+            }
+
             // Recompute the *_normalized columns used by the venue dedup lookup
             // whenever the source field changes (or on initial create).
             foreach (['name', 'name_en', 'city', 'address1', 'address1_en'] as $source) {

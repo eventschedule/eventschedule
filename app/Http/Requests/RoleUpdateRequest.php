@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Models\Role;
 use App\Rules\NoFakeEmail;
 use App\Rules\SquareImage;
+use App\Utils\UrlUtils;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -19,6 +20,14 @@ class RoleUpdateRequest extends FormRequest
     {
         if (! $this->input('custom_domain')) {
             $this->merge(['custom_domain_mode' => null]);
+        }
+
+        // Unwrap a pasted link shim before max:255 measures it, so copying a link out of Facebook
+        // (390 characters for a 23-character site) stores the site rather than 500ing on the
+        // varchar(255). has(), never unconditional: update() fills from $request->all(), so
+        // merging a value for an absent key would null a stored website on any save that omits it.
+        if ($this->has('website')) {
+            $this->merge(['website' => UrlUtils::normalizeWebsiteUrl($this->input('website'))]);
         }
 
         // '' and null must not both be storable: Stay22Service::resolveAid() reads null as
@@ -55,6 +64,11 @@ class RoleUpdateRequest extends FormRequest
                 ['string', 'max:50']
             ),
             'phone' => ['nullable', 'string', 'max:20', 'regex:/^\+[1-9]\d{1,14}$/'],
+            // string, not url: a scheme-less "example.com" is a legitimate stored value (clean()
+            // and detectPlatform() both handle one deliberately), and this request runs on EVERY
+            // settings save from one big form - a url rule would lock owners with such a value out
+            // of changing anything until they fixed a field they never touched.
+            'website' => ['nullable', 'string', 'max:255'],
             // Curator event sources. Bounded here rather than trimmed in the controller so
             // an over-long list is refused with a message instead of coming back silently
             // short - one source can move thousands of event links.

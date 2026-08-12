@@ -3,11 +3,12 @@
 namespace App\Http\Requests;
 
 use App\Http\Requests\Concerns\ValidatesEventCustomFields;
+use App\Http\Requests\Concerns\ValidatesVenueFields;
 use Illuminate\Foundation\Http\FormRequest;
 
 class EventUpdateRequest extends FormRequest
 {
-    use ValidatesEventCustomFields;
+    use ValidatesEventCustomFields, ValidatesVenueFields;
 
     /**
      * Get the validation rules that apply to the request.
@@ -46,7 +47,7 @@ class EventUpdateRequest extends FormRequest
             'event_sponsor_tiers.*' => ['nullable', 'string', 'in:gold,silver,bronze'],
 
             'existing_event_sponsors' => ['nullable', 'string', 'json'],
-        ], $this->eventCustomFieldRules());
+        ], $this->venueFieldRules(), $this->eventCustomFieldRules());
     }
 
     public function attributes(): array
