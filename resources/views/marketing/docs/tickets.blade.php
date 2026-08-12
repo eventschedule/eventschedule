@@ -673,15 +673,15 @@
     <section id="installments" class="doc-section">
         <h2 class="doc-heading">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" />
             </svg>
             Installment Payments <x-doc-badge plan="pro" />
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Let buyers spread the cost of an expensive ticket over monthly payments. Useful for courses, retreats and multi-day events announced well in advance: a buyer pays the first installment at checkout and gets their ticket straight away, and the rest is charged automatically to the same card each month.</p>
 
-        <div class="doc-fields">
-            <h3 class="doc-subheading">Setting it up</h3>
-            <p class="text-gray-600 dark:text-gray-300 mb-4">Open your event, go to <strong class="text-gray-900 dark:text-white">Tickets</strong> then the <strong class="text-gray-900 dark:text-white">Payment</strong> tab, and turn on <strong class="text-gray-900 dark:text-white">Let buyers pay in monthly installments</strong>. The option appears only when the event is paid through Stripe, because Stripe is the only payment method that can charge a saved card automatically.</p>
+        <h3 class="doc-subheading">Setting it up</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Open your event, go to <strong class="text-gray-900 dark:text-white">Tickets</strong> then the <strong class="text-gray-900 dark:text-white">Payment</strong> tab, and turn on <strong class="text-gray-900 dark:text-white">Let buyers pay in monthly installments</strong>. The option appears only when the event is <a href="#payment" class="doc-link">paid through Stripe</a>, because Stripe is the only payment method that can charge a saved card automatically.</p>
+        <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
                     <tr><th>Setting</th><th>What it does</th></tr>
@@ -689,7 +689,7 @@
                 <tbody>
                     <tr>
                         <td>Number of payments</td>
-                        <td>How many equal monthly payments the order total is split into. The first is taken at checkout.</td>
+                        <td>How many monthly payments the order total is split into. The first is taken at checkout. Amounts that do not divide evenly put the odd cent on the first payment, so 1,000 over three is 333.34 then 333.33 twice.</td>
                     </tr>
                     <tr>
                         <td>Last payment due before the event</td>
@@ -702,28 +702,31 @@
                 </tbody>
             </table>
         </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Every individual payment has to clear Stripe's minimum charge of roughly $0.50, so splitting a small order too many ways withdraws the option. A <a href="#promo-codes" class="doc-link">promo code</a> or gift card applied at checkout can take an order under that line, or under your own minimum, and the buyer will simply not be offered monthly payments. Installments are also not offered for a basket spanning several events, or for one containing a <a href="{{ route('marketing.docs.subscriptions') }}" class="doc-link">pass</a>.</p>
 
-        <div class="doc-fields" id="installments-buyer">
-            <h3 class="doc-subheading">What the buyer sees</h3>
-            <p class="text-gray-600 dark:text-gray-300 mb-4">At checkout the buyer chooses between paying in full and paying monthly. Paying in full is selected by default. If they choose monthly they see every payment date and amount before committing, confirm that they authorise the future charges, and are charged only the first payment. There is no interest and no fee: the total is the same either way.</p>
-            <p class="text-gray-600 dark:text-gray-300 mb-4">Their ticket is valid from the first payment. Two days before each following payment we email them a reminder naming the card and the amount, and they can pay early, clear the whole balance or change their card at any time from their ticket page.</p>
+        <h3 id="installments-buyer" class="doc-subheading">What the buyer sees</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">At checkout the buyer chooses between paying in full and paying monthly. Paying in full is selected by default. If they choose monthly they see every payment date and amount before committing, confirm that they authorise the future charges, and are charged only the first payment. There is no interest and no fee: the total is the same either way.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Their ticket is valid from the first payment. Two days before each following payment we email them a reminder naming the card and the amount. Every one of those emails links to their own payment plan page, where they can pay early, clear the whole balance or change their card. That page is the only place their saved card is shown: the ticket page is what the QR code opens, and door staff scan it.</p>
+
+        <h3 id="installments-tracking" class="doc-subheading">Tracking payments</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Installments</strong> tab on your <a href="{{ route('marketing.docs.tickets') }}#managing-sales" class="doc-link">Sales page</a> lists everyone paying monthly, how far through they are, what has been collected, what is outstanding, and what to expect month by month. Overdue plans sort to the top.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">You get one daily summary of the payments due in the next couple of days, rather than an email per buyer, and an immediate email whenever a payment fails.</p>
+        <div class="doc-callout doc-callout-warning">
+            <div class="doc-callout-title">Your sales figures will run ahead of your bank balance</div>
+            <p>Sales totals count the full ticket price at the moment of purchase, because the ticket is issued then. So your Sales and <a href="{{ route('marketing.docs.analytics') }}" class="doc-link">Analytics</a> figures include money you have not collected yet while plans are still running. The Installments tab is the one that shows what has genuinely been taken.</p>
         </div>
 
-        <div class="doc-fields" id="installments-tracking">
-            <h3 class="doc-subheading">Tracking payments</h3>
-            <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Installments</strong> tab on your Sales page lists everyone paying monthly, how far through they are, what has been collected, what is outstanding, and what to expect month by month. Overdue plans sort to the top.</p>
-            <p class="text-gray-600 dark:text-gray-300 mb-4">You get one daily summary of the payments due tomorrow, rather than an email per buyer, and an immediate email whenever a payment fails.</p>
-            <div class="doc-callout">
-                <p><strong>Sales totals count the full ticket price at the moment of purchase</strong>, because the ticket is issued then. So your Sales and Analytics figures will run ahead of the money actually in your account while plans are still running. The Installments tab is the one that shows what has genuinely been collected.</p>
-            </div>
-        </div>
+        <h3 id="installments-missed" class="doc-subheading">When a payment fails</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">If a card is declined we retry it three more times over the following nine days, emailing the buyer each time and telling them plainly that their ticket is still valid. If their bank asks them to confirm the payment (common in Europe) we send a different email asking them to approve it, and do not count it as a decline.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">If the balance is still unpaid after that, the ticket goes <strong class="text-gray-900 dark:text-white">on hold</strong>: it stops scanning at the door until they pay, and paying makes it valid again immediately. A week before the event everyone with an outstanding balance gets a final notice, and you get a list of them, so nobody is surprised at the door.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Running out of retries is the common route to a hold, but not the only one. A plan also goes on hold if a bank authentication request goes unanswered for a week, or if your own Stripe connection is disconnected so nothing can be collected at all. That second one is worth knowing: the buyer has done nothing wrong and cannot fix it, so you are the one we email, and reconnecting Stripe is what restarts collection. For the ordinary routes, the buyer replacing or re-confirming their card lifts the hold and puts the remaining payments back on schedule.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">One state deliberately waits for a person: if a charge is interrupted and we cannot tell whether the money moved, we stop rather than retry, because retrying a payment that may already have succeeded is how a buyer gets charged twice. The same applies to a payment that arrives but does not match anything we can apply it to. Both show on the Installments tab as needing your attention, with the Stripe reference to check against your dashboard, and neither is resolved by the buyer changing their card.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Scanning a ticket that is on hold shows your door staff the attendee's name and the amount outstanding rather than a flat rejection, so they can take payment or let the guest in at your discretion.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Cancelling or refunding an order, cancelling the event, or deleting the schedule all stop the remaining payments immediately. Refunding the money already collected is done from your own Stripe dashboard; the Installments tab lists every payment reference so you can find them.</p>
 
-        <div class="doc-fields" id="installments-missed">
-            <h3 class="doc-subheading">When a payment fails</h3>
-            <p class="text-gray-600 dark:text-gray-300 mb-4">We retry a declined card three times over about a week, emailing the buyer each time and telling them plainly that their ticket is still valid. If their bank asks them to confirm the payment (common in Europe) we send a different email asking them to approve it, and do not count it as a decline.</p>
-            <p class="text-gray-600 dark:text-gray-300 mb-4">If the balance is still unpaid after that, the ticket goes <strong class="text-gray-900 dark:text-white">on hold</strong>: it stops scanning at the door until they pay, and paying makes it valid again immediately. A week before the event everyone with an outstanding balance gets a final notice, and you get a list of them, so nobody is surprised at the door.</p>
-            <p class="text-gray-600 dark:text-gray-300 mb-4">Scanning a ticket that is on hold shows your door staff the attendee's name and the amount outstanding rather than a flat rejection, so they can take payment or let the guest in at your discretion.</p>
-            <p class="text-gray-600 dark:text-gray-300">Cancelling or refunding an order, cancelling the event, or deleting the schedule all stop the remaining payments immediately. Refunding the money already collected is done from your own Stripe dashboard; the Installments tab lists every payment reference so you can find them.</p>
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Selfhosted installs</div>
+            <p>Installments are available on every schedule, and payments settle through your own Stripe keys rather than a connected account. They do depend on the scheduler: the first payment is taken at checkout either way, but nothing charges the second and later payments unless <code class="doc-inline-code">schedule:run</code> is running on a cron. See <a href="{{ route('marketing.docs.selfhost.installation') }}" class="doc-link">selfhosting</a> for setting that up.</p>
         </div>
     </section>
 
@@ -825,7 +828,7 @@
             </svg>
             Managing Sales
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Track and manage your ticket sales from <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Sales</strong>. The page spans every schedule you own, and carries tabs for <strong class="text-gray-900 dark:text-white">Sales</strong>, <strong class="text-gray-900 dark:text-white">Waitlist</strong>, <strong class="text-gray-900 dark:text-white">Feedback</strong>, <strong class="text-gray-900 dark:text-white">Subscriptions</strong> and <strong class="text-gray-900 dark:text-white">Gift Cards</strong>.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Track and manage your ticket sales from <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Sales</strong>. The page spans every schedule you own, and carries tabs for <strong class="text-gray-900 dark:text-white">Sales</strong>, <strong class="text-gray-900 dark:text-white">Waitlist</strong>, <strong class="text-gray-900 dark:text-white">Feedback</strong>, <strong class="text-gray-900 dark:text-white">Subscriptions</strong>, <strong class="text-gray-900 dark:text-white"><a href="#installments" class="doc-link">Installments</a></strong> and <strong class="text-gray-900 dark:text-white">Gift Cards</strong>.</p>
 
         <h3 class="doc-subheading">What You Can See</h3>
         <ul class="doc-list mb-6">

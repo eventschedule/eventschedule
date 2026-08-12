@@ -10,10 +10,23 @@ use Illuminate\Database\Eloquent\Model;
  */
 class SaleInstallment extends Model
 {
-    /** Retry backoff in days after a genuine decline, indexed by attempt number. */
+    /**
+     * Retry backoff in days after a genuine decline, indexed by attempt number.
+     *
+     * Three retries spanning nine days: the first charge on the due date, then +1, +3 and +5.
+     */
     public const RETRY_DAYS = [1, 3, 5];
 
-    public const MAX_ATTEMPTS = 3;
+    /**
+     * Total attempts before the plan goes on hold - the initial charge plus one per RETRY_DAYS
+     * entry.
+     *
+     * Must stay at 1 + count(RETRY_DAYS); a constant expression cannot call count(), so
+     * InstallmentScheduleTest pins the relationship instead. It was 3, which stopped the ladder
+     * after two retries on day four and left RETRY_DAYS[2] as dead config - four days, not the
+     * nine the buyer-facing copy promised.
+     */
+    public const MAX_ATTEMPTS = 4;
 
     protected $fillable = [
         'sale_installment_plan_id',

@@ -2,10 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\SendQueuedEmail;
+use App\Mail\InstallmentAuthenticationRequired;
 use App\Models\SaleInstallment;
 use App\Models\SaleInstallmentPlan;
 use App\Services\InstallmentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Bus;
 use Mockery;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
@@ -138,6 +141,40 @@ class InstallmentChargeSettlementTest extends TestCase
         $second->refresh();
         $this->assertSame('awaiting_reconciliation', $second->status);
         $this->assertNull($second->next_attempt_at, 'An unknown outcome must not be auto-retried');
+    }
+
+    /**
+     * A `requires_action` intent is the buyer's move, so the buyer has to be told to make it. The
+     * identical outcome arriving as a CardException already emailed them; arriving as an intent
+     * status parked in silence, and the buyer's first news of it was their ticket going on hold a
+     * week later for a payment nobody had asked them to approve.
+     */
+    public function test_an_intent_needing_customer_action_emails_the_buyer(): void
+    {
+        Bus::fake();
+        [, $second] = $this->planDueForCharge();
+
+        $this->fakeStripe(function ($mock) {
+            $mock->shouldReceive('chargeOffSession')->once()
+                ->andReturn($this->fakeIntent('pi_sca', 'requires_action'));
+        });
+
+        $this->artisan('app:charge-installments')->assertSuccessful();
+
+        $second->refresh();
+        $this->assertSame('awaiting_customer', $second->status);
+        $this->assertSame('requires_action', $second->last_error);
+        // Not a decline: the ladder must not be consumed by something the card never refused.
+        $this->assertSame(0, $second->attempts);
+
+        $mailables = [];
+        foreach (Bus::dispatched(SendQueuedEmail::class) as $job) {
+            $ref = new \ReflectionProperty($job, 'mailable');
+            $ref->setAccessible(true);
+            $mailables[] = get_class($ref->getValue($job));
+        }
+
+        $this->assertContains(InstallmentAuthenticationRequired::class, $mailables);
     }
 
     /**

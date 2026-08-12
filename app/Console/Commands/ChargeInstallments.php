@@ -14,6 +14,7 @@ use App\Models\SaleInstallment;
 use App\Models\SaleInstallmentPlan;
 use App\Services\AuditService;
 use App\Services\InstallmentService;
+use App\Services\WebhookService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -302,8 +303,28 @@ class ChargeInstallments extends Command
                 return;
             }
 
-            // Anything else (requires_action and friends) is the customer's move, not ours.
+            // Anything else (requires_action and friends) is the customer's move, not ours - so
+            // the customer has to be asked to make it. The same outcome arriving as a CardException
+            // emails them; arriving as an intent status used to park in silence, and the buyer's
+            // first news of it was their ticket going on hold a week later.
             $this->releaseAndPark($installment, 'requires_action');
+
+            $role = $this->roleFor($plan);
+            if ($role && $this->canEmail($role, $plan)) {
+                SendQueuedEmail::dispatch(
+                    new InstallmentAuthenticationRequired($plan, $installment->fresh(), $role),
+                    $plan->sale->email,
+                    $role->id,
+                    app()->getLocale()
+                );
+            }
+
+            Log::info('Installment charge parked for customer action', [
+                'installment_id' => $installment->id,
+                'plan_id' => $plan->id,
+                'intent_status' => $intent->status ?? null,
+            ]);
+
             $failed++;
         } catch (\Stripe\Exception\CardException $e) {
             $this->handleCardFailure($installment, $plan, $e);
@@ -387,6 +408,26 @@ class ChargeInstallments extends Command
 
         if ($isFinal) {
             $this->markDelinquent($plan);
+        }
+
+        // The event name promises a charge that failed, so a decline has to be what fires it. The
+        // only other dispatcher is InstallmentService::settle(), which fires it when a payment
+        // *arrives* and cannot be applied - a real case, but not the one an integrator reads the
+        // name as. Both now fire it and `outcome` is what tells them apart: 'declined' here,
+        // 'dead_plan' / 'amount_mismatch' / 'duplicate' / 'nothing_due' there.
+        if ($plan->sale) {
+            WebhookService::dispatch('installment.failed', $plan->sale, null, [
+                'installment' => [
+                    'sequence' => $installment->sequence,
+                    'amount' => (float) $installment->amount,
+                    'outcome' => 'declined',
+                    'error' => $code,
+                    'attempt' => $attempts,
+                    'is_final' => $isFinal,
+                    'next_attempt_at' => $isFinal ? null : now()->addDays($backoffDays)->toIso8601String(),
+                    'plan' => $plan->fresh()->toSummaryData(),
+                ],
+            ]);
         }
 
         if ($role && $this->canEmail($role, $plan)) {

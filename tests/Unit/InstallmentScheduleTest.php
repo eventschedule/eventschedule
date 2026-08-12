@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Models\SaleInstallment;
 use App\Services\InstallmentService;
 use App\Utils\MoneyUtils;
 use Carbon\Carbon;
@@ -132,6 +133,41 @@ class InstallmentScheduleTest extends TestCase
         $schedule = $this->service()->buildSchedule(600.00, 6, 'USD');
 
         $this->assertSame([1, 2, 3, 4, 5, 6], array_column($schedule, 'sequence'));
+    }
+
+    /**
+     * The decline ladder, pinned by the DAY the buyer actually reaches each attempt.
+     *
+     * The user guide states a number, so the code and the copy have to be checkable against one
+     * another. This previously read 3 attempts over 4 days while the guide promised three retries
+     * over about a week, and RETRY_DAYS[2] was unreachable - the constants disagreed and nothing
+     * noticed.
+     */
+    public function test_the_decline_ladder_spans_nine_days(): void
+    {
+        // The invariant a constant expression cannot enforce: one attempt, then one per backoff.
+        $this->assertSame(
+            1 + count(SaleInstallment::RETRY_DAYS),
+            SaleInstallment::MAX_ATTEMPTS,
+            'MAX_ATTEMPTS must stay in step with RETRY_DAYS'
+        );
+
+        $days = [];
+        $day = 0;
+
+        for ($attempt = 1; $attempt <= SaleInstallment::MAX_ATTEMPTS; $attempt++) {
+            $days[] = $day;
+
+            if ($attempt >= SaleInstallment::MAX_ATTEMPTS) {
+                break;
+            }
+
+            $day += SaleInstallment::RETRY_DAYS[min($attempt, count(SaleInstallment::RETRY_DAYS)) - 1];
+        }
+
+        // Charged on the due date, then three retries: +1, +3, +5.
+        $this->assertSame([0, 1, 4, 9], $days);
+        $this->assertSame(9, end($days), 'The guide promises nine days');
     }
 
     /**

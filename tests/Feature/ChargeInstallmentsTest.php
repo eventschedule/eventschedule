@@ -322,7 +322,11 @@ class ChargeInstallmentsTest extends TestCase
         $this->assertSame(2, $second->fresh()->attempts);
         $this->assertSame('active', $plan->fresh()->status);
 
-        // Third strike: the ticket stops scanning.
+        $this->invokeCardFailure($second->fresh(), $plan, 'card_declined');
+        $this->assertSame(3, $second->fresh()->attempts);
+        $this->assertSame('active', $plan->fresh()->status, 'The third attempt still has a retry left');
+
+        // Fourth and final attempt - day nine. The ticket stops scanning.
         $this->invokeCardFailure($second->fresh(), $plan, 'card_declined');
         $second->refresh();
         $this->assertSame('failed', $second->status);

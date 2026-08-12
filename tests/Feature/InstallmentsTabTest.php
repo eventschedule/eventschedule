@@ -55,6 +55,90 @@ class InstallmentsTabTest extends TestCase
     }
 
     /**
+     * Money that arrived and could not be applied to any payment. It is deliberately never
+     * auto-applied, so the organizer is the only one who can resolve it - and before this it was
+     * written to the database and read by nothing at all, including the audit log, which prints
+     * only `metadata` and never `new_values`.
+     */
+    public function test_unmatched_money_is_shown_to_the_organizer(): void
+    {
+        $owner = $this->createOwner();
+        $plan = $this->planFor($owner);
+        $plan->update(['unmatched_amount' => 120.00]);
+
+        $response = $this->actingAs($owner)->get(route('sales'))->assertOk();
+
+        $response->assertSee(__('messages.installment_unmatched_notice', [
+            'amount' => \App\Utils\MoneyUtils::format(120.00, 'USD'),
+        ]), false);
+    }
+
+    /**
+     * A charge whose outcome we never learned is parked rather than retried, because a retry after
+     * Stripe's idempotency key expires is how a timeout becomes a double charge. That makes it a
+     * state only a human can clear, so the human has to be able to see it.
+     */
+    public function test_a_charge_with_an_unknown_outcome_is_shown_to_the_organizer(): void
+    {
+        $owner = $this->createOwner();
+        $plan = $this->planFor($owner);
+        $plan->installments->firstWhere('sequence', 2)
+            ->update(['status' => 'awaiting_reconciliation', 'last_error' => 'timeout']);
+
+        $response = $this->actingAs($owner)->get(route('sales'))->assertOk();
+
+        $response->assertSee(__('messages.installment_needs_check_notice'), false);
+    }
+
+    /**
+     * The per-payment breakdown called every unpaid row "Scheduled", so a failed or parked payment
+     * looked identical to one simply not due yet.
+     */
+    public function test_the_breakdown_names_each_payment_state(): void
+    {
+        $owner = $this->createOwner();
+        $plan = $this->planFor($owner);
+        $plan->installments->firstWhere('sequence', 2)->update([
+            'status' => 'failed', 'transaction_reference' => 'pi_failed_ref',
+        ]);
+        $plan->installments->firstWhere('sequence', 3)->update([
+            'status' => 'awaiting_customer', 'last_error' => 'authentication_required',
+        ]);
+
+        $response = $this->actingAs($owner)->get(route('sales'))->assertOk();
+
+        $response->assertSee(__('messages.installment_payment_failed'), false);
+        $response->assertSee(__('messages.installment_payment_awaiting_buyer'), false);
+    }
+
+    /**
+     * The forecast counted only `scheduled` rows, so a plan going wrong quietly improved the
+     * figure the organizer plans against. Everything still owed belongs in it.
+     */
+    public function test_the_forecast_counts_money_that_is_owed_but_off_schedule(): void
+    {
+        $owner = $this->createOwner();
+        $plan = $this->planFor($owner);
+
+        // getInstallmentsData() scopes to auth()->user(), so the act has to come first.
+        $this->actingAs($owner);
+
+        $controller = app(\App\Http\Controllers\TicketController::class);
+        $method = new \ReflectionMethod($controller, 'getInstallmentsData');
+        $method->setAccessible(true);
+
+        $before = collect($method->invoke($controller)['installmentForecast'])->sum('amount');
+
+        // Park one payment. The money is still owed, so the total must not move.
+        $plan->installments->firstWhere('sequence', 3)->update(['status' => 'awaiting_customer']);
+
+        $after = collect($method->invoke($controller)['installmentForecast'])->sum('amount');
+
+        $this->assertSame($before, $after, 'Parking a payment must not shrink the forecast');
+        $this->assertGreaterThan(0, $after);
+    }
+
+    /**
      * /sales aggregates across every schedule the user owns, so summing two currencies into one
      * figure would be plainly wrong. Totals are grouped instead.
      */

@@ -4434,8 +4434,8 @@ return [
     'installment_final_notice_body' => 'You still owe :amount for :event. Please pay before the event so your ticket is valid on the day.',
 
     // Organizer digest
-    'installment_digest_due_subject' => '{1} :count installment payment is due tomorrow|[2,*] :count installment payments are due tomorrow',
-    'installment_digest_due_heading' => 'Payments due tomorrow',
+    'installment_digest_due_subject' => '{1} :count installment payment is due in the next two days|[2,*] :count installment payments are due in the next two days',
+    'installment_digest_due_heading' => 'Payments due in the next two days',
     'installment_digest_due_body' => 'These payments will be charged automatically tomorrow. You do not need to do anything. We will email you only if one fails.',
     'installment_digest_overdue_subject' => '{1} :count installment payment needs attention|[2,*] :count installment payments need attention',
     'installment_digest_overdue_heading' => 'Payments that need attention',
@@ -4481,10 +4481,14 @@ return [
     'pending_action_installments_overdue' => '{1} :count overdue installment payment|[2,*] :count overdue installment payments',
     'installment_line_item' => 'payment :number of :count',
     'installments_stripe_mandate' => 'By paying, you authorise :count further monthly payments of :amount to the same card.',
-    'notification_installment_due_help' => 'Get a daily summary of installment payments due tomorrow, and an immediate email whenever one fails.',
+    'notification_installment_due_help' => 'Get a daily summary of installment payments due in the next two days, and an immediate email whenever one fails.',
     'installment_payment_in_progress' => 'This payment is already being processed. Please check back in a few minutes.',
     'installment_error_connect_revoked' => 'The schedule\'s Stripe connection needs reconnecting',
     'installment_error_reconcile' => 'Needs checking in Stripe',
     'installment_status_processing' => 'Processing',
+    'installment_payment_failed' => 'Failed',
+    'installment_payment_awaiting_buyer' => 'Waiting on the buyer',
+    'installment_unmatched_notice' => ':amount arrived that could not be applied to a payment. Check it against your Stripe dashboard and refund or apply it by hand.',
+    'installment_needs_check_notice' => 'A charge was interrupted and we could not confirm whether it went through. We did not retry it, so that nobody is charged twice. Check the reference in your Stripe dashboard.',
     'installments_plan_count' => '{1} payment plan|[2,*] payment plans',
 ];

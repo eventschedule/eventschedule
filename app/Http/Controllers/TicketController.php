@@ -411,6 +411,17 @@ class TicketController extends Controller
                     : null,
                 'card_expiring' => $plan->cardExpiresBeforeFinalPayment(),
                 'error' => $next?->humanErrorKey() ? __($next->humanErrorKey()) : null,
+                // Money that arrived and could not be applied to a row: an overpayment, or a
+                // payment for a plan that had already been cancelled. It is deliberately never
+                // auto-applied, so it sits here until the organizer looks. Without this it was
+                // written to the database and read by nothing.
+                'unmatched' => (float) $plan->unmatched_amount > 0 ? (float) $plan->unmatched_amount : null,
+                // A charge whose outcome we never learned. Not retried on purpose: a retry after
+                // Stripe's idempotency key expires is how a timeout becomes a double charge, so
+                // the resolution is a human comparing the reference against their dashboard.
+                'needs_check' => $plan->installments
+                    ->where('status', 'awaiting_reconciliation')
+                    ->isNotEmpty(),
                 // Every payment reference the organizer needs to refund by hand on their own
                 // Stripe dashboard: nothing in this app refunds a Connect ticket sale, and the
                 // sale's single transaction_reference cannot identify N charges.
@@ -424,7 +435,13 @@ class TicketController extends Controller
             ];
         })
             // An action queue, not a ledger: the rows that need doing something about come first.
-            ->sortBy(fn ($r) => [$r['is_overdue'] ? 0 : 1, $r['next_due'] ?? '9999'])
+            // Money that arrived and could not be applied, and a charge with no known outcome,
+            // outrank an overdue payment - they are the two the organizer alone can resolve.
+            ->sortBy(fn ($r) => [
+                $r['unmatched'] || $r['needs_check'] ? 0 : 1,
+                $r['is_overdue'] ? 0 : 1,
+                $r['next_due'] ?? '9999',
+            ])
             ->values();
 
         $totals = $plans->groupBy('currency')->map(fn ($group, $currency) => [
@@ -434,8 +451,11 @@ class TicketController extends Controller
             'outstanding' => (float) $group->sum(fn ($p) => $p->amountRemaining()),
         ])->values();
 
+        // Everything still owed, not merely everything still on schedule. Filtering to 'scheduled'
+        // silently dropped overdue and parked payments out of the figure the organizer plans
+        // against, so a plan going wrong made the forecast look better rather than worse.
         $forecast = $plans->flatMap(fn ($p) => $p->installments
-            ->where('status', 'scheduled')
+            ->whereNotIn('status', ['paid', 'cancelled'])
             ->map(fn ($i) => [
                 'month' => $i->due_at?->format('Y-m'),
                 'label' => $i->due_at?->format('M Y'),

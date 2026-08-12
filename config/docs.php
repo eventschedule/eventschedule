@@ -238,7 +238,7 @@ return [
             'blurb' => 'Set up ticketing and manage sales.',
             'icon' => 'ticket',
             'published' => '2024-01-01',
-            'modified' => '2026-07-30',
+            'modified' => '2026-08-12',
         ],
 
         'subscriptions' => [
@@ -579,7 +579,7 @@ return [
             'blurb' => 'Programmatically manage schedules and events over REST.',
             'icon' => 'code',
             'published' => '2024-01-01',
-            'modified' => '2026-03-01',
+            'modified' => '2026-08-12',
         ],
 
         'developer/webhooks' => [
@@ -590,7 +590,7 @@ return [
             'blurb' => 'HMAC-signed POST notifications for sales, events and check-ins.',
             'icon' => 'webhook',
             'published' => '2026-03-01',
-            'modified' => '2026-03-01',
+            'modified' => '2026-08-12',
         ],
 
     ],

@@ -411,6 +411,50 @@ class DocsManifestTest extends TestCase
         }
     }
 
+    /**
+     * The Sales page tab strip and its Help anchors, pinned to each other.
+     *
+     * /sales carries six tabs spanning four doc pages, and the mapping was flat - so Help on the
+     * Installments, Subscriptions and Gift Cards tabs all opened "Managing Sales". The anchor map
+     * is keyed on the tab BUTTON ids, so a tab added without an entry silently falls back to that
+     * same wrong page rather than failing loudly.
+     */
+    public function test_every_sales_tab_has_its_own_help_anchor(): void
+    {
+        $view = file_get_contents(resource_path('views/ticket/sales.blade.php'));
+
+        preg_match_all('/<button[^>]*id="(tab-[a-z-]+)"[^>]*class="sales-tab/', $view, $matches);
+        $tabs = array_unique($matches[1]);
+
+        $this->assertGreaterThanOrEqual(5, count($tabs), 'Expected the Sales tab strip to be found');
+
+        $reflection = new \ReflectionProperty(\App\Utils\HelpUtils::class, 'mappings');
+        $reflection->setAccessible(true);
+        $mappings = $reflection->getValue();
+
+        $this->assertIsArray($mappings['sales'] ?? null, 'The /sales mapping must carry per-tab anchors');
+
+        foreach ($tabs as $tab) {
+            $this->assertArrayHasKey(
+                $tab,
+                $mappings['sales']['anchors'],
+                "The Sales tab '{$tab}' has no Help anchor, so its Help button opens the wrong page."
+            );
+        }
+    }
+
+    /**
+     * The anchor map is inert unless something reads it. /sales selects its tab from ?tab= and its
+     * buttons carry no data-tab, so both of those paths have to exist in the shared Help script.
+     */
+    public function test_the_help_script_reads_the_sales_tab_strip(): void
+    {
+        $nav = file_get_contents(resource_path('views/layouts/navigation.blade.php'));
+
+        $this->assertStringContainsString('.sales-tab', $nav, 'Nothing reads a Sales tab click');
+        $this->assertStringContainsString("'tab-' + tabParam", $nav, 'Nothing reads ?tab= on load');
+    }
+
     public function test_search_index_entries_point_at_real_pages_and_anchors(): void
     {
         foreach ($this->searchIndex() as $row) {

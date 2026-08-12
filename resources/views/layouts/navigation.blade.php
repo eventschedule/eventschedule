@@ -503,9 +503,20 @@
             var hash = window.location.hash.replace('#', '');
             if (hash && anchorMap[hash]) {
                 updateHelpLinks(anchorMap[hash]);
-            } else {
-                updateHelpLinks(baseUrl);
+                return;
             }
+
+            // /sales selects its tab from ?tab=, not from a hash, and the value reconstructs the
+            // tab button id the anchor map is keyed on: ?tab=installments -> tab-installments.
+            try {
+                var tabParam = new URLSearchParams(window.location.search).get('tab');
+                if (tabParam && anchorMap['tab-' + tabParam]) {
+                    updateHelpLinks(anchorMap['tab-' + tabParam]);
+                    return;
+                }
+            } catch (e) {}
+
+            updateHelpLinks(baseUrl);
         }
 
         // Set initial state based on URL hash
@@ -545,6 +556,15 @@
                 } else {
                     updateHelpLinks(baseUrl);
                 }
+                return;
+            }
+
+            // The Sales page tabs carry no data-tab: their ids ARE the anchor keys, and the
+            // ?tab= parameter reconstructs the same id. Without this branch every tab on /sales
+            // opened "Managing Sales", including Installments and Gift Cards.
+            var salesTab = e.target.closest('.sales-tab');
+            if (salesTab && anchorMap[salesTab.id]) {
+                updateHelpLinks(anchorMap[salesTab.id]);
                 return;
             }
 

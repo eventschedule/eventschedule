@@ -159,7 +159,21 @@ class HelpUtils
         'following/merge-venues*' => '/docs/creating-schedules#merge',
         'following' => '/docs/sharing',
         'tickets' => '/docs/tickets',
-        'sales' => '/docs/tickets#managing-sales',
+        // /sales carries six tabs covering four different doc pages, so a flat mapping sent the
+        // Help button to "Managing Sales" from the Installments, Subscriptions and Gift Cards
+        // tabs alike. Keyed on the tab BUTTON ids, which is what navigation.blade.php reads from
+        // a .sales-tab click and reconstructs from the ?tab= parameter on load.
+        'sales' => [
+            'doc' => '/docs/tickets#managing-sales',
+            'anchors' => [
+                'tab-sales' => '/docs/tickets#managing-sales',
+                'tab-waitlist' => '/docs/tickets#waitlist',
+                'tab-feedback' => '/docs/tickets#feedback',
+                'tab-subscriptions' => '/docs/subscriptions',
+                'tab-installments' => '/docs/tickets#installments',
+                'tab-gift-cards' => '/docs/gift-cards',
+            ],
+        ],
         'sales.import' => '/docs/tickets#importing-attendees',
         'analytics' => [
             'doc' => '/docs/analytics',

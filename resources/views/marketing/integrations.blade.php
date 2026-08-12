@@ -657,9 +657,11 @@
             ],
         ];
 
-        // Webhook event types, verbatim from Webhook::EVENT_TYPES.
+        // Webhook event types, verbatim from Webhook::EVENT_TYPES. The heading below counts them,
+        // so adding one there means adding it here too.
         $hookTypes = [
             'sale.created', 'sale.paid', 'sale.refunded', 'sale.cancelled',
+            'installment.paid', 'installment.failed',
             'event.created', 'event.updated', 'event.deleted', 'event.cancelled',
             'ticket.scanned', 'ticket.booked', 'ticket.booking_cancelled', 'feedback.submitted',
         ];

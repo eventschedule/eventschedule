@@ -3283,7 +3283,7 @@
 
                         {{-- Defaults ON, unlike the others. A failed installment is money that did
                              not arrive; an organizer who never opened this page still needs to
-                             hear about it. Routine "due tomorrow" notices are aggregated into one
+                             hear about it. Routine upcoming-payment notices are aggregated into one
                              daily digest, so this cannot flood them. --}}
                         <div class="mb-6">
                             <x-toggle name="notification_installment_due"

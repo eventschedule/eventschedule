@@ -60,7 +60,16 @@ class WebhookService
             }
 
             if ($extraData) {
-                $data = array_merge($data, $extraData);
+                // toApiData() returns a stdClass, and array_merge() rejects an object outright on
+                // PHP 8 - so every dispatch carrying $extraData threw a TypeError. It went
+                // unnoticed because dispatch() returns early when nobody is subscribed, which is
+                // the case in every test, so the line was never reached under test.
+                //
+                // The blast radius was worst on the installment path: the throw landed after the
+                // payment had already committed, was swallowed by the cron's catch, and rewrote a
+                // just-settled row as awaiting_reconciliation - money taken, ticket eventually put
+                // on hold. ticket.booked and ticket.booking_cancelled pass $extraData the same way.
+                $data = (object) array_merge((array) $data, $extraData);
             }
 
             $payload = [

@@ -524,11 +524,14 @@
             ],
         ];
 
+        // The heading below counts these, so the two have to be changed together.
         $webhookEvents = [
             ['sale.created', 'A sale is created, still unpaid.'],
             ['sale.paid', 'Confirmed paid, whether by Stripe, Invoice Ninja, by hand or free.'],
             ['sale.refunded', 'A paid sale is refunded.'],
             ['sale.cancelled', 'A sale is cancelled.'],
+            ['installment.paid', 'A payment of an installment plan is collected.'],
+            ['installment.failed', 'A scheduled payment could not be collected. Read outcome for why.'],
             ['event.created', 'A new event exists.'],
             ['event.updated', 'An event changed.'],
             ['event.deleted', 'An event is gone.'],
@@ -1013,7 +1016,7 @@
                         </div>
                     </div>
 
-                    <!-- the twelve types -->
+                    <!-- the fourteen types -->
                     <div data-reveal>
                         <div class="es-cons-term overflow-hidden">
                             <div class="es-cons-bar">

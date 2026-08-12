@@ -119,6 +119,35 @@
                             </td>
                         </tr>
 
+                        {{-- The two states nothing automatic will resolve. Money that arrived and
+                             could not be applied is never auto-applied, and a charge with an
+                             unknown outcome is never retried, because a retry after Stripe's
+                             idempotency key expires is how a timeout becomes a double charge. Both
+                             were being written and read by nobody, so the organizer had no way to
+                             learn either had happened. --}}
+                        @if ($row['unmatched'] || $row['needs_check'])
+                            <tr>
+                                <td colspan="7" class="px-4 pb-3">
+                                    <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                        <div class="flex items-start gap-3">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                                            </svg>
+                                            <div class="text-sm text-amber-800 dark:text-amber-200 space-y-1">
+                                                @if ($row['unmatched'])
+                                                    <p>{{ __('messages.installment_unmatched_notice', ['amount' => \App\Utils\MoneyUtils::format($row['unmatched'], $row['currency'])]) }}</p>
+                                                @endif
+
+                                                @if ($row['needs_check'])
+                                                    <p>{{ __('messages.installment_needs_check_notice') }}</p>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endif
+
                         {{-- Every payment reference, so the organizer can find the charges to
                              refund on their own Stripe dashboard. Nothing in this app refunds a
                              Connect ticket sale, and the sale's single transaction_reference
@@ -133,7 +162,19 @@
                                                 <div class="text-xs text-gray-600 dark:text-gray-400 flex flex-wrap gap-x-4">
                                                     <span>{{ $payment['due_at'] }}</span>
                                                     <span>{{ \App\Utils\MoneyUtils::format($payment['amount'], $row['currency']) }}</span>
-                                                    <span>{{ $payment['status'] === 'paid' ? __('messages.paid') : __('messages.scheduled') }}</span>
+                                                    {{-- Each state named. This read "Scheduled" for
+                                                         everything unpaid, so a failed, parked or
+                                                         cancelled payment was indistinguishable
+                                                         from one simply not due yet. --}}
+                                                    <span>{{ __(match ($payment['status']) {
+                                                        'paid' => 'messages.paid',
+                                                        'processing' => 'messages.installment_status_processing',
+                                                        'failed' => 'messages.installment_payment_failed',
+                                                        'cancelled' => 'messages.installment_status_cancelled',
+                                                        'awaiting_customer' => 'messages.installment_payment_awaiting_buyer',
+                                                        'awaiting_reconciliation' => 'messages.installment_error_reconcile',
+                                                        default => 'messages.scheduled',
+                                                    }) }}</span>
                                                     @if ($payment['reference'])
                                                         <span class="font-mono">{{ $payment['reference'] }}</span>
                                                     @endif
