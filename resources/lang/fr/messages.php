@@ -4364,6 +4364,7 @@ return [
     'installment_card_expiring' => 'Cette carte expire avant le dernier paiement.',
     'cancel_payment_plan' => 'Annuler l\'échéancier',
     'payment_plan' => 'Échéancier de paiement',
+    'thank_you' => 'Merci ! Votre paiement a bien été reçu.',
     'installments_progress' => ':paid paiements effectués sur :count',
     'installment_next' => 'Prochain paiement : :amount le :date',
     'pay_next_installment' => 'Payer la prochaine mensualité maintenant',

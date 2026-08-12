@@ -199,6 +199,49 @@ trait HandlesSaleStatusActions
                 if ($locked->payment_method !== 'rsvp') {
                     $this->decrementSaleAnalytics($legs);
                 }
+            } else {
+                // This sale is ALREADY released, so the branch above did not run and no status
+                // cascade fired - but a sibling can still be live. The expiry cascade is narrowed
+                // to `unpaid` rows (Sale::booted), so a leg paid in cash at the door survives an
+                // expired anchor, and `amount_mismatch` does not cascade at all. The raw
+                // is_deleted update below fires NO model events, so without this those rows keep
+                // their seats out of inventory forever and their revenue on the books, while
+                // orderTotalPayment() silently stops counting them.
+                $legs = $this->saleAnalyticsLegs($locked);
+
+                // Same two shapes the delete cascade below uses, deliberately - Sale's own
+                // statusCascadeQuery() is protected and not reachable from here.
+                $siblings = null;
+
+                if ($locked->isOrderPrimary()) {
+                    $siblings = Sale::where('order_id', $locked->order_id)->where('id', '!=', $locked->id);
+                } elseif ($locked->group_id && $locked->isPrimarySale()) {
+                    $siblings = Sale::where('group_id', $locked->group_id)->where('id', '!=', $locked->id);
+                }
+
+                // Leg primaries and ungrouped rows only. Each one's own save cascades to its own
+                // guests, so no row is visited twice - re-saving a guest another sibling's cascade
+                // has just cancelled would still read dirty (the in-memory copy holds the old
+                // status) and fire the release hooks a SECOND time, double-crediting the gift card
+                // and over-releasing the seats.
+                $live = $siblings
+                    ? $siblings->whereIn('status', ['unpaid', 'paid'])
+                        ->where(fn ($query) => $query->whereNull('group_id')->orWhereColumn('group_id', 'id'))
+                        ->get()
+                    : collect();
+
+                foreach ($live as $sibling) {
+                    $sibling->status = 'cancelled';
+                    $sibling->save();
+                }
+
+                // saleAnalyticsLegs() rejects rows already cancelled/refunded/expired, so $locked
+                // itself is correctly dropped - it was decremented when it was released. An
+                // `amount_mismatch` row survives that filter but decrementSaleAnalytics() only
+                // touches rows whose status was `paid`, and a mismatched sale was never credited.
+                if ($locked->payment_method !== 'rsvp') {
+                    $this->decrementSaleAnalytics($legs);
+                }
             }
 
             $locked->is_deleted = true;

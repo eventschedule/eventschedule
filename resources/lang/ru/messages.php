@@ -4378,6 +4378,7 @@ return [
     'installment_card_expiring' => 'Срок действия этой карты истекает до последнего платежа.',
     'cancel_payment_plan' => 'Отменить график',
     'payment_plan' => 'График платежей',
+    'thank_you' => 'Спасибо! Ваш платёж получен.',
     'installments_progress' => 'внесено :paid из :count платежей',
     'installment_next' => 'Следующий платёж: :amount :date',
     'pay_next_installment' => 'Оплатить следующий платёж сейчас',

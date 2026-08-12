@@ -104,6 +104,73 @@ class InstallmentBuyerSurfacesTest extends TestCase
         $this->assertSame('cancelled', $plan->fresh()->status);
     }
 
+    /**
+     * The plan snapshots the connected account at creation; this page resolves it live. An
+     * organizer who unlinks Stripe and reconnects gets a brand-new acct_, and the stale snapshot
+     * then made StripeController::handleInstallmentPayment() reject the buyer's own payment as a
+     * "connected account mismatch" - charged, and credited nothing.
+     */
+    public function test_paying_after_the_organizer_relinks_stripe_re_points_the_plan(): void
+    {
+        [$owner, , , , $plan] = $this->scaffold();
+        config(['app.hosted' => true]);
+
+        $this->assertSame('acct_merchant', $plan->stripe_account_id);
+
+        // A card was captured on the OLD account.
+        $plan->update([
+            'stripe_customer_id' => 'cus_old',
+            'stripe_payment_method_id' => 'pm_old',
+        ]);
+
+        // Unlink + reconnect: StripeController::unlink() nulls the account, connect() mints a new one.
+        $owner->stripe_account_id = 'acct_reconnected';
+        $owner->save();
+
+        // The Stripe call itself fails with no network; what matters is the state written first.
+        $this->post(route('installment.pay', [
+            'plan_id' => UrlUtils::encodeId($plan->id),
+            'secret' => $plan->secret,
+        ]), ['mode' => 'next'])->assertRedirect();
+
+        $plan->refresh();
+
+        $this->assertSame('acct_reconnected', $plan->stripe_account_id,
+            'the snapshot must follow the account the session was actually created on');
+        $this->assertNull($plan->stripe_customer_id,
+            'the old Customer lived on the old account and cannot be charged');
+        $this->assertNull($plan->stripe_payment_method_id,
+            'the old PaymentMethod lived on the old account and cannot be charged');
+    }
+
+    /**
+     * Unlinked and not reconnected. Falling through would build the session on the PLATFORM secret,
+     * so the buyer's money would land in ours rather than the organizer's - and the webhook would
+     * then refuse to credit it.
+     */
+    public function test_paying_is_refused_when_the_organizer_has_no_connected_account(): void
+    {
+        [$owner, , , , $plan] = $this->scaffold();
+        config(['app.hosted' => true]);
+
+        $owner->stripe_account_id = null;
+        $owner->save();
+
+        // The EXACT message matters. Without the guard this route still redirects with an error,
+        // because the platform StripeClient then throws on an empty key and the catch-all reports
+        // messages.error - so asserting merely "an error" passes for entirely the wrong reason and
+        // pins nothing. This asserts it was refused BEFORE any session was attempted.
+        $this->post(route('installment.pay', [
+            'plan_id' => UrlUtils::encodeId($plan->id),
+            'secret' => $plan->secret,
+        ]), ['mode' => 'next'])
+            ->assertRedirect()
+            ->assertSessionHas('error', __('messages.installments_requires_stripe'));
+
+        // The snapshot is untouched, so nothing has been re-pointed at the platform account.
+        $this->assertSame('acct_merchant', $plan->fresh()->stripe_account_id);
+    }
+
     // ---- The door ----
 
     public function test_a_current_plan_scans_normally(): void

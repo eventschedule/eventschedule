@@ -4357,6 +4357,7 @@ return [
     'installment_card_expiring' => 'Deze kaart verloopt voor de laatste betaling.',
     'cancel_payment_plan' => 'Betaalschema annuleren',
     'payment_plan' => 'Betaalschema',
+    'thank_you' => 'Bedankt! We hebben je betaling ontvangen.',
     'installments_progress' => ':paid van :count betalingen gedaan',
     'installment_next' => 'Volgende betaling: :amount op :date',
     'pay_next_installment' => 'Betaal nu de volgende termijn',

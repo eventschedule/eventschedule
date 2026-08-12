@@ -83,6 +83,62 @@ class MultiEventOrderLifecycleTest extends TestCase
         $this->assertSame('expired', $legA->fresh()->status);
     }
 
+    /**
+     * Deleting an order whose anchor is ALREADY released still has to return the other legs' seats.
+     *
+     * The two guards above leave a legitimate divergence behind: the expiry cascade is narrowed to
+     * `unpaid` rows, so a leg collected in cash survives an expired anchor. deleteSale() then took
+     * its "cancel first so Sale::booted releases the inventory" branch only when the anchor itself
+     * was unpaid/paid, and flagged the siblings with a raw query-builder update that fires no model
+     * events - so that paid leg's seats were never returned and its revenue stayed on the books,
+     * while orderTotalPayment() silently stopped counting it.
+     */
+    public function test_deleting_a_released_order_returns_a_paid_legs_seats(): void
+    {
+        [$legA, $legB, , $eventB, $role] = $this->createTwoLegOrder();
+
+        $ticketB = $eventB->tickets->first();
+
+        // A second, unrelated buyer on the same ticket. This is the double-release detector: the
+        // count has to land on exactly 1, not 0. updateSold() floors at zero, so without another
+        // holder on the row a hook firing twice is indistinguishable from firing once.
+        $this->createSale($eventB, $role, [
+            'email' => 'someone-else@gmail.com', 'payment_amount' => 30,
+            'payment_method' => 'cash', 'status' => 'paid',
+        ], $ticketB);
+
+        $this->assertSame(2, $ticketB->fresh()->soldCountFor($legB->event_date));
+
+        // Collected at the door, then the rest of the order lapses.
+        $legB->status = 'paid';
+        $legB->save();
+
+        $legA->refresh();
+        $legA->status = 'expired';
+        $legA->save();
+
+        $this->assertSame('paid', $legB->fresh()->status, 'precondition: the paid leg survives expiry');
+        $this->assertSame(2, $ticketB->fresh()->soldCountFor($legB->event_date),
+            'precondition: the paid leg still holds its seat');
+
+        $actor = new class
+        {
+            use \App\Traits\HandlesSaleStatusActions;
+
+            public function run(Sale $sale): ?string
+            {
+                return $this->deleteSale($sale);
+            }
+        };
+
+        $actor->run($legA->fresh());
+
+        $this->assertSame(1, $ticketB->fresh()->soldCountFor($legB->event_date),
+            'the deleted order must give the seat back exactly once');
+        $this->assertSame('cancelled', $legB->fresh()->status);
+        $this->assertTrue((bool) $legB->fresh()->is_deleted);
+    }
+
     public function test_cancelling_an_order_still_reaches_a_paid_leg(): void
     {
         [$legA, $legB] = $this->createTwoLegOrder();

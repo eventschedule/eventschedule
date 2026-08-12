@@ -4357,6 +4357,7 @@ return [
     'installment_card_expiring' => 'Esta tarjeta caduca antes del último pago.',
     'cancel_payment_plan' => 'Cancelar el plan',
     'payment_plan' => 'Plan de pagos',
+    'thank_you' => '¡Gracias! Hemos recibido tu pago.',
     'installments_progress' => ':paid de :count pagos realizados',
     'installment_next' => 'Próximo pago: :amount el :date',
     'pay_next_installment' => 'Pagar ahora la próxima cuota',

@@ -189,6 +189,13 @@ class ReleaseTickets extends Command
      * that migration can still hold a dangling id, and this loop is the only thing that ever
      * returns their seats and gift-card holds. Silently resolving to a missing row meant they were
      * skipped on every run, forever.
+     *
+     * DELIBERATE, do not "fix": when the anchor exists but is no longer `unpaid`, the caller's
+     * transaction finds it in a state it will not expire and the whole order keeps its seats -
+     * including legs on other events. That is intended for the case that actually reaches it,
+     * `amount_mismatch`: money DID arrive, it is waiting on an admin (AdminAlertService surfaces it
+     * as `sales_mismatch`), and releasing those seats would resell a ticket somebody has paid for.
+     * Expiring the legs individually here would do exactly that.
      */
     private function expiryTargetId(Sale $sale): int
     {

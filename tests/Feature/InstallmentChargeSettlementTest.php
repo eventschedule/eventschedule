@@ -204,7 +204,12 @@ class InstallmentChargeSettlementTest extends TestCase
         [$client, $options] = app(InstallmentService::class)->stripeContextFor($plan->fresh());
 
         $this->assertSame([], $options, 'Selfhost must not send stripe_account');
-        $this->assertNotNull($client);
+
+        // The key, not just the options. `assertNotNull($client)` used to stand in for this, which
+        // could not fail - `new` does not return null - so the two rails could have been swapped
+        // and this test, named for that exact regression, would still have passed.
+        $this->assertSame(config('services.stripe_platform.secret'), $client->getApiKey(),
+            'Selfhost has no Connect key, so it must charge on the platform secret');
     }
 
     public function test_hosted_connect_uses_the_connected_account(): void
@@ -212,9 +217,11 @@ class InstallmentChargeSettlementTest extends TestCase
         config(['app.hosted' => true]);
         [$plan] = $this->planDueForCharge();
 
-        [, $options] = app(InstallmentService::class)->stripeContextFor($plan->fresh());
+        [$client, $options] = app(InstallmentService::class)->stripeContextFor($plan->fresh());
 
         $this->assertSame(['stripe_account' => 'acct_merchant'], $options);
+        $this->assertSame(config('services.stripe.key'), $client->getApiKey(),
+            'A Connect plan must charge on the Connect key, not the platform secret');
     }
 
     /**

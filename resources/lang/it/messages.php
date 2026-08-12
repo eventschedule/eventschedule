@@ -4357,6 +4357,7 @@ return [
     'installment_card_expiring' => 'Questa carta scade prima dell\'ultimo pagamento.',
     'cancel_payment_plan' => 'Annulla il piano',
     'payment_plan' => 'Piano di pagamento',
+    'thank_you' => 'Grazie! Il tuo pagamento è stato ricevuto.',
     'installments_progress' => ':paid pagamenti effettuati su :count',
     'installment_next' => 'Prossimo pagamento: :amount il :date',
     'pay_next_installment' => 'Paga adesso la prossima rata',

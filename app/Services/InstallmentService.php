@@ -538,6 +538,12 @@ class InstallmentService
                 \App\Models\AnalyticsEventsDaily::incrementPromoSale($leg->event_id, $legPromo);
             }
 
+            // The ordinary paid path reports this from StripeController; the installment branch
+            // breaks out before that block, so without this an event running a boost campaign
+            // recorded no conversion at all for a payment-plan purchase and Meta optimised against
+            // a sale it never saw. Same leg total the analytics credit above uses.
+            app()->make(\App\Services\MetaAdsService::class)->sendSaleConversion($leg, $legTotal);
+
             WebhookService::dispatch('sale.paid', $leg);
             foreach ($leg->guestSales()->get() as $guestSale) {
                 WebhookService::dispatch('sale.paid', $guestSale);

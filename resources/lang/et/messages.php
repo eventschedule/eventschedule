@@ -4376,6 +4376,7 @@ return [
     'installment_card_expiring' => 'See kaart aegub enne viimast makset.',
     'cancel_payment_plan' => 'Tühista maksegraafik',
     'payment_plan' => 'Maksegraafik',
+    'thank_you' => 'Aitäh! Teie makse on laekunud.',
     'installments_progress' => ':paid makset tehtud :count-st',
     'installment_next' => 'Järgmine makse: :amount kuupäeval :date',
     'pay_next_installment' => 'Maksa järgmine osamakse kohe',

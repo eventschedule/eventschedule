@@ -1015,6 +1015,25 @@ return [
     'generating_graphic' => 'Generating graphic',
     'error_loading_graphic' => 'Error loading graphic',
     'error' => 'Error',
+
+    // Referenced in code but never defined, so each of these rendered its own key name
+    // ("messages.not_found") to the user. English only for now: fallback_locale is 'en', so every
+    // locale shows this rather than the raw key, and proper translations can follow.
+    'error_occurred' => 'Something went wrong. Please try again.',
+    'something_went_wrong' => 'Something went wrong. Please try again.',
+    'not_found' => 'Not found',
+    'invalid_value' => 'Invalid value',
+    'invalid_image' => 'That image could not be read. Please upload a JPG, PNG, GIF or WebP.',
+    'role_id_required' => 'A schedule is required',
+    'select_calendar' => 'Select a calendar',
+    'new_verification_link_has_been_sent' => 'A new verification link has been sent to your email address.',
+    'unknown' => 'Unknown',
+    'enable' => 'Enable',
+    'disable' => 'Disable',
+    'clear_steps' => 'Clear steps',
+    'no_schedules' => 'No schedules',
+    'create_schedule_first' => 'Create a schedule first to send newsletters.',
+
     'upcoming_events' => 'Upcoming Events',
     'tonight' => 'Tonight',
     'permission_denied' => 'Permission denied',
@@ -3707,6 +3726,8 @@ return [
     'audit_boost_paused' => 'Boost paused',
     'audit_boost_resumed' => 'Boost resumed',
     'audit_boost_cancelled' => 'Boost cancelled',
+    'audit_installment_paid' => 'Installment paid',
+    'audit_installment_failed' => 'Installment failed',
 
     'cookie_consent_banner_label' => 'Cookie consent',
     'cookie_consent_message' => 'We use cookies for analytics.',
@@ -4467,6 +4488,7 @@ return [
     'installment_card_expiring' => 'This card expires before the last payment.',
     'cancel_payment_plan' => 'Cancel the plan',
     'payment_plan' => 'Payment plan',
+    'thank_you' => 'Thank you! Your payment has been received.',
     'installments_progress' => ':paid of :count payments made',
     'installment_next' => 'Next payment: :amount on :date',
     'pay_next_installment' => 'Pay the next payment now',

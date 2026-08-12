@@ -4396,6 +4396,7 @@ return [
     'installment_card_expiring' => 'Acest card expiră înainte de ultima plată.',
     'cancel_payment_plan' => 'Anulează graficul',
     'payment_plan' => 'Grafic de plăţi',
+    'thank_you' => 'Mulţumim! Plata dumneavoastră a fost primită.',
     'installments_progress' => ':paid din :count plăţi efectuate',
     'installment_next' => 'Următoarea plată: :amount pe :date',
     'pay_next_installment' => 'Plăteşte acum următoarea rată',

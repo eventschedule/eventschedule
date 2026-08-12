@@ -71,9 +71,47 @@ class InstallmentController extends Controller
             return back()->with('error', __('messages.error'));
         }
 
-        $useConnect = config('app.hosted') && $owner->stripe_account_id;
+        // The plan SNAPSHOTS the connected account at creation (InstallmentService::createPlan)
+        // while this page resolves it LIVE, and the two diverge permanently once an organizer
+        // unlinks and reconnects: StripeController::unlink() nulls the account and connect() then
+        // mints a brand-new acct_. Both halves of that divergence have to be handled here, before
+        // any session is created, or the buyer pays and nothing credits them.
+        $live = $owner->stripe_account_id;
+
+        // Unlinked and not reconnected. Falling through would build the session on the PLATFORM
+        // secret, so the money would land in our account rather than the organizer's - and
+        // handleInstallmentPayment() would then refuse it as a platform key on a Connect plan,
+        // leaving the buyer charged and uncredited. Refusing outright is the only safe answer.
+        if (config('app.hosted') && ! $live) {
+            return back()->with('error', __('messages.installments_requires_stripe'));
+        }
+
+        // Reconnected under a new account. The stored Customer and PaymentMethod live on the OLD
+        // account, so they can be neither charged nor retrieved - and leaving the snapshot stale
+        // makes the webhook's account guard reject this very payment. Re-snapshot and drop the
+        // dead card; the session below carries setup_future_usage, so paying re-establishes one on
+        // the account that will actually be charged.
+        if ($live && $plan->stripe_account_id && $live !== $plan->stripe_account_id) {
+            \Log::warning('Installment plan re-pointed at a new connected account', [
+                'plan_id' => $plan->id,
+                'old_account' => $plan->stripe_account_id,
+                'new_account' => $live,
+            ]);
+
+            $plan->forceFill([
+                'stripe_account_id' => $live,
+                'stripe_customer_id' => null,
+                'stripe_payment_method_id' => null,
+                'card_brand' => null,
+                'card_last4' => null,
+                'card_exp_month' => null,
+                'card_exp_year' => null,
+            ])->save();
+        }
+
+        $useConnect = config('app.hosted') && $live;
         $stripe = new StripeClient($useConnect ? config('services.stripe.key') : config('services.stripe_platform.secret'));
-        $options = $useConnect ? ['stripe_account' => $owner->stripe_account_id] : [];
+        $options = $useConnect ? ['stripe_account' => $live] : [];
 
         $returnData = [
             'plan_id' => UrlUtils::encodeId($plan->id),

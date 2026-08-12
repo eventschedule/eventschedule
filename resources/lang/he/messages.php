@@ -4352,6 +4352,7 @@ return [
     'installment_card_expiring' => 'תוקף הכרטיס הזה פג לפני התשלום האחרון.',
     'cancel_payment_plan' => 'לבטל את לוח התשלומים',
     'payment_plan' => 'לוח תשלומים',
+    'thank_you' => 'תודה! התשלום שלך התקבל.',
     'installments_progress' => 'בוצעו :paid תשלומים מתוך :count',
     'installment_next' => 'התשלום הבא: :amount ב-:date',
     'pay_next_installment' => 'לשלם עכשיו את התשלום הבא',

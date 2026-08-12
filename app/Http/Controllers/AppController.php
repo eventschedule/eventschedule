@@ -303,10 +303,24 @@ class AppController extends Controller
                     report($e);
                 }
                 try {
-                    // Bounded explicitly: this whole hourly block shares one 900s budget, and a
-                    // synchronous run of Stripe charges is the one thing here that can consume it
-                    // all and starve the commands queued behind. It resumes next hour.
-                    \Artisan::call('app:charge-installments', ['--max-seconds' => 120]);
+                    // Shared with the crontab scheduler in routes/console.php. That entry point
+                    // has withoutOverlapping(), but it only serialises the scheduler against
+                    // itself - an install running both rails would otherwise have two charge
+                    // loops against the same cards at once. Deliberately not translate_data_lock,
+                    // which this method already holds around its whole chain.
+                    $chargeLock = Cache::lock('app_charge_installments_lock', 300);
+
+                    if ($chargeLock->get()) {
+                        try {
+                            // Bounded explicitly: this whole hourly block shares one 900s budget,
+                            // and a synchronous run of Stripe charges is the one thing here that
+                            // can consume it all and starve the commands queued behind. It
+                            // resumes next hour.
+                            \Artisan::call('app:charge-installments', ['--max-seconds' => 120]);
+                        } finally {
+                            $chargeLock->release();
+                        }
+                    }
                 } catch (\Throwable $e) {
                     \Log::error('Scheduled command app:charge-installments failed: '.$e->getMessage());
                     report($e);

@@ -104,6 +104,31 @@ class InstallmentWebhookTest extends TestCase
     }
 
     /**
+     * A payment-plan purchase is still a purchase, so a boosted event has to hear about it.
+     *
+     * The installment branch of the webhook `break`s before StripeController's own paid-sale block,
+     * which is where the Meta conversion is reported - so every payment-plan sale on a boosted
+     * event was silently invisible to the campaign, and Meta optimised against a purchase it never
+     * saw. Mocked at the service rather than at the HTTP layer so the assertion is "the settlement
+     * path reports the conversion", independent of whether Meta credentials are configured.
+     */
+    public function test_settling_the_first_installment_reports_the_meta_conversion(): void
+    {
+        [, , $sale, $plan] = $this->scaffold();
+        $first = $plan->installments->firstWhere('sequence', 1);
+
+        $meta = \Mockery::mock(\App\Services\MetaAdsService::class);
+        $meta->shouldReceive('sendSaleConversion')
+            ->once()
+            ->withArgs(fn ($leg, $amount) => $leg->id === $sale->id && abs($amount - 1000.00) < 0.001);
+        $this->app->instance(\App\Services\MetaAdsService::class, $meta);
+
+        $this->settle($first, 25000);
+
+        $this->assertSame('paid', $sale->fresh()->status, 'precondition: the sale became paid');
+    }
+
+    /**
      * The failure the whole branch-placement discussion exists to prevent: a 1-of-4 payment
      * reconciled against the full order total would flag the sale and kill a valid ticket.
      */

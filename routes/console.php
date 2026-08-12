@@ -105,7 +105,26 @@ Schedule::call(function () {
 // concurrent runs would attempt the same installment. The Stripe idempotency key is the second
 // line of defence; this is the first.
 Schedule::call(function () {
-    Artisan::call('app:charge-installments');
+    // A lock scoped to app:charge-installments ALONE, shared with AppController::translateData(),
+    // for the same reason app_translate_lock exists: withoutOverlapping() only serialises the
+    // scheduler against itself, so an install running BOTH a crontab schedule:run and an external
+    // cron against /translate_data ran two copies side by side. For translations that bought the
+    // same work twice; here it is two charge loops against the same cards, which is worth a
+    // stronger guard than the row claim and the idempotency key alone.
+    //
+    // The TTL is a backstop for a hard-killed run, sized above the command's own 120s budget and
+    // well inside the hourly gap, so at worst one hour is skipped.
+    $lock = Cache::lock('app_charge_installments_lock', 300);
+
+    if (! $lock->get()) {
+        return;
+    }
+
+    try {
+        Artisan::call('app:charge-installments');
+    } finally {
+        $lock->release();
+    }
 })->hourly()->name('charge-installments')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {

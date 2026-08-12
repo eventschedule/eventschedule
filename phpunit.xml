@@ -29,6 +29,18 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
+        <!--
+            Placeholder keys, never real ones. .env.example ships STRIPE_PLATFORM_SECRET blank and
+            omits STRIPE_KEY entirely, so on CI they resolve to '' and null - and the Stripe SDK
+            validates the key in its constructor, so every `new StripeClient(config(...))` in the
+            app throws before the test reaches an assertion. Pinning here keeps CI and local
+            identical, and stops a developer's real key from ever backing a test client.
+            Forced so an exported shell var cannot reintroduce either failure.
+            Keep the two values distinct: InstallmentChargeSettlementTest tells the Connect rail
+            from the platform rail by comparing them.
+        -->
+        <env name="STRIPE_KEY" value="sk_test_fake_connect" force="true"/>
+        <env name="STRIPE_PLATFORM_SECRET" value="sk_test_fake_platform" force="true"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="APP_TESTING" value="true"/>
         <env name="IS_NEXUS" value="true"/>

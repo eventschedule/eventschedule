@@ -4361,6 +4361,7 @@ return [
     'installment_card_expiring' => 'Diese Karte läuft vor der letzten Zahlung ab.',
     'cancel_payment_plan' => 'Zahlungsplan stornieren',
     'payment_plan' => 'Zahlungsplan',
+    'thank_you' => 'Vielen Dank! Ihre Zahlung ist eingegangen.',
     'installments_progress' => ':paid von :count Zahlungen geleistet',
     'installment_next' => 'Nächste Zahlung: :amount am :date',
     'pay_next_installment' => 'Nächste Rate jetzt zahlen',

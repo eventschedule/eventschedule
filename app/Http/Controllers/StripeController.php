@@ -728,31 +728,13 @@ class StripeController extends Controller
         }
     }
 
+    /**
+     * Thin delegate. The implementation moved to MetaAdsService so the installment settlement path
+     * can reach it too - it settles outside this controller and was silently sending no conversion
+     * at all.
+     */
     private function sendMetaConversion(Sale $sale, float $amount): void
     {
-        try {
-            $event = $sale->event;
-            if (! $event || ! $event->activeBoostCampaign) {
-                return;
-            }
-
-            $metaService = app()->make(MetaAdsService::class);
-            $metaService->sendConversionEvent('Purchase', [
-                'event_id' => 'es_sale_'.$sale->id,
-                'user_data' => [
-                    'em' => [hash('sha256', strtolower(trim($sale->email)))],
-                ],
-                'custom_data' => [
-                    'value' => $amount,
-                    'currency' => $sale->event->ticket_currency_code ?? config('services.meta.default_currency', 'USD'),
-                    'content_name' => $event->name,
-                ],
-            ]);
-        } catch (\Exception $e) {
-            \Log::warning('Failed to send Meta conversion event', [
-                'sale_id' => $sale->id,
-                'error' => $e->getMessage(),
-            ]);
-        }
+        app()->make(MetaAdsService::class)->sendSaleConversion($sale, $amount);
     }
 }

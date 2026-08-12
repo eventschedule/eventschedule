@@ -4358,6 +4358,7 @@ return [
     'installment_card_expiring' => 'تنتهي صلاحية هذه البطاقة قبل الدفعة الأخيرة.',
     'cancel_payment_plan' => 'إلغاء جدول الدفع',
     'payment_plan' => 'جدول الدفع',
+    'thank_you' => 'شكرًا لك! تم استلام دفعتك.',
     'installments_progress' => 'تم سداد :paid من :count دفعات',
     'installment_next' => 'الدفعة القادمة: :amount في :date',
     'pay_next_installment' => 'ادفع القسط القادم الآن',

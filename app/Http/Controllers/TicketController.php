@@ -2582,8 +2582,16 @@ class TicketController extends Controller
 
         // Aggregate SaleTickets across the whole order, or the whole group.
         if ($isOrder || ($sale->group_id && $sale->isPrimarySale())) {
+            // is_deleted matters on the order branch: $expectedTotal below is
+            // orderTotalPayment(), which DOES filter deleted rows, and Sale carries no global
+            // scope - so an unfiltered aggregation here bills for a leg the total does not
+            // include. The reconciliation further down assumes the drift is per-unit rounding and
+            // therefore absorbable one cent at a time; a whole extra leg breaks that assumption
+            // and the session is created for the wrong amount.
+            // The group branch is deliberately left alone: it has the same latent inconsistency
+            // but predates the cart, so changing it here would alter a long-settled path.
             $allGroupSales = $isOrder
-                ? Sale::where('order_id', $sale->order_id)->with('saleTickets.ticket')->get()
+                ? Sale::where('order_id', $sale->order_id)->where('is_deleted', false)->with('saleTickets.ticket')->get()
                 : Sale::where('group_id', $sale->group_id)->with('saleTickets.ticket')->get();
             $aggregatedTickets = [];
             foreach ($allGroupSales as $gs) {
