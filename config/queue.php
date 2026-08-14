@@ -109,4 +109,31 @@ return [
         'table' => 'failed_jobs',
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Automatic Failed Job Retries
+    |--------------------------------------------------------------------------
+    |
+    | app:retry-failed-jobs pushes failed jobs back onto the queue from both cron
+    | rails. Uncapped, a job that can never succeed was re-pushed every minute
+    | forever. Each job uuid gets max_attempts automatic retries, spaced at least
+    | cooldown_minutes apart (the first is immediate, since the job has already
+    | burned its own tries and backoff in the worker), after which it is left in
+    | failed_jobs for an operator to look at.
+    |
+    | Nothing is parked permanently: the counter expires after counter_ttl_hours,
+    | so a broken job costs a handful of retries a day instead of hundreds, and a
+    | long outage gets a fresh budget tomorrow. The throttle is cache-backed and
+    | deliberately fails OPEN - if the cache is cleared or unavailable the jobs
+    | are simply retried, which is today's behaviour, not something worse.
+    |
+    */
+
+    'retry_failed' => [
+        'max_attempts' => (int) env('QUEUE_RETRY_MAX_ATTEMPTS', 5),
+        'cooldown_minutes' => (int) env('QUEUE_RETRY_COOLDOWN_MINUTES', 15),
+        'batch' => (int) env('QUEUE_RETRY_BATCH', 50),
+        'counter_ttl_hours' => (int) env('QUEUE_RETRY_COUNTER_TTL_HOURS', 24),
+    ],
+
 ];

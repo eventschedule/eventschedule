@@ -8,7 +8,6 @@ use Codedge\Updater\UpdaterManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
@@ -150,22 +149,13 @@ class AppController extends Controller
                     '--tries' => 3,
                 ]);
 
-                // Retry failed jobs (capped at 50 to prevent infinite loops)
-                $failedCount = DB::table('failed_jobs')->count();
-                if ($failedCount > 0) {
-                    \Log::warning("Found {$failedCount} failed jobs, retrying up to 50");
-                    $failedIds = DB::table('failed_jobs')->orderBy('failed_at')->limit(50)->pluck('uuid');
-                    foreach ($failedIds as $uuid) {
-                        \Artisan::call('queue:retry', ['id' => [$uuid]]);
-                    }
-
-                    // Process retried jobs
-                    \Artisan::call('queue:work', [
-                        '--stop-when-empty' => true,
-                        '--max-time' => 60,
-                        '--tries' => 3,
-                    ]);
-                }
+                // Retry failed jobs. The per-job cap, the cooldown and the per-job error
+                // handling all live in the command, shared with the crontab rail in
+                // routes/console.php, so this rail's one-minute cadence and that rail's
+                // five-minute cadence cannot produce two different retry budgets. Keep the
+                // two callers in sync. The command runs its own queue:work when it actually
+                // pushed something.
+                \Artisan::call('app:retry-failed-jobs');
             } catch (\Exception $e) {
                 \Log::warning('Queue processing failed: '.$e->getMessage());
             }

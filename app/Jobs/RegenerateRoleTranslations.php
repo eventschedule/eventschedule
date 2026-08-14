@@ -31,6 +31,11 @@ class RegenerateRoleTranslations implements ShouldQueue
 {
     use Queueable;
 
+    // The whole job is "re-translate this schedule's columns", so a schedule deleted between
+    // dispatch and delivery leaves nothing to do. Without this the payload cannot be
+    // deserialized and the job fails permanently instead of being dropped.
+    public $deleteWhenMissingModels = true;
+
     public $tries = 1;
 
     public $timeout = 120;

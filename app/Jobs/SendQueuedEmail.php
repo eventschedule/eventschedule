@@ -14,6 +14,21 @@ class SendQueuedEmail implements ShouldQueue
 {
     use Queueable;
 
+    /**
+     * $mailable is stored whole, and every mailable in app/Mail uses SerializesModels, so
+     * TicketPurchase's Sale/Event/Role become model identifiers in the payload. Sales are
+     * hard rows - Sale has no SoftDeletes, and sales.event_id / ticket_id / user_id are all
+     * ON DELETE CASCADE - so deleting an event, a schedule or an account removes the sale
+     * out from under a queued email. Without this the payload cannot be deserialized and the
+     * job fails inside CallQueuedHandler before handle() runs, which no try/catch in this
+     * class can reach.
+     *
+     * Dropping it is the right answer rather than a shortcut: the mailable dereferences the
+     * model to render (TicketPurchase::content() reads $this->sale->secret), so a confirmation
+     * whose sale is gone has nothing left to confirm and can never be delivered.
+     */
+    public $deleteWhenMissingModels = true;
+
     public int $tries = 3;
 
     public int $backoff = 60;
@@ -31,6 +46,16 @@ class SendQueuedEmail implements ShouldQueue
      */
     public function __construct(Mailable $mailable, string $recipient, ?int $roleId = null, ?string $locale = null)
     {
+        // What makes the drop above safe: "missing" must mean deleted, not merely uncommitted.
+        // Dispatched inside an open transaction, a worker could otherwise pick this up before
+        // the sale row is visible and discard a perfectly good email. config/queue.php sets
+        // after_commit on the database connection, but not on redis or sqs, so pin it here and
+        // the guarantee no longer depends on which connection an install happens to use.
+        // Set via the trait method rather than a property: Illuminate\Bus\Queueable already
+        // declares $afterCommit, and redeclaring a trait property with a different default is
+        // a fatal error on the PHP 8.2 this package still supports.
+        $this->afterCommit();
+
         $this->mailable = $mailable;
         $this->recipient = $recipient;
         $this->roleId = $roleId;

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Console\Commands\RetryFailedJobs;
 use App\Http\Requests\AdminPlanUpdateRequest;
 use App\Mail\PromotionDecision;
 use App\Models\AnalyticsDaily;
@@ -32,6 +33,7 @@ use App\Services\WebhookService;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Auth\Events\Verified;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -1982,8 +1984,21 @@ class AdminController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
+        // An operator retry is a statement that the underlying cause is fixed, so hand the job
+        // a clean automatic-retry budget. Cleared before the call, not after: queue:retry can
+        // throw on a payload whose models are gone, and the budget must be reset either way.
+        RetryFailedJobs::forgetAttempts($id);
+
         try {
             Artisan::call('queue:retry', ['id' => [$id]]);
+        } catch (ModelNotFoundException $e) {
+            // queue:retry unserializes the payload to refresh retryUntil, so a job referencing
+            // a deleted record throws here rather than on the worker. Never surface the raw
+            // exception message.
+            Log::warning('Failed job references a deleted record', ['id' => $id]);
+
+            return redirect()->route('admin.queue')
+                ->with('error', 'This job refers to a record that no longer exists, so it cannot be retried. Delete it instead.');
         } catch (\Exception $e) {
             Log::error('Failed to retry job', ['id' => $id, 'error' => $e->getMessage()]);
 
@@ -2004,6 +2019,7 @@ class AdminController extends Controller
 
         try {
             Artisan::call('queue:forget', ['id' => $id]);
+            RetryFailedJobs::forgetAttempts($id);
         } catch (\Exception $e) {
             Log::error('Failed to delete job', ['id' => $id, 'error' => $e->getMessage()]);
 
@@ -2022,15 +2038,33 @@ class AdminController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        try {
-            Artisan::call('queue:retry', ['id' => ['all']]);
-        } catch (\Exception $e) {
-            Log::error('Failed to retry all jobs', ['error' => $e->getMessage()]);
+        // Deliberately NOT queue:retry --id=all. That unserializes each payload to refresh
+        // retryUntil and aborts the whole run on the first one it cannot deserialize, so a
+        // single job referencing a deleted record stopped Retry All from retrying anything.
+        $uuids = DB::table('failed_jobs')->orderBy('failed_at')->pluck('uuid');
 
-            return redirect()->route('admin.queue')->with('error', 'Failed to retry jobs.');
+        $retried = 0;
+        $skipped = 0;
+
+        foreach ($uuids as $uuid) {
+            // Same reset as the single-job button, for the same reason.
+            RetryFailedJobs::forgetAttempts($uuid);
+
+            try {
+                Artisan::call('queue:retry', ['id' => [$uuid]]);
+                $retried++;
+            } catch (\Throwable $e) {
+                Log::warning('Failed job could not be retried', ['id' => $uuid, 'error' => $e->getMessage()]);
+                $skipped++;
+            }
         }
 
-        return redirect()->route('admin.queue')->with('success', 'All failed jobs queued for retry.');
+        return redirect()->route('admin.queue')->with(
+            'success',
+            $skipped > 0
+                ? "{$retried} jobs queued for retry, {$skipped} could not be retried (see the log)."
+                : 'All failed jobs queued for retry.'
+        );
     }
 
     /**
@@ -2043,7 +2077,15 @@ class AdminController extends Controller
         }
 
         try {
+            // Collected before the flush, forgotten after, so the retry budgets do not outlive
+            // the rows they belong to.
+            $uuids = DB::table('failed_jobs')->pluck('uuid');
+
             Artisan::call('queue:flush');
+
+            foreach ($uuids as $uuid) {
+                RetryFailedJobs::forgetAttempts($uuid);
+            }
         } catch (\Exception $e) {
             Log::error('Failed to clear failed jobs', ['error' => $e->getMessage()]);
 

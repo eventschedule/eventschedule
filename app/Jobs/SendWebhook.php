@@ -14,6 +14,11 @@ class SendWebhook implements ShouldQueue
 {
     use Queueable;
 
+    // A missing Webhook means the owner deleted the integration between dispatch and delivery,
+    // so there is no endpoint left to deliver to. Without this the payload cannot be
+    // deserialized and the job fails permanently instead of being dropped.
+    public $deleteWhenMissingModels = true;
+
     public int $tries = 3;
 
     public array $backoff = [30, 60];
