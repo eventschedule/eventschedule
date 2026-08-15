@@ -452,9 +452,10 @@ class InstallmentService
         });
 
         // Outside the transaction on purpose: this is the one part of the capture that talks to
-        // Stripe, and the plan row was locked in there. Runs whatever the outcome was - a replayed
-        // webhook returns early inside it without an API call.
-        if ($paymentIntentObject) {
+        // Stripe, and the plan row was locked in there. A replayed webhook returns early inside it
+        // without an API call; a dead plan is skipped outright, since nothing will ever charge it
+        // again and the card would only be described to nobody.
+        if ($paymentIntentObject && $outcome !== 'dead_plan') {
             $this->captureCardDisplay($plan->fresh(), $describedMethod);
         }
 
@@ -665,7 +666,10 @@ class InstallmentService
 
         $this->captureCardIds($plan, $paymentIntent);
 
-        $stored = $plan->isDirty();
+        // Scoped to the two columns this actually sets. A bare isDirty() would report "a card was
+        // stored" because a caller happened to have dirtied something unrelated - and that answer
+        // is what gates the buyer's success banner.
+        $stored = $plan->isDirty(['stripe_customer_id', 'stripe_payment_method_id']);
 
         if ($stored) {
             $plan->save();
@@ -764,6 +768,10 @@ class InstallmentService
      *
      * They all return null instead of throwing. Every caller runs AFTER the money has already
      * moved, so a failed read must never unwind a settlement or a card swap.
+     *
+     * Returning null is not the same as being silent, though, and the two are deliberately split.
+     * A read that only fills in display text is logged; a read the buyer is waiting on is also
+     * reported, so it reaches Sentry. See $report on stripeRead().
      */
 
     /**
@@ -789,11 +797,19 @@ class InstallmentService
             fn ($stripe, $options) => $stripe->paymentMethods->retrieve($id, [], $options));
     }
 
-    /** The SetupIntent behind a completed `mode: setup` session, for a card swap. */
+    /**
+     * The SetupIntent behind a completed `mode: setup` session, for a card swap.
+     *
+     * Reported, unlike its siblings. This one is only ever reached when a buyer has just replaced
+     * their card because we asked them to, and a failure here means the swap did not happen - so
+     * the cron keeps declining the old card and the ticket is eventually refused at the door. It
+     * carried a report() before the shared implementation was extracted, and losing it would put
+     * a silent failure back into the one feature whose entire defect was silence.
+     */
     public function retrieveSetupIntent(SaleInstallmentPlan $plan, string $id): ?\Stripe\SetupIntent
     {
         return $this->stripeRead($plan, 'setup intent', $id,
-            fn ($stripe, $options) => $stripe->setupIntents->retrieve($id, [], $options));
+            fn ($stripe, $options) => $stripe->setupIntents->retrieve($id, [], $options), report: true);
     }
 
     /** A Checkout Session the buyer was redirected back on. */
@@ -803,13 +819,23 @@ class InstallmentService
             fn ($stripe, $options) => $stripe->checkout->sessions->retrieve($id, [], $options));
     }
 
-    private function stripeRead(SaleInstallmentPlan $plan, string $what, string $id, \Closure $read)
+    /**
+     * $report escalates a failure from a log line to Sentry. Off by default: these reads run on
+     * webhook and cron paths that fire constantly, and a transient Stripe blip on one that only
+     * fills in "Visa ending 4242" is not worth waking anyone. On by default would be the same
+     * mistake in the other direction - the noise trains people to ignore it.
+     */
+    private function stripeRead(SaleInstallmentPlan $plan, string $what, string $id, \Closure $read, bool $report = false)
     {
         try {
             [$stripe, $options] = $this->stripeContextFor($plan);
 
             return $read($stripe, $options);
         } catch (\Exception $e) {
+            if ($report) {
+                report($e);
+            }
+
             \Log::warning('Could not read a Stripe '.$what.' for an installment plan', [
                 'plan_id' => $plan->id,
                 'stripe_id' => $id,

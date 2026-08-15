@@ -4011,7 +4011,16 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-<noscript>
+{{-- v-pre is load-bearing, not decoration. This block sits INSIDE #calendar-app, and a browser
+     with scripting on parses <noscript> as raw text and serializes it back verbatim into
+     innerHTML - which is exactly what Vue's runtime compiler is handed. Vue does not treat
+     <noscript> as raw text, so every mustache in here is compiled as a template expression, and
+     Blade's {{ }} escaping does not help: it escapes HTML entities and leaves "{" and "}" alone.
+     Event names, venue names and descriptions are all written by somebody else - on a curator
+     they come from the source schedules, and venues are invented by calendar sync - so without
+     this an event named "{{ constructor... }}" runs as JavaScript on the schedule's public page.
+     CSP unsafe-eval is on by design (Vue template compilation), so it does not block this. --}}
+<noscript v-pre>
     @if ($events->isNotEmpty() && $events->first() instanceof \App\Models\Event)
     <ul>
         @foreach ($events as $noscriptEvent)

@@ -74,6 +74,42 @@ class EventFormTemplateInjectionTest extends TestCase
         $this->assertGreaterThan(0, $found, "{$label}: payload never rendered, so this test proves nothing");
     }
 
+    /**
+     * The guest calendar is a third Vue mount, #calendar-app, and its <noscript> fallback list is
+     * inside it.
+     *
+     * That block is easy to assume safe and is not. A browser with scripting on parses <noscript>
+     * as raw text and serializes it back verbatim into innerHTML - which is what Vue's runtime
+     * compiler receives - and Vue does not treat <noscript> as raw text, so it compiles the
+     * mustaches. Verified directly against Vue's own compiler: `<noscript>{{ 7*7 }}</noscript>`
+     * yields `_toDisplayString(7*7)`.
+     *
+     * The names here are written by somebody else: on a curator they come from the source
+     * schedules, and venue names are invented by calendar sync from third-party calendars.
+     */
+    public function test_event_names_in_the_calendar_noscript_are_not_compiled_by_vue(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+        $this->createEvent($role, [
+            'name' => self::PAYLOAD,
+            'starts_at' => now()->addDays(3)->setTime(19, 0)->format('Y-m-d H:i:s'),
+        ]);
+
+        $html = $this->get(route('role.view_guest', ['subdomain' => $role->subdomain]))
+            ->assertOk()
+            ->getContent();
+
+        $start = strpos($html, 'id="calendar-app"');
+        $this->assertNotFalse($start, 'the guest calendar should still mount Vue on #calendar-app');
+        $mounted = substr($html, $start);
+
+        $this->assertStringContainsString(e(self::PAYLOAD), $mounted,
+            'the event should be listed in the noscript fallback, otherwise this test proves nothing');
+
+        $this->assertGuarded($mounted, self::PAYLOAD, 'calendar noscript event name');
+    }
+
     public function test_another_users_schedule_name_and_terms_are_not_compiled_by_vue(): void
     {
         $victim = $this->createOwner();

@@ -208,6 +208,46 @@ class InstallmentCardCaptureTest extends TestCase
         $this->assertSame(2030, $plan->card_exp_year);
     }
 
+    /**
+     * "A card was stored" has to mean the card changed, not that the model was dirty. That answer
+     * is what gates the buyer's success banner, so a bare isDirty() would let an unrelated pending
+     * change confirm a swap that never happened.
+     */
+    public function test_an_unrelated_pending_change_is_not_a_stored_card(): void
+    {
+        [$plan] = $this->planAwaitingFirstPayment();
+        $plan->update([
+            'stripe_customer_id' => 'cus_live',
+            'stripe_payment_method_id' => 'pm_live',
+            'card_last4' => '4242',
+        ]);
+
+        $this->fakeStripe(function ($mock) {
+            $mock->shouldNotReceive('retrievePaymentMethod');
+        });
+
+        // Dirty, but not in a way that concerns the card.
+        $plan->status = 'delinquent';
+
+        $this->assertFalse(app(InstallmentService::class)->captureFrom($plan, $this->fakeIntent()));
+    }
+
+    /** Nothing will ever charge a cancelled plan, so its card is not worth an API call. */
+    public function test_a_cancelled_plan_does_not_buy_a_card_lookup(): void
+    {
+        [$plan, $first] = $this->planAwaitingFirstPayment();
+        $plan->update(['status' => 'cancelled', 'stripe_payment_method_id' => 'pm_live']);
+
+        $this->fakeStripe(function ($mock) {
+            $mock->shouldNotReceive('retrievePaymentMethod');
+        });
+
+        $this->webhook($first, $this->fakeIntent());
+
+        // The money still lands somewhere an organizer can see it.
+        $this->assertEqualsWithDelta(250.0, (float) $plan->fresh()->unmatched_amount, 0.001);
+    }
+
     /** A replayed webhook must not buy the same lookup twice. */
     public function test_a_known_card_is_not_re_fetched(): void
     {
@@ -269,6 +309,48 @@ class InstallmentCardCaptureTest extends TestCase
             $plan->installments()->where('sequence', 2)->first()->status,
             'the parked row goes back in the ladder'
         );
+    }
+
+    /**
+     * A card swap that fails has to reach Sentry, not just the log.
+     *
+     * This one is only reached because a buyer replaced their card after we asked them to, and a
+     * failure means the swap did not happen - the cron carries on declining the old card until the
+     * ticket is refused at the door. It carried a report() before the Stripe reads were extracted
+     * behind a shared helper, and the extraction dropped it.
+     */
+    public function test_a_failed_card_swap_is_reported(): void
+    {
+        [$plan] = $this->planAwaitingFirstPayment();
+
+        \Illuminate\Support\Facades\Exceptions::fake();
+
+        $this->partialMock(InstallmentService::class, function ($mock) {
+            $mock->shouldReceive('stripeContextFor')->andThrow(new \RuntimeException('stripe is down'));
+        });
+
+        $this->assertFalse(app(InstallmentService::class)->applyCardUpdate($plan, 'seti_new'));
+
+        \Illuminate\Support\Facades\Exceptions::assertReported(
+            fn (\RuntimeException $e) => $e->getMessage() === 'stripe is down'
+        );
+    }
+
+    /** ...while a routine card-display read that fails stays a log line. */
+    public function test_a_failed_card_display_read_is_not_reported(): void
+    {
+        [$plan] = $this->planAwaitingFirstPayment();
+        $plan->update(['stripe_payment_method_id' => 'pm_live']);
+
+        \Illuminate\Support\Facades\Exceptions::fake();
+
+        $this->partialMock(InstallmentService::class, function ($mock) {
+            $mock->shouldReceive('stripeContextFor')->andThrow(new \RuntimeException('stripe is down'));
+        });
+
+        app(InstallmentService::class)->captureCardDisplay($plan);
+
+        \Illuminate\Support\Facades\Exceptions::assertNothingReported();
     }
 
     /** A session belonging to somebody else's plan must not be applied to this one. */
