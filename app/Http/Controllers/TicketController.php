@@ -3127,6 +3127,20 @@ class TicketController extends Controller
                 $sale->transaction_reference = $session->payment_intent;
                 $sale->save();
             }
+
+            // Backstop the installment card capture.
+            //
+            // Which of the two Stripe events reports this purchase is a dashboard setting we do
+            // not control, and only payment_intent.succeeded carries the intent the capture needs.
+            // On an install subscribed to checkout.session.completed alone, a plan was therefore
+            // left with no stored card - which is silent and total: chargeDue() skips it, both
+            // reminder sweeps filter it out, and the organizer collects installment 1 and nothing
+            // else. This path needs no webhook at all.
+            //
+            // Deliberately NOT done by expanding payment_intent on the session retrieve above:
+            // that value is assigned to transaction_reference a few lines up, and expanding it
+            // turns a string into an object for EVERY Stripe checkout, not just these.
+            app(InstallmentService::class)->captureFromSession($sale->installmentPlan, $session);
         } catch (\Exception $e) {
             // Log the error but don't fail - webhook will handle payment confirmation
             \Log::warning('Stripe session retrieval failed in success(): '.$e->getMessage());

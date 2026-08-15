@@ -13,7 +13,12 @@
                 <div class="mb-4 rounded-lg p-3 text-sm bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 text-green-800 dark:text-green-200">
                     {{ __('messages.thank_you') }}
                 </div>
-            @elseif (request()->boolean('updated'))
+            {{-- Gated on the card actually being stored, not on the query string. Stripe redirects
+                 here whether or not anything reached us, and this used to confirm a swap that a
+                 doc-following install never received - leaving the buyer reassured while the cron
+                 kept declining the card they had just replaced. When it is false the card panel
+                 below still shows the truth, so silence is the honest answer. --}}
+            @elseif (request()->boolean('updated') && $cardStored)
                 <div class="mb-4 rounded-lg p-3 text-sm bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 text-green-800 dark:text-green-200">
                     {{ __('messages.update_payment_card') }}
                 </div>

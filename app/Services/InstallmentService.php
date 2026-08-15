@@ -280,6 +280,10 @@ class InstallmentService
         $saleBecamePaid = false;
         $paidLegs = [];
 
+        // The PaymentMethod the plan's stored card fields already describe, read before the
+        // capture below can overwrite it. See captureCardDisplay().
+        $describedMethod = null;
+
         // Lock order is PLAN -> INSTALLMENT -> SALE. Every teardown path takes the Sale lock first
         // and then the plan (refundSale -> Sale::booted -> cancelPlan), so those two orders are an
         // ABBA inversion. DB::transaction defaults to a single attempt, so neither side retries a
@@ -287,7 +291,7 @@ class InstallmentService
         // when it actually needs writing, which removes the cycle in the common case.
         DB::transaction(function () use (
             $plan, $installment, $isPayoff, $paidAmount, $reference, $paymentIntentObject,
-            $payoffIds, &$outcome, &$saleBecamePaid, &$paidLegs
+            $payoffIds, &$outcome, &$saleBecamePaid, &$paidLegs, &$describedMethod
         ) {
             $lockedPlan = SaleInstallmentPlan::lockForUpdate()->find($plan->id);
 
@@ -299,6 +303,31 @@ class InstallmentService
                 $outcome = 'dead_plan';
 
                 return;
+            }
+
+            // The card the rest of this plan will be charged against, stored FIRST, before any of
+            // the early returns below can skip it.
+            //
+            // This is the whole feature's single point of failure: nothing else writes these two
+            // columns from a purchase, and without them chargeDue() skips the plan and both
+            // reminder sweeps filter it out - so the organizer collects installment 1 and nothing
+            // else, and nobody is told. It has to be up here because
+            // checkout.session.completed and payment_intent.succeeded both report the same
+            // payment: whichever lands second finds the row already settled, and settling from
+            // the one that carries no PaymentIntent used to mean the card was never recorded at
+            // all. Deliberately not below with the rest of the write - the comment there claimed
+            // this ordering while the code did the opposite.
+            //
+            // Ids only: this holds a row lock, so the PaymentMethod lookup that fills in brand and
+            // last4 waits until after the commit.
+            if ($paymentIntentObject) {
+                $describedMethod = $lockedPlan->stripe_payment_method_id;
+
+                $this->captureCardIds($lockedPlan, $paymentIntentObject);
+
+                if ($lockedPlan->isDirty()) {
+                    $lockedPlan->save();
+                }
             }
 
             $targets = $this->settlementTargets($lockedPlan, $installment, $isPayoff, $payoffIds);
@@ -386,16 +415,6 @@ class InstallmentService
                 ]);
             }
 
-            // Card details ride along on whichever event carries a PaymentIntent. Captured BEFORE
-            // any early return above could skip it, because checkout.session.completed and
-            // payment_intent.succeeded race: if the session event settled the row first, the
-            // payment-intent event used to hit the already-paid return and the card was never
-            // stored - leaving a plan the cron skips forever and an organizer who collects one
-            // instalment of four.
-            if ($paymentIntentObject) {
-                $this->captureCardDetails($lockedPlan, $paymentIntentObject);
-            }
-
             $stillOwed = SaleInstallment::where('sale_installment_plan_id', $lockedPlan->id)
                 ->whereNotIn('status', ['paid', 'cancelled'])
                 ->exists();
@@ -431,6 +450,13 @@ class InstallmentService
 
             UsageTrackingService::track(UsageTrackingService::STRIPE_PAYMENT);
         });
+
+        // Outside the transaction on purpose: this is the one part of the capture that talks to
+        // Stripe, and the plan row was locked in there. Runs whatever the outcome was - a replayed
+        // webhook returns early inside it without an API call.
+        if ($paymentIntentObject) {
+            $this->captureCardDisplay($plan->fresh(), $describedMethod);
+        }
 
         if ($saleBecamePaid) {
             $this->onSaleBecamePaid($plan->fresh(), $paidLegs);
@@ -554,36 +580,132 @@ class InstallmentService
     }
 
     /**
-     * Pull brand / last4 / expiry off a PaymentIntent's payment method. Best effort: the charge
-     * has already succeeded, so a failure here must never unwind it.
+     * Store the Customer and PaymentMethod this plan will be charged against.
+     *
+     * The money-critical half of the capture, and deliberately network-free: it is called from
+     * inside settle()'s transaction while the plan row is locked, and holding a row lock across a
+     * Stripe round trip would serialise every settlement behind the slowest one. The cosmetic half
+     * - brand, last4, expiry - is captureCardDisplay(), which runs after the commit.
+     *
+     * Mutates the model without saving; the caller owns the write.
      */
-    private function captureCardDetails(SaleInstallmentPlan $plan, $paymentIntent): void
+    private function captureCardIds(SaleInstallmentPlan $plan, $paymentIntent): void
     {
-        try {
-            if (isset($paymentIntent->customer) && is_string($paymentIntent->customer)) {
-                $plan->stripe_customer_id = $paymentIntent->customer;
-            }
-
-            if (isset($paymentIntent->payment_method) && is_string($paymentIntent->payment_method)) {
-                $plan->stripe_payment_method_id = $paymentIntent->payment_method;
-            }
-
-            $card = $paymentIntent->charges->data[0]->payment_method_details->card
-                ?? $paymentIntent->payment_method_details->card
-                ?? null;
-
-            if ($card) {
-                $plan->card_brand = $card->brand ?? $plan->card_brand;
-                $plan->card_last4 = $card->last4 ?? $plan->card_last4;
-                $plan->card_exp_month = $card->exp_month ?? $plan->card_exp_month;
-                $plan->card_exp_year = $card->exp_year ?? $plan->card_exp_year;
-            }
-        } catch (\Exception $e) {
-            \Log::warning('Could not capture installment card details', [
-                'plan_id' => $plan->id,
-                'error' => $e->getMessage(),
-            ]);
+        if (isset($paymentIntent->customer) && is_string($paymentIntent->customer)) {
+            $plan->stripe_customer_id = $paymentIntent->customer;
         }
+
+        $method = $paymentIntent->payment_method ?? null;
+
+        // Expanded rather than left as an id. Nothing here expands it today, but a Session or
+        // PaymentIntent retrieved with `expand` arrives this way and would otherwise be dropped.
+        if (is_object($method)) {
+            $method = $method->id ?? null;
+        }
+
+        if (is_string($method) && $method !== '') {
+            $plan->stripe_payment_method_id = $method;
+        }
+    }
+
+    /**
+     * Fill in the card's brand / last4 / expiry from the stored PaymentMethod.
+     *
+     * The card details live on the PaymentMethod, NOT on the PaymentIntent. This used to read
+     * `$paymentIntent->charges->data[0]->payment_method_details->card`, but `charges` was removed
+     * from PaymentIntent in the 2022-11-15 API version and stripe-php v16 does not declare it (it
+     * carries `latest_charge`), while `payment_method_details` is a Charge field and never a
+     * PaymentIntent one. So that chain was always null and these four columns were never written
+     * on any rail - which silently disabled cardExpiresBeforeFinalPayment(), the one future
+     * failure this feature can actually see coming, and left every email saying "your card"
+     * rather than naming it.
+     *
+     * $describedMethod is the PaymentMethod the stored card fields already describe. Passing it is
+     * what keeps a replayed webhook free of an API call while still re-reading the card when
+     * setup_future_usage has repointed the plan at a different one.
+     *
+     * Best effort, and always after the money is settled: the charge has already succeeded, so a
+     * failure here must never unwind it. Saves itself, because its caller's transaction has
+     * committed by the time it runs.
+     */
+    public function captureCardDisplay(?SaleInstallmentPlan $plan, ?string $describedMethod = null): void
+    {
+        if (! $plan || ! $plan->stripe_payment_method_id) {
+            return;
+        }
+
+        if ($plan->card_last4 && $describedMethod === $plan->stripe_payment_method_id) {
+            return;
+        }
+
+        $card = $this->retrievePaymentMethod($plan, $plan->stripe_payment_method_id)?->card;
+
+        if (! $card) {
+            return;
+        }
+
+        $plan->forceFill([
+            'card_brand' => $card->brand ?? $plan->card_brand,
+            'card_last4' => $card->last4 ?? $plan->card_last4,
+            'card_exp_month' => $card->exp_month ?? $plan->card_exp_month,
+            'card_exp_year' => $card->exp_year ?? $plan->card_exp_year,
+        ])->save();
+    }
+
+    /**
+     * Record a card from a PaymentIntent and persist it, ids and display fields together.
+     *
+     * The entry point for callers OUTSIDE settle() - TicketController::success(), which is the
+     * backstop that makes the capture work whatever a given install's webhook endpoint happens to
+     * be subscribed to. Returns true when the stored card actually changed.
+     */
+    public function captureFrom(SaleInstallmentPlan $plan, $paymentIntent): bool
+    {
+        $describedMethod = $plan->stripe_payment_method_id;
+
+        $this->captureCardIds($plan, $paymentIntent);
+
+        $stored = $plan->isDirty();
+
+        if ($stored) {
+            $plan->save();
+        }
+
+        $this->captureCardDisplay($plan, $describedMethod);
+
+        return $stored;
+    }
+
+    /**
+     * Capture the card from a Checkout Session the buyer has just completed.
+     *
+     * The webhook-free backstop, called from TicketController::success() on the redirect. It is
+     * what makes the capture work whatever a given install's Stripe endpoint happens to be
+     * subscribed to - and the subscription is the whole problem: our own setup docs point the
+     * Connect endpoint at payment_intent.succeeded and the platform endpoint at
+     * checkout.session.completed, and only the first of those carries an intent to capture from.
+     *
+     * Does nothing when the plan already has a card, so a normal purchase costs no API call.
+     */
+    public function captureFromSession(?SaleInstallmentPlan $plan, $session): bool
+    {
+        if (! $plan || $plan->stripe_payment_method_id) {
+            return false;
+        }
+
+        $intent = $session->payment_intent ?? null;
+
+        if (is_object($intent)) {
+            return $this->captureFrom($plan, $intent);
+        }
+
+        if (! is_string($intent) || $intent === '') {
+            return false;
+        }
+
+        $intent = $this->retrievePaymentIntent($plan, $intent);
+
+        return $intent ? $this->captureFrom($plan, $intent) : false;
     }
 
     /**
@@ -631,6 +753,119 @@ class InstallmentService
                 'sale_id' => \App\Utils\UrlUtils::encodeId($plan->sale_id),
             ],
         ], $options + ['idempotency_key' => $idempotencyKey]);
+    }
+
+    /*
+     * The Stripe reads this feature performs, each behind its own named method.
+     *
+     * Named rather than inlined for the same reason chargeOffSession() is: they are the seams the
+     * tests replace, and the card handoff - where every serious bug in this feature has lived - is
+     * otherwise unreachable without a network.
+     *
+     * They all return null instead of throwing. Every caller runs AFTER the money has already
+     * moved, so a failed read must never unwind a settlement or a card swap.
+     */
+
+    /**
+     * Read one PaymentIntent back off the plan's own rail.
+     *
+     * Exists because the two Stripe events that report the same purchase carry different payloads:
+     * `payment_intent.succeeded` hands the webhook the whole intent, while
+     * `checkout.session.completed` hands it a session whose `payment_intent` is a bare id. The card
+     * capture needs the intent, and which of the two an install receives is a Stripe dashboard
+     * setting we do not control - so the session rail fetches what it was not given rather than
+     * leaving the plan with no card and the balance uncollectable.
+     */
+    public function retrievePaymentIntent(SaleInstallmentPlan $plan, string $id): ?\Stripe\PaymentIntent
+    {
+        return $this->stripeRead($plan, 'payment intent', $id,
+            fn ($stripe, $options) => $stripe->paymentIntents->retrieve($id, [], $options));
+    }
+
+    /** The card behind a stored payment method - brand, last4 and expiry all live here. */
+    public function retrievePaymentMethod(SaleInstallmentPlan $plan, string $id): ?\Stripe\PaymentMethod
+    {
+        return $this->stripeRead($plan, 'payment method', $id,
+            fn ($stripe, $options) => $stripe->paymentMethods->retrieve($id, [], $options));
+    }
+
+    /** The SetupIntent behind a completed `mode: setup` session, for a card swap. */
+    public function retrieveSetupIntent(SaleInstallmentPlan $plan, string $id): ?\Stripe\SetupIntent
+    {
+        return $this->stripeRead($plan, 'setup intent', $id,
+            fn ($stripe, $options) => $stripe->setupIntents->retrieve($id, [], $options));
+    }
+
+    /** A Checkout Session the buyer was redirected back on. */
+    public function retrieveCheckoutSession(SaleInstallmentPlan $plan, string $id): ?\Stripe\Checkout\Session
+    {
+        return $this->stripeRead($plan, 'checkout session', $id,
+            fn ($stripe, $options) => $stripe->checkout->sessions->retrieve($id, [], $options));
+    }
+
+    private function stripeRead(SaleInstallmentPlan $plan, string $what, string $id, \Closure $read)
+    {
+        try {
+            [$stripe, $options] = $this->stripeContextFor($plan);
+
+            return $read($stripe, $options);
+        } catch (\Exception $e) {
+            \Log::warning('Could not read a Stripe '.$what.' for an installment plan', [
+                'plan_id' => $plan->id,
+                'stripe_id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
+    }
+
+    /**
+     * Point a plan at a new card, from a SetupIntent the buyer just completed.
+     *
+     * Shared by the `checkout.session.completed` webhook and by InstallmentController::view(),
+     * which applies it on the redirect back from Stripe. Both are needed: a `mode: 'setup'`
+     * session emits ONLY `checkout.session.completed` and never `payment_intent.succeeded`, so on
+     * an install whose endpoint follows our own Connect setup docs the webhook never arrives and
+     * the swap was a silent no-op - the buyer saw a success banner while the cron went on
+     * declining the dead card until their ticket was refused at the door.
+     *
+     * Idempotent, so whichever of the two gets there first wins and the other is free.
+     * The CALLER owns authentication (the webhook's account guards, the controller's plan secret).
+     */
+    public function applyCardUpdate(SaleInstallmentPlan $plan, string $setupIntentId): bool
+    {
+        $setupIntent = $this->retrieveSetupIntent($plan, $setupIntentId);
+
+        if (($setupIntent->status ?? null) !== 'succeeded' || ! $setupIntent->payment_method) {
+            return false;
+        }
+
+        $card = $this->retrievePaymentMethod($plan, $setupIntent->payment_method)?->card;
+
+        $plan->forceFill([
+            'stripe_customer_id' => $setupIntent->customer ?: $plan->stripe_customer_id,
+            'stripe_payment_method_id' => $setupIntent->payment_method,
+            // Written even when the card lookup failed, so the display can never describe the card
+            // this plan has just STOPPED using. A null last4 reads as "we do not know"; the old
+            // card's last4 reads as a lie, and it is the number the buyer is told we will charge.
+            'card_brand' => $card->brand ?? null,
+            'card_last4' => $card->last4 ?? null,
+            'card_exp_month' => $card->exp_month ?? null,
+            'card_exp_year' => $card->exp_year ?? null,
+        ])->save();
+
+        // A new card is exactly the remedy for the state that parked these rows, so put them
+        // back in the ladder rather than leaving the buyer stuck after doing what we asked.
+        SaleInstallment::where('sale_installment_plan_id', $plan->id)
+            ->whereIn('status', ['awaiting_customer', 'failed'])
+            ->update(['status' => 'scheduled', 'attempts' => 0, 'next_attempt_at' => null, 'last_error' => null]);
+
+        if ($plan->status === 'delinquent') {
+            $plan->forceFill(['status' => 'active', 'delinquent_at' => null])->save();
+        }
+
+        return true;
     }
 
     /**

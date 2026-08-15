@@ -633,6 +633,19 @@ class StripeController extends Controller
 
         $paidAmount = $rawAmount / MoneyUtils::getSmallestUnitMultiplier($plan->currency);
 
+        // The session rail is handed a session, not an intent - `checkout.session.completed`
+        // carries `payment_intent` as a bare id - so fetch what it was not given. Without this the
+        // capture inside settle() has nothing to read on that rail and the plan is left with no
+        // card, which is silent: chargeDue() skips it and both reminder sweeps filter it out.
+        //
+        // Deliberately AFTER the account and currency guards above, so a forged or misdirected
+        // event cannot make us spend an API call. The `pi_` test matters because $reference falls
+        // back to the session id when a session carries no intent.
+        if (! $paymentIntentObject && is_string($reference) && str_starts_with($reference, 'pi_')) {
+            $paymentIntentObject = app(\App\Services\InstallmentService::class)
+                ->retrievePaymentIntent($plan, $reference);
+        }
+
         // Everything above is authentication; the money itself is settled by the one shared
         // implementation, which app:charge-installments also calls so a missing or delayed webhook
         // can no longer leave a charged card unrecorded.
@@ -691,41 +704,17 @@ class StripeController extends Controller
             return;
         }
 
-        try {
-            [$stripe, $options] = app(\App\Services\InstallmentService::class)->stripeContextFor($plan);
-            $setupIntent = $stripe->setupIntents->retrieve($session->setup_intent, [], $options);
-
-            if (($setupIntent->status ?? null) !== 'succeeded' || ! $setupIntent->payment_method) {
-                return;
-            }
-
-            $paymentMethod = $stripe->paymentMethods->retrieve($setupIntent->payment_method, [], $options);
-
-            $plan->forceFill([
-                'stripe_customer_id' => $setupIntent->customer ?: $plan->stripe_customer_id,
-                'stripe_payment_method_id' => $setupIntent->payment_method,
-                'card_brand' => $paymentMethod->card->brand ?? $plan->card_brand,
-                'card_last4' => $paymentMethod->card->last4 ?? $plan->card_last4,
-                'card_exp_month' => $paymentMethod->card->exp_month ?? $plan->card_exp_month,
-                'card_exp_year' => $paymentMethod->card->exp_year ?? $plan->card_exp_year,
-            ])->save();
-
-            // A new card is exactly the remedy for the state that parked these rows, so put them
-            // back in the ladder rather than leaving the buyer stuck after doing what we asked.
-            SaleInstallment::where('sale_installment_plan_id', $plan->id)
-                ->whereIn('status', ['awaiting_customer', 'failed'])
-                ->update(['status' => 'scheduled', 'attempts' => 0, 'next_attempt_at' => null, 'last_error' => null]);
-
-            if ($plan->status === 'delinquent') {
-                $plan->forceFill(['status' => 'active', 'delinquent_at' => null])->save();
-            }
-        } catch (\Exception $e) {
-            report($e);
-            \Log::error('Could not apply an installment card update', [
-                'plan_id' => $plan->id,
-                'error' => $e->getMessage(),
-            ]);
+        if (! $session->setup_intent) {
+            return;
         }
+
+        // Shared with InstallmentController::view(), which applies the same swap on the redirect
+        // back from Stripe. Both paths exist because this webhook only arrives if the install's
+        // endpoint happens to subscribe to checkout.session.completed - our own Connect setup docs
+        // tell operators to subscribe to payment_intent.succeeded alone, and a `mode: 'setup'`
+        // session never emits that one. The implementation is idempotent, so whichever gets here
+        // first wins and the other is free.
+        app(\App\Services\InstallmentService::class)->applyCardUpdate($plan, $session->setup_intent);
     }
 
     /**

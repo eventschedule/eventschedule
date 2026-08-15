@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SaleInstallment;
 use App\Models\SaleInstallmentPlan;
+use App\Services\InstallmentService;
 use App\Utils\HoneypotUtils;
 use App\Utils\MoneyUtils;
 use App\Utils\UrlUtils;
@@ -32,16 +34,105 @@ class InstallmentController extends Controller
         return $plan;
     }
 
-    public function view(string $planId, string $secret)
+    public function view(Request $request, string $planId, string $secret)
     {
         $plan = $this->resolvePlan($planId, $secret);
+
+        $cardStored = $this->applyReturnedSession($request, $plan);
+
+        if ($cardStored) {
+            // applyCardUpdate() requeues parked rows with a mass update, so the collection loaded
+            // by resolvePlan() is stale by now.
+            $plan->load('installments');
+        }
 
         return view('installment.pay', [
             'plan' => $plan,
             'sale' => $plan->sale,
             'event' => $plan->sale?->event,
             'role' => $plan->sale?->event?->creatorRole,
+            'cardStored' => $cardStored,
         ]);
+    }
+
+    /**
+     * Apply what the buyer just did on Stripe, read from the session they were redirected back on.
+     *
+     * The webhook is the other half of this and remains the backstop, but it cannot be the only
+     * path. A `mode: 'setup'` session emits ONLY `checkout.session.completed`, and our own Connect
+     * setup docs tell operators to subscribe to `payment_intent.succeeded` alone - so on a
+     * doc-following install the card swap never reached the app at all, while this page cheerfully
+     * told the buyer it had. The cron then went on declining the dead card until the plan went
+     * delinquent and the ticket was refused at the door, which is the exact outcome "replace your
+     * card" exists to prevent.
+     *
+     * Deliberately captures the CARD only and never settles money: settlement carries webhook
+     * authentication this page has no equivalent for, and a redirect is something a buyer can
+     * replay. Both halves are idempotent, so whichever arrives first wins.
+     *
+     * Returns true when a card was actually stored, which is what the success banner is gated on.
+     */
+    private function applyReturnedSession(Request $request, SaleInstallmentPlan $plan): bool
+    {
+        $sessionId = $request->query('session_id');
+
+        if (! is_string($sessionId) || $sessionId === '') {
+            return false;
+        }
+
+        $installments = app(InstallmentService::class);
+        $session = $installments->retrieveCheckoutSession($plan, $sessionId);
+
+        if (! $session) {
+            return false;
+        }
+
+        // The session has to name THIS plan. The URL secret opens one plan; without this check it
+        // would also let whoever holds it apply a session belonging to somebody else's.
+        if (! $this->sessionBelongsToPlan($session, $plan)) {
+            \Log::warning('Installment return session does not belong to this plan', [
+                'plan_id' => $plan->id,
+                'session' => $sessionId,
+            ]);
+
+            return false;
+        }
+
+        if (isset($session->metadata->installment_plan_card_update)) {
+            return $session->setup_intent
+                ? $installments->applyCardUpdate($plan, $session->setup_intent)
+                : false;
+        }
+
+        // A manual payment or payoff. Its session also carries setup_future_usage, so the card it
+        // leaves behind is the one future installments are charged to - and on an install
+        // subscribed only to checkout.session.completed nothing else would ever record it.
+        // Same call TicketController::success() makes, including its no-op when a card is already
+        // stored, so a buyer reloading this page costs nothing.
+        return $installments->captureFromSession($plan, $session);
+    }
+
+    /**
+     * Whether a returned Checkout Session was created for this plan.
+     *
+     * Checked against the metadata key that actually identifies it rather than the sale_id every
+     * session carries, so this stays correct if a sale ever grows a second plan.
+     */
+    private function sessionBelongsToPlan($session, SaleInstallmentPlan $plan): bool
+    {
+        foreach (['installment_plan_card_update', 'installment_plan_payoff'] as $key) {
+            if (isset($session->metadata->{$key})) {
+                return UrlUtils::decodeId($session->metadata->{$key}) == $plan->id;
+            }
+        }
+
+        if (isset($session->metadata->installment_id)) {
+            return SaleInstallment::whereKey(UrlUtils::decodeId($session->metadata->installment_id))
+                ->where('sale_installment_plan_id', $plan->id)
+                ->exists();
+        }
+
+        return false;
     }
 
     /**
@@ -118,6 +209,12 @@ class InstallmentController extends Controller
             'secret' => $plan->secret,
         ];
 
+        // Handed back so view() can apply the outcome itself instead of trusting a webhook that
+        // may not be subscribed - see applyReturnedSession(). Appended raw because Stripe
+        // substitutes the placeholder, and safe to append with '&' because both URLs below already
+        // open their query string: route() puts plan_id and secret in the PATH.
+        $returnSession = '&session_id={CHECKOUT_SESSION_ID}';
+
         try {
             if ($mode === 'update_card') {
                 // mode: 'setup' stores a reusable payment method without taking money. Nothing in
@@ -130,7 +227,7 @@ class InstallmentController extends Controller
                     'metadata' => [
                         'installment_plan_card_update' => UrlUtils::encodeId($plan->id),
                     ],
-                    'success_url' => route('installment.view', $returnData).'?updated=1',
+                    'success_url' => route('installment.view', $returnData).'?updated=1'.$returnSession,
                     'cancel_url' => route('installment.view', $returnData),
                 ], $options);
 
@@ -192,7 +289,7 @@ class InstallmentController extends Controller
                     'setup_future_usage' => 'off_session',
                     'metadata' => $metadata,
                 ],
-                'success_url' => route('installment.view', $returnData).'?paid=1',
+                'success_url' => route('installment.view', $returnData).'?paid=1'.$returnSession,
                 'cancel_url' => route('installment.view', $returnData),
             ], $options);
 

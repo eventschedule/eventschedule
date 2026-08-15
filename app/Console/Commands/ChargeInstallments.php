@@ -227,6 +227,7 @@ class ChargeInstallments extends Command
 
         $charged = 0;
         $failed = 0;
+        $cardless = [];
 
         foreach ($due as $installment) {
             if ($this->outOfTime()) {
@@ -237,8 +238,19 @@ class ChargeInstallments extends Command
             $plan = $installment->plan;
 
             if (! $plan || ! $plan->stripe_customer_id || ! $plan->stripe_payment_method_id) {
-                // No stored card yet (installment 1 has not settled) - nothing to charge
-                // off-session. The buyer's own pay link still works.
+                // A payment is due and there is no card to take it with. Nothing can be charged
+                // off-session; the buyer's own pay link still works, which is what makes this
+                // survivable rather than fatal.
+                //
+                // Counted rather than passed over in silence, because this used to be a bare
+                // `continue` and it is where the money stops. Every other surface that might have
+                // complained filters on stripe_payment_method_id too - remindUpcoming() and
+                // sweepBeforeEvents() both do - so an install whose webhook never delivered the
+                // card collected installment 1 and nothing else, and told nobody at all.
+                if ($plan) {
+                    $cardless[$plan->id] = true;
+                }
+
                 continue;
             }
 
@@ -268,7 +280,18 @@ class ChargeInstallments extends Command
             $this->attemptCharge($installment->fresh(), $plan, $charged, $failed);
         }
 
-        $this->info("Installments charged: {$charged}, failed: {$failed}.");
+        if ($cardless) {
+            $planIds = array_keys($cardless);
+
+            Log::warning('Installments are due on plans with no stored card and cannot be charged', [
+                'plan_count' => count($planIds),
+                'plan_ids' => array_slice($planIds, 0, 20),
+            ]);
+
+            $this->warn(count($planIds).' plan(s) have a payment due but no card on file.');
+        }
+
+        $this->info("Installments charged: {$charged}, failed: {$failed}, no card: ".count($cardless).'.');
     }
 
     private function attemptCharge(SaleInstallment $installment, SaleInstallmentPlan $plan, int &$charged, int &$failed): void
