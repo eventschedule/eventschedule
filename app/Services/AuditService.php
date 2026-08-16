@@ -52,6 +52,10 @@ class AuditService
 
     const SCHEDULE_MEMBER_REMOVE = 'schedule.member_remove';
 
+    // Destructive, and often performed by someone outside the schedule it touches (a curator
+    // clearing a broken video off an unclaimed act), so worth a trail.
+    const SCHEDULE_VIDEO_REMOVE = 'schedule.video_remove';
+
     // Event actions
     const EVENT_CREATE = 'event.create';
 

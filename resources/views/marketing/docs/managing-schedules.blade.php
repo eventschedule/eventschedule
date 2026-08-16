@@ -232,11 +232,17 @@
 
         <ul class="doc-list mb-6">
             <li>Each act gets up to six suggestions, showing the <strong>thumbnail</strong>, <strong>title</strong>, <strong>channel</strong>, <strong>view count</strong> and <strong>like count</strong>, with a <strong>Watch</strong> link that opens the video on YouTube</li>
+            <li>Only videos their owner allows to be played on other websites are suggested, so a saved video will not turn into YouTube's "Video unavailable" panel on your public pages</li>
+            <li>Click the <strong>play button</strong> on a suggestion to watch it right there, in the same player your visitors get</li>
             <li>The closest match is <strong>preselected</strong>. Click another card to choose it instead, or click the selected card again to clear it</li>
             <li><strong>Save Videos</strong> attaches your choice to that act's schedule, where it appears on their public page</li>
             <li><strong>Skip</strong> takes the act off the list without attaching anything, so it stops coming back</li>
             <li>Either way the act disappears from the list, and once the list is empty the tab says so</li>
         </ul>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            If a video does stop working later, because its owner turned off embedding or deleted it, you do not have to come back here. <strong class="text-gray-900 dark:text-white">Remove video</strong> appears under the video on your schedule page and on the event page for anyone who can edit the schedule, and takes just that one video away. A nightly check also removes saved videos that YouTube can no longer play.
+        </p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Note</div>

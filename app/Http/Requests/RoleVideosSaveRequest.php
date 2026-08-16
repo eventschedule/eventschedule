@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\YouTubeUrl;
 use Illuminate\Foundation\Http\FormRequest;
 
 class RoleVideosSaveRequest extends FormRequest
@@ -19,7 +20,7 @@ class RoleVideosSaveRequest extends FormRequest
         ];
 
         if (! empty($this->videos)) {
-            $rules['videos.*.url'] = ['required', 'url'];
+            $rules['videos.*.url'] = ['required', 'url', new YouTubeUrl];
             $rules['videos.*.title'] = ['required', 'string'];
         }
 

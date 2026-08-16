@@ -1436,14 +1436,31 @@ class GeminiUtils
             return [];
         }
 
-        // First, search for videos
+        // Over-fetch candidates: search.list costs 100 quota units per call whatever maxResults
+        // is, so asking for more is free, and the status pass below discards some of them.
+        $fetchCount = min(max($maxResults * 2, 12), 50);
+
+        // First, search for videos.
+        //
+        // videoEmbeddable and videoSyndicated are what keep YouTube's "Playback on other websites
+        // has been disabled by the video owner" error off the guest pages. Without them the
+        // most-viewed match for a bare artist name is very often the official label upload, which
+        // is exactly the kind that refuses to embed - and nothing downstream notices, because a
+        // non-embeddable video still has a perfectly good thumbnail. Both filters require
+        // type=video, which is set below.
+        //
+        // Keep videoSyndicated even though the status pass below re-checks embeddability:
+        // syndication has NO counterpart in videos.list?part=status, so this request is the only
+        // place it can be expressed. Dropping it silently reopens that whole class of failure.
         $searchUrl = 'https://www.googleapis.com/youtube/v3/search'
             .'?key='.$apiKey
             .'&q='.urlencode($query)
             .'&type=video'
             .'&order=relevance'
-            .'&maxResults='.$maxResults
+            .'&maxResults='.$fetchCount
             .'&part=snippet'
+            .'&videoEmbeddable=true'
+            .'&videoSyndicated=true'
             .'&regionCode=IL';        // Israel region
 
         // Use secure cURL instead of file_get_contents
@@ -1489,6 +1506,8 @@ class GeminiUtils
 
                 // Validate video ID format
                 if (preg_match('/^[a-zA-Z0-9_-]{11}$/', $videoId)) {
+                    $watchUrl = 'https://www.youtube.com/watch?v='.$videoId;
+
                     $videoIds[] = $videoId;
                     $videos[$videoId] = [
                         'id' => $videoId,
@@ -1496,7 +1515,10 @@ class GeminiUtils
                         'description' => html_entity_decode($snippet['description'] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8'),
                         'channelTitle' => html_entity_decode($snippet['channelTitle'] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8'),
                         'thumbnail' => $snippet['thumbnails']['medium']['url'] ?? null,
-                        'url' => 'https://www.youtube.com/watch?v='.$videoId,
+                        'url' => $watchUrl,
+                        // So the matcher can preview the candidate in the same player the guest
+                        // pages use, rather than judging it by its thumbnail alone.
+                        'embed_url' => UrlUtils::getYouTubeEmbed($watchUrl),
                         'publishedAt' => $snippet['publishedAt'] ?? null,
                         'viewCount' => 0,
                         'likeCount' => 0,
@@ -1505,13 +1527,17 @@ class GeminiUtils
             }
         }
 
-        // If we have video IDs, try to get statistics
+        // If we have video IDs, try to get statistics and playability status. part is free - the
+        // call costs one quota unit however many parts and ids it carries - so status rides along
+        // with statistics rather than costing a second request. videoEmbeddable above is the
+        // primary filter; this is the second line of defence, and the only one that catches a
+        // video deleted or made private since the search index was built.
         if (! empty($videoIds)) {
             $videoIdsString = implode(',', $videoIds);
             $statsUrl = 'https://www.googleapis.com/youtube/v3/videos'
                 .'?key='.$apiKey
                 .'&id='.$videoIdsString
-                .'&part=statistics';
+                .'&part=statistics,status';
 
             $ch = curl_init();
             curl_setopt_array($ch, [
@@ -1530,10 +1556,14 @@ class GeminiUtils
             $statsHttpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
 
+            $statusItems = [];
+
             if ($statsResponse !== false && $statsHttpCode === 200) {
                 $statsData = json_decode($statsResponse, true);
 
                 if (isset($statsData['items']) && is_array($statsData['items'])) {
+                    $statusItems = $statsData['items'];
+
                     foreach ($statsData['items'] as $item) {
                         if (isset($item['id']) && isset($item['statistics'])) {
                             $videoId = $item['id'];
@@ -1547,6 +1577,13 @@ class GeminiUtils
                     }
                 }
             }
+
+            // Only prune when the status pass actually came back with something. A failed or empty
+            // videos.list response must not empty the result set - that would turn a transient API
+            // blip into "no videos found", and the search filter has already done the main work.
+            if ($statusItems) {
+                $videos = self::rejectUnplayableVideos($videos, $statusItems);
+            }
         }
 
         // Sort videos by view count in descending order
@@ -1555,8 +1592,59 @@ class GeminiUtils
             return $b['viewCount'] - $a['viewCount'];
         });
 
-        // Ensure we never return more than 6 videos
-        return array_slice($sortedVideos, 0, 6);
+        // Trim the over-fetch back to what the caller asked for
+        return array_slice($sortedVideos, 0, $maxResults);
+    }
+
+    /**
+     * Drop search hits that will not actually play in an embedded player.
+     *
+     * Split out from searchYouTube() so it can be tested without an HTTP call. YouTube's search
+     * index happily returns videos that are gone, private, or embedding-disabled; each of those
+     * renders as "Video unavailable" inside the iframe on the guest pages, with nothing anywhere
+     * in the admin portal to hint at it.
+     *
+     * @param  array  $videos  candidates keyed by video id
+     * @param  array  $statusItems  the items array of a videos.list?part=status response
+     * @return array the surviving candidates, still keyed by video id
+     */
+    public static function rejectUnplayableVideos(array $videos, array $statusItems): array
+    {
+        $statusById = [];
+
+        foreach ($statusItems as $item) {
+            if (isset($item['id'])) {
+                $statusById[$item['id']] = $item['status'] ?? [];
+            }
+        }
+
+        foreach (array_keys($videos) as $videoId) {
+            // Absent from the response entirely: deleted, private, or otherwise no longer there.
+            if (! isset($statusById[$videoId])) {
+                unset($videos[$videoId]);
+
+                continue;
+            }
+
+            if (! self::isPlayableStatus($statusById[$videoId])) {
+                unset($videos[$videoId]);
+            }
+        }
+
+        return $videos;
+    }
+
+    /**
+     * Whether a videos.list `status` object describes a video that will play when embedded.
+     *
+     * Strict comparisons throughout: a missing key means the API did not vouch for the video, and
+     * the whole point here is to stop guessing.
+     */
+    public static function isPlayableStatus(array $status): bool
+    {
+        return ($status['embeddable'] ?? null) === true
+            && ($status['privacyStatus'] ?? null) === 'public'
+            && ($status['uploadStatus'] ?? null) === 'processed';
     }
 
     public static function sendImageGenerationRequest($prompt, $aspectRatio = '3:4')

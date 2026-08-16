@@ -410,6 +410,13 @@ class AppController extends Controller
                     \Log::error('Scheduled command app:cleanup-backups failed: '.$e->getMessage());
                     report($e);
                 }
+                // Not hosted-gated: a selfhost install with a YouTube key gets the same rot.
+                try {
+                    \Artisan::call('app:recheck-video-embeds');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command app:recheck-video-embeds failed: '.$e->getMessage());
+                    report($e);
+                }
 
                 if (config('app.hosted')) {
                     try {

@@ -43,11 +43,33 @@
                                         class="border rounded-lg p-3 transition-colors relative"
                                         :class="[isVideoSelected(role, video) ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/30' : 'border-gray-200 dark:border-gray-600', isViewer ? '' : 'cursor-pointer hover:border-blue-300 dark:hover:border-blue-600']"
                                         @click="!isViewer && selectVideo(role, video)">
-                                    <div class="aspect-video bg-gray-100 dark:bg-gray-600 rounded mb-2 flex items-center justify-center relative">
-                                        <img v-if="video.thumbnail" :src="video.thumbnail" :alt="video.title" class="w-full h-full object-cover rounded">
-                                        <svg v-else class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                        </svg>
+                                    {{-- Click to play in the same embedded player the guest pages use.
+                                         A thumbnail alone cannot show that a video refuses to embed. --}}
+                                    <div class="aspect-video bg-gray-100 dark:bg-gray-600 rounded mb-2 flex items-center justify-center relative overflow-hidden">
+                                        <iframe v-if="previewingVideoId === video.id && video.embed_url"
+                                                :src="video.embed_url"
+                                                :title="video.title"
+                                                class="w-full h-full rounded"
+                                                frameborder="0"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                referrerpolicy="strict-origin-when-cross-origin"
+                                                allowfullscreen></iframe>
+                                        <template v-else>
+                                            <img v-if="video.thumbnail" :src="video.thumbnail" :alt="video.title" class="w-full h-full object-cover rounded">
+                                            <svg v-else class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                            </svg>
+                                            <button v-if="video.embed_url" type="button"
+                                                    @click.stop="previewVideo(video)"
+                                                    :aria-label="previewLabel"
+                                                    class="absolute inset-0 flex items-center justify-center bg-black/25 hover:bg-black/40 transition-colors duration-200 rounded focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[var(--brand-blue)]">
+                                                <span class="flex items-center justify-center w-12 h-12 rounded-full bg-black/60 text-white shadow-md">
+                                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                        <path d="M8 5v14l11-7z"/>
+                                                    </svg>
+                                                </span>
+                                            </button>
+                                        </template>
                                     </div>
                                     
                                     <h5 class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">@{{ video.title }}</h5>
@@ -149,6 +171,15 @@ document.addEventListener('DOMContentLoaded', function() {
             return {
                 talentRoles: [],
                 loading: true,
+                // One preview at a time: starting a second stops the first, so the tab never ends
+                // up with half a dozen players running at once.
+                previewingVideoId: null,
+                // Bound through data() rather than serialised straight into the aria-label
+                // attribute: the JSON directive emits double quotes, which would terminate the
+                // attribute, mangle the DOM and kill the Vue mount. (Do not name that directive in
+                // this comment - Blade compiles directives inside JavaScript comments too, and an
+                // empty argument list compiles to invalid PHP.)
+                previewLabel: @json(__('messages.preview_video')),
                 isViewer: document.getElementById('videos-app').dataset.isViewer === 'true'
             }
         },
@@ -216,6 +247,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             },
             
+            previewVideo(video) {
+                this.previewingVideoId = video.id;
+            },
+
             isVideoSelected(role, video) {
                 return role.selectedVideos && role.selectedVideos.some(v => v.id === video.id);
             },

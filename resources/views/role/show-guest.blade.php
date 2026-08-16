@@ -6,6 +6,13 @@
        ? ($selectedGroup->role->accent_color ?? '#4E81FA')
        : ($role->accent_color ?? '#4E81FA');
    $contrastColor = accent_contrast_color($accentColor);
+
+   // Precondition for the Remove-video control, resolved once. VideoUtils::canRemoveVideo() runs
+   // an isEditor() query per call, and the carousel alone can draw dozens of videos, so calling it
+   // per video put a query per card on the page for every signed-in visitor. This is a strict
+   // subset of that rule - the partial still calls canRemoveVideo() and remains the authority - so
+   // the view can only ever be more restrictive, never show a button the endpoint would refuse.
+   $canRemoveVideos = auth()->check() && ! is_demo_mode() && auth()->user()->isEditor($role->subdomain);
   @endphp
 
   @php
@@ -145,11 +152,26 @@ html[data-es-view="list"] #calendar-panel-wrapper {
             <div id="events-carousel" class="flex overflow-x-auto scrollbar-hide gap-6 pb-4 pt-4 {{ $isRtl ? 'rtl' : '' }}">
               @foreach($upcomingEventsWithVideos as $eventData)
                 @foreach($eventData['video_roles'] as $videoRole)
+                  @php
+                    // The first PLAYABLE video, not simply the first: getFirstVideoUrl() returns
+                    // index 0 whatever it holds, so a single unparseable entry would drop the whole
+                    // card even when the act has a perfectly good second video.
+                    $carouselVideoUrl = null;
+                    $carouselEmbedUrl = null;
+                    foreach ($videoRole->decodeLinks('youtube_links') as $carouselLink) {
+                        $carouselEmbedUrl = \App\Utils\UrlUtils::getYouTubeEmbed($carouselLink->url);
+                        if ($carouselEmbedUrl) {
+                            $carouselVideoUrl = $carouselLink->url;
+                            break;
+                        }
+                    }
+                  @endphp
+                  @continue (! $carouselEmbedUrl)
                   <div class="carousel-item flex-shrink-0 w-full sm:w-80 bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden group/card">
                     <!-- Video iframe -->
                     <iframe
                       class="w-full h-48 object-cover"
-                      src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($videoRole->getFirstVideoUrl()) }}"
+                      src="{{ $carouselEmbedUrl }}"
                       title="{{ $videoRole->translatedName() }} - YouTube video"
                       frameborder="0"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -157,7 +179,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                       allowfullscreen
                       loading="lazy">
                     </iframe>
-                    
+
                     <!-- Event details below video -->
                     <div class="p-4">
                       <a href="{{ $eventData['event']->getGuestUrl($role->subdomain) }}" class="block">
@@ -171,6 +193,17 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                           {{ $eventData['event']->localStartsAt(true, request()->date) }}
                         </p>
                       </a>
+                      {{-- Outside the anchor above: a button nested in a link is invalid HTML. Below
+                           the iframe rather than over it, because the carousel's nav buttons and
+                           their click-blocking overlays own the card's edges. --}}
+                      @if ($canRemoveVideos)
+                        @include('partials.remove-video-button', [
+                          'schedule' => $role,
+                          'target' => $videoRole,
+                          'videoUrl' => $carouselVideoUrl,
+                          'class' => 'mt-2',
+                        ])
+                      @endif
                     </div>
                   </div>
                 @endforeach
@@ -348,7 +381,14 @@ html[data-es-view="list"] #calendar-panel-wrapper {
 
       @if ($role->youtube_links && $role->youtube_links != '[]')
         @php
-          $videoLinks = $role->decodeLinks('youtube_links');
+          // Filtered BEFORE counting: the column count and the "is there anything to show" test
+          // below both have to reflect the cards that actually render, or an entry that cannot be
+          // turned into an embed reserves a grid column for nothing - and a list where every entry
+          // fails would draw an empty panel.
+          $videoLinks = array_values(array_filter(
+              $role->decodeLinks('youtube_links'),
+              fn ($l) => (bool) \App\Utils\UrlUtils::getYouTubeEmbed($l->url)
+          ));
           $videoCount = count($videoLinks);
           $gridCols = min($videoCount, $role->getVideoColumns());
         @endphp
@@ -360,6 +400,14 @@ html[data-es-view="list"] #calendar-panel-wrapper {
               @foreach ($videoLinks as $link)
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
                   <iframe class="w-full" style="height:{{ $role->getVideoHeight() }}px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($link->url) }}" title="{{ $role->translatedName() }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                  @if ($canRemoveVideos)
+                    @include('partials.remove-video-button', [
+                      'schedule' => $role,
+                      'target' => $role,
+                      'videoUrl' => $link->url,
+                      'class' => 'px-3 py-2 text-end',
+                    ])
+                  @endif
                 </div>
               @endforeach
             </div>          

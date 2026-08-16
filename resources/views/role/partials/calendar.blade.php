@@ -149,7 +149,7 @@
                 'videos' => $event->relationLoaded('approvedVideos') ? $event->approvedVideos->take(3)->map(fn($v) => [
                     'youtube_url' => $v->youtube_url,
                     'thumbnail_url' => \App\Utils\UrlUtils::getYouTubeThumbnail($v->youtube_url),
-                    'embed_url' => \App\Utils\UrlUtils::getYouTubeEmbed($v->youtube_url),
+                    'embed_url' => \App\Utils\UrlUtils::getYouTubeEmbed($v->youtube_url) ?: null,
                 ])->values()->toArray() : [],
                 'recent_comments' => $event->relationLoaded('approvedComments') ? $event->approvedComments->take(2)->map(fn($c) => [
                     'author' => $c->submitterName(),
@@ -916,7 +916,7 @@
                                             <div v-if="event.videos.some((v, i) => playingVideo === event.uniqueKey + '-' + i)"
                                                  class="w-full aspect-video rounded-lg overflow-hidden shadow-sm" @click.stop>
                                                 <template v-for="(vid, vidIdx) in event.videos" :key="'playing-' + vidIdx">
-                                                    <iframe v-if="playingVideo === event.uniqueKey + '-' + vidIdx"
+                                                    <iframe v-if="playingVideo === event.uniqueKey + '-' + vidIdx && vid.embed_url"
                                                             :src="vid.embed_url + '?autoplay=1'"
                                                             class="w-full h-full" frameborder="0"
                                                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -1271,7 +1271,7 @@
                                         <div v-if="event.videos.some((v, i) => playingVideo === event.uniqueKey + '-' + i)"
                                              class="w-full aspect-video rounded-lg overflow-hidden shadow-sm" @click.stop>
                                             <template v-for="(vid, vidIdx) in event.videos" :key="'playing-' + vidIdx">
-                                                <iframe v-if="playingVideo === event.uniqueKey + '-' + vidIdx"
+                                                <iframe v-if="playingVideo === event.uniqueKey + '-' + vidIdx && vid.embed_url"
                                                         :src="vid.embed_url + '?autoplay=1'"
                                                         class="w-full h-full" frameborder="0"
                                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

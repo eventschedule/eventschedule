@@ -628,6 +628,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::get('/{subdomain}/match-videos', [RoleController::class, 'getTalentRolesWithoutVideos'])->name('role.talent_roles_without_videos');
     Route::post('/{subdomain}/save-video', [RoleController::class, 'saveVideo'])->name('role.save_video');
     Route::post('/{subdomain}/save-videos', [RoleController::class, 'saveVideos'])->name('role.save_videos');
+    Route::post('/{subdomain}/remove-video', [RoleController::class, 'removeVideo'])->name('role.remove_video')->middleware('throttle:60,1');
 
     Route::post('/{subdomain}/approve-video/{hash}', [EventController::class, 'approveVideo'])->name('event.approve_video');
     Route::delete('/{subdomain}/reject-video/{hash}', [EventController::class, 'rejectVideo'])->name('event.reject_video');

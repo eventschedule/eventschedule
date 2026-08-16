@@ -167,6 +167,12 @@
         @endif
         @endif
 
+        @php
+          // Resolved once for the whole talent loop, not per video: VideoUtils::canRemoveVideo()
+          // runs an isEditor() query per call. A strict subset of that rule - the partial still
+          // calls it and remains the authority - so this can only ever be more restrictive.
+          $canRemoveVideos = auth()->check() && ! is_demo_mode() && auth()->user()->isEditor($role->subdomain);
+        @endphp
         @foreach ($talentMembers as $talentIndex => $each)
         @php
           $hasTalentHeader = ($each->header_image && ! in_array($each->header_image, ['none', 'logos'], true)) || $each->header_image_url;
@@ -293,36 +299,49 @@
                     @endif
                   </div>
 
-                  @if ($each->isClaimed() && (config('app.hosted') || config('app.is_testing')) && ! is_demo_mode())
-                    @if (auth()->user() && auth()->user()->isMember($each->subdomain))
-                      <a href="{{ app_url(route('role.view_admin', ['subdomain' => $each->subdomain, 'tab' => 'schedule'], false)) }}"
-                        class="inline-flex items-center justify-center">
-                        <button type="button" name="follow"
+                  <div class="flex items-center gap-2">
+                    @if ($each->isClaimed() && (config('app.hosted') || config('app.is_testing')) && ! is_demo_mode())
+                      @if (auth()->user() && auth()->user()->isMember($each->subdomain))
+                        <a href="{{ app_url(route('role.view_admin', ['subdomain' => $each->subdomain, 'tab' => 'schedule'], false)) }}"
+                          class="inline-flex items-center justify-center">
+                          <button type="button" name="follow"
+                            style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
+                            class="inline-flex items-center rounded-md px-4 py-2 text-xs font-semibold border-2 border-transparent shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-md">
+                            {{ __('messages.manage') }}
+                          </button>
+                        </a>
+                      @else
+                        <button type="button"
+                          data-follow-trigger
+                          data-follow-url="{{ route('role.follow', ['subdomain' => $each->subdomain]) }}"
+                          data-schedule-name="{{ $each->name }}"
+                          data-schedule-image="{{ $each->profile_image_url }}"
+                          data-accent-color="{{ $accentColor }}"
+                          data-contrast-color="{{ $contrastColor }}"
                           style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
-                          class="inline-flex items-center rounded-md px-4 py-2 text-xs font-semibold border-2 border-transparent shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-md">
-                          {{ __('messages.manage') }}
+                          class="inline-flex items-center justify-center rounded-md px-4 py-2 transition-all duration-200 hover:scale-105 hover:shadow-md text-xs font-semibold shadow-sm">
+                          {{ __('messages.follow') }}
                         </button>
-                      </a>
-                    @else
+                      @endif
+                    @endif
+
+                    {{-- A sibling @if, not the @elseif this used to be: chained, it could never fire
+                         alongside the Manage/Follow buttons. The gate now matches the endpoint it
+                         calls exactly - EventController::clearVideos authorises through the event
+                         policy (the event's owner, or an owner/admin of any schedule on it), which
+                         is wider than the event's creator alone, but it also only ever touches
+                         UNCLAIMED roles, so showing the button for a claimed one would flash
+                         "cleared" while doing nothing. A claimed act's own team still gets the
+                         per-video control below. Only worth offering for more than one video;
+                         otherwise the per-video remove says the same thing.  --}}
+                    @if (auth()->user() && auth()->user()->canEditEvent($event) && ! $each->isClaimed() && $each->youtube_links && count($each->decodeLinks('youtube_links')) > 1)
                       <button type="button"
-                        data-follow-trigger
-                        data-follow-url="{{ route('role.follow', ['subdomain' => $each->subdomain]) }}"
-                        data-schedule-name="{{ $each->name }}"
-                        data-schedule-image="{{ $each->profile_image_url }}"
-                        data-accent-color="{{ $accentColor }}"
-                        data-contrast-color="{{ $contrastColor }}"
-                        style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
-                        class="inline-flex items-center justify-center rounded-md px-4 py-2 transition-all duration-200 hover:scale-105 hover:shadow-md text-xs font-semibold shadow-sm">
-                        {{ __('messages.follow') }}
+                        class="clear-videos-btn inline-flex items-center rounded-md px-3 py-1.5 text-xs font-semibold text-red-600 bg-white dark:bg-gray-800 border border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 shadow-sm"
+                        data-clear-url="{{ route('event.clear_videos', ['subdomain' => $role->subdomain, 'event_hash' => App\Utils\UrlUtils::encodeId($event->id), 'role_hash' => App\Utils\UrlUtils::encodeId($each->id)]) }}">
+                        {{ __('messages.clear_videos') }}
                       </button>
                     @endif
-                  @elseif (auth()->user() && auth()->user()->id === $event->user_id && $each->youtube_links)
-                    <button type="button"
-                      class="clear-videos-btn inline-flex items-center rounded-md px-3 py-1.5 text-xs font-semibold text-red-600 bg-white dark:bg-gray-800 border border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 shadow-sm"
-                      data-clear-url="{{ route('event.clear_videos', ['subdomain' => $role->subdomain, 'event_hash' => App\Utils\UrlUtils::encodeId($event->id), 'role_hash' => App\Utils\UrlUtils::encodeId($each->id)]) }}">
-                      {{ __('messages.clear_videos') }}
-                    </button>
-                  @endif
+                  </div>
                 </div>
 
                 {{-- Description with expand/collapse --}}
@@ -358,8 +377,18 @@
                     $sidebarVideoLinks = $each->decodeLinks('youtube_links');
                   @endphp
                   @foreach ($sidebarVideoLinks as $sLink)
+                      @php $sLinkEmbedUrl = \App\Utils\UrlUtils::getYouTubeEmbed($sLink->url); @endphp
+                      @continue (! $sLinkEmbedUrl)
                       <div class="rounded-lg overflow-hidden">
-                        <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($sLink->url) }}" title="{{ $each->nameInLanguage($displayLang) }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                        <iframe class="w-full" style="aspect-ratio:16/9" src="{{ $sLinkEmbedUrl }}" title="{{ $each->nameInLanguage($displayLang) }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                        @if ($canRemoveVideos)
+                          @include('partials.remove-video-button', [
+                            'schedule' => $role,
+                            'target' => $each,
+                            'videoUrl' => $sLink->url,
+                            'class' => 'mt-1 text-end',
+                          ])
+                        @endif
                       </div>
                   @endforeach
                 @endif

@@ -469,7 +469,11 @@ class ScheduleFeaturesTest extends TestCase
     {
         $owner = $this->createOwner();
         $curator = $this->createRole($owner, 'curator');
-        $talent = $this->createRole($owner, 'talent', ['youtube_links' => json_encode([])]);
+        // Unclaimed: a curator may only attach videos to acts that do not run their own schedule.
+        $talent = $this->createRole($owner, 'talent', [
+            'email_verified_at' => null,
+            'youtube_links' => json_encode([]),
+        ]);
 
         $event = $this->createEvent($curator);
         $event->roles()->attach($talent->id, ['is_accepted' => true]);
@@ -483,6 +487,248 @@ class ScheduleFeaturesTest extends TestCase
         $links = json_decode($talent->fresh()->youtube_links, true) ?? [];
         $this->assertNotEmpty($links);
         $this->assertStringContainsString('dQw4w9WgXcQ', json_encode($links));
+    }
+
+    public function test_a_curator_cannot_attach_a_video_to_a_claimed_talent(): void
+    {
+        // Otherwise the matcher can create a video the curator has no way to remove: both
+        // canRemoveVideo and clearVideos refuse claimed targets, so writes would reach a set
+        // removals cannot.
+        $owner = $this->createOwner();
+        $curator = $this->createRole($owner, 'curator');
+        $talent = $this->createRole($this->createOwner(), 'talent', ['youtube_links' => json_encode([])]);
+
+        $this->assertTrue($talent->isClaimed());
+
+        $event = $this->createEvent($curator);
+        $event->roles()->attach($talent->id, ['is_accepted' => true]);
+
+        $this->actingAs($owner)->post(route('role.save_video', ['subdomain' => $curator->subdomain]), [
+            'role_id' => $talent->id,
+            'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+            'video_title' => 'Live Set',
+        ])->assertStatus(403);
+
+        $this->assertSame([], json_decode($talent->fresh()->youtube_links, true));
+    }
+
+    public function test_the_video_matcher_does_not_offer_claimed_talents(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createRole($owner, 'curator');
+        $claimed = $this->createRole($this->createOwner(), 'talent', ['name' => 'Claimed Act']);
+        $unclaimed = $this->createRole($this->createOwner(), 'talent', [
+            'name' => 'Unclaimed Act',
+            'email_verified_at' => null,
+        ]);
+
+        $event = $this->createEvent($curator);
+        $event->roles()->attach($claimed->id, ['is_accepted' => true]);
+        $event->roles()->attach($unclaimed->id, ['is_accepted' => true]);
+
+        $names = collect(
+            $this->actingAs($owner)
+                ->get(route('role.talent_roles_without_videos', ['subdomain' => $curator->subdomain]))
+                ->assertOk()
+                ->json()
+        )->pluck('name');
+
+        $this->assertContains('Unclaimed Act', $names);
+        $this->assertNotContains('Claimed Act', $names);
+    }
+
+    /**
+     * Two videos on an unclaimed talent, one of which is broken.
+     */
+    private function talentWithTwoVideos(\App\Models\User $talentOwner, array $attrs = []): \App\Models\Role
+    {
+        return $this->createRole($talentOwner, 'talent', $attrs + [
+            'youtube_links' => json_encode([
+                ['url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'title' => 'Broken', 'type' => 'youtube'],
+                ['name' => 'Good one', 'url' => 'https://www.youtube.com/watch?v=oHg5SJYRHA0', 'thumbnail_url' => 'https://i.ytimg.com/x.jpg'],
+            ]),
+        ]);
+    }
+
+    public function test_curator_editor_removes_only_the_named_video_from_an_unclaimed_talent(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createRole($owner, 'curator');
+
+        // A different owner, and unverified, so the talent is unclaimed and $owner is not on its team.
+        $talent = $this->talentWithTwoVideos($this->createOwner(), ['email_verified_at' => null]);
+
+        $event = $this->createEvent($curator);
+        $event->roles()->attach($talent->id, ['is_accepted' => true]);
+
+        $this->actingAs($owner)->post(route('role.remove_video', ['subdomain' => $curator->subdomain]), [
+            'role_hash' => UrlUtils::encodeId($talent->id),
+            'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        ]);
+
+        $links = json_decode($talent->fresh()->youtube_links, true);
+
+        $this->assertCount(1, $links);
+        $this->assertStringNotContainsString('dQw4w9WgXcQ', json_encode($links));
+        // The survivor keeps the keys the schedule editor wrote, not a rebuilt subset.
+        $this->assertSame('Good one', $links[0]['name']);
+        $this->assertSame('https://i.ytimg.com/x.jpg', $links[0]['thumbnail_url']);
+    }
+
+    public function test_removing_a_video_is_audited_where_the_actor_can_see_it(): void
+    {
+        // Filed against the target instead, the row lands on an unclaimed act with no team and no
+        // reachable admin panel, so the trail exists in the database and nowhere else.
+        $owner = $this->createOwner();
+        $curator = $this->createRole($owner, 'curator');
+        $talent = $this->talentWithTwoVideos($this->createOwner(), ['email_verified_at' => null]);
+
+        $event = $this->createEvent($curator);
+        $event->roles()->attach($talent->id, ['is_accepted' => true]);
+
+        $this->actingAs($owner)->post(route('role.remove_video', ['subdomain' => $curator->subdomain]), [
+            'role_hash' => UrlUtils::encodeId($talent->id),
+            'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        ]);
+
+        $this->assertDatabaseHas('audit_logs', [
+            'action' => AuditService::SCHEDULE_VIDEO_REMOVE,
+            'model_type' => 'Role',
+            'model_id' => $curator->id,
+        ]);
+
+        // And it actually reaches the page, which is the whole point.
+        $this->actingAs($owner)
+            ->get(route('role.audit_log', ['subdomain' => $curator->subdomain]))
+            ->assertOk()
+            ->assertSee($talent->name);
+    }
+
+    public function test_removing_the_last_video_writes_null_so_the_matcher_offers_the_talent_again(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createRole($owner, 'curator');
+        $talent = $this->createRole($this->createOwner(), 'talent', [
+            'email_verified_at' => null,
+            'youtube_links' => json_encode([
+                ['url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'title' => 'Broken', 'type' => 'youtube'],
+            ]),
+        ]);
+
+        $event = $this->createEvent($curator);
+        $event->roles()->attach($talent->id, ['is_accepted' => true]);
+
+        $this->actingAs($owner)->post(route('role.remove_video', ['subdomain' => $curator->subdomain]), [
+            'role_hash' => UrlUtils::encodeId($talent->id),
+            'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        ]);
+
+        // Not '[]' - that is the Skip tombstone, and it would blacklist the act permanently.
+        $this->assertNull($talent->fresh()->youtube_links);
+    }
+
+    public function test_curator_cannot_remove_videos_from_a_claimed_talent_it_does_not_manage(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createRole($owner, 'curator');
+        // Claimed (createRole verifies by default) and owned by someone else.
+        $talent = $this->talentWithTwoVideos($this->createOwner());
+
+        $event = $this->createEvent($curator);
+        $event->roles()->attach($talent->id, ['is_accepted' => true]);
+
+        $this->actingAs($owner)->post(route('role.remove_video', ['subdomain' => $curator->subdomain]), [
+            'role_hash' => UrlUtils::encodeId($talent->id),
+            'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        ])
+            ->assertSessionHas('error');
+
+        $this->assertCount(2, json_decode($talent->fresh()->youtube_links, true));
+    }
+
+    public function test_curator_cannot_remove_videos_from_a_talent_with_no_shared_accepted_event(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createRole($owner, 'curator');
+        $talent = $this->talentWithTwoVideos($this->createOwner(), ['email_verified_at' => null]);
+
+        // An event exists, but the talent is not on it.
+        $this->createEvent($curator);
+
+        $this->actingAs($owner)->post(route('role.remove_video', ['subdomain' => $curator->subdomain]), [
+            'role_hash' => UrlUtils::encodeId($talent->id),
+            'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        ])
+            ->assertSessionHas('error');
+
+        $this->assertCount(2, json_decode($talent->fresh()->youtube_links, true));
+    }
+
+    public function test_a_schedule_editor_can_remove_a_video_from_their_own_schedule(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->talentWithTwoVideos($owner, ['type' => 'venue']);
+
+        $this->actingAs($owner)->post(route('role.remove_video', ['subdomain' => $role->subdomain]), [
+            'role_hash' => UrlUtils::encodeId($role->id),
+            'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        ]);
+
+        $this->assertCount(1, json_decode($role->fresh()->youtube_links, true));
+    }
+
+    public function test_a_signed_in_stranger_cannot_remove_a_video(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createRole($owner, 'curator');
+        $talent = $this->talentWithTwoVideos($this->createOwner(), ['email_verified_at' => null]);
+
+        $event = $this->createEvent($curator);
+        $event->roles()->attach($talent->id, ['is_accepted' => true]);
+
+        $this->actingAs($this->createOwner())->post(route('role.remove_video', ['subdomain' => $curator->subdomain]), [
+            'role_hash' => UrlUtils::encodeId($talent->id),
+            'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        ])
+            ->assertSessionHas('error');
+
+        $this->assertCount(2, json_decode($talent->fresh()->youtube_links, true));
+    }
+
+    public function test_videos_tab_renders_a_well_formed_vue_template(): void
+    {
+        // The tab mounts a Vue app and this project uses the full build, so the server-rendered
+        // HTML *is* the template. A double quote inside an attribute value - which @json() emits -
+        // terminates the attribute, and the parser then sprays the remainder as bogus attributes
+        // (classically one named literally ':'). Vue's compiler throws, mount() empties the
+        // container, and the tab renders blank with nothing logged server-side.
+        $owner = $this->createOwner();
+        $curator = $this->createRole($owner, 'curator');
+
+        $html = $this->actingAs($owner)
+            ->get(route('role.view_admin', ['subdomain' => $curator->subdomain, 'tab' => 'videos']))
+            ->assertOk()
+            ->getContent();
+
+        // Checked against the raw source, not a parsed DOM: libxml is far more forgiving than a
+        // browser's HTML5 parser and quietly discards the broken attributes instead of surfacing
+        // them, so a DOM-based assertion passes even on markup that blanks the page.
+        //
+        // The fingerprint is an attribute that opens and closes immediately and is then followed by
+        // more content - `:aria-label=""Preview video""` - which is what serialising JSON into an
+        // attribute produces. A genuinely empty attribute (alt="") is followed by whitespace, > or /.
+        preg_match_all('/\S+=""[^\s>\/]/', $html, $matches);
+
+        $this->assertSame(
+            [],
+            $matches[0],
+            'An attribute value closed early; this breaks the Vue mount and blanks the tab: '.implode(', ', $matches[0])
+        );
+
+        // And prove the template we care about actually reached the page, so the assertion above
+        // cannot pass by rendering nothing at all.
+        $this->assertStringContainsString('id="videos-app"', $html);
+        $this->assertStringContainsString('previewVideo(video)', $html);
     }
 
     public function test_owner_can_view_audit_log(): void

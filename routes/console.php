@@ -162,6 +162,12 @@ Schedule::call(function () {
     Artisan::call('app:cleanup-backups');
 })->daily()->appendOutputTo(storage_path('logs/scheduler.log'));
 
+// Keep in sync with AppController::translateData(). Daily is plenty: a video having embedding
+// switched off is not urgent, and the command no-ops without a YouTube key.
+Schedule::call(function () {
+    Artisan::call('app:recheck-video-embeds');
+})->daily()->name('recheck-video-embeds')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+
 Schedule::call(function () {
     if (\App\Services\MetaAdsService::isBoostConfigured()) {
         Artisan::call('boost:sync');

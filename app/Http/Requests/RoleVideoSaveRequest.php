@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\YouTubeUrl;
 use Illuminate\Foundation\Http\FormRequest;
 
 class RoleVideoSaveRequest extends FormRequest
@@ -15,7 +16,7 @@ class RoleVideoSaveRequest extends FormRequest
     {
         return [
             'role_id' => ['required', 'integer'],
-            'video_url' => ['required', 'url'],
+            'video_url' => ['required', 'url', new YouTubeUrl],
             'video_title' => ['required', 'string'],
         ];
     }

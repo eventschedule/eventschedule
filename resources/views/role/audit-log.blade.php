@@ -84,6 +84,7 @@
                                         'schedule.delete' => __('messages.audit_schedule_deleted'),
                                         'schedule.member_add' => __('messages.audit_member_added'),
                                         'schedule.member_remove' => __('messages.audit_member_removed'),
+                                        'schedule.video_remove' => __('messages.audit_video_removed'),
                                         'subscription.create' => __('messages.audit_subscription_created'),
                                         'subscription.swap' => __('messages.audit_subscription_changed'),
                                         'subscription.cancel' => __('messages.audit_subscription_cancelled'),

@@ -97,7 +97,7 @@ trait CalendarDataTrait
             'videos' => $event->relationLoaded('approvedVideos') ? $event->approvedVideos->take(3)->map(fn ($v) => [
                 'youtube_url' => $v->youtube_url,
                 'thumbnail_url' => UrlUtils::getYouTubeThumbnail($v->youtube_url),
-                'embed_url' => UrlUtils::getYouTubeEmbed($v->youtube_url),
+                'embed_url' => UrlUtils::getYouTubeEmbed($v->youtube_url) ?: null,
             ])->values()->toArray() : [],
             'recent_comments' => $event->relationLoaded('approvedComments') ? $event->approvedComments->take(2)->map(fn ($c) => [
                 'author' => $c->submitterName(),

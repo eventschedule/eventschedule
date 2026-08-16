@@ -6,6 +6,7 @@ use App\Http\Requests\MemberAddRequest;
 use App\Http\Requests\RoleCreateRequest;
 use App\Http\Requests\RoleEmailVerificationRequest;
 use App\Http\Requests\RoleUpdateRequest;
+use App\Http\Requests\RoleVideoRemoveRequest;
 use App\Http\Requests\RoleVideoSaveRequest;
 use App\Http\Requests\RoleVideosSaveRequest;
 use App\Jobs\SendQueuedSms;
@@ -51,6 +52,7 @@ use App\Utils\QrCodeUtils;
 use App\Utils\SlugPatternUtils;
 use App\Utils\UrlUtils;
 use App\Utils\VenueUtils;
+use App\Utils\VideoUtils;
 use Carbon\Carbon;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
@@ -2472,7 +2474,7 @@ class RoleController extends Controller
             'videos' => $event->approvedVideos->take(3)->map(fn ($v) => [
                 'youtube_url' => $v->youtube_url,
                 'thumbnail_url' => UrlUtils::getYouTubeThumbnail($v->youtube_url),
-                'embed_url' => UrlUtils::getYouTubeEmbed($v->youtube_url),
+                'embed_url' => UrlUtils::getYouTubeEmbed($v->youtube_url) ?: null,
             ])->values()->toArray(),
             'recent_comments' => $event->approvedComments->take(2)->map(fn ($c) => [
                 'author' => $c->submitterName(),
@@ -6513,7 +6515,15 @@ class RoleController extends Controller
 
         foreach ($upcomingEvents as $event) {
             foreach ($event->roles as $eventRole) {
-                if ($eventRole->isTalent() && (! $eventRole->youtube_links && $eventRole->youtube_links != '[]')) {
+                // Claimed acts curate their own profile: EventController::clearVideos and
+                // VideoUtils::canRemoveVideo both refuse them, so offering them here would let a
+                // curator attach a video they could never take back off.
+                //
+                // `'[]'` needs no test of its own - it is a non-empty string, so `! $x` already
+                // excludes it. It is the tombstone the Skip button writes, meaning "a person looked
+                // at this act and decided it gets no video"; do not "fix" this into `!== '[]'`,
+                // which would invert Skip and offer those acts forever.
+                if ($eventRole->isTalent() && ! $eventRole->isClaimed() && ! $eventRole->youtube_links) {
                     // Check if we already have this role
                     if (! $talentRoles->contains('id', $eventRole->id)) {
                         $talentRoles->push([
@@ -6626,15 +6636,15 @@ class RoleController extends Controller
             return response()->json(['success' => false, 'message' => __('messages.talent_role_not_found')]);
         }
 
-        // Verify this talent is in one of the curator's accepted events
-        $sharedEvent = \DB::table('event_role as curator_er')
-            ->join('event_role as talent_er', 'curator_er.event_id', '=', 'talent_er.event_id')
-            ->where('curator_er.role_id', $role->id)
-            ->where('curator_er.is_accepted', true)
-            ->where('talent_er.role_id', $talentRole->id)
-            ->exists();
+        // A claimed act owns its own videos. Without this a curator could attach one here and then
+        // have no way to remove it: VideoUtils::canRemoveVideo and EventController::clearVideos
+        // both refuse claimed targets, so writes would reach a set removals cannot.
+        if ($talentRole->isClaimed()) {
+            return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
+        }
 
-        if (! $sharedEvent) {
+        // Verify this talent is in one of the curator's accepted events
+        if (! VideoUtils::sharesAcceptedEvent($role, $talentRole)) {
             return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
         }
 
@@ -6676,15 +6686,13 @@ class RoleController extends Controller
             return response()->json(['success' => false, 'message' => __('messages.talent_role_not_found')]);
         }
 
-        // Verify this talent is in one of the curator's accepted events
-        $sharedEvent = \DB::table('event_role as curator_er')
-            ->join('event_role as talent_er', 'curator_er.event_id', '=', 'talent_er.event_id')
-            ->where('curator_er.role_id', $role->id)
-            ->where('curator_er.is_accepted', true)
-            ->where('talent_er.role_id', $talentRole->id)
-            ->exists();
+        // See saveVideo(): a claimed act owns its own videos, and removals refuse claimed targets.
+        if ($talentRole->isClaimed()) {
+            return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
+        }
 
-        if (! $sharedEvent) {
+        // Verify this talent is in one of the curator's accepted events
+        if (! VideoUtils::sharesAcceptedEvent($role, $talentRole)) {
             return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
         }
 
@@ -6708,6 +6716,60 @@ class RoleController extends Controller
             'success' => true,
             'message' => __('messages.videos_saved_successfully'),
         ]);
+    }
+
+    /**
+     * Remove a single video from a schedule's youtube_links, from the guest pages.
+     *
+     * A full-page form POST rather than fetch(): these routes sit behind the app_subdomain
+     * middleware, so a request from a guest host is 302'd to app.<domain>. fetch() would follow
+     * that redirect as a bodyless GET, and an absolute cross-origin fetch is blocked because CORS
+     * is scoped to api/*. The form posts to app_url() and redirects back.
+     */
+    public function removeVideo(RoleVideoRemoveRequest $request, $subdomain)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        $targetId = UrlUtils::decodeId($request->role_hash);
+        $target = $targetId ? Role::find($targetId) : null;
+
+        if (! $target) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        if (! VideoUtils::canRemoveVideo(auth()->user(), $target, $role)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $links = $target->decodeLinks('youtube_links');
+        $remaining = VideoUtils::removeByUrl($links, $request->video_url);
+
+        // Nothing matched: a double submit, or the nightly re-check got there first. Not an error.
+        if (count($remaining) === count($links)) {
+            return redirect()->back()->with('message', __('messages.video_removed'));
+        }
+
+        // Direct assignment, not update(): youtube_links is not fillable, and fill() drops guarded
+        // keys silently.
+        $target->youtube_links = VideoUtils::encodeLinks($remaining);
+        $target->save();
+
+        // Filed against the VIEWED schedule, not the target. auditLog() only surfaces schedule.*
+        // rows whose model_id is the schedule being viewed, and it requires isEditor on that
+        // schedule - so a row filed against an unclaimed act lands somewhere with no team and no
+        // reachable admin panel, where nobody can ever read it. The target is named in the
+        // metadata, which audit-log.blade.php renders as the row's detail for schedule.* actions.
+        AuditService::log(
+            AuditService::SCHEDULE_VIDEO_REMOVE,
+            auth()->id(),
+            'Role',
+            $role->id,
+            ['url' => $request->video_url, 'schedule' => $target->name],
+            null,
+            $target->name
+        );
+
+        return redirect()->back()->with('message', __('messages.video_removed'));
     }
 
     /**
