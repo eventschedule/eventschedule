@@ -22,6 +22,13 @@
     $eventRole = $event->roles->where('id', $role->id)->first();
     $eventIsAccepted = $eventRole->pivot->is_accepted;
 
+    // The raw ?date=, for the back/venue/talent links that rebuild a month+year from it. Read
+    // ONCE, here, and never into $date - the controller passes a sanitized $date into this view
+    // and Blade @php shares the template scope, so assigning to it would hand the raw query
+    // param to every date consumer further down the page (they throw on garbage).
+    // ?date[]=x makes request('date') an array, which is a TypeError in preg_match().
+    $rawDateParam = is_string(request('date')) ? request('date') : null;
+
     // Resolve every piece of event text once, against the language the visitor is reading. An
     // aggregated event stores its two languages under the VENUE's labels, which need not match
     // this schedule's, so "show the translation" is the wrong question - see Event::textInLanguage().
@@ -185,8 +192,8 @@
                       $tQueryParams = [];
                       if (request('category')) $tQueryParams['category'] = request('category');
                       if (request('schedule')) $tQueryParams['schedule'] = request('schedule');
-                      if (request('date')) {
-                        $tDate = request('date');
+                      if ($rawDateParam) {
+                        $tDate = $rawDateParam;
                         if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $tDate)) {
                           $tDateParts = explode('-', $tDate);
                           $tQueryParams['month'] = (int)$tDateParts[1];
@@ -220,8 +227,8 @@
                     $tQueryParams = [];
                     if (request('category')) $tQueryParams['category'] = request('category');
                     if (request('schedule')) $tQueryParams['schedule'] = request('schedule');
-                    if (request('date')) {
-                      $tDate = request('date');
+                    if ($rawDateParam) {
+                      $tDate = $rawDateParam;
                       if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $tDate)) {
                         $tDateParts = explode('-', $tDate);
                         $tQueryParams['month'] = (int)$tDateParts[1];
@@ -255,8 +262,8 @@
                           $tQueryParams = [];
                           if (request('category')) $tQueryParams['category'] = request('category');
                           if (request('schedule')) $tQueryParams['schedule'] = request('schedule');
-                          if (request('date')) {
-                            $tDate = request('date');
+                          if ($rawDateParam) {
+                            $tDate = $rawDateParam;
                             if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $tDate)) {
                               $tDateParts = explode('-', $tDate);
                               $tQueryParams['month'] = (int)$tDateParts[1];
@@ -639,12 +646,16 @@
           if (request('category')) $queryParams['category'] = request('category');
           if (request('schedule')) $queryParams['schedule'] = request('schedule');
           if ($requestedLayout = requested_event_layout()) $queryParams['layout'] = $requestedLayout;
-          if (request('date')) {
-            $date = request('date');
-            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
-              $dateParts = explode('-', $date);
-              $queryParams['month'] = (int)$dateParts[1];
-              $queryParams['year'] = (int)$dateParts[0];
+          // Scratch name, never $date: the controller passes a sanitized $date into this view and
+          // assigning to it here would replace it with the raw query param for the whole rest of
+          // the page (Blade @php shares the template scope), feeding garbage to every date
+          // consumer below - the calendar links throw on it.
+          if ($rawDateParam) {
+            $tDate = $rawDateParam;
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $tDate)) {
+              $tDateParts = explode('-', $tDate);
+              $queryParams['month'] = (int)$tDateParts[1];
+              $queryParams['year'] = (int)$tDateParts[0];
             }
           } else {
             if (request('month')) $queryParams['month'] = request('month');
@@ -775,12 +786,13 @@
                       $queryParams = [];
                       if (request('category')) $queryParams['category'] = request('category');
                       if (request('schedule')) $queryParams['schedule'] = request('schedule');
-                      if (request('date')) {
-                        $date = request('date');
-                        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
-                          $dateParts = explode('-', $date);
-                          $queryParams['month'] = (int)$dateParts[1];
-                          $queryParams['year'] = (int)$dateParts[0];
+                      // Scratch name, never $date - see the breadcrumb block above.
+                      if ($rawDateParam) {
+                        $tDate = $rawDateParam;
+                        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $tDate)) {
+                          $tDateParts = explode('-', $tDate);
+                          $queryParams['month'] = (int)$tDateParts[1];
+                          $queryParams['year'] = (int)$tDateParts[0];
                         }
                       } else {
                         if (request('month')) $queryParams['month'] = request('month');

@@ -1714,8 +1714,10 @@ class RoleController extends Controller
         $otherRole = null;
         $event = null;
         $selectedGroup = null;
-        // Support both path params and query params (backwards compatibility)
-        $date = $date ?: ($request->date ? date('Y-m-d', strtotime($request->date)) : null);
+        // Support both path params and query params (backwards compatibility).
+        // ?date[]=x hands strtotime() an array, which is a TypeError, so only take a string.
+        $requestDate = is_string($request->date) ? $request->date : null;
+        $date = $date ?: ($requestDate ? date('Y-m-d', strtotime($requestDate)) : null);
         if ($date && ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
             $date = null;
         }

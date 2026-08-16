@@ -1264,6 +1264,24 @@ class Event extends Model
     }
 
     /**
+     * Is $date a real calendar date in the Y-m-d shape occurrence dates use?
+     *
+     * The shape check alone is not enough: '2026-13-45' matches it, and Carbon::parse() then
+     * throws on it while createFromFormat() silently rolls it over to 2027-02-14.
+     *
+     * Deliberately untyped: guest views pass request input straight in, and ?date[]=x makes that
+     * an array, which is a TypeError for both a string type hint and preg_match().
+     */
+    protected static function isOccurrenceDate($date): bool
+    {
+        if (! is_string($date) || ! preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $date, $m)) {
+            return false;
+        }
+
+        return checkdate((int) $m[2], (int) $m[3], (int) $m[1]);
+    }
+
+    /**
      * The UTC instant at which this event's occurrence on $date starts.
      *
      * $date is a venue-local calendar date; the time of day comes from `starts_at`. Setting
@@ -1279,6 +1297,13 @@ class Event extends Model
             : Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC');
 
         $timeOfDay = $startsAt->copy()->setTimezone($tz)->format('H:i:s');
+
+        // Match getStartDateTime(): a malformed date is ignored, not fatal. Guest URLs are
+        // visitor-supplied and every add-to-calendar link on the event page flows through here.
+        // Re-deriving the date from $startsAt is an identity, so this means "as if no date".
+        if (! self::isOccurrenceDate($date)) {
+            $date = $startsAt->copy()->setTimezone($tz)->format('Y-m-d');
+        }
 
         return Carbon::createFromFormat('Y-m-d H:i:s', $date.' '.$timeOfDay, $tz)->setTimezone('UTC');
     }
@@ -1751,7 +1776,8 @@ class Event extends Model
             // End of the occurrence's day AT THE VENUE. Carbon::parse($date) would use the app
             // timezone, closing RSVP at UTC midnight - an hour before doors for a 9pm New York
             // show, and nine hours into the next venue day for Tokyo.
-            if ($date && Carbon::parse($date, $this->scheduleTimezone())->endOfDay()->isPast()) {
+            // A malformed date skips the check rather than throwing, same as the null case.
+            if (self::isOccurrenceDate($date) && Carbon::parse($date, $this->scheduleTimezone())->endOfDay()->isPast()) {
                 return false;
             }
         } else {
@@ -2233,7 +2259,10 @@ class Event extends Model
             $startAt->setTimezone($timezone);
         }
 
-        if ($date && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+        // isOccurrenceDate() rather than the bare shape regex: guest views hand this raw request
+        // input (role/show-guest.blade.php passes request()->date straight through), and
+        // '2026-13-45' matches the shape but throws in Carbon::parse() below.
+        if (self::isOccurrenceDate($date)) {
             $customDate = Carbon::parse($date);
             $startAt->setDate($customDate->year, $customDate->month, $customDate->day);
         }

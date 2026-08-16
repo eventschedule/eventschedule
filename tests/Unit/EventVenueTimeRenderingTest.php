@@ -154,6 +154,67 @@ class EventVenueTimeRenderingTest extends TestCase
         $this->assertSame($expected->format('Y-m-d\TH:i:s\Z'), urldecode($outlook[1]));
     }
 
+    /**
+     * Occurrence dates arrive from guest URLs, so they are attacker-controlled.
+     *
+     * Guest views pass this input in raw - role/show-guest.blade.php hands
+     * request()->date straight to localStartsAt() -> getStartDateTime() - so these must
+     * degrade to "no date given" rather than throw. Two traps: '2026-13-45' satisfies the
+     * bare Y-m-d shape regex and then throws in Carbon::parse(), and ?date[]=x makes the
+     * value an array, which is a TypeError inside preg_match() itself.
+     */
+    public function test_malformed_occurrence_dates_degrade_to_the_anchor_instead_of_throwing(): void
+    {
+        $event = $this->eveningShow();
+        $event->days_of_week = '0000010';
+
+        $anchor = Carbon::parse('2026-07-11 01:00:00', 'UTC');
+
+        foreach (['6348', 'abc', '2026-13-45', '2026-02-30', '0', '', '../../etc/passwd'] as $bad) {
+            $this->assertTrue(
+                $event->occurrenceStartUtc($bad)->eq($anchor),
+                "occurrenceStartUtc should fall back to starts_at for: {$bad}"
+            );
+            $this->assertTrue(
+                $event->getStartDateTime($bad)->eq($anchor),
+                "getStartDateTime should ignore: {$bad}"
+            );
+        }
+
+        // Untyped on purpose - getStartDateTime() takes whatever the view hands it.
+        $this->assertTrue($event->getStartDateTime(['x'])->eq($anchor), 'An array date must not be fatal');
+        $this->assertTrue($event->getStartDateTime(null)->eq($anchor));
+
+        // A real date is still applied, so the guard did not simply disable the feature.
+        $this->assertTrue(
+            $event->getStartDateTime('2026-07-18')->eq(Carbon::parse('2026-07-18 01:00:00', 'UTC'))
+        );
+        // Feb 29 is a real date, so it must be honoured. Asserted as the venue's wall clock
+        // rather than a UTC instant: New York is on EST in February and EDT in July, so the
+        // two occurrences of this 9pm show do not share a UTC time-of-day.
+        $this->assertSame(
+            '2024-02-29 21:00:00',
+            $event->occurrenceStartUtc('2024-02-29')->setTimezone('America/New_York')->format('Y-m-d H:i:s')
+        );
+    }
+
+    /** canAcceptRsvp() parses the occurrence date with Carbon::parse(), which throws on 'abc'. */
+    public function test_rsvp_gate_survives_a_malformed_occurrence_date(): void
+    {
+        $event = $this->eveningShow();
+        $event->days_of_week = '0000010';
+        $event->recurring_frequency = 'weekly';
+        $event->rsvp_enabled = true;
+
+        foreach (['6348', 'abc', '2026-13-45', '2026-02-30'] as $bad) {
+            $this->assertTrue($event->canAcceptRsvp($bad), "canAcceptRsvp should not throw on: {$bad}");
+        }
+
+        // The date is still honoured when it is real: a past occurrence closes RSVP.
+        $this->assertFalse($event->canAcceptRsvp('2020-01-03'));
+        $this->assertTrue($event->canAcceptRsvp(now()->addYear()->format('Y-m-d')));
+    }
+
     protected function tearDown(): void
     {
         Auth::logout();
