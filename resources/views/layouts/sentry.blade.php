@@ -1,5 +1,19 @@
 window.sentryOnLoad = function () {
     Sentry.init({
+        // Third-party scripts we neither ship nor control. Cloudflare injects its Web Analytics
+        // beacon same-origin on proxied customer domains, so its crashes arrive with a real message
+        // and a full stack rather than the opaque 'Script error.' the list below already drops.
+        // denyUrls matches only the throwing frame, so our own errors are still reported when a
+        // third party merely triggers them.
+        denyUrls: [
+            /\/beacon\.min\.js/i,        // Cloudflare Web Analytics
+            /\/cdn-cgi\//i,              // Cloudflare Rocket Loader, email decode, RUM
+            /cloudflareinsights\.com/i,
+            /^chrome-extension:\/\//i,
+            /^moz-extension:\/\//i,
+            /^safari-(web-)?extension:\/\//i,
+            /^chrome:\/\//i,
+        ],
         beforeSend: function (event) {
             var str = JSON.stringify(event);
             var ignore = [
