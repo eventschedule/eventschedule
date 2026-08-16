@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
+use App\Utils\CounterUtils;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 class AnalyticsReferrersDaily extends Model
 {
@@ -44,7 +44,7 @@ class AnalyticsReferrersDaily extends Model
         // Use empty string for null domain to make unique constraint work
         $domainKey = $domain ?? '';
 
-        DB::statement(
+        CounterUtils::statement(
             'INSERT INTO analytics_referrers_daily (role_id, date, source, domain, views)
              VALUES (?, ?, ?, ?, 1)
              ON DUPLICATE KEY UPDATE views = views + 1',

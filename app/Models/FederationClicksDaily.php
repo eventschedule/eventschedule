@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
+use App\Utils\CounterUtils;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Daily count of visitors sent from this site out to a federated instance.
@@ -33,7 +33,7 @@ class FederationClicksDaily extends Model
      */
     public static function incrementClick(int $instanceId): void
     {
-        DB::statement(
+        CounterUtils::statement(
             'INSERT INTO federation_clicks_daily (federated_instance_id, date, clicks, created_at, updated_at)
              VALUES (?, ?, 1, NOW(), NOW())
              ON DUPLICATE KEY UPDATE clicks = clicks + 1, updated_at = NOW()',

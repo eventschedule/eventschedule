@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
+use App\Utils\CounterUtils;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Daily aggregate counters for the marketing (WP) site, powering the top of the
@@ -52,9 +52,10 @@ class MarketingDailyStat extends Model
      * Atomically increment one of the daily counters for today (UTC).
      *
      * Mirrors AnalyticsDaily::incrementView(): a single INSERT ... ON DUPLICATE KEY
-     * UPDATE is race-safe (two concurrent first-of-day requests cannot both insert
-     * and throw a duplicate-key QueryException) and is a single round-trip. Failures
-     * are swallowed and reported so a DB hiccup can never break a public page render.
+     * UPDATE, one round-trip. It is race-safe against DUPLICATE KEYS (two concurrent
+     * first-of-day requests cannot both insert and throw a 1062) but not against
+     * DEADLOCKS (1213), so it goes through CounterUtils, which retries those and then
+     * reports - a DB hiccup can never break a public page render.
      */
     public static function record(string $column): void
     {
@@ -62,15 +63,11 @@ class MarketingDailyStat extends Model
             return;
         }
 
-        try {
-            DB::statement(
-                "INSERT INTO marketing_daily_stats (date, {$column})
-                 VALUES (?, 1)
-                 ON DUPLICATE KEY UPDATE {$column} = {$column} + 1",
-                [now()->toDateString()]
-            );
-        } catch (\Throwable $e) {
-            report($e);
-        }
+        CounterUtils::statement(
+            "INSERT INTO marketing_daily_stats (date, {$column})
+             VALUES (?, 1)
+             ON DUPLICATE KEY UPDATE {$column} = {$column} + 1",
+            [now()->toDateString()]
+        );
     }
 }

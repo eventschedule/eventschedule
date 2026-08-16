@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
+use App\Utils\CounterUtils;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 class AnalyticsDaily extends Model
 {
@@ -30,7 +30,11 @@ class AnalyticsDaily extends Model
     }
 
     /**
-     * Increment view count for a role/date combination using upsert
+     * Increment view count for a role/date combination using upsert.
+     *
+     * Called once per public page view from PageView::recordView(). The write goes through
+     * CounterUtils so a deadlock on the hot (role_id, date) row retries and then fails
+     * quietly - it used to propagate and 500 the guest page it was counting.
      */
     public static function incrementView(int $roleId, string $deviceType): void
     {
@@ -43,7 +47,7 @@ class AnalyticsDaily extends Model
 
         $date = now()->toDateString();
 
-        DB::statement(
+        CounterUtils::statement(
             "INSERT INTO analytics_daily (role_id, date, {$column})
              VALUES (?, ?, 1)
              ON DUPLICATE KEY UPDATE {$column} = {$column} + 1",

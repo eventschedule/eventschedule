@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
+use App\Utils\CounterUtils;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 class AnalyticsSocialClicksDaily extends Model
 {
@@ -34,7 +34,7 @@ class AnalyticsSocialClicksDaily extends Model
     {
         $date = now()->toDateString();
 
-        DB::statement(
+        CounterUtils::statement(
             'INSERT INTO analytics_social_clicks_daily (role_id, date, platform, clicks)
              VALUES (?, ?, ?, 1)
              ON DUPLICATE KEY UPDATE clicks = clicks + 1',

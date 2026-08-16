@@ -147,8 +147,12 @@ From Duff-fueled nights at Moe\'s to cultural enlightenment at the Aztec Theater
 
     /**
      * Populate demo data for a role (curator with multiple venues)
+     *
+     * @param  bool  $seedAnalytics  false defers the analytics seeding to the caller, so it can
+     *                               run outside a transaction (see resetDemoData()).
+     * @return array the created venue roles, keyed by subdomain
      */
-    public function populateDemoData(Role $role): void
+    public function populateDemoData(Role $role, bool $seedAnalytics = true): array
     {
         $user = $role->user;
 
@@ -212,10 +216,23 @@ From Duff-fueled nights at Moe\'s to cultural enlightenment at the Aztec Theater
         // Create ticket purchases for the demo user
         $this->createUserTicketPurchases($user);
 
-        // Create analytics data for the demo role (curator)
+        // Create analytics data for the demo role (curator) and each venue. resetDemoData()
+        // passes false and seeds these itself after its transaction commits - see the note
+        // there on why analytics writes must not be held inside a long transaction.
+        if ($seedAnalytics) {
+            $this->seedAnalyticsData($role, $venues);
+        }
+
+        return $venues;
+    }
+
+    /**
+     * Seed the synthetic analytics counters for the demo curator and its venues.
+     */
+    protected function seedAnalyticsData(Role $role, array $venues): void
+    {
         $this->createAnalyticsData($role);
 
-        // Create analytics data for each venue
         foreach ($venues as $venue) {
             $this->createAnalyticsData($venue);
         }
@@ -858,7 +875,23 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
      */
     public function resetDemoData(Role $role): void
     {
-        DB::transaction(function () use ($role) {
+        // The analytics wipe and re-seed deliberately run OUTSIDE the transaction below.
+        //
+        // These are synthetic counters that gain nothing from being atomic with the event and
+        // sale deletes, but holding their row locks for the whole reset is what deadlocked
+        // live traffic: this runs hourly on production, and while it X-locks a demo role row
+        // (the demo-% roles are dropped and recreated on every run) a concurrent guest view of
+        // that same schedule needs an FK shared lock on the very same roles row to insert its
+        // analytics_daily counter, while already holding the counter row. That cycle is the
+        // 1213 reported in Sentry as a 500 on demo-troymcclure.eventschedule.com.
+        //
+        // Wiping first and seeding after the commit keeps each analytics lock to a single
+        // autocommit statement, so there is no long-lived lock for a page view to cycle with.
+        $this->clearAnalyticsForDemoRoles($role);
+
+        $venues = [];
+
+        DB::transaction(function () use ($role, &$venues) {
             $user = $role->user;
 
             // Delete demo user's ticket purchases first (sales where user_id is demo user)
@@ -888,12 +921,8 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 Sale::whereIn('event_id', $demoEventIds)->delete();
                 Ticket::whereIn('event_id', $demoEventIds)->delete();
 
-                // Delete analytics for events
-                AnalyticsEventsDaily::whereIn('event_id', $demoEventIds)->delete();
-
-                // Delete analytics for role
-                AnalyticsDaily::where('role_id', $demoRole->id)->delete();
-                AnalyticsReferrersDaily::where('role_id', $demoRole->id)->delete();
+                // Analytics for this role and its events were cleared before the transaction
+                // opened; deleting the role below also cascades any row written since.
 
                 // Detach events and delete events created by this role
                 $demoRole->events()->detach();
@@ -928,14 +957,40 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             // Delete curator groups
             Group::where('role_id', $role->id)->delete();
 
-            // Delete analytics for curator
-            AnalyticsDaily::where('role_id', $role->id)->delete();
-            AnalyticsEventsDaily::whereIn('event_id', $curatorEventIds)->delete();
-            AnalyticsReferrersDaily::where('role_id', $role->id)->delete();
+            // Curator analytics were cleared before the transaction opened.
 
-            // Repopulate
-            $this->populateDemoData($role);
+            // Repopulate. Analytics seeding is deferred to after the commit.
+            $venues = $this->populateDemoData($role, seedAnalytics: false);
         });
+
+        $this->seedAnalyticsData($role, $venues);
+    }
+
+    /**
+     * Clear the demo analytics counters ahead of a reset.
+     *
+     * Runs in autocommit, one statement at a time, so it never holds an analytics row lock
+     * across the reset transaction. See the note in resetDemoData().
+     */
+    protected function clearAnalyticsForDemoRoles(Role $role): void
+    {
+        $demoRoleIds = Role::where('subdomain', 'like', 'demo-%')
+            ->where('subdomain', '!=', self::DEMO_ROLE_SUBDOMAIN)
+            ->pluck('id')
+            ->push($role->id);
+
+        $eventIds = DB::table('event_role')
+            ->whereIn('role_id', $demoRoleIds)
+            ->pluck('event_id')
+            ->merge(Event::whereIn('creator_role_id', $demoRoleIds)->pluck('id'))
+            ->unique();
+
+        AnalyticsDaily::whereIn('role_id', $demoRoleIds)->delete();
+        AnalyticsReferrersDaily::whereIn('role_id', $demoRoleIds)->delete();
+
+        if ($eventIds->isNotEmpty()) {
+            AnalyticsEventsDaily::whereIn('event_id', $eventIds)->delete();
+        }
     }
 
     /**

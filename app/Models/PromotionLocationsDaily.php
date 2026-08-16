@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
+use App\Utils\CounterUtils;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Daily impression / click rollup for a network promotion, per visitor country.
@@ -51,17 +51,13 @@ class PromotionLocationsDaily extends Model
 
         $other = $column === 'clicks' ? 'impressions' : 'clicks';
 
-        try {
-            DB::statement(
-                "INSERT INTO promotion_locations_daily
-                    (boost_campaign_id, date, country_code, {$column}, {$other})
-                 VALUES (?, ?, ?, 1, 0)
-                 ON DUPLICATE KEY UPDATE {$column} = {$column} + 1",
-                [$campaignId, now()->toDateString(), strtoupper($countryCode)]
-            );
-        } catch (\Throwable $e) {
-            report($e);
-        }
+        CounterUtils::statement(
+            "INSERT INTO promotion_locations_daily
+                (boost_campaign_id, date, country_code, {$column}, {$other})
+             VALUES (?, ?, ?, 1, 0)
+             ON DUPLICATE KEY UPDATE {$column} = {$column} + 1",
+            [$campaignId, now()->toDateString(), strtoupper($countryCode)]
+        );
     }
 
     public function scopeForCampaign($query, int $campaignId)

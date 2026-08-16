@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
+use App\Utils\CounterUtils;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 class AnalyticsEventsDaily extends Model
 {
@@ -47,7 +47,7 @@ class AnalyticsEventsDaily extends Model
 
         $date = now()->toDateString();
 
-        DB::statement(
+        CounterUtils::statement(
             "INSERT INTO analytics_events_daily (event_id, date, {$column})
              VALUES (?, ?, 1)
              ON DUPLICATE KEY UPDATE {$column} = {$column} + 1",
@@ -62,7 +62,7 @@ class AnalyticsEventsDaily extends Model
     {
         $date = now()->toDateString();
 
-        DB::statement(
+        CounterUtils::statement(
             'INSERT INTO analytics_events_daily (event_id, date, sales_count, revenue)
              VALUES (?, ?, 1, ?)
              ON DUPLICATE KEY UPDATE sales_count = sales_count + 1, revenue = revenue + ?',
@@ -77,7 +77,7 @@ class AnalyticsEventsDaily extends Model
     {
         $date = now()->toDateString();
 
-        DB::statement(
+        CounterUtils::statement(
             'INSERT INTO analytics_events_daily (event_id, date, promo_sales_count, promo_discount_total)
              VALUES (?, ?, 1, ?)
              ON DUPLICATE KEY UPDATE promo_sales_count = promo_sales_count + 1, promo_discount_total = promo_discount_total + ?',
@@ -92,7 +92,7 @@ class AnalyticsEventsDaily extends Model
     {
         $date = $date ?? now()->toDateString();
 
-        DB::statement(
+        CounterUtils::statement(
             'UPDATE analytics_events_daily
              SET promo_sales_count = IF(promo_sales_count > 0, promo_sales_count - 1, 0),
                  promo_discount_total = IF(promo_discount_total > ?, promo_discount_total - ?, 0)
@@ -108,7 +108,7 @@ class AnalyticsEventsDaily extends Model
     {
         $date = $date ?? now()->toDateString();
 
-        DB::statement(
+        CounterUtils::statement(
             'UPDATE analytics_events_daily
              SET sales_count = IF(sales_count > 0, sales_count - 1, 0),
                  revenue = IF(revenue > ?, revenue - ?, 0)

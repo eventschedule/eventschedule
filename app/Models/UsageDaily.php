@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
+use App\Utils\CounterUtils;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 class UsageDaily extends Model
 {
@@ -29,7 +29,7 @@ class UsageDaily extends Model
     {
         $date = now()->toDateString();
 
-        DB::statement(
+        CounterUtils::statement(
             'INSERT INTO usage_daily (date, operation, role_id, `count`)
              VALUES (?, ?, ?, 1)
              ON DUPLICATE KEY UPDATE `count` = `count` + 1',

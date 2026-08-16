@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
+use App\Utils\CounterUtils;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 class AnalyticsUtmDaily extends Model
 {
@@ -35,7 +35,7 @@ class AnalyticsUtmDaily extends Model
     {
         $date = now()->toDateString();
 
-        DB::statement(
+        CounterUtils::statement(
             'INSERT INTO analytics_utm_daily (role_id, date, param_type, param_value, views)
              VALUES (?, ?, ?, ?, 1)
              ON DUPLICATE KEY UPDATE views = views + 1',

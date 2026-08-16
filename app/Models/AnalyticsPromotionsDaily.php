@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
+use App\Utils\CounterUtils;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Daily impression / click rollup for a network promotion, per host schedule.
  *
  * Follows the analytics_*_daily convention: no raw event log, one synchronous
- * INSERT ... ON DUPLICATE KEY UPDATE per event, MySQL only. Writes are wrapped so a
- * counter can never break a guest page render.
+ * INSERT ... ON DUPLICATE KEY UPDATE per event, MySQL only. Writes go through
+ * CounterUtils so a counter can never break a guest page render.
  */
 class AnalyticsPromotionsDaily extends Model
 {
@@ -42,32 +42,24 @@ class AnalyticsPromotionsDaily extends Model
     {
         $delta = $isNewVisitor ? 1 : 0;
 
-        try {
-            DB::statement(
-                'INSERT INTO analytics_promotions_daily
-                    (boost_campaign_id, host_role_id, date, impressions, unique_visitors, clicks)
-                 VALUES (?, ?, ?, 1, ?, 0)
-                 ON DUPLICATE KEY UPDATE impressions = impressions + 1, unique_visitors = unique_visitors + ?',
-                [$campaignId, $hostRoleId, now()->toDateString(), $delta, $delta]
-            );
-        } catch (\Throwable $e) {
-            report($e);
-        }
+        CounterUtils::statement(
+            'INSERT INTO analytics_promotions_daily
+                (boost_campaign_id, host_role_id, date, impressions, unique_visitors, clicks)
+             VALUES (?, ?, ?, 1, ?, 0)
+             ON DUPLICATE KEY UPDATE impressions = impressions + 1, unique_visitors = unique_visitors + ?',
+            [$campaignId, $hostRoleId, now()->toDateString(), $delta, $delta]
+        );
     }
 
     public static function recordClick(int $campaignId, int $hostRoleId): void
     {
-        try {
-            DB::statement(
-                'INSERT INTO analytics_promotions_daily
-                    (boost_campaign_id, host_role_id, date, impressions, unique_visitors, clicks)
-                 VALUES (?, ?, ?, 0, 0, 1)
-                 ON DUPLICATE KEY UPDATE clicks = clicks + 1',
-                [$campaignId, $hostRoleId, now()->toDateString()]
-            );
-        } catch (\Throwable $e) {
-            report($e);
-        }
+        CounterUtils::statement(
+            'INSERT INTO analytics_promotions_daily
+                (boost_campaign_id, host_role_id, date, impressions, unique_visitors, clicks)
+             VALUES (?, ?, ?, 0, 0, 1)
+             ON DUPLICATE KEY UPDATE clicks = clicks + 1',
+            [$campaignId, $hostRoleId, now()->toDateString()]
+        );
     }
 
     public function scopeForCampaign($query, int $campaignId)
