@@ -33,7 +33,7 @@
     </p>
     <div class="flex justify-end items-center gap-2">
         <button type="button" data-cookie-consent-action="denied"
-                class="ap-secondary-btn inline-flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                class="ap-secondary-btn inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
             {{ __('messages.cookie_consent_decline') }}
         </button>
         <x-brand-button type="button" data-cookie-consent-action="granted">
