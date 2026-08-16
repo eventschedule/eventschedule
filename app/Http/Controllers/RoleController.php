@@ -1717,6 +1717,9 @@ class RoleController extends Controller
         // Support both path params and query params (backwards compatibility).
         // ?date[]=x hands strtotime() an array, which is a TypeError, so only take a string.
         $requestDate = is_string($request->date) ? $request->date : null;
+        // Kept before the merge below: only the PATH form is a crawlable, self-canonical URL, so
+        // only it 404s on a non-occurrence. See the guard further down.
+        $routeDate = $date;
         $date = $date ?: ($requestDate ? date('Y-m-d', strtotime($requestDate)) : null);
         if ($date && ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
             $date = null;
@@ -1785,6 +1788,57 @@ class RoleController extends Controller
             // password gate below; Draft/Internal (is_draft) remain members-only via their own guard.
 
             if ($event) {
+                // A date in the URL has to be a real occurrence of this event. The route only
+                // constrains the SHAPE of {date} ('\d{4}-\d{2}-\d{2}'), so without this every
+                // well-formed date rendered a distinct, self-canonical, index,follow page with
+                // identical content and a synthesized startDate - 1999-01-03 and 2099-12-25 both
+                // returned 200. That is an unbounded duplicate-content space, and Google had
+                // crawled its way to ~164k "Crawled - currently not indexed" URLs against a
+                // sitemap advertising ~5k. matchesDate() covers the non-recurring case too (it
+                // range-checks multi-day events and isSameDay()s the rest), so it is applied to
+                // every event rather than gated on days_of_week.
+                //
+                // '1970-01-01' is not a user-supplied date: date('Y-m-d', strtotime($bad)) yields
+                // it for an unparseable ?date=, so drop it the way the month/year branch below
+                // already does instead of 404ing an otherwise valid event URL.
+                if ($date === '1970-01-01') {
+                    $date = null;
+                } elseif ($date && ! $event->matchesDate($date, $event->scheduleTimezone())) {
+                    if ($routeDate) {
+                        // Redirect rather than 404. Stored dates build user-facing URLs all over
+                        // the app - Sale::getEventUrl() on the buyer's tickets page and the
+                        // owner's sales table, the Stripe cancel URL, waitlist mail, the
+                        // ticket-confirmation push - and every one of them stops matching the
+                        // moment an owner edits the recurrence. Excluding a single date IS the
+                        // "cancel this occurrence" feature, which is precisely when a ticket
+                        // holder is most likely to click their link, so 404ing here would break a
+                        // paying customer's own confirmation.
+                        //
+                        // 302 rather than 301: the state is revocable (an owner can re-include an
+                        // excluded date) and a cached 301 would strand that visitor on the undated
+                        // page for good. Either way the duplicate 200 is gone, which is all the
+                        // crawl problem needed - Googlebot only follows dates it finds linked.
+                        //
+                        // Same host as the request (getGuestUrl($subdomain), not
+                        // getCanonicalUrl()), so a subdomain visitor is not thrown onto a custom
+                        // domain mid-checkout; the canonical tag still does the consolidating.
+                        $target = $event->getGuestUrl($subdomain);
+
+                        if ($query = $request->getQueryString()) {
+                            $target .= (str_contains($target, '?') ? '&' : '?').$query;
+                        }
+
+                        return redirect($target, 302);
+                    }
+
+                    // A ?date= that is not an occurrence is dropped rather than 404'd: a malformed
+                    // query param must not break an otherwise valid event page (pinned by
+                    // RoleGuestSurfaceCharacterizationTest, where strtotime() rolls '2026-02-30'
+                    // over to a real but non-occurring date), and leaving it set would point the
+                    // canonical at a path URL that now 404s.
+                    $date = null;
+                }
+
                 // Handle direct registration redirect when URL has trailing slash
                 if ($request->attributes->get('has_trailing_slash') && $event->registration_url) {
                     if (! auth()->user()?->isAdmin()) {

@@ -345,6 +345,14 @@ Route::post('/installment/pay/{plan_id}/{secret}', [InstallmentController::class
 Route::get('/feedback/{event_id}/{secret}', [FeedbackController::class, 'show'])->name('feedback.show')->middleware('throttle:60,1');
 Route::post('/feedback/{event_id}/{secret}', [FeedbackController::class, 'store'])->name('feedback.store')->middleware('throttle:10,1');
 
+// NOTE: '/tickets' is also a legacy WordPress marketing URL that still ranks, but it is
+// deliberately NOT redirected. It collides with the authenticated "my tickets" route below, which
+// is registered first and wins everywhere, so reclaiming it needs a host-scoped route ahead of
+// this group - and that would 301 a signed-in visitor holding an old bookmark away from their own
+// tickets, permanently, since browsers cache a 301 indefinitely. Queued mail is exposed too:
+// jobs generate URLs from APP_URL (the bare marketing host), which is why ProcessBackupExport
+// forces the root to app_url(), so any future route('tickets') in a mailable would silently
+// become a marketing redirect. Not worth it for a page averaging position 23.
 Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::get('/event', [EventController::class, 'createDefault'])->name('event.create_default');
     Route::get('/dashboard', [HomeController::class, 'home'])->name('home');

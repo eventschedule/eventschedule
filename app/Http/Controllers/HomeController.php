@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BlogPost;
 use App\Models\BoostCampaign;
 use App\Models\Event;
 use App\Models\EventComment;
@@ -13,6 +14,7 @@ use App\Models\Role;
 use App\Models\Sale;
 use App\Services\AnalyticsService;
 use App\Utils\DateUtils;
+use App\Utils\LegacyRedirects;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -24,10 +26,41 @@ class HomeController extends Controller
 {
     use Traits\CalendarDataTrait;
 
+    /**
+     * The catch-all at the bottom of routes/web.php, for single-segment paths nothing else claims.
+     *
+     * It used to end in redirect(route('home')) for every miss. /dashboard needs auth, so a
+     * signed-out visitor - or Googlebot - was forwarded to /login, which robots.txt disallows.
+     * Nothing ever returned 404, and errors/404.blade.php was unreachable for one-segment paths.
+     * Two whole classes of still-ranking URL were dead-ending there: all 187 posts in
+     * sitemap-blog-1.xml (the blog moved to blog.{domain} and the apex URLs were never
+     * redirected) and the old WordPress marketing pages in LegacyRedirects.
+     *
+     * A bare hit with no slug is NOT a miss - app.{domain}/ relies on it to reach the dashboard -
+     * so only a slug that matches nothing 404s.
+     */
     public function landing($slug = null)
     {
         if ($slug && $role = Role::whereSubdomain($slug)->first()) {
             return redirect()->route('role.view_guest', ['subdomain' => $role->subdomain]);
+        }
+
+        if ($slug) {
+            // Matched against the same published() scope the sitemap uses, so the set that
+            // redirects is exactly the set that is advertised.
+            if (BlogPost::published()->where('slug', $slug)->exists()) {
+                return redirect(blog_url('/'.$slug), 301);
+            }
+
+            if (trim($slug, '/') === 'blog') {
+                return redirect(blog_url(), 301);
+            }
+
+            if ($target = LegacyRedirects::targetFor($slug)) {
+                return redirect(marketing_url($target), 301);
+            }
+
+            abort(404);
         }
 
         return redirect(route('home'));

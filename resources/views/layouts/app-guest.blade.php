@@ -21,6 +21,27 @@
         $isUnverifiedRole = $role && $role->exists
             && !($role->email && $role->email_verified_at)
             && !($role->phone && $role->phone_verified_at);
+
+        // Language variants. The PRIMARY language lives on the clean URL - that is the URL the
+        // sitemap submits and the one people link to - so only the alternate language carries
+        // ?lang=. Appending it unconditionally made every submitted URL a non-canonical
+        // "alternate": Google was told to index a URL that then pointed it at a second one, which
+        // is what the property's ~99k "Alternate page with proper canonical tag" rows were, and it
+        // doubled the crawlable URL space for nothing.
+        //
+        // ?lang[]=x hands is_valid_language_code() an array against its ?string signature. The
+        // old call site only ran inside the alternate-language branch; this one runs on every
+        // guest render, so it takes the same is_string() guard RoleController::viewGuest() uses.
+        $guestPrimaryLang = $role->language_code;
+        $guestTargetLang = $role->translation_language_code ?: 'en';
+        $guestHasAltLang = $guestPrimaryLang != $guestTargetLang;
+        $guestRequestedLang = is_string(request()->lang) ? request()->lang : null;
+        $guestShownLang = is_valid_language_code($guestRequestedLang)
+            ? $guestRequestedLang
+            : (session()->has('translate') ? $guestTargetLang : $guestPrimaryLang);
+        $guestLangSuffix = ($guestHasAltLang && $guestShownLang !== $guestPrimaryLang)
+            ? '?lang=' . $guestShownLang
+            : '';
     @endphp
 
     <x-slot name="meta">
@@ -30,14 +51,13 @@
             <meta name="robots" content="index, follow">
         @endif
 
-        @if ($role->language_code != ($role->translation_language_code ?: 'en'))
+        @if ($guestHasAltLang)
             @php
-                $targetCode = $role->translation_language_code ?: 'en';
                 $hreflangBase = ($event && $event->exists) ? $event->getCanonicalUrl($date ?? null) : $role->getCanonicalUrl();
             @endphp
-            <link rel="alternate" hreflang="{{ $targetCode }}" href="{{ $hreflangBase }}?lang={{ $targetCode }}">
-            <link rel="alternate" hreflang="{{ $role->language_code }}" href="{{ $hreflangBase }}?lang={{ $role->language_code }}">
-            <link rel="alternate" hreflang="x-default" href="{{ $hreflangBase }}?lang={{ $role->language_code }}">
+            <link rel="alternate" hreflang="{{ $guestTargetLang }}" href="{{ $hreflangBase }}?lang={{ $guestTargetLang }}">
+            <link rel="alternate" hreflang="{{ $guestPrimaryLang }}" href="{{ $hreflangBase }}">
+            <link rel="alternate" hreflang="x-default" href="{{ $hreflangBase }}">
         @endif
 
         @php
@@ -92,11 +112,7 @@
                 <meta name="twitter:card" content="summary_large_image">
                 <meta name="twitter:site" content="@ScheduleEvent">
             @else
-            @if ($role->language_code != ($role->translation_language_code ?: 'en'))
-                <link rel="canonical" href="{{ $event->getCanonicalUrl($date) }}?{{ 'lang=' . (is_valid_language_code(request()->lang) ? request()->lang : (session()->has('translate') ? ($role->translation_language_code ?: 'en') : $role->language_code)) }}">
-            @else
-                <link rel="canonical" href="{{ $event->getCanonicalUrl($date) }}">
-            @endif
+            <link rel="canonical" href="{{ $event->getCanonicalUrl($date) }}{{ $guestLangSuffix }}">
             <meta name="description" content="{{ $event->getMetaDescription($date, $guestLang, $role) }}">
             <meta property="og:type" content="event">
             <meta property="og:title" content="{{ $guestEventName }}">
@@ -116,11 +132,7 @@
             <meta name="twitter:site" content="@ScheduleEvent">
             @endif
         @elseif ($role->exists)
-            @if ($role->language_code != ($role->translation_language_code ?: 'en'))
-                <link rel="canonical" href="{{ $role->getCanonicalUrl() }}?{{ 'lang=' . (is_valid_language_code(request()->lang) ? request()->lang : (session()->has('translate') ? ($role->translation_language_code ?: 'en') : $role->language_code)) }}">
-            @else
-                <link rel="canonical" href="{{ $role->getCanonicalUrl() }}">
-            @endif
+            <link rel="canonical" href="{{ $role->getCanonicalUrl() }}{{ $guestLangSuffix }}">
             @if ($description = Str::limit(trim(strip_tags($role->translatedDescription())), 155))
             <meta name="description" content="{{ $description }}">
             <meta property="og:description" content="{{ $description }}">
