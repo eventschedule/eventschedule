@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\BlogPost;
 use App\Models\Event;
 use App\Models\Role;
+use App\Services\DemoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -491,7 +492,31 @@ class SitemapController extends Controller
         return Role::query()
             ->claimed()
             ->where('is_deleted', false)
-            ->whereNotNull('subdomain');
+            ->whereNotNull('subdomain')
+            ->whereNot(fn ($q) => $this->scopeToDemoSchedules($q));
+    }
+
+    /**
+     * Constrain a roles query to the demo schedules, for negation by the callers.
+     *
+     * Demo schedules are seeded fabricated content shown off from /examples; they send noindex
+     * (see layouts/app-guest.blade.php) and so must not be advertised in the sitemap either -
+     * submitting a URL that then refuses indexing is the contradiction "Alternate page"/"Excluded
+     * by noindex" rows are made of.
+     *
+     * Expressed as a query rather than is_demo_role() per row on purpose: these queries chunk over
+     * every role and event in the database, and the helper reads $role->user, so calling it per
+     * row is an N+1 across hundreds of thousands of rows. claimed() already guarantees user_id is
+     * set, so the join cannot drop a legitimate schedule.
+     */
+    private function scopeToDemoSchedules($query)
+    {
+        return $query
+            ->where('roles.subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
+            ->orWhereExists(fn ($u) => $u->select(DB::raw(1))
+                ->from('users')
+                ->whereColumn('users.id', 'roles.user_id')
+                ->where('users.email', DemoService::DEMO_EMAIL));
     }
 
     private function eventQuery()
@@ -512,13 +537,18 @@ class SitemapController extends Controller
             // accepted pivot is an ownerless placeholder schedule qualifies - and
             // RoleController::viewGuest() redirects anything that fails isClaimed(), so the
             // URL we would emit is a redirect or a soft 404.
+            //
+            // The demo exclusion binds to the same pivot row for the same reason: an event only
+            // qualifies if some NON-demo schedule accepted it. Excluding demo events outright
+            // would drop a real schedule's event that a demo curator happens to have picked up.
             ->whereExists(fn ($q) => $q->select(DB::raw(1))
                 ->from('event_role')
                 ->join('roles', 'roles.id', '=', 'event_role.role_id')
                 ->whereColumn('event_role.event_id', 'events.id')
                 ->where('event_role.is_accepted', true)
                 ->where('roles.is_deleted', false)
-                ->whereNotNull('roles.user_id'));
+                ->whereNotNull('roles.user_id')
+                ->whereNot(fn ($d) => $this->scopeToDemoSchedules($d)));
     }
 
     private function blogQuery()
