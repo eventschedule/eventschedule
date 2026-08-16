@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Utils\PlanPriceUtils;
 use Laravel\Cashier\Billable;
 
 trait RoleBillable
@@ -165,11 +166,12 @@ trait RoleBillable
             return $this->plan_term === 'year' ? 'yearly' : 'monthly';
         }
 
-        $yearlyPriceId = config('services.stripe_platform.price_yearly');
-        $enterpriseYearlyPriceId = config('services.stripe_platform.enterprise_price_yearly');
-
-        if ($subscription->hasPrice($yearlyPriceId) || ($enterpriseYearlyPriceId && $subscription->hasPrice($enterpriseYearlyPriceId))) {
-            return 'yearly';
+        // Includes retired price IDs: a subscriber grandfathered on an old yearly price is still
+        // billed yearly, and reporting them as monthly would misstate their renewal date.
+        foreach (PlanPriceUtils::yearlyIds() as $priceId) {
+            if ($subscription->hasPrice($priceId)) {
+                return 'yearly';
+            }
         }
 
         return 'monthly';
@@ -192,10 +194,15 @@ trait RoleBillable
             return false;
         }
 
-        $enterpriseMonthly = config('services.stripe_platform.enterprise_price_monthly');
-        $enterpriseYearly = config('services.stripe_platform.enterprise_price_yearly');
+        // Includes retired price IDs. Stripe keeps billing an archived price, so a customer who
+        // subscribed before a price change is still paying for Enterprise; matching only the
+        // current IDs would strip their features while their card keeps being charged.
+        foreach (PlanPriceUtils::enterpriseIds() as $priceId) {
+            if ($subscription->hasPrice($priceId)) {
+                return true;
+            }
+        }
 
-        return ($enterpriseMonthly && $subscription->hasPrice($enterpriseMonthly)) ||
-               ($enterpriseYearly && $subscription->hasPrice($enterpriseYearly));
+        return false;
     }
 }

@@ -6,6 +6,7 @@ use App\Models\AnalyticsDaily;
 use App\Models\MarketingDailyStat;
 use App\Models\Role;
 use App\Models\User;
+use App\Utils\PlanPriceUtils;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -911,10 +912,27 @@ class GrowthExportService
             }
 
             if ($role->plan_source === null) {
-                $isYear = $role->plan_term === 'year';
-                $mrr += $tier === 'enterprise'
-                    ? ($isYear ? $entYearly / 12 : $entMonthly)
-                    : ($isYear ? $yearly / 12 : $monthly);
+                // Prefer what this subscriber is actually billed. A schedule grandfathered
+                // through a price change still bills on the retired price, while the config
+                // amounts below describe what we sell TODAY - using those would overstate MRR
+                // after a price increase, and disagree with the dashboard's ARR, which reads
+                // the real price. Roles with no subscription row (legacy plan_type backfills)
+                // keep the by-tier estimate, which is all that was ever available for them.
+                $subscription = $role->subscriptions->first(
+                    fn ($s) => in_array($s->stripe_status, ['active', 'trialing', 'past_due'], true)
+                );
+                $actual = PlanPriceUtils::amountFor($subscription->stripe_price ?? null);
+
+                if ($actual !== null) {
+                    $mrr += PlanPriceUtils::termFor($subscription->stripe_price) === 'year'
+                        ? $actual / 12
+                        : $actual;
+                } else {
+                    $isYear = $role->plan_term === 'year';
+                    $mrr += $tier === 'enterprise'
+                        ? ($isYear ? $entYearly / 12 : $entMonthly)
+                        : ($isYear ? $yearly / 12 : $monthly);
+                }
             }
         }
 

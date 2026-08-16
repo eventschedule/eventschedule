@@ -1390,7 +1390,7 @@ return [
     'billed_yearly' => 'Billed yearly',
     'month' => 'month',
     'year' => 'year',
-    'save_17_percent' => 'Save 17%',
+    'save_percent' => 'Save :percent%',
     'payment_details' => 'Payment Details',
     'card_holder_name' => 'Card Holder Name',
     'card_details' => 'Card Details',

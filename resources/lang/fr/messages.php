@@ -1302,7 +1302,7 @@ return [
     'billed_yearly' => 'Facturé annuellement',
     'month' => 'mois',
     'year' => 'année',
-    'save_17_percent' => 'Économisez 17 %',
+    'save_percent' => 'Économisez :percent %',
     'payment_details' => 'Détails de paiement',
     'card_holder_name' => 'Nom du titulaire de la carte',
     'card_details' => 'Détails de la carte',

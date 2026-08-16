@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Mail\SubscriptionPaymentFailed;
 use App\Models\Role;
 use App\Services\OneSignalService;
+use App\Utils\PlanPriceUtils;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Laravel\Cashier\Http\Controllers\WebhookController;
 use Symfony\Component\HttpFoundation\Response;
@@ -64,20 +66,29 @@ class SubscriptionWebhookController extends WebhookController
 
         if ($role) {
             if ($role->hasActiveSubscription()) {
-                $planType = $role->hasActiveEnterpriseSubscription() ? 'enterprise' : 'pro';
-
-                // Determine plan_term from the invoice line items
-                $planTerm = null;
+                // Place the invoiced price before writing anything. A price we cannot resolve
+                // means config is incomplete - most likely one was retired without being listed
+                // in STRIPE_LEGACY_* - and hasActiveEnterpriseSubscription() answers false for
+                // exactly that price, so trusting it here would stamp plan_type = 'pro' onto a
+                // customer this very invoice just charged the Enterprise rate. Renewal invoices
+                // fire every billing cycle, so leave the row alone and let the warning stand.
                 $lines = $payload['data']['object']['lines']['data'] ?? [];
-                if (! empty($lines)) {
-                    $priceId = $lines[0]['price']['id'] ?? null;
-                    if ($priceId) {
-                        $yearlyPriceId = config('services.stripe_platform.price_yearly');
-                        $enterpriseYearlyPriceId = config('services.stripe_platform.enterprise_price_yearly');
-                        $isYearly = ($priceId === $yearlyPriceId) || ($priceId === $enterpriseYearlyPriceId);
-                        $planTerm = $isYearly ? 'year' : 'month';
-                    }
+                $priceId = $lines[0]['price']['id'] ?? null;
+                $planTier = PlanPriceUtils::tierFor($priceId);
+                $planTerm = PlanPriceUtils::termFor($priceId);
+
+                if ($priceId && (! $planTier || ! $planTerm)) {
+                    Log::warning('Unrecognized Stripe price on paid invoice; leaving plan unchanged', [
+                        'role_id' => $role->id,
+                        'price_id' => $priceId,
+                    ]);
+
+                    return new Response('Webhook Handled', 200);
                 }
+
+                // No line items to read: fall back to the subscription-scoped answer, which is
+                // what this handler did before the price was consulted at all.
+                $planType = $planTier ?: ($role->hasActiveEnterpriseSubscription() ? 'enterprise' : 'pro');
 
                 // Use lock to prevent race with controller swap
                 \DB::transaction(function () use ($role, $planType, $planTerm) {
@@ -153,20 +164,25 @@ class SubscriptionWebhookController extends WebhookController
 
         if ($role) {
             // Update the plan type and term based on the price
-            $yearlyPriceId = config('services.stripe_platform.price_yearly');
-            $enterpriseMonthlyPriceId = config('services.stripe_platform.enterprise_price_monthly');
-            $enterpriseYearlyPriceId = config('services.stripe_platform.enterprise_price_yearly');
             $currentPrice = $data['items']['data'][0]['price']['id'] ?? null;
+            $planType = PlanPriceUtils::tierFor($currentPrice);
+            $planTerm = PlanPriceUtils::termFor($currentPrice);
 
-            if ($currentPrice) {
-                $isYearly = ($currentPrice === $yearlyPriceId) || ($currentPrice === $enterpriseYearlyPriceId);
-                $isEnterprise = ($currentPrice === $enterpriseMonthlyPriceId) || ($currentPrice === $enterpriseYearlyPriceId);
-
+            if ($currentPrice && (! $planType || ! $planTerm)) {
+                // A price we cannot place means config is incomplete - most likely a price was
+                // retired without being listed in STRIPE_LEGACY_*. Writing the old fallback here
+                // (pro/month) would persist a downgrade onto a customer who is still being
+                // charged the Enterprise rate, so leave the row alone and let the alert stand.
+                Log::warning('Unrecognized Stripe price on subscription update; leaving plan unchanged', [
+                    'role_id' => $role->id,
+                    'price_id' => $currentPrice,
+                ]);
+            } elseif ($currentPrice) {
                 // Use lock to prevent race with controller swap
-                \DB::transaction(function () use ($role, $isEnterprise, $isYearly) {
+                \DB::transaction(function () use ($role, $planType, $planTerm) {
                     $role = Role::lockForUpdate()->find($role->id);
-                    $role->plan_type = $isEnterprise ? 'enterprise' : 'pro';
-                    $role->plan_term = $isYearly ? 'year' : 'month';
+                    $role->plan_type = $planType;
+                    $role->plan_term = $planTerm;
                     $role->plan_expires = null;
                     $role->plan_source = null;
                     $role->save();

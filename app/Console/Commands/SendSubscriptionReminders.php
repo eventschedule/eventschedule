@@ -6,6 +6,7 @@ use App\Mail\SubscriptionRenewal;
 use App\Mail\SubscriptionTrialEnding;
 use App\Models\Role;
 use App\Services\OneSignalService;
+use App\Utils\PlanPriceUtils;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -244,7 +245,7 @@ class SendSubscriptionReminders extends Command
                 }
 
                 $planLabel = $this->getPlanLabel($subscription);
-                $amount = $this->getAmountForSubscription($subscription);
+                $amount = $this->getAmountForSubscription($subscription, $stripeSubscription);
                 $renewalDate = $periodEnd->format('F j, Y');
 
                 if (! $amount) {
@@ -286,32 +287,38 @@ class SendSubscriptionReminders extends Command
 
     protected function getPlanLabel(Subscription $subscription): string
     {
-        $enterpriseMonthly = config('services.stripe_platform.enterprise_price_monthly');
-        $enterpriseYearly = config('services.stripe_platform.enterprise_price_yearly');
-
-        if (($enterpriseMonthly && $subscription->hasPrice($enterpriseMonthly)) ||
-            ($enterpriseYearly && $subscription->hasPrice($enterpriseYearly))) {
-            return 'Enterprise';
+        foreach (PlanPriceUtils::enterpriseIds() as $priceId) {
+            if ($subscription->hasPrice($priceId)) {
+                return 'Enterprise';
+            }
         }
 
         return 'Pro';
     }
 
-    protected function getAmountForSubscription(Subscription $subscription): string
+    /**
+     * What this subscriber will actually be charged at renewal.
+     *
+     * Read off the live Stripe subscription first, which the caller has already fetched. That is
+     * the only figure guaranteed to be right for a grandfathered subscriber: the config amounts
+     * describe what we sell TODAY, and quoting those to someone still billing on a retired price
+     * would state a number they are not being charged. Config is the fallback for when the
+     * Stripe object is unavailable.
+     *
+     * @param  \Stripe\Subscription|null  $stripeSubscription  the already-fetched Stripe object
+     */
+    protected function getAmountForSubscription(Subscription $subscription, $stripeSubscription = null): string
     {
-        $priceId = $subscription->stripe_price;
+        $unitAmount = $stripeSubscription->items->data[0]->price->unit_amount ?? null;
 
-        $priceMap = [
-            config('services.stripe_platform.price_monthly') => config('services.stripe_platform.price_monthly_amount'),
-            config('services.stripe_platform.price_yearly') => config('services.stripe_platform.price_yearly_amount'),
-            config('services.stripe_platform.enterprise_price_monthly') => config('services.stripe_platform.enterprise_price_monthly_amount'),
-            config('services.stripe_platform.enterprise_price_yearly') => config('services.stripe_platform.enterprise_price_yearly_amount'),
-        ];
+        if ($unitAmount !== null) {
+            return '$'.rtrim(rtrim(number_format($unitAmount / 100, 2, '.', ''), '0'), '.');
+        }
 
-        $amount = $priceMap[$priceId] ?? null;
+        $amount = PlanPriceUtils::amountFor($subscription->stripe_price);
 
         if ($amount) {
-            return '$'.$amount;
+            return '$'.rtrim(rtrim(number_format($amount, 2, '.', ''), '0'), '.');
         }
 
         return '';

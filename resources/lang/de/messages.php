@@ -1301,7 +1301,7 @@ return [
     'billed_yearly' => 'Jährlich abgerechnet',
     'month' => 'Monat',
     'year' => 'Jahr',
-    'save_17_percent' => '17% sparen',
+    'save_percent' => ':percent% sparen',
     'payment_details' => 'Zahlungsdetails',
     'card_holder_name' => 'Name des Karteninhabers',
     'card_details' => 'Kartendetails',

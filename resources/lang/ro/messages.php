@@ -1315,7 +1315,7 @@ return [
     'billed_yearly' => 'Facturat anual',
     'month' => 'lună',
     'year' => 'an',
-    'save_17_percent' => 'Economisești 17%',
+    'save_percent' => 'Economisești :percent%',
     'payment_details' => 'Detalii Plată',
     'card_holder_name' => 'Numele Titularului de Card',
     'card_details' => 'Detalii Card',

@@ -4,13 +4,34 @@
         <script src="https://js.stripe.com/v3/" {!! nonce_attr() !!}></script>
     </x-slot>
 
+    @php
+        // The yearly saving is derived from the two configured amounts, never written down. It
+        // used to be a literal "Save 17%" string in all twelve locales, correct only by
+        // coincidence, and it would have gone quietly wrong the next time either amount moved.
+        // Each tier gets its own figure because the two ratios are free to diverge.
+        $planPrices = [];
+
+        foreach (['pro' => '', 'enterprise' => 'enterprise_'] as $tier => $prefix) {
+            $monthly = config('services.stripe_platform.'.$prefix.'price_monthly_amount');
+            $yearly = config('services.stripe_platform.'.$prefix.'price_yearly_amount');
+            $monthlyTotal = (float) $monthly * 12;
+            $percent = $monthlyTotal > 0
+                ? (int) round((($monthlyTotal - (float) $yearly) / $monthlyTotal) * 100)
+                : 0;
+
+            $planPrices[$tier] = [
+                'monthly' => (string) $monthly,
+                'yearly' => (string) $yearly,
+                'savePercent' => $percent,
+                'saveLabel' => __('messages.save_percent', ['percent' => $percent]),
+            ];
+        }
+    @endphp
+
     <div class="max-w-4xl mx-auto py-8" x-data="{
         selectedTier: '{{ $selectedTier }}',
         selectedPlan: 'monthly',
-        prices: {
-            pro: { monthly: '{{ config('services.stripe_platform.price_monthly_amount') }}', yearly: '{{ config('services.stripe_platform.price_yearly_amount') }}' },
-            enterprise: { monthly: '{{ config('services.stripe_platform.enterprise_price_monthly_amount') }}', yearly: '{{ config('services.stripe_platform.enterprise_price_yearly_amount') }}' }
-        }
+        prices: @js($planPrices)
     }">
         <h2 class="pb-4 text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
             <span x-show="selectedTier === 'enterprise'" x-cloak>{{ __('messages.enterprise_plan') }}</span>
@@ -175,9 +196,9 @@
                             <span class="flex flex-col">
                                 <span class="block text-sm font-medium text-gray-900 dark:text-gray-100">
                                     {{ __('messages.yearly') }}
-                                    <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                        {{ __('messages.save_17_percent') }}
-                                    </span>
+                                    <span x-show="prices[selectedTier]['savePercent'] > 0" x-cloak
+                                          x-text="prices[selectedTier]['saveLabel']"
+                                          class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"></span>
                                 </span>
                                 <span class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">{{ __('messages.billed_yearly') }}</span>
                                 <span class="mt-4 text-2xl font-semibold text-gray-900 dark:text-gray-100">$<span x-text="prices[selectedTier]['yearly']"></span><span class="text-sm font-normal text-gray-500 dark:text-gray-400">/{{ __('messages.year') }}</span></span>

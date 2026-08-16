@@ -8,6 +8,7 @@ use App\Models\Referral;
 use App\Models\Role;
 use App\Services\AuditService;
 use App\Services\UsageTrackingService;
+use App\Utils\PlanPriceUtils;
 use Illuminate\Http\Request;
 use Laravel\Cashier\Exceptions\IncompletePayment;
 
@@ -42,7 +43,7 @@ class SubscriptionController extends Controller
         }
 
         // If requesting Enterprise, verify price IDs are configured
-        $enterpriseConfigured = config('services.stripe_platform.enterprise_price_monthly') && config('services.stripe_platform.enterprise_price_yearly');
+        $enterpriseConfigured = PlanPriceUtils::current('enterprise', 'monthly') && PlanPriceUtils::current('enterprise', 'yearly');
         if ($requestedTier === 'enterprise' && ! $enterpriseConfigured) {
             $requestedTier = 'pro';
         }
@@ -52,8 +53,8 @@ class SubscriptionController extends Controller
         return view('subscription.show', [
             'role' => $role,
             'intent' => $intent,
-            'monthlyPrice' => config('services.stripe_platform.price_monthly'),
-            'yearlyPrice' => config('services.stripe_platform.price_yearly'),
+            'monthlyPrice' => PlanPriceUtils::current('pro', 'monthly'),
+            'yearlyPrice' => PlanPriceUtils::current('pro', 'yearly'),
             'selectedTier' => $requestedTier,
             'enterpriseConfigured' => $enterpriseConfigured,
         ]);
@@ -73,15 +74,15 @@ class SubscriptionController extends Controller
         $tier = $request->input('tier', 'pro');
 
         // Validate Enterprise price IDs are configured
-        if ($tier === 'enterprise' && (! config('services.stripe_platform.enterprise_price_monthly') || ! config('services.stripe_platform.enterprise_price_yearly'))) {
+        if ($tier === 'enterprise' && (! PlanPriceUtils::current('enterprise', 'monthly') || ! PlanPriceUtils::current('enterprise', 'yearly'))) {
             return redirect()->back()->with('error', __('messages.subscription_error'));
         }
 
         // If upgrading from Pro to Enterprise with existing subscription, use swap
         if ($tier === 'enterprise' && $role->hasActiveSubscription() && ! $role->hasActiveEnterpriseSubscription()) {
-            $priceId = $request->plan === 'yearly'
-                ? config('services.stripe_platform.enterprise_price_yearly')
-                : config('services.stripe_platform.enterprise_price_monthly');
+            // current(), never the legacy sets: a new or swapped subscription is always created
+            // at what we sell today. Retired price IDs exist only to be RECOGNIZED.
+            $priceId = PlanPriceUtils::current('enterprise', $request->plan);
 
             try {
                 $subscription = $role->subscription('default');
@@ -119,15 +120,7 @@ class SubscriptionController extends Controller
                 ->with('message', __('messages.subscription_already_active'));
         }
 
-        if ($tier === 'enterprise') {
-            $priceId = $request->plan === 'yearly'
-                ? config('services.stripe_platform.enterprise_price_yearly')
-                : config('services.stripe_platform.enterprise_price_monthly');
-        } else {
-            $priceId = $request->plan === 'yearly'
-                ? config('services.stripe_platform.price_yearly')
-                : config('services.stripe_platform.price_monthly');
-        }
+        $priceId = PlanPriceUtils::current($tier, $request->plan);
 
         try {
             // Calculate trial days
@@ -302,19 +295,11 @@ class SubscriptionController extends Controller
         }
 
         // Validate Enterprise price IDs are configured
-        if ($tier === 'enterprise' && (! config('services.stripe_platform.enterprise_price_monthly') || ! config('services.stripe_platform.enterprise_price_yearly'))) {
+        if ($tier === 'enterprise' && (! PlanPriceUtils::current('enterprise', 'monthly') || ! PlanPriceUtils::current('enterprise', 'yearly'))) {
             return redirect()->back()->with('error', __('messages.subscription_error'));
         }
 
-        if ($tier === 'enterprise') {
-            $priceId = $request->plan === 'yearly'
-                ? config('services.stripe_platform.enterprise_price_yearly')
-                : config('services.stripe_platform.enterprise_price_monthly');
-        } else {
-            $priceId = $request->plan === 'yearly'
-                ? config('services.stripe_platform.price_yearly')
-                : config('services.stripe_platform.price_monthly');
-        }
+        $priceId = PlanPriceUtils::current($tier, $request->plan);
 
         $subscription = $role->subscription('default');
 

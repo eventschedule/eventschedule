@@ -1350,7 +1350,7 @@ return [
     'billed_yearly' => 'חיוב שנתי',
     'month' => 'חודש',
     'year' => 'שנה',
-    'save_17_percent' => 'חסוך 17%',
+    'save_percent' => 'חסוך :percent%',
     'payment_details' => 'פרטי תשלום',
     'card_holder_name' => 'שם בעל הכרטיס',
     'card_details' => 'פרטי כרטיס',

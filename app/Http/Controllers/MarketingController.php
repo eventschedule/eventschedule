@@ -4084,7 +4084,9 @@ class MarketingController extends Controller
                 'keywords' => 'Linktree alternative for events, Linktree replacement, event link in bio, event landing page',
                 'audience_hint' => 'For creators and organizers using a link-in-bio for event promotion',
                 'about' => 'Linktree is a link-in-bio tool that event organizers use to share multiple event links from a single URL. While it solves the "one link" problem on social media, it is just a list of links with no event context, ticketing, or scheduling functionality.',
-                'pricing_note' => 'Linktree Pro costs $9/month for analytics and customization. Event Schedule gives you a full event schedule page with ticketing, newsletters, and subscriber signups from $'.$this->planPrice().'/month.',
+                // Linktree Pro is $9/month, which is what Pro costs too, so this line cannot lean
+                // on being cheaper. It compares what the same money buys instead.
+                'pricing_note' => 'Linktree Pro costs $9/month for analytics and customization on what is still a list of links. Event Schedule starts free, and Pro at $'.$this->planPrice().'/month buys a full event schedule page with ticketing, newsletters, and subscriber signups.',
                 'competitor_price' => 'From $9/mo (Pro)',
                 'es_price' => 'From $0/mo (Pro $'.$this->planPrice().'/mo)',
                 'comparison_rows' => [

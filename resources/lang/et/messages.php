@@ -1308,7 +1308,7 @@ return [
     'billed_yearly' => 'Arveldatakse igal aastal',
     'month' => 'kuu',
     'year' => 'aastal',
-    'save_17_percent' => 'Säästa 17%',
+    'save_percent' => 'Säästa :percent%',
     'payment_details' => 'Makse üksikasjad',
     'card_holder_name' => 'Kaardi omaniku nimi',
     'card_details' => 'Kaardi üksikasjad',

@@ -30,6 +30,7 @@ use App\Services\GrowthExportService;
 use App\Services\OneSignalService;
 use App\Services\TranslationQueue;
 use App\Services\WebhookService;
+use App\Utils\PlanPriceUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Auth\Events\Verified;
@@ -274,17 +275,6 @@ class AdminController extends Controller
             ->whereNull('admin_newsletter_unsubscribed_at')
             ->count();
 
-        // ARR calculation
-        $monthlyPriceId = config('services.stripe_platform.price_monthly');
-        $yearlyPriceId = config('services.stripe_platform.price_yearly');
-        $enterpriseMonthlyPriceId = config('services.stripe_platform.enterprise_price_monthly');
-        $enterpriseYearlyPriceId = config('services.stripe_platform.enterprise_price_yearly');
-
-        $monthlyAmount = (float) config('services.stripe_platform.price_monthly_amount');
-        $yearlyAmount = (float) config('services.stripe_platform.price_yearly_amount');
-        $enterpriseMonthlyAmount = (float) config('services.stripe_platform.enterprise_price_monthly_amount');
-        $enterpriseYearlyAmount = (float) config('services.stripe_platform.enterprise_price_yearly_amount');
-
         // Signups by method (selected period)
         $emailUsersInPeriod = User::whereNotNull('email_verified_at')
             ->where('email', '!=', DemoService::DEMO_EMAIL)
@@ -360,17 +350,22 @@ class AdminController extends Controller
             })
             ->pluck('stripe_price');
 
+        // ARR. PlanPriceUtils resolves retired price IDs too, so subscribers grandfathered
+        // through a price change are counted at what they actually pay rather than dropping to
+        // zero. A price it cannot place contributes nothing, which is the honest answer: falling
+        // back to the current amount would overstate revenue after a price increase.
         $arr = 0;
         foreach ($activeSubscriptions as $priceId) {
-            if ($priceId === $monthlyPriceId) {
-                $arr += $monthlyAmount * 12;
-            } elseif ($priceId === $yearlyPriceId) {
-                $arr += $yearlyAmount;
-            } elseif ($enterpriseMonthlyPriceId && $priceId === $enterpriseMonthlyPriceId) {
-                $arr += $enterpriseMonthlyAmount * 12;
-            } elseif ($enterpriseYearlyPriceId && $priceId === $enterpriseYearlyPriceId) {
-                $arr += $enterpriseYearlyAmount;
+            $amount = PlanPriceUtils::amountFor($priceId);
+            $term = PlanPriceUtils::termFor($priceId);
+
+            // Both, or neither: annualizing an amount whose term we had to assume is how a
+            // yearly price gets counted twelve times over.
+            if (! $amount || ! $term) {
+                continue;
             }
+
+            $arr += $term === 'year' ? $amount : $amount * 12;
         }
 
         // Domains overview

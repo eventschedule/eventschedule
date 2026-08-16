@@ -1358,7 +1358,7 @@ return [
     'billed_yearly' => 'يُفوتر سنوياً',
     'month' => 'شهر',
     'year' => 'سنة',
-    'save_17_percent' => 'وفر 17%',
+    'save_percent' => 'وفر :percent%',
     'payment_details' => 'تفاصيل الدفع',
     'card_holder_name' => 'اسم حامل البطاقة',
     'card_details' => 'تفاصيل البطاقة',

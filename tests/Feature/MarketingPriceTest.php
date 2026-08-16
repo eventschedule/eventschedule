@@ -21,25 +21,60 @@ class MarketingPriceTest extends TestCase
 
     /**
      * Example prices that are legitimately hardcoded: gift-card denominations, boost budgets,
-     * sample ticket prices, the SaaS calculator's slider range. Keyed file => line.
+     * sample ticket prices, the SaaS calculator's slider range.
+     *
+     * Keyed file => distinctive snippets of the exempt line. This used to be keyed by line
+     * number, which silently drifted onto an innocent line the moment anything was inserted
+     * above it - exempting a line nobody chose while re-arming the one that was checked.
+     * test_the_allow_list_has_no_stale_entries() fails if a snippet stops matching, so an
+     * exemption cannot outlive the copy it was written for.
      */
     private const ALLOWED = [
-        'boost.blade.php' => [537, 970],
-        'docs/boost.blade.php' => [137, 482, 610],
-        'for-comedians.blade.php' => [695],
-        'for-musicians.blade.php' => [694],
-        'for-nightclubs.blade.php' => [740],
-        'for-talent.blade.php' => [364],
-        'gift-cards.blade.php' => [672, 674],
+        'boost.blade.php' => [
+            "'Three landed', '\$50'",
+            'es-launch-ink font-bold">$15.00',
+        ],
+        'docs/boost.blade.php' => [
+            'The budget starts at the site minimum, $5 by default',
+            '<td>$50</td>',
+            'dark:text-white">$15.00</span>',
+        ],
+        'for-comedians.blade.php' => ['Front Row + Meet & Greet'],
+        'for-musicians.blade.php' => ['<span>GA TICKET x2</span>'],
+        'for-nightclubs.blade.php' => ["['Before 11pm', '\$10'"],
+        'for-talent.blade.php' => ['<span class="font-bold">$15.00</span>'],
+        'gift-cards.blade.php' => ["['\$50', false]", "['\$150', false]"],
         // /saas sells running your OWN platform on Event Schedule, so its Free/$29/$99 tier
         // mockups and "+$29/mo after trial" badges are the READER's pricing, not ours. They
         // stay hardcoded even though $29 collides with the Enterprise price.
-        'saas.blade.php' => [641, 884, 932, 1110, 1121, 1220, 1238],
+        'saas.blade.php' => [
+            "['Free', '\$0'], ['Pro', '\$29'], ['Ent', '\$99']",
+            '<span>$5</span><span>$199</span>',
+            "'acme upgraded to Pro', '+\$29/mo'",
+            "'Headliner Showcase'",
+            'the $22/$15 ticket',
+            "['Free', '\$0', 0], ['Pro', '\$29', 1]",
+            '$29/mo after trial',
+        ],
     ];
+
+    /** Price literals that are ours, across every generation. Retired ones must not come back. */
+    private const PLAN_AMOUNTS = '5|9|12|15|19|29|50|90|150|290';
 
     private function marketingViews(): array
     {
         return File::allFiles(resource_path('views/marketing'));
+    }
+
+    private function isAllowed(string $relative, string $line): bool
+    {
+        foreach (self::ALLOWED[$relative] ?? [] as $snippet) {
+            if (str_contains($line, $snippet)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function test_no_hardcoded_plan_price_in_marketing_prose(): void
@@ -53,7 +88,7 @@ class MarketingPriceTest extends TestCase
             foreach ($lines as $index => $line) {
                 $number = $index + 1;
 
-                if (in_array($number, self::ALLOWED[$relative] ?? [], true)) {
+                if ($this->isAllowed($relative, $line)) {
                     continue;
                 }
 
@@ -61,7 +96,7 @@ class MarketingPriceTest extends TestCase
                 // "$18 on the door" in a sample ticket table is fine and must stay.
                 // '~' delimiter, not '/': PLAN_WORDS contains "/mo", which would close a
                 // '/'-delimited pattern and turn the rest into invalid modifiers.
-                if (preg_match('~\$(5|9|12|15|19|29|50|90|150|290)\b~', $line)
+                if (preg_match('~\$('.self::PLAN_AMOUNTS.')\b~', $line)
                     && preg_match('~'.self::PLAN_WORDS.'~i', $line)) {
                     $offenders[] = "{$relative}:{$number}: ".trim(mb_substr($line, 0, 120));
                 }
@@ -121,6 +156,11 @@ class MarketingPriceTest extends TestCase
             '$50', '$59', '$99', '$1.79', '$5,999', '$0.28',
             'Canva Pro costs $15/month', 'From $15/mo (Pro)',
             '$5 to $15/month', '$5 to $15/mo',
+            // Linktree Pro and AddEvent happen to sit exactly on our Pro and Enterprise prices,
+            // so these three read as ours to any bare pattern. Exempted by full phrase, not by
+            // the number, so an actual hardcoded $9 or $29 of our own still fails.
+            'Linktree Pro costs $9/month', 'From $9/mo (Pro)',
+            'calendar buttons at $29/mo',
         ];
 
         foreach (explode("\n", File::get($path)) as $index => $line) {
@@ -136,7 +176,10 @@ class MarketingPriceTest extends TestCase
             // known competitor phrases before looking for a literal of our own.
             $stripped = str_replace($competitorPrices, '', $line);
 
-            if (preg_match('~\$(5|15|50|150)\b~', $stripped)) {
+            // Both generations. The retired 5/15/50/150 must not return, and the current
+            // 9/29/90/290 must not be written down either - that is the literal the NEXT price
+            // change would leave behind, and the old regex could not see it.
+            if (preg_match('~\$('.self::PLAN_AMOUNTS.')\b~', $stripped)) {
                 $offenders[] = "MarketingController.php:{$number}: ".trim(mb_substr($line, 0, 120));
             }
         }

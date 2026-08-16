@@ -1297,7 +1297,7 @@ return [
     'billed_yearly' => 'Jaarlijks gefactureerd',
     'month' => 'maand',
     'year' => 'jaar',
-    'save_17_percent' => 'Bespaar 17%',
+    'save_percent' => 'Bespaar :percent%',
     'payment_details' => 'Betalingsgegevens',
     'card_holder_name' => 'Naam Kaarthouder',
     'card_details' => 'Kaartgegevens',

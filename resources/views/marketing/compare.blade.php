@@ -988,7 +988,9 @@
             if (!ticketsEl || !priceEl) return;
 
             var panel = ticketsEl.closest('[data-pro-monthly]');
-            var proMonthly = panel ? (parseFloat(panel.getAttribute('data-pro-monthly')) || 5) : 5;
+            // The fallback is rendered from config rather than written as a literal. A hardcoded
+            // number here survived the price raise and kept quoting the old $5.
+            var proMonthly = parseFloat(panel && panel.getAttribute('data-pro-monthly')) || {{ $proMonthly }};
 
             var out = {
                 es: document.getElementById('fc-es'),

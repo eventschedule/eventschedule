@@ -1368,7 +1368,7 @@ return [
     'billed_yearly' => 'Оплата ежегодно',
     'month' => 'месяц',
     'year' => 'год',
-    'save_17_percent' => 'Сэкономьте 17%',
+    'save_percent' => 'Сэкономьте :percent%',
     'payment_details' => 'Детали оплаты',
     'card_holder_name' => 'Имя владельца карты',
     'card_details' => 'Детали карты',
