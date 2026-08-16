@@ -4,6 +4,14 @@
     $imageUrl = $event->getImageUrl();
     $isHidden = $event->is_hidden_from_discovery;
     $isAdmin = auth()->check() && auth()->user()->isAdmin();
+    // Same timezone resolution as getShortDateRangeDisplay(), so every check
+    // below agrees with the date the card prints.
+    $cardStart = $event->starts_at ? $event->getStartDateTime(null, true) : null;
+    // The browse query keeps a recurring event on days_of_week after its anchor
+    // date has passed; a stale past date under an "Upcoming events" heading
+    // reads as a lie, so those cards show the Recurring label instead.
+    $cardShowsRecurring = $event->days_of_week && (! $cardStart || $cardStart->copy()->endOfDay()->isPast());
+    $cardStartsToday = $cardStart && ! $cardShowsRecurring && ! $event->days_of_week && ! $event->is_multi_day && $cardStart->isToday();
 @endphp
 @if($eventUrl)
 <div class="group relative flex flex-col bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 hover:shadow-lg hover:border-blue-400/50 dark:hover:border-blue-400/30 transition-all overflow-hidden {{ $isHidden ? 'opacity-60' : '' }}">
@@ -23,12 +31,23 @@
     <div class="p-5 flex flex-col flex-1">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3 line-clamp-2">{{ $event->name }}</h3>
         <div class="mt-auto flex flex-col gap-2">
-            @if($event->starts_at)
+            @if($cardStart && ! $cardShowsRecurring)
                 <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                     <svg aria-hidden="true" class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    <span class="truncate">{{ $event->getShortDateRangeDisplay('M j, Y g:ia') }}</span>
+                    @if($cardStartsToday)
+                        {{-- A date-only starts_at (length 10) has no real time; "12:00am" would be noise. --}}
+                        <span class="truncate">
+                            @if(strlen($event->starts_at) === 10)
+                                Today
+                            @else
+                                Today &middot; {{ $cardStart->format('g:ia') }}
+                            @endif
+                        </span>
+                    @else
+                        <span class="truncate">{{ $event->getShortDateRangeDisplay('M j, Y g:ia') }}</span>
+                    @endif
                 </div>
             @elseif($event->days_of_week)
                 <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">

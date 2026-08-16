@@ -90,6 +90,29 @@ class EventSaveTicketsCharacterizationTest extends TestCase
         $this->assertDatabaseHas('tickets', ['id' => $drop->id, 'is_deleted' => 1]);
     }
 
+    /**
+     * A blank price box makes the ticket free, silently - it never errors and never
+     * keeps the old price. Worth pinning because the AP form used to blank that box on
+     * its own (locale-formatted value in an input[type=number]), so an organizer who
+     * saved without noticing gave their tickets away. See EventEditTicketPriceTest.
+     */
+    public function test_blank_price_makes_the_ticket_free_rather_than_erroring(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent');
+        $event = $this->createEvent($role, ['tickets_enabled' => true]);
+        $ticket = $this->createTicket($event, ['type' => 'General', 'price' => 25, 'quantity' => 100]);
+
+        $this->putUpdateEvent($owner, $role, $event, [
+            'tickets_enabled' => '1',
+            'tickets' => [
+                ['id' => $ticket->id, 'type' => 'General', 'quantity' => '100', 'price' => ''],
+            ],
+        ])->assertRedirect();
+
+        $this->assertNull($ticket->fresh()->price);
+    }
+
     public function test_disabling_tickets_soft_deletes_all_tickets(): void
     {
         $owner = $this->createOwner();

@@ -5224,17 +5224,12 @@
           sales_end_at_date: ticket.sales_end_at ? ticket.sales_end_at.substring(0, 10) : '',
           sales_end_at_time: ticket.sales_end_at ? ticket.sales_end_at.substring(11, 16) : '',
 
-          /*
-          price: new Intl.NumberFormat('{{ app()->getLocale() }}', {
-            style: 'currency',
-            currency: '{{ $event->ticket_currency_code ?? "USD" }}'
-          }).format(ticket.price).toString().replace(/[^\d.,]/g, '')
-          */
-         price: new Intl.NumberFormat('{{ app()->getLocale() }}', {
-            style: 'decimal',
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-          }).format(ticket.price)
+          // Raw value, never Intl.NumberFormat: the input below is type="number", and a
+          // locale-formatted string ("25,00", "1,500.00") is not a valid floating-point
+          // number, so the browser's value sanitization blanks the field - on load and
+          // again on every re-render. parseFloat also drops the decimal(13,3) trailing
+          // zeros MySQL returns. Same shape as the add-on prices further down.
+          price: (ticket.price === null || ticket.price === '') ? null : parseFloat(ticket.price)
         })),
         ticketUidCounter: @json(max(1, ($event->tickets ?? collect())->count())),
         eventCustomFields: @json($event->custom_fields ?? []),

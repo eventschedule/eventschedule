@@ -224,4 +224,24 @@ return [
 
     'max_sponsors' => 50,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Maximum Tickets Per Order
+    |--------------------------------------------------------------------------
+    |
+    | How long the guest quantity dropdown gets when a ticket has no "Max Per
+    | Order" of its own. A convenience bound on the picker, not a purchase
+    | limit: checkout only enforces the ticket's own max_per_order and its
+    | remaining stock. Read by Ticket::toData() and by the guest ticket form.
+    |
+    | ?: rather than a second argument, and clamped: env() returns '' for a key
+    | that is present but empty, so a default argument never fires and (int) ''
+    | would be 0 - which reads through to "Sold Out" on every ticket of every
+    | event. The upper bound keeps a fat-fingered value from rendering tens of
+    | thousands of <option> nodes per row.
+    |
+    */
+
+    'max_tickets_per_order' => min(100, max(1, (int) (env('MAX_TICKETS_PER_ORDER') ?: 20))),
+
 ];

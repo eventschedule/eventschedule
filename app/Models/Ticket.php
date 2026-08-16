@@ -380,8 +380,16 @@ class Ticket extends Model
 
         $sold = $this->soldCountFor($date);
 
-        $perOrderCap = $this->max_per_order ?: 20;
+        // ?: 20 as well as the clamp in config/app.php: an install that caches its config
+        // and upgrades without clearing it resolves the new key to null, and a null cap
+        // reads through to "Sold Out" on every ticket of every event.
+        $perOrderCap = $this->max_per_order ?: (config('app.max_tickets_per_order') ?: 20);
 
+        // This is the bound for THIS row only. The shared per-occurrence house is passed to
+        // the guest form separately (Event::seatsRemainingForSale) - deriving it from any one
+        // ticket's number here is what let a single ticket's max_per_order become the whole
+        // event's ceiling in combined mode.
+        //
         // Passes and add-ons use only their own pool. A regular seat ticket is bounded
         // by both its own pool AND the shared per-occurrence house (which subtracts pass
         // advance-bookings): for combined mode the house is always the tighter bound, for

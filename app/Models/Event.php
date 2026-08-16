@@ -2747,6 +2747,19 @@ class Event extends Model
         return $this->tickets->reject(fn ($ticket) => $ticket->is_pass)->values();
     }
 
+    /**
+     * Whether every seat ticket draws on one shared pool of the same size - the
+     * precondition for combined mode meaning anything.
+     *
+     * EVERY seat ticket must carry the same positive quantity. This used to ignore the
+     * unlimited ones, so an event with [unlimited, 40] counted as "combined" and nothing
+     * downstream agreed what that meant: occurrenceSeatsRemaining() reported no ceiling
+     * (so the guest picker was unbounded), while TicketController capped the whole order
+     * at 40 and counted the unlimited ticket's sales against that 40 - once it had sold
+     * 40, the limited ticket was rejected forever. Matching the admin form's own
+     * hasSameTicketQuantities (event/edit.blade.php), which has always been this strict,
+     * makes such an event plainly individual instead.
+     */
     public function hasSameTicketQuantities()
     {
         $tickets = $this->seatTickets();
@@ -2754,11 +2767,9 @@ class Event extends Model
             return false;
         }
 
-        $quantities = $tickets->pluck('quantity')->filter(function ($qty) {
-            return $qty > 0;
-        })->unique();
+        $quantities = $tickets->pluck('quantity')->map(fn ($qty) => (int) $qty)->unique();
 
-        return $quantities->count() === 1;
+        return $quantities->count() === 1 && $quantities->first() > 0;
     }
 
     public function getSameTicketQuantity()
@@ -2767,7 +2778,12 @@ class Event extends Model
             return null;
         }
 
-        return $this->seatTickets()->first()->quantity;
+        // The one distinct positive quantity hasSameTicketQuantities() just validated.
+        // Belt and braces now that the predicate is strict: first()->quantity would be
+        // fine, but this cannot return the null of an unlimited ticket even if the
+        // predicate is ever loosened again, and a null here reaches the checkout guards
+        // as a capacity of zero.
+        return $this->seatTickets()->pluck('quantity')->first(fn ($qty) => $qty > 0);
     }
 
     public function getTotalTicketQuantity()
@@ -2809,6 +2825,18 @@ class Event extends Model
         $regularSold = $seatTickets->sum(fn ($t) => $t->soldCountFor($date));
 
         return max(0, $capacity - $regularSold - $this->passReservedSeats($date));
+    }
+
+    /**
+     * Seats remaining for the occurrence the ticket form is selling. Resolves a
+     * missing date the same way TicketController::assertLegTicketsAvailable() does,
+     * so the form and the guard it will be checked against can never disagree - a
+     * one-time event page reaches the form with no date, and occurrenceSeatsRemaining()
+     * would then report "unlimited" and drop the shared-pool bound. Null = unlimited.
+     */
+    public function seatsRemainingForSale(?string $date): ?int
+    {
+        return $this->occurrenceSeatsRemaining($date ?: $this->saleEventDateFromStartsAt());
     }
 
     /**

@@ -1742,6 +1742,10 @@ class EventRepo
                     'pass_admits_per_event' => $passAdmitsPerEvent,
                 ];
 
+                // A blank price field posts '' (ConvertEmptyStringsToNull normally turns that
+                // into null, but the decimal column must never see '' if that ever changes).
+                $ticketPrice = ($data['price'] ?? '') === '' ? null : $data['price'];
+
                 if (! empty($data['id'])) {
                     $ticket = Ticket::find($data['id']);
                     // Guard before dereferencing: a bogus id used to 500 mid-save, after the event
@@ -1752,7 +1756,7 @@ class EventRepo
                             'type' => $data['type'] ?? null,
                             'quantity' => $data['quantity'] ?? null,
                             'max_per_order' => $maxPerOrder,
-                            'price' => $data['price'] ?? null,
+                            'price' => $ticketPrice,
                             'description' => $data['description'] ?? null,
                             'sales_start_at' => $salesStartAt,
                             'sales_end_at' => $salesEndAt,
@@ -1766,7 +1770,7 @@ class EventRepo
                         'type' => $data['type'] ?? null,
                         'quantity' => $data['quantity'] ?? null,
                         'max_per_order' => $maxPerOrder,
-                        'price' => $data['price'] ?? null,
+                        'price' => $ticketPrice,
                         'description' => $data['description'] ?? null,
                         'sales_start_at' => $salesStartAt,
                         'sales_end_at' => $salesEndAt,

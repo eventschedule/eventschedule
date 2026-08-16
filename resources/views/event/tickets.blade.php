@@ -100,7 +100,13 @@
                     requirePhone: @json((bool) $event->require_phone),
                     countryCodePhone: @json((bool) $event->country_code_phone),
                     password: @json(old('password', '')),
-                    totalTicketsMode: @json($event->total_tickets_mode ?? 'individual'),
+                    {{-- Seats left in the shared per-occurrence house, from the same source
+                         of truth the checkout guard reads (it applies the same bound in
+                         every mode - combined via the per-ticket cap, otherwise via the
+                         array_sum check). Null = no ceiling. Deriving this from any one
+                         ticket's own number is what let a single ticket's max_per_order
+                         become the whole event's ceiling. --}}
+                    sharedSeatsRemaining: @json($event->seatsRemainingForSale($date ?? request()->date)),
                     turnstileEnabled: @json(\App\Utils\TurnstileUtils::isActiveForRequest()),
                     turnstileSiteKey: @json(\App\Utils\TurnstileUtils::getSiteKey()),
                     turnstileToken: '',
@@ -382,24 +388,8 @@
                 hasEventCustomFields() {
                     return this.eventCustomFields && Object.keys(this.eventCustomFields).length > 0;
                 },
-                isCombinedMode() {
-                    return this.totalTicketsMode === 'combined';
-                },
                 totalSelectedTickets() {
                     return this.tickets.reduce((total, ticket) => total + ticket.selectedQty, 0);
-                },
-                totalAvailableTickets() {
-                    if (this.isCombinedMode) {
-                        // In combined mode, all tickets have the same quantity
-                        return this.tickets[0]?.quantity || 0;
-                    }
-                    return this.tickets.reduce((total, ticket) => total + ticket.quantity, 0);
-                },
-                remainingTickets() {
-                    if (this.isCombinedMode) {
-                        return this.totalAvailableTickets - this.totalSelectedTickets;
-                    }
-                    return null;
                 },
                 ticketSelectionKey() {
                     return this.tickets.map(t => t.id + ':' + t.selectedQty).join(',');
@@ -509,22 +499,36 @@
                     history.replaceState(null, '', url);
                     this.isSubmitting = true;
                 },
+                // Two bounds, kept apart. ticket.quantity is this row's own limit (its stock,
+                // already capped by its own max per order); sharedSeatsRemaining is the house
+                // the rows draw from together. Reading one row's number as the house is what
+                // let a single "Max Per Order 2" cap every other ticket type.
+                //
+                // The house applies in every mode, matching the server: combined mode caps
+                // the order at the shared quantity (TicketController), and every other mode
+                // gets the array_sum check against occurrenceSeatsRemaining(). It only bites
+                // once pass advance-bookings hold seats - otherwise the per-row limits
+                // already sum to exactly the house.
+                //
+                // Always returns a finite number: the dropdown iterates over it.
                 getAvailableQuantity(ticket) {
-                    const perOrderCap = ticket.max_per_order && ticket.max_per_order > 0 ? ticket.max_per_order : Infinity;
-
-                    if (ticket.is_addon || !this.isCombinedMode) {
-                        return Math.min(ticket.quantity, perOrderCap);
+                    // Passes and add-ons draw on their own pool, never the house, exactly as
+                    // TicketController::assertLegTicketsAvailable() has it.
+                    if (ticket.is_addon || ticket.is_pass || this.sharedSeatsRemaining === null) {
+                        return Math.max(0, ticket.quantity);
                     }
 
-                    // In combined mode, calculate available based on other selections
                     const otherSelected = this.tickets
-                        .filter(t => t.id !== ticket.id)
+                        .filter(t => t.id !== ticket.id && !t.is_pass)
                         .reduce((total, t) => total + t.selectedQty, 0);
 
-                    return Math.min(perOrderCap, Math.max(0, this.totalAvailableTickets - otherSelected));
+                    return Math.max(0, Math.min(ticket.quantity, this.sharedSeatsRemaining - otherSelected));
                 },
                 updateTicketQuantities() {
-                    if (this.isCombinedMode) {
+                    // Only the shared house makes one row's availability depend on another's
+                    // selection, so there is nothing to re-clamp without it. Called from a
+                    // deep watcher on tickets, so it stays a no-op for the common event.
+                    if (this.sharedSeatsRemaining !== null) {
                         this.tickets.forEach(ticket => {
                             const available = this.getAvailableQuantity(ticket);
                             if (ticket.selectedQty > available) {
