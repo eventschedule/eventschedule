@@ -192,6 +192,15 @@ abstract class PaymentGatewayDriver
     }
 
     /**
+     * An already-translated sentence shown above the credentials form, or null. Typically where to
+     * find these values in the gateway's own dashboard.
+     */
+    public function credentialHelp(): ?string
+    {
+        return null;
+    }
+
+    /**
      * Persist validated credentials. The default writes each declared field straight onto the owner,
      * which is all a form-based gateway needs; encryption is handled by the model's casts rather
      * than here, so a driver never sees ciphertext.
@@ -205,13 +214,28 @@ abstract class PaymentGatewayDriver
                 continue;
             }
 
+            $value = $input[$field->name];
+
             // A blank secret means "leave it alone", so an owner can correct a merchant id without
             // retyping a key they cannot read back. Same sentinel the Invoice Ninja form uses.
-            if ($field->isSecret() && ($input[$field->name] === null || $input[$field->name] === '')) {
+            if ($field->isSecret() && ($value === null || $value === '')) {
                 continue;
             }
 
-            $owner->{$field->name} = $input[$field->name];
+            // Multi-selects arrive as an array of checked values and are stored as a comma list, with
+            // empty meaning "no restriction" rather than "nothing allowed".
+            if ($field->type === 'multiselect') {
+                $value = implode(',', array_intersect(
+                    array_map('strval', (array) $value),
+                    array_keys($field->options),
+                ));
+            }
+
+            if ($field->type === 'toggle') {
+                $value = (bool) $value;
+            }
+
+            $owner->{$field->name} = $value;
         }
 
         $owner->save();

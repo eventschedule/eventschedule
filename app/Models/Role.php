@@ -1375,6 +1375,7 @@ class Role extends Model implements MustVerifyEmail
             'appointment',
             'appointments',
             'checkout',
+            'payments',
             'settings',
             'promo',
             'promotions',

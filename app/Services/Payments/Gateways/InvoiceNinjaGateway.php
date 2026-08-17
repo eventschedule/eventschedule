@@ -54,4 +54,12 @@ class InvoiceNinjaGateway extends PaymentGatewayDriver
         // as a silent side effect of this refactor.
         return 'https://app.invoicing.co/#/invoices/'.$reference.'/edit';
     }
+
+    /**
+     * Custom UI: connecting is not a credentials form here.
+     */
+    public function settingsView(): ?string
+    {
+        return 'profile.partials.payments.invoiceninja';
+    }
 }

@@ -34,6 +34,8 @@ use App\Http\Controllers\MicrosoftCalendarController;
 use App\Http\Controllers\MicrosoftCalendarWebhookController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\NewsletterTrackingController;
+use App\Http\Controllers\PaymentGatewayController;
+use App\Http\Controllers\PaymentWebhookController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PromoCodeController;
 use App\Http\Controllers\PromotionController;
@@ -280,6 +282,26 @@ Route::post('/invoiceninja/webhook/{secret?}', [InvoiceNinjaController::class, '
 Route::post('/invoiceninja/purchase-webhook/{sale}', [InvoiceNinjaController::class, 'purchaseWebhook'])->name('invoiceninja.purchase_webhook')->middleware('throttle:60,1');
 Route::post('/invoiceninja/event-purchase-webhook/{event}', [InvoiceNinjaController::class, 'eventPurchaseWebhook'])->name('invoiceninja.event_purchase_webhook')->middleware('throttle:60,1');
 
+// Generic payment gateway endpoints (no auth required).
+//
+// One set of routes for every gateway, present and future: the {gateway} segment selects the driver,
+// so adding a gateway needs no route, no controller and no CSRF exemption of its own. The four
+// bespoke webhook endpoints above predate this and keep their URLs, because those are registered in
+// external dashboards and in live Invoice Ninja installs - repointing them would silently stop real
+// sales from settling.
+//
+// Domain-less on purpose. A notify_url is generated at checkout and handed to the provider, so it has
+// to keep working no matter which host the buyer arrived on. Registered before the selfhost
+// /{subdomain}/... catch-alls further down, and 'payments' is a reserved subdomain, so neither mode
+// can shadow it.
+Route::post('/payments/{gateway}/webhook/{sale_id?}', [PaymentWebhookController::class, 'handle'])
+    ->name('payments.webhook')->middleware('throttle:120,1');
+// GET and POST both: most gateways bring the buyer back with a redirect, some post the form back.
+Route::match(['get', 'post'], '/payments/{gateway}/return/{sale_id}', [PaymentGatewayController::class, 'handleReturn'])
+    ->name('payments.return')->middleware('throttle:100,1');
+Route::match(['get', 'post'], '/payments/{gateway}/cancel/{sale_id}', [PaymentGatewayController::class, 'handleCancel'])
+    ->name('payments.cancel')->middleware('throttle:100,1');
+
 // Google Calendar webhook routes (no auth required)
 Route::get('/google-calendar/webhook', [GoogleCalendarWebhookController::class, 'verify'])->name('google.calendar.webhook.verify')->middleware('throttle:10,1');
 Route::post('/google-calendar/webhook', [GoogleCalendarWebhookController::class, 'handle'])->name('google.calendar.webhook.handle')->middleware('throttle:60,1');
@@ -479,6 +501,12 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
 
     Route::get('/stripe/link', [StripeController::class, 'link'])->name('stripe.link');
     Route::post('/stripe/unlink', [StripeController::class, 'unlink'])->name('stripe.unlink');
+
+    // Generic connect/disconnect for any gateway whose settings are a plain credentials form. Stripe
+    // (OAuth) and Invoice Ninja (validate, then register a webhook) keep their own routes above,
+    // because their connect flows are not form submissions.
+    Route::post('/payments/{gateway}/connect', [PaymentGatewayController::class, 'connect'])->name('payments.connect')->middleware('throttle:10,1');
+    Route::post('/payments/{gateway}/disconnect', [PaymentGatewayController::class, 'disconnect'])->name('payments.disconnect')->middleware('throttle:10,1');
     Route::get('/stripe/complete', [StripeController::class, 'complete'])->name('stripe.complete');
     Route::post('/invoiceninja/unlink', [InvoiceNinjaController::class, 'unlink'])->name('invoiceninja.unlink');
     Route::patch('/settings/invoiceninja-mode', [ProfileController::class, 'updateInvoiceninjaMode'])->name('profile.update_invoiceninja_mode');

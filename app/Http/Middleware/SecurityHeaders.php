@@ -43,6 +43,10 @@ class SecurityHeaders
             'event.rsvp',                // RSVP POST
             'payment_url.success',       // Payment URL success
             'payment_url.cancel',        // Payment URL cancel
+            // Every gateway's return and cancel landings share these two route names, so this covers
+            // any gateway added later rather than needing a new entry each time.
+            'payments.return',
+            'payments.cancel',
         ];
         $currentRouteName = $request->route()?->getName();
         $isEmbeddable = $request->has('embed')

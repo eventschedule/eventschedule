@@ -47,6 +47,15 @@ return Application::configure(basePath: dirname(__DIR__))
             'invoiceninja/webhook/*',
             'invoiceninja/purchase-webhook/*',
             'invoiceninja/event-purchase-webhook/*',
+            // One exemption covering every gateway, present and future. The return/cancel paths are
+            // here too because a gateway that posts the buyer back cannot carry our CSRF token; both
+            // handlers verify the sale out of the signed URL rather than trusting the request.
+            // Both shapes: the sale segment is optional, for gateways whose callback is registered
+            // once per merchant account rather than per payment.
+            'payments/*/webhook',
+            'payments/*/webhook/*',
+            'payments/*/return/*',
+            'payments/*/cancel/*',
             'test_database',
             'nl/u/*',
             'webhooks/meta',

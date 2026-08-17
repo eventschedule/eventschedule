@@ -33,4 +33,12 @@ class PaymentUrlGateway extends PaymentGatewayDriver
     {
         return (bool) $owner?->payment_url;
     }
+
+    /**
+     * Custom UI: connecting is not a credentials form here.
+     */
+    public function settingsView(): ?string
+    {
+        return 'profile.partials.payments.payment-url';
+    }
 }

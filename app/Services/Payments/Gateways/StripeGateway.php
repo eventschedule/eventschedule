@@ -73,4 +73,12 @@ class StripeGateway extends PaymentGatewayDriver
 
         return 'https://dashboard.stripe.com/payments/'.$sale->transaction_reference;
     }
+
+    /**
+     * Custom UI: connecting is not a credentials form here.
+     */
+    public function settingsView(): ?string
+    {
+        return 'profile.partials.payments.stripe';
+    }
 }

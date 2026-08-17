@@ -203,6 +203,24 @@ class PaymentGatewayManager
     }
 
     /**
+     * The gateways that have something for an owner to configure, in registry order.
+     *
+     * Drives both the tab strip and the tab bodies on the payment-methods settings section, so a new
+     * gateway gets a tab by existing rather than by having one added to a hardcoded list. Cash is
+     * excluded because it declares neither a custom view nor any credential fields.
+     *
+     * @return array<string, PaymentGatewayDriver>
+     */
+    public function withSettings(): array
+    {
+        return array_filter(
+            $this->all(),
+            fn (PaymentGatewayDriver $driver) => $driver->settingsView() !== null
+                || $driver->credentialFields() !== [],
+        );
+    }
+
+    /**
      * The methods whose unpaid sales must never be swept, for use with whereNotIn().
      *
      * An empty result is safe: Laravel compiles whereNotIn(col, []) to `1 = 1`, which excludes
