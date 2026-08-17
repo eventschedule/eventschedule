@@ -43,14 +43,17 @@ class PayfastSignature
         $fields = [];
 
         foreach (self::FIELD_ORDER as $key) {
-            // empty() and not isset(): Payfast excludes blank values from the signature, and an
-            // included-but-empty field produces a different hash than an omitted one.
-            if (! empty($data[$key])) {
+            // Payfast excludes BLANK values from the signature - and blank means '' exactly, which is
+            // what its own generator tests for. empty() would additionally drop the string "0", so a
+            // buyer whose name is literally 0 would have name_first omitted from our hash while the
+            // form still posted it, and Payfast would reject every such payment as a signature
+            // mismatch.
+            if (($data[$key] ?? '') !== '' && $data[$key] !== null) {
                 $fields[$key] = $data[$key];
             }
         }
 
-        if (! empty($passphrase)) {
+        if ($passphrase !== null && $passphrase !== '') {
             $fields['passphrase'] = $passphrase;
         }
 
@@ -80,8 +83,9 @@ class PayfastSignature
         $query = http_build_query($data);
 
         // Appended as a suffix here rather than as a field, because the fields must keep the order
-        // they arrived in and http_build_query() has already run over them.
-        if (! empty($passphrase)) {
+        // they arrived in and http_build_query() has already run over them. Same '' rather than
+        // empty() reasoning as sign(): a passphrase of "0" is legal and must still be applied.
+        if ($passphrase !== null && $passphrase !== '') {
             $query .= '&passphrase='.urlencode($passphrase);
         }
 

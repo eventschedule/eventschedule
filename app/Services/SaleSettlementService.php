@@ -66,7 +66,10 @@ class SaleSettlementService
         ?string $usageMetric = null,
         bool $onlyWhenUnpaid = false,
     ): string {
-        $outcome = DB::transaction(function () use ($sale, $reference, $receivedAmount, $context, $usageMetric, $onlyWhenUnpaid) {
+        /** @var list<array{0: Sale, 1: float}> $conversions */
+        $conversions = [];
+
+        $outcome = DB::transaction(function () use ($sale, $reference, $receivedAmount, $context, $onlyWhenUnpaid, &$conversions) {
             $locked = Sale::lockForUpdate()->find($sale->id);
 
             if (! $locked) {
@@ -166,28 +169,45 @@ class SaleSettlementService
 
             $this->incrementSaleAnalytics($legs);
 
-            // Attributed per event for the same reason as analytics. Read after the save so these
-            // are the post-cascade statuses, and skipped for a leg that was already paid, which
-            // reported its conversion when it was.
+            // Collected here, reported after the commit. Read after the save so these are the
+            // post-cascade statuses, and skipped for a leg that was already paid, which reported its
+            // conversion when it was.
             foreach ($locked->orderLegs() as $leg) {
                 if ($leg->status !== 'paid' || ($wasPaid[$leg->id] ?? false)) {
                     continue;
                 }
 
-                app()->make(MetaAdsService::class)->sendSaleConversion($leg, (float) $leg->legTotalPayment());
-            }
-
-            if ($usageMetric) {
-                UsageTrackingService::track($usageMetric);
+                $conversions[] = [$leg, (float) $leg->legTotalPayment()];
             }
 
             return 'paid';
         });
 
         if ($outcome === 'paid') {
-            // Outside the transaction: a webhook delivery or an email cannot be rolled back, so
-            // announcing a payment the transaction then abandons is unrecoverable.
+            // Everything below runs AFTER the commit, and none of it may run before.
+            //
+            // Emails and webhooks because they cannot be unsent: announcing a payment the transaction
+            // then abandons is unrecoverable.
+            //
+            // The Meta conversion and the usage counter because of the opposite hazard - they can
+            // break the transaction. MetaAdsService does a synchronous Http::timeout(30) call, which
+            // held the sale's row lock open for up to half a minute per leg, long enough for the
+            // gateway's own webhook timeout to fire and retry into the lock. And
+            // UsageTrackingService::track() swallows \Exception, while CounterUtils deliberately
+            // re-throws inside a transaction: a deadlock on the shared usage_daily counter row would
+            // be caught and discarded after MySQL had already rolled the whole settlement back,
+            // leaving settle() to report 'paid', email a ticket and fire sale.paid for a sale still
+            // sitting unpaid in the database - which ReleaseTickets would then expire, reselling the
+            // seats. Neither belongs anywhere near a transaction that owns money.
             $sale->refresh();
+
+            foreach ($conversions as [$leg, $amount]) {
+                app()->make(MetaAdsService::class)->sendSaleConversion($leg, $amount);
+            }
+
+            if ($usageMetric) {
+                UsageTrackingService::track($usageMetric);
+            }
 
             $this->dispatchSaleWebhookAcrossOrder('sale.paid', $sale);
 

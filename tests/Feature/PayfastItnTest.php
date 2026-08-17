@@ -180,21 +180,44 @@ class PayfastItnTest extends TestCase
         $this->assertSame('unpaid', $this->sale->fresh()->status);
     }
 
-    public function test_an_itn_from_an_unrecognised_source_is_rejected(): void
+    public function test_an_itn_from_an_unrecognised_source_still_settles(): void
     {
+        // THE production shape, and the reason this check is advisory rather than a gate.
+        //
+        // $request->ip() is only the buyer-facing address when Laravel trusts the upstream proxy, and
+        // config/trustedproxy.php trusts none unless IS_NEXUS is set. So on a selfhost install behind
+        // Cloudflare or Docker this is the proxy's address and can never match the published Payfast
+        // hosts. Rejecting on it took the buyer's money and issued no ticket, on every single payment,
+        // with nothing but a log line to show for it - and it could not be reproduced on the hosted
+        // install, which does set IS_NEXUS.
         config(['payments.payfast.itn_hosts' => ['203.0.113.7']]);
 
-        $this->postItn($this->itnBody())->assertStatus(403);
+        $this->postItn($this->itnBody())->assertNoContent();
 
-        $this->assertSame('unpaid', $this->sale->fresh()->status);
+        $this->assertSame('paid', $this->sale->fresh()->status);
     }
 
-    public function test_the_source_check_fails_closed_when_no_host_resolves(): void
+    public function test_a_failure_to_resolve_any_host_does_not_block_settlement(): void
     {
-        // A DNS blip must not turn the endpoint that marks sales paid into an open door.
+        // Same reasoning for a DNS blip. The endpoint is not left open by this: confirmsPayment()
+        // still has to get a VALID back from Payfast itself, which is strictly stronger than an
+        // address allowlist and is what the tests below pin.
         config(['payments.payfast.itn_hosts' => []]);
 
-        $this->postItn($this->itnBody())->assertStatus(403);
+        $this->postItn($this->itnBody())->assertNoContent();
+
+        $this->assertSame('paid', $this->sale->fresh()->status);
+    }
+
+    public function test_a_forged_itn_from_an_unrecognised_source_is_still_refused(): void
+    {
+        // The other half of demoting the address check: with the source no longer a gate, an attacker
+        // posting from anywhere must still be stopped by the checks that matter. Payfast declining to
+        // confirm the payload is the decisive one.
+        config(['payments.payfast.itn_hosts' => ['203.0.113.7']]);
+        $this->validationBody = 'INVALID';
+
+        $this->postItn($this->itnBody())->assertStatus(400);
 
         $this->assertSame('unpaid', $this->sale->fresh()->status);
     }

@@ -60,13 +60,19 @@ class PayfastGateway extends PaymentGatewayDriver
     }
 
     /**
-     * Both the merchant id and key are needed to post a checkout at all. The passphrase is optional
-     * at Payfast, but see credentialRules(): we require it, because without one the ITN signature
-     * check is worthless.
+     * All three are required before Payfast is offered as a payment method.
+     *
+     * The merchant id and key are needed to sign a checkout at all. The passphrase is optional at
+     * Payfast itself, but not here: without one the ITN signature is a plain MD5 anyone can
+     * reproduce, so an account missing it would accept notifications it cannot actually authenticate.
+     * Excluded here rather than only validated on save, so a half-configured account never reaches an
+     * event's payment dropdown.
      */
     public function isConfiguredFor(?User $owner): bool
     {
-        return (bool) ($owner?->payfast_merchant_id && $owner->payfast_merchant_key);
+        return (bool) ($owner?->payfast_merchant_id
+            && $owner->payfast_merchant_key
+            && $owner->payfast_passphrase);
     }
 
     /**
@@ -166,14 +172,32 @@ class PayfastGateway extends PaymentGatewayDriver
     {
         return [
             'payfast_merchant_id' => ['required', 'string', 'max:32'],
-            // Not `required`: blank means "keep the stored one", which is how an owner fixes a
-            // merchant id without retyping a secret they cannot read back.
-            'payfast_merchant_key' => ['nullable', 'string', 'max:64'],
-            'payfast_passphrase' => ['nullable', 'string', 'max:100'],
+            // Both secrets are "required unless one is already stored". Blank means "keep what is
+            // there", so an owner correcting a merchant id does not have to retype values they cannot
+            // read back - but a FIRST connect cannot leave them empty and save a half-configured
+            // account that isConfiguredFor() would then reject anyway.
+            //
+            // The passphrase in particular: Payfast treats it as optional, we do not. Without one the
+            // ITN signature is a plain MD5 of the payload that anyone can reproduce, so the check
+            // meant to prove a notification came from Payfast would prove nothing.
+            'payfast_merchant_key' => [$this->requiredUnlessStored('payfast_merchant_key'), 'string', 'max:64'],
+            'payfast_passphrase' => [$this->requiredUnlessStored('payfast_passphrase'), 'string', 'max:100'],
             'payfast_sandbox' => ['nullable', 'boolean'],
             'payfast_payment_types' => ['nullable', 'array'],
-            'payfast_payment_types.*' => ['string', 'in:'.implode(',', array_keys($this->paymentTypes()))],
+            // nullable: the form posts a blank sentinel entry so that unticking every box still
+            // sends the key, which is what lets an owner clear a restriction. It arrives as null
+            // (ConvertEmptyStringsToNull recurses) and saveCredentials' array_intersect drops it.
+            'payfast_payment_types.*' => ['nullable', 'string', 'in:'.implode(',', array_keys($this->paymentTypes()))],
         ];
+    }
+
+    /**
+     * 'required' on a first connect, 'nullable' once a value is stored - the blank-means-unchanged
+     * convention the credentials form uses for every secret.
+     */
+    private function requiredUnlessStored(string $field): string
+    {
+        return request()->user()?->{$field} ? 'nullable' : 'required';
     }
 
     public function credentialHelp(): ?string
@@ -250,6 +274,13 @@ class PayfastGateway extends PaymentGatewayDriver
             $fields['payment_method'] = $restrictTo;
         }
 
+        // Drop empties BEFORE signing, so the set posted by the view is exactly the set signed here.
+        // sign() skips empty values, while the view renders whatever it is given - so a field that
+        // was blank would go to Payfast unsigned and risk a signature mismatch. Not reachable today
+        // (name and email are required at checkout, and TrimStrings rejects whitespace-only input),
+        // but a signature should hold by construction rather than by luck.
+        $fields = array_filter($fields, fn ($value) => $value !== null && $value !== '');
+
         // Signed with the passphrase, which is then discarded. It must never reach the form: it is the
         // shared secret that makes an ITN signature meaningful, and the buyer's browser is not a place
         // to keep it.
@@ -321,13 +352,21 @@ class PayfastGateway extends PaymentGatewayDriver
 
         $client = new PayfastClient((bool) $owner->payfast_sandbox);
 
+        // Advisory, NOT a gate. $request->ip() is only the buyer-facing address when Laravel trusts
+        // the upstream proxy, and config/trustedproxy.php trusts none unless IS_NEXUS is set - so on
+        // a selfhost install behind Cloudflare, a host-level proxy or Docker this is the proxy's
+        // address and would never match. Rejecting on it meant every Payfast payment on those
+        // installs took the buyer's money and issued no ticket, silently, with only a log line.
+        //
+        // Nothing is really lost by demoting it. An IP allowlist is the weakest of the checks here
+        // and is entirely subsumed by confirmsPayment() below: nobody can make Payfast confirm a
+        // payment that did not happen, from any address. It is also a moving target - Payfast has
+        // added sending addresses that broke merchants relying on the published host list.
         if (! $client->isValidSourceIp($request->ip())) {
-            Log::warning('Payfast ITN from an unrecognised source address', [
+            Log::warning('Payfast ITN from an unrecognised source address - continuing, see confirmsPayment', [
                 'sale_id' => $sale->id,
                 'ip' => $request->ip(),
             ]);
-
-            return response('invalid source', 403);
         }
 
         if (! $client->confirmsPayment($payload)) {

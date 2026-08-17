@@ -40,6 +40,10 @@
                     // Stored as a comma list; empty means "offer everything the gateway offers".
                     $selected = array_filter(explode(',', (string) $user->{$field->name}));
                 @endphp
+                {{-- Unticking every box posts nothing at all, and saveCredentials() skips a field
+                     that is absent - so without this the owner could never clear a restriction they
+                     had set, and the help text promising otherwise would be a lie. --}}
+                <input type="hidden" name="{{ $field->name }}[]" value="">
                 <div class="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
                     @foreach ($field->options as $optionValue => $optionLabel)
                         <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">

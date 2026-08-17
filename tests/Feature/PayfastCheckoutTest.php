@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Sale;
+use App\Services\Payments\Payfast\PayfastSignature;
 use App\Services\Payments\PaymentGatewayManager;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
@@ -162,6 +163,71 @@ class PayfastCheckoutTest extends TestCase
         $this->assertLessThanOrEqual(100, mb_strlen(html_entity_decode($m[1], ENT_QUOTES)));
     }
 
+    public function test_every_posted_field_is_signed(): void
+    {
+        // The signature covers a fixed field list and skips empties, while the view renders whatever
+        // it is handed. If those two sets ever diverge Payfast rejects the payment, so pin that the
+        // posted set is exactly the signed set.
+        $owner = $this->connectedOwner();
+        $role = $this->createRole($owner);
+        $event = $this->payfastEvent($role);
+        $ticket = $this->createTicket($event, ['type' => 'General', 'price' => 150, 'quantity' => 50]);
+
+        $html = $this->checkout($role, $event, $ticket)->getContent();
+
+        preg_match_all('/name="([^"]+)" value="([^"]*)"/', $html, $matches, PREG_SET_ORDER);
+
+        $posted = [];
+        foreach ($matches as $match) {
+            $posted[$match[1]] = html_entity_decode($match[2], ENT_QUOTES);
+        }
+
+        $signature = $posted['signature'] ?? null;
+        unset($posted['signature']);
+
+        $this->assertNotNull($signature);
+
+        // No blank field may be posted: sign() would have skipped it while the form still sends it.
+        foreach ($posted as $name => $value) {
+            $this->assertNotSame('', $value, "posted field {$name} is blank and therefore unsigned");
+        }
+
+        $this->assertSame(
+            PayfastSignature::sign($posted, 'test-passphrase'),
+            $signature,
+            'the signature must cover exactly the fields the form posts',
+        );
+    }
+
+    public function test_an_individual_tickets_event_charges_the_group_total(): void
+    {
+        // Payfast does not disable individual tickets, so a Payfast sale can be a GROUP primary with
+        // guest rows hanging off it. The redirect must charge the whole group, and the ITN then
+        // reconciles against the same figure - if the two disagreed every such sale would land in
+        // amount_mismatch.
+        $owner = $this->connectedOwner();
+        $role = $this->createRole($owner);
+        $event = $this->payfastEvent($role, ['individual_tickets' => true]);
+        $ticket = $this->createTicket($event, ['type' => 'General', 'price' => 150, 'quantity' => 50]);
+
+        $this->post(route('event.checkout', ['subdomain' => $role->subdomain]), [
+            'event_id' => UrlUtils::encodeId($event->id),
+            'event_date' => Carbon::parse($event->starts_at)->format('Y-m-d'),
+            'name' => 'ZAR Buyer',
+            'email' => 'zar-buyer@gmail.com',
+            'tickets' => [UrlUtils::encodeId($ticket->id) => 2],
+            'guests' => [['name' => 'Second Attendee', 'email' => 'guest@gmail.com']],
+        ])->assertOk();
+
+        $primary = Sale::where('email', 'zar-buyer@gmail.com')->firstOrFail();
+
+        // The amount posted to Payfast is the group total, not the primary seat's own share.
+        $this->assertEqualsWithDelta(300.0, (float) $primary->groupTotalPayment(), 0.001);
+
+        $html = $this->checkout($role, $event, $ticket)->getContent();
+        $this->assertMatchesRegularExpression('/name="amount" value="\d+\.\d{2}"/', $html);
+    }
+
     public function test_payfast_is_only_offered_for_zar(): void
     {
         $owner = $this->connectedOwner();
@@ -193,6 +259,53 @@ class PayfastCheckoutTest extends TestCase
         $owner->forceFill(['payfast_merchant_id' => '10000100'])->save();
 
         $this->assertArrayNotHasKey('payfast', app(PaymentGatewayManager::class)->connectedFor($owner->fresh()));
+    }
+
+    public function test_an_owner_without_a_passphrase_is_not_offered_payfast(): void
+    {
+        // Payfast treats the passphrase as optional; we do not. Without one, verifyItn() appends
+        // nothing and the ITN signature degrades to a plain MD5 of the payload that anyone can
+        // reproduce - so the check meant to prove a notification came from Payfast proves nothing.
+        // Such an account must never reach an event's payment dropdown.
+        $owner = $this->createOwner();
+        $owner->forceFill([
+            'payfast_merchant_id' => '10000100',
+            'payfast_merchant_key' => '46f0cd694581a',
+            'payfast_passphrase' => null,
+        ])->save();
+
+        $manager = app(PaymentGatewayManager::class);
+
+        $this->assertArrayNotHasKey('payfast', $manager->connectedFor($owner->fresh()));
+        $this->assertArrayNotHasKey('payfast', $manager->availableFor($owner->fresh(), 'ZAR'));
+    }
+
+    public function test_a_first_connect_cannot_save_without_the_secrets(): void
+    {
+        $owner = $this->createOwner();
+
+        $this->actingAs($owner)
+            ->post('/payments/payfast/connect', ['payfast_merchant_id' => '10000100'])
+            ->assertSessionHasErrors(['payfast_merchant_key', 'payfast_passphrase']);
+
+        $this->assertNull($owner->fresh()->payfast_merchant_id);
+    }
+
+    public function test_a_reconnect_may_leave_the_stored_secrets_untouched(): void
+    {
+        // The blank-means-unchanged convention: an owner correcting a merchant id must not have to
+        // retype secrets the form never shows them.
+        $owner = $this->connectedOwner();
+
+        $this->actingAs($owner)
+            ->post('/payments/payfast/connect', ['payfast_merchant_id' => '10000999'])
+            ->assertSessionHasNoErrors();
+
+        $owner->refresh();
+
+        $this->assertSame('10000999', $owner->payfast_merchant_id);
+        $this->assertSame('46f0cd694581a', $owner->payfast_merchant_key);
+        $this->assertSame('test-passphrase', $owner->payfast_passphrase);
     }
 
     public function test_payfast_cannot_be_carted(): void
@@ -229,6 +342,75 @@ class PayfastCheckoutTest extends TestCase
 
         $this->checkout($role, $event, $ticket)
             ->assertSee('name="payment_method" value="cp"', escape: false);
+    }
+
+    public function test_a_payment_type_restriction_can_be_cleared(): void
+    {
+        // Unticking every box posts nothing for a checkbox group, and saveCredentials() skips a field
+        // that is absent - so without the blank sentinel the owner could never undo a restriction, and
+        // every checkout would keep pinning the type they had since removed. The help text promises
+        // that unticking everything hands the choice back to Payfast.
+        $owner = $this->connectedOwner(['payfast_payment_types' => 'cp']);
+        $this->createRole($owner);
+
+        // The form itself must carry the blank sentinel, or a browser with every box unticked posts
+        // nothing at all and the controller never sees the field. Posting the sentinel by hand below
+        // would test only the controller half and pass with the form broken.
+        $this->actingAs($owner)->get(route('profile.edit'))
+            ->assertSee('name="payfast_payment_types[]" value=""', escape: false);
+
+        $this->actingAs($owner)
+            ->post('/payments/payfast/connect', [
+                'payfast_merchant_id' => '10000100',
+                'payfast_payment_types' => [''],
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame('', (string) $owner->fresh()->payfast_payment_types);
+    }
+
+    public function test_a_buyer_whose_name_is_zero_still_gets_a_valid_signature(): void
+    {
+        // "0" is a legal name and passes `required`, but it is falsy. Skipping it with empty() would
+        // drop name_first from our hash while the form still posted it, and Payfast would reject
+        // every such payment as a signature mismatch.
+        $owner = $this->connectedOwner();
+        $role = $this->createRole($owner);
+        $event = $this->payfastEvent($role);
+        $ticket = $this->createTicket($event, ['type' => 'General', 'price' => 150, 'quantity' => 50]);
+
+        $html = $this->post(route('event.checkout', ['subdomain' => $role->subdomain]), [
+            'event_id' => UrlUtils::encodeId($event->id),
+            'event_date' => Carbon::parse($event->starts_at)->format('Y-m-d'),
+            'name' => '0',
+            'email' => 'zar-buyer@gmail.com',
+            'tickets' => [UrlUtils::encodeId($ticket->id) => 1],
+        ])->getContent();
+
+        preg_match_all('/name="([^"]+)" value="([^"]*)"/', $html, $matches, PREG_SET_ORDER);
+
+        $posted = [];
+        foreach ($matches as $match) {
+            $posted[$match[1]] = html_entity_decode($match[2], ENT_QUOTES);
+        }
+
+        $signature = $posted['signature'];
+        unset($posted['signature']);
+
+        $this->assertSame('0', $posted['name_first']);
+
+        // Asserting sign($posted) === $signature would prove nothing: both sides call the same
+        // function, so a field it wrongly skips is skipped identically in the expectation. Pin
+        // instead that name_first genuinely PARTICIPATES - drop it and the signature must change.
+        $withoutName = $posted;
+        unset($withoutName['name_first']);
+
+        $this->assertNotSame(
+            PayfastSignature::sign($withoutName, 'test-passphrase'),
+            $signature,
+            'name_first is posted, so it must be covered by the signature',
+        );
+        $this->assertSame(PayfastSignature::sign($posted, 'test-passphrase'), $signature);
     }
 
     public function test_several_selected_payment_types_leave_the_choice_to_payfast(): void
