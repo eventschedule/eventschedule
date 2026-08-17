@@ -209,67 +209,15 @@
             </div>
         </div>
 
-        {{-- Appearance picker styling. `.hidden` needs the compound selector to
-             beat the base rule's display:inline-flex - a bare .hidden ties on
-             specificity and would lose on source order. --}}
-        <style {!! nonce_attr() !!}>
-            .ap-theme-option {
-                display: inline-flex;
-                align-items: center;
-                gap: 0.5rem;
-                background: rgb(var(--ap-surface));
-                color: rgb(var(--ap-ink-2));
-            }
-            .ap-theme-option.hidden { display: none; }
-            .ap-theme-option:hover { background: rgb(var(--ap-surface-hover)); }
-            .ap-theme-option.active {
-                border-color: var(--brand-blue);
-                background: var(--brand-blue-a10);
-                color: var(--brand-blue);
-                font-weight: 600;
-            }
-            .ap-theme-chip {
-                display: inline-block;
-                width: 1.5rem;
-                height: 1rem;
-                border-radius: 4px;
-                border: 1px solid rgba(128, 128, 128, 0.35);
-                background: linear-gradient(135deg, var(--sw-bg) 0 50%, var(--sw-surface) 50% 100%);
-            }
-        </style>
-
         {{-- Appearance Tab.
-             Deliberately holds no named inputs: the theme is stored in
-             localStorage, per device, so nothing here belongs in the profile
-             POST. The buttons reuse the js-theme-* hooks, so the delegated
-             driver in layouts/navigation.blade.php picks them up for free. --}}
-        <div id="profile-tab-appearance" class="profile-tab-content hidden space-y-6">
-            <div>
-                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.theme') }}</h3>
-                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ __('messages.appearance_help') }}</p>
-                <div class="mt-3 flex flex-wrap gap-2" role="radiogroup" aria-label="{{ __('messages.theme') }}">
-                    @foreach (['light', 'dark', 'system'] as $mode)
-                        <button type="button" data-theme="{{ $mode }}"
-                            class="js-theme-mode-btn ap-theme-option rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-medium transition-all duration-200"
-                            role="radio" aria-checked="false">{{ __('messages.theme_' . $mode) }}</button>
-                    @endforeach
-                </div>
-            </div>
+             Deliberately holds no named inputs: the theme is stored in localStorage, per
+             device, so nothing here belongs in the profile POST.
 
-            <div>
-                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.palette') }}</h3>
-                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ __('messages.palette_help') }}</p>
-                <div class="mt-3 flex flex-wrap gap-2" role="radiogroup" aria-label="{{ __('messages.palette') }}">
-                    @foreach (config('app.ap_palettes') as [$variant, $brightness, $swatchBg, $swatchSurface])
-                        <button type="button" data-variant="{{ $variant }}" data-brightness="{{ $brightness }}"
-                            class="js-theme-variant-btn ap-theme-option hidden items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-medium transition-all duration-200"
-                            role="radio" aria-checked="false">
-                            <span class="ap-theme-chip" style="--sw-bg: {{ $swatchBg }}; --sw-surface: {{ $swatchSurface }}"></span>
-                            {{ __('messages.variant_' . $variant) }}
-                        </button>
-                    @endforeach
-                </div>
-            </div>
+             The picker is the same component the sidebar footer's theme popover renders, in
+             its surface tone - markup, styling and the JS driver all ship with it, so this tab
+             no longer depends on an unrelated layout partial happening to be on the page. --}}
+        <div id="profile-tab-appearance" class="profile-tab-content hidden max-w-md">
+            <x-theme-picker tone="surface" headings="full" />
         </div>
 
         <!-- Accessibility Tab -->

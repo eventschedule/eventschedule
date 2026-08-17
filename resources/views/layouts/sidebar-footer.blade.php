@@ -10,133 +10,102 @@
      This renders twice per page (mobile drawer + desktop rail), so there are no ids anywhere -
      every handler is scoped to the closest .sidebar-footer-actions. --}}
 @php
-    // Declared once: the popover's mode buttons and the strip's trigger glyph render the same
-    // three icons.
-    $themeModeIcons = [
-        'light' => 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z',
-        'dark' => 'M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z',
-        'system' => 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
-    ];
+    // The trigger glyph below renders all three modes and hides two. Same source as the icons
+    // above each mode in components/theme-picker.blade.php, so the two cannot drift.
+    $themeModeIcons = config('app.ap_theme_mode_icons');
 @endphp
 
-{{-- The inline padding-bottom clears the iPhone home indicator on the mobile drawer, which
-     reaches the viewport bottom - the same guard Flutter's SidebarFooterActions gets from
-     SafeArea(top: false), and the pattern the guest portal's bottom bars already use.
-     env(safe-area-inset-bottom) is 0 on desktop, so the rail is unaffected. --}}
-<div class="sidebar-footer-actions relative shrink-0 border-t border-white/[0.06] px-6 pt-3"
-    style="padding-bottom: max(1rem, env(safe-area-inset-bottom));">
+{{-- No padding of its own: the band below is full-bleed and owns the rail's whole width, so
+     every edge inset and the top border live on it, not here. All this element does is give
+     the popover and the hover labels something to position against. --}}
+<div class="sidebar-footer-actions relative shrink-0">
 
     {{-- Theme popover. inset-x-6, not inset-x-0: an absolutely positioned child resolves its
-         offsets against the padding BOX, so inset-x-0 would sit flush with the rail edges
-         instead of lining up with the strip below.
+         offsets against the padding BOX, which here is the full rail width - so inset-x-0
+         would sit flush with the rail edges. The band below deliberately does run edge to
+         edge; this floats above it and should read as a panel, hence the 24px inset.
 
          No aria-label on the group: the two radiogroups inside carry their own, and each is
          preceded by a visible heading saying the same thing. --}}
     <div class="js-theme-popover theme-popover-panel absolute inset-x-6 bottom-full mb-2 hidden rounded-xl p-2 shadow-lg"
         role="group">
-
-        <div class="px-1 pb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-400">{{ __('messages.appearance') }}</div>
-
-        {{-- Mode: Light / Dark / System --}}
-        <div class="theme-switcher-container flex gap-1 rounded-lg p-1.5 w-full" role="radiogroup" aria-label="{{ __('messages.appearance') }}">
-            @foreach ($themeModeIcons as $mode => $iconPath)
-                @if (! $loop->first)
-                    <div class="theme-separator w-px self-stretch my-1.5 bg-white/[0.08] transition-opacity duration-200"></div>
-                @endif
-                <button
-                    type="button"
-                    data-theme="{{ $mode }}"
-                    class="theme-btn js-theme-mode-btn flex-1 rounded-md px-2 py-1.5 text-sm font-medium text-gray-400 hover:text-white hover:scale-105 active:scale-95 transition-all duration-200"
-                    aria-label="{{ __('messages.theme_' . $mode) }}"
-                    title="{{ __('messages.theme_' . $mode) }}"
-                    role="radio"
-                    aria-checked="false">
-                    <svg class="h-4 w-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $iconPath }}" />
-                    </svg>
-                </button>
-            @endforeach
-        </div>
-
-        <div class="px-1 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-gray-400">{{ __('messages.palette') }}</div>
-
-        {{-- Palette. Only the three variants for the brightness currently in effect are shown -
-             the port of activeBrightness() in the Flutter app's theme_tile.dart. Under System
-             that follows the OS, so the JS re-runs this on the matchMedia change event too. --}}
-        <div class="theme-switcher-container flex gap-1 rounded-lg p-1.5 w-full" role="radiogroup" aria-label="{{ __('messages.palette') }}">
-            @foreach (config('app.ap_palettes') as [$variant, $brightness, $swatchBg, $swatchSurface])
-                <button
-                    type="button"
-                    data-variant="{{ $variant }}"
-                    data-brightness="{{ $brightness }}"
-                    class="theme-btn js-theme-variant-btn flex-1 rounded-md px-1.5 py-1.5 hover:scale-105 active:scale-95 transition-all duration-200 hidden"
-                    aria-label="{{ __('messages.variant_' . $variant) }}"
-                    title="{{ __('messages.variant_' . $variant) }}"
-                    role="radio"
-                    aria-checked="false">
-                    <span class="theme-swatch" style="--sw-bg: {{ $swatchBg }}; --sw-surface: {{ $swatchSurface }}"></span>
-                    <span class="mt-1 block truncate text-[10px] font-medium leading-tight">{{ __('messages.variant_' . $variant) }}</span>
-                </button>
-            @endforeach
-        </div>
+        {{-- Same component the Appearance tab in settings renders, in its rail tone. Only the
+             palette row's "show just this brightness" behaviour is dynamic, and that lives in
+             the component's driver, so nothing about it is popover-specific. --}}
+        <x-theme-picker tone="rail" headings="compact" />
     </div>
 
-    {{-- The action strip. Reuses .theme-switcher-container / .theme-btn so it reads as the same
-         grouped control as the pickers it now hides, and the icon-over-caption shape is the one
-         the palette swatches above already use.
+    {{-- The action strip: a full-bleed band across the foot of the rail rather than a rounded
+         card inset in its gutter, so it reads as the rail's footer instead of a widget parked
+         in it. The picker rows inside the popover above stay inset and rounded (.tp-group); the
+         band needs a top-only border and no radius, so it has its own class.
 
-         None of these carry an aria-label: each has a visible caption, so the caption IS the
-         accessible name and the two can never drift. An aria-label would override it - which is
-         how the theme button ended up named "Appearance" while reading "Theme", failing WCAG
-         2.5.3 for anyone driving the UI by voice. `title` is only on Contact, the one control
-         whose tooltip says more than its caption. --}}
-    <div class="theme-switcher-container flex gap-1 rounded-lg p-1.5 w-full">
+         Icon-only. Each caption moved into a .sidebar-tip that appears on hover and on keyboard
+         focus, which is what buys the band its single-line height and lets Contact carry the
+         full "Contact Us" string instead of the clipped short form.
+
+         With the captions gone every control here NEEDS an aria-label - the SVGs are
+         aria-hidden, so there is nothing else to name them. Keep each aria-label byte-identical
+         to its .sidebar-tip text. That is the WCAG 2.5.3 (label in name) guard, and the reason
+         the theme button once ended up named "Appearance" while reading "Theme", unusable for
+         anyone driving the UI by voice.
+
+         No `title` anywhere: .sidebar-tip replaces it, styled to the rail, instant rather than
+         after the browser's ~1s delay, and visible on Tab. --}}
+    <div class="sidebar-footer-bar flex w-full gap-1 px-2 pt-2"
+        {{-- Clears the iPhone home indicator on the mobile drawer, which reaches the viewport
+             bottom - the same guard Flutter's SidebarFooterActions gets from
+             SafeArea(top: false), and the pattern the guest portal's bottom bars already use.
+             It sits on the band, not the wrapper, so the tint runs all the way down.
+             env(safe-area-inset-bottom) is 0 on desktop, so the rail is unaffected. --}}
+        style="padding-bottom: max(0.5rem, env(safe-area-inset-bottom));">
 
         {{-- User guide. Keeps the js-help-link hook so the delegated anchor-map driver in
              layouts/navigation.blade.php keeps retargeting it per section and tab. --}}
         <a href="{{ \App\Utils\HelpUtils::getDocUrl() }}" target="_blank" rel="noopener noreferrer"
-            class="theme-btn js-help-link flex-1 rounded-md px-1.5 py-1.5 transition-all duration-200">
+            class="theme-btn js-help-link flex-1 rounded-lg py-2.5 transition-all duration-200"
+            aria-label="{{ __('messages.help') }}">
             <svg class="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span class="mt-1 block truncate text-[10px] font-medium leading-tight">{{ __('messages.help') }}</span>
+            <span class="sidebar-tip absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-xs font-medium" aria-hidden="true">{{ __('messages.help') }}</span>
         </a>
 
         {{-- Contact. Hosted opens the in-app support chat (a chat bubble, because that is what
              it does); selfhost has no chat service, so it opens mail instead - and says so with
-             an envelope. Was hidden behind a hover on the Help row until now.
+             an envelope.
 
-             The caption is the short `contact` key, not `contact_us`: the slot is ~45px wide at
-             this font size, so "Contact Us" and most of its translations would clip. The tooltip
-             carries the full string. --}}
+             `contact_us`, not the short `contact` key the caption used to carry: a tooltip has
+             no width to clip against, so this and its translations finally fit whole. --}}
         @if (config('app.hosted'))
         <button type="button"
-            class="theme-btn js-support-chat-sidebar-btn flex-1 rounded-md px-1.5 py-1.5 transition-all duration-200"
-            title="{{ __('messages.contact_us') }}">
+            class="theme-btn js-support-chat-sidebar-btn flex-1 rounded-lg py-2.5 transition-all duration-200"
+            aria-label="{{ __('messages.contact_us') }}">
             <svg class="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
-            <span class="mt-1 block truncate text-[10px] font-medium leading-tight">{{ __('messages.contact') }}</span>
+            <span class="sidebar-tip absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-xs font-medium" aria-hidden="true">{{ __('messages.contact_us') }}</span>
             <span class="js-support-chat-sidebar-badge absolute top-0.5 end-0.5 inline-flex items-center justify-center min-w-[1rem] h-4 px-1 text-[10px] font-bold text-white bg-red-500 rounded-full" style="display: none;"></span>
         </button>
         @else
         <a href="mailto:{{ config('app.support_email') }}?subject=Feedback"
-            class="theme-btn flex-1 rounded-md px-1.5 py-1.5 transition-all duration-200"
-            title="{{ __('messages.contact_us') }}">
+            class="theme-btn flex-1 rounded-lg py-2.5 transition-all duration-200"
+            aria-label="{{ __('messages.contact_us') }}">
             <svg class="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
-            <span class="mt-1 block truncate text-[10px] font-medium leading-tight">{{ __('messages.contact') }}</span>
+            <span class="sidebar-tip absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-xs font-medium" aria-hidden="true">{{ __('messages.contact_us') }}</span>
         </a>
         @endif
 
         {{-- About. Drives components/modal.blade.php through its open-modal window event. --}}
         <button type="button"
-            class="theme-btn js-about-btn flex-1 rounded-md px-1.5 py-1.5 transition-all duration-200">
+            class="theme-btn js-about-btn flex-1 rounded-lg py-2.5 transition-all duration-200"
+            aria-label="{{ __('messages.about') }}">
             <svg class="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span class="mt-1 block truncate text-[10px] font-medium leading-tight">{{ __('messages.about') }}</span>
+            <span class="sidebar-tip absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-xs font-medium" aria-hidden="true">{{ __('messages.about') }}</span>
         </button>
 
         {{-- Theme. All three glyphs ship inline with the inactive two hidden, so the icon can
@@ -144,29 +113,33 @@
              haspopup="dialog", not "true": "true" resolves to `menu`, and what opens is a pair
              of radiogroups. --}}
         <button type="button"
-            class="theme-btn js-theme-popover-btn flex-1 rounded-md px-1.5 py-1.5 transition-all duration-200"
-            aria-haspopup="dialog" aria-expanded="false">
+            class="theme-btn js-theme-popover-btn flex-1 rounded-lg py-2.5 transition-all duration-200"
+            aria-label="{{ __('messages.theme') }}" aria-haspopup="dialog" aria-expanded="false">
             @foreach ($themeModeIcons as $glyph => $iconPath)
                 <svg class="js-theme-glyph h-5 w-5 mx-auto {{ $glyph === 'system' ? '' : 'hidden' }}" data-theme-glyph="{{ $glyph }}"
                     fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $iconPath }}" />
                 </svg>
             @endforeach
-            <span class="mt-1 block truncate text-[10px] font-medium leading-tight">{{ __('messages.theme') }}</span>
+            <span class="sidebar-tip absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-xs font-medium" aria-hidden="true">{{ __('messages.theme') }}</span>
         </button>
     </div>
 </div>
 
 @once
 <style {!! nonce_attr() !!}>
-    .theme-switcher-container {
-        background: linear-gradient(to bottom, rgb(var(--ap-rail-hover)),
-                    color-mix(in srgb, rgb(var(--ap-rail-hover)) 88%, #000)) !important;
-        border: 1px solid rgba(255, 255, 255, 0.06);
-    }
     .theme-popover-panel {
         background: rgb(var(--ap-rail-deep));
         border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    /* Same gradient recipe as .tp-rail .tp-group, .dark-nav-hover and .schedule-badge, so the
+       band tracks all six palettes. --ap-rail-hover sits one step lighter than the rail's own
+       bottom (--ap-rail-deep, via .sidebar-gradient) - that step is what makes the band read
+       as a band. Top border only: the other three edges are the rail's. */
+    .sidebar-footer-bar {
+        background: linear-gradient(to bottom, rgb(var(--ap-rail-hover)),
+                    color-mix(in srgb, rgb(var(--ap-rail-hover)) 88%, #000));
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
     }
     .theme-btn { position: relative; }
     .theme-btn.active {
@@ -193,99 +166,60 @@
         outline: 2px solid var(--brand-blue);
         outline-offset: 2px;
     }
-    /* The popover sits on --ap-rail-deep, which IS .theme-btn.active's background - so an
-       active pill inside it would read as a hole rather than a selection. Lift it one step. */
-    .theme-popover-panel .theme-btn.active {
-        background: color-mix(in srgb, rgb(var(--ap-rail-deep)) 88%, #fff) !important;
+    /* The band's captions, moved out of the layout. Built from --ap-rail-deep so it tracks
+       every palette rather than needing a .dark twin, and the first real consumer of
+       --ap-rail-ink, which app.css ports but nothing used until now.
+
+       Lifted one step toward white, the same trick (and the same ratio) the popover uses on
+       its active pill below, and for the same reason: the tip opens over the BOTTOM of the
+       rail, which .sidebar-gradient paints in --ap-rail-deep. Left at the raw token it is
+       the exact colour of its own backdrop and reads as a hole with a hairline around it. */
+    .sidebar-tip {
+        background: color-mix(in srgb, rgb(var(--ap-rail-deep)) 88%, #fff);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: rgb(var(--ap-rail-ink));
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 150ms ease-out;
     }
-    /* Two-tone chip: page ground over card surface, so each palette reads at a glance. */
-    .theme-swatch {
-        display: block;
-        width: 100%;
-        height: 14px;
-        border-radius: 4px;
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        background: linear-gradient(135deg, var(--sw-bg) 0%, var(--sw-bg) 50%,
-                    var(--sw-surface) 50%, var(--sw-surface) 100%);
+    /* Hover is gated on a real pointer. A tap on a touch screen fires :hover and leaves it
+       latched, so an ungated rule would strand the label on screen after every press. Focus
+       is deliberately NOT gated - it is the only label a keyboard user gets. */
+    @media (hover: hover) {
+        .theme-btn:hover .sidebar-tip { opacity: 1; }
     }
+    .theme-btn:focus-visible .sidebar-tip { opacity: 1; }
+    /* The popover opens into exactly the strip of space the label wants. All three rules here
+       compute to the same specificity, so this one wins by being last - keep it last. */
+    .js-theme-popover-btn[aria-expanded="true"] .sidebar-tip { opacity: 0; }
 </style>
 
 <script {!! nonce_attr() !!}>
-    function updateThemeButtons() {
-        var mode = 'system';
-        if (window.getCurrentTheme) {
-            mode = window.getCurrentTheme();
-        } else {
-            try { mode = localStorage.getItem('theme') || 'system'; } catch (e) {}
-        }
-
-        document.querySelectorAll('.js-theme-mode-btn').forEach(function(button) {
-            var active = button.getAttribute('data-theme') === mode;
-            button.classList.toggle('active', active);
-            button.setAttribute('aria-checked', active ? 'true' : 'false');
-        });
-
-        // The strip's theme trigger shows the active mode's glyph. querySelectorAll, not
-        // querySelector: there are two triggers on the page (drawer + desktop rail).
+    // The popover trigger's glyph tracks the active mode. All three ship inline with two
+    // hidden, so this is a class toggle rather than building SVG in JS. querySelectorAll, not
+    // querySelector: there are two triggers on the page (drawer + desktop rail).
+    //
+    // components/theme-picker.blade.php owns the single repaint entry point and fires
+    // theme-buttons-updated at the end of it. Riding that keeps this sidebar-only concern out
+    // of the picker, which three surfaces now share.
+    function syncThemeGlyphs(mode) {
         document.querySelectorAll('.js-theme-glyph').forEach(function(glyph) {
             glyph.classList.toggle('hidden', glyph.getAttribute('data-theme-glyph') !== mode);
         });
-
-        // Show only the palettes for the brightness actually rendering, and mark
-        // the selected one. Falls back to reading the dark class if the head
-        // script has not defined the helpers yet.
-        var brightness = window.getThemeBrightness
-            ? window.getThemeBrightness()
-            : (document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-        var current = window.getThemeVariant ? window.getThemeVariant(brightness) : null;
-
-        document.querySelectorAll('.js-theme-variant-btn').forEach(function(button) {
-            var forThisBrightness = button.getAttribute('data-brightness') === brightness;
-            button.classList.toggle('hidden', !forThisBrightness);
-            var active = forThisBrightness && button.getAttribute('data-variant') === current;
-            button.classList.toggle('active', active);
-            button.setAttribute('aria-checked', active ? 'true' : 'false');
-        });
-
-        // Hide separators touching the active button.
-        document.querySelectorAll('.theme-separator').forEach(function(sep) {
-            var prev = sep.previousElementSibling;
-            var next = sep.nextElementSibling;
-            sep.style.opacity = (prev && prev.classList.contains('active')) ||
-                                (next && next.classList.contains('active')) ? '0' : '1';
-        });
-
-        syncRovingTabindex();
     }
 
-    // Every radio in a group but the checked one is taken out of the tab order, which is what
-    // makes a radiogroup one tab stop with the arrow keys moving inside it. Re-run whenever the
-    // selection changes, since the tabbable radio moves with it.
-    function syncRovingTabindex() {
-        document.querySelectorAll('[role="radiogroup"]').forEach(function(group) {
-            var radios = groupRadios(group);
-            if (!radios.length) {
-                return;
-            }
-            var checked = radios.filter(function(r) {
-                return r.getAttribute('aria-checked') === 'true';
-            });
-            var tabbable = checked.length ? checked[0] : radios[0];
-            radios.forEach(function(radio) {
-                radio.setAttribute('tabindex', radio === tabbable ? '0' : '-1');
-            });
-        });
-    }
+    window.addEventListener('theme-buttons-updated', function(e) {
+        syncThemeGlyphs(e.detail && e.detail.mode);
+    });
 
-    // The palette group keeps the three off-brightness buttons in the DOM and hides them, so
-    // "the radios in this group" is never just a querySelectorAll.
-    function groupRadios(group) {
-        return [].slice.call(group.querySelectorAll('[role="radio"]')).filter(function(radio) {
-            return !radio.classList.contains('hidden');
-        });
-    }
-
-    window.updateThemeButtons = updateThemeButtons;
+    // The picker's first paint runs before that listener exists - its render-once block is
+    // emitted at the popover above, which parses first - so seed the glyph here instead of
+    // leaving it wrong until the picker's second pass.
+    //
+    // (Do not name that Blade directive in this comment. Blade compiles directives inside JS
+    // comments just the same, and an unbalanced one 500s every admin page.)
+    syncThemeGlyphs(window.getCurrentTheme ? window.getCurrentTheme() : 'system');
 
     // Closes every open theme popover. `except` is the trigger being toggled (so a click on an
     // already-open trigger is not closed twice); `restoreFocus` pulls focus back to the trigger,
@@ -312,12 +246,11 @@
         });
     }
 
-    // Delegated, and bound once. The footer renders twice (desktop and mobile sidebars), and
-    // pickers can also render later in the page body - the profile Appearance tab does - so
-    // direct per-button listeners would both double-bind here and miss anything parsed after
-    // this script.
-    if (!window.__themePickerBound) {
-        window.__themePickerBound = true;
+    // Delegated, and bound once. The footer renders twice (desktop and mobile sidebars), so
+    // direct per-button listeners would double-bind. The picker's own handlers live in
+    // components/theme-picker.blade.php behind their own guard.
+    if (!window.__sidebarFooterBound) {
+        window.__sidebarFooterBound = true;
         document.addEventListener('click', function(e) {
             var popoverBtn = e.target.closest('.js-theme-popover-btn');
             if (popoverBtn) {
@@ -343,27 +276,6 @@
                 return;
             }
 
-            // Picking a mode or a palette deliberately leaves the popover OPEN. The Flutter
-            // menu closes on select, but it only carries the three modes; this one also
-            // carries the palette row, which re-populates the moment the brightness flips -
-            // so closing would force a second trip for the likeliest next click. The page
-            // repaints live behind the popover either way.
-            var modeBtn = e.target.closest('.js-theme-mode-btn');
-            if (modeBtn) {
-                setTheme(modeBtn.getAttribute('data-theme'));
-                updateThemeButtons();
-                return;
-            }
-            var variantBtn = e.target.closest('.js-theme-variant-btn');
-            if (variantBtn && typeof window.setThemeVariant === 'function') {
-                window.setThemeVariant(
-                    variantBtn.getAttribute('data-brightness'),
-                    variantBtn.getAttribute('data-variant')
-                );
-                updateThemeButtons();
-                return;
-            }
-
             if (e.target.closest('.js-about-btn')) {
                 window.dispatchEvent(new CustomEvent('open-modal', { detail: 'about-app' }));
                 return;
@@ -380,59 +292,6 @@
             }
         });
 
-        // Arrow-key navigation inside the mode and palette radiogroups. Declaring role="radio"
-        // promises this: a radiogroup is one tab stop, and the arrows move within it. Selection
-        // follows focus, which is the standard pattern and doubles as a live preview here.
-        // Delegated on document, so it also covers the pickers on the profile Appearance tab.
-        document.addEventListener('keydown', function(e) {
-            if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft' && e.key !== 'ArrowDown' &&
-                e.key !== 'ArrowUp' && e.key !== 'Home' && e.key !== 'End') {
-                return;
-            }
-            var radio = e.target.closest('[role="radio"]');
-            var group = radio && radio.closest('[role="radiogroup"]');
-            if (!group) {
-                return;
-            }
-            var radios = groupRadios(group);
-            var index = radios.indexOf(radio);
-            if (index === -1) {
-                return;
-            }
-
-            // Left/Right follow the visual order, which mirrors in Hebrew and Arabic. Up/Down
-            // never mirror.
-            var rtl = document.documentElement.getAttribute('dir') === 'rtl';
-            var step = 0;
-            if (e.key === 'ArrowDown') {
-                step = 1;
-            } else if (e.key === 'ArrowUp') {
-                step = -1;
-            } else if (e.key === 'ArrowRight') {
-                step = rtl ? -1 : 1;
-            } else if (e.key === 'ArrowLeft') {
-                step = rtl ? 1 : -1;
-            }
-
-            var target;
-            if (e.key === 'Home') {
-                target = radios[0];
-            } else if (e.key === 'End') {
-                target = radios[radios.length - 1];
-            } else {
-                target = radios[(index + step + radios.length) % radios.length];
-            }
-            if (!target || target === radio) {
-                return;
-            }
-
-            e.preventDefault();
-            target.focus();
-            // click(), not a copy of the selection logic: the delegated handler above already
-            // owns the one path that writes the theme and repaints.
-            target.click();
-        });
-
         document.addEventListener('keydown', function(e) {
             if (e.key !== 'Escape') {
                 return;
@@ -447,34 +306,6 @@
             e.preventDefault();
             closeThemePopovers(null, true);
         });
-
-        // Cross-tab sync: mode and either palette choice.
-        window.addEventListener('storage', function(e) {
-            if (e.key === 'theme' || e.key === 'themeLight' || e.key === 'themeDark') {
-                // Repaint the PAGE first. updateThemeButtons() only reads state and toggles
-                // button classes, so on its own it left the other tab highlighting the
-                // newly-chosen palette while still rendering the old one - and because it
-                // derives which palette row to show from the live `dark` class, it read the
-                // stale brightness too. applyTheme() re-applies from storage without writing
-                // back, which setTheme() would (echoing the event round again).
-                if (typeof window.applyTheme === 'function') window.applyTheme();
-                updateThemeButtons();
-            }
-        });
-    }
-
-    // Paint the buttons now, then sync again once the document is complete. The second pass is
-    // not optional: the render-once guard around this block means it runs at the FIRST
-    // sidebar's position - the desktop rail and the profile Appearance tab have not been
-    // parsed yet, and without it their palette row stays entirely hidden.
-    //
-    // (Do not name that Blade directive here. Blade compiles directives inside JS comments
-    // just the same, and an unbalanced one 500s every admin page.)
-    updateThemeButtons();
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', updateThemeButtons);
-    } else {
-        requestAnimationFrame(updateThemeButtons);
     }
 </script>
 @endonce

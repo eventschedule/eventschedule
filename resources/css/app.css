@@ -801,6 +801,118 @@ input[type="search"], textarea, select {
     background: linear-gradient(to bottom, rgb(var(--ap-rail)), rgb(var(--ap-rail-deep))) !important;
 }
 
+/* ──────────────────────────────────────────────────────────────────────────
+ * Theme picker (components/theme-picker.blade.php)
+ *
+ * One control for the two places the user changes appearance: the sidebar
+ * footer popover and the Appearance tab in settings. Geometry, content shape
+ * and the pressed-inset selected state are shared; only the colour tone below
+ * differs, and it has to - the rail is dark in every palette, so it cannot use
+ * the gray ramp the rest of the AP does.
+ *
+ * Deliberately no `display` on .tp-item. Tailwind's `.hidden` is a plain
+ * `display: none` at the same specificity, so a base display here would tie
+ * and win on source order - which is the bug the old .ap-theme-option carried
+ * a compound `.ap-theme-option.hidden` selector to work around. The buttons
+ * are flex items, so the container blockifies them anyway.
+ * ────────────────────────────────────────────────────────────────────────── */
+.tp-group {
+    display: flex;
+    gap: 0.25rem;
+    width: 100%;
+    border-radius: 0.75rem;
+    padding: 0.25rem;
+}
+.tp-item {
+    flex: 1;
+    min-width: 0;
+    position: relative;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.25rem;
+    text-align: center;
+    transition: all 0.2s;
+}
+.tp-icon {
+    display: block;
+    height: 1.25rem;
+    width: 1.25rem;
+    margin-inline: auto;
+}
+.tp-label {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.6875rem;
+    line-height: 1.1;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.tp-heading {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    padding-inline: 0.25rem;
+}
+/* Two-tone chip: page ground over card surface, so each palette reads at a glance. */
+.tp-swatch {
+    display: block;
+    width: 100%;
+    height: 14px;
+    border-radius: 4px;
+    background: linear-gradient(135deg, var(--sw-bg) 0 50%, var(--sw-surface) 50% 100%);
+}
+.tp-item:focus-visible {
+    outline: 2px solid var(--brand-blue);
+    outline-offset: 2px;
+}
+
+/* Surface tone - the house segmented control (compare the appointments filter
+   tabs), expressed in tokens so it follows all six palettes. */
+.tp-surface .tp-group {
+    background: rgb(var(--ap-surface-sunken));
+    border: 1px solid rgb(var(--ap-border));
+}
+.tp-surface .tp-heading { color: rgb(var(--ap-ink-3)); }
+.tp-surface .tp-item { color: rgb(var(--ap-ink-3)); }
+.tp-surface .tp-item:hover {
+    background: rgb(var(--ap-surface-hover));
+    color: rgb(var(--ap-ink));
+}
+.tp-surface .tp-item.active {
+    background: rgb(var(--ap-surface));
+    color: rgb(var(--ap-ink));
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+.tp-surface .tp-swatch { border: 1px solid rgb(var(--ap-border-strong)); }
+
+/* Rail tone - same geometry, rail tokens, and a deeper inset because it is
+   pressed into a dark surface rather than a light one. */
+.tp-rail .tp-group {
+    background: linear-gradient(to bottom, rgb(var(--ap-rail-hover)),
+                color-mix(in srgb, rgb(var(--ap-rail-hover)) 88%, #000));
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.tp-rail .tp-heading { color: rgb(var(--ap-rail-ink-2)); }
+.tp-rail .tp-item { color: rgb(var(--ap-rail-ink-2)); }
+.tp-rail .tp-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+.tp-rail .tp-item.active {
+    background: rgb(var(--ap-rail-deep));
+    color: #ffffff;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+.tp-rail .tp-swatch { border: 1px solid rgba(255, 255, 255, 0.14); }
+/* The popover's own background IS --ap-rail-deep, so an active pill sitting on
+   it would read as a hole rather than a selection. Lift it one step, the same
+   ratio .sidebar-tip uses for the same reason. */
+.theme-popover-panel .tp-rail .tp-item.active {
+    background: color-mix(in srgb, rgb(var(--ap-rail-deep)) 88%, #fff);
+}
+
 /* Card top highlight */
 .card-highlight {
     border-top: 1px solid var(--ap-hairline);

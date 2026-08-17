@@ -260,56 +260,133 @@
          rail): two modals sharing the name would both answer the same open-modal event and
          stack two overlays. Out here it is rendered once, and outside the sidebar's own
          scroll and stacking context. --}}
-    <x-modal name="about-app" maxWidth="sm" :ariaLabel="__('messages.about')">
-        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('messages.about') }}</h3>
-            <button type="button" x-on:click="$dispatch('close')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" aria-label="{{ __('messages.close') }}">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-        </div>
+    @php
+        // One row shape for every link, so the dialog reads as a list rather than as the three
+        // clashing treatments it used to carry (a blue text link, a grey star pill, and another
+        // blue text link, all in one line).
+        $aboutRow = 'flex items-center gap-3 px-6 py-3 text-sm text-gray-700 dark:text-gray-300'
+            .' hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-colors no-underline'
+            .' focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand-blue)]';
+        $aboutIcon = 'h-5 w-5 flex-shrink-0 text-gray-400 dark:text-gray-500';
+        // Terms and privacy are hosted-only on purpose. marketing_url() falls back to
+        // eventschedule.com, and those documents do not govern somebody else's selfhost install.
+        // Never route('marketing.*') here - those routes are nexus-gated.
+        $aboutHosted = config('app.hosted');
+    @endphp
 
-        <div class="p-6">
-            {{-- The wordmark, not images/logo.png: these two config values are what a selfhost
-                 operator overrides through APP_LOGO_DARK / APP_LOGO_LIGHT to rebrand, and they
-                 swap with the theme so a dark mark never lands on the dark modal surface. Same
-                 pair as components/application-logo.blade.php, inlined because that component
-                 wraps itself in a p-6 that does not fit here. The mark carries the app name,
-                 so there is no separate name line. --}}
-            <div>
-                <img class="h-9 w-auto dark:hidden" src="{{ asset(ltrim(config('app.logo_dark'), '/')) }}" alt="{{ config('app.name') }}">
-                <img class="h-9 w-auto hidden dark:block" src="{{ asset(ltrim(config('app.logo_light'), '/')) }}" alt="{{ config('app.name') }}">
-                <div class="mt-3 text-sm text-gray-500 dark:text-gray-400">
+    <x-modal name="about-app" maxWidth="md" :ariaLabel="__('messages.about')">
+        <div class="relative">
+            {{-- Floating rather than sitting in a titled header bar: the wordmark below IS the
+                 title. `end`, not `right`, so it crosses over in Hebrew and Arabic. --}}
+            <button type="button" class="js-close-modal absolute top-4 end-4 z-10 rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]"
+                data-modal="about-app" aria-label="{{ __('messages.close') }}">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+
+            {{-- Brand block. The wordmark, not images/logo.png: these two config values are what
+                 a selfhost operator overrides through APP_LOGO_DARK / APP_LOGO_LIGHT to
+                 rebrand, and they swap with the theme so a dark mark never lands on the dark
+                 modal surface. Same pair as components/application-logo.blade.php, inlined
+                 because that component wraps itself in a p-6 that does not fit here. The mark
+                 carries the app name, so there is no separate name line. --}}
+            <div class="px-6 pt-8 pb-6 text-center">
+                <img class="h-10 w-auto mx-auto dark:hidden" src="{{ asset(ltrim(config('app.logo_dark'), '/')) }}" alt="{{ config('app.name') }}">
+                <img class="h-10 w-auto mx-auto hidden dark:block" src="{{ asset(ltrim(config('app.logo_light'), '/')) }}" alt="{{ config('app.name') }}">
+
+                {{-- bdi + dir=ltr: a version is a left-to-right token even on an RTL page, and
+                     without this the leading "v" jumps to the wrong end. --}}
+                <div class="mt-4">
                     <bdi dir="ltr">
-                        <x-link href="https://github.com/eventschedule/eventschedule/releases" target="_blank" hideIcon>{{ config('self-update.version_installed') }}</x-link>
+                        <a href="https://github.com/eventschedule/eventschedule/releases" target="_blank" rel="noopener noreferrer"
+                            class="inline-flex items-center gap-1.5 rounded-full border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-2.5 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 no-underline transition-colors hover:bg-gray-200 hover:text-gray-800 dark:hover:bg-gray-700 dark:hover:text-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]">
+                            {{ config('self-update.version_installed') }}
+                        </a>
                     </bdi>
                 </div>
             </div>
 
-            <div class="mt-6 flex flex-wrap items-center gap-3 text-sm">
-                <x-link :href="\App\Utils\HelpUtils::getDocUrl()" target="_blank">{{ __('messages.help') }}</x-link>
-
-                <a href="https://github.com/eventschedule/eventschedule" target="_blank" rel="noopener noreferrer"
-                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300 transition-all duration-200 no-underline">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+            <div class="border-t border-gray-200 dark:border-gray-700 divide-y divide-gray-200 dark:divide-gray-700">
+                {{-- User guide. HelpUtils::getDocUrl() is section-aware, so this lands on the
+                     docs page for whatever the user has open behind the dialog. --}}
+                <a href="{{ \App\Utils\HelpUtils::getDocUrl() }}" target="_blank" rel="noopener noreferrer" class="{{ $aboutRow }}">
+                    <svg class="{{ $aboutIcon }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                     </svg>
-                    @if (isset($githubStars) && $githubStars)
-                    <svg class="h-3.5 w-3.5 text-yellow-500" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    <span>{{ __('messages.help') }}</span>
+                    <svg class="ms-auto h-4 w-4 flex-shrink-0 text-gray-400 dark:text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M4.25 5.5a.75.75 0 00-.75.75v8.5c0 .414.336.75.75.75h8.5a.75.75 0 00.75-.75v-4a.75.75 0 011.5 0v4A2.25 2.25 0 0112.75 17h-8.5A2.25 2.25 0 012 14.75v-8.5A2.25 2.25 0 014.25 4h5a.75.75 0 010 1.5h-5zm7.25-.75a.75.75 0 01.75-.75h3.5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0V6.31l-5.47 5.47a.75.75 0 01-1.06-1.06l5.47-5.47H12.25a.75.75 0 01-.75-.75z" clip-rule="evenodd" />
                     </svg>
-                    {{ number_format($githubStars) }}
-                    @else
-                    GitHub
-                    @endif
                 </a>
 
-                @if (config('app.hosted'))
-                <bdi dir="ltr"><x-link href="mailto:{{ config('app.support_email') }}?subject=Feedback" hideIcon>{{ config('app.support_email') }}</x-link></bdi>
+                {{-- Source. The star count is a view-composer value cached for an hour
+                     (AppServiceProvider -> GitHubUtils::getStars); when the fetch has failed or
+                     not run yet the row simply carries no count. --}}
+                <a href="https://github.com/eventschedule/eventschedule" target="_blank" rel="noopener noreferrer" class="{{ $aboutRow }}">
+                    <svg class="{{ $aboutIcon }}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                    </svg>
+                    <span>GitHub</span>
+                    <span class="ms-auto flex items-center gap-3">
+                        @if (isset($githubStars) && $githubStars)
+                        <bdi dir="ltr" class="inline-flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400">
+                            <svg class="h-3.5 w-3.5 text-yellow-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            {{ number_format($githubStars) }}
+                        </bdi>
+                        @endif
+                        <svg class="h-4 w-4 flex-shrink-0 text-gray-400 dark:text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M4.25 5.5a.75.75 0 00-.75.75v8.5c0 .414.336.75.75.75h8.5a.75.75 0 00.75-.75v-4a.75.75 0 011.5 0v4A2.25 2.25 0 0112.75 17h-8.5A2.25 2.25 0 012 14.75v-8.5A2.25 2.25 0 014.25 4h5a.75.75 0 010 1.5h-5zm7.25-.75a.75.75 0 01.75-.75h3.5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0V6.31l-5.47 5.47a.75.75 0 01-1.06-1.06l5.47-5.47H12.25a.75.75 0 01-.75-.75z" clip-rule="evenodd" />
+                        </svg>
+                    </span>
+                </a>
+
+                {{-- Contact. Selfhost gets this too now: the address is configurable, and the
+                     sidebar's own Contact button has always offered it there. --}}
+                <a href="mailto:{{ config('app.support_email') }}?subject=Feedback" class="{{ $aboutRow }}">
+                    <svg class="{{ $aboutIcon }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    <span>{{ __('messages.contact_us') }}</span>
+                    <bdi dir="ltr" class="ms-auto truncate text-xs text-gray-500 dark:text-gray-400">{{ config('app.support_email') }}</bdi>
+                </a>
+
+                @if ($aboutHosted)
+                <a href="{{ marketing_url('/terms-of-service') }}" target="_blank" rel="noopener noreferrer" class="{{ $aboutRow }}">
+                    <svg class="{{ $aboutIcon }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span>{{ __('messages.terms_of_service') }}</span>
+                    <svg class="ms-auto h-4 w-4 flex-shrink-0 text-gray-400 dark:text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M4.25 5.5a.75.75 0 00-.75.75v8.5c0 .414.336.75.75.75h8.5a.75.75 0 00.75-.75v-4a.75.75 0 011.5 0v4A2.25 2.25 0 0112.75 17h-8.5A2.25 2.25 0 012 14.75v-8.5A2.25 2.25 0 014.25 4h5a.75.75 0 010 1.5h-5zm7.25-.75a.75.75 0 01.75-.75h3.5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0V6.31l-5.47 5.47a.75.75 0 01-1.06-1.06l5.47-5.47H12.25a.75.75 0 01-.75-.75z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+
+                <a href="{{ marketing_url('/privacy') }}" target="_blank" rel="noopener noreferrer" class="{{ $aboutRow }}">
+                    <svg class="{{ $aboutIcon }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                    </svg>
+                    <span>{{ __('messages.privacy_policy') }}</span>
+                    <svg class="ms-auto h-4 w-4 flex-shrink-0 text-gray-400 dark:text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M4.25 5.5a.75.75 0 00-.75.75v8.5c0 .414.336.75.75.75h8.5a.75.75 0 00.75-.75v-4a.75.75 0 011.5 0v4A2.25 2.25 0 0112.75 17h-8.5A2.25 2.25 0 012 14.75v-8.5A2.25 2.25 0 014.25 4h5a.75.75 0 010 1.5h-5zm7.25-.75a.75.75 0 01.75-.75h3.5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0V6.31l-5.47 5.47a.75.75 0 01-1.06-1.06l5.47-5.47H12.25a.75.75 0 01-.75-.75z" clip-rule="evenodd" />
+                    </svg>
+                </a>
                 @endif
             </div>
 
-            <div class="mt-6 flex justify-end">
-                <button type="button" x-on:click="$dispatch('close')" class="px-4 py-3 text-base font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
+            <div class="flex items-center justify-between gap-3 border-t border-gray-200 dark:border-gray-700 px-6 py-4">
+                {{-- bdi, like the version badge: "©" is bidi-neutral, so on an RTL page the
+                     algorithm resolves it to the far end and the line renders as
+                     "Event Schedule 2026 ©". --}}
+                <bdi dir="ltr" class="text-xs text-gray-500 dark:text-gray-400">&copy; {{ date('Y') }} {{ config('app.name') }}</bdi>
+                {{-- A plain button carrying x-secondary-link's classes: this is a standalone
+                     action, so it takes that sizing rather than x-secondary-button's small
+                     utility one, and it cannot BE the link component because it dismisses a
+                     dialog rather than navigating. The old inline bg-gray-100 was nearly the
+                     same value as the modal surface in the light palettes, so it read as
+                     unstyled text. --}}
+                <button type="button" data-modal="about-app"
+                    class="js-close-modal ap-secondary-btn inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                     {{ __('messages.close') }}
                 </button>
             </div>
@@ -320,6 +397,19 @@
         document.getElementById('logout-link').addEventListener('click', function(e) {
             e.preventDefault();
             this.closest('form').submit();
+        });
+
+        // Dismisses a dialog by name. components/modal.blade.php already listens for
+        // close-modal on window, so this needs no Alpine directive on the button - which is
+        // what the About buttons used to carry, against the repo's no-Alpine rule. The shell
+        // itself stays Alpine; it is shared with four other call sites.
+        document.addEventListener('click', function(e) {
+            var closeBtn = e.target.closest('.js-close-modal');
+            if (closeBtn) {
+                window.dispatchEvent(new CustomEvent('close-modal', {
+                    detail: closeBtn.getAttribute('data-modal')
+                }));
+            }
         });
 
         document.addEventListener('click', function(e) {

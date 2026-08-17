@@ -243,6 +243,28 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Theme mode glyphs
+    |--------------------------------------------------------------------------
+    |
+    | Sun / moon / monitor, as bare SVG path data on a 24x24 viewBox. Two views
+    | draw these and they must not drift: components/theme-picker.blade.php puts
+    | one above each mode's label, and layouts/sidebar-footer.blade.php ships all
+    | three inside its popover trigger with two hidden, so the trigger's glyph can
+    | track the active mode without building SVG in JS.
+    |
+    | The keys are the mode values themselves - they are what lands in the
+    | `theme` localStorage key and what setTheme() is called with.
+    |
+    */
+
+    'ap_theme_mode_icons' => [
+        'light' => 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z',
+        'dark' => 'M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z',
+        'system' => 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Maximum Sponsors
     |--------------------------------------------------------------------------
     |
