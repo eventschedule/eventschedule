@@ -599,6 +599,17 @@ if (! function_exists('post_signup_redirect_url')) {
     }
 }
 
+if (! function_exists('payment_gateways')) {
+    /**
+     * The payment gateway registry, for blades that need to ask what a gateway can do rather than
+     * naming it. See App\Services\Payments\PaymentGatewayManager.
+     */
+    function payment_gateways(): \App\Services\Payments\PaymentGatewayManager
+    {
+        return app(\App\Services\Payments\PaymentGatewayManager::class);
+    }
+}
+
 if (! function_exists('is_demo_mode')) {
     /**
      * Check if the current session is in demo mode

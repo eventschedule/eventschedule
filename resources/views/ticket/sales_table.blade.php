@@ -120,18 +120,13 @@
                                     @endif
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                    @php $referenceUrl = payment_gateways()->get($sale->payment_method)?->referenceUrl($sale); @endphp
                                     @if ($sale->transaction_reference == __('messages.manual_payment'))
                                         <span class="text-gray-600 dark:text-gray-400">{{ __('messages.manual_payment') }}</span>
                                     @elseif ($sale->payment_method == 'import')
                                         <span class="text-gray-600 dark:text-gray-400">{{ __('messages.manual_import') }}</span>
-                                    @elseif ($sale->payment_method == 'invoiceninja' && str_starts_with($sale->transaction_reference, 'sub:'))
-                                        <span class="font-mono text-sm">{{ $sale->transaction_reference }}</span>
-                                    @elseif ($sale->payment_method == 'invoiceninja')
-                                        <x-link href="https://app.invoicing.co/#/invoices/{{ $sale->transaction_reference }}/edit" target="_blank">
-                                            {{ $sale->transaction_reference }}
-                                        </x-link>
-                                    @elseif ($sale->payment_method == 'stripe')
-                                        <x-link href="https://dashboard.stripe.com/payments/{{ $sale->transaction_reference }}" target="_blank">
+                                    @elseif ($referenceUrl)
+                                        <x-link href="{{ $referenceUrl }}" target="_blank">
                                             {{ $sale->transaction_reference }}
                                         </x-link>
                                     @else
@@ -480,18 +475,17 @@
                     <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
                         <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.transaction_reference') }}</div>
                         <div class="text-sm text-gray-900 dark:text-gray-100">
+                            {{-- The gateway owns the format of its own reference, so it also owns
+                                 whether there is anywhere to link to. Null means "no dashboard page"
+                                 (an Invoice Ninja 'sub:' subscription id, an unknown legacy method,
+                                 or a marker with no driver at all) and falls through to plain text. --}}
+                            @php $referenceUrl = payment_gateways()->get($sale->payment_method)?->referenceUrl($sale); @endphp
                             @if ($sale->transaction_reference == __('messages.manual_payment'))
                                 <span class="text-gray-600 dark:text-gray-400">{{ __('messages.manual_payment') }}</span>
                             @elseif ($sale->payment_method == 'import')
                                 <span class="text-gray-600 dark:text-gray-400">{{ __('messages.manual_import') }}</span>
-                            @elseif ($sale->payment_method == 'invoiceninja' && str_starts_with($sale->transaction_reference, 'sub:'))
-                                <span class="font-mono text-sm break-all">{{ $sale->transaction_reference }}</span>
-                            @elseif ($sale->payment_method == 'invoiceninja')
-                                <x-link href="https://app.invoicing.co/#/invoices/{{ $sale->transaction_reference }}/edit" target="_blank" class="break-all">
-                                    {{ $sale->transaction_reference }}
-                                </x-link>
-                            @elseif ($sale->payment_method == 'stripe')
-                                <x-link href="https://dashboard.stripe.com/payments/{{ $sale->transaction_reference }}" target="_blank" class="break-all">
+                            @elseif ($referenceUrl)
+                                <x-link href="{{ $referenceUrl }}" target="_blank" class="break-all">
                                     {{ $sale->transaction_reference }}
                                 </x-link>
                             @else

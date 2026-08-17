@@ -8,6 +8,14 @@
 @endif
 
 @php
+  // The gateway registry, consulted three ways on the Payment tab: which gateways this owner has
+  // actually connected (drives the setup nudge), which of those can take this event's currency
+  // (drives the dropdown), and what each one supports (drives the Vue gates further down).
+  $paymentGateways = payment_gateways();
+  $connectedGateways = $paymentGateways->connectedFor($user);
+  $selectableGateways = $paymentGateways->availableFor($user, $event->ticket_currency_code);
+  $gatewayCapabilities = $paymentGateways->capabilityMap();
+
   $use24hr = get_use_24_hour_time($role ?? null);
   // Prefill the time in the SCHEDULE's timezone so the form round-trips with the schedule-anchored
   // capture in EventRepo::saveEvent(). An existing event stored under a different timezone will
@@ -3189,7 +3197,7 @@
                                      setup step has to be first-class.
 
                                      Opens in a new tab deliberately: this form is unsaved. --}}
-                                @if (! $user->canAcceptStripePayments() && ! $user->invoiceninja_api_key && ! $user->payment_url)
+                                @if (! $connectedGateways)
                                 <div class="mb-6 ap-card rounded-xl p-6" v-show="event.tickets_enabled">
                                     <div class="flex items-start gap-3">
                                         <div class="dashboard-icon p-2 rounded-xl bg-blue-50 dark:bg-blue-500/10">
@@ -3218,23 +3226,17 @@
                                 </div>
                                 @endif
 
-                                @if ($user->canAcceptStripePayments() || $user->invoiceninja_api_key || $user->payment_url)
+                                @if ($connectedGateways)
                                 <div class="mb-6">
                                     <x-input-label for="payment_method" :value="__('messages.payment_method')"/>
                                     <select id="payment_method" name="payment_method" v-model="event.payment_method" :required="event.tickets_enabled"
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                        <option value="cash">@lang('messages.cash')</option>
-                                        @if ($user->stripe_completed_at)
-                                        <option value="stripe">Stripe - {{ $user->stripe_company_name }}</option>
-                                        @elseif ($user->canAcceptStripePayments())
-                                        <option value="stripe">Stripe</option>
-                                        @endif
-                                        @if ($user->invoiceninja_api_key)
-                                        <option value="invoiceninja">Invoice Ninja - {{ $user->invoiceninja_company_name }}</option>
-                                        @endif
-                                        @if ($user->payment_url)
-                                        <option value="payment_url">{{ __('messages.payment_url') }} - {{ $user->paymentUrlHost() }}</option>
-                                        @endif
+                                        {{-- Ordered by config('payments.gateways'), and filtered to what this owner has
+                                             connected and what can settle this event's currency. A gateway that cannot
+                                             take the currency is omitted rather than shown and then rejected. --}}
+                                        @foreach ($selectableGateways as $gatewayKey => $gateway)
+                                        <option value="{{ $gatewayKey }}">{{ $gateway->label($user) }}</option>
+                                        @endforeach
                                     </select>
                                     <div class="text-xs pt-1">
                                         <x-link href="{{ route('profile.edit') }}#section-payment-methods" target="_blank">
@@ -3257,7 +3259,7 @@
                                         </option>
                                         @endforeach
                                     </select>
-                                    @if (! $user->canAcceptStripePayments() && ! $user->invoiceninja_api_key && ! $user->payment_url)
+                                    @if (! $connectedGateways)
                                     <div class="text-xs pt-1">
                                         <x-link href="{{ route('profile.edit') }}#section-payment-methods" target="_blank">
                                             {{ __('messages.manage_payment_methods') }}
@@ -3266,7 +3268,7 @@
                                     @endif
                                 </div>
 
-                                <div class="mb-6" v-show="event.payment_method == 'cash'">
+                                <div class="mb-6" v-show="gatewayCapabilities[event.payment_method]?.payment_instructions">
                                     <x-input-label for="payment_instructions" :value="__('messages.payment_instructions')" />
                                     <textarea id="payment_instructions" name="payment_instructions" v-model="event.payment_instructions" rows="4" data-content-dir="{{ content_dir($role) }}"
                                         class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"></textarea>
@@ -3278,7 +3280,7 @@
                                      and off for another, buyer picks both, option vanishes). This is
                                      also where an organizer already is when thinking about how they get
                                      paid. Stripe only - nothing else can charge a saved card. --}}
-                                <div class="mb-6" v-show="event.payment_method == 'stripe'">
+                                <div class="mb-6" v-show="gatewayCapabilities[event.payment_method]?.installments">
                                     <div class="flex items-start justify-between gap-3">
                                         <div class="min-w-0">
                                             <label for="installments_enabled" class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
@@ -5155,6 +5157,10 @@
           installment_final_days_before: {{ (int) ($event->installment_final_days_before ?? 14) }},
           installment_min_order_amount: @json($event->installment_min_order_amount),
         },
+        // What each gateway can do, keyed by payment_method, so the Payment tab gates on capability
+        // instead of naming gateways. Bound through data() and read with Vue's own interpolation
+        // rather than echoed into a v-show attribute, which would not survive the mount.
+        gatewayCapabilities: @json($gatewayCapabilities),
         initiallyHidden: @json($event->exists && ($event->is_draft || $event->is_private)),
         isPro: @json($role->isPro()),
         ticketMode: @json($event->tickets_enabled ? 'tickets' : ($event->rsvp_enabled ? 'rsvp' : 'external')),

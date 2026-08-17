@@ -1463,7 +1463,10 @@ class TicketController extends Controller
             }
         }
 
-        if (! in_array($first->payment_method, ['stripe', 'cash'], true)) {
+        // Only rails that settle a whole order in one go. Asked of the gateway rather than matched
+        // against a literal list, so a new gateway that can do it says so once in its driver
+        // instead of needing this line and the mirror of it in event/tickets.blade.php edited.
+        if (! payment_gateways()->supportsCart($first->payment_method)) {
             return __('messages.cart_payment_method_unsupported');
         }
 

@@ -202,6 +202,10 @@ class ApiEventController extends Controller
 
         $allowedCategoryIds = collect($role->getEventCategories())->pluck('id')->all();
 
+        // From the gateway registry, so a new gateway is accepted here without touching this file.
+        // 'manual' is kept as the long-standing alias for cash and normalised below.
+        $allowedPaymentMethods = array_merge(payment_gateways()->selectableKeys(), ['manual']);
+
         try {
             $request->validate([
                 'name' => 'required|string|max:255',
@@ -221,7 +225,7 @@ class ApiEventController extends Controller
                 'category' => 'nullable|string|max:255',
                 'tickets_enabled' => 'nullable|boolean',
                 'ticket_currency_code' => 'nullable|string|size:3',
-                'payment_method' => 'nullable|string|in:stripe,invoiceninja,payment_url,manual',
+                'payment_method' => 'nullable|string|in:'.implode(',', $allowedPaymentMethods),
                 'payment_instructions' => 'nullable|string|max:5000',
                 'schedule_type' => 'nullable|string|in:single,recurring',
                 'recurring_frequency' => 'required_if:schedule_type,recurring|nullable|string|in:daily,weekly,every_n_weeks,monthly_date,monthly_weekday,yearly',
@@ -258,6 +262,13 @@ class ApiEventController extends Controller
                 'error' => 'Validation failed',
                 'errors' => $e->errors(),
             ], 422);
+        }
+
+        // 'manual' is a documented alias the API has always accepted, but events.payment_method is a
+        // MySQL enum that has never contained it, so it could only ever fail on write. Normalise it
+        // to the value it plainly means rather than leaving a rule that accepts an unstorable input.
+        if ($request->input('payment_method') === 'manual') {
+            $request->merge(['payment_method' => 'cash']);
         }
 
         // Strip request to only allowed fields to prevent mass assignment
@@ -342,6 +353,8 @@ class ApiEventController extends Controller
             ? collect($currentRoleForUpdate->getEventCategories())->pluck('id')->all()
             : array_keys(config('app.event_categories', []));
 
+        $allowedPaymentMethods = array_merge(payment_gateways()->selectableKeys(), ['manual']);
+
         try {
             $request->validate([
                 'name' => 'sometimes|required|string|max:255',
@@ -361,7 +374,7 @@ class ApiEventController extends Controller
                 'category' => 'nullable|string|max:255',
                 'tickets_enabled' => 'nullable|boolean',
                 'ticket_currency_code' => 'nullable|string|size:3',
-                'payment_method' => 'nullable|string|in:stripe,invoiceninja,payment_url,manual',
+                'payment_method' => 'nullable|string|in:'.implode(',', $allowedPaymentMethods),
                 'payment_instructions' => 'nullable|string|max:5000',
                 'schedule_type' => 'nullable|string|in:single,recurring',
                 'recurring_frequency' => 'required_if:schedule_type,recurring|nullable|string|in:daily,weekly,every_n_weeks,monthly_date,monthly_weekday,yearly',
@@ -398,6 +411,13 @@ class ApiEventController extends Controller
                 'error' => 'Validation failed',
                 'errors' => $e->errors(),
             ], 422);
+        }
+
+        // 'manual' is a documented alias the API has always accepted, but events.payment_method is a
+        // MySQL enum that has never contained it, so it could only ever fail on write. Normalise it
+        // to the value it plainly means rather than leaving a rule that accepts an unstorable input.
+        if ($request->input('payment_method') === 'manual') {
+            $request->merge(['payment_method' => 'cash']);
         }
 
         // Strip request to only allowed fields to prevent mass assignment

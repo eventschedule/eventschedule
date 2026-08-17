@@ -23,6 +23,11 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(\App\Services\GeoIpService::class);
 
+        // Singleton so the driver instances and the config read behind
+        // PaymentGatewayManager::all() are shared across a request. The sales table asks it about
+        // every row on the page.
+        $this->app->singleton(\App\Services\Payments\PaymentGatewayManager::class);
+
         $this->callAfterResolving('translator', function ($translator) {
             $translator->getLoader()->addPath(config('app.lang_overrides_path'));
         });

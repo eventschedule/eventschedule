@@ -95,8 +95,14 @@ class ReleaseTickets extends Command
      */
     private function releaseGiftCardHolds(): void
     {
+        // Which rails opt out of sweeping is the gateway's own answer now
+        // (PaymentGatewayDriver::expiresUnpaidSales), not a literal 'cash' in two queries. Cash is
+        // still the only one that opts out; the difference is that the next gateway settled in
+        // person declares it once instead of being missed here.
+        $nonExpiring = payment_gateways()->nonExpiringKeys();
+
         $staleCards = GiftCard::where('status', 'unpaid')
-            ->where('payment_method', '!=', 'cash')
+            ->whereNotIn('payment_method', $nonExpiring)
             ->whereRaw('TIMESTAMPDIFF(HOUR, created_at, NOW()) >= 48')
             ->get();
 
@@ -124,7 +130,7 @@ class ReleaseTickets extends Command
         // Cash sales are excluded: like the card loop above, cash orders are never auto-expired -
         // a partial cash redemption's remainder is settled in person and the owner cancels it.
         $heldSales = Sale::where('sales.status', 'unpaid')
-            ->where('sales.payment_method', '!=', 'cash')
+            ->whereNotIn('sales.payment_method', $nonExpiring)
             ->where(function ($q) {
                 $q->whereNull('sales.group_id')->orWhereColumn('sales.group_id', 'sales.id');
             })

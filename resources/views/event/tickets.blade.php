@@ -8,9 +8,16 @@
     // purchase and has nowhere to put a guest list, so carting one would quietly turn it into a
     // single anonymous multi-seat sale and lose exactly the attendee details the organizer turned
     // this on to collect. Those events keep the full form on this page.
-    $cartEligible = in_array($event->payment_method, ['stripe', 'cash'], true)
+    $cartEligible = payment_gateways()->supportsCart($event->payment_method)
         && ! $event->individual_tickets
         && ! request()->embed;
+
+    // This event's gateway, or null for cash and for the provenance markers. Everything the guest
+    // form needs to know about how payment behaves is asked of it rather than matched on its name.
+    $paymentGateway = payment_gateways()->get($event->payment_method);
+    $gatewayMinCharge = $paymentGateway
+        ? ($paymentGateway->amountLimits($event->ticket_currency_code ?: 'USD')[0] ?? 0)
+        : 0;
 
     // Does a full payment schedule still finish before this occurrence, with the organizer's
     // collection runway to spare? Computed server-side because it needs the schedule's timezone
@@ -122,8 +129,13 @@
                     giftCardMessage: '',
                     giftCardBalance: 0,
                     isValidatingGiftCard: false,
-                    isStripePayment: @json($event->payment_method === 'stripe'),
-                    giftCardMinCharge: @json(50 / \App\Utils\MoneyUtils::getSmallestUnitMultiplier($event->ticket_currency_code)),
+                    {{-- Two separate questions that used to share one isStripePayment flag: can this
+                         gateway charge a saved card later (installments), and does it refuse charges
+                         below a floor (which decides how much of a gift card can be applied without
+                         leaving an unchargeable remainder). --}}
+                    installmentsSupported: @json($paymentGateway?->supportsInstallments() ?? false),
+                    hasGatewayMinimum: @json($gatewayMinCharge > 0),
+                    giftCardMinCharge: @json($gatewayMinCharge),
                     isPaymentLinkMode: @json($event->payment_method === 'invoiceninja' && $event->user->invoiceninja_mode === 'payment_link'),
                     {{-- Mirrors TicketController::cartEligibilityError(): a cart can only hold
                          events that could be paid for in one session. --}}
@@ -277,7 +289,7 @@
                  * re-checks all of this in TicketController::checkout() regardless.
                  */
                 installmentsOffered() {
-                    if (! this.installmentsEnabled || ! this.isStripePayment) return false;
+                    if (! this.installmentsEnabled || ! this.installmentsSupported) return false;
                     if (! this.installmentsFitEvent) return false;
                     if (this.installmentCount < 2) return false;
                     if (this.totalSelectedTickets < 1) return false;
@@ -289,7 +301,7 @@
                 },
                 /** Was it offered before discounts were applied? Drives the explanatory notice. */
                 installmentsWereOffered() {
-                    return this.installmentsEnabled && this.isStripePayment
+                    return this.installmentsEnabled && this.installmentsSupported
                         && this.installmentsFitEvent && this.installmentCount >= 2;
                 },
                 /**
@@ -368,7 +380,7 @@
                     let applied = Math.min(this.giftCardBalance, orderTotal);
                     // Mirror the server: Stripe refuses charges below ~50 smallest currency
                     // units, so leave either nothing to pay or at least the minimum.
-                    if (this.isStripePayment) {
+                    if (this.hasGatewayMinimum) {
                         const remainder = orderTotal - applied;
                         if (remainder > 0 && remainder < this.giftCardMinCharge) {
                             applied = Math.max(0, orderTotal - this.giftCardMinCharge);
@@ -986,7 +998,7 @@
 
 <div id="ticket-selector">
     <form action="{{ route('event.checkout', ['subdomain' => $subdomain]) }}" method="post" v-on:submit="validateForm"
-        @if (request()->embed && in_array($event->payment_method, ['stripe', 'invoiceninja', 'payment_url'])) target="_top" @endif>
+        @if (request()->embed && payment_gateways()->redirectsOffsite($event->payment_method)) target="_top" @endif>
         @csrf
         <input type="hidden" name="event_id" value="{{ \App\Utils\UrlUtils::encodeId($event->id) }}">
         <input type="hidden" name="event_date" value="{{ $date }}">
@@ -1691,7 +1703,7 @@
             </button>
         </div>
 
-        @if ($event->payment_method == 'cash' && $event->payment_instructions_html)
+        @if (payment_gateways()->usesPaymentInstructions($event->payment_method) && $event->payment_instructions_html)
             {{-- v-pre: this user content is inside the #ticket-selector Vue mount; without it a {{ }} in the
                  payment instructions would be compiled as a Vue expression (CSTI) in the buyer's browser. --}}
             <div class="mt-8 custom-content" v-pre>

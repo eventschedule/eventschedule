@@ -200,7 +200,7 @@
                   default     => '',
               };
               $canShowPayNow = $isUnpaid
-                  && in_array($sale->payment_method, ['stripe', 'invoiceninja', 'payment_url'])
+                  && payment_gateways()->canResumePayment($sale->payment_method)
                   && (!$sale->group_id || $sale->isPrimarySale());
               $tierBg     = $isUnpaid ? 'bg-yellow-500/25 print:bg-yellow-50' : 'bg-red-500/25 print:bg-red-50';
               $tierBorder = $isUnpaid ? 'border-yellow-400/70 print:border-yellow-300' : 'border-red-400/70 print:border-red-300';
@@ -228,7 +228,7 @@
                         <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
                       </svg>
                     </a>
-                  @elseif ($isUnpaid && $sale->payment_method === 'cash')
+                  @elseif ($isUnpaid && payment_gateways()->usesPaymentInstructions($sale->payment_method))
                     <p class="text-[12px] mt-[6px] {{ $tierSub }} italic">
                       {{ __('messages.pay_at_the_door') }}
                     </p>
