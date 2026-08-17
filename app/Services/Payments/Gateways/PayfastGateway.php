@@ -388,14 +388,21 @@ class PayfastGateway extends PaymentGatewayDriver
 
         $client = new PayfastClient((bool) $owner->payfast_sandbox);
 
-        // Advisory, NOT a gate. $request->ip() is only the buyer-facing address when Laravel trusts
-        // the upstream proxy, and config/trustedproxy.php trusts none unless IS_NEXUS is set - so on
-        // a selfhost install behind Cloudflare, a host-level proxy or Docker this is the proxy's
-        // address and would never match. Rejecting on it meant every Payfast payment on those
-        // installs took the buyer's money and issued no ticket, silently, with only a log line.
+        if (! $client->confirmsPayment($payload)) {
+            Log::warning('Payfast did not confirm the ITN payload', ['sale_id' => $sale->id]);
+
+            return response('not confirmed', 400);
+        }
+
+        // Advisory, NOT a gate - and deliberately AFTER the confirmation, because it costs DNS
+        // lookups and gates nothing. $request->ip() is only the buyer-facing address when Laravel
+        // trusts the upstream proxy, and config/trustedproxy.php trusts none unless IS_NEXUS is set -
+        // so on a selfhost install behind Cloudflare, a host-level proxy or Docker this is the
+        // proxy's address and would never match. Rejecting on it meant every Payfast payment on
+        // those installs took the buyer's money and issued no ticket, silently.
         //
         // Nothing is really lost by demoting it. An IP allowlist is the weakest of the checks here
-        // and is entirely subsumed by confirmsPayment() below: nobody can make Payfast confirm a
+        // and is entirely subsumed by confirmsPayment() above: nobody can make Payfast confirm a
         // payment that did not happen, from any address. It is also a moving target - Payfast has
         // added sending addresses that broke merchants relying on the published host list.
         if (! $client->isValidSourceIp($request->ip())) {
@@ -403,12 +410,6 @@ class PayfastGateway extends PaymentGatewayDriver
                 'sale_id' => $sale->id,
                 'ip' => $request->ip(),
             ]);
-        }
-
-        if (! $client->confirmsPayment($payload)) {
-            Log::warning('Payfast did not confirm the ITN payload', ['sale_id' => $sale->id]);
-
-            return response('not confirmed', 400);
         }
 
         $status = strtoupper((string) ($payload['payment_status'] ?? ''));
@@ -432,7 +433,37 @@ class PayfastGateway extends PaymentGatewayDriver
             $this->key(),
         );
 
-        Log::info('Payfast ITN settled', ['sale_id' => $sale->id, 'outcome' => $outcome]);
+        // The outcome decides how loudly this is recorded, because some of them mean Payfast HAS the
+        // buyer's money and this install cannot honour it. All of them still answer 204: a retry
+        // cannot fix any of these, and a non-2xx would just make Payfast redeliver the same news.
+        //
+        //  - released: the sale was expired (ReleaseTickets) or cancelled before the ITN landed -
+        //    realistic for Instant EFT's PENDING-then-COMPLETE flow. Seats already went back;
+        //    reviving would oversell. The buyer paid and holds nothing, so a human must act.
+        //  - deleted / missing: the sale row is gone or flagged deleted; same money-with-no-ticket
+        //    shape.
+        //  - amount_mismatch: parked for review; AdminAlertService already counts these.
+        if (in_array($outcome, ['released', 'deleted', 'missing'], true)) {
+            Log::error('Payfast payment received for a sale that can no longer be honoured', [
+                'sale_id' => $sale->id,
+                'outcome' => $outcome,
+                'pf_payment_id' => $payload['pf_payment_id'] ?? null,
+                'amount_gross' => $payload['amount_gross'] ?? null,
+            ]);
+
+            // report() so hosted installs surface this in Sentry (REPORT_ERRORS); a log line alone
+            // is how the fatal-source-IP bug stayed invisible.
+            report(new \RuntimeException(
+                'Payfast payment received for sale '.$sale->id." that can no longer be honoured (outcome: {$outcome})"
+            ));
+        } elseif ($outcome === 'amount_mismatch') {
+            Log::warning('Payfast ITN amount mismatch - sale parked for review', [
+                'sale_id' => $sale->id,
+                'amount_gross' => $payload['amount_gross'] ?? null,
+            ]);
+        } else {
+            Log::info('Payfast ITN settled', ['sale_id' => $sale->id, 'outcome' => $outcome]);
+        }
 
         return response()->noContent();
     }

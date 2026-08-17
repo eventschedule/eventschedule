@@ -2,6 +2,7 @@
 
 namespace App\Services\Payments\Payfast;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -46,27 +47,35 @@ class PayfastClient
             return false;
         }
 
-        $allowed = [];
+        // Cached: this check is advisory (its result only feeds a log line), so it must not cost
+        // up to four blocking DNS resolutions on the settlement path for every ITN. Five minutes is
+        // far shorter than any DNS change Payfast would make. Literal addresses in the config skip
+        // resolution entirely, which is also what keeps the tests off the network.
+        $allowed = Cache::remember('payfast:itn_ips', 300, function () {
+            $resolved = [];
 
-        foreach ((array) config('payments.payfast.itn_hosts', []) as $host) {
-            // A literal address in the config is taken as-is; anything else is resolved.
-            if (filter_var($host, FILTER_VALIDATE_IP)) {
-                $allowed[] = $host;
+            foreach ((array) config('payments.payfast.itn_hosts', []) as $host) {
+                // A literal address in the config is taken as-is; anything else is resolved.
+                if (filter_var($host, FILTER_VALIDATE_IP)) {
+                    $resolved[] = $host;
 
-                continue;
+                    continue;
+                }
+
+                $addresses = gethostbynamel($host);
+
+                if ($addresses !== false) {
+                    $resolved = array_merge($resolved, $addresses);
+                }
             }
 
-            $resolved = gethostbynamel($host);
-
-            if ($resolved !== false) {
-                $allowed = array_merge($allowed, $resolved);
-            }
-        }
+            return $resolved;
+        });
 
         if (! $allowed) {
-            // Resolution failed for every host. Fail closed: a DNS blip must not turn into an open
-            // door on the endpoint that marks sales paid. The signature check has already run, and
-            // Payfast retries, so a genuine payment is not lost.
+            // Resolution failed for every host. Reported as not-valid, but note the caller treats
+            // this whole check as ADVISORY - a DNS blip only changes what gets logged, never whether
+            // a genuine payment settles. confirmsPayment() is the gate.
             Log::warning('Payfast ITN source check could not resolve any valid host');
 
             return false;

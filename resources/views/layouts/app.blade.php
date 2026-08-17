@@ -137,16 +137,19 @@
             }
         }, true);
 
-        // data-submit-on-load on a form: submit it as soon as the page is ready.
+        // data-submit-on-load on a form: submit it as soon as the DOM is ready.
         //
         // For gateways whose checkout takes a signed POST rather than a redirect (Payfast's Custom
         // integration), so the interstitial is invisible in practice. The form keeps a real submit
-        // button as the no-JS fallback, and this is a delegated listener rather than an inline
-        // handler so it needs no CSP exception.
-        (function () {
+        // button as the no-JS fallback, and living in this nonce'd block means no CSP exception.
+        //
+        // MUST wait for DOMContentLoaded: this script block is in <head>, so a bare querySelector
+        // here runs before <body> exists and finds nothing - which is exactly the bug the first
+        // version shipped with, leaving every buyer to click the fallback button by hand.
+        document.addEventListener('DOMContentLoaded', function () {
             var pending = document.querySelector('form[data-submit-on-load]');
             if (pending) pending.submit();
-        })();
+        });
 
         // data-auto-submit on a control (e.g. <select>): submit its form on change
         document.addEventListener('change', function (e) {

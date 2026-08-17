@@ -264,6 +264,28 @@ class SaleSettlementServiceTest extends TestCase
         $this->assertSame(0.0, (float) AnalyticsEventsDaily::where('event_id', $event->id)->sum('revenue'));
     }
 
+    public function test_a_deleted_sale_is_never_settled(): void
+    {
+        // deleteSale() cancels live rows first, but an amount_mismatch row keeps its status and only
+        // gains the is_deleted flag - so it stays findable by transaction_reference, and without the
+        // guard a correct-amount retry would settle a sale the owner deleted, credit its revenue and
+        // email its ticket.
+        $sale = $this->saleFor(price: 100);
+        $sale->status = 'amount_mismatch';
+        $sale->is_deleted = true;
+        $sale->saveQuietly();
+
+        $outcome = $this->settlement()->settle($sale, 'ref-1', 100.0, 'test');
+
+        $this->assertSame('deleted', $outcome);
+        $this->assertSame('amount_mismatch', $sale->fresh()->status);
+        $this->assertSame(
+            0.0,
+            (float) AnalyticsEventsDaily::where('event_id', $sale->event_id)->sum('revenue'),
+            'a deleted sale must not be credited',
+        );
+    }
+
     public function test_a_missing_sale_is_reported_rather_than_fataling(): void
     {
         $sale = $this->saleFor();

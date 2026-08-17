@@ -56,7 +56,7 @@ class SaleSettlementService
      *                                look at, and on the Invoice Ninja rails a retry has never been
      *                                able to settle it. Keeping that gate strict means a flagged sale
      *                                cannot quietly clear itself.
-     * @return string one of paid|already_paid|released|amount_mismatch|missing|not_settleable
+     * @return string one of paid|already_paid|released|deleted|amount_mismatch|missing|not_settleable
      */
     public function settle(
         Sale $sale,
@@ -74,6 +74,20 @@ class SaleSettlementService
 
             if (! $locked) {
                 return 'missing';
+            }
+
+            // A deleted sale must never be revived, emailed or credited. deleteSale() cancels live
+            // rows first, but an amount_mismatch row keeps its status and only gains the is_deleted
+            // flag - so it is still findable by transaction_reference, and without this a correct-
+            // amount retry would settle a sale the owner deleted and email its ticket.
+            if ($locked->is_deleted) {
+                Log::warning('Payment callback for a deleted sale - not marking paid', [
+                    'sale_id' => $locked->id,
+                    'status' => $locked->status,
+                    'gateway' => $context,
+                ]);
+
+                return 'deleted';
             }
 
             // Idempotent by design. Gateways retry, and the buyer's return can race the callback.

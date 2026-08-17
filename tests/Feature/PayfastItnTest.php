@@ -281,6 +281,40 @@ class PayfastItnTest extends TestCase
         }
     }
 
+    public function test_a_payment_for_a_released_sale_is_escalated_not_just_logged(): void
+    {
+        // The money-with-no-ticket shape: an Instant EFT can go PENDING then COMPLETE, and the sale
+        // can be expired by ReleaseTickets in between. Not reviving it is correct (the seats are
+        // gone) - but the first version answered 204 and logged it at INFO under the word "settled",
+        // which is how a buyer loses real money with no alert anywhere. It must be reported so
+        // hosted installs see it in Sentry; the 204 stays because a retry cannot fix it.
+        \Illuminate\Support\Facades\Exceptions::fake();
+
+        $this->sale->status = 'expired';
+        $this->sale->save();
+
+        $this->postItn($this->itnBody())->assertNoContent();
+
+        $this->assertSame('expired', $this->sale->fresh()->status);
+
+        \Illuminate\Support\Facades\Exceptions::assertReported(
+            fn (\RuntimeException $e) => str_contains($e->getMessage(), 'no longer be honoured')
+        );
+    }
+
+    public function test_an_amount_mismatch_is_not_escalated_to_sentry(): void
+    {
+        // Mismatches are parked for review and AdminAlertService already counts them - reporting
+        // every one would bury the genuinely stranded payments the exception exists to surface.
+        \Illuminate\Support\Facades\Exceptions::fake();
+
+        $this->postItn($this->itnBody(['amount_gross' => '250.00']))->assertNoContent();
+
+        $this->assertSame('amount_mismatch', $this->sale->fresh()->status);
+
+        \Illuminate\Support\Facades\Exceptions::assertNotReported(\RuntimeException::class);
+    }
+
     public function test_a_released_sale_is_never_revived(): void
     {
         // Expiry already gave the seats back, and marking paid does not re-take them, so an ITN that
