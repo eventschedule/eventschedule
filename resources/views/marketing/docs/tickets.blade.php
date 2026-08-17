@@ -13,6 +13,7 @@
             <x-doc-nav-link href="#free-events">Free Tickets</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-group label="Payment" href="#payment">
+            <x-doc-nav-link href="#payfast">Payfast</x-doc-nav-link>
             <x-doc-nav-link href="#invoiceninja-modes">Invoice Ninja Modes</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-link href="#options">Options</x-doc-nav-link>
@@ -277,7 +278,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">The Tickets mode has five sub-tabs:</p>
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">General:</strong> the ticket types themselves, plus passes and per-type sales dates</li>
-            <li><strong class="text-gray-900 dark:text-white"><a href="#payment" class="doc-link">Payment</a>:</strong> payment method (Cash, Stripe, Invoice Ninja or Payment URL) and the currency</li>
+            <li><strong class="text-gray-900 dark:text-white"><a href="#payment" class="doc-link">Payment</a>:</strong> payment method (Cash, Stripe, Invoice Ninja, Payfast or Payment URL) and the currency</li>
             <li><strong class="text-gray-900 dark:text-white"><a href="#options" class="doc-link">Options</a>:</strong> checkout toggles, custom fields, ticket notes and a terms link</li>
             <li><strong class="text-gray-900 dark:text-white"><a href="#promo-codes" class="doc-link">Promo Codes</a>:</strong> discount codes <x-doc-badge plan="pro" /></li>
             <li><strong class="text-gray-900 dark:text-white"><a href="#add-ons" class="doc-link">Add-ons</a>:</strong> optional extras buyers can attach to an order <x-doc-badge plan="pro" /></li>
@@ -419,7 +420,7 @@
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">What can share a cart</div>
-            <p>A single payment cannot be split across payment accounts, currencies or payment rails, so a cart only holds events that agree on all three: the same owner, the same ticket currency, and the same payment method. The cart says so when an event cannot join. Stripe and cash are supported; Invoice Ninja and Payment URL are not, since both send the buyer to a page built for one event.</p>
+            <p>A single payment cannot be split across payment accounts, currencies or payment rails, so a cart only holds events that agree on all three: the same owner, the same ticket currency, and the same payment method. The cart says so when an event cannot join. Stripe and cash are supported; Invoice Ninja, Payfast and Payment URL are not, since each sends the buyer to a page built for one event.</p>
             <p>Events using individual tickets keep their own checkout. The cart collects one name and email for the whole purchase and has nowhere to put a guest list, so carting one would lose exactly the attendee details that setting exists to collect.</p>
         </div>
 
@@ -466,7 +467,7 @@
             </svg>
             Payment
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Before you can take money online you need to connect a payment method. Payment methods belong to your account, not to a single event, so you connect one once and pick it per event. Event Schedule supports four options:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Before you can take money online you need to connect a payment method. Payment methods belong to your account, not to a single event, so you connect one once and pick it per event. Event Schedule supports five options:</p>
 
         <div class="doc-fields" id="payment-setup">
             <div class="doc-field">
@@ -480,6 +481,10 @@
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Payment URL</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Use any payment link (PayPal, Venmo, Square, etc.) by entering the URL.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Payfast</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Take card, Instant EFT, Capitec Pay and the other South African methods. Settles in rand (ZAR) only. See <a href="#payfast" class="doc-link">Connecting Payfast</a>.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Cash</h4>
@@ -505,6 +510,30 @@
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Recommended</div>
             <p>We recommend using Stripe with Invoice Ninja for the best experience. Invoice Ninja provides additional features like invoicing, payment reminders, and financial reporting.</p>
+        </div>
+
+        <h3 id="payfast" class="doc-subheading">Connecting Payfast</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4"><x-link href="https://payfast.io" target="_blank">Payfast</x-link> is a South African gateway, useful where Stripe is not available. It settles in rand (ZAR) only, so Payfast appears as an option only on events priced in ZAR.</p>
+        <ol class="doc-list doc-list-numbered mb-6">
+            <li>In Payfast, open <strong class="text-gray-900 dark:text-white">Settings</strong> and note your <strong class="text-gray-900 dark:text-white">Merchant ID</strong> and <strong class="text-gray-900 dark:text-white">Merchant Key</strong></li>
+            <li>Set a <strong class="text-gray-900 dark:text-white">passphrase</strong> in the same Payfast screen if you have not already</li>
+            <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Settings &rarr; Payment Methods</strong> and open the <strong class="text-gray-900 dark:text-white">Payfast</strong> tab</li>
+            <li>Enter all three values and save</li>
+            <li>Payfast now appears on the <strong class="text-gray-900 dark:text-white">Payment</strong> tab of any event priced in ZAR</li>
+        </ol>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The passphrase is required rather than optional. It is what lets us verify that a payment notification genuinely came from Payfast, so without one there is no way to tell a real payment from a forged one.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">By default Payfast shows buyers every method your account supports. To send them straight to one instead, tick exactly one entry under <strong class="text-gray-900 dark:text-white">Payment methods</strong>. Ticking several, or none, leaves the choice to Payfast.</p>
+
+        <div class="doc-callout doc-callout-info mb-6">
+            <div class="doc-callout-title">Testing with the sandbox</div>
+            <p>Turn on <strong class="text-gray-900 dark:text-white">Test mode</strong> to send payments to Payfast's sandbox instead of taking real money. Payfast's public sandbox credentials are merchant ID <code>10000100</code> and merchant key <code>46f0cd694581a</code>. Note that Payfast cannot reach a notification URL on <code>localhost</code>, so a sandbox purchase only completes end to end on a publicly reachable install. Turn test mode off before you sell real tickets.</p>
+        </div>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Refunds and minimums</div>
+            <p>Payfast will not process a payment under R5.00, so Payfast is not offered for orders below that. Refunds are issued from your own Payfast dashboard; marking a sale refunded here records it without moving money, which is the same as every other payment method.</p>
         </div>
     </section>
 
