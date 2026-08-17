@@ -70,7 +70,7 @@
              2. A real <table> of postings, one row per thing the
                 integration writes, each row traceable to code
                 (InvoiceNinja::findClient / createClient / createInvoice,
-                TicketController::invoiceninjaInvoiceCheckout).
+                InvoiceNinjaGateway::invoiceninjaInvoiceCheckout).
              3. Ledger typography instead of ornament: a serif
                 letterspaced caption face (.es-ledg-tag), tabular
                 monospace figures (.es-ledg-num), and the accountant's
@@ -522,7 +522,7 @@
             [
                 'left'    => 'Each ticket type',
                 'leftSub' => $entry['qty'].' x '.$entry['ticket'],
-                // TicketController::invoiceninjaInvoiceCheckout() line items
+                // InvoiceNinjaGateway::invoiceninjaInvoiceCheckout() line items
                 'right'   => 'A line item: the ticket name as the product, its description as the note, the quantity bought and the price each.',
             ],
             [

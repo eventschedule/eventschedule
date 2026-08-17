@@ -57,7 +57,7 @@
            CONCEPT: a payout statement. The page is laid out the way the
            money actually moves, because that is the whole argument. The
            charge for a ticket is created ON THE SELLER'S OWN CONNECTED
-           ACCOUNT - TicketController::stripeCheckout() passes
+           ACCOUNT - StripeGateway::stripeCheckout() passes
            ['stripe_account' => $event->user->stripe_account_id] as the
            request option - and there is no application_fee_amount
            anywhere in the repository. So "zero platform fees" is not a

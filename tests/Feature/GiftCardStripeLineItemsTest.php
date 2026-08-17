@@ -2,18 +2,18 @@
 
 namespace Tests\Feature;
 
-use App\Http\Controllers\TicketController;
 use App\Models\Event;
 use App\Models\PromoCode;
 use App\Models\SaleTicket;
 use App\Models\Ticket;
+use App\Services\Payments\Gateways\StripeGateway;
 use App\Utils\MoneyUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
 /**
- * Unit tests for TicketController::buildStripeLineItems() - the money math that scales Stripe
+ * Unit tests for StripeGateway::buildStripeLineItems() - the money math that scales Stripe
  * line items for promo discounts + gift-card tender and reconciles the rounding. Guards the
  * "negative unit_amount → Stripe rejects → 500" crash for individual tickets + promo + gift card,
  * and the ~1c over/undercharge from per-unit rounding on a volume-discounted multi-quantity line.
@@ -82,11 +82,13 @@ class GiftCardStripeLineItemsTest extends TestCase
      */
     private function buildLegs($saleTickets, array $promoLegs, float $giftTotal, float $expectedTotal): array
     {
-        $controller = app(TicketController::class);
-        $method = new \ReflectionMethod($controller, 'buildStripeLineItems');
+        // Reflection because the method is private: it is internal to the driver's own pricing, and
+        // exposing it just to test it would make it look like a contract other code may call.
+        $gateway = app(StripeGateway::class);
+        $method = new \ReflectionMethod($gateway, 'buildStripeLineItems');
         $method->setAccessible(true);
 
-        return $method->invoke($controller, collect($saleTickets), $this->event, $promoLegs, $giftTotal, $expectedTotal);
+        return $method->invoke($gateway, collect($saleTickets), $this->event, $promoLegs, $giftTotal, $expectedTotal);
     }
 
     private function assertLineItemsValid(array $lineItems, float $expectedTotal): void

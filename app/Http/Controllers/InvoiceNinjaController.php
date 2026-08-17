@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AnalyticsEventsDaily;
 use App\Models\Event;
 use App\Models\GiftCard;
 use App\Models\Sale;
@@ -10,7 +9,6 @@ use App\Models\User;
 use App\Services\AuditService;
 use App\Services\EmailService;
 use App\Services\SaleSettlementService;
-use App\Services\WebhookService;
 use App\Utils\InvoiceNinja;
 use App\Utils\MoneyUtils;
 use App\Utils\UrlUtils;
@@ -261,10 +259,10 @@ class InvoiceNinjaController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Sale not found'], 400);
         }
 
-        $didTransitionToPaid = false;
+        $readyToSettle = false;
 
         // Mark sale as paid with row locking
-        \DB::transaction(function () use ($sale, $event, $payload, &$didTransitionToPaid) {
+        \DB::transaction(function () use ($sale, $event, $payload, &$readyToSettle) {
             $sale = Sale::lockForUpdate()->find($sale->id);
             if ($sale->status !== 'unpaid') {
                 return;
@@ -390,28 +388,27 @@ class InvoiceNinjaController extends Controller
                 return;
             }
 
-            $sale->status = 'paid';
+            // Persist the figures derived above, still unpaid. This has to be its own save: the
+            // settlement below re-reads the row under its own lock, so anything left only in memory
+            // here would be silently discarded and the sale would settle against a stale total.
             $sale->save();
-            $didTransitionToPaid = true;
-
-            AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
-                ['status' => 'unpaid'], ['status' => 'paid'], 'invoiceninja_event_purchase:event_id:'.$sale->event_id);
-
-            AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
-            if ($sale->discount_amount > 0) {
-                AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
-            }
-
-            WebhookService::dispatch('sale.paid', $sale);
-            if ($sale->group_id && $sale->isPrimarySale()) {
-                foreach (Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->get() as $gs) {
-                    WebhookService::dispatch('sale.paid', $gs);
-                }
-            }
+            $readyToSettle = true;
         });
 
-        if ($didTransitionToPaid) {
-            (new EmailService)->sendSaleConfirmationEmails($sale->refresh());
+        if ($readyToSettle) {
+            // receivedAmount is null on purpose - the reconciliation above has already run, against
+            // the invoice total rather than legTotalPayment(), and passing it would have the service
+            // overwrite the server-computed payment_amount with the payload's own figure.
+            //
+            // onlyWhenUnpaid preserves this rail's gate: a sale in amount_mismatch stays there for a
+            // human rather than clearing itself on a retry.
+            app(SaleSettlementService::class)->settle(
+                $sale,
+                null,
+                null,
+                'invoiceninja_event_purchase',
+                onlyWhenUnpaid: true,
+            );
         }
 
         return response()->json(['status' => 'success']);

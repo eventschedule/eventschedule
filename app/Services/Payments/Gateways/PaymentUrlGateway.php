@@ -2,8 +2,11 @@
 
 namespace App\Services\Payments\Gateways;
 
+use App\Models\Sale;
 use App\Models\User;
+use App\Services\Payments\CheckoutContext;
 use App\Services\Payments\PaymentGatewayDriver;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * A plain link out to whatever the owner already uses - Venmo, Cash App, PayPal.me, a bank page.
@@ -40,5 +43,42 @@ class PaymentUrlGateway extends PaymentGatewayDriver
     public function settingsView(): ?string
     {
         return 'profile.partials.payments.payment-url';
+    }
+
+    /**
+     * Send the buyer to the owner's own link. That is the whole integration: we never hear from the
+     * provider, and the buyer comes back through an HMAC-signed return URL.
+     */
+    public function startCheckout(CheckoutContext $context): Response
+    {
+        return redirect($context->owner()->payment_url);
+    }
+
+    /**
+     * A per-sale callback token, so one leaked return URL cannot mark every other sale paid.
+     *
+     * Derived rather than stored, which is why this rail needed no schema change to get per-sale
+     * tokens. Kept here with verify() because the two are only ever meaningful together.
+     */
+    public static function generateHmac(Sale $sale, $paymentSecret): string
+    {
+        return hash_hmac('sha256', (string) $sale->id, $paymentSecret);
+    }
+
+    /**
+     * Accepts either the per-sale token or, for links handed out before per-sale tokens existed, the
+     * owner's global payment_secret.
+     */
+    public function verifySecret(string $secret, Sale $sale, $owner): bool
+    {
+        if (! $owner || ! $owner->payment_secret) {
+            return false;
+        }
+
+        if (hash_equals(self::generateHmac($sale, $owner->payment_secret), $secret)) {
+            return true;
+        }
+
+        return hash_equals((string) $owner->payment_secret, $secret);
     }
 }

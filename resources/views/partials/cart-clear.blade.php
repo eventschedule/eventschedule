@@ -6,7 +6,7 @@
     page to empty itself - and a cart still holding a completed purchase shows a live CHECKOUT
     button on the buyer's next visit to the schedule, which would charge them for it again.
 
-    Driven by the 'cart_purchased' flash that TicketController::redirectToPurchaseLanding() sets, so
+    Driven by the 'cart_purchased' flash that PaymentGatewayDriver::redirectToPurchaseLanding() sets, so
     it fires only on the redirect that follows a purchase. A ticket link is permanent and gets
     reopened long afterwards; clearing on every view would silently empty a cart the buyer had
     since refilled. An abandoned payment (checkout.cancel) sets no flash and keeps its cart.
