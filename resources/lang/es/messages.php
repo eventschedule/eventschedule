@@ -434,6 +434,8 @@ return [
     'updated_schedule' => 'Horario actualizado con éxito',
     'embed' => 'Incrustar',
     'about' => 'Acerca de',
+    'contact_us' => 'Contáctanos',
+    'contact' => 'Contacto',
     'social_media' => 'Redes Sociales',
     'create_schedule' => 'Crear Horario',
     'create_your_own_event_schedule' => '¡Crea tu propio horario de eventos!',

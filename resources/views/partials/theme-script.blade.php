@@ -15,13 +15,28 @@
     on the :root/.dark fallback so the six palettes can never fight a schedule
     owner's configured colours.
 --}}
-@php($variants = $variants ?? false)
+@php
+    $variants = $variants ?? false;
+    // Built here rather than inlined into @json below: a multi-line array literal inside the
+    // directive truncates. These are the allow-list setThemeVariant() validates against, so a
+    // palette present in config but missing here would render a swatch that silently refuses
+    // to apply.
+    $lightVariants = [];
+    $darkVariants = [];
+    foreach (config('app.ap_palettes') as [$paletteName, $paletteBrightness]) {
+        if ($paletteBrightness === 'dark') {
+            $darkVariants[] = $paletteName;
+        } else {
+            $lightVariants[] = $paletteName;
+        }
+    }
+@endphp
 <script {!! nonce_attr() !!}>
     (function() {
         var KEY = 'theme', KEY_LIGHT = 'themeLight', KEY_DARK = 'themeDark';
         var VARIANTS = @json($variants);
-        var LIGHT = ['sand', 'mist', 'paper'];
-        var DARK = ['espresso', 'midnight', 'carbon'];
+        var LIGHT = @json($lightVariants);
+        var DARK = @json($darkVariants);
         var DEFAULT_LIGHT = 'mist', DEFAULT_DARK = 'midnight';
 
         function get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }

@@ -438,6 +438,8 @@ return [
     'updated_schedule' => 'Planning mis à jour avec succès',
     'embed' => 'Intégrer',
     'about' => 'À propos',
+    'contact_us' => 'Nous contacter',
+    'contact' => 'Contact',
     'social_media' => 'Réseaux sociaux',
     'create_schedule' => 'Créer un planning',
     'create_your_own_event_schedule' => 'Créez votre propre planning d\'événements !',

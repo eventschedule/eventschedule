@@ -83,9 +83,18 @@
                     </div>
 
                     <!-- Sidebar component, swap this element with another sidebar if you like -->
-                    <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 dark:bg-[#1A1A1A] sidebar-gradient px-6 pb-4 ring-1 ring-white/10">
+                    {{-- Scrolling nav column + pinned footer. min-h-0 on both is load-bearing:
+                         without it the flex child refuses to shrink below its content height,
+                         overflow-y-auto never engages and the footer is pushed off screen. The
+                         outer wrapper deliberately does NOT clip, so the footer's theme popover
+                         can open upward over the nav list. --}}
+                    <div class="flex grow flex-col min-h-0 bg-gray-900 dark:bg-[#1A1A1A] sidebar-gradient ring-1 ring-white/10">
 
-                        @include('layouts.navigation')                        
+                        <div class="flex flex-1 min-h-0 flex-col gap-y-5 overflow-y-auto px-6">
+                            @include('layouts.navigation')
+                        </div>
+
+                        @include('layouts.sidebar-footer')
 
                     </div>
                 </div>
@@ -95,9 +104,15 @@
         <!-- Static sidebar for desktop -->
         <div class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col lg:start-0">
             <!-- Sidebar component, swap this element with another sidebar if you like -->
-            <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 dark:bg-[#1A1A1A] sidebar-gradient px-6 pb-4">
+            {{-- Same scroll/footer split as the drawer above - see the comment there for why
+                 min-h-0 and the non-clipping outer wrapper both matter. --}}
+            <div class="flex grow flex-col min-h-0 bg-gray-900 dark:bg-[#1A1A1A] sidebar-gradient">
 
-                @include('layouts.navigation')
+                <div class="flex flex-1 min-h-0 flex-col gap-y-5 overflow-y-auto px-6">
+                    @include('layouts.navigation')
+                </div>
+
+                @include('layouts.sidebar-footer')
 
             </div>
         </div>
@@ -239,6 +254,67 @@
             @include('partials.support-chat-widget')
         @endif
     @endauth
+
+    {{-- About, opened by the sidebar footer's info button. It lives out here rather than in
+         layouts/sidebar-footer.blade.php because that partial renders twice (drawer + desktop
+         rail): two modals sharing the name would both answer the same open-modal event and
+         stack two overlays. Out here it is rendered once, and outside the sidebar's own
+         scroll and stacking context. --}}
+    <x-modal name="about-app" maxWidth="sm" :ariaLabel="__('messages.about')">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('messages.about') }}</h3>
+            <button type="button" x-on:click="$dispatch('close')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" aria-label="{{ __('messages.close') }}">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <div class="p-6">
+            {{-- The wordmark, not images/logo.png: these two config values are what a selfhost
+                 operator overrides through APP_LOGO_DARK / APP_LOGO_LIGHT to rebrand, and they
+                 swap with the theme so a dark mark never lands on the dark modal surface. Same
+                 pair as components/application-logo.blade.php, inlined because that component
+                 wraps itself in a p-6 that does not fit here. The mark carries the app name,
+                 so there is no separate name line. --}}
+            <div>
+                <img class="h-9 w-auto dark:hidden" src="{{ asset(ltrim(config('app.logo_dark'), '/')) }}" alt="{{ config('app.name') }}">
+                <img class="h-9 w-auto hidden dark:block" src="{{ asset(ltrim(config('app.logo_light'), '/')) }}" alt="{{ config('app.name') }}">
+                <div class="mt-3 text-sm text-gray-500 dark:text-gray-400">
+                    <bdi dir="ltr">
+                        <x-link href="https://github.com/eventschedule/eventschedule/releases" target="_blank" hideIcon>{{ config('self-update.version_installed') }}</x-link>
+                    </bdi>
+                </div>
+            </div>
+
+            <div class="mt-6 flex flex-wrap items-center gap-3 text-sm">
+                <x-link :href="\App\Utils\HelpUtils::getDocUrl()" target="_blank">{{ __('messages.help') }}</x-link>
+
+                <a href="https://github.com/eventschedule/eventschedule" target="_blank" rel="noopener noreferrer"
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300 transition-all duration-200 no-underline">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                    </svg>
+                    @if (isset($githubStars) && $githubStars)
+                    <svg class="h-3.5 w-3.5 text-yellow-500" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    {{ number_format($githubStars) }}
+                    @else
+                    GitHub
+                    @endif
+                </a>
+
+                @if (config('app.hosted'))
+                <bdi dir="ltr"><x-link href="mailto:{{ config('app.support_email') }}?subject=Feedback" hideIcon>{{ config('app.support_email') }}</x-link></bdi>
+                @endif
+            </div>
+
+            <div class="mt-6 flex justify-end">
+                <button type="button" x-on:click="$dispatch('close')" class="px-4 py-3 text-base font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
+                    {{ __('messages.close') }}
+                </button>
+            </div>
+        </div>
+    </x-modal>
 
     <script {!! nonce_attr() !!}>
         document.getElementById('logout-link').addEventListener('click', function(e) {

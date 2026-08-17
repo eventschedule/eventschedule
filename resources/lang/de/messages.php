@@ -408,6 +408,8 @@ return [
     'updated_schedule' => 'Zeitplan erfolgreich aktualisiert',
     'embed' => 'Einbetten',
     'about' => 'Über',
+    'contact_us' => 'Kontaktieren Sie uns',
+    'contact' => 'Kontakt',
     'social_media' => 'Soziale Medien',
     'create_schedule' => 'Zeitplan erstellen',
     'create_your_own_event_schedule' => 'Erstellen Sie Ihren eigenen Veranstaltungszeitplan!',

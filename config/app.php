@@ -213,6 +213,36 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Admin Portal Palettes
+    |--------------------------------------------------------------------------
+    |
+    | The six --ap-* palettes, ported from the Flutter client's InTheme design
+    | system: [name, brightness, page ground, card surface]. The last two are the
+    | two-tone swatch shown in the picker, not the palette itself.
+    |
+    | This is the source for the NAMES: both pickers that offer them (the sidebar
+    | footer's theme popover and the Appearance tab in profile settings) and the
+    | allow-list the pre-paint script validates a stored choice against
+    | (partials/theme-script.blade.php) all read it, so none of them can drift.
+    |
+    | What is NOT derived from here, and must be added by hand for a new palette:
+    | the data-theme block in resources/css/app.css that defines its tokens, the
+    | fallback copy in resources/css/marketing-app.css, and the variant_<name>
+    | key in every language file under resources/lang.
+    |
+    */
+
+    'ap_palettes' => [
+        ['sand', 'light', '#F6F4EF', '#FFFFFF'],
+        ['mist', 'light', '#ECEEF2', '#FFFFFF'],
+        ['paper', 'light', '#FFFFFF', '#FAFAF9'],
+        ['espresso', 'dark', '#15140F', '#1F1E18'],
+        ['midnight', 'dark', '#0F1115', '#181B21'],
+        ['carbon', 'dark', '#000000', '#0E0E0E'],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Maximum Sponsors
     |--------------------------------------------------------------------------
     |

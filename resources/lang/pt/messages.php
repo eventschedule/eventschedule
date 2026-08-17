@@ -820,6 +820,8 @@ return [
     'deleted_schedule' => 'Agenda excluída com sucesso',
     'embed' => 'Incorporar',
     'about' => 'Sobre',
+    'contact_us' => 'Fale Conosco',
+    'contact' => 'Contato',
     'social_media' => 'Mídia social',
     'payment_url' => 'Link de Pagamento',
 

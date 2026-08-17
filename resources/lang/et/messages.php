@@ -485,6 +485,8 @@ return [
     'updated_schedule' => 'Ajakava edukalt värskendatud',
     'embed' => 'Manusta',
     'about' => 'Umbes',
+    'contact_us' => 'Võta meiega ühendust',
+    'contact' => 'Kontakt',
     'social_media' => 'Sotsiaalmeedia',
     'create_schedule' => 'Loo ajakava',
     'create_your_own_event_schedule' => 'Koostage oma sündmuste ajakava!',

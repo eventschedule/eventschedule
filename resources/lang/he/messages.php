@@ -573,6 +573,8 @@ return [
     'updated_schedule' => 'לוח הזמנים עודכן בהצלחה',
     'embed' => 'הטמע',
     'about' => 'אודות',
+    'contact_us' => 'צור קשר',
+    'contact' => 'קשר',
     'social_media' => 'מדיה חברתית',
     'payment_url' => 'קישור תשלום',
 

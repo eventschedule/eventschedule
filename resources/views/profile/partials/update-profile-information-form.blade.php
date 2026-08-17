@@ -260,14 +260,7 @@
                 <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.palette') }}</h3>
                 <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ __('messages.palette_help') }}</p>
                 <div class="mt-3 flex flex-wrap gap-2" role="radiogroup" aria-label="{{ __('messages.palette') }}">
-                    @foreach ([
-                        ['sand', 'light', '#F6F4EF', '#FFFFFF'],
-                        ['mist', 'light', '#ECEEF2', '#FFFFFF'],
-                        ['paper', 'light', '#FFFFFF', '#FAFAF9'],
-                        ['espresso', 'dark', '#15140F', '#1F1E18'],
-                        ['midnight', 'dark', '#0F1115', '#181B21'],
-                        ['carbon', 'dark', '#000000', '#0E0E0E'],
-                    ] as [$variant, $brightness, $swatchBg, $swatchSurface])
+                    @foreach (config('app.ap_palettes') as [$variant, $brightness, $swatchBg, $swatchSurface])
                         <button type="button" data-variant="{{ $variant }}" data-brightness="{{ $brightness }}"
                             class="js-theme-variant-btn ap-theme-option hidden items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-medium transition-all duration-200"
                             role="radio" aria-checked="false">

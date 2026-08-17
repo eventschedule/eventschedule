@@ -822,6 +822,8 @@ return [
     'deleted_schedule' => 'Programma eliminato con successo',
     'embed' => 'Incorpora',
     'about' => 'Informazioni',
+    'contact_us' => 'Contattaci',
+    'contact' => 'Contatto',
     'social_media' => 'Social media',
     'payment_url' => 'Link di Pagamento',
 

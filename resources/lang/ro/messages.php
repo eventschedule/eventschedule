@@ -486,6 +486,8 @@ return [
     'updated_schedule' => 'Program actualizat cu succes',
     'embed' => 'Încorporează',
     'about' => 'Despre',
+    'contact_us' => 'Contactează-ne',
+    'contact' => 'Contact',
     'social_media' => 'Rețele Sociale',
     'create_schedule' => 'Creează Program',
     'create_your_own_event_schedule' => 'Creează-ți propriul program de evenimente!',

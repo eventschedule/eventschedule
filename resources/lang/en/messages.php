@@ -485,6 +485,8 @@ return [
     'updated_schedule' => 'Successfully updated schedule',
     'embed' => 'Embed',
     'about' => 'About',
+    'contact_us' => 'Contact Us',
+    'contact' => 'Contact',
     'social_media' => 'Social Media',
     'create_schedule' => 'Create Schedule',
     'create_your_own_event_schedule' => 'Create your own event schedule!',

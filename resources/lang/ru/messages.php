@@ -486,6 +486,8 @@ return [
     'updated_schedule' => 'Расписание успешно обновлено.',
     'embed' => 'Встроить',
     'about' => 'О',
+    'contact_us' => 'Свяжитесь с нами',
+    'contact' => 'Контакт',
     'social_media' => 'Социальные сети',
     'create_schedule' => 'Создать расписание',
     'create_your_own_event_schedule' => 'Создайте свой собственный график мероприятий!',

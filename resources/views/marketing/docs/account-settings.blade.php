@@ -116,7 +116,9 @@
 
         <p class="doc-paragraph">
             The <span class="font-semibold text-gray-900 dark:text-white">Appearance</span> tab in Settings controls how the
-            admin portal looks. You can also change it from the theme controls at the bottom of the sidebar, on any page.
+            admin portal looks. You can also change it on any page from the
+            <span class="font-semibold text-gray-900 dark:text-white">Theme</span> button in the row of icons pinned to the
+            bottom of the sidebar, which opens the same Theme and Palette controls in a popup.
         </p>
 
         <p class="doc-paragraph">

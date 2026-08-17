@@ -401,6 +401,8 @@ return [
     'updated_schedule' => 'تم تحديث الجدول بنجاح',
     'embed' => 'تضمين',
     'about' => 'حول',
+    'contact_us' => 'اتصل بنا',
+    'contact' => 'اتصال',
     'social_media' => 'وسائل التواصل الاجتماعي',
     'create_schedule' => 'إنشاء جدول',
     'create_your_own_event_schedule' => 'أنشئ جدول أحداثك الخاص!',

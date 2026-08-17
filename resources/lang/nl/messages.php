@@ -819,6 +819,8 @@ return [
     'updated_schedule' => 'Schema succesvol bijgewerkt',
     'embed' => 'Insluiten',
     'about' => 'Over',
+    'contact_us' => 'Neem contact op',
+    'contact' => 'Contact',
     'social_media' => 'Sociale media',
     'payment_url' => 'Betaallink',
 
