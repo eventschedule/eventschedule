@@ -33,7 +33,7 @@ class PaymentGatewayController extends Controller
      */
     public function handleReturn(Request $request, string $gateway, string $sale_id): Response
     {
-        [$driver, $sale] = $this->resolve($gateway, $sale_id);
+        [$driver, $sale] = $this->resolve($request, $gateway, $sale_id);
 
         return $driver->handleReturn($request, $sale);
     }
@@ -43,7 +43,7 @@ class PaymentGatewayController extends Controller
      */
     public function handleCancel(Request $request, string $gateway, string $sale_id): Response
     {
-        [$driver, $sale] = $this->resolve($gateway, $sale_id);
+        [$driver, $sale] = $this->resolve($request, $gateway, $sale_id);
 
         return $driver->handleCancel($request, $sale);
     }
@@ -108,7 +108,7 @@ class PaymentGatewayController extends Controller
     /**
      * @return array{0: PaymentGatewayDriver, 1: Sale}
      */
-    private function resolve(string $gateway, string $sale_id): array
+    private function resolve(Request $request, string $gateway, string $sale_id): array
     {
         $driver = $this->gateways->get($gateway);
 
@@ -122,6 +122,25 @@ class PaymentGatewayController extends Controller
         // sale, or its own secret would be used to validate somebody else's payment.
         if (! $sale || $sale->payment_method !== $gateway) {
             abort(404);
+        }
+
+        // The sale id in the URL is a Sqid - deterministic obfuscation over an alphabet that ships in
+        // config, not a secret - so possession of one proves nothing. Both handlers behind this are
+        // dangerous without proof of ownership:
+        //
+        //  - return 302s to the purchase landing, whose URL embeds $sale->secret. That is the buyer's
+        //    ticket and QR access token, and a Location header would hand it to anyone.
+        //  - cancel flips unpaid -> expired, which fires the Sale::booted release hooks: seats back
+        //    into inventory and any redeemed gift-card balance credited back. Grief-able one guessed
+        //    id at a time.
+        //
+        // So the caller has to already hold the secret, which is what the legacy TicketController
+        // handlers require (cancel() and paymentUrlCancel() both hash_equals it). Checked here rather
+        // than per driver so every present and future gateway inherits it.
+        $secret = (string) $request->query('secret', '');
+
+        if ($secret === '' || ! hash_equals((string) $sale->secret, $secret)) {
+            abort(403);
         }
 
         return [$driver, $sale];

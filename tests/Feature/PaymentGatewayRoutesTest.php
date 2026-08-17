@@ -86,7 +86,8 @@ class PaymentGatewayRoutesTest extends TestCase
     {
         $sale = $this->saleOnMethod('cash');
 
-        $this->get('/payments/cash/cancel/'.UrlUtils::encodeId($sale->id))->assertRedirect();
+        $this->get('/payments/cash/cancel/'.UrlUtils::encodeId($sale->id).'?secret='.$sale->secret)
+            ->assertRedirect();
 
         // Seats go back via the Sale::booted release hooks, which the status change fires.
         $this->assertSame('expired', $sale->fresh()->status);
@@ -98,11 +99,66 @@ class PaymentGatewayRoutesTest extends TestCase
         $sale->status = 'paid';
         $sale->save();
 
-        $this->get('/payments/cash/cancel/'.UrlUtils::encodeId($sale->id))->assertRedirect();
+        $this->get('/payments/cash/cancel/'.UrlUtils::encodeId($sale->id).'?secret='.$sale->secret)
+            ->assertRedirect();
 
         // A late or replayed cancel must never un-pay a sale: expiry already has its own restore
         // hooks, and running them against a paid sale would give back seats that are still sold.
         $this->assertSame('paid', $sale->fresh()->status);
+    }
+
+    public function test_return_requires_the_sale_secret(): void
+    {
+        // Sale ids are Sqids - deterministic obfuscation over an alphabet in config, not a secret. So
+        // without this guard anyone who can generate one gets a 302 whose Location carries
+        // $sale->secret, which is the buyer's ticket and QR access token.
+        $sale = $this->saleOnMethod('cash');
+        $id = UrlUtils::encodeId($sale->id);
+
+        $this->get("/payments/cash/return/{$id}")->assertForbidden();
+        $this->get("/payments/cash/return/{$id}?secret=wrong")->assertForbidden();
+
+        $this->get("/payments/cash/return/{$id}?secret={$sale->secret}")->assertRedirect();
+    }
+
+    public function test_the_return_redirect_never_leaks_the_secret_without_one(): void
+    {
+        // Pins the disclosure itself rather than just the status code: the secret must not appear in
+        // the response at all when the caller could not already prove they had it.
+        $sale = $this->saleOnMethod('cash');
+
+        $response = $this->get('/payments/cash/return/'.UrlUtils::encodeId($sale->id));
+
+        $response->assertForbidden();
+        $this->assertStringNotContainsString($sale->secret, (string) $response->headers->get('Location'));
+        $this->assertStringNotContainsString($sale->secret, $response->getContent());
+    }
+
+    public function test_cancel_requires_the_sale_secret(): void
+    {
+        // The destructive half: expiring a sale fires the Sale::booted release hooks, so an unguarded
+        // cancel lets anyone return a stranger's seats to inventory and credit back a gift card they
+        // redeemed.
+        $sale = $this->saleOnMethod('cash');
+        $id = UrlUtils::encodeId($sale->id);
+
+        $this->get("/payments/cash/cancel/{$id}")->assertForbidden();
+        $this->assertSame('unpaid', $sale->fresh()->status);
+
+        $this->get("/payments/cash/cancel/{$id}?secret=wrong")->assertForbidden();
+        $this->assertSame('unpaid', $sale->fresh()->status);
+    }
+
+    public function test_the_secret_check_is_constant_time_and_rejects_a_prefix(): void
+    {
+        // hash_equals, not ==: a prefix of the real secret must not pass.
+        $sale = $this->saleOnMethod('cash');
+        $prefix = substr($sale->secret, 0, 8);
+
+        $this->get('/payments/cash/cancel/'.UrlUtils::encodeId($sale->id)."?secret={$prefix}")
+            ->assertForbidden();
+
+        $this->assertSame('unpaid', $sale->fresh()->status);
     }
 
     public function test_connect_requires_a_gateway_with_credential_fields(): void

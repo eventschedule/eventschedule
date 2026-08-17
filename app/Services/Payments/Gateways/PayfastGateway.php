@@ -215,8 +215,20 @@ class PayfastGateway extends PaymentGatewayDriver
         $fields = [
             'merchant_id' => $owner->payfast_merchant_id,
             'merchant_key' => $owner->payfast_merchant_key,
-            'return_url' => route('payments.return', ['gateway' => $this->key(), 'sale_id' => $encodedSaleId]),
-            'cancel_url' => route('payments.cancel', ['gateway' => $this->key(), 'sale_id' => $encodedSaleId]),
+            // The sale secret rides along on the buyer-facing callbacks: the id alone is a Sqid and
+            // proves nothing, and PaymentGatewayController::resolve() refuses both without it. Not on
+            // notify_url, which Payfast authenticates by signature instead and which must not carry a
+            // ticket token through a third party's logs.
+            'return_url' => route('payments.return', [
+                'gateway' => $this->key(),
+                'sale_id' => $encodedSaleId,
+                'secret' => $sale->secret,
+            ]),
+            'cancel_url' => route('payments.cancel', [
+                'gateway' => $this->key(),
+                'sale_id' => $encodedSaleId,
+                'secret' => $sale->secret,
+            ]),
             'notify_url' => route('payments.webhook', ['gateway' => $this->key(), 'sale_id' => $encodedSaleId]),
             'name_first' => $this->clean($sale->name, 100),
             'email_address' => $sale->email,
