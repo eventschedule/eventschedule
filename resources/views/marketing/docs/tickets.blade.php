@@ -522,13 +522,13 @@
             <li>Payfast now appears on the <strong class="text-gray-900 dark:text-white">Payment</strong> tab of any event priced in ZAR</li>
         </ol>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The passphrase is required rather than optional. It is what lets us verify that a payment notification genuinely came from Payfast, so without one there is no way to tell a real payment from a forged one.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The passphrase is required rather than optional. It is what lets us verify that a payment notification genuinely came from Payfast, so without one there is no way to tell a real payment from a forged one. Setting it on your Payfast account also makes Payfast reject unsigned checkout requests, which protects your merchant account beyond this integration.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">By default Payfast shows buyers every method your account supports. To send them straight to one instead, tick exactly one entry under <strong class="text-gray-900 dark:text-white">Payment methods</strong>. Ticking several, or none, leaves the choice to Payfast.</p>
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Testing with the sandbox</div>
-            <p>Turn on <strong class="text-gray-900 dark:text-white">Test mode</strong> to send payments to Payfast's sandbox instead of taking real money. Payfast's public sandbox credentials are merchant ID <code>10000100</code> and merchant key <code>46f0cd694581a</code>. Note that Payfast cannot reach a notification URL on <code>localhost</code>, so a sandbox purchase only completes end to end on a publicly reachable install. Turn test mode off before you sell real tickets.</p>
+            <p>Turn on <strong class="text-gray-900 dark:text-white">Test mode</strong> to send payments to Payfast's sandbox instead of taking real money. Payfast's public sandbox credentials are merchant ID <code>10000100</code> and merchant key <code>46f0cd694581a</code>. Note that Payfast cannot reach a notification URL on <code>localhost</code>, so a sandbox purchase only completes end to end on a publicly reachable install. While test mode is on, the payment page shows buyers a clear test-mode notice, and the payment method appears with a test-mode label on the event form. Turn test mode off before you sell real tickets.</p>
         </div>
 
         <div class="doc-callout doc-callout-info">

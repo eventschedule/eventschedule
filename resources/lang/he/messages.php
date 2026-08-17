@@ -4397,6 +4397,7 @@ return [
     'payfast_payment_types' => 'אמצעי תשלום',
     'payfast_payment_types_help' => 'בחר אחד בלבד כדי לשלוח קונים ישירות אליו. אם לא תסמן אף אחד, או תסמן יותר מאחד, Payfast יציג לקונה את כל מה שהחשבון שלך תומך בו.',
     'payfast_checkout_unavailable' => 'Payfast אינו יכול לעבד תשלום זה. נא לפנות למארגן האירוע.',
+    'payfast_test_mode_notice' => 'מצב בדיקה פעיל. תשלום זה עובר לסביבת הבדיקות של Payfast ולא ייגבה כסף אמיתי.',
     'payfast_type_cc' => 'כרטיס אשראי',
     'payfast_type_dc' => 'כרטיס דביט',
     'payfast_type_ef' => 'העברה בנקאית מיידית',

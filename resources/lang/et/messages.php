@@ -4421,6 +4421,7 @@ return [
     'payfast_payment_types' => 'Maksemeetodid',
     'payfast_payment_types_help' => 'Vali tapselt uks, et saata ostjad otse selle juurde. Kui jatad koik markimata voi markid mitu, naitab Payfast ostjale koike, mida sinu konto toetab.',
     'payfast_checkout_unavailable' => 'Payfast ei saa seda makset toodelda. Palun vota uhendust urituse korraldajaga.',
+    'payfast_test_mode_notice' => 'Testirezhiim on sees. See makse laheb Payfasti liivakasti ja parisraha ei voeta.',
     'payfast_type_cc' => 'Krediitkaart',
     'payfast_type_dc' => 'Deebetkaart',
     'payfast_type_ef' => 'Kiirulekanne (EFT)',

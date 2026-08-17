@@ -52,11 +52,17 @@ class PayfastGateway extends PaymentGatewayDriver
 
     public function label(?User $owner): string
     {
-        if ($owner?->payfast_merchant_id) {
-            return 'Payfast - '.$owner->payfast_merchant_id;
+        $label = $owner?->payfast_merchant_id
+            ? 'Payfast - '.$owner->payfast_merchant_id
+            : 'Payfast';
+
+        // A forgotten sandbox toggle sells free tickets that look completely normal, so test mode is
+        // named everywhere the owner chooses the gateway.
+        if ($owner?->payfast_sandbox) {
+            $label .= ' ('.__('messages.payfast_sandbox').')';
         }
 
-        return 'Payfast';
+        return $label;
     }
 
     /**
@@ -171,7 +177,11 @@ class PayfastGateway extends PaymentGatewayDriver
     public function credentialRules(): array
     {
         return [
-            'payfast_merchant_id' => ['required', 'string', 'max:32'],
+            // Digits only: real Payfast merchant ids are numeric, and the id is echoed into the
+            // event dropdown's option text inside a Vue mount - constraining the charset here closes
+            // the template-injection source at the input as well as at the sink (the option carries
+            // v-pre too).
+            'payfast_merchant_id' => ['required', 'string', 'max:32', 'regex:/^\d+$/'],
             // Both secrets are "required unless one is already stored". Blank means "keep what is
             // there", so an owner correcting a merchant id does not have to retype values they cannot
             // read back - but a FIRST connect cannot leave them empty and save a half-configured
@@ -327,6 +337,7 @@ class PayfastGateway extends PaymentGatewayDriver
             'fields' => $fields,
             'signature' => $signature,
             'event' => $event,
+            'sandbox' => (bool) $owner->payfast_sandbox,
         ]);
     }
 

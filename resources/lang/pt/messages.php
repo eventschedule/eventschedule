@@ -4402,6 +4402,7 @@ return [
     'payfast_payment_types' => 'Metodos de pagamento',
     'payfast_payment_types_help' => 'Escolha exatamente um para enviar os compradores diretamente para ele. Se nao selecionar nenhum, ou selecionar mais do que um, o Payfast mostra ao comprador tudo o que a sua conta suporta.',
     'payfast_checkout_unavailable' => 'O Payfast nao pode processar este pagamento. Contacte o organizador do evento.',
+    'payfast_test_mode_notice' => 'O modo de teste esta ativo. Este pagamento vai para o ambiente de testes do Payfast e nao sera cobrado dinheiro real.',
     'payfast_type_cc' => 'Cartao de credito',
     'payfast_type_dc' => 'Cartao de debito',
     'payfast_type_ef' => 'Transferencia instantanea (EFT)',

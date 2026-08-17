@@ -346,6 +346,66 @@ class PayfastCheckoutTest extends TestCase
         $this->assertStringContainsString('embed=true', html_entity_decode($m[1] ?? '', ENT_QUOTES));
     }
 
+    public function test_test_mode_is_named_in_the_dropdown_label(): void
+    {
+        // A forgotten sandbox toggle sells free tickets that look completely normal, so test mode is
+        // named in the one place the owner picks the gateway.
+        $owner = $this->connectedOwner();   // sandbox on by default in these fixtures
+
+        $label = app(PaymentGatewayManager::class)->get('payfast')->label($owner);
+
+        $this->assertStringContainsString(__('messages.payfast_sandbox'), $label);
+
+        $owner->forceFill(['payfast_sandbox' => false])->save();
+
+        $this->assertStringNotContainsString(
+            __('messages.payfast_sandbox'),
+            app(PaymentGatewayManager::class)->get('payfast')->label($owner->fresh()),
+        );
+    }
+
+    public function test_the_interstitial_warns_when_in_test_mode(): void
+    {
+        // The owner testing IS the buyer on this page - and a real buyer seeing the notice stops
+        // before "paying" into a sandbox.
+        $owner = $this->connectedOwner();
+        $role = $this->createRole($owner);
+        $event = $this->payfastEvent($role);
+        $ticket = $this->createTicket($event, ['type' => 'General', 'price' => 150, 'quantity' => 50]);
+
+        $this->checkout($role, $event, $ticket)
+            ->assertSee(__('messages.payfast_test_mode_notice'));
+    }
+
+    public function test_the_interstitial_stays_quiet_in_live_mode(): void
+    {
+        $owner = $this->connectedOwner(['payfast_sandbox' => false]);
+        $role = $this->createRole($owner);
+        $event = $this->payfastEvent($role);
+        $ticket = $this->createTicket($event, ['type' => 'General', 'price' => 150, 'quantity' => 50]);
+
+        $this->checkout($role, $event, $ticket)
+            ->assertDontSee(__('messages.payfast_test_mode_notice'));
+    }
+
+    public function test_a_merchant_id_must_be_numeric(): void
+    {
+        // Real Payfast merchant ids are numeric, and the id is echoed into the event dropdown's
+        // option text inside a Vue mount - so the charset rule closes the template-injection source
+        // at the input as well as at the sink.
+        $owner = $this->createOwner();
+
+        $this->actingAs($owner)
+            ->post('/payments/payfast/connect', [
+                'payfast_merchant_id' => '{{Object}}',
+                'payfast_merchant_key' => '46f0cd694581a',
+                'payfast_passphrase' => 'test-passphrase',
+            ])
+            ->assertSessionHasErrors('payfast_merchant_id');
+
+        $this->assertNull($owner->fresh()->payfast_merchant_id);
+    }
+
     public function test_payfast_is_only_offered_for_zar(): void
     {
         $owner = $this->connectedOwner();

@@ -72,11 +72,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const paymentTabs = document.querySelectorAll('.payment-tab');
     const paymentTabContents = document.querySelectorAll('.payment-tab-content');
 
-    // Restore active tab from localStorage
-    const savedPaymentTab = localStorage.getItem('paymentActiveTab');
-    if (savedPaymentTab) {
-        switchPaymentTab(savedPaymentTab);
-    }
+    // Restore active tab from localStorage. Guarded: with storage unavailable an unhandled throw
+    // here would abort this whole handler before the tab CLICK listeners below are bound, leaving
+    // every gateway but the first unreachable.
+    try {
+        const savedPaymentTab = localStorage.getItem('paymentActiveTab');
+        if (savedPaymentTab) {
+            switchPaymentTab(savedPaymentTab);
+        }
+    } catch (e) {}
 
     // "Change credentials" reveals the pre-filled form over the connected state.
     const invoiceninjaChangeBtn = document.getElementById('invoiceninja-change-btn');
@@ -123,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
         tab.addEventListener('click', function() {
             const tabName = this.dataset.tab;
             switchPaymentTab(tabName);
-            localStorage.setItem('paymentActiveTab', tabName);
+            try { localStorage.setItem('paymentActiveTab', tabName); } catch (e) {}
         });
     });
 

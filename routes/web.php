@@ -291,9 +291,11 @@ Route::post('/invoiceninja/event-purchase-webhook/{event}', [InvoiceNinjaControl
 // sales from settling.
 //
 // Domain-less on purpose. A notify_url is generated at checkout and handed to the provider, so it has
-// to keep working no matter which host the buyer arrived on. Registered before the selfhost
-// /{subdomain}/... catch-alls further down, and 'payments' is a reserved subdomain, so neither mode
-// can shadow it.
+// to keep working no matter which host the buyer arrived on. Registration ORDER is what protects
+// them: they sit ~1350 lines before the selfhost /{subdomain}/... catch-alls, so they always win.
+// 'payments' is also reserved for NEW schedules on hosted (Role::cleanSubdomain gates the list on
+// app.hosted), but a pre-existing selfhost schedule literally named "payments" would lose these
+// four path segments to the routes below - acceptable, and worth knowing.
 Route::post('/payments/{gateway}/webhook/{sale_id?}', [PaymentWebhookController::class, 'handle'])
     ->name('payments.webhook')->middleware('throttle:120,1');
 // GET and POST both: most gateways bring the buyer back with a redirect, some post the form back.

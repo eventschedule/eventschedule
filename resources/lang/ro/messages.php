@@ -4441,6 +4441,7 @@ return [
     'payfast_payment_types' => 'Metode de plata',
     'payfast_payment_types_help' => 'Alege exact una pentru a trimite cumparatorii direct la ea. Daca nu bifezi niciuna, sau bifezi mai multe, Payfast arata cumparatorului tot ce accepta contul tau.',
     'payfast_checkout_unavailable' => 'Payfast nu poate procesa aceasta plata. Contacteaza organizatorul evenimentului.',
+    'payfast_test_mode_notice' => 'Modul de testare este activ. Aceasta plata merge catre sandbox-ul Payfast si nu se vor incasa bani reali.',
     'payfast_type_cc' => 'Card de credit',
     'payfast_type_dc' => 'Card de debit',
     'payfast_type_ef' => 'Transfer instant (EFT)',

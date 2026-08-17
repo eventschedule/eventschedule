@@ -3233,10 +3233,26 @@
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                         {{-- Ordered by config('payments.gateways'), and filtered to what this owner has
                                              connected and what can settle this event's currency. A gateway that cannot
-                                             take the currency is omitted rather than shown and then rejected. --}}
+                                             take the currency is omitted rather than shown and then rejected.
+
+                                             v-pre on every option: the label can carry owner-typed text (a Payfast
+                                             merchant id, an API-sourced company name), and this select sits inside the
+                                             Vue mount, where a server-rendered text node is compiled as a template.
+                                             Same guard as the sub-schedule options further up this file. --}}
                                         @foreach ($selectableGateways as $gatewayKey => $gateway)
-                                        <option value="{{ $gatewayKey }}">{{ $gateway->label($user) }}</option>
+                                        <option v-pre value="{{ $gatewayKey }}">{{ $gateway->label($user) }}</option>
                                         @endforeach
+                                        {{-- The SAVED method stays visible even when no longer offerable (currency
+                                             changed after saving, gateway disconnected). Without this the select
+                                             rendered blank, a blank select posts nothing, and the stale value silently
+                                             survived every save - the state that let a USD event keep charging through
+                                             Payfast. Showing it lets the owner see and fix it; checkout guards remain
+                                             the authority either way. --}}
+                                        @if ($event->payment_method
+                                            && ! array_key_exists($event->payment_method, $selectableGateways)
+                                            && ($storedGateway = $paymentGateways->get($event->payment_method)))
+                                        <option v-pre value="{{ $event->payment_method }}">{{ $storedGateway->label($user) }}</option>
+                                        @endif
                                     </select>
                                     <div class="text-xs pt-1">
                                         <x-link href="{{ route('profile.edit') }}#section-payment-methods" target="_blank">

@@ -4532,6 +4532,7 @@ return [
     'payfast_payment_types' => 'Payment methods',
     'payfast_payment_types_help' => 'Pick exactly one to send buyers straight to it. Leave all of them unticked, or tick more than one, and Payfast shows the buyer everything your account supports.',
     'payfast_checkout_unavailable' => 'Payfast cannot process this payment. Please contact the event organizer.',
+    'payfast_test_mode_notice' => 'Test mode is on. This payment goes to the Payfast sandbox and no real money will be charged.',
     'payfast_type_cc' => 'Credit card',
     'payfast_type_dc' => 'Debit card',
     'payfast_type_ef' => 'Instant EFT',
