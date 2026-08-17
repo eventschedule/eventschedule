@@ -222,6 +222,8 @@ class AuditService
         'google_refresh_token',
         'facebook_token',
         'stripe_account_id',
+        'payfast_merchant_key',
+        'payfast_passphrase',
         'two_factor_secret',
         'two_factor_recovery_codes',
     ];

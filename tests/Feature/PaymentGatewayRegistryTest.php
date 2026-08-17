@@ -116,7 +116,7 @@ class PaymentGatewayRegistryTest extends TestCase
     {
         $keys = $this->manager()->selectableKeys();
 
-        $this->assertSame(['cash', 'stripe', 'invoiceninja', 'payment_url'], $keys);
+        $this->assertSame(['cash', 'stripe', 'invoiceninja', 'payment_url', 'payfast'], $keys);
         $this->assertNotContains('rsvp', $keys);
         $this->assertNotContains('import', $keys);
     }
@@ -125,7 +125,7 @@ class PaymentGatewayRegistryTest extends TestCase
     {
         // The event dropdown renders in registry order, so the config array is the single place that
         // decides it. Cash first matches what the hand-written option list used to do.
-        $this->assertSame(['cash', 'stripe', 'invoiceninja', 'payment_url'], $this->manager()->keys());
+        $this->assertSame(['cash', 'stripe', 'invoiceninja', 'payment_url', 'payfast'], $this->manager()->keys());
     }
 
     public function test_amount_limits_carry_the_stripe_minimum_charge(): void
@@ -152,9 +152,8 @@ class PaymentGatewayRegistryTest extends TestCase
         $owner->payment_url = 'https://venmo.com/example';
         $owner->save();
 
-        // Nothing restricts currency yet, so this pins the mechanism rather than a real gateway:
-        // availableFor() must consult supportsCurrency(), which is what will keep Payfast off a
-        // non-ZAR event.
+        // A stub gateway rather than Payfast, so this pins availableFor()'s use of supportsCurrency()
+        // independently of any one driver's rules. PayfastCheckoutTest covers the real ZAR gate.
         $this->assertArrayHasKey('payment_url', $this->manager()->availableFor($owner, 'ZAR'));
 
         config(['payments.gateways' => [

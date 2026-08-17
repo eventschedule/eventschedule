@@ -27,6 +27,24 @@ return [
         'stripe' => App\Services\Payments\Gateways\StripeGateway::class,
         'invoiceninja' => App\Services\Payments\Gateways\InvoiceNinjaGateway::class,
         'payment_url' => App\Services\Payments\Gateways\PaymentUrlGateway::class,
+        'payfast' => App\Services\Payments\Gateways\PayfastGateway::class,
+    ],
+
+    'payfast' => [
+
+        /*
+         * The hosts an ITN may legitimately come from, resolved at check time rather than pinned as
+         * addresses because Payfast changes them - that is their own guidance. A literal IP here is
+         * used as-is, which is what lets tests point this at the test client instead of stubbing
+         * gethostbynamel().
+         */
+        'itn_hosts' => [
+            'www.payfast.co.za',
+            'sandbox.payfast.co.za',
+            'w1w.payfast.co.za',
+            'w2w.payfast.co.za',
+        ],
+
     ],
 
 ];

@@ -1368,7 +1368,19 @@ class TicketController extends Controller
                 case 'payment_url':
                     return $this->paymentUrlCheckout($subdomain, $sale, $event, $isEmbed);
                 default:
-                    return $this->cashCheckout($subdomain, $sale, $event, $isEmbed);
+                    // Everything else drives itself through the registry, which is how a gateway
+                    // added from here on needs no arm of its own. The three above still keep their
+                    // checkout bodies in this controller and are the next thing to move in.
+                    //
+                    // An unknown method falls back to cash, exactly as this default always did:
+                    // CashGateway inherits the base startCheckout(), which lands the buyer on their
+                    // ticket with the sale left unpaid.
+                    $gateway = payment_gateways()->get($event->payment_method)
+                        ?? payment_gateways()->get('cash');
+
+                    return $gateway->startCheckout(
+                        new \App\Services\Payments\CheckoutContext($sale, $event, $subdomain, $isEmbed)
+                    );
             }
         }
     }
@@ -3079,11 +3091,6 @@ class TicketController extends Controller
         ])->values()->all());
 
         return redirect($this->purchaseLandingUrl($sale, $event, $isEmbed));
-    }
-
-    private function cashCheckout($subdomain, $sale, $event, $isEmbed = false)
-    {
-        return $this->redirectToPurchaseLanding($sale, $event, $isEmbed);
     }
 
     public function success($subdomain, $sale_id)

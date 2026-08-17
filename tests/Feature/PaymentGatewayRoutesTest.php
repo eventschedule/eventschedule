@@ -126,7 +126,7 @@ class PaymentGatewayRoutesTest extends TestCase
         $keys = array_keys(app(PaymentGatewayManager::class)->withSettings());
 
         // Cash has nothing to configure, so it must not produce an empty tab.
-        $this->assertSame(['stripe', 'invoiceninja', 'payment_url'], $keys);
+        $this->assertSame(['stripe', 'invoiceninja', 'payment_url', 'payfast'], $keys);
     }
 
     public function test_the_payment_settings_section_renders(): void
@@ -140,6 +140,10 @@ class PaymentGatewayRoutesTest extends TestCase
             ->assertOk()
             ->assertSee('payment-tab-stripe', escape: false)
             ->assertSee('payment-tab-invoiceninja', escape: false)
-            ->assertSee('payment-tab-payment-url', escape: false);
+            ->assertSee('payment-tab-payment-url', escape: false)
+            // Payfast has no settings blade of its own - its tab comes entirely from
+            // credentialFields() via the shared credentials partial, which is the whole point.
+            ->assertSee('payment-tab-payfast', escape: false)
+            ->assertSee('payfast_merchant_id', escape: false);
     }
 }
