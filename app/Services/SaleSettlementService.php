@@ -50,7 +50,13 @@ class SaleSettlementService
      *                                      (cash, a manual mark-paid, a free order).
      * @param  string  $context  short slug for the audit trail, e.g. 'payfast'
      * @param  string|null  $usageMetric  a UsageTrackingService constant, when the rail is metered
-     * @return string one of paid|already_paid|released|amount_mismatch|missing
+     * @param  bool  $onlyWhenUnpaid  refuse anything that is not exactly `unpaid`, rather than only
+     *                                `paid` and the released statuses. The difference is
+     *                                `amount_mismatch`: a sale parked there was flagged for a human to
+     *                                look at, and on the Invoice Ninja rails a retry has never been
+     *                                able to settle it. Keeping that gate strict means a flagged sale
+     *                                cannot quietly clear itself.
+     * @return string one of paid|already_paid|released|amount_mismatch|missing|not_settleable
      */
     public function settle(
         Sale $sale,
@@ -58,8 +64,9 @@ class SaleSettlementService
         ?float $receivedAmount,
         string $context,
         ?string $usageMetric = null,
+        bool $onlyWhenUnpaid = false,
     ): string {
-        $outcome = DB::transaction(function () use ($sale, $reference, $receivedAmount, $context, $usageMetric) {
+        $outcome = DB::transaction(function () use ($sale, $reference, $receivedAmount, $context, $usageMetric, $onlyWhenUnpaid) {
             $locked = Sale::lockForUpdate()->find($sale->id);
 
             if (! $locked) {
@@ -83,6 +90,19 @@ class SaleSettlementService
                 ]);
 
                 return 'released';
+            }
+
+            // Everything else - `amount_mismatch` in practice - is refused too when the caller asked
+            // for the strict gate. Reported separately from 'released' so a caller can tell a sale
+            // awaiting review apart from one whose seats have already gone back.
+            if ($onlyWhenUnpaid && $locked->status !== 'unpaid') {
+                Log::warning('Payment callback for a sale that is not unpaid - not marking paid', [
+                    'sale_id' => $locked->id,
+                    'status' => $locked->status,
+                    'gateway' => $context,
+                ]);
+
+                return 'not_settleable';
             }
 
             $expected = (float) ($locked->isOrderPrimary()

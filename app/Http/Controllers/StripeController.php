@@ -2,16 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AnalyticsEventsDaily;
 use App\Models\GiftCard;
 use App\Models\Sale;
 use App\Models\SaleInstallment;
 use App\Models\SaleInstallmentPlan;
 use App\Services\AuditService;
 use App\Services\EmailService;
-use App\Services\MetaAdsService;
+use App\Services\SaleSettlementService;
 use App\Services\UsageTrackingService;
-use App\Services\WebhookService;
 use App\Utils\MoneyUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
@@ -172,113 +170,17 @@ class StripeController extends Controller
                         break;
                     }
 
-                    $didTransitionToPaid = false;
+                    // The amount arrives in Stripe's smallest unit; the settlement service reconciles
+                    // in major units.
+                    $currencyCode = $sale->event?->ticket_currency_code ?? 'USD';
 
-                    // Use lockForUpdate to prevent race with the success redirect handler
-                    \DB::transaction(function () use ($sale, $paymentIntent, &$didTransitionToPaid) {
-                        $sale = Sale::lockForUpdate()->find($sale->id);
-                        if ($sale->status === 'paid') {
-                            return;
-                        }
-
-                        // A released sale must never be revived. Expiry already gave the seats back and
-                        // restored any gift-card balance, and marking paid does not re-take them - so
-                        // flipping expired -> paid oversells the event and double-spends the card. A
-                        // multi-event order widens the window: one leg's expiry window can elapse while
-                        // the order's single Stripe session is still open.
-                        if (in_array($sale->status, ['expired', 'cancelled', 'refunded'], true)) {
-                            \Log::warning('Stripe webhook for a released sale - not marking paid', [
-                                'sale_id' => $sale->id,
-                                'status' => $sale->status,
-                            ]);
-
-                            return;
-                        }
-
-                        $currencyCode = $sale->event?->ticket_currency_code ?? 'USD';
-                        $webhookAmount = $paymentIntent->amount / MoneyUtils::getSmallestUnitMultiplier($currencyCode);
-
-                        // For grouped purchases (individual tickets) the buyer pays the group total in one charge.
-                        $expectedAmount = $sale->isOrderPrimary()
-                            ? $sale->orderTotalPayment()
-                            : $sale->legTotalPayment();
-                        $amountDifference = abs($webhookAmount - $expectedAmount);
-
-                        // Allow small tolerance for floating point/rounding differences
-                        if ($amountDifference > 0.01) {
-                            \Log::error('Payment amount mismatch in Stripe webhook - sale NOT marked as paid', [
-                                'sale_id' => $sale->id,
-                                'expected_amount' => $expectedAmount,
-                                'webhook_amount' => $webhookAmount,
-                                'difference' => $amountDifference,
-                                'payment_intent_id' => $paymentIntent->id,
-                            ]);
-
-                            $sale->status = 'amount_mismatch';
-                            $sale->transaction_reference = $paymentIntent->id;
-                            $sale->save();
-
-                            AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
-                                ['status' => 'unpaid'], ['status' => 'amount_mismatch'], 'stripe_amount_mismatch:event_id:'.$sale->event_id);
-
-                            return;
-                        }
-
-                        // Preserve per-seat payment_amount on grouped primaries; only overwrite for
-                        // ungrouped sales. An ORDER primary is excluded for the same reason:
-                        // $webhookAmount is the WHOLE order's total here, so writing it onto the
-                        // one leg that anchors the order would count every other leg twice in
-                        // orderTotalPayment(), the AP sales table and the revenue reports.
-                        if (! $sale->isPrimarySale() && ! $sale->isOrderPrimary()) {
-                            $sale->payment_amount = $webhookAmount;
-                        }
-                        $sale->status = 'paid';
-                        $sale->transaction_reference = $paymentIntent->id;
-                        $sale->save();
-                        $didTransitionToPaid = true;
-
-                        AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
-                            ['status' => 'unpaid'], ['status' => 'paid'], 'stripe:event_id:'.$sale->event_id);
-
-                        // Analytics, the Meta conversion and the sale.paid deliveries are each
-                        // attributed to ONE event, so a payment spanning several is posted leg by
-                        // leg. Posting $webhookAmount against $sale->event_id credits the anchoring
-                        // leg's event with the entire order and the rest with nothing - and it
-                        // never washes out, because the decrement side in
-                        // HandlesSaleStatusActions works per leg. orderLegs() is just [$sale] for
-                        // an ordinary sale, so nothing changes off the cart path.
-                        foreach ($sale->orderLegs() as $leg) {
-                            // A leg released before the payment landed keeps its own status - the
-                            // paid cascade deliberately skips cancelled/refunded/expired rows - so
-                            // it earns its event nothing and gets no delivery. Read after the save,
-                            // so these statuses are the post-cascade ones.
-                            if ($leg->status !== 'paid') {
-                                continue;
-                            }
-
-                            $legTotal = $leg->legTotalPayment();
-
-                            AnalyticsEventsDaily::incrementSale($leg->event_id, $legTotal);
-                            $promoTotal = $leg->legTotalDiscount();
-                            if ($promoTotal > 0) {
-                                AnalyticsEventsDaily::incrementPromoSale($leg->event_id, $promoTotal);
-                            }
-
-                            // Send conversion event to Meta CAPI if event has active boost
-                            $this->sendMetaConversion($leg, $legTotal);
-
-                            WebhookService::dispatch('sale.paid', $leg);
-                            foreach ($leg->guestSales()->get() as $gs) {
-                                WebhookService::dispatch('sale.paid', $gs);
-                            }
-                        }
-
-                        UsageTrackingService::track(UsageTrackingService::STRIPE_PAYMENT);
-                    });
-
-                    if ($didTransitionToPaid) {
-                        (new EmailService)->sendSaleConfirmationEmails($sale->refresh());
-                    }
+                    app(SaleSettlementService::class)->settle(
+                        $sale,
+                        $paymentIntent->id,
+                        $paymentIntent->amount / MoneyUtils::getSmallestUnitMultiplier($currencyCode),
+                        'stripe',
+                        UsageTrackingService::STRIPE_PAYMENT,
+                    );
                 } elseif (isset($paymentIntent->metadata->gift_card_id)) {
                     $giftCard = GiftCard::find(UrlUtils::decodeId($paymentIntent->metadata->gift_card_id));
                     if ($giftCard) {
@@ -345,108 +247,18 @@ class StripeController extends Controller
                             break;
                         }
 
-                        $didTransitionToPaid = false;
+                        $currencyCode = $sale->event?->ticket_currency_code ?? 'USD';
 
-                        // Use lockForUpdate to prevent race with the success redirect handler
-                        \DB::transaction(function () use ($sale, $session, &$didTransitionToPaid) {
-                            $sale = Sale::lockForUpdate()->find($sale->id);
-                            if ($sale->status === 'paid') {
-                                return;
-                            }
-
-                            // A released sale must never be revived. Expiry already gave the seats back and
-                            // restored any gift-card balance, and marking paid does not re-take them - so
-                            // flipping expired -> paid oversells the event and double-spends the card. A
-                            // multi-event order widens the window: one leg's expiry window can elapse while
-                            // the order's single Stripe session is still open.
-                            if (in_array($sale->status, ['expired', 'cancelled', 'refunded'], true)) {
-                                \Log::warning('Stripe webhook for a released sale - not marking paid', [
-                                    'sale_id' => $sale->id,
-                                    'status' => $sale->status,
-                                ]);
-
-                                return;
-                            }
-
-                            $currencyCode = $sale->event?->ticket_currency_code ?? 'USD';
-                            $webhookAmount = $session->amount_total / MoneyUtils::getSmallestUnitMultiplier($currencyCode);
-
-                            // For grouped purchases (individual tickets) the buyer pays the group total in one charge.
-                            $expectedAmount = $sale->isOrderPrimary()
-                            ? $sale->orderTotalPayment()
-                            : $sale->legTotalPayment();
-                            $amountDifference = abs($webhookAmount - $expectedAmount);
-
-                            // Allow small tolerance for floating point/rounding differences
-                            if ($amountDifference > 0.01) {
-                                \Log::error('Payment amount mismatch in Stripe checkout webhook - sale NOT marked as paid', [
-                                    'sale_id' => $sale->id,
-                                    'expected_amount' => $expectedAmount,
-                                    'webhook_amount' => $webhookAmount,
-                                    'difference' => $amountDifference,
-                                    'session_id' => $session->id,
-                                ]);
-
-                                $sale->status = 'amount_mismatch';
-                                $sale->transaction_reference = $session->payment_intent;
-                                $sale->save();
-
-                                AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
-                                    ['status' => 'unpaid'], ['status' => 'amount_mismatch'], 'stripe_checkout_amount_mismatch:event_id:'.$sale->event_id);
-
-                                return;
-                            }
-
-                            // Preserve per-seat payment_amount on grouped primaries; only overwrite
-                            // for ungrouped sales. An ORDER primary is excluded for the same
-                            // reason: $webhookAmount is the WHOLE order's total here, so writing it
-                            // onto the one leg that anchors the order would count every other leg
-                            // twice in orderTotalPayment(), the AP sales table and the reports.
-                            if (! $sale->isPrimarySale() && ! $sale->isOrderPrimary()) {
-                                $sale->payment_amount = $webhookAmount;
-                            }
-                            $sale->status = 'paid';
-                            $sale->transaction_reference = $session->payment_intent;
-                            $sale->save();
-                            $didTransitionToPaid = true;
-
-                            AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
-                                ['status' => 'unpaid'], ['status' => 'paid'], 'stripe_checkout:event_id:'.$sale->event_id);
-
-                            UsageTrackingService::track(UsageTrackingService::STRIPE_PAYMENT);
-
-                            // Record the sale in analytics leg by leg - see the matching comment in
-                            // the payment_intent.succeeded branch above. Each of these side effects
-                            // belongs to one event, and orderLegs() is just [$sale] unless this
-                            // payment covered several.
-                            foreach ($sale->orderLegs() as $leg) {
-                                // Released legs are skipped by the paid cascade, so they earn
-                                // nothing here either - see the matching guard above.
-                                if ($leg->status !== 'paid') {
-                                    continue;
-                                }
-
-                                $legTotal = $leg->legTotalPayment();
-
-                                AnalyticsEventsDaily::incrementSale($leg->event_id, $legTotal);
-                                $promoTotal = $leg->legTotalDiscount();
-                                if ($promoTotal > 0) {
-                                    AnalyticsEventsDaily::incrementPromoSale($leg->event_id, $promoTotal);
-                                }
-
-                                // Send conversion event to Meta CAPI if event has active boost
-                                $this->sendMetaConversion($leg, $legTotal);
-
-                                WebhookService::dispatch('sale.paid', $leg);
-                                foreach ($leg->guestSales()->get() as $gs) {
-                                    WebhookService::dispatch('sale.paid', $gs);
-                                }
-                            }
-                        });
-
-                        if ($didTransitionToPaid) {
-                            (new EmailService)->sendSaleConfirmationEmails($sale->refresh());
-                        }
+                        // payment_intent can be null on a session, and the hand-written version wrote
+                        // it through unconditionally - nulling out a reference the success redirect had
+                        // already stamped. Passing null leaves the stored one intact instead.
+                        app(SaleSettlementService::class)->settle(
+                            $sale,
+                            $session->payment_intent ?: null,
+                            $session->amount_total / MoneyUtils::getSmallestUnitMultiplier($currencyCode),
+                            'stripe_checkout',
+                            UsageTrackingService::STRIPE_PAYMENT,
+                        );
                     }
                 } elseif ($session->payment_status === 'paid' && isset($session->metadata->gift_card_id)) {
                     $giftCard = GiftCard::find(UrlUtils::decodeId($session->metadata->gift_card_id));
@@ -715,15 +527,5 @@ class StripeController extends Controller
         // session never emits that one. The implementation is idempotent, so whichever gets here
         // first wins and the other is free.
         app(\App\Services\InstallmentService::class)->applyCardUpdate($plan, $session->setup_intent);
-    }
-
-    /**
-     * Thin delegate. The implementation moved to MetaAdsService so the installment settlement path
-     * can reach it too - it settles outside this controller and was silently sending no conversion
-     * at all.
-     */
-    private function sendMetaConversion(Sale $sale, float $amount): void
-    {
-        app()->make(MetaAdsService::class)->sendSaleConversion($sale, $amount);
     }
 }

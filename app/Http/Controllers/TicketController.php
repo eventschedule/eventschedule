@@ -24,6 +24,7 @@ use App\Services\InstallmentService;
 use App\Services\PassBookingService;
 use App\Services\PassRedemptionService;
 use App\Services\RoleMailerService;
+use App\Services\SaleSettlementService;
 use App\Services\TicketVolumeDiscount;
 use App\Services\UsageTrackingService;
 use App\Services\WebhookService;
@@ -1310,26 +1311,15 @@ class TicketController extends Controller
         $isEmbed = $request->boolean('embed');
 
         if ($total == 0 && ! $isPaymentLink) {
-            $sale->status = 'paid';
-            $sale->save();
-
-            // Record the free ticket sale in analytics (0 revenue) - once per EVENT, so a free
-            // multi-event order registers against every event in it rather than only the one that
-            // happens to anchor the order.
-            foreach ($sale->orderLegs() as $leg) {
-                AnalyticsEventsDaily::incrementSale($leg->event_id, 0);
-                $legPromo = $leg->legTotalDiscount();
-                if ($legPromo > 0) {
-                    AnalyticsEventsDaily::incrementPromoSale($leg->event_id, $legPromo);
-                }
-
-                WebhookService::dispatch('sale.paid', $leg);
-                foreach ($leg->guestSales()->get() as $gs) {
-                    WebhookService::dispatch('sale.paid', $gs);
-                }
-            }
-
-            (new EmailService)->sendSaleConfirmationEmails($sale);
+            // Nothing to collect, so this settles immediately. No reference (there is no gateway to
+            // get one from) and no amount to reconcile against.
+            //
+            // The revenue booked is still zero, exactly as the hand-written version's literal 0 was:
+            // every payment_amount write is max(0, ...), so a zero order total forces every leg in the
+            // order to zero, and legTotalPayment() therefore returns 0 for all of them. What this does
+            // add is an audit row and, on a boosted event, a zero-value conversion - both of which a
+            // free registration should have been recording all along.
+            app(SaleSettlementService::class)->settle($sale, null, null, 'free');
 
             return $this->redirectToPurchaseLanding($sale, $event, $isEmbed);
         } else {
@@ -3191,7 +3181,14 @@ class TicketController extends Controller
         return redirect($cancelRedirectUrl);
     }
 
-    public function paymentUrlSuccess($sale_id)
+    /**
+     * $subdomain is unused but must be declared: both route groups put a subdomain ahead of the sale
+     * id (a path segment on selfhost, a domain parameter when hosted) and the controller dispatcher
+     * fills scalar arguments positionally. Without it this method received the SUBDOMAIN as $sale_id
+     * and every payment-URL return 404'd - which is why the rail's callbacks have never worked. Every
+     * sibling handler here and in GiftCardController already takes the pair.
+     */
+    public function paymentUrlSuccess($subdomain, $sale_id)
     {
         $sale = Sale::findOrFail(UrlUtils::decodeId($sale_id));
         $event = $sale->event;
@@ -3204,41 +3201,21 @@ class TicketController extends Controller
             abort(403, 'Invalid secret');
         }
 
-        $didTransitionToPaid = false;
-
-        // Use lockForUpdate to prevent race conditions from concurrent requests
-        DB::transaction(function () use ($sale, &$didTransitionToPaid) {
-            $sale = Sale::lockForUpdate()->find($sale->id);
-            if ($sale->status === 'paid') {
-                return;
-            }
-
-            $sale->status = 'paid';
-            $sale->transaction_reference = __('messages.manual_payment');
-            $sale->save();
-            $didTransitionToPaid = true;
-
-            AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
-                ['status' => 'unpaid'], ['status' => 'paid'], 'payment_url:event_id:'.$sale->event_id);
-
-            $analyticsAmount = $sale->legTotalPayment();
-            AnalyticsEventsDaily::incrementSale($sale->event_id, $analyticsAmount);
-            $promoTotal = $sale->legTotalDiscount();
-            if ($promoTotal > 0) {
-                AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $promoTotal);
-            }
-        });
-
-        WebhookService::dispatch('sale.paid', $sale);
-        if ($sale->group_id && $sale->isPrimarySale()) {
-            foreach (Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->get() as $gs) {
-                WebhookService::dispatch('sale.paid', $gs);
-            }
-        }
-
-        if ($didTransitionToPaid) {
-            (new EmailService)->sendSaleConfirmationEmails($sale->refresh());
-        }
+        // The rail reports no amount - the buyer just says they paid - so there is nothing to
+        // reconcile. The reference is the localised "manual payment" sentinel the sales table reads
+        // back to render this as a manual payment rather than a gateway id.
+        //
+        // Three things this settles that the hand-written version got wrong. An expired or refunded
+        // sale is no longer revived: cancel-then-success on the same secret used to mint a paid ticket
+        // out of released seats. The sale.paid webhooks are now gated on actually transitioning, so
+        // re-opening this URL stops re-firing them. And they carry a refreshed sale, where before the
+        // stale outer instance made the payload say status "unpaid" inside a sale.paid delivery.
+        app(SaleSettlementService::class)->settle(
+            $sale,
+            __('messages.manual_payment'),
+            null,
+            'payment_url',
+        );
 
         $url = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
         if (request()->boolean('embed')) {
@@ -3248,7 +3225,7 @@ class TicketController extends Controller
         return redirect($url);
     }
 
-    public function paymentUrlCancel($sale_id)
+    public function paymentUrlCancel($subdomain, $sale_id)
     {
         $sale = Sale::findOrFail(UrlUtils::decodeId($sale_id));
         $event = $sale->event;
