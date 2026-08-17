@@ -251,11 +251,12 @@
                 </li>
                 @endif
 
-            </ul>
-        </li>
-
-        <li class="mt-auto">
-            <ul role="list" class="-mx-2 space-y-1">
+                {{-- Last entry of the main group rather than pinned to the foot of the column,
+                     which is what an mt-auto wrapper around it used to do. That left it
+                     stranded on its own above the footer band, separated from the list it
+                     belongs to by a gap whose height varied with how many schedules the user
+                     has. Nothing carries mt-auto in this nav now: the band is pinned by
+                     app-admin.blade.php as a sibling of this scrolling column, not from here. --}}
                 <li>
                     <a href="{{ route('profile.edit') }}"
                         class="dark-nav-hover group flex gap-x-4 items-center rounded-lg p-2 text-lg font-semibold leading-6 text-gray-400 hover:text-white {{ request()->is('settings') || request()->is('settings/*') ? 'dark-nav-active text-white' : '' }}">
@@ -266,6 +267,7 @@
                         {{ __('messages.settings') }}
                     </a>
                 </li>
+
             </ul>
         </li>
     </ul>
