@@ -132,6 +132,20 @@ class SaleSettlementService
                 return 'amount_mismatch';
             }
 
+            // Preserve per-seat payment_amount on grouped primaries, and on order primaries where
+            // $receivedAmount is the WHOLE order: writing it onto the one leg that anchors the order
+            // would count every other leg twice in orderTotalPayment(), the sales table and revenue.
+            //
+            // Assigned BEFORE the analytics legs are read, and that ordering is load-bearing. For an
+            // ungrouped sale the gateway's figure lands in payment_amount, and a later refund debits
+            // whatever is stored there (HandlesSaleStatusActions::decrementSaleAnalytics reads
+            // legTotalPayment() at refund time). Crediting our pre-overwrite figure instead would
+            // leave the difference - up to the reconciliation tolerance, since anything larger is
+            // rejected above - stranded on the event's revenue forever.
+            if ($receivedAmount !== null && ! $locked->isPrimarySale() && ! $locked->isOrderPrimary()) {
+                $locked->payment_amount = $receivedAmount;
+            }
+
             // Read before the save: the paid cascade rewrites sibling statuses, and each leg's
             // PRE-change status is what decides whether it earns its event anything. A leg already
             // paid by hand was credited then, and crediting it again books the same money twice.
@@ -139,13 +153,6 @@ class SaleSettlementService
             $wasPaid = $locked->orderLegs()
                 ->mapWithKeys(fn (Sale $leg) => [$leg->id => $leg->status === 'paid'])
                 ->all();
-
-            // Preserve per-seat payment_amount on grouped primaries, and on order primaries where
-            // $receivedAmount is the WHOLE order: writing it onto the one leg that anchors the order
-            // would count every other leg twice in orderTotalPayment(), the sales table and revenue.
-            if ($receivedAmount !== null && ! $locked->isPrimarySale() && ! $locked->isOrderPrimary()) {
-                $locked->payment_amount = $receivedAmount;
-            }
 
             $previous = $locked->status;
             $locked->status = 'paid';

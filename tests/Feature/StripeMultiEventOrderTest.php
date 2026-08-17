@@ -217,4 +217,39 @@ class StripeMultiEventOrderTest extends TestCase
         $this->assertEqualsWithDelta(25.0, (float) $sale->payment_amount, 0.001);
         $this->assertEqualsWithDelta(25.0, $this->revenueFor($event->id), 0.001);
     }
+
+    public function test_a_refund_nets_off_the_amount_the_settlement_credited(): void
+    {
+        $owner = $this->createOwner();
+        $this->ownerApiKey = $this->apiKey($owner);
+        $role = $this->createRole($owner);
+        $event = $this->createEvent($role, ['tickets_enabled' => true, 'payment_method' => 'stripe', 'ticket_currency_code' => 'USD']);
+
+        // sales.payment_amount is decimal(13,3), and our totals are summed from decimals - a fixed
+        // volume discount over a multi-quantity line lands on a fractional cent routinely. Stripe can
+        // only ever charge whole cents, so it reports 25.00 against our stored 25.004.
+        $sale = $this->createSale($event, $role, [
+            'email' => 'solo-buyer@gmail.com', 'payment_amount' => 25.004, 'payment_method' => 'stripe', 'status' => 'unpaid',
+        ], $this->createTicket($event, ['price' => 25.004, 'quantity' => 50]));
+
+        // Inside the reconciliation tolerance, so this settles rather than being flagged - which is
+        // exactly why the tolerance exists.
+        //
+        // For an ungrouped sale the gateway's figure is then written onto payment_amount, and that
+        // stored value is what a later refund reads back. So the credit has to be the same number, or
+        // the two never cancel and every refunded sale leaves residue on the event's revenue.
+        $this->payOrder($sale, 25.00);
+
+        $sale->refresh();
+        $this->assertSame('paid', $sale->status);
+        $this->assertEqualsWithDelta(25.0, (float) $sale->payment_amount, 0.0005);
+        $this->assertEqualsWithDelta(25.0, $this->revenueFor($event->id), 0.0005,
+            'the credit must be the amount that ends up stored, not the one it replaced');
+
+        $this->ownerAction($sale, 'refund');
+
+        $this->assertSame('refunded', $sale->fresh()->status);
+        $this->assertEqualsWithDelta(0.0, $this->revenueFor($event->id), 0.001,
+            'a refund must return the event to zero, leaving no residue');
+    }
 }
