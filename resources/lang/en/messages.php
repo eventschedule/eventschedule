@@ -4531,6 +4531,7 @@ return [
     'payfast_sandbox_help' => 'Send payments to the Payfast sandbox instead of taking real money. Turn this off before you sell tickets.',
     'payfast_payment_types' => 'Payment methods',
     'payfast_payment_types_help' => 'Pick exactly one to send buyers straight to it. Leave all of them unticked, or tick more than one, and Payfast shows the buyer everything your account supports.',
+    'payfast_checkout_unavailable' => 'Payfast cannot process this payment. Please contact the event organizer.',
     'payfast_type_cc' => 'Credit card',
     'payfast_type_dc' => 'Debit card',
     'payfast_type_ef' => 'Instant EFT',

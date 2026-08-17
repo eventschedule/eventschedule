@@ -4401,6 +4401,7 @@ return [
     'payfast_sandbox_help' => 'Envia los pagos al entorno de pruebas de Payfast en lugar de cobrar dinero real. Desactivalo antes de vender entradas.',
     'payfast_payment_types' => 'Metodos de pago',
     'payfast_payment_types_help' => 'Elige solo uno para llevar a los compradores directamente a el. Si no marcas ninguno, o marcas varios, Payfast mostrara al comprador todo lo que admita tu cuenta.',
+    'payfast_checkout_unavailable' => 'Payfast no puede procesar este pago. Ponte en contacto con el organizador del evento.',
     'payfast_type_cc' => 'Tarjeta de credito',
     'payfast_type_dc' => 'Tarjeta de debito',
     'payfast_type_ef' => 'Transferencia instantanea (EFT)',

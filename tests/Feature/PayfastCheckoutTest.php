@@ -228,6 +228,124 @@ class PayfastCheckoutTest extends TestCase
         $this->assertMatchesRegularExpression('/name="amount" value="\d+\.\d{2}"/', $html);
     }
 
+    public function test_a_non_zar_event_is_refused_before_payfast(): void
+    {
+        // The dropdown filters by currency at render time, but the stored payment_method survives an
+        // API update or a later currency edit. Payfast's protocol has no currency field - every
+        // amount is implicitly rand - so a USD event reaching the gateway would debit the ZAR face
+        // value (R100 for a $100 ticket) and the ITN would then reconcile cleanly, because both sides
+        // compare the bare number. The checkout-time guard is the only authority that can stop it.
+        $owner = $this->connectedOwner();
+        $role = $this->createRole($owner);
+        $event = $this->payfastEvent($role, ['ticket_currency_code' => 'USD']);
+        $ticket = $this->createTicket($event, ['type' => 'General', 'price' => 100, 'quantity' => 50]);
+
+        $response = $this->checkout($role, $event, $ticket);
+
+        $response->assertStatus(302);
+        $response->assertSessionHas('error', __('messages.payfast_checkout_unavailable'));
+
+        // The sale exists but nothing was posted to Payfast; ReleaseTickets reclaims it later.
+        $sale = Sale::where('email', 'zar-buyer@gmail.com')->firstOrFail();
+        $this->assertSame('unpaid', $sale->status);
+    }
+
+    public function test_an_order_below_the_payfast_floor_is_refused(): void
+    {
+        // Payfast refuses under R5.00 on its own page, after the seats are held and with no way back
+        // but the browser's Back button. Refusing here turns that into an explained error instead.
+        $owner = $this->connectedOwner();
+        $role = $this->createRole($owner);
+        $event = $this->payfastEvent($role);
+        $ticket = $this->createTicket($event, ['type' => 'General', 'price' => 3, 'quantity' => 50]);
+
+        $response = $this->checkout($role, $event, $ticket);
+
+        $response->assertStatus(302);
+        $response->assertSessionHas('error', __('messages.payfast_checkout_unavailable'));
+        $this->assertSame('unpaid', Sale::where('email', 'zar-buyer@gmail.com')->firstOrFail()->status);
+    }
+
+    public function test_a_custom_domain_checkout_keeps_the_signature_valid(): void
+    {
+        // ResolveCustomDomain rewrites the HTML body AFTER the driver signs the fields, replacing the
+        // subdomain host with the custom domain in the three callback URLs - and it cannot update the
+        // signature. Generating the URLs on the custom domain BEFORE signing (custom_domain_url, the
+        // same helper the Stripe session uses) means the rewrite finds nothing to replace, so what
+        // the browser posts is exactly what was signed. Without that, every custom-domain Payfast
+        // checkout dies at Payfast as a signature mismatch.
+        config(['app.hosted' => true]);
+
+        $owner = $this->connectedOwner();
+        $role = $this->createRole($owner);
+        $role->forceFill([
+            'custom_domain_host' => 'tickets.acme.test',
+            'custom_domain_mode' => 'direct',
+            'custom_domain_status' => 'active',
+        ])->save();
+
+        $event = $this->payfastEvent($role);
+        $ticket = $this->createTicket($event, ['type' => 'General', 'price' => 150, 'quantity' => 50]);
+
+        // The host has to ride in the URI itself: Symfony's Request::create() overwrites HTTP_HOST
+        // from the URI, so a Host header alone never reaches ResolveCustomDomain.
+        $html = $this->post(
+            'https://tickets.acme.test/'.$role->subdomain.'/checkout',
+            [
+                'event_id' => UrlUtils::encodeId($event->id),
+                'event_date' => Carbon::parse($event->starts_at)->format('Y-m-d'),
+                'name' => 'ZAR Buyer',
+                'email' => 'zar-buyer@gmail.com',
+                'tickets' => [UrlUtils::encodeId($ticket->id) => 1],
+            ],
+        )->getContent();
+
+        preg_match_all('/name="([^"]+)" value="([^"]*)"/', $html, $matches, PREG_SET_ORDER);
+
+        $posted = [];
+        foreach ($matches as $match) {
+            $posted[$match[1]] = html_entity_decode($match[2], ENT_QUOTES);
+        }
+
+        $signature = $posted['signature'];
+        unset($posted['signature']);
+
+        // The callbacks live on the custom domain the buyer is actually on.
+        $this->assertStringContainsString('tickets.acme.test', $posted['return_url']);
+        $this->assertStringContainsString('tickets.acme.test', $posted['notify_url']);
+
+        // And the signature covers those exact values - i.e. the middleware rewrite did not desync
+        // the posted fields from the signed ones.
+        $this->assertSame(
+            PayfastSignature::sign($posted, 'test-passphrase'),
+            $signature,
+            'the signature must be computed over the URLs the browser actually posts',
+        );
+    }
+
+    public function test_an_embedded_checkout_carries_the_embed_flag_home(): void
+    {
+        // The Stripe session URLs propagate embed=true so an embedded buyer lands back on the
+        // embedded ticket view; the Payfast callbacks must do the same.
+        $owner = $this->connectedOwner();
+        $role = $this->createRole($owner);
+        $event = $this->payfastEvent($role);
+        $ticket = $this->createTicket($event, ['type' => 'General', 'price' => 150, 'quantity' => 50]);
+
+        $html = $this->post(route('event.checkout', ['subdomain' => $role->subdomain]), [
+            'event_id' => UrlUtils::encodeId($event->id),
+            'event_date' => Carbon::parse($event->starts_at)->format('Y-m-d'),
+            'name' => 'ZAR Buyer',
+            'email' => 'zar-buyer@gmail.com',
+            'tickets' => [UrlUtils::encodeId($ticket->id) => 1],
+            'embed' => 'true',
+        ])->getContent();
+
+        preg_match('/name="return_url" value="([^"]*)"/', $html, $m);
+
+        $this->assertStringContainsString('embed=true', html_entity_decode($m[1] ?? '', ENT_QUOTES));
+    }
+
     public function test_payfast_is_only_offered_for_zar(): void
     {
         $owner = $this->connectedOwner();

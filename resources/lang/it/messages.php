@@ -4401,6 +4401,7 @@ return [
     'payfast_sandbox_help' => 'Invia i pagamenti alla sandbox di Payfast invece di incassare denaro reale. Disattivalo prima di vendere biglietti.',
     'payfast_payment_types' => 'Metodi di pagamento',
     'payfast_payment_types_help' => 'Scegline esattamente uno per portare gli acquirenti direttamente a quello. Se non ne selezioni nessuno, o piu di uno, Payfast mostra all acquirente tutto cio che il tuo account supporta.',
+    'payfast_checkout_unavailable' => 'Payfast non puo elaborare questo pagamento. Contatta l organizzatore dell evento.',
     'payfast_type_cc' => 'Carta di credito',
     'payfast_type_dc' => 'Carta di debito',
     'payfast_type_ef' => 'Bonifico istantaneo (EFT)',

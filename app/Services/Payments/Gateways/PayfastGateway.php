@@ -234,8 +234,52 @@ class PayfastGateway extends PaymentGatewayDriver
             return $this->redirectToPurchaseLanding($sale, $event, $context->isEmbed);
         }
 
+        // Refuse anything Payfast cannot actually take, BEFORE the buyer is posted anywhere.
+        //
+        // Currency is the one that loses money: Payfast's Custom integration has no currency field -
+        // every amount is implicitly rand - so a USD event reaching this point would debit the ZAR
+        // face value (R100 for a $100 ticket), and the ITN would then reconcile cleanly because both
+        // sides compare the bare number. The dropdown filters by currency at render time, but the
+        // stored payment_method survives an API update or a later currency edit, so the authority has
+        // to live here.
+        //
+        // The floor is the same class with a smaller blast radius: Payfast refuses under R5.00 on its
+        // own page, after the seats are held and with no way back but the browser's Back button.
+        [$minimum] = $this->amountLimits($context->currency());
+        $total = $context->total();
+
+        if (! $this->supportsCurrency($context->currency())
+            || ($total > 0 && $minimum !== null && $total < $minimum)) {
+            Log::warning('Payfast checkout refused: unsupported currency or below minimum', [
+                'sale_id' => $sale->id,
+                'currency' => $context->currency(),
+                'total' => $total,
+            ]);
+
+            // Same failure shape as stripeCheckout()'s catch: back to the event page with a message
+            // (guest pages render session('error')), sale left unpaid for ReleaseTickets to reclaim.
+            return back()->with('error', __('messages.payfast_checkout_unavailable'));
+        }
+
         $encodedSaleId = UrlUtils::encodeId($sale->id);
 
+        // The embed flag rides the buyer-facing callbacks so an embedded purchase lands back on the
+        // embedded ticket view, exactly as the Stripe session URLs do.
+        $callbackParams = [
+            'gateway' => $this->key(),
+            'sale_id' => $encodedSaleId,
+            'secret' => $sale->secret,
+        ];
+
+        if ($context->isEmbed) {
+            $callbackParams['embed'] = 'true';
+        }
+
+        // custom_domain_url() on all three: a checkout served from a custom domain has its HTML body
+        // rewritten by ResolveCustomDomain AFTER this method signs the fields, and the rewrite cannot
+        // update the signature. Generating the URLs on the custom domain up front means the rewrite
+        // finds nothing to replace in them, so what the browser posts is exactly what was signed.
+        // A no-op away from custom domains, and the same helper createStripeSession() uses.
         $fields = [
             'merchant_id' => $owner->payfast_merchant_id,
             'merchant_key' => $owner->payfast_merchant_key,
@@ -243,17 +287,9 @@ class PayfastGateway extends PaymentGatewayDriver
             // proves nothing, and PaymentGatewayController::resolve() refuses both without it. Not on
             // notify_url, which Payfast authenticates by signature instead and which must not carry a
             // ticket token through a third party's logs.
-            'return_url' => route('payments.return', [
-                'gateway' => $this->key(),
-                'sale_id' => $encodedSaleId,
-                'secret' => $sale->secret,
-            ]),
-            'cancel_url' => route('payments.cancel', [
-                'gateway' => $this->key(),
-                'sale_id' => $encodedSaleId,
-                'secret' => $sale->secret,
-            ]),
-            'notify_url' => route('payments.webhook', ['gateway' => $this->key(), 'sale_id' => $encodedSaleId]),
+            'return_url' => custom_domain_url(route('payments.return', $callbackParams)),
+            'cancel_url' => custom_domain_url(route('payments.cancel', $callbackParams)),
+            'notify_url' => custom_domain_url(route('payments.webhook', ['gateway' => $this->key(), 'sale_id' => $encodedSaleId])),
             'name_first' => $this->clean($sale->name, 100),
             'email_address' => $sale->email,
             // The encoded sale id, so the ITN can be cross-checked against the sale in its own URL.
