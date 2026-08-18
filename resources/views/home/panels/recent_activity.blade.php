@@ -14,7 +14,7 @@
                     <span class="font-medium text-gray-900 dark:text-white">{{ $activity['description'] }}</span>
                     @endif
                     @if(!empty($activity['amount']))
-                    <span class="text-green-600 dark:text-green-400 font-medium">${{ number_format($activity['amount'], 2) }}</span>
+                    <span class="text-green-600 dark:text-green-400 font-medium">{{ \App\Utils\MoneyUtils::format($activity['amount'], $activity['currency_code'] ?? null) }}</span>
                     @endif
                 </p>
                 <p class="text-xs text-gray-400 mt-0.5">{{ $activity['date']->diffForHumans() }}</p>

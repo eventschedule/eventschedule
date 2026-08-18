@@ -32,9 +32,9 @@ class ReferralCreditEarned extends Mailable
         // From config, like every other price the site quotes. Hardcoded, this email told the
         // referrer their credit was worth one number while /referrals - which now reads the same
         // config through a view composer - told them another.
-        $creditValue = '$'.(int) ($this->referral->plan_type === 'enterprise'
+        $creditValue = plan_price((int) ($this->referral->plan_type === 'enterprise'
             ? config('services.stripe_platform.enterprise_price_monthly_amount', 29)
-            : config('services.stripe_platform.price_monthly_amount', 9));
+            : config('services.stripe_platform.price_monthly_amount', 9)));
 
         return new Content(
             view: 'emails.referral.credit-earned',

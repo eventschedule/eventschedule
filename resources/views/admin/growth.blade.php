@@ -100,12 +100,12 @@
                     @endforeach
                     <div class="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-3">
                         <dt class="text-gray-600 dark:text-gray-400">MRR</dt>
-                        <dd class="font-medium text-gray-900 dark:text-white">${{ number_format($money['mrr_usd'], 2) }}</dd>
+                        <dd class="font-medium text-gray-900 dark:text-white">{{ plan_price($money['mrr']) }}</dd>
                     </div>
                     <div class="flex items-center justify-between">
                         <dt class="text-gray-600 dark:text-gray-400">ARPU</dt>
                         <dd class="font-medium text-gray-900 dark:text-white">
-                            {{ $money['arpu_usd'] === null ? __('messages.funnel_na') : '$' . number_format($money['arpu_usd'], 2) }}
+                            {{ $money['arpu'] === null ? __('messages.funnel_na') : plan_price($money['arpu']) }}
                         </dd>
                     </div>
                 </dl>

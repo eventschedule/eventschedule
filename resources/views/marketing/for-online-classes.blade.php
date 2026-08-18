@@ -35,7 +35,7 @@
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "Free forever"
         },
         "featureList": [
@@ -516,7 +516,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for teaching online classes?',
-                'a' => 'Yes. Setting a course up as a term, skipping holiday weeks, ending the recurrence after a set number of sessions, taking free registrations with a seat cap per session date, publishing one link, embedding your schedule, syncing two ways with Google, Outlook or CalDAV, sending newsletters to the students who follow you and reading your analytics are all on the free plan. Selling seats is free too, up to 25 paid tickets a month per schedule. Lifting that cap, plus class cards and custom checkout questions, is the Pro plan at $'.$proMonthly.' a month, and Event Schedule charges zero platform fees on payments at any plan level.',
+                'a' => 'Yes. Setting a course up as a term, skipping holiday weeks, ending the recurrence after a set number of sessions, taking free registrations with a seat cap per session date, publishing one link, embedding your schedule, syncing two ways with Google, Outlook or CalDAV, sending newsletters to the students who follow you and reading your analytics are all on the free plan. Selling seats is free too, up to 25 paid tickets a month per schedule. Lifting that cap, plus class cards and custom checkout questions, is the Pro plan at '.plan_price($proMonthly).' a month, and Event Schedule charges zero platform fees on payments at any plan level.',
             ],
             [
                 'q' => 'How do I set up a twelve-week term?',
@@ -913,7 +913,7 @@
                         </li>
                     </ul>
                     <p class="es-syl-muted mt-6 text-sm">
-                        Class cards are Pro, at ${{ $proMonthly }} a month. Publishing the term, taking free registrations and selling your first 25 paid tickets a month are not.
+                        Class cards are Pro, at {{ plan_price($proMonthly) }} a month. Publishing the term, taking free registrations and selling your first 25 paid tickets a month are not.
                         <a href="{{ marketing_url('/features/ticketing') }}" class="es-syl-link font-semibold underline hover:no-underline">See what ticketing includes</a>.
                     </p>
                 </div>
@@ -1315,7 +1315,7 @@
                         Write the term once. <span class="es-syl-lit">Teach all twelve.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg es-syl-dim">
-                        Publishing your term, capping the seats, taking free registrations and selling your first 25 paid tickets a month are free forever. Unlimited sales and class cards are ${{ $proMonthly }} a month, and nothing is taken off what you charge.
+                        Publishing your term, capping the seats, taking free registrations and selling your first 25 paid tickets a month are free forever. Unlimited sales and class cards are {{ plan_price($proMonthly) }} a month, and nothing is taken off what you charge.
                     </p>
 
                     <div class="mx-auto mb-10 max-w-md" aria-hidden="true">

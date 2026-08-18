@@ -42,7 +42,11 @@ class MarketingPriceTest extends TestCase
         'for-comedians.blade.php' => ['Front Row + Meet & Greet'],
         'for-musicians.blade.php' => ['<span>GA TICKET x2</span>'],
         'for-nightclubs.blade.php' => ["['Before 11pm', '\$10'"],
-        'for-talent.blade.php' => ['<span class="font-bold">$15.00</span>'],
+        'for-talent.blade.php' => [
+            'tickets at ${{ $feePrice }}',
+            'number_format($feeEb, 2)',
+            'number_format($feeEs, 2)',
+            'number_format($feeKeep, 2)', '<span class="font-bold">$15.00</span>'],
         'gift-cards.blade.php' => ["['\$50', false]", "['\$150', false]"],
         // /saas sells running your OWN platform on Event Schedule, so its Free/$29/$99 tier
         // mockups and "+$29/mo after trial" badges are the READER's pricing, not ours. They
@@ -56,6 +60,28 @@ class MarketingPriceTest extends TestCase
             "['Free', '\$0', 0], ['Pro', '\$29', 1]",
             '$29/mo after trial',
         ],
+        'compare.blade.php' => [
+            'number_format($card[\'value\'], 2)',
+            'data-odometer="${{ number_format($calcSaving, 0) }}"',
+            '\'note\' => \'$\'.$rates[\'eventschedule\'][\'monthly\']',
+        ],
+        'for-breweries-and-wineries.blade.php' => [
+            '${{ $wPrice }}',
+        ],
+        'for-comedy-clubs.blade.php' => [
+            '${{ $headline[3] }}',
+            '${{ $headline[4] }}',
+            '${{ $nAdv }}',
+        ],
+        'for-restaurants.blade.php' => [
+            '${{ $sitting[\'price\'] }}',
+        ],
+        'pricing.blade.php' => [
+            '/month + Stripe, 0% platform fee',
+            'number_format($calcEb, 2)',
+            'number_format($calcEs, 2)',
+            'number_format($calcSave, 2)',
+        ],
     ];
 
     /** Price literals that are ours, across every generation. Retired ones must not come back. */
@@ -64,6 +90,32 @@ class MarketingPriceTest extends TestCase
     private function marketingViews(): array
     {
         return File::allFiles(resource_path('views/marketing'));
+    }
+
+    /**
+     * The admin-portal views that quote one of OUR prices. They are not under views/marketing,
+     * so nothing guarded them - which is exactly how a hardcoded '$' survived the sweep in
+     * show-admin-plan's wind-down banner and in two Chart.js axis callbacks.
+     */
+    private const AP_PRICE_VIEWS = [
+        'role/show-admin-plan.blade.php',
+        'subscription/show.blade.php',
+        'referral/index.blade.php',
+        'components/plan-gate.blade.php',
+        'admin/growth.blade.php',
+        'admin/revenue.blade.php',
+        'admin/boost.blade.php',
+    ];
+
+    private function apPriceViews(): array
+    {
+        $out = [];
+
+        foreach (self::AP_PRICE_VIEWS as $relative) {
+            $out[$relative] = resource_path('views/'.$relative);
+        }
+
+        return $out;
     }
 
     private function isAllowed(string $relative, string $line): bool
@@ -106,6 +158,175 @@ class MarketingPriceTest extends TestCase
         $this->assertSame([], $offenders,
             'Hardcoded plan price in marketing copy. Use the composer-provided $proMonthly / '
             ."\$proYearly / \$entMonthly / \$entYearly instead:\n".implode("\n", $offenders));
+    }
+
+    /**
+     * The CURRENCY, not the amount. The amounts were centralised long before the symbol was, so
+     * every plan price on the site was written "${{ $proMonthly }}" - config moved the number and
+     * the dollar sign stayed welded on, which is what made a non-USD operator edit Blade files by
+     * hand on every upgrade. plan_price() renders both together.
+     */
+    public function test_no_hardcoded_currency_symbol_on_a_rendered_price(): void
+    {
+        $offenders = [];
+
+        foreach ($this->marketingViews() as $file) {
+            $relative = str_replace(resource_path('views/marketing').'/', '', $file->getPathname());
+
+            foreach (explode("\n", File::get($file->getPathname())) as $index => $line) {
+                if ($this->isAllowed($relative, $line)) {
+                    continue;
+                }
+
+                // "${{ ... }}" - a dollar glued to the front of any echoed value.
+                if (str_contains($line, '${{')) {
+                    $offenders[] = "{$relative}:".($index + 1).': '.trim(mb_substr($line, 0, 140));
+                }
+            }
+        }
+
+        $this->assertSame([], $offenders,
+            'Hardcoded currency symbol in front of a rendered price. Use plan_price($amount), '
+            ."which renders the installation's own currency:\n".implode("\n", $offenders));
+    }
+
+    /**
+     * The same thing one layer down: a '$' concatenated onto a price inside a PHP block, in a
+     * view or in the controller that builds the comparison tables and FAQ arrays.
+     */
+    public function test_no_concatenated_currency_symbol_on_a_plan_price(): void
+    {
+        $offenders = [];
+
+        $files = $this->marketingViews();
+        $sources = [];
+        foreach ($files as $file) {
+            $sources[str_replace(resource_path('views/marketing').'/', '', $file->getPathname())] = $file->getPathname();
+        }
+        $sources['MarketingController.php'] = app_path('Http/Controllers/MarketingController.php');
+
+        foreach ($sources as $relative => $path) {
+            foreach (explode("\n", File::get($path)) as $index => $line) {
+                if ($this->isAllowed($relative, $line)) {
+                    continue;
+                }
+
+                // "$'.$proMonthly" / "$' . $proMonthly" / "$'.$this->planPrice()", and the
+                // "'$'.$var" form. Anchored on our own price variables so a competitor's
+                // published USD pricing stays untouched.
+                if (preg_match('~\$\x27\s*\.\s*\$(proMonthly|proYearly|entMonthly|entYearly|this->planPrice)~', $line)
+                    || preg_match('~\x27\$\x27\s*\.\s*\$(proMonthly|proYearly|entMonthly|entYearly|this->planPrice)~', $line)) {
+                    $offenders[] = "{$relative}:".($index + 1).': '.trim(mb_substr($line, 0, 140));
+                }
+            }
+        }
+
+        $this->assertSame([], $offenders,
+            "Currency symbol concatenated onto a plan price. Use plan_price(\$amount):\n"
+            .implode("\n", $offenders));
+    }
+
+    /**
+     * Structured data has to name the same currency the visible price is rendered in, or the
+     * offer Google reads disagrees with the page.
+     */
+    public function test_structured_data_does_not_hardcode_the_currency(): void
+    {
+        $offenders = [];
+
+        foreach ($this->marketingViews() as $file) {
+            $relative = str_replace(resource_path('views/marketing').'/', '', $file->getPathname());
+
+            foreach (explode("\n", File::get($file->getPathname())) as $index => $line) {
+                if (preg_match('~"priceCurrency"\s*:\s*"[A-Z]{3}"~', $line)) {
+                    $offenders[] = "{$relative}:".($index + 1).': '.trim(mb_substr($line, 0, 140));
+                }
+            }
+        }
+
+        $this->assertSame([], $offenders,
+            "Hardcoded priceCurrency in JSON-LD. Use platform_currency():\n".implode("\n", $offenders));
+    }
+
+    /**
+     * The admin portal quotes our prices too, and had no guard at all.
+     */
+    public function test_no_hardcoded_currency_symbol_in_the_admin_portal(): void
+    {
+        $offenders = [];
+
+        foreach ($this->apPriceViews() as $relative => $path) {
+            foreach (explode("\n", File::get($path)) as $index => $line) {
+                // "${{ ... }}" in the markup, or "'$'." concatenated onto a value in a PHP block.
+                if (str_contains($line, '${{') || preg_match('~\x27\$\x27\s*\.~', $line)) {
+                    $offenders[] = "{$relative}:".($index + 1).': '.trim(mb_substr($line, 0, 140));
+                }
+            }
+        }
+
+        $this->assertSame([], $offenders,
+            'Hardcoded currency symbol on an admin-portal price. Use plan_price($amount) for our '
+            ."own prices, or MoneyUtils::format(\$amount, \$row->currency_code) for a row's:\n"
+            .implode("\n", $offenders));
+    }
+
+    /**
+     * The same thing in JavaScript. Two Chart.js axis callbacks kept a literal '$' while the
+     * cards above them were converted, so the axis and the figure disagreed.
+     *
+     * Scoped to the admin views on purpose: the marketing site has eight legitimate '$' + …
+     * formatters in the Eventbrite fee calculators, and adding eight exemptions to silence a
+     * check is worse than not having the check.
+     */
+    public function test_no_hardcoded_currency_symbol_in_admin_javascript(): void
+    {
+        $offenders = [];
+
+        foreach ($this->apPriceViews() as $relative => $path) {
+            foreach (explode("\n", File::get($path)) as $index => $line) {
+                if (preg_match('~\x27\$\x27\s*\+~', $line)) {
+                    $offenders[] = "{$relative}:".($index + 1).': '.trim(mb_substr($line, 0, 140));
+                }
+            }
+        }
+
+        $this->assertSame([], $offenders,
+            'Hardcoded currency symbol in admin JavaScript. Emit the symbol with @json(...) and '
+            ."reference it, so the chart cannot disagree with the page:\n".implode("\n", $offenders));
+    }
+
+    /**
+     * Every ALLOWED snippet must still match the copy it was written for.
+     *
+     * The class docblock has promised this test for a while but it was never written, so an
+     * exemption could outlive its line: once the copy moves, the snippet stops matching, stops
+     * protecting anything, and quietly widens the guard instead of narrowing it.
+     */
+    public function test_the_allow_list_has_no_stale_entries(): void
+    {
+        $stale = [];
+
+        foreach (self::ALLOWED as $relative => $snippets) {
+            $path = resource_path('views/marketing/'.$relative);
+
+            if (! File::exists($path)) {
+                $stale[] = "{$relative}: file no longer exists";
+
+                continue;
+            }
+
+            $contents = File::get($path);
+
+            foreach ($snippets as $snippet) {
+                if (! str_contains($contents, $snippet)) {
+                    $stale[] = "{$relative}: no line matches ".trim(mb_substr($snippet, 0, 80));
+                }
+            }
+        }
+
+        $this->assertSame([], $stale,
+            'Stale ALLOWED entries. The copy they exempt has changed, so they now protect nothing '
+            ."- delete them or update them to match:\n".implode("\n", $stale));
     }
 
     /**

@@ -22,7 +22,7 @@
         "offers": {
             "@type": "Offer",
             "price": "{{ $proMonthly }}",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "REST API access is part of the Pro plan. Selfhosted installations include it at no cost."
         },
         "featureList": [
@@ -557,7 +557,7 @@
         $faqs = [
             [
                 'q' => 'Is the API free to use?',
-                'a' => 'The REST API is part of the Pro plan at $'.$proMonthly.' a month, with a seven-day trial when you subscribe. Selfhosted installations are Pro by definition, so running your own copy unlocks every endpoint at no cost. Ticket sales carry zero platform fees on every plan and in both modes: you keep everything except your payment processor\'s cut.',
+                'a' => 'The REST API is part of the Pro plan at '.plan_price($proMonthly).' a month, with a seven-day trial when you subscribe. Selfhosted installations are Pro by definition, so running your own copy unlocks every endpoint at no cost. Ticket sales carry zero platform fees on every plan and in both modes: you keep everything except your payment processor\'s cut.',
             ],
             [
                 'q' => 'How does authentication work?',
@@ -1422,7 +1422,7 @@
                             The last call is the <span class="es-cons-lit">first one.</span>
                         </h2>
                         <p class="es-cons-dim mb-10 max-w-xl text-lg">
-                            Pick a name and start, or register straight from your code. Publishing a schedule and its dates is free forever, and so are the first 25 paid tickets a month; the API and unlimited ticket sales are ${{ $proMonthly }} a month, and Event Schedule takes nothing from the door.
+                            Pick a name and start, or register straight from your code. Publishing a schedule and its dates is free forever, and so are the first 25 paid tickets a month; the API and unlimited ticket sales are {{ plan_price($proMonthly) }} a month, and Event Schedule takes nothing from the door.
                         </p>
 
                         <div class="flex max-w-2xl flex-col items-stretch gap-3 sm:flex-row">

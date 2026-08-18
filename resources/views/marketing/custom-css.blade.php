@@ -25,7 +25,7 @@
         "offers": {
             "@type": "Offer",
             "price": "{{ $proMonthly }}",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "Available on Pro plan"
         }
     }
@@ -1154,7 +1154,7 @@
                 <div class="mx-auto mb-12 max-w-3xl text-center">
                     <p class="es-sheet2-mark mb-5" data-reveal><span class="es-sheet2-num">07</span> the plan</p>
                     <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                        ${{ $proMonthly }} a month, <span class="es-sheet2-lit">or selfhost it.</span>
+                        {{ plan_price($proMonthly) }} a month, <span class="es-sheet2-lit">or selfhost it.</span>
                     </h2>
                 </div>
 
@@ -1292,7 +1292,7 @@
                         Claim the name. <span class="es-sheet2-lit">Then write the sheet.</span>
                     </h2>
                     <p class="es-sheet2-muted mx-auto mb-10 max-w-2xl text-lg">
-                        Publishing a schedule is free forever. Custom CSS arrives with Pro at ${{ $proMonthly }} a month, and it is included on every selfhosted install.
+                        Publishing a schedule is free forever. Custom CSS arrives with Pro at {{ plan_price($proMonthly) }} a month, and it is included on every selfhosted install.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

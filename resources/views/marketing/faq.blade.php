@@ -555,12 +555,12 @@
                 'items' => [
                     [
                         'q' => "What's the difference between Free and Pro?",
-                        'a' => 'Free gives you the calendar: unlimited events, two-way calendar sync, sub-schedules, recurring events, built-in analytics, the embed, and newsletters at 10 emails a month. Pro is $' . $proMonthly . ' a month and is mostly about selling: ticketing with QR check-in, the check-in dashboard, passes, promo codes, gift cards, appointment booking, the sold-out waitlist, custom fields, generated event graphics, webhooks, the REST API, custom CSS, and taking the Event Schedule branding off your public pages. It also raises newsletters to 100 emails a month.',
+                        'a' => 'Free gives you the calendar: unlimited events, two-way calendar sync, sub-schedules, recurring events, built-in analytics, the embed, and newsletters at 10 emails a month. Pro is ' . plan_price($proMonthly) . ' a month and is mostly about selling: ticketing with QR check-in, the check-in dashboard, passes, promo codes, gift cards, appointment booking, the sold-out waitlist, custom fields, generated event graphics, webhooks, the REST API, custom CSS, and taking the Event Schedule branding off your public pages. It also raises newsletters to 100 emails a month.',
                         'links' => [['Compare the plans', marketing_url('/pricing')]],
                     ],
                     [
                         'q' => 'What does Enterprise add?',
-                        'a' => 'Enterprise is $' . $entMonthly . ' a month and adds a custom domain for your schedule, Internal and Unlisted event visibility with an optional password, up to five team members with availability tracking, scheduled graphic emails, event creation over WhatsApp, the AI generators for schedule and event copy, agenda scanning, and newsletters at 1,000 emails a month. Priority support comes with it.',
+                        'a' => 'Enterprise is ' . plan_price($entMonthly) . ' a month and adds a custom domain for your schedule, Internal and Unlisted event visibility with an optional password, up to five team members with availability tracking, scheduled graphic emails, event creation over WhatsApp, the AI generators for schedule and event copy, agenda scanning, and newsletters at 1,000 emails a month. Priority support comes with it.',
                         'links' => [['Pricing', marketing_url('/pricing')]],
                     ],
                     [
@@ -570,7 +570,7 @@
                     ],
                     [
                         'q' => 'What happens when my free trial ends?',
-                        'a' => 'The ' . $trialDays . '-day trial applies to a paid plan, not to the product. When it ends, the card on file is charged for Pro at $' . $proMonthly . ' a month or $' . $proYearly . ' a year, or Enterprise at $' . $entMonthly . ' a month or $' . $entYearly . ' a year. Cancel during the trial and nothing is charged. Cancel later and the schedule drops back to the free plan with every event and every record intact. You lose the paid features, not the calendar.',
+                        'a' => 'The ' . $trialDays . '-day trial applies to a paid plan, not to the product. When it ends, the card on file is charged for Pro at ' . plan_price($proMonthly) . ' a month or ' . plan_price($proYearly) . ' a year, or Enterprise at ' . plan_price($entMonthly) . ' a month or ' . plan_price($entYearly) . ' a year. Cancel during the trial and nothing is charged. Cancel later and the schedule drops back to the free plan with every event and every record intact. You lose the paid features, not the calendar.',
                     ],
                     [
                         'q' => 'Can I cancel anytime?',
@@ -805,7 +805,7 @@
             || str_starts_with($cell, 'Up to ')
         );
         $rateRows = [
-            ['What it costs', '$0, permanently', '$' . $proMonthly . ' / month or $' . $proYearly . ' / year', '$' . $entMonthly . ' / month or $' . $entYearly . ' / year'],
+            ['What it costs', plan_price(0) . ', permanently', plan_price($proMonthly) . ' / month or ' . plan_price($proYearly) . ' / year', plan_price($entMonthly) . ' / month or ' . plan_price($entYearly) . ' / year'],
             ['Events on your schedule', 'Unlimited', 'Unlimited', 'Unlimited'],
             ['Public page, embed and QR code', 'Yes', 'Yes', 'Yes'],
             ['Two-way Google, Outlook and CalDAV sync', 'Yes', 'Yes', 'Yes'],

@@ -947,9 +947,10 @@ class GrowthExportService
             'by_plan_source' => $bySource,
             'by_plan_term' => $byTerm,
             'subscription_status' => $statuses,
-            'mrr_usd' => round($mrr, 2),
-            'arpu_usd' => $paying > 0 ? round($mrr / $paying, 2) : null,
-            'list_prices_usd' => ['pro_monthly' => $monthly, 'pro_yearly' => $yearly,
+            // Not *_usd: these are in the platform currency, whatever the operator set.
+            'mrr' => round($mrr, 2),
+            'arpu' => $paying > 0 ? round($mrr / $paying, 2) : null,
+            'list_prices' => ['pro_monthly' => $monthly, 'pro_yearly' => $yearly,
                 'enterprise_monthly' => $entMonthly, 'enterprise_yearly' => $entYearly],
             'median_days_to_upgrade' => $this->median($daysToUpgrade),
             'gmv_by_currency' => $this->gmvByCurrency(),

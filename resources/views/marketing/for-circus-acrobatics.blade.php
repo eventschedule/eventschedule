@@ -35,7 +35,7 @@
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "Free forever"
         },
         "featureList": [
@@ -624,7 +624,7 @@
                                         <div class="flex items-center justify-between rounded-lg bg-white p-2.5 text-sm dark:bg-white/5"><span class="text-gray-900 dark:text-white">General Admission</span><span class="font-medium text-gray-900 dark:text-white">$25</span></div>
                                         <div class="flex items-center justify-between rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-2.5 text-sm"><span class="text-gray-900 dark:text-white">Ringside</span><span class="font-medium text-gray-900 dark:text-white">$45</span></div>
                                     </div>
-                                    <div class="mt-4 flex justify-between border-t border-gray-200 pt-3 dark:border-white/10"><span class="text-sm text-gray-500 dark:text-gray-400">Platform fee</span><span class="font-bold text-emerald-600 dark:text-emerald-400">$0</span></div>
+                                    <div class="mt-4 flex justify-between border-t border-gray-200 pt-3 dark:border-white/10"><span class="text-sm text-gray-500 dark:text-gray-400">Platform fee</span><span class="font-bold text-emerald-600 dark:text-emerald-400">{{ plan_price(0) }}</span></div>
                                     <div class="mt-3 inline-flex items-center gap-2 rounded-full border border-amber-300/60 bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800 dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-300">
                                         <svg aria-hidden="true" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
                                         QR check-in at the door
@@ -767,7 +767,7 @@
                         </div>
                         <div class="flex items-center justify-between rounded-lg border border-amber-300 bg-amber-100 px-3 py-2 dark:border-amber-400/20 dark:bg-amber-500/10">
                             <span class="text-sm text-gray-700 dark:text-gray-200">Platform fee on every ticket</span>
-                            <span class="font-bold text-emerald-600 dark:text-emerald-400">$0</span>
+                            <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ plan_price(0) }}</span>
                         </div>
                         <span class="es-circus-silk bg-gradient-to-b from-rose-500/45 via-rose-500/15 to-transparent" style="left:12%;width:0.25rem;height:9rem;--d:0.4s;" aria-hidden="true"></span>
                         <div class="es-glare" aria-hidden="true"></div>

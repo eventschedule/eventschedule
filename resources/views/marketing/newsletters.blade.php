@@ -30,7 +30,7 @@
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "The newsletter builder is included on the free plan, with 10 recipients per month"
         },
         "featureList": [
@@ -612,7 +612,7 @@
         // Role::newsletterLimit(). Null means no cap at all.
         $allowances = [
             ['Free', '10', 'The whole builder: blocks, templates, segments, scheduling, tracking, A/B tests.'],
-            ['Pro, $'.$proMonthly.' a month', '100', 'Also lets you upload image files into a newsletter rather than linking to them.'],
+            ['Pro, '.plan_price($proMonthly).' a month', '100', 'Also lets you upload image files into a newsletter rather than linking to them.'],
             ['Enterprise', '1,000', 'For a schedule sending to a large list every month.'],
             ['Your own SMTP', 'No limit', 'Point the schedule at your own mail server and the monthly cap comes off.'],
             ['Selfhosted', 'No limit', 'Your install, your mail service, no counting.'],

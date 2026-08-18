@@ -164,11 +164,11 @@
                 <tbody>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Pro</span></td>
-                        <td>${{ $proMonthly }}, one month of Pro</td>
+                        <td>{{ plan_price($proMonthly) }}, one month of Pro</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Enterprise</span></td>
-                        <td>${{ $entMonthly }}, one month of Enterprise</td>
+                        <td>{{ plan_price($entMonthly) }}, one month of Enterprise</td>
                     </tr>
                 </tbody>
             </table>
@@ -176,7 +176,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">The tier is read on day 30, not on day 1</div>
-            <p>The credit follows whichever plan their subscription is on at the moment it qualifies. Someone who starts on Pro and moves up to Enterprise inside the first 30 days earns you the ${{ $entMonthly }} Enterprise credit, and the history table updates to match. The amounts are fixed at ${{ $proMonthly }} and ${{ $entMonthly }} whether they pay monthly or yearly.</p>
+            <p>The credit follows whichever plan their subscription is on at the moment it qualifies. Someone who starts on Pro and moves up to Enterprise inside the first 30 days earns you the {{ plan_price($entMonthly) }} Enterprise credit, and the history table updates to match. The amounts are fixed at {{ plan_price($proMonthly) }} and {{ plan_price($entMonthly) }} whether they pay monthly or yearly.</p>
         </div>
     </section>
 
@@ -196,7 +196,7 @@
 
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Open <strong class="text-gray-900 dark:text-white">Referrals</strong> in the admin panel sidebar</li>
-            <li>Find the credit in <strong class="text-gray-900 dark:text-white">Credits Ready to Apply</strong>. Each one shows its tier and value, such as Pro ${{ $proMonthly }} credit</li>
+            <li>Find the credit in <strong class="text-gray-900 dark:text-white">Credits Ready to Apply</strong>. Each one shows its tier and value, such as Pro {{ plan_price($proMonthly) }} credit</li>
             <li>Choose a schedule from the <strong class="text-gray-900 dark:text-white">Select schedule</strong> dropdown. Only schedules you own are listed, not ones where you were added as a team member</li>
             <li>Click <strong class="text-gray-900 dark:text-white">Apply Credit</strong></li>
         </ol>
@@ -217,7 +217,7 @@
                 <tbody>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Has an active subscription</span></td>
-                        <td>The ${{ $proMonthly }} or ${{ $entMonthly }} goes on the schedule's billing balance and comes off its next invoice automatically. Your plan and renewal date are untouched, and a credit larger than the invoice carries over to the one after</td>
+                        <td>The {{ plan_price($proMonthly) }} or {{ plan_price($entMonthly) }} goes on the schedule's billing balance and comes off its next invoice automatically. Your plan and renewal date are untouched, and a credit larger than the invoice carries over to the one after</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Has no active subscription</span></td>
@@ -229,7 +229,7 @@
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Tip</div>
-            <p>Applying a credit is final: it is spent on the schedule you choose and cannot be split across schedules or moved afterwards. To try a paid tier on a schedule that is not paying yet, spend the credit there, since that is the case where it buys 30 days of the plan outright rather than ${{ $proMonthly }} or ${{ $entMonthly }} off a bill.</p>
+            <p>Applying a credit is final: it is spent on the schedule you choose and cannot be split across schedules or moved afterwards. To try a paid tier on a schedule that is not paying yet, spend the credit there, since that is the case where it buys 30 days of the plan outright rather than {{ plan_price($proMonthly) }} or {{ plan_price($entMonthly) }} off a bill.</p>
         </div>
 
         <div class="doc-callout doc-callout-info">

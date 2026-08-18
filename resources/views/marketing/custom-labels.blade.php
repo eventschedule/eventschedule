@@ -16,8 +16,8 @@
         "offers": {
             "@type": "Offer",
             "price": "{{ $proMonthly }}",
-            "priceCurrency": "USD",
-            "description": "Included in the Pro plan at ${{ $proMonthly }} per month. Every Pro feature is included in a selfhosted install."
+            "priceCurrency": "{{ platform_currency() }}",
+            "description": "Included in the Pro plan at {{ plan_price($proMonthly) }} per month. Every Pro feature is included in a selfhosted install."
         },
         "featureList": [
             "34 renameable labels across the public schedule, event pages, photo gallery and appointment booking",
@@ -676,7 +676,7 @@
             ],
             [
                 'q' => 'Is it free?',
-                'a' => 'Custom labels are on the Pro plan, which is $'.$proMonthly.' a month. Publishing a schedule, the calendar itself, recurring events, calendar sync, analytics and free registration stay free forever, as do newsletters at 10 emails a month, counted per recipient. A selfhosted install gets every Pro and Enterprise feature, custom labels included.',
+                'a' => 'Custom labels are on the Pro plan, which is '.plan_price($proMonthly).' a month. Publishing a schedule, the calendar itself, recurring events, calendar sync, analytics and free registration stay free forever, as do newsletters at 10 emails a month, counted per recipient. A selfhosted install gets every Pro and Enterprise feature, custom labels included.',
             ],
         ];
 

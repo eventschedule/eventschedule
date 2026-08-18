@@ -163,7 +163,7 @@
                 "@type": "Offer",
                 "name": "Free",
                 "price": "0",
-                "priceCurrency": "USD",
+                "priceCurrency": "{{ platform_currency() }}",
                 "description": "Unlimited events, Google Calendar and CalDAV sync, newsletters, RSVP with capacity, embeddable calendar, and fan engagement features.",
                 "availability": "https://schema.org/InStock"
             },
@@ -171,7 +171,7 @@
                 "@type": "Offer",
                 "name": "Pro",
                 "price": "{{ number_format($proMonthly, 2) }}",
-                "priceCurrency": "USD",
+                "priceCurrency": "{{ platform_currency() }}",
                 "description": "Everything in Free plus ticketing with QR check-ins and live dashboard, ticket waitlist, sale notifications, sales CSV export, Stripe payments, remove branding, custom CSS, event graphics, REST API, and webhooks.",
                 "availability": "https://schema.org/InStock"
             },
@@ -179,7 +179,7 @@
                 "@type": "Offer",
                 "name": "Enterprise",
                 "price": "{{ number_format($entMonthly, 2) }}",
-                "priceCurrency": "USD",
+                "priceCurrency": "{{ platform_currency() }}",
                 "description": "Everything in Pro plus AI style generation, AI content generation, AI flyer generation, WhatsApp event creation, custom domains, multiple team members, and priority support.",
                 "availability": "https://schema.org/InStock"
             }

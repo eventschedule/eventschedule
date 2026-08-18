@@ -38,7 +38,16 @@ class MoneyUtils
 
     public static function format($amount, $currencyCode)
     {
-        $upper = strtoupper($currencyCode);
+        // Null-safe, because plenty of callers read the code off a nullable relation
+        // ($sale->event?->ticket_currency_code). Without this, strtoupper(null) is deprecated
+        // on PHP 8.1 and the amount renders as a bare "120.50 " with no currency at all -
+        // worse than the wrong symbol. USD matches what the columns default to.
+        $upper = strtoupper((string) $currencyCode);
+
+        if ($upper === '') {
+            $upper = 'USD';
+            $currencyCode = 'USD';
+        }
         $decimals = self::decimalsFor($upper);
 
         $formatted = number_format($amount, $decimals, '.', ',');
@@ -54,6 +63,49 @@ class MoneyUtils
         $displayCode = self::$displayCodeOverrides[$upper] ?? $currencyCode;
 
         return $formatted.' '.$displayCode;
+    }
+
+    /**
+     * The glyph for a currency, for the few places that need a bare symbol next to a
+     * number they format themselves (a budget input's label, a JS-driven counter).
+     * Prefer format(), which puts the two together correctly.
+     *
+     * Falls back to the code itself, matching what format() does for a currency with
+     * no glyph: "CHF", not a dollar sign that would name the wrong money.
+     */
+    public static function symbol(?string $currencyCode): string
+    {
+        $upper = strtoupper($currencyCode ?? '');
+
+        if ($upper === '') {
+            $upper = 'USD';
+        }
+
+        return self::$displaySymbols[$upper] ?? self::$displayCodeOverrides[$upper] ?? $upper;
+    }
+
+    /**
+     * The currencies an owner may pick from, as {value, label} objects.
+     *
+     * Memoized: this file is otherwise re-read with a raw file_get_contents at every
+     * call site, one of them inside a Blade view.
+     */
+    public static function currencies(): array
+    {
+        static $currencies = null;
+
+        if ($currencies === null) {
+            $json = @file_get_contents(base_path('storage/currencies.json'));
+            $currencies = $json ? (json_decode($json) ?: []) : [];
+        }
+
+        return $currencies;
+    }
+
+    /** Just the codes, for validating a submitted currency. */
+    public static function currencyCodes(): array
+    {
+        return array_column(self::currencies(), 'value');
     }
 
     public static function getSmallestUnitMultiplier($currencyCode)
@@ -113,6 +165,8 @@ class MoneyUtils
             'HR' => 'EUR',
         ];
 
-        return $map[strtoupper($countryCode ?? '')] ?? 'USD';
+        // The installation's own currency, not a hardcoded USD: an operator whose schedules
+        // never fill in a country still gets their money, and setting nothing keeps USD.
+        return $map[strtoupper($countryCode ?? '')] ?? PlatformCurrency::code();
     }
 }

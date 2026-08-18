@@ -316,6 +316,62 @@
              monetization heading would also misdescribe it, since that feature is scoped to
              free-tier schedules on multi-tenant hosted installs and this one is none of
              those. --}}
+        {{-- Always rendered. Even a selfhost with no plans to price uses this as the
+             default currency for a new event. --}}
+        <div id="currency" class="ap-card rounded-xl p-6 scroll-mt-24">
+            <div class="mb-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">@lang('messages.platform_currency_title')</h2>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">@lang('messages.platform_currency_description')</p>
+            </div>
+
+            <form method="POST" action="{{ route('admin.settings.update_currency') }}" class="{{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
+                @csrf
+
+                <div class="mb-6">
+                    <x-input-label for="platform_currency" :value="__('messages.currency')" />
+                    <select id="platform_currency" name="platform_currency" {{ is_demo_mode() ? 'disabled' : '' }}
+                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                        @foreach ($currencies as $currency)
+                        @if ($loop->index == 2)
+                        <option disabled>──────────</option>
+                        @endif
+                        <option value="{{ $currency->value }}" {{ old('platform_currency', $platformCurrency) == $currency->value ? 'selected' : '' }}>
+                            {{ $currency->value }} - {{ $currency->label }}
+                        </option>
+                        @endforeach
+                    </select>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@lang('messages.platform_currency_help')</p>
+                    <x-input-error class="mt-2" :messages="$errors->get('platform_currency')" />
+                </div>
+
+                @if (config('app.hosted'))
+                <div class="mb-6 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
+                    <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <span>@lang('messages.platform_currency_display_only')</span>
+                    </p>
+                </div>
+                @endif
+
+                @if (is_demo_mode())
+                <div class="mb-6 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
+                    <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <span>@lang('messages.demo_mode_settings_disabled')</span>
+                    </p>
+                </div>
+                @endif
+
+                <div class="flex justify-end">
+                    <x-brand-button type="submit">@lang('messages.save')</x-brand-button>
+                </div>
+            </form>
+        </div>
+
         @if ($stay22Available)
         <div id="accommodation" class="ap-card rounded-xl p-6 scroll-mt-24">
             <div class="mb-4">

@@ -344,6 +344,31 @@ if (! function_exists('content_dir_for_language')) {
     }
 }
 
+if (! function_exists('platform_currency')) {
+    /**
+     * The currency code this installation quotes its own prices in.
+     */
+    function platform_currency(): string
+    {
+        return \App\Utils\PlatformCurrency::code();
+    }
+}
+
+if (! function_exists('plan_price')) {
+    /**
+     * One of OUR prices, rendered in the installation's currency: "$9", "R9", "9 CHF".
+     *
+     * Use this for every plan amount, platform fee and free-tier zero the app quotes for
+     * itself, so an operator sets the currency once instead of editing Blade files. Do NOT
+     * use it for money that belongs to a row - a ticket sale renders the currency it was
+     * taken in, via MoneyUtils::format($amount, $event->ticket_currency_code).
+     */
+    function plan_price($amount): string
+    {
+        return \App\Utils\PlatformCurrency::format($amount);
+    }
+}
+
 if (! function_exists('marketing_url')) {
     /**
      * Generate a URL for marketing pages

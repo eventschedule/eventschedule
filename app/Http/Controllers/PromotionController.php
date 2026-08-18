@@ -19,6 +19,7 @@ use App\Services\PromotionInventoryService;
 use App\Services\PromotionModerationService;
 use App\Services\PromotionService;
 use App\Utils\CountryUtils;
+use App\Utils\MoneyUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -72,7 +73,7 @@ class PromotionController extends Controller
             'maxBudget' => min((float) config('ads.native_max_budget', 1000), (float) $role->getBoostMaxBudget()),
             'cpm' => (float) AdsService::setting('native_cpm', 2.00),
             'cpc' => (float) AdsService::setting('native_cpc', 0.25),
-            'currency' => $currency = config('ads.native_currency', 'USD'),
+            'currency' => $currency = AdsService::nativeCurrency(),
             // PROMOTIONS_CURRENCY is configurable, so every amount on this form has to carry a
             // symbol - a non-USD operator's buyers would otherwise see bare numbers.
             'currencySymbol' => BoostCampaign::currencySymbol($currency),
@@ -125,15 +126,20 @@ class PromotionController extends Controller
         // The per-schedule trust limit, which the form only uses to set the input's max attribute.
         // Enforcing it here as well is what makes it an actual limit rather than a suggestion.
         if ($budget > (float) $role->getBoostMaxBudget()) {
-            return response()->json(['error' => __('messages.boost_exceeds_limit')], 422);
+            return response()->json(['error' => __('messages.boost_exceeds_limit', ['limit' => MoneyUtils::format($role->getBoostMaxBudget(), AdsService::nativeCurrency())])], 422);
         }
 
         try {
             $stripe = new \Stripe\StripeClient(config('services.stripe_platform.secret'));
 
+            $currency = AdsService::nativeCurrency();
+
             $params = [
-                'amount' => (int) round($budget * 100),
-                'currency' => strtolower(config('ads.native_currency', 'USD')),
+                // The multiplier is looked up rather than a literal 100, and from the SAME
+                // currency the charge is denominated in on the next line. JPY and KRW have no
+                // minor unit, so *100 there would bill a hundred times the budget.
+                'amount' => (int) round($budget * MoneyUtils::getSmallestUnitMultiplier($currency)),
+                'currency' => strtolower($currency),
                 'automatic_payment_methods' => ['enabled' => true],
                 'metadata' => [
                     'type' => 'promo',
@@ -230,7 +236,7 @@ class PromotionController extends Controller
         if (round((float) $request->budget, 2) > (float) $role->getBoostMaxBudget()) {
             $this->abandonIntent($request);
 
-            return back()->with('error', __('messages.boost_exceeds_limit'));
+            return back()->with('error', __('messages.boost_exceeds_limit', ['limit' => MoneyUtils::format($role->getBoostMaxBudget(), AdsService::nativeCurrency())]));
         }
 
         // create() gates on this too, so reaching it here means a direct POST or a phone that
@@ -302,7 +308,7 @@ class PromotionController extends Controller
                 'user_budget' => $budget,
                 'budget_type' => 'lifetime',
                 'lifetime_budget' => $budget,
-                'currency_code' => config('ads.native_currency', 'USD'),
+                'currency_code' => AdsService::nativeCurrency(),
                 'pricing_model' => $pricingModel,
                 'unit_rate_micros' => PromotionBillingService::toMicros($rate),
                 'budget_micros' => PromotionBillingService::toMicros($budget),

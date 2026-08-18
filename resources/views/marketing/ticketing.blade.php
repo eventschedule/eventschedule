@@ -30,8 +30,8 @@
         "offers": {
             "@type": "Offer",
             "price": "{{ $proMonthly }}",
-            "priceCurrency": "USD",
-            "description": "Selling starts on the free plan, at up to 25 paid tickets a month, and those tickets are scanned at the door on every plan. Pro removes the monthly cap and adds the live check-in dashboard, the waitlist, promo codes and passes for ${{ $proMonthly }} per month, with a 7 day free trial. Zero platform fees on ticket sales, on every plan."
+            "priceCurrency": "{{ platform_currency() }}",
+            "description": "Selling starts on the free plan, at up to 25 paid tickets a month, and those tickets are scanned at the door on every plan. Pro removes the monthly cap and adds the live check-in dashboard, the waitlist, promo codes and passes for {{ plan_price($proMonthly) }} per month, with a 7 day free trial. Zero platform fees on ticket sales, on every plan."
         },
         "featureList": [
             "Zero platform fees on ticket sales",
@@ -660,7 +660,7 @@
             ],
             [
                 'q' => 'Do I need a paid plan to sell tickets?',
-                'a' => 'No. The Free plan sells up to 25 paid tickets a month through Stripe, scans every one of them at the door, and we take no platform fee on any tier. Pro removes the monthly cap and adds the live check-in dashboard, waitlists, promo codes, passes and the sales export, for $'.$proMonthly.' a month with a 7 day free trial. Free registration is separate and unlimited on every plan: turn on RSVP for a free event, set a capacity limit, and attendees still get a confirmation email.',
+                'a' => 'No. The Free plan sells up to 25 paid tickets a month through Stripe, scans every one of them at the door, and we take no platform fee on any tier. Pro removes the monthly cap and adds the live check-in dashboard, waitlists, promo codes, passes and the sales export, for '.plan_price($proMonthly).' a month with a 7 day free trial. Free registration is separate and unlimited on every plan: turn on RSVP for a free event, set a capacity limit, and attendees still get a confirmation email.',
             ],
             [
                 'q' => 'How does QR code check-in work?',
@@ -1163,7 +1163,7 @@
                         <h3 class="es-turn-ink text-lg font-black">Ticketing without a ceiling</h3>
                         <span class="es-turn-plan es-turn-plan-pro">Pro</span>
                     </div>
-                    <p class="es-turn-muted mb-5 text-sm leading-relaxed">Selling itself starts free, at 25 paid tickets a month. Pro takes the counter's ceiling off and adds the rest of this page: ${{ $proMonthly }} a month with a 7 day free trial, and still zero platform fees.</p>
+                    <p class="es-turn-muted mb-5 text-sm leading-relaxed">Selling itself starts free, at 25 paid tickets a month. Pro takes the counter's ceiling off and adds the rest of this page: {{ plan_price($proMonthly) }} a month with a 7 day free trial, and still zero platform fees.</p>
                     <ul class="es-turn-muted space-y-2.5 text-sm">
                         @foreach (['No monthly cap on the paid tickets you sell', 'Promo codes, add-ons and gift cards', 'Passes and season subscriptions across many events', 'Custom questions at checkout, and individual tickets per guest', 'The check-in dashboard and the sold-out waitlist', 'The ticket form embedded on the website you already have'] as $proItem)
                             <li class="flex gap-2.5">
@@ -1359,7 +1359,7 @@
                         Sell the ticket. <span class="es-turn-lit">Keep the ticket.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg es-turn-band-muted">
-                        Publishing your events, taking free registrations and scanning at the door are free forever, and so are the first 25 paid tickets you sell each month. Take the ceiling off, and add the live check-in dashboard and the waitlist, for ${{ $proMonthly }} a month. Nothing is taken at the gate either way.
+                        Publishing your events, taking free registrations and scanning at the door are free forever, and so are the first 25 paid tickets you sell each month. Take the ceiling off, and add the live check-in dashboard and the waitlist, for {{ plan_price($proMonthly) }} a month. Nothing is taken at the gate either way.
                     </p>
 
                     {{-- The last register. The hero's counter climbed to 142; this one never

@@ -29,8 +29,8 @@
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free to start, including up to 25 paid tickets a month. Pro at ${{ $proMonthly }} a month lifts the cap."
+            "priceCurrency": "{{ platform_currency() }}",
+            "description": "Free to start, including up to 25 paid tickets a month. Pro at {{ plan_price($proMonthly) }} a month lifts the cap."
         },
         "url": "{{ url()->current() }}",
         "keywords": "stripe ticket payments, stripe connect event tickets, zero platform fee ticketing, stripe checkout tickets, direct payouts",
@@ -670,7 +670,7 @@
         // figure Event Schedule collects on a sale.
         $remit = [
             ['Our cut of each sale', $money(0), 'There is no fee field in the charge we create.'],
-            ['The Pro plan, monthly', '$'.$proMonthly.'', 'Optional: it lifts the 25-a-month cap. Nothing further is charged on a sale.'],
+            ['The Pro plan, monthly', plan_price($proMonthly), 'Optional: it lifts the 25-a-month cap. Nothing further is charged on a sale.'],
             ['Card processing', "Stripe's rate", 'Stripe sets it, per country and method.'],
         ];
 
@@ -738,7 +738,7 @@
         $faqs = [
             [
                 'q' => 'Does Event Schedule take a cut of ticket sales?',
-                'a' => 'No. On the hosted platform the charge is created on your own connected Stripe account and no application fee is added to it, so there is no line where a platform cut could be taken. You pay Stripe its processing fee and keep the rest. Selling starts on the free plan, at up to 25 paid tickets a month, and the Pro plan at $'.$proMonthly.' a month lifts that cap. The subscription is the whole of what Event Schedule charges.',
+                'a' => 'No. On the hosted platform the charge is created on your own connected Stripe account and no application fee is added to it, so there is no line where a platform cut could be taken. You pay Stripe its processing fee and keep the rest. Selling starts on the free plan, at up to 25 paid tickets a month, and the Pro plan at '.plan_price($proMonthly).' a month lifts that cap. The subscription is the whole of what Event Schedule charges.',
             ],
             [
                 'q' => 'How do I connect Stripe, and what happens if it is not finished?',
@@ -906,7 +906,7 @@
 
                     <p data-reveal>
                         <span class="es-payout-plan es-payout-plan-free">Free</span>
-                        <span class="es-payout-muted ms-2 text-sm">Selling starts free, at 25 paid tickets a month. Pro lifts the cap for ${{ $proMonthly }} a month, and that is the entire bill from us.</span>
+                        <span class="es-payout-muted ms-2 text-sm">Selling starts free, at 25 paid tickets a month. Pro lifts the cap for {{ plan_price($proMonthly) }} a month, and that is the entire bill from us.</span>
                     </p>
                 </div>
 

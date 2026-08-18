@@ -35,7 +35,7 @@
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "Free forever"
         },
         "featureList": [
@@ -682,7 +682,7 @@
             ],
             [
                 'q' => 'Can I charge for webinars?',
-                'a' => 'Yes, and you can start on the free plan: 25 paid tickets a month, per schedule. Connect your own Stripe account, add as many named ticket types as the session needs, each with its own price, quantity and sales window, and Event Schedule charges zero platform fees on every plan. Stripe charges its own standard processing fee, approximately 2.9% plus $0.30 a transaction. Scanning a ticket\'s QR code is free on every plan, for the sessions you also run in a room. Pro at $'.$proMonthly.' a month takes the monthly ceiling off and adds the rest of the door tooling: the live check-in dashboard, the sold-out ticket waitlist, promo codes and add-ons. Free registration with a capacity limit is unlimited and never counts against the 25.',
+                'a' => 'Yes, and you can start on the free plan: 25 paid tickets a month, per schedule. Connect your own Stripe account, add as many named ticket types as the session needs, each with its own price, quantity and sales window, and Event Schedule charges zero platform fees on every plan. Stripe charges its own standard processing fee, approximately 2.9% plus $0.30 a transaction. Scanning a ticket\'s QR code is free on every plan, for the sessions you also run in a room. Pro at '.plan_price($proMonthly).' a month takes the monthly ceiling off and adds the rest of the door tooling: the live check-in dashboard, the sold-out ticket waitlist, promo codes and add-ons. Free registration with a capacity limit is unlimited and never counts against the 25.',
             ],
             [
                 'q' => 'Can I schedule a recurring webinar series?',
@@ -694,7 +694,7 @@
             ],
             [
                 'q' => 'Is Event Schedule free for hosting webinars?',
-                'a' => 'Yes. Unlimited webinars, the running order on each one, recurring series, free registration with a capacity limit, two-way calendar sync, the embeddable calendar and built-in analytics are all free forever, and so is selling your first 25 paid tickets a month and scanning those tickets in. Pro at $'.$proMonthly.' a month removes that ceiling and adds the live check-in dashboard, custom questions on the registration form and the sold-out ticket waitlist, extra team members are on Enterprise, and there are zero platform fees on ticket sales at every plan level. On the hosted service, attendee email goes out through your own SMTP details, which you add once in the integrations tab on any plan.',
+                'a' => 'Yes. Unlimited webinars, the running order on each one, recurring series, free registration with a capacity limit, two-way calendar sync, the embeddable calendar and built-in analytics are all free forever, and so is selling your first 25 paid tickets a month and scanning those tickets in. Pro at '.plan_price($proMonthly).' a month removes that ceiling and adds the live check-in dashboard, custom questions on the registration form and the sold-out ticket waitlist, extra team members are on Enterprise, and there are zero platform fees on ticket sales at every plan level. On the hosted service, attendee email goes out through your own SMTP details, which you add once in the integrations tab on any plan.',
             ],
         ];
 
@@ -894,7 +894,7 @@
                         <p class="es-air-label mt-2">Link field per event</p>
                     </div>
                     <div class="es-air-card p-6 text-center" data-reveal>
-                        <p class="es-air-num text-4xl font-black es-air-lit">$0</p>
+                        <p class="es-air-num text-4xl font-black es-air-lit">{{ plan_price(0) }}</p>
                         <p class="es-air-label mt-2">Platform fee on sales</p>
                     </div>
                     <div class="es-air-card p-6 text-center" data-reveal>
@@ -1576,7 +1576,7 @@
                         Publish the session. <span class="es-air-lit">Keep the room.</span>
                     </h2>
                     <p class="es-air-rack-note mx-auto mb-10 max-w-2xl text-lg">
-                        Unlimited webinars, the running order, recurring series and free registration are free forever, and so are the first twenty-five paid tickets a month. ${{ $proMonthly }} a month takes the ceiling off, and nothing is ever taken off the top.
+                        Unlimited webinars, the running order, recurring series and free registration are free forever, and so are the first twenty-five paid tickets a month. {{ plan_price($proMonthly) }} a month takes the ceiling off, and nothing is ever taken off the top.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

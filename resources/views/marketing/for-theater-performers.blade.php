@@ -34,7 +34,7 @@
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "Free forever"
         },
         "featureList": [
@@ -368,7 +368,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for theater performers?',
-                'a' => 'The parts you use every day are free forever: your public schedule and its list layout, past productions kept and dated, sub-schedules, booking requests from companies that want to cast you, Drafts that keep auditions off the public page, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling tickets to work you produce yourself is on the Pro plan at $'.$proMonthly.' a month, and Event Schedule charges zero platform fees on sales.',
+                'a' => 'The parts you use every day are free forever: your public schedule and its list layout, past productions kept and dated, sub-schedules, booking requests from companies that want to cast you, Drafts that keep auditions off the public page, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling tickets to work you produce yourself is on the Pro plan at '.plan_price($proMonthly).' a month, and Event Schedule charges zero platform fees on sales.',
             ],
             [
                 'q' => 'How does my schedule become a credits list?',

@@ -34,7 +34,7 @@
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "Free forever"
         },
         "featureList": [
@@ -354,7 +354,7 @@
             ],
             [
                 'q' => 'Is Event Schedule free for a gallery?',
-                'a' => 'The parts you use for every show are free forever: the run as a recurring event, date exceptions, separate evening events, free registration with a capacity for a private view, sub-schedules, exhibition proposals from artists, two-way calendar sync and an embeddable calendar. Selling a ticket to a collector dinner or a paid preview is on the Pro plan at $'.$proMonthly.' a month, with zero platform fees on sales.',
+                'a' => 'The parts you use for every show are free forever: the run as a recurring event, date exceptions, separate evening events, free registration with a capacity for a private view, sub-schedules, exhibition proposals from artists, two-way calendar sync and an embeddable calendar. Selling a ticket to a collector dinner or a paid preview is on the Pro plan at '.plan_price($proMonthly).' a month, with zero platform fees on sales.',
             ],
             [
                 'q' => 'Can I cap the private view without charging for it?',

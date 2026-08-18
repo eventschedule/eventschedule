@@ -8,8 +8,8 @@
         {{-- Revenue & Sales Cards --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <x-stat-panel label="{{ __('messages.total_revenue') }}" color="green">
-                ${{ number_format($totalRevenue, 2) }}
-                <x-slot:subtitle>+${{ number_format($revenueInPeriod, 2) }} @lang('messages.in_period')</x-slot:subtitle>
+                {{ plan_price($totalRevenue) }}
+                <x-slot:subtitle>+{{ plan_price($revenueInPeriod) }} @lang('messages.in_period')</x-slot:subtitle>
             </x-stat-panel>
             <x-stat-panel label="{{ __('messages.total_sales') }}">
                 {{ number_format($totalSales) }}
@@ -21,12 +21,12 @@
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <x-stat-panel label="{{ __('messages.pending_revenue') }}" color="amber">
-                ${{ number_format($pendingRevenue, 2) }}
+                {{ plan_price($pendingRevenue) }}
                 <x-slot:subtitle>{{ number_format($pendingSales) }} @lang('messages.pending_sales')</x-slot:subtitle>
             </x-stat-panel>
             <x-stat-panel label="{{ __('messages.boost_markup_revenue') }}" color="green">
-                ${{ number_format($boostMarkupTotal, 2) }}
-                <x-slot:subtitle>+${{ number_format($boostMarkupInPeriod, 2) }} @lang('messages.in_period')</x-slot:subtitle>
+                {{ \App\Utils\MoneyUtils::format($boostMarkupTotal, config('services.meta.default_currency', 'USD')) }}
+                <x-slot:subtitle>+{{ \App\Utils\MoneyUtils::format($boostMarkupInPeriod, config('services.meta.default_currency', 'USD')) }} @lang('messages.in_period')</x-slot:subtitle>
             </x-stat-panel>
         </div>
 
@@ -104,8 +104,8 @@
                                 {{ \Illuminate\Support\Str::limit($sale->event?->name ?? '-', 30) }}
                             </td>
                             <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">{{ $sale->name }} ({{ $sale->email }})</td>
-                            <td class="px-4 py-3 text-sm text-end font-medium text-gray-900 dark:text-white">${{ number_format($sale->calculateTotal(), 2) }}</td>
-                            <td class="px-4 py-3 text-sm text-end font-medium text-amber-600 dark:text-amber-400">${{ number_format($sale->payment_amount, 2) }}</td>
+                            <td class="px-4 py-3 text-sm text-end font-medium text-gray-900 dark:text-white">{{ \App\Utils\MoneyUtils::format($sale->calculateTotal(), $sale->event?->ticket_currency_code) }}</td>
+                            <td class="px-4 py-3 text-sm text-end font-medium text-amber-600 dark:text-amber-400">{{ \App\Utils\MoneyUtils::format($sale->payment_amount, $sale->event?->ticket_currency_code) }}</td>
                             <td class="px-4 py-3 text-sm font-mono text-gray-500 dark:text-gray-400" title="{{ $sale->transaction_reference }}">
                                 {{ $sale->transaction_reference ? \Illuminate\Support\Str::limit($sale->transaction_reference, 15) : '-' }}
                             </td>
@@ -149,7 +149,7 @@
                                 {{ \Illuminate\Support\Str::limit($campaign->event?->name ?? '-', 30) }}
                             </td>
                             <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">{{ $campaign->user?->name }} ({{ $campaign->user?->email }})</td>
-                            <td class="px-4 py-3 text-sm text-end font-medium text-amber-600 dark:text-amber-400">${{ number_format($campaign->total_charged, 2) }}</td>
+                            <td class="px-4 py-3 text-sm text-end font-medium text-amber-600 dark:text-amber-400">{{ \App\Utils\MoneyUtils::format($campaign->total_charged, $campaign->currency_code) }}</td>
                             <td class="px-4 py-3 text-sm text-end whitespace-nowrap">
                                 <form method="POST" action="{{ route('admin.boost.approve', $campaign->id) }}" class="inline">
                                     @csrf
@@ -200,7 +200,7 @@
                                 {{ \Illuminate\Support\Str::limit($sale->event?->name ?? '-', 30) }}
                             </td>
                             <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">{{ $sale->name }}</td>
-                            <td class="px-4 py-3 text-sm text-end font-medium text-gray-900 dark:text-white">${{ number_format($sale->payment_amount, 2) }}</td>
+                            <td class="px-4 py-3 text-sm text-end font-medium text-gray-900 dark:text-white">{{ \App\Utils\MoneyUtils::format($sale->payment_amount, $sale->event?->ticket_currency_code) }}</td>
                             <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $sale->payment_method ?? '-' }}</td>
                             <td class="px-4 py-3 text-sm">
                                 @php
@@ -235,6 +235,10 @@
     <script src="{{ asset('js/chart.min.js') }}" {!! nonce_attr() !!}></script>
 
     <script {!! nonce_attr() !!}>
+        // Matches the plan_price() totals in the cards above, so the axis cannot disagree
+        // with them. JSON-encoded rather than interpolated, so a glyph is quoted safely.
+        // (Do not write the directive name in this comment - Blade compiles it here too.)
+        const REVENUE_CURRENCY_SYMBOL = @json(\App\Utils\PlatformCurrency::symbol());
         function initCharts() {
             if (typeof Chart === 'undefined') {
                 setTimeout(initCharts, 50);
@@ -288,7 +292,7 @@
                             ticks: {
                                 color: textColor,
                                 callback: function(value) {
-                                    return '$' + value.toLocaleString();
+                                    return REVENUE_CURRENCY_SYMBOL + value.toLocaleString();
                                 }
                             }
                         }

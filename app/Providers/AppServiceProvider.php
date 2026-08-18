@@ -9,6 +9,7 @@ use App\Policies\RolePolicy;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Cashier\Cashier;
@@ -140,6 +141,14 @@ class AppServiceProvider extends ServiceProvider
             if (auth()->check() && auth()->user()->isAdmin()) {
                 $view->with('adminAlertBadges', \App\Services\AdminAlertService::badges());
             }
+        });
+
+        // PlatformCurrency memoizes for the process. That is right for a web request, but a
+        // queue worker lives for days: without this it would keep serving the currency that was
+        // set when it booted, long after an admin changed it. Setting::set() clears the shared
+        // cache across processes; only this static needs help.
+        Queue::looping(function () {
+            \App\Utils\PlatformCurrency::flush();
         });
 
         View::composer('marketing.partials.header', function ($view) {

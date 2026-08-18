@@ -66,6 +66,11 @@ return [
 
     'native_min_budget' => (float) env('PROMOTIONS_MIN_BUDGET', 5.00),
     'native_max_budget' => (float) env('PROMOTIONS_MAX_BUDGET', 1000.00),
+    // Deliberately NOT falling back to the platform currency. A promotion purchase is a live
+    // Stripe charge, and the platform currency is a super-admin dropdown documented as display
+    // only - letting it pick the charge currency would silently re-denominate every purchase on
+    // an install that had simply never set this variable. Changing what is billed stays here,
+    // in .env, where it takes a deploy.
     'native_currency' => env('PROMOTIONS_CURRENCY', 'USD'),
 
     // Concurrent network campaigns per schedule. Deliberately separate from

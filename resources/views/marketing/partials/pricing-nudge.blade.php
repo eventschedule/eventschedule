@@ -5,12 +5,12 @@
         </h2>
         <div class="flex flex-col sm:flex-row justify-center gap-6 mt-8 mb-8">
             <div class="flex-1 max-w-xs mx-auto sm:mx-0">
-                <div class="text-3xl font-bold text-gray-900 dark:text-white">$0</div>
+                <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ plan_price(0) }}</div>
                 <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">Scheduling, calendar sync, newsletters, and 25 tickets a month</div>
             </div>
             <div class="hidden sm:block w-px bg-gray-200 dark:bg-white/10"></div>
             <div class="flex-1 max-w-xs mx-auto sm:mx-0">
-                <div class="text-3xl font-bold text-gray-900 dark:text-white">${{ $proMonthly }}<span class="text-base font-normal text-gray-500 dark:text-gray-400">/mo</span></div>
+                <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ plan_price($proMonthly) }}<span class="text-base font-normal text-gray-500 dark:text-gray-400">/mo</span></div>
                 <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">Unlimited tickets, QR check-in, event graphics, and no branding</div>
             </div>
         </div>

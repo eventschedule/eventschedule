@@ -26,7 +26,7 @@
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "Free plan includes one team member. Multiple team members are on the Enterprise plan."
         },
         "url": "{{ url()->current() }}",
@@ -650,7 +650,7 @@
         $faqs = [
             [
                 'q' => 'How many team members can I have?',
-                'a' => 'On the free plan a schedule has one member, which is you. Adding anybody else needs the Enterprise plan at $'.$entMonthly.' a month, and on eventschedule.com a team is capped at five members in total. A selfhosted install gets Enterprise features and has no member cap.',
+                'a' => 'On the free plan a schedule has one member, which is you. Adding anybody else needs the Enterprise plan at '.plan_price($entMonthly).' a month, and on eventschedule.com a team is capped at five members in total. A selfhosted install gets Enterprise features and has no member cap.',
             ],
             [
                 'q' => 'What are the access levels?',
@@ -823,7 +823,7 @@
                         </div>
                         <p class="es-line-ink mb-2 text-4xl font-black" aria-hidden="true">5</p>
                         <h3 class="es-line-ink mb-2 text-lg font-bold">Up to five, in total</h3>
-                        <p class="es-line-muted text-sm">${{ $entMonthly }} a month, or ${{ $entYearly }} a year. Five is the whole card, owner included, so it is four other people rather than five. Per-member availability arrives with it, on talent schedules.</p>
+                        <p class="es-line-muted text-sm">{{ plan_price($entMonthly) }} a month, or {{ plan_price($entYearly) }} a year. Five is the whole card, owner included, so it is four other people rather than five. Per-member availability arrives with it, on talent schedules.</p>
                     </div>
                     <div class="es-line-card p-7" data-reveal="panel">
                         <div class="mb-3 flex flex-wrap items-center gap-2">

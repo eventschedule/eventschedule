@@ -14,7 +14,7 @@
             <div class="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
                 <span>{{ number_format($campaign->impressions ?? 0) }} {{ strtolower(__('messages.impressions')) }}</span>
                 <span>{{ number_format($campaign->clicks ?? 0) }} {{ strtolower(__('messages.clicks')) }}</span>
-                <span>${{ number_format($campaign->actual_spend ?? 0, 2) }}</span>
+                <span>{{ \App\Utils\MoneyUtils::format($campaign->actual_spend ?? 0, $campaign->currency_code) }}</span>
             </div>
         </div>
         @empty

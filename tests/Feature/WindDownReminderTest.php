@@ -50,6 +50,18 @@ class WindDownReminderTest extends TestCase
         $this->artisan('app:send-subscription-reminders')->assertExitCode(0);
     }
 
+    /**
+     * The memo is a process-lifetime static, and RefreshDatabase does not reset it. Without
+     * this, a failed assertion in the ZAR test below would leave every later test in the
+     * process rendering prices in rand.
+     */
+    protected function tearDown(): void
+    {
+        \App\Utils\PlatformCurrency::flush();
+
+        parent::tearDown();
+    }
+
     public function test_the_amount_carries_its_currency_symbol(): void
     {
         config(['services.stripe_platform.price_monthly_amount' => '9']);
@@ -63,6 +75,29 @@ class WindDownReminderTest extends TestCase
 
             // A bare int coerces to "9" and the copy renders it verbatim: "will be charged 9."
             return $amount->getValue($mail) === '$9';
+        });
+    }
+
+    /**
+     * And the symbol follows the installation's currency, rather than a hardcoded dollar.
+     *
+     * The USD case above passes either way, since plan_price(9) is still "$9" - it cannot tell
+     * you whether the wiring works. This one can.
+     */
+    public function test_the_amount_uses_the_platform_currency(): void
+    {
+        config(['services.stripe_platform.price_monthly_amount' => '9']);
+        \App\Models\Setting::set('platform_currency', 'ZAR');
+        \App\Utils\PlatformCurrency::flush();
+
+        $this->windingDown();
+        $this->remind();
+
+        Mail::assertSent(SubscriptionTrialEnding::class, function ($mail) {
+            $amount = new \ReflectionProperty($mail, 'amount');
+            $amount->setAccessible(true);
+
+            return $amount->getValue($mail) === 'R9';
         });
     }
 

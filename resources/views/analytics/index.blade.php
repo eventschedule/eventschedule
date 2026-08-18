@@ -294,7 +294,7 @@
                 <div class="flex-1 bg-gray-50 dark:bg-gray-700/50 rounded-lg md:rounded-r-none p-4 text-center">
                     <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('messages.impressions') }}</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ number_format($boostStats['total_impressions']) }}</p>
-                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">${{ number_format($boostStats['total_spend'], 2) }} {{ __('messages.total_spend') }}</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ \App\Utils\MoneyUtils::format($boostStats['total_spend'], $boostStats['spend_currency'] ?? null) }} {{ __('messages.total_spend') }}</p>
                 </div>
                 {{-- Arrow --}}
                 <div class="hidden md:flex items-center text-gray-300 dark:text-gray-600 px-1">
@@ -307,7 +307,7 @@
                     <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
                         {{ number_format($boostStats['avg_ctr'], 1) }}% CTR
                         @if ($boostStats['avg_cpc'] > 0)
-                            &middot; ${{ number_format($boostStats['avg_cpc'], 2) }}/{{ __('messages.click') }}
+                            &middot; {{ \App\Utils\MoneyUtils::format($boostStats['avg_cpc'], $boostStats['spend_currency'] ?? null) }}/{{ __('messages.click') }}
                         @endif
                     </p>
                 </div>
@@ -324,7 +324,7 @@
                             {{ number_format(($boostStats['boost_views'] / $boostStats['total_clicks']) * 100, 0) }}% {{ __('messages.landed') }}
                         @endif
                         @if ($boostStats['cost_per_view'] > 0)
-                            &middot; ${{ number_format($boostStats['cost_per_view'], 2) }}/{{ __('messages.view') }}
+                            &middot; {{ \App\Utils\MoneyUtils::format($boostStats['cost_per_view'], $boostStats['spend_currency'] ?? null) }}/{{ __('messages.view') }}
                         @endif
                     </p>
                 </div>
@@ -341,7 +341,7 @@
                             {{ number_format(($boostStats['boost_sales'] / $boostStats['boost_views']) * 100, 1) }}% {{ __('messages.converted') }}
                         @endif
                         @if ($boostStats['cost_per_sale'] > 0)
-                            &middot; ${{ number_format($boostStats['cost_per_sale'], 2) }}/{{ __('messages.sale') }}
+                            &middot; {{ \App\Utils\MoneyUtils::format($boostStats['cost_per_sale'], $boostStats['spend_currency'] ?? null) }}/{{ __('messages.sale') }}
                         @endif
                     </p>
                 </div>
@@ -367,7 +367,7 @@
                         @foreach ($boostStats['boost_revenue_by_currency'] as $i => $entry)
                             {{ \App\Utils\MoneyUtils::format($entry['amount'], $entry['currency_code']) }}@if ($i < count($boostStats['boost_revenue_by_currency']) - 1) + @endif
                         @endforeach
-                        {{ __('messages.revenue') }} / ${{ number_format($boostStats['total_spend'], 2) }} {{ __('messages.spend') }}
+                        {{ __('messages.revenue') }} / {{ \App\Utils\MoneyUtils::format($boostStats['total_spend'], $boostStats['spend_currency'] ?? null) }} {{ __('messages.spend') }}
                     </p>
                 </div>
             </div>
@@ -405,7 +405,7 @@
                                     {{ ucfirst($campaign['status']) }}
                                 </span>
                             </td>
-                            <td class="py-2 text-gray-700 dark:text-gray-300 text-end">${{ number_format($campaign['spend'], 2) }}</td>
+                            <td class="py-2 text-gray-700 dark:text-gray-300 text-end">{{ \App\Utils\MoneyUtils::format($campaign['spend'], $campaign['spend_currency'] ?? ($boostStats['spend_currency'] ?? null)) }}</td>
                             <td class="py-2 text-gray-700 dark:text-gray-300 text-end">{{ number_format($campaign['impressions']) }}</td>
                             <td class="py-2 text-gray-700 dark:text-gray-300 text-end">{{ number_format($campaign['clicks']) }}</td>
                             <td class="py-2">

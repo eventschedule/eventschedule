@@ -35,7 +35,7 @@
                         {{ __('messages.comped_plan_ending_title', ['date' => $role->trial_ends_at->format('F j, Y')]) }}
                     </p>
                     <p class="mt-1 text-sm text-amber-700 dark:text-amber-300">
-                        {{ __('messages.comped_plan_ending_body', ['price' => '$'.$windDownPrice]) }}
+                        {{ __('messages.comped_plan_ending_body', ['price' => plan_price($windDownPrice)]) }}
                     </p>
                 </div>
             </div>
@@ -295,7 +295,7 @@
                     </button>
                 </form>
                 <span class="ms-3 text-sm text-gray-500 dark:text-gray-400">
-                    ${{ $role->currentPlanTerm() == 'yearly' ? config('services.stripe_platform.enterprise_price_yearly_amount') . '/' . __('messages.year') : config('services.stripe_platform.enterprise_price_monthly_amount') . '/' . __('messages.month') }}
+                    {{ $role->currentPlanTerm() == 'yearly' ? plan_price(config('services.stripe_platform.enterprise_price_yearly_amount')) . '/' . __('messages.year') : plan_price(config('services.stripe_platform.enterprise_price_monthly_amount')) . '/' . __('messages.month') }}
                 </span>
             </div>
             @endif
@@ -325,7 +325,7 @@
                     <input type="hidden" name="plan" value="yearly">
                     <input type="hidden" name="tier" value="{{ $planTier }}">
                     <button type="submit" class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 font-medium">
-                        {{ __('messages.switch_to_yearly') }} (${{ $swapYearlyAmount }}/{{ __('messages.year') }})
+                        {{ __('messages.switch_to_yearly') }} ({{ plan_price($swapYearlyAmount) }}/{{ __('messages.year') }})
                     </button>
                 </form>
                 @else
@@ -334,7 +334,7 @@
                     <input type="hidden" name="plan" value="monthly">
                     <input type="hidden" name="tier" value="{{ $planTier }}">
                     <button type="submit" class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 font-medium">
-                        {{ __('messages.switch_to_monthly') }} (${{ $swapMonthlyAmount }}/{{ __('messages.month') }})
+                        {{ __('messages.switch_to_monthly') }} ({{ plan_price($swapMonthlyAmount) }}/{{ __('messages.month') }})
                     </button>
                 </form>
                 @endif

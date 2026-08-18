@@ -26,7 +26,7 @@
             ],
             [
                 'q' => 'Do I have to pay to use Event Schedule?',
-                'a' => 'No. The free plan is free forever with unlimited events and schedules, and it sells up to 25 paid tickets a month. Pro at $'.$rates['eventschedule']['monthly'].'/mo lifts that to unlimited ticket sales and adds the API, and selfhosted installs get every paid feature at no cost.',
+                'a' => 'No. The free plan is free forever with unlimited events and schedules, and it sells up to 25 paid tickets a month. Pro at '.plan_price($rates['eventschedule']['monthly']).'/mo lifts that to unlimited ticket sales and adds the API, and selfhosted installs get every paid feature at no cost.',
             ],
         ];
 
@@ -85,14 +85,14 @@
                     "@type": "Offer",
                     "name": "Free",
                     "price": "0",
-                    "priceCurrency": "USD",
+                    "priceCurrency": "{{ platform_currency() }}",
                     "description": "Unlimited events and schedules, free forever, with no platform fees"
                 },
                 {
                     "@type": "Offer",
                     "name": "Pro",
                     "price": "{{ $rates['eventschedule']['monthly'] }}",
-                    "priceCurrency": "USD",
+                    "priceCurrency": "{{ platform_currency() }}",
                     "description": "Unlimited ticket sales, the check-in dashboard and API access, with 0% platform fees on ticket sales"
                 }
             ]
@@ -444,6 +444,10 @@
          disagree, and every rate comes from getHubFeeRates(). --}}
     @php
         $calcCards = [
+            // Deliberately still a dollar sign, and NOT plan_price(). This row sits inside the
+            // fee calculator, whose other rows are competitors' published US pricing; rendering
+            // ours in the platform currency would put "R9/mo" beside a "$247.50" saving and
+            // compare two different currencies. The calculator is a USD unit or nothing.
             ['key' => 'eventschedule', 'id' => 'fc-es', 'value' => $esCost, 'best' => true, 'note' => '$'.$rates['eventschedule']['monthly'].'/mo + Stripe, 0% platform fee'],
             ['key' => 'eventbrite', 'id' => 'fc-eb', 'value' => $ebCost, 'best' => false, 'note' => $rates['eventbrite']['label']],
             ['key' => 'luma', 'id' => 'fc-luma', 'value' => $lumaCost, 'best' => false, 'note' => $rates['luma']['label']],

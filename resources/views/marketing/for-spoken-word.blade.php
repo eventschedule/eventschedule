@@ -34,7 +34,7 @@
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "Free forever"
         },
         "featureList": [
@@ -480,7 +480,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for open mics and readings?',
-                'a' => 'Yes. Sharing your schedule, running recurring nights, taking free registrations with a capacity limit, and syncing with Google, Outlook, or CalDAV are all free forever. Ticketing, event graphics, and custom questions on the sign-up form are on the Pro plan at $'.$proMonthly.' a month, and Event Schedule charges zero platform fees on tickets.',
+                'a' => 'Yes. Sharing your schedule, running recurring nights, taking free registrations with a capacity limit, and syncing with Google, Outlook, or CalDAV are all free forever. Ticketing, event graphics, and custom questions on the sign-up form are on the Pro plan at '.plan_price($proMonthly).' a month, and Event Schedule charges zero platform fees on tickets.',
             ],
             [
                 'q' => 'Can poets sign up for a slot themselves?',

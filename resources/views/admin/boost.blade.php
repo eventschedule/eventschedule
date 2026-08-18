@@ -1,4 +1,9 @@
 <x-app-admin-layout>
+    @php
+        // Every figure on this page is Meta-boost money, billed in the ad account's
+        // currency. It used to render a literal '$' regardless.
+        $boostCurrency = config('services.meta.default_currency', 'USD');
+    @endphp
     <div class="space-y-4">
 
         {{-- Navigation --}}
@@ -15,15 +20,15 @@
                 {{ number_format($activeCampaigns) }}
             </x-stat-panel>
             <x-stat-panel label="{{ __('messages.markup_revenue') }}" padding="p-4">
-                ${{ number_format($markupRevenue, 2) }}
+                {{ \App\Utils\MoneyUtils::format($markupRevenue, $boostCurrency) }}
             </x-stat-panel>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <x-stat-panel label="{{ __('messages.total_ad_spend') }}" padding="p-4">
-                ${{ number_format($totalAdSpend, 2) }}
+                {{ \App\Utils\MoneyUtils::format($totalAdSpend, $boostCurrency) }}
             </x-stat-panel>
             <x-stat-panel label="{{ __('messages.total_refunds') }}" color="red" padding="p-4">
-                ${{ number_format($totalRefunds, 2) }}
+                {{ \App\Utils\MoneyUtils::format($totalRefunds, $boostCurrency) }}
             </x-stat-panel>
         </div>
 
@@ -33,10 +38,10 @@
                 {{ number_format($avgCtr, 2) }}%
             </x-stat-panel>
             <x-stat-panel label="{{ __('messages.avg_cpc') }}" padding="p-4">
-                ${{ number_format($avgCpc, 2) }}
+                {{ \App\Utils\MoneyUtils::format($avgCpc, $boostCurrency) }}
             </x-stat-panel>
             <x-stat-panel label="{{ __('messages.avg_cpm') }}" padding="p-4">
-                ${{ number_format($avgCpm, 2) }}
+                {{ \App\Utils\MoneyUtils::format($avgCpm, $boostCurrency) }}
             </x-stat-panel>
             <x-stat-panel label="{{ __('messages.rejection_rate') }}" :color="$rejectionRate > 20 ? 'red' : null" padding="p-4">
                 {{ number_format($rejectionRate, 1) }}%
@@ -174,10 +179,10 @@
                             <tr>
                                 <td class="py-2 text-gray-900 dark:text-white">{{ $boosterRole?->subdomain ?? 'N/A' }}</td>
                                 <td class="py-2 text-gray-700 dark:text-gray-300 text-end">{{ $booster->campaign_count }}</td>
-                                <td class="py-2 text-gray-700 dark:text-gray-300 text-end">${{ number_format($booster->total_budget, 2) }}</td>
-                                <td class="py-2 text-gray-700 dark:text-gray-300 text-end">${{ number_format($booster->total_spend ?? 0, 2) }}</td>
+                                <td class="py-2 text-gray-700 dark:text-gray-300 text-end">{{ \App\Utils\MoneyUtils::format($booster->total_budget, $boostCurrency) }}</td>
+                                <td class="py-2 text-gray-700 dark:text-gray-300 text-end">{{ \App\Utils\MoneyUtils::format($booster->total_spend ?? 0, $boostCurrency) }}</td>
                                 <td class="py-2 text-gray-700 dark:text-gray-300 text-end">{{ number_format($booster->total_clicks ?? 0) }}</td>
-                                <td class="py-2 text-gray-700 dark:text-gray-300 text-end">${{ $boosterRole ? number_format($boosterRole->getBoostMaxBudget(), 0) : 'N/A' }}</td>
+                                <td class="py-2 text-gray-700 dark:text-gray-300 text-end">{{ $boosterRole ? \App\Utils\MoneyUtils::format($boosterRole->getBoostMaxBudget(), $boostCurrency) : 'N/A' }}</td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -253,7 +258,7 @@
                         @foreach ($rolesWithCredit as $creditRole)
                         <tr>
                             <td class="py-2 text-gray-900 dark:text-white">{{ $creditRole->subdomain }}</td>
-                            <td class="py-2 text-gray-700 dark:text-gray-300 text-end">${{ number_format($creditRole->boost_credit, 2) }}</td>
+                            <td class="py-2 text-gray-700 dark:text-gray-300 text-end">{{ \App\Utils\MoneyUtils::format($creditRole->boost_credit, $boostCurrency) }}</td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -278,7 +283,7 @@
                     <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50"></div>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.max_budget_per_campaign')</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.max_budget_per_campaign', ['symbol' => \App\Utils\MoneyUtils::symbol(config('services.meta.default_currency', 'USD'))])</label>
                     <input type="number" name="amount" required min="1" max="{{ config('services.meta.max_budget', 1000) }}" step="0.01"
                         class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] w-32"
                         placeholder="100">
@@ -302,14 +307,14 @@
                         @foreach ($rolesWithLimit as $limitRole)
                         <tr>
                             <td class="py-2 text-gray-900 dark:text-white">{{ $limitRole->subdomain }}</td>
-                            <td class="py-2 text-gray-700 dark:text-gray-300 text-end">${{ number_format($limitRole->boost_max_budget, 2) }}</td>
+                            <td class="py-2 text-gray-700 dark:text-gray-300 text-end">{{ \App\Utils\MoneyUtils::format($limitRole->boost_max_budget, $boostCurrency) }}</td>
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
             @else
-            <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.no_custom_limits', ['amount' => number_format(config('services.meta.boost_default_limit', 10), 0)])</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.no_custom_limits', ['amount' => \App\Utils\MoneyUtils::format(config('services.meta.boost_default_limit', 10), config('services.meta.default_currency', 'USD'))])</p>
             @endif
         </div>
 
@@ -373,8 +378,8 @@
                                     @lang('messages.boost_status_' . $campaign->status)
                                 </span>
                             </td>
-                            <td class="py-2 text-gray-700 dark:text-gray-300 text-end">${{ number_format($campaign->user_budget, 2) }}</td>
-                            <td class="py-2 text-gray-700 dark:text-gray-300 text-end">${{ number_format($campaign->actual_spend ?? 0, 2) }}</td>
+                            <td class="py-2 text-gray-700 dark:text-gray-300 text-end">{{ \App\Utils\MoneyUtils::format($campaign->user_budget, $campaign->currency_code) }}</td>
+                            <td class="py-2 text-gray-700 dark:text-gray-300 text-end">{{ \App\Utils\MoneyUtils::format($campaign->actual_spend ?? 0, $campaign->currency_code) }}</td>
                             <td class="py-2 text-gray-700 dark:text-gray-300 text-end">{{ number_format($campaign->impressions ?? 0) }}</td>
                             <td class="py-2 text-gray-700 dark:text-gray-300 text-end">{{ number_format($campaign->clicks ?? 0) }}</td>
                             <td class="py-2 text-gray-500 dark:text-gray-400 text-xs">{{ $campaign->created_at->format('M j, Y') }}</td>
@@ -421,8 +426,8 @@
                                     {{ ucfirst($record->type) }}
                                 </span>
                             </td>
-                            <td class="py-2 text-gray-700 dark:text-gray-300 text-end">${{ number_format($record->amount, 2) }}</td>
-                            <td class="py-2 text-gray-700 dark:text-gray-300 text-end">${{ number_format($record->markup_amount ?? 0, 2) }}</td>
+                            <td class="py-2 text-gray-700 dark:text-gray-300 text-end">{{ \App\Utils\MoneyUtils::format($record->amount, $boostCurrency) }}</td>
+                            <td class="py-2 text-gray-700 dark:text-gray-300 text-end">{{ \App\Utils\MoneyUtils::format($record->markup_amount ?? 0, $boostCurrency) }}</td>
                             <td class="py-2 text-gray-700 dark:text-gray-300">{{ ucfirst($record->status) }}</td>
                             <td class="py-2 text-gray-500 dark:text-gray-400 text-xs max-w-[200px] truncate">{{ $record->notes ?? '-' }}</td>
                             <td class="py-2 text-gray-500 dark:text-gray-400 text-xs">{{ $record->created_at->format('M j, Y H:i') }}</td>
@@ -442,6 +447,10 @@
     {{-- Chart.js --}}
     <script src="{{ asset('js/chart.min.js') }}" {!! nonce_attr() !!}></script>
     <script {!! nonce_attr() !!}>
+        // Same currency as every figure on the page above, so the axis cannot disagree
+        // with the cards. JSON-encoded rather than interpolated, so a glyph is quoted safely.
+        // (Do not write the directive name in this comment - Blade compiles it here too.)
+        const BOOST_CURRENCY_SYMBOL = @json(\App\Utils\MoneyUtils::symbol($boostCurrency));
         const isDarkMode = document.documentElement.classList.contains('dark') ||
             (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && !document.documentElement.classList.contains('light'));
         const textColor = isDarkMode ? '#9CA3AF' : '#6B7280';
@@ -536,7 +545,7 @@
                     y: {
                         ticks: {
                             color: textColor,
-                            callback: function(value) { return '$' + value.toFixed(0); }
+                            callback: function(value) { return BOOST_CURRENCY_SYMBOL + value.toFixed(0); }
                         },
                         grid: { color: gridColor }
                     }

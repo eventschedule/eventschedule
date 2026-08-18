@@ -125,7 +125,7 @@
             ],
             [
                 'q' => 'Is the event graphics feature free?',
-                'a' => 'Generating event graphics is on the Pro plan, which is $' . $proMonthly . ' a month with a ' . $trialDays . '-day free trial. Uploading a flyer to an event is free on every plan. The AI text prompt and the scheduled graphic emails are Enterprise.',
+                'a' => 'Generating event graphics is on the Pro plan, which is ' . plan_price($proMonthly) . ' a month with a ' . $trialDays . '-day free trial. Uploading a flyer to an event is free on every plan. The AI text prompt and the scheduled graphic emails are Enterprise.',
             ],
         ];
 
@@ -175,7 +175,7 @@
         "offers": {
             "@type": "Offer",
             "price": "{{ $proMonthly }}",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "Pro plan with {{ config('app.trial_days', 7) }}-day free trial"
         },
         "featureList": [
@@ -1385,7 +1385,7 @@
                     Free to have the artwork. <span class="es-gal-accent">Pro to hang it.</span>
                 </h2>
                 <p class="es-gal-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Pro is ${{ $proMonthly }} a month with a {{ $trialDays }}-day free trial. Nothing on this page is charged per graphic.
+                    Pro is {{ plan_price($proMonthly) }} a month with a {{ $trialDays }}-day free trial. Nothing on this page is charged per graphic.
                 </p>
             </div>
 
@@ -1567,7 +1567,7 @@
                         Your next six shows, <span class="es-gal-lit">in one image.</span>
                     </h2>
                     <p class="es-gal-dim mx-auto mb-10 max-w-2xl text-lg sm:text-xl">
-                        Publishing your schedule is free forever. Event graphics are ${{ $proMonthly }} a month with a {{ $trialDays }}-day free trial, and no design work either way.
+                        Publishing your schedule is free forever. Event graphics are {{ plan_price($proMonthly) }} a month with a {{ $trialDays }}-day free trial, and no design work either way.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

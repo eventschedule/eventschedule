@@ -9,6 +9,9 @@ This file is the single source of truth for which features belong to each plan t
 
 ## Plan Tiers
 
+> Amounts are eventschedule.com's defaults. A selfhosted or white-label platform sets its own via
+> `STRIPE_PRICE_*_AMOUNT`, and the currency symbol via `PLATFORM_CURRENCY` / `/admin/settings`.
+
 | Tier | Price (monthly) | Price (yearly) | Code method |
 |------|----------------|----------------|-------------|
 | Free | $0 | $0 | default (neither `isPro()` nor `isEnterprise()`) |

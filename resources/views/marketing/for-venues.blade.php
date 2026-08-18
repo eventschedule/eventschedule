@@ -35,7 +35,7 @@
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "Free forever"
         },
         "featureList": [
@@ -199,7 +199,7 @@
         $plans = [
             [
                 'name' => 'Free',
-                'price' => '$0',
+                'price' => plan_price(0),
                 'note' => 'forever',
                 'lede' => 'Everything you need to get the room listed, taking requests and selling its first tickets.',
                 'items' => ['Public event calendar', 'Booking request inbox', '25 paid tickets a month, QR scanning included', 'Sub-schedules for each room', 'Recurring nights', 'Google, Outlook and CalDAV sync', 'Free RSVPs and analytics'],
@@ -207,7 +207,7 @@
             ],
             [
                 'name' => 'Pro',
-                'price' => '$' . $proMonthly,
+                'price' => plan_price($proMonthly),
                 'note' => 'per month',
                 'lede' => 'Adds the box office and the things that make it look like yours.',
                 'items' => ['Everything in Free', 'Unlimited ticket sales', 'Live check-in dashboard', 'Promo codes, gift cards and waitlists', 'Unlimited bookable spaces', 'No Event Schedule branding'],
@@ -215,7 +215,7 @@
             ],
             [
                 'name' => 'Enterprise',
-                'price' => '$' . $entMonthly,
+                'price' => plan_price($entMonthly),
                 'note' => 'per month',
                 'lede' => 'For rooms with a real team and a brand of their own.',
                 'items' => ['Everything in Pro', 'Your own domain', 'Up to five team members', 'Internal and unlisted events', '1,000 newsletter recipients a month', 'Priority support'],
@@ -480,7 +480,7 @@
             </div>
             <div class="flex items-center justify-between rounded-lg bg-gray-50 px-2.5 py-1.5 text-[11px] dark:bg-white/5">
                 <span class="text-gray-600 dark:text-gray-300">Platform fee</span>
-                <span class="font-semibold text-emerald-600 dark:text-emerald-400">$0</span>
+                <span class="font-semibold text-emerald-600 dark:text-emerald-400">{{ plan_price(0) }}</span>
             </div>
         </div>
     </x-marketing.feature-banner>
@@ -804,7 +804,7 @@
         <div class="mb-4 flex items-end justify-between gap-4">
             <div>
                 <div class="text-[11px] text-gray-500 dark:text-gray-400">Platform fees, all time</div>
-                <div class="es-od text-gradient-house text-4xl font-black" data-odometer="$0">$0</div>
+                <div class="es-od text-gradient-house text-4xl font-black" data-odometer="{{ plan_price(0) }}">{{ plan_price(0) }}</div>
             </div>
             <div class="text-end">
                 <div class="text-[11px] text-gray-500 dark:text-gray-400">Tickets sold</div>

@@ -18,7 +18,7 @@
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "Free and open source under the Attribution Assurance License"
         },
         "featureList": [
@@ -954,7 +954,7 @@
             @php
                 $numberStats = [
                     ['0%', 'Platform fees on tickets', 'We never take a cut, on any plan'],
-                    ['$0', 'Forever, for any number of events', 'No licence fee and no seat count'],
+                    [plan_price(0), 'Forever, for any number of events', 'No licence fee and no seat count'],
                     [(string) count(config('app.supported_languages')), 'Languages built in', 'Your guest pages, translated'],
                 ];
             @endphp
@@ -1177,7 +1177,7 @@
                     ['Setup', 'We have it running before you finish your coffee'],
                     ['Infrastructure', 'We run the servers, backups and updates'],
                     ['Updates', 'Automatic, you never think about it'],
-                    ['Features', 'Free, Pro at $'.$hostedProMonthly.'/mo or Enterprise at $'.$hostedEntMonthly.'/mo'],
+                    ['Features', 'Free, Pro at '.plan_price($hostedProMonthly).'/mo or Enterprise at '.plan_price($hostedEntMonthly).'/mo'],
                     ['Your data', 'Hosted by us, exportable at any time'],
                     ['Support', 'Email support, priority on Enterprise'],
                 ],

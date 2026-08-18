@@ -28,8 +28,8 @@
         "offers": {
             "@type": "Offer",
             "price": "{{ $proMonthly }}",
-            "priceCurrency": "USD",
-            "description": "Selling gift cards is included in the Pro plan at ${{ $proMonthly }} per month"
+            "priceCurrency": "{{ platform_currency() }}",
+            "description": "Selling gift cards is included in the Pro plan at {{ plan_price($proMonthly) }} per month"
         },
         "url": "{{ url()->current() }}",
         "provider": {
@@ -704,7 +704,7 @@
             ],
             [
                 'q' => 'Which plan includes gift cards?',
-                'a' => 'Selling gift cards is a Pro feature, at $'.$proMonthly.' a month. Redeeming a card that has already been bought always works, even if you later turn selling off, because a sold card is an outstanding liability rather than a feature.',
+                'a' => 'Selling gift cards is a Pro feature, at '.plan_price($proMonthly).' a month. Redeeming a card that has already been bought always works, even if you later turn selling off, because a sold card is an outstanding liability rather than a feature.',
             ],
             [
                 'q' => 'Do gift cards expire?',
@@ -1123,7 +1123,7 @@
             <div class="es-gift-tint mx-auto mt-10 max-w-3xl p-6" data-reveal>
                 <div class="mb-3 flex flex-wrap items-center gap-2">
                     <span class="es-gift-plan es-gift-plan-pro">Pro</span>
-                    <span class="es-gift-ink text-sm font-bold">Selling gift cards is on the Pro plan, at ${{ $proMonthly }} a month.</span>
+                    <span class="es-gift-ink text-sm font-bold">Selling gift cards is on the Pro plan, at {{ plan_price($proMonthly) }} a month.</span>
                 </div>
                 <p class="es-gift-muted text-sm">
                     The money is collected on your own payment account and Event Schedule takes no cut

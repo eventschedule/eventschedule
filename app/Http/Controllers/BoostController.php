@@ -11,6 +11,7 @@ use App\Models\Role;
 use App\Services\AuditService;
 use App\Services\BoostBillingService;
 use App\Services\MetaAdsService;
+use App\Utils\MoneyUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -194,11 +195,7 @@ class BoostController extends Controller
         $view = $isAdvanced ? 'boost.create-advanced' : 'boost.create';
 
         $currencyCode = config('services.meta.default_currency', 'USD');
-        $currencySymbol = match ($currencyCode) {
-            'EUR' => "\u{20AC}",
-            'GBP' => "\u{00A3}",
-            default => '$',
-        };
+        $currencySymbol = \App\Utils\MoneyUtils::symbol($currencyCode);
 
         return view($view, [
             'event' => $event,
@@ -277,10 +274,10 @@ class BoostController extends Controller
         $boostMaxBudget = $role->getBoostMaxBudget();
         if ((float) $request->budget > $boostMaxBudget) {
             if ($isAjax) {
-                return response()->json(['error' => __('messages.boost_exceeds_limit', ['limit' => number_format($boostMaxBudget, 0)])], 422);
+                return response()->json(['error' => __('messages.boost_exceeds_limit', ['limit' => MoneyUtils::format($boostMaxBudget, config('services.meta.default_currency', 'USD'))])], 422);
             }
 
-            return back()->with('error', __('messages.boost_exceeds_limit', ['limit' => number_format($boostMaxBudget, 0)]));
+            return back()->with('error', __('messages.boost_exceeds_limit', ['limit' => MoneyUtils::format($boostMaxBudget, config('services.meta.default_currency', 'USD'))]));
         }
 
         // Require verified phone for boost (hosted mode only)
@@ -863,7 +860,7 @@ class BoostController extends Controller
         if ($role) {
             $boostMaxBudget = $role->getBoostMaxBudget();
             if ($budget > $boostMaxBudget) {
-                return response()->json(['error' => __('messages.boost_exceeds_limit', ['limit' => number_format($boostMaxBudget, 0)])], 422);
+                return response()->json(['error' => __('messages.boost_exceeds_limit', ['limit' => MoneyUtils::format($boostMaxBudget, config('services.meta.default_currency', 'USD'))])], 422);
             }
         }
 

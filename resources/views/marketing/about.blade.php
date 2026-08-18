@@ -549,7 +549,7 @@
             ],
             [
                 'Free plan',
-                '$0, with no credit card and no expiry. One team member. Pro is $'.$proMonthly.' a month and Enterprise is $'.$entMonthly.'.',
+                plan_price(0).', with no credit card and no expiry. One team member. Pro is '.plan_price($proMonthly).' a month and Enterprise is '.plan_price($entMonthly).'.',
                 marketing_url('/pricing'), 'See the plans', false,
             ],
             [
@@ -592,7 +592,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule really free?',
-                'a' => 'Yes, and not as a trial. Unlimited events and schedules, recurring events with date exceptions, sub-schedules, free registration with a capacity limit, two-way Google, Outlook and CalDAV sync, the embeddable calendar and built-in analytics are all on the free plan, along with selling up to 25 paid tickets a month and scanning them at the door, with no credit card and no expiry. Unlimited ticket sales and the check-in dashboard are on the Pro plan at $'.$proMonthly.' a month, multiple team members are on Enterprise at $'.$entMonthly.', and the free plan is one team member.',
+                'a' => 'Yes, and not as a trial. Unlimited events and schedules, recurring events with date exceptions, sub-schedules, free registration with a capacity limit, two-way Google, Outlook and CalDAV sync, the embeddable calendar and built-in analytics are all on the free plan, along with selling up to 25 paid tickets a month and scanning them at the door, with no credit card and no expiry. Unlimited ticket sales and the check-in dashboard are on the Pro plan at '.plan_price($proMonthly).' a month, multiple team members are on Enterprise at '.plan_price($entMonthly).', and the free plan is one team member.',
             ],
             [
                 'q' => 'What license is it under, and where is the source?',
@@ -913,11 +913,11 @@
                         </li>
                         <li class="flex gap-3">
                             <svg aria-hidden="true" class="es-colo-second mt-1 h-4 w-4 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span class="es-colo-muted text-sm">Unlimited ticket sales and the check-in dashboard for ${{ $proMonthly }} a month <span class="es-colo-pill es-colo-pill-paid">Pro</span></span>
+                            <span class="es-colo-muted text-sm">Unlimited ticket sales and the check-in dashboard for {{ plan_price($proMonthly) }} a month <span class="es-colo-pill es-colo-pill-paid">Pro</span></span>
                         </li>
                         <li class="flex gap-3">
                             <svg aria-hidden="true" class="es-colo-second mt-1 h-4 w-4 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span class="es-colo-muted text-sm">Your own domain and up to five team members for ${{ $entMonthly }} <span class="es-colo-pill es-colo-pill-paid">Enterprise</span></span>
+                            <span class="es-colo-muted text-sm">Your own domain and up to five team members for {{ plan_price($entMonthly) }} <span class="es-colo-pill es-colo-pill-paid">Enterprise</span></span>
                         </li>
                         <li class="flex gap-3">
                             <svg aria-hidden="true" class="es-colo-second mt-1 h-4 w-4 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>

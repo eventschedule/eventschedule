@@ -17,7 +17,7 @@
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "Free plan available, carpool matching on the Pro plan"
         },
         "featureList": [

@@ -81,7 +81,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Currency</span></td>
-                        <td>Cards can only be redeemed at events priced in this currency. It defaults to the currency of your most recent ticketed event, or USD if you have not priced one yet.</td>
+                        <td>Cards can only be redeemed at events priced in this currency. It defaults to the currency of your most recent ticketed event, or the platform currency if you have not priced one yet.</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Valid for (days)</span></td>

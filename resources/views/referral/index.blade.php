@@ -71,7 +71,7 @@
                             {{ ucfirst($credit->plan_type) }}
                         </span>
                         <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                            ${{ $credit->plan_type === 'enterprise' ? $entMonthly : $proMonthly }} {{ __('messages.credit') }}
+                            {{ plan_price($credit->plan_type === 'enterprise' ? $entMonthly : $proMonthly) }} {{ __('messages.credit') }}
                         </span>
                     </div>
                     <form action="{{ route('referrals.apply_credit') }}" method="POST" class="flex items-center gap-2">
@@ -116,9 +116,12 @@
             </div>
             <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <p class="text-sm text-gray-600 dark:text-gray-400">
-                    {{-- Bare numbers: each translation keeps its own currency placement
-                         (English "$5", French "5 $"), so the symbol stays in the string. --}}
-                    {{ __('messages.referral_credit_values', ['pro' => $proMonthly, 'enterprise' => $entMonthly]) }}
+                    {{-- Pre-formatted by plan_price(), so the symbol follows the installation's
+                         currency and a translator cannot desync it. This replaced a scheme where
+                         each locale carried its own symbol and placement (English "$5", French
+                         "5 $"); the trade-off is that every locale now prefixes, which is what
+                         MoneyUtils::format() already does for every other price in the app. --}}
+                    {{ __('messages.referral_credit_values', ['pro' => plan_price($proMonthly), 'enterprise' => plan_price($entMonthly)]) }}
                 </p>
             </div>
         </div>

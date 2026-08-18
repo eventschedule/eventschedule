@@ -478,7 +478,7 @@
                 'label' => 'The FAQ',
                 'href' => marketing_url('/faq'),
                 'external' => false,
-                'why' => 'What is on the free plan, what Pro adds at $'.$proMonthly.' a month, and why there are zero platform fees on ticket sales.',
+                'why' => 'What is on the free plan, what Pro adds at '.plan_price($proMonthly).' a month, and why there are zero platform fees on ticket sales.',
             ],
             [
                 'what' => 'Something is broken',
@@ -567,7 +567,7 @@
             ],
             [
                 'q' => 'Do I have to talk to sales before I can sign up?',
-                'a' => 'No. Pricing is published on the pricing page, the free plan needs no card, and you can create a schedule and start adding events without speaking to anybody. Ticketing is on the Pro plan at $'.$proMonthly.' a month, and Event Schedule charges zero platform fees on ticket sales.',
+                'a' => 'No. Pricing is published on the pricing page, the free plan needs no card, and you can create a schedule and start adding events without speaking to anybody. Ticketing is on the Pro plan at '.plan_price($proMonthly).' a month, and Event Schedule charges zero platform fees on ticket sales.',
             ],
             [
                 'q' => 'I selfhost. Where do I get help?',
@@ -577,7 +577,7 @@
 
         $relatedPages = [
             ['/faq', 'FAQ', 'The short answers, in one page.'],
-            ['/pricing', 'Pricing', 'Free forever, Pro at $'.$proMonthly.' a month.'],
+            ['/pricing', 'Pricing', 'Free forever, Pro at '.plan_price($proMonthly).' a month.'],
             ['/docs', 'User guide', 'Setup, events, tickets and the API.'],
             ['/about', 'About', 'Who builds Event Schedule, and why.'],
         ];

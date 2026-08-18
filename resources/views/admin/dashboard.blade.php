@@ -102,13 +102,13 @@
                 {{ number_format($stripePaidCount) }}
             </x-stat-panel>
             <x-stat-panel label="ARR" color="green">
-                ${{ number_format($arr, 2) }}
+                {{ plan_price($arr) }}
             </x-stat-panel>
             <x-stat-panel label="{{ __('messages.active_boost_campaigns') }}">
                 {{ number_format($activeBoostCampaigns) }}
             </x-stat-panel>
             <x-stat-panel label="{{ __('messages.boost_markup_revenue') }}" color="green">
-                ${{ number_format($boostMarkupRevenue, 2) }}
+                {{ \App\Utils\MoneyUtils::format($boostMarkupRevenue, config('services.meta.default_currency', 'USD')) }}
             </x-stat-panel>
         </div>
 

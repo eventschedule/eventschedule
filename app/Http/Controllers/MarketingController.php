@@ -1495,7 +1495,7 @@ class MarketingController extends Controller
         return [
             'Pricing & Fees' => [
                 ['Free plan', 'Yes (forever)', 'Free to publish events', 'Yes (forever)', 'Free events only', 'Yes (forever)'],
-                ['Paid plan price', 'From $'.$this->planPrice().'/mo (7-day free trial)', 'Free (fees on tickets)', '$59/mo', 'From $0.28/ticket', 'Free'],
+                ['Paid plan price', 'From '.plan_price($this->planPrice()).'/mo (7-day free trial)', 'Free (fees on tickets)', '$59/mo', 'From $0.28/ticket', 'Free'],
                 ['Platform fees', '0%', '3.7% + $1.79/ticket', '5% (free plan), 0% (Plus)', '$0.28-$0.60/ticket', 'N/A (no ticketing)'],
                 ['Payment processing', 'Stripe (2.9% + $0.30)', 'Built-in (included above)', 'Stripe (2.9% + $0.30)', 'Stripe/PayPal/Square', 'No'],
             ],
@@ -1662,7 +1662,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Free to publish events', true],
-                        ['Paid plan price', '$'.$this->planPrice().'/mo (7-day free trial)', 'Free (fees on tickets)', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'Free (fees on tickets)', true],
                         ['Platform fees', '0%', '3.7% + $1.79/ticket', true],
                         ['Payment processing', 'Stripe (2.9% + $0.30)', 'Built-in (included above)', false],
                     ],
@@ -1808,7 +1808,7 @@ class MarketingController extends Controller
                 'faq' => [
                     ['question' => 'Can I import my existing Eventbrite events?', 'answer' => 'Yes. With the Pro plan, you can connect your Eventbrite account and import your events in bulk. Event details, ticket types, venues, and images are all transferred automatically.'],
                     ['question' => 'Is it easy to switch from Eventbrite to Event Schedule?', 'answer' => 'Yes. There is no need to migrate your Eventbrite history. Create a free schedule, add your upcoming events (or use AI import to paste and parse them), and share your new schedule URL with your audience.'],
-                    ['question' => 'How does Event Schedule pricing compare to Eventbrite?', 'answer' => 'Eventbrite charges 3.7% + $1.79 per ticket on paid events. Event Schedule charges zero platform fees at every plan level. The Pro plan is a flat $'.$this->planPrice().'/mo regardless of how many tickets you sell.'],
+                    ['question' => 'How does Event Schedule pricing compare to Eventbrite?', 'answer' => 'Eventbrite charges 3.7% + $1.79 per ticket on paid events. Event Schedule charges zero platform fees at every plan level. The Pro plan is a flat '.plan_price($this->planPrice()).'/mo regardless of how many tickets you sell.'],
                     ['question' => 'Does Event Schedule have an event marketplace like Eventbrite?', 'answer' => 'Event Schedule focuses on giving organizers their own branded schedule pages rather than a shared marketplace. You get a dedicated URL, custom domain support, and embeddable calendar widgets to drive discovery from your own channels.'],
                 ],
             ],
@@ -1817,7 +1817,7 @@ class MarketingController extends Controller
                 'key' => 'luma',
                 'slug' => 'luma-alternative',
                 'tagline' => 'A powerful open source alternative to Luma at a fraction of the price.',
-                'description' => 'Compare Event Schedule with Luma. Get custom domains, zero platform fees, and open source flexibility for $'.$this->planPrice().'/mo instead of $59/mo.',
+                'description' => 'Compare Event Schedule with Luma. Get custom domains, zero platform fees, and open source flexibility for '.plan_price($this->planPrice()).'/mo instead of $59/mo.',
                 'keywords' => 'luma alternative, luma alternative open source, lu.ma alternative, event platform comparison, luma competitor',
                 'about' => 'Luma (lu.ma) is a modern event platform popular with tech communities and creators. It offers sleek event pages, built-in video streaming, and community features.',
                 'competitor_strengths' => [
@@ -1828,7 +1828,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Yes (forever)', false],
-                        ['Paid plan price', '$'.$this->planPrice().'/mo (7-day free trial)', '$59/mo', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', '$59/mo', true],
                         ['Platform fees', '0%', '5% (free plan), 0% (Plus)', true],
                         ['Payment processing', 'Stripe (2.9% + $0.30)', 'Stripe (2.9% + $0.30)', false],
                     ],
@@ -1883,7 +1883,7 @@ class MarketingController extends Controller
                 'key_advantages' => [
                     [
                         'title' => '12x More Affordable',
-                        'description' => 'Event Schedule Pro costs $'.$this->planPrice().'/mo with a 7-day free trial. Luma Plus costs $59/mo for comparable features.',
+                        'description' => 'Event Schedule Pro costs '.plan_price($this->planPrice()).'/mo with a 7-day free trial. Luma Plus costs $59/mo for comparable features.',
                         'icon' => 'dollar',
                         'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
                         'border' => 'border-emerald-200 dark:border-emerald-500/20',
@@ -1944,7 +1944,7 @@ class MarketingController extends Controller
                 'why_choose' => [
                     'summary' => 'Event Schedule delivers comparable features to Luma at a fraction of the cost, with open source transparency and zero platform fees.',
                     'points' => [
-                        '$'.$this->planPrice().'/month vs Luma\'s $59/month for premium features',
+                        plan_price($this->planPrice()).'/month vs Luma\'s $59/month for premium features',
                         'Zero platform fees vs Luma\'s 5% on the free plan',
                         'Fully open source with selfhosting option for complete data ownership',
                         'Two-way Google Calendar and CalDAV sync included free on every plan',
@@ -1952,7 +1952,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Luma to Event Schedule?', 'answer' => 'Yes. Create a free schedule and add your events manually or via AI import. Your existing audience can follow your new schedule and subscribe to updates via newsletter or calendar sync.'],
-                    ['question' => 'How does Event Schedule pricing compare to Luma?', 'answer' => 'Luma charges $59/mo for its premium plan. Event Schedule Pro is $'.$this->planPrice().'/mo with zero platform fees. Even the free plan includes unlimited events, Google Calendar sync, and newsletters.'],
+                    ['question' => 'How does Event Schedule pricing compare to Luma?', 'answer' => 'Luma charges $59/mo for its premium plan. Event Schedule Pro is '.plan_price($this->planPrice()).'/mo with zero platform fees. Even the free plan includes unlimited events, Google Calendar sync, and newsletters.'],
                     ['question' => 'Does Event Schedule support virtual events like Luma?', 'answer' => 'Yes. Event Schedule supports online events with video links, descriptions, and ticketing. While Luma has built-in video streaming, Event Schedule integrates with any video platform you already use.'],
                 ],
             ],
@@ -1961,7 +1961,7 @@ class MarketingController extends Controller
                 'key' => 'ticket-tailor',
                 'slug' => 'ticket-tailor-alternative',
                 'tagline' => 'A flat-rate alternative to Ticket Tailor with zero per-ticket fees.',
-                'description' => 'Compare Event Schedule with Ticket Tailor. Get zero platform fees, open source flexibility, and AI features for a flat $'.$this->planPrice().'/mo.',
+                'description' => 'Compare Event Schedule with Ticket Tailor. Get zero platform fees, open source flexibility, and AI features for a flat '.plan_price($this->planPrice()).'/mo.',
                 'keywords' => 'ticket tailor alternative, ticket tailor alternative free, ticketing platform comparison, no per-ticket fees, ticket tailor competitor',
                 'about' => 'Ticket Tailor is an independent ticketing platform focused on affordable event ticketing. It offers a straightforward per-ticket pricing model and supports various payment processors.',
                 'competitor_strengths' => [
@@ -1972,7 +1972,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Free events only', true],
-                        ['Paid plan price', '$'.$this->planPrice().'/mo (7-day free trial)', 'From $0.28/ticket', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'From $0.28/ticket', true],
                         ['Platform fees', '0%', '$0.28 to $0.60/ticket', true],
                         ['Payment processing', 'Stripe (2.9% + $0.30)', 'Stripe/PayPal/Square', false],
                     ],
@@ -2027,7 +2027,7 @@ class MarketingController extends Controller
                 'key_advantages' => [
                     [
                         'title' => 'Flat-Rate Pricing',
-                        'description' => 'Pay $'.$this->planPrice().'/mo flat instead of $0.28 to $0.60 per ticket. The more tickets you sell, the more you save.',
+                        'description' => 'Pay '.plan_price($this->planPrice()).'/mo flat instead of $0.28 to $0.60 per ticket. The more tickets you sell, the more you save.',
                         'icon' => 'dollar',
                         'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
                         'border' => 'border-emerald-200 dark:border-emerald-500/20',
@@ -2088,7 +2088,7 @@ class MarketingController extends Controller
                 'why_choose' => [
                     'summary' => 'Event Schedule offers flat-rate pricing instead of per-ticket fees, plus a full suite of features that go beyond pure ticketing.',
                     'points' => [
-                        'Flat $'.$this->planPrice().'/month vs Ticket Tailor\'s per-ticket fees that scale with volume',
+                        'Flat '.plan_price($this->planPrice()).'/month vs Ticket Tailor\'s per-ticket fees that scale with volume',
                         'Built-in newsletters, Google Calendar sync, and CalDAV sync included free',
                         'AI event parsing and flyer generation that pure ticketing platforms lack',
                         'Fully open source with selfhosting option for complete data control',
@@ -2096,7 +2096,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Ticket Tailor to Event Schedule?', 'answer' => 'Yes. If you are familiar with Ticket Tailor, Event Schedule will feel natural. Create a free schedule, set up your ticket types, and connect Stripe. The ticketing workflow is straightforward and you can be selling tickets within minutes.'],
-                    ['question' => 'How does Event Schedule pricing compare to Ticket Tailor?', 'answer' => 'Ticket Tailor charges per ticket sold. Event Schedule Pro is a flat $'.$this->planPrice().'/mo with zero platform fees, no matter how many tickets you sell. This makes costs predictable and lower for most organizers.'],
+                    ['question' => 'How does Event Schedule pricing compare to Ticket Tailor?', 'answer' => 'Ticket Tailor charges per ticket sold. Event Schedule Pro is a flat '.plan_price($this->planPrice()).'/mo with zero platform fees, no matter how many tickets you sell. This makes costs predictable and lower for most organizers.'],
                     ['question' => 'What does Event Schedule offer that Ticket Tailor does not?', 'answer' => 'Event Schedule is open source and supports selfhosting, giving you full control over your data. It also includes AI event import, two-way Google Calendar sync, built-in newsletters, and fan engagement features that Ticket Tailor does not offer.'],
                 ],
             ],
@@ -2240,7 +2240,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Can I use Event Schedule alongside Google Calendar?', 'answer' => 'Yes. Event Schedule offers two-way Google Calendar sync on the free plan. Your events stay in sync between both platforms, so you can use Google Calendar as your personal view while Event Schedule powers your public schedule and ticketing.'],
-                    ['question' => 'Is Event Schedule free like Google Calendar?', 'answer' => 'Event Schedule has a generous free plan that includes unlimited events, Google Calendar sync, newsletters, and team collaboration. The Pro plan at $'.$this->planPrice().'/mo adds ticketing, QR check-ins, and custom branding.'],
+                    ['question' => 'Is Event Schedule free like Google Calendar?', 'answer' => 'Event Schedule has a generous free plan that includes unlimited events, Google Calendar sync, newsletters, and team collaboration. The Pro plan at '.plan_price($this->planPrice()).'/mo adds ticketing, QR check-ins, and custom branding.'],
                     ['question' => 'Can Event Schedule handle ticketing that Google Calendar cannot?', 'answer' => 'Yes. Google Calendar has no ticketing features. Event Schedule Pro includes full ticketing with QR check-ins, a live dashboard, ticket waitlists, sale notifications, and sales CSV export. All with zero platform fees.'],
                 ],
             ],
@@ -2260,7 +2260,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Yes (limited)', true],
-                        ['Paid plan price', '$'.$this->planPrice().'/mo (7-day free trial)', 'From $16.79/mo (organizer)', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'From $16.79/mo (organizer)', true],
                         ['Platform fees', '0%', '0% (but subscription required)', true],
                         ['Payment processing', 'Stripe (2.9% + $0.30)', 'Built-in (for paid events)', false],
                     ],
@@ -2313,7 +2313,7 @@ class MarketingController extends Controller
                 'key_advantages' => [
                     [
                         'title' => 'No Organizer Fee',
-                        'description' => 'Meetup charges organizers $16.79 to $24.50/mo just to host a group. Event Schedule is free forever with optional $'.$this->planPrice().'/mo Pro upgrade - saving you up to $200/year.',
+                        'description' => 'Meetup charges organizers $16.79 to $24.50/mo just to host a group. Event Schedule is free forever with optional '.plan_price($this->planPrice()).'/mo Pro upgrade - saving you up to $200/year.',
                         'icon' => 'dollar',
                         'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
                         'border' => 'border-emerald-200 dark:border-emerald-500/20',
@@ -2373,7 +2373,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Meetup to Event Schedule?', 'answer' => 'Yes. Create a free schedule and add your recurring or one-time events. Share your schedule URL with your community. Event Schedule supports recurring events and newsletters to keep your group engaged.'],
-                    ['question' => 'How does Event Schedule pricing compare to Meetup?', 'answer' => 'Meetup charges organizers a subscription starting at $16.79/mo for basic groups, with higher tiers for larger communities. Event Schedule has a free plan with unlimited events. The Pro plan is $'.$this->planPrice().'/mo with zero platform fees on ticket sales.'],
+                    ['question' => 'How does Event Schedule pricing compare to Meetup?', 'answer' => 'Meetup charges organizers a subscription starting at $16.79/mo for basic groups, with higher tiers for larger communities. Event Schedule has a free plan with unlimited events. The Pro plan is '.plan_price($this->planPrice()).'/mo with zero platform fees on ticket sales.'],
                     ['question' => 'Can Event Schedule handle community events and recurring meetups?', 'answer' => 'Yes. Event Schedule supports recurring events, fan engagement features like videos and comments, newsletters with A/B testing, and embeddable calendar widgets. All designed for building and maintaining community.'],
                 ],
             ],
@@ -2393,7 +2393,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Free for organizers', false],
-                        ['Paid plan price', '$'.$this->planPrice().'/mo (7-day free trial)', 'Free (fees on buyers)', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'Free (fees on buyers)', true],
                         ['Platform fees', '0%', 'Service fee on buyers', true],
                         ['Payment processing', 'Stripe (2.9% + $0.30)', 'Built-in', false],
                     ],
@@ -2527,7 +2527,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Free to list', false],
-                        ['Paid plan price', '$'.$this->planPrice().'/mo (7-day free trial)', 'Free (fees on tickets)', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'Free (fees on tickets)', true],
                         ['Platform fees', '0%', '$0.99 + 5% per ticket (buyer-paid)', true],
                         ['Payment processing', 'Stripe (2.9% + $0.30)', 'Built-in', false],
                     ],
@@ -2641,7 +2641,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Brown Paper Tickets to Event Schedule?', 'answer' => 'Yes. Many organizers are moving away from Brown Paper Tickets as the platform is being retired and migrated to Events.com. Create a free schedule, add your events (AI import speeds this up), and share your new URL. You can be up and running in minutes.'],
-                    ['question' => 'How does Event Schedule pricing compare to Brown Paper Tickets?', 'answer' => 'Brown Paper Tickets charges $0.99 + 5% per ticket as a buyer-paid service fee. Event Schedule charges zero platform fees at any plan level. The Pro plan is a flat $'.$this->planPrice().'/mo for unlimited ticketing with direct Stripe payouts.'],
+                    ['question' => 'How does Event Schedule pricing compare to Brown Paper Tickets?', 'answer' => 'Brown Paper Tickets charges $0.99 + 5% per ticket as a buyer-paid service fee. Event Schedule charges zero platform fees at any plan level. The Pro plan is a flat '.plan_price($this->planPrice()).'/mo for unlimited ticketing with direct Stripe payouts.'],
                     ['question' => 'Is Event Schedule actively maintained?', 'answer' => 'Yes. Brown Paper Tickets is being retired and migrated to Events.com. Event Schedule is built with a modern tech stack and receives regular updates. It is fully open source, so you can inspect the code, track development activity, and even selfhost it for complete control over your platform.'],
                 ],
             ],
@@ -2661,7 +2661,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'No (custom pricing)', true],
-                        ['Paid plan price', '$'.$this->planPrice().'/mo (7-day free trial)', 'Enterprise pricing', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'Enterprise pricing', true],
                         ['Platform fees', '0%', 'Included in subscription', true],
                         ['Payment processing', 'Stripe (2.9% + $0.30)', 'Built-in', false],
                     ],
@@ -2732,8 +2732,8 @@ class MarketingController extends Controller
                         'icon_color' => 'text-sky-600 dark:text-sky-400',
                     ],
                     [
-                        'title' => 'Transparent $'.$this->planPrice().'/mo',
-                        'description' => 'Splash hides pricing behind "contact us" forms. Event Schedule is free forever, with Pro at a transparent $'.$this->planPrice().'/mo - no surprise invoices or annual commitments.',
+                        'title' => 'Transparent '.plan_price($this->planPrice()).'/mo',
+                        'description' => 'Splash hides pricing behind "contact us" forms. Event Schedule is free forever, with Pro at a transparent '.plan_price($this->planPrice()).'/mo - no surprise invoices or annual commitments.',
                         'icon' => 'dollar',
                         'gradient' => 'from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30',
                         'border' => 'border-teal-200 dark:border-teal-500/20',
@@ -2775,7 +2775,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Splash to Event Schedule?', 'answer' => 'Yes. Unlike Splash, there is no enterprise onboarding or sales process required. Just sign up, create a free schedule, add your events, and share your schedule URL. AI import can speed up event creation too.'],
-                    ['question' => 'How does Event Schedule pricing compare to Splash?', 'answer' => 'Splash uses custom enterprise pricing that requires contacting sales, with contracts typically running thousands of dollars per year. Event Schedule Pro is a transparent $'.$this->planPrice().'/mo with zero platform fees and no annual commitment.'],
+                    ['question' => 'How does Event Schedule pricing compare to Splash?', 'answer' => 'Splash uses custom enterprise pricing that requires contacting sales, with contracts typically running thousands of dollars per year. Event Schedule Pro is a transparent '.plan_price($this->planPrice()).'/mo with zero platform fees and no annual commitment.'],
                     ['question' => 'Can Event Schedule handle corporate events like Splash?', 'answer' => 'Yes. Event Schedule supports custom domains, custom branding, team collaboration, and embeddable widgets. Enterprise features include custom CSS and API access for integration with your existing tools.'],
                 ],
             ],
@@ -2784,7 +2784,7 @@ class MarketingController extends Controller
                 'key' => 'sched',
                 'slug' => 'sched-alternative',
                 'tagline' => 'A more affordable, full-featured alternative to Sched with zero platform fees.',
-                'description' => 'Compare Event Schedule with Sched. Get zero platform fees, calendar sync, and open source flexibility for $'.$this->planPrice().'/mo instead of $50+/mo.',
+                'description' => 'Compare Event Schedule with Sched. Get zero platform fees, calendar sync, and open source flexibility for '.plan_price($this->planPrice()).'/mo instead of $50+/mo.',
                 'keywords' => 'sched alternative, sched.com alternative, conference schedule platform, event agenda alternative, sched competitor',
                 'about' => 'Sched is a conference and event scheduling platform popular for managing multi-track agendas, speaker profiles, and personalized attendee schedules. It targets conferences, trade shows, and multi-day events.',
                 'competitor_strengths' => [
@@ -2795,7 +2795,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Small events only (under 50 attendees)', true],
-                        ['Paid plan price', '$'.$this->planPrice().'/mo (7-day free trial)', 'From $50/mo', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'From $50/mo', true],
                         ['Platform fees', '0%', 'Ticketing add-on required', true],
                         ['Payment processing', 'Stripe (2.9% + $0.30)', 'Stripe (separate)', false],
                     ],
@@ -2848,7 +2848,7 @@ class MarketingController extends Controller
                 'key_advantages' => [
                     [
                         'title' => '10x More Affordable',
-                        'description' => '$'.$this->planPrice().'/mo vs $50+/mo starting price. Get more features for a fraction of the cost.',
+                        'description' => plan_price($this->planPrice()).'/mo vs $50+/mo starting price. Get more features for a fraction of the cost.',
                         'icon' => 'dollar',
                         'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
                         'border' => 'border-emerald-200 dark:border-emerald-500/20',
@@ -2908,7 +2908,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Sched to Event Schedule?', 'answer' => 'Yes. Create a free schedule and add your conference sessions or events. AI import lets you paste event details to populate your schedule quickly. No migration needed.'],
-                    ['question' => 'How does Event Schedule pricing compare to Sched?', 'answer' => 'Sched charges per-event or annual pricing that scales with attendee count. Event Schedule Pro is a flat $'.$this->planPrice().'/mo with unlimited events and zero platform fees on ticket sales.'],
+                    ['question' => 'How does Event Schedule pricing compare to Sched?', 'answer' => 'Sched charges per-event or annual pricing that scales with attendee count. Event Schedule Pro is a flat '.plan_price($this->planPrice()).'/mo with unlimited events and zero platform fees on ticket sales.'],
                     ['question' => 'Can Event Schedule handle conference agendas like Sched?', 'answer' => 'Yes. Event Schedule supports multi-day events, sub-schedules for organizing tracks or sessions, and embeddable calendar widgets. Attendees can browse your full conference agenda from a single schedule page.'],
                 ],
             ],
@@ -2928,7 +2928,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'No (quote-based)', true],
-                        ['Paid plan price', '$'.$this->planPrice().'/mo (7-day free trial)', 'Custom quotes', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'Custom quotes', true],
                         ['Platform fees', '0%', '3% + $0.99/ticket', true],
                         ['Payment processing', 'Stripe (2.9% + $0.30)', 'Stripe (2.9% + $0.30)', false],
                     ],
@@ -2982,7 +2982,7 @@ class MarketingController extends Controller
                 'key_advantages' => [
                     [
                         'title' => 'Transparent Pricing',
-                        'description' => '$'.$this->planPrice().'/mo flat vs opaque custom quotes requiring sales calls. No surprises, no negotiations.',
+                        'description' => plan_price($this->planPrice()).'/mo flat vs opaque custom quotes requiring sales calls. No surprises, no negotiations.',
                         'icon' => 'dollar',
                         'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
                         'border' => 'border-emerald-200 dark:border-emerald-500/20',
@@ -3042,7 +3042,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Whova to Event Schedule?', 'answer' => 'Yes. Unlike Whova, there is no sales process or demo required. Just sign up, create a free schedule, and start adding events. AI import can parse pasted event details to speed things up.'],
-                    ['question' => 'How does Event Schedule pricing compare to Whova?', 'answer' => 'Whova uses quote-based enterprise pricing that requires a sales call, with costs typically running thousands of dollars per event. Event Schedule Pro is a flat $'.$this->planPrice().'/mo with unlimited events and zero platform fees on ticket sales.'],
+                    ['question' => 'How does Event Schedule pricing compare to Whova?', 'answer' => 'Whova uses quote-based enterprise pricing that requires a sales call, with costs typically running thousands of dollars per event. Event Schedule Pro is a flat '.plan_price($this->planPrice()).'/mo with unlimited events and zero platform fees on ticket sales.'],
                     ['question' => 'Does Event Schedule offer attendee engagement features like Whova?', 'answer' => 'Yes. Event Schedule includes fan videos and comments, newsletters with A/B testing, event polls, and post-event feedback, all built into the platform without per-event pricing.'],
                 ],
             ],
@@ -3051,7 +3051,7 @@ class MarketingController extends Controller
                 'key' => 'accelevents',
                 'slug' => 'accelevents-alternative',
                 'tagline' => 'A simpler, more affordable alternative to Accelevents without enterprise pricing.',
-                'description' => 'Compare Event Schedule with Accelevents. Get zero platform fees, instant setup, and open source flexibility for $'.$this->planPrice().'/mo instead of $7,500+/year.',
+                'description' => 'Compare Event Schedule with Accelevents. Get zero platform fees, instant setup, and open source flexibility for '.plan_price($this->planPrice()).'/mo instead of $7,500+/year.',
                 'keywords' => 'accelevents alternative, accelevents alternative free, event management platform, accelevents competitor, affordable event platform',
                 'about' => 'Accelevents is an enterprise event management platform offering in-person, virtual, and hybrid event solutions. It targets mid-to-large organizations with badge printing, CRM integrations, and white-label capabilities.',
                 'competitor_strengths' => [
@@ -3062,7 +3062,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Limited (high per-ticket fees)', true],
-                        ['Paid plan price', '$'.$this->planPrice().'/mo (7-day free trial)', 'From $7,000/year', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'From $7,000/year', true],
                         ['Platform fees', '0%', '$1 + 1%/ticket (paid plans)', true],
                         ['Payment processing', 'Stripe (2.9% + $0.30)', '2.9% + $0.30', false],
                     ],
@@ -3116,7 +3116,7 @@ class MarketingController extends Controller
                 ],
                 'key_advantages' => [
                     [
-                        'title' => '$'.$this->planPrice().'/mo vs $7,000+/year',
+                        'title' => plan_price($this->planPrice()).'/mo vs $7,000+/year',
                         'description' => '125x more affordable for core event management features. No enterprise contracts required.',
                         'icon' => 'dollar',
                         'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
@@ -3177,7 +3177,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Accelevents to Event Schedule?', 'answer' => 'Yes. Unlike Accelevents, there is no enterprise onboarding or implementation process. Sign up, create a free schedule, and start adding events immediately. AI import can parse pasted event details to speed things up.'],
-                    ['question' => 'How does Event Schedule pricing compare to Accelevents?', 'answer' => 'Accelevents starts at $7,000/year with additional per-ticket fees ($1 + 1%) on paid plans. Event Schedule Pro is a flat $'.$this->planPrice().'/mo with unlimited events and zero platform fees.'],
+                    ['question' => 'How does Event Schedule pricing compare to Accelevents?', 'answer' => 'Accelevents starts at $7,000/year with additional per-ticket fees ($1 + 1%) on paid plans. Event Schedule Pro is a flat '.plan_price($this->planPrice()).'/mo with unlimited events and zero platform fees.'],
                     ['question' => 'Can Event Schedule handle virtual and hybrid events like Accelevents?', 'answer' => 'Yes. Event Schedule supports online events with video links and integrates with any streaming platform. Combined with ticketing, QR check-ins, and newsletters, it covers both virtual and in-person needs.'],
                 ],
             ],
@@ -3186,7 +3186,7 @@ class MarketingController extends Controller
                 'key' => 'tito',
                 'slug' => 'tito-alternative',
                 'tagline' => 'A flat-rate alternative to Tito with calendar sync, newsletters, and zero per-ticket fees.',
-                'description' => 'Compare Event Schedule with Tito. Get flat $'.$this->planPrice().'/mo pricing instead of 3% per ticket, plus calendar sync, newsletters, and selfhosting.',
+                'description' => 'Compare Event Schedule with Tito. Get flat '.plan_price($this->planPrice()).'/mo pricing instead of 3% per ticket, plus calendar sync, newsletters, and selfhosting.',
                 'keywords' => 'tito alternative, ti.to alternative, tito ticketing alternative, event ticketing platform, tito competitor',
                 'about' => 'Tito is a simple, developer-friendly ticketing platform popular with tech conferences and community events. It charges 3% per paid ticket with no monthly subscription, and is known for its clean interface and well-documented API.',
                 'competitor_strengths' => [
@@ -3197,7 +3197,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Free for free events', false],
-                        ['Paid plan price', '$'.$this->planPrice().'/mo (7-day free trial)', '3% per ticket (cap 25 EUR)', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', '3% per ticket (cap 25 EUR)', true],
                         ['Platform fees', '0%', '3% per ticket', true],
                         ['Payment processing', 'Stripe (2.9% + $0.30)', 'Stripe/PayPal', false],
                     ],
@@ -3252,7 +3252,7 @@ class MarketingController extends Controller
                 'key_advantages' => [
                     [
                         'title' => 'Flat-Rate Pricing',
-                        'description' => '$'.$this->planPrice().'/mo flat vs 3% per ticket. Sell 200 x $25 tickets and save $145/mo.',
+                        'description' => plan_price($this->planPrice()).'/mo flat vs 3% per ticket. Sell 200 x $25 tickets and save $145/mo.',
                         'icon' => 'dollar',
                         'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
                         'border' => 'border-emerald-200 dark:border-emerald-500/20',
@@ -3312,7 +3312,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Tito to Event Schedule?', 'answer' => 'Yes. Create a free schedule and start adding events right away. AI import lets you paste event details to populate your listings quickly. No migration scripts required.'],
-                    ['question' => 'How does Event Schedule pricing compare to Tito?', 'answer' => 'Tito charges per-ticket fees on each sale. Event Schedule charges zero platform fees at every plan level. The Pro plan is a flat $'.$this->planPrice().'/mo for unlimited ticketing and events.'],
+                    ['question' => 'How does Event Schedule pricing compare to Tito?', 'answer' => 'Tito charges per-ticket fees on each sale. Event Schedule charges zero platform fees at every plan level. The Pro plan is a flat '.plan_price($this->planPrice()).'/mo for unlimited ticketing and events.'],
                     ['question' => 'Does Event Schedule support developer-friendly features like Tito?', 'answer' => 'Yes. Event Schedule offers a REST API, webhooks, custom CSS, and is fully open source. You can selfhost it, fork it, or integrate it with your own tools and workflows.'],
                 ],
             ],
@@ -3321,7 +3321,7 @@ class MarketingController extends Controller
                 'key' => 'addevent',
                 'slug' => 'addevent-alternative',
                 'tagline' => 'A complete event platform that goes beyond "Add to Calendar" buttons.',
-                'description' => 'Compare Event Schedule with AddEvent. Get ticketing, public event pages, and a full event platform for $'.$this->planPrice().'/mo instead of just calendar buttons at $29/mo.',
+                'description' => 'Compare Event Schedule with AddEvent. Get ticketing, public event pages, and a full event platform for '.plan_price($this->planPrice()).'/mo instead of just calendar buttons at $29/mo.',
                 'keywords' => 'addevent alternative, add to calendar alternative, addevent competitor, event calendar platform, calendar button alternative',
                 'about' => 'AddEvent is a calendar marketing tool focused on "Add to Calendar" buttons, subscription calendars, and RSVP collection. It helps drive event attendance through calendar engagement but does not offer ticketing or event management features.',
                 'competitor_strengths' => [
@@ -3332,7 +3332,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Yes (100 clicks/mo, 20 RSVPs)', true],
-                        ['Paid plan price', '$'.$this->planPrice().'/mo (7-day free trial)', 'From $36/mo', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'From $36/mo', true],
                         ['Platform fees', '0%', 'N/A (no ticketing)', true],
                         ['Payment processing', 'Stripe (2.9% + $0.30)', 'N/A (no ticketing)', true],
                     ],
@@ -3400,7 +3400,7 @@ class MarketingController extends Controller
                     ],
                     [
                         'title' => '7x More Affordable',
-                        'description' => '$'.$this->planPrice().'/mo vs $36/mo, with far more features included.',
+                        'description' => plan_price($this->planPrice()).'/mo vs $36/mo, with far more features included.',
                         'icon' => 'percent',
                         'gradient' => 'from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30',
                         'border' => 'border-teal-200 dark:border-teal-500/20',
@@ -3442,7 +3442,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from AddEvent to Event Schedule?', 'answer' => 'Yes. Create a free schedule and add your events manually or via AI import. Event Schedule provides a full event management platform, not just a calendar widget.'],
-                    ['question' => 'How does Event Schedule pricing compare to AddEvent?', 'answer' => 'AddEvent charges $36/mo for its premium plan. Event Schedule Pro is $'.$this->planPrice().'/mo with zero platform fees. Even the free plan includes unlimited events, Google Calendar sync, and newsletters.'],
+                    ['question' => 'How does Event Schedule pricing compare to AddEvent?', 'answer' => 'AddEvent charges $36/mo for its premium plan. Event Schedule Pro is '.plan_price($this->planPrice()).'/mo with zero platform fees. Even the free plan includes unlimited events, Google Calendar sync, and newsletters.'],
                     ['question' => 'How is Event Schedule different from AddEvent?', 'answer' => 'AddEvent focuses on calendar add-to-calendar buttons and embeds. Event Schedule is a complete event management platform with ticketing, QR check-ins, newsletters, AI import, and public schedule pages.'],
                 ],
             ],
@@ -3451,7 +3451,7 @@ class MarketingController extends Controller
                 'key' => 'pretix',
                 'slug' => 'pretix-alternative',
                 'tagline' => 'A broader open source event platform with flat pricing and more built-in features.',
-                'description' => 'Compare Event Schedule with Pretix. Get flat $'.$this->planPrice().'/mo pricing instead of per-ticket fees, plus calendar sync, newsletters, AI features, and fan engagement.',
+                'description' => 'Compare Event Schedule with Pretix. Get flat '.plan_price($this->planPrice()).'/mo pricing instead of per-ticket fees, plus calendar sync, newsletters, AI features, and fan engagement.',
                 'keywords' => 'pretix alternative, pretix alternative free, open source ticketing alternative, pretix competitor, event platform open source',
                 'about' => 'Pretix is an open source ticketing platform (AGPLv3) based in Germany, focused on ticket sales for conferences, festivals, and exhibitions. It offers a selfhosted Community Edition and a paid hosted service with per-ticket pricing.',
                 'competitor_strengths' => [
@@ -3462,7 +3462,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Selfhosted only (Community Edition)', true],
-                        ['Hosted pricing', '$'.$this->planPrice().'/mo (7-day free trial)', '2.5%/ticket (cap 15 EUR)', true],
+                        ['Hosted pricing', plan_price($this->planPrice()).'/mo (7-day free trial)', '2.5%/ticket (cap 15 EUR)', true],
                         ['Platform fees', '0%', '2.5% per ticket', true],
                         ['Payment processing', 'Stripe (2.9% + $0.30)', 'Stripe/PayPal/Mollie', false],
                     ],
@@ -3516,7 +3516,7 @@ class MarketingController extends Controller
                 ],
                 'key_advantages' => [
                     [
-                        'title' => 'Flat $'.$this->planPrice().'/mo Pricing',
+                        'title' => 'Flat '.plan_price($this->planPrice()).'/mo Pricing',
                         'description' => 'No per-ticket fees ever. Pretix charges 2.5% per ticket on their hosted plan.',
                         'icon' => 'dollar',
                         'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
@@ -3577,7 +3577,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Pretix to Event Schedule?', 'answer' => 'Yes. Create a free schedule and start adding events immediately. No data migration or server setup required. AI import can parse pasted event details to speed up the process.'],
-                    ['question' => 'How does Event Schedule pricing compare to Pretix?', 'answer' => 'Pretix Hosted charges per-ticket fees on each sale. Event Schedule Pro is a flat $'.$this->planPrice().'/mo with zero platform fees. Both platforms are open source, but Event Schedule is simpler to selfhost.'],
+                    ['question' => 'How does Event Schedule pricing compare to Pretix?', 'answer' => 'Pretix Hosted charges per-ticket fees on each sale. Event Schedule Pro is a flat '.plan_price($this->planPrice()).'/mo with zero platform fees. Both platforms are open source, but Event Schedule is simpler to selfhost.'],
                     ['question' => 'Is Event Schedule easier to selfhost than Pretix?', 'answer' => 'Yes. Pretix selfhosting requires Docker, PostgreSQL, Redis, and significant server administration. Event Schedule runs on standard PHP hosting with MySQL, making it accessible to a much wider range of hosting environments.'],
                 ],
             ],
@@ -3586,8 +3586,8 @@ class MarketingController extends Controller
                 'name' => 'Humanitix',
                 'key' => 'humanitix',
                 'slug' => 'humanitix-alternative',
-                'tagline' => 'Keep 100% of your ticket revenue with flat $'.$this->planPrice().'/mo pricing and zero platform fees.',
-                'description' => 'Compare Event Schedule with Humanitix. Get flat $'.$this->planPrice().'/mo pricing instead of per-ticket fees, plus calendar sync, newsletters, AI features, and selfhosting.',
+                'tagline' => 'Keep 100% of your ticket revenue with flat '.plan_price($this->planPrice()).'/mo pricing and zero platform fees.',
+                'description' => 'Compare Event Schedule with Humanitix. Get flat '.plan_price($this->planPrice()).'/mo pricing instead of per-ticket fees, plus calendar sync, newsletters, AI features, and selfhosting.',
                 'keywords' => 'humanitix alternative, humanitix alternative free, event ticketing platform, humanitix competitor, affordable event platform',
                 'about' => 'Humanitix is a ticketing platform that donates profits to charity, primarily children\'s education. It charges a per-ticket booking fee (under $3 for most tickets) with no subscription plans. It offers ticketing, QR check-in, promo codes, and embeddable widgets.',
                 'competitor_strengths' => [
@@ -3598,7 +3598,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Free for free events', false],
-                        ['Paid plan price', '$'.$this->planPrice().'/mo (7-day free trial)', 'No subscription (per-ticket only)', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'No subscription (per-ticket only)', true],
                         ['Platform fees', '0%', 'Booking fee on paid tickets (under $3 for most)', true],
                         ['Payment processing', 'Stripe (2.9% + $0.30)', 'Included in platform fee', false],
                     ],
@@ -3652,7 +3652,7 @@ class MarketingController extends Controller
                 ],
                 'key_advantages' => [
                     [
-                        'title' => 'Flat $'.$this->planPrice().'/mo Pricing',
+                        'title' => 'Flat '.plan_price($this->planPrice()).'/mo Pricing',
                         'description' => 'No per-ticket fees ever. Humanitix charges a booking fee on every paid ticket (under $3 for most tickets).',
                         'icon' => 'dollar',
                         'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
@@ -3713,7 +3713,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Humanitix to Event Schedule?', 'answer' => 'Yes. Create a free schedule and start adding events right away. With zero platform fees, you keep more of your ticket revenue and can donate directly to causes you care about on your own terms.'],
-                    ['question' => 'How does Event Schedule pricing compare to Humanitix?', 'answer' => 'Humanitix charges a per-ticket booking fee on every paid event (under $3 for most tickets). Event Schedule charges zero platform fees at every plan level. The Pro plan is a flat $'.$this->planPrice().'/mo regardless of ticket volume.'],
+                    ['question' => 'How does Event Schedule pricing compare to Humanitix?', 'answer' => 'Humanitix charges a per-ticket booking fee on every paid event (under $3 for most tickets). Event Schedule charges zero platform fees at every plan level. The Pro plan is a flat '.plan_price($this->planPrice()).'/mo regardless of ticket volume.'],
                     ['question' => 'Does Humanitix donate to charity while Event Schedule does not?', 'answer' => 'Humanitix donates its profits to charity, which is funded by per-ticket fees on your sales. With Event Schedule, you keep 100% of your ticket revenue (minus Stripe processing) and can donate to causes you choose directly.'],
                 ],
             ],
@@ -3723,7 +3723,7 @@ class MarketingController extends Controller
                 'key' => 'eventzilla',
                 'slug' => 'eventzilla-alternative',
                 'tagline' => 'A flat-rate open source alternative to Eventzilla with zero per-ticket fees.',
-                'description' => 'Compare Event Schedule with Eventzilla. Get flat $'.$this->planPrice().'/mo pricing instead of per-ticket fees, plus calendar sync, newsletters, AI features, and open source.',
+                'description' => 'Compare Event Schedule with Eventzilla. Get flat '.plan_price($this->planPrice()).'/mo pricing instead of per-ticket fees, plus calendar sync, newsletters, AI features, and open source.',
                 'keywords' => 'eventzilla alternative, eventzilla alternative free, event registration platform, eventzilla competitor, affordable event platform',
                 'about' => 'Eventzilla is an event registration and ticketing platform offering per-ticket pricing across multiple tiers. Plans range from $1.50/registration (Basic) to $5,999/year (Unlimited). It includes features like badge printing, speaker management, live streaming, and CRM integrations.',
                 'competitor_strengths' => [
@@ -3734,7 +3734,7 @@ class MarketingController extends Controller
                 'sections' => [
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Free for free events only', true],
-                        ['Paid plan price', '$'.$this->planPrice().'/mo (7-day free trial)', '$1.50/ticket + up to 2.9%', true],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', '$1.50/ticket + up to 2.9%', true],
                         ['Platform fees', '0%', '1.9% to 2.9% (Pro/Plus plans)', true],
                         ['Payment processing', 'Stripe (2.9% + $0.30)', 'Stripe/PayPal (separate fees)', false],
                     ],
@@ -3788,7 +3788,7 @@ class MarketingController extends Controller
                 ],
                 'key_advantages' => [
                     [
-                        'title' => 'Flat $'.$this->planPrice().'/mo Pricing',
+                        'title' => 'Flat '.plan_price($this->planPrice()).'/mo Pricing',
                         'description' => 'No per-ticket fees ever. Eventzilla charges $1.50/ticket plus up to 2.9% in platform fees.',
                         'icon' => 'dollar',
                         'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
@@ -3849,7 +3849,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is it easy to switch from Eventzilla to Event Schedule?', 'answer' => 'Yes. Create a free schedule and add your events manually or via AI import. Share your new schedule URL and start selling tickets immediately. No complex migration needed.'],
-                    ['question' => 'How does Event Schedule pricing compare to Eventzilla?', 'answer' => 'Eventzilla charges $1.50/ticket plus up to 2.9% in platform fees depending on the plan. Event Schedule Pro is a flat $'.$this->planPrice().'/mo with zero platform fees, making costs predictable regardless of ticket volume.'],
+                    ['question' => 'How does Event Schedule pricing compare to Eventzilla?', 'answer' => 'Eventzilla charges $1.50/ticket plus up to 2.9% in platform fees depending on the plan. Event Schedule Pro is a flat '.plan_price($this->planPrice()).'/mo with zero platform fees, making costs predictable regardless of ticket volume.'],
                     ['question' => 'Can Event Schedule handle registration features like Eventzilla?', 'answer' => 'Yes. Event Schedule includes ticketing with custom fields, QR check-ins, a live dashboard, ticket waitlists, and sales CSV export. It also adds features Eventzilla lacks, like Google Calendar sync, newsletters, and AI event import.'],
                 ],
             ],
@@ -3871,9 +3871,9 @@ class MarketingController extends Controller
                 'keywords' => 'Google Forms alternative for events, Google Forms replacement, event registration form, event signup form',
                 'audience_hint' => 'For event organizers using Google Forms for RSVPs and registration',
                 'about' => 'Google Forms is a free form builder used by many event organizers to collect RSVPs and registrations. While it works for basic data collection, it was never designed for event management - leaving organizers to manually handle payments, confirmations, and attendee tracking outside the form.',
-                'pricing_note' => 'Google Forms is free, but when you add Stripe for payments and Mailchimp for emails, costs add up quickly. Event Schedule combines registration, payments, emails, and check-in from $'.$this->planPrice().'/month total.',
+                'pricing_note' => 'Google Forms is free, but when you add Stripe for payments and Mailchimp for emails, costs add up quickly. Event Schedule combines registration, payments, emails, and check-in from '.plan_price($this->planPrice()).'/month total.',
                 'competitor_price' => 'Free (but $50+/mo with add-ons)',
-                'es_price' => 'From $0/mo (Pro $'.$this->planPrice().'/mo)',
+                'es_price' => 'From $0/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [
                     ['feature' => 'Event registration', 'competitor' => 'Manual form setup', 'es' => 'Built-in with tickets'],
                     ['feature' => 'Payment processing', 'competitor' => false, 'es' => true],
@@ -3919,7 +3919,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is Event Schedule a good Google Forms alternative for events?', 'answer' => 'Yes. Event Schedule replaces Google Forms for event registration with built-in ticketing, payments, and attendee management. You can set up your first event in minutes. Paste your event details and AI will extract dates, times, and descriptions automatically.'],
-                    ['question' => 'Is Event Schedule really free?', 'answer' => 'Yes. The free plan includes unlimited events, Google Calendar sync, newsletters, and fan engagement features. Ticketing with zero platform fees is available on the Pro plan for $'.$this->planPrice().'/month. No credit card required to start.'],
+                    ['question' => 'Is Event Schedule really free?', 'answer' => 'Yes. The free plan includes unlimited events, Google Calendar sync, newsletters, and fan engagement features. Ticketing with zero platform fees is available on the Pro plan for '.plan_price($this->planPrice()).'/month. No credit card required to start.'],
                     ['question' => 'Can Event Schedule handle custom registration fields like Google Forms?', 'answer' => 'Yes. Pro plan includes custom fields on ticket forms so you can collect any information you need from attendees. Unlike Google Forms, the data is automatically connected to your attendee records and ticket sales.'],
                     ['question' => 'Can I use Event Schedule for free events without payments?', 'answer' => 'Yes. Event Schedule supports free RSVPs with automatic confirmation emails and attendee tracking. Your event page collects registrations and you get a real attendee list with QR code check-in tools, all without setting up any payment processing.'],
                     ['question' => 'Can I collect RSVPs for free events without Google Forms?', 'answer' => 'Yes. Event Schedule supports free RSVPs with automatic confirmation emails. Attendees register through your event page and you get a real attendee list with check-in tools, not just form responses.'],
@@ -3942,9 +3942,9 @@ class MarketingController extends Controller
                 'keywords' => 'Mailchimp alternative for events, Mailchimp replacement, event email marketing, event newsletter',
                 'audience_hint' => 'For organizers managing event emails in a separate platform',
                 'about' => 'Mailchimp is a popular email marketing platform that many event organizers use to promote events and communicate with attendees. However, using Mailchimp means managing a separate tool alongside your event platform, manually syncing attendee lists, and paying for email marketing on top of your event tools.',
-                'pricing_note' => 'Mailchimp starts at $13/month for 500 contacts and goes up from there. Event Schedule newsletters are free for unlimited subscribers, and Pro at $'.$this->planPrice().'/month adds ticketing with zero platform fees.',
+                'pricing_note' => 'Mailchimp starts at $13/month for 500 contacts and goes up from there. Event Schedule newsletters are free for unlimited subscribers, and Pro at '.plan_price($this->planPrice()).'/month adds ticketing with zero platform fees.',
                 'competitor_price' => 'From $13/mo',
-                'es_price' => 'From $0/mo (Pro $'.$this->planPrice().'/mo)',
+                'es_price' => 'From $0/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [
                     ['feature' => 'Email newsletters', 'competitor' => true, 'es' => 'With A/B testing'],
                     ['feature' => 'Subscriber management', 'competitor' => true, 'es' => 'Auto from ticket sales'],
@@ -3990,7 +3990,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is Event Schedule a good Mailchimp alternative for event emails?', 'answer' => 'Yes. Event Schedule includes built-in newsletters with A/B testing, subscriber management, and automatic attendee data integration. You can send event announcements and updates directly from your schedule without a separate email tool.'],
-                    ['question' => 'How much does Event Schedule cost compared to Mailchimp?', 'answer' => 'Event Schedule is free for newsletters, subscriber management, and unlimited events. The Pro plan at $'.$this->planPrice().'/month adds ticketing with zero platform fees. Mailchimp charges based on subscriber count and can cost $20 or more per month for similar email features alone.'],
+                    ['question' => 'How much does Event Schedule cost compared to Mailchimp?', 'answer' => 'Event Schedule is free for newsletters, subscriber management, and unlimited events. The Pro plan at '.plan_price($this->planPrice()).'/month adds ticketing with zero platform fees. Mailchimp charges based on subscriber count and can cost $20 or more per month for similar email features alone.'],
                     ['question' => 'Does Event Schedule support email automation like Mailchimp?', 'answer' => 'Event Schedule focuses on event-specific communications: newsletters to subscribers, sale confirmations, and event updates. While it does not have Mailchimp-style drip campaigns, it covers the email needs of most event organizers without requiring a separate platform.'],
                     ['question' => 'Can I import my Mailchimp subscriber list?', 'answer' => 'Event Schedule builds your subscriber list organically. Visitors subscribe through your schedule page and ticket buyers are added automatically. You do not need to import a CSV since new subscribers opt in directly through your events.'],
                     ['question' => 'Can I send newsletters to people who bought tickets?', 'answer' => 'Yes. Ticket buyers are automatically part of your subscriber base. You can send newsletters to all subscribers or target specific segments without manually importing attendee lists.'],
@@ -4013,9 +4013,9 @@ class MarketingController extends Controller
                 'keywords' => 'Canva alternative for events, Canva replacement, event flyer maker, event graphic generator',
                 'audience_hint' => 'For organizers spending hours designing event flyers manually',
                 'about' => 'Canva is a popular graphic design platform that event organizers use to create flyers, social media posts, and promotional graphics. While Canva offers great design flexibility, creating event graphics manually takes time and requires updating multiple designs whenever event details change.',
-                'pricing_note' => 'Canva Pro costs $15/month for premium design features. Event Schedule generates event graphics automatically on the Pro plan at $'.$this->planPrice().'/month, which also includes ticketing and newsletters.',
+                'pricing_note' => 'Canva Pro costs $15/month for premium design features. Event Schedule generates event graphics automatically on the Pro plan at '.plan_price($this->planPrice()).'/month, which also includes ticketing and newsletters.',
                 'competitor_price' => 'From $15/mo (Pro)',
-                'es_price' => 'From $0/mo (Pro $'.$this->planPrice().'/mo)',
+                'es_price' => 'From $0/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [
                     ['feature' => 'Event graphics', 'competitor' => 'Manual design', 'es' => 'Auto-generated'],
                     ['feature' => 'AI flyer generation', 'competitor' => 'AI design tools', 'es' => 'Event-specific AI'],
@@ -4061,7 +4061,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is Event Schedule a good Canva alternative for event graphics?', 'answer' => 'Yes. Event Schedule auto-generates shareable event graphics from your event details and also offers AI-powered flyer generation. Graphics update automatically when event details change, so you never have outdated flyers.'],
-                    ['question' => 'Is Event Schedule free for event graphics?', 'answer' => 'Event graphics generation is included in the Pro plan at $'.$this->planPrice().'/month, which also includes ticketing, QR check-in, and more. The free plan includes unlimited events, public event pages, and Google Calendar sync.'],
+                    ['question' => 'Is Event Schedule free for event graphics?', 'answer' => 'Event graphics generation is included in the Pro plan at '.plan_price($this->planPrice()).'/month, which also includes ticketing, QR check-in, and more. The free plan includes unlimited events, public event pages, and Google Calendar sync.'],
                     ['question' => 'How do Event Schedule graphics compare to Canva designs?', 'answer' => 'Canva offers more design flexibility for general-purpose graphics. Event Schedule graphics are purpose-built for events, automatically pulling in dates, times, locations, and descriptions. They are designed for quick social media sharing and are always in sync with your event data.'],
                     ['question' => 'Do I need design skills to create event graphics with Event Schedule?', 'answer' => 'No. Event Schedule generates event graphics automatically from your event details. AI flyer generation creates unique designs with no design input required. You can also customize styles and branding to match your look.'],
                     ['question' => 'Can I still use Canva alongside Event Schedule?', 'answer' => 'Of course. Many organizers use Event Schedule for automatic event graphics and Canva for custom brand materials. Event Schedule handles the event-specific graphics so you spend less time in Canva for routine event promotion.'],
@@ -4086,9 +4086,9 @@ class MarketingController extends Controller
                 'about' => 'Linktree is a link-in-bio tool that event organizers use to share multiple event links from a single URL. While it solves the "one link" problem on social media, it is just a list of links with no event context, ticketing, or scheduling functionality.',
                 // Linktree Pro is $9/month, which is what Pro costs too, so this line cannot lean
                 // on being cheaper. It compares what the same money buys instead.
-                'pricing_note' => 'Linktree Pro costs $9/month for analytics and customization on what is still a list of links. Event Schedule starts free, and Pro at $'.$this->planPrice().'/month buys a full event schedule page with ticketing, newsletters, and subscriber signups.',
+                'pricing_note' => 'Linktree Pro costs $9/month for analytics and customization on what is still a list of links. Event Schedule starts free, and Pro at '.plan_price($this->planPrice()).'/month buys a full event schedule page with ticketing, newsletters, and subscriber signups.',
                 'competitor_price' => 'From $9/mo (Pro)',
-                'es_price' => 'From $0/mo (Pro $'.$this->planPrice().'/mo)',
+                'es_price' => 'From $0/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [
                     ['feature' => 'Event details on page', 'competitor' => 'Links only', 'es' => 'Full event info'],
                     ['feature' => 'Ticket sales', 'competitor' => false, 'es' => 'Zero platform fees'],
@@ -4134,7 +4134,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is Event Schedule a good Linktree alternative for event promotion?', 'answer' => 'Yes. Linktree is a list of links. Event Schedule gives you a full schedule page with event details, dates, ticket purchasing, and subscriber signups. Your audience sees a rich event experience, not just a link directory.'],
-                    ['question' => 'Does Event Schedule have a free plan?', 'answer' => 'Yes. The free plan includes unlimited events, a public schedule page, Google Calendar sync, newsletters, and embeddable widgets. Ticketing with zero platform fees is available on the Pro plan for $'.$this->planPrice().'/month.'],
+                    ['question' => 'Does Event Schedule have a free plan?', 'answer' => 'Yes. The free plan includes unlimited events, a public schedule page, Google Calendar sync, newsletters, and embeddable widgets. Ticketing with zero platform fees is available on the Pro plan for '.plan_price($this->planPrice()).'/month.'],
                     ['question' => 'Can I use Event Schedule as my link in bio?', 'answer' => 'Yes. Your schedule page URL works perfectly as a link in bio. It shows all your upcoming events with full details and ticket links, updating automatically as you add or change events. No manual link management needed.'],
                     ['question' => 'Does the schedule page work with Instagram and TikTok?', 'answer' => 'Yes. Your Event Schedule URL works as a link in bio on any social platform including Instagram, TikTok, YouTube, and X. It shows all your upcoming events with full details and ticket links, updating automatically as you add events.'],
                     ['question' => 'Can visitors subscribe to my events from the schedule page?', 'answer' => 'Yes. Your schedule page includes a subscribe button so visitors can sign up for email updates. You can then send newsletters about upcoming events directly from Event Schedule.'],
@@ -4157,9 +4157,9 @@ class MarketingController extends Controller
                 'keywords' => 'Google Sheets alternative for events, Google Sheets replacement, event tracking spreadsheet, Excel alternative for events',
                 'audience_hint' => 'For organizers tracking event data and attendees in spreadsheets',
                 'about' => 'Google Sheets is a go-to tool for event organizers who need to track attendees, manage guest lists, and organize event details. But spreadsheets were not built for event management - they require manual data entry, have no attendee-facing features, and become unwieldy as events grow.',
-                'pricing_note' => 'Google Sheets is free, but tracking events manually costs time. Event Schedule automates attendee tracking, and the Pro plan at $'.$this->planPrice().'/month adds ticketing with automatic sales data.',
+                'pricing_note' => 'Google Sheets is free, but tracking events manually costs time. Event Schedule automates attendee tracking, and the Pro plan at '.plan_price($this->planPrice()).'/month adds ticketing with automatic sales data.',
                 'competitor_price' => 'Free (manual effort)',
-                'es_price' => 'From $0/mo (Pro $'.$this->planPrice().'/mo)',
+                'es_price' => 'From $0/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [
                     ['feature' => 'Attendee tracking', 'competitor' => 'Manual entry', 'es' => 'Automatic'],
                     ['feature' => 'Ticket sales tracking', 'competitor' => 'Manual entry', 'es' => 'Real-time dashboard'],
@@ -4205,7 +4205,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is Event Schedule a good Google Sheets alternative for event tracking?', 'answer' => 'Yes. Event Schedule automatically tracks ticket sales, attendee lists, and check-ins. You get a live dashboard instead of a static spreadsheet, and you can export to CSV anytime for custom analysis.'],
-                    ['question' => 'Is there a free plan for Event Schedule?', 'answer' => 'Yes. The free plan includes unlimited events, Google Calendar sync, newsletters, and fan engagement features. Ticketing with automatic tracking and zero platform fees is available on the Pro plan for $'.$this->planPrice().'/month.'],
+                    ['question' => 'Is there a free plan for Event Schedule?', 'answer' => 'Yes. The free plan includes unlimited events, Google Calendar sync, newsletters, and fan engagement features. Ticketing with automatic tracking and zero platform fees is available on the Pro plan for '.plan_price($this->planPrice()).'/month.'],
                     ['question' => 'Can I still export data to a spreadsheet?', 'answer' => 'Yes. Pro plan includes CSV export of your sales data, so you can use spreadsheets for custom analysis when needed. The difference is that data collection and tracking happens automatically instead of through manual entry.'],
                     ['question' => 'Can multiple team members access event data at the same time?', 'answer' => 'Yes. Event Schedule supports team collaboration with role-based access. Multiple team members can view dashboards, manage events, and check in attendees simultaneously without worrying about overwriting each other in a shared spreadsheet.'],
                     ['question' => 'Does Event Schedule have a REST API for custom integrations?', 'answer' => 'Yes. The Pro plan includes a REST API that lets you pull event data, attendee lists, and sales information programmatically. Connect Event Schedule with your CRM, accounting software, or any other tool.'],
@@ -4228,9 +4228,9 @@ class MarketingController extends Controller
                 'keywords' => 'Calendly alternative for events, Calendly replacement, event scheduling tool, public event scheduling',
                 'audience_hint' => 'For organizers using appointment scheduling for public events',
                 'about' => 'Calendly is a scheduling tool designed for booking one-on-one meetings and appointments. Some event organizers use it to schedule events, but it lacks public event pages, ticketing, and the ability to share a calendar of events with an audience.',
-                'pricing_note' => 'Calendly charges $10/month per user for its Standard plan. Event Schedule is free for unlimited events and public pages, with ticketing at $'.$this->planPrice().'/month and no per-user fees.',
+                'pricing_note' => 'Calendly charges $10/month per user for its Standard plan. Event Schedule is free for unlimited events and public pages, with ticketing at '.plan_price($this->planPrice()).'/month and no per-user fees.',
                 'competitor_price' => 'From $10/mo per user',
-                'es_price' => 'From $0/mo (Pro $'.$this->planPrice().'/mo)',
+                'es_price' => 'From $0/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [
                     ['feature' => 'Public event pages', 'competitor' => 'Booking pages', 'es' => 'Full event pages'],
                     ['feature' => 'One-on-one appointment booking', 'competitor' => true, 'es' => 'Built in (free, 1 type)'],
@@ -4277,7 +4277,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is Event Schedule a good Calendly alternative for public events?', 'answer' => 'Yes. Calendly is built for one-on-one appointment scheduling. Event Schedule is built for public events with audiences. You get public event pages, ticket sales, a shareable schedule, newsletters, and event graphics that Calendly does not offer.'],
-                    ['question' => 'Does Event Schedule have a free plan?', 'answer' => 'Yes. The free plan includes unlimited events, public event pages, Google Calendar sync, newsletters, and fan engagement features. Ticketing with zero platform fees is available on the Pro plan for $'.$this->planPrice().'/month.'],
+                    ['question' => 'Does Event Schedule have a free plan?', 'answer' => 'Yes. The free plan includes unlimited events, public event pages, Google Calendar sync, newsletters, and fan engagement features. Ticketing with zero platform fees is available on the Pro plan for '.plan_price($this->planPrice()).'/month.'],
                     ['question' => 'Does Event Schedule sync with Google Calendar like Calendly?', 'answer' => 'Yes. Event Schedule includes two-way Google Calendar sync on the free plan. Events you create sync to your Google Calendar, and Google Calendar events can sync back. CalDAV sync is also supported.'],
                     ['question' => 'Can attendees add events to their own Google Calendar?', 'answer' => 'Yes. Event pages include an option to add the event to Google Calendar or download an iCal file. Two-way Google Calendar sync also keeps your own calendar updated automatically when you create or edit events in Event Schedule.'],
                     ['question' => 'Can I use Event Schedule for recurring events?', 'answer' => 'Yes. Event Schedule supports recurring events with flexible scheduling patterns. Each occurrence can have its own ticket types and attendee limits, which is something Calendly cannot handle for public events.'],
@@ -4300,9 +4300,9 @@ class MarketingController extends Controller
                 'keywords' => 'SurveyMonkey alternative for events, SurveyMonkey replacement, event registration, event signup',
                 'audience_hint' => 'For organizers using survey tools for event registration',
                 'about' => 'SurveyMonkey is a survey platform that some event organizers repurpose for event registration and feedback collection. While it offers form building capabilities, it was designed for surveys and research - not for managing events, selling tickets, or handling attendee logistics.',
-                'pricing_note' => 'SurveyMonkey charges $25+/month for features like payment collection and custom branding. Event Schedule Pro is $'.$this->planPrice().'/month with zero platform fees on ticket sales.',
+                'pricing_note' => 'SurveyMonkey charges $25+/month for features like payment collection and custom branding. Event Schedule Pro is '.plan_price($this->planPrice()).'/month with zero platform fees on ticket sales.',
                 'competitor_price' => 'From $25+/mo',
-                'es_price' => 'From $0/mo (Pro $'.$this->planPrice().'/mo)',
+                'es_price' => 'From $0/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [
                     ['feature' => 'Event registration', 'competitor' => 'Survey forms', 'es' => 'Purpose-built'],
                     ['feature' => 'Payment processing', 'competitor' => 'Paid add-on', 'es' => 'Zero platform fees'],
@@ -4336,7 +4336,7 @@ class MarketingController extends Controller
                     'intro' => 'SurveyMonkey was built for surveys, not events. Event Schedule gives you purpose-built registration with ticketing, payments, and check-in tools.',
                     'points' => [
                         'Event registration with ticket types, limits, and waitlists',
-                        'Zero platform fees at $'.$this->planPrice().'/month vs SurveyMonkey at $25+/month',
+                        'Zero platform fees at '.plan_price($this->planPrice()).'/month vs SurveyMonkey at $25+/month',
                         'Attendee records with check-in tools, not survey responses',
                         'Public event pages that look professional, not like questionnaires',
                     ],
@@ -4348,7 +4348,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is Event Schedule a good SurveyMonkey alternative for event registration?', 'answer' => 'Yes. Event Schedule provides purpose-built event registration with ticket types, attendee limits, waitlists, and automatic confirmations. Unlike SurveyMonkey, registrations are connected to ticketing, payments, and check-in tools.'],
-                    ['question' => 'How much does Event Schedule cost compared to SurveyMonkey?', 'answer' => 'Event Schedule is free for unlimited events, newsletters, and Google Calendar sync. The Pro plan at $'.$this->planPrice().'/month adds ticketing with zero platform fees. SurveyMonkey charges $25 or more per month for features like payment collection and custom branding.'],
+                    ['question' => 'How much does Event Schedule cost compared to SurveyMonkey?', 'answer' => 'Event Schedule is free for unlimited events, newsletters, and Google Calendar sync. The Pro plan at '.plan_price($this->planPrice()).'/month adds ticketing with zero platform fees. SurveyMonkey charges $25 or more per month for features like payment collection and custom branding.'],
                     ['question' => 'Does Event Schedule support post-event surveys?', 'answer' => 'Event Schedule includes post-event feedback collection on the Pro plan. While it does not have SurveyMonkey-style branching logic, it covers the feedback needs of most event organizers with integrated attendee data.'],
                     ['question' => 'Does Event Schedule support attendee limits and waitlists?', 'answer' => 'Yes. Set capacity limits per ticket type and Event Schedule manages waitlists automatically. When tickets sell out, attendees can join the waitlist and get notified if spots open up. This is built into the ticketing system with no extra setup.'],
                     ['question' => 'Can I collect custom information from attendees?', 'answer' => 'Yes. Pro plan includes custom fields on ticket forms so you can collect any information you need during registration. The data is connected to attendee records and available for export.'],
@@ -4371,9 +4371,9 @@ class MarketingController extends Controller
                 'keywords' => 'Doodle alternative for events, Doodle replacement, event scheduling poll, event date scheduling',
                 'audience_hint' => 'For organizers using date polling to coordinate events',
                 'about' => 'Doodle is a scheduling poll tool that helps groups find a common time to meet. Event organizers sometimes use it to pick event dates, but Doodle stops at the poll - it does not help you create, promote, or manage the actual event once a date is chosen.',
-                'pricing_note' => 'Doodle charges $7+/month per user for its Pro plan. Event Schedule is free for unlimited events with a public schedule, and $'.$this->planPrice().'/month for ticketing with no per-user fees.',
+                'pricing_note' => 'Doodle charges $7+/month per user for its Pro plan. Event Schedule is free for unlimited events with a public schedule, and '.plan_price($this->planPrice()).'/month for ticketing with no per-user fees.',
                 'competitor_price' => 'From $7+/mo per user',
-                'es_price' => 'From $0/mo (Pro $'.$this->planPrice().'/mo)',
+                'es_price' => 'From $0/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [
                     ['feature' => 'Event creation', 'competitor' => 'Date polls only', 'es' => 'Full event management'],
                     ['feature' => 'Public event pages', 'competitor' => false, 'es' => true],
@@ -4419,7 +4419,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is Event Schedule a good Doodle alternative for event management?', 'answer' => 'Yes. Doodle stops at picking a date. Event Schedule takes you from event creation through promotion and ticketing to check-in day. You get public event pages, ticket sales, Google Calendar sync, and newsletters in one platform.'],
-                    ['question' => 'Is Event Schedule free to use?', 'answer' => 'Yes. The free plan includes unlimited events, public event pages, Google Calendar sync, newsletters, and fan engagement features. Ticketing with zero platform fees is available on the Pro plan for $'.$this->planPrice().'/month.'],
+                    ['question' => 'Is Event Schedule free to use?', 'answer' => 'Yes. The free plan includes unlimited events, public event pages, Google Calendar sync, newsletters, and fan engagement features. Ticketing with zero platform fees is available on the Pro plan for '.plan_price($this->planPrice()).'/month.'],
                     ['question' => 'Does Event Schedule have scheduling or polling features like Doodle?', 'answer' => 'Event Schedule includes event polls on the Pro plan for collecting attendee preferences. For date selection, you create events with set dates and share them through your public schedule page. It is designed for publishing events, not polling for availability.'],
                     ['question' => 'Can attendees see all my upcoming events in one place?', 'answer' => 'Yes. Your public schedule page shows all upcoming events in a calendar view with full details and ticket links. Attendees can browse your entire event lineup from one URL instead of receiving separate poll links for each event.'],
                     ['question' => 'Can I collect RSVPs for free events?', 'answer' => 'Yes. Event Schedule supports free RSVPs with automatic confirmation emails. Attendees register through your event page and you get a real attendee list with check-in tools.'],
@@ -4443,9 +4443,9 @@ class MarketingController extends Controller
                 'keywords' => 'QR code alternative for events, QR code generator replacement, event QR code, QR code check-in',
                 'audience_hint' => 'For organizers using standalone QR tools for event check-in',
                 'about' => 'QR code generators are standalone tools that event organizers use to create scannable codes for event check-in, links to event pages, or ticket verification. Using a separate QR tool means manually creating codes, linking them to attendee data, and building your own check-in process.',
-                'pricing_note' => 'Many QR generators charge $5 to $15/month for dynamic QR codes. Event Schedule includes QR codes on every ticket automatically with the Pro plan at $'.$this->planPrice().'/month, which also covers ticketing, check-in, and a live dashboard.',
+                'pricing_note' => 'Many QR generators charge $5 to $15/month for dynamic QR codes. Event Schedule includes QR codes on every ticket automatically with the Pro plan at '.plan_price($this->planPrice()).'/month, which also covers ticketing, check-in, and a live dashboard.',
                 'competitor_price' => '$5 to $15/mo',
-                'es_price' => 'From $0/mo (Pro $'.$this->planPrice().'/mo)',
+                'es_price' => 'From $0/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [
                     ['feature' => 'QR codes on tickets', 'competitor' => 'Manual creation', 'es' => 'Automatic'],
                     ['feature' => 'Scan-to-check-in', 'competitor' => false, 'es' => true],
@@ -4491,7 +4491,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is Event Schedule a good QR code generator alternative for events?', 'answer' => 'Yes. Every ticket sold through Event Schedule includes a unique QR code automatically. No need for a separate QR generation tool. QR codes are linked to attendee data for instant validation at the door.'],
-                    ['question' => 'How much does QR code ticketing cost?', 'answer' => 'QR code tickets are included in the Pro plan at $'.$this->planPrice().'/month with zero platform fees. You only pay standard Stripe processing fees (typically 2.9% + $0.30 per transaction). The free plan includes unlimited events without ticketing.'],
+                    ['question' => 'How much does QR code ticketing cost?', 'answer' => 'QR code tickets are included in the Pro plan at '.plan_price($this->planPrice()).'/month with zero platform fees. You only pay standard Stripe processing fees (typically 2.9% + $0.30 per transaction). The free plan includes unlimited events without ticketing.'],
                     ['question' => 'How does the QR check-in system work?', 'answer' => 'Each ticket includes a unique QR code emailed to the buyer. At the event, use any smartphone to scan QR codes and check attendees in. The system validates tickets, prevents duplicate scans, and tracks attendance on a live dashboard in real time.'],
                     ['question' => 'Can I use QR check-in without selling tickets?', 'answer' => 'Yes. Free RSVP events also include QR codes for attendee check-in. You do not need to sell paid tickets to use the QR check-in system. Any registered attendee gets a scannable QR code for event day.'],
                     ['question' => 'Do I need special hardware to scan QR codes?', 'answer' => 'No. Any smartphone with a web browser can scan tickets. Open the check-in page on your phone, point it at the QR code, and the attendee is checked in instantly. No app download required.'],
@@ -4514,9 +4514,9 @@ class MarketingController extends Controller
                 'keywords' => 'Squarespace alternative for events, Squarespace replacement, event website builder, event landing page',
                 'audience_hint' => 'For organizers building event pages on a general website builder',
                 'about' => 'Squarespace is a general website builder that some event organizers use to create event pages and sell tickets through third-party integrations. While it produces beautiful websites, building event functionality on top of a website builder means extra complexity, plugins, and ongoing maintenance for features that should be built in.',
-                'pricing_note' => 'Squarespace costs $16+/month for a basic site, plus extra for third-party ticketing. Event Schedule is free for event pages, and $'.$this->planPrice().'/month for ticketing with zero platform fees.',
+                'pricing_note' => 'Squarespace costs $16+/month for a basic site, plus extra for third-party ticketing. Event Schedule is free for event pages, and '.plan_price($this->planPrice()).'/month for ticketing with zero platform fees.',
                 'competitor_price' => 'From $16+/mo',
-                'es_price' => 'From $0/mo (Pro $'.$this->planPrice().'/mo)',
+                'es_price' => 'From $0/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [
                     ['feature' => 'Event pages', 'competitor' => 'Manual page build', 'es' => 'Auto-generated'],
                     ['feature' => 'Ticketing', 'competitor' => 'Third-party plugins', 'es' => 'Zero platform fees'],
@@ -4562,7 +4562,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is Event Schedule a good Squarespace alternative for event pages?', 'answer' => 'Yes. Event Schedule provides ready-made event pages with all event details, ticket purchasing, and a shareable schedule. No website building, plugins, or custom page design required. You can also embed the calendar widget on your existing Squarespace site.'],
-                    ['question' => 'How does Event Schedule pricing compare to Squarespace?', 'answer' => 'Event Schedule is free for unlimited events and a public schedule page. The Pro plan at $'.$this->planPrice().'/month adds ticketing with zero platform fees. Squarespace costs $16 or more per month for a basic website, plus additional fees for third-party ticketing integrations.'],
+                    ['question' => 'How does Event Schedule pricing compare to Squarespace?', 'answer' => 'Event Schedule is free for unlimited events and a public schedule page. The Pro plan at '.plan_price($this->planPrice()).'/month adds ticketing with zero platform fees. Squarespace costs $16 or more per month for a basic website, plus additional fees for third-party ticketing integrations.'],
                     ['question' => 'Do I still need a website if I use Event Schedule?', 'answer' => 'Not necessarily. Your Event Schedule page works as a standalone event website with a custom URL, all your events, ticket sales, and subscriber signups. If you already have a website, you can embed the Event Schedule calendar widget on it.'],
                     ['question' => 'Can I keep my Squarespace site and use Event Schedule for events?', 'answer' => 'Yes. You can embed the Event Schedule calendar widget on your Squarespace site with a simple code block. Use Squarespace for your main website and Event Schedule for event pages, ticketing, and attendee management. They work together seamlessly.'],
                     ['question' => 'Can I embed Event Schedule on my Squarespace site?', 'answer' => 'Yes. The embeddable calendar widget works on any website including Squarespace. Add a code block to your Squarespace page and paste the embed snippet to show your event calendar.'],
@@ -4585,9 +4585,9 @@ class MarketingController extends Controller
                 'keywords' => 'Notion alternative for events, Notion replacement, Notion event planning, event management workspace',
                 'audience_hint' => 'For organizers planning events in workspace tools like Notion',
                 'about' => 'Notion is a workspace and productivity tool that some event organizers use to plan events with databases, calendars, and shared pages. While Notion is excellent for internal project management, it has no public-facing event pages, no ticketing or RSVP functionality, and a steep learning curve for setting up event workflows.',
-                'pricing_note' => 'Notion Plus costs $10/month per user. Event Schedule is free for unlimited events, public pages, and team features. Pro at $'.$this->planPrice().'/month adds ticketing with zero platform fees and no per-user charges.',
+                'pricing_note' => 'Notion Plus costs $10/month per user. Event Schedule is free for unlimited events, public pages, and team features. Pro at '.plan_price($this->planPrice()).'/month adds ticketing with zero platform fees and no per-user charges.',
                 'competitor_price' => 'From $10/mo per user',
-                'es_price' => 'From $0/mo (Pro $'.$this->planPrice().'/mo)',
+                'es_price' => 'From $0/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [
                     ['feature' => 'Public event pages', 'competitor' => false, 'es' => true],
                     ['feature' => 'Ticketing & payments', 'competitor' => false, 'es' => 'Zero platform fees'],
@@ -4633,7 +4633,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is Event Schedule a good Notion alternative for event planning?', 'answer' => 'Yes, for the event management side. Event Schedule handles everything Notion cannot: public event pages, ticket sales, attendee management, Google Calendar sync, and newsletters. You may still use Notion for internal project notes, but Event Schedule replaces it for audience-facing event work.'],
-                    ['question' => 'Is Event Schedule free like Notion?', 'answer' => 'Yes. The free plan includes unlimited events, public event pages, Google Calendar sync, newsletters, and team collaboration. The Pro plan at $'.$this->planPrice().'/month adds ticketing with zero platform fees, event graphics, and more.'],
+                    ['question' => 'Is Event Schedule free like Notion?', 'answer' => 'Yes. The free plan includes unlimited events, public event pages, Google Calendar sync, newsletters, and team collaboration. The Pro plan at '.plan_price($this->planPrice()).'/month adds ticketing with zero platform fees, event graphics, and more.'],
                     ['question' => 'Does Event Schedule support team collaboration like Notion?', 'answer' => 'Yes. You can invite team members to manage events together with role-based access on the Enterprise plan. Unlike Notion, collaboration is purpose-built for event management with tools like shared schedules, sub-schedules, and delegated event editing.'],
                     ['question' => 'Is Event Schedule easier to set up than a Notion event database?', 'answer' => 'Yes. Create a schedule in under a minute with no databases, templates, or formulas to configure. Add events with AI import or manual entry and you have a public event page with ticketing immediately. No workspace setup needed.'],
                     ['question' => 'Can I use Event Schedule alongside Notion?', 'answer' => 'Yes. Many organizers use Notion for internal project planning and Event Schedule for the audience-facing side: public event pages, ticket sales, newsletters, and attendee management. The REST API can also connect Event Schedule data with your Notion workflows.'],
@@ -4656,9 +4656,9 @@ class MarketingController extends Controller
                 'keywords' => 'Trello alternative for events, Trello replacement, Trello event planning, event management board',
                 'audience_hint' => 'For organizers managing events with task boards and project tools',
                 'about' => 'Trello is a kanban-style project management tool that some event organizers use to track event planning tasks. While Trello is great for organizing workflows with boards and cards, it has no attendee-facing features, no registration or ticketing, and task boards do not map well to the event lifecycle of creating, promoting, and managing events.',
-                'pricing_note' => 'Trello Standard costs $6/month per user. Event Schedule is free for unlimited events and public pages with team collaboration, and $'.$this->planPrice().'/month for ticketing with no per-user fees.',
+                'pricing_note' => 'Trello Standard costs $6/month per user. Event Schedule is free for unlimited events and public pages with team collaboration, and '.plan_price($this->planPrice()).'/month for ticketing with no per-user fees.',
                 'competitor_price' => 'From $6/mo per user',
-                'es_price' => 'From $0/mo (Pro $'.$this->planPrice().'/mo)',
+                'es_price' => 'From $0/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [
                     ['feature' => 'Public event pages', 'competitor' => false, 'es' => true],
                     ['feature' => 'Ticketing & payments', 'competitor' => false, 'es' => 'Zero platform fees'],
@@ -4704,7 +4704,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is Event Schedule a good Trello alternative for event management?', 'answer' => 'Yes, for the event management side. Event Schedule handles what Trello cannot: public event pages, ticket sales, attendee management, and event promotion. You may still use Trello for internal task tracking, but Event Schedule replaces it for the full event lifecycle.'],
-                    ['question' => 'Is Event Schedule free like Trello?', 'answer' => 'Yes. The free plan includes unlimited events, public event pages, Google Calendar sync, newsletters, and fan engagement features. The Pro plan at $'.$this->planPrice().'/month adds ticketing with zero platform fees, event graphics, and more.'],
+                    ['question' => 'Is Event Schedule free like Trello?', 'answer' => 'Yes. The free plan includes unlimited events, public event pages, Google Calendar sync, newsletters, and fan engagement features. The Pro plan at '.plan_price($this->planPrice()).'/month adds ticketing with zero platform fees, event graphics, and more.'],
                     ['question' => 'Does Event Schedule have task management like Trello?', 'answer' => 'Event Schedule is not a task management tool. It replaces Trello specifically for event management workflows: creating events, publishing them, selling tickets, and managing attendees. For internal planning tasks, you can continue using any project management tool you prefer.'],
                     ['question' => 'Does Event Schedule have webhooks for automation?', 'answer' => 'Yes. The Pro plan includes webhooks and a REST API for connecting Event Schedule with your other tools. Automate workflows like syncing attendee data to your CRM or triggering notifications when tickets are sold.'],
                     ['question' => 'Can I use Event Schedule alongside Trello?', 'answer' => 'Yes. Use Trello for internal planning tasks and Event Schedule for the audience-facing event lifecycle: creating events, selling tickets, managing attendees, and sending newsletters. The two tools complement each other well.'],
@@ -5557,6 +5557,7 @@ class MarketingController extends Controller
             ['page' => 'Stripe Integration', 'section' => 'Choose Your Setup', 'description' => 'Select the right deployment option.', 'url' => $r['selfhost_stripe'].'#choose-setup', 'category' => 'Selfhost', 'keywords' => 'setup option deployment'],
             ['page' => 'Stripe Integration', 'section' => 'For Selfhosted Users', 'description' => 'Stripe configuration for selfhosted deployments.', 'url' => $r['selfhost_stripe'].'#selfhosted-users', 'category' => 'Selfhost', 'keywords' => 'selfhosted stripe configuration'],
             ['page' => 'Stripe Integration', 'section' => 'For SaaS Operators', 'description' => 'Stripe Connect setup for SaaS platforms.', 'url' => $r['selfhost_stripe'].'#saas-operators', 'category' => 'Selfhost', 'keywords' => 'saas stripe connect'],
+            ['page' => 'Stripe Integration', 'section' => 'Plan currency', 'description' => 'PLATFORM_CURRENCY decides the symbol shown beside your plan prices; the Stripe price decides what is charged.', 'url' => $r['selfhost_stripe'].'#saas-operators', 'category' => 'Selfhost', 'keywords' => 'PLATFORM_CURRENCY plan price currency symbol dollar euro pound rand display only'],
             ['page' => 'Stripe Integration', 'section' => 'Invoice Ninja Integration', 'description' => 'Configure Invoice Ninja as a payment gateway.', 'url' => $r['selfhost_stripe'].'#invoice-ninja', 'category' => 'Selfhost', 'keywords' => 'invoice ninja payment gateway'],
             ['page' => 'Stripe Integration', 'section' => 'Testing', 'description' => 'Test your payment setup.', 'url' => $r['selfhost_stripe'].'#testing', 'category' => 'Selfhost', 'keywords' => 'test payment debug'],
             ['page' => 'Stripe Integration', 'section' => 'Troubleshooting', 'description' => 'Fix common payment issues.', 'url' => $r['selfhost_stripe'].'#troubleshooting', 'category' => 'Selfhost', 'keywords' => 'troubleshoot fix problem'],
@@ -5627,6 +5628,7 @@ class MarketingController extends Controller
             ['page' => 'Admin Panel', 'section' => 'Queue', 'description' => 'Monitor background job queue.', 'url' => $r['selfhost_admin'].'#system-queue', 'category' => 'Selfhost', 'keywords' => 'queue jobs background worker'],
             ['page' => 'Admin Panel', 'section' => 'Logs', 'description' => 'View application error logs.', 'url' => $r['selfhost_admin'].'#system-logs', 'category' => 'Selfhost', 'keywords' => 'logs errors debug'],
             ['page' => 'Admin Panel', 'section' => 'Settings', 'description' => 'Add custom header and footer code (Google Tag Manager, analytics) injected into all public guest pages.', 'url' => $r['selfhost_admin'].'#system-settings', 'category' => 'Selfhost', 'keywords' => 'settings header footer code google tag manager gtm analytics tracking script head body'],
+            ['page' => 'Admin Panel', 'section' => 'Platform Currency', 'description' => 'Set the currency your platform shows its own prices in, and the fallback currency for a new event.', 'url' => $r['selfhost_admin'].'#system-settings', 'category' => 'Selfhost', 'keywords' => 'platform currency symbol dollar euro pound rand yen PLATFORM_CURRENCY plan price marketing prices default currency white label'],
             ['page' => 'Admin Panel', 'section' => 'Cookie consent banner', 'description' => 'When the cookie banner appears, what the UTM attribution cookies do, and why the built-in analytics need no consent.', 'url' => $r['selfhost_admin'].'#system-settings', 'category' => 'Selfhost', 'keywords' => 'cookie consent banner gdpr privacy COOKIE_CONSENT_BANNER utm_params utm_referrer_url utm_landing_page attribution tracking analytics anonymous aggregate hashed ip'],
             ['page' => 'Admin Panel', 'section' => 'Translations', 'description' => 'Review and customize the app\'s text in any language, and share improvements with the community.', 'url' => $r['selfhost_admin'].'#system-translations', 'category' => 'Selfhost', 'keywords' => 'translations translate language customize text terminology rename wording localization locale strings'],
             ['page' => 'Admin Panel', 'section' => 'Sharing translations', 'description' => 'Share your translation improvements with the EventSchedule community for review.', 'url' => $r['selfhost_admin'].'#system-translations', 'category' => 'Selfhost', 'keywords' => 'share translations community contribute suggestions auto-share'],
@@ -5654,6 +5656,7 @@ class MarketingController extends Controller
             ['page' => 'SaaS Setup', 'section' => 'DNS Setup', 'description' => 'Configure subdomain DNS for SaaS.', 'url' => $r['saas_setup'].'#dns', 'category' => 'SaaS', 'keywords' => 'dns subdomain wildcard'],
             ['page' => 'SaaS Setup', 'section' => 'Web Server', 'description' => 'Web server configuration for SaaS mode.', 'url' => $r['saas_setup'].'#webserver', 'category' => 'SaaS', 'keywords' => 'webserver nginx apache'],
             ['page' => 'SaaS Setup', 'section' => 'Stripe Integration', 'description' => 'Configure Stripe for SaaS subscriptions.', 'url' => $r['saas_setup'].'#stripe', 'category' => 'SaaS', 'keywords' => 'stripe payment subscription'],
+            ['page' => 'SaaS Setup', 'section' => 'Plan currency', 'description' => 'Set PLATFORM_CURRENCY so your plan prices show in your own currency rather than dollars.', 'url' => $r['saas_setup'].'#stripe', 'category' => 'SaaS', 'keywords' => 'PLATFORM_CURRENCY plan price currency symbol dollar euro pound rand white label branding'],
             ['page' => 'SaaS Setup', 'section' => 'Example', 'description' => 'Complete SaaS setup example.', 'url' => $r['saas_setup'].'#example', 'category' => 'SaaS', 'keywords' => 'example tutorial walkthrough'],
             ['page' => 'SaaS Setup', 'section' => 'Verification', 'description' => 'Verify your SaaS setup is working.', 'url' => $r['saas_setup'].'#verification', 'category' => 'SaaS', 'keywords' => 'verify test check'],
             ['page' => 'SaaS Setup', 'section' => 'Demo Account', 'description' => 'Create a demo account for testing.', 'url' => $r['saas_setup'].'#demo', 'category' => 'SaaS', 'keywords' => 'demo test account sample'],
@@ -5746,7 +5749,7 @@ class MarketingController extends Controller
             ['page' => 'Referral Program', 'section' => 'Overview', 'description' => 'Earn free months by referring other event organizers.', 'url' => $r['referral_program'].'#overview', 'category' => 'User Guide', 'keywords' => 'referral refer earn free credit discount'],
             ['page' => 'Referral Program', 'section' => 'How It Works', 'description' => 'Share your link, they subscribe, earn your credit.', 'url' => $r['referral_program'].'#how-it-works', 'category' => 'User Guide', 'keywords' => 'referral steps share link subscribe'],
             ['page' => 'Referral Program', 'section' => 'Your Referral Link', 'description' => 'Find and share your unique referral link.', 'url' => $r['referral_program'].'#referral-link', 'category' => 'User Guide', 'keywords' => 'referral link copy share'],
-            ['page' => 'Referral Program', 'section' => 'Rewards', 'description' => 'Pro ($'.$this->planPrice().') and Enterprise ($'.$this->planPrice(true).') referral credits.', 'url' => $r['referral_program'].'#rewards', 'category' => 'User Guide', 'keywords' => 'referral reward credit pro enterprise free month'],
+            ['page' => 'Referral Program', 'section' => 'Rewards', 'description' => 'Pro ('.plan_price($this->planPrice()).') and Enterprise ('.plan_price($this->planPrice(true)).') referral credits.', 'url' => $r['referral_program'].'#rewards', 'category' => 'User Guide', 'keywords' => 'referral reward credit pro enterprise free month'],
             ['page' => 'Referral Program', 'section' => 'Applying Credits', 'description' => 'Apply qualified referral credits to your schedules.', 'url' => $r['referral_program'].'#applying-credits', 'category' => 'User Guide', 'keywords' => 'apply credit schedule referral'],
             ['page' => 'Referral Program', 'section' => 'Referral Statuses', 'description' => 'Pending, Subscribed, Qualified, Credited, and Expired statuses.', 'url' => $r['referral_program'].'#statuses', 'category' => 'User Guide', 'keywords' => 'referral status pending subscribed qualified credited expired'],
             ['page' => 'Referral Program', 'section' => 'Referral History', 'description' => 'View all your referrals and their current status.', 'url' => $r['referral_program'].'#history', 'category' => 'User Guide', 'keywords' => 'referral history table list'],

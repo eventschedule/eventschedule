@@ -28,7 +28,7 @@
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "Free forever"
         },
         "url": "{{ url()->current() }}",
@@ -603,7 +603,7 @@
             ],
             [
                 'q' => 'Are sub-schedules free?',
-                'a' => 'Yes, on every plan, and there is no cap on how many you create. Two things that touch sub-schedules are on the Pro plan at $'.$proMonthly.' a month: a pass scoped to a single sub-schedule, and the REST API that creates, lists, updates and deletes them.',
+                'a' => 'Yes, on every plan, and there is no cap on how many you create. Two things that touch sub-schedules are on the Pro plan at '.plan_price($proMonthly).' a month: a pass scoped to a single sub-schedule, and the REST API that creates, lists, updates and deletes them.',
             ],
         ];
 
@@ -1023,7 +1023,7 @@
                         Sell one section. <span class="es-sort-lit">Or script it.</span>
                     </h2>
                     <p class="es-sort-band-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                        Sub-schedules themselves are free. Two things that build on them sit on the Pro plan at ${{ $proMonthly }} a month.
+                        Sub-schedules themselves are free. Two things that build on them sit on the Pro plan at {{ plan_price($proMonthly) }} a month.
                     </p>
                 </div>
 

@@ -34,7 +34,7 @@
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "Free forever"
         },
         "featureList": [
@@ -353,7 +353,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for food trucks?',
-                'a' => 'The parts you use every week are free forever: your public schedule and its list layout, the regular pitches as recurring events, date exceptions for the weeks you lose a spot, an address and map on every stop, a QR code for the serving window, booking requests for catering, sub-schedules, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling tickets to a ticketed event is on the Pro plan at $'.$proMonthly.' a month, with zero platform fees on sales.',
+                'a' => 'The parts you use every week are free forever: your public schedule and its list layout, the regular pitches as recurring events, date exceptions for the weeks you lose a spot, an address and map on every stop, a QR code for the serving window, booking requests for catering, sub-schedules, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling tickets to a ticketed event is on the Pro plan at '.plan_price($proMonthly).' a month, with zero platform fees on sales.',
             ],
             [
                 'q' => 'How do customers know where I am today?',

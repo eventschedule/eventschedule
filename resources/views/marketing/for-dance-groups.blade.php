@@ -34,7 +34,7 @@
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "Free forever"
         },
         "featureList": [
@@ -465,7 +465,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for dance groups?',
-                'a' => 'The parts you use every week are free forever: weekly classes as recurring events, date exceptions for the weeks you are closed, free registration with a capacity per class, sub-schedules, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling anything - class cards, memberships and show tickets - is on the Pro plan at $'.$proMonthly.' a month, and Event Schedule charges zero platform fees on sales.',
+                'a' => 'The parts you use every week are free forever: weekly classes as recurring events, date exceptions for the weeks you are closed, free registration with a capacity per class, sub-schedules, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling anything - class cards, memberships and show tickets - is on the Pro plan at '.plan_price($proMonthly).' a month, and Event Schedule charges zero platform fees on sales.',
             ],
             [
                 'q' => 'How do I set up a weekly class?',

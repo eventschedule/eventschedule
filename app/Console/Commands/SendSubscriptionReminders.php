@@ -6,6 +6,7 @@ use App\Mail\SubscriptionRenewal;
 use App\Mail\SubscriptionTrialEnding;
 use App\Models\Role;
 use App\Services\OneSignalService;
+use App\Utils\MoneyUtils;
 use App\Utils\PlanPriceUtils;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -86,7 +87,7 @@ class SendSubscriptionReminders extends Command
                         // Formatted, like getAmountForSubscription() does for every other caller.
                         // A bare int coerced to "9" and the copy renders it verbatim: "will be
                         // charged 9."
-                        '$'.$amount,
+                        plan_price($amount),
                         $isEnterprise ? 'Enterprise' : 'Pro',
                         $role->trial_ends_at->format('F j, Y'),
                         $role->hasDefaultPaymentMethod(),
@@ -312,13 +313,26 @@ class SendSubscriptionReminders extends Command
         $unitAmount = $stripeSubscription->items->data[0]->price->unit_amount ?? null;
 
         if ($unitAmount !== null) {
-            return '$'.rtrim(rtrim(number_format($unitAmount / 100, 2, '.', ''), '0'), '.');
+            // The currency comes off the same Stripe price as the amount, not from our own
+            // setting: this line states what the customer is actually charged, and a
+            // grandfathered subscriber may well be billed in a currency the platform has
+            // since stopped selling in.
+            //
+            // The divisor is looked up rather than a literal 100. JPY and KRW have no minor
+            // unit, so unit_amount is already whole yen - dividing by 100 there understated
+            // a renewal by a factor of a hundred.
+            $currency = strtoupper($stripeSubscription->items->data[0]->price->currency ?? platform_currency());
+
+            return MoneyUtils::format(
+                $unitAmount / MoneyUtils::getSmallestUnitMultiplier($currency),
+                $currency
+            );
         }
 
         $amount = PlanPriceUtils::amountFor($subscription->stripe_price);
 
         if ($amount) {
-            return '$'.rtrim(rtrim(number_format($amount, 2, '.', ''), '0'), '.');
+            return plan_price($amount);
         }
 
         return '';

@@ -308,7 +308,7 @@
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "url": "{{ config('app.url') }}/pricing",
             "availability": "https://schema.org/InStock"
         }
@@ -1464,7 +1464,7 @@
                     <p class="text-sm text-gray-500 dark:text-gray-400">We don't take a cut of your ticket sales</p>
                 </div>
                 <div class="rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-8 text-center dark:border-emerald-500/20 dark:from-emerald-900/25 dark:to-teal-900/25" data-reveal="panel">
-                    <div class="es-od text-gradient mb-4 justify-center text-6xl font-black lg:text-7xl" data-odometer="$0">$0</div>
+                    <div class="es-od text-gradient mb-4 justify-center text-6xl font-black lg:text-7xl" data-odometer="{{ plan_price(0) }}">{{ plan_price(0) }}</div>
                     <div class="mb-1 text-xl font-bold text-gray-900 dark:text-white">Free forever</div>
                     <p class="text-sm text-gray-500 dark:text-gray-400">Unlimited events and schedules on our free plan</p>
                 </div>

@@ -463,15 +463,21 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                         <td><code class="doc-inline-code">15</code> / <code class="doc-inline-code">150</code></td>
                         <td>Display-only Enterprise amounts</td>
                     </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">PLATFORM_CURRENCY</code></td>
+                        <td><code class="doc-inline-code">USD</code></td>
+                        <td>The currency those amounts are shown in, everywhere the platform quotes its own price. Also the fallback currency for a new event whose schedule has no country. A super-admin can change it at <code class="doc-inline-code">/admin/settings</code>, which overrides this value</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
 
         <div class="doc-callout doc-callout-warning">
             <div class="doc-callout-title">The amounts are labels, not prices</div>
-            <p>The <code class="doc-inline-code">*_AMOUNT</code> variables only decide what the interface prints. What a
-            customer is actually charged comes from the Stripe Price the matching Price ID points at. Set both, and keep
-            them in step, or your platform will advertise one figure and bill another.</p>
+            <p>The <code class="doc-inline-code">*_AMOUNT</code> and <code class="doc-inline-code">PLATFORM_CURRENCY</code>
+            variables only decide what the interface prints. What a customer is actually charged comes from the Stripe
+            Price the matching Price ID points at, including its currency. Set them all, and keep them in step, or your
+            platform will advertise one figure and bill another.</p>
         </div>
 
         <h3 class="doc-subheading">Webhook Endpoint</h3>

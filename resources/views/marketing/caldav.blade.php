@@ -25,7 +25,7 @@
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "Free on every plan"
         },
         "url": "{{ url()->current() }}",

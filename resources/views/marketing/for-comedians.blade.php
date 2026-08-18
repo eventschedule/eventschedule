@@ -91,7 +91,7 @@
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "Free forever"
         },
         "featureList": [
@@ -694,7 +694,7 @@
                                     <div class="flex items-center justify-between rounded-lg bg-gray-100 p-2 dark:bg-white/5"><span class="text-sm text-gray-900 dark:text-white">General Admission</span><span class="font-medium text-gray-900 dark:text-white">$20</span></div>
                                     <div class="flex items-center justify-between rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-2"><span class="text-sm text-gray-900 dark:text-white">Front Row + Meet & Greet</span><span class="font-medium text-gray-900 dark:text-white">$50</span></div>
                                 </div>
-                                <div class="mt-4 flex justify-between border-t border-gray-200 pt-3 dark:border-white/10"><span class="text-sm text-gray-500 dark:text-gray-400">Platform fee</span><span class="font-bold text-emerald-600 dark:text-emerald-400">$0</span></div>
+                                <div class="mt-4 flex justify-between border-t border-gray-200 pt-3 dark:border-white/10"><span class="text-sm text-gray-500 dark:text-gray-400">Platform fee</span><span class="font-bold text-emerald-600 dark:text-emerald-400">{{ plan_price(0) }}</span></div>
                             </div>
 
                             <div>

@@ -91,7 +91,7 @@
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "Free forever"
         },
         "featureList": [
@@ -851,7 +851,7 @@
                             <div class="es-dj-od mx-auto w-full max-w-[240px] rounded-xl border border-emerald-300/50 bg-emerald-50 p-4 dark:border-emerald-400/30 dark:bg-emerald-500/10" aria-hidden="true">
                                 <div class="mb-3 text-center">
                                     <div class="text-xs uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-300">Platform fee</div>
-                                    <div class="es-od justify-center text-3xl font-black text-gray-900 dark:text-white" data-odometer="$0">$0</div>
+                                    <div class="es-od justify-center text-3xl font-black text-gray-900 dark:text-white" data-odometer="{{ plan_price(0) }}">{{ plan_price(0) }}</div>
                                     <div class="text-xs text-gray-500 dark:text-gray-400">You keep 100%</div>
                                 </div>
                                 <div class="border-t border-emerald-300/40 pt-3 dark:border-emerald-400/20">

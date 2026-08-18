@@ -16,7 +16,7 @@
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "Availability management is an Enterprise plan feature on the hosted platform and is included on selfhosted deployments"
         },
         "featureList": [

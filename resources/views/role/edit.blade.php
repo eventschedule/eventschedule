@@ -4101,7 +4101,7 @@
                             @php
                                 $giftCardCurrencies = json_decode(file_get_contents(base_path('storage/currencies.json')));
                                 $giftCardCurrencyDefault = old('gift_card_currency_code', $role->gift_card_currency_code
-                                    ?: ($role->events()->whereNotNull('ticket_currency_code')->orderByDesc('events.id')->value('ticket_currency_code') ?: 'USD'));
+                                    ?: ($role->events()->whereNotNull('ticket_currency_code')->orderByDesc('events.id')->value('ticket_currency_code') ?: platform_currency()));
                             @endphp
                             <select id="gift_card_currency_code" name="gift_card_currency_code"
                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">

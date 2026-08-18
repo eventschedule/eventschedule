@@ -741,6 +741,10 @@ class HomeController extends Controller
                         'description' => $sale->event ? $sale->event->name : '',
                         'date' => $sale->created_at,
                         'amount' => $sale->payment_amount,
+                        // The sale's OWN currency, not the platform's. The panel used to print a
+                        // literal '$', so a seller in ZAR saw R120 on the Revenue panel and $120
+                        // on this one, for the same sale.
+                        'currency_code' => $sale->event?->ticket_currency_code,
                     ];
                 });
             $activities = $activities->merge($sales);

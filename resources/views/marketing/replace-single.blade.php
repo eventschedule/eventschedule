@@ -97,7 +97,7 @@
                 "@type": "Offer",
                 "name": "Free",
                 "price": "0",
-                "priceCurrency": "USD",
+                "priceCurrency": "{{ platform_currency() }}",
                 "description": "Unlimited events and schedules, public event pages, Google, Outlook and CalDAV calendar sync, free RSVP with capacity limits, embeddable calendar, built-in analytics, AI event parsing, and 10 newsletter emails a month. One team member.",
                 "availability": "https://schema.org/InStock"
             },
@@ -105,7 +105,7 @@
                 "@type": "Offer",
                 "name": "Pro",
                 "price": "{{ number_format($proMonthly, 2) }}",
-                "priceCurrency": "USD",
+                "priceCurrency": "{{ platform_currency() }}",
                 "description": "Everything in Free plus ticketing with QR check-in and a check-in dashboard, ticket waitlist, promo codes, custom fields, sale notifications, sales CSV export, Stripe payments, no Event Schedule branding, custom CSS, event graphics, the embeddable ticket widget, REST API and webhooks, and 100 newsletter emails a month.",
                 "availability": "https://schema.org/InStock"
             },
@@ -113,7 +113,7 @@
                 "@type": "Offer",
                 "name": "Enterprise",
                 "price": "{{ number_format($entMonthly, 2) }}",
-                "priceCurrency": "USD",
+                "priceCurrency": "{{ platform_currency() }}",
                 "description": "Everything in Pro plus your own custom domain, up to five team members, internal and unlisted events, AI flyer and style generation, AI agenda scanning, WhatsApp event creation, 1,000 newsletter emails a month, and priority support.",
                 "availability": "https://schema.org/InStock"
             }
@@ -888,7 +888,7 @@
                     <div class="es-swap-card p-6" data-reveal="panel">
                         <div class="mb-3 flex flex-wrap items-center gap-2">
                             <h3 class="es-swap-band-ink text-lg font-bold">Free</h3>
-                            <span class="es-swap-plan">$0</span>
+                            <span class="es-swap-plan">{{ plan_price(0) }}</span>
                         </div>
                         <p class="es-swap-band-muted text-sm leading-relaxed">
                             Unlimited events and schedules. Public event pages and a shareable calendar. Two-way Google, Outlook and CalDAV sync. Free RSVP with a capacity limit. Embeddable calendar, built-in analytics, AI event parsing, and 10 newsletter emails a month.
@@ -897,7 +897,7 @@
                     <div class="es-swap-card p-6" data-reveal="panel">
                         <div class="mb-3 flex flex-wrap items-center gap-2">
                             <h3 class="es-swap-band-ink text-lg font-bold">Pro</h3>
-                            <span class="es-swap-plan es-swap-plan-pro">${{ $proMonthly }} a month</span>
+                            <span class="es-swap-plan es-swap-plan-pro">{{ plan_price($proMonthly) }} a month</span>
                         </div>
                         <p class="es-swap-band-muted text-sm leading-relaxed">
                             Ticketing with QR check-in and the check-in dashboard. Custom fields on the form, waitlist, promo codes, sales export. Event graphics, the embeddable ticket widget, the REST API and webhooks. 100 newsletter emails a month.
@@ -906,7 +906,7 @@
                     <div class="es-swap-card p-6" data-reveal="panel">
                         <div class="mb-3 flex flex-wrap items-center gap-2">
                             <h3 class="es-swap-band-ink text-lg font-bold">Enterprise</h3>
-                            <span class="es-swap-plan es-swap-plan-pro">${{ $entMonthly }} a month</span>
+                            <span class="es-swap-plan es-swap-plan-pro">{{ plan_price($entMonthly) }} a month</span>
                         </div>
                         <p class="es-swap-band-muted text-sm leading-relaxed">
                             Your own domain. Up to five team members. Internal and unlisted events. AI flyer and style generation, AI agenda scanning, WhatsApp event creation, and 1,000 newsletter emails a month.

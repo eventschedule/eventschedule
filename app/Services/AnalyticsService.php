@@ -1003,16 +1003,26 @@ class AnalyticsService
 
         $costPerView = $boostViews > 0 ? round((float) $totalSpend / $boostViews, 2) : 0;
         $costPerSale = $boostSalesStats['sales'] > 0 ? round((float) $totalSpend / $boostSalesStats['sales'], 2) : 0;
-        // ROAS (revenue / spend) only makes sense when boost revenue is also in USD,
-        // since spend is always USD (Event Schedule's own billing). Hide otherwise.
+        // What the operator is billed in. Campaigns snapshot it at purchase, and the set can mix
+        // Meta boosts (META_DEFAULT_CURRENCY) with network promotions (PROMOTIONS_CURRENCY), so
+        // take the most COMMON code rather than whichever campaign happens to be newest - the
+        // list is ordered by created_at, so "first" made the label on a fixed historical total
+        // flip every time a campaign in the other currency was created.
+        $spendCurrency = $campaigns->pluck('currency_code')->filter()->countBy()->sortDesc()->keys()->first()
+            ?: config('services.meta.default_currency', 'USD');
+
+        // ROAS (revenue / spend) only makes sense when boost revenue is in the same currency as
+        // the spend. That used to be hardcoded to USD on both sides, which hid the ratio from
+        // every operator not billing in dollars even when the two agreed. Hide on mismatch.
         $roas = ((float) $totalSpend > 0
                 && $boostSalesStats['currency_count'] === 1
-                && $boostSalesStats['primary_currency'] === 'USD')
+                && $boostSalesStats['primary_currency'] === $spendCurrency)
             ? round($boostSalesStats['revenue'] / (float) $totalSpend, 2)
             : null;
 
         return [
             'has_data' => true,
+            'spend_currency' => $spendCurrency,
             'total_spend' => (float) $totalSpend,
             'total_budget' => (float) $totalBudget,
             'total_impressions' => (int) $totalImpressions,
@@ -1035,6 +1045,7 @@ class AnalyticsService
                 'event_name' => $c->event?->translatedName() ?? 'N/A',
                 'status' => $c->status,
                 'spend' => (float) ($c->actual_spend ?? 0),
+                'spend_currency' => $c->currency_code,
                 'impressions' => (int) ($c->impressions ?? 0),
                 'clicks' => (int) ($c->clicks ?? 0),
             ])->toArray(),

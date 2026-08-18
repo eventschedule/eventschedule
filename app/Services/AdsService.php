@@ -51,6 +51,18 @@ class AdsService
         return config('ads.'.$key, $default);
     }
 
+    /**
+     * The currency on-network promotions are priced and charged in.
+     *
+     * PROMOTIONS_CURRENCY only, never the platform currency: this denominates a real Stripe
+     * charge (PromotionController::intent), and the platform currency is an admin dropdown
+     * documented as display-only.
+     */
+    public static function nativeCurrency(): string
+    {
+        return config('ads.native_currency') ?: 'USD';
+    }
+
     public static function boolSetting(string $key): bool
     {
         $value = self::setting($key);

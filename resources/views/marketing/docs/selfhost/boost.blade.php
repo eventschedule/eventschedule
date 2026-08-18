@@ -146,7 +146,7 @@
 
         <div class="doc-callout doc-callout-info mt-6">
             <div class="doc-callout-title">Match the currency</div>
-            <p>Budgets are sent to Meta as minor units with no currency attached, so Meta always spends in the ad account's own currency. Set <code class="doc-inline-code">META_DEFAULT_CURRENCY</code> to the currency you picked here, or the amounts shown in the app will be labelled in a currency Meta is not billing in. The app renders a symbol for USD, EUR and GBP and falls back to <code class="doc-inline-code">$</code> for anything else.</p>
+            <p>Budgets are sent to Meta as minor units with no currency attached, so Meta always spends in the ad account's own currency. Set <code class="doc-inline-code">META_DEFAULT_CURRENCY</code> to the currency you picked here, or the amounts shown in the app will be labelled in a currency Meta is not billing in. The app renders a symbol for the major currencies and falls back to the three-letter code, so an amount is never labelled in the wrong money.</p>
         </div>
     </section>
 

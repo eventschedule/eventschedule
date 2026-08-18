@@ -32,7 +32,7 @@
         $performerTypes = ['Musicians', 'DJs', 'Comedians', 'Dancers', 'Magicians', 'Poets', 'Acrobats', 'Actors', 'Bands', 'Instructors', 'Artists', 'Vendors'];
 
         $faqs = [
-            ['q' => 'Is Event Schedule free for performers?', 'a' => 'Yes. Sharing your show schedule, syncing your calendar, taking booking requests from venues, letting fans follow you and selling up to 25 paid tickets a month are all free forever, and so is a newsletter allowance of 10 emails each month, counted per recipient rather than per send. Unlimited ticket sales, schedule graphics and a larger newsletter allowance are on the Pro plan at $' . $proMonthly . '/month, and there are still no platform fees on ticket sales.'],
+            ['q' => 'Is Event Schedule free for performers?', 'a' => 'Yes. Sharing your show schedule, syncing your calendar, taking booking requests from venues, letting fans follow you and selling up to 25 paid tickets a month are all free forever, and so is a newsletter allowance of 10 emails each month, counted per recipient rather than per send. Unlimited ticket sales, schedule graphics and a larger newsletter allowance are on the Pro plan at ' . plan_price($proMonthly) . '/month, and there are still no platform fees on ticket sales.'],
             ['q' => 'What happens when a venue books me for a show?', 'a' => 'The venue adds you to their event and you get a request. Accept it and the gig appears on your schedule automatically, with the venue listed on it. You never type the same date into two calendars, and both schedules stay in sync from then on.'],
             ['q' => 'I already have a Linktree. Why would I need this?', 'a' => 'A link page shows buttons. A schedule shows dates. Your Event Schedule page lists your actual upcoming shows with venues, times and ticket links, updates itself as you add dates, and lets fans follow you so you can email them when a new show lands. You can keep your link page and point it here, or replace it entirely.'],
             ['q' => 'Can I put my dates on my own website and social profiles?', 'a' => 'Yes. Embed your schedule on any website with a single iframe, or share your schedule URL on social profiles, EPKs and booking platforms. There are also iCal and RSS feeds, so your dates can flow into other calendars and sites automatically. Everything updates the moment you add a show.'],
@@ -71,7 +71,7 @@
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "Free forever"
         },
         "featureList": [
@@ -479,7 +479,7 @@
                     <div class="rounded-2xl border border-cyan-400/30 bg-cyan-500/10 p-6 text-center backdrop-blur-sm" data-reveal="panel">
                         <div class="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300">Event Schedule</div>
                         <div class="mb-2 text-4xl font-black text-white">${{ number_format($feeEs, 2) }}</div>
-                        <p class="text-sm text-gray-400">${{ $proMonthly }} for Pro plus Stripe's 2.9% + $0.30. Our platform fee is $0.</p>
+                        <p class="text-sm text-gray-400">{{ plan_price($proMonthly) }} for Pro plus Stripe's 2.9% + $0.30. Our platform fee is $0.</p>
                     </div>
 
                     <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-6 text-center backdrop-blur-sm" data-reveal="panel">
@@ -505,7 +505,7 @@
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-10 max-w-3xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                    What you get <span class="text-gradient-talent">free</span>, and what costs ${{ $proMonthly }}
+                    What you get <span class="text-gradient-talent">free</span>, and what costs {{ plan_price($proMonthly) }}
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.1s;">
                     Most performers never need to pay. The line is drawn at volume and promotion.
@@ -515,7 +515,7 @@
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2" data-reveal-group="90">
                 <div class="flex flex-col rounded-3xl border border-gray-200 bg-gray-50 p-7 dark:border-white/10 dark:bg-white/[0.04]" data-reveal="panel">
                     <div class="mb-1 text-sm font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Free forever</div>
-                    <div class="mb-5 text-4xl font-black text-gray-900 dark:text-white">$0</div>
+                    <div class="mb-5 text-4xl font-black text-gray-900 dark:text-white">{{ plan_price(0) }}</div>
                     {{-- Hardcoded markup, no user data, so the inline links are safe to unescape. --}}
                     <ul class="mb-6 space-y-2.5 text-sm text-gray-600 dark:text-gray-400">
                         @foreach ([
@@ -543,7 +543,7 @@
                 <div class="flex flex-col rounded-3xl border border-blue-200 bg-blue-50/50 p-7 dark:border-blue-400/25 dark:bg-blue-500/[0.07]" data-reveal="panel">
                     <div class="mb-1 text-sm font-semibold uppercase tracking-[0.18em] text-blue-700 dark:text-blue-300">Pro</div>
                     <div class="mb-5 flex items-baseline gap-1.5">
-                        <span class="text-4xl font-black text-gray-900 dark:text-white">${{ $proMonthly }}</span>
+                        <span class="text-4xl font-black text-gray-900 dark:text-white">{{ plan_price($proMonthly) }}</span>
                         <span class="text-sm text-gray-500 dark:text-gray-400">/month</span>
                     </div>
                     <ul class="mb-6 space-y-2.5 text-sm text-gray-600 dark:text-gray-400">

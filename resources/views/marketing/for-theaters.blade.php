@@ -34,7 +34,7 @@
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "Free forever"
         },
         "featureList": [
@@ -397,7 +397,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for theaters?',
-                'a' => 'Yes. Setting a production up as a run, marking dark days, splitting your spaces into sub-schedules, publishing your season and syncing two ways with Google, Outlook or CalDAV are all free forever, and so is selling: the free plan takes payment for up to 25 tickets a month per schedule, with free registration uncapped. The Pro plan at $'.$proMonthly.' a month lifts that ceiling and adds QR check-in, the check-in dashboard, season passes and custom checkout questions. Event Schedule charges zero platform fees on ticket sales on every plan, the free one included.',
+                'a' => 'Yes. Setting a production up as a run, marking dark days, splitting your spaces into sub-schedules, publishing your season and syncing two ways with Google, Outlook or CalDAV are all free forever, and so is selling: the free plan takes payment for up to 25 tickets a month per schedule, with free registration uncapped. The Pro plan at '.plan_price($proMonthly).' a month lifts that ceiling and adds QR check-in, the check-in dashboard, season passes and custom checkout questions. Event Schedule charges zero platform fees on ticket sales on every plan, the free one included.',
             ],
             [
                 'q' => 'How do I set up a multi-week run?',
@@ -1189,7 +1189,7 @@
                         Set the run once. <span class="es-bill-lit">Sell all fourteen.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-400">
-                        Publishing your season and its dates is free forever, and so is selling your first twenty-five tickets a month. ${{ $proMonthly }} a month lifts the ceiling and adds season passes and check-in, and nothing is taken from the door.
+                        Publishing your season and its dates is free forever, and so is selling your first twenty-five tickets a month. {{ plan_price($proMonthly) }} a month lifts the ceiling and adds season passes and check-in, and nothing is taken from the door.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

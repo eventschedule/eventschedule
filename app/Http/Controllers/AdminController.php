@@ -30,7 +30,9 @@ use App\Services\GrowthExportService;
 use App\Services\OneSignalService;
 use App\Services\TranslationQueue;
 use App\Services\WebhookService;
+use App\Utils\MoneyUtils;
 use App\Utils\PlanPriceUtils;
+use App\Utils\PlatformCurrency;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Auth\Events\Verified;
@@ -43,6 +45,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Laravel\Cashier\Subscription;
@@ -2724,6 +2727,10 @@ class AdminController extends Controller
         return view('admin.settings', [
             'custom_header_code' => Setting::get('custom_header_code'),
             'custom_footer_code' => Setting::get('custom_footer_code'),
+            // Always rendered: even a single-tenant selfhost, which has no plans to price,
+            // uses this as the default currency for a new event.
+            'platformCurrency' => PlatformCurrency::code(),
+            'currencies' => MoneyUtils::currencies(),
             // Federation is an instance-side feature; the nexus has the moderation
             // queue instead.
             'federationAvailable' => $federationAvailable,
@@ -2833,6 +2840,55 @@ class AdminController extends Controller
             $old,
             $new,
             'Updated monetization settings',
+        );
+
+        return redirect()->route('admin.settings')->with('success', __('messages.settings_saved'));
+    }
+
+    /**
+     * Persist the installation's own currency.
+     *
+     * Display only: what a customer is actually charged comes from the Stripe Price the
+     * matching Price ID points at, exactly as with STRIPE_PRICE_*_AMOUNT. This decides
+     * the symbol the app prints beside those amounts, and the fallback currency for a new
+     * event whose schedule has no country set.
+     */
+    public function updateCurrencySettings(Request $request): RedirectResponse
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $request->validate([
+            // Against the list the pickers actually offer, not just size:3. Nothing else in
+            // the app validates a currency code, so a typo here would otherwise render as a
+            // bare three-letter suffix on every price the platform quotes.
+            'platform_currency' => ['required', 'string', Rule::in(MoneyUtils::currencyCodes())],
+        ]);
+
+        if (is_demo_mode()) {
+            return redirect()->route('admin.settings')->with('error', __('messages.demo_mode_settings_disabled'));
+        }
+
+        $code = strtoupper((string) $request->input('platform_currency'));
+
+        $old = ['platform_currency' => Setting::get('platform_currency')];
+        $new = ['platform_currency' => $code];
+
+        Setting::set('platform_currency', $code);
+
+        // The redirect below re-renders the settings page in the same process, and
+        // PlatformCurrency memoizes for the request.
+        PlatformCurrency::flush();
+
+        AuditService::log(
+            AuditService::ADMIN_SETTINGS_UPDATE,
+            auth()->id(),
+            null,
+            null,
+            $old,
+            $new,
+            'Updated platform currency',
         );
 
         return redirect()->route('admin.settings')->with('success', __('messages.settings_saved'));

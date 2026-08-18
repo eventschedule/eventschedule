@@ -34,7 +34,7 @@
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "Free forever"
         },
         "featureList": [
@@ -512,7 +512,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for nightclubs?',
-                'a' => 'Yes. Sharing your nights, running recurring residencies, splitting them into sub-schedules, taking free registrations with a capacity limit, and two-way sync with Google, Outlook or CalDAV are all free forever. Ticketing with QR check-in, the check-in dashboard, event graphics and passes are on the Pro plan at $'.$proMonthly.' a month, and Event Schedule charges zero platform fees on tickets.',
+                'a' => 'Yes. Sharing your nights, running recurring residencies, splitting them into sub-schedules, taking free registrations with a capacity limit, and two-way sync with Google, Outlook or CalDAV are all free forever. Ticketing with QR check-in, the check-in dashboard, event graphics and passes are on the Pro plan at '.plan_price($proMonthly).' a month, and Event Schedule charges zero platform fees on tickets.',
             ],
             [
                 'q' => 'Can people sign up for a free night without paying?',

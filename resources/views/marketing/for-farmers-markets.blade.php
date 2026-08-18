@@ -35,7 +35,7 @@
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "Free forever"
         },
         "featureList": [
@@ -525,7 +525,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for farmers markets?',
-                'a' => 'Yes. The whole season is free forever: a recurring market day with a closing date, date exceptions for the Saturdays you lose to weather, sub-schedules for produce, bakery, flowers and the winter market, an agenda on each market day, free RSVP with a places limit, a downloadable QR code that puts your market page in a shopper\'s hand, built-in analytics, two-way Google, Outlook and CalDAV sync, and an embeddable calendar. Newsletters are free too, at ten emails a month counted one per recipient, and go up to a hundred on Pro and a thousand on Enterprise. Selling is free as well, for the first '.$freeTicketCap.' paid tickets a month, with zero platform fees on what you sell; Pro at $'.$proMonthly.' a month takes that ceiling off.',
+                'a' => 'Yes. The whole season is free forever: a recurring market day with a closing date, date exceptions for the Saturdays you lose to weather, sub-schedules for produce, bakery, flowers and the winter market, an agenda on each market day, free RSVP with a places limit, a downloadable QR code that puts your market page in a shopper\'s hand, built-in analytics, two-way Google, Outlook and CalDAV sync, and an embeddable calendar. Newsletters are free too, at ten emails a month counted one per recipient, and go up to a hundred on Pro and a thousand on Enterprise. Selling is free as well, for the first '.$freeTicketCap.' paid tickets a month, with zero platform fees on what you sell; Pro at '.plan_price($proMonthly).' a month takes that ceiling off.',
             ],
             [
                 'q' => 'How do I set up a whole market season at once?',
@@ -541,7 +541,7 @@
             ],
             [
                 'q' => 'Can I charge for pitches and take the money online?',
-                'a' => 'Yes, and the first '.$freeTicketCap.' paid tickets a month are on the free plan. A pitch fee is a named ticket type with its own price and stock, and the stock is counted per market date, so a full Saturday does not stop the following Saturday selling. Scanning the QR code at the gate on market morning is free too. Pro at $'.$proMonthly.' a month lifts the monthly ceiling and adds the live check-in dashboard and your own questions at checkout, such as whether they need power or how long the van is. Sales go through your own Stripe account and Event Schedule charges no platform fee on top.',
+                'a' => 'Yes, and the first '.$freeTicketCap.' paid tickets a month are on the free plan. A pitch fee is a named ticket type with its own price and stock, and the stock is counted per market date, so a full Saturday does not stop the following Saturday selling. Scanning the QR code at the gate on market morning is free too. Pro at '.plan_price($proMonthly).' a month lifts the monthly ceiling and adds the live check-in dashboard and your own questions at checkout, such as whether they need power or how long the van is. Sales go through your own Stripe account and Event Schedule charges no platform fee on top.',
             ],
             [
                 'q' => 'How do shoppers hear about the market?',
@@ -1007,7 +1007,7 @@
 
                     <p class="es-mkt-muted mt-7 text-sm" data-reveal>
                         Selling is free for your first {{ $freeTicketCap }} paid tickets a month, and Pro
-                        at ${{ $proMonthly }} a month has no ceiling at all. Publishing the season, taking
+                        at {{ plan_price($proMonthly) }} a month has no ceiling at all. Publishing the season, taking
                         submissions and free RSVP places never count against it.
                     </p>
                 </div>
@@ -1363,7 +1363,7 @@
                     </h2>
                     <p class="es-mkt-muted mx-auto mb-10 max-w-xl text-lg sm:text-xl">
                         The season, the pitch list and the email list cost nothing, and so do your first
-                        {{ $freeTicketCap }} paid tickets a month. Unlimited selling is ${{ $proMonthly }}
+                        {{ $freeTicketCap }} paid tickets a month. Unlimited selling is {{ plan_price($proMonthly) }}
                         a month, and none of what you take at the gate comes to us.
                     </p>
 

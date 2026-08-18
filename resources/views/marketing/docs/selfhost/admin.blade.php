@@ -631,7 +631,7 @@
             </svg>
             Settings (System)
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The Settings page holds the handful of settings that apply to the whole installation. It is built from separate cards, each with its own Save button, and a card is only rendered when it can do something on this install. Two of the four are gated on an <code class="doc-inline-code">.env</code> switch, so a plain selfhost usually sees the first two. None of these settings can be changed while the install is in demo mode.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The Settings page holds the handful of settings that apply to the whole installation. It is built from separate cards, each with its own Save button, and a card is only rendered when it can do something on this install. Two of the five are gated on an <code class="doc-inline-code">.env</code> switch, so a plain selfhost usually sees the first three. None of these settings can be changed while the install is in demo mode.</p>
 
         <div class="doc-table-wrap">
             <table class="doc-table">
@@ -657,6 +657,11 @@
                         <td>Monetization</td>
                         <td>Google AdSense and the on-network promotions marketplace</td>
                         <td><code class="doc-inline-code">ADS_ENABLED=true</code> on a multi-tenant hosted install</td>
+                    </tr>
+                    <tr>
+                        <td>Platform currency</td>
+                        <td>The currency this installation shows its own prices in</td>
+                        <td>Always</td>
                     </tr>
                     <tr>
                         <td>Accommodation affiliate</td>
@@ -701,6 +706,14 @@
 
         <h3 class="doc-subheading">Monetization</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-6">This card configures advertising on free schedules: whether to show AdSense, the publisher and ad slot IDs, whether personalized ads are allowed, whether to run your own promotions marketplace, whether promotions take priority over AdSense, and the prices you charge per thousand impressions and per click. It stays hidden unless <code class="doc-inline-code">ADS_ENABLED=true</code> and the install is a multi-tenant hosted platform, because a selfhosted install resolves every schedule to Enterprise and so has no free tier for an ad to appear on.</p>
+
+        <h3 class="doc-subheading">Platform currency</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The currency this installation quotes <em>its own</em> prices in. It decides the symbol printed beside every plan price and upgrade prompt, and it is the currency a new event falls back to when its schedule has no country set. Pick from the same list the ticket and gift-card pickers offer. It defaults to <code class="doc-inline-code">PLATFORM_CURRENCY</code> from <code class="doc-inline-code">.env</code>, and to US dollars when that is unset.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">It does not touch money that already exists. A ticket is always shown in the currency it was priced in, a past sale in the currency it was taken in, and a schedule that has set a country keeps the currency that country implies. Changing this never rewrites a stored amount.</p>
+        <div class="doc-callout doc-callout-warning mb-6">
+            <div class="doc-callout-title">A label, not a price</div>
+            <p>On a platform that sells plans, this decides what the interface prints, not what a customer is charged. The charge comes from the Stripe price your <code class="doc-inline-code">STRIPE_PRICE_*</code> IDs point at, exactly as with the <code class="doc-inline-code">*_AMOUNT</code> variables. Set the currency here, the amounts in <code class="doc-inline-code">.env</code> and the prices in Stripe, and keep all three in step, or your site will advertise one figure and bill another.</p>
+        </div>
 
         <h3 class="doc-subheading">Accommodation affiliate</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Setting <code class="doc-inline-code">STAY22_ENABLED=true</code> lets schedules show a map of lodging near their venues and earn affiliate commission. The card holds a single field, the <strong class="text-gray-900 dark:text-white">Fallback Stay22 affiliate ID</strong>, used only for schedules that enabled the map without supplying an ID of their own, and never on a schedule's own custom domain. See <a href="{{ route('marketing.docs.saas.monetization') }}#accommodation" class="doc-link">Accommodation affiliate</a> for the disclosure obligations it places on you.</p>

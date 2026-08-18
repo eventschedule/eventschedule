@@ -49,6 +49,14 @@ return [
     // Tests lower this to exercise pagination without seeding thousands of rows.
     'sitemap_urls_per_file' => (int) env('SITEMAP_URLS_PER_FILE', 10000),
 
+    // The currency this install quotes ITS OWN prices in - plan amounts on the marketing
+    // site and the upgrade prompts, and the fallback default for a new event. A super-admin
+    // can override it at /admin/settings; this only supplies the starting value.
+    //
+    // ?: not a second arg: .env.example ships keys present-but-empty and env() returns ''
+    // for that, so a default argument would never fire and the symbol would come out blank.
+    'platform_currency' => env('PLATFORM_CURRENCY') ?: 'USD',
+
     'is_nexus' => (bool) env('IS_NEXUS', false),
     // The upstream nexus app: receives shared translation suggestions AND federated
     // events. Separate from marketing_url, which operators may point at their own site -

@@ -34,7 +34,7 @@
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "Free forever"
         },
         "featureList": [
@@ -355,7 +355,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for restaurants?',
-                'a' => 'The schedule itself is free forever: your public page and its link, sub-schedules for private dining or a supper club, enquiries for private hire, Drafts that keep an event off the public page until you announce it, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling covers is on the Pro plan at $'.$proMonthly.' a month, and Event Schedule charges zero platform fees on sales.',
+                'a' => 'The schedule itself is free forever: your public page and its link, sub-schedules for private dining or a supper club, enquiries for private hire, Drafts that keep an event off the public page until you announce it, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling covers is on the Pro plan at '.plan_price($proMonthly).' a month, and Event Schedule charges zero platform fees on sales.',
             ],
             [
                 'q' => 'How do I stop selling more covers than the kitchen can cook?',
@@ -506,7 +506,7 @@
             <div class="mt-8 text-center" data-reveal>
                 <span class="es-cover-plan es-cover-plan-pro">Pro</span>
                 <span class="es-cover-muted ml-2 text-sm">
-                    Selling covers is on the Pro plan at ${{ $proMonthly }} a month, with no platform fee on top of what Stripe charges.
+                    Selling covers is on the Pro plan at {{ plan_price($proMonthly) }} a month, with no platform fee on top of what Stripe charges.
                 </span>
             </div>
         </div>
@@ -948,7 +948,7 @@
                         Cook for the number <span class="es-cover-grad">that actually sold</span>.
                     </h2>
                     <p class="mx-auto mb-10 max-w-xl text-lg text-gray-300 sm:text-xl">
-                        The schedule is free. Selling the covers is ${{ $proMonthly }} a month, and none of
+                        The schedule is free. Selling the covers is {{ plan_price($proMonthly) }} a month, and none of
                         the ticket price comes to us.
                     </p>
 

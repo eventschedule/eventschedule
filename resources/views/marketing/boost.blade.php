@@ -30,7 +30,7 @@
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "Ad budget starts at $10, plus a 20% service fee. Boost requires a Pro schedule."
         },
         "featureList": [

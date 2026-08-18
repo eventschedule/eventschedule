@@ -11,8 +11,10 @@
         $proYearly = (int) config('services.stripe_platform.price_yearly_amount', 90);
         $entMonthly = (int) config('services.stripe_platform.enterprise_price_monthly_amount', 29);
         $entYearly = (int) config('services.stripe_platform.enterprise_price_yearly_amount', 290);
-        $proPerMonth = number_format($proYearly / 12, 2);
-        $entPerMonth = number_format($entYearly / 12, 2);
+        // Raw, not number_format'd: plan_price() formats to the platform currency's own
+        // precision, which is zero decimals for JPY and friends.
+        $proPerMonth = $proYearly / 12;
+        $entPerMonth = $entYearly / 12;
         $saveMax = max(($proMonthly * 12) - $proYearly, ($entMonthly * 12) - $entYearly);
 
         // Curated feature lists (CLAUDE.md:43). Wording and order are fixed - style
@@ -78,7 +80,7 @@
 
         $faqs = [
             ['q' => 'Is there really a free plan?', 'a' => 'Yes! The free plan includes unlimited events, all core features, appointment booking with one appointment type, and selling up to 25 paid tickets a month with no platform fee. You only need to upgrade if you want to remove branding, sell more than 25 tickets a month, or access advanced features.'],
-            ['q' => 'How does the free trial work?', 'a' => 'When you sign up for Pro or Enterprise, you get a 7-day free trial. Enter your card to start, and you won\'t be charged until the trial ends. After that, Pro is $' . $proMonthly . '/month or $' . $proYearly . '/year, and Enterprise is $' . $entMonthly . '/month or $' . $entYearly . '/year. You can cancel anytime.'],
+            ['q' => 'How does the free trial work?', 'a' => 'When you sign up for Pro or Enterprise, you get a 7-day free trial. Enter your card to start, and you won\'t be charged until the trial ends. After that, Pro is ' . plan_price($proMonthly) . '/month or ' . plan_price($proYearly) . '/year, and Enterprise is ' . plan_price($entMonthly) . '/month or ' . plan_price($entYearly) . '/year. You can cancel anytime.'],
             ['q' => 'What is the difference between Pro and Enterprise?', 'a' => 'The free plan already sells up to 25 paid tickets a month, scans tickets at the door and carries one appointment type. Pro removes both limits and adds the rest of the ticketing suite: the live check-in dashboard, passes and subscriptions, individual tickets, promo/discount codes, add-ons, waitlists and sales CSV export. It also adds white-label branding, event graphics, event boosting with ads, custom fields, custom CSS styling, REST API & webhooks, and 100 newsletter emails per month. Enterprise adds custom domains, private and password-protected events, up to five team members, WhatsApp event creation, email scheduling, agenda scanning, availability management, 1,000 newsletter emails per month, and priority support.'],
             ['q' => 'Can I cancel anytime?', 'a' => 'Absolutely. You can cancel your subscription at any time and you\'ll keep access until the end of your billing period.'],
             ['q' => 'Do you take a cut of ticket sales?', 'a' => 'No! We don\'t charge any fees on ticket sales. You only pay the standard Stripe processing fees (typically 2.9% + $0.30 per transaction).'],
@@ -99,19 +101,19 @@
                 "@type": "Offer",
                 "name": "Free",
                 "price": "0",
-                "priceCurrency": "USD",
+                "priceCurrency": "{{ platform_currency() }}",
                 "description": "Unlimited events and schedules, calendar sync, analytics, free event registration, and up to 25 paid tickets a month."
             },
             {
                 "@type": "Offer",
                 "name": "Pro",
                 "price": "{{ number_format($proMonthly, 2, '.', '') }}",
-                "priceCurrency": "USD",
-                "description": "Unlimited ticket sales, live check-in dashboard, event graphics, API and webhooks. Also available at ${{ $proYearly }}/year.",
+                "priceCurrency": "{{ platform_currency() }}",
+                "description": "Unlimited ticket sales, live check-in dashboard, event graphics, API and webhooks. Also available at {{ plan_price($proYearly) }}/year.",
                 "priceSpecification": {
                     "@type": "UnitPriceSpecification",
                     "price": "{{ number_format($proMonthly, 2, '.', '') }}",
-                    "priceCurrency": "USD",
+                    "priceCurrency": "{{ platform_currency() }}",
                     "billingDuration": 1,
                     "billingIncrement": 1,
                     "unitCode": "MON"
@@ -121,12 +123,12 @@
                 "@type": "Offer",
                 "name": "Enterprise",
                 "price": "{{ number_format($entMonthly, 2, '.', '') }}",
-                "priceCurrency": "USD",
-                "description": "Custom domains, private events, multiple team members, and AI content generation. Also available at ${{ $entYearly }}/year.",
+                "priceCurrency": "{{ platform_currency() }}",
+                "description": "Custom domains, private events, multiple team members, and AI content generation. Also available at {{ plan_price($entYearly) }}/year.",
                 "priceSpecification": {
                     "@type": "UnitPriceSpecification",
                     "price": "{{ number_format($entMonthly, 2, '.', '') }}",
-                    "priceCurrency": "USD",
+                    "priceCurrency": "{{ platform_currency() }}",
                     "billingDuration": 1,
                     "billingIncrement": 1,
                     "unitCode": "MON"
@@ -246,7 +248,7 @@
                 </div>
                 <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">
                     <svg aria-hidden="true" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                    Save up to ${{ $saveMax }} a year
+                    Save up to {{ plan_price($saveMax) }} a year
                 </span>
             </div>
 
@@ -269,7 +271,7 @@
 
                         <div>
                             <div class="mb-2 flex items-baseline gap-2">
-                                <span class="text-6xl font-black tracking-tight text-gray-900 tabular-nums dark:text-white">$0</span>
+                                <span class="text-6xl font-black tracking-tight text-gray-900 tabular-nums dark:text-white">{{ plan_price(0) }}</span>
                                 <span class="text-gray-500 dark:text-gray-400"><span class="bt-period-month">/month</span><span class="bt-period-year">/year</span></span>
                             </div>
                             <p class="text-gray-500 dark:text-gray-400">Perfect for getting started</p>
@@ -307,16 +309,16 @@
                         <div>
                             <div class="relative mb-2 h-[68px]">
                                 <div class="bt-price-year absolute inset-0 items-baseline gap-2">
-                                    <span class="text-6xl font-black tracking-tight text-gray-900 tabular-nums dark:text-white">${{ $proYearly }}</span>
+                                    <span class="text-6xl font-black tracking-tight text-gray-900 tabular-nums dark:text-white">{{ plan_price($proYearly) }}</span>
                                     <span class="text-gray-500 dark:text-gray-400">/year</span>
                                 </div>
                                 <div class="bt-price-month absolute inset-0 flex items-baseline gap-2">
-                                    <span class="text-6xl font-black tracking-tight text-gray-900 tabular-nums dark:text-white">${{ $proMonthly }}</span>
+                                    <span class="text-6xl font-black tracking-tight text-gray-900 tabular-nums dark:text-white">{{ plan_price($proMonthly) }}</span>
                                     <span class="text-gray-500 dark:text-gray-400">/month</span>
                                 </div>
                             </div>
                             <div class="grid">
-                                <p class="bt-note-year text-gray-500 dark:text-gray-400">Just ${{ $proPerMonth }}/month, billed annually after your free trial</p>
+                                <p class="bt-note-year text-gray-500 dark:text-gray-400">Just {{ plan_price($proPerMonth) }}/month, billed annually after your free trial</p>
                                 <p class="bt-note-month text-gray-500 dark:text-gray-400">Billed monthly after your free trial</p>
                             </div>
                         </div>
@@ -346,16 +348,16 @@
                         <div>
                             <div class="relative mb-2 h-[68px]">
                                 <div class="bt-price-year absolute inset-0 items-baseline gap-2">
-                                    <span class="text-6xl font-black tracking-tight text-gray-900 tabular-nums dark:text-white">${{ $entYearly }}</span>
+                                    <span class="text-6xl font-black tracking-tight text-gray-900 tabular-nums dark:text-white">{{ plan_price($entYearly) }}</span>
                                     <span class="text-gray-500 dark:text-gray-400">/year</span>
                                 </div>
                                 <div class="bt-price-month absolute inset-0 flex items-baseline gap-2">
-                                    <span class="text-6xl font-black tracking-tight text-gray-900 tabular-nums dark:text-white">${{ $entMonthly }}</span>
+                                    <span class="text-6xl font-black tracking-tight text-gray-900 tabular-nums dark:text-white">{{ plan_price($entMonthly) }}</span>
                                     <span class="text-gray-500 dark:text-gray-400">/month</span>
                                 </div>
                             </div>
                             <div class="grid">
-                                <p class="bt-note-year text-gray-500 dark:text-gray-400">Just ${{ $entPerMonth }}/month, billed annually after your free trial</p>
+                                <p class="bt-note-year text-gray-500 dark:text-gray-400">Just {{ plan_price($entPerMonth) }}/month, billed annually after your free trial</p>
                                 <p class="bt-note-month text-gray-500 dark:text-gray-400">Billed monthly after your free trial</p>
                             </div>
                         </div>
@@ -426,6 +428,11 @@
 
                     <div class="rounded-2xl border-2 border-emerald-300 bg-emerald-50/60 p-6 dark:border-emerald-500/40 dark:bg-emerald-500/10">
                         <div class="mb-1 text-sm font-semibold text-emerald-800 dark:text-emerald-300">Event Schedule Pro</div>
+                        {{-- Deliberately still a dollar sign, and NOT plan_price(). This label sits
+                             inside the fee calculator, whose totals ($calcEs above literally adds
+                             $proMonthly to Stripe's USD per-ticket fee, and $calcEb is Eventbrite's
+                             published US pricing) are a USD unit. Converting just this line would put
+                             "R9/month" directly above "$247.50". Same call as compare.blade.php. --}}
                         <div class="mb-3 text-xs text-emerald-800 dark:text-emerald-400/80">${{ $proMonthly }}/month + Stripe, 0% platform fee</div>
                         <div id="pf-es" class="mb-3 text-4xl font-black tracking-tight text-emerald-700 tabular-nums dark:text-emerald-300">${{ number_format($calcEs, 2) }}</div>
                         <div class="h-2 overflow-hidden rounded-full bg-emerald-100 dark:bg-emerald-500/20">

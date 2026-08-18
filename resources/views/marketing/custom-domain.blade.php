@@ -24,7 +24,7 @@
         "offers": {
             "@type": "Offer",
             "price": "{{ $entMonthly }}",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "Available on Enterprise plan"
         }
     }
@@ -572,7 +572,7 @@
             ],
             [
                 'q' => 'Which plan includes custom domains?',
-                'a' => 'Custom domains are available on the Enterprise plan, which is $'.$entMonthly.' a month. Free and Pro plans use the default eventschedule.com subdomain. You can upgrade at any time from your account settings. Removing the Event Schedule badge is a separate thing and starts on Pro.',
+                'a' => 'Custom domains are available on the Enterprise plan, which is '.plan_price($entMonthly).' a month. Free and Pro plans use the default eventschedule.com subdomain. You can upgrade at any time from your account settings. Removing the Event Schedule badge is a separate thing and starts on Pro.',
             ],
             [
                 'q' => 'How long does setup take, and what if it fails?',
@@ -1087,7 +1087,7 @@
                             Part of <span class="es-plate-lit">Enterprise</span>
                         </h2>
                         <p class="mx-auto max-w-2xl text-lg text-gray-300" data-reveal style="--reveal-delay: 0.15s;">
-                            Custom domains sit on the Enterprise plan at ${{ $entMonthly }} a month, next to the AI features, internal and unlisted events, and a team of up to five people. Free and Pro schedules use their eventschedule.com subdomain, which is a perfectly good address to publish from while you decide.
+                            Custom domains sit on the Enterprise plan at {{ plan_price($entMonthly) }} a month, next to the AI features, internal and unlisted events, and a team of up to five people. Free and Pro schedules use their eventschedule.com subdomain, which is a perfectly good address to publish from while you decide.
                         </p>
                     </div>
 
@@ -1103,7 +1103,7 @@
                     </div>
 
                     <p class="mt-10 text-center text-sm text-gray-400" data-reveal>
-                        Removing the Powered by badge starts on Pro at ${{ $proMonthly }} a month.
+                        Removing the Powered by badge starts on Pro at {{ plan_price($proMonthly) }} a month.
                         <a href="{{ marketing_url('/pricing') }}" class="es-plate-lit font-medium hover:underline">Compare the plans</a>
                     </p>
                 </div>

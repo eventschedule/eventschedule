@@ -119,7 +119,7 @@
 
         @if ($showPrice && ! $isDemo)
             <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
-                {{ __('messages.plan_price_line', ['monthly' => $monthly, 'yearly' => $yearly]) }}
+                {{ __('messages.plan_price_line', ['monthly' => plan_price($monthly), 'yearly' => plan_price($yearly)]) }}
                 @if ($canTrial)
                     <span class="text-green-600 dark:text-green-400">{{ __('messages.plan_trial_note', ['days' => config('app.trial_days', 7)]) }}</span>
                 @endif

@@ -20,8 +20,11 @@
                 : 0;
 
             $planPrices[$tier] = [
-                'monthly' => (string) $monthly,
-                'yearly' => (string) $yearly,
+                // Pre-formatted, symbol included. The markup used to concatenate a literal
+                // '$' into four x-text bindings; savePercent above is still computed from the
+                // raw amounts, so the arithmetic is unaffected.
+                'monthly' => plan_price($monthly),
+                'yearly' => plan_price($yearly),
                 'savePercent' => $percent,
                 'saveLabel' => __('messages.save_percent', ['percent' => $percent]),
             ];
@@ -76,7 +79,7 @@
                     </div>
                 </div>
                 <div class="mb-4">
-                    <span class="text-3xl font-bold text-gray-900 dark:text-gray-100" x-text="'$' + prices.pro[selectedPlan]"></span>
+                    <span class="text-3xl font-bold text-gray-900 dark:text-gray-100" x-text="prices.pro[selectedPlan]"></span>
                     <span class="text-sm text-gray-500 dark:text-gray-400">
                         <span x-show="selectedPlan === 'yearly'" x-cloak>/{{ __('messages.year') }}</span>
                         <span x-show="selectedPlan !== 'yearly'">/{{ __('messages.month') }}</span>
@@ -126,7 +129,7 @@
                     </div>
                 </div>
                 <div class="mb-4">
-                    <span class="text-3xl font-bold text-gray-900 dark:text-gray-100" x-text="'$' + prices.enterprise[selectedPlan]"></span>
+                    <span class="text-3xl font-bold text-gray-900 dark:text-gray-100" x-text="prices.enterprise[selectedPlan]"></span>
                     <span class="text-sm text-gray-500 dark:text-gray-400">
                         <span x-show="selectedPlan === 'yearly'" x-cloak>/{{ __('messages.year') }}</span>
                         <span x-show="selectedPlan !== 'yearly'">/{{ __('messages.month') }}</span>
@@ -181,7 +184,7 @@
                             <span class="flex flex-col">
                                 <span class="block text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.monthly') }}</span>
                                 <span class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">{{ __('messages.billed_monthly') }}</span>
-                                <span class="mt-4 text-2xl font-semibold text-gray-900 dark:text-gray-100">$<span x-text="prices[selectedTier]['monthly']"></span><span class="text-sm font-normal text-gray-500 dark:text-gray-400">/{{ __('messages.month') }}</span></span>
+                                <span class="mt-4 text-2xl font-semibold text-gray-900 dark:text-gray-100"><span x-text="prices[selectedTier]['monthly']"></span><span class="text-sm font-normal text-gray-500 dark:text-gray-400">/{{ __('messages.month') }}</span></span>
                             </span>
                         </span>
                         <svg class="h-5 w-5 text-indigo-600 plan-check hidden" viewBox="0 0 20 20" fill="currentColor">
@@ -201,7 +204,7 @@
                                           class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"></span>
                                 </span>
                                 <span class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">{{ __('messages.billed_yearly') }}</span>
-                                <span class="mt-4 text-2xl font-semibold text-gray-900 dark:text-gray-100">$<span x-text="prices[selectedTier]['yearly']"></span><span class="text-sm font-normal text-gray-500 dark:text-gray-400">/{{ __('messages.year') }}</span></span>
+                                <span class="mt-4 text-2xl font-semibold text-gray-900 dark:text-gray-100"><span x-text="prices[selectedTier]['yearly']"></span><span class="text-sm font-normal text-gray-500 dark:text-gray-400">/{{ __('messages.year') }}</span></span>
                             </span>
                         </span>
                         <svg class="h-5 w-5 text-indigo-600 plan-check hidden" viewBox="0 0 20 20" fill="currentColor">

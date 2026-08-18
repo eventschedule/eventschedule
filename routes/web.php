@@ -751,6 +751,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
         // each other's values through as hidden inputs, and a miss silently wipes settings.
         Route::post('/admin/settings/monetization', [AdminController::class, 'updateAdsSettings'])->name('admin.settings.update_ads');
         Route::post('/admin/settings/accommodation', [AdminController::class, 'updateStay22Settings'])->name('admin.settings.update_stay22');
+        Route::post('/admin/settings/currency', [AdminController::class, 'updateCurrencySettings'])->name('admin.settings.update_currency');
 
         // Federation moderation. Registered everywhere but runtime-404s off the nexus,
         // because phpunit pins IS_NEXUS=true and a registration-time gate would be

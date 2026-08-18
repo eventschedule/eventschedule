@@ -268,14 +268,14 @@ class BoostCampaign extends Model
     /**
      * The symbol for a currency code, for screens that price something before a campaign
      * exists - the purchase form quotes rates, budgets and credit with no row to read from.
+     *
+     * Delegates to MoneyUtils, which is the one symbol table in the app. This used to be a
+     * private match on EUR/GBP that rendered every other currency - ZAR included - as a
+     * dollar sign, so PROMOTIONS_CURRENCY could only really be set to three values.
      */
     public static function currencySymbol(?string $code): string
     {
-        return match ($code) {
-            'EUR' => "\u{20AC}",
-            'GBP' => "\u{00A3}",
-            default => '$',
-        };
+        return \App\Utils\MoneyUtils::symbol($code);
     }
 
     public function getBudgetUtilization()

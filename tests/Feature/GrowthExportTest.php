@@ -334,7 +334,7 @@ class GrowthExportTest extends TestCase
         $monthly = (float) config('services.stripe_platform.price_monthly_amount', 5);
 
         $this->assertSame(2, $money['plan_counts']['pro']);
-        $this->assertSame(round($monthly, 2), $money['mrr_usd'], 'the admin grant pays nothing');
+        $this->assertSame(round($monthly, 2), $money['mrr'], 'the admin grant pays nothing');
         $this->assertSame(1, $money['by_plan_source']['admin']);
         $this->assertSame(1, $money['by_plan_source']['stripe']);
         $this->assertNotNull($paying->fresh());

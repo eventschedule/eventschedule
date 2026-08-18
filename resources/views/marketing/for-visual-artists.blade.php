@@ -35,7 +35,7 @@
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ platform_currency() }}",
             "description": "Free forever"
         },
         "featureList": [
@@ -614,7 +614,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for visual artists?',
-                'a' => 'Yes. The wall itself costs nothing: your public page and its permanent link, recurring open studio dates with individual dates taken out, sub-schedules with their own colour and their own link, Drafts that stay off the page until you announce, the header wall of the venues you have shown with, two-way Google, Outlook and CalDAV calendar sync, an embeddable calendar, built-in analytics, a downloadable QR code for your schedule, free RSVP with a capacity, one bookable appointment type, QR check-in at the door, and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling paid places is free too, up to 25 a month. The Pro plan at $'.$proMonthly.' a month lifts that cap and adds event graphics, your own questions at checkout and more appointment types. Event Schedule charges zero platform fees on ticket sales on every plan.',
+                'a' => 'Yes. The wall itself costs nothing: your public page and its permanent link, recurring open studio dates with individual dates taken out, sub-schedules with their own colour and their own link, Drafts that stay off the page until you announce, the header wall of the venues you have shown with, two-way Google, Outlook and CalDAV calendar sync, an embeddable calendar, built-in analytics, a downloadable QR code for your schedule, free RSVP with a capacity, one bookable appointment type, QR check-in at the door, and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling paid places is free too, up to 25 a month. The Pro plan at '.plan_price($proMonthly).' a month lifts that cap and adds event graphics, your own questions at checkout and more appointment types. Event Schedule charges zero platform fees on ticket sales on every plan.',
             ],
             [
                 'q' => 'Can I list exhibitions, open studios and art fairs together?',
@@ -630,7 +630,7 @@
             ],
             [
                 'q' => 'Can I sell places at a workshop or a ticketed opening?',
-                'a' => 'Yes, and the free plan sells the first 25 paid places each month. Create as many named ticket types as the event needs, each with its own price and quantity. The quantity is counted per occurrence date, so a full March does not stop April selling. Check people in with a QR code at the door on any plan, and take the money through your own Stripe account. Pro at $'.$proMonthly.' a month removes the 25-a-month cap and adds your own questions at checkout. Event Schedule charges zero platform fees either way, so what you keep is the price less what Stripe charges.',
+                'a' => 'Yes, and the free plan sells the first 25 paid places each month. Create as many named ticket types as the event needs, each with its own price and quantity. The quantity is counted per occurrence date, so a full March does not stop April selling. Check people in with a QR code at the door on any plan, and take the money through your own Stripe account. Pro at '.plan_price($proMonthly).' a month removes the 25-a-month cap and adds your own questions at checkout. Event Schedule charges zero platform fees either way, so what you keep is the price less what Stripe charges.',
             ],
             [
                 'q' => 'What happens to the photographs people take at the opening?',
@@ -1058,7 +1058,7 @@
                     </p>
                     <div class="es-brush-sub mt-auto p-4" aria-hidden="true">
                         <p class="es-brush-muted text-[0.6rem] font-extrabold uppercase tracking-[0.18em]">Platform fee</p>
-                        <p class="es-brush-ink mt-1 font-mono text-2xl font-black">$0 <span class="es-brush-muted text-sm font-bold">on every sale</span></p>
+                        <p class="es-brush-ink mt-1 font-mono text-2xl font-black">{{ plan_price(0) }} <span class="es-brush-muted text-sm font-bold">on every sale</span></p>
                     </div>
                 </div>
 
@@ -1363,7 +1363,7 @@
                     <p class="mx-auto mb-10 max-w-xl text-lg text-gray-300 sm:text-xl">
                         The page, the dates, the gallery logos and the calendar sync cost nothing, and
                         so do the first twenty-five paid places you sell each month. Lifting that cap
-                        is ${{ $proMonthly }} a month, and none of the ticket price comes to us.
+                        is {{ plan_price($proMonthly) }} a month, and none of the ticket price comes to us.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

@@ -458,7 +458,7 @@
 <span class="code-variable">NATIVE_PROMO_PRIORITY_OVER_PROGRAMMATIC</span>=<span class="code-value">true</span>
 <span class="code-variable">PROMOTIONS_NETWORK_CPM</span>=<span class="code-value">2.00</span>       <span class="code-comment"># price per 1,000 views</span>
 <span class="code-variable">PROMOTIONS_NETWORK_CPC</span>=<span class="code-value">0.25</span>       <span class="code-comment"># price per click</span>
-<span class="code-variable">PROMOTIONS_CURRENCY</span>=<span class="code-string">USD</span>
+<span class="code-variable">PROMOTIONS_CURRENCY</span>=<span class="code-string">USD</span>  <span class="code-comment"># what promotions are charged in; set here only</span>
 <span class="code-variable">PROMOTIONS_MIN_BUDGET</span>=<span class="code-value">5.00</span>
 <span class="code-variable">PROMOTIONS_MAX_BUDGET</span>=<span class="code-value">1000.00</span>
 <span class="code-variable">PROMOTIONS_MAX_CONCURRENT</span>=<span class="code-value">2</span>         <span class="code-comment"># live campaigns per schedule</span>
