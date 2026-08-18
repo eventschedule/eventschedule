@@ -22,6 +22,7 @@
         <x-doc-nav-link href="#system-audit-log">Audit Log</x-doc-nav-link>
         <x-doc-nav-link href="#system-queue">Queue</x-doc-nav-link>
         <x-doc-nav-link href="#system-logs">Logs</x-doc-nav-link>
+        <x-doc-nav-link href="#system-app-update">App Update</x-doc-nav-link>
         <x-doc-nav-link href="#system-settings">Settings</x-doc-nav-link>
         <x-doc-nav-link href="#system-translations">Translations</x-doc-nav-link>
     </x-slot:toc>
@@ -106,14 +107,24 @@
             </svg>
             Accessing /admin
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The admin panel lives at <code class="doc-inline-code">/admin</code>, which redirects to <code class="doc-inline-code">/admin/dashboard</code>. It is restricted to users whose <code class="doc-inline-code">is_admin</code> column is set to <code class="doc-inline-code">true</code>, and there is no screen for granting that: it is set in the database.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The admin panel lives at <code class="doc-inline-code">/admin</code>, which redirects to <code class="doc-inline-code">/admin/dashboard</code>. It is restricted to users whose <code class="doc-inline-code">is_admin</code> column is set to <code class="doc-inline-code">true</code>. There is no screen for granting that, on purpose, so it is done from the command line or in the database.</p>
 
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Grant the flag by updating the <code class="doc-inline-code">users</code> table directly (see the query below).</li>
+            <li>Grant the flag by running <code class="doc-inline-code">php artisan app:make-admin you@example.com</code> on the server, or by updating the <code class="doc-inline-code">users</code> table directly (see the query below). Run the command with no email to list who is an admin already.</li>
             <li>Make sure the account has a password. An account created through Google sign-in has none, and the panel will send you to your profile settings to set one first.</li>
             <li>Sign in and open <code class="doc-inline-code">/admin</code>, or use the <strong class="text-gray-900 dark:text-white">Admin</strong> item that now appears at the bottom of the main sidebar.</li>
             <li>Re-enter your password when prompted. This confirmation is required once per session, on top of being signed in.</li>
         </ol>
+
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>Terminal</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code>php artisan app:make-admin you@example.com</code></pre>
+        </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Or, if you would rather do it in the database:</p>
 
         <div class="doc-code-block">
             <div class="doc-code-header">
@@ -619,6 +630,33 @@
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Logs can contain personal data</div>
             <p>Stack traces and log messages may include email addresses and request details. Treat a downloaded log file as sensitive, and remember that clearing the file cannot be undone.</p>
+        </div>
+    </section>
+
+    <!-- System: App Update -->
+    <section id="system-app-update" class="doc-section">
+        <h2 class="doc-heading">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            App Update (System)
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The App Update page shows the version this installation is running next to the latest release published on GitHub, and applies an update in one click. It never appears on eventschedule.com, which deploys from git. The same panel is also on your own <a href="{{ route('marketing.docs.account_settings') }}#app-update" class="doc-link">Settings</a> page; the admin one is the operator's copy, and it is the one the System menu badges when a release is waiting.</p>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Installed Version</strong> - what <code class="doc-inline-code">config/self-update.php</code> reports, which the release you are running ships. If this stays on an old number after a successful update, you have a cached config: run <code class="doc-inline-code">php artisan config:clear</code>.</li>
+            <li><strong class="text-gray-900 dark:text-white">Latest Version</strong> - the newest tag on GitHub, refreshed once a day by a scheduled check so no page load has to wait on the network. It reads <strong class="text-gray-900 dark:text-white">Unknown</strong> if GitHub could not be reached, which is never treated as an update being available.</li>
+            <li><strong class="text-gray-900 dark:text-white">Check for Updates</strong> - ask GitHub now instead of waiting for the daily check. Limited to five requests a minute, because an unauthenticated install gets 60 GitHub calls an hour in total.</li>
+            <li><strong class="text-gray-900 dark:text-white">Update</strong> - download and install the new release, then run any new database migrations. Take a backup first.</li>
+        </ul>
+
+        <div class="doc-callout doc-callout-tip">
+            <div class="doc-callout-title">If the page is missing, or the update times out</div>
+            <p>Everything here is also available from the command line, which is the way out if the screen itself is unreachable: <code class="doc-inline-code">php artisan app:update</code> does the same download, install and migrate. A large update can outrun PHP's <code class="doc-inline-code">max_execution_time</code>, and the command has no such limit. Your uploads, custom translations and anything else under <code class="doc-inline-code">storage/app/</code> are excluded from the update by design.</p>
+        </div>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Cached config after an update</div>
+            <p>An update never replaces <code class="doc-inline-code">bootstrap/cache/</code>, so it now clears the cached config, routes, events, views and package manifest for you once the new release is in place. If you run <code class="doc-inline-code">php artisan optimize</code> as part of your deployment, re-run it afterwards.</p>
         </div>
     </section>
 

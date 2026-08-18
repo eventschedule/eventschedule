@@ -64,6 +64,13 @@ Schedule::call(function () {
     }
 })->everyFifteenMinutes()->name('app-translate')->withoutOverlapping(20)->appendOutputTo(storage_path('logs/scheduler.log'));
 
+// Keeps the cached "latest release" warm so the admin panel's App Update badge never has to
+// make an outbound call to GitHub during a page render. Keep in sync with
+// AppController::translateData(). No-ops on nexus.
+Schedule::call(function () {
+    Artisan::call('app:check-version');
+})->daily()->name('app-check-version')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+
 Schedule::call(function () {
     Artisan::call('google:refresh-webhooks');
 })->daily()->appendOutputTo(storage_path('logs/scheduler.log'));

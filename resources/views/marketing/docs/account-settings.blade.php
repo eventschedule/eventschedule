@@ -452,6 +452,7 @@
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Note</div>
             <p>This section never appears on eventschedule.com, where everyone is always on the latest version automatically. On a single-tenant selfhost any signed-in user sees it; on a selfhosted platform running in hosted mode it is limited to the instance administrator, so a customer cannot update the whole installation.</p>
+            <p class="mt-3">Instance admins have the same panel at <strong class="text-gray-900 dark:text-white">Admin &gt; System &gt; App Update</strong>, which adds a last-checked time, a manual check and a badge on the System menu when a release is waiting. Either way, <code class="doc-inline-code">php artisan app:update</code> does the same job from the command line and works even when neither screen is available.</p>
         </div>
     </section>
 

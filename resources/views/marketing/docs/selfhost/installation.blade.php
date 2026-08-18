@@ -429,7 +429,8 @@
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Keeping the install up to date</div>
-            <p>Upgrades are one step, from either direction: open <span class="font-semibold text-gray-900 dark:text-white">Settings &gt; App Update</span>, which shows your installed version next to the latest release and offers an <span class="font-semibold text-gray-900 dark:text-white">Update</span> button when they differ, or run <code class="doc-inline-code">php artisan app:update</code> on the server. Both download and install the new release and then run any new migrations. Take a backup first. Your uploads, custom translations and anything else under <code class="doc-inline-code">storage/app/</code> are excluded from the update by design, so they survive it.</p>
+            <p>Upgrades are one step, from either direction: open <span class="font-semibold text-gray-900 dark:text-white">Settings &gt; App Update</span>, which shows your installed version next to the latest release and offers an <span class="font-semibold text-gray-900 dark:text-white">Update</span> button when they differ, or run <code class="doc-inline-code">php artisan app:update</code> on the server. Both download and install the new release and then run any new migrations. Take a backup first. Your uploads, custom translations and anything else under <code class="doc-inline-code">storage/app/</code> are excluded from the update by design, so they survive it. Instance admins get the same panel at <span class="font-semibold text-gray-900 dark:text-white">Admin &gt; System &gt; App Update</span>, which also badges the System menu when a release is waiting.</p>
+            <p class="mt-3">If the App Update screen is not there at all, use the command: it works on every install and does not depend on the screen. That is also the way back from an older release whose UI hid the update button.</p>
         </div>
     </section>
 

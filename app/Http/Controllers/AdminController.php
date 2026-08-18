@@ -22,6 +22,7 @@ use App\Models\Setting;
 use App\Models\UsageDaily;
 use App\Models\User;
 use App\Services\AdminAlertService;
+use App\Services\AppUpdateService;
 use App\Services\AuditService;
 use App\Services\BoostBillingService;
 use App\Services\DemoService;
@@ -35,6 +36,7 @@ use App\Utils\PlanPriceUtils;
 use App\Utils\PlatformCurrency;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
+use Codedge\Updater\UpdaterManager;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\RedirectResponse;
@@ -3505,5 +3507,83 @@ class AdminController extends Controller
         AuditService::log(AuditService::ADMIN_DOMAIN_REMOVE, auth()->id(), 'Role', $role->id, null, null, "Removed domain: {$hostname}");
 
         return redirect()->back()->with('success', __('messages.domain_removed'));
+    }
+
+    /**
+     * System > App Update.
+     *
+     * The docs and the marketing site have promised an update notice "in your admin panel"
+     * for a long time; until now the only self-updater surface was Settings, which is where
+     * issue #106 went looking and did not find it.
+     *
+     * abort(404) at runtime rather than a registration-time gate on the routes: phpunit pins
+     * IS_NEXUS=true, and AdminAlertService::row() silently drops any alert whose route is not
+     * registered, so a conditional registration would make the nav badge untestable and
+     * absent with no error to follow.
+     */
+    public function appUpdate(UpdaterManager $updater, AppUpdateService $appUpdate)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        if (config('app.is_nexus')) {
+            abort(404);
+        }
+
+        return view('admin.app-update', [
+            'version_installed' => $appUpdate->versionInstalled(),
+            'version_available' => $appUpdate->versionAvailable($updater),
+            'update_available' => $appUpdate->isUpdateAvailable(),
+            'last_checked_at' => $appUpdate->lastCheckedAt(),
+        ]);
+    }
+
+    /**
+     * Apply an update from the admin panel.
+     *
+     * Deliberately not a redirect into AppController::update(): every exit of that method is
+     * hardcoded to route('profile.edit').'#section-app', so an operator who started in /admin
+     * would be thrown out to their profile settings. Both call the same service.
+     */
+    public function appUpdateRun(UpdaterManager $updater, AppUpdateService $appUpdate)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        if (config('app.is_nexus')) {
+            abort(404);
+        }
+
+        if (is_demo_mode()) {
+            return redirect()->route('admin.app_update')->with('error', __('messages.demo_mode_restriction'));
+        }
+
+        $result = $appUpdate->performUpdate($updater);
+
+        return redirect()->route('admin.app_update')
+            ->with($result['status'] === 'updated' ? 'success' : 'error', $result['message']);
+    }
+
+    /**
+     * Force a fresh lookup against GitHub. Throttled at the route, because unauthenticated
+     * GitHub allows only 60 calls an hour for the whole install.
+     */
+    public function appUpdateCheck(UpdaterManager $updater, AppUpdateService $appUpdate)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        if (config('app.is_nexus')) {
+            abort(404);
+        }
+
+        $available = $appUpdate->versionAvailable($updater, true);
+
+        return redirect()->route('admin.app_update')
+            ->with($available === null ? 'error' : 'success',
+                $available === null ? __('messages.version_check_failed') : __('messages.version_checked'));
     }
 }

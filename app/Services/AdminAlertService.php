@@ -54,6 +54,9 @@ class AdminAlertService
         'boosts_disapproved',
         'domains_pending',
         'translations_unshared',
+        // Last: informational, and unlike every other row above it does not drain by the
+        // operator clearing a queue, only by them choosing to update.
+        'app_update_available',
     ];
 
     /**
@@ -160,6 +163,12 @@ class AdminAlertService
             // The mirror image of translation_suggestions: on a selfhosted install
             // these are local fixes that have not been offered back to the nexus yet.
             'translations_unshared' => fn () => $isNexus ? 0 : TranslationOverride::unshared()->count(),
+
+            // A pure cache read. This composer runs on EVERY admin page render, and
+            // getVersionAvailable() is an outbound call to GitHub - which allows 60 an hour
+            // unauthenticated - so a cold cache must read "no update", not block the nav on a
+            // network round trip. The daily app:check-version command is what keeps it warm.
+            'app_update_available' => fn () => (! $isNexus && app(AppUpdateService::class)->isUpdateAvailable()) ? 1 : 0,
         ];
 
         $items = collect();
@@ -255,6 +264,9 @@ class AdminAlertService
             'boosts_disapproved' => ['manage', 'boost', 'admin.boost', [], '#boost-alerts', 'amber', 'Boost'],
             'domains_pending' => ['manage', 'domains', 'admin.domains', ['status' => 'pending'], '', 'amber', __('messages.domains')],
             'translations_unshared' => ['system', 'translations', 'admin.translations', [], '', 'blue', __('messages.translations')],
+            // Blue, not red or amber: SEVERITY above reserves red for breakage, and an operator
+            // who has decided not to update yet would otherwise carry a permanent alarm.
+            'app_update_available' => ['system', 'app-update', 'admin.app_update', [], '', 'blue', __('messages.app_update')],
         };
 
         // Several admin routes are registered only on hosted installs. The counts are

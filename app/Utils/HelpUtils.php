@@ -197,6 +197,7 @@ class HelpUtils
         // Growth continues the onboarding funnel documented under Users (Insights), so it
         // points there rather than at a section of its own.
         'admin/growth*' => '/docs/selfhost/admin#insights-users',
+        'admin/app-update*' => '/docs/selfhost/admin#system-app-update',
         'admin/translations*' => '/docs/selfhost/admin#system-translations',
         // Federation is mirrored into both docs trees; point the AP Help button at the
         // selfhost copy, which is the one every non-nexus install can act on.

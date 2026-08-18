@@ -24,20 +24,27 @@
         <div class="flex items-center">
             <span class="text-gray-600 dark:text-gray-400 w-[160px] pe-4">{{ __('messages.latest_version') }}:</span>
             <span class="font-medium text-gray-700 dark:text-gray-300">
-                {{ $version_available }}
+                {{ $version_available ?? __('messages.unknown') }}
             </span>
         </div>
 
     </div>
 
+    {{-- $update_available, not a string comparison of the two versions. A failed lookup leaves
+         $version_available null, and comparing that against the installed version used to render
+         an Update button during any GitHub outage. --}}
     <form method="POST" action="{{ route('app.update') }}" enctype="multipart/form-data" class="mt-6">
         @csrf
 
-    @if ($version_installed != $version_available)
+    @if ($update_available)
         <x-primary-button>{{ __('messages.update') }}</x-primary-button>
 
         <div class="text-gray-600 dark:text-gray-400 pt-6"> 
             {!! __('messages.app_update_tip', ['link' => '<a href="https://github.com/eventschedule/eventschedule/releases/download/' . $version_available . '/eventschedule.zip" class="hover:underline">eventschedule.zip</a>']) !!}
+        </div>
+    @elseif ($version_available === null)
+        <div class="text-gray-600 dark:text-gray-400 pb-4">
+            {{ __('messages.version_check_failed') }}
         </div>
     @else
         <div class="text-gray-600 dark:text-gray-400 pb-4"> 

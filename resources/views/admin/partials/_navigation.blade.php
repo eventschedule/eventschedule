@@ -8,7 +8,7 @@
         $manageKeys = array_merge($manageKeys, ['schedules', 'domains', 'referrals', 'blog']);
     }
     $manageActive = in_array($active, $manageKeys);
-    $systemActive = in_array($active, ['audit-log', 'queue', 'logs', 'support', 'settings', 'translations', 'federation']);
+    $systemActive = in_array($active, ['audit-log', 'queue', 'logs', 'app-update', 'support', 'settings', 'translations', 'federation']);
 
     // Pending-work badges, shared by the AdminAlertService composer. Queues sit
     // unnoticed without them, and operators then conclude the feature is broken.
@@ -156,6 +156,14 @@
                         <a href="{{ route('admin.logs') }}" class="{{ $active === 'logs' ? $dropdownItemActive : $dropdownItem }}">
                             Logs
                         </a>
+                        {{-- Selfhost only. eventschedule.com deploys from git, so there is nothing
+                             here to update; the route is registered everywhere and 404s at runtime. --}}
+                        @if (! config('app.is_nexus'))
+                        <a href="{{ route('admin.app_update') }}" class="{{ $active === 'app-update' ? $dropdownItemActive : $dropdownItem }}">
+                            @lang('messages.app_update')
+                            <x-nav-badge :badge="$tabBadges['app-update'] ?? null" />
+                        </a>
+                        @endif
                         <a href="{{ route('admin.settings') }}" class="{{ $active === 'settings' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.settings')
                         </a>

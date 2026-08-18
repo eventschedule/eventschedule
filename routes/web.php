@@ -192,16 +192,25 @@ Route::get('/manifest.webmanifest', [AppController::class, 'manifest'])
 // Self-update is available on any non-nexus install (selfhosted or a self-hosted SaaS).
 // On a multi-tenant self-hosted SaaS it is operator-only (the 'admin' middleware,
 // EnsureUserIsAdmin, so a tenant cannot trigger a global update); on a plain selfhost any
-// authenticated user may trigger it. Keep this in sync with the can_self_update() helper.
-if (! config('app.is_nexus') && ! config('app.is_testing')) {
-    $updateMiddleware = ['auth', 'verified'];
-    if (config('app.hosted')) {
-        $updateMiddleware[] = 'admin';
-    }
-    Route::match(['get', 'post'], '/update', [AppController::class, 'update'])
-        ->name('app.update')
-        ->middleware($updateMiddleware);
+// authenticated user may trigger it.
+//
+// Registered on every install and gated at runtime by can_self_update() inside
+// AppController::update(), rather than wrapped in a registration-time if. Two reasons:
+// a route-cached install freezes whatever the condition evaluated to when the cache was
+// written, and phpunit pins IS_NEXUS=true, so a conditional registration made
+// route('app.update') throw while rendering the Settings section - which is why issue #106
+// was never covered by a test.
+//
+// Safe to register domain-less: the tenant group Route::domain('{subdomain}...') above is
+// registered first, so a schedule's own /update slug still wins on its own host. Same
+// ordering rule this file relies on for /manifest.webmanifest.
+$updateMiddleware = ['auth', 'verified'];
+if (config('app.hosted')) {
+    $updateMiddleware[] = 'admin';
 }
+Route::match(['get', 'post'], '/update', [AppController::class, 'update'])
+    ->name('app.update')
+    ->middleware($updateMiddleware);
 
 require __DIR__.'/auth.php';
 
@@ -745,6 +754,18 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
         Route::post('/admin/boost/grant-credit', [AdminController::class, 'boostGrantCredit'])->name('admin.boost.grant_credit');
         Route::post('/admin/boost/set-limit', [AdminController::class, 'boostSetLimit'])->name('admin.boost.set_limit');
         Route::post('/admin/translation/retry', [AdminController::class, 'retryTranslation'])->name('admin.translation.retry');
+        // App Update (selfhost). Registered on every install and 404'd at runtime inside the
+        // controller, matching the federation and growth routes above: phpunit pins
+        // IS_NEXUS=true, and AdminAlertService::row() drops any alert row whose route is not
+        // registered - silently - so a registration-time gate would make the nav badge both
+        // untestable and invisible with nothing to debug.
+        Route::get('/admin/app-update', [AdminController::class, 'appUpdate'])->name('admin.app_update');
+        Route::post('/admin/app-update/run', [AdminController::class, 'appUpdateRun'])->name('admin.app_update.run');
+        // Tighter than the group's 30/min: unauthenticated GitHub allows 60 calls an hour for
+        // the whole install, and this is the only button that spends that budget on demand.
+        Route::post('/admin/app-update/check', [AdminController::class, 'appUpdateCheck'])
+            ->name('admin.app_update.check')
+            ->middleware('throttle:5,1');
         Route::get('/admin/settings', [AdminController::class, 'settings'])->name('admin.settings');
         Route::post('/admin/settings', [AdminController::class, 'updateSettings'])->name('admin.settings.update');
         // Own endpoint, not admin.settings.update: cards sharing that action have to carry

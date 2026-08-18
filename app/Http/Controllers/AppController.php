@@ -3,41 +3,42 @@
 namespace App\Http\Controllers;
 
 use App\Models\Role;
+use App\Services\AppUpdateService;
 use App\Utils\UrlUtils;
 use Codedge\Updater\UpdaterManager;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 class AppController extends Controller
 {
-    public function update(UpdaterManager $updater)
+    /**
+     * The Settings > App Update action.
+     *
+     * The route is registered on every install and authorized here instead, so a route-cached
+     * selfhost cannot freeze a stale registration and so the section stays renderable under
+     * phpunit (which pins IS_NEXUS=true). On a multi-tenant self-hosted SaaS the route also
+     * carries the 'admin' middleware.
+     *
+     * Every exit lands back on Settings. The admin panel has its own action,
+     * AdminController::appUpdateRun(), because an operator who started in /admin should not be
+     * thrown out to their profile.
+     */
+    public function update(UpdaterManager $updater, AppUpdateService $appUpdate)
     {
-        if (config('app.is_nexus')) {
-            return redirect()->to(route('profile.edit').'#section-app')->with('error', 'Not authorized');
+        if (! can_self_update()) {
+            abort(404);
         }
 
-        try {
-            if ($updater->source()->isNewVersionAvailable()) {
-                $versionAvailable = $updater->source()->getVersionAvailable();
-
-                $release = $updater->source()->fetch($versionAvailable);
-
-                $updater->source()->update($release);
-
-                Artisan::call('migrate', ['--force' => true]);
-            } else {
-                return redirect()->to(route('profile.edit').'#section-app')->with('error', __('messages.no_new_version_available'));
-            }
-        } catch (\Exception $e) {
-            report($e);
-
-            return redirect()->to(route('profile.edit').'#section-app')->with('error', __('messages.error'));
+        if (is_demo_mode()) {
+            return redirect()->to(route('profile.edit').'#section-app')->with('error', __('messages.demo_mode_restriction'));
         }
 
-        return redirect()->to(route('profile.edit').'#section-app')->with('message', __('messages.app_updated'));
+        $result = $appUpdate->performUpdate($updater);
+
+        return redirect()->to(route('profile.edit').'#section-app')
+            ->with($result['status'] === 'updated' ? 'message' : 'error', $result['message']);
     }
 
     public function setup()
@@ -380,6 +381,15 @@ class AppController extends Controller
             if (! Cache::has('td_daily')) {
                 Cache::put('td_daily', true, now()->endOfDay());
 
+                // Keep in sync with routes/console.php. No-ops on nexus, where there is
+                // nothing to self-update; it matters on a self-hosted SaaS that drives its
+                // cron through this endpoint rather than through schedule:run.
+                try {
+                    \Artisan::call('app:check-version');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command app:check-version failed: '.$e->getMessage());
+                    report($e);
+                }
                 try {
                     \Artisan::call('google:refresh-webhooks');
                 } catch (\Exception $e) {

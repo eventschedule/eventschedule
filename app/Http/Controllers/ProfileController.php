@@ -8,6 +8,7 @@ use App\Mail\SupportEmail;
 use App\Models\BackupJob;
 use App\Models\BoostCampaign;
 use App\Notifications\DeletedUserNotification;
+use App\Services\AppUpdateService;
 use App\Services\AuditService;
 use App\Services\BoostBillingService;
 use App\Services\MetaAdsService;
@@ -58,19 +59,13 @@ class ProfileController extends Controller
         ];
 
         if (can_self_update($request->user())) {
-            $data['version_installed'] = $updater->source()->getVersionInstalled();
+            $appUpdate = app(AppUpdateService::class);
 
-            try {
-                if ($request->has('clear_cache')) {
-                    cache()->forget('version_available');
-                }
-
-                $data['version_available'] = cache()->remember('version_available', 3600, function () use ($updater) {
-                    return $updater->source()->getVersionAvailable();
-                });
-            } catch (\Exception $e) {
-                $data['version_available'] = 'Error: failed to check version';
-            }
+            $data['version_installed'] = $appUpdate->versionInstalled();
+            // null when the lookup failed, which the partial renders as "unknown" rather
+            // than as a version that differs from the installed one.
+            $data['version_available'] = $appUpdate->versionAvailable($updater, $request->has('clear_cache'));
+            $data['update_available'] = $appUpdate->isUpdateAvailable();
         }
 
         return view('profile.edit', $data);

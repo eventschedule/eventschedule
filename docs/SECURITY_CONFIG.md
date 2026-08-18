@@ -161,4 +161,9 @@ php artisan config:clear
 php artisan cache:clear
 php artisan view:clear
 php artisan optimize
-``` 
+```
+
+> **Re-run `php artisan optimize` after every app update.** An update never replaces
+> `bootstrap/cache/`, so a cached config keeps reporting the pre-update version and a cached
+> route table keeps serving the pre-update routes. The updater clears those caches for you once
+> the new release is in place, which means the optimized files are gone and need rebuilding. 

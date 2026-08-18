@@ -151,6 +151,10 @@ class AuditService
 
     const ADMIN_DOMAIN_REMOVE = 'admin.domain_remove';
 
+    const ADMIN_GRANT = 'admin.grant';
+
+    const ADMIN_REVOKE = 'admin.revoke';
+
     // Subscription actions
     const SUBSCRIPTION_CREATE = 'subscription.create';
 
