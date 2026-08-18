@@ -724,4 +724,56 @@ class PayfastCheckoutTest extends TestCase
         $this->checkout($role, $event, $ticket)
             ->assertDontSee('name="payment_method"', escape: false);
     }
+
+    public function test_the_notify_url_survives_an_install_served_under_a_base_path(): void
+    {
+        // A selfhost install whose document root is the project folder rather than public/ answers
+        // under a base path - the state docs/selfhost/installation describes ("the app answers on
+        // both https://your-domain.com/ and https://your-domain.com/public/"). There the request root
+        // ALREADY carries that segment, so a notify_url built from an absolute path - or from one
+        // parsed back out of an absolute URL - doubles it and Payfast is sent to /public/public/...
+        //
+        // That failure is silent and unrecoverable: the ITN 404s before reaching any controller, so
+        // nothing is logged, Payfast retries and gives up, the buyer has been charged, and the sale
+        // sits unpaid with its seats held forever because expire_unpaid_tickets defaults to 0.
+        //
+        // The base path has to be a real one, driven by SCRIPT_NAME the way a subdirectory install
+        // does it, rather than URL::forceRootUrl() - forcing the root only rewrites generated links,
+        // so the test client would POST to a path that has no route and 404 before reaching checkout.
+        $owner = $this->connectedOwner();
+        $role = $this->createRole($owner);
+        $event = $this->payfastEvent($role);
+        $ticket = $this->createTicket($event, ['type' => 'General', 'price' => 150, 'quantity' => 50]);
+
+        // Same origin the route already resolves to; only the base path is added.
+        $full = route('event.checkout', ['subdomain' => $role->subdomain]);
+        $origin = parse_url($full, PHP_URL_SCHEME).'://'.parse_url($full, PHP_URL_HOST);
+
+        $response = $this->call('POST', $origin.'/public/index.php'.parse_url($full, PHP_URL_PATH), [
+            'event_id' => UrlUtils::encodeId($event->id),
+            'event_date' => Carbon::parse($event->starts_at)->format('Y-m-d'),
+            'name' => 'ZAR Buyer',
+            'email' => 'zar-buyer@gmail.com',
+            'tickets' => [UrlUtils::encodeId($ticket->id) => 1],
+        ], [], [], [
+            'SCRIPT_NAME' => '/public/index.php',
+            'SCRIPT_FILENAME' => '/var/www/app/public/index.php',
+            'PHP_SELF' => '/public/index.php',
+        ]);
+
+        $response->assertOk();
+
+        preg_match('/name="notify_url" value="([^"]*)"/', $response->getContent(), $m);
+        $notify = html_entity_decode($m[1] ?? '', ENT_QUOTES);
+
+        $this->assertNotSame('', $notify, 'the checkout should have rendered a notify_url at all');
+
+        // Pinned by shape rather than by rebuilding it the way the code does, which would pass either
+        // way. The base path must appear exactly once, and the route path exactly once after it.
+        $this->assertSame(
+            $origin.'/public/index.php/payments/payfast/webhook/'.UrlUtils::encodeId(Sale::latest('id')->first()->id),
+            $notify,
+            'notify_url must carry the install base path exactly once',
+        );
+    }
 }

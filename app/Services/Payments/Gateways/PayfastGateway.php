@@ -306,6 +306,14 @@ class PayfastGateway extends PaymentGatewayDriver
         // host that is not currently direct+active, so a domain removal or DNS repoint mid-flight
         // would take the buyer's money and lose the settlement, silently and unrecoverably.
         //
+        // The path is built relative - route(..., false) - because app_url() prepends the root, and
+        // on selfhost that root already carries the front-controller base path. Handing it an
+        // absolute path (or one parsed out of an absolute URL) doubles that segment, so an install
+        // served from /public/ would send Payfast to /public/public/... The ITN would 404, the buyer
+        // would be charged, and the sale would sit unpaid with its seats held forever - no log line,
+        // because the request never reaches a controller. This is the idiom every other app_url()
+        // call site uses for the same reason.
+        //
         // The body rewrite that made all this necessary is now opted out of below, so these values
         // reach the browser byte-identical to what was signed.
         $fields = [
@@ -317,7 +325,7 @@ class PayfastGateway extends PaymentGatewayDriver
             // ticket token through a third party's logs.
             'return_url' => custom_domain_url(route('payments.return', $callbackParams)),
             'cancel_url' => custom_domain_url(route('payments.cancel', $callbackParams)),
-            'notify_url' => app_url(parse_url(route('payments.webhook', ['gateway' => $this->key(), 'sale_id' => $encodedSaleId]), PHP_URL_PATH)),
+            'notify_url' => app_url(route('payments.webhook', ['gateway' => $this->key(), 'sale_id' => $encodedSaleId], false)),
             'name_first' => $this->clean($sale->name, 100),
             'email_address' => $sale->email,
             // The encoded sale id, so the ITN can be cross-checked against the sale in its own URL.
