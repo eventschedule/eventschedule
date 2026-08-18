@@ -939,7 +939,7 @@
                                     <tr><td><code class="doc-inline-code">rsvp_limit</code></td><td>No</td><td>Cap on registrations per date (integer, minimum 1)</td></tr>
                                     <tr><td><code class="doc-inline-code">tickets_enabled</code></td><td>No</td><td>Enable ticketing (boolean)</td></tr>
                                     <tr><td><code class="doc-inline-code">ticket_currency_code</code></td><td>No</td><td>Three-letter ISO currency code, for example USD</td></tr>
-                                    <tr><td><code class="doc-inline-code">payment_method</code></td><td>No</td><td>stripe, invoiceninja, payment_url, or manual</td></tr>
+                                    <tr><td><code class="doc-inline-code">payment_method</code></td><td>No</td><td>cash, stripe, invoiceninja, payment_url or payfast. <code class="doc-inline-code">manual</code> is accepted as an alias for <code class="doc-inline-code">cash</code>. The method must be connected on the account, and <code class="doc-inline-code">payfast</code> only settles events priced in ZAR</td></tr>
                                     <tr><td><code class="doc-inline-code">payment_instructions</code></td><td>No</td><td>Instructions shown for manual payment (max 5000 characters)</td></tr>
                                     <tr><td><code class="doc-inline-code">tickets</code></td><td>No</td><td>Array of ticket types. Each takes <code class="doc-inline-code">type</code> (required), <code class="doc-inline-code">quantity</code>, <code class="doc-inline-code">price</code>, <code class="doc-inline-code">description</code>, <code class="doc-inline-code">sales_start_at</code> and <code class="doc-inline-code">sales_end_at</code>. A <code class="doc-inline-code">quantity</code> of 0 means unlimited.</td></tr>
                                     <tr><td><code class="doc-inline-code">addons</code></td><td>No</td><td>Array of paid extras sold alongside a ticket, such as parking or merchandise. Each takes <code class="doc-inline-code">type</code> (required), <code class="doc-inline-code">quantity</code>, <code class="doc-inline-code">price</code>, <code class="doc-inline-code">description</code> and <code class="doc-inline-code">url</code>. Only saved when <code class="doc-inline-code">tickets_enabled</code> is true.</td></tr>
@@ -1336,7 +1336,7 @@
                         </div>
                         <div class="doc-callout doc-callout-warning">
                             <div class="doc-callout-title">refund does not move money</div>
-                            <p>This action records the sale as refunded and backs the amount out of your revenue figures. It does not send anything through Stripe or Invoice Ninja. Issue the actual refund in your payment provider, then call this to keep the two in step.</p>
+                            <p>This action records the sale as refunded and backs the amount out of your revenue figures. It does not send anything through Stripe, Invoice Ninja or Payfast. Issue the actual refund in your payment provider, then call this to keep the two in step.</p>
                         </div>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">Cancelling or refunding releases the seats back into stock and notifies anyone on the waitlist for that date. For a multi-event order, act on the primary sale: a non-primary row returns <code class="doc-inline-code">403</code>, and the change cascades to the rest of the order for you.</p>
                     </div>

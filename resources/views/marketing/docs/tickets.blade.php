@@ -513,7 +513,7 @@
         </div>
 
         <h3 id="payfast" class="doc-subheading">Connecting Payfast</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4"><x-link href="https://payfast.io" target="_blank">Payfast</x-link> is a South African gateway, useful where Stripe is not available. It settles in rand (ZAR) only, so Payfast appears as an option only on events priced in ZAR.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4"><x-link href="https://payfast.io" target="_blank">Payfast</x-link> is a South African gateway, useful where Stripe is not available. It settles in rand (ZAR) only, so Payfast appears as an option only on events priced in ZAR - and if an event is later switched to another currency, or its method is set through the API, checkout refuses rather than charging the wrong currency. See <a href="#payfast-refused" class="doc-link">When a Payfast checkout is refused</a>.</p>
         <ol class="doc-list doc-list-numbered mb-6">
             <li>In Payfast, open <strong class="text-gray-900 dark:text-white">Settings</strong> and note your <strong class="text-gray-900 dark:text-white">Merchant ID</strong> and <strong class="text-gray-900 dark:text-white">Merchant Key</strong></li>
             <li>Set a <strong class="text-gray-900 dark:text-white">passphrase</strong> in the same Payfast screen if you have not already</li>
@@ -528,12 +528,22 @@
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Testing with the sandbox</div>
-            <p>Turn on <strong class="text-gray-900 dark:text-white">Test mode</strong> to send payments to Payfast's sandbox instead of taking real money. Payfast's public sandbox credentials are merchant ID <code>10000100</code> and merchant key <code>46f0cd694581a</code>. Note that Payfast cannot reach a notification URL on <code>localhost</code>, so a sandbox purchase only completes end to end on a publicly reachable install. While test mode is on, the payment page shows buyers a clear test-mode notice, and the payment method appears with a test-mode label on the event form. Turn test mode off before you sell real tickets.</p>
+            <p>Turn on <strong class="text-gray-900 dark:text-white">Test mode</strong> to send payments to Payfast's sandbox instead of taking real money. Payfast's public sandbox credentials are merchant ID <code>10000100</code> and merchant key <code>46f0cd694581a</code>. You still need a passphrase: set one in your <x-link href="https://sandbox.payfast.co.za" target="_blank">Payfast sandbox account</x-link> and enter it here alongside them, because all three are required whether or not test mode is on. Note that Payfast cannot reach a notification URL on <code>localhost</code>, so a sandbox purchase only completes end to end on a publicly reachable install. While test mode is on, the payment page shows buyers a clear test-mode notice, and the payment method appears with a test-mode label on the event form. Turn test mode off before you sell real tickets. Selfhosted installs need no extra configuration for the notification to be accepted - it is authenticated by its signature and by asking Payfast to confirm it, not by the address it arrives from, so running behind Cloudflare, a reverse proxy or Docker changes nothing.</p>
         </div>
 
-        <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Refunds and minimums</div>
-            <p>Payfast will not process a payment under R5.00, so Payfast is not offered for orders below that. Refunds are issued from your own Payfast dashboard; marking a sale refunded here records it without moving money, which is the same as every other payment method.</p>
+        <div class="doc-callout doc-callout-info mb-6">
+            <div class="doc-callout-title" id="payfast-refused">When a Payfast checkout is refused</div>
+            <p>Two orders never reach Payfast, because it would reject them on its own page after the seats were already held. An order under <strong class="text-gray-900 dark:text-white">R5.00</strong> - Payfast's minimum - and any event whose currency is not ZAR. In both cases the buyer is returned to the ticket page with a message, and the seats go straight back on sale. If you see that on your own event, check the event's <strong class="text-gray-900 dark:text-white">Currency</strong> on the Payment tab: an event can keep Payfast selected after its currency is changed, and it then shows in the dropdown marked <em>no longer available</em> until you pick something else.</p>
+        </div>
+
+        <div class="doc-callout doc-callout-info mb-6">
+            <div class="doc-callout-title">Refunds</div>
+            <p>Refunds are issued from your own Payfast dashboard. Marking a sale refunded here records it without moving money, which is the same as every other payment method.</p>
+        </div>
+
+        <div class="doc-callout doc-callout-tip">
+            <div class="doc-callout-title">What Payfast does not do</div>
+            <p>A Payfast event cannot be combined with others in the <a href="#cart" class="doc-link">multi-event cart</a> - a Payfast payment covers one event - and it cannot offer <a href="#installments" class="doc-link">monthly installments</a>, which need a card the gateway can charge again later. <a href="{{ route('marketing.docs.gift_cards') }}" class="doc-link">Gift cards</a> cannot be sold through Payfast either. Everything else - promo codes, add-ons, volume discounts, per-attendee tickets - works normally.</p>
         </div>
     </section>
 
@@ -890,7 +900,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Refunds move no money</div>
-            <p>Refund Ticket changes the status in Event Schedule and adjusts your revenue figures. The actual money is returned in your Stripe Dashboard or Invoice Ninja account. Cancelling or deleting a sale that was paid for shows you a reminder to handle the refund yourself. These actions fire the matching <x-link href="{{ route('marketing.docs.developer.webhooks') }}">webhook</x-link>: <code class="doc-inline-code">sale.paid</code>, <code class="doc-inline-code">sale.refunded</code> or <code class="doc-inline-code">sale.cancelled</code>.</p>
+            <p>Refund Ticket changes the status in Event Schedule and adjusts your revenue figures. The actual money is returned in your payment provider's own dashboard - Stripe, Invoice Ninja or Payfast. Cancelling or deleting a sale that was paid for shows you a reminder to handle the refund yourself. These actions fire the matching <x-link href="{{ route('marketing.docs.developer.webhooks') }}">webhook</x-link>: <code class="doc-inline-code">sale.paid</code>, <code class="doc-inline-code">sale.refunded</code> or <code class="doc-inline-code">sale.cancelled</code>.</p>
         </div>
     </section>
 
@@ -1141,7 +1151,7 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Refunds</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Refunds are handled through your payment provider (Stripe or Invoice Ninja). Event Schedule marks the sale as cancelled, but you must process the actual refund in your Stripe Dashboard or Invoice Ninja account. Stripe refunds appear on customer statements within 5-10 business days.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Refunds are handled through your payment provider (Stripe, Invoice Ninja or Payfast). Event Schedule marks the sale as cancelled, but you must process the actual refund in that provider's dashboard. A Payfast reference is shown as plain text rather than a link, so you will need to search for it in your Payfast dashboard. Stripe refunds appear on customer statements within 5-10 business days.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Taxes</h4>

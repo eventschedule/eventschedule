@@ -120,7 +120,7 @@ class HelpUtils
                 'payment-tab-stripe' => '/docs/account-settings#stripe',
                 'payment-tab-invoiceninja' => '/docs/account-settings#invoice-ninja',
                 'payment-tab-payment-url' => '/docs/account-settings#payment-url',
-                'payment-tab-payfast' => '/docs/tickets#payfast',
+                'payment-tab-payfast' => '/docs/account-settings#payfast',
                 'section-api' => '/docs/account-settings#api',
                 'section-webhooks' => '/docs/account-settings#webhooks',
                 'section-google-calendar' => '/docs/account-settings#google',

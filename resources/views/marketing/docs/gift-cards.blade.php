@@ -89,7 +89,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Payment Method</span></td>
-                        <td>How buyers pay: Cash, Stripe, Invoice Ninja, or your payment link. Only the methods already set up on your account are listed, and Cash is the default.</td>
+                        <td>How buyers pay: Cash, Stripe, Invoice Ninja, or your payment link. Only the methods already set up on your account are listed, and Cash is the default. Payfast cannot be used for gift cards even when it is connected.</td>
                     </tr>
                 </tbody>
             </table>
@@ -174,7 +174,7 @@
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Stripe's minimum charge</div>
-            <p>Stripe will not process a charge below 50 of the currency's smallest units (0.50 USD or EUR, 50 JPY). On events that take payment through Stripe, if applying the whole balance would leave less than that still to pay, slightly less is applied and the small remainder stays on the card, so checkout never lands on an amount Stripe would refuse. Events paid by cash, Invoice Ninja or a payment link are not adjusted.</p>
+            <p>Stripe will not process a charge below 50 of the currency's smallest units (0.50 USD or EUR, 50 JPY). Payfast has its own floor of R5.00. On an event taking payment through either, if applying the whole balance would leave less than that still to pay, slightly less is applied and the small remainder stays on the card, so checkout never lands on an amount the gateway would refuse. Events paid by cash, Invoice Ninja or a payment link have no floor and are not adjusted.</p>
         </div>
 
         <div class="doc-callout doc-callout-info mb-2">

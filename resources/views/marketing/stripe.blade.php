@@ -695,8 +695,8 @@
             ['04', 'Then the ticket is emailed', 'Only after that does the confirmation email with the QR code go out, and the sale reach your Sales tab and your revenue figures.'],
         ];
 
-        // Event.payment_method, per event. TicketController::checkout()
-        // switches on it: stripe, invoiceninja, payment_url, cash.
+        // Event.payment_method, per event. TicketController::checkout() resolves it through
+        // config/payments.php: cash, stripe, invoiceninja, payment_url, payfast.
         $routes = [
             [
                 'name'  => 'Stripe',

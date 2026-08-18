@@ -164,7 +164,7 @@
             Payment Methods
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            To sell tickets you need at least one payment method on your account. Event Schedule supports three, each on its own tab in this section. Which one an event uses is decided per event, on the event's <a href="{{ route('marketing.docs.tickets') }}#payment" class="doc-link">Payment</a> tab, so connecting more than one lets you route different events differently. Without any connected method the only option an event has is cash on the door.
+            To sell tickets you need at least one payment method on your account. Event Schedule supports four - Stripe, Invoice Ninja, Payfast and a plain payment link - each on its own tab in this section. Which one an event uses is decided per event, on the event's <a href="{{ route('marketing.docs.tickets') }}#payment" class="doc-link">Payment</a> tab, so connecting more than one lets you route different events differently. Without any connected method the only option an event has is cash on the door.
         </p>
 
         <h3 id="stripe" class="doc-subheading">Stripe</h3>
@@ -231,6 +231,32 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Unlink Account</strong> under the saved URL and confirm. The field is then empty and ready for a new URL.</p>
             </div>
         </div>
+
+        <h3 id="payfast" class="doc-subheading">Payfast</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            <x-link href="https://payfast.io" target="_blank">Payfast</x-link> is a South African gateway, useful where Stripe is not available. Like Stripe it confirms the payment and releases the ticket on its own, with no manual step. It settles in South African rand only, so it appears as an option on events priced in ZAR and nowhere else.
+        </p>
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">What to enter</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Your <strong class="text-gray-900 dark:text-white">Merchant ID</strong>, <strong class="text-gray-900 dark:text-white">Merchant Key</strong> and <strong class="text-gray-900 dark:text-white">passphrase</strong>, all three from <strong class="text-gray-900 dark:text-white">Settings</strong> in your Payfast dashboard. Set a passphrase there first if you have not already - it is required here, because it is what proves a payment notification genuinely came from Payfast.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Test mode</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Sends payments to Payfast's sandbox so nothing is really charged. While it is on, the payment method reads <strong class="text-gray-900 dark:text-white">(Test mode)</strong> on the event form and buyers see a notice on the payment page. Turn it off before you sell real tickets.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Payment methods</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">By default Payfast shows buyers everything your account supports - card, Instant EFT, Capitec Pay and the rest. Tick exactly one to send buyers straight to it; tick none, or several, and the choice stays with Payfast.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Removing it</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Unlink Account</strong> and confirm. Any event still set to Payfast keeps the setting but shows it as no longer available, so you can see it and pick something else.</p>
+            </div>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+            For the full walkthrough, including the sandbox credentials and what happens to an event priced in another currency, see <a href="{{ route('marketing.docs.tickets') }}#payfast" class="doc-link">Connecting Payfast</a>.
+        </p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Note</div>
@@ -561,7 +587,7 @@
                 {
                     "@type": "HowToStep",
                     "name": "Configure Payment Methods",
-                    "text": "Connect Stripe, Invoice Ninja, or set a payment link to start selling tickets.",
+                    "text": "Connect Stripe, Invoice Ninja or Payfast, or set a payment link, to start selling tickets.",
                     "url": "{{ url(route('marketing.docs.account_settings')) }}#payments"
                 },
                 {

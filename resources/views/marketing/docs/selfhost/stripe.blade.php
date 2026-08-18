@@ -10,6 +10,7 @@
             <x-doc-nav-link href="#saas-operators">SaaS Operators</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-link href="#invoice-ninja">Invoice Ninja</x-doc-nav-link>
+        <x-doc-nav-link href="#payfast">Payfast</x-doc-nav-link>
         <x-doc-nav-link href="#testing">Testing</x-doc-nav-link>
         <x-doc-nav-link href="#troubleshooting">Troubleshooting</x-doc-nav-link>
         <x-doc-nav-link href="#security">Security</x-doc-nav-link>
@@ -38,7 +39,7 @@
         </div>
 
         <h3 class="doc-subheading">Where the payment method is chosen</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Server configuration only makes Stripe <em>available</em>. Each event still picks one payment method in the event editor, under <strong class="text-gray-900 dark:text-white">Tickets &rarr; Payment</strong>: Cash, Stripe, Invoice Ninja or Payment Link. The four options are described on the <a href="{{ route('marketing.docs.tickets') }}#payment" class="doc-link">Tickets</a> page.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Server configuration only makes Stripe <em>available</em>. Each event still picks one payment method in the event editor, under <strong class="text-gray-900 dark:text-white">Tickets &rarr; Payment</strong>: Cash, Stripe, Invoice Ninja, Payfast or Payment Link. The five options are described on the <a href="{{ route('marketing.docs.tickets') }}#payment" class="doc-link">Tickets</a> page.</p>
 
         <div class="doc-callout doc-callout-plan">
             <div class="doc-callout-title">Plan requirement</div>
@@ -475,6 +476,31 @@
     </section>
 
     <!-- Testing -->
+    <section id="payfast" class="doc-section">
+        <h2 class="doc-heading">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+            </svg>
+            Payfast (Alternative Payment Method)
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-6"><a href="https://payfast.io" target="_blank" rel="noopener noreferrer" class="doc-link">Payfast</a> is a South African gateway, useful where Stripe is not available. It settles in South African rand only. Setup is documented in the <a href="{{ route('marketing.docs.tickets') }}#payfast" class="doc-link">user guide</a>; the notes below are the parts specific to running your own install.</p>
+
+        <div class="doc-callout doc-callout-info mb-6">
+            <div class="doc-callout-title">No server configuration required</div>
+            <p>Like Invoice Ninja, Payfast needs no <code class="doc-inline-code">.env</code> configuration. Each user connects their own merchant account from <strong>Settings &rarr; Payment Methods &rarr; Payfast</strong>, so different event owners on the same install can use different Payfast accounts.</p>
+        </div>
+
+        <div class="doc-callout doc-callout-warning mb-6">
+            <div class="doc-callout-title">Your install must be publicly reachable</div>
+            <p>Payfast confirms a payment by POSTing a notification to your server. It cannot reach <code class="doc-inline-code">localhost</code> or a private address, so on a laptop or an internal-only host a payment will be taken and the ticket will never be issued. Use a public hostname, or a tunnel, before taking any payment - including a sandbox one.</p>
+        </div>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">A log warning you can safely ignore</div>
+            <p>You may see <code class="doc-inline-code">Payfast ITN from an unrecognised source address - continuing, see confirmsPayment</code> in your logs on every successful payment. That is expected behind Cloudflare, a reverse proxy or Docker: the app sees your proxy's address rather than Payfast's, and the address check is advisory for exactly that reason. The notification is authenticated by its signature and by asking Payfast to confirm it, so no <code class="doc-inline-code">TRUSTED_PROXIES</code> configuration is needed for payments to work.</p>
+        </div>
+    </section>
+
     <section id="testing" class="doc-section">
         <h2 class="doc-heading">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
