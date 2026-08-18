@@ -286,6 +286,26 @@ class SaleSettlementServiceTest extends TestCase
         );
     }
 
+    public function test_a_paid_then_deleted_sale_reports_already_paid_not_deleted(): void
+    {
+        // Order of the guards matters. This sale WAS honoured - the buyer holds a ticket - so a
+        // redelivered ITN must report already_paid. Reporting 'deleted' would fire the
+        // money-with-no-ticket alarm on the channel that exists to catch real ones.
+        $sale = $this->saleFor(price: 100);
+
+        $this->settlement()->settle($sale, 'ref-1', 100.0, 'test');
+        $this->assertSame('paid', $sale->fresh()->status);
+
+        $sale->refresh();
+        $sale->is_deleted = true;
+        $sale->saveQuietly();
+
+        $this->assertSame(
+            'already_paid',
+            $this->settlement()->settle($sale, 'ref-1', 100.0, 'test'),
+        );
+    }
+
     public function test_a_missing_sale_is_reported_rather_than_fataling(): void
     {
         $sale = $this->saleFor();

@@ -18,6 +18,32 @@ class CustomDomainCanonicalTest extends TestCase
     use CreatesScheduleData;
     use RefreshDatabase;
 
+    public function test_the_body_rewrite_is_still_on_by_default(): void
+    {
+        // The Payfast checkout opts out of the body rewrite (its fields are signed, so rewriting one
+        // afterwards desyncs the signature). That opt-out must stay strictly opt-in: every ordinary
+        // page served on a custom domain still needs its subdomain URLs rewritten, or the whole
+        // custom-domain experience silently leaks the .eventschedule.com host back into links.
+        config(['app.hosted' => true]);
+
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue', [
+            'name' => 'Rewrite Venue',
+            'custom_domain' => 'https://rewrite-direct.test',
+            'custom_domain_host' => 'rewrite-direct.test',
+            'custom_domain_mode' => 'direct',
+            'custom_domain_status' => 'active',
+        ]);
+
+        $content = $this->get('https://rewrite-direct.test/')->assertOk()->getContent();
+
+        $this->assertStringNotContainsString(
+            'https://'.$role->subdomain.'.',
+            $content,
+            'an ordinary custom-domain page must still have its subdomain URLs rewritten',
+        );
+    }
+
     public function test_direct_active_custom_domain_is_canonical_on_subdomain_request(): void
     {
         $owner = $this->createOwner();

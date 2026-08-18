@@ -72,7 +72,12 @@ class ResolveCustomDomain
 
         // Replace subdomain URLs with custom domain URLs in HTML responses
         // Note: only replace the schedule's subdomain URL, not app URLs (login, admin, follow)
-        if ($this->isHtmlResponse($response)) {
+        //
+        // A controller can set skip_body_rewrite to opt out, the same way skip_location_rewrite works
+        // below. Needed by any response whose body is CRYPTOGRAPHICALLY SIGNED: a gateway checkout
+        // form signs its field values, and rewriting one of them afterwards desyncs the signature
+        // from what the browser posts, which the gateway then rejects with no server-side trace.
+        if ($this->isHtmlResponse($response) && ! $request->attributes->get('skip_body_rewrite')) {
             $content = $response->getContent();
             if ($content) {
                 $content = str_replace($subdomainUrl, $customDomainUrl, $content);

@@ -4403,6 +4403,7 @@ return [
     'payfast_payment_types_help' => 'Scegline esattamente uno per portare gli acquirenti direttamente a quello. Se non ne selezioni nessuno, o piu di uno, Payfast mostra all acquirente tutto cio che il tuo account supporta.',
     'payfast_checkout_unavailable' => 'Payfast non puo elaborare questo pagamento. Contatta l organizzatore dell evento.',
     'payfast_test_mode_notice' => 'La modalita test e attiva. Questo pagamento va alla sandbox di Payfast e non verra addebitato denaro reale.',
+    'payment_method_unavailable' => 'non piu disponibile',
     'payfast_type_cc' => 'Carta di credito',
     'payfast_type_dc' => 'Carta di debito',
     'payfast_type_ef' => 'Bonifico istantaneo (EFT)',

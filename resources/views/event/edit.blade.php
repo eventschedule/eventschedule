@@ -14,6 +14,19 @@
   $paymentGateways = payment_gateways();
   $connectedGateways = $paymentGateways->connectedFor($user);
   $selectableGateways = $paymentGateways->availableFor($user, $event->ticket_currency_code);
+
+  // The saved method when it is no longer on offer - currency changed after saving, or the gateway
+  // was disconnected. Computed here rather than inside the select because the select itself has to
+  // render for it: with nothing connected the whole block is otherwise hidden, leaving the stale
+  // value invisible AND unchangeable, which is the state this is meant to rescue.
+  $storedGateway = null;
+  if ($event->payment_method && ! array_key_exists($event->payment_method, $selectableGateways)) {
+      $candidate = $paymentGateways->get($event->payment_method);
+      // isSelectableForEvents() keeps this aligned with the in: rule on the form request, which is
+      // built from selectableKeys() - otherwise a future non-selectable driver would render an
+      // option the request then rejects with no field-level message.
+      $storedGateway = ($candidate && $candidate->isSelectableForEvents()) ? $candidate : null;
+  }
   $gatewayCapabilities = $paymentGateways->capabilityMap();
 
   $use24hr = get_use_24_hour_time($role ?? null);
@@ -3226,7 +3239,7 @@
                                 </div>
                                 @endif
 
-                                @if ($connectedGateways)
+                                @if ($connectedGateways || $storedGateway)
                                 <div class="mb-6">
                                     <x-input-label for="payment_method" :value="__('messages.payment_method')"/>
                                     <select id="payment_method" name="payment_method" v-model="event.payment_method" :required="event.tickets_enabled"
@@ -3248,10 +3261,8 @@
                                              survived every save - the state that let a USD event keep charging through
                                              Payfast. Showing it lets the owner see and fix it; checkout guards remain
                                              the authority either way. --}}
-                                        @if ($event->payment_method
-                                            && ! array_key_exists($event->payment_method, $selectableGateways)
-                                            && ($storedGateway = $paymentGateways->get($event->payment_method)))
-                                        <option v-pre value="{{ $event->payment_method }}">{{ $storedGateway->label($user) }}</option>
+                                        @if ($storedGateway)
+                                        <option v-pre value="{{ $event->payment_method }}">{{ $storedGateway->label($user) }} - {{ __('messages.payment_method_unavailable') }}</option>
                                         @endif
                                     </select>
                                     <div class="text-xs pt-1">

@@ -37,9 +37,11 @@ class PayfastClient
      * is their own guidance. It comes from config so tests can point it at the test client without
      * stubbing gethostbynamel().
      *
-     * $ip must be the real client address. Behind Cloudflare or any reverse proxy that means
-     * TrustProxies has to be configured, which it is - otherwise every ITN appears to come from the
-     * proxy and none of them validate.
+     * ADVISORY ONLY - the caller logs the result and carries on. $ip is the real client address only
+     * when Laravel trusts the upstream proxy, and config/trustedproxy.php trusts none unless
+     * IS_NEXUS is set, so on a selfhost install behind Cloudflare or Docker this is the proxy's
+     * address and never matches. That is exactly why this must not gate settlement: confirmsPayment()
+     * does.
      */
     public function isValidSourceIp(?string $ip): bool
     {
@@ -47,17 +49,25 @@ class PayfastClient
             return false;
         }
 
-        // Cached: this check is advisory (its result only feeds a log line), so it must not cost
-        // up to four blocking DNS resolutions on the settlement path for every ITN. Five minutes is
-        // far shorter than any DNS change Payfast would make. Literal addresses in the config skip
-        // resolution entirely, which is also what keeps the tests off the network.
-        $allowed = Cache::remember('payfast:itn_ips', 300, function () {
-            $resolved = [];
+        $hosts = (array) config('payments.payfast.itn_hosts', []);
 
-            foreach ((array) config('payments.payfast.itn_hosts', []) as $host) {
+        // Cached: this check is advisory (its result only feeds a log line), so it must not cost up
+        // to four blocking DNS resolutions on the settlement path for every ITN. Literal addresses
+        // in the config skip resolution entirely, which is also what keeps the tests off the network.
+        //
+        // The key includes the configured hosts, so an operator adding one - the realistic urgent
+        // case, since Payfast has added sending addresses before - takes effect at once instead of
+        // waiting out a TTL that was reasoned about for DNS changes, not config edits.
+        $key = 'payfast:itn_ips:'.md5(implode(',', $hosts));
+        $allowed = Cache::get($key);
+
+        if ($allowed === null) {
+            $allowed = [];
+
+            foreach ($hosts as $host) {
                 // A literal address in the config is taken as-is; anything else is resolved.
                 if (filter_var($host, FILTER_VALIDATE_IP)) {
-                    $resolved[] = $host;
+                    $allowed[] = $host;
 
                     continue;
                 }
@@ -65,12 +75,17 @@ class PayfastClient
                 $addresses = gethostbynamel($host);
 
                 if ($addresses !== false) {
-                    $resolved = array_merge($resolved, $addresses);
+                    $allowed = array_merge($allowed, $addresses);
                 }
             }
 
-            return $resolved;
-        });
+            // Only a NON-empty result is cached. Storing a total resolution failure would keep the
+            // check failing - and logging false "unrecognised source" warnings on every genuine ITN -
+            // for the whole TTL after DNS had already recovered.
+            if ($allowed) {
+                Cache::put($key, $allowed, 300);
+            }
+        }
 
         if (! $allowed) {
             // Resolution failed for every host. Reported as not-valid, but note the caller treats

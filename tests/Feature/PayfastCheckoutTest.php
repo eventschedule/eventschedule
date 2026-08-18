@@ -245,9 +245,10 @@ class PayfastCheckoutTest extends TestCase
         $response->assertStatus(302);
         $response->assertSessionHas('error', __('messages.payfast_checkout_unavailable'));
 
-        // The sale exists but nothing was posted to Payfast; ReleaseTickets reclaims it later.
+        // The sale is released rather than left unpaid: nothing else would ever reclaim it, because
+        // expire_unpaid_tickets defaults to 0 and ReleaseTickets only sweeps events that opted in.
         $sale = Sale::where('email', 'zar-buyer@gmail.com')->firstOrFail();
-        $this->assertSame('unpaid', $sale->status);
+        $this->assertSame('expired', $sale->status);
     }
 
     public function test_an_order_below_the_payfast_floor_is_refused(): void
@@ -263,7 +264,7 @@ class PayfastCheckoutTest extends TestCase
 
         $response->assertStatus(302);
         $response->assertSessionHas('error', __('messages.payfast_checkout_unavailable'));
-        $this->assertSame('unpaid', Sale::where('email', 'zar-buyer@gmail.com')->firstOrFail()->status);
+        $this->assertSame('expired', Sale::where('email', 'zar-buyer@gmail.com')->firstOrFail()->status);
     }
 
     public function test_a_custom_domain_checkout_keeps_the_signature_valid(): void
@@ -310,9 +311,10 @@ class PayfastCheckoutTest extends TestCase
         $signature = $posted['signature'];
         unset($posted['signature']);
 
-        // The callbacks live on the custom domain the buyer is actually on.
+        // The BUYER-FACING callbacks live on the custom domain the buyer is actually on. notify_url
+        // deliberately does not - see test_the_notify_url_stays_on_the_app_host.
         $this->assertStringContainsString('tickets.acme.test', $posted['return_url']);
-        $this->assertStringContainsString('tickets.acme.test', $posted['notify_url']);
+        $this->assertStringContainsString('tickets.acme.test', $posted['cancel_url']);
 
         // And the signature covers those exact values - i.e. the middleware rewrite did not desync
         // the posted fields from the signed ones.
@@ -404,6 +406,125 @@ class PayfastCheckoutTest extends TestCase
             ->assertSessionHasErrors('payfast_merchant_id');
 
         $this->assertNull($owner->fresh()->payfast_merchant_id);
+    }
+
+    public function test_the_notify_url_stays_on_the_app_host(): void
+    {
+        // routes/web.php states the invariant: a notify_url is handed to the provider at checkout and
+        // "has to keep working no matter which host the buyer arrived on". Binding it to the custom
+        // domain broke that - ResolveCustomDomain 404s any host that is not currently direct+active,
+        // so a domain removal or DNS repoint before a slow Instant EFT ITN lands would take the
+        // buyer's money and lose the settlement silently.
+        config(['app.hosted' => true]);
+
+        $owner = $this->connectedOwner();
+        $role = $this->createRole($owner);
+        $role->forceFill([
+            'custom_domain_host' => 'tickets.acme.test',
+            'custom_domain_mode' => 'direct',
+            'custom_domain_status' => 'active',
+        ])->save();
+
+        $event = $this->payfastEvent($role);
+        $ticket = $this->createTicket($event, ['type' => 'General', 'price' => 150, 'quantity' => 50]);
+
+        $html = $this->post('https://tickets.acme.test/'.$role->subdomain.'/checkout', [
+            'event_id' => UrlUtils::encodeId($event->id),
+            'event_date' => Carbon::parse($event->starts_at)->format('Y-m-d'),
+            'name' => 'ZAR Buyer',
+            'email' => 'zar-buyer@gmail.com',
+            'tickets' => [UrlUtils::encodeId($ticket->id) => 1],
+        ])->getContent();
+
+        preg_match('/name="notify_url" value="([^"]*)"/', $html, $m);
+        $notify = html_entity_decode($m[1] ?? '', ENT_QUOTES);
+
+        $this->assertStringNotContainsString('tickets.acme.test', $notify,
+            'the machine-to-machine callback must not depend on a host the owner can retire');
+
+        // The buyer-facing ones still keep them on their own domain.
+        preg_match('/name="return_url" value="([^"]*)"/', $html, $r);
+        $this->assertStringContainsString('tickets.acme.test', html_entity_decode($r[1] ?? '', ENT_QUOTES));
+    }
+
+    public function test_a_signed_field_quoting_the_schedule_url_survives_the_body_rewrite(): void
+    {
+        // The body rewrite replaces the subdomain URL ANYWHERE in the response, including inside a
+        // signed item_description. Wrapping three URL fields did not fix that - only opting the whole
+        // response out of the rewrite does.
+        config(['app.hosted' => true]);
+
+        $owner = $this->connectedOwner();
+        $role = $this->createRole($owner);
+        $role->forceFill([
+            'custom_domain_host' => 'tickets.acme.test',
+            'custom_domain_mode' => 'direct',
+            'custom_domain_status' => 'active',
+        ])->save();
+
+        $event = $this->payfastEvent($role, [
+            'short_description' => 'Details at https://'.$role->subdomain.'.eventschedule.test/info',
+        ]);
+        $ticket = $this->createTicket($event, ['type' => 'General', 'price' => 150, 'quantity' => 50]);
+
+        $html = $this->post('https://tickets.acme.test/'.$role->subdomain.'/checkout', [
+            'event_id' => UrlUtils::encodeId($event->id),
+            'event_date' => Carbon::parse($event->starts_at)->format('Y-m-d'),
+            'name' => 'ZAR Buyer',
+            'email' => 'zar-buyer@gmail.com',
+            'tickets' => [UrlUtils::encodeId($ticket->id) => 1],
+        ])->getContent();
+
+        preg_match_all('/name="([^"]+)" value="([^"]*)"/', $html, $matches, PREG_SET_ORDER);
+        $posted = [];
+        foreach ($matches as $match) {
+            $posted[$match[1]] = html_entity_decode($match[2], ENT_QUOTES);
+        }
+        $signature = $posted['signature'];
+        unset($posted['signature']);
+
+        $this->assertSame(
+            PayfastSignature::sign($posted, 'test-passphrase'),
+            $signature,
+            'no signed field may be rewritten after signing',
+        );
+    }
+
+    public function test_a_refused_checkout_gives_the_seats_back(): void
+    {
+        // The sale rows are already committed and SaleTicket::created already incremented `sold`, so
+        // refusing without releasing holds inventory forever: expire_unpaid_tickets defaults to 0, so
+        // ReleaseTickets never sweeps it. A misconfigured event would quietly sell itself out.
+        $owner = $this->connectedOwner();
+        $role = $this->createRole($owner);
+        $event = $this->payfastEvent($role, ['ticket_currency_code' => 'USD']);
+        $ticket = $this->createTicket($event, ['type' => 'General', 'price' => 100, 'quantity' => 3]);
+
+        $this->checkout($role, $event, $ticket, 2)->assertStatus(302);
+
+        $sale = Sale::where('email', 'zar-buyer@gmail.com')->firstOrFail();
+
+        $this->assertSame('expired', $sale->status);
+        $this->assertSame(
+            0,
+            (int) array_sum((array) json_decode($ticket->fresh()->sold ?: '{}', true)),
+            'a refused checkout must not consume inventory',
+        );
+    }
+
+    public function test_a_total_that_rounds_up_to_the_floor_is_accepted(): void
+    {
+        // payment_amount is decimal(13,3) and the posted amount is number_format(...,2), so 4.999
+        // reaches Payfast as "5.00" and is accepted. Refusing it would reject a payment the gateway
+        // would have taken.
+        $owner = $this->connectedOwner();
+        $role = $this->createRole($owner);
+        $event = $this->payfastEvent($role);
+        $ticket = $this->createTicket($event, ['type' => 'General', 'price' => 4.999, 'quantity' => 50]);
+
+        $this->checkout($role, $event, $ticket)
+            ->assertOk()
+            ->assertSee('name="amount" value="5.00"', escape: false);
     }
 
     public function test_payfast_is_only_offered_for_zar(): void

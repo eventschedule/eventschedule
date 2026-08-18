@@ -4403,6 +4403,7 @@ return [
     'payfast_payment_types_help' => 'Elige solo uno para llevar a los compradores directamente a el. Si no marcas ninguno, o marcas varios, Payfast mostrara al comprador todo lo que admita tu cuenta.',
     'payfast_checkout_unavailable' => 'Payfast no puede procesar este pago. Ponte en contacto con el organizador del evento.',
     'payfast_test_mode_notice' => 'El modo de prueba esta activado. Este pago va al entorno de pruebas de Payfast y no se cobrara dinero real.',
+    'payment_method_unavailable' => 'ya no disponible',
     'payfast_type_cc' => 'Tarjeta de credito',
     'payfast_type_dc' => 'Tarjeta de debito',
     'payfast_type_ef' => 'Transferencia instantanea (EFT)',

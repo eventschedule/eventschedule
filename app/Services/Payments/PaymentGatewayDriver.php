@@ -318,7 +318,15 @@ abstract class PaymentGatewayDriver
 
         $event = $sale->event;
 
-        return redirect($event->getGuestUrl($sale->subdomain, $sale->event_date).'?tickets=true');
+        $url = $event->getGuestUrl($sale->subdomain, $sale->event_date).'?tickets=true';
+
+        // Same courtesy handleReturn() extends: an embedded buyer who cancels should land back in an
+        // embedded page, not the full guest site.
+        if ($request->boolean('embed')) {
+            $url .= '&embed=true';
+        }
+
+        return redirect($url);
     }
 
     // -------------------------------------------------------------- settlement
@@ -358,6 +366,36 @@ abstract class PaymentGatewayDriver
     }
 
     // ----------------------------------------------------------------- helpers
+
+    /**
+     * Give back the seats of a sale the buyer can never complete.
+     *
+     * A driver that refuses a checkout AFTER TicketController committed the sale rows must call this,
+     * or the inventory is held indefinitely: SaleTicket::created already incremented `sold`, the only
+     * release is Sale::booted's status transition off `unpaid`, and ReleaseTickets sweeps by event
+     * opt-in (events.expire_unpaid_tickets defaults to 0) so it will never come back on its own.
+     */
+    protected function releaseAbandonedSale(Sale $sale, string $reason): void
+    {
+        $released = DB::transaction(function () use ($sale) {
+            $locked = Sale::lockForUpdate()->find($sale->id);
+
+            if (! $locked || $locked->status !== 'unpaid') {
+                return false;
+            }
+
+            // Sale::booted turns this into the seat and gift-card restore.
+            $locked->status = 'expired';
+            $locked->save();
+
+            return true;
+        });
+
+        if ($released) {
+            AuditService::log(AuditService::SALE_EXPIRED, $sale->user_id, 'Sale', $sale->id,
+                ['status' => 'unpaid'], ['status' => 'expired'], $reason.':event_id:'.$sale->event_id);
+        }
+    }
 
     /**
      * Where a buyer lands after a purchase: the order page when the checkout covered several events,

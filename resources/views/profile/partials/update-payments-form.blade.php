@@ -75,12 +75,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Restore active tab from localStorage. Guarded: with storage unavailable an unhandled throw
     // here would abort this whole handler before the tab CLICK listeners below are bound, leaving
     // every gateway but the first unreachable.
-    try {
-        const savedPaymentTab = localStorage.getItem('paymentActiveTab');
-        if (savedPaymentTab) {
-            switchPaymentTab(savedPaymentTab);
-        }
-    } catch (e) {}
+    let savedPaymentTab = null;
+    try { savedPaymentTab = localStorage.getItem('paymentActiveTab'); } catch (e) {}
+    if (savedPaymentTab) {
+        switchPaymentTab(savedPaymentTab);
+    }
 
     // "Change credentials" reveals the pre-filled form over the connected state.
     const invoiceninjaChangeBtn = document.getElementById('invoiceninja-change-btn');

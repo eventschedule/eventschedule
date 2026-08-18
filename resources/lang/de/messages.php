@@ -4407,6 +4407,7 @@ return [
     'payfast_payment_types_help' => 'Wahle genau eine aus, um Kaufer direkt dorthin zu schicken. Lasst du alle leer oder wahlst mehrere, zeigt Payfast dem Kaufer alles, was dein Konto unterstutzt.',
     'payfast_checkout_unavailable' => 'Payfast kann diese Zahlung nicht verarbeiten. Bitte kontaktiere den Veranstalter.',
     'payfast_test_mode_notice' => 'Der Testmodus ist aktiv. Diese Zahlung geht an die Payfast-Sandbox, es wird kein echtes Geld abgebucht.',
+    'payment_method_unavailable' => 'nicht mehr verfugbar',
     'payfast_type_cc' => 'Kreditkarte',
     'payfast_type_dc' => 'Debitkarte',
     'payfast_type_ef' => 'Sofort-Uberweisung (EFT)',

@@ -256,7 +256,10 @@ class PayfastGateway extends PaymentGatewayDriver
         // The floor is the same class with a smaller blast radius: Payfast refuses under R5.00 on its
         // own page, after the seats are held and with no way back but the browser's Back button.
         [$minimum] = $this->amountLimits($context->currency());
-        $total = $context->total();
+        // The ROUNDED figure, because that is what gets posted below: payment_amount is decimal(13,3)
+        // and a promo can land a total on 4.995, which Payfast receives as "5.00" and accepts.
+        // Comparing the raw total would refuse a payment the gateway would have taken.
+        $total = (float) number_format($context->total(), 2, '.', '');
 
         if (! $this->supportsCurrency($context->currency())
             || ($total > 0 && $minimum !== null && $total < $minimum)) {
@@ -266,9 +269,15 @@ class PayfastGateway extends PaymentGatewayDriver
                 'total' => $total,
             ]);
 
-            // Same failure shape as stripeCheckout()'s catch: back to the event page with a message
-            // (guest pages render session('error')), sale left unpaid for ReleaseTickets to reclaim.
-            return back()->with('error', __('messages.payfast_checkout_unavailable'));
+            // Release the seats before bailing. The Sale rows are already committed by this point
+            // and SaleTicket::created has already incremented `sold`, so simply returning would hold
+            // inventory FOREVER: events.expire_unpaid_tickets defaults to 0 and ReleaseTickets only
+            // sweeps events that opted in, so nothing would ever reclaim it. And because back()
+            // re-renders the form with the buyer's quantities restored, the obvious retry would burn
+            // another seat - a misconfigured event would quietly sell itself out.
+            $this->releaseAbandonedSale($sale, 'payfast_refused');
+
+            return back()->withInput()->with('error', __('messages.payfast_checkout_unavailable'));
         }
 
         $encodedSaleId = UrlUtils::encodeId($sale->id);
@@ -285,11 +294,20 @@ class PayfastGateway extends PaymentGatewayDriver
             $callbackParams['embed'] = 'true';
         }
 
-        // custom_domain_url() on all three: a checkout served from a custom domain has its HTML body
-        // rewritten by ResolveCustomDomain AFTER this method signs the fields, and the rewrite cannot
-        // update the signature. Generating the URLs on the custom domain up front means the rewrite
-        // finds nothing to replace in them, so what the browser posts is exactly what was signed.
-        // A no-op away from custom domains, and the same helper createStripeSession() uses.
+        // Two different hosts, deliberately.
+        //
+        // return_url/cancel_url use custom_domain_url() so a buyer who checked out on the schedule's
+        // own domain is returned to it rather than being bounced onto the subdomain.
+        //
+        // notify_url uses app_url(): it is a machine-to-machine callback Payfast may deliver hours
+        // later (Instant EFT clears slowly), so it must not depend on a host the owner can retire.
+        // routes/web.php says exactly this - "it has to keep working no matter which host the buyer
+        // arrived on" - and binding it to a custom domain broke that: ResolveCustomDomain 404s any
+        // host that is not currently direct+active, so a domain removal or DNS repoint mid-flight
+        // would take the buyer's money and lose the settlement, silently and unrecoverably.
+        //
+        // The body rewrite that made all this necessary is now opted out of below, so these values
+        // reach the browser byte-identical to what was signed.
         $fields = [
             'merchant_id' => $owner->payfast_merchant_id,
             'merchant_key' => $owner->payfast_merchant_key,
@@ -299,7 +317,7 @@ class PayfastGateway extends PaymentGatewayDriver
             // ticket token through a third party's logs.
             'return_url' => custom_domain_url(route('payments.return', $callbackParams)),
             'cancel_url' => custom_domain_url(route('payments.cancel', $callbackParams)),
-            'notify_url' => custom_domain_url(route('payments.webhook', ['gateway' => $this->key(), 'sale_id' => $encodedSaleId])),
+            'notify_url' => app_url(parse_url(route('payments.webhook', ['gateway' => $this->key(), 'sale_id' => $encodedSaleId]), PHP_URL_PATH)),
             'name_first' => $this->clean($sale->name, 100),
             'email_address' => $sale->email,
             // The encoded sale id, so the ITN can be cross-checked against the sale in its own URL.
@@ -331,6 +349,12 @@ class PayfastGateway extends PaymentGatewayDriver
         // shared secret that makes an ITN signature meaningful, and the buyer's browser is not a place
         // to keep it.
         $signature = PayfastSignature::sign($fields, $owner->payfast_passphrase);
+
+        // Every field below is signed, so nothing in this body may be rewritten after the fact.
+        // ResolveCustomDomain would otherwise replace the schedule's subdomain URL anywhere it
+        // appears - including inside a signed item_name or item_description that happens to quote
+        // the schedule's own link - and desync the signature from what the browser posts.
+        request()->attributes->set('skip_body_rewrite', true);
 
         return response()->view('payments.payfast.redirect', [
             'action' => (new PayfastClient((bool) $owner->payfast_sandbox))->processUrl(),
@@ -400,7 +424,13 @@ class PayfastGateway extends PaymentGatewayDriver
         $client = new PayfastClient((bool) $owner->payfast_sandbox);
 
         if (! $client->confirmsPayment($payload)) {
-            Log::warning('Payfast did not confirm the ITN payload', ['sale_id' => $sale->id]);
+            // Carries the IP: this is the rejection an attacker who already holds the passphrase and
+            // a valid sale id would trigger, and it is the only place the source address still tells
+            // an operator anything (the advisory check below runs only on success).
+            Log::warning('Payfast did not confirm the ITN payload', [
+                'sale_id' => $sale->id,
+                'ip' => $request->ip(),
+            ]);
 
             return response('not confirmed', 400);
         }
@@ -454,27 +484,48 @@ class PayfastGateway extends PaymentGatewayDriver
         //  - deleted / missing: the sale row is gone or flagged deleted; same money-with-no-ticket
         //    shape.
         //  - amount_mismatch: parked for review; AdminAlertService already counts these.
-        if (in_array($outcome, ['released', 'deleted', 'missing'], true)) {
-            Log::error('Payfast payment received for a sale that can no longer be honoured', [
+        match ($outcome) {
+            // Payfast HAS the buyer's money and this install cannot honour it. A human must act.
+            'released', 'deleted', 'missing' => (function () use ($sale, $outcome) {
+                Log::error('Payfast payment received for a sale that can no longer be honoured', [
+                    'sale_id' => $sale->id,
+                    'outcome' => $outcome,
+                ]);
+
+                // report() so hosted installs surface this in Sentry (REPORT_ERRORS); a log line
+                // alone is how the fatal-source-IP bug stayed invisible. Deliberately carries only
+                // the sale id and outcome - the payment id and amount would ride Sentry's log
+                // breadcrumbs to a vendor DSN on selfhost, and both are already in the database.
+                report(new \RuntimeException(
+                    'Payfast payment received for sale '.$sale->id." that can no longer be honoured (outcome: {$outcome})"
+                ));
+            })(),
+
+            // Parked for review; AdminAlertService already counts these.
+            'amount_mismatch' => Log::warning('Payfast ITN amount mismatch - sale parked for review', [
+                'sale_id' => $sale->id,
+            ]),
+
+            'paid', 'already_paid' => Log::info('Payfast ITN settled', [
                 'sale_id' => $sale->id,
                 'outcome' => $outcome,
-                'pf_payment_id' => $payload['pf_payment_id'] ?? null,
-                'amount_gross' => $payload['amount_gross'] ?? null,
-            ]);
+            ]),
 
-            // report() so hosted installs surface this in Sentry (REPORT_ERRORS); a log line alone
-            // is how the fatal-source-IP bug stayed invisible.
-            report(new \RuntimeException(
-                'Payfast payment received for sale '.$sale->id." that can no longer be honoured (outcome: {$outcome})"
-            ));
-        } elseif ($outcome === 'amount_mismatch') {
-            Log::warning('Payfast ITN amount mismatch - sale parked for review', [
-                'sale_id' => $sale->id,
-                'amount_gross' => $payload['amount_gross'] ?? null,
-            ]);
-        } else {
-            Log::info('Payfast ITN settled', ['sale_id' => $sale->id, 'outcome' => $outcome]);
-        }
+            // Exhaustive on purpose. An outcome nobody anticipated is far more likely to mean
+            // money-with-no-ticket than business as usual, so a new settle() return value must fail
+            // LOUD here rather than land in a quiet default logged as "settled" - which is precisely
+            // the anti-pattern this block was written to remove.
+            default => (function () use ($sale, $outcome) {
+                Log::error('Payfast ITN produced an unhandled settlement outcome', [
+                    'sale_id' => $sale->id,
+                    'outcome' => $outcome,
+                ]);
+
+                report(new \RuntimeException(
+                    'Payfast ITN produced an unhandled settlement outcome for sale '.$sale->id." (outcome: {$outcome})"
+                ));
+            })(),
+        };
 
         return response()->noContent();
     }

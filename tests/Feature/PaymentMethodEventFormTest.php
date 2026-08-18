@@ -42,6 +42,44 @@ class PaymentMethodEventFormTest extends TestCase
             ->assertSessionDoesntHaveErrors('payment_method');
     }
 
+    public function test_a_disconnected_gateway_still_renders_its_stored_method(): void
+    {
+        // The case the previous commit named but did not cover: with the ONLY gateway disconnected,
+        // connectedFor() is empty, so the whole select was hidden behind the "connect a gateway"
+        // nudge - leaving the stored method invisible AND unchangeable from the form, which is the
+        // exact dead end the fix was supposed to remove.
+        $owner = $this->createOwner();
+        $owner->forceFill([
+            'payfast_merchant_id' => '10000100',
+            'payfast_merchant_key' => '46f0cd694581a',
+            'payfast_passphrase' => 'test-passphrase',
+        ])->save();
+
+        $role = $this->createRole($owner);
+        $event = $this->createEvent($role, [
+            'tickets_enabled' => true,
+            'payment_method' => 'payfast',
+            'ticket_currency_code' => 'ZAR',
+        ]);
+
+        // Owner clears their Payfast credentials afterwards.
+        $owner->forceFill([
+            'payfast_merchant_id' => null,
+            'payfast_merchant_key' => null,
+            'payfast_passphrase' => null,
+        ])->save();
+
+        $response = $this->actingAs($owner)->get(
+            route('event.edit', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($event->id)]),
+        );
+
+        $response->assertOk();
+        $response->assertSee('name="payment_method"', escape: false);
+        $response->assertSee('value="payfast"', escape: false);
+        // And it is marked, so a broken configuration does not read as a healthy one.
+        $response->assertSee(__('messages.payment_method_unavailable'));
+    }
+
     public function test_a_stored_method_no_longer_offered_still_renders_as_an_option(): void
     {
         // The dropdown is filtered by the SAVED currency, so an event whose currency changed after

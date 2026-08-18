@@ -76,10 +76,19 @@ class SaleSettlementService
                 return 'missing';
             }
 
-            // A deleted sale must never be revived, emailed or credited. deleteSale() cancels live
-            // rows first, but an amount_mismatch row keeps its status and only gains the is_deleted
-            // flag - so it is still findable by transaction_reference, and without this a correct-
-            // amount retry would settle a sale the owner deleted and email its ticket.
+            // Idempotent by design. Gateways retry, and the buyer's return can race the callback.
+            if ($locked->status === 'paid') {
+                return 'already_paid';
+            }
+
+            // Deleted AND not already paid. Order matters: a sale that was paid and only later
+            // deleted was honoured - the buyer holds a ticket - so it must report already_paid, not
+            // 'deleted', or a redelivered ITN raises a false money-with-no-ticket alarm on the very
+            // channel that exists to catch real ones.
+            //
+            // deleteSale() cancels live rows first, but an amount_mismatch row keeps its status and
+            // only gains the is_deleted flag, so it stays findable by transaction_reference and a
+            // correct-amount retry would otherwise settle a sale the owner deleted.
             if ($locked->is_deleted) {
                 Log::warning('Payment callback for a deleted sale - not marking paid', [
                     'sale_id' => $locked->id,
@@ -88,11 +97,6 @@ class SaleSettlementService
                 ]);
 
                 return 'deleted';
-            }
-
-            // Idempotent by design. Gateways retry, and the buyer's return can race the callback.
-            if ($locked->status === 'paid') {
-                return 'already_paid';
             }
 
             // A released sale must never be revived. Expiry already returned the seats and any

@@ -4410,6 +4410,7 @@ return [
     'payfast_payment_types_help' => 'N en choisissez qu un pour y envoyer directement les acheteurs. Si vous n en cochez aucun, ou plusieurs, Payfast presente a l acheteur tout ce que votre compte accepte.',
     'payfast_checkout_unavailable' => 'Payfast ne peut pas traiter ce paiement. Veuillez contacter l organisateur de l evenement.',
     'payfast_test_mode_notice' => 'Le mode test est active. Ce paiement part vers le bac a sable Payfast et aucun argent reel ne sera preleve.',
+    'payment_method_unavailable' => 'plus disponible',
     'payfast_type_cc' => 'Carte de credit',
     'payfast_type_dc' => 'Carte de debit',
     'payfast_type_ef' => 'Virement instantane (EFT)',

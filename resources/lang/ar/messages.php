@@ -4404,6 +4404,7 @@ return [
     'payfast_payment_types_help' => 'اختر واحدة فقط لإرسال المشترين إليها مباشرة. اتركها كلها بدون تحديد، أو حدد أكثر من واحدة، وسيعرض Payfast للمشتري كل ما يدعمه حسابك.',
     'payfast_checkout_unavailable' => 'يتعذر على Payfast معالجة هذه الدفعة. يرجى التواصل مع منظم الفعالية.',
     'payfast_test_mode_notice' => 'وضع الاختبار مفعّل. ستذهب هذه الدفعة إلى بيئة اختبار Payfast ولن يتم تحصيل أي أموال حقيقية.',
+    'payment_method_unavailable' => 'لم يعد متاحاً',
     'payfast_type_cc' => 'بطاقة ائتمان',
     'payfast_type_dc' => 'بطاقة خصم',
     'payfast_type_ef' => 'تحويل إلكتروني فوري',

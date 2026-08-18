@@ -4403,6 +4403,7 @@ return [
     'payfast_payment_types_help' => 'Kies er precies een om kopers er direct naartoe te sturen. Vink je er geen of meerdere aan, dan toont Payfast de koper alles wat je account ondersteunt.',
     'payfast_checkout_unavailable' => 'Payfast kan deze betaling niet verwerken. Neem contact op met de organisator van het evenement.',
     'payfast_test_mode_notice' => 'Testmodus staat aan. Deze betaling gaat naar de Payfast-sandbox en er wordt geen echt geld afgeschreven.',
+    'payment_method_unavailable' => 'niet meer beschikbaar',
     'payfast_type_cc' => 'Creditcard',
     'payfast_type_dc' => 'Debetkaart',
     'payfast_type_ef' => 'Directe overboeking (EFT)',
