@@ -36,6 +36,21 @@ class LegalDocument extends Model
     ];
 
     /**
+     * The named route each path is registered as, for the one caller that must not
+     * build these URLs against the request host - see policy_url().
+     *
+     * On a nexus these routes carry a domain (Route::domain(_base_domain())), so
+     * route() resolves them onto the marketing host whatever host the visitor is on;
+     * url() would not. Registered under all three branches of routes/web.php, so the
+     * names always exist and route() cannot throw.
+     */
+    public const ROUTES = [
+        self::PRIVACY => 'marketing.privacy',
+        self::TERMS => 'marketing.terms',
+        self::COOKIES => 'marketing.cookie_policy',
+    ];
+
+    /**
      * The page shipped with the app for each type. `cookies` has none - the
      * cookie disclosure lives inside the privacy policy today - so an install
      * that has not written one has no cookie policy page at all.

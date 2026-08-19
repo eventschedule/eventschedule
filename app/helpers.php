@@ -415,9 +415,31 @@ if (! function_exists('policy_url')) {
                 return $document['url'];
             }
 
-            return $document && $document['has_content']
-                ? url(\App\Models\LegalDocument::PATHS[$for])
-                : null;
+            if (! $document || ! $document['has_content']) {
+                return null;
+            }
+
+            // NOT url(): that builds against the host the request arrived on, and the
+            // legal routes are not registered on every host an install serves.
+            //
+            //  - On a nexus they carry a domain (Route::domain(_base_domain())), so a
+            //    guest on tenant.example.com would be handed a URL that its own /{slug}
+            //    catch-all answers instead, and one on app.example.com a hard 404.
+            //    route() reads the domain off the route, so it lands on the marketing
+            //    host - and unlike marketing_url() it cannot be pointed at an operator's
+            //    external site, which would send consent links away from the document
+            //    they just wrote.
+            //  - Everywhere else the route is domain-less, and the tenant subdomain group
+            //    is registered ~1500 lines earlier in routes/web.php, so on a tenant host
+            //    /{slug} still wins. app_url() is the one host that group excludes
+            //    ('^(?!www|app).*'). On a plain selfhost it collapses to url($path),
+            //    which is why path-based installs keep working exactly as before.
+            //
+            // A literal PATH, never a route() result - app_url() prepends the root, and an
+            // absolute path doubles a selfhost's front-controller base path.
+            return config('app.is_nexus')
+                ? route(\App\Models\LegalDocument::ROUTES[$for])
+                : app_url(\App\Models\LegalDocument::PATHS[$for]);
         };
 
         if ($resolved = $resolve($type)) {

@@ -6,8 +6,11 @@ use App\Models\LegalDocument;
 use App\Models\User;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\URL;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -344,7 +347,11 @@ class LegalPagesTest extends TestCase
 
     public function test_on_a_selfhost_install_a_written_document_is_served_locally(): void
     {
-        config(['app.is_nexus' => false]);
+        // app.hosted is pinned because this is the PLAIN selfhost claim - path-based routing,
+        // one tenant, the legal routes reachable on the only host there is. A multi-tenant
+        // install shares is_nexus=false but not that, and policy_url() answers it differently;
+        // see test_on_a_multi_tenant_install_a_written_document_is_linked_on_the_app_host().
+        config(['app.is_nexus' => false, 'app.hosted' => false]);
         $this->withRemoteMarketingSite();
 
         LegalDocument::create(['type' => 'privacy', 'content' => '## Our own policy']);
@@ -365,6 +372,64 @@ class LegalPagesTest extends TestCase
         config(['app.is_nexus' => false]);
 
         $this->get('/privacy')->assertOk()->assertSee('es-fine-h', false);
+    }
+
+    // ------------------------------------------------- which HOST the links point at
+
+    /**
+     * On a nexus the legal routes are registered inside Route::domain(_base_domain()), so a
+     * consent link has to land on the marketing host whatever host the visitor is on.
+     *
+     * policy_url() used url(), which builds against the REQUEST host - so a buyer on
+     * tenant.example.com was handed a URL that the tenant group's /{slug} catch-all answers
+     * (the schedule's own page), and one on app.example.com a hard 404. That is the same
+     * "consenting to the wrong document" failure issue #116 exists to fix, one layer up.
+     *
+     * phpunit takes the app.is_testing branch of routes/web.php, where these routes are
+     * domain-less - so the host distinction does not exist here unless it is put back. Hence
+     * the re-registration below: without it this test passes against the broken helper too.
+     */
+    public function test_on_a_nexus_a_written_document_is_linked_on_the_marketing_host(): void
+    {
+        $this->withRemoteMarketingSite();
+        config(['app.is_nexus' => true]);
+
+        Route::domain('marketing.example.test')
+            ->get('/privacy', fn () => '')
+            ->name('marketing.privacy');
+        Route::getRoutes()->refreshNameLookups();
+
+        // The visitor is on a tenant host, which is where every consent link is rendered.
+        URL::setRequest(Request::create('https://tenant.example.test/some-schedule'));
+
+        LegalDocument::create(['type' => 'privacy', 'content' => 'Ours']);
+
+        $this->assertSame('https://marketing.example.test/privacy', policy_url('privacy'));
+        $this->assertNotSame(url('/privacy'), policy_url('privacy'));
+    }
+
+    /**
+     * A multi-tenant install with no marketing site (a self-hosted SaaS): the legal routes are
+     * domain-less, but the Route::domain('{subdomain}...') group is registered ~1500 lines
+     * earlier in routes/web.php, so on a tenant host its /{slug} catch-all still wins. The app
+     * host is the one host that group excludes ('^(?!www|app).*').
+     */
+    public function test_on_a_multi_tenant_install_a_written_document_is_linked_on_the_app_host(): void
+    {
+        config([
+            'app.is_nexus' => false,
+            'app.hosted' => true,
+            // Both of these send app_url() down its local branch, and neither describes the
+            // install being modelled. Stated here rather than inherited so the test cannot
+            // start passing for the wrong reason if phpunit.xml changes.
+            'app.is_testing' => false,
+            'app.env' => 'production',
+        ]);
+
+        LegalDocument::create(['type' => 'privacy', 'content' => 'Ours']);
+
+        $this->assertSame(app_url('/privacy'), policy_url('privacy'));
+        $this->assertStringStartsWith('https://app.', policy_url('privacy'));
     }
 
     // ---------------------------------------------------------------- cost
@@ -411,5 +476,33 @@ class LegalPagesTest extends TestCase
             ->assertSee('id="terms"', false)
             ->assertSee('id="cookies"', false)
             ->assertSee('class="html-editor', false);
+    }
+
+    /**
+     * The Legal link lives in the System dropdown, so the System tab has to read as active
+     * while you are on the page it contains. $systemActive in _navigation.blade.php is a
+     * literal list of section keys, and 'legal' was simply never added to it.
+     */
+    public function test_the_admin_page_marks_the_system_tab_active(): void
+    {
+        $this->adminActing();
+
+        $content = $this->get(route('admin.legal'))->assertOk()->getContent();
+
+        // The System <button>'s own class attribute. [^>] is load-bearing: it cannot cross the
+        // tag boundary, so this cannot accidentally match the active styling on a dropdown ITEM
+        // further down - which is what made the first version of this test pass either way.
+        $matched = preg_match(
+            '/openDropdown === \'system\' \? null : \'system\'"[^>]*class="([^"]*)"/',
+            $content,
+            $m
+        );
+
+        $this->assertSame(1, $matched, 'Could not find the System tab button in the admin nav');
+        $this->assertStringContainsString(
+            'border-[var(--brand-blue)]',
+            $m[1],
+            'The System tab should be styled active on /admin/legal'
+        );
     }
 }

@@ -8,7 +8,7 @@
         $manageKeys = array_merge($manageKeys, ['schedules', 'domains', 'referrals', 'blog']);
     }
     $manageActive = in_array($active, $manageKeys);
-    $systemActive = in_array($active, ['audit-log', 'queue', 'logs', 'app-update', 'support', 'settings', 'translations', 'federation']);
+    $systemActive = in_array($active, ['audit-log', 'queue', 'logs', 'app-update', 'support', 'settings', 'translations', 'legal', 'federation']);
 
     // Pending-work badges, shared by the AdminAlertService composer. Queues sit
     // unnoticed without them, and operators then conclude the feature is broken.
