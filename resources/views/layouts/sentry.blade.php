@@ -3,6 +3,8 @@ window.sentryOnLoad = function () {
         // Third-party scripts we neither ship nor control. Cloudflare injects its Web Analytics
         // beacon same-origin on proxied customer domains, so its crashes arrive with a real message
         // and a full stack rather than the opaque 'Script error.' the list below already drops.
+        // Meta's in-app browser injects its own telemetry under iabjs://, which throws on teardown
+        // because it postMessages across an Android bridge that native has already torn down.
         // denyUrls matches only the throwing frame, so our own errors are still reported when a
         // third party merely triggers them.
         denyUrls: [
@@ -13,6 +15,7 @@ window.sentryOnLoad = function () {
             /^moz-extension:\/\//i,
             /^safari-(web-)?extension:\/\//i,
             /^chrome:\/\//i,
+            /^iabjs:\/\//i,              // Meta in-app browser (Instagram, Facebook, Messenger, Threads)
         ],
         beforeSend: function (event) {
             var str = JSON.stringify(event);
@@ -28,6 +31,7 @@ window.sentryOnLoad = function () {
                 'WKWebView',
                 'contentWindow',
                 'Java object is gone',
+                'Java exception was raised',
                 'cloudflare-static',
                 'Turnstile',
                 'Loading chunk',
