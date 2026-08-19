@@ -387,6 +387,54 @@ if (! function_exists('marketing_url')) {
     }
 }
 
+if (! function_exists('policy_url')) {
+    /**
+     * The URL of a legal document (privacy | terms | cookies).
+     *
+     * An operator can replace any of them from /admin/legal, either by pointing
+     * at a policy hosted elsewhere or by writing one in the app (issue #116).
+     * Resolution order: external URL -> in-app document -> the built-in page.
+     *
+     * $fallbackPath is the marketing path to use when nothing is overridden.
+     * It is explicit because the call sites are not consistent about the terms
+     * document: most link /terms-of-service, while the selfhost branches of the
+     * consent checkboxes link /self-hosting-terms-of-service. Passing it keeps
+     * each site's existing behaviour exactly.
+     */
+    function policy_url(string $type, ?string $fallbackPath = null): string
+    {
+        // Resolved against one index read rather than by calling this helper
+        // again for the cookie fallback below, which doubled the cost of the
+        // cookie banner on every install that has not written one.
+        $index = \App\Models\LegalDocument::index();
+
+        $resolve = function (string $for) use ($index): ?string {
+            $document = $index[$for] ?? null;
+
+            if ($document && $document['url']) {
+                return $document['url'];
+            }
+
+            return $document && $document['has_content']
+                ? url(\App\Models\LegalDocument::PATHS[$for])
+                : null;
+        };
+
+        if ($resolved = $resolve($type)) {
+            return $resolved;
+        }
+
+        // Nothing written for the cookie policy: the cookie disclosure is part
+        // of the privacy policy, which is where the banner has always pointed.
+        if ($fallbackPath === null && $type === \App\Models\LegalDocument::COOKIES) {
+            return $resolve(\App\Models\LegalDocument::PRIVACY)
+                ?? marketing_url(\App\Models\LegalDocument::PATHS[\App\Models\LegalDocument::PRIVACY]);
+        }
+
+        return marketing_url($fallbackPath ?? \App\Models\LegalDocument::PATHS[$type]);
+    }
+}
+
 if (! function_exists('marketing_domain')) {
     /**
      * Get the marketing domain for display (without protocol)

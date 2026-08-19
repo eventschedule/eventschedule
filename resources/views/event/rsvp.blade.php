@@ -419,8 +419,8 @@
                                 <div class="ms-3 text-sm leading-6">
                                     <label for="terms" class="font-medium text-gray-900 dark:text-gray-300">
                                         {!! str_replace([':terms', ':privacy'], [
-                                            '<a href="' . marketing_url('/terms-of-service') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline"> ' . __('messages.terms_of_service') . '</a>',
-                                            '<a href="' . marketing_url('/privacy') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">' . __('messages.privacy_policy') . '</a>'
+                                            '<a href="' . policy_url('terms') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline"> ' . __('messages.terms_of_service') . '</a>',
+                                            '<a href="' . policy_url('privacy') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">' . __('messages.privacy_policy') . '</a>'
                                         ], __('messages.i_accept_the_terms_and_privacy')) !!}
                                     </label>
                                 </div>
@@ -502,8 +502,8 @@
                                 <div class="ms-3 text-sm leading-6">
                                     <label for="terms_rsvp_guest" class="font-medium text-gray-900 dark:text-gray-300">
                                         {!! str_replace([':terms', ':privacy'], [
-                                            '<a href="' . marketing_url('/terms-of-service') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline"> ' . __('messages.terms_of_service') . '</a>',
-                                            '<a href="' . marketing_url('/privacy') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">' . __('messages.privacy_policy') . '</a>'
+                                            '<a href="' . policy_url('terms') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline"> ' . __('messages.terms_of_service') . '</a>',
+                                            '<a href="' . policy_url('privacy') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">' . __('messages.privacy_policy') . '</a>'
                                         ], __('messages.i_accept_the_terms_and_privacy')) !!}
                                     </label>
                                 </div>

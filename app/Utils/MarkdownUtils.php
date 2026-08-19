@@ -7,13 +7,20 @@ use HTMLPurifier_Config;
 use League\CommonMark\Environment\Environment;
 use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
 use League\CommonMark\Extension\HeadingPermalink\HeadingPermalinkExtension;
+use League\CommonMark\Extension\Table\TableExtension;
 use League\CommonMark\MarkdownConverter;
 
 class MarkdownUtils
 {
     private const MAX_SPACER_PARAGRAPHS = 10;
 
-    public static function convertToHtml($markdown)
+    /**
+     * @param  bool  $tables  Enable GFM pipe tables. Off by default so schedule and
+     *                        event content renders exactly as it always has; the
+     *                        operator-authored legal documents opt in, because a
+     *                        cookie list and a retention schedule are tables.
+     */
+    public static function convertToHtml($markdown, bool $tables = false)
     {
         if (! $markdown) {
             return $markdown;
@@ -41,6 +48,10 @@ class MarkdownUtils
         ]);
         $environment->addExtension(new CommonMarkCoreExtension);
         $environment->addExtension(new HeadingPermalinkExtension);
+
+        if ($tables) {
+            $environment->addExtension(new TableExtension);
+        }
 
         $converter = new MarkdownConverter($environment);
         $html = $converter->convert($markdown)->getContent();

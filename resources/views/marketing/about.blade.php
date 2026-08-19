@@ -555,7 +555,7 @@
             [
                 'Analytics',
                 'Opt-in. Analytics, advertising and personalization signals are set to denied until you press Allow in the cookie banner, and declining sets no analytics cookies at all.',
-                marketing_url('/privacy'), 'Privacy policy', false,
+                policy_url('privacy'), 'Privacy policy', false,
             ],
             [
                 'First edition',

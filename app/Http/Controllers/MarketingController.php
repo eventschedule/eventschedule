@@ -995,14 +995,6 @@ class MarketingController extends Controller
     }
 
     /**
-     * Privacy Policy page
-     */
-    public function privacy()
-    {
-        return view('marketing.privacy');
-    }
-
-    /**
      * Public accessibility declaration (marketing site).
      */
     public function accessibility()
@@ -1016,14 +1008,6 @@ class MarketingController extends Controller
     public function docsSelfhostAccessibility()
     {
         return view('marketing.docs.selfhost.accessibility');
-    }
-
-    /**
-     * Terms of Service page
-     */
-    public function terms()
-    {
-        return view('marketing.terms');
     }
 
     /**
@@ -5633,6 +5617,7 @@ class MarketingController extends Controller
             ['page' => 'Admin Panel', 'section' => 'App Update', 'description' => 'See the installed version next to the latest release, and apply an update in one click.', 'url' => $r['selfhost_admin'].'#system-app-update', 'category' => 'Selfhost', 'keywords' => 'update upgrade version release github selfhost one click migrations app:update update app missing notification badge'],
             ['page' => 'Admin Panel', 'section' => 'Translations', 'description' => 'Review and customize the app\'s text in any language, and share improvements with the community.', 'url' => $r['selfhost_admin'].'#system-translations', 'category' => 'Selfhost', 'keywords' => 'translations translate language customize text terminology rename wording localization locale strings'],
             ['page' => 'Admin Panel', 'section' => 'Sharing translations', 'description' => 'Share your translation improvements with the EventSchedule community for review.', 'url' => $r['selfhost_admin'].'#system-translations', 'category' => 'Selfhost', 'keywords' => 'share translations community contribute suggestions auto-share'],
+            ['page' => 'Admin Panel', 'section' => 'Legal Pages', 'description' => 'Replace the built-in privacy policy and terms of service with your own, and add a cookie policy.', 'url' => $r['selfhost_admin'].'#system-legal-pages', 'category' => 'Selfhost', 'keywords' => 'legal privacy policy terms of service cookie policy gdpr paia popia ccpa compliance jurisdiction consent custom documents markdown'],
 
             // Boost Setup (Selfhost)
             ['page' => 'Boost Setup', 'section' => 'Overview', 'description' => 'Set up Meta/Facebook boost for selfhosted instances.', 'url' => $r['selfhost_boost'].'#overview', 'category' => 'Selfhost', 'keywords' => 'boost meta facebook setup'],

@@ -149,6 +149,7 @@ class AppServiceProvider extends ServiceProvider
         // cache across processes; only this static needs help.
         Queue::looping(function () {
             \App\Utils\PlatformCurrency::flush();
+            \App\Models\LegalDocument::flush();
         });
 
         View::composer('marketing.partials.header', function ($view) {

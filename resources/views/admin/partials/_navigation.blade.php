@@ -171,6 +171,9 @@
                             @lang('messages.translations')
                             <x-nav-badge :badge="$tabBadges['translations'] ?? null" />
                         </a>
+                        <a href="{{ route('admin.legal') }}" class="{{ $active === 'legal' ? $dropdownItemActive : $dropdownItem }}">
+                            @lang('messages.legal_pages')
+                        </a>
                         @if (config('app.is_nexus'))
                         <a href="{{ route('admin.federation') }}" class="{{ $active === 'federation' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.federation')

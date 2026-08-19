@@ -723,11 +723,12 @@
               <h3 class="text-[11px] uppercase tracking-wider text-violet-400 print:text-violet-600 font-semibold mb-[6px]">{{ __('messages.terms_and_conditions') }}</h3>
               @php
                 $termsUrl = $event->terms_url ?: (config('app.hosted')
-                  ? marketing_url('/terms-of-service')
-                  : marketing_url('/self-hosting-terms-of-service'));
-                $termsDisplay = $event->terms_url
-                  ? preg_replace('#^https?://(www\.)?#', '', $event->terms_url)
-                  : marketing_domain() . '/terms';
+                  ? policy_url('terms')
+                  : policy_url('terms', '/self-hosting-terms-of-service'));
+                // Derived from the resolved URL rather than hardcoded: with an operator's
+                // own terms in place the link no longer goes to the marketing domain, and
+                // the old literal '/terms' was not a real route on any install either.
+                $termsDisplay = preg_replace('#^https?://(www\.)?#', '', rtrim($termsUrl, '/'));
               @endphp
               <a href="{{ $termsUrl }}" target="_blank" class="text-[11px] text-white/60 print-text-gray hover:text-white/80 transition-colors break-all">
                 {{ Str::limit($termsDisplay, 30) }}

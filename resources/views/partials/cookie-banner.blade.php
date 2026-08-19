@@ -29,7 +29,7 @@
             bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 shadow-lg p-4">
     <p class="text-sm leading-relaxed mb-3">
         {{ __('messages.cookie_consent_message') }}
-        <x-link :href="marketing_url('/privacy')">{{ __('messages.cookie_consent_learn_more') }}</x-link>
+        <x-link :href="policy_url('cookies')">{{ __('messages.cookie_consent_learn_more') }}</x-link>
     </p>
     <div class="flex justify-end items-center gap-2">
         <button type="button" data-cookie-consent-action="denied"

@@ -1345,6 +1345,8 @@ class Role extends Model implements MustVerifyEmail
             'home',
             'privacy',
             'terms',
+            'terms-of-service',
+            'cookie-policy',
             'register',
             'venues',
             'profile',

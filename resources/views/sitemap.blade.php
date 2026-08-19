@@ -1057,6 +1057,23 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
         <changefreq>yearly</changefreq>
         <priority>0.5</priority>
     </url>
+@php
+    // The cookie policy exists only where an operator wrote one - there is no page
+    // shipped for it - so it is listed only then. Like privacy and terms above it
+    // gets no hreflang: the documents are not translated.
+    //
+    // Content only, never a url-only document: that case 302s off-domain, and a
+    // <loc> that redirects away is a soft error to a crawler.
+    $cookiePolicy = \App\Models\LegalDocument::index()['cookies'] ?? null;
+@endphp
+@if ($cookiePolicy && $cookiePolicy['has_content'] && ! $cookiePolicy['url'])
+    <url>
+        <loc>{{ url('/cookie-policy') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.5</priority>
+    </url>
+@endif
     <url>
         <loc>{{ url('/blog') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>

@@ -100,6 +100,9 @@ class RouteLoadTest extends TestCase
             '/contact',
             '/privacy',
             '/terms-of-service',
+            // 404s until an operator writes one, which assertRoutesLoad tolerates;
+            // it is here to catch a 500 inside LegalController before that point.
+            '/cookie-policy',
             '/self-hosting-terms-of-service',
             '/search',
             '/accessibility',
@@ -340,6 +343,7 @@ class RouteLoadTest extends TestCase
             '/admin/newsletters',
             '/admin/newsletters/create',
             '/admin/newsletter-segments',
+            '/admin/legal',
         ], $user, $session);
     }
 

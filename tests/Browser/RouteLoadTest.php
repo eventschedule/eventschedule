@@ -62,6 +62,7 @@ class RouteLoadTest extends DuskTestCase
                 '/contact',
                 '/privacy',
                 '/terms-of-service',
+                '/cookie-policy',
                 '/self-hosting-terms-of-service',
 
                 // Feature pages

@@ -117,12 +117,12 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ marketing_url('/privacy') }}" class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                        <a href="{{ policy_url('privacy') }}" class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                             Privacy Policy
                         </a>
                     </li>
                     <li>
-                        <a href="{{ marketing_url('/terms-of-service') }}" class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                        <a href="{{ policy_url('terms') }}" class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                             Terms of Service
                         </a>
                     </li>

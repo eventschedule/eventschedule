@@ -25,6 +25,7 @@
         <x-doc-nav-link href="#system-app-update">App Update</x-doc-nav-link>
         <x-doc-nav-link href="#system-settings">Settings</x-doc-nav-link>
         <x-doc-nav-link href="#system-translations">Translations</x-doc-nav-link>
+        <x-doc-nav-link href="#system-legal-pages">Legal Pages</x-doc-nav-link>
     </x-slot:toc>
 
     <!-- Overview -->
@@ -789,6 +790,30 @@
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Behind the scenes</div>
             <p>Customizations are stored in the database and published as override files under <code class="doc-inline-code">storage/app/lang</code>, or wherever <code class="doc-inline-code">LANG_OVERRIDES_PATH</code> points if you run several servers from a shared volume. Hand-made override files (the pre-existing <a href="{{ route('marketing.docs.selfhost.installation') }}#translations" class="doc-link">custom translations</a> approach) are adopted into the editor automatically. After restoring a database backup or cloning to a new server, run <code class="doc-inline-code">php artisan translations:publish</code> to rebuild the files.</p>
+        </div>
+    </section>
+
+    <!-- System: Legal Pages -->
+    <section id="system-legal-pages" class="doc-section">
+        <h2 class="doc-heading">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 01-2.031.352 5.988 5.988 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 01-2.031.352 5.989 5.989 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971z" />
+            </svg>
+            Legal Pages (System)
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Your installation ships with a privacy policy and terms of service written for eventschedule.com. They are almost certainly not the documents you need: privacy law differs by country, and GDPR, PAIA and POPIA each ask for different disclosures. The Legal Pages screen lets you replace them with your own, and add a cookie policy, which the app has no page for otherwise.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">There is a card for each of the three documents - <strong class="text-gray-900 dark:text-white">Privacy Policy</strong>, <strong class="text-gray-900 dark:text-white">Terms of Service</strong> and <strong class="text-gray-900 dark:text-white">Cookie Policy</strong> - and each one offers two ways to supply it:</p>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">External URL</strong> - link to a policy you already publish elsewhere, for example on your main company website. Every link in the app goes straight there.</li>
+            <li><strong class="text-gray-900 dark:text-white">Document</strong> - write the policy here in Markdown. It is served from your own domain at <code class="doc-inline-code">/privacy</code>, <code class="doc-inline-code">/terms-of-service</code> or <code class="doc-inline-code">/cookie-policy</code>, styled to match your install, with a "last updated" date. Headings automatically get anchors, so you can link to individual clauses.</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">If you fill in both, the external URL wins. If you leave both blank, the built-in page is used, exactly as before. Nothing ships pre-filled: the editors start empty, because a template written for one jurisdiction would be wrong for most.</p>
+
+        <h3 class="doc-subheading">Where your policies appear</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Saving a document changes every link to it across the whole app at once - the "I accept the terms and privacy policy" checkbox on signup, ticket checkout, RSVPs, booking requests and event submissions, the issued ticket, the admin portal's About menu, and the cookie banner's "Learn more" link, which prefers your cookie policy when you have one. Until you write one, those links continue to point at eventschedule.com.</p>
+        <div class="doc-callout doc-callout-warning">
+            <div class="doc-callout-title">This is not legal advice</div>
+            <p>What you save here is what your users agree to when they register or buy a ticket. Event Schedule cannot tell you what your policies need to say - have a qualified professional review them for the jurisdictions you operate in.</p>
         </div>
     </section>
 </x-docs-page>

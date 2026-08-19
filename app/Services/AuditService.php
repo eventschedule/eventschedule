@@ -127,6 +127,8 @@ class AuditService
 
     const ADMIN_SETTINGS_UPDATE = 'admin.settings_update';
 
+    const ADMIN_LEGAL_UPDATE = 'admin.legal_update';
+
     const ADMIN_TRANSLATIONS_UPDATE = 'admin.translations_update';
 
     const ADMIN_TRANSLATIONS_REVERT = 'admin.translations_revert';

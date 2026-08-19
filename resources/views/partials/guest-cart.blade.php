@@ -180,8 +180,8 @@
                         <input type="checkbox" name="terms" value="1" required
                             class="mt-0.5 h-4 w-4 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-800 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                         <span>{!! str_replace([':terms', ':privacy'], [
-                            '<a href="'.marketing_url('/terms-of-service').'" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">'.__('messages.terms_of_service').'</a>',
-                            '<a href="'.marketing_url('/privacy').'" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">'.__('messages.privacy_policy').'</a>',
+                            '<a href="'.policy_url('terms').'" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">'.__('messages.terms_of_service').'</a>',
+                            '<a href="'.policy_url('privacy').'" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">'.__('messages.privacy_policy').'</a>',
                         ], __('messages.i_accept_the_terms_and_privacy')) !!}</span>
                     </label>
                 @endif

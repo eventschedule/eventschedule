@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminFederationController;
+use App\Http\Controllers\AdminLegalController;
 use App\Http\Controllers\AdminNewsletterController;
 use App\Http\Controllers\AdminTranslationController;
 use App\Http\Controllers\AnalyticsController;
@@ -28,6 +29,7 @@ use App\Http\Controllers\GraphicController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InstallmentController;
 use App\Http\Controllers\InvoiceNinjaController;
+use App\Http\Controllers\LegalController;
 use App\Http\Controllers\MarketingController;
 use App\Http\Controllers\MetaAdsWebhookController;
 use App\Http\Controllers\MicrosoftCalendarController;
@@ -774,6 +776,13 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
         Route::post('/admin/settings/accommodation', [AdminController::class, 'updateStay22Settings'])->name('admin.settings.update_stay22');
         Route::post('/admin/settings/currency', [AdminController::class, 'updateCurrencySettings'])->name('admin.settings.update_currency');
 
+        // Operator-authored privacy policy / terms / cookie policy. One endpoint per
+        // document, for the reason given above.
+        Route::get('/admin/legal', [AdminLegalController::class, 'index'])->name('admin.legal');
+        Route::post('/admin/legal/{type}', [AdminLegalController::class, 'update'])
+            ->where('type', 'privacy|terms|cookies')
+            ->name('admin.legal.update');
+
         // Federation moderation. Registered everywhere but runtime-404s off the nexus,
         // because phpunit pins IS_NEXUS=true and a registration-time gate would be
         // untestable (same reasoning as the translation review routes below).
@@ -1047,9 +1056,12 @@ if (config('app.is_nexus')) {
         Route::get('/notion-alternative', fn () => redirect()->route('marketing.replace_notion', [], 301));
         Route::get('/trello-alternative', fn () => redirect()->route('marketing.replace_trello', [], 301));
         Route::get('/contact', [MarketingController::class, 'contact'])->name('marketing.contact');
-        Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
+        // The legal documents go through LegalController because an operator can replace
+        // any of them from /admin/legal; it falls back to the bundled marketing page.
+        Route::get('/privacy', [LegalController::class, 'show'])->defaults('type', 'privacy')->name('marketing.privacy');
         Route::get('/accessibility', [MarketingController::class, 'accessibility'])->name('marketing.accessibility');
-        Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
+        Route::get('/terms-of-service', [LegalController::class, 'show'])->defaults('type', 'terms')->name('marketing.terms');
+        Route::get('/cookie-policy', [LegalController::class, 'show'])->defaults('type', 'cookies')->name('marketing.cookie_policy');
         Route::get('/self-hosting-terms-of-service', [MarketingController::class, 'selfHostingTerms'])->name('marketing.self_hosting_terms');
         Route::get('/selfhost', [MarketingController::class, 'selfHost'])->name('marketing.selfhost');
         Route::get('/self-host-event-schedule', fn () => redirect()->route('marketing.selfhost', [], 301));
@@ -1264,9 +1276,12 @@ if (config('app.is_nexus')) {
             Route::get('/notion-alternative', fn () => redirect()->route('marketing.replace_notion', [], 301));
             Route::get('/trello-alternative', fn () => redirect()->route('marketing.replace_trello', [], 301));
             Route::get('/contact', [MarketingController::class, 'contact'])->name('marketing.contact');
-            Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
+            // The legal documents go through LegalController because an operator can replace
+            // any of them from /admin/legal; it falls back to the bundled marketing page.
+            Route::get('/privacy', [LegalController::class, 'show'])->defaults('type', 'privacy')->name('marketing.privacy');
             Route::get('/accessibility', [MarketingController::class, 'accessibility'])->name('marketing.accessibility');
-            Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
+            Route::get('/terms-of-service', [LegalController::class, 'show'])->defaults('type', 'terms')->name('marketing.terms');
+            Route::get('/cookie-policy', [LegalController::class, 'show'])->defaults('type', 'cookies')->name('marketing.cookie_policy');
             Route::get('/self-hosting-terms-of-service', [MarketingController::class, 'selfHostingTerms'])->name('marketing.self_hosting_terms');
             Route::get('/selfhost', [MarketingController::class, 'selfHost'])->name('marketing.selfhost');
             Route::get('/self-host-event-schedule', fn () => redirect()->route('marketing.selfhost', [], 301));
@@ -1462,6 +1477,7 @@ if (config('app.is_nexus')) {
             Route::get('/privacy', fn () => redirect('https://'._base_domain().'/privacy', 301));
             Route::get('/accessibility', fn () => redirect('https://'._base_domain().'/accessibility', 301));
             Route::get('/terms-of-service', fn () => redirect('https://'._base_domain().'/terms-of-service', 301));
+            Route::get('/cookie-policy', fn () => redirect('https://'._base_domain().'/cookie-policy', 301));
             Route::get('/self-hosting-terms-of-service', fn () => redirect('https://'._base_domain().'/self-hosting-terms-of-service', 301));
             Route::get('/selfhost', fn () => redirect('https://'._base_domain().'/selfhost', 301));
             Route::get('/self-host-event-schedule', fn () => redirect('https://'._base_domain().'/selfhost', 301));
@@ -1607,6 +1623,20 @@ if (config('app.is_nexus')) {
     Route::get('/use-cases', fn () => redirect()->route('home'));
     Route::get('/compare', fn () => redirect()->route('home'));
     Route::get('/contact', fn () => redirect()->route('home'));
+    // The legal documents are the exception to the redirect-to-home rule above: an
+    // operator can author their own from /admin/legal, and this is where they are
+    // served. With none written, LegalController sends the visitor to the marketing
+    // site, which is where every consent link on this install already points.
+    //
+    // These three paths did NOT exist on non-nexus before, so like the reserved
+    // segments noted around line 305 they now win over the selfhost /{subdomain}
+    // catch-alls below: a pre-existing selfhost schedule literally named 'privacy',
+    // 'terms-of-service' or 'cookie-policy' loses its public URL on upgrade.
+    // Role::cleanSubdomain() reserves them, but only when app.hosted is true, so it
+    // does not defend this case - acceptable, and worth knowing.
+    Route::get('/privacy', [LegalController::class, 'show'])->defaults('type', 'privacy')->name('marketing.privacy');
+    Route::get('/terms-of-service', [LegalController::class, 'show'])->defaults('type', 'terms')->name('marketing.terms');
+    Route::get('/cookie-policy', [LegalController::class, 'show'])->defaults('type', 'cookies')->name('marketing.cookie_policy');
     Route::get('/selfhost', fn () => redirect()->route('home'));
     Route::get('/saas', fn () => redirect()->route('home'));
     Route::get('/docs', fn () => redirect()->route('home'))->name('marketing.docs');
