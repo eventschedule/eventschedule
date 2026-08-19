@@ -61,6 +61,28 @@ class LegalPagesTest extends TestCase
         config(['app.is_testing' => false, 'app.marketing_url' => 'https://eventschedule.com']);
     }
 
+    /**
+     * A plain selfhost install: path-based routing, one tenant, the legal routes reachable on
+     * the only host there is. A multi-tenant install shares is_nexus=false but not app.hosted,
+     * and policy_url() answers it differently - see
+     * test_on_a_multi_tenant_install_a_written_document_is_linked_on_the_app_host().
+     *
+     * app.url is pinned because turning off BOTH hosted and is_testing - every caller pairs
+     * this with withRemoteMarketingSite(), which does the second - re-arms
+     * selfhost_needs_setup(): it reads a blank APP_URL as a fresh install and has
+     * EnsureSelfhostSetup redirect every request to the setup wizard, so the page under test
+     * never renders. CI copies .env.example, where APP_URL is blank, so it cannot be left
+     * ambient - that is why this passed locally and failed on the build.
+     */
+    private function selfhost(): void
+    {
+        config([
+            'app.is_nexus' => false,
+            'app.hosted' => false,
+            'app.url' => config('app.url') ?: 'http://localhost',
+        ]);
+    }
+
     // ---------------------------------------------------------------- admin endpoint
 
     public function test_a_non_admin_cannot_save_a_legal_document(): void
@@ -242,7 +264,12 @@ class LegalPagesTest extends TestCase
 
         $this->get('/privacy')->assertOk()
             ->assertSee('{{ 7*7 }}', false)
-            ->assertDontSee('49');
+            // Not a bare '49': the page carries a random 40-character CSRF token and a random
+            // base64 CSP nonce, either of which can contain those two digits by chance. The
+            // claim is that nothing evaluated the expression, so assert the sentence it would
+            // have produced - and, directly, that nothing mounts Vue on this page.
+            ->assertDontSee('id="app"', false)
+            ->assertDontSee('Retention is 49 days');
 
         $this->adminActing();
 
@@ -337,7 +364,7 @@ class LegalPagesTest extends TestCase
      */
     public function test_on_a_selfhost_install_an_unwritten_document_goes_to_the_marketing_site(): void
     {
-        config(['app.is_nexus' => false]);
+        $this->selfhost();
         $this->withRemoteMarketingSite();
 
         $this->get('/privacy')->assertRedirect('https://eventschedule.com/privacy');
@@ -347,11 +374,7 @@ class LegalPagesTest extends TestCase
 
     public function test_on_a_selfhost_install_a_written_document_is_served_locally(): void
     {
-        // app.hosted is pinned because this is the PLAIN selfhost claim - path-based routing,
-        // one tenant, the legal routes reachable on the only host there is. A multi-tenant
-        // install shares is_nexus=false but not that, and policy_url() answers it differently;
-        // see test_on_a_multi_tenant_install_a_written_document_is_linked_on_the_app_host().
-        config(['app.is_nexus' => false, 'app.hosted' => false]);
+        $this->selfhost();
         $this->withRemoteMarketingSite();
 
         LegalDocument::create(['type' => 'privacy', 'content' => '## Our own policy']);
@@ -366,6 +389,10 @@ class LegalPagesTest extends TestCase
     /**
      * marketing_url() returns a LOCAL url in testing mode, so the fallback branch
      * would otherwise redirect this route to itself.
+     *
+     * Deliberately not selfhost(): app.is_testing stays ON here, because that is the branch
+     * under test - which also means selfhost_needs_setup() short-circuits and the helper's
+     * app.url pin would be moot.
      */
     public function test_the_selfhost_fallback_does_not_redirect_to_itself(): void
     {
