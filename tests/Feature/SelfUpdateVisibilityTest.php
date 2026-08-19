@@ -19,10 +19,10 @@ use Tests\TestCase;
  * used to be registered conditionally and route('app.update') threw while rendering the
  * section under phpunit.
  *
- * Every test pins app.is_nexus, app.is_testing AND app.hosted. None of the three can be left
- * to the environment: phpunit.xml pins IS_NEXUS/APP_TESTING true, and CI additionally writes
- * IS_HOSTED=true into .env (.github/workflows/test.yml), so the "default" differs between a
- * developer's machine and the build.
+ * Every test pins app.is_nexus, app.is_testing, app.hosted AND app.url. None of the four can
+ * be left to the environment: phpunit.xml pins IS_NEXUS/APP_TESTING true, and CI additionally
+ * writes IS_HOSTED=true into .env and leaves APP_URL blank (.github/workflows/test.yml), so
+ * the "default" differs between a developer's machine and the build.
  */
 class SelfUpdateVisibilityTest extends TestCase
 {
@@ -39,6 +39,11 @@ class SelfUpdateVisibilityTest extends TestCase
             'app.is_nexus' => false,
             'app.is_testing' => false,
             'app.hosted' => false,
+            // Turning off BOTH hosted and is_testing re-arms selfhost_needs_setup(), which
+            // reads a blank APP_URL as a fresh install and has EnsureSelfhostSetup redirect
+            // every request to the setup wizard - so the controller under test never runs.
+            // CI copies .env.example, where APP_URL is blank, so it cannot be left ambient.
+            'app.url' => config('app.url') ?: 'http://localhost',
             'self-update.version_installed' => 'v1.0.100',
         ], $overrides));
 
@@ -176,7 +181,8 @@ class SelfUpdateVisibilityTest extends TestCase
     {
         // is_nexus and is_testing both make can_self_update() false; the controller is what
         // enforces it now that the route itself is always registered.
-        config(['app.is_nexus' => true, 'app.is_testing' => false, 'app.hosted' => false]);
+        // Through the helper, so the app.url pin it carries applies here too.
+        $this->selfhost(['app.is_nexus' => true]);
 
         // An admin with a confirmed session, so the request reaches the controller whether or
         // not the 'admin' middleware was attached at boot (which depends on IS_HOSTED in .env,

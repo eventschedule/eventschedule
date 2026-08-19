@@ -19,9 +19,10 @@ use Tests\TestCase;
  * marketing site said it was "in your admin panel", and a selfhost user who lost the Settings
  * section had no second way in and no way to grant themselves admin.
  *
- * app.is_nexus, app.is_testing and app.hosted are pinned in every test. phpunit.xml pins
- * IS_NEXUS/APP_TESTING true and CI writes IS_HOSTED=true into .env, so nothing here may rely
- * on an ambient default.
+ * app.is_nexus, app.is_testing, app.hosted and app.url are pinned in every test. phpunit.xml
+ * pins IS_NEXUS/APP_TESTING true and CI writes IS_HOSTED=true into .env, so nothing here may
+ * rely on an ambient default - and CI leaves APP_URL blank, which is the fourth key's reason
+ * for being (see selfhost()).
  */
 class AdminAppUpdateTest extends TestCase
 {
@@ -34,6 +35,11 @@ class AdminAppUpdateTest extends TestCase
             'app.is_nexus' => false,
             'app.is_testing' => false,
             'app.hosted' => false,
+            // Turning off BOTH hosted and is_testing re-arms selfhost_needs_setup(), which
+            // reads a blank APP_URL as a fresh install and has EnsureSelfhostSetup redirect
+            // every request to the setup wizard - so the controller under test never runs.
+            // CI copies .env.example, where APP_URL is blank, so it cannot be left ambient.
+            'app.url' => config('app.url') ?: 'http://localhost',
             'self-update.version_installed' => 'v1.0.100',
         ], $overrides));
 
