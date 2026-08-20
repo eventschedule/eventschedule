@@ -1029,8 +1029,7 @@ return [
     'error' => 'Error',
 
     // Referenced in code but never defined, so each of these rendered its own key name
-    // ("messages.not_found") to the user. English only for now: fallback_locale is 'en', so every
-    // locale shows this rather than the raw key, and proper translations can follow.
+    // ("messages.not_found") to the user. Now translated in all 11 non-English files as well.
     'error_occurred' => 'Something went wrong. Please try again.',
     'something_went_wrong' => 'Something went wrong. Please try again.',
     'not_found' => 'Not found',
