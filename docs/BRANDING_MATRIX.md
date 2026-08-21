@@ -64,6 +64,9 @@ down where the strip already renders:
 | Newsletter email footer | yes | -- | -- | yes | -- | -- |
 | Head metadata: `<title>`, `og:site_name` | -- | -- | -- | -- | -- | -- |
 | Head metadata: `BreadcrumbList` root | `marketing_url()` | `marketing_url()` | `marketing_url()` | `marketing_url()` | `marketing_url()` | `marketing_url()` |
+| Head metadata: `og:image` | the owner's, or none | the owner's, or none | the owner's, or none | the owner's, or none | the owner's, or none | the owner's, or none |
+| Head metadata: web app manifest | the schedule's own | the schedule's own | the schedule's own | the schedule's own | the schedule's own | the schedule's own |
+| Head metadata: `theme-color` | the accent, or nothing | the accent, or nothing | the accent, or nothing | the accent, or nothing | the accent, or nothing | the accent, or nothing |
 | AP footer (not a guest surface) | support email | support email | support email | support email | support email | "Powered by eventschedule.com" + version |
 
 The first two rows are mutually exclusive column by column, and that is the invariant a reader
@@ -89,6 +92,10 @@ the head, and `servesOnCustomDomain()` removes that one too.
 | `<title>` | `App\View\Components\AppGuestLayout::guestTitle()` | none - never branded |
 | `og:site_name` | `resources/views/layouts/app-guest.blade.php` (4 branches) | none - never branded |
 | `BreadcrumbList` root | `resources/views/layouts/app-guest.blade.php` (2 branches) | `! $role->servesOnCustomDomain()` |
+| `og:image` / `twitter:image` | `resources/views/layouts/app-guest.blade.php` (5 branches incl. JSON-LD) | none - never branded; omitted entirely when the owner has no image |
+| `og:image` on ticket / order / installment / Payfast | `resources/views/partials/private-page-meta.blade.php` | none - those four set a `meta` slot purely to avoid the shell's default |
+| Web app manifest (tenant) | `AppController::scheduleManifest()` via `resources/views/partials/web-app-manifest.blade.php` | none - never plan-gated, and never installable on Android |
+| `theme-color` (tenant) | `resources/views/partials/web-app-manifest.blade.php` | `Role::manifestThemeColor()`, the same accessor the manifest JSON reads |
 | AP footer | `resources/views/layouts/app-admin.blade.php` | `! config('app.hosted')`, no plan check |
 
 ## Rules that are easy to break
@@ -122,7 +129,31 @@ the head, and `servesOnCustomDomain()` removes that one too.
    operator's platform and every schedule on a selfhost install leave them unbranded. Putting our
    name into someone's outgoing mail, or into HTML they paste on a client's site, is a different
    decision and has not been made.
-6. **The WP documents this matrix publicly** and is written to not overclaim. Any change here needs
+6. **The head is white-label surface too, and it hid two leaks for years.** Both were fallbacks,
+   which is why no gate caught them: a gate chooses between the tenant's asset and a neutral one,
+   while a fallback fires only when the tenant *has* no asset - exactly the free, unfinished
+   schedule least able to notice. `og:image` fell back to `/images/social/home.png`, our 1200x630
+   marketing card, on five branches of `app-guest.blade.php`, so a logo-less schedule's WhatsApp
+   preview was an Event Schedule advert next to an `og:site_name` bearing their name. Four more
+   views (`ticket/view`, `ticket/order`, `installment/pay`, `payments/payfast/redirect`) set no
+   `meta` slot at all and inherited the shell's default, which names us outright. **The correct
+   fallback in the head is nothing.** Note what that does and does not promise: X with a
+   `summary` card shows no image, but Facebook's crawler falls back to selecting one from the page
+   body, so "no og:image" is not "no picture". The claim worth making, and the only one true on
+   every platform, is that the picture is never OURS - it degrades to the owner's own page, which
+   an advert of ours does not. Coverage:
+   `tests/Feature/GuestSocialImageTest.php`.
+7. **The tenant manifest is advertised but deliberately not installable.** An Android WebAPK claims
+   every link tapped on its host from another app and shows its launch splash before the page, so
+   an install branded as ours put our logo full screen in front of every schedule's audience.
+   `display_override: ['browser']` is what now stops Chrome minting one; `display` stays
+   `standalone` because Safari ignores `display_override` and iOS only exposes the Push API inside
+   a Home Screen web app, which the ticket page's opt-in depends on. Do not "tidy" these into one
+   field, and do not add a second `display_override` entry in front of `browser`. `sizes: "any"`
+   is not a defence - Chromium treats it as satisfying every size requirement. The historic
+   `/manifest.webmanifest` path stays served so WebAPKs installed before v1.0.124 re-brand
+   themselves off it. Coverage: `tests/Feature/GuestManifestTest.php`.
+8. **The WP documents this matrix publicly** and is written to not overclaim. Any change here needs
    `resources/views/marketing/white-label.blade.php` (the seven-row register, section 05, the
    selfhost and operator FAQs which also feed the FAQ JSON-LD, and the file's own design comment),
    the operator-facing `marketing/saas.blade.php` and `marketing/selfhost.blade.php`, and
@@ -145,5 +176,7 @@ suffix repeated across every page of every schedule is also a standard trigger f
 the title. Dropping them costs the platform nothing measurable and hands each schedule a title that
 matches its own name, which is what `og:title` had been sending all along.
 
-Coverage: `tests/Feature/GuestBrandingTest.php` (matrix) and
-`tests/Feature/GrantedPlanCreditTest.php` (the nexus granted-plan case in depth).
+Coverage: `tests/Feature/GuestBrandingTest.php` (matrix),
+`tests/Feature/GrantedPlanCreditTest.php` (the nexus granted-plan case in depth),
+`tests/Feature/GuestSocialImageTest.php` (the head's `og:image`) and
+`tests/Feature/GuestManifestTest.php` (the web app manifest and `theme-color`).

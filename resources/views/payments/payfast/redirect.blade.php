@@ -10,6 +10,10 @@
 --}}
 <x-app-layout :title="__('messages.redirecting_to_payment')">
 
+    <x-slot name="meta">
+        @include('partials.private-page-meta')
+    </x-slot>
+
     <div class="max-w-lg mx-auto px-4 py-16 text-center">
         @if (! empty($sandbox))
             {{-- Test mode is the owner's own toggle, and a forgotten one sells free tickets that look

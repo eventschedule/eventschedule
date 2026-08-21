@@ -1787,6 +1787,27 @@ class Role extends Model implements MustVerifyEmail
         return $this->plan_expires >= now()->format('Y-m-d') && $this->plan_type == 'pro';
     }
 
+    /**
+     * The colour a browser may tint its own chrome with on this schedule's pages, or null.
+     *
+     * One value for the two consumers that have to agree: AppController::scheduleManifest() puts
+     * it in the manifest as theme_color, and partials/web-app-manifest.blade.php emits the
+     * matching <meta name="theme-color">. Null means "say nothing", never a default. The meta tag
+     * used to fall back to #4E81FA while the manifest omitted the field in exactly that case, so a
+     * schedule that had cleared its accent got OUR brand blue in its address bar: the same leak
+     * the manifest split was written to close, surviving in the tag next to it.
+     *
+     * Not the same question as the page's own accent, which does default - show-guest.blade.php
+     * falls back for buttons. A default button colour is UI; a tinted address bar reads as identity.
+     *
+     * ?: rather than ??: accent_color is NOT NULL with a '#007bff' default, so a cleared accent
+     * reaches us as an empty string, never null.
+     */
+    public function manifestThemeColor(): ?string
+    {
+        return $this->accent_color ?: null;
+    }
+
     public function showBranding()
     {
         // A single-tenant install has no tiers - actualPlanTier() short-circuits to

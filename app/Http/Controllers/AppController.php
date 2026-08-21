@@ -592,23 +592,47 @@ class AppController extends Controller
             'short_name' => Str::limit($name, 12, ''),
             'start_url' => './',
             'scope' => './',
+            // Advertised but deliberately NOT installable. Chrome only offers an install, and
+            // only mints a WebAPK, when the effective display mode is fullscreen, standalone,
+            // minimal-ui or window-controls-overlay - and it resolves that from the first
+            // supported entry in display_override BEFORE it looks at display. 'browser' there
+            // fails the check, so no home-screen app is created, which is what actually matters:
+            // a WebAPK claims every link on the host and shows its launch splash before the page.
+            // Chrome's plain "Add to Home screen" shortcut still works and opens in a tab.
+            //
+            // display stays 'standalone' because Safari ignores display_override and reads this:
+            // iOS only exposes the Push API inside a Home Screen web app, and the ticket
+            // confirmation page offers exactly that opt-in (partials/push-optin). Setting
+            // display itself to 'browser' would silently kill push for iPhone ticket buyers,
+            // and iOS was never the problem - it does no link capturing, which is why the splash
+            // only ever showed on Android.
+            //
+            // Nothing may add another entry to display_override: a 'minimal-ui' in front of this
+            // would re-open the hole with display untouched. GuestManifestTest pins both halves.
             'display' => 'standalone',
+            'display_override' => ['browser'],
             'background_color' => '#ffffff',
             'lang' => $role->language_code,
             'dir' => $role->isRtl() ? 'rtl' : 'ltr',
         ];
 
         // Omitted rather than defaulted: falling back to our brand blue would tint the mobile
-        // address bar on a page that is meant to carry no branding of ours.
-        if ($role->accent_color) {
-            $manifest['theme_color'] = $role->accent_color;
+        // address bar on a page that is meant to carry no branding of ours. The matching
+        // <meta name="theme-color"> in partials/web-app-manifest.blade.php reads the same
+        // accessor, so the tag and this document cannot disagree - they used to.
+        if ($themeColor = $role->manifestThemeColor()) {
+            $manifest['theme_color'] = $themeColor;
         }
 
         // The schedule's own logo or nothing at all - never /images/logo.png, which is the whole
         // bug. Uploads are stored as-is (RoleController::update does no resizing), so the real
-        // dimensions are unknown and "any" is the only honest value; if a browser then declines
-        // to treat the page as installable, the result is the pre-manifest behaviour, which is
-        // what was asked for. A schedule with no logo advertises no icons for the same reason.
+        // dimensions are unknown and "any" is the only honest value. A schedule with no logo
+        // advertises no icons for the same reason. Do not rely on "any" to prevent an install:
+        // Chromium treats it as satisfying every size requirement, so the earlier hope here that a
+        // browser would "decline to treat the page as installable" was never true - display_override
+        // is what does that now. These fields are still worth serving because a WebAPK minted while
+        // the static manifest was live re-brands itself off them on its next update check, which is
+        // the only reason the historic path is still served at all.
         if ($role->profile_image_url) {
             $manifest['icons'] = [[
                 'src' => $role->profile_image_url,

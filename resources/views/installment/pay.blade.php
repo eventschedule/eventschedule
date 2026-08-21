@@ -1,5 +1,9 @@
 <x-app-layout :title="__('messages.payment_plan') . ($event ? ' - ' . $event->name : '')">
 
+    <x-slot name="meta">
+        @include('partials.private-page-meta')
+    </x-slot>
+
     <main id="main-content" class="flex-1 p-4 sm:p-6" tabindex="0">
         <div class="max-w-2xl mx-auto">
 

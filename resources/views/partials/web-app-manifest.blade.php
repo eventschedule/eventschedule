@@ -14,6 +14,11 @@
       @include('partials.web-app-manifest', ['manifestRole' => $role])   tenant surface
       @include('partials.web-app-manifest', ['platformApp' => true])     admin portal
 
+    The tenant manifest is also deliberately NOT installable - see AppController::scheduleManifest().
+    This partial's job on a tenant page is to point Chrome at that document, so a WebAPK installed
+    back when the static manifest was live re-brands itself off it, and to echo its theme colour.
+    It is not to make anything installable.
+
     A tenant surface whose $role is null renders nothing, and that is the right answer rather than
     a fallback: no manifest at all only costs the page an install prompt nobody asked for, while
     the platform manifest would put us back in front of someone else's audience. Same for a page
@@ -22,6 +27,11 @@
 @php
     $manifestRole = $manifestRole ?? null;
     $platformApp = $platformApp ?? false;
+
+    // The manifest omits theme_color when the schedule has cleared its accent; this tag must too,
+    // or the address bar carries our blue on a page whose own manifest carries no colour at all.
+    // Role::manifestThemeColor() is the single rule both halves read.
+    $manifestThemeColor = $manifestRole?->manifestThemeColor();
 
     // CSP sends manifest-src 'self', so a cross-origin href is refused by the browser outright.
     // In hosted mode role.manifest lives inside Route::domain(), so route() always emits an
@@ -43,7 +53,9 @@
     @if ($manifestUrl)
         <link rel="manifest" href="{{ $manifestUrl }}">
     @endif
-    <meta name="theme-color" content="{{ $manifestRole->accent_color ?: '#4E81FA' }}">
+    @if ($manifestThemeColor)
+        <meta name="theme-color" content="{{ $manifestThemeColor }}">
+    @endif
 @elseif ($platformApp)
     <link rel="manifest" href="{{ route('app.manifest') }}">
     <meta name="theme-color" content="#4E81FA">

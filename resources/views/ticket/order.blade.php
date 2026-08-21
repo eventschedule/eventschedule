@@ -1,5 +1,9 @@
 <x-app-layout :title="__('messages.your_tickets') . ($role ? ' | ' . $role->translatedName() : '')">
 
+    <x-slot name="meta">
+        @include('partials.private-page-meta')
+    </x-slot>
+
     <x-slot name="footCode">
         @include('partials.site-foot-code')
         @include('partials.cart-clear')

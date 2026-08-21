@@ -626,7 +626,7 @@
             ],
             [
                 'q' => 'Is anything left?',
-                'a' => 'On a schedule hosted here, nothing in the body of the page and two things outside it. First, one line of metadata in the page head: the breadcrumb data still names eventschedule.com as the site root. The title in the browser tab and the site name in a shared link preview both read your schedule\'s name on every plan, free included, and the tab icon becomes your logo on Pro. Point a custom domain at the schedule and the breadcrumb roots at your own domain too, which leaves the head with nothing of ours in it. Second, if an admin granted your Enterprise plan by hand rather than you buying it, a small Event Schedule credit chip stays below the footer; customers who pay through Stripe never carry that chip, and neither do plans earned through the referral programme. On any install that is not eventschedule.com the chip is the normal case rather than an exception, on every plan except a free one that is already carrying the operator\'s own strip - see the two questions below.',
+                'a' => 'On a schedule hosted here, nothing in the body of the page and two things outside it. First, one line of metadata in the page head: the breadcrumb data still names eventschedule.com as the site root. The title in the browser tab and the site name in a shared link preview both read your schedule\'s name on every plan, free included, the picture on that preview is your own artwork or, failing that, whatever your page already shows - never one of ours, and the tab icon becomes your logo on Pro. Point a custom domain at the schedule and the breadcrumb roots at your own domain too, which leaves the head with nothing of ours in it. Second, if an admin granted your Enterprise plan by hand rather than you buying it, a small Event Schedule credit chip stays below the footer; customers who pay through Stripe never carry that chip, and neither do plans earned through the referral programme. On any install that is not eventschedule.com the chip is the normal case rather than an exception, on every plan except a free one that is already carrying the operator\'s own strip - see the two questions below.',
             ],
             [
                 'q' => 'Do I need to change my embed after upgrading?',
@@ -957,9 +957,12 @@
 
                         <p class="es-slate2-muted mt-auto text-sm">
                             The tab reads your schedule's name and nothing else, and so does the site
-                            name on a shared link preview - on every plan, free included. The icon
-                            beside it becomes your uploaded logo on Pro. One string is left, and you
-                            will only ever meet it in the page source: the breadcrumb data names
+                            name on a shared link preview - on every plan, free included. The picture
+                            on that preview is your event's artwork or your logo, and if you have
+                            neither, the card falls back to whatever is already on your page, never
+                            to a picture of ours. The
+                            icon beside it becomes your uploaded logo on Pro. One string is left, and
+                            you will only ever meet it in the page source: the breadcrumb data names
                             <span class="es-slate2-lit">eventschedule.com</span> as the site root. Point
                             a domain of your own at the schedule and that roots at your domain too.
                         </p>

@@ -76,19 +76,28 @@
         <meta property="og:locale" content="{{ $ogLocale }}">
 
         @if ($event && $event->exists && ($passwordGate ?? false))
+            @php
+                // The schedule's own logo, never the event's flyer: this page is password gated,
+                // so its imagery is precisely what the owner chose not to make public. And never
+                // /images/social/home.png, which put an Event Schedule advert in the WhatsApp
+                // preview of somebody else's private event.
+                $gateOgImage = $role->profile_image_url ?: null;
+            @endphp
             <meta name="description" content="{{ __('messages.event_password_required') }}">
             <meta property="og:type" content="event">
             <meta property="og:title" content="{{ __('messages.event_password_required') }}">
             <meta property="og:description" content="{{ __('messages.event_password_required') }}">
-            <meta property="og:image" content="{{ config('app.url') . '/images/social/home.png' }}">
-            <meta property="og:image:width" content="1200">
-            <meta property="og:image:height" content="630">
+            @if ($gateOgImage)
+            <meta property="og:image" content="{{ $gateOgImage }}">
+            @endif
             <meta property="og:url" content="{{ $event->getCanonicalUrl($date) }}">
             <meta property="og:site_name" content="{{ $role->translatedName() ?: config('app.name') }}">
             <meta name="twitter:title" content="{{ __('messages.event_password_required') }}">
             <meta name="twitter:description" content="{{ __('messages.event_password_required') }}">
-            <meta name="twitter:image" content="{{ config('app.url') . '/images/social/home.png' }}">
-            <meta name="twitter:card" content="summary_large_image">
+            @if ($gateOgImage)
+            <meta name="twitter:image" content="{{ $gateOgImage }}">
+            @endif
+            <meta name="twitter:card" content="{{ $gateOgImage ? 'summary_large_image' : 'summary' }}">
             <meta name="twitter:site" content="@ScheduleEvent">
         @elseif ($event && $event->exists && !$event->is_draft)
             @if ($galleryMode)
@@ -101,24 +110,29 @@
                             if ($firstPhoto) break;
                         }
                     }
-                    $galleryOgImage = $firstPhoto ? $firstPhoto->photo_url : ($event->getImageUrl() ?: (config('app.url') . '/images/social/home.png'));
+                    // Never /images/social/home.png: an event with no photo, no flyer and no
+                    // schedule or venue logo advertises no image, and the scraper falls back to
+                    // the page's own contents rather than to an advert of ours.
+                    $galleryOgImage = $firstPhoto ? $firstPhoto->photo_url : $event->getImageUrl();
                 @endphp
                 <link rel="canonical" href="{{ $event->getCanonicalPhotoGalleryUrl($date) }}">
                 <meta name="description" content="{{ $galleryTitle }}">
                 <meta property="og:type" content="website">
                 <meta property="og:title" content="{{ $galleryTitle }}">
                 <meta property="og:description" content="{{ $event->getMetaDescription($date, $guestLang, $role) }}">
+                @if ($galleryOgImage)
                 <meta property="og:image" content="{{ $galleryOgImage }}">
-                <meta property="og:image:width" content="1200">
-                <meta property="og:image:height" content="630">
                 <meta property="og:image:alt" content="{{ $galleryTitle }}">
+                @endif
                 <meta property="og:url" content="{{ $event->getCanonicalPhotoGalleryUrl($date) }}">
                 <meta property="og:site_name" content="{{ $role->translatedName() ?: config('app.name') }}">
                 <meta name="twitter:title" content="{{ $galleryTitle }}">
                 <meta name="twitter:description" content="{{ $event->getMetaDescription($date, $guestLang, $role) }}">
+                @if ($galleryOgImage)
                 <meta name="twitter:image" content="{{ $galleryOgImage }}">
                 <meta name="twitter:image:alt" content="{{ $galleryTitle }}">
-                <meta name="twitter:card" content="summary_large_image">
+                @endif
+                <meta name="twitter:card" content="{{ $galleryOgImage ? 'summary_large_image' : 'summary' }}">
                 <meta name="twitter:site" content="@ScheduleEvent">
             @else
             <link rel="canonical" href="{{ $event->getCanonicalUrl($date) }}{{ $guestLangSuffix }}">
@@ -126,18 +140,23 @@
             <meta property="og:type" content="event">
             <meta property="og:title" content="{{ $guestEventName }}">
             <meta property="og:description" content="{{ $event->getMetaDescription($date, $guestLang, $role) }}">
-            @php $eventOgImage = $event->getImageUrl() ?: (config('app.url') . '/images/social/home.png'); @endphp
+            {{-- getImageUrl() already cascades flyer -> schedule logo -> venue logo, so null here
+                 means the owner has no image anywhere. Advertising none lets the scraper fall
+                 back to their own page, which beats handing it an advert of ours. --}}
+            @php $eventOgImage = $event->getImageUrl(); @endphp
+            @if ($eventOgImage)
             <meta property="og:image" content="{{ $eventOgImage }}">
-            <meta property="og:image:width" content="1200">
-            <meta property="og:image:height" content="630">
             <meta property="og:image:alt" content="{{ $guestEventName }}">
+            @endif
             <meta property="og:url" content="{{ $event->getCanonicalUrl($date) }}">
             <meta property="og:site_name" content="{{ $role->translatedName() ?: config('app.name') }}">
             <meta name="twitter:title" content="{{ $guestEventName }}">
             <meta name="twitter:description" content="{{ $event->getMetaDescription($date, $guestLang, $role) }}">
+            @if ($eventOgImage)
             <meta name="twitter:image" content="{{ $eventOgImage }}">
             <meta name="twitter:image:alt" content="{{ $guestEventName }}">
-            <meta name="twitter:card" content="summary_large_image">
+            @endif
+            <meta name="twitter:card" content="{{ $eventOgImage ? 'summary_large_image' : 'summary' }}">
             <meta name="twitter:site" content="@ScheduleEvent">
             @endif
         @elseif ($role->exists)
@@ -164,23 +183,21 @@
             @if ($name = $role->translatedName())
             <meta property="og:title" content="{{ $name }}">
             <meta name="twitter:title" content="{{ $name }}">
-            <meta name="twitter:image:alt" content="{{ $name }}">
             @endif
+            {{-- No @else: a schedule with no logo used to advertise US in its own link preview.
+                 Advertising nothing is the right fallback. It does not guarantee a picture-less
+                 card - Facebook's crawler will pick one out of the page body - but whatever it
+                 finds there is the owner's, which an advert of ours never is. --}}
             @if ($image = $role->profile_image_url)
             <meta property="og:image" content="{{ $image }}">
             <meta property="og:image:alt" content="{{ $name ?? $role->translatedName() }}">
             <meta name="twitter:image" content="{{ $image }}">
-            @else
-            <meta property="og:image" content="{{ config('app.url') . '/images/social/home.png' }}">
-            <meta property="og:image:alt" content="{{ $name ?? $role->translatedName() }}">
-            <meta name="twitter:image" content="{{ config('app.url') . '/images/social/home.png' }}">
+            <meta name="twitter:image:alt" content="{{ $name ?? $role->translatedName() }}">
             @endif
-            <meta property="og:image:width" content="1200">
-            <meta property="og:image:height" content="630">
             <meta property="og:type" content="website">
             <meta property="og:url" content="{{ $role->getCanonicalUrl() }}">
             <meta property="og:site_name" content="{{ $role->translatedName() ?: config('app.name') }}">
-            <meta name="twitter:card" content="summary_large_image">
+            <meta name="twitter:card" content="{{ $role->profile_image_url ? 'summary_large_image' : 'summary' }}">
             <meta name="twitter:site" content="@ScheduleEvent">
         @endif
     </x-slot>
@@ -323,7 +340,9 @@
                     $eventDescription = $eventName . ' - ' . __('messages.event');
                 }
                 $eventUrl = $event->getCanonicalUrl($date ?? null);
-                $eventImage = $event->getImageUrl() ?: (config('app.url') . '/images/social/home.png');
+                // The block below is already @if-guarded, so null simply omits "image" rather
+                // than asserting to Google that this event looks like an Event Schedule advert.
+                $eventImage = $event->getImageUrl();
                 $startDate = $event->getSchemaStartDate($date ?? null);
                 $endDate = $event->getSchemaEndDate($date ?? null);
                 $location = $event->getSchemaLocation();
