@@ -124,6 +124,7 @@
                 'ticket_price' => $event->ticket_price,
                 'ticket_currency_code' => $event->ticket_currency_code,
                 'coupon_code' => $event->coupon_code,
+                'coupon_discount_label' => $event->couponDiscountLabel(),
                 'duration' => $event->duration,
                 'is_multi_day' => $event->duration >= 24,
                 'local_end_date' => $event->duration >= 24
@@ -884,9 +885,7 @@
                                                     <span v-if="event.ticket_price == 0">{{ $label('free_entry') }}</span>
                                                     <span v-else v-text="formatPrice(event.ticket_price, event.ticket_currency_code)"></span>
                                                 </span>
-                                                <span v-if="event.coupon_code" class="text-sm text-gray-500 dark:text-gray-400">
-                                                    {{ __('messages.coupon_code') }}: <span v-text="event.coupon_code"></span>
-                                                </span>
+                                                <span v-if="event.coupon_code || event.coupon_discount_label" class="text-sm text-gray-500 dark:text-gray-400"><span v-if="event.coupon_code">{{ __('messages.coupon_code') }}: <span v-text="event.coupon_code"></span></span><span v-if="event.coupon_code && event.coupon_discount_label"> &bull; </span><span v-if="event.coupon_discount_label" v-text="event.coupon_discount_label"></span></span>
                                             </div>
                                         </div>
 
@@ -1239,9 +1238,7 @@
                                                 <span v-if="event.ticket_price == 0">{{ $label('free_entry') }}</span>
                                                 <span v-else v-text="formatPrice(event.ticket_price, event.ticket_currency_code)"></span>
                                             </span>
-                                            <span v-if="event.coupon_code" class="text-sm text-gray-500 dark:text-gray-400">
-                                                {{ __('messages.coupon_code') }}: <span v-text="event.coupon_code"></span>
-                                            </span>
+                                            <span v-if="event.coupon_code || event.coupon_discount_label" class="text-sm text-gray-500 dark:text-gray-400"><span v-if="event.coupon_code">{{ __('messages.coupon_code') }}: <span v-text="event.coupon_code"></span></span><span v-if="event.coupon_code && event.coupon_discount_label"> &bull; </span><span v-if="event.coupon_discount_label" v-text="event.coupon_discount_label"></span></span>
                                         </div>
                                     </div>
 
@@ -3240,6 +3237,7 @@ const calendarApp = createApp({
                 ticket_currency_code: event.ticket_currency_code || '',
                 registration_url: event.registration_url || '',
                 coupon_code: event.coupon_code || '',
+                coupon_discount_label: event.coupon_discount_label || '',
                 is_password_protected: event.is_password_protected || false
             };
         },
@@ -3505,8 +3503,9 @@ const calendarApp = createApp({
             }
 
             if (couponTextEl) {
-                if (popupData.coupon_code && popupData.registration_url && popupData.ticket_price != null) {
-                    couponTextEl.textContent = ' \u2022 ' + popupData.coupon_code;
+                const couponBits = [popupData.coupon_code, popupData.coupon_discount_label].filter(Boolean);
+                if (couponBits.length && popupData.registration_url && popupData.ticket_price != null) {
+                    couponTextEl.textContent = ' \u2022 ' + couponBits.join(' \u2022 ');
                     couponTextEl.style.display = 'inline';
                 } else {
                     couponTextEl.style.display = 'none';

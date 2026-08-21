@@ -537,6 +537,8 @@ return [
     'combined_total_help' => 'Toate tipurile de bilete sunt combinate într-un singur fond',
     'price' => 'Preț',
     'coupon_code' => 'Cod Cupon',
+    'coupon_discount_help' => 'Opțional. Afișat lângă codul de cupon pentru ca invitații să vadă cât valorează.',
+    'discount_off' => 'reducere de :amount',
     'quantity' => 'Cantitate',
     'free' => 'Gratuit',
     'invalid_request' => 'Cerere invalidă',

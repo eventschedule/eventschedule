@@ -935,7 +935,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Import Form Fields</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Decides which optional fields appear on the AI import <a href="#engagement-requests" class="doc-link">request form</a>: short description, description, price, coupon code, registration URL, category, and sub-schedule if you have any. Turn a field on and a <strong class="text-gray-900 dark:text-white">Required</strong> checkbox appears next to it, so you can insist on an answer. Shown on the hosted platform only.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Decides which optional fields appear on the AI import <a href="#engagement-requests" class="doc-link">request form</a>: short description, description, price, coupon code, registration URL, category, and sub-schedule if you have any. The coupon code field brings its discount along with it. Turn a field on and a <strong class="text-gray-900 dark:text-white">Required</strong> checkbox appears next to it, so you can insist on an answer. Shown on the hosted platform only.</p>
             </div>
         </div>
     </section>
@@ -1574,6 +1574,11 @@ example.eventschedule.com/summer-concert</code></pre>
                         <td><code class="doc-inline-code">{coupon_code}</code></td>
                         <td>Event coupon code</td>
                         <td>SAVE20</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">{coupon_discount}</code></td>
+                        <td>What the coupon is worth, as a percentage or an amount in the event's currency. Empty when no discount is set</td>
+                        <td>15%</td>
                     </tr>
                 </tbody>
             </table>

@@ -8,6 +8,7 @@ use App\Jobs\SyncEventToMicrosoftCalendar;
 use App\Services\TicketVolumeDiscount;
 use App\Utils\EventTextGenerator;
 use App\Utils\MarkdownUtils;
+use App\Utils\MoneyUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -77,6 +78,8 @@ class Event extends Model
         'ticket_currency_code',
         'ticket_price',
         'coupon_code',
+        'coupon_discount',
+        'coupon_discount_type',
         'ticket_notes',
         'terms_url',
         'total_tickets_mode',
@@ -2340,6 +2343,38 @@ class Event extends Model
     public function getIsMultiDayAttribute(): bool
     {
         return $this->duration >= 24;
+    }
+
+    /**
+     * The coupon's discount formatted for display, with no surrounding words: '15%' for a
+     * percentage, or the amount in the event's ticket currency for a fixed discount. Empty
+     * when no discount is set. This is what {coupon_discount} substitutes.
+     */
+    public function getFormattedCouponDiscountAttribute(): string
+    {
+        // Covers null, '' and a stored 0 - "0% off" is noise, not information.
+        if ($this->coupon_discount === null || (float) $this->coupon_discount <= 0) {
+            return '';
+        }
+
+        // A null type means the row predates the column; percentage is the form's default.
+        if (($this->coupon_discount_type ?? 'percentage') === 'fixed') {
+            return MoneyUtils::format($this->coupon_discount, $this->ticket_currency_code);
+        }
+
+        // Cast first so the stored decimal(13,3) reads as '15' rather than '15.000'.
+        return ((float) $this->coupon_discount).'%';
+    }
+
+    /**
+     * The same value as a display phrase ('15% off'), for the guest-facing surfaces that
+     * show it beside the coupon code. Empty when no discount is set.
+     */
+    public function couponDiscountLabel(): string
+    {
+        $formatted = $this->formatted_coupon_discount;
+
+        return $formatted === '' ? '' : __('messages.discount_off', ['amount' => $formatted]);
     }
 
     /**

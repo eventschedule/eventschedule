@@ -2,13 +2,14 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\ValidatesCouponDiscount;
 use App\Http\Requests\Concerns\ValidatesEventCustomFields;
 use App\Http\Requests\Concerns\ValidatesVenueFields;
 use Illuminate\Foundation\Http\FormRequest;
 
 class EventCreateRequest extends FormRequest
 {
-    use ValidatesEventCustomFields, ValidatesVenueFields;
+    use ValidatesCouponDiscount, ValidatesEventCustomFields, ValidatesVenueFields;
 
     /**
      * Get the validation rules that apply to the request.
@@ -34,7 +35,8 @@ class EventCreateRequest extends FormRequest
             'venue_email' => ['nullable', 'email', 'max:255'],
             'venue_phone' => ['nullable', 'string', 'max:20', 'regex:/^\+[1-9]\d{1,14}$/'],
             'members.*.phone' => ['nullable', 'string', 'max:20', 'regex:/^\+[1-9]\d{1,14}$/'],
-        ], $this->venueFieldRules(), $this->eventCustomFieldRules());
+        ], $this->couponDiscountRules($this->input('coupon_discount_type')),
+            $this->venueFieldRules(), $this->eventCustomFieldRules());
     }
 
     public function attributes(): array

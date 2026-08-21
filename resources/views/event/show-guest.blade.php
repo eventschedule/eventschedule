@@ -890,9 +890,16 @@
                 {{ \App\Utils\MoneyUtils::format($event->ticket_price, $event->ticket_currency_code) }}
               @endif
             </span>
-            @if ($event->coupon_code)
+            @php
+                // Either half can stand alone: a bare "15% off" is as useful as a bare code.
+                $eventCouponBits = array_filter([
+                    $event->coupon_code ? __('messages.coupon_code').': '.$event->coupon_code : null,
+                    $event->couponDiscountLabel() ?: null,
+                ]);
+            @endphp
+            @if ($eventCouponBits)
             <span class="text-sm text-gray-500 dark:text-gray-400">
-              {{ __('messages.coupon_code') }}: {{ $event->coupon_code }}
+              {{ implode(' • ', $eventCouponBits) }}
             </span>
             @endif
           </div>

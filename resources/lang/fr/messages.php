@@ -481,6 +481,8 @@ return [
     'terms_url_help' => 'URL personnalisée des conditions générales pour les billets. Laisser vide pour utiliser la valeur par défaut.',
     'price' => 'Prix',
     'coupon_code' => 'Code promo',
+    'coupon_discount_help' => 'Facultatif. Affiché à côté du code promo pour que les invités voient sa valeur.',
+    'discount_off' => ':amount de réduction',
     'quantity' => 'Quantité',
     'unlimited' => 'Illimité',
     'free' => 'Gratuit',

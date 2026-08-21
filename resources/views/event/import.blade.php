@@ -617,6 +617,20 @@
                             <x-text-input id="coupon_code_@{{ idx }}" type="text" class="mt-1 block w-full"
                                 maxlength="255" v-model="preview.parsed[idx].coupon_code"
                                 v-bind:readonly="savedEvents[idx]" autocomplete="off" />
+
+                            <x-input-label class="mt-4">{{ __('messages.discount') }}</x-input-label>
+                            <div class="mt-1 flex gap-3">
+                                <select v-model="preview.parsed[idx].coupon_discount_type"
+                                    v-bind:disabled="savedEvents[idx]"
+                                    class="w-28 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                    <option value="percentage">%</option>
+                                    <option value="fixed">@{{ preview.parsed[idx].ticket_currency_code }}</option>
+                                </select>
+                                <x-text-input type="number" step="0.01" min="0"
+                                    class="flex-1"
+                                    v-model="preview.parsed[idx].coupon_discount"
+                                    v-bind:readonly="savedEvents[idx]" />
+                            </div>
                         </div>
 
                         <!-- Registration URL -->
@@ -1785,6 +1799,9 @@
                         if (!event.ticket_currency_code) {
                             event.ticket_currency_code = '{{ $defaultCurrency }}';
                         }
+                        if (!event.coupon_discount_type) {
+                            event.coupon_discount_type = 'percentage';
+                        }
                         if (!event.group_id) {
                             event.group_id = '';
                         }
@@ -2046,6 +2063,8 @@
                             registration_url: parsed.registration_url,
                             ticket_price: parsed.ticket_price,
                             coupon_code: parsed.coupon_code,
+                            coupon_discount: parsed.coupon_discount,
+                            coupon_discount_type: parsed.coupon_discount_type,
                             ticket_currency_code: parsed.ticket_currency_code,
                             current_role_group_id: parsed.group_id || null,
                             custom_field_values: parsed.custom_field_values || {},

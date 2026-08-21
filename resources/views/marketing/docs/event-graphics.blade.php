@@ -367,6 +367,7 @@ https://example.com/event/summer-concert</code></pre>
                     <div class="flex justify-between gap-3"><code class="doc-inline-code">{price}</code> <span class="text-gray-600 dark:text-gray-400">10, or blank if free</span></div>
                     <div class="flex justify-between gap-3"><code class="doc-inline-code">{currency}</code> <span class="text-gray-600 dark:text-gray-400">USD</span></div>
                     <div class="flex justify-between gap-3"><code class="doc-inline-code">{coupon_code}</code> <span class="text-gray-600 dark:text-gray-400">SAVE20</span></div>
+                    <div class="flex justify-between gap-3"><code class="doc-inline-code">{coupon_discount}</code> <span class="text-gray-600 dark:text-gray-400">15%</span></div>
                 </div>
             </div>
         </div>
@@ -592,6 +593,11 @@ https://example.com/event/summer-concert</code></pre>
                         <td><code class="doc-inline-code">{coupon_code}</code></td>
                         <td>Event coupon code</td>
                         <td>SAVE20</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">{coupon_discount}</code></td>
+                        <td>What the coupon is worth. A percentage renders as <code class="doc-inline-code">15%</code>; a fixed discount renders as an amount in the event's currency. Blank when no discount is set, so the line drops rather than printing a zero.</td>
+                        <td>15%</td>
                     </tr>
                 </tbody>
             </table>

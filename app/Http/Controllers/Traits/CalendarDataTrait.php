@@ -71,6 +71,7 @@ trait CalendarDataTrait
             'ticket_price' => $event->ticket_price,
             'ticket_currency_code' => $event->ticket_currency_code,
             'coupon_code' => $event->coupon_code,
+            'coupon_discount_label' => $event->couponDiscountLabel(),
             'duration' => $event->duration,
             'is_multi_day' => $event->duration >= 24,
             'local_end_date' => $event->duration >= 24
@@ -145,6 +146,7 @@ trait CalendarDataTrait
             $data['ticket_price'] = null;
             $data['registration_url'] = null;
             $data['coupon_code'] = null;
+            $data['coupon_discount_label'] = null;
             $data['talent'] = [];
             $data['videos'] = [];
             $data['recent_comments'] = [];

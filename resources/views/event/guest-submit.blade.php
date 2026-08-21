@@ -332,6 +332,17 @@
                   <label for="submit_coupon_code" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.coupon_code') }}<span v-if="requiredFields.coupon_code" class="text-red-500"> *</span></label>
                   <input id="submit_coupon_code" type="text" maxlength="255" v-model="event.coupon_code" autocomplete="off" :class="errClass('coupon_code')"
                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+
+                  <label for="submit_coupon_discount" class="block font-medium text-sm text-gray-700 dark:text-gray-300 mt-4">{{ __('messages.discount') }}</label>
+                  <div class="mt-1 flex gap-2">
+                    <input id="submit_coupon_discount" type="number" min="0" step="0.01" inputmode="decimal" v-model="event.coupon_discount" autocomplete="off"
+                      class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                    <select v-model="event.coupon_discount_type"
+                      class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                      <option value="percentage">%</option>
+                      <option value="fixed">@{{ event.ticket_currency_code }}</option>
+                    </select>
+                  </div>
                 </div>
 
                 {{-- Category (curator-configured) --}}
@@ -673,6 +684,8 @@
                     short_description: '',
                     short_description_en: '',
                     coupon_code: '',
+                    coupon_discount: '',
+                    coupon_discount_type: 'percentage',
                     category_id: '',
                     group_id: '',
                 },
@@ -1513,6 +1526,8 @@
                     name_en: this.event.name_en || null,
                     short_description_en: this.event.short_description_en || null,
                     coupon_code: this.event.coupon_code,
+                    coupon_discount: this.event.coupon_discount,
+                    coupon_discount_type: this.event.coupon_discount_type,
                     category_id: this.event.category_id || null,
                     curator_group_id: this.event.group_id || null,
                     custom_field_values: this.customFieldValues,
@@ -1624,6 +1639,8 @@
                 this.event.short_description = '';
                 this.event.short_description_en = '';
                 this.event.coupon_code = '';
+                this.event.coupon_discount = '';
+                this.event.coupon_discount_type = 'percentage';
                 this.event.category_id = '';
                 this.event.group_id = '';
                 if (this.datePicker) this.datePicker.clear();
@@ -1667,7 +1684,7 @@
                     const hasContent = !!((e.name || '').trim() || e.event_date || e.event_start_time
                         || (e.venue_name || '').trim() || (e.venue_address1 || '').trim() || (e.venue_city || '').trim()
                         || (e.event_url || '').trim() || (e.description || '').trim() || (e.short_description || '').trim()
-                        || e.ticket_price || (e.registration_url || '').trim() || (e.coupon_code || '').trim());
+                        || e.ticket_price || (e.registration_url || '').trim() || (e.coupon_code || '').trim() || e.coupon_discount);
                     if (!hasContent) {
                         // Clearing the form (Start fresh / Submit another) dissolves the draft.
                         localStorage.removeItem(this.draftKey);
@@ -1703,7 +1720,7 @@
                     const fields = ['name', 'event_start_time', 'event_end_time', 'is_online', 'venue_name',
                         'venue_address1', 'venue_city', 'venue_state', 'venue_postal_code', 'venue_country_code',
                         'event_url', 'description', 'ticket_price', 'ticket_currency_code', 'registration_url',
-                        'short_description', 'coupon_code'];
+                        'short_description', 'coupon_code', 'coupon_discount', 'coupon_discount_type'];
                     fields.forEach((f) => {
                         if (e[f] !== undefined && e[f] !== null && e[f] !== '') this.event[f] = e[f];
                     });

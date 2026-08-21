@@ -5400,7 +5400,7 @@ class MarketingController extends Controller
 
             // Tickets
             ['page' => 'Selling Tickets', 'section' => 'General Ticketing', 'description' => 'Overview of ticket sales setup and features.', 'url' => $r['tickets'].'#general', 'category' => 'User Guide', 'keywords' => 'ticketing overview sell'],
-            ['page' => 'Selling Tickets', 'section' => 'External Events', 'description' => 'Link to external registration pages and display event pricing.', 'url' => $r['tickets'].'#external', 'category' => 'User Guide', 'keywords' => 'external registration url price coupon link'],
+            ['page' => 'Selling Tickets', 'section' => 'External Events', 'description' => 'Link to external registration pages and display event pricing, coupon code and discount.', 'url' => $r['tickets'].'#external', 'category' => 'User Guide', 'keywords' => 'external registration url price coupon discount link'],
             ['page' => 'Selling Tickets', 'section' => 'Registration (RSVP)', 'description' => 'Enable free event registration with optional capacity limits.', 'url' => $r['tickets'].'#registration', 'category' => 'User Guide', 'keywords' => 'registration rsvp free sign up attend'],
             ['page' => 'Selling Tickets', 'section' => 'Ticketing Setup', 'description' => 'Set up paid or multi-type ticketing for events.', 'url' => $r['tickets'].'#ticketing', 'category' => 'User Guide', 'keywords' => 'ticketing setup paid pro sell'],
             ['page' => 'Selling Tickets', 'section' => 'Ticket Types', 'description' => 'Configure different ticket type options.', 'url' => $r['tickets'].'#ticket-types', 'category' => 'User Guide', 'keywords' => 'general vip types tiers'],

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Concerns\ValidatesCouponDiscount;
 use App\Http\Requests\EventCommentSubmitRequest;
 use App\Http\Requests\EventCreateRequest;
 use App\Http\Requests\EventParseRequest;
@@ -67,6 +68,8 @@ use Illuminate\Validation\ValidationException;
 
 class EventController extends Controller
 {
+    use ValidatesCouponDiscount;
+
     protected $eventRepo;
 
     public function __construct(EventRepo $eventRepo)
@@ -2383,7 +2386,10 @@ class EventController extends Controller
 
         // An event needs a name; reject empty/null before it reaches the typed
         // SlugPatternUtils::generateSlug(string $eventName) inside saveEvent() (TypeError otherwise).
-        $request->validate(['name' => ['required', 'string', 'max:255']]);
+        $request->validate(array_merge(
+            ['name' => ['required', 'string', 'max:255']],
+            $this->couponDiscountRules($request->input('coupon_discount_type'))
+        ));
 
         // Attach newly created / safety-net-matched venues to the importing user as
         // follower so they appear in the venue dropdowns on future visits, matching
@@ -2465,12 +2471,12 @@ class EventController extends Controller
         // creates the user account + talent schedule - so a null name can't reach the typed
         // SlugPatternUtils::generateSlug(string $eventName) inside saveEvent() (TypeError otherwise).
         // Covers both the non-account save below and the require_account path.
-        $request->validate([
+        $request->validate(array_merge([
             'name' => ['required', 'string', 'max:255'],
             'name_en' => ['nullable', 'string', 'max:255'],
             'venue_name_en' => ['nullable', 'string', 'max:255'],
             'short_description_en' => ['nullable', 'string', 'max:255'],
-        ]);
+        ], $this->couponDiscountRules($request->input('coupon_discount_type'))));
 
         // Prevent guests from injecting any visibility state. Both callers of this endpoint post
         // JSON, and Request::getInputSource() reads the JSON bag for those - so removing from

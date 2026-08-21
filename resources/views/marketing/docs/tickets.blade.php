@@ -130,6 +130,7 @@
             <li><strong class="text-gray-900 dark:text-white">Registration URL:</strong> the external ticketing page. It becomes a <strong class="text-gray-900 dark:text-white">View Event</strong> button on your event page, opening in a new tab.</li>
             <li><strong class="text-gray-900 dark:text-white">Price:</strong> a display-only price with a currency. Leave it blank if you do not know it; enter <code class="doc-inline-code">0</code> and the event page reads "Free entry".</li>
             <li><strong class="text-gray-900 dark:text-white">Coupon Code:</strong> shown under the price so attendees can use it on the external platform. Event Schedule never validates it.</li>
+            <li><strong class="text-gray-900 dark:text-white">Discount:</strong> what the coupon is worth, as a percentage or an amount in the event's currency. Shown beside the code, so the event page can read <code class="doc-inline-code">SAVE20 &bull; 15% off</code> rather than sending guests to the external site to find out. Leave it blank if the coupon has no fixed value.</li>
         </ul>
 
         <div class="doc-callout doc-callout-tip">

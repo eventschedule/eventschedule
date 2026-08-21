@@ -176,7 +176,7 @@ Tickets: $20</code></pre>
             <li><strong class="text-gray-900 dark:text-white">Several events at once</strong> - Paste a whole list. If the text names several distinct performers the AI splits them into separate events, and events that share a start time and address are merged back into one event with several participants</li>
             <li><strong class="text-gray-900 dark:text-white">Sensible dates only</strong> - A parsed date that is more than three days in the past, or more than about two months away, is left blank for you to fill in rather than guessed</li>
             <li><strong class="text-gray-900 dark:text-white">Other languages</strong> - For a schedule whose language is not English, the AI keeps the original language and adds English translations alongside it</li>
-            <li><strong class="text-gray-900 dark:text-white">Which fields appear</strong> - Name, date and time, and venue are always on the card. The extra fields (short description, description, price, coupon code, registration URL, category and sub-schedule) are switched on per schedule, and can be marked required. The sub-schedule field only appears once the schedule has sub-schedules</li>
+            <li><strong class="text-gray-900 dark:text-white">Which fields appear</strong> - Name, date and time, and venue are always on the card. The extra fields (short description, description, price, coupon code and its discount, registration URL, category and sub-schedule) are switched on per schedule, and can be marked required. The sub-schedule field only appears once the schedule has sub-schedules</li>
             <li><strong class="text-gray-900 dark:text-white">Performer videos</strong> - On a curator schedule, when a parsed performer does not match a talent schedule you already have, the card searches YouTube for that name and offers up to six clips. Pick one and it becomes the new talent schedule's video</li>
         </ul>
 
@@ -249,7 +249,7 @@ Tickets: $20</code></pre>
                     <tr>
                         <td>Import Form Fields</td>
                         <td>Edit schedule &rarr; Settings &rarr; Advanced (hosted service)</td>
-                        <td>A toggle per extra field (short description, description, price, coupon code, registration URL, category and sub-schedules) that chooses which ones appear on each parsed card, each with a <strong class="text-gray-900 dark:text-white">Required</strong> tick box for fields that must be filled in before the event can be saved</td>
+                        <td>A toggle per extra field (short description, description, price, coupon code and its discount, registration URL, category and sub-schedules) that chooses which ones appear on each parsed card, each with a <strong class="text-gray-900 dark:text-white">Required</strong> tick box for fields that must be filled in before the event can be saved</td>
                     </tr>
                     <tr>
                         <td>Agenda prompt <x-doc-badge plan="enterprise" /></td>

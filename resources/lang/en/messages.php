@@ -536,6 +536,8 @@ return [
     'combined_total_help' => 'All ticket types are combined into a single pool',
     'price' => 'Price',
     'coupon_code' => 'Coupon Code',
+    'coupon_discount_help' => 'Optional. Shown beside the coupon code so guests can see what it is worth.',
+    'discount_off' => ':amount off',
     'quantity' => 'Quantity',
     'free' => 'Free',
     'invalid_request' => 'Invalid request',

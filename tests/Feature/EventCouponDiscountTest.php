@@ -1,0 +1,306 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Event;
+use App\Models\Role;
+use App\Models\User;
+use App\Utils\EventTextGenerator;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Feature\Characterization\Concerns\SavesEventsOverHttp;
+use Tests\Feature\Concerns\CreatesScheduleData;
+use Tests\TestCase;
+
+/**
+ * The External ticket mode carries a display-only coupon code. The discount says what that
+ * code is worth, so the event page can read "SAVE20 - 15% off" instead of sending guests to
+ * the external platform to find out.
+ *
+ * Nothing redeems the value, which is exactly why it needs pinning: the only thing stopping
+ * "150% off" or "15.000%" from rendering as fact is the validation rule and the accessor.
+ */
+class EventCouponDiscountTest extends TestCase
+{
+    use CreatesScheduleData;
+    use RefreshDatabase;
+    use SavesEventsOverHttp;
+
+    private User $owner;
+
+    private Role $role;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->owner = $this->createOwner();
+        $this->role = $this->createRole($this->owner, 'venue', ['timezone' => 'UTC']);
+    }
+
+    private function externalEvent(array $attrs = []): Event
+    {
+        return $this->createEvent($this->role, array_merge([
+            'creator_role_id' => $this->role->id,
+            'registration_url' => 'https://tickets.example.org/show',
+            'ticket_price' => 48,
+            'ticket_currency_code' => 'USD',
+        ], $attrs));
+    }
+
+    private function guestHtml(Event $event): string
+    {
+        return $this->get(route('event.view_guest', [
+            'subdomain' => $this->role->subdomain,
+            'slug' => $event->slug,
+        ]))->assertOk()->getContent();
+    }
+
+    public function test_a_percentage_discount_round_trips_through_the_event_form(): void
+    {
+        $event = $this->externalEvent();
+
+        $this->putUpdateEvent($this->owner, $this->role, $event, [
+            'coupon_code' => 'SAVE20',
+            'coupon_discount' => '15',
+            'coupon_discount_type' => 'percentage',
+        ])->assertSessionHasNoErrors();
+
+        $event->refresh();
+        $this->assertSame('percentage', $event->coupon_discount_type);
+        $this->assertEquals(15, (float) $event->coupon_discount);
+        $this->assertSame('15%', $event->formatted_coupon_discount);
+    }
+
+    public function test_a_fixed_discount_round_trips_and_renders_in_the_event_currency(): void
+    {
+        $event = $this->externalEvent(['ticket_currency_code' => 'EUR']);
+
+        $this->putUpdateEvent($this->owner, $this->role, $event, [
+            'coupon_code' => 'TENOFF',
+            'coupon_discount' => '10',
+            'coupon_discount_type' => 'fixed',
+        ])->assertSessionHasNoErrors();
+
+        $event->refresh();
+        $this->assertSame('fixed', $event->coupon_discount_type);
+        // Whatever the symbol is, it must be the row's currency and never a hardcoded '$'.
+        $this->assertSame(
+            \App\Utils\MoneyUtils::format($event->coupon_discount, 'EUR'),
+            $event->formatted_coupon_discount
+        );
+        $this->assertStringNotContainsString('%', $event->formatted_coupon_discount);
+    }
+
+    /**
+     * The column is decimal(13,3), so the stored value reads back as "15.000". Rendering that
+     * verbatim would put "15.000% off" on the event page.
+     */
+    public function test_a_percentage_drops_the_stored_trailing_zeros(): void
+    {
+        $event = $this->externalEvent([
+            'coupon_discount' => 15,
+            'coupon_discount_type' => 'percentage',
+        ]);
+
+        $this->assertSame('15%', $event->fresh()->formatted_coupon_discount);
+    }
+
+    public function test_a_fractional_percentage_keeps_its_decimal(): void
+    {
+        $event = $this->externalEvent([
+            'coupon_discount' => 12.5,
+            'coupon_discount_type' => 'percentage',
+        ]);
+
+        $this->assertSame('12.5%', $event->fresh()->formatted_coupon_discount);
+    }
+
+    /** A zero discount is noise, not information - it must not render as "0% off". */
+    public function test_a_zero_discount_renders_as_nothing(): void
+    {
+        $event = $this->externalEvent([
+            'coupon_discount' => 0,
+            'coupon_discount_type' => 'percentage',
+        ]);
+
+        $this->assertSame('', $event->fresh()->formatted_coupon_discount);
+        $this->assertSame('', $event->fresh()->couponDiscountLabel());
+    }
+
+    public function test_a_percentage_over_one_hundred_is_rejected(): void
+    {
+        $event = $this->externalEvent();
+
+        $this->putUpdateEvent($this->owner, $this->role, $event, [
+            'coupon_discount' => '150',
+            'coupon_discount_type' => 'percentage',
+        ])->assertSessionHasErrors('coupon_discount');
+
+        $this->assertNull($event->fresh()->coupon_discount);
+    }
+
+    /** The same ceiling must not apply to a fixed amount - 150 EUR off is legitimate. */
+    public function test_a_fixed_amount_over_one_hundred_is_accepted(): void
+    {
+        $event = $this->externalEvent();
+
+        $this->putUpdateEvent($this->owner, $this->role, $event, [
+            'coupon_discount' => '150',
+            'coupon_discount_type' => 'fixed',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertEquals(150, (float) $event->fresh()->coupon_discount);
+    }
+
+    public function test_a_non_numeric_discount_is_rejected(): void
+    {
+        $event = $this->externalEvent();
+
+        $this->putUpdateEvent($this->owner, $this->role, $event, [
+            'coupon_discount' => 'free stuff',
+        ])->assertSessionHasErrors('coupon_discount');
+    }
+
+    public function test_the_guest_page_shows_the_discount_beside_the_coupon_code(): void
+    {
+        $event = $this->externalEvent([
+            'coupon_code' => 'SAVE20',
+            'coupon_discount' => 15,
+            'coupon_discount_type' => 'percentage',
+        ]);
+
+        $html = $this->guestHtml($event);
+
+        $this->assertStringContainsString('SAVE20', $html);
+        $this->assertStringContainsString(__('messages.discount_off', ['amount' => '15%']), $html);
+    }
+
+    /** Either half stands alone: a bare "15% off" is as useful to a guest as a bare code. */
+    public function test_the_guest_page_shows_a_discount_with_no_coupon_code(): void
+    {
+        $event = $this->externalEvent([
+            'coupon_discount' => 15,
+            'coupon_discount_type' => 'percentage',
+        ]);
+
+        $this->assertStringContainsString(
+            __('messages.discount_off', ['amount' => '15%']),
+            $this->guestHtml($event)
+        );
+    }
+
+    public function test_the_guest_page_shows_nothing_when_there_is_no_discount(): void
+    {
+        $event = $this->externalEvent(['coupon_code' => 'SAVE20']);
+
+        $this->assertStringNotContainsString(
+            __('messages.discount_off', ['amount' => '15%']),
+            $this->guestHtml($event)
+        );
+    }
+
+    public function test_the_coupon_discount_token_substitutes_in_a_text_template(): void
+    {
+        $event = $this->externalEvent([
+            'coupon_code' => 'SAVE20',
+            'coupon_discount' => 15,
+            'coupon_discount_type' => 'percentage',
+        ])->fresh();
+
+        $this->assertSame(
+            'Use SAVE20 for 15% off',
+            EventTextGenerator::parseTemplate(
+                'Use {coupon_code} for {coupon_discount} off',
+                $event,
+                $this->role,
+                false
+            )
+        );
+    }
+
+    public function test_the_coupon_discount_token_resolves_to_nothing_when_unset(): void
+    {
+        $event = $this->externalEvent()->fresh();
+
+        $this->assertSame(
+            'Discount:',
+            trim(EventTextGenerator::parseTemplate('Discount: {coupon_discount}', $event, $this->role, false))
+        );
+    }
+
+    /**
+     * The AP form is Vue. A select bound to null renders blank, and decimal(13,3) serializes
+     * as the string "15.000" - neither is a usable starting value, so pin the seeding.
+     */
+    public function test_the_edit_form_seeds_both_fields_in_a_usable_shape(): void
+    {
+        $event = $this->externalEvent([
+            'coupon_discount' => 15,
+            'coupon_discount_type' => 'fixed',
+        ]);
+
+        $html = $this->actingAs($this->owner)->get(route('event.edit', [
+            'subdomain' => $this->role->subdomain,
+            'hash' => \App\Utils\UrlUtils::encodeId($event->id),
+        ]))->assertOk()->getContent();
+
+        $this->assertStringContainsString('name="coupon_discount_type"', $html);
+        $this->assertStringContainsString('name="coupon_discount"', $html);
+        $this->assertStringContainsString('coupon_discount_type: "fixed"', $html);
+        $this->assertStringContainsString('coupon_discount: 15,', $html);
+        $this->assertStringNotContainsString('coupon_discount: "15.000"', $html);
+    }
+
+    /** A brand new event must not open with a blank type select. */
+    public function test_the_edit_form_defaults_an_unset_type_to_percentage(): void
+    {
+        $html = $this->actingAs($this->owner)->get(route('event.edit', [
+            'subdomain' => $this->role->subdomain,
+            'hash' => \App\Utils\UrlUtils::encodeId($this->externalEvent()->id),
+        ]))->assertOk()->getContent();
+
+        $this->assertStringContainsString('coupon_discount_type: "percentage"', $html);
+    }
+
+    /**
+     * The guest schedule page loads its events over Ajax, so CalendarDataTrait - not the
+     * blade's server-rendered twin - is what actually feeds the cards and the popup.
+     */
+    public function test_the_calendar_payload_carries_the_discount_label(): void
+    {
+        $this->externalEvent([
+            'coupon_code' => 'SAVE20',
+            'coupon_discount' => 15,
+            'coupon_discount_type' => 'percentage',
+        ]);
+
+        $payload = json_encode($this->getJson(route('role.calendar_events', [
+            'subdomain' => $this->role->subdomain,
+            'month' => now()->addDays(7)->month,
+            'year' => now()->addDays(7)->year,
+        ]))->assertOk()->json());
+
+        $this->assertStringContainsString('coupon_discount_label', $payload);
+        $this->assertStringContainsString(__('messages.discount_off', ['amount' => '15%']), $payload);
+    }
+
+    /** Password-protected events redact the coupon; the discount must not leak past it. */
+    public function test_the_calendar_payload_redacts_the_discount_for_a_locked_event(): void
+    {
+        $this->externalEvent([
+            'coupon_code' => 'SAVE20',
+            'coupon_discount' => 15,
+            'coupon_discount_type' => 'percentage',
+            'event_password' => 'letmein',
+        ]);
+
+        $payload = json_encode($this->getJson(route('role.calendar_events', [
+            'subdomain' => $this->role->subdomain,
+            'month' => now()->addDays(7)->month,
+            'year' => now()->addDays(7)->year,
+        ]))->assertOk()->json());
+
+        $this->assertStringNotContainsString('SAVE20', $payload);
+        $this->assertStringNotContainsString(__('messages.discount_off', ['amount' => '15%']), $payload);
+    }
+}

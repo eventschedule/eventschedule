@@ -727,6 +727,7 @@ class GraphicController extends Controller
                     'price' => EventTextGenerator::getPrice($event),
                     'currency' => $event->ticket_currency_code ?? '',
                     'coupon_code' => $event->coupon_code ?? '',
+                    'coupon_discount' => $event->formatted_coupon_discount,
                 ];
 
                 // Add custom field values
