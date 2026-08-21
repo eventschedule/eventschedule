@@ -262,17 +262,56 @@ if (! function_exists('rtl_class')) {
     }
 }
 
+if (! function_exists('dir_script_pattern')) {
+    /**
+     * PCRE character-class body for one side of the bidi split ('rtl' or 'ltr').
+     *
+     * Kept in one place so the counter (detect_content_dir) and the presence test
+     * (has_rtl_text) can never drift apart.
+     */
+    function dir_script_pattern(string $side): string
+    {
+        return $side === 'rtl'
+            ? '\p{Hebrew}\p{Arabic}\p{Syriac}\p{Thaana}'
+            : '\p{Latin}\p{Greek}\p{Cyrillic}';
+    }
+}
+
+if (! function_exists('strip_dir_noise')) {
+    /**
+     * Drop the parts of a string that say nothing about its direction: HTML tags and URLs.
+     *
+     * Accepts either markdown or rendered HTML. Without this, a `<strong>` tag name and an
+     * href's Latin characters drag the count toward 'ltr'.
+     *
+     * The `?? $text` is load-bearing: a /u pattern returns NULL on malformed UTF-8, and one bad
+     * byte from an iCal or scraper import reaches this on every event name and description. The
+     * original string is handed back instead, so the callers' own /u matches fail the same way
+     * and they degrade to "no opinion" rather than throwing a TypeError out of a guest page.
+     */
+    function strip_dir_noise(?string $text): string
+    {
+        $text = html_entity_decode(strip_tags((string) $text), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        return preg_replace('~\b(?:https?://|www\.)\S+~iu', '', $text) ?? $text;
+    }
+}
+
 if (! function_exists('detect_content_dir')) {
     /**
      * Base direction ('rtl'|'ltr') of a piece of text, or null when it has nothing to go on.
      *
-     * Whichever script has more strong directional characters wins. That beats first-strong
-     * (`dir="auto"`) detection for real content: "DJ Mike presents: <hebrew>" is Hebrew text
-     * that first-strong would call LTR. Mirrors detectDir() in resources/js/editor-helpers.js
-     * so the editor and the published page agree.
+     * Whichever script has more strong directional characters wins, with the first strong
+     * character breaking an exact tie. That beats first-strong (`dir="auto"`) detection for
+     * real content: "DJ Mike presents: <hebrew>" is Hebrew text that first-strong would call
+     * LTR. Same policy as detectDir() in resources/js/editor-helpers.js, tie-break included -
+     * though not the same alphabet: the JS side counts Latin only (no Greek or Cyrillic), spans
+     * whole Unicode blocks rather than script properties, and does not strip tags or URLs.
      *
-     * Accepts either markdown or rendered HTML. Tags and URLs are dropped first, otherwise
-     * their Latin characters would drag the count toward 'ltr'.
+     * This answers "which script is this text mostly written in", which is not always the
+     * same question as "which way should this element read". Callers that already know the
+     * authoring language - content_dir() and content_dir_for_language() - only consult it
+     * where that language leaves genuine doubt; see resolve_content_dir().
      */
     function detect_content_dir(?string $text): ?string
     {
@@ -280,17 +319,87 @@ if (! function_exists('detect_content_dir')) {
             return null;
         }
 
-        $text = html_entity_decode(strip_tags($text), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $text = preg_replace('~\b(?:https?://|www\.)\S+~iu', '', $text);
+        $text = strip_dir_noise($text);
 
-        $rtl = preg_match_all('/[\p{Hebrew}\p{Arabic}\p{Syriac}\p{Thaana}]/u', $text);
-        $ltr = preg_match_all('/[\p{Latin}\p{Greek}\p{Cyrillic}]/u', $text);
+        $rtl = preg_match_all('/['.dir_script_pattern('rtl').']/u', $text);
+        $ltr = preg_match_all('/['.dir_script_pattern('ltr').']/u', $text);
 
         if (! $rtl && ! $ltr) {
             return null;
         }
 
+        // Exact tie: the first strong character decides, matching detectDir(). The `> 0` and the
+        // `?? ''` are belt and braces - the early return above already guarantees a strong
+        // character exists, but that guarantee lives in a different if.
+        if ($rtl === $ltr && $rtl > 0) {
+            preg_match('/['.dir_script_pattern('rtl').dir_script_pattern('ltr').']/u', $text, $first);
+
+            return preg_match('/['.dir_script_pattern('rtl').']/u', $first[0] ?? '') ? 'rtl' : 'ltr';
+        }
+
         return $rtl > $ltr ? 'rtl' : 'ltr';
+    }
+}
+
+if (! function_exists('has_rtl_text')) {
+    /**
+     * True when $text contains at least one strong right-to-left letter.
+     *
+     * Deliberately presence, not majority. An RTL language routinely embeds Latin script -
+     * band names, venue names, hashtags - while LTR text essentially never embeds Hebrew or
+     * Arabic. So inside a known-RTL context "there is Hebrew here" settles the question,
+     * while counting the two scripts symmetrically does not: a Hebrew band title spends more
+     * letters on the Latin name than on the Hebrew words around it, so detect_content_dir()
+     * called it LTR and the browser pushed its punctuation to the wrong end of the line.
+     *
+     * \p{L} is what makes "letter" true rather than aspirational. Those script blocks also hold
+     * characters that are not strong R - Arabic-Indic digits (bidi class AN), Hebrew niqqud and
+     * Arabic harakat (NSM), and punctuation like the Arabic comma and percent sign. Matching any
+     * of them would let a single stray mark inside an otherwise-Latin string flip a whole title.
+     * detect_content_dir() does not draw that distinction; that is a pre-existing quirk of the
+     * counter, left alone deliberately so its pinned tests keep their meaning.
+     */
+    function has_rtl_text(?string $text): bool
+    {
+        if ($text === null || trim($text) === '') {
+            return false;
+        }
+
+        return (bool) preg_match('/(?=['.dir_script_pattern('rtl').'])\p{L}/u', strip_dir_noise($text));
+    }
+}
+
+if (! function_exists('resolve_content_dir')) {
+    /**
+     * The shared policy behind content_dir() and content_dir_for_language().
+     *
+     * The known authoring language leads and the text only overrides it where the text is
+     * trustworthy, which is asymmetric on purpose:
+     *
+     *  - Known-RTL: the presence of any RTL letter settles it, because Latin inside RTL text
+     *    is ordinary and proves nothing. Text with Latin but no RTL letters reads LTR; text with
+     *    NO strong characters at all ("2026", "12:00 - 18:00", an emoji) has nothing to say and
+     *    falls through to the language, which is what an empty string does too. Answering 'ltr'
+     *    for those was a regression - a blank field stayed RTL while a field holding "2026"
+     *    flipped.
+     *  - Known-LTR: an aggregated event may genuinely be in the other language (a Hebrew
+     *    event surfaced on an English curator's page), so the majority rule still overrides.
+     *
+     * Do not "simplify" this into a symmetric rule. Consulting the character counts ahead of
+     * the known language is exactly what made Hebrew titles containing a Latin band name
+     * render backwards.
+     */
+    function resolve_content_dir(?string $text, string $fallback): string
+    {
+        if (trim((string) $text) === '') {
+            return $fallback;
+        }
+
+        if ($fallback === 'rtl') {
+            return has_rtl_text($text) ? 'rtl' : (detect_content_dir($text) ?: $fallback);
+        }
+
+        return detect_content_dir($text) ?: $fallback;
     }
 }
 
@@ -298,15 +407,13 @@ if (! function_exists('content_dir')) {
     /**
      * Base direction ('rtl'|'ltr') for schedule content.
      *
-     * When $content is given and has strong directional characters, the content itself decides.
-     * That keeps the published page in step with the editor, which detects the same way, and
-     * handles a Hebrew description written in an English-language schedule (and the reverse).
-     *
-     * Otherwise it falls back to the schedule's language: for authored content the schedule's
-     * own language (viewer-independent, via isContentRtl) so mixed Latin/Hebrew text keeps the
+     * The language fallback is the schedule's own: for authored content its authoring
+     * language (viewer-independent, via isContentRtl) so mixed Latin/Hebrew text keeps the
      * schedule's intended base direction, matching the WhatsApp export; for the translated
-     * (`_en`) value the schedule's TARGET language, so an RTL translation renders correctly.
-     * Defaults to 'en' (=> 'ltr'), reproducing the original behavior.
+     * (`_en`) value its TARGET language, so an RTL translation renders correctly. Defaults
+     * to 'en' (=> 'ltr'), reproducing the original behavior.
+     *
+     * When $content is given, resolve_content_dir() decides how much say it gets.
      *
      * @param  object|null  $role  The schedule whose language governs the content
      * @param  bool  $showingTranslation  True when the translated (`_en`) value is shown
@@ -314,17 +421,14 @@ if (! function_exists('content_dir')) {
      */
     function content_dir(?object $role, bool $showingTranslation = false, ?string $content = null): string
     {
-        if ($detected = detect_content_dir($content)) {
-            return $detected;
-        }
-
         if ($showingTranslation) {
             $target = ($role && ! empty($role->translation_language_code)) ? $role->translation_language_code : 'en';
-
-            return in_array($target, ['ar', 'he']) ? 'rtl' : 'ltr';
+            $fallback = in_array($target, ['ar', 'he']) ? 'rtl' : 'ltr';
+        } else {
+            $fallback = ($role && method_exists($role, 'isContentRtl') && $role->isContentRtl()) ? 'rtl' : 'ltr';
         }
 
-        return ($role && method_exists($role, 'isContentRtl') && $role->isContentRtl()) ? 'rtl' : 'ltr';
+        return resolve_content_dir($content, $fallback);
     }
 }
 
@@ -333,14 +437,20 @@ if (! function_exists('content_dir_for_language')) {
      * Base direction for a string whose language is already known.
      *
      * The content_dir() variant above infers the language from the schedule plus a
-     * "showing translation" boolean, which is wrong for an aggregated event whose language pair
-     * differs from the viewing schedule's - that is how Hebrew event names ended up tagged 'ltr'
-     * on a curator's English view. Once the resolver has picked a string it also knows which
-     * language it picked, so pass both and let the text itself decide when it can.
+     * "showing translation" boolean, which is wrong for an aggregated event whose language
+     * pair differs from the viewing schedule's - that is how Hebrew event names ended up
+     * tagged 'ltr' on a curator's English view. Once the resolver has picked a string it
+     * also knows which language it picked, so pass both and let resolve_content_dir() weigh
+     * them.
+     *
+     * $lang MUST be the language the text was authored in or selected for - never the viewer's
+     * UI locale. The known-RTL branch trusts it enough that a single RTL letter settles the
+     * direction, so passing app()->getLocale() here makes a Hebrew reader's English document
+     * render RTL. A caller that only knows the viewer should use detect_content_dir() directly.
      */
     function content_dir_for_language(?string $text, ?string $lang): string
     {
-        return detect_content_dir($text) ?: (in_array($lang, ['ar', 'he'], true) ? 'rtl' : 'ltr');
+        return resolve_content_dir($text, in_array($lang, ['ar', 'he'], true) ? 'rtl' : 'ltr');
     }
 }
 

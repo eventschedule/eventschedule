@@ -89,15 +89,22 @@
         $eventToVueArray = function($event) use ($role, $subdomain, $route, $displayLang) {
             $groupId = isset($role) ? $event->getGroupIdForSubdomain($role->subdomain) : null;
             $eventName = $event->nameInLanguage($displayLang, $role ?? null);
+            $shortDescription = $event->shortDescriptionInLanguage($displayLang, $role ?? null);
+            $venueName = $event->getVenueDisplayName(true, $displayLang);
+            // See calendarEventToVueArray(): direction defers to whoever owns each string, so an
+            // aggregated event is not measured against the viewing schedule's language.
+            $dirLang = $event->creatorRole?->language_code ?: $displayLang;
             return [
                 'id' => \App\Utils\UrlUtils::encodeId($event->id),
                 'group_id' => $groupId ? \App\Utils\UrlUtils::encodeId($groupId) : null,
                 'category_id' => $event->category_id,
                 'category_color' => $event->resolveCategoryColor(),
                 'name' => $eventName,
-                'dir' => content_dir_for_language($eventName, $displayLang),
-                'short_description' => $event->shortDescriptionInLanguage($displayLang, $role ?? null),
-                'venue_name' => $event->getVenueDisplayName(true, $displayLang),
+                'dir' => content_dir_for_language($eventName, $dirLang),
+                'short_description' => $shortDescription,
+                'description_dir' => content_dir_for_language($shortDescription, $dirLang),
+                'venue_name' => $venueName,
+                'venue_dir' => content_dir_for_language($venueName, $event->venue?->language_code ?: $dirLang),
                 'venue_subdomain' => $event->venue?->subdomain ?: null,
                 'is_free' => $event->isFree(),
                 'starts_at' => $event->starts_at,
@@ -143,6 +150,7 @@
                 'venue_guest_url' => ($event->venue && isset($role) && $event->venue->subdomain === $role->subdomain) ? null : ($event->venue?->getGuestUrl() ?: null),
                 'talent' => $event->roles->filter(fn($r) => $r->type === 'talent' && ($route !== 'guest' || $r->isClaimed()))->map(fn($r) => [
                     'name' => $r->name,
+                    'dir' => content_dir_for_language($r->name, $r->language_code ?: $dirLang),
                     'profile_image' => $r->profile_image_url ?: null,
                     'header_image' => ($r->getAttributes()['header_image'] && ! in_array($r->getAttributes()['header_image'], ['none', 'logos'], true)) ? $r->getHeaderImageUrlAttribute($r->getAttributes()['header_image']) : null,
                     'guest_url' => (isset($role) && $r->subdomain === $role->subdomain) ? null : ($r->getGuestUrl() ?: null),
@@ -550,7 +558,7 @@
                                     <span class="flex items-start gap-1.5">
                                         <span v-if="getEventDotColor(event)" class="inline-block w-2 h-2 rounded-full flex-shrink-0 mt-1.5" :style="{ backgroundColor: getEventDotColor(event) }"></span>
                                         <span :class="getEventsForDate(day.date).filter(e => isEventVisible(e)).length == 1 ? 'line-clamp-2' : 'line-clamp-1'"
-                                          class="hover:underline truncate" dir="auto" v-text="getEventDisplayName(event)">
+                                          class="hover:underline truncate" :dir="getEventDisplayDir(event)" v-text="getEventDisplayName(event)">
                                         </span>
                                     </span>
                                     <span v-if="getEventsForDate(day.date).filter(e => isEventVisible(e)).length == 1"
@@ -634,7 +642,7 @@
                                         <span class="flex items-start gap-1.5">
                                             <span v-if="getEventDotColor(event)" class="inline-block w-2 h-2 rounded-full flex-shrink-0 mt-1.5" :style="{ backgroundColor: getEventDotColor(event) }"></span>
                                             <span :class="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1 ? 'line-clamp-2' : 'line-clamp-1'"
-                                              class="hover:underline truncate" dir="auto" v-text="getEventDisplayName(event)">
+                                              class="hover:underline truncate" :dir="getEventDisplayDir(event)" v-text="getEventDisplayName(event)">
                                             </span>
                                         </span>
                                         <span v-if="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1"
@@ -819,7 +827,7 @@
                                                 <span v-if="event.is_internal" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200 ms-2 align-middle">{{ __('messages.internal') }}</span><span v-else-if="event.is_draft" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 ms-2 align-middle">{{ __('messages.draft') }}</span>
                                             </h2>
                                         </div>
-                                        <p v-if="event.short_description && !event.is_password_protected" class="text-gray-600 dark:text-gray-400 mt-2" :dir="event.dir || 'auto'" v-text="event.short_description"></p>
+                                        <p v-if="event.short_description && !event.is_password_protected" class="text-gray-600 dark:text-gray-400 mt-2" :dir="event.description_dir || event.dir || 'auto'" v-text="event.short_description"></p>
 
                                         {{-- Date Badge --}}
                                         <div v-if="event.occurrenceDate" class="flex items-center gap-4">
@@ -846,7 +854,7 @@
                                                     <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
                                                 </svg>
                                             </div>
-                                            <span class="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2 hover:underline" v-html="commaBreak(event.venue_name)" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
+                                            <span class="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2 hover:underline" v-html="commaBreak(event.venue_name)" :dir="event.venue_dir || 'auto'"></span>
                                             <svg class="w-5 h-5 flex-shrink-0 fill-gray-900 dark:fill-gray-100 opacity-70" :class="isRtl ? 'scale-x-[-1]' : ''" viewBox="0 0 24 24" aria-hidden="true">
                                                 <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
                                             </svg>
@@ -858,7 +866,7 @@
                                                     <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
                                                 </svg>
                                             </div>
-                                            <span class="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2" v-html="commaBreak(event.venue_name)" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
+                                            <span class="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2" v-html="commaBreak(event.venue_name)" :dir="event.venue_dir || 'auto'"></span>
                                         </div>
 
                                         {{-- RSVP Free Badge --}}
@@ -885,7 +893,7 @@
                                                     <span v-if="event.ticket_price == 0">{{ $label('free_entry') }}</span>
                                                     <span v-else v-text="formatPrice(event.ticket_price, event.ticket_currency_code)"></span>
                                                 </span>
-                                                <span v-if="event.coupon_code || event.coupon_discount_label" class="text-sm text-gray-500 dark:text-gray-400"><span v-if="event.coupon_code">{{ __('messages.coupon_code') }}: <span v-text="event.coupon_code"></span></span><span v-if="event.coupon_code && event.coupon_discount_label"> &bull; </span><span v-if="event.coupon_discount_label" v-text="event.coupon_discount_label"></span></span>
+                                                <span v-if="event.coupon_code || event.coupon_discount_label" class="text-sm text-gray-500 dark:text-gray-400"><span v-if="event.coupon_code">{{ __('messages.coupon_code') }}: <bdi v-text="event.coupon_code"></bdi></span><span v-if="event.coupon_code && event.coupon_discount_label"> &bull; </span><bdi v-if="event.coupon_discount_label" v-text="event.coupon_discount_label"></bdi></span>
                                             </div>
                                         </div>
 
@@ -901,8 +909,8 @@
                                             </div>
                                             <template v-for="(t, tIndex) in event.talent" :key="'tn-' + tIndex">
                                                 <span v-if="tIndex > 0" class="text-base text-gray-600 dark:text-gray-300">, </span>
-                                                <a v-if="t.guest_url" :href="t.guest_url" class="text-base text-gray-600 dark:text-gray-300 hover:opacity-80 hover:underline transition-opacity truncate" v-html="commaBreak(t.name)"></a>
-                                                <span v-else class="text-base text-gray-600 dark:text-gray-300 truncate" v-html="commaBreak(t.name)"></span>
+                                                <a v-if="t.guest_url" :href="t.guest_url" class="text-base text-gray-600 dark:text-gray-300 hover:opacity-80 hover:underline transition-opacity truncate" v-html="commaBreak(t.name)" :dir="t.dir || 'auto'"></a>
+                                                <span v-else class="text-base text-gray-600 dark:text-gray-300 truncate" v-html="commaBreak(t.name)" :dir="t.dir || 'auto'"></span>
                                             </template>
                                             <svg v-if="event.talent.some(t => t.guest_url)" class="w-5 h-5 flex-shrink-0 fill-gray-900 dark:fill-gray-100 opacity-70" :class="isRtl ? 'scale-x-[-1]' : ''" viewBox="0 0 24 24" aria-hidden="true">
                                                 <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
@@ -1172,7 +1180,7 @@
                                             <span v-if="event.is_internal" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200 ms-2 align-middle">{{ __('messages.internal') }}</span><span v-else-if="event.is_draft" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 ms-2 align-middle">{{ __('messages.draft') }}</span>
                                         </h2>
                                     </div>
-                                    <p v-if="event.short_description && !event.is_password_protected" class="text-gray-600 dark:text-gray-400 mt-2" :dir="event.dir || 'auto'" v-text="event.short_description"></p>
+                                    <p v-if="event.short_description && !event.is_password_protected" class="text-gray-600 dark:text-gray-400 mt-2" :dir="event.description_dir || event.dir || 'auto'" v-text="event.short_description"></p>
 
                                     {{-- Date Badge --}}
                                     <div v-if="event.occurrenceDate" class="flex items-center gap-4">
@@ -1199,7 +1207,7 @@
                                                 <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
                                             </svg>
                                         </div>
-                                        <span class="text-lg font-semibold text-gray-900 dark:text-white truncate hover:underline" v-html="commaBreak(event.venue_name)" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
+                                        <span class="text-lg font-semibold text-gray-900 dark:text-white truncate hover:underline" v-html="commaBreak(event.venue_name)" :dir="event.venue_dir || 'auto'"></span>
                                         <svg class="w-5 h-5 flex-shrink-0 fill-gray-900 dark:fill-gray-100 opacity-70" :class="isRtl ? 'scale-x-[-1]' : ''" viewBox="0 0 24 24" aria-hidden="true">
                                             <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
                                         </svg>
@@ -1211,7 +1219,7 @@
                                                 <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
                                             </svg>
                                         </div>
-                                        <span class="text-lg font-semibold text-gray-900 dark:text-white truncate" v-html="commaBreak(event.venue_name)" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
+                                        <span class="text-lg font-semibold text-gray-900 dark:text-white truncate" v-html="commaBreak(event.venue_name)" :dir="event.venue_dir || 'auto'"></span>
                                     </div>
 
                                     {{-- RSVP Free Badge --}}
@@ -1238,7 +1246,7 @@
                                                 <span v-if="event.ticket_price == 0">{{ $label('free_entry') }}</span>
                                                 <span v-else v-text="formatPrice(event.ticket_price, event.ticket_currency_code)"></span>
                                             </span>
-                                            <span v-if="event.coupon_code || event.coupon_discount_label" class="text-sm text-gray-500 dark:text-gray-400"><span v-if="event.coupon_code">{{ __('messages.coupon_code') }}: <span v-text="event.coupon_code"></span></span><span v-if="event.coupon_code && event.coupon_discount_label"> &bull; </span><span v-if="event.coupon_discount_label" v-text="event.coupon_discount_label"></span></span>
+                                            <span v-if="event.coupon_code || event.coupon_discount_label" class="text-sm text-gray-500 dark:text-gray-400"><span v-if="event.coupon_code">{{ __('messages.coupon_code') }}: <bdi v-text="event.coupon_code"></bdi></span><span v-if="event.coupon_code && event.coupon_discount_label"> &bull; </span><bdi v-if="event.coupon_discount_label" v-text="event.coupon_discount_label"></bdi></span>
                                         </div>
                                     </div>
 
@@ -1254,8 +1262,8 @@
                                         </div>
                                         <template v-for="(t, tIndex) in event.talent" :key="'tn2-' + tIndex">
                                             <span v-if="tIndex > 0" class="text-base text-gray-600 dark:text-gray-300">, </span>
-                                            <a v-if="t.guest_url" :href="t.guest_url" class="text-base text-gray-600 dark:text-gray-300 hover:opacity-80 hover:underline transition-opacity truncate" v-html="commaBreak(t.name)"></a>
-                                            <span v-else class="text-base text-gray-600 dark:text-gray-300 truncate" v-html="commaBreak(t.name)"></span>
+                                            <a v-if="t.guest_url" :href="t.guest_url" class="text-base text-gray-600 dark:text-gray-300 hover:opacity-80 hover:underline transition-opacity truncate" v-html="commaBreak(t.name)" :dir="t.dir || 'auto'"></a>
+                                            <span v-else class="text-base text-gray-600 dark:text-gray-300 truncate" v-html="commaBreak(t.name)" :dir="t.dir || 'auto'"></span>
                                         </template>
                                         <svg v-if="event.talent.some(t => t.guest_url)" class="w-5 h-5 flex-shrink-0 fill-gray-900 dark:fill-gray-100 opacity-70" :class="isRtl ? 'scale-x-[-1]' : ''" viewBox="0 0 24 24" aria-hidden="true">
                                             <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
@@ -3229,7 +3237,9 @@ const calendarApp = createApp({
             const time = this.getEventTime(event);
             return {
                 name: event.name || '',
+                dir: event.dir || 'auto',
                 venue_name: event.venue_name || '',
+                venue_dir: event.venue_dir || 'auto',
                 time: time || '',
                 image_url: event.image_url || '',
                 description: '', // Description not currently in event data
@@ -3240,6 +3250,15 @@ const calendarApp = createApp({
                 coupon_discount_label: event.coupon_discount_label || '',
                 is_password_protected: event.is_password_protected || false
             };
+        },
+        // Mirrors getEventDisplayName below: that method shows the VENUE name when you are
+        // looking at a talent's own schedule, so the cell must not always use the event
+        // name's direction.
+        getEventDisplayDir(event) {
+            if (this.subdomain && this.isRoleAMember(event)) {
+                return (event.venue_name ? event.venue_dir : event.dir) || 'auto';
+            }
+            return event.dir || 'auto';
         },
         getEventDisplayName(event) {
             if (this.subdomain && this.isRoleAMember(event)) {
@@ -3458,7 +3477,10 @@ const calendarApp = createApp({
             const lockEl = document.getElementById('event-popup-lock');
             const titleTextEl = document.getElementById('event-popup-title-text');
             if (lockEl) lockEl.style.display = popupData.is_password_protected ? 'inline-block' : 'none';
-            if (titleTextEl) titleTextEl.textContent = popupData.name || '';
+            if (titleTextEl) {
+                titleTextEl.textContent = popupData.name || '';
+                titleTextEl.dir = popupData.dir || 'auto';
+            }
 
             if (imageEl) {
                 if (popupData.image_url) {
@@ -3472,6 +3494,7 @@ const calendarApp = createApp({
             if (venueEl && venueTextEl) {
                 if (popupData.venue_name) {
                     venueTextEl.textContent = popupData.venue_name;
+                    venueTextEl.dir = popupData.venue_dir || 'auto';
                     venueEl.style.display = 'flex';
                 } else {
                     venueEl.style.display = 'none';
@@ -3505,7 +3528,15 @@ const calendarApp = createApp({
             if (couponTextEl) {
                 const couponBits = [popupData.coupon_code, popupData.coupon_discount_label].filter(Boolean);
                 if (couponBits.length && popupData.registration_url && popupData.ticket_price != null) {
-                    couponTextEl.textContent = ' \u2022 ' + couponBits.join(' \u2022 ');
+                    // Each bit is user text sitting between bullet separators, so isolate it or
+                    // a Latin coupon code drags the bullets to the wrong side of an RTL line.
+                    // FSI (U+2068), not LRI: this list also carries coupon_discount_label, which
+                    // is a translated string and is Hebrew on a Hebrew locale - LRI would force
+                    // it left-to-right. FSI resolves each bit first-strong, matching the <bdi>
+                    // the cards use. Control characters rather than markup because this writes
+                    // through textContent; the popup is pointer-events:none so nothing here can
+                    // reach a clipboard.
+                    couponTextEl.textContent = ' \u2022 ' + couponBits.map(b => '\u2068' + b + '\u2069').join(' \u2022 ');
                     couponTextEl.style.display = 'inline';
                 } else {
                     couponTextEl.style.display = 'none';
@@ -4025,11 +4056,13 @@ document.addEventListener('DOMContentLoaded', function() {
         @foreach ($events as $noscriptEvent)
         @php
             $noscriptLang = isset($role) ? $role->displayLanguageCode() : 'en';
+            $noscriptName = $noscriptEvent->nameInLanguage($noscriptLang, $role ?? null);
             $noscriptShort = $noscriptEvent->shortDescriptionInLanguage($noscriptLang, $role ?? null);
+            $noscriptDirLang = $noscriptEvent->creatorRole?->language_code ?: $noscriptLang;
         @endphp
         <li style="margin-bottom: 1rem;">
             <a href="{{ $noscriptEvent->getGuestUrl($role?->subdomain ?? $noscriptEvent->roles->first()?->subdomain) }}">
-                <strong>{{ $noscriptEvent->nameInLanguage($noscriptLang, $role ?? null) }}</strong>
+                <strong dir="{{ content_dir_for_language($noscriptName, $noscriptDirLang) }}">{{ $noscriptName }}</strong>
             </a>
             <br>
             {{ $noscriptEvent->localStartsAt(true) }}
@@ -4038,7 +4071,7 @@ document.addEventListener('DOMContentLoaded', function() {
             @endif
             @if ($noscriptShort)
                 <br>
-                <span>{{ Str::limit($noscriptShort, 100) }}</span>
+                <span dir="{{ content_dir_for_language($noscriptShort, $noscriptDirLang) }}">{{ Str::limit($noscriptShort, 100) }}</span>
             @endif
         </li>
         @endforeach

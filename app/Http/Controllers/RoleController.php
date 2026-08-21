@@ -2429,6 +2429,16 @@ class RoleController extends Controller
 
         $displayLang = $displayLang ?: ($role ? $role->displayLanguageCode() : 'en');
         $eventName = $event->nameInLanguage($displayLang, $role);
+        $venueName = $event->getVenueDisplayName(true, $displayLang);
+
+        // The language a *direction* falls back to when the string itself has nothing to say.
+        // Deliberately separate from $displayLang, which decides WHICH text is shown: on the
+        // dashboard $role is null and $displayLang is 'en', so a Hebrew event would otherwise
+        // have its direction resolved against English and read backwards. Each string defers to
+        // whoever owns it - the event's creator, the venue, the talent - and because the
+        // known-RTL branch of resolve_content_dir() tests for actual RTL letters, naming a
+        // language the string turns out not to be written in is harmless.
+        $dirLang = $event->creatorRole?->language_code ?: $displayLang;
 
         $data = [
             'id' => UrlUtils::encodeId($event->id),
@@ -2437,8 +2447,9 @@ class RoleController extends Controller
             'category_name' => $event->resolveCategoryName(),
             'category_color' => $event->resolveCategoryColor(),
             'name' => $eventName,
-            'dir' => content_dir_for_language($eventName, $displayLang),
-            'venue_name' => $event->getVenueDisplayName(true, $displayLang),
+            'dir' => content_dir_for_language($eventName, $dirLang),
+            'venue_name' => $venueName,
+            'venue_dir' => content_dir_for_language($venueName, $event->venue?->language_code ?: $dirLang),
             'starts_at' => $event->starts_at,
             'days_of_week' => $event->days_of_week,
             'local_starts_at' => $event->localStartsAt(),
@@ -2467,6 +2478,7 @@ class RoleController extends Controller
             'venue_header_image' => ($event->venue && $event->venue->getAttributes()['header_image'] && ! in_array($event->venue->getAttributes()['header_image'], ['none', 'logos'], true)) ? $event->venue->getHeaderImageUrlAttribute($event->venue->getAttributes()['header_image']) : null,
             'talent' => $event->roles->filter(fn ($r) => $r->type === 'talent' && $r->isClaimed())->map(fn ($r) => [
                 'name' => $r->name,
+                'dir' => content_dir_for_language($r->name, $r->language_code ?: $dirLang),
                 'profile_image' => $r->profile_image_url ?: null,
                 'header_image' => ($r->getAttributes()['header_image'] && ! in_array($r->getAttributes()['header_image'], ['none', 'logos'], true)) ? $r->getHeaderImageUrlAttribute($r->getAttributes()['header_image']) : null,
                 'guest_url' => ($role && $r->subdomain === $role->subdomain) ? null : ($r->getGuestUrl() ?: null),
@@ -2487,6 +2499,7 @@ class RoleController extends Controller
 
         if ($event->isPasswordProtected()) {
             $data['venue_name'] = null;
+            $data['venue_dir'] = null;
             $data['venue_profile_image'] = null;
             $data['venue_header_image'] = null;
             $data['talent'] = [];

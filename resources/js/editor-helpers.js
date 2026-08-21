@@ -36,6 +36,23 @@ function detectDir(text) {
     return rtl > ltr ? 'rtl' : 'ltr';
 }
 
+// Presence of any strong RTL letter, as opposed to detectDir's majority. Mirrors
+// has_rtl_text() in app/helpers.php - see resolveEditorDirection for when each one applies.
+//
+// The letter test is what makes "letter" true rather than aspirational: RTL_CHAR spans whole
+// Unicode blocks, which also carry Arabic-Indic digits (bidi class AN), Hebrew niqqud and
+// Arabic harakat (NSM) and punctuation like the Arabic comma - none of them strong R, and any
+// one of them alone would flip an otherwise-Latin field to RTL.
+const RTL_LETTER = /\p{L}/u;
+
+function hasRtlText(text) {
+    if (!text) return false;
+    for (const ch of text) {
+        if (RTL_CHAR.test(ch) && RTL_LETTER.test(ch)) return true;
+    }
+    return false;
+}
+
 function pageDir() {
     return (document.documentElement.getAttribute('dir') || '').toLowerCase() === 'rtl' ? 'rtl' : 'ltr';
 }
@@ -74,6 +91,13 @@ function applyDir(cm, dir) {
 // English-language schedule to an LTR base direction, which is the worst case for bidi
 // editing.
 //
+// How step 3 reads the content depends on step 4, mirroring resolve_content_dir() in
+// app/helpers.php so the editor and the published page agree. When the field is stamped
+// RTL, the presence of any RTL letter settles it, because Latin inside RTL text is
+// ordinary - band names, venue names, hashtags - and majority counting flips a Hebrew
+// title with a Latin band name to LTR. Otherwise detectDir's majority rule applies, so a
+// Hebrew description in an English-language schedule can still override the stamp.
+//
 // Anti-flip lock: once a direction is detected for non-empty content we stop
 // re-detecting on every keystroke, so it cannot flip while typing. Pasting or replacing
 // the content clears the lock (see unlockEditorDirection) because that is exactly when
@@ -91,7 +115,8 @@ export function resolveEditorDirection(element, value) {
     if (value && value.trim()) {
         if (element._editorDirLocked && element._editorDir) return element._editorDir;
 
-        const detected = detectDir(value);
+        const stampedRtl = (element.dataset.contentDir || '').toLowerCase() === 'rtl';
+        const detected = stampedRtl ? (hasRtlText(value) ? 'rtl' : 'ltr') : detectDir(value);
         if (detected) {
             element._editorDirLocked = true;
             element._editorDir = detected;

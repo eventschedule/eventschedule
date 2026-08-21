@@ -532,4 +532,40 @@ class LegalPagesTest extends TestCase
             'The System tab should be styled active on /admin/legal'
         );
     }
+
+    public function test_a_legal_document_keeps_its_own_direction_regardless_of_the_viewers_locale(): void
+    {
+        // The document decides, not the reader. Passing the viewer's locale here let a Hebrew
+        // reader's mostly-English terms flip to RTL on a single Hebrew word - the direction
+        // helper's known-RTL branch trusts its language argument enough that one letter settles
+        // it, which is only safe when that argument is the language the TEXT was written in.
+        LegalDocument::create([
+            'type' => 'terms',
+            'content' => str_repeat('These Terms of Service govern your use of the platform. ', 30)
+                .'Operated by אוונטס Ltd.',
+        ]);
+
+        app()->setLocale('he');
+
+        $html = $this->get('/terms-of-service')->assertOk()->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '/<div dir="ltr"[^>]*class="[^"]*legal-prose/',
+            $html,
+            'A mostly-English legal document must stay LTR for a Hebrew-locale reader.'
+        );
+    }
+
+    public function test_a_hebrew_legal_document_reads_rtl_for_an_english_locale_reader(): void
+    {
+        LegalDocument::create([
+            'type' => 'terms',
+            'content' => 'תנאי השימוש שלנו חלים על כל שימוש בפלטפורמה ובשירותים הנלווים אליה.',
+        ]);
+
+        app()->setLocale('en');
+
+        $this->get('/terms-of-service')->assertOk()
+            ->assertSee('<div dir="rtl"', false);
+    }
 }

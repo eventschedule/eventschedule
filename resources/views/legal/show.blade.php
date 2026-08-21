@@ -20,7 +20,7 @@
              which is the viewer's UI locale, so a Hebrew policy read by an anonymous
              visitor would lay out LTR - and the table, blockquote and list rules in
              this layout are all logical properties that resolve from it. --}}
-        <div dir="{{ content_dir_for_language($html, app()->getLocale()) }}"
+        <div dir="{{ detect_content_dir($html) ?: (is_rtl() ? 'rtl' : 'ltr') }}"
             class="custom-content legal-prose mt-8 text-gray-700 dark:text-gray-300 leading-relaxed">
             {!! $html !!}
         </div>

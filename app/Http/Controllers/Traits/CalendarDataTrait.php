@@ -21,6 +21,17 @@ trait CalendarDataTrait
         // events whose own language pair differs from this schedule's - see Event::textInLanguage().
         $displayLang = $displayLang ?: ($role ? $role->displayLanguageCode() : 'en');
         $eventName = $event->nameInLanguage($displayLang, $role);
+        $shortDescription = $event->shortDescriptionInLanguage($displayLang, $role);
+        $venueName = $event->getVenueDisplayName(true, $displayLang);
+
+        // The language a *direction* falls back to when the string itself has nothing to say.
+        // Deliberately separate from $displayLang, which decides WHICH text is shown: on the
+        // dashboard $role is null and $displayLang is 'en', so a Hebrew event would otherwise
+        // have its direction resolved against English and read backwards. Each string defers to
+        // whoever owns it - the event's creator, the venue, the talent - and because the
+        // known-RTL branch of resolve_content_dir() tests for actual RTL letters, naming a
+        // language the string turns out not to be written in is harmless.
+        $dirLang = $event->creatorRole?->language_code ?: $displayLang;
 
         $user = auth()->user();
         $canEdit = false;
@@ -41,9 +52,11 @@ trait CalendarDataTrait
             'category_name' => $event->resolveCategoryName($displayLang),
             'category_color' => $event->resolveCategoryColor(),
             'name' => $eventName,
-            'dir' => content_dir_for_language($eventName, $displayLang),
-            'short_description' => $event->shortDescriptionInLanguage($displayLang, $role),
-            'venue_name' => $event->getVenueDisplayName(true, $displayLang),
+            'dir' => content_dir_for_language($eventName, $dirLang),
+            'short_description' => $shortDescription,
+            'description_dir' => content_dir_for_language($shortDescription, $dirLang),
+            'venue_name' => $venueName,
+            'venue_dir' => content_dir_for_language($venueName, $event->venue?->language_code ?: $dirLang),
             'venue_subdomain' => $event->venue?->subdomain ?: null,
             'is_free' => $event->isFree(),
             'starts_at' => $event->starts_at,
@@ -91,6 +104,7 @@ trait CalendarDataTrait
             'venue_guest_url' => ($event->venue && isset($role) && $event->venue->subdomain === $role->subdomain) ? null : ($event->venue?->getGuestUrl() ?: null),
             'talent' => $event->roles->filter(fn ($r) => $r->type === 'talent' && (! $guestView || $r->isClaimed()))->map(fn ($r) => [
                 'name' => $r->name,
+                'dir' => content_dir_for_language($r->name, $r->language_code ?: $dirLang),
                 'profile_image' => $r->profile_image_url ?: null,
                 'header_image' => ($r->getAttributes()['header_image'] && ! in_array($r->getAttributes()['header_image'], ['none', 'logos'], true)) ? $r->getHeaderImageUrlAttribute($r->getAttributes()['header_image']) : null,
                 'guest_url' => (isset($role) && $r->subdomain === $role->subdomain) ? null : ($r->getGuestUrl() ?: null),
@@ -140,6 +154,7 @@ trait CalendarDataTrait
         if ($event->isPasswordProtected()) {
             $data['short_description'] = null;
             $data['venue_name'] = null;
+            $data['venue_dir'] = null;
             $data['venue_guest_url'] = null;
             $data['venue_profile_image'] = null;
             $data['venue_header_image'] = null;

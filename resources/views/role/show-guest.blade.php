@@ -167,6 +167,13 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                     }
                   @endphp
                   @continue (! $carouselEmbedUrl)
+                  @php
+                    // Below the @continue on purpose: these depend on the event, not the video
+                    // role, and this carousel can draw dozens of video roles that never render.
+                    $carouselLang = $role->displayLanguageCode();
+                    $carouselName = $eventData['event']->nameInLanguage($carouselLang, $role);
+                    $carouselVenue = $eventData['event']->getVenueDisplayName(true, $carouselLang);
+                  @endphp
                   <div class="carousel-item flex-shrink-0 w-full sm:w-80 bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden group/card">
                     <!-- Video iframe -->
                     <iframe
@@ -183,11 +190,11 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                     <!-- Event details below video -->
                     <div class="p-4">
                       <a href="{{ $eventData['event']->getGuestUrl($role->subdomain) }}" class="block">
-                        <h2 class="text-gray-900 dark:text-gray-100 font-semibold text-lg mb-2 line-clamp-1 group-hover/card:text-blue-600 transition-colors duration-200">
-                          {{ $eventData['event']->nameInLanguage($role->displayLanguageCode(), $role) }}
+                        <h2 class="text-gray-900 dark:text-gray-100 font-semibold text-lg mb-2 line-clamp-1 group-hover/card:text-blue-600 transition-colors duration-200" dir="{{ content_dir_for_language($carouselName, $carouselLang) }}">
+                          {{ $carouselName }}
                         </h2>
-                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-1 group-hover/card:text-gray-700 dark:group-hover/card:text-gray-300 transition-colors duration-200">
-                          {{ $eventData['event']->getVenueDisplayName(true, $role->displayLanguageCode()) }}
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-1 group-hover/card:text-gray-700 dark:group-hover/card:text-gray-300 transition-colors duration-200" dir="{{ content_dir_for_language($carouselVenue, $carouselLang) }}">
+                          {{ $carouselVenue }}
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 text-xs group-hover/card:text-gray-600 dark:group-hover/card:text-gray-300 transition-colors duration-200">
                           {{ $eventData['event']->localStartsAt(true, request()->date) }}

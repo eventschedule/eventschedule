@@ -23,13 +23,17 @@
             @endphp
 
             @foreach($displayEvents as $index => $event)
+                @php
+                    $graphicName = $event->nameInLanguage($graphicLang, $role ?? null);
+                    $graphicVenue = $event->getVenueDisplayName(true, $graphicLang);
+                @endphp
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl dark:shadow-gray-900/50 overflow-hidden transform hover:scale-[1.02] transition-all duration-300 hover:shadow-2xl dark:hover:shadow-gray-900/70">
                     <div class="flex {{ is_rtl() ? 'flex-row' : 'flex-row-reverse' }} min-h-0">
 
                         <!-- Event Image Section -->
                         <div class="w-52 h-52 flex-shrink-0 relative overflow-hidden">
                             <img src="{{ $event->getImageUrl() }}" 
-                                 alt="{{ $event->nameInLanguage($graphicLang, $role ?? null) }}" 
+                                 alt="{{ $graphicName }}" 
                                  class="w-full h-full object-cover object-center">
                             <!-- Gradient Overlay -->
                             <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
@@ -42,9 +46,9 @@
                                 <!-- Event Name -->
                                 <div class="pt-1">
                                     <h3 class="text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight truncate" 
-                                        title="{{ $event->nameInLanguage($graphicLang, $role ?? null) }}"
-                                        dir="auto">
-                                        <x-user-text>{{ $event->nameInLanguage($graphicLang, $role ?? null) }}</x-user-text>
+                                        title="{{ $graphicName }}"
+                                        dir="{{ content_dir_for_language($graphicName, $graphicLang) }}">
+                                        <x-user-text>{{ $graphicName }}</x-user-text>
                                     </h3>
                                 </div>
 
@@ -56,8 +60,8 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                         </svg>
                                     </div>
-                                    <p class="text-lg text-gray-700 dark:text-gray-300 font-medium">
-                                        <x-user-text>{{ $event->getVenueDisplayName() }}</x-user-text>
+                                    <p class="text-lg text-gray-700 dark:text-gray-300 font-medium" dir="{{ content_dir_for_language($graphicVenue, $graphicLang) }}">
+                                        <x-user-text>{{ $graphicVenue }}</x-user-text>
                                     </p>
                                 </div>
                                 
