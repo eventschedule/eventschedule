@@ -91,7 +91,12 @@ html[data-es-view="list"] #calendar-panel-wrapper {
         @endphp
         @if ($mobileBannerUrl)
         <div class="relative {{ $headerStyle === 'banner' ? '-mt-10 pt-10' : '' }} md:m-0 md:p-0">
-            <div class="absolute -top-40 -bottom-3 left-1/2 -translate-x-1/2 w-screen bg-cover bg-no-repeat bg-top md:hidden -z-10"
+            {{-- The upward bleed is banner-only. Banner leaves that strip empty (just the
+                 layout's language-switcher row), but compact puts its full-width bar there, and
+                 this container's z-10 paints over it - so under compact the image starts at the
+                 container's top edge instead: -top-3 cancels the mobile pt-3, landing it flush
+                 against the bar's bottom border. --}}
+            <div class="absolute {{ $headerStyle === 'banner' ? '-top-40' : '-top-3' }} -bottom-3 left-1/2 -translate-x-1/2 w-screen bg-cover bg-no-repeat bg-top md:hidden -z-10"
                  style="background-image: url('{{ $mobileBannerUrl }}');"></div>
         @endif
         @if ($headerStyle === 'banner')

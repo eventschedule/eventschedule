@@ -107,7 +107,8 @@
 
     <button
       type="button"
-      class="pointer-events-auto es-a11y-ignore flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-900 shadow-md transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] dark:border-white/10 dark:bg-[#252526] dark:text-gray-100 dark:hover:bg-[#2d2d30]"
+      class="pointer-events-auto es-a11y-ignore flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-3 sm:px-4 text-sm font-semibold text-gray-900 shadow-md transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] dark:border-white/10 dark:bg-[#252526] dark:text-gray-100 dark:hover:bg-[#2d2d30]"
+      :aria-label="labelOpen"
       :aria-expanded="panelOpen ? 'true' : 'false'"
       aria-haspopup="dialog"
       aria-controls="es-a11y-panel"
@@ -116,7 +117,9 @@
       <svg class="h-5 w-5 text-[var(--brand-blue)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4a4 4 0 014 4v1h1a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2h1V8a4 4 0 118 0z" />
       </svg>
-      <span>{{ labelOpen }}</span>
+      <!-- Label hidden below sm so the launcher is a 46px circle on a phone instead of a ~200px
+           pill sitting on top of page content; aria-label above keeps the button named. -->
+      <span class="hidden sm:inline">{{ labelOpen }}</span>
     </button>
   </div>
 </template>
