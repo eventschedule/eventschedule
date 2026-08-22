@@ -3,6 +3,7 @@
 namespace Tests\Feature\Characterization;
 
 use App\Jobs\NotifyEventChange;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
@@ -22,6 +23,34 @@ class EventSaveLifecycleCharacterizationTest extends TestCase
     use CreatesScheduleData;
     use RefreshDatabase;
     use SavesEventsOverHttp;
+
+    /**
+     * The dates in this class are absolute on purpose: eventPayload()'s
+     * '2026-08-15 20:00:00' schedule-local default and createEvent()'s raw
+     * '2026-08-16 00:00:00' UTC are the same instant in America/New_York (EDT),
+     * which is exactly what test_immaterial_update pins. Freeze the clock before
+     * that instant so saveEvent()'s $isPast guard (beside the notification
+     * dispatch in EventRepo) stays on the upcoming side forever. Without this the
+     * notify test silently stops notifying once the wall clock passes the
+     * literals, and its without-notify sibling passes for the wrong reason.
+     *
+     * Do not switch these to relative dates: the local/UTC pair would then have
+     * to be recomputed in the test, which is the production conversion this
+     * characterization is supposed to be pinning.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Carbon::setTestNow(Carbon::parse('2026-08-01 12:00:00', 'UTC'));
+    }
+
+    protected function tearDown(): void
+    {
+        Carbon::setTestNow();
+
+        parent::tearDown();
+    }
 
     public function test_draft_create_and_publish_transition(): void
     {
@@ -86,6 +115,35 @@ class EventSaveLifecycleCharacterizationTest extends TestCase
 
         // Subscribed calendars still need the change -> sequence advances,
         // but no attendee notification is dispatched.
+        $this->assertDatabaseHas('events', ['id' => $event->id, 'ical_sequence' => 1]);
+        Queue::assertNotPushed(NotifyEventChange::class);
+    }
+
+    public function test_past_event_bumps_sequence_but_never_notifies(): void
+    {
+        Queue::fake();
+
+        // Overrides the class freeze: the event is now behind us. saveEvent refuses
+        // to email attendees about a change to something that already happened, and
+        // that suppression is what this pins - it is the only coverage the $isPast
+        // guard has once the class stops drifting past its own literals.
+        Carbon::setTestNow(Carbon::parse('2026-09-01 12:00:00', 'UTC'));
+
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent');
+        $event = $this->createEvent($role, ['starts_at' => '2026-08-16 00:00:00', 'timezone' => 'America/New_York']);
+        $this->createSale($event, $role, ['email' => 'attendee@gmail.com', 'status' => 'paid']);
+
+        $response = $this->putUpdateEvent($owner, $role, $event, [
+            'starts_at' => '2026-08-20 21:00:00',
+            'notify_attendees' => '1',
+            'notify_message' => 'Moved to Thursday!',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('message', __('messages.saved_without_notifying'));
+
+        // Subscribed calendars still need the correction, so the sequence advances.
         $this->assertDatabaseHas('events', ['id' => $event->id, 'ical_sequence' => 1]);
         Queue::assertNotPushed(NotifyEventChange::class);
     }
