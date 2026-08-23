@@ -2,6 +2,13 @@
     <div class="space-y-4">
         <!-- Summary + lookup -->
         <div class="ap-card rounded-xl p-4 flex flex-wrap items-center gap-4">
+            <!-- Which show, and WHICH NIGHT. This used to live in a header slot the admin layout
+                 never renders, so the console named neither - and on a thirty-date run the only
+                 thing telling a staffer whose seat they were about to release was the URL. -->
+            <div class="w-full">
+                <h1 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ eventName }}</h1>
+                <p v-if="dateLabel" class="text-sm text-gray-500 dark:text-gray-400">{{ dateLabel }}</p>
+            </div>
             <a :href="backUrl" class="text-sm font-medium text-gray-500 dark:text-gray-400 hover:underline">&larr; {{ t.back }}</a>
             <a :href="reportUrl" class="text-sm font-medium text-[var(--brand-blue)] hover:underline">{{ t.report }}</a>
 
@@ -32,14 +39,33 @@
 
         <div class="grid grid-cols-1 xl:grid-cols-[1fr_22rem] gap-4">
             <!-- Map -->
-            <div class="ap-card rounded-xl p-2 overflow-auto">
-                <svg v-if="sections.length" :viewBox="viewBox" class="w-full" style="min-width: 480px; height: 30rem;"
+            <div class="ap-card rounded-xl p-2">
+                <div v-if="levels.length > 1 || sections.length" class="flex flex-wrap items-center gap-2 px-1 pb-2">
+                    <!-- Only worth showing when there is somewhere else to go. -->
+                    <div v-if="levels.length > 1" class="flex items-center gap-1 rounded-lg bg-gray-100 dark:bg-gray-800 p-1">
+                        <button v-for="lvl in levels" :key="lvl.id" type="button" @click="activeLevelId = lvl.id"
+                            :aria-pressed="lvl.id === activeLevel?.id"
+                            class="px-2 py-1 rounded text-xs transition-all duration-200"
+                            :class="lvl.id === activeLevel?.id
+                                ? 'bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-gray-100'
+                                : 'text-gray-500 dark:text-gray-400'">{{ lvl.name || t.level }}</button>
+                    </div>
+                    <div class="ms-auto flex items-center gap-1 rounded-lg bg-gray-100 dark:bg-gray-800 p-1">
+                        <button type="button" @click="zoomBy(-0.15)" class="px-2 py-1 rounded text-sm text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 transition-all duration-200" :aria-label="t.zoomOut">&minus;</button>
+                        <span class="px-1 text-xs tabular-nums text-gray-500 dark:text-gray-400">{{ Math.round(zoom * 100) }}%</span>
+                        <button type="button" @click="zoomBy(0.15)" class="px-2 py-1 rounded text-sm text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 transition-all duration-200" :aria-label="t.zoomIn">+</button>
+                        <button type="button" @click="fit" class="px-2 py-1 rounded text-xs text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 transition-all duration-200">{{ t.fit }}</button>
+                    </div>
+                </div>
+                <svg v-if="sections.length" ref="svgEl" v-bind="bind" :viewBox="viewBox" class="w-full select-none touch-none"
+                    :style="{ height: mapHeight, cursor: 'grab' }"
                     role="group" :aria-label="t.mapLabel">
                     <defs>
                         <pattern id="boBlocked" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
                             <line x1="0" y1="0" x2="0" y2="4" stroke="#6b7280" stroke-width="1.6" />
                         </pattern>
                     </defs>
+                    <g :transform="`translate(${pan.x} ${pan.y}) scale(${zoom})`">
                     <g v-for="s in sections" :key="s.id" :transform="`translate(${s.x} ${s.y})`">
                         <text :x="0" :y="-10" font-size="12" class="fill-gray-500 dark:fill-gray-400">{{ s.name }}</text>
                         <g v-for="seat in s.seats" :key="seat.id" :transform="`translate(${seatX(s, seat)} ${seatY(s, seat)})`">
@@ -60,6 +86,7 @@
                                 fill="#1f2937" pointer-events="none">&#9855;</text>
                         </g>
                     </g>
+                    </g>
                 </svg>
                 <p v-else class="p-4 text-sm text-gray-500 dark:text-gray-400">{{ t.noSeats }}</p>
                 <p class="px-2 pb-1 text-xs text-gray-400 dark:text-gray-500">{{ t.mapHint }}</p>
@@ -72,7 +99,7 @@
                     <ul class="mt-2 space-y-1">
                         <li v-for="s in sections" :key="s.id">
                             <button type="button" @click="selectSection(s)"
-                                class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-start hover:bg-gray-50 dark:hover:bg-[#252526] transition-all duration-200">
+                                class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-start hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200">
                                 <span class="w-3 h-3 rounded-sm shrink-0" :style="{ backgroundColor: s.color }"></span>
                                 <span class="truncate text-gray-700 dark:text-gray-300">{{ s.name }}</span>
                                 <span class="ms-auto text-xs text-gray-400">{{ s.seats.length }}</span>
@@ -189,8 +216,9 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, nextTick, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, nextTick, ref, watch } from 'vue';
 import { loadMap, startPolling } from '../seat-map-store';
+import { useMapViewport } from '../seat-map-viewport';
 
 const props = defineProps({
     eventId: { type: String, required: true },
@@ -201,6 +229,9 @@ const props = defineProps({
     releaseUrl: { type: String, required: true },
     exchangeUrl: { type: String, required: true },
     bookUrl: { type: String, required: true },
+    eventName: { type: String, default: '' },
+    // Preformatted server-side, where the locale lives.
+    dateLabel: { type: String, default: '' },
     backUrl: { type: String, default: '' },
     reportUrl: { type: String, default: '' },
     csrfToken: { type: String, required: true },
@@ -224,25 +255,60 @@ const error = ref('');
 const notice = ref('');
 const busy = ref(false);
 
-const sections = computed(() => {
-    if (!map.value) return [];
-    const out = [];
-    (map.value.levels || []).forEach(l => (l.sections || []).forEach(s => out.push(s)));
-    return out;
-});
+/**
+ * Levels are separate spaces, so they are drawn one at a time.
+ *
+ * Drawing them together superimposed a balcony on the stalls: every level's first section is seeded
+ * at the same origin, so two levels land on top of each other rather than side by side.
+ */
+const levels = computed(() => ((map.value && map.value.levels) || []).filter(l => (l.sections || []).length));
+const activeLevelId = ref(null);
+const activeLevel = computed(() => levels.value.find(l => l.id === activeLevelId.value) || levels.value[0] || null);
+
+/** Only what is on screen. */
+const sections = computed(() => (activeLevel.value && activeLevel.value.sections) || []);
+
+/** Every section on every level - what the counts, the lookup and a seat's name are built from. */
+const allSections = computed(() => levels.value.flatMap(l => l.sections || []));
+
 const counts = computed(() => (map.value && map.value.counts) || {});
-const allSeats = computed(() => sections.value.flatMap(s => s.seats.map(seat => ({ seat, section: s }))));
+const allSeats = computed(() => allSections.value.flatMap(s => s.seats.map(seat => ({ seat, section: s }))));
+
+/** The seats being drawn, in reading order - what the keyboard walks. */
+const shownSeats = computed(() => sections.value.flatMap(s => s.seats.map(seat => ({ seat, section: s }))));
+
+function levelOf(seatId) {
+    return levels.value.find(l => (l.sections || []).some(s => s.seats.some(x => x.id === seatId))) || null;
+}
 const single = computed(() => (selected.value.length === 1
     ? allSeats.value.find(x => x.seat.id === selected.value[0])?.seat ?? null
     : null));
 
-const viewBox = computed(() => {
+const svgEl = ref(null);
+
+/** Bounding box of the active level, in content units. */
+function contentBounds() {
     const xs = [], ys = [];
     sections.value.forEach(s => s.seats.forEach(seat => { xs.push(s.x + seatX(s, seat)); ys.push(s.y + seatY(s, seat)); }));
-    if (!xs.length) return '0 0 800 400';
-    const pad = 34;
+    if (!xs.length) return null;
+    const pad = 20;
     const minX = Math.min(...xs) - pad, minY = Math.min(...ys) - pad - 14;
-    return `${minX} ${minY} ${Math.max(200, Math.max(...xs) - minX + pad)} ${Math.max(120, Math.max(...ys) - minY + pad)}`;
+    return { minX, minY, w: Math.max(1, Math.max(...xs) - minX + pad), h: Math.max(1, Math.max(...ys) - minY + pad) };
+}
+
+const { zoom, pan, canvas, bind, fit, zoomBy, observe, revealPoint } = useMapViewport({ svgEl, contentBounds });
+
+/**
+ * The canvas is the viewBox, and zoom/pan move the content inside it - so a wide, shallow room no
+ * longer letterboxes inside a tall fixed box. The height still follows the room's proportions so a
+ * single row does not get a 30rem tall panel to sit in.
+ */
+const viewBox = computed(() => `0 0 ${canvas.w} ${canvas.h}`);
+const mapHeight = computed(() => {
+    const b = contentBounds();
+    if (!b) return '20rem';
+    const ratio = Math.min(1.1, Math.max(0.3, b.h / b.w));
+    return `${Math.round(Math.min(640, Math.max(240, canvas.w * ratio)))}px`;
 });
 
 // Same relative-to-parent geometry as the designer and the picker, including the fallback for a
@@ -311,11 +377,14 @@ function onSeatKey(evt, section, seat) {
     const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[evt.key];
     if (!step) return;
     evt.preventDefault();
-    const list = allSeats.value;
+    // The seats being drawn, not every seat in the house: arrowing must not walk onto a level
+    // that is not on screen.
+    const list = shownSeats.value;
     const i = list.findIndex(x => x.seat.id === seat.id);
     const next = list[Math.min(list.length - 1, Math.max(0, i + step))];
     if (!next) return;
     focusedId.value = next.seat.id;
+    reveal(next);
     nextTick(() => document.getElementById(`bo-seat-${next.seat.id}`)?.focus());
 }
 
@@ -344,9 +413,24 @@ function runLookup() {
 
     error.value = '';
     notice.value = '';
+    // The hit may be on another level, which is not drawn - switch to it, or the staffer is told
+    // the seat was found and then shown a map without it.
+    const lvl = levelOf(hit.seat.id);
+    if (lvl && lvl.id !== activeLevel.value?.id) activeLevelId.value = lvl.id;
+
     selected.value = [hit.seat.id];
     focusedId.value = hit.seat.id;
-    nextTick(() => document.getElementById(`bo-seat-${hit.seat.id}`)?.scrollIntoView({ block: 'center', behavior: 'instant' }));
+    nextTick(() => {
+        reveal(hit);
+        document.getElementById(`bo-seat-${hit.seat.id}`)?.focus();
+    });
+}
+
+/** Pan a seat into view, by its position on the canvas rather than by scrolling the page. */
+function reveal(entry) {
+    if (!entry) return;
+    const s = entry.section;
+    revealPoint(s.x + seatX(s, entry.seat), s.y + seatY(s, entry.seat));
 }
 
 async function post(url, body) {
@@ -420,9 +504,16 @@ onMounted(async () => {
     const data = await loadMap(props.stateUrl, props.eventId, props.date);
     if (!data) { error.value = t.loadFailed; return; }
     map.value = data;
-    focusedId.value = allSeats.value[0]?.seat.id ?? null;
+    activeLevelId.value = levels.value[0]?.id ?? null;
+    focusedId.value = shownSeats.value[0]?.seat.id ?? null;
+    await nextTick();
+    observe();
+    fit();
     // Faster than the guest picker: staff are watching a live door.
     startPolling(props.stateUrl, props.eventId, props.date, map.value, () => {}, 3000);
 });
+// Each level has its own extent, so a switch has to reframe or the new level lands off screen.
+watch(activeLevelId, () => nextTick(fit));
+
 onBeforeUnmount(() => {});
 </script>

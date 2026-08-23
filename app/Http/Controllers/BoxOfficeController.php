@@ -130,9 +130,16 @@ class BoxOfficeController extends Controller
 
         $counts = ['total' => 0, 'sold' => 0, 'held' => 0, 'blocked' => 0, 'available' => 0];
         $rows = [];
-        $drawn = [];
+        // Drawn seats, keyed by level. Levels are separate spaces and every level's first section
+        // starts at the same origin, so drawing them on one canvas put the balcony on top of the
+        // stalls. Paper has no level switcher, so the report stacks them with a heading each.
+        $drawnByLevel = [];
+        $levelNames = $map->levels()->get()->pluck('name', 'id');
 
         foreach ($sections as $section) {
+            $levelKey = $section->seating_level_id ?? 0;
+            $drawn = &$drawnByLevel[$levelKey];
+            $drawn = $drawn ?? [];
             $mine = $seats->where('seating_section_id', $section->id)->values();
 
             $degenerate = $mine->count() > 1
@@ -182,21 +189,34 @@ class BoxOfficeController extends Controller
                     'label' => $seat->seat_label,
                 ];
             }
+
+            unset($drawn);
         }
 
-        $xs = array_column($drawn, 'x');
-        $ys = array_column($drawn, 'y');
         $pad = 24;
+        $levels = [];
+
+        foreach ($drawnByLevel as $levelKey => $drawn) {
+            if (! $drawn) {
+                continue;
+            }
+
+            $xs = array_column($drawn, 'x');
+            $ys = array_column($drawn, 'y');
+
+            $levels[] = [
+                'name' => $levelNames[$levelKey] ?? null,
+                'drawn' => $drawn,
+                'viewBox' => sprintf('%d %d %d %d', min($xs) - $pad, min($ys) - $pad,
+                    max(60, max($xs) - min($xs) + $pad * 2), max(60, max($ys) - min($ys) + $pad * 2)),
+            ];
+        }
 
         return [
             'counts' => $counts,
             'rows' => $rows,
-            'drawn' => $drawn,
+            'levels' => $levels,
             'sections' => $sections,
-            'viewBox' => $drawn
-                ? sprintf('%d %d %d %d', min($xs) - $pad, min($ys) - $pad,
-                    max(60, max($xs) - min($xs) + $pad * 2), max(60, max($ys) - min($ys) + $pad * 2))
-                : '0 0 600 300',
         ];
     }
 

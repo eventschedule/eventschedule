@@ -1175,11 +1175,13 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             'x' => 0, 'y' => 0,
         ], range('A', 'F'), 12, 6);
 
-        // Circle: rows A-C of 10, split 5+5. Offset clear of the Stalls block - the console and the
-        // report draw every level on one canvas, so overlapping x ranges collide the labels.
+        // Circle: rows A-C of 10, split 5+5. Its own level, drawn on its own canvas, so it starts
+        // at the origin exactly as the Stalls does - which is what the designer produces. This used
+        // to be nudged out to x=420 because the console and the report drew every level together
+        // and the two blocks collided; they now show one level at a time.
         $this->seedDemoSection($plan, $circle, [
             'name' => 'Circle', 'band' => 'Circle', 'color' => '#800020', 'position' => 1,
-            'x' => 420, 'y' => 0,
+            'x' => 0, 'y' => 0,
         ], range('A', 'C'), 10, 5);
 
         // Wheelchair spaces live in their own accessibility-only section, which is the only kind of

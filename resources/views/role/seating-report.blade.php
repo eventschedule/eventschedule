@@ -4,12 +4,6 @@
         $args = ['subdomain' => $subdomain, 'hash' => $hash];
     @endphp
 
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('messages.seating_report') }}
-        </h2>
-    </x-slot>
-
     {{-- Print CSS rather than a PDF library: this project has none, and the ticket page already
          establishes the pattern. Deliberately plain black on white when printed - a front-of-house
          sheet usually comes off a mono laser printer. --}}
@@ -32,7 +26,7 @@
                 <div class="flex flex-wrap items-start justify-between gap-4">
                     <div>
                         <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ $event->translatedName() }}</h1>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ $map->event_date }}</p>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ \Carbon\Carbon::parse($map->event_date)->translatedFormat('l, F j, Y') }}</p>
                     </div>
                     <div class="no-print flex flex-wrap gap-3">
                         <a href="{{ route('box_office.show', $args) }}"
@@ -56,18 +50,24 @@
                 </dl>
             </div>
 
-            @if (count($drawn))
+            {{-- One block per level. Levels are separate spaces and each one's first section starts
+                 at the same origin, so drawing them together put the balcony on top of the stalls.
+                 The interactive maps switch between levels; paper stacks them. --}}
+            @foreach ($levels as $level)
                 <div class="ap-card print-plain rounded-xl p-4 seat-map">
+                    @if (count($levels) > 1 && $level['name'])
+                        <h2 class="mb-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $level['name'] }}</h2>
+                    @endif
                     {{-- Status is carried by SHAPE, not colour: this sheet is usually printed in
                          black and white, where four shades of grey are four identical circles. --}}
-                    <svg viewBox="{{ $viewBox }}" class="w-full" style="max-height: 26rem;" role="img"
+                    <svg viewBox="{{ $level['viewBox'] }}" class="w-full" style="max-height: 26rem;" role="img"
                          aria-label="{{ __('messages.seating_map_label') }}">
                         <defs>
                             <pattern id="rptBlocked" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
                                 <line x1="0" y1="0" x2="0" y2="4" stroke="#000" stroke-width="1.4" />
                             </pattern>
                         </defs>
-                        @foreach ($drawn as $seat)
+                        @foreach ($level['drawn'] as $seat)
                             <g transform="translate({{ $seat['x'] }} {{ $seat['y'] }})">
                                 <circle r="9" fill="{{ $seat['state'] === 'sold' ? '#111827' : ($seat['state'] === 'blocked' ? 'url(#rptBlocked)' : '#fff') }}"
                                         stroke="#111827" stroke-width="1.2"
@@ -90,7 +90,7 @@
                         <span>&#9855; {{ __('messages.seating_kind_wheelchair') }}</span>
                     </div>
                 </div>
-            @endif
+            @endforeach
 
             <div class="ap-card print-plain rounded-xl p-4 overflow-x-auto">
                 <table class="min-w-full text-sm">

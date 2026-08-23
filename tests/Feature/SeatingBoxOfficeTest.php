@@ -736,7 +736,14 @@ class SeatingBoxOfficeTest extends TestCase
         $this->assertStringContainsString('Buyer', $html);
         $this->assertStringContainsString('Producer hold', $html);
         $this->assertStringContainsString($event->translatedName(), $html);
-        $this->assertStringContainsString($map->event_date, $html);
+
+        // The date a person can read, not the raw Y-m-d the column stores. This used to assert the
+        // stored string, which passed precisely because the sheet printed "2026-01-01" at a venue.
+        $this->assertStringContainsString(
+            \Carbon\Carbon::parse($map->event_date)->translatedFormat('l, F j, Y'),
+            $html
+        );
+        $this->assertStringNotContainsString('>'.$map->event_date.'<', $html);
 
         // A row per seat, plus the header.
         $this->assertSame(11, substr_count($html, '<tr'));
@@ -801,5 +808,52 @@ class SeatingBoxOfficeTest extends TestCase
         $this->assertTrue((bool) $sale->fresh()->is_deleted, 'fixture sanity: the delete happened');
         $this->assertSame(0, SeatingSeat::where('sale_id', $sale->id)->count());
         $this->assertSame('available', $seats->first()->fresh()->status);
+    }
+
+    /**
+     * A two-level plan draws one map per level, not both on top of each other.
+     *
+     * Every level's first section is seeded at the same origin, because the designer only ever
+     * shows one level at a time. The report used to flatten them onto a single canvas, so the
+     * designer's own theatre preset - Stalls plus Balcony - printed an 80-seat balcony directly on
+     * top of a 216-seat stalls, and the demo data only looked right because a section had been
+     * hand-nudged sideways.
+     */
+    public function test_each_level_gets_its_own_map_on_the_report(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+        $plan = $this->makePlan($role);
+
+        // A balcony, deliberately at the SAME coordinates as the stalls - which is what the
+        // designer produces, since a level is its own space.
+        $stalls = SeatingSection::where('seating_plan_id', $plan->id)->firstOrFail();
+        $balcony = SeatingLevel::create(['seating_plan_id' => $plan->id, 'name' => 'Balcony', 'position' => 1]);
+        $upstairs = SeatingSection::create([
+            'seating_plan_id' => $plan->id, 'seating_level_id' => $balcony->id,
+            'name' => 'Balcony', 'band' => 'Stalls', 'kind' => 'seated',
+            'x' => $stalls->x, 'y' => $stalls->y,
+        ]);
+        for ($n = 1; $n <= 4; $n++) {
+            SeatingSeat::create([
+                'seating_plan_id' => $plan->id, 'seating_section_id' => $upstairs->id,
+                'row_label' => 'A', 'row_position' => 1, 'seat_label' => (string) $n, 'position' => $n,
+            ]);
+        }
+
+        $event = $this->seatedEvent($role, $plan->fresh());
+        $this->maps()->materialize($event);
+
+        $html = $this->actingAs($owner)->get(route('box_office.report', [
+            'subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($event->id),
+        ]))->assertOk()->getContent();
+
+        // One <svg> per level, each headed by its name, rather than one canvas holding both.
+        $this->assertSame(2, substr_count($html, '<svg viewBox='), 'the levels were flattened onto one map');
+        $this->assertStringContainsString('Ground', $html);
+        $this->assertStringContainsString('Balcony', $html);
+
+        // ...and every seat still reaches the table below, on both levels.
+        $this->assertSame(15, substr_count($html, '<tr'));
     }
 }

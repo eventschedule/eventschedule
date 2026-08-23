@@ -12,11 +12,11 @@
                 :aria-label="t.planName" />
             <span v-else class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ planName }}</span>
 
-            <div class="flex items-center gap-1 rounded-xl bg-gray-100 dark:bg-[#252526] p-1">
-                <button type="button" @click="zoomBy(-0.15)" class="px-2 py-1 rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-[#2d2d30] transition-all duration-200" :aria-label="t.zoomOut">&minus;</button>
+            <div class="flex items-center gap-1 rounded-xl bg-gray-100 dark:bg-gray-800 p-1">
+                <button type="button" @click="zoomBy(-0.15)" class="px-2 py-1 rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 transition-all duration-200" :aria-label="t.zoomOut">&minus;</button>
                 <span class="px-2 text-xs tabular-nums text-gray-500 dark:text-gray-400">{{ Math.round(zoom * 100) }}%</span>
-                <button type="button" @click="zoomBy(0.15)" class="px-2 py-1 rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-[#2d2d30] transition-all duration-200" :aria-label="t.zoomIn">+</button>
-                <button type="button" @click="fitToView" class="px-2 py-1 rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-[#2d2d30] transition-all duration-200">{{ t.fit }}</button>
+                <button type="button" @click="zoomBy(0.15)" class="px-2 py-1 rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 transition-all duration-200" :aria-label="t.zoomIn">+</button>
+                <button type="button" @click="fitToView" class="px-2 py-1 rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 transition-all duration-200">{{ t.fit }}</button>
             </div>
 
             <div class="ms-auto flex items-center gap-3">
@@ -30,6 +30,16 @@
                     {{ saving ? t.saving : t.save }}
                 </button>
             </div>
+        </div>
+
+        <!-- What is already committed. Restructuring a room that is on sale is the one edit the
+             server can refuse - a sold seat cannot be deleted - and without this the organizer
+             found that out on Save, after doing the work. -->
+        <div v-if="usageNotice" class="rounded-lg border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-3 flex items-start gap-2">
+            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+            </svg>
+            <p class="text-sm text-amber-800 dark:text-amber-200">{{ usageNotice }}</p>
         </div>
 
         <div v-if="error" id="seating-error" class="rounded-lg border border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-300">
@@ -50,7 +60,10 @@
             <button type="button" @click="addLevel()" class="mt-4 text-sm text-[var(--brand-blue)] hover:underline">{{ t.blankCanvas }}</button>
         </div>
 
-        <div v-else class="grid grid-cols-1 xl:grid-cols-[18rem_1fr_20rem] gap-4">
+        <!-- Three columns only past 1400px. At xl the canvas got ~290px once the AP sidebar was
+             subtracted, so "Fit" landed on 41% and the plan you are drawing was the smallest thing
+             on the screen. Below that the canvas takes the full width and the panels stack. -->
+        <div v-else class="grid grid-cols-1 min-[1400px]:grid-cols-[17rem_1fr_19rem] gap-4">
 
             <!-- Left: levels and sections -->
             <div class="ap-card rounded-xl p-4 space-y-4">
@@ -63,7 +76,7 @@
                         <li v-for="(lvl, i) in levels" :key="lvl.id">
                             <button type="button" @click="selectLevel(i)"
                                 class="w-full text-start px-3 py-2 rounded-lg text-sm transition-all duration-200"
-                                :class="i === activeLevel ? 'bg-gray-100 dark:bg-[#2d2d30] text-gray-900 dark:text-gray-100 shadow-[inset_0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#252526]'">
+                                :class="i === activeLevel ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-[inset_0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'">
                                 {{ lvl.name }}
                                 <span class="text-xs text-gray-400">({{ seatsInLevel(lvl) }})</span>
                             </button>
@@ -87,7 +100,7 @@
                         <li v-for="s in level.sections" :key="s.id">
                             <button type="button" @click="selectSection(s)"
                                 class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-start transition-all duration-200"
-                                :class="isSelectedSection(s) ? 'bg-gray-100 dark:bg-[#2d2d30]' : 'hover:bg-gray-50 dark:hover:bg-[#252526]'">
+                                :class="isSelectedSection(s) ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-800'">
                                 <span class="w-3 h-3 rounded-sm shrink-0" :style="{ backgroundColor: s.color }"></span>
                                 <span class="truncate text-gray-700 dark:text-gray-300">{{ s.name }}</span>
                                 <span class="ms-auto text-xs text-gray-400">{{ s.kind === 'standing' ? s.capacity : s.seats.length }}</span>
@@ -104,7 +117,8 @@
 
             <!-- Centre: the canvas -->
             <div class="ap-card rounded-xl p-2 overflow-hidden">
-                <svg v-if="level" ref="svgEl" class="w-full select-none" :viewBox="viewBox" style="height: 34rem; touch-action: none;"
+                <svg v-if="level" ref="svgEl" v-bind="viewportBind" class="w-full select-none" :viewBox="viewBox"
+                    :style="{ height: canvasHeight, touchAction: 'none' }"
                     @mousedown="onCanvasDown" @mousemove="onMove" @mouseup="endDrag" @mouseleave="endDrag">
                     <defs>
                         <pattern id="restrictedHatch" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
@@ -306,10 +320,12 @@
 
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
+import { useMapViewport } from '../seat-map-viewport';
 
 const props = defineProps({
     planName: { type: String, default: '' },
     nameEditable: { type: Boolean, default: true },
+    usage: { type: Object, default: () => ({ events: 0, sold: 0 }) },
     structureUrl: { type: String, required: true },
     saveUrl: { type: String, required: true },
     backUrl: { type: String, default: '' },
@@ -328,8 +344,6 @@ const selectedSeats = ref([]);
 const dirty = ref(false);
 const saving = ref(false);
 const error = ref('');
-const zoom = ref(1);
-const pan = reactive({ x: 40, y: 60 });
 const svgEl = ref(null);
 
 // Client-side ids are negative so the server, which treats any id it does not already own as new,
@@ -349,8 +363,32 @@ const section = computed(() => {
 // pixel. Tying it to level.width/height meant the browser scaled the whole map down a second time
 // to fit the centre column - a 1200-unit level in a ~525px box rendered everything at 44%, and the
 // toolbar's zoom percentage was then a lie.
-const canvas = reactive({ w: 900, h: 540 });
+// Panning must never fight an element drag: a mousedown on a section, table or seat starts that
+// drag instead, and the viewport stays out of the way until it ends.
+const { zoom, pan, canvas, bind: viewportBind, fit: fitToView, zoomBy, measure: measureCanvas, observe: observeCanvas } =
+    useMapViewport({ svgEl, contentBounds, canPan: () => !drag.mode });
+
 const viewBox = computed(() => `0 0 ${canvas.w} ${canvas.h}`);
+
+const usageNotice = computed(() => {
+    const events = Number(props.usage?.events || 0);
+    const sold = Number(props.usage?.sold || 0);
+
+    // Only :sold is interpolated: the events count is deliberately not, because a number sitting
+    // next to a count-noun needs singular/plural agreement in every one of the twelve languages,
+    // and "in use by 1 events" is what that costs when it is skipped.
+    if (sold > 0) return (t.inUseSold || '').replace(':sold', sold);
+    if (events > 0) return t.inUse || '';
+    return '';
+});
+
+/** Tall enough to work in, proportioned to the room rather than fixed at 34rem. */
+const canvasHeight = computed(() => {
+    const b = contentBounds();
+    if (!b) return '34rem';
+    const ratio = Math.min(1.0, Math.max(0.45, b.h / b.w));
+    return `${Math.round(Math.min(704, Math.max(384, canvas.w * ratio)))}px`;
+});
 const totalSeats = computed(() => levels.value.reduce((n, l) => n + seatsInLevel(l), 0));
 
 function seatsInLevel(lvl) {
@@ -499,18 +537,12 @@ function onSeatKey(evt, seat, owner) {
         dirty.value = true;
     }
 }
-function onCanvasDown(evt) {
-    const p = svgPoint(evt);
-    Object.assign(drag, { mode: 'pan', id: null, startX: evt.clientX, startY: evt.clientY, originX: pan.x, originY: pan.y });
+// Panning is the viewport's job; a press on bare canvas only drops the seat selection.
+function onCanvasDown() {
     selectedSeats.value = [];
 }
 function onMove(evt) {
     if (!drag.mode) return;
-    if (drag.mode === 'pan') {
-        pan.x = drag.originX + (evt.clientX - drag.startX);
-        pan.y = drag.originY + (evt.clientY - drag.startY);
-        return;
-    }
     const p = svgPoint(evt);
     const dx = Math.round(p.x - drag.startX);
     const dy = Math.round(p.y - drag.startY);
@@ -531,9 +563,6 @@ function endDrag() {
     drag.mode = null;
 }
 
-function zoomBy(d) {
-    zoom.value = Math.min(3, Math.max(0.2, Math.round((zoom.value + d) * 100) / 100));
-}
 /**
  * The bounding box of everything drawn on the active level, in section coordinates.
  * Used by fitToView so the map fills the canvas rather than sitting tiny in a corner - a
@@ -558,27 +587,7 @@ function contentBounds() {
     return { minX, minY, w: Math.max(1, maxX - minX), h: Math.max(1, maxY - minY) };
 }
 
-function fitToView() {
-    const b = contentBounds();
-    if (!b) { zoom.value = 1; pan.x = 40; pan.y = 40; return; }
 
-    const pad = 32;
-    const z = Math.min((canvas.w - pad * 2) / b.w, (canvas.h - pad * 2) / b.h);
-    zoom.value = Math.min(3, Math.max(0.2, Math.round(z * 100) / 100));
-    pan.x = Math.round((canvas.w - b.w * zoom.value) / 2 - b.minX * zoom.value);
-    pan.y = Math.round((canvas.h - b.h * zoom.value) / 2 - b.minY * zoom.value);
-}
-
-/** Keep the unit-per-pixel mapping true when the pane resizes. */
-function measureCanvas() {
-    const el = svgEl.value;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    if (r.width > 0 && r.height > 0) {
-        canvas.w = Math.round(r.width);
-        canvas.h = Math.round(r.height);
-    }
-}
 
 // ---- structure editing
 function addLevel(name) {
@@ -872,14 +881,11 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', guardUnload));
 
 onMounted(async () => {
     window.addEventListener('beforeunload', guardUnload);
-    measureCanvas();
-    if (typeof ResizeObserver !== 'undefined' && svgEl.value) {
-        new ResizeObserver(() => { measureCanvas(); }).observe(svgEl.value);
-    }
+    observeCanvas();
     await load();
     // The svg only has a size once v-else has rendered it, which is after load() sets levels.
     await nextTick();
-    measureCanvas();
+    observeCanvas();
     fitToView();
 });
 </script>

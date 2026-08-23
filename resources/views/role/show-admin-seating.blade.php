@@ -99,7 +99,7 @@
                             @if ($canEdit)
                             <form method="POST" action="{{ route('seating.duplicate', ['subdomain' => $role->subdomain, 'hash' => $hash]) }}">
                                 @csrf
-                                <button type="submit" class="px-4 py-3 text-base rounded-md font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-[#2d2d30] hover:bg-gray-200 dark:hover:bg-[#3a3a3d] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
+                                <button type="submit" class="px-4 py-3 text-base rounded-md font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
                                     {{ __('messages.seating_duplicate') }}
                                 </button>
                             </form>

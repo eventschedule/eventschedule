@@ -48,6 +48,21 @@ class SeatingCopySitesTest extends TestCase
         return $plan->fresh();
     }
 
+    /**
+     * Pin the clock to the middle of the day.
+     *
+     * The two check-in tests below put an event `now()->addHours(2)` away, and the scanner rebuilds
+     * the start from the sale's DATE plus the event's time-of-day in the venue timezone. Run late
+     * enough in the evening and those two hours cross midnight, the rebuilt start lands on the
+     * following day, and check-in reports itself as more than 24 hours away. It passed all day and
+     * failed after about 21:00 - so freeze, rather than leave a suite that depends on when it runs.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->travelTo(now()->startOfDay()->addHours(12));
+    }
+
     private function seatedEvent(Role $role, ?SeatingPlan $plan, ?string $startsAt = null): Event
     {
         $payload = [

@@ -414,9 +414,14 @@ class GenerateDocScreenshots extends Command
                 $this->info('Admin password confirmed.');
             }
 
-            // Force light mode for consistent screenshots
-            $browser->script("localStorage.setItem('theme', 'light')");
-            $browser->script("document.documentElement.classList.remove('dark')");
+            // Force light mode for consistent screenshots.
+            //
+            // Via setTheme() rather than toggling the .dark class by hand: the AP stamps BOTH
+            // .dark and data-theme="<palette>" on <html>, and :root[data-theme] outspecifies
+            // .dark. Setting the class alone leaves data-theme on the previous palette, so the
+            // token ramp renders light while every dark: utility fires - a page that is light
+            // with a handful of dark chips floating in it.
+            $browser->script('window.setTheme("light")');
             $browser->pause(300);
 
             $generated = 0;
@@ -485,8 +490,7 @@ class GenerateDocScreenshots extends Command
                     }
 
                     // Take dark screenshot
-                    $browser->script("localStorage.setItem('theme', 'dark')");
-                    $browser->script("document.documentElement.classList.add('dark')");
+                    $browser->script('window.setTheme("dark")');
                     $browser->pause(800);
                     $browser->screenshot($id.'-dark');
 
@@ -499,8 +503,7 @@ class GenerateDocScreenshots extends Command
                     }
 
                     // Restore light mode for next screenshot
-                    $browser->script("localStorage.setItem('theme', 'light')");
-                    $browser->script("document.documentElement.classList.remove('dark')");
+                    $browser->script('window.setTheme("light")');
                     $browser->pause(300);
                 }
             }

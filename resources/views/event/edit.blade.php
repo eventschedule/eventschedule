@@ -3654,6 +3654,21 @@
                                     ])->values();
                                 @endphp
 
+                                {{-- A schedule with no plan yet used to see nothing at all here, so
+                                     allocated seating was invisible unless you already knew to go
+                                     looking for the tab. Say it exists, and link to where it is
+                                     built. --}}
+                                @if ($role->seatingEnabled() && $seatingPlanOptions->isEmpty())
+                                <div class="mb-6 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+                                    <x-input-label :value="__('messages.seating_plan')" />
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.seating_no_plans_yet') }}</p>
+                                    <a href="{{ route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'seating']) }}"
+                                       class="mt-2 inline-block text-sm font-medium text-[var(--brand-blue)] hover:underline">
+                                        {{ __('messages.seating_new_plan') }}
+                                    </a>
+                                </div>
+                                @endif
+
                                 @if ($seatingPlanOptions->isNotEmpty())
                                 <div class="mb-6">
                                     <x-input-label for="seating_plan_id" :value="__('messages.seating_plan')" />
@@ -3666,15 +3681,13 @@
                                     </select>
                                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.seating_plan_help') }}</p>
                                     @if ($event->exists && $event->hasAllocatedSeating())
-                                        <div v-if="event.seating_plan_id" class="mt-2 flex flex-wrap gap-4">
-                                            <a href="{{ route('box_office.show', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}"
-                                               class="text-sm font-medium text-[var(--brand-blue)] hover:underline">
+                                        <div v-if="event.seating_plan_id" class="mt-3 flex flex-wrap gap-3">
+                                            <x-secondary-link :href="route('box_office.show', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)])">
                                                 {{ __('messages.seating_box_office') }}
-                                            </a>
-                                            <a href="{{ route('seating.occurrence_design', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}"
-                                               class="text-sm font-medium text-[var(--brand-blue)] hover:underline">
+                                            </x-secondary-link>
+                                            <x-secondary-link :href="route('seating.occurrence_design', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)])">
                                                 {{ __('messages.seating_modify_this_date') }}
-                                            </a>
+                                            </x-secondary-link>
                                         </div>
                                     @endif
                                 </div>

@@ -30,10 +30,13 @@
                 : route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'seating'], false),
             // Renaming is a TEMPLATE operation. On one date it would be meaningless and confusing.
             'nameEditable' => ! $isOccurrence,
+            'usage' => $usage ?? ['events' => 0, 'sold' => 0],
             'csrfToken' => csrf_token(),
             // Flat map rather than a nested lang array: check_translations.php walks top-level
             // keys, and a nested blob would hide every missing translation inside it.
             'strings' => [
+                'inUse' => __('messages.seating_plan_in_use'),
+                'inUseSold' => __('messages.seating_plan_in_use_sold'),
                 'back' => __('messages.back'), 'planName' => __('messages.name'),
                 // Already translated into all 12 locales in Phase 1; reused verbatim for the
                 // seat aria-labels rather than minting English-only duplicates.
@@ -110,12 +113,6 @@
             ],
         ];
     @endphp
-
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ $isOccurrence ? $occurrenceEvent->translatedName() : $plan->name }}
-        </h2>
-    </x-slot>
 
     <div class="py-6">
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">

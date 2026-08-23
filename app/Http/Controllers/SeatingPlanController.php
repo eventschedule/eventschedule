@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\BusinessException;
+use App\Models\Event;
+use App\Models\EventSeatingMap;
 use App\Models\Role;
 use App\Models\SeatingPlan;
+use App\Models\SeatingSeat;
 use App\Services\SeatingStructureService;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
@@ -117,7 +120,31 @@ class SeatingPlanController extends Controller
             'role' => $role,
             'plan' => $plan,
             'subdomain' => $subdomain,
+            'usage' => $this->planUsage($plan),
         ]);
+    }
+
+    /**
+     * How much of this plan is already committed, for the designer's warning strip.
+     *
+     * Restructuring a room that is on sale is the one edit that can be refused, because a sold seat
+     * cannot be deleted. Without this the organizer only finds out on Save, after the work.
+     */
+    private function planUsage(SeatingPlan $plan): array
+    {
+        $eventIds = Event::where('seating_plan_id', $plan->id)->pluck('id');
+
+        if ($eventIds->isEmpty()) {
+            return ['events' => 0, 'sold' => 0];
+        }
+
+        // Sold seats live on the per-date snapshots, never on the template itself.
+        $sold = SeatingSeat::whereIn(
+            'event_seating_map_id',
+            EventSeatingMap::whereIn('event_id', $eventIds)->select('id')
+        )->where('status', 'sold')->count();
+
+        return ['events' => $eventIds->count(), 'sold' => $sold];
     }
 
     public function structure(Request $request, $subdomain, $hash)
@@ -177,6 +204,11 @@ class SeatingPlanController extends Controller
             'subdomain' => $subdomain,
             'occurrence' => $map,
             'occurrenceEvent' => $event,
+            // Scoped to THIS date: editing one occurrence cannot disturb any other.
+            'usage' => [
+                'events' => 0,
+                'sold' => SeatingSeat::where('event_seating_map_id', $map->id)->where('status', 'sold')->count(),
+            ],
         ]);
     }
 

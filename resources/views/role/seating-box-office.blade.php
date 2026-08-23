@@ -9,6 +9,8 @@
         $boxOfficeProps = [
             'eventId' => $hash,
             'date' => $map->event_date,
+            'eventName' => $event->translatedName(),
+            'dateLabel' => \Carbon\Carbon::parse($map->event_date)->translatedFormat('l, F j, Y'),
             'stateUrl' => route('box_office.state', $args, false),
             'blockUrl' => route('box_office.block', $args, false),
             'unblockUrl' => route('box_office.unblock', $args, false),
@@ -24,6 +26,10 @@
                 'rowPattern' => __('messages.seat_row_label'),
                 'seatPattern' => __('messages.seat_number_label'),
                 'mapLabel' => __('messages.seating_map_label'),
+                'level' => __('messages.seating_level'),
+                'zoomIn' => __('messages.seating_zoom_in'),
+                'zoomOut' => __('messages.seating_zoom_out'),
+                'fit' => __('messages.seating_fit'),
                 'mapHint' => __('messages.seating_box_office_hint'),
                 'sections' => __('messages.seating_sections'),
                 'noSeats' => __('messages.seating_no_seats_left'),
@@ -66,12 +72,6 @@
             ],
         ];
     @endphp
-
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ $event->translatedName() }} &middot; {{ $map->event_date }}
-        </h2>
-    </x-slot>
 
     <div class="py-6">
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">

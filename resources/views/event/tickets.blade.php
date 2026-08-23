@@ -82,6 +82,13 @@
             'keyboardHint' => __('messages.seating_keyboard_hint'),
             'rowPattern' => __('messages.seat_row_label'),
             'seatPattern' => __('messages.seat_number_label'),
+            'level' => __('messages.seating_level'),
+            'zoomIn' => __('messages.seating_zoom_in'),
+            'zoomOut' => __('messages.seating_zoom_out'),
+            'fit' => __('messages.seating_fit'),
+            'holdLapsed' => __('messages.seating_hold_lapsed'),
+            'pickAgain' => __('messages.seating_pick_again'),
+            'removeSeat' => __('messages.seating_remove_seat'),
         ],
     ];
 @endphp
@@ -589,6 +596,9 @@
                             price: ticket.price,
                             quantity: ticket.quantity,
                         },
+                        // Formatted here rather than in the picker: this form owns the currency,
+                        // and a second money formatter is how a hardcoded symbol gets in.
+                        priceLabel: ticket.price > 0 ? this.formatPrice(ticket.price) : '',
                     }, this.seatingPicker));
                 },
 
