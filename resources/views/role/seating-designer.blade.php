@@ -31,11 +31,18 @@
             // Renaming is a TEMPLATE operation. On one date it would be meaningless and confusing.
             'nameEditable' => ! $isOccurrence,
             'usage' => $usage ?? ['events' => 0, 'sold' => 0],
+            // Which story the sold-seat warning tells: a plan used by other events, or one
+            // date of one event. Getting this wrong stacked two amber banners that disagreed.
+            'isOccurrence' => $isOccurrence,
             'csrfToken' => csrf_token(),
             // Flat map rather than a nested lang array: check_translations.php walks top-level
             // keys, and a nested blob would hide every missing translation inside it.
             'strings' => [
                 'inUse' => __('messages.seating_plan_in_use'),
+                'dateHasSold' => __('messages.seating_date_has_sold'),
+                'confirmRemoveLevel' => __('messages.seating_confirm_remove_level'),
+                'confirmRemoveSection' => __('messages.seating_confirm_remove_section'),
+                'confirmRemoveSeats' => __('messages.seating_confirm_remove_seats'),
                 'inUseSold' => __('messages.seating_plan_in_use_sold'),
                 'back' => __('messages.back'), 'planName' => __('messages.name'),
                 // Already translated into all 12 locales in Phase 1; reused verbatim for the
@@ -128,7 +135,7 @@
                         </svg>
                         <div class="flex-1">
                             <p class="text-sm font-medium text-amber-800 dark:text-amber-200">
-                                {{ __('messages.seating_editing_one_date', ['date' => $occurrence->event_date]) }}
+                                {{ __('messages.seating_editing_one_date', ['date' => \Carbon\Carbon::parse($occurrence->event_date)->translatedFormat('l, F j, Y')]) }}
                             </p>
                             <p class="mt-1 text-xs text-amber-700 dark:text-amber-300">
                                 {{ __('messages.seating_editing_one_date_help') }}

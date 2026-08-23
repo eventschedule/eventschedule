@@ -88,8 +88,10 @@
                     <label class="block text-xs font-medium text-gray-500 dark:text-gray-400">{{ t.levelName }}</label>
                     <input v-model="level.name" type="text" maxlength="100" @input="dirty = true"
                         class="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm text-sm" />
+                    <!-- A bordered danger button, not underlined red text: this deletes the
+                         level and every seat on it. -->
                     <button v-if="levels.length > 1" type="button" @click="removeLevel(activeLevel)"
-                        class="mt-2 text-xs text-red-600 dark:text-red-400 hover:underline">{{ t.removeLevel }}</button>
+                        class="mt-3 px-3 py-2 rounded-md text-xs font-medium border border-red-300 dark:border-red-700 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200">{{ t.removeLevel }}</button>
                 </div>
 
                 <div v-if="level">
@@ -281,7 +283,7 @@
                         </button>
                     </div>
 
-                    <button type="button" @click="removeSection(section)" class="text-xs text-red-600 dark:text-red-400 hover:underline">{{ t.removeSection }}</button>
+                    <button type="button" @click="removeSection(section)" class="px-3 py-2 rounded-md text-xs font-medium border border-red-300 dark:border-red-700 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200">{{ t.removeSection }}</button>
                 </template>
 
                 <template v-if="selectedSeats.length">
@@ -291,12 +293,16 @@
                         </h4>
                         <div class="flex flex-wrap gap-1">
                             <button v-for="k in seatKinds" :key="k" type="button" @click="applyKind(k)"
-                                class="px-2 py-1 rounded-md text-xs border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-[var(--brand-blue)] transition-all duration-200">
+                                :aria-pressed="k === selectedKind"
+                                class="px-2 py-1 rounded-md text-xs border transition-all duration-200"
+                                :class="k === selectedKind
+                                    ? 'border-[var(--brand-blue)] bg-[var(--brand-blue)]/10 text-[var(--brand-blue)] font-medium'
+                                    : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-[var(--brand-blue)]'">
                                 {{ t['kind_' + k] }}
                             </button>
                         </div>
                         <button type="button" @click="toggleAisle" class="text-xs text-[var(--brand-blue)] hover:underline">{{ t.toggleAisle }}</button>
-                        <button type="button" @click="removeSelectedSeats" class="block text-xs text-red-600 dark:text-red-400 hover:underline">{{ t.removeSeats }}</button>
+                        <button type="button" @click="removeSelectedSeats" class="px-3 py-2 rounded-md text-xs font-medium border border-red-300 dark:border-red-700 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200">{{ t.removeSeats }}</button>
                     </div>
                 </template>
 
@@ -326,6 +332,7 @@ const props = defineProps({
     planName: { type: String, default: '' },
     nameEditable: { type: Boolean, default: true },
     usage: { type: Object, default: () => ({ events: 0, sold: 0 }) },
+    isOccurrence: { type: Boolean, default: false },
     structureUrl: { type: String, required: true },
     saveUrl: { type: String, required: true },
     backUrl: { type: String, default: '' },
@@ -377,7 +384,14 @@ const usageNotice = computed(() => {
     // Only :sold is interpolated: the events count is deliberately not, because a number sitting
     // next to a count-noun needs singular/plural agreement in every one of the twelve languages,
     // and "in use by 1 events" is what that costs when it is skipped.
-    if (sold > 0) return (t.inUseSold || '').replace(':sold', sold);
+    //
+    // On ONE DATE the plan-scoped wording is simply false - the Blade banner above already says you
+    // are editing a single date, and this used to sit under it claiming the plan was "in use by
+    // other events". Two amber panels, one of them wrong.
+    if (sold > 0) {
+        return ((props.isOccurrence ? t.dateHasSold : t.inUseSold) || '').replace(':sold', sold);
+    }
+
     if (events > 0) return t.inUse || '';
     return '';
 });
@@ -603,6 +617,9 @@ function addLevel(name) {
     dirty.value = true;
 }
 function removeLevel(i) {
+    const lvl = levels.value[i];
+    if (! confirmRemoval(t.confirmRemoveLevel, { ':level': lvl?.name || '', ':count': seatsInLevel(lvl) })) return;
+
     levels.value.splice(i, 1);
     activeLevel.value = Math.max(0, i - 1);
     dirty.value = true;
@@ -630,6 +647,8 @@ function addSection(kind, attrs = {}) {
     return s;
 }
 function removeSection(s) {
+    if (! confirmRemoval(t.confirmRemoveSection, { ':section': s.name || '', ':count': s.seats.length })) return;
+
     const i = level.value.sections.indexOf(s);
     if (i >= 0) level.value.sections.splice(i, 1);
     selectedSectionId.value = null;
@@ -722,6 +741,36 @@ function generateTables() {
     dirty.value = true;
 }
 
+/**
+ * window.confirm(), the same guard `data-confirm` uses across the app.
+ *
+ * Everything here deletes seats, and until now every one of them did it on a single click of a red
+ * text link. A missing translation must NOT turn into a silent yes, so an empty message still asks.
+ */
+function confirmRemoval(message, replacements = {}) {
+    let text = message || '';
+    Object.entries(replacements).forEach(([token, value]) => { text = text.split(token).join(value); });
+
+    return window.confirm(text || '?');
+}
+
+/**
+ * The kind the selection currently is, or null when it is mixed.
+ *
+ * The four buttons used to render identically, so the panel said what you could change the seats
+ * TO and never what they were. Mixed shows nothing rather than guessing at one of them.
+ */
+const selectedKind = computed(() => {
+    const s = section.value;
+    if (!s || !selectedSeats.value.length) return null;
+
+    const kinds = new Set(
+        s.seats.filter((seat) => selectedSeats.value.includes(seat.id)).map((seat) => seat.kind || 'standard')
+    );
+
+    return kinds.size === 1 ? [...kinds][0] : null;
+});
+
 function applyKind(kind) {
     const s = section.value;
     if (!s) return;
@@ -739,6 +788,10 @@ function removeSelectedSeats() {
     if (!s) return;
     const locked = s.seats.filter((x) => selectedSeats.value.includes(x.id) && x.locked);
     if (locked.length) { error.value = t.cannotRemoveSold; return; }
+
+    // After the sold-seat guard, never before it: asking and then refusing is worse than refusing.
+    if (! confirmRemoval(t.confirmRemoveSeats, { ':count': selectedSeats.value.length })) return;
+
     s.seats = s.seats.filter((x) => !selectedSeats.value.includes(x.id));
     selectedSeats.value = [];
     dirty.value = true;

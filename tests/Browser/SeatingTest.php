@@ -3,6 +3,7 @@
 namespace Tests\Browser;
 
 use App\Models\Role;
+use App\Models\Sale;
 use App\Models\SeatingLevel;
 use App\Models\SeatingPlan;
 use App\Models\SeatingSeat;
@@ -10,6 +11,7 @@ use App\Models\SeatingSection;
 use App\Services\SeatingMapService;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
+use Illuminate\Support\Str;
 use Laravel\Dusk\Browser;
 use Tests\Browser\Traits\AccountSetupTrait;
 use Tests\DuskTestCase;
@@ -51,7 +53,7 @@ class SeatingTest extends DuskTestCase
             SeatingSeat::create([
                 'seating_plan_id' => $plan->id, 'seating_section_id' => $section->id,
                 'row_label' => 'A', 'row_position' => 1, 'seat_label' => (string) $n,
-                'position' => $n, 'x' => $n * 26, 'y' => 0, 'kind' => 'seat',
+                'position' => $n, 'x' => $n * 26, 'y' => 0, 'kind' => 'standard',
             ]);
         }
 
@@ -289,6 +291,70 @@ class SeatingTest extends DuskTestCase
             // A house seat is off sale, so the map's version has to move or every other open
             // console keeps polling with a cursor that never returns it.
             $this->assertGreaterThan($versionBefore, $map->fresh()->version);
+        });
+    }
+
+    /**
+     * The box office asks before it takes a seat off a customer, and an armed exchange can be
+     * called off.
+     *
+     * Both were one click from doing real damage: Release went straight through from a bare text
+     * link, and once Exchange was armed the NEXT click on any other seat moved the booking, with no
+     * cancel and no Escape. Neither is reachable from a Feature test - the confirm is a browser
+     * dialog and the exchange is component state.
+     */
+    public function test_the_box_office_guards_its_destructive_actions(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->setupTestAccount($browser);
+            $this->createTestVenue($browser);
+            $this->createTestTalent($browser);
+            $this->createTestEventWithTickets($browser);
+
+            [$event] = $this->makeSeated();
+            $map = app(SeatingMapService::class)->materialize($event);
+            $seats = SeatingSeat::where('event_seating_map_id', $map->id)->orderBy('position')->get();
+
+            // A real booking to act on.
+            $sale = Sale::create([
+                'event_id' => $event->id, 'event_date' => $map->event_date,
+                'name' => 'Jane Smith', 'email' => 'jane@example.com',
+                'status' => 'paid', 'payment_method' => 'box_office', 'secret' => Str::random(32),
+            ]);
+            $seats->take(2)->each(fn ($s) => $s->update(['status' => 'sold', 'sale_id' => $sale->id]));
+
+            $sold = $seats->first();
+            $other = $seats->get(4);
+
+            $browser->visit('/talent/seating/box-office/'.UrlUtils::encodeId($event->id))
+                ->waitFor('#seating-box-office', 20)
+                ->waitFor('#bo-seat-'.$sold->id, 20)
+                ->pause(500);
+
+            // 1. Release asks, and a dismissed dialog changes nothing.
+            $browser->script('document.querySelector(\'#bo-seat-'.$sold->id.'\').dispatchEvent(new MouseEvent("click", { bubbles: true }));');
+            $browser->pause(400);
+            $browser->script('[...document.querySelectorAll("button")].find(b => b.textContent.trim() === '.json_encode(__('messages.seating_release_seat')).').click();');
+            $browser->pause(300)->dismissDialog()->pause(1200);
+
+            $this->assertSame('sold', $sold->fresh()->status, 'dismissing the confirm still released the seat');
+
+            // 2. An armed exchange lets go on Escape, and the next seat click is then harmless.
+            $browser->script('[...document.querySelectorAll("button")].find(b => b.textContent.trim() === '.json_encode(__('messages.seating_exchange')).').click();');
+            $browser->pause(400)->keys('body', '{escape}')->pause(300);
+            $browser->script('document.querySelector(\'#bo-seat-'.$other->id.'\').dispatchEvent(new MouseEvent("click", { bubbles: true }));');
+            $browser->pause(1200);
+
+            $this->assertSame($sale->id, (int) $sold->fresh()->sale_id, 'Escape did not disarm the exchange');
+            $this->assertSame('available', $other->fresh()->status, 'the booking moved after Escape');
+
+            // 3. Accepting the confirm does release it.
+            $browser->script('document.querySelector(\'#bo-seat-'.$sold->id.'\').dispatchEvent(new MouseEvent("click", { bubbles: true }));');
+            $browser->pause(400);
+            $browser->script('[...document.querySelectorAll("button")].find(b => b.textContent.trim() === '.json_encode(__('messages.seating_release_seat')).').click();');
+            $browser->pause(300)->acceptDialog()->pause(1500);
+
+            $this->assertSame('available', $sold->fresh()->status, 'accepting the confirm did not release the seat');
         });
     }
 }

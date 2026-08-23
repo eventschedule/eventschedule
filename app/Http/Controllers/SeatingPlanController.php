@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\BusinessException;
 use App\Models\Event;
-use App\Models\EventSeatingMap;
 use App\Models\Role;
 use App\Models\SeatingPlan;
 use App\Models\SeatingSeat;
@@ -120,31 +119,8 @@ class SeatingPlanController extends Controller
             'role' => $role,
             'plan' => $plan,
             'subdomain' => $subdomain,
-            'usage' => $this->planUsage($plan),
+            'usage' => $plan->usage(),
         ]);
-    }
-
-    /**
-     * How much of this plan is already committed, for the designer's warning strip.
-     *
-     * Restructuring a room that is on sale is the one edit that can be refused, because a sold seat
-     * cannot be deleted. Without this the organizer only finds out on Save, after the work.
-     */
-    private function planUsage(SeatingPlan $plan): array
-    {
-        $eventIds = Event::where('seating_plan_id', $plan->id)->pluck('id');
-
-        if ($eventIds->isEmpty()) {
-            return ['events' => 0, 'sold' => 0];
-        }
-
-        // Sold seats live on the per-date snapshots, never on the template itself.
-        $sold = SeatingSeat::whereIn(
-            'event_seating_map_id',
-            EventSeatingMap::whereIn('event_id', $eventIds)->select('id')
-        )->where('status', 'sold')->count();
-
-        return ['events' => $eventIds->count(), 'sold' => $sold];
     }
 
     public function structure(Request $request, $subdomain, $hash)
@@ -262,7 +238,7 @@ class SeatingPlanController extends Controller
     {
         $role = $this->gate($request, $subdomain);
 
-        $event = \App\Models\Event::whereHas('roles', fn ($q) => $q->where('roles.id', $role->id))
+        $event = Event::whereHas('roles', fn ($q) => $q->where('roles.id', $role->id))
             ->findOrFail(UrlUtils::decodeId($hash));
 
         if (! $request->user()->canEditEvent($event)) {
@@ -271,7 +247,7 @@ class SeatingPlanController extends Controller
 
         $date = $request->input('date');
 
-        if ($date !== null && ! \App\Models\Event::isOccurrenceDate($date)) {
+        if ($date !== null && ! Event::isOccurrenceDate($date)) {
             abort(404);
         }
 

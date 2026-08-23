@@ -52,6 +52,8 @@
                 'exchangeChoose' => __('messages.seating_exchange_choose'),
                 'exchangePrompt' => __('messages.seating_exchange_prompt'),
                 'releaseSeat' => __('messages.seating_release_seat'),
+                'confirmRelease' => __('messages.seating_confirm_release'),
+                'cancelExchange' => __('messages.seating_cancel_exchange'),
                 'releaseHelp' => __('messages.seating_release_help'),
                 'actionFailed' => __('messages.error'),
                 'loadFailed' => __('messages.seating_load_failed'),

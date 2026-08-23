@@ -2009,7 +2009,7 @@ class BackupService
                 'row_position' => $row['row_position'] ?? 0,
                 'seat_label' => $row['seat_label'] ?? null,
                 'x' => $row['x'] ?? 0, 'y' => $row['y'] ?? 0,
-                'kind' => $row['kind'] ?? 'seat',
+                'kind' => $row['kind'] ?? 'standard',
                 'aisle_after' => (bool) ($row['aisle_after'] ?? false),
                 'position' => $row['position'] ?? 0,
                 'status' => $status,

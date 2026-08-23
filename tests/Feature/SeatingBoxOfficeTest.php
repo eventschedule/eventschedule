@@ -869,4 +869,92 @@ class SeatingBoxOfficeTest extends TestCase
         // ...and every seat still reaches the table below, on both levels.
         $this->assertSame(15, substr_count($html, '<tr'));
     }
+
+    /**
+     * The plans list says what a plan is committed to.
+     *
+     * Deleting a plan is confirmed, but the card gave nothing to base the answer on: a name, a seat
+     * count and a description. Whether three events and forty-seven sold seats hang off it was the
+     * one thing it did not say.
+     */
+    public function test_the_plans_list_shows_what_a_plan_is_used_for(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+        $plan = $this->makePlan($role);
+        $unused = SeatingPlan::create(['role_id' => $role->id, 'name' => 'Spare Room']);
+
+        $event = $this->seatedEvent($role, $plan);
+        $map = $this->maps()->materialize($event);
+        $this->buy($role, $event, $this->seats($map)->take(2));
+
+        $html = $this->actingAs($owner)->get(route('role.view_admin', [
+            'subdomain' => $role->subdomain, 'tab' => 'seating',
+        ]))->assertOk()->getContent();
+
+        $usage = $plan->fresh()->usage();
+        $this->assertSame(1, $usage['events']);
+        $this->assertSame(2, $usage['sold']);
+
+        // Both figures reach the card...
+        $this->assertStringContainsString(__('messages.events').':', $html);
+        $this->assertStringContainsString(__('messages.seating_count_sold').':', $html);
+
+        // ...and the unused plan carries neither, rather than a pair of zeroes.
+        $this->assertSame(['events' => 0, 'sold' => 0], $unused->fresh()->usage());
+        $this->assertSame(1, substr_count($html, __('messages.seating_count_sold').':'));
+    }
+
+    /**
+     * Editing one date does not claim the plan is in use by other events.
+     *
+     * The occurrence designer passes events => 0 and this date's sold count, and the component only
+     * branched on whether anything was sold - so a date with sales stacked two amber banners, the
+     * second one saying "This plan is in use by other events" underneath one saying you were
+     * editing a single date.
+     */
+    public function test_the_occurrence_designer_scopes_its_sold_warning_to_the_date(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+        $event = $this->seatedEvent($role, $this->makePlan($role));
+        $map = $this->maps()->materialize($event);
+        $this->buy($role, $event, $this->seats($map)->take(2));
+
+        $html = $this->actingAs($owner)->get(route('seating.occurrence_design', [
+            'subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($event->id),
+        ]))->assertOk()->getContent();
+
+        // Both wordings ship in the props - the component chooses at runtime - so the flag that
+        // makes the choice is the thing to pin.
+        $this->assertTrue($this->designerProps($html)['isOccurrence']);
+        $this->assertSame(
+            2,
+            $this->designerProps($html)['usage']['sold'],
+            'the occurrence designer must count THIS date, not the whole plan'
+        );
+
+        // ...and the date it names is one a person would write, not the stored Y-m-d.
+        $this->assertStringContainsString(
+            \Carbon\Carbon::parse($map->event_date)->translatedFormat('l, F j, Y'),
+            $html
+        );
+        $this->assertStringNotContainsString('>'.$map->event_date.'<', $html);
+
+        // The template designer for the same plan is the other branch.
+        $plan = SeatingPlan::where('role_id', $role->id)->firstOrFail();
+        $templateHtml = $this->actingAs($owner)->get(route('seating.design', [
+            'subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($plan->id),
+        ]))->assertOk()->getContent();
+
+        $this->assertFalse($this->designerProps($templateHtml)['isOccurrence']);
+    }
+
+    /** The designer is a Vue mount; its props are the contract the page hands it. */
+    private function designerProps(string $html): array
+    {
+        $this->assertSame(1, preg_match('/id="seating-designer" data-props="([^"]*)"/', $html, $m));
+
+        return json_decode(html_entity_decode($m[1], ENT_QUOTES), true);
+    }
 }

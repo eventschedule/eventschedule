@@ -91,4 +91,31 @@ class SeatingPlan extends Model
     {
         return (int) $this->sections()->where('kind', 'standing')->sum('capacity');
     }
+
+    /**
+     * How much of this plan is already committed: events using it, and seats sold across them.
+     *
+     * Answers the two questions that make editing or deleting a plan a decision rather than a
+     * gamble - the designer warns with it before the organizer restructures a live room, and the
+     * plans list shows it beside the seat count.
+     *
+     * Per-row rather than a join over every plan, deliberately: a schedule has a handful of plans
+     * at most, which is the same call RoleController already makes for seatCount().
+     */
+    public function usage(): array
+    {
+        $eventIds = Event::where('seating_plan_id', $this->id)->pluck('id');
+
+        if ($eventIds->isEmpty()) {
+            return ['events' => 0, 'sold' => 0];
+        }
+
+        // Sold seats live on the per-date snapshots, never on the template itself.
+        $sold = SeatingSeat::whereIn(
+            'event_seating_map_id',
+            EventSeatingMap::whereIn('event_id', $eventIds)->select('id')
+        )->where('status', 'sold')->count();
+
+        return ['events' => $eventIds->count(), 'sold' => $sold];
+    }
 }

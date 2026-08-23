@@ -1,5 +1,5 @@
 <template>
-    <div class="space-y-4">
+    <div class="space-y-4" :class="{ 'pb-28 xl:pb-0': single }">
         <!-- Summary + lookup -->
         <div class="ap-card rounded-xl p-4 flex flex-wrap items-center gap-4">
             <!-- Which show, and WHICH NIGHT. This used to live in a header slot the admin layout
@@ -120,8 +120,15 @@
                             class="px-3 py-2 rounded-md text-xs font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-[var(--brand-blue)] transition-all duration-200">
                             {{ exchangeFrom ? t.exchangeChoose : t.exchange }}
                         </button>
+                        <button v-if="exchangeFrom" type="button" @click="cancelExchange"
+                            class="px-3 py-2 rounded-md text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-all duration-200">
+                            {{ t.cancelExchange }}
+                        </button>
+                        <!-- A bordered danger button, not underlined red text: this is the most
+                             destructive control on the screen and it used to be the least
+                             substantial thing next to a properly drawn button. -->
                         <button type="button" @click="releaseSeat"
-                            class="px-3 py-2 rounded-md text-xs font-medium text-red-600 dark:text-red-400 hover:underline">
+                            class="px-3 py-2 rounded-md text-xs font-medium border border-red-300 dark:border-red-700 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200">
                             {{ t.releaseSeat }}
                         </button>
                     </div>
@@ -209,6 +216,52 @@
                     <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full" style="background:#dc2626"></span>{{ t.count_sold }}</span>
                     <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full border" style="border-color:#6b7280;background:repeating-linear-gradient(45deg,#9ca3af,#9ca3af 1.5px,#6b7280 1.5px,#6b7280 3px)"></span>{{ t.count_blocked }}</span>
                     <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full" style="background:#f59e0b"></span>{{ t.count_held }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Small screens: the door loop, pinned.
+             The inspector stacks BELOW the map once the two columns collapse, so acting on a seat
+             meant tap, scroll down, act, scroll back - and door staff are the people most likely to
+             be holding a phone. This puts the selected seat and its actions where the thumb already
+             is, and leaves the full inspector untouched above the breakpoint.
+
+             position: fixed is safe in the AP: the accessibility widget, with its
+             --es-a11y-cta-clearance juggling, is loaded by app-guest.blade.php only. -->
+        <div v-if="single" class="xl:hidden fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg p-3"
+             style="padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px))">
+            <div class="flex items-center gap-3">
+                <div class="min-w-0 flex-1">
+                    <p class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">{{ seatName(single) }}</p>
+                    <p class="truncate text-xs text-gray-500 dark:text-gray-400">
+                        <span v-if="single.state === 'sold' && single.booker">{{ single.booker.name }}</span>
+                        <span v-else>{{ t['count_' + single.state] || single.state }}</span>
+                    </p>
+                </div>
+
+                <div class="flex shrink-0 items-center gap-2">
+                    <template v-if="single.state === 'sold'">
+                        <button type="button" @click="startExchange"
+                            class="px-3 py-2 rounded-md text-xs font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 transition-all duration-200">
+                            {{ exchangeFrom ? t.exchangeChoose : t.exchange }}
+                        </button>
+                        <button v-if="exchangeFrom" type="button" @click="cancelExchange"
+                            class="px-3 py-2 rounded-md text-xs font-medium text-gray-500 dark:text-gray-400 transition-all duration-200">
+                            {{ t.cancelExchange }}
+                        </button>
+                        <button v-else type="button" @click="releaseSeat"
+                            class="px-3 py-2 rounded-md text-xs font-medium border border-red-300 dark:border-red-700 text-red-700 dark:text-red-400 transition-all duration-200">
+                            {{ t.releaseSeat }}
+                        </button>
+                    </template>
+                    <button v-else-if="single.state === 'blocked'" type="button" @click="unblock" :disabled="busy"
+                        class="px-3 py-2 rounded-md text-xs font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 transition-all duration-200">
+                        {{ t.unblock }}
+                    </button>
+                    <button v-else type="button" @click="block" :disabled="busy"
+                        class="px-3 py-2 rounded-md text-xs font-medium text-white bg-[var(--brand-button-bg)] disabled:opacity-50 transition-all duration-200">
+                        {{ t.blockSeats }}
+                    </button>
                 </div>
             </div>
         </div>
@@ -359,9 +412,15 @@ function labelFor(s, seat) {
 }
 
 function onSeatClick(evt, section, seat) {
-    // Second click of an exchange: pick the destination.
-    if (exchangeFrom.value && seat.id !== exchangeFrom.value) {
-        doExchange(exchangeFrom.value, seat.id);
+    if (exchangeFrom.value) {
+        // Second click of an exchange: pick the destination. Clicking the ARMED seat instead means
+        // "no, not this after all", so it disarms rather than falling through to plain selection.
+        if (seat.id !== exchangeFrom.value) {
+            doExchange(exchangeFrom.value, seat.id);
+        } else {
+            cancelExchange();
+        }
+
         return;
     }
     if (evt.shiftKey) {
@@ -466,7 +525,22 @@ function applyState(state) {
 
 const block = () => post(props.blockUrl, { seat_ids: selected.value, kind: holdKind.value, note: holdNote.value });
 const unblock = () => post(props.unblockUrl, { seat_ids: single.value ? [single.value.id] : selected.value });
-const releaseSeat = () => single.value && post(props.releaseUrl, { seat_id: single.value.id });
+/**
+ * Releasing takes a seat off somebody who paid for it, so it asks first - and names them, because
+ * the panel is already showing who they are. window.confirm(), the same guard `data-confirm` uses
+ * across the app; an empty translation still asks rather than silently going ahead.
+ */
+function releaseSeat() {
+    if (! single.value) return;
+
+    const text = (t.confirmRelease || '')
+        .split(':seat').join(seatName(single.value))
+        .split(':name').join(single.value.booker?.name || '');
+
+    if (! window.confirm(text || '?')) return;
+
+    return post(props.releaseUrl, { seat_id: single.value.id });
+}
 
 async function bookSeats() {
     if (!selected.value.length || !buyer.value.name) return;
@@ -494,6 +568,22 @@ function startExchange() {
     exchangeFrom.value = single.value.id;
     notice.value = t.exchangePrompt;
 }
+
+/**
+ * Disarm.
+ *
+ * Once armed, the NEXT click on any other seat moves a booking - so a staffer who armed it by
+ * mistake and then clicked a seat to look at it had already moved somebody. There was no way out:
+ * Escape did nothing, and the button re-armed the same seat.
+ */
+function cancelExchange() {
+    exchangeFrom.value = null;
+    notice.value = '';
+}
+
+function onExchangeKey(evt) {
+    if (evt.key === 'Escape' && exchangeFrom.value) cancelExchange();
+}
 async function doExchange(fromId, toId) {
     exchangeFrom.value = null;
     notice.value = '';
@@ -511,9 +601,10 @@ onMounted(async () => {
     fit();
     // Faster than the guest picker: staff are watching a live door.
     startPolling(props.stateUrl, props.eventId, props.date, map.value, () => {}, 3000);
+    window.addEventListener('keydown', onExchangeKey);
 });
 // Each level has its own extent, so a switch has to reframe or the new level lands off screen.
 watch(activeLevelId, () => nextTick(fit));
 
-onBeforeUnmount(() => {});
+onBeforeUnmount(() => window.removeEventListener('keydown', onExchangeKey));
 </script>

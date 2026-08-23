@@ -68,6 +68,9 @@
                         $hash = UrlUtils::encodeId($plan->id);
                         $seats = $plan->seatCount();
                         $standing = $plan->standingCapacity();
+                        // What the plan is committed to, so Delete and Duplicate are decisions
+                        // rather than guesses. Per-row for the same reason seatCount() is.
+                        $usage = $plan->usage();
                     @endphp
                     <div class="ap-card rounded-xl p-6 flex flex-col">
                         <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 break-words">{{ $plan->name }}</h3>
@@ -81,6 +84,21 @@
                                 <div class="flex gap-1">
                                     <dt>{{ __('messages.seating_standing') }}:</dt>
                                     <dd class="font-medium text-gray-700 dark:text-gray-300">{{ number_format($standing) }}</dd>
+                                </div>
+                            @endif
+                            {{-- A dt/dd pair rather than a sentence: the number never sits next to
+                                 a count-noun, so no language needs singular/plural agreement with
+                                 it - which is what produced "1 events" the first time round. --}}
+                            @if ($usage['events'])
+                                <div class="flex gap-1">
+                                    <dt>{{ __('messages.events') }}:</dt>
+                                    <dd class="font-medium text-gray-700 dark:text-gray-300">{{ number_format($usage['events']) }}</dd>
+                                </div>
+                            @endif
+                            @if ($usage['sold'])
+                                <div class="flex gap-1">
+                                    <dt>{{ __('messages.seating_count_sold') }}:</dt>
+                                    <dd class="font-medium text-gray-700 dark:text-gray-300">{{ number_format($usage['sold']) }}</dd>
                                 </div>
                             @endif
                         </dl>
