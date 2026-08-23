@@ -401,6 +401,9 @@
                 <option value="availability" {{ $tab == 'availability' ? 'selected' : '' }}>{{ __('messages.availability') }}</option>
                 @endif
                 <option value="appointments" {{ $tab == 'appointments' ? 'selected' : '' }}>{{ __('messages.appointments') }}{{ $pendingBookingCount ? ' (' . $pendingBookingCount . ')' : '' }}</option>
+                @if (auth()->user()->isEditor($role->subdomain))
+                <option value="seating" {{ $tab == 'seating' ? 'selected' : '' }}>{{ __('messages.seating_plans') }}</option>
+                @endif
                 @if (count($requests))
                 <option value="requests" {{ $tab == 'requests' ? 'selected' : '' }}>
                     {{ __('messages.requests') }}{{ count($requests) ? ' (' . count($requests) . ')' : '' }}</option>
@@ -437,6 +440,10 @@
                 @endif
                 <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments']) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'appointments' ? 'border-[var(--brand-blue)] px-3 pb-5 text-base font-medium text-[var(--brand-blue)]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.appointments') }}{{ $pendingBookingCount ? ' (' . $pendingBookingCount . ')' : '' }}</a>
+                @if (auth()->user()->isEditor($role->subdomain))
+                <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'seating']) }}"
+                    class="whitespace-nowrap border-b-2 {{ $tab == 'seating' ? 'border-[var(--brand-blue)] px-3 pb-5 text-base font-medium text-[var(--brand-blue)]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.seating_plans') }}</a>
+                @endif
                 @if (count($requests))
                 <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'requests']) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'requests' ? 'border-[var(--brand-blue)] px-3 pb-5 text-base font-medium text-[var(--brand-blue)]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.requests') }}{{ count($requests) ? ' (' . count($requests) . ')' : '' }}</a>
@@ -464,6 +471,8 @@
     @include('role.show-admin-availability')
     @elseif ($tab == 'appointments')
     @include('role.show-admin-appointments')
+    @elseif ($tab == 'seating')
+    @include('role.show-admin-seating')
     @elseif ($tab == 'requests')
     @include('role.show-admin-requests')
     @elseif ($tab == 'followers')

@@ -3638,6 +3638,48 @@
 
                                 <!-- Tickets Tab -->
                                 <div v-show="activeTicketTab === 'tickets'">
+                                @php
+                                    // Deliberately distinctive names: these blocks share the VIEW
+                                    // scope, so a plain $plans here would be visible to every
+                                    // block below it.
+                                    $seatingPlanList = $role->seatingEnabled()
+                                        ? \App\Models\SeatingPlan::with('sections')
+                                            ->where('role_id', $role->id)->where('is_deleted', false)
+                                            ->orderBy('name')->get()
+                                        : collect();
+                                    $seatingPlanOptions = $seatingPlanList->map(fn ($p) => [
+                                        'id' => $p->id,
+                                        'name' => $p->name,
+                                        'bands' => $p->sections->pluck('band')->filter()->unique()->values()->all(),
+                                    ])->values();
+                                @endphp
+
+                                @if ($seatingPlanOptions->isNotEmpty())
+                                <div class="mb-6">
+                                    <x-input-label for="seating_plan_id" :value="__('messages.seating_plan')" />
+                                    <select id="seating_plan_id" name="seating_plan_id" v-model="event.seating_plan_id"
+                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm">
+                                        <option value="">{{ __('messages.seating_no_plan') }}</option>
+                                        @foreach ($seatingPlanOptions as $option)
+                                            <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
+                                        @endforeach
+                                    </select>
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.seating_plan_help') }}</p>
+                                    @if ($event->exists && $event->hasAllocatedSeating())
+                                        <div v-if="event.seating_plan_id" class="mt-2 flex flex-wrap gap-4">
+                                            <a href="{{ route('box_office.show', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}"
+                                               class="text-sm font-medium text-[var(--brand-blue)] hover:underline">
+                                                {{ __('messages.seating_box_office') }}
+                                            </a>
+                                            <a href="{{ route('seating.occurrence_design', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}"
+                                               class="text-sm font-medium text-[var(--brand-blue)] hover:underline">
+                                                {{ __('messages.seating_modify_this_date') }}
+                                            </a>
+                                        </div>
+                                    @endif
+                                </div>
+                                @endif
+
                                 <div class="mb-6">
                                     <div v-for="(ticket, index) in tickets" :key="ticket.uid"
                                         :class="{'mt-4 p-4 border border-gray-300 dark:border-gray-700 rounded-lg': tickets.length > 1, 'mt-4': tickets.length === 1}">
@@ -3650,8 +3692,19 @@
                                             </div>
                                             <div>
                                                 <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.quantity') }} @{{ (! isRecurring && ticket.sold && Object.values(JSON.parse(ticket.sold))[0] > 0) ? (' - ' + Object.values(JSON.parse(ticket.sold))[0] + ' ' +soldLabel) : '' }}</label>
-                                                <x-text-input type="number" v-bind:name="`tickets[${index}][quantity]`" 
-                                                    v-model="ticket.quantity" class="mt-1 block w-full" placeholder="{{ __('messages.unlimited') }}" />
+                                                <x-text-input type="number" v-bind:name="`tickets[${index}][quantity]`"
+                                                    v-model="ticket.quantity" class="mt-1 block w-full" placeholder="{{ __('messages.unlimited') }}"
+                                                    v-bind:readonly="!!ticket.seating_band" v-bind:class="{ 'opacity-60': !!ticket.seating_band }" />
+                                                <p v-if="ticket.seating_band" class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.seating_quantity_from_plan') }}</p>
+                                            </div>
+                                            <div v-if="seatingBands.length && !ticket.is_pass">
+                                                <x-input-label :value="__('messages.seating_band')" />
+                                                <select v-bind:name="`tickets[${index}][seating_band]`" v-model="ticket.seating_band"
+                                                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm">
+                                                    <option value="">{{ __('messages.seating_band_none') }}</option>
+                                                    <option v-for="band in seatingBands" :key="band" :value="band">@{{ band }}</option>
+                                                </select>
+                                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.seating_band_ticket_help') }}</p>
                                             </div>
                                             <div v-if="tickets.length > 1">
                                                 <x-input-label :value="__('messages.type') . ' *'" />
@@ -4002,7 +4055,10 @@
                                     </div>
 
                                     <!-- Total Tickets Mode Selection -->
-                                    <div v-if="hasSameTicketQuantities && tickets.length > 1" class="mt-6 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
+                                    <!-- Hidden for an allocated event: quantities come from the plan, so two
+                                         equal sections would offer "combined" by accident and the server
+                                         refuses it anyway (Event::hasSameTicketQuantities). -->
+                                    <div v-if="hasSameTicketQuantities && tickets.length > 1 && !event.seating_plan_id" class="mt-6 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
                                         <div class="space-y-3">
                                             <div class="flex items-center">
                                                 <input id="total_tickets_individual" name="total_tickets_mode" type="radio"
@@ -5254,11 +5310,17 @@
             'events' => collect($t->pass_event_ids ?? [])->map(fn ($id) => \App\Utils\UrlUtils::encodeId($id))->values()->all(),
         ]])->all();
         @endphp
+        // [{id, name, bands[]}] for the schedule's plans, computed in the Tickets tab markup
+        // above - Blade has already executed that block by the time this line runs.
+        // (Do NOT write the Blade directive name in a comment here: Blade compiles it wherever
+        // it appears, including inside JS comments, and the view then dies on a parse error.)
+        seatingPlanOptions: @json($seatingPlanOptions ?? []),
         tickets: @json($event->tickets ?? [new Ticket()]).map((ticket, i) => ({
           uid: i,
           ...ticket,
           volume_discount: ticket.volume_discount && typeof ticket.volume_discount === 'object' ? ticket.volume_discount : null,
           max_per_order: ticket.max_per_order ?? null,
+          seating_band: ticket.seating_band ?? '',
           is_pass: !!ticket.is_pass,
           pass_usage_type: ticket.pass_usage_type || 'per_occurrence',
           pass_max_uses: ticket.pass_max_uses ?? null,
@@ -7246,6 +7308,19 @@
       },
     },
     computed: {
+      /**
+       * The bands offered by the plan currently attached to this event.
+       *
+       * Empty when no plan is selected, which is what hides the per-ticket band select entirely -
+       * an event with no seat map should look exactly as it did before this feature existed.
+       */
+      seatingBands() {
+        const id = this.event.seating_plan_id;
+        if (!id) return [];
+        const plan = (this.seatingPlanOptions || []).find(p => String(p.id) === String(id));
+        return plan ? plan.bands : [];
+      },
+
       /**
        * Does the payment schedule finish with enough runway before the event?
        *

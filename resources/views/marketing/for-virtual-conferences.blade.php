@@ -1029,7 +1029,7 @@
                             <span class="es-agenda-accent font-mono text-lg font-black">{{ plan_price(0) }}</span>
                         </div>
                         <p class="es-agenda-muted mt-3 text-xs">
-                            Every row here is on the free plan: the paid ones capped at 25 tickets a month, the $0 one never counted against that and still selling once the cap is reached. A conference with nothing to charge for turns the event over to free registration instead. To be clear about what this is not, there is no seat map and buyers are not choosing a seat.
+                            Every row here is on the free plan: the paid ones capped at 25 tickets a month, the $0 one never counted against that and still selling once the cap is reached. A conference with nothing to charge for turns the event over to free registration instead. These are counts, not seats: an online room has nowhere to sit, and the seating plans Enterprise adds are for venues with actual rows in them.
                         </p>
                     </div>
                 </div>

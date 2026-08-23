@@ -14,6 +14,7 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\BoostController;
+use App\Http\Controllers\BoxOfficeController;
 use App\Http\Controllers\CalDAVController;
 use App\Http\Controllers\CarpoolController;
 use App\Http\Controllers\CheckInController;
@@ -44,6 +45,8 @@ use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\PushController;
 use App\Http\Controllers\ReferralController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SeatingPickerController;
+use App\Http\Controllers\SeatingPlanController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\SubscriptionController;
@@ -120,6 +123,10 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::post('/suggest-poll-option/{event_hash}/{poll_hash}', [EventController::class, 'suggestPollOption'])->name('event.suggest_poll_option')->middleware('throttle:20,60');
         Route::post('/event-password', [RoleController::class, 'checkEventPassword'])->name('event.check_password')->middleware('throttle:10,5');
         Route::post('/promo-code/validate', [PromoCodeController::class, 'validate'])->name('promo_code.validate')->middleware('throttle:20,1');
+        // Allocated seating, guest side. The hold token lives in the SESSION, never in the
+        // payload, so one visitor cannot claim another's held seats by replaying a token.
+        Route::get('/seating/state', [SeatingPickerController::class, 'state'])->name('seating.state')->middleware('throttle:120,1');
+        Route::post('/seating/hold', [SeatingPickerController::class, 'hold'])->name('seating.hold')->middleware('throttle:60,1');
         Route::post('/checkout', [TicketController::class, 'checkout'])->name('event.checkout')->middleware('throttle:10,1');
         Route::post('/rsvp', [TicketController::class, 'rsvp'])->name('event.rsvp')->middleware('throttle:10,1');
         Route::post('/waitlist/join', [WaitlistController::class, 'join'])->name('waitlist.join')->middleware('throttle:10,1');
@@ -624,6 +631,39 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::delete('/{subdomain}/appointments/{hash}', [AppointmentTypeController::class, 'destroy'])->name('appointments.destroy');
     Route::post('/{subdomain}/appointments/{hash}/toggle', [AppointmentTypeController::class, 'toggle'])->name('appointments.toggle');
     Route::post('/{subdomain}/appointments/{hash}/duplicate', [AppointmentTypeController::class, 'duplicate'])->name('appointments.duplicate');
+    // Allocated seating: template CRUD plus the designer's read/save endpoints. Every one of
+    // these is Enterprise-gated in the controller, editor-only, and scoped to the schedule.
+    Route::post('/{subdomain}/seating', [SeatingPlanController::class, 'store'])->name('seating.store');
+    Route::put('/{subdomain}/seating/{hash}', [SeatingPlanController::class, 'update'])->name('seating.update');
+    Route::delete('/{subdomain}/seating/{hash}', [SeatingPlanController::class, 'destroy'])->name('seating.destroy');
+    Route::post('/{subdomain}/seating/{hash}/duplicate', [SeatingPlanController::class, 'duplicate'])->name('seating.duplicate');
+    Route::get('/{subdomain}/seating/{hash}/design', [SeatingPlanController::class, 'design'])->name('seating.design');
+    Route::get('/{subdomain}/seating/{hash}/structure', [SeatingPlanController::class, 'structure'])->name('seating.structure');
+    Route::put('/{subdomain}/seating/{hash}/structure', [SeatingPlanController::class, 'saveStructure'])->name('seating.save_structure')->middleware('throttle:60,1,seating_save');
+    // "Modify this date only" - the same designer against one occurrence's snapshot. Registered
+    // before nothing in particular; the /occurrence/ segment keeps it clear of the plan routes.
+    Route::get('/{subdomain}/seating/occurrence/{hash}/design', [SeatingPlanController::class, 'designOccurrence'])->name('seating.occurrence_design');
+    Route::get('/{subdomain}/seating/occurrence/{hash}/structure', [SeatingPlanController::class, 'occurrenceStructure'])->name('seating.occurrence_structure');
+    Route::put('/{subdomain}/seating/occurrence/{hash}/structure', [SeatingPlanController::class, 'saveOccurrenceStructure'])->name('seating.occurrence_save')->middleware('throttle:60,1,seating_save');
+    Route::post('/{subdomain}/seating/occurrence/{hash}/revert', [SeatingPlanController::class, 'revertOccurrence'])->name('seating.occurrence_revert');
+
+    // Box office console. Staff-side, so the payload here carries the internal hold note and the
+    // booker - deliberately a different controller from the guest picker's.
+    //
+    // The five write actions share one limiter. Each takes an array of seats, so even clearing a
+    // whole row is a handful of requests, but each can also refund money, create a sale, or mail
+    // the waitlist - and on a selfhost install QUEUE_CONNECTION=sync sends that mail inside the
+    // request. A stuck retry loop or a compromised staff account should not be able to empty a
+    // house or a mail quota faster than a person could click.
+    Route::get('/{subdomain}/seating/box-office/{hash}', [BoxOfficeController::class, 'show'])->name('box_office.show');
+    Route::get('/{subdomain}/seating/box-office/{hash}/state', [BoxOfficeController::class, 'state'])->name('box_office.state');
+    Route::post('/{subdomain}/seating/box-office/{hash}/block', [BoxOfficeController::class, 'block'])->name('box_office.block')->middleware('throttle:60,1,box_office');
+    Route::post('/{subdomain}/seating/box-office/{hash}/unblock', [BoxOfficeController::class, 'unblock'])->name('box_office.unblock')->middleware('throttle:60,1,box_office');
+    Route::post('/{subdomain}/seating/box-office/{hash}/release-seat', [BoxOfficeController::class, 'releaseSeat'])->name('box_office.release_seat')->middleware('throttle:60,1,box_office');
+    Route::post('/{subdomain}/seating/box-office/{hash}/exchange', [BoxOfficeController::class, 'exchange'])->name('box_office.exchange')->middleware('throttle:60,1,box_office');
+    Route::post('/{subdomain}/seating/box-office/{hash}/book', [BoxOfficeController::class, 'bookSeats'])->name('box_office.book')->middleware('throttle:60,1,box_office');
+    Route::get('/{subdomain}/seating/box-office/{hash}/report', [BoxOfficeController::class, 'report'])->name('box_office.report');
+    Route::get('/{subdomain}/seating/box-office/{hash}/report.csv', [BoxOfficeController::class, 'reportCsv'])->name('box_office.report_csv');
     // Owner-side reschedule. Throttled like the other write routes: it drives the same inline calendar
     // fan-out and guest mail, so a compromised editor account should not be unbounded.
     Route::get('/{subdomain}/appointments/bookings/{saleHash}/reschedule', [AppointmentTypeController::class, 'showBookingReschedule'])->name('appointments.booking_reschedule');
@@ -704,7 +744,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     $adminTabSubdomain = config('app.is_nexus')
         ? '(?!docs(?=/|$)|features(?=/|$))[^/]+'
         : '(?!docs(?=/|$))[^/]+';
-    Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|templates|availability|appointments|requests|followers|team|plan|videos')->where('subdomain', $adminTabSubdomain);
+    Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|templates|availability|appointments|seating|requests|followers|team|plan|videos')->where('subdomain', $adminTabSubdomain);
 
     Route::post('/{subdomain}/upload-image', [EventController::class, 'uploadImage'])->name('event.upload_image');
 
@@ -927,6 +967,7 @@ if (config('app.is_nexus')) {
         Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');
         Route::get('/features/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
         Route::get('/features/gift-cards', [MarketingController::class, 'giftCards'])->name('marketing.gift_cards');
+        Route::get('/features/allocated-seating', [MarketingController::class, 'allocatedSeating'])->name('marketing.allocated_seating');
         Route::get('/features/ai', [MarketingController::class, 'ai'])->name('marketing.ai');
         Route::get('/features/calendar-sync', [MarketingController::class, 'calendarSync'])->name('marketing.calendar_sync');
         Route::get('/google-calendar', [MarketingController::class, 'googleCalendar'])->name('marketing.google_calendar');
@@ -1082,6 +1123,7 @@ if (config('app.is_nexus')) {
         Route::get('/docs/tickets', [MarketingController::class, 'docsTickets'])->name('marketing.docs.tickets');
         Route::get('/docs/subscriptions', [MarketingController::class, 'docsSubscriptions'])->name('marketing.docs.subscriptions');
         Route::get('/docs/gift-cards', [MarketingController::class, 'docsGiftCards'])->name('marketing.docs.gift_cards');
+        Route::get('/docs/allocated-seating', [MarketingController::class, 'docsAllocatedSeating'])->name('marketing.docs.allocated_seating');
         Route::get('/docs/appointments', [MarketingController::class, 'docsAppointments'])->name('marketing.docs.appointments');
         Route::get('/docs/event-graphics', [MarketingController::class, 'docsEventGraphics'])->name('marketing.docs.event_graphics');
         Route::get('/docs/newsletters', [MarketingController::class, 'docsNewsletters'])->name('marketing.docs.newsletters');
@@ -1145,6 +1187,7 @@ if (config('app.is_nexus')) {
             Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');
             Route::get('/features/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
             Route::get('/features/gift-cards', [MarketingController::class, 'giftCards'])->name('marketing.gift_cards');
+            Route::get('/features/allocated-seating', [MarketingController::class, 'allocatedSeating'])->name('marketing.allocated_seating');
             Route::get('/features/ai', [MarketingController::class, 'ai'])->name('marketing.ai');
             Route::get('/features/calendar-sync', [MarketingController::class, 'calendarSync'])->name('marketing.calendar_sync');
             Route::get('/google-calendar', [MarketingController::class, 'googleCalendar'])->name('marketing.google_calendar');
@@ -1302,6 +1345,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/tickets', [MarketingController::class, 'docsTickets'])->name('marketing.docs.tickets');
             Route::get('/docs/subscriptions', [MarketingController::class, 'docsSubscriptions'])->name('marketing.docs.subscriptions');
             Route::get('/docs/gift-cards', [MarketingController::class, 'docsGiftCards'])->name('marketing.docs.gift_cards');
+            Route::get('/docs/allocated-seating', [MarketingController::class, 'docsAllocatedSeating'])->name('marketing.docs.allocated_seating');
             Route::get('/docs/appointments', [MarketingController::class, 'docsAppointments'])->name('marketing.docs.appointments');
             Route::get('/docs/event-graphics', [MarketingController::class, 'docsEventGraphics'])->name('marketing.docs.event_graphics');
             Route::get('/docs/newsletters', [MarketingController::class, 'docsNewsletters'])->name('marketing.docs.newsletters');
@@ -1744,6 +1788,10 @@ if (! config('app.hosted') || config('app.is_testing')) {
     Route::post('/{subdomain}/suggest-poll-option/{event_hash}/{poll_hash}', [EventController::class, 'suggestPollOption'])->name('event.suggest_poll_option')->middleware('throttle:20,60');
     Route::post('/{subdomain}/event-password', [RoleController::class, 'checkEventPassword'])->name('event.check_password')->middleware('throttle:10,5');
     Route::post('/{subdomain}/promo-code/validate', [PromoCodeController::class, 'validate'])->name('promo_code.validate')->middleware('throttle:20,1');
+    // Allocated seating, guest side. Mirrors the subdomain block above - the guest routes are
+    // registered twice, once per routing mode, and only the path-based copy exists on selfhost.
+    Route::get('/{subdomain}/seating/state', [SeatingPickerController::class, 'state'])->name('seating.state')->middleware('throttle:120,1');
+    Route::post('/{subdomain}/seating/hold', [SeatingPickerController::class, 'hold'])->name('seating.hold')->middleware('throttle:60,1');
     Route::post('/{subdomain}/checkout', [TicketController::class, 'checkout'])->name('event.checkout')->middleware('throttle:10,1');
     Route::post('/{subdomain}/rsvp', [TicketController::class, 'rsvp'])->name('event.rsvp')->middleware('throttle:10,1');
     Route::post('/{subdomain}/waitlist/join', [WaitlistController::class, 'join'])->name('waitlist.join')->middleware('throttle:10,1');

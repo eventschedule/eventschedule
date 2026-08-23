@@ -11,6 +11,7 @@ use App\Models\EventPart;
 use App\Models\EventPhoto;
 use App\Models\EventPoll;
 use App\Models\EventPollVote;
+use App\Models\EventSeatingMap;
 use App\Models\EventVideo;
 use App\Models\GiftCard;
 use App\Models\Group;
@@ -24,6 +25,11 @@ use App\Models\PromoCode;
 use App\Models\Role;
 use App\Models\Sale;
 use App\Models\SaleTicket;
+use App\Models\SeatingLevel;
+use App\Models\SeatingPlan;
+use App\Models\SeatingSeat;
+use App\Models\SeatingSection;
+use App\Models\SeatingTable;
 use App\Models\Ticket;
 use App\Models\TicketWaitlist;
 use App\Utils\CountryUtils;
@@ -33,6 +39,7 @@ use App\Utils\TextUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -83,6 +90,12 @@ class BackupService
         // the exporter iterates getFillable() - but listing them keeps the exclusion
         // intentional rather than a side effect, if that ever changes.
         'federated_at', 'federated_hash',
+        // Points at a seating_plans row on THIS install. It is fillable so event cloning
+        // carries it, and both the exporter and importEvent() walk getFillable() - so a raw id
+        // would either abort the WHOLE restore on the foreign key, or (restoring onto the same
+        // install) silently point the event at another schedule's seat map. The plan travels
+        // instead as `_seating_plan_ref_id` and is remapped through $idMap['seating_plans'].
+        'seating_plan_id',
     ];
 
     private const MAX_SCHEDULES = 50;
@@ -94,6 +107,18 @@ class BackupService
     private const MAX_SALES_PER_SCHEDULE = 100000;
 
     private const MAX_RECIPIENTS_PER_SCHEDULE = 10000;
+
+    private const MAX_SEATING_MAPS_PER_EVENT = 500;
+
+    /**
+     * Seating snapshots dropped by the per-event cap during this export.
+     *
+     * Carried into the file's meta block rather than only the log, so an operator restoring a
+     * backup that comes back short of dates can see why without server access.
+     *
+     * @var array<int,string>
+     */
+    private array $seatingTruncationWarnings = [];
 
     public function exportSchedules(array $roles, bool $includeImages, BackupJob $job): array
     {
@@ -119,6 +144,10 @@ class BackupService
             'exported_by' => $job->user->email,
             'includes_images' => $includeImages,
         ];
+
+        if ($this->seatingTruncationWarnings) {
+            $meta['warnings'] = $this->seatingTruncationWarnings;
+        }
 
         return [
             'json' => ['meta' => $meta, 'schedules' => $schedules],
@@ -224,6 +253,9 @@ class BackupService
             'newsletter_unsubscribes' => $unsubscribesData,
             'gift_cards' => $this->exportGiftCards($role),
             'appointment_types' => $this->exportAppointmentTypes($role),
+            // Templates, exported with the schedule that owns them. The per-occurrence snapshots
+            // travel with their event, because that is what they belong to.
+            'seating_plans' => $this->exportSeatingPlans($role),
         ];
 
         // Curator event sources are deliberately NOT carried in a backup. A restore always
@@ -231,6 +263,183 @@ class BackupService
         // link to the source as well would list every event twice - once as the imported
         // copy, once as the live original. The exported events already hold the calendar;
         // the source list is re-added by hand on the restored schedule.
+    }
+
+    /**
+     * Reusable seating plans belonging to a schedule.
+     *
+     * Soft-deleted plans go too: an event may still point at one, and dropping it here would make
+     * the restore write a dangling seating_plan_id.
+     */
+    private function exportSeatingPlans(Role $role): array
+    {
+        return SeatingPlan::where('role_id', $role->id)->get()->map(fn ($plan) => array_merge([
+            '_ref_id' => $plan->id,
+            'name' => $plan->name,
+            'description' => $plan->description,
+            'is_deleted' => (bool) $plan->is_deleted,
+        ], $this->exportSeatingStructure('seating_plan_id', $plan->id)))->toArray();
+    }
+
+    /**
+     * Per-occurrence snapshots, with who is sitting where.
+     *
+     * Dropping these would restore a sold-out house as an empty map, so every seat a buyer already
+     * holds a confirmation for would go back on sale.
+     */
+    private function exportSeatingMaps(Event $event): array
+    {
+        if (! $event->seating_plan_id) {
+            return [];
+        }
+
+        $maps = EventSeatingMap::where('event_id', $event->id)->orderBy('event_date')->get();
+
+        // FILTER FIRST, then cap. The other way round - which is how this was written - takes the
+        // first 500 dates in calendar order and only then asks which of them carry anything, so an
+        // event with 800 mostly-untouched dates could export ZERO snapshots while silently dropping
+        // the sold ones sitting at positions 501+. Dropping a booked date out of a backup is the
+        // one thing this code exists to prevent.
+        $maps = $maps->filter(fn ($map) => $this->snapshotIsWorthKeeping($map, $event))->values();
+
+        if ($maps->count() > self::MAX_SEATING_MAPS_PER_EVENT) {
+            // Never a silent truncation: say what was dropped, so a restore that comes back short
+            // is explicable rather than mysterious.
+            Log::warning('Backup: seating snapshots truncated', [
+                'event_id' => $event->id,
+                'total' => $maps->count(),
+                'exported' => self::MAX_SEATING_MAPS_PER_EVENT,
+            ]);
+            $this->seatingTruncationWarnings[] = __('messages.backup_truncated_seating', [
+                'limit' => number_format(self::MAX_SEATING_MAPS_PER_EVENT),
+                'total' => number_format($maps->count()),
+                'event' => $event->name ?? '',
+            ]);
+            $maps = $maps->take(self::MAX_SEATING_MAPS_PER_EVENT);
+        }
+
+        return $maps
+            ->map(fn ($map) => array_merge([
+                'event_date' => $map->event_date,
+                '_seating_plan_ref_id' => $map->seating_plan_id,
+                'orphan_rule_enabled' => (bool) $map->orphan_rule_enabled,
+                'orphan_rule_min_gap' => $map->orphan_rule_min_gap,
+                'orphan_rule_lift_pct' => $map->orphan_rule_lift_pct,
+                'materialized_at' => $map->materialized_at,
+            ], $this->exportSeatingStructure('event_seating_map_id', $map->id)))
+            ->toArray();
+    }
+
+    /**
+     * Is this snapshot carrying anything the plan cannot reproduce?
+     *
+     * A materialized map is a COPY of the template, so a date nobody has touched adds nothing to a
+     * backup and is re-materialized on first use after the restore. Exporting them all anyway is
+     * not a rounding error: a 1,200-seat house over 30 dates measured at 36,000 seat rows and
+     * 11.6 MB of JSON, and the cap above allows sixty times that. A long run of untouched dates
+     * would produce a backup nobody can take.
+     *
+     * Kept when: a seat is sold or held back, a section has been removed, a seat exists that no
+     * template seat produced, or the seat count no longer matches the plan.
+     *
+     * The one thing this loses is a per-date edit that MOVED seats without changing how many there
+     * are and without selling any - the restored date falls back to the template layout. That is a
+     * cosmetic regression on an unsold date, traded against backups that can actually be written.
+     */
+    private function snapshotIsWorthKeeping(EventSeatingMap $map, Event $event): bool
+    {
+        $hasBookings = SeatingSeat::where('event_seating_map_id', $map->id)
+            ->where('status', '!=', 'available')
+            ->exists();
+
+        if ($hasBookings) {
+            return true;
+        }
+
+        $removedSection = SeatingSection::where('event_seating_map_id', $map->id)
+            ->where('is_deleted', true)
+            ->exists();
+
+        if ($removedSection) {
+            return true;
+        }
+
+        $orphanSeat = SeatingSeat::where('event_seating_map_id', $map->id)
+            ->whereNull('source_seat_id')
+            ->exists();
+
+        if ($orphanSeat) {
+            return true;
+        }
+
+        $planId = $map->seating_plan_id ?: $event->seating_plan_id;
+
+        if (! $planId) {
+            return true;
+        }
+
+        return SeatingSeat::where('event_seating_map_id', $map->id)->count()
+            !== SeatingSeat::where('seating_plan_id', $planId)->count();
+    }
+
+    /**
+     * Levels, sections, tables and seats for one owner - a plan or a map, which share these tables
+     * and differ only by which owner column is set.
+     *
+     * Every parent link travels as a _ref into the SAME export, never as a raw id: the restore
+     * lands on a different install (or the same one with different ids), and a raw id would either
+     * abort on the foreign key or, worse, bind a seat to a stranger's booking.
+     */
+    private function exportSeatingStructure(string $ownerColumn, int $ownerId): array
+    {
+        $levels = SeatingLevel::where($ownerColumn, $ownerId)->orderBy('position')->get();
+        $sections = SeatingSection::where($ownerColumn, $ownerId)->orderBy('position')->get();
+        $tables = SeatingTable::whereIn('seating_section_id', $sections->pluck('id'))->get();
+        $seats = SeatingSeat::where($ownerColumn, $ownerId)
+            ->orderBy('row_position')->orderBy('position')->get();
+
+        return [
+            'levels' => $levels->map(fn ($l) => [
+                '_ref_id' => $l->id,
+                'name' => $l->name, 'position' => $l->position,
+                'width' => $l->width, 'height' => $l->height,
+            ])->all(),
+            'sections' => $sections->map(fn ($sec) => [
+                '_ref_id' => $sec->id,
+                '_level_ref_id' => $sec->seating_level_id,
+                '_ticket_ref_id' => $sec->ticket_id,
+                '_table_ticket_ref_id' => $sec->table_ticket_id,
+                'name' => $sec->name, 'color' => $sec->color, 'kind' => $sec->kind,
+                'capacity' => $sec->capacity, 'band' => $sec->band,
+                'accessibility_only' => (bool) $sec->accessibility_only,
+                'x' => $sec->x, 'y' => $sec->y, 'rotation' => $sec->rotation,
+                'position' => $sec->position, 'shape' => $sec->shape,
+                'is_deleted' => (bool) $sec->is_deleted,
+            ])->all(),
+            'tables' => $tables->map(fn ($t) => [
+                '_ref_id' => $t->id,
+                '_section_ref_id' => $t->seating_section_id,
+                'label' => $t->label, 'shape' => $t->shape, 'seat_count' => $t->seat_count,
+                'booking_mode' => $t->booking_mode,
+                'x' => $t->x, 'y' => $t->y, 'rotation' => $t->rotation,
+                'width' => $t->width, 'height' => $t->height,
+            ])->all(),
+            'seats' => $seats->map(fn ($seat) => [
+                '_ref_id' => $seat->id,
+                '_section_ref_id' => $seat->seating_section_id,
+                '_table_ref_id' => $seat->seating_table_id,
+                '_source_seat_ref_id' => $seat->source_seat_id,
+                '_sale_ref_id' => $seat->sale_id,
+                '_sale_ticket_ref_id' => $seat->sale_ticket_id,
+                'row_label' => $seat->row_label, 'row_position' => $seat->row_position,
+                'seat_label' => $seat->seat_label,
+                'x' => $seat->x, 'y' => $seat->y, 'kind' => $seat->kind,
+                'aisle_after' => (bool) $seat->aisle_after, 'position' => $seat->position,
+                'status' => $seat->status,
+                'hold_kind' => $seat->hold_kind, 'hold_note' => $seat->hold_note,
+                'hold_expires_at' => $seat->hold_expires_at,
+            ])->all(),
+        ];
     }
 
     private function exportAppointmentTypes(Role $role): array
@@ -343,6 +552,11 @@ class BackupService
         $eventData['videos'] = $this->exportVideos($event);
         $eventData['feedbacks'] = $this->exportFeedbacks($event);
         $eventData['waitlists'] = $this->exportWaitlists($event);
+        // Carried as a _ref, never as the raw id: EVENT_EXPORT_EXCLUDE drops seating_plan_id
+        // precisely because a raw id means a dangling FK on another install and, on the same
+        // install, a silent link to another schedule's seat map.
+        $eventData['_seating_plan_ref_id'] = $event->seating_plan_id;
+        $eventData['seating_maps'] = $this->exportSeatingMaps($event);
 
         return $eventData;
     }
@@ -360,6 +574,10 @@ class BackupService
                 'sales_start_at' => $ticket->sales_start_at,
                 'sales_end_at' => $ticket->sales_end_at,
                 'custom_fields' => $ticket->custom_fields,
+                // Names the seating band this ticket prices. Dropped here, a restored event keeps
+                // its tickets AND its seating_plan_id but nothing maps to a section, so it quietly
+                // reverts to selling by quantity with no seats assigned - and nothing errors.
+                'seating_band' => $ticket->seating_band,
                 'is_pass' => $ticket->is_pass,
                 'pass_usage_type' => $ticket->pass_usage_type,
                 'pass_max_uses' => $ticket->pass_max_uses,
@@ -463,6 +681,8 @@ class BackupService
 
             $saleData['sale_tickets'] = $sale->saleTickets->map(function ($st) {
                 $stData = [
+                    // Allocated seats bind to the LINE, so the snapshot needs to find it again.
+                    '_ref_id' => $st->id,
                     '_ticket_ref_id' => $st->ticket_id,
                     'seats' => $st->seats,
                     'quantity' => $st->quantity,
@@ -847,6 +1067,9 @@ class BackupService
             'segments' => [],
             'ab_tests' => [],
             'polls' => [],
+            'seating_plans' => [],
+            'seating_seats' => [],
+            'sale_tickets' => [],
         ];
 
         return DB::transaction(function () use ($scheduleData, $userId, $includesImages, $job, &$report, &$idMap) {
@@ -866,6 +1089,19 @@ class BackupService
                     report($e);
                     $report['sub_schedules']['failed']++;
                     $report['sub_schedules']['failures'][] = ($groupData['name'] ?? 'Unknown').': Import failed';
+                }
+            }
+
+            // Seating plans before events: importEvent() resolves seating_plan_id through this map,
+            // and a map's snapshot points its seats back at the template they were copied from.
+            foreach ($scheduleData['seating_plans'] ?? [] as $planData) {
+                try {
+                    $plan = $this->importSeatingPlan($planData, $role, $idMap);
+                    if (isset($planData['_ref_id'])) {
+                        $idMap['seating_plans'][$planData['_ref_id']] = $plan->id;
+                    }
+                } catch (\Exception $e) {
+                    report($e);
                 }
             }
 
@@ -990,7 +1226,12 @@ class BackupService
                                 // Import sale tickets
                                 foreach ($saleData['sale_tickets'] ?? [] as $stData) {
                                     try {
-                                        $this->importSaleTicket($stData, $sale, $idMap);
+                                        $line = $this->importSaleTicket($stData, $sale, $idMap);
+                                        // Seats bind to the LINE, not just the sale, so the
+                                        // snapshot below needs this remap too.
+                                        if ($line && isset($stData['_ref_id'])) {
+                                            $idMap['sale_tickets'][$stData['_ref_id']] = $line->id;
+                                        }
                                     } catch (\Exception $e) {
                                         report($e);
                                     }
@@ -1058,6 +1299,16 @@ class BackupService
                     foreach ($eventData['waitlists'] ?? [] as $wlData) {
                         try {
                             $this->importWaitlist($wlData, $event, $role);
+                        } catch (\Exception $e) {
+                            report($e);
+                        }
+                    }
+
+                    // Seating snapshots LAST: every seat resolves a ticket, a sale and a sale line,
+                    // so all three have to be in the map already.
+                    foreach ($eventData['seating_maps'] ?? [] as $mapData) {
+                        try {
+                            $this->importSeatingMap($mapData, $event, $idMap);
                         } catch (\Exception $e) {
                             report($e);
                         }
@@ -1438,6 +1689,11 @@ class BackupService
         $event->ticket_notes_html = MarkdownUtils::convertToHtml($event->ticket_notes);
         $event->payment_instructions_html = MarkdownUtils::convertToHtml($event->payment_instructions);
 
+        // Excluded from the raw field walk on purpose; resolved through the plans imported just
+        // above so the event points at ITS OWN restored plan, not whatever id used to be there.
+        $planRefId = $data['_seating_plan_ref_id'] ?? null;
+        $event->seating_plan_id = $planRefId ? ($idMap['seating_plans'][$planRefId] ?? null) : null;
+
         // Clear local flyer image path
         if ($event->flyer_image_url && ! str_starts_with($event->flyer_image_url, 'http')) {
             $event->flyer_image_url = null;
@@ -1492,6 +1748,7 @@ class BackupService
         $ticket->sales_start_at = $data['sales_start_at'] ?? null;
         $ticket->sales_end_at = $data['sales_end_at'] ?? null;
         $ticket->custom_fields = $data['custom_fields'] ?? null;
+        $ticket->seating_band = $data['seating_band'] ?? null;
         // Deliberately NOT plan-gated, unlike the equivalent scrub in EventRepo::saveEvent(). A
         // restore always lands on a schedule importRole() has just created, and ROLE_EXPORT_FIELDS
         // carries no plan columns, so roles.plan_type falls back to its 'free' default - meaning a
@@ -1598,6 +1855,225 @@ class BackupService
         }
 
         return $giftCard;
+    }
+
+    /**
+     * Restore one reusable seating plan.
+     *
+     * A template carries no ticket_id and no bookings, so nothing here needs the sale maps - the
+     * per-occurrence snapshot is where those live.
+     */
+    private function importSeatingPlan(array $data, Role $role, array &$idMap): SeatingPlan
+    {
+        $plan = SeatingPlan::create([
+            'role_id' => $role->id,
+            'name' => $data['name'] ?? __('messages.seating_plan'),
+            'description' => $data['description'] ?? null,
+            'is_deleted' => (bool) ($data['is_deleted'] ?? false),
+        ]);
+
+        $this->importSeatingStructure($data, ['seating_plan_id' => $plan->id], $idMap);
+
+        return $plan;
+    }
+
+    /**
+     * Restore one per-occurrence snapshot, including who is sitting where.
+     *
+     * Must run AFTER the event's tickets, sales and sale tickets: every one of those is a _ref this
+     * remaps, and a seat whose sale cannot be resolved is restored as available rather than bound
+     * to whatever id happens to occupy that row now.
+     */
+    private function importSeatingMap(array $data, Event $event, array &$idMap): void
+    {
+        $planRef = $data['_seating_plan_ref_id'] ?? null;
+
+        $map = EventSeatingMap::create([
+            'event_id' => $event->id,
+            'event_date' => $data['event_date'] ?? null,
+            'seating_plan_id' => $planRef ? ($idMap['seating_plans'][$planRef] ?? null) : null,
+            'orphan_rule_enabled' => (bool) ($data['orphan_rule_enabled'] ?? true),
+            'orphan_rule_min_gap' => $data['orphan_rule_min_gap'] ?? null,
+            'orphan_rule_lift_pct' => $data['orphan_rule_lift_pct'] ?? null,
+            'materialized_at' => $data['materialized_at'] ?? null,
+        ]);
+
+        $this->importSeatingStructure($data, ['event_seating_map_id' => $map->id], $idMap, true);
+    }
+
+    /**
+     * Levels, sections, tables and seats for one restored owner.
+     *
+     * Levels, sections and tables go through create() so the models' casts apply - there are tens of
+     * them, not thousands. Seats do not: a 6,000-seat venue with a dozen snapshotted dates is 70,000+
+     * rows, and one INSERT each would hold the restore transaction open for minutes while a selfhost
+     * install runs it inline in the web request. They are chunked in blocks of 500 the same way
+     * SeatingMapService::copyStructure() writes them.
+     */
+    private function importSeatingStructure(array $data, array $ownerAttrs, array &$idMap, bool $isMap = false): void
+    {
+        $levelIds = [];
+        foreach ($data['levels'] ?? [] as $row) {
+            $level = SeatingLevel::create($ownerAttrs + [
+                'name' => $row['name'] ?? null,
+                'position' => $row['position'] ?? 0,
+                'width' => $row['width'] ?? null,
+                'height' => $row['height'] ?? null,
+            ]);
+            if (isset($row['_ref_id'])) {
+                $levelIds[$row['_ref_id']] = $level->id;
+            }
+        }
+
+        $sectionIds = [];
+        foreach ($data['sections'] ?? [] as $row) {
+            $levelRef = $row['_level_ref_id'] ?? null;
+            $ticketRef = $row['_ticket_ref_id'] ?? null;
+            $tableTicketRef = $row['_table_ticket_ref_id'] ?? null;
+
+            $section = SeatingSection::create($ownerAttrs + [
+                'seating_level_id' => $levelRef ? ($levelIds[$levelRef] ?? null) : null,
+                // Only a snapshot prices its sections; a template has no event to price against.
+                'ticket_id' => ($isMap && $ticketRef) ? ($idMap['tickets'][$ticketRef] ?? null) : null,
+                'table_ticket_id' => ($isMap && $tableTicketRef) ? ($idMap['tickets'][$tableTicketRef] ?? null) : null,
+                'name' => $row['name'] ?? null,
+                'color' => $row['color'] ?? null,
+                'kind' => $row['kind'] ?? 'seated',
+                'capacity' => $row['capacity'] ?? null,
+                'band' => $row['band'] ?? null,
+                'accessibility_only' => (bool) ($row['accessibility_only'] ?? false),
+                'x' => $row['x'] ?? 0, 'y' => $row['y'] ?? 0,
+                'rotation' => $row['rotation'] ?? 0,
+                'position' => $row['position'] ?? 0,
+                'shape' => $row['shape'] ?? null,
+                'is_deleted' => (bool) ($row['is_deleted'] ?? false),
+            ]);
+            if (isset($row['_ref_id'])) {
+                $sectionIds[$row['_ref_id']] = $section->id;
+            }
+        }
+
+        $tableIds = [];
+        foreach ($data['tables'] ?? [] as $row) {
+            $sectionRef = $row['_section_ref_id'] ?? null;
+            $sectionId = $sectionRef ? ($sectionIds[$sectionRef] ?? null) : null;
+
+            if (! $sectionId) {
+                continue;
+            }
+
+            $table = SeatingTable::create([
+                'seating_section_id' => $sectionId,
+                'label' => $row['label'] ?? null,
+                'shape' => $row['shape'] ?? 'round',
+                'seat_count' => $row['seat_count'] ?? 0,
+                'booking_mode' => $row['booking_mode'] ?? null,
+                'x' => $row['x'] ?? 0, 'y' => $row['y'] ?? 0,
+                'rotation' => $row['rotation'] ?? 0,
+                'width' => $row['width'] ?? null, 'height' => $row['height'] ?? null,
+            ]);
+            if (isset($row['_ref_id'])) {
+                $tableIds[$row['_ref_id']] = $table->id;
+            }
+        }
+
+        $now = now();
+        $rows = [];
+        $refIds = [];
+
+        foreach ($data['seats'] ?? [] as $row) {
+            $sectionRef = $row['_section_ref_id'] ?? null;
+            $sectionId = $sectionRef ? ($sectionIds[$sectionRef] ?? null) : null;
+
+            if (! $sectionId) {
+                continue;
+            }
+
+            $tableRef = $row['_table_ref_id'] ?? null;
+            $saleRef = $row['_sale_ref_id'] ?? null;
+            $saleTicketRef = $row['_sale_ticket_ref_id'] ?? null;
+            $sourceRef = $row['_source_seat_ref_id'] ?? null;
+
+            $saleId = ($isMap && $saleRef) ? ($idMap['sales'][$saleRef] ?? null) : null;
+            $saleTicketId = ($isMap && $saleTicketRef) ? ($idMap['sale_tickets'][$saleTicketRef] ?? null) : null;
+
+            [$status, $holdKind, $holdNote, $holdExpires] = $this->restoredSeatState($row, $saleId);
+
+            $rows[] = $ownerAttrs + [
+                'seating_section_id' => $sectionId,
+                'seating_table_id' => $tableRef ? ($tableIds[$tableRef] ?? null) : null,
+                // Points back at the template seat this was copied from. Null unless that plan came
+                // in the same backup, or it would bind to a stranger's row.
+                'source_seat_id' => $sourceRef ? ($idMap['seating_seats'][$sourceRef] ?? null) : null,
+                'row_label' => $row['row_label'] ?? null,
+                'row_position' => $row['row_position'] ?? 0,
+                'seat_label' => $row['seat_label'] ?? null,
+                'x' => $row['x'] ?? 0, 'y' => $row['y'] ?? 0,
+                'kind' => $row['kind'] ?? 'seat',
+                'aisle_after' => (bool) ($row['aisle_after'] ?? false),
+                'position' => $row['position'] ?? 0,
+                'status' => $status,
+                'hold_kind' => $holdKind,
+                'hold_note' => $holdNote,
+                'hold_expires_at' => $holdExpires,
+                'hold_token' => null,
+                'sale_id' => $saleId,
+                'sale_ticket_id' => $saleTicketId,
+                'state_version' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+
+            // Only a template's seats are ever a source_seat_id target, so only a template pays for
+            // reading the ids back.
+            $refIds[] = $isMap ? null : ($row['_ref_id'] ?? null);
+        }
+
+        foreach (array_chunk($rows, 500) as $chunk) {
+            SeatingSeat::insert($chunk);
+        }
+
+        if (! $isMap && array_filter($refIds, fn ($ref) => $ref !== null)) {
+            // insert() returns no ids. The plan was created moments ago and nothing else writes to
+            // it mid-restore, so its seats in id order are exactly the rows we just wrote, in order.
+            $ids = SeatingSeat::where($ownerAttrs)->orderBy('id')->pluck('id')->all();
+
+            foreach ($refIds as $i => $ref) {
+                if ($ref !== null && isset($ids[$i])) {
+                    $idMap['seating_seats'][$ref] = $ids[$i];
+                }
+            }
+        }
+    }
+
+    /**
+     * What a seat's status means once it has been restored.
+     *
+     * A cart hold is a live shopper's session - the token and the browser are both gone by the time
+     * anyone restores, so keeping it would take seats off sale until a sweeper that may never run
+     * clears them. Staff holds (no expiry) are a deliberate decision and survive. A sold seat whose
+     * sale did not come through goes back on sale rather than pointing at nothing.
+     *
+     * @return array{0: string, 1: ?string, 2: ?string, 3: mixed}
+     */
+    private function restoredSeatState(array $row, ?int $saleId): array
+    {
+        $status = $row['status'] ?? 'available';
+        $expires = $row['hold_expires_at'] ?? null;
+
+        if ($status === 'sold' && ! $saleId) {
+            return ['available', null, null, null];
+        }
+
+        if ($status === 'held' && $expires) {
+            return ['available', null, null, null];
+        }
+
+        if ($status === 'held') {
+            return ['held', $row['hold_kind'] ?? 'box_office', $row['hold_note'] ?? null, null];
+        }
+
+        return [$status, null, null, null];
     }
 
     private function importAppointmentType(array $data, Role $role): AppointmentType
@@ -1796,16 +2272,16 @@ class BackupService
         }
     }
 
-    private function importSaleTicket(array $data, Sale $sale, array &$idMap): void
+    private function importSaleTicket(array $data, Sale $sale, array &$idMap): ?SaleTicket
     {
         $ticketRefId = $data['_ticket_ref_id'] ?? null;
         $ticketId = $ticketRefId ? ($idMap['tickets'][$ticketRefId] ?? null) : null;
 
         if (! $ticketId) {
-            return;
+            return null;
         }
 
-        SaleTicket::withoutEvents(function () use ($data, $sale, $ticketId) {
+        return SaleTicket::withoutEvents(function () use ($data, $sale, $ticketId) {
             $st = new SaleTicket;
             $st->sale_id = $sale->id;
             $st->ticket_id = $ticketId;
@@ -1821,6 +2297,8 @@ class BackupService
             }
 
             $st->save();
+
+            return $st;
         });
     }
 

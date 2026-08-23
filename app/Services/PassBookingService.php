@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Models\Sale;
 use App\Models\SaleTicket;
+use App\Models\SeatingSeat;
 use App\Models\Ticket;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
@@ -152,9 +153,12 @@ class PassBookingService
      */
     public function seatsLeft(Event $event, string $date, Ticket $passTicket): ?int
     {
-        // The shared per-occurrence house, after regular sales AND existing pass
-        // reservations - the same figure the regular-sale side enforces.
-        $houseLeft = $event->occurrenceSeatsRemaining($date);
+        // On an allocated event there is no shared house - occurrenceSeatsRemaining() returns
+        // null by design, and reading it here let UNLIMITED pass holders book a physically full
+        // room. The real ceiling is seats left in the band this pass admits to.
+        $houseLeft = $event->hasAllocatedSeating()
+            ? $this->allocatedSeatsLeft($event, $date, $passTicket)
+            : $event->occurrenceSeatsRemaining($date);
 
         // Optional per-occurrence cap on how many seats passes may take.
         $passCap = $passTicket->pass_seats_per_occurrence;
@@ -168,6 +172,113 @@ class PassBookingService
         }
 
         return min($houseLeft, $passLeft);
+    }
+
+    /**
+     * Seats a pass may still take at an allocated occurrence.
+     *
+     * `tickets.seating_band` on the PASS names the band its holder sits in. A pass with no band
+     * may take any allocated seat, which is the sensible default for a house-wide season pass.
+     */
+    private function allocatedSeatsLeft(Event $event, string $date, Ticket $passTicket): int
+    {
+        $bands = $this->bandTicketsFor($event, $date, $passTicket);
+
+        // allocatedSeatsRemaining() already knows how to answer before the occurrence has been
+        // snapshotted, which a pass booking can easily be the first thing to do.
+        return (int) $bands->sum(fn (Ticket $t) => (int) $event->allocatedSeatsRemaining($date, $t));
+    }
+
+    /**
+     * The allocated ticket bands a pass admits to.
+     *
+     * `tickets.seating_band` on the PASS names the band its holder sits in. A pass with no band may
+     * take any allocated seat, which is the sensible default for a house-wide season pass.
+     */
+    private function bandTicketsFor(Event $event, string $date, Ticket $passTicket): \Illuminate\Support\Collection
+    {
+        $allocated = $event->tickets->filter(fn (Ticket $t) => $t->isAllocated($date));
+
+        if ($passTicket->seating_band) {
+            return $allocated->where('seating_band', $passTicket->seating_band)->values();
+        }
+
+        return $allocated->values();
+    }
+
+    /**
+     * Claim an actual seat for a pass booking.
+     *
+     * The holder gets no picker - that was the decision, and it keeps one picker entry point - so
+     * best-available is what they get. The seat id goes on the usage entry, which is what the
+     * cancel path reads to give it back.
+     */
+    private function claimSeatForBooking(Event $event, string $date, Ticket $passTicket, SaleTicket $line): ?int
+    {
+        $map = app(SeatingMapService::class)->materialize($event, $date);
+
+        if (! $map) {
+            return null;
+        }
+
+        $best = app(BestAvailableService::class);
+        $holds = app(SeatHoldService::class);
+
+        foreach ($this->bandTicketsFor($event, $date, $passTicket) as $ticket) {
+            // Pick, then claim under a lock, with one retry if the seat went in between.
+            // sale_id only, NOT sale_ticket_id: the pass line is one row reused across every
+            // occurrence, so binding seats to it would make SaleTicket::seatLabels() list every
+            // seat the holder ever booked on every ticket they print. The usage entry carries the
+            // per-occurrence seat.
+            for ($attempt = 0; $attempt < 2; $attempt++) {
+                $ids = $best->pick($map, $ticket, 1);
+
+                if (! $ids) {
+                    break;
+                }
+
+                if ($holds->claimPickedSeats($map, $ids, $line->sale_id, null)) {
+                    return $ids[0];
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Give back the seat a pass booking took.
+     *
+     * Only the seat recorded on the usage entry, and only if it is still bound to this pass - a box
+     * office exchange may have moved the holder since, and that seat belongs to whoever holds it now.
+     */
+    private function releaseSeatForUsage(?Event $event, SaleTicket $line, array $usage): void
+    {
+        $seatId = $usage['seat_id'] ?? null;
+
+        if (! $seatId || ! $event) {
+            return;
+        }
+
+        $seat = SeatingSeat::find($seatId);
+
+        // Still sold AND still this order's. If the box office released or exchanged it since, the
+        // seat now belongs to whoever holds it, and freeing it here would sell it twice.
+        if (! $seat || $seat->status !== 'sold' || (int) $seat->sale_id !== (int) $line->sale_id) {
+            return;
+        }
+
+        $map = $seat->eventSeatingMap;
+
+        $seat->update([
+            'status' => 'available',
+            'hold_kind' => null,
+            'hold_token' => null,
+            'hold_expires_at' => null,
+            'sale_id' => null,
+            'sale_ticket_id' => null,
+            'state_version' => $map ? $map->bumpVersion() : $seat->state_version,
+        ]);
     }
 
     /**
@@ -194,8 +305,14 @@ class PassBookingService
             ->whereIn('id', $bookings->pluck('event_id')->unique()->all())
             ->get()->keyBy('id');
 
+        // Allocated bookings took a real seat - the holder needs to be told which one, and it is
+        // the only place they will ever see it before the door.
+        $seats = SeatingSeat::with(['section', 'seatingTable'])
+            ->whereIn('id', $bookings->pluck('seat_id')->filter()->all())
+            ->get()->keyBy('id');
+
         return $bookings
-            ->map(function ($u) use ($events, $ticket, $now) {
+            ->map(function ($u) use ($events, $ticket, $now, $seats) {
                 $event = $events->get((int) ($u['event_id'] ?? 0));
                 if (! $event) {
                     return null;
@@ -234,6 +351,9 @@ class PassBookingService
                     'past_cutoff' => $deadline ? ($now->gt($deadline) && ! $inGrace) : false,
                     'deadline_past' => $deadline ? $now->gt($deadline) : false,
                     'late_policy' => $deadline ? $ticket->passLateCancelPolicy() : null,
+                    'seat_label' => isset($u['seat_id'])
+                        ? $seats->get((int) $u['seat_id'])?->fullLabel()
+                        : null,
                 ];
             })
             ->filter()
@@ -394,12 +514,27 @@ class PassBookingService
                 return $result;
             }
 
-            $usages[] = [
+            // An allocated occurrence must hand the holder a real seat, or the booking is a
+            // promise the door cannot keep - they would arrive with a valid QR and nowhere to sit.
+            $seatId = null;
+            if ($event->hasAllocatedSeating()) {
+                $seatId = $this->claimSeatForBooking($event, $date, $passTicket, $fresh);
+
+                if (! $seatId) {
+                    $result->status = 'sold_out';
+
+                    return $result;
+                }
+            }
+
+            $usages[] = array_filter([
                 'event_id' => $eventId,
                 'date' => $date,
                 'at' => $now->copy()->setTimezone('UTC')->timestamp,
                 'kind' => 'booking',
-            ];
+                // The cancel path reads this to give the seat back.
+                'seat_id' => $seatId,
+            ], fn ($v) => $v !== null);
             $fresh->pass_usages = $usages;
             $fresh->save();
 
@@ -487,6 +622,9 @@ class PassBookingService
                     return $result;
                 }
 
+                // Forfeited still means they are not coming, so the seat goes back on sale.
+                $this->releaseSeatForUsage($event, $fresh, $usages[$index]);
+                unset($usages[$index]['seat_id']);
                 $usages[$index]['kind'] = 'forfeited';
                 $fresh->pass_usages = array_values($usages);
                 $fresh->save();
@@ -497,6 +635,7 @@ class PassBookingService
                 return $result;
             }
 
+            $this->releaseSeatForUsage($event, $fresh, $usages[$index]);
             array_splice($usages, $index, 1);
             $fresh->pass_usages = array_values($usages);
             $fresh->save();

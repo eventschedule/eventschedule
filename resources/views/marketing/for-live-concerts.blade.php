@@ -924,7 +924,7 @@
                     Name the tickets. <span class="es-stage-accent">Keep the door.</span>
                 </h2>
                 <p class="es-stage-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Sales run through your own Stripe account and Event Schedule takes nothing from them. Being clear about the shape of it: these are named ticket types with prices and quantities, not a seating chart. There is no seat map, and nobody is choosing a specific seat.
+                    Sales run through your own Stripe account and Event Schedule takes nothing from them. Being clear about the shape of it: these are named ticket types with prices and quantities, sold by the number. A reserved-seating room is an Enterprise thing, where you draw the venue once and the buyer picks their own seat off it.
                 </p>
             </div>
 

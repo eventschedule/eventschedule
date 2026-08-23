@@ -84,8 +84,9 @@
            THE DEVICE IS THE COUNT ITSELF - a large fraction with a simple
            fill. Deliberately NOT a row of discrete seat marks: 24 marks in
            a line would read as /for-theaters' day strip, and anything
-           resembling a seating plan would imply a seat map, which the
-           product does not have (no seat selection exists anywhere).
+           resembling a seating plan would imply the Enterprise seat
+           picker, which is for venues with rows - a restaurant sells
+           covers, and covers are a count.
 
            THREE MECHANISMS BACK THE SPINE, all checked in code:
              - Covers = ticket quantity, and inventory is PER DATE

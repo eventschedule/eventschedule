@@ -180,6 +180,7 @@
                 ['Team scheduling', 'bg-cyan-500', route('marketing.team_scheduling')],
                 ['Online events', 'bg-sky-500', route('marketing.online_events')],
                 ['Sub-schedules', 'bg-blue-400', route('marketing.sub_schedules')],
+                ['Reserved seating', 'bg-emerald-500', route('marketing.allocated_seating')],
             ],
         ];
     @endphp
@@ -220,7 +221,7 @@
         badge="Ticketing"
         heading="Sell tickets online"
         lede="Multiple ticket types, waitlist, and a live check-in dashboard. Accept payments with Stripe. Zero platform fees."
-        :chips="['Zero fees', 'QR check-ins', 'Stripe payments', 'Check-in dashboard', 'Waitlist', 'Promo codes', 'Sales export', 'Free event RSVP']"
+        :chips="['Zero fees', 'QR check-ins', 'Stripe payments', 'Check-in dashboard', 'Waitlist', 'Promo codes', 'Sales export', 'Free event RSVP', 'Reserved seating']"
         :lead="true"
         frame="browser"
         frame-url="yourvenue.eventschedule.com/tickets"
@@ -1241,6 +1242,10 @@
             [
                 'q' => 'Do you take a cut of ticket sales?',
                 'a' => 'No. Event Schedule charges zero platform fees on tickets, on every plan including free. You connect your own Stripe account and payouts go straight to you, so the only deduction is Stripe processing. The free plan caps volume at 25 paid tickets a month rather than taking a cut; Pro removes the cap.',
+            ],
+            [
+                'q' => 'Can buyers choose their own seat?',
+                'a' => 'Yes, on the Enterprise plan. Draw your room once as a reusable seating plan - levels, sections, rows, tables, standing areas and wheelchair spaces - attach it to an event, and buyers pick their seats off the map. One plan covers every date of a run, and a single date can be changed on its own. Your box office gets the same map to hold seats back, take a booking over the phone, move somebody or release one seat.',
             ],
             [
                 'q' => 'Can I use my own domain?',

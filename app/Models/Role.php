@@ -604,6 +604,18 @@ class Role extends Model implements MustVerifyEmail
     }
 
     /**
+     * Whether this schedule may build and sell from allocated seating plans.
+     *
+     * Enterprise, not Pro: it is aimed at venues and theatres rather than the long tail,
+     * and it is the first ticketing capability to sit in that tier. Selfhost gets it for
+     * free through isEnterprise(), as with every other gate.
+     */
+    public function seatingEnabled(): bool
+    {
+        return $this->isEnterprise();
+    }
+
+    /**
      * Whether the configured gift card payment method is usable by the owner.
      */
     public function giftCardPaymentMethodAvailable(): bool

@@ -28,6 +28,14 @@ class ReleaseTickets extends Command
      */
     public function handle()
     {
+        // Lapsed cart holds on seat maps. Pure housekeeping: SeatingSeat::scopeAvailable() already
+        // treats a lapsed hold as free at read time, so nothing waits on this - but leaving the
+        // rows held makes the box-office view and every export read as though seats are still out.
+        $sweptSeats = app(\App\Services\SeatHoldService::class)->sweepExpiredHolds();
+        if ($sweptSeats) {
+            \Illuminate\Support\Facades\Log::info("Released {$sweptSeats} expired seat holds");
+        }
+
         // Per-event expiry (owner opt-in via expire_unpaid_tickets). This loop has NO cash
         // exclusion, so a cash sale - including a partial cash gift-card redemption - on an event
         // with expire_unpaid_tickets set IS auto-expired here once past that window (a single,

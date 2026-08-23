@@ -466,6 +466,11 @@ class ApiSaleController extends Controller
                     ]);
                 }
 
+                // Allocated seating: no picker on this path, so take the best seats available.
+                // Without this the sale takes quantity stock but no seats, and because an allocated
+                // ticket's availability reads the MAP the picker keeps offering the same seats.
+                app(\App\Services\SeatHoldService::class)->assignBestAvailableForSale($event, $sale);
+
                 // Create SaleTickets for add-ons
                 $addonSelections = $request->input('addons', []);
                 foreach ($addonSelections as $addonId => $addonQty) {

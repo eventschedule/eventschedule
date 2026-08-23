@@ -951,16 +951,36 @@ class TicketController extends Controller
             }
         }
 
+        // Allocated seats, batched once for the whole export rather than per line - this runs over
+        // every sale the user owns. Pass seats carry no sale_ticket_id (the pass line is reused
+        // across occurrences), so they are keyed by sale instead.
+        $seatLabels = [];
+        $seatedSaleIds = $sales->filter(fn ($s) => $s->event && $s->event->seating_plan_id)->pluck('id');
+
+        // Chunked, because this export is not capped: a venue with a year of seated shows produces
+        // an IN list long enough to run into max_allowed_packet, and one unbounded hydrate of every
+        // seat row on top of the sales already held in memory.
+        foreach ($seatedSaleIds->chunk(1000) as $chunk) {
+            \App\Models\SeatingSeat::with(['section', 'seatingTable'])
+                ->whereIn('sale_id', $chunk)
+                ->orderBy('row_position')->orderBy('position')
+                ->get()
+                ->groupBy('sale_id')
+                ->each(function ($group, $saleId) use (&$seatLabels) {
+                    $seatLabels[$saleId] = $group->map(fn ($seat) => $seat->fullLabel())->filter()->implode(', ');
+                });
+        }
+
         $filename = 'sales-'.now()->format('Y-m-d').'.csv';
 
-        return response()->streamDownload(function () use ($sales, $customFieldNames) {
+        return response()->streamDownload(function () use ($sales, $customFieldNames, $seatLabels) {
             $handle = fopen('php://output', 'w');
 
             // UTF-8 BOM for Excel compatibility
             fwrite($handle, "\xEF\xBB\xBF");
 
             // Header row
-            $headers = ['Name', 'Email', 'Phone', 'Event', 'Event Date', 'Tickets', 'Add-ons', 'Quantity', 'Amount', 'Currency', 'Promo Code', 'Discount', 'Gift Card', 'Gift Card Amount', 'Transaction Reference', 'Payment Method', 'Status', 'Date', 'Group ID', 'Order ID', 'Check-in Status', 'Check-in Time', 'Pass Type', 'Pass Visits Used', 'Pass Expires'];
+            $headers = ['Name', 'Email', 'Phone', 'Event', 'Event Date', 'Tickets', 'Add-ons', 'Quantity', 'Amount', 'Currency', 'Promo Code', 'Discount', 'Gift Card', 'Gift Card Amount', 'Transaction Reference', 'Payment Method', 'Status', 'Date', 'Group ID', 'Order ID', 'Check-in Status', 'Check-in Time', 'Pass Type', 'Pass Visits Used', 'Pass Expires', 'Seats'];
             $headers = array_merge($headers, $customFieldNames);
             fputcsv($handle, $headers);
 
@@ -1023,6 +1043,9 @@ class TicketController extends Controller
                 $row[] = $passSt ? $passSt->ticket->pass_usage_type : '';
                 $row[] = $passSt ? $passSt->passUsageCount() : '';
                 $row[] = ($passSt && $passSt->pass_expires_at) ? $passSt->pass_expires_at->format('Y-m-d') : '';
+
+                // Allocated seats. Owner-authored labels, so sanitized like any other free text.
+                $row[] = CsvUtils::sanitizeCell($seatLabels[$sale->id] ?? '');
 
                 // Build custom field values
                 $customValues = array_fill(0, count($customFieldNames), '');
@@ -1122,19 +1145,16 @@ class TicketController extends Controller
             // checkout POST.
             $event = Event::with(['tickets', 'roles'])->find(UrlUtils::decodeId($leg['event_id']));
 
-            $unavailable = ! $event
-                || ! $event->roles()->wherePivot('role_id', $role->id)->exists()
-                || ($event->is_draft && ! $isMemberOrAdmin)
-                || ($event->is_private
-                    && ! $isMemberOrAdmin
-                    && ! ($event->isPasswordProtected() && session()->has('event_password_'.$event->id)));
+            // Shared with the seat-map endpoints so the two cannot drift - see
+            // Event::guestVisibilityFailure().
+            $visibility = $event ? $event->guestVisibilityFailure($role, $isMemberOrAdmin) : 'hidden';
 
-            if ($unavailable) {
+            if ($visibility !== null) {
                 if ($isCart) {
                     return $this->refuseCartLeg($leg, $event?->translatedName());
                 }
 
-                abort($event && ! $event->roles()->wherePivot('role_id', $role->id)->exists() ? 403 : 404);
+                abort($visibility === 'not_on_schedule' ? 403 : 404);
             }
 
             // Per-attendee events cannot be bought from the cart: it collects one name and email
@@ -1238,6 +1258,19 @@ class TicketController extends Controller
         $isPaymentLink = $event->payment_method === 'invoiceninja'
             && $event->user->invoiceninja_mode === 'payment_link';
 
+        // Allocated seating cannot work in payment-link mode: the quantities are chosen on the
+        // Invoice Ninja page, so there is nothing to size a seat claim against until the webhook
+        // fires - and the webhook creates the SaleTickets long after the buyer's holds would have
+        // lapsed. Refused here rather than only at save time because invoiceninja_mode is a
+        // per-user setting that can change after the event was configured.
+        if ($isPaymentLink) {
+            foreach ($legs as $leg) {
+                if ($leg['event']->hasAllocatedSeating()) {
+                    return back()->withInput()->with('error', __('messages.seating_payment_link_unsupported'));
+                }
+            }
+        }
+
         // Use database transaction with row locking to prevent race conditions
         // that could lead to overselling tickets
         try {
@@ -1256,6 +1289,10 @@ class TicketController extends Controller
                     $this->priceSaleLeg($legSale, $request, $leg, $leg['event'], $subdomain, $isPaymentLink, $giftCard);
 
                     $legSale->save();
+
+                    // Stage two of the seat claim, inside this transaction and before any payment
+                    // page: the buyer's held seats become sold and are bound to their sale rows.
+                    $this->claimSeatsForLeg($request, $legSale, $leg['event']);
 
                     $sales[] = $legSale;
                 }
@@ -1472,6 +1509,51 @@ class TicketController extends Controller
      * Scoped to a single event on purpose: a cart spanning several events must call this once per
      * leg, and must do so in a stable event order, or two overlapping carts deadlock on the locks.
      */
+    /**
+     * Turn this buyer's held seats into sold seats bound to the sale they just created.
+     *
+     * Deliberately trusts the session hold token rather than the posted seat ids - the client asks,
+     * the server claims only what it is actually holding for them.
+     *
+     * Then checks the books balance: every allocated ticket must come away with exactly as many
+     * seats as it sold. Anything else - a hold that lapsed between picking and submitting, a
+     * quantity typed straight into the form, a band whose seats were taken - throws, and throwing
+     * rolls the whole transaction back so no half-seated sale is ever written.
+     */
+    private function claimSeatsForLeg(Request $request, Sale $sale, Event $event): void
+    {
+        if (! $event->hasAllocatedSeating()) {
+            return;
+        }
+
+        $holds = app(\App\Services\SeatHoldService::class);
+        $map = app(\App\Services\SeatingMapService::class)->mapFor($event, $sale->event_date);
+
+        $counts = $map ? $holds->claimForSale($map, $holds->tokenFor($request), $sale) : [];
+
+        // Balance EVERY line in the group. Checking only the primary's meant a guest attendee's
+        // line was never verified, so a sale could be written with an attendee holding no seat.
+        $groupSaleIds = Sale::where('id', $sale->id)->orWhere('group_id', $sale->id)->pluck('id');
+
+        foreach (\App\Models\SaleTicket::with('ticket')->whereIn('sale_id', $groupSaleIds)->get() as $saleTicket) {
+            $ticket = $saleTicket->ticket;
+
+            if (! $ticket) {
+                continue;
+            }
+
+            $ticket->setRelation('event', $event);
+
+            if (! $ticket->isAllocated($sale->event_date)) {
+                continue;
+            }
+
+            if (($counts[$saleTicket->id] ?? 0) !== (int) $saleTicket->quantity) {
+                throw new \App\Exceptions\BusinessException(__('messages.seating_seats_no_longer_held'));
+            }
+        }
+    }
+
     private function assertLegTicketsAvailable(array $leg, Event $event, bool $isPaymentLink): void
     {
         // Check ticket availability with row locking (skip for payment link mode)
@@ -2753,7 +2835,11 @@ class TicketController extends Controller
         foreach ($sale->saleTickets as $saleTicket) {
             $data->tickets[] = [
                 'type' => $saleTicket->ticket->type,
+                // `seats` is the check-in slot map (1..n => timestamp or null), not a seat NUMBER.
+                // On an allocated event the door needs the actual seat, so send it alongside in
+                // the same order the slots run; the scanner labels each slot with it.
                 'seats' => json_decode($saleTicket->seats, true) ?? [],
+                'seat_labels' => $saleTicket->seatLabels(),
             ];
         }
 
@@ -3582,6 +3668,12 @@ class TicketController extends Controller
                             ->update(['status' => 'purchased']);
                     }
 
+                    // Allocated seating: a comp list has no picker, so take the best seats
+                    // available. Skipping this took quantity stock without taking seats, and an
+                    // allocated ticket's availability reads the map - so the picker went on
+                    // offering the very seats the import had just sold.
+                    app(\App\Services\SeatHoldService::class)->assignBestAvailableForSale($event, $sale);
+
                     $seenEmails[$email] = true;
                     $imported++;
                     if ($status === 'paid') {
@@ -3589,6 +3681,11 @@ class TicketController extends Controller
                     }
                 }
             });
+        } catch (\App\Exceptions\BusinessException $e) {
+            // Intentional and actionable - the seating band ran out of seats part way through the
+            // import. The transaction rolled back, so the message names the real problem rather
+            // than a generic failure.
+            return back()->withInput()->with('error', $e->getMessage());
         } catch (\Illuminate\Database\QueryException $e) {
             report($e);
 

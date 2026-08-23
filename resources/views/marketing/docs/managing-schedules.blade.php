@@ -71,6 +71,11 @@
                         <td>Always</td>
                     </tr>
                     <tr>
+                        <td><a href="{{ route('marketing.docs.allocated_seating') }}" class="doc-link">Seating</a></td>
+                        <td>Reusable seating plans for your room, used to sell reserved seats</td>
+                        <td><x-doc-badge plan="enterprise" /></td>
+                    </tr>
+                    <tr>
                         <td><a href="#requests" class="doc-link">Requests</a></td>
                         <td>Submitted events and bookings waiting for your decision</td>
                         <td>Only while something is pending</td>

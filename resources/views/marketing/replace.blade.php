@@ -608,7 +608,7 @@
             ],
             [
                 'q' => 'What does Event Schedule not replace?',
-                'a' => 'There is no automation or drip-campaign builder, so a nurture sequence stays where it is. There is no blank design canvas: graphics are generated from the event record in fixed layouts. It is not a general website builder, and there is no task board or kanban. There are also no seat maps, so ticket types are priced but buyers are not choosing a specific seat.',
+                'a' => 'There is no automation or drip-campaign builder, so a nurture sequence stays where it is. There is no blank design canvas: graphics are generated from the event record in fixed layouts. It is not a general website builder, and there is no task board or kanban. Seat maps exist, but only on Enterprise: on the other plans ticket types are priced by the number and buyers are not choosing a specific seat.',
             ],
             [
                 'q' => 'Do I have to move everything at once?',
@@ -939,7 +939,7 @@
             </div>
 
             <p class="es-belt-muted es-belt-small mx-auto mt-8 max-w-3xl text-center" data-reveal>
-                One more, because it gets asked: there is no seating chart. Ticket types are named and priced, and a buyer picks a type rather than a seat.
+                One more, because it gets asked: a seating chart is an Enterprise feature. Below that, ticket types are named and priced, and a buyer picks a type rather than a seat.
             </p>
         </div>
     </section>

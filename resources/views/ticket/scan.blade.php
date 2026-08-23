@@ -124,13 +124,14 @@
                                 <div v-for="ticket in eventDetails.tickets" :key="ticket.type" class="mb-3">
                                     <h4 class="font-medium text-gray-700 dark:text-gray-300">@{{ ticket.type }} {{ __('messages.ticket') }}</h4>
                                     <div class="flex flex-wrap gap-2 mt-2">
-                                        <div v-for="(status, seat) in ticket.seats"
+                                        <div v-for="(status, seat, index) in ticket.seats"
                                              :key="seat"
                                              :class="[
-                                                 'w-12 h-12 rounded-lg flex items-center justify-center font-medium border',
+                                                 'h-12 rounded-lg flex items-center justify-center font-medium border',
+                                                 seatLabel(ticket, index) ? 'min-w-12 px-3 text-sm' : 'w-12',
                                                  status ? 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-800' : 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800'
                                              ]">
-                                            @{{ seat }}
+                                            @{{ seatLabel(ticket, index) || seat }}
                                         </div>
                                     </div>
                                 </div>
@@ -283,6 +284,13 @@
                 }
             },
             methods: {
+                // Allocated events send the real seat per slot, in slot order. Everything else
+                // sends nothing here and the slot keeps its ordinal.
+                seatLabel(ticket, index) {
+                    const labels = ticket && ticket.seat_labels;
+
+                    return (Array.isArray(labels) && labels[index]) ? labels[index] : null;
+                },
                 toggleDropdown() {
                     this.dropdownOpen = !this.dropdownOpen;
                 },

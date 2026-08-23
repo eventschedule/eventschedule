@@ -162,6 +162,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * Allocated Seating page
+     */
+    public function allocatedSeating()
+    {
+        return view('marketing.allocated-seating');
+    }
+
+    /**
      * CalDAV page
      */
     public function caldav()
@@ -1183,6 +1191,11 @@ class MarketingController extends Controller
     public function docsGiftCards()
     {
         return view('marketing.docs.gift-cards');
+    }
+
+    public function docsAllocatedSeating()
+    {
+        return view('marketing.docs.allocated-seating');
     }
 
     public function docsAppointments()
@@ -5237,6 +5250,7 @@ class MarketingController extends Controller
             'tickets' => route('marketing.docs.tickets'),
             'subscriptions' => route('marketing.docs.subscriptions'),
             'gift_cards' => route('marketing.docs.gift_cards'),
+            'allocated_seating' => route('marketing.docs.allocated_seating'),
             'appointments' => route('marketing.docs.appointments'),
             'event_graphics' => route('marketing.docs.event_graphics'),
             'analytics' => route('marketing.docs.analytics'),
@@ -5416,6 +5430,15 @@ class MarketingController extends Controller
             ['page' => 'Selling Tickets', 'section' => 'Installment Payments', 'description' => 'Let buyers pay for an expensive ticket over monthly installments.', 'url' => $r['tickets'].'#installments', 'category' => 'User Guide', 'keywords' => 'installment installments monthly payment plan instalment split pay later spread cost deposit'],
             ['page' => 'Selling Tickets', 'section' => 'Promo Codes', 'description' => 'Create discount codes for ticket purchases.', 'url' => $r['tickets'].'#promo-codes', 'category' => 'User Guide', 'keywords' => 'promo discount coupon code'],
             ['page' => 'Selling Tickets', 'section' => 'Add-ons', 'description' => 'Offer optional items customers can add to their ticket purchase, such as parking, merchandise, or meal packages.', 'url' => $r['tickets'].'#add-ons', 'category' => 'User Guide', 'keywords' => 'add-ons optional extras merchandise parking meals'],
+            ['page' => 'Allocated Seating', 'section' => 'What allocated seating is', 'description' => 'Sell the seats themselves rather than a quantity: draw your room once and reuse it across every date.', 'url' => $r['allocated_seating'].'#overview', 'category' => 'User Guide', 'keywords' => 'allocated reserved seating seats seat map assigned numbered auditorium theatre stadium'],
+            ['page' => 'Allocated Seating', 'section' => 'Build the plan', 'description' => 'Levels, sections, rows, tables, standing areas, seat kinds, gangways and wheelchair spaces.', 'url' => $r['allocated_seating'].'#build', 'category' => 'User Guide', 'keywords' => 'seating plan designer rows sections levels tables wheelchair companion accessible aisle gangway layout curve'],
+            ['page' => 'Allocated Seating', 'section' => 'Put it on sale', 'description' => 'Attach a plan to an event and price each band; the plan sets the ticket quantity.', 'url' => $r['allocated_seating'].'#sell', 'category' => 'User Guide', 'keywords' => 'price band ticket type quantity attach seating plan event'],
+            ['page' => 'Allocated Seating', 'section' => 'Change a single date', 'description' => 'Edit one performance without touching the rest of the run, and revert it again.', 'url' => $r['allocated_seating'].'#one-date', 'category' => 'User Guide', 'keywords' => 'modify this date only revert per date occurrence recurring'],
+            ['page' => 'Allocated Seating', 'section' => 'What the buyer sees', 'description' => 'Best available or choose your own seats, the hold countdown, map and list views.', 'url' => $r['allocated_seating'].'#buying', 'category' => 'User Guide', 'keywords' => 'seat picker choose your own best available hold countdown map list'],
+            ['page' => 'Allocated Seating', 'section' => 'Rules that refuse a selection', 'description' => 'The single-seat rule, accessible seating and whole-table bookings.', 'url' => $r['allocated_seating'].'#rules', 'category' => 'User Guide', 'keywords' => 'single seat orphan rule wheelchair companion whole table refused'],
+            ['page' => 'Allocated Seating', 'section' => 'Run the door', 'description' => 'The box office console: hold seats back, book by phone, move or release a single seat.', 'url' => $r['allocated_seating'].'#box-office', 'category' => 'User Guide', 'keywords' => 'box office house seats block reserve exchange release phone booking comp lookup'],
+            ['page' => 'Allocated Seating', 'section' => 'Seating plan report', 'description' => 'Printable seat by seat report of who is sitting where, or a CSV.', 'url' => $r['allocated_seating'].'#report', 'category' => 'User Guide', 'keywords' => 'seating report print front of house csv manifest'],
+            ['page' => 'Allocated Seating', 'section' => 'Every option and limit', 'description' => 'Reference table of every seating option, choice and size limit.', 'url' => $r['allocated_seating'].'#reference', 'category' => 'User Guide', 'keywords' => 'reference options limits seat kinds table booking row labels curve caps'],
             ['page' => 'Selling Tickets', 'section' => 'Managing Sales', 'description' => 'View and manage ticket sale records.', 'url' => $r['tickets'].'#managing-sales', 'category' => 'User Guide', 'keywords' => 'sales orders manage view'],
             ['page' => 'Selling Tickets', 'section' => 'Filtering Sales', 'description' => 'Search and filter sales by buyer name, email, or event name.', 'url' => $r['tickets'].'#filtering-sales', 'category' => 'User Guide', 'keywords' => 'filter search sales buyer name email'],
             ['page' => 'Selling Tickets', 'section' => 'Sale Notifications', 'description' => 'Get notified when tickets are purchased.', 'url' => $r['tickets'].'#sale-notifications', 'category' => 'User Guide', 'keywords' => 'notification alert email'],

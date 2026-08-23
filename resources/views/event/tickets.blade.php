@@ -45,6 +45,46 @@
 @endphp
 
 <x-slot name="head">
+@php
+    // Shared by every seat picker on the page. Built here, NOT inline in the @ json directive: a
+    // multi-line array literal inside a Blade directive does not parse and 500s the view.
+    // Path-relative routes so the fetches stay same-origin on a custom domain.
+    // Only built when the event actually sells allocated seats - an ordinary event should not pay
+    // for three route() calls and twenty translations it will never use.
+    $seatingPickerProps = ! $event->hasAllocatedSeating() ? null : [
+        'eventId' => \App\Utils\UrlUtils::encodeId($event->id),
+        'date' => $date ?? request()->date ?? '',
+        'stateUrl' => route('seating.state', ['subdomain' => $subdomain], false),
+        'holdUrl' => route('seating.hold', ['subdomain' => $subdomain], false),
+        'csrfToken' => csrf_token(),
+        'strings' => [
+            'howMany' => __('messages.seating_how_many'),
+            'chooseOwn' => __('messages.seating_choose_own'),
+            'backToQuantity' => __('messages.seating_back_to_quantity'),
+            'mapView' => __('messages.seating_map_view'),
+            'listView' => __('messages.seating_list_view'),
+            'mapLabel' => __('messages.seating_map_label'),
+            'holdingFor' => __('messages.seating_holding_for'),
+            'moreTime' => __('messages.seating_more_time'),
+            'loading' => __('messages.loading'),
+            'noSeats' => __('messages.seating_no_seats_left'),
+            'soldOut' => __('messages.sold_out'),
+            'yourSeats' => __('messages.seating_your_seats'),
+            'legendAvailable' => __('messages.seating_legend_available'),
+            'legendSelected' => __('messages.seating_legend_selected'),
+            'legendTaken' => __('messages.seating_legend_taken'),
+            'wheelchair' => __('messages.seating_kind_wheelchair'),
+            'maxReached' => __('messages.seating_max_reached'),
+            'wholeTableGone' => __('messages.seating_whole_table_gone'),
+            'fewerSeats' => __('messages.seating_fewer_seats'),
+            'holdFailed' => __('messages.seating_hold_failed'),
+            'loadFailed' => __('messages.seating_load_failed'),
+            'keyboardHint' => __('messages.seating_keyboard_hint'),
+            'rowPattern' => __('messages.seat_row_label'),
+            'seatPattern' => __('messages.seat_number_label'),
+        ],
+    ];
+@endphp
   <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
   @if ($event->country_code_phone)
   <link rel="stylesheet" href="{{ asset('vendor/intl-tel-input/css/intlTelInput.css') }}">
@@ -113,6 +153,7 @@
                          array_sum check). Null = no ceiling. Deriving this from any one
                          ticket's own number is what let a single ticket's max_per_order
                          become the whole event's ceiling. --}}
+                    seatingPicker: @json($seatingPickerProps),
                     sharedSeatsRemaining: @json($event->seatsRemainingForSale($date ?? request()->date)),
                     turnstileEnabled: @json(\App\Utils\TurnstileUtils::isActiveForRequest()),
                     turnstileSiteKey: @json(\App\Utils\TurnstileUtils::getSiteKey()),
@@ -235,6 +276,16 @@
                 }
             },
             mounted() {
+                // The picker owns its own seats but this form owns the running total and the
+                // submit validation, so it reports its selection rather than reaching in here.
+                document.addEventListener('es-seats-changed', (e) => {
+                    const ticket = this.tickets.find(t => t.id === e.detail.ticketId);
+                    if (ticket) {
+                        ticket.selectedQty = e.detail.quantity;
+                        this.onTicketChange();
+                    }
+                });
+
                 if (this.turnstileEnabled && this.turnstileSiteKey) {
                     const renderTurnstile = () => {
                         const checkTurnstile = () => {
@@ -523,6 +574,24 @@
                 // already sum to exactly the house.
                 //
                 // Always returns a finite number: the dropdown iterates over it.
+                /**
+                 * Props for one ticket's seat picker, as a JSON string on the mount element.
+                 *
+                 * The picker is a separately-bundled Vue app: this form runs on the global build
+                 * with the runtime compiler, and an SFC from the bundle belongs to a different Vue
+                 * runtime, so it cannot simply be registered as a child component here.
+                 */
+                pickerProps(ticket) {
+                    return JSON.stringify(Object.assign({
+                        ticket: {
+                            id: ticket.id,
+                            type: ticket.type,
+                            price: ticket.price,
+                            quantity: ticket.quantity,
+                        },
+                    }, this.seatingPicker));
+                },
+
                 getAvailableQuantity(ticket) {
                     // Passes and add-ons draw on their own pool, never the house, exactly as
                     // TicketController::assertLegTicketsAvailable() has it.
@@ -996,6 +1065,9 @@
 </script>
 </x-slot>
 
+@if ($event->hasAllocatedSeating())
+    @vite('resources/js/seating-picker.js')
+@endif
 <div id="ticket-selector">
     <form action="{{ route('event.checkout', ['subdomain' => $subdomain]) }}" method="post" v-on:submit="validateForm"
         @if (request()->embed && payment_gateways()->redirectsOffsite($event->payment_method)) target="_top" @endif>
@@ -1337,6 +1409,7 @@
                     <p v-if="ticket.sales_ended" class="text-lg font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sales_ended') }}</p>
                     <p v-else-if="ticket.sales_not_started" class="text-lg font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sales_not_started') }}</p>
                     <p v-else-if="getAvailableQuantity(ticket) === 0" class="text-lg font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sold_out') }}</p>
+                    <div v-else-if="ticket.is_allocated" class="seating-picker-mount" :data-props="pickerProps(ticket)"></div>
                     <p v-else>
                     <select
                         v-model="ticket.selectedQty"

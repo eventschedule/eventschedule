@@ -131,7 +131,7 @@ return [
             'title' => 'Sell',
             'blurb' => 'Take money for tickets, passes and bookings.',
             'accent' => 'cyan',
-            'cols' => 4,
+            'cols' => 5,
         ],
         'promote' => [
             'title' => 'Promote',
@@ -252,6 +252,18 @@ return [
             'icon' => 'pass',
             'published' => '2026-06-11',
             'modified' => '2026-06-11',
+        ],
+
+        'allocated-seating' => [
+            'group' => 'user-guide',
+            'cluster' => 'sell',
+            'route' => 'marketing.docs.allocated_seating',
+            'path' => '/docs/allocated-seating',
+            'title' => 'Allocated Seating',
+            'blurb' => 'Sell reserved seats from a plan of your venue.',
+            'icon' => 'ticket',
+            'published' => '2026-08-23',
+            'modified' => '2026-08-23',
         ],
 
         'gift-cards' => [

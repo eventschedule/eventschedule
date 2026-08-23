@@ -23,6 +23,10 @@ class Ticket extends Model
         'type',
         'quantity',
         'max_per_order',
+        // Without this, EventRepo's Ticket::create()/update() silently DROP the band - mass
+        // assignment ignores anything unlisted, so the column stayed null and every allocated
+        // ticket quietly fell back to the quantity path.
+        'seating_band',
         'sold',
         'price',
         'description',
@@ -117,6 +121,7 @@ class Ticket extends Model
         return [
             'type' => $this->type,
             'quantity' => $this->quantity,
+            'seating_band' => $this->seating_band,
             'price' => $this->price,
             'description' => $this->description,
             'custom_fields' => $this->custom_fields,
@@ -136,6 +141,29 @@ class Ticket extends Model
                 'events' => collect($this->pass_event_ids ?? [])->map(fn ($id) => UrlUtils::encodeId($id))->values()->all(),
             ],
         ];
+    }
+
+    /**
+     * Whether this ticket sells specific seats rather than a quantity.
+     *
+     * Both halves are required: a band with no plan attached to the event has nothing to resolve
+     * against, and a plan with no band on this ticket means the ticket is general admission or
+     * standing. Passes and add-ons draw on their own pool and are never seat-allocated.
+     */
+    public function isAllocated(?string $date = null): bool
+    {
+        if ($this->is_pass || $this->is_addon || empty($this->seating_band)) {
+            return false;
+        }
+
+        $event = $this->event;
+        if (! $event || ! $event->seating_plan_id) {
+            return false;
+        }
+
+        // Standing bands are excluded: they carry a band and a ticket so the map can price them,
+        // but they hold no seat rows, so they keep the quantity path.
+        return in_array($this->seating_band, $event->seatedBands($date), true);
     }
 
     public function isSalesNotStarted()
@@ -372,6 +400,9 @@ class Ticket extends Model
                 : null;
         }
         $data['quantity'] = $this->quantity;
+        $data['seating_band'] = $this->seating_band ?: null;
+        // The guest form swaps the quantity dropdown for the seat picker on this flag.
+        $data['is_allocated'] = $this->isAllocated($date);
         $data['max_per_order'] = $this->max_per_order ?: null;
         $data['price'] = $this->price;
         $data['description'] = $this->description ? UrlUtils::convertUrlsToLinks($this->description_html ?? $this->description) : null;
@@ -397,6 +428,13 @@ class Ticket extends Model
         // tighter than the per-ticket limit (so behavior is unchanged there).
         if ($this->is_pass || $this->is_addon || ! $this->event) {
             $data['quantity'] = $this->quantity > 0 ? max(0, min($perOrderCap, $this->quantity - $sold)) : $perOrderCap;
+        } elseif ($this->isAllocated($date)) {
+            // An allocated ticket's inventory is rows in the seat map, not quantity minus sold, so
+            // the JSON sold-count map does not enter into it - a seat that was refunded is back in
+            // the map the moment its status flips, with no counter to keep in step. The number is
+            // still clamped to the per-order cap because it drives the picker's selectable maximum.
+            $available = $this->event->allocatedSeatsRemaining($date, $this);
+            $data['quantity'] = $available === null ? $perOrderCap : max(0, min($perOrderCap, $available));
         } else {
             $houseRemaining = $this->event->occurrenceSeatsRemaining($date);
             $ownRemaining = $this->quantity > 0 ? max(0, $this->quantity - $sold) : null;

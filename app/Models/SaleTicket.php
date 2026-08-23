@@ -59,6 +59,32 @@ class SaleTicket extends Model
         });
     }
 
+    /**
+     * The physical seats this line holds, as human references.
+     *
+     * NOTE the near-miss: the `seats` COLUMN on this table is a JSON map of admission slot to
+     * check-in timestamp and carries no location. Seat location only ever lives on
+     * seating_seats.sale_ticket_id, which is what this reads.
+     *
+     * Empty for every quantity-based ticket, so the render sites can call it unconditionally.
+     */
+    public function seatLabels(): array
+    {
+        return \App\Models\SeatingSeat::with(['section', 'seatingTable'])
+            ->where('sale_ticket_id', $this->id)
+            ->orderBy('row_position')->orderBy('position')
+            ->get()
+            ->map(fn ($seat) => $seat->fullLabel())
+            ->filter()
+            ->values()
+            ->all();
+    }
+
+    public function seatingSeats()
+    {
+        return $this->hasMany(SeatingSeat::class);
+    }
+
     public function sale()
     {
         return $this->belongsTo(Sale::class);

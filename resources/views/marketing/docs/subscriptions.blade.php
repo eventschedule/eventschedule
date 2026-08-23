@@ -238,6 +238,12 @@
             <li><strong class="text-gray-900 dark:text-white">Holders book from their pass page</strong> - the private link in their confirmation email lists upcoming dates with the seats left on each; they book or cancel a date themselves, and each booking spends one visit up front, until they hit their limit.</li>
             <li><strong class="text-gray-900 dark:text-white">Booked or attended</strong> - the Subscriptions tab shows which dates a holder has reserved versus actually attended, and the check-in dashboard shows how many seats are reserved for the date.</li>
         </ul>
+
+        <div class="doc-callout doc-callout-info mb-6">
+            <div class="doc-callout-title">On an event with <a href="{{ route('marketing.docs.allocated_seating') }}" class="doc-link">allocated seating</a></div>
+            <p>Booking ahead gives the holder an actual seat, chosen for them as the best available - they get no seat picker, and the seat is shown beside the date on their pass page. Cancelling gives that exact seat back.</p>
+            <p>The pool is per <strong>price band</strong> rather than one room-wide number, and a pass may take a seat in any band: there is no way to restrict a pass to one part of the house.</p>
+        </div>
         <p class="text-gray-600 dark:text-gray-300 mb-6">The list of bookable dates covers up to a year ahead (at most 60 dates per covered event) and stops at the pass's expiry, so every date offered is a date the pass can still be redeemed on. On a festival pass, booking a date spends that event's single visit, so its other dates drop off the list.</p>
 
         <h3 id="cancellation-policy" class="doc-subheading">Cancellation policy</h3>

@@ -83,6 +83,7 @@ class Event extends Model
         'ticket_notes',
         'terms_url',
         'total_tickets_mode',
+        'seating_plan_id',
         'payment_method',
         'payment_instructions',
         'expire_unpaid_tickets',
@@ -161,6 +162,19 @@ class Event extends Model
     /** Per-request memo of pass advance-booking seats reserved, keyed by occurrence date. */
     protected $passReservedSeatsCache = [];
 
+    /** Per-request memo for seatingMapFor(). */
+    protected $seatingMapCache = [];
+
+    /** Per-request memo for seatedBands(). Null means "not looked up yet". */
+    protected $seatedBandsCache = null;
+
+    /** Per-request memo for the snapshot-backed answer, keyed by map. */
+    protected $seatedBandsByMap = [];
+
+    /** Per-request memo for seatingPlanModel(). False means "not looked up yet" - null is a
+     * legitimate result (no plan, or a deleted one). */
+    protected $seatingPlanCache = false;
+
     /**
      * Columns whose change makes a federated listing stale, either because the listing
      * displays them, because they change its URL, or because they change whether it
@@ -231,6 +245,16 @@ class Event extends Model
                 // the UTC one - they differ for any evening event west of UTC.
                 $newDate = $model->saleEventDateFromStartsAt();
 
+                // The seat map is keyed on that same date, so it has to move too. This lives HERE
+                // rather than only in EventRepo because inbound Google, Microsoft and CalDAV sync
+                // all write starts_at straight onto the model - so the sales below followed the
+                // event to the new night while the map stayed on the old one, materialize() built
+                // a fresh all-available map, and the buyer's ticket still named a seat that was
+                // back on sale. Two people, one seat.
+                $oldSeatingDate = $model->seating_plan_id
+                    ? $model->saleEventDateFor($model->getOriginal('starts_at'))
+                    : null;
+
                 if ($newDate) {
                     DB::transaction(function () use ($model, $newDate) {
                         $allTickets = $model->tickets->merge($model->addons);
@@ -257,6 +281,11 @@ class Event extends Model
                             $sale->save();
                         });
                     });
+
+                    if ($oldSeatingDate && $oldSeatingDate !== $newDate) {
+                        app(\App\Services\SeatingMapService::class)
+                            ->rekeyOccurrence($model, $oldSeatingDate, $newDate);
+                    }
                 }
             }
 
@@ -485,6 +514,127 @@ class Event extends Model
     public function addons()
     {
         return $this->hasMany(Ticket::class)->where('is_deleted', false)->where('is_addon', true)->orderBy('price', 'desc');
+    }
+
+    public function seatingPlan()
+    {
+        return $this->belongsTo(SeatingPlan::class);
+    }
+
+    public function seatingMaps()
+    {
+        return $this->hasMany(EventSeatingMap::class);
+    }
+
+    /**
+     * Whether this event sells from a seat map at all. A NULL seating_plan_id IS the
+     * flag - there is no separate boolean that could disagree with it.
+     */
+    public function hasAllocatedSeating(): bool
+    {
+        return ! empty($this->seating_plan_id);
+    }
+
+    /**
+     * This occurrence's seat map, memoized for the request.
+     *
+     * Ticket::toData() asks per ticket, so an event with six bands would otherwise re-query the
+     * map six times per page. Mirrors the passReservedSeatsCache pattern below.
+     */
+    public function seatingMapFor(?string $date)
+    {
+        if (! $this->hasAllocatedSeating()) {
+            return null;
+        }
+
+        $key = (string) $date;
+        if (! array_key_exists($key, $this->seatingMapCache)) {
+            $this->seatingMapCache[$key] = app(\App\Services\SeatingMapService::class)->mapFor($this, $date);
+        }
+
+        return $this->seatingMapCache[$key];
+    }
+
+    /**
+     * The plan's bands that actually hold seats.
+     *
+     * A STANDING section has a band and a ticket like any other - so the map can label and price
+     * it - but no seat rows, so its ticket must keep the ordinary quantity path. Without this a
+     * standing ticket would be treated as seat-allocated and report zero seats available, i.e.
+     * permanently sold out. One query per event, memoized, because toData() asks per ticket.
+     *
+     * @return string[]
+     */
+    public function seatedBands(?string $date = null): array
+    {
+        // Answer from the SNAPSHOT when this occurrence has one. The snapshot is deliberately
+        // frozen against later template edits, so reading the template here made a ticket stop
+        // being "allocated" the moment somebody renamed a band on the plan - which silently
+        // skipped the checkout balance check and sold seats that were never claimed.
+        if ($date !== null && ($map = $this->seatingMapFor($date))) {
+            $key = 'map:'.$map->id;
+
+            if (! array_key_exists($key, $this->seatedBandsByMap)) {
+                $this->seatedBandsByMap[$key] = \App\Models\SeatingSection::where('event_seating_map_id', $map->id)
+                    ->where('is_deleted', false)
+                    ->where('kind', '!=', 'standing')
+                    ->whereNotNull('band')
+                    ->whereHas('seats')
+                    ->pluck('band')->unique()->values()->all();
+            }
+
+            return $this->seatedBandsByMap[$key];
+        }
+
+        if ($this->seatedBandsCache === null) {
+            $plan = $this->seating_plan_id
+                ? \App\Models\SeatingPlan::with('sections')->find($this->seating_plan_id)
+                : null;
+
+            // whereHas('seats') matters: a section drawn but not yet given rows would otherwise
+            // make its ticket "allocated" while the map holds nothing, and the picker would offer
+            // the per-order cap for a band with no seats at all.
+            $this->seatedBandsCache = $plan
+                ? \App\Models\SeatingSection::where('seating_plan_id', $plan->id)
+                    ->where('is_deleted', false)
+                    ->where('kind', '!=', 'standing')
+                    ->whereNotNull('band')
+                    ->whereHas('seats')
+                    ->pluck('band')->unique()->values()->all()
+                : [];
+        }
+
+        return $this->seatedBandsCache;
+    }
+
+    /** The attached plan, loaded at most once per request. */
+    public function seatingPlanModel()
+    {
+        if ($this->seatingPlanCache === false) {
+            $this->seatingPlanCache = $this->seating_plan_id
+                ? \App\Models\SeatingPlan::where('is_deleted', false)->find($this->seating_plan_id)
+                : null;
+        }
+
+        return $this->seatingPlanCache;
+    }
+
+    /** Seats still sellable for one allocated ticket at this occurrence. */
+    public function allocatedSeatsRemaining(?string $date, Ticket $ticket): ?int
+    {
+        $map = $this->seatingMapFor($date);
+
+        // Not snapshotted yet, so nobody can have bought a seat and the template's own count is
+        // exact. Read it from the PLAN rather than from tickets.quantity: EventRepo skips the
+        // derivation when it computes to zero, so a band removed from the plan keeps whatever
+        // quantity was posted and this would report seats that do not exist.
+        if (! $map) {
+            $plan = $this->seatingPlanModel();
+
+            return $plan ? $plan->seatCountForBand($ticket->seating_band) : 0;
+        }
+
+        return app(\App\Services\SeatingMapService::class)->availableSeatCount($map, $ticket->id);
     }
 
     public function promoCodes()
@@ -1275,7 +1425,7 @@ class Event extends Model
      * Deliberately untyped: guest views pass request input straight in, and ?date[]=x makes that
      * an array, which is a TypeError for both a string type hint and preg_match().
      */
-    protected static function isOccurrenceDate($date): bool
+    public static function isOccurrenceDate($date): bool
     {
         if (! is_string($date) || ! preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $date, $m)) {
             return false;
@@ -1545,6 +1695,34 @@ class Event extends Model
         }
 
         return max(0, $count);
+    }
+
+    /**
+     * Why a guest may not buy or see this event on $role's schedule, or null if they may.
+     *
+     * Extracted so the seat-map endpoints cannot drift from checkout: they used to guard only
+     * is_draft, which left an unlisted password-protected event's entire seating plan readable
+     * anonymously. Returns a reason rather than a bool so checkout can keep telling 403
+     * (not on this schedule) apart from 404 (hidden).
+     *
+     * @return null|'not_on_schedule'|'hidden'
+     */
+    public function guestVisibilityFailure(Role $role, bool $isMemberOrAdmin): ?string
+    {
+        if (! $this->roles()->wherePivot('role_id', $role->id)->exists()) {
+            return 'not_on_schedule';
+        }
+
+        if ($this->is_draft && ! $isMemberOrAdmin) {
+            return 'hidden';
+        }
+
+        if ($this->is_private && ! $isMemberOrAdmin
+            && ! ($this->isPasswordProtected() && session()->has('event_password_'.$this->id))) {
+            return 'hidden';
+        }
+
+        return null;
     }
 
     public function canSellTickets($date = null)
@@ -2658,6 +2836,9 @@ class Event extends Model
 
         // Tickets
         $data->tickets_enabled = (bool) $this->tickets_enabled;
+        // Encoded like every other user-visible id. Present but null on a general-admission event
+        // so a subscriber can branch on it without special-casing a missing key.
+        $data->seating_plan_id = $this->seating_plan_id ? UrlUtils::encodeId($this->seating_plan_id) : null;
         if ($this->tickets_enabled && $this->relationLoaded('tickets')) {
             $data->tickets = $this->tickets->map(function ($ticket) {
                 $row = [
@@ -2671,6 +2852,14 @@ class Event extends Model
                     'volume_discount' => TicketVolumeDiscount::toGuestPayload($ticket->volume_discount),
                     'is_pass' => (bool) $ticket->is_pass,
                 ];
+
+                // Allocated bands. `quantity` above is a derived mirror of the seat count, so a
+                // subscriber reading it alone cannot tell an 80-seat band from an 80-cap standing
+                // one, nor that the seats must be picked rather than counted.
+                if ($ticket->seating_band) {
+                    $row['seating_band'] = $ticket->seating_band;
+                    $row['is_allocated'] = $ticket->isAllocated();
+                }
 
                 if ($ticket->is_pass) {
                     $row['pass_usage_type'] = $ticket->pass_usage_type;
@@ -2763,6 +2952,15 @@ class Event extends Model
 
     public function allTicketsSoldOut($date)
     {
+        // Allocated events need their own answer. occurrenceSeatsRemaining() returns null for
+        // them on purpose (each band owns its seats, so there is no single house number), and null
+        // reads as "unlimited, never sold out" - which would leave a completely full house showing
+        // as available, and would keep guests off the waitlist forever, since WaitlistController
+        // only opens it once this returns true.
+        if ($this->hasAllocatedSeating()) {
+            return $this->allocatedSoldOut($date);
+        }
+
         // Sold out when the shared per-occurrence house (after both regular sales and
         // pass advance-bookings) has no seats left. Null = unlimited => never sold out.
         // Equivalent to the old per-ticket "every sold out" check when nothing is
@@ -2770,6 +2968,46 @@ class Event extends Model
         $remaining = $this->occurrenceSeatsRemaining($date);
 
         return $remaining !== null && $remaining <= 0;
+    }
+
+    /**
+     * Every sellable ticket on an allocated event is exhausted.
+     *
+     * Allocated bands are measured against the seat map; standing and general-admission tickets on
+     * the same event keep the quantity path they have always used, so both have to agree before the
+     * event counts as full.
+     */
+    protected function allocatedSoldOut(?string $date): bool
+    {
+        $tickets = $this->seatTickets();
+
+        if ($tickets->isEmpty()) {
+            return false;
+        }
+
+        foreach ($tickets as $ticket) {
+            // Share this instance so isAllocated() and the map lookup memoize once, not per ticket.
+            $ticket->setRelation('event', $this);
+
+            if ($ticket->isAllocated($date)) {
+                if ((int) $this->allocatedSeatsRemaining($date, $ticket) > 0) {
+                    return false;
+                }
+
+                continue;
+            }
+
+            // Unlimited quantity is never sold out.
+            if ($ticket->quantity <= 0) {
+                return false;
+            }
+
+            if (($ticket->quantity - $ticket->soldCountFor($date)) > 0) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -2797,6 +3035,14 @@ class Event extends Model
      */
     public function hasSameTicketQuantities()
     {
+        // Combined mode is meaningless on an allocated event, and actively harmful: quantities are
+        // DERIVED from the plan, so two equal-sized sections make this true by accident, and the
+        // checkout guard then caps the whole house at one band's size. A 100+100 house stopped
+        // selling at 100 while a hundred seats sat empty and the picker went on offering them.
+        if ($this->hasAllocatedSeating()) {
+            return false;
+        }
+
         $tickets = $this->seatTickets();
         if ($tickets->count() <= 1) {
             return false;
@@ -2843,6 +3089,15 @@ class Event extends Model
     public function occurrenceSeatsRemaining(?string $date): ?int
     {
         if (! $date) {
+            return null;
+        }
+
+        // Allocated seating has no shared house: every band owns its own seats, and a standing
+        // section keeps the ordinary quantity path. Bounding the order by one pooled number would
+        // be wrong in both directions - it would cap a 400-seat stalls order at the smallest band,
+        // and it would let a band oversell as long as the total still fit. The real bound is
+        // per-ticket, via allocatedSeatsRemaining(), enforced seat by seat at checkout.
+        if ($this->hasAllocatedSeating()) {
             return null;
         }
 
@@ -3218,19 +3473,29 @@ class Event extends Model
      */
     public function saleEventDateFromStartsAt(): ?string
     {
-        if (! $this->starts_at) {
+        return $this->saleEventDateFor($this->starts_at);
+    }
+
+    /**
+     * The same derivation for an ARBITRARY starts_at, so a caller can work out the occurrence key
+     * an event used to have. Moving a one-time event otherwise strands its seat map on the old
+     * date, where nothing will ever look for it again.
+     */
+    public function saleEventDateFor($startsAt): ?string
+    {
+        if (! $startsAt) {
             return null;
         }
 
         // Date-only starts_at already represents the calendar date in the schedule's view.
-        if (strlen($this->starts_at) === 10) {
-            return $this->starts_at;
+        if (strlen($startsAt) === 10) {
+            return (string) $startsAt;
         }
 
         $this->loadMissing('creatorRole');
         $tz = $this->creatorRole?->timezone ?? config('app.timezone');
 
-        return Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')->timezone($tz)->format('Y-m-d');
+        return Carbon::createFromFormat('Y-m-d H:i:s', (string) $startsAt, 'UTC')->timezone($tz)->format('Y-m-d');
     }
 
     /**

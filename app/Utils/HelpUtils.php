@@ -138,6 +138,12 @@ class HelpUtils
         '{subdomain}/appointments' => '/docs/appointments',
         '{subdomain}/templates' => '/docs/managing-schedules#templates',
         '{subdomain}/availability' => '/docs/managing-schedules#availability',
+        // The seating tab, the designer and the box office console. No ticket-tab-* entry to go
+        // with these: the plan picker lives on the Tickets tab itself, which already maps to
+        // #ticketing, and there is no seating tab in that strip to key on.
+        '{subdomain}/seating' => '/docs/allocated-seating#build',
+        '{subdomain}/seating/*/design' => '/docs/allocated-seating#build',
+        '{subdomain}/seating/box-office/*' => '/docs/allocated-seating#box-office',
         '{subdomain}/requests' => '/docs/managing-schedules#requests',
         '{subdomain}/followers' => '/docs/managing-schedules#followers',
         '{subdomain}/team' => '/docs/managing-schedules#team',

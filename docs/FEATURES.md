@@ -122,6 +122,7 @@ Gated by `$role->isEnterprise()`.
 | Save parsed event parts | `EventController:1654`, `$role->isEnterprise()` | Save AI-parsed event data |
 | AI text processing on graphics | `GraphicController:298`, `$role->isEnterprise()` | AI prompt for graphic text via Gemini |
 | Email scheduling (graphic emails) | `GraphicController:142`, `$role->isEnterprise()` | Schedule automated graphic emails |
+| Allocated (reserved) seating | `SeatingPlanController`, `BoxOfficeController`, `EventRepo::saveEvent()`, `$role->isEnterprise()` | Reusable drag-and-drop seating plans (levels, sections, rows, tables, standing areas, wheelchair spaces), a guest seat picker, per-date edits, the box office console (hold back, phone booking, move, release) and the printable seating plan report. A plan already attached to an event survives the schedule lapsing; only attaching a NEW one is gated |
 | Custom domains | `RoleController`, `$role->isEnterprise()` | Use your own domain for schedule |
 | Internal & unlisted events | `EventRepo`, `$role->isEnterprise()` | Internal (members-only, never public) and Unlisted (hidden from the schedule but reachable by direct link, with an optional password) visibility options |
 | Multiple team members | `RoleController:1210,1229`, `$role->isEnterprise()` | Add/manage multiple team members |

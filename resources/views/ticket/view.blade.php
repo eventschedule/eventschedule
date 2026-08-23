@@ -418,6 +418,10 @@
                   @if ($saleTicket->ticket->is_pass)
                   <span class="ms-1 inline-block px-[8px] py-[2px] rounded-full bg-blue-500/20 print:bg-blue-100 text-blue-300 print:text-blue-700 text-[11px] font-semibold">{{ __('messages.season_pass') }} &middot; {{ __('messages.pass_valid_all_dates') }}</span>
                   @endif
+                  @php $seatLabels = $saleTicket->seatLabels(); @endphp
+                  @if (count($seatLabels))
+                  <span class="block text-[12px] text-white/70 print-text-gray mt-[2px]">{{ implode(' &middot; ', $seatLabels) }}</span>
+                  @endif
                 </span>
                 <span class="px-[12px] py-[4px] rounded-full bg-violet-500/20 print:bg-violet-100 text-violet-300 print:text-violet-700 text-[12px] font-semibold">
                   x{{ $saleTicket->quantity }}
@@ -536,6 +540,9 @@
                             <span class="text-[13px] text-white">{{ $b['date_label'] ?: $b['date'] }}@if ($b['event_name'] !== $event->name) <span class="text-white/50">&middot; {{ $b['event_name'] }}</span>@endif
                                 {{-- Not while the deadline itself has passed (undo grace): a past
                                      instant must not be presented as a live cutoff. --}}
+                                @if (! empty($b['seat_label']))
+                                <span class="block text-[11px] text-white/60">{{ $b['seat_label'] }}</span>
+                                @endif
                                 @if (! empty($b['cancel_deadline_label']) && ! $pastCutoff && empty($b['deadline_past']))
                                 <span class="block text-[11px] text-white/40">{{ __('messages.pass_cancel_deadline_note', ['deadline' => $b['cancel_deadline_label']]) }}</span>
                                 @endif

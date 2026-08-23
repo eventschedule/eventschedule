@@ -39,6 +39,10 @@
             @foreach ($regularTickets as $saleTicket)
                 <p style="margin: 10px 0;">
                     <strong>{{ $saleTicket->ticket->type ?: __('messages.ticket') }}</strong>
+                    @php $seatLabels = $saleTicket->seatLabels(); @endphp
+                    @if (count($seatLabels))
+                    <br><span style="color: #6b7280; font-size: 13px;">{{ implode(' &middot; ', $seatLabels) }}</span>
+                    @endif
                     x {{ $saleTicket->quantity }}
                     @if ($saleTicket->ticket->is_pass)
                     <br><span style="display: inline-block; margin-top: 4px; font-size: 12px; color: #4E81FA;">@if ($saleTicket->ticket->pass_usage_type === 'per_occurrence'){{ __('messages.season_pass') }} &middot; {{ __('messages.pass_valid_all_dates') }}@else{{ __('messages.subscription') }}@if ($saleTicket->ticket->pass_usage_type === 'total' && $saleTicket->ticket->pass_max_uses) &middot; {{ $saleTicket->ticket->pass_max_uses }} {{ __('messages.visits') }}@elseif ($saleTicket->ticket->pass_usage_type === 'unlimited') &middot; {{ __('messages.pass_unlimited_visits') }}@endif @endif</span>

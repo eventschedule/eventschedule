@@ -568,8 +568,8 @@
         // listed strengths would not be a colophon.
         $errata = [
             [
-                'There is no seat map.',
-                'A ticket type carries a name, a price, a quantity and a sales window. Buyers are not choosing a specific seat, and there is no seating chart to draw.',
+                'Seat maps are Enterprise only.',
+                'On every other plan a ticket type carries a name, a price, a quantity and a sales window, and buyers are not choosing a specific seat. Drawing a room and selling the seats in it is the one part of ticketing that sits behind the top plan.',
             ],
             [
                 'Followers are not emailed automatically.',

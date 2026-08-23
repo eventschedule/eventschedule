@@ -319,6 +319,13 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
 @include('partials.sitemap-hreflang', ['url' => url('/features/gift-cards')])
     </url>
     <url>
+        <loc>{{ url('/features/allocated-seating') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/allocated-seating')])
+    </url>
+    <url>
         <loc>{{ url('/features/calendar-sync') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
@@ -842,6 +849,13 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
 @include('partials.sitemap-hreflang', ['url' => url('/docs/gift-cards')])
+    </url>
+    <url>
+        <loc>{{ url('/docs/allocated-seating') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/allocated-seating')])
     </url>
     <url>
         <loc>{{ url('/docs/appointments') }}</loc>

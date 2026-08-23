@@ -20,6 +20,7 @@
         <x-doc-nav-link href="#installments">Installment Payments</x-doc-nav-link>
         <x-doc-nav-link href="#promo-codes">Promo Codes</x-doc-nav-link>
         <x-doc-nav-link href="#add-ons">Add-ons</x-doc-nav-link>
+        <x-doc-nav-link href="#allocated-seating">Allocated Seating</x-doc-nav-link>
         <x-doc-nav-group label="Managing Sales" href="#managing-sales">
             <x-doc-nav-link href="#sale-notifications">Sale Notifications</x-doc-nav-link>
             <x-doc-nav-link href="#export">Exporting Sales Data</x-doc-nav-link>
@@ -336,8 +337,8 @@
         </div>
 
         <div class="doc-callout doc-callout-info mb-6">
-            <div class="doc-callout-title">No seat maps, and no name-your-price</div>
-            <p>Event Schedule sells by quantity, not by seat: there is no seating chart, no assigned seat and no per-section inventory. There is also no pay-what-you-wish pricing - every ticket type has one fixed price, and a blank price simply means free.</p>
+            <div class="doc-callout-title">Sold by quantity, and no name-your-price</div>
+            <p>A ticket type sells by the number, not by the seat: the buyer takes three, not seats 12, 13 and 14. To sell the seats themselves, see <a href="#allocated-seating" class="doc-link">Allocated Seating</a>. There is also no pay-what-you-wish pricing - every ticket type has one fixed price, and a blank price simply means free.</p>
         </div>
 
         <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Ticket Settings</h4>
@@ -861,6 +862,13 @@
     </section>
 
     <!-- Managing Sales -->
+    <!-- Allocated Seating - now its own page; the anchor stays alive for existing links -->
+    <section id="allocated-seating" class="doc-section">
+        <h2 class="doc-heading">Allocated Seating <x-doc-badge plan="enterprise" /></h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Everything above sells by the number. If your venue has rows, you can sell the seats themselves instead: draw the room once as a seating plan, attach it to an event, and buyers pick where they sit. Your box office gets the same map to hold seats back, take a booking over the phone, move somebody or release a single seat.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">It has a guide of its own: <a href="{{ route('marketing.docs.allocated_seating') }}" class="doc-link">Allocated Seating</a>.</p>
+    </section>
+
     <section id="managing-sales" class="doc-section">
         <h2 class="doc-heading">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
@@ -955,6 +963,7 @@
                 <li>Transaction reference, payment method and status</li>
                 <li>Check-in status and check-in time</li>
                 <li>Pass type, visits used and expiry, for <a href="{{ route('marketing.docs.subscriptions') }}" class="doc-link">pass</a> sales</li>
+                <li>Seats, for <a href="{{ route('marketing.docs.allocated_seating') }}" class="doc-link">allocated seating</a> sales</li>
                 <li>Custom checkout field responses (event-level and ticket-level), one column per field</li>
             </ul>
         </div>
@@ -1042,7 +1051,7 @@
             <li><strong class="text-gray-900 dark:text-white">Per-ticket-type breakdown</strong> showing check-in counts for each ticket type</li>
             <li><strong class="text-gray-900 dark:text-white">Guest headcount</strong> - when a <a href="{{ route('marketing.docs.subscriptions') }}#admissions-per-event" class="doc-link">pass admits guests</a>, a headcount including guests is shown next to the check-in count</li>
             <li><strong class="text-gray-900 dark:text-white">Reserved pass seats</strong> for the occurrence, so door staff know how many pass holders are still expected</li>
-            <li><strong class="text-gray-900 dark:text-white">Recent activity feed</strong> showing the last 10 check-ins with attendee names and times</li>
+            <li><strong class="text-gray-900 dark:text-white">Recent activity feed</strong> showing the last 10 check-ins with attendee names and times, and their seat on an <a href="{{ route('marketing.docs.allocated_seating') }}" class="doc-link">allocated</a> event</li>
             <li><strong class="text-gray-900 dark:text-white">Filter by event and event date</strong> to view specific event dates</li>
         </ul>
 

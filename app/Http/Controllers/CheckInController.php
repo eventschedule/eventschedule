@@ -125,13 +125,29 @@ class CheckInController extends Controller
         $admittedCounts = [];
         $recentCheckins = [];
 
+        // On an allocated event the door wants the seat, not the slot ordinal. One batched read
+        // rather than seatLabels() per line: this endpoint is polled.
+        $seatLabels = [];
+        if ($event->hasAllocatedSeating()) {
+            $seatLabels = \App\Models\SeatingSeat::with(['section', 'seatingTable'])
+                ->whereIn('sale_ticket_id', $saleTickets->pluck('id'))
+                ->orderBy('row_position')->orderBy('position')
+                ->get()
+                ->groupBy('sale_ticket_id')
+                ->map(fn ($group) => $group->map(fn ($seat) => $seat->fullLabel())->values()->all())
+                ->all();
+        }
+
         foreach ($saleTickets as $saleTicket) {
             $seats = $saleTicket->seats ? json_decode($saleTicket->seats, true) : [];
             if (! is_array($seats)) {
                 $seats = [];
             }
+            $labels = $seatLabels[$saleTicket->id] ?? [];
+            $slot = -1;
 
             foreach ($seats as $seatNum => $timestamp) {
+                $slot++;
                 if ($timestamp !== null) {
                     $ticketId = $saleTicket->ticket_id;
                     $checkedInCounts[$ticketId] = ($checkedInCounts[$ticketId] ?? 0) + 1;
@@ -140,6 +156,7 @@ class CheckInController extends Controller
                     $recentCheckins[] = [
                         'name' => $saleTicket->sale->name,
                         'ticket_type' => $saleTicket->ticket->type,
+                        'seat_label' => $labels[$slot] ?? null,
                         'timestamp' => (int) $timestamp,
                     ];
                 }

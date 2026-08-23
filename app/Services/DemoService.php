@@ -10,6 +10,10 @@ use App\Models\Group;
 use App\Models\Role;
 use App\Models\Sale;
 use App\Models\SaleTicket;
+use App\Models\SeatingLevel;
+use App\Models\SeatingPlan;
+use App\Models\SeatingSeat;
+use App\Models\SeatingSection;
 use App\Models\Ticket;
 use App\Models\User;
 use Carbon\Carbon;
@@ -207,8 +211,13 @@ From Duff-fueled nights at Moe\'s to cultural enlightenment at the Aztec Theater
             $venueGroups[$subdomain] = $this->createGroups($venue);
         }
 
+        // The Aztec is the one venue with rows, so it is the one that gets a seating plan.
+        $seatingPlan = isset($venues['demo-aztectheater'])
+            ? $this->createDemoSeatingPlan($venues['demo-aztectheater'])
+            : null;
+
         // Create events with tickets (attached to venues AND curator)
-        $this->createEvents($role, $user, $venues, $venueGroups, $curatorGroups);
+        $this->createEvents($role, $user, $venues, $venueGroups, $curatorGroups, $seatingPlan);
 
         // Create followed schedules for the demo user (external schedules)
         $this->createFollowedSchedules($user);
@@ -1022,7 +1031,7 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
      * Create demo events with tickets and sales
      * Events are attached to their venue AND to the curator
      */
-    protected function createEvents(Role $curator, User $user, array $venues, array $venueGroups, array $curatorGroups): void
+    protected function createEvents(Role $curator, User $user, array $venues, array $venueGroups, array $curatorGroups, ?SeatingPlan $seatingPlan = null): void
     {
         $events = $this->getEventTemplates();
         // Use fixed start date of January 1, 2026 for demo data
@@ -1072,6 +1081,9 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             $event->ticket_currency_code = 'USD';
             $event->flyer_image_url = $eventData['image'] ?? null;
             $event->category_id = $eventData['category_id'] ?? null;
+            if (! empty($eventData['allocated_seating']) && $seatingPlan) {
+                $event->seating_plan_id = $seatingPlan->id;
+            }
 
             // Set recurring fields for recurring events
             if ($isRecurring) {
@@ -1113,12 +1125,151 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             if ($isRecurring) {
                 $this->createSalesForEvent($event, $venue);
             }
+
+            // A seated demo event with an untouched map reads as a product nobody uses. Put a few seats
+
+            // in each state so the box office console and the printable report show what they are for.
+
+            if (! empty($eventData['allocated_seating']) && $seatingPlan) {
+
+                $this->seedDemoSeatOccupancy($event);
+
+            }
         }
     }
 
     /**
      * Create tickets for an event
      */
+    /**
+     * The Aztec's auditorium: an allocated seating plan the demo can actually be clicked around.
+     *
+     * Small enough to render in one screen, real enough to exercise every rule the picker enforces:
+     * a centre gangway (so a run cannot span it), a raised circle on its own level, and a pair of
+     * wheelchair spaces in an accessibility-only section.
+     */
+    protected function createDemoSeatingPlan(Role $venue): SeatingPlan
+    {
+        $existing = SeatingPlan::where('role_id', $venue->id)->first();
+
+        if ($existing) {
+            return $existing;
+        }
+
+        $plan = SeatingPlan::create([
+            'role_id' => $venue->id,
+            'name' => 'Aztec Auditorium',
+            'description' => 'Art deco, 1927. The carpet is experienced. The seats have memories.',
+        ]);
+
+        $stalls = SeatingLevel::create([
+            'seating_plan_id' => $plan->id, 'name' => 'Stalls', 'position' => 0,
+        ]);
+        $circle = SeatingLevel::create([
+            'seating_plan_id' => $plan->id, 'name' => 'Circle', 'position' => 1,
+        ]);
+
+        // Stalls: rows A-F of 12, split 6+6 by a centre gangway.
+        $this->seedDemoSection($plan, $stalls, [
+            'name' => 'Stalls', 'band' => 'Stalls', 'color' => '#DAA520', 'position' => 0,
+            'x' => 0, 'y' => 0,
+        ], range('A', 'F'), 12, 6);
+
+        // Circle: rows A-C of 10, split 5+5. Offset clear of the Stalls block - the console and the
+        // report draw every level on one canvas, so overlapping x ranges collide the labels.
+        $this->seedDemoSection($plan, $circle, [
+            'name' => 'Circle', 'band' => 'Circle', 'color' => '#800020', 'position' => 1,
+            'x' => 420, 'y' => 0,
+        ], range('A', 'C'), 10, 5);
+
+        // Wheelchair spaces live in their own accessibility-only section, which is the only kind of
+        // section the picker will hand a wheelchair space out of.
+        $access = SeatingSection::create([
+            'seating_plan_id' => $plan->id, 'seating_level_id' => $stalls->id,
+            'name' => 'Accessible', 'band' => 'Stalls', 'kind' => 'seated',
+            'color' => '#4E81FA', 'position' => 2, 'accessibility_only' => true,
+            'x' => 0, 'y' => 220,
+        ]);
+        foreach ([1, 2, 3, 4] as $n) {
+            SeatingSeat::create([
+                'seating_plan_id' => $plan->id, 'seating_section_id' => $access->id,
+                'row_label' => 'W', 'row_position' => 1, 'seat_label' => (string) $n,
+                'position' => $n, 'x' => ($n - 1) * 34, 'y' => 0,
+                // Alternating space and companion, which is how a real accessible row is laid out.
+                'kind' => $n % 2 === 1 ? 'wheelchair' : 'companion',
+            ]);
+        }
+
+        return $plan;
+    }
+
+    /**
+     * Put a handful of the demo event's seats into each state.
+     *
+     * Sold, held back by the box office, and one basket. Without this every seating screen in the
+     * demo is a wall of identical empty circles, which shows a prospect the drawing but not the
+     * point of it - and the docs screenshots come from exactly these screens.
+     */
+    protected function seedDemoSeatOccupancy(Event $event): void
+    {
+        $map = app(\App\Services\SeatingMapService::class)->materialize($event);
+
+        if (! $map) {
+            return;
+        }
+
+        $stalls = SeatingSection::where('event_seating_map_id', $map->id)->where('name', 'Stalls')->first();
+
+        if (! $stalls) {
+            return;
+        }
+
+        $seats = SeatingSeat::where('seating_section_id', $stalls->id)
+            ->orderBy('row_position')->orderBy('position')->get();
+
+        // Rows A and B mostly gone, which is how a real house fills.
+        SeatingSeat::whereIn('id', $seats->take(19)->pluck('id'))->update(['status' => 'sold']);
+
+        // Two house seats the producer is holding, with the note staff would actually write.
+        SeatingSeat::whereIn('id', $seats->slice(30, 2)->pluck('id'))->update([
+            'status' => 'held', 'hold_kind' => 'house', 'hold_note' => 'Holding for the producer',
+        ]);
+
+        // One live basket, so the "in a basket" state is visible too.
+        SeatingSeat::whereIn('id', $seats->slice(40, 2)->pluck('id'))->update([
+            'status' => 'held', 'hold_kind' => 'cart',
+            'hold_token' => str_repeat('d', 32), 'hold_expires_at' => now()->addMinutes(9),
+        ]);
+    }
+
+    /** One rectangular block of rows, with a gangway after $splitAt seats. */
+    protected function seedDemoSection(SeatingPlan $plan, SeatingLevel $level, array $attrs, array $rows, int $perRow, int $splitAt): void
+    {
+        $section = SeatingSection::create($attrs + [
+            'seating_plan_id' => $plan->id,
+            'seating_level_id' => $level->id,
+            'kind' => 'seated',
+        ]);
+
+        foreach ($rows as $i => $rowLabel) {
+            for ($n = 1; $n <= $perRow; $n++) {
+                SeatingSeat::create([
+                    'seating_plan_id' => $plan->id,
+                    'seating_section_id' => $section->id,
+                    'row_label' => $rowLabel,
+                    'row_position' => $i + 1,
+                    'seat_label' => (string) $n,
+                    'position' => $n,
+                    // The gangway is drawn as extra space, and aisle_after is what stops a
+                    // contiguous run being offered across it.
+                    'x' => ($n - 1) * 26 + ($n > $splitAt ? 30 : 0),
+                    'y' => $i * 30,
+                    'aisle_after' => $n === $splitAt,
+                ]);
+            }
+        }
+    }
+
     protected function createTicketsForEvent(Event $event, array $ticketTypes): void
     {
         foreach ($ticketTypes as $ticketData) {
@@ -1128,6 +1279,8 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 'price' => $ticketData['price'],
                 'quantity' => $ticketData['quantity'],
                 'description' => $ticketData['description'] ?? null,
+                // Names the section of the plan this ticket prices. Null on every other demo event.
+                'seating_band' => $ticketData['seating_band'] ?? null,
             ]);
         }
     }
@@ -1602,9 +1755,12 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 'minute' => 0,
                 'days_of_week' => '0000100', // Thursday
                 'talent' => 'demo-troymcclure',
+                // The one demo event with reserved seating, so the picker, the box office console
+                // and the seating plan report all have something real to open.
+                'allocated_seating' => true,
                 'tickets' => [
-                    ['type' => 'General Admission', 'price' => 15, 'quantity' => 80],
-                    ['type' => 'Stop the Planet of the Apes Package', 'price' => 40, 'quantity' => 15, 'description' => 'Includes popcorn + autographed headshot'],
+                    ['type' => 'Stalls', 'price' => 15, 'quantity' => 80, 'seating_band' => 'Stalls', 'description' => 'Ground floor. Mind the gangway.'],
+                    ['type' => 'Circle', 'price' => 40, 'quantity' => 30, 'seating_band' => 'Circle', 'description' => 'Up top, where the popcorn rains from'],
                 ],
             ],
             [

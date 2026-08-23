@@ -56,9 +56,13 @@
     // of three; 4 x span-6 = two rows of two at lg, then 4 x span-3 = one row of
     // four at xl. Four across at lg left each card ~215px, which wrapped the
     // longer titles and broke the shared baseline within a row.
+    // 5 x span-4 leaves a two-card row at lg, so the last card widens to close it - the same
+    // trick as the 3-card sm rule below. At xl the track is four across and the fifth card takes
+    // the remaining eight columns.
     $spans = [
         3 => 'lg:col-span-4',
         4 => 'lg:col-span-6 xl:col-span-3',
+        5 => 'lg:col-span-6 xl:col-span-4',
     ];
 
     $span = $cols ? ($spans[$cols] ?? null) : null;
@@ -75,7 +79,15 @@
                  hole in the bottom-right. The last card of a 3-card cluster
                  spans both columns to close it; lg:col-span-* overrides this
                  again at the wider breakpoints. --}}
-            <li class="{{ $span }} @if ($cols === 3 && $loop->last) sm:col-span-2 @endif">
+            {{-- The wide last card REPLACES the standard span rather than joining it. Tailwind emits
+                 col-span-* in lexicographic order, so col-span-12 lands before col-span-2..6 in the
+                 stylesheet and `lg:col-span-6 lg:col-span-12` on one element resolves to 6. --}}
+            @php
+                $itemSpan = ($cols === 5 && $loop->last)
+                    ? 'sm:col-span-2 lg:col-span-12 xl:col-span-8'
+                    : $span;
+            @endphp
+            <li class="{{ $itemSpan }} @if ($cols === 3 && $loop->last) sm:col-span-2 @endif">
                 <a href="{{ route($item['route']) }}"
                    class="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)] dark:border-white/10 dark:bg-white/[0.04] sm:p-5 {{ $a['hover'] }}">
 

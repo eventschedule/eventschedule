@@ -21,7 +21,11 @@ $addonTickets = $sale->saleTickets->filter(fn($st) => $st->ticket && $st->ticket
 @endphp
 {{ __('messages.ticket_details') }}
 @foreach ($regularTickets as $saleTicket)
+@php $seatLabels = $saleTicket->seatLabels(); @endphp
 {{ $saleTicket->ticket->type ?: __('messages.ticket') }} x {{ $saleTicket->quantity }}
+@if (count($seatLabels))
+{{ implode(', ', $seatLabels) }}
+@endif
 @endforeach
 @if ($addonTickets->count() > 0)
 

@@ -247,18 +247,28 @@ trait HandlesSaleStatusActions
             $locked->is_deleted = true;
             $locked->save();
 
+            // Every sale this delete removes from view, so their seats can be released below.
+            // Collected BEFORE the cascade because that is a raw query-builder update.
+            $deletedIds = [$locked->id];
+
             // Cascade the delete. An order primary takes the whole order - guest rows carry
             // order_id too, so this is one flat set. Deleting only this leg would leave the others
             // live: still holding inventory, still in attendee lists, still counted.
             if ($locked->isOrderPrimary()) {
-                Sale::where('order_id', $locked->order_id)
-                    ->where('id', '!=', $locked->id)
-                    ->update(['is_deleted' => true]);
+                $siblings = Sale::where('order_id', $locked->order_id)->where('id', '!=', $locked->id);
+                $deletedIds = array_merge($deletedIds, $siblings->pluck('id')->all());
+                $siblings->update(['is_deleted' => true]);
             } elseif ($locked->group_id && $locked->isPrimarySale()) {
-                Sale::where('group_id', $locked->group_id)
-                    ->where('id', '!=', $locked->id)
-                    ->update(['is_deleted' => true]);
+                $siblings = Sale::where('group_id', $locked->group_id)->where('id', '!=', $locked->id);
+                $deletedIds = array_merge($deletedIds, $siblings->pluck('id')->all());
+                $siblings->update(['is_deleted' => true]);
             }
+
+            // Allocated seats go back to the map. Sale::booted only releases on a status change to
+            // cancelled/refunded/expired - and an `amount_mismatch` sale takes the branch above
+            // that never changes status, so its seats stayed `sold` against a row that had
+            // vanished from every list, with no tooling to recover them.
+            app(\App\Services\SeatHoldService::class)->releaseForSaleIds($deletedIds);
 
             return $pre;
         });

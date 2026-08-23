@@ -668,7 +668,7 @@
             ],
             [
                 'q' => 'Is there a seat map or assigned seating?',
-                'a' => 'No, and it is worth being straight about it. Event Schedule sells named ticket types with their own prices and quantities, not numbered seats. A "Table of six" ticket type prices a table and limits how many exist, but the buyer is not picking a specific seat on a chart.',
+                'a' => 'Yes, on Enterprise. Draw your room once as a reusable seating plan - levels, sections, rows, tables, standing areas and wheelchair spaces - attach it to an event, and buyers pick their own seats off the map. Your box office gets the same map to hold seats back, take a booking over the phone, move somebody or release a single seat. On every other plan a ticket type is a name, a price and a quantity, and the buyer is not choosing a specific seat.',
             ],
             [
                 'q' => 'What payment methods are supported?',
@@ -878,7 +878,7 @@
                 <div class="es-turn-mark mb-6" data-reveal aria-hidden="true"><span>03</span></div>
                 <p class="es-turn-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Ticket types</p>
                 <h2 class="es-balance es-turn-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Name your prices. <span class="es-turn-accent">Not your seats.</span>
+                    Name your prices. <span class="es-turn-accent">Or your seats.</span>
                 </h2>
                 <p class="es-turn-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
                     Create as many ticket types as the event needs. Each one carries its own price, its own quantity, and optionally its own sales start and end date.
@@ -930,8 +930,8 @@
                     <p class="es-turn-muted text-sm leading-relaxed">On a recurring event, each occurrence gets its own count, so a sold-out Saturday does not close the Sunday. A combined limit can also cap the total across every ticket type at once.</p>
                 </div>
                 <div class="es-turn-card p-6" data-reveal="panel">
-                    <h3 class="es-turn-ink mb-2 text-base font-bold">There is no seat map</h3>
-                    <p class="es-turn-muted text-sm leading-relaxed">Worth being straight about. A "Table of six" type prices a table and limits how many exist, but nobody is choosing seat H14 off a chart. If you need a real seating chart, this is not it.</p>
+                    <h3 class="es-turn-ink mb-2 text-base font-bold">Seat maps are an Enterprise thing</h3>
+                    <p class="es-turn-muted text-sm leading-relaxed">Everything above sells by the number: a "Table of six" type prices a table and limits how many exist. Enterprise adds the real chart, where you draw the room once and the buyer takes seat H14 off it.</p>
                 </div>
             </div>
         </div>

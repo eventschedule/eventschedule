@@ -413,7 +413,7 @@
             ],
             [
                 'q' => 'Can I price different parts of the house differently?',
-                'a' => 'Yes, with named ticket types. Create as many as the production needs, each with its own price, quantity and sales window, plus add-ons and a rate that applies when somebody buys several at once. To be clear about what this is: it is priced ticket types, not a seating chart. There is no seat map and buyers are not choosing a specific seat.',
+                'a' => 'Yes, two ways. Named ticket types price parts of the house by the number: create as many as the production needs, each with its own price, quantity and sales window, plus add-ons and a rate that applies when somebody buys several at once. On Enterprise you can price the house by its actual seats instead: draw the auditorium once as a seating plan, give each section a price band, and the buyer picks their own seat off the map.',
             ],
             [
                 'q' => 'Can I run more than one space?',
@@ -745,7 +745,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 6. Ticket types (explicitly not a seat map)                  -->
+    <!-- 6. Ticket types, by the number or by the seat                -->
     <!-- ============================================================ -->
     <section id="tiers" class="scroll-mt-24 border-t border-[rgba(18,24,20,0.08)] py-20 dark:border-[rgba(232,236,233,0.08)] lg:py-28">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
@@ -753,10 +753,10 @@
                 <div class="es-bill-corner mb-6" data-reveal aria-hidden="true"><span>06</span></div>
                 <p class="es-bill-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Ticket types</p>
                 <h2 class="es-balance es-bill-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Name your prices. <span class="es-bill-accent">Not your seats.</span>
+                    Name your prices. <span class="es-bill-accent">Or your seats.</span>
                 </h2>
                 <p class="es-bill-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Create as many ticket types as the production needs, each with its own price, quantity and sales window. Being straight with you: this is priced ticket types, not a seating chart. There is no seat map, and buyers are not picking a specific seat.
+                    Create as many ticket types as the production needs, each with its own price, quantity and sales window. That sells the house by the number. On Enterprise you can sell it by the seat instead: draw the auditorium once, and the buyer takes row C seat 14 off a real chart.
                 </p>
             </div>
 

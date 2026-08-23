@@ -216,12 +216,32 @@ class GenerateDocScreenshots extends Command
     {
         $encodedRoleId = $role ? UrlUtils::encodeId($role->id) : null;
 
+        // The seating screens all hang off the demo venue that actually has a plan. DemoService
+        // seeds "Aztec Auditorium" on demo-aztectheater and attaches it to one of its events, so
+        // these photograph a real room rather than an empty one.
+        $seatingRole = Role::where('subdomain', 'demo-aztectheater')->first();
+        $seatingPlan = $seatingRole
+            ? \App\Models\SeatingPlan::where('role_id', $seatingRole->id)->where('is_deleted', false)->first()
+            : null;
+        $seatedEvent = $seatingPlan
+            ? \App\Models\Event::where('seating_plan_id', $seatingPlan->id)->first()
+            : null;
+
         $pages = [
             'getting-started' => [
                 ['id' => 'getting-started--dashboard', 'route' => '/dashboard'],
             ],
             'schedule-styling' => [
                 ['id' => 'schedule-styling--section-style', 'route' => '/simpsons/edit', 'section' => 'section-style'],
+            ],
+            'allocated-seating' => [
+                ['id' => 'allocated-seating--plans', 'route' => $seatingRole ? '/demo-aztectheater/seating' : null],
+                ['id' => 'allocated-seating--designer', 'route' => $seatingPlan ? '/demo-aztectheater/seating/'.UrlUtils::encodeId($seatingPlan->id).'/design' : null, 'pause' => 2500],
+                ['id' => 'allocated-seating--box-office', 'route' => $seatedEvent ? '/demo-aztectheater/seating/box-office/'.UrlUtils::encodeId($seatedEvent->id) : null, 'pause' => 2500],
+                ['id' => 'allocated-seating--report', 'route' => $seatedEvent ? '/demo-aztectheater/seating/box-office/'.UrlUtils::encodeId($seatedEvent->id).'/report' : null, 'pause' => 1500],
+                // The picker sits behind "Buy Tickets" and then "Choose your own seats", so it has
+                // to be clicked open before it can be photographed.
+                ['id' => 'allocated-seating--picker', 'route' => $seatedEvent ? '/demo-aztectheater/'.$seatedEvent->slug.'/'.UrlUtils::encodeId($seatedEvent->id) : null, 'public' => true, 'pause' => 2500, 'script' => "[...document.querySelectorAll('a,button')].filter(b => /buy tickets/i.test(b.textContent))[0]?.click(); setTimeout(() => [...document.querySelectorAll('button')].filter(b => /choose your own/i.test(b.textContent))[0]?.click(), 900)"],
             ],
             'creating-schedules' => [
                 ['id' => 'creating-schedules--section-details', 'route' => '/simpsons/edit', 'section' => 'section-details'],

@@ -56,6 +56,7 @@
         ];
         $enterpriseFeatures = [
             'Everything in Pro',
+            'Allocated (reserved) seating',
             'Multiple team members per account',
             'Private & password-protected events',
             'WhatsApp event creation',
@@ -81,7 +82,7 @@
         $faqs = [
             ['q' => 'Is there really a free plan?', 'a' => 'Yes! The free plan includes unlimited events, all core features, appointment booking with one appointment type, and selling up to 25 paid tickets a month with no platform fee. You only need to upgrade if you want to remove branding, sell more than 25 tickets a month, or access advanced features.'],
             ['q' => 'How does the free trial work?', 'a' => 'When you sign up for Pro or Enterprise, you get a 7-day free trial. Enter your card to start, and you won\'t be charged until the trial ends. After that, Pro is ' . plan_price($proMonthly) . '/month or ' . plan_price($proYearly) . '/year, and Enterprise is ' . plan_price($entMonthly) . '/month or ' . plan_price($entYearly) . '/year. You can cancel anytime.'],
-            ['q' => 'What is the difference between Pro and Enterprise?', 'a' => 'The free plan already sells up to 25 paid tickets a month, scans tickets at the door and carries one appointment type. Pro removes both limits and adds the rest of the ticketing suite: the live check-in dashboard, passes and subscriptions, individual tickets, promo/discount codes, add-ons, waitlists and sales CSV export. It also adds white-label branding, event graphics, event boosting with ads, custom fields, custom CSS styling, REST API & webhooks, and 100 newsletter emails per month. Enterprise adds custom domains, private and password-protected events, up to five team members, WhatsApp event creation, email scheduling, agenda scanning, availability management, 1,000 newsletter emails per month, and priority support.'],
+            ['q' => 'What is the difference between Pro and Enterprise?', 'a' => 'The free plan already sells up to 25 paid tickets a month, scans tickets at the door and carries one appointment type. Pro removes both limits and adds the rest of the ticketing suite: the live check-in dashboard, passes and subscriptions, individual tickets, promo/discount codes, add-ons, waitlists and sales CSV export. It also adds white-label branding, event graphics, event boosting with ads, custom fields, custom CSS styling, REST API & webhooks, and 100 newsletter emails per month. Enterprise adds allocated (reserved) seating, custom domains, private and password-protected events, up to five team members, WhatsApp event creation, email scheduling, agenda scanning, availability management, 1,000 newsletter emails per month, and priority support.'],
             ['q' => 'Can I cancel anytime?', 'a' => 'Absolutely. You can cancel your subscription at any time and you\'ll keep access until the end of your billing period.'],
             ['q' => 'Do you take a cut of ticket sales?', 'a' => 'No! We don\'t charge any fees on ticket sales. You only pay the standard Stripe processing fees (typically 2.9% + $0.30 per transaction).'],
         ];
@@ -124,7 +125,7 @@
                 "name": "Enterprise",
                 "price": "{{ number_format($entMonthly, 2, '.', '') }}",
                 "priceCurrency": "{{ platform_currency() }}",
-                "description": "Custom domains, private events, multiple team members, and AI content generation. Also available at {{ plan_price($entYearly) }}/year.",
+                "description": "Allocated seating, custom domains, private events, multiple team members, and AI content generation. Also available at {{ plan_price($entYearly) }}/year.",
                 "priceSpecification": {
                     "@type": "UnitPriceSpecification",
                     "price": "{{ number_format($entMonthly, 2, '.', '') }}",

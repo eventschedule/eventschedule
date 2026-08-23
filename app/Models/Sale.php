@@ -165,6 +165,13 @@ class Sale extends Model
                     }
                 }
 
+                // Allocated seats go back to the map. Here rather than in the trait methods for the
+                // same reason the rest of this block is: the admin action, the API, deleteSale(),
+                // the expiry sweep and the group/order cascades all converge on this hook, and the
+                // cascade's raw update fires no model events, so it re-saves each sibling to land
+                // back here. A no-op for a sale that holds no seats.
+                app(\App\Services\SeatHoldService::class)->releaseForSale($sale);
+
                 // Give the redemption back once per LEG, matching how checkout takes it:
                 // priceSaleLeg() increments times_used once per leg, but this hook runs for every
                 // row, and the cancel cascade saves each guest row individually so its inventory is
@@ -240,6 +247,18 @@ class Sale extends Model
     public function saleTickets()
     {
         return $this->hasMany(SaleTicket::class);
+    }
+
+    /**
+     * Which physical seats this sale holds, on an allocated-seating occurrence.
+     *
+     * NOTE the near-miss in naming: sale_tickets.seats is a JSON map of admission slot to
+     * check-in timestamp and carries no location at all. Seat LOCATION only ever lives
+     * here, on seating_seats.sale_id.
+     */
+    public function seatAssignments()
+    {
+        return $this->hasMany(SeatingSeat::class);
     }
 
     /**
@@ -639,6 +658,12 @@ class Sale extends Model
                     $row['pass_visits_used'] = $saleTicket->passUsageCount();
                     $row['pass_max_uses'] = $saleTicket->ticket->pass_max_uses;
                     $row['pass_expires_at'] = $saleTicket->pass_expires_at?->toIso8601String();
+                }
+
+                // Allocated events only. A subscriber printing its own tickets or seating a party
+                // has no other way to learn which seats the sale actually took.
+                if ($saleTicket->ticket->isAllocated($this->event_date)) {
+                    $row['seats'] = $saleTicket->seatLabels();
                 }
 
                 return $row;

@@ -166,9 +166,21 @@ class PassRedemptionService
                 // Gate the extra admit on the occurrence still having a free seat. A booking reserves
                 // only ONE seat up front (computePassReservedSeats counts max(1, admits)), but admits
                 // can climb to admitsPerEvent at the door - so an unchecked bump lets a walk-in guest
-                // retroactively oversell a full room. null = unlimited house, so fail open there.
-                $seatsRemaining = $scanningEvent->occurrenceSeatsRemaining($today);
-                $roomForGuest = $seatsRemaining === null || $seatsRemaining > 0;
+                // retroactively oversell a full room.
+                //
+                // An allocated event needs its own question. occurrenceSeatsRemaining() returns null
+                // for one BY DESIGN - its inventory is seat rows in a map, not a counter - and that
+                // null used to fall into the "unlimited house, fail open" branch below. It is the
+                // first thing that method returns, so the gate was a permanent no-op on the one
+                // house type whose capacity is definitionally finite: every remaining admission on
+                // a multi-admit pass read green at a sold-out door.
+                if ($scanningEvent->hasAllocatedSeating()) {
+                    $roomForGuest = ! $scanningEvent->allTicketsSoldOut($today);
+                } else {
+                    // null here really does mean an unlimited house, so fail open.
+                    $seatsRemaining = $scanningEvent->occurrenceSeatsRemaining($today);
+                    $roomForGuest = $seatsRemaining === null || $seatsRemaining > 0;
+                }
 
                 if ($admitsUsed < $admitsPerEvent && $roomForGuest) {
                     $usages[$existingIndex]['admits'] = $admitsUsed + 1;

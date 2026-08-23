@@ -98,7 +98,7 @@
                         class="flex items-center justify-between py-3 first:pt-0 last:pb-0">
                         <div>
                             <p class="font-medium text-gray-800 dark:text-gray-300">@{{ checkin.name }}</p>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">@{{ checkin.ticket_type }}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">@{{ checkin.ticket_type }}<span v-if="checkin.seat_label"> &middot; @{{ checkin.seat_label }}</span></p>
                         </div>
                         <span class="text-sm text-gray-400 dark:text-gray-400 whitespace-nowrap ms-4">@{{ relativeTime(checkin.timestamp) }}</span>
                     </div>

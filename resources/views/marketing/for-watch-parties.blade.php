@@ -128,11 +128,11 @@
            of it. A bulleted list cannot make that point; a proportional
            strip makes it without a word.
 
-           NO SEATS ANYWHERE. An earlier version of this page drew seat
-           chips (A1, B4, C2) on the recurring rows. There is no seat
-           map, no assigned seating and no section inventory in this
-           product, so a seat grid teaches a model that does not exist.
-           The door is a COUNT, and it is drawn as a count.
+           NO SEATS ON THIS PAGE. An earlier version drew seat chips
+           (A1, B4, C2) on the recurring rows. Allocated seating is real
+           but it is Enterprise and opt-in per event, so a seat grid here
+           teaches the wrong default for a screening night. The door is a
+           COUNT, and it is drawn as a count.
 
            COLOUR: the page keeps its inherited red-orange family, but
            narrowed to a single tungsten lamp accent (#9c3d10 light,
@@ -1144,7 +1144,7 @@
                         </li>
                     </ul>
                     <p class="es-scr-muted mt-6 text-sm">
-                        To be clear about what this is not: there is no seating chart. These are priced ticket types with quantities, and nobody is choosing a specific seat.
+                        The door here is a count, not a chart: priced ticket types with quantities, and nobody picking a specific seat. A screening room that really does allocate seats can draw one on Enterprise.
                     </p>
                 </div>
 

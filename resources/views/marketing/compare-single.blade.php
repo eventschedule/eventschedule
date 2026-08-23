@@ -1181,9 +1181,9 @@
                         <p class="es-score-band-muted text-sm">Your public events can be listed on the Event Schedule browse and search pages, but a listing is not a marketplace's built-in audience. What actually fills a room is your own schedule page, an embeddable calendar, a follower QR code and newsletters.</p>
                     </div>
                     <div class="es-score-card flex flex-col p-6" data-reveal="panel">
-                        <p class="es-score-tag mb-3">No seat maps</p>
-                        <h3 class="es-score-band-ink mb-2 text-lg font-bold">Ticket types, not seats</h3>
-                        <p class="es-score-band-muted text-sm">A ticket type has a name, a price and a quantity. There is no seating chart and buyers are not choosing a specific seat, so a reserved-seating house will want something else.</p>
+                        <p class="es-score-tag mb-3">Seat maps are Enterprise</p>
+                        <h3 class="es-score-band-ink mb-2 text-lg font-bold">Ticket types, then seats</h3>
+                        <p class="es-score-band-muted text-sm">On Free and Pro a ticket type has a name, a price and a quantity, and buyers are not choosing a specific seat. A reserved-seating house needs Enterprise, where you draw the room once and sell the seats in it.</p>
                     </div>
                     <div class="es-score-card flex flex-col p-6" data-reveal="panel">
                         <p class="es-score-tag mb-3">One team member on Free</p>

@@ -125,6 +125,8 @@
                                         <span class="text-gray-600 dark:text-gray-400">{{ __('messages.manual_payment') }}</span>
                                     @elseif ($sale->payment_method == 'import')
                                         <span class="text-gray-600 dark:text-gray-400">{{ __('messages.manual_import') }}</span>
+                                    @elseif ($sale->payment_method == 'box_office')
+                                        <span class="text-gray-600 dark:text-gray-400">{{ __('messages.seating_box_office_sale') }}</span>
                                     @elseif ($referenceUrl)
                                         <x-link href="{{ $referenceUrl }}" target="_blank">
                                             {{ $sale->transaction_reference }}
@@ -484,6 +486,8 @@
                                 <span class="text-gray-600 dark:text-gray-400">{{ __('messages.manual_payment') }}</span>
                             @elseif ($sale->payment_method == 'import')
                                 <span class="text-gray-600 dark:text-gray-400">{{ __('messages.manual_import') }}</span>
+                            @elseif ($sale->payment_method == 'box_office')
+                                <span class="text-gray-600 dark:text-gray-400">{{ __('messages.seating_box_office_sale') }}</span>
                             @elseif ($referenceUrl)
                                 <x-link href="{{ $referenceUrl }}" target="_blank" class="break-all">
                                     {{ $sale->transaction_reference }}

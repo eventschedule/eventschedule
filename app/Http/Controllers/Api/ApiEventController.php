@@ -494,6 +494,10 @@ class ApiEventController extends Controller
                     'id' => $ticket->id,
                     'type' => $ticket->type,
                     'quantity' => $ticket->quantity,
+                    // Omitted, EventRepo writes null - so a PATCH that only renames the event
+                    // would silently turn every allocated ticket into general admission while its
+                    // sold seats stayed bound to it.
+                    'seating_band' => $ticket->seating_band,
                     'price' => $ticket->price,
                     'description' => $ticket->description,
                     'custom_fields' => $ticket->custom_fields,

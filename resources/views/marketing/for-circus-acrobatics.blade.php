@@ -1143,7 +1143,7 @@
                     ],
                     [
                         'q' => 'Can I sell tickets to my shows?',
-                        'a' => 'Yes. Connect your Stripe account and sell tickets directly from your schedule. Create as many ticket types as the night needs, each at its own fixed price, with its own inventory per date. Zero platform fees on every plan - you only pay Stripe\'s standard processing fees. There is no seating chart, so a tier like Ringside is a ticket type rather than a numbered seat.',
+                        'a' => 'Yes. Connect your Stripe account and sell tickets directly from your schedule. Create as many ticket types as the night needs, each at its own fixed price, with its own inventory per date. Zero platform fees on every plan - you only pay Stripe\'s standard processing fees. A tier like Ringside is a ticket type sold by the number; if you seat the ring properly, Enterprise adds a real seating plan the audience picks from.',
                     ],
                     [
                         'q' => 'Can I sell class passes for my aerial or acro classes?',

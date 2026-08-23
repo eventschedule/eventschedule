@@ -2825,6 +2825,7 @@ class RoleController extends Controller
         $datesUnavailable = [];
 
         $appointmentTypes = collect();
+        $seatingPlans = collect();
         $appointmentEditing = null;
         $appointmentBookings = collect();
         $appointmentBookingCounts = [];
@@ -2949,6 +2950,13 @@ class RoleController extends Controller
                 ->withQueryString();
         } elseif ($tab == 'templates') {
             $eventTemplates = $role->eventTemplates;
+        } elseif ($tab == 'seating') {
+            // A schedule has a handful of plans at most, so seatCount() per row in the view is
+            // cheaper to read than a withCount() carrying the live-section subquery.
+            $seatingPlans = \App\Models\SeatingPlan::where('role_id', $role->id)
+                ->where('is_deleted', false)
+                ->orderBy('name')
+                ->get();
         } elseif ($tab == 'appointments') {
             [
                 $appointmentTypes,
@@ -3003,6 +3011,7 @@ class RoleController extends Controller
             'showFederationPrompt',
             'timezoneMismatchEvents',
             'appointmentTypes',
+            'seatingPlans',
             'appointmentEditing',
             'appointmentBookings',
             'appointmentBookingCounts',

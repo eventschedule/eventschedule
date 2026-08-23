@@ -64,8 +64,9 @@
 
            WHY A LEDGER AND NOT A SEATING PLAN: riders never pick a
            seat. They ask for "a spot" and the driver says yes, so the
-           cells are a COUNT, never a chooser. There is no seat map
-           anywhere in this product and this page must not imply one.
+           cells are a COUNT, never a chooser. Allocated seating does
+           exist (Enterprise, for venues with rows in them), but a car
+           has none and this page must not imply otherwise.
            /for-restaurants deliberately avoided a row of 24 marks
            because at that length it reads as an inventory chart; four
            cells in a car is the literal data model, and the count is

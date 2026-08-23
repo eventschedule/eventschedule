@@ -390,6 +390,10 @@ class EventRepo
         // silently unlocking every Pro extra.
         $ticketExtrasAllowed = $currentRole && $currentRole->isPro();
 
+        // Allocated seating is Enterprise. Same fail-closed shape: no schedule in hand means
+        // the free ruleset, never a silently unlocked seat map.
+        $seatingAllowed = $currentRole && $currentRole->seatingEnabled();
+
         if ($event === null && $currentRole && ! $currentRole->canCreateEvent($user)) {
             throw new \App\Exceptions\EventCreationLimitException;
         }
@@ -851,6 +855,34 @@ class EventRepo
             }
         }
 
+        // events.seating_plan_id is fillable (so buildClonePayload() carries it on clone), which
+        // means the fill() above takes whatever integer a client posts - and nothing validates it.
+        // Unguarded, an organizer could attach ANOTHER schedule's seat map to their own event, and
+        // a non-Enterprise schedule could switch seating on.
+        //
+        // Only a CHANGE is policed, and a rejected change reverts to the stored value rather than
+        // nulling. That matters twice: a curator saving a venue's cross-listed event must not wipe
+        // the venue's plan just because the plan is not the curator's, and a lapsed Enterprise
+        // schedule keeps the seating it already configured. Same shape as the scrubs below.
+        // Detaching a plan is always allowed.
+        // An empty <select> option posts '', which reaches an integer column as '' and 1366s under
+        // MySQL strict mode. ConvertEmptyStringsToNull covers the web form, but not the API, the
+        // console or a direct repo call - and the boolean loop above exists for exactly this class
+        // of bug, so normalise rather than rely on middleware.
+        $event->seating_plan_id = $event->seating_plan_id ?: null;
+
+        if ($event->seating_plan_id != $event->getOriginal('seating_plan_id')) {
+            $plan = $event->seating_plan_id
+                ? \App\Models\SeatingPlan::where('is_deleted', false)->find($event->seating_plan_id)
+                : null;
+
+            $ownsPlan = $plan && $currentRole && (int) $plan->role_id === (int) $currentRole->id;
+
+            if ($event->seating_plan_id && (! $ownsPlan || ! $seatingAllowed)) {
+                $event->seating_plan_id = $event->getOriginal('seating_plan_id');
+            }
+        }
+
         // Installments are Pro, and scrubbed on the same terms as individual tickets and passes:
         // clear it only when the flag is being turned ON by a non-Pro schedule. A lapsed Pro
         // schedule keeps collecting on plans its buyers already agreed to - the mandate was given
@@ -1192,7 +1224,19 @@ class EventRepo
             ];
         }
 
+        // A one-time event that moves takes its seat map with it. Recurring events are excluded:
+        // their occurrences are generated from the pattern and each date already has its own map,
+        // so shifting starts_at is not a rename of a single occurrence.
+        $seatingOldDate = ($event->seating_plan_id && empty($event->days_of_week) && $event->isDirty('starts_at'))
+            ? $event->saleEventDateFor($event->getOriginal('starts_at'))
+            : null;
+
         $event->save();
+
+        if ($seatingOldDate) {
+            app(\App\Services\SeatingMapService::class)
+                ->rekeyOccurrence($event, $seatingOldDate, $event->saleEventDateFromStartsAt());
+        }
 
         // Anti-abuse: count this newly-created event toward the schedule's / user's daily cap.
         // Hosted-only and silent-fail inside track(); mirrors the enforcement guard above.
@@ -1529,6 +1573,8 @@ class EventRepo
             $ticketData = $request->input('tickets', []);
             $ticketIds = [];
             $hasPassTicket = false;
+            // Fetched at most once per save, not once per ticket.
+            $seatingPlanForBands = null;
 
             foreach ($ticketData as $data) {
                 // Process custom_fields with name_en translation
@@ -1746,6 +1792,59 @@ class EventRepo
                 // into null, but the decimal column must never see '' if that ever changes).
                 $ticketPrice = ($data['price'] ?? '') === '' ? null : $data['price'];
 
+                // Allocated seating: a ticket may name the band it sells. Only meaningful while a
+                // plan is attached and the schedule is Enterprise, and never on a pass - a pass
+                // draws on its own pool.
+                //
+                // The QUANTITY is derived from the plan rather than taken from the form, because
+                // the two would otherwise drift: the organizer sets the price, the plan decides how
+                // many seats exist. The field is rendered read-only for a banded ticket for the
+                // same reason.
+                // Preserve what is already stored unless the form actually posted a band. Two ways
+                // this used to wipe live seating: a schedule whose Enterprise lapsed (the band
+                // select stops rendering, so nothing is posted) and a plan that was soft-deleted.
+                // Either way the next unrelated save nulled every band while the event kept its
+                // plan and its sold seats - the same reason seating_plan_id is preserved above.
+                $existingTicket = ! empty($data['id'])
+                    ? Ticket::where('event_id', $event->id)->find($data['id'])
+                    : null;
+
+                $seatingBand = $existingTicket?->seating_band;
+                $ticketQuantity = $data['quantity'] ?? null;
+                $rawBand = $data['seating_band'] ?? null;
+
+                if (! array_key_exists('seating_band', $data)) {
+                    // Not posted at all: leave the stored value alone.
+                } elseif (! $seatingAllowed || ! $event->seating_plan_id || $isPass) {
+                    // Posted but not permitted: also leave it alone rather than clearing it.
+                } elseif (! is_scalar($rawBand) || trim((string) $rawBand) === '') {
+                    // Explicitly cleared by the organizer.
+                    $seatingBand = null;
+                }
+
+                if ($seatingAllowed && $event->seating_plan_id && ! $isPass && is_scalar($rawBand)) {
+                    $band = mb_substr(trim((string) $rawBand), 0, 100);
+
+                    if ($band !== '') {
+                        $seatingBand = $band;
+                        // fall through to derive the quantity from the plan
+                        $seatingPlanForBands ??= \App\Models\SeatingPlan::where('is_deleted', false)
+                            ->find($event->seating_plan_id);
+
+                        if ($seatingPlanForBands) {
+                            // Seated bands count seats; a standing band counts its capacity. Zero
+                            // for either means the band no longer exists in the plan, so the posted
+                            // quantity is left alone rather than silently zeroing a live ticket.
+                            $derived = $seatingPlanForBands->seatCountForBand($band)
+                                ?: $seatingPlanForBands->standingCapacityForBand($band);
+
+                            if ($derived > 0) {
+                                $ticketQuantity = $derived;
+                            }
+                        }
+                    }
+                }
+
                 if (! empty($data['id'])) {
                     $ticket = Ticket::find($data['id']);
                     // Guard before dereferencing: a bogus id used to 500 mid-save, after the event
@@ -1754,7 +1853,8 @@ class EventRepo
                         $ticketIds[] = $ticket->id;
                         $ticket->update(array_merge([
                             'type' => $data['type'] ?? null,
-                            'quantity' => $data['quantity'] ?? null,
+                            'quantity' => $ticketQuantity,
+                            'seating_band' => $seatingBand,
                             'max_per_order' => $maxPerOrder,
                             'price' => $ticketPrice,
                             'description' => $data['description'] ?? null,
@@ -1768,7 +1868,8 @@ class EventRepo
                     $ticket = Ticket::create(array_merge([
                         'event_id' => $event->id,
                         'type' => $data['type'] ?? null,
-                        'quantity' => $data['quantity'] ?? null,
+                        'quantity' => $ticketQuantity,
+                        'seating_band' => $seatingBand,
                         'max_per_order' => $maxPerOrder,
                         'price' => $ticketPrice,
                         'description' => $data['description'] ?? null,
@@ -1784,6 +1885,14 @@ class EventRepo
             $event->tickets()
                 ->whereNotIn('id', $ticketIds)
                 ->update(['is_deleted' => true]);
+
+            // Re-point every already-snapshotted date at the new mapping. Without this a recurring
+            // event's existing maps keep the ticket ids they were copied under, so renaming a band,
+            // adding a ticket or deleting one would leave older dates selling at the old price -
+            // or at no price at all. Cheap: one UPDATE per band, not per section.
+            if ($event->seating_plan_id) {
+                app(\App\Services\SeatingMapService::class)->applyBandMapping($event->fresh());
+            }
 
             // Subscriptions are single redeemable units; per-person individual
             // ticketing doesn't apply, so disable it when a pass is present.
