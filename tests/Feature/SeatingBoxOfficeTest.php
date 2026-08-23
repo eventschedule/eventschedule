@@ -827,11 +827,16 @@ class SeatingBoxOfficeTest extends TestCase
 
         // A balcony, deliberately at the SAME coordinates as the stalls - which is what the
         // designer produces, since a level is its own space.
+        //
+        // Its section also takes position 0, BELOW the stalls section, so the report cannot get the
+        // running order right by accident: sections are read in position order, and printing the
+        // levels in the order they first appear there would put the balcony above the stalls.
         $stalls = SeatingSection::where('seating_plan_id', $plan->id)->firstOrFail();
+        $stalls->update(['position' => 5]);
         $balcony = SeatingLevel::create(['seating_plan_id' => $plan->id, 'name' => 'Balcony', 'position' => 1]);
         $upstairs = SeatingSection::create([
             'seating_plan_id' => $plan->id, 'seating_level_id' => $balcony->id,
-            'name' => 'Balcony', 'band' => 'Stalls', 'kind' => 'seated',
+            'name' => 'Balcony', 'band' => 'Stalls', 'kind' => 'seated', 'position' => 0,
             'x' => $stalls->x, 'y' => $stalls->y,
         ]);
         for ($n = 1; $n <= 4; $n++) {
@@ -852,6 +857,14 @@ class SeatingBoxOfficeTest extends TestCase
         $this->assertSame(2, substr_count($html, '<svg viewBox='), 'the levels were flattened onto one map');
         $this->assertStringContainsString('Ground', $html);
         $this->assertStringContainsString('Balcony', $html);
+
+        // ...in LEVEL order. A house is printed from the ground up, whatever order the sections
+        // inside it happen to be stored in.
+        $this->assertLessThan(
+            strpos($html, 'Balcony</h2>'),
+            strpos($html, 'Ground</h2>'),
+            'the balcony printed above the stalls'
+        );
 
         // ...and every seat still reaches the table below, on both levels.
         $this->assertSame(15, substr_count($html, '<tr'));

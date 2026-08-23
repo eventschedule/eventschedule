@@ -366,7 +366,7 @@ const section = computed(() => {
 // Panning must never fight an element drag: a mousedown on a section, table or seat starts that
 // drag instead, and the viewport stays out of the way until it ends.
 const { zoom, pan, canvas, bind: viewportBind, fit: fitToView, zoomBy, measure: measureCanvas, observe: observeCanvas } =
-    useMapViewport({ svgEl, contentBounds, canPan: () => !drag.mode });
+    useMapViewport({ svgEl, contentBounds, canPan: () => !drag.mode, panFromChildren: false });
 
 const viewBox = computed(() => `0 0 ${canvas.w} ${canvas.h}`);
 

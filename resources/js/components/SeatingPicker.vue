@@ -75,7 +75,11 @@
             <template v-else-if="mySections.length">
                 <!-- MAP -->
                 <div v-show="mode === 'map'">
-                    <svg ref="svgEl" v-bind="bind" :viewBox="viewBox" class="w-full select-none touch-none"
+                    <!-- pan-y, not none: this map sits inside a long checkout form, and taking
+                         every touch would mean a buyer swiping up from the map stays put instead of
+                         scrolling on. Vertical swipes scroll the page, horizontal drag pans, and
+                         zooming has the -/+/Fit buttons. The full-page tools keep touch-action:none. -->
+                    <svg ref="svgEl" v-bind="bind" :viewBox="viewBox" class="w-full select-none touch-pan-y"
                         :style="{ height: mapHeight, cursor: 'grab' }" role="group" :aria-label="t.mapLabel">
                         <defs>
                             <pattern id="seatTakenHatch" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">

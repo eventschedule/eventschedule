@@ -196,7 +196,20 @@ class BoxOfficeController extends Controller
         $pad = 24;
         $levels = [];
 
-        foreach ($drawnByLevel as $levelKey => $drawn) {
+        // In LEVEL order, which is what $levelNames carries - EventSeatingMap::levels() orders by
+        // position. Walking $drawnByLevel instead would print the levels in the order each one's
+        // first section happens to sit, so a balcony whose section came first printed above the
+        // stalls. Anything with no level at all goes last rather than being dropped.
+        $levelKeys = $levelNames->keys()->all();
+        foreach (array_keys($drawnByLevel) as $key) {
+            if (! in_array($key, $levelKeys, true)) {
+                $levelKeys[] = $key;
+            }
+        }
+
+        foreach ($levelKeys as $levelKey) {
+            $drawn = $drawnByLevel[$levelKey] ?? [];
+
             if (! $drawn) {
                 continue;
             }

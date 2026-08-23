@@ -131,6 +131,57 @@ class SeatingTest extends DuskTestCase
     }
 
     /**
+     * Dragging a section moves the section, and ONLY the section.
+     *
+     * The shared viewport pans on `pointerdown` on the <svg>; the draggable elements stop
+     * `mousedown`. Those are different events and pointerdown fires first, so for one commit a
+     * press on a section started a pan as well and the whole view slid out from under the thing
+     * being dragged. Nothing else can catch this: a Feature test cannot reach a drag, and the
+     * journey above drives the screen through script() clicks.
+     *
+     * Reads the two `transform` attributes rather than component state, because a <script setup>
+     * SFC exposes nothing on the proxy in a production build.
+     */
+    public function test_dragging_a_section_does_not_pan_the_canvas(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->setupTestAccount($browser);
+            $this->createTestTalent($browser);
+            $this->upgradeToEnterprise('talent');
+
+            $browser->visit('/talent/seating')
+                ->waitFor('#new_seating_plan_name', 15)
+                ->type('#new_seating_plan_name', 'Drag House');
+            $browser->script('document.querySelector(\'#new_seating_plan_name\').form.requestSubmit();');
+
+            // One level, one section - the least there is to grab hold of.
+            $browser->waitFor('button[data-preset="rows"]', 20);
+            $browser->script('document.querySelector(\'button[data-preset="rows"]\').click();');
+            $browser->waitFor('#seating-designer svg > g > g > rect', 15)->pause(700);
+
+            $read = 'return {'
+                .' pan: document.querySelector("#seating-designer svg > g").getAttribute("transform"),'
+                .' section: document.querySelector("#seating-designer svg > g > g").getAttribute("transform")'
+                .'};';
+
+            $before = $browser->script($read)[0];
+
+            $rect = $browser->driver->findElement(
+                \Facebook\WebDriver\WebDriverBy::cssSelector('#seating-designer svg > g > g > rect')
+            );
+            // A real WebDriver drag, so the browser emits the pointer and mouse events itself in
+            // the order it really would - which is the whole point.
+            $browser->driver->action()->clickAndHold($rect)->moveByOffset(60, 40)->release()->perform();
+            $browser->pause(500);
+
+            $after = $browser->script($read)[0];
+
+            $this->assertNotSame($before['section'], $after['section'], 'the section did not move');
+            $this->assertSame($before['pan'], $after['pan'], 'dragging a section also panned the canvas');
+        });
+    }
+
+    /**
      * The picker: a buyer takes two seats and checks out.
      *
      * Choosing a quantity asks for best-available, which holds the seats before the form is even

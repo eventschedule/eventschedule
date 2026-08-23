@@ -24,8 +24,11 @@ const clampZoom = (z) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z));
  *        bounding box of everything drawn, in content units
  * @param {() => boolean} [opts.canPan] false while something else owns the drag (the designer is
  *        moving a section, a table or a seat), so panning never fights an element drag
+ * @param {boolean} [opts.panFromChildren] may a press that landed on something DRAWN start a pan?
+ *        True for the guest picker and the box office, where dragging off a seat is how a finger
+ *        moves the map. False for the designer, where everything drawn is itself draggable.
  */
-export function useMapViewport({ svgEl, contentBounds, canPan = () => true }) {
+export function useMapViewport({ svgEl, contentBounds, canPan = () => true, panFromChildren = true }) {
     const zoom = ref(1);
     const pan = reactive({ x: 40, y: 60 });
     const canvas = reactive({ w: 900, h: 540 });
@@ -37,7 +40,10 @@ export function useMapViewport({ svgEl, contentBounds, canPan = () => true }) {
      * AFTER the first fit - which left the framing computed against a stale height and the room
      * sitting low in a half-empty box. Re-fitting on resize solves that, but re-fitting after the
      * user has zoomed in on a seat would snatch the map back from under them. So: auto-fit until
-     * they touch it, then never again.
+     * they adjust it, then never again.
+     *
+     * Set by an actual pan or pinch MOVEMENT, and by the zoom controls - never by a bare press,
+     * which is how a plain seat click used to switch the re-fit off.
      */
     let userAdjusted = false;
 
@@ -141,7 +147,15 @@ export function useMapViewport({ svgEl, contentBounds, canPan = () => true }) {
 
     function onPointerDown(evt) {
         if (!canPan()) return;
-        userAdjusted = true;
+
+        // A press that landed on something DRAWN is that thing's press, not the canvas's.
+        //
+        // `canPan` alone cannot cover this: the designer's draggable elements stop `mousedown`,
+        // but `pointerdown` is a separate event that fires FIRST, so the flag it checks
+        // (`drag.mode`) is still null when this runs. Dragging a section therefore started a pan
+        // as well, and the whole view slid under the section being moved.
+        if (!panFromChildren && evt.target !== evt.currentTarget) return;
+
         pointers.set(evt.pointerId, { x: evt.clientX, y: evt.clientY });
 
         if (pointers.size === 1) {
@@ -162,11 +176,19 @@ export function useMapViewport({ svgEl, contentBounds, canPan = () => true }) {
         if (pinchFrom && pointers.size >= 2) {
             const [a, b] = [...pointers.values()];
             const mid = midpoint(a, b);
+            userAdjusted = true;
             zoomAt(pinchFrom.zoom * (distance(a, b) / pinchFrom.dist), mid.x, mid.y);
             return;
         }
 
         if (!panFrom) return;
+
+        // Taking control is a MOVE, not a press: setting the flag on pointerdown meant the first
+        // tap on a seat switched off the automatic re-fit for the rest of the session.
+        if (Math.hypot(evt.clientX - panFrom.x, evt.clientY - panFrom.y) > 3) {
+            userAdjusted = true;
+        }
+
         const el = svgEl.value;
         const r = el ? el.getBoundingClientRect() : null;
         // Drag in client pixels, move in viewBox units.
