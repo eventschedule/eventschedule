@@ -9,7 +9,7 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 ## Important Rules
 
 - **`php artisan test` is safe to run locally, including concurrently** - `tests/bootstrap.php` gives each session its own `eventschedule_test_<token>` schema (derived from `CLAUDE_CODE_SESSION_ID`, or `TEST_DB_TOKEN` to pick one by hand), so parallel runs cannot drop each other's tables. With neither variable set it falls back to the shared `eventschedule_test`, which is what CI uses. It never touches the `eventschedule` dev database: `phpunit.xml` forces `DB_DATABASE`, and `tests/TestCase.php` refuses to run against anything but a `*_test` schema. Two runs that do land on the same schema queue on a lock rather than corrupt it. See `tests/TestDatabase.php`.
-- **Never run `php artisan dusk` locally without asking first** - Dusk swaps `.env` with `.env.dusk.local` and wipes the database it points at. Browser tests run in CI.
+- **`php artisan dusk` needs `php artisan serve` running first** - Dusk swaps `.env` for `.env.dusk.local`, which points at its own `eventschedule_test_dusk` schema and `http://127.0.0.1:8000`. It wipes that schema, never the `eventschedule` dev database. Serve on port 8000 before running it, or every journey fails to connect.
 - **Never run `npm install` without asking first** - Confirm before installing dependencies
 - **Never run `composer install` without asking first** - Confirm before installing dependencies
 - **Never delete migration files** - They may have already been run on production
@@ -128,7 +128,13 @@ FLUSH PRIVILEGES;
 
 The `\_` escapes are load-bearing: they make the underscores literal, so the pattern can only ever match `eventschedule_test_<something>`.
 
-**Warning: Dusk browser tests wipe the database `.env.dusk.local` points at.** Never run `php artisan dusk` locally without asking first; browser tests run in CI. Dusk is unaffected by all of the above.
+**Dusk browser tests wipe the database `.env.dusk.local` points at** - which is now
+`eventschedule_test_dusk`, its own schema, matched by the same `eventschedule\_test\_%` grant the
+PHPUnit schemas use. It used to point at `eventschedule`, the dev database, which is why running
+Dusk locally was forbidden.
+
+Dusk needs the app served at the `APP_URL` in that file, so start `php artisan serve` (port 8000)
+first. It is otherwise unaffected by the per-session PHPUnit schemas above.
 
 ```bash
 # Run Feature & Unit tests (safe locally)

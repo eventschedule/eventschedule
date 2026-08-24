@@ -46,8 +46,15 @@
             {{ error }}
         </div>
 
+        <!-- Nothing is offered until the plan has actually arrived: the empty state below keys off
+             `!levels.length`, which is true from the first paint, so without this a preset clicked
+             early was built and then wiped by the fetch landing behind it. -->
+        <div v-if="loading" id="seating-loading" class="ap-card rounded-xl p-8 text-sm text-gray-500 dark:text-gray-400">
+            {{ t.loading }}
+        </div>
+
         <!-- Empty state: presets rather than a blank canvas -->
-        <div v-if="!levels.length" class="ap-card rounded-xl p-8">
+        <div v-else-if="!levels.length" class="ap-card rounded-xl p-8">
             <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ t.startFrom }}</h3>
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ t.startFromHelp }}</p>
             <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -63,7 +70,7 @@
         <!-- Three columns only past 1400px. At xl the canvas got ~290px once the AP sidebar was
              subtracted, so "Fit" landed on 41% and the plan you are drawing was the smallest thing
              on the screen. Below that the canvas takes the full width and the panels stack. -->
-        <div v-else class="grid grid-cols-1 min-[1400px]:grid-cols-[17rem_1fr_19rem] gap-4">
+        <div v-else-if="!loading" class="grid grid-cols-1 min-[1400px]:grid-cols-[17rem_1fr_19rem] gap-4">
 
             <!-- Left: levels and sections -->
             <div class="ap-card rounded-xl p-4 space-y-4">
@@ -352,6 +359,7 @@ const activeLevel = ref(0);
 const selectedSectionId = ref(null);
 const selectedSeats = ref([]);
 const dirty = ref(false);
+const loading = ref(true);
 const saving = ref(false);
 const error = ref('');
 const svgEl = ref(null);
@@ -903,19 +911,36 @@ const issues = computed(() => {
 });
 
 // ---- persistence
+/**
+ * Fetch the plan. Nothing is offered until this lands.
+ *
+ * The empty state renders on `!levels.length`, which is true from the first paint - so the preset
+ * picker appeared BEFORE this fetch resolved, and clicking one built a layout that the assignment
+ * below then silently wiped. The organizer saw their chosen layout appear and vanish, with the
+ * toolbar still claiming unsaved changes.
+ */
 async function load() {
-    const res = await fetch(props.structureUrl, { headers: { Accept: 'application/json' }, credentials: 'same-origin' });
-    if (!res.ok) { error.value = t.loadFailed; return; }
-    const data = await res.json();
-    levels.value = (data.levels || []).map((l) => Object.assign({}, l, {
-        sections: (l.sections || []).map((s) => Object.assign({}, s, {
-            band: s.band || '',
-            tables: s.tables || [],
-            seats: s.seats || [],
-        })),
-    }));
-    if (levels.value.length) selectedSectionId.value = levels.value[0].sections[0]?.id ?? null;
-    fitToView();
+    loading.value = true;
+
+    try {
+        const res = await fetch(props.structureUrl, { headers: { Accept: 'application/json' }, credentials: 'same-origin' });
+        if (!res.ok) { error.value = t.loadFailed; return; }
+
+        const data = await res.json();
+
+        levels.value = (data.levels || []).map((l) => Object.assign({}, l, {
+            sections: (l.sections || []).map((s) => Object.assign({}, s, {
+                band: s.band || '',
+                tables: s.tables || [],
+                seats: s.seats || [],
+            })),
+        }));
+
+        if (levels.value.length) selectedSectionId.value = levels.value[0].sections[0]?.id ?? null;
+        fitToView();
+    } finally {
+        loading.value = false;
+    }
 }
 
 async function save() {

@@ -104,7 +104,9 @@ class SeatingTest extends DuskTestCase
                 ->type('#new_seating_plan_name', 'Main House');
             $browser->script('document.querySelector(\'#new_seating_plan_name\').form.requestSubmit();');
 
-            $browser->waitFor('#seating-designer', 20)
+            $browser->assertPathIs('/talent/seating/*/design')
+                ->waitUntilMissing('#seating-loading', 20)
+                ->waitFor('#seating-designer', 20)
                 ->waitFor('button[data-preset="theatre"]', 20);
 
             // The empty state offers presets rather than a blank canvas. Theatre lays out stalls
@@ -156,8 +158,11 @@ class SeatingTest extends DuskTestCase
                 ->type('#new_seating_plan_name', 'Drag House');
             $browser->script('document.querySelector(\'#new_seating_plan_name\').form.requestSubmit();');
 
-            // One level, one section - the least there is to grab hold of.
-            $browser->waitFor('button[data-preset="rows"]', 20);
+            // One level, one section - the least there is to grab hold of. The presets are not
+            // offered until the plan has loaded, so clicking one cannot be undone by the fetch.
+            $browser->assertPathIs('/talent/seating/*/design')
+                ->waitUntilMissing('#seating-loading', 20)
+                ->waitFor('button[data-preset="rows"]', 20);
             $browser->script('document.querySelector(\'button[data-preset="rows"]\').click();');
             $browser->waitFor('#seating-designer svg > g > g > rect', 15)->pause(700);
 
@@ -217,8 +222,9 @@ class SeatingTest extends DuskTestCase
                 sel.dispatchEvent(new Event("change", { bubbles: true }));
             ');
 
-            // The hold is a POST, and the hidden inputs are what the checkout will claim.
-            $browser->waitFor('input[name="seat_ids[]"]', 20)
+            // The hold is a POST, and the hidden inputs are what the checkout will claim. waitFor()
+            // is no use here: it requires isDisplayed(), and a type="hidden" input never is.
+            $browser->waitUntil('document.querySelectorAll(\'input[name="seat_ids[]"]\').length === 2', 20)
                 ->pause(500);
 
             $this->assertSame(2, SeatingSeat::whereNotNull('hold_token')->count(), 'the picker never held the seats');
@@ -260,6 +266,7 @@ class SeatingTest extends DuskTestCase
             $versionBefore = $map->version;
 
             $browser->visit('/talent/seating/box-office/'.UrlUtils::encodeId($event->id))
+                ->assertPathBeginsWith('/talent/seating/box-office/')
                 ->waitFor('#seating-box-office', 20)
                 ->waitFor('#bo-seat-'.$seat->id, 20)
                 ->pause(500);
@@ -330,6 +337,7 @@ class SeatingTest extends DuskTestCase
             $other = $seats->get(4);
 
             $browser->visit('/talent/seating/box-office/'.UrlUtils::encodeId($event->id))
+                ->assertPathBeginsWith('/talent/seating/box-office/')
                 ->waitFor('#seating-box-office', 20)
                 ->waitFor('#bo-seat-'.$sold->id, 20)
                 ->pause(500);
@@ -344,7 +352,12 @@ class SeatingTest extends DuskTestCase
 
             // 2. An armed exchange lets go on Escape, and the next seat click is then harmless.
             $browser->script('[...document.querySelectorAll("button")].find(b => b.textContent.trim() === '.json_encode(__('messages.seating_exchange')).').click();');
-            $browser->pause(400)->keys('body', '{escape}')->pause(300);
+            // Dispatched on window, where the listener lives, rather than through keys(): Dusk
+            // resolves a keys() selector against the page root, so 'body' became 'body body' and
+            // threw NoSuchElement - and a <div> is not an interactable sendKeys target either.
+            $browser->pause(400);
+            $browser->script('window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))');
+            $browser->pause(300);
             $browser->script('document.querySelector(\'#bo-seat-'.$other->id.'\').dispatchEvent(new MouseEvent("click", { bubbles: true }));');
             $browser->pause(1200);
 
@@ -383,6 +396,7 @@ class SeatingTest extends DuskTestCase
             $seat->update(['status' => 'sold']);
 
             $browser->visit('/talent/seating/occurrence/'.UrlUtils::encodeId($event->id).'/design?date='.$map->event_date)
+                ->waitUntilMissing('#seating-loading', 20)
                 ->waitFor('#seating-designer', 20)
                 ->waitFor('#seating-designer svg > g > g', 20)
                 ->pause(700);
