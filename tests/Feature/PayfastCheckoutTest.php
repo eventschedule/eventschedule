@@ -34,6 +34,24 @@ class PayfastCheckoutTest extends TestCase
         return $owner;
     }
 
+    /**
+     * The installation's own Payfast account, as a selfhost operator would set it in .env.
+     *
+     * config() rather than putenv(): config/payments.php reads env() once at boot, and these tests
+     * run long after that.
+     */
+    private function platformAccount(array $overrides = []): void
+    {
+        config(array_merge([
+            'app.hosted' => false,
+            'payments.payfast.merchant_id' => '20000200',
+            'payments.payfast.merchant_key' => 'platform-merchant-key',
+            'payments.payfast.passphrase' => 'platform-passphrase',
+            'payments.payfast.sandbox' => true,
+            'payments.payfast.payment_types' => null,
+        ], $overrides));
+    }
+
     private function payfastEvent($role, array $attrs = [])
     {
         return $this->createEvent($role, array_merge([
@@ -613,7 +631,7 @@ class PayfastCheckoutTest extends TestCase
         $this->assertFalse(app(PaymentGatewayManager::class)->supportsCart('payfast'));
     }
 
-    public function test_a_disconnected_owner_lands_the_buyer_rather_than_posting_an_unsigned_form(): void
+    public function test_a_disconnected_owner_lands_the_buyer_and_gives_the_seats_back(): void
     {
         // Reachable when an owner disconnects Payfast while an event still names it.
         $owner = $this->createOwner();
@@ -621,7 +639,7 @@ class PayfastCheckoutTest extends TestCase
         $event = $this->payfastEvent($role);
         $ticket = $this->createTicket($event, ['type' => 'General', 'price' => 150, 'quantity' => 50]);
 
-        $response = $this->checkout($role, $event, $ticket);
+        $response = $this->checkout($role, $event, $ticket, 2);
 
         $sale = Sale::where('email', 'zar-buyer@gmail.com')->firstOrFail();
 
@@ -629,7 +647,13 @@ class PayfastCheckoutTest extends TestCase
             'event_id' => UrlUtils::encodeId($event->id),
             'secret' => $sale->secret,
         ]));
-        $this->assertSame('unpaid', $sale->status);
+
+        // Not merely left unpaid: TicketController has already committed the sale and SaleTicket::created
+        // has already incremented `sold`, so a bail that does not release holds those seats FOREVER -
+        // events.expire_unpaid_tickets defaults to 0 and ReleaseTickets only sweeps events that opted
+        // in. Every retry would burn two more, quietly selling the event out.
+        $this->assertSame('expired', $sale->fresh()->status);
+        $this->assertSame(0, (int) $ticket->fresh()->sold);
     }
 
     public function test_a_single_selected_payment_type_pins_the_checkout(): void
@@ -775,5 +799,205 @@ class PayfastCheckoutTest extends TestCase
             $notify,
             'notify_url must carry the install base path exactly once',
         );
+    }
+
+    // ------------------------------------------- installation-wide credentials (selfhost)
+
+    public function test_an_install_wide_account_lets_an_owner_who_connected_nothing_sell(): void
+    {
+        // The follow-up to #113: a selfhost operator running the whole install on one Payfast account
+        // should not have to hand their merchant key and passphrase to every user, which per-owner
+        // credentials forced. STRIPE_PLATFORM_SECRET has always worked this way for Stripe.
+        $this->platformAccount();
+
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner);
+        $event = $this->payfastEvent($role);
+        $ticket = $this->createTicket($event, ['type' => 'General', 'price' => 150, 'quantity' => 50]);
+
+        $this->assertArrayHasKey('payfast', app(PaymentGatewayManager::class)->availableFor($owner, 'ZAR'));
+
+        $response = $this->checkout($role, $event, $ticket);
+
+        $response->assertOk();
+        $response->assertSee('name="merchant_id" value="20000200"', escape: false);
+        $response->assertSee('name="merchant_key" value="platform-merchant-key"', escape: false);
+        // The sandbox flag has to come from the same set as the credentials, or a live merchant id is
+        // posted to the sandbox host (or the reverse, which takes real money in a test).
+        $response->assertSee('https://sandbox.payfast.co.za/eng/process', escape: false);
+        $response->assertDontSee('platform-passphrase');
+    }
+
+    public function test_the_install_wide_account_signs_with_its_own_passphrase(): void
+    {
+        // Mixing the two sets - one account's merchant id under the other's passphrase - produces a
+        // signature that verifies against nothing, which is a payment taken and no ticket issued.
+        $this->platformAccount();
+
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner);
+        $event = $this->payfastEvent($role);
+        $ticket = $this->createTicket($event, ['type' => 'General', 'price' => 150, 'quantity' => 50]);
+
+        $html = $this->checkout($role, $event, $ticket)->getContent();
+
+        preg_match_all('/name="([^"]+)" value="([^"]*)"/', $html, $matches, PREG_SET_ORDER);
+
+        $fields = [];
+        $posted = null;
+
+        foreach ($matches as $match) {
+            $value = html_entity_decode($match[2], ENT_QUOTES);
+
+            if ($match[1] === 'signature') {
+                $posted = $value;
+
+                continue;
+            }
+
+            $fields[$match[1]] = $value;
+        }
+
+        $this->assertNotNull($posted);
+        $this->assertSame(PayfastSignature::sign($fields, 'platform-passphrase'), $posted);
+    }
+
+    public function test_an_owners_own_account_beats_the_install_wide_one(): void
+    {
+        // The installation account is a DEFAULT, never an override. An operator adding the env vars
+        // must not silently re-route the money of an owner who deliberately connected their own.
+        $this->platformAccount();
+
+        $owner = $this->connectedOwner();
+        $role = $this->createRole($owner);
+        $event = $this->payfastEvent($role);
+        $ticket = $this->createTicket($event, ['type' => 'General', 'price' => 150, 'quantity' => 50]);
+
+        $response = $this->checkout($role, $event, $ticket);
+
+        $response->assertSee('name="merchant_id" value="10000100"', escape: false);
+        $response->assertDontSee('20000200');
+        $response->assertDontSee('platform-merchant-key');
+    }
+
+    public function test_an_install_wide_account_is_ignored_when_hosted(): void
+    {
+        // On hosted the money has to reach the event owner's own account. An installation-wide
+        // merchant id here would route every ZAR sale on the platform to the operator.
+        $this->platformAccount(['app.hosted' => true]);
+
+        $owner = $this->createOwner();
+
+        $manager = app(PaymentGatewayManager::class);
+
+        $this->assertArrayNotHasKey('payfast', $manager->connectedFor($owner));
+        $this->assertArrayNotHasKey('payfast', $manager->availableFor($owner, 'ZAR'));
+    }
+
+    public function test_a_half_filled_env_offers_nothing(): void
+    {
+        // Same rule as a half-connected owner, and for the same reason: without a passphrase the ITN
+        // signature is a plain MD5 anyone can reproduce. Enforced on the env set too, so a partially
+        // filled .env surfaces as "Payfast is not offered" rather than as a forgeable notification.
+        $this->platformAccount(['payments.payfast.passphrase' => null]);
+
+        $owner = $this->createOwner();
+
+        $this->assertArrayNotHasKey('payfast', app(PaymentGatewayManager::class)->availableFor($owner, 'ZAR'));
+    }
+
+    public function test_the_settings_tab_never_names_the_install_wide_account(): void
+    {
+        // The tab strip calls label(null) to get the bare product name. Resolving a null owner to the
+        // installation's set would put "(Test mode)" on that tab for everyone on a sandbox install -
+        // and, worse, would echo an env-supplied merchant id, which has never been through the
+        // digits-only rule that keeps this label safe inside a Vue mount.
+        $this->platformAccount();
+
+        $driver = app(PaymentGatewayManager::class)->get('payfast');
+
+        $this->assertSame('Payfast', $driver->label(null));
+    }
+
+    public function test_an_owner_on_the_install_wide_account_still_sees_test_mode(): void
+    {
+        // The suffix is not cosmetic: a forgotten sandbox toggle sells free tickets that look
+        // completely normal. It has to follow the credentials actually in use, wherever they came from.
+        $this->platformAccount();
+
+        $owner = $this->createOwner();
+        $driver = app(PaymentGatewayManager::class)->get('payfast');
+
+        $this->assertSame('Payfast ('.__('messages.payfast_sandbox').')', $driver->label($owner));
+    }
+
+    public function test_the_settings_tab_reports_the_install_wide_account(): void
+    {
+        // An owner who has connected nothing must not be shown a connected-looking form: bullets in
+        // the secret inputs, no required marker on a first connect, and an Unlink button for
+        // credentials they never entered.
+        $this->platformAccount();
+
+        $owner = $this->createOwner();
+        $this->createRole($owner);
+
+        $this->actingAs($owner)->get(route('profile.edit'))
+            ->assertSee(__('messages.gateway_provided_by_install'))
+            ->assertDontSee(__('messages.gateway_own_account_in_use'))
+            ->assertDontSee(__('messages.unlink_account'));
+    }
+
+    public function test_the_settings_tab_reports_an_owners_own_account(): void
+    {
+        $this->platformAccount();
+
+        $owner = $this->connectedOwner();
+        $this->createRole($owner);
+
+        $this->actingAs($owner)->get(route('profile.edit'))
+            ->assertSee(__('messages.gateway_own_account_in_use'))
+            ->assertDontSee(__('messages.gateway_provided_by_install'));
+    }
+
+    public function test_an_unreadable_stored_secret_never_falls_back_to_the_install_account(): void
+    {
+        // EncryptedString::get() swallows a DecryptException and returns null, so an owner whose
+        // secrets were encrypted under a previous APP_KEY - rotated, or a database restored into a
+        // different install - looks exactly like an owner who never connected anything. Falling
+        // through to the installation's account there would post the operator's merchant id, sign
+        // with the operator's passphrase, and settle this owner's ticket revenue into somebody
+        // else's Payfast, with nothing in the log to say so.
+        $this->platformAccount();
+
+        $owner = $this->connectedOwner();
+
+        // Plaintext straight into the column, bypassing the cast: the same state an APP_KEY change
+        // leaves behind, and the only honest way to reproduce it.
+        \Illuminate\Support\Facades\DB::table('users')->where('id', $owner->id)->update([
+            'payfast_passphrase' => 'not-decryptable-under-this-key',
+        ]);
+
+        $owner = $owner->fresh();
+
+        $this->assertNull($owner->payfast_passphrase, 'fixture: the cast must swallow this');
+
+        $manager = app(PaymentGatewayManager::class);
+
+        $this->assertArrayNotHasKey('payfast', $manager->availableFor($owner, 'ZAR'),
+            'a broken account must disappear from the dropdown, not silently borrow the operator\'s');
+    }
+
+    public function test_a_merchant_id_of_zero_still_counts_as_the_owners_own(): void
+    {
+        // blank(), not a truthiness test. PayfastSignature says twice that a value of "0" is legal;
+        // treating it as absent would hand this owner's sales to the installation's account.
+        $this->platformAccount();
+
+        $owner = $this->connectedOwner(['payfast_merchant_id' => '0']);
+
+        $driver = app(PaymentGatewayManager::class)->get('payfast');
+
+        $this->assertTrue($driver->hasOwnCredentials($owner));
+        $this->assertSame('0', $driver->credentialsFor($owner)['payfast_merchant_id']);
     }
 }

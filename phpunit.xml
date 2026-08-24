@@ -41,6 +41,21 @@
         -->
         <env name="STRIPE_KEY" value="sk_test_fake_connect" force="true"/>
         <env name="STRIPE_PLATFORM_SECRET" value="sk_test_fake_platform" force="true"/>
+        <!--
+            Same reasoning as the Stripe keys above, for the installation-wide Payfast account and the
+            default payment method. These are documented for operators to set, so a developer who
+            follows our own selfhost guide would otherwise have their .env silently change what the
+            suite tests: with them populated, Payfast becomes a connected gateway for every user and
+            seven tests fail, several of which have nothing to do with Payfast.
+
+            force="true" covers getenv() and $_ENV but NOT $_SERVER, which Laravel's Env reads first -
+            see tests/bootstrap.php, which mirrors these across so an exported shell variable cannot
+            outrank a pin here. The same caveat applies to the Stripe keys above.
+        -->
+        <env name="PAYFAST_MERCHANT_ID" value="" force="true"/>
+        <env name="PAYFAST_MERCHANT_KEY" value="" force="true"/>
+        <env name="PAYFAST_PASSPHRASE" value="" force="true"/>
+        <env name="DEFAULT_PAYMENT_METHOD" value="" force="true"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="APP_TESTING" value="true"/>
         <env name="IS_NEXUS" value="true"/>

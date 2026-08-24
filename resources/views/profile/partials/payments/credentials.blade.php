@@ -7,15 +7,41 @@
 --}}
 @php
     $fields = $gateway->credentialFields();
-    $isConnected = $gateway->isConfiguredFor($user);
+    // hasOwnCredentials(), NOT isConfiguredFor(): on an install that supplies its own credentials
+    // (a selfhost operator's PAYFAST_* in .env) every owner is "configured" without having entered
+    // anything, and this flag drives the write-only secret placeholder, whether a first connect may
+    // leave a secret blank, and the Unlink button. Keyed off the broader question, the form would
+    // offer to unlink credentials the owner never typed.
+    $isConnected = $gateway->hasOwnCredentials($user);
+    $platformProvided = $gateway->platformCredentials() !== [];
     // Bullets, not the stored value: a secret is write-only from here on. Leaving the input blank
     // means "keep what is stored", which is how an owner corrects a merchant id without having to
     // re-enter a key they cannot read back.
     $secretPlaceholder = str_repeat('•', 10);
 @endphp
 
+@if ($platformProvided)
+    {{-- The install supplies this gateway for everyone. Say which account is actually taking the
+         money, because the form below stays open either way and an owner has no other way to tell. --}}
+    <div class="mt-4">
+        <div class="flex items-center">
+            <svg class="w-5 h-5 text-green-500 me-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            <span class="text-sm text-gray-600 dark:text-gray-400">
+                {{ $isConnected ? __('messages.gateway_own_account_in_use') : __('messages.gateway_provided_by_install') }}
+            </span>
+        </div>
+        <p class="mt-2 text-xs text-gray-500 dark:text-gray-500">
+            {{ $isConnected ? __('messages.gateway_own_account_in_use_help') : __('messages.gateway_provided_by_install_help') }}
+        </p>
+    </div>
+@endif
+
+{{-- After the panel, not before it: with an install-supplied account in force, "enter your merchant
+     details" is an instruction the reader may not need, and leading with it contradicts the panel. --}}
 @if ($gateway->credentialHelp())
-    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+    <p class="text-sm text-gray-600 dark:text-gray-400 mt-4 mb-4">
         {{ $gateway->credentialHelp() }}
     </p>
 @endif

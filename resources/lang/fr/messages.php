@@ -4675,4 +4675,10 @@ return [
     'seating_too_many_tables' => 'Un plan de salle peut compter jusqu\'à :max tables.',
     'seating_whole_table_only' => ':table se réserve en table entière : les :count places doivent être prises ensemble.',
     'seating_whole_table_gone' => 'Cette table ne se vend qu\'entière, et une partie est déjà prise.',
+    'gateway_provided_by_install' => 'Fourni par cette installation',
+    'gateway_provided_by_install_help' => 'Un compte a été configuré pour tous les utilisateurs de ce site, vous pouvez donc commencer à vendre sans connecter le vôtre. Pour utiliser un autre compte, saisissez ses informations ci-dessous.',
+    'gateway_own_account_in_use' => 'Votre propre compte est utilisé',
+    'gateway_own_account_in_use_help' => 'Cette installation fournit également un compte. Dissociez le vôtre ci-dessous pour revenir à celui-ci.',
+    'no_payment_method_for_currency' => 'Aucun moyen de paiement pour :currency',
+    'no_payment_method_for_currency_body' => 'Vous avez un moyen de paiement connecté, mais aucun ne peut encaisser en :currency. Modifiez la devise de cet événement ou connectez-en un qui le peut. En attendant, vous pouvez toujours encaisser sur place.',
 ];

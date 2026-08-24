@@ -4663,4 +4663,10 @@ return [
     'seating_too_many_tables' => 'מפת ישיבה יכולה לכלול עד :max שולחנות.',
     'seating_whole_table_only' => 'שולחן :table מוזמן רק בשלמותו, ולכן יש לקחת את כל :count המושבים יחד.',
     'seating_whole_table_gone' => 'השולחן הזה נמכר רק בשלמותו, וחלק ממנו כבר נתפס.',
+    'gateway_provided_by_install' => 'מסופק על ידי התקנה זו',
+    'gateway_provided_by_install_help' => 'הוגדר חשבון עבור כל המשתמשים באתר הזה, כך שאפשר להתחיל למכור בלי לחבר חשבון משלך. כדי להשתמש בחשבון אחר, הזן את פרטיו למטה.',
+    'gateway_own_account_in_use' => 'החשבון שלך בשימוש',
+    'gateway_own_account_in_use_help' => 'התקנה זו מספקת גם חשבון. נתק את החשבון שלך למטה כדי לחזור להשתמש בו.',
+    'no_payment_method_for_currency' => 'אין אמצעי תשלום עבור :currency',
+    'no_payment_method_for_currency_body' => 'יש לך אמצעי תשלום מחובר, אך אף אחד מהם אינו יכול לסלוק ב-:currency. שנה את המטבע של האירוע הזה, או חבר אמצעי שתומך בו. עד אז עדיין אפשר לגבות תשלום בכניסה.',
 ];

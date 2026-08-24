@@ -4668,4 +4668,10 @@ return [
     'seating_too_many_tables' => 'Um mapa de sala comporta até :max mesas.',
     'seating_whole_table_only' => ':table é reservada como mesa inteira, então os :count lugares têm de ser levados juntos.',
     'seating_whole_table_gone' => 'Essa mesa só é vendida inteira, e parte dela já foi ocupada.',
+    'gateway_provided_by_install' => 'Fornecido por esta instalação',
+    'gateway_provided_by_install_help' => 'Foi configurada uma conta para todos neste site, por isso pode começar a vender sem vincular a sua. Para usar outra conta, introduza os respetivos dados abaixo.',
+    'gateway_own_account_in_use' => 'A usar a sua própria conta',
+    'gateway_own_account_in_use_help' => 'Esta instalação também fornece uma conta. Desvincule a sua abaixo para voltar a usá-la.',
+    'no_payment_method_for_currency' => 'Nenhum método de pagamento para :currency',
+    'no_payment_method_for_currency_body' => 'Tem um método de pagamento ligado, mas nenhum deles consegue liquidar em :currency. Altere a moeda deste evento ou ligue um que consiga. Até lá, pode continuar a receber o pagamento à porta.',
 ];

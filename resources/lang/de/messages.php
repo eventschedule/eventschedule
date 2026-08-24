@@ -4672,4 +4672,10 @@ return [
     'seating_too_many_tables' => 'Ein Saalplan kann bis zu :max Tische haben.',
     'seating_whole_table_only' => ':table wird nur als ganzer Tisch gebucht, alle :count Plätze müssen zusammen genommen werden.',
     'seating_whole_table_gone' => 'Dieser Tisch wird nur komplett verkauft, und ein Teil davon ist bereits vergeben.',
+    'gateway_provided_by_install' => 'Von dieser Installation bereitgestellt',
+    'gateway_provided_by_install_help' => 'Für alle auf dieser Website wurde ein Konto eingerichtet, sodass Sie mit dem Verkauf beginnen können, ohne ein eigenes zu verbinden. Um ein anderes Konto zu verwenden, geben Sie unten dessen Daten ein.',
+    'gateway_own_account_in_use' => 'Ihr eigenes Konto wird verwendet',
+    'gateway_own_account_in_use_help' => 'Diese Installation stellt ebenfalls ein Konto bereit. Trennen Sie unten Ihr Konto, um wieder dieses zu verwenden.',
+    'no_payment_method_for_currency' => 'Keine Zahlungsmethode für :currency',
+    'no_payment_method_for_currency_body' => 'Sie haben eine Zahlungsmethode verbunden, aber keine davon kann :currency abrechnen. Ändern Sie die Währung dieser Veranstaltung oder verbinden Sie eine passende Methode. Bis dahin können Sie die Zahlung weiterhin an der Abendkasse entgegennehmen.',
 ];

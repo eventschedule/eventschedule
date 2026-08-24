@@ -184,6 +184,44 @@ class PaymentGatewayRegistryTest extends TestCase
         // not hide the gateway from an event that merely has a free ticket type.
         $this->assertArrayHasKey('currency_locked', $manager->availableFor($owner, 'ZAR', 0.0));
     }
+
+    public function test_no_driver_supplies_install_wide_credentials_when_hosted(): void
+    {
+        // PaymentGatewayDriver::platformCredentials() documents this as a MUST, and it is the rule
+        // that keeps hosted money reaching the event owner rather than the operator. Asserted across
+        // the whole registry, not just the one driver that implements it today: the next gateway to
+        // adopt the seam and forget the guard would route every hosted sale to us, silently.
+        config([
+            'app.hosted' => true,
+            'payments.payfast.merchant_id' => '20000200',
+            'payments.payfast.merchant_key' => 'platform-merchant-key',
+            'payments.payfast.passphrase' => 'platform-passphrase',
+        ]);
+
+        foreach ($this->manager()->all() as $key => $driver) {
+            $this->assertSame([], $driver->platformCredentials(),
+                $key.' must not supply installation-wide credentials on a hosted install');
+        }
+    }
+
+    public function test_no_driver_resolves_credentials_for_a_null_owner(): void
+    {
+        // The settings tab strip asks every driver for label(null) to get its bare product name. A
+        // driver that resolved a null owner to the installation's set would put the connected account
+        // - or "(Test mode)" - on a tab that is meant to say only the product name.
+        config([
+            'app.hosted' => false,
+            'payments.payfast.merchant_id' => '20000200',
+            'payments.payfast.merchant_key' => 'platform-merchant-key',
+            'payments.payfast.passphrase' => 'platform-passphrase',
+            'payments.payfast.sandbox' => true,
+        ]);
+
+        foreach ($this->manager()->all() as $key => $driver) {
+            $this->assertNull($driver->credentialsFor(null), $key.' resolved credentials for no owner');
+            $this->assertFalse($driver->hasOwnCredentials(null), $key.' claimed a null owner has its own');
+        }
+    }
 }
 
 /**

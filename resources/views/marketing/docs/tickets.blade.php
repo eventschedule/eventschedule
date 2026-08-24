@@ -526,6 +526,11 @@
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">The passphrase is required rather than optional. It is what lets us verify that a payment notification genuinely came from Payfast, so without one there is no way to tell a real payment from a forged one. Setting it on your Payfast account also makes Payfast reject unsigned checkout requests, which protects your merchant account beyond this integration.</p>
 
+        <div class="doc-callout doc-callout-tip mb-6">
+            <div class="doc-callout-title">Your site may already have an account</div>
+            <p>On a selfhosted site, the administrator can configure one Payfast account for everyone. If the Payfast tab says <strong class="text-gray-900 dark:text-white">Provided by this installation</strong>, skip the steps above - Payfast is already available on your ZAR events and payments settle into the site's account. Entering your own details there still works and takes precedence, so you are paid into your own account instead; unlink them to go back. Selfhost administrators: see the <a href="{{ route('marketing.docs.selfhost.stripe') }}#payfast" class="doc-link">Payments guide</a>.</p>
+        </div>
+
         <p class="text-gray-600 dark:text-gray-300 mb-6">By default Payfast shows buyers every method your account supports. To send them straight to one instead, tick exactly one entry under <strong class="text-gray-900 dark:text-white">Payment methods</strong>. Ticking several, or none, leaves the choice to Payfast.</p>
 
         <div class="doc-callout doc-callout-info mb-6">

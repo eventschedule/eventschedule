@@ -4777,4 +4777,10 @@ return [
     'legal_using_builtin' => 'Currently using the built-in page.',
     'legal_view_page' => 'View page',
     'legal_document_saved' => 'Legal page saved successfully',
+    'gateway_provided_by_install' => 'Provided by this installation',
+    'gateway_provided_by_install_help' => 'An account has been set up for everyone on this site, so you can start selling without connecting your own. To use a different account, enter its details below.',
+    'gateway_own_account_in_use' => 'Using your own account',
+    'gateway_own_account_in_use_help' => 'This installation also provides an account. Unlink yours below to go back to using it.',
+    'no_payment_method_for_currency' => 'No payment method for :currency',
+    'no_payment_method_for_currency_body' => 'You have a payment method connected, but none of them can settle :currency. Change this event\'s currency, or connect one that can. Until then you can still take payment at the door.',
 ];

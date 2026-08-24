@@ -665,7 +665,10 @@ class EventController extends Controller
             if ($role->default_tickets) {
                 $defaultTickets = json_decode($role->default_tickets, true);
                 $event->ticket_currency_code = $defaultTickets['currency_code'] ?? MoneyUtils::getCurrencyForCountry($role->country_code);
-                $event->payment_method = $defaultTickets['payment_method'] ?? 'cash';
+                // The schedule's saved ticket defaults win: that is the owner's own explicit choice.
+                // DEFAULT_PAYMENT_METHOD only fills the gap where they have not made one.
+                $event->payment_method = $defaultTickets['payment_method']
+                    ?? payment_gateways()->defaultMethodFor($user, $event->ticket_currency_code);
                 $event->payment_instructions = $defaultTickets['payment_instructions'] ?? null;
                 $event->expire_unpaid_tickets = $defaultTickets['expire_unpaid_tickets'] ?? false;
                 $event->installments_enabled = $defaultTickets['installments_enabled'] ?? false;
@@ -704,7 +707,7 @@ class EventController extends Controller
                 $defaultPromoCodes = $defaultTickets['promo_codes'] ?? [];
             } else {
                 $event->ticket_currency_code = MoneyUtils::getCurrencyForCountry($role->country_code);
-                $event->payment_method = 'cash';
+                $event->payment_method = payment_gateways()->defaultMethodFor($user, $event->ticket_currency_code);
                 $event->tickets = collect([new Ticket]);
             }
 

@@ -15,6 +15,13 @@
   $connectedGateways = $paymentGateways->connectedFor($user);
   $selectableGateways = $paymentGateways->availableFor($user, $event->ticket_currency_code);
 
+  // Connected is not the same question as usable HERE. connectedFor() is currency-blind, so an owner
+  // whose only gateway cannot settle this event's currency - Payfast is rand-only, and a selfhost
+  // install can supply it to everyone from .env - passes the "has connected something" test while the
+  // dropdown offers nothing but cash. Without this they would be shown a healthy-looking form and
+  // publish a paid event that can only be settled by hand.
+  $onlineGateways = array_diff_key($selectableGateways, ['cash' => true]);
+
   // The saved method when it is no longer on offer - currency changed after saving, or the gateway
   // was disconnected. Computed here rather than inside the select because the select itself has to
   // render for it: with nothing connected the whole block is otherwise hidden, leaving the stale
@@ -3252,6 +3259,18 @@
                                 <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2" v-show="event.tickets_enabled">
                                     <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
                                     <div class="text-sm text-amber-800 dark:text-amber-200">{{ __('messages.stripe_verifying') }}</div>
+                                </div>
+                                @elseif (! $onlineGateways)
+                                {{-- Connected, but not to anything that can take money in this currency. The
+                                     nudge above is Stripe-specific and would be actively wrong advice here:
+                                     on the selfhost installs this case is commonest on, Stripe is precisely
+                                     what is unavailable. Naming the currency instead points at the fix. --}}
+                                <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2" v-show="event.tickets_enabled">
+                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>
+                                    <div class="text-sm text-amber-800 dark:text-amber-200">
+                                        <div class="font-semibold">{{ __('messages.no_payment_method_for_currency', ['currency' => $event->ticket_currency_code]) }}</div>
+                                        <p class="mt-1">{{ __('messages.no_payment_method_for_currency_body', ['currency' => $event->ticket_currency_code]) }}</p>
+                                    </div>
                                 </div>
                                 @endif
 

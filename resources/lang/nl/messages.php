@@ -4668,4 +4668,10 @@ return [
     'seating_too_many_tables' => 'Een zaalplattegrond kan maximaal :max tafels hebben.',
     'seating_whole_table_only' => ':table wordt alleen als hele tafel geboekt, dus alle :count stoelen moeten samen genomen worden.',
     'seating_whole_table_gone' => 'Die tafel wordt alleen als geheel verkocht, en een deel is al bezet.',
+    'gateway_provided_by_install' => 'Geleverd door deze installatie',
+    'gateway_provided_by_install_help' => 'Er is een account ingesteld voor iedereen op deze site, dus je kunt beginnen met verkopen zonder je eigen account te koppelen. Voer hieronder de gegevens in om een ander account te gebruiken.',
+    'gateway_own_account_in_use' => 'Je eigen account wordt gebruikt',
+    'gateway_own_account_in_use_help' => 'Deze installatie levert ook een account. Ontkoppel je eigen account hieronder om dat weer te gebruiken.',
+    'no_payment_method_for_currency' => 'Geen betaalmethode voor :currency',
+    'no_payment_method_for_currency_body' => 'Je hebt een betaalmethode gekoppeld, maar geen daarvan kan in :currency afrekenen. Wijzig de valuta van dit evenement of koppel er een die dat wel kan. Tot die tijd kun je nog steeds aan de deur betaling innen.',
 ];

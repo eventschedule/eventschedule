@@ -4707,4 +4707,10 @@ return [
     'seating_too_many_tables' => 'Un plan de sală poate avea până la :max mese.',
     'seating_whole_table_only' => ':table se rezervă doar ca masă întreagă, deci toate cele :count locuri trebuie luate împreună.',
     'seating_whole_table_gone' => 'Acea masă se vinde doar întreagă, iar o parte din ea este deja ocupată.',
+    'gateway_provided_by_install' => 'Furnizat de această instalare',
+    'gateway_provided_by_install_help' => 'A fost configurat un cont pentru toți utilizatorii acestui site, așa că poți începe să vinzi fără să conectezi contul tău. Pentru a folosi alt cont, introdu datele lui mai jos.',
+    'gateway_own_account_in_use' => 'Se folosește contul tău',
+    'gateway_own_account_in_use_help' => 'Această instalare oferă și un cont. Deconectează-l pe al tău mai jos pentru a reveni la el.',
+    'no_payment_method_for_currency' => 'Nicio metodă de plată pentru :currency',
+    'no_payment_method_for_currency_body' => 'Ai o metodă de plată conectată, dar niciuna nu poate deconta în :currency. Schimbă moneda acestui eveniment sau conectează una care poate. Până atunci poți încasa în continuare la intrare.',
 ];

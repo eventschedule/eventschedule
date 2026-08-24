@@ -4687,4 +4687,10 @@ return [
     'seating_too_many_tables' => 'Saaliplaanil võib olla kuni :max lauda.',
     'seating_whole_table_only' => ':table broneeritakse ainult tervikuna, seega tuleb kõik :count kohta võtta koos.',
     'seating_whole_table_gone' => 'Seda lauda müüakse ainult tervikuna ja osa sellest on juba võetud.',
+    'gateway_provided_by_install' => 'Pakutud selle paigalduse poolt',
+    'gateway_provided_by_install_help' => 'Kõigile selle saidi kasutajatele on seadistatud konto, nii et saad müüma hakata ilma oma kontot ühendamata. Teise konto kasutamiseks sisesta selle andmed allpool.',
+    'gateway_own_account_in_use' => 'Kasutad oma kontot',
+    'gateway_own_account_in_use_help' => 'See paigaldus pakub samuti kontot. Tühista allpool oma konto linkimine, et selle juurde naasta.',
+    'no_payment_method_for_currency' => 'Selle valuuta (:currency) jaoks pole makseviisi',
+    'no_payment_method_for_currency_body' => 'Teil on makseviis ühendatud, kuid ükski neist ei saa arveldada valuutas :currency. Muutke selle sündmuse valuutat või ühendage sobiv makseviis. Seni saate makse endiselt kohapeal vastu võtta.',
 ];

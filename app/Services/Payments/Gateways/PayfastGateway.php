@@ -52,13 +52,21 @@ class PayfastGateway extends PaymentGatewayDriver
 
     public function label(?User $owner): string
     {
-        $label = $owner?->payfast_merchant_id
+        $credentials = $this->credentialsFor($owner);
+
+        // The merchant id is named only when it is the OWNER's. An installation-wide account belongs
+        // to the operator, not to the person reading the dropdown, and its id has not been through
+        // credentialRules()' digits-only rule - this label is echoed server-side into a Vue-mounted
+        // <option> (which carries v-pre for exactly that reason), so an unvalidated value has no
+        // business there.
+        $label = $this->hasOwnCredentials($owner)
             ? 'Payfast - '.$owner->payfast_merchant_id
             : 'Payfast';
 
         // A forgotten sandbox toggle sells free tickets that look completely normal, so test mode is
-        // named everywhere the owner chooses the gateway.
-        if ($owner?->payfast_sandbox) {
+        // named everywhere the owner chooses the gateway - including when the sandbox flag came from
+        // the installation rather than from this owner.
+        if (! empty($credentials['payfast_sandbox'])) {
             $label .= ' ('.__('messages.payfast_sandbox').')';
         }
 
@@ -66,19 +74,55 @@ class PayfastGateway extends PaymentGatewayDriver
     }
 
     /**
-     * All three are required before Payfast is offered as a payment method.
+     * All three of merchant id, merchant key and passphrase are required before Payfast is offered as
+     * a payment method - from the owner's own account, or from the installation's.
      *
      * The merchant id and key are needed to sign a checkout at all. The passphrase is optional at
      * Payfast itself, but not here: without one the ITN signature is a plain MD5 anyone can
      * reproduce, so an account missing it would accept notifications it cannot actually authenticate.
-     * Excluded here rather than only validated on save, so a half-configured account never reaches an
-     * event's payment dropdown.
+     * Enforced here rather than only on save, so a half-configured account never reaches an event's
+     * payment dropdown - and, since platformCredentials() applies the same rule, neither does a
+     * half-filled .env.
      */
     public function isConfiguredFor(?User $owner): bool
     {
-        return (bool) ($owner?->payfast_merchant_id
-            && $owner->payfast_merchant_key
-            && $owner->payfast_passphrase);
+        return $this->credentialsFor($owner) !== null;
+    }
+
+    /**
+     * The installation's own Payfast account, from .env, for every owner who has not connected one.
+     *
+     * This is the selfhost ask behind issue #113's follow-up: an operator running the whole install on
+     * one merchant account should not have to hand their merchant key and passphrase to every user,
+     * which is what per-owner-only credentials forced. STRIPE_PLATFORM_SECRET has always done this for
+     * Stripe (User::canAcceptStripePayments()); these are the same idea, declared rather than
+     * hardcoded.
+     *
+     * @return array<string, mixed>
+     */
+    public function platformCredentials(): array
+    {
+        // Hosted only ever settles into the event owner's own account. An installation-wide merchant
+        // id here would route every ZAR sale on eventschedule.com to the operator.
+        if (config('app.hosted')) {
+            return [];
+        }
+
+        $merchantId = (string) config('payments.payfast.merchant_id');
+        $merchantKey = (string) config('payments.payfast.merchant_key');
+        $passphrase = (string) config('payments.payfast.passphrase');
+
+        if ($merchantId === '' || $merchantKey === '' || $passphrase === '') {
+            return [];
+        }
+
+        return [
+            'payfast_merchant_id' => $merchantId,
+            'payfast_merchant_key' => $merchantKey,
+            'payfast_passphrase' => $passphrase,
+            'payfast_sandbox' => (bool) config('payments.payfast.sandbox'),
+            'payfast_payment_types' => (string) config('payments.payfast.payment_types'),
+        ];
     }
 
     /**
@@ -236,10 +280,22 @@ class PayfastGateway extends PaymentGatewayDriver
         $sale = $context->sale;
         $event = $context->event;
 
-        if (! $this->isConfiguredFor($owner)) {
+        // The owner's own account if they have connected one, otherwise the installation's. Resolved
+        // once and used for every field below, because mixing the two would sign with one account's
+        // passphrase under the other's merchant id.
+        $credentials = $this->credentialsFor($owner);
+
+        if (! $credentials) {
             // Reachable when an owner disconnects Payfast while an event still names it. Better to
             // land the buyer on their (unpaid) ticket than to post an unsigned form.
             Log::warning('Payfast checkout attempted with no credentials', ['sale_id' => $sale->id]);
+
+            // Give the seats back before bailing, for the reason releaseAbandonedSale() spells out and
+            // the currency/floor refusal below already honours: TicketController has committed the
+            // Sale and SaleTicket rows and `sold` is already incremented, so simply landing the buyer
+            // holds that inventory forever - events.expire_unpaid_tickets defaults to 0 and
+            // ReleaseTickets only sweeps events that opted in, and every retry burns more.
+            $this->releaseAbandonedSale($sale, 'payfast_unconfigured');
 
             return $this->redirectToPurchaseLanding($sale, $event, $context->isEmbed);
         }
@@ -317,8 +373,8 @@ class PayfastGateway extends PaymentGatewayDriver
         // The body rewrite that made all this necessary is now opted out of below, so these values
         // reach the browser byte-identical to what was signed.
         $fields = [
-            'merchant_id' => $owner->payfast_merchant_id,
-            'merchant_key' => $owner->payfast_merchant_key,
+            'merchant_id' => $credentials['payfast_merchant_id'],
+            'merchant_key' => $credentials['payfast_merchant_key'],
             // The sale secret rides along on the buyer-facing callbacks: the id alone is a Sqid and
             // proves nothing, and PaymentGatewayController::resolve() refuses both without it. Not on
             // notify_url, which Payfast authenticates by signature instead and which must not carry a
@@ -341,7 +397,7 @@ class PayfastGateway extends PaymentGatewayDriver
             $fields['item_description'] = $description;
         }
 
-        $restrictTo = $this->restrictedPaymentType($owner);
+        $restrictTo = $this->restrictedPaymentType($credentials);
         if ($restrictTo !== null) {
             $fields['payment_method'] = $restrictTo;
         }
@@ -356,7 +412,7 @@ class PayfastGateway extends PaymentGatewayDriver
         // Signed with the passphrase, which is then discarded. It must never reach the form: it is the
         // shared secret that makes an ITN signature meaningful, and the buyer's browser is not a place
         // to keep it.
-        $signature = PayfastSignature::sign($fields, $owner->payfast_passphrase);
+        $signature = PayfastSignature::sign($fields, $credentials['payfast_passphrase']);
 
         // Every field below is signed, so nothing in this body may be rewritten after the fact.
         // ResolveCustomDomain would otherwise replace the schedule's subdomain URL anywhere it
@@ -365,11 +421,11 @@ class PayfastGateway extends PaymentGatewayDriver
         request()->attributes->set('skip_body_rewrite', true);
 
         return response()->view('payments.payfast.redirect', [
-            'action' => (new PayfastClient((bool) $owner->payfast_sandbox))->processUrl(),
+            'action' => (new PayfastClient((bool) $credentials['payfast_sandbox']))->processUrl(),
             'fields' => $fields,
             'signature' => $signature,
             'event' => $event,
-            'sandbox' => (bool) $owner->payfast_sandbox,
+            'sandbox' => (bool) $credentials['payfast_sandbox'],
         ]);
     }
 
@@ -379,10 +435,16 @@ class PayfastGateway extends PaymentGatewayDriver
      * The ITN. Five checks before a cent is recognised, in cheapest-first order:
      *
      *  1. the sale is in a state that can be paid at all;
-     *  2. the signature matches, computed over the RAW body;
-     *  3. the merchant id is the owner's, so one merchant's ITN cannot settle another's sale;
+     *  2. the merchant id names an account that may settle this sale, so one merchant's ITN cannot
+     *     settle another's;
+     *  3. the signature matches THAT account's passphrase, computed over the RAW body;
      *  4. the source address really belongs to Payfast;
      *  5. Payfast itself confirms the payload, which is the one an attacker cannot influence.
+     *
+     * Checks 2 and 3 are the other way round from how this was first written. They had to swap once
+     * an owner could have two legitimate accounts - their own and the installation's - because the
+     * merchant id is what says which passphrase the payload was signed with. A hash_equals over a
+     * short id is also cheaper than an MD5 over the whole body, so cheapest-first still holds.
      *
      * Only then does the amount get reconciled, by SaleSettlementService, which is also where
      * idempotency and the released-sale guard live.
@@ -398,7 +460,13 @@ class PayfastGateway extends PaymentGatewayDriver
 
         $owner = $sale->event?->user;
 
-        if (! $owner || ! $this->isConfiguredFor($owner)) {
+        // Both sets that could have signed this payment, not just the one a fresh checkout would use.
+        // An Instant EFT can clear hours later, so an owner who connects their own Payfast account
+        // mid-flight would otherwise have that ITN checked against a passphrase it was never signed
+        // with - the buyer charged, the ticket never issued, and nothing but a log line to show it.
+        $candidates = $this->candidateCredentials($owner);
+
+        if (! $owner || ! $candidates) {
             Log::warning('Payfast ITN for a sale whose owner has no credentials', ['sale_id' => $sale->id]);
 
             return response('not configured', 400);
@@ -407,18 +475,43 @@ class PayfastGateway extends PaymentGatewayDriver
         $rawBody = $request->getContent();
         $payload = PayfastSignature::parseItn($rawBody);
 
-        if (! PayfastSignature::verifyItn($rawBody, $owner->payfast_passphrase)) {
-            Log::warning('Payfast ITN signature mismatch', ['sale_id' => $sale->id]);
+        // Guards against a Payfast account other than one of this owner's settling this sale. Cheap,
+        // and Invoice Ninja's driver omits it.
+        //
+        // EVERY set naming this merchant id gets its signature tried, not just the first. The two can
+        // legitimately share an id with different passphrases - an operator who rotates
+        // PAYFAST_PASSPHRASE in .env while an owner still holds the old one in their profile - and
+        // stopping at the first match would reject an ITN the other set really did sign, which is the
+        // buyer charged and no ticket issued. One extra MD5 in a case that cannot otherwise settle.
+        $matchedMerchant = false;
+        $credentials = null;
 
-            return response('invalid signature', 400);
+        foreach ($candidates as $candidate) {
+            if (! hash_equals((string) $candidate['payfast_merchant_id'], (string) ($payload['merchant_id'] ?? ''))) {
+                continue;
+            }
+
+            $matchedMerchant = true;
+
+            if (PayfastSignature::verifyItn($rawBody, $candidate['payfast_passphrase'])) {
+                $credentials = $candidate;
+                break;
+            }
         }
 
-        // Guards against a Payfast account other than the owner's settling this sale. Cheap, and
-        // Invoice Ninja's driver omits it.
-        if (! hash_equals((string) $owner->payfast_merchant_id, (string) ($payload['merchant_id'] ?? ''))) {
+        // Two rejections, kept apart on purpose: they are what an operator has to go on when a real
+        // payment goes missing, and "nobody we know owns that merchant id" is a different problem
+        // from "the right account, signed wrong".
+        if (! $matchedMerchant) {
             Log::warning('Payfast ITN merchant id mismatch', ['sale_id' => $sale->id]);
 
             return response('merchant mismatch', 400);
+        }
+
+        if (! $credentials) {
+            Log::warning('Payfast ITN signature mismatch', ['sale_id' => $sale->id]);
+
+            return response('invalid signature', 400);
         }
 
         // The sale is also identified by the URL, so this catches a valid ITN replayed against a
@@ -429,7 +522,7 @@ class PayfastGateway extends PaymentGatewayDriver
             return response('payment id mismatch', 400);
         }
 
-        $client = new PayfastClient((bool) $owner->payfast_sandbox);
+        $client = new PayfastClient((bool) $credentials['payfast_sandbox']);
 
         if (! $client->confirmsPayment($payload)) {
             // Carries the IP: this is the rejection an attacker who already holds the passphrase and
@@ -545,11 +638,13 @@ class PayfastGateway extends PaymentGatewayDriver
      *
      * Payfast's payment_method field takes one code, not a list, so an owner who has ticked several
      * gets the unrestricted page - which is what they meant by choosing more than one.
+     *
+     * @param  array<string, mixed>  $credentials  the resolved set, owner's or installation's
      */
-    private function restrictedPaymentType(User $owner): ?string
+    private function restrictedPaymentType(array $credentials): ?string
     {
         $selected = array_values(array_filter(
-            explode(',', (string) $owner->payfast_payment_types),
+            explode(',', (string) ($credentials['payfast_payment_types'] ?? '')),
         ));
 
         if (count($selected) !== 1) {

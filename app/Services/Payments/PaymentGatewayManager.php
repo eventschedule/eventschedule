@@ -154,6 +154,31 @@ class PaymentGatewayManager
     }
 
     /**
+     * What a NEW event's payment method should start on.
+     *
+     * 'cash' is the historical default and the events.payment_method column default. An operator
+     * whose install runs on one gateway can point DEFAULT_PAYMENT_METHOD at it (config
+     * payments.default_method) so owners are not selecting the same thing on every event - the
+     * selfhost half of issue #113's follow-up, where Stripe is unavailable and Payfast is the only
+     * rail an install has.
+     *
+     * Falls back to cash unless the configured gateway is genuinely usable for this event, which
+     * availableFor() already decides: selectable, connected for this owner, able to settle this
+     * currency. So a typo, a gateway nobody has connected, or Payfast on a non-ZAR event all degrade
+     * to today's behaviour rather than starting an event on a method that cannot take money.
+     */
+    public function defaultMethodFor(?User $owner, ?string $currencyCode): string
+    {
+        $key = (string) config('payments.default_method');
+
+        if ($key === '' || $key === 'cash') {
+            return 'cash';
+        }
+
+        return array_key_exists($key, $this->availableFor($owner, $currencyCode)) ? $key : 'cash';
+    }
+
+    /**
      * Whether a stored method may be combined with other events in one cart. Unknown methods say no:
      * the cart has to settle every leg in one payment, and a rail we know nothing about cannot be
      * assumed to manage that.

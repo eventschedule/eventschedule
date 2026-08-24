@@ -200,6 +200,148 @@ abstract class PaymentGatewayDriver
         return null;
     }
 
+    // ------------------------------------------------------- credential resolution
+
+    /**
+     * Credentials the INSTALLATION supplies on behalf of every owner, keyed by credentialFields()
+     * name, or [] when this gateway is owner-configured only.
+     *
+     * The selfhost answer to "one merchant account for the whole install". Stripe has had this since
+     * the beginning - STRIPE_PLATFORM_SECRET makes every owner able to charge - but it was hardcoded
+     * into User::canAcceptStripePayments() rather than expressed as a capability, so Payfast (issue
+     * #113) shipped without it and a selfhost operator had to hand their merchant key to every user.
+     *
+     * A driver implementing this MUST return [] when config('app.hosted'): on a hosted install the
+     * money has to reach the event owner's own account, never the operator's.
+     *
+     * Read config() here, do not memoize into a property. PaymentGatewayManager is a singleton, so a
+     * driver instance outlives any config change - the same trap PlatformCurrency::flush() exists for.
+     *
+     * @return array<string, mixed>
+     */
+    public function platformCredentials(): array
+    {
+        return [];
+    }
+
+    /**
+     * Has this owner supplied a complete set of their own?
+     *
+     * Every credentialFields() entry marked required. Distinct from isConfiguredFor(), which asks the
+     * broader question "can this owner take money" and is satisfied by the installation's credentials
+     * too - the settings form needs this narrower one, or it offers to unlink credentials the owner
+     * never entered.
+     */
+    public function hasOwnCredentials(?User $owner): bool
+    {
+        if (! $owner) {
+            return false;
+        }
+
+        $required = array_filter($this->credentialFields(), fn (CredentialField $field) => $field->required);
+
+        // No required fields means there is nothing an owner could have supplied that would make this
+        // their account, so they have not. Covers both a gateway that declares no fields at all
+        // (Stripe, Invoice Ninja and Payment Link all connect through a settingsView() of their own)
+        // and a hypothetical one whose every field is optional, which would otherwise be reported as
+        // owner-configured for everybody.
+        if ($required === []) {
+            return false;
+        }
+
+        foreach ($required as $field) {
+            // The RAW column, not the cast value. EncryptedString::get() swallows a DecryptException
+            // and returns null, so an owner whose secrets were encrypted under a previous APP_KEY -
+            // rotated, or a database restored into a different install - would read as an owner who
+            // never connected anything, and credentialsFor() would quietly settle their sales into
+            // the installation's account. "Did they store one" is a question about the row, not
+            // about whether we can still read it.
+            //
+            // blank() rather than a truthiness test, so a legal value of "0" counts as present.
+            // PayfastSignature says the same of a passphrase of "0", twice.
+            if (blank($owner->getRawOriginal($field->name))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * The credentials to start a new checkout with: the owner's own if complete, else the
+     * installation's, else null when this gateway cannot take money for them at all.
+     *
+     * ALL-OR-NOTHING, never a field-by-field merge. A merchant id from one account paired with a
+     * passphrase from another produces a signature that verifies against nothing, which is a payment
+     * taken and a ticket never issued.
+     *
+     * Null for a null owner, deliberately: no owner, no credentials. The settings tab strip calls
+     * label(null) to get the bare product name, and resolving that to the installation's set would
+     * put the connected account (or "Test mode") on a tab that is meant to say only "Payfast".
+     *
+     * @return array<string, mixed>|null
+     */
+    public function credentialsFor(?User $owner): ?array
+    {
+        if (! $owner) {
+            return null;
+        }
+
+        if ($this->hasOwnCredentials($owner)) {
+            $own = [];
+
+            foreach ($this->credentialFields() as $field) {
+                $own[$field->name] = $owner->{$field->name};
+            }
+
+            foreach ($this->credentialFields() as $field) {
+                // Stored, but it does not decrypt. Refuse outright rather than falling through to the
+                // installation's set: this owner HAS an account, and quietly settling their sales into
+                // somebody else's is far worse than not offering the gateway - which is exactly what
+                // happened before installation-wide credentials existed.
+                if ($field->required && blank($own[$field->name])) {
+                    return null;
+                }
+            }
+
+            return $own;
+        }
+
+        return $this->platformCredentials() ?: null;
+    }
+
+    /**
+     * Every credential set that may legitimately settle this owner's payments, owner-first.
+     *
+     * Normally one. Two only where an installation set exists AND the owner has their own, which
+     * matters for a gateway whose notification can arrive hours after checkout: an owner who connects
+     * their own account while an Instant EFT is still clearing would otherwise have that payment
+     * verified against a passphrase it was never signed with, and the buyer would be charged for a
+     * ticket that is never issued.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function candidateCredentials(?User $owner): array
+    {
+        if (! $owner) {
+            return [];
+        }
+
+        $sets = [];
+
+        if ($resolved = $this->credentialsFor($owner)) {
+            $sets[] = $resolved;
+        }
+
+        $platform = $this->platformCredentials();
+
+        if ($platform && $platform !== ($sets[0] ?? null)) {
+            $sets[] = $platform;
+        }
+
+        return $sets;
+    }
+
     /**
      * Persist validated credentials. The default writes each declared field straight onto the owner,
      * which is all a form-based gateway needs; encryption is handled by the model's casts rather

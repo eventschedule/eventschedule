@@ -326,4 +326,172 @@ class PayfastItnTest extends TestCase
 
         $this->assertSame('expired', $this->sale->fresh()->status);
     }
+
+    // ------------------------------------------- installation-wide credentials (selfhost)
+
+    /**
+     * Point the installation at its own Payfast account, as a selfhost operator would in .env, and
+     * clear this owner's own columns so the fallback is what settles.
+     */
+    private function installWideAccount(bool $clearOwner = true): void
+    {
+        config([
+            'app.hosted' => false,
+            'payments.payfast.merchant_id' => '20000200',
+            'payments.payfast.merchant_key' => 'platform-merchant-key',
+            'payments.payfast.passphrase' => 'platform-passphrase',
+            'payments.payfast.sandbox' => true,
+            'payments.payfast.payment_types' => null,
+        ]);
+
+        if ($clearOwner) {
+            $this->owner->forceFill([
+                'payfast_merchant_id' => null,
+                'payfast_merchant_key' => null,
+                'payfast_passphrase' => null,
+            ])->save();
+
+            // The Sale already holds a stale relation from setUp's checkout.
+            $this->sale->refresh()->load('event.user');
+        }
+    }
+
+    public function test_an_itn_on_the_install_wide_account_settles_the_sale(): void
+    {
+        $this->installWideAccount();
+
+        $body = $this->itnBody(['merchant_id' => '20000200'], passphrase: 'platform-passphrase');
+
+        $this->postItn($body)->assertNoContent();
+
+        $this->assertSame('paid', $this->sale->fresh()->status);
+    }
+
+    public function test_the_install_wide_passphrase_does_not_settle_another_merchants_itn(): void
+    {
+        // The merchant id selects which passphrase is checked, so an ITN naming an account neither
+        // this owner nor the installation holds is refused before any signature work happens.
+        $this->installWideAccount();
+
+        $body = $this->itnBody(['merchant_id' => '99999999'], passphrase: 'platform-passphrase');
+
+        $this->postItn($body)->assertStatus(400);
+
+        $this->assertSame('unpaid', $this->sale->fresh()->status);
+    }
+
+    public function test_an_itn_on_the_install_wide_account_still_needs_the_right_passphrase(): void
+    {
+        $this->installWideAccount();
+
+        $body = $this->itnBody(['merchant_id' => '20000200'], passphrase: 'not-the-passphrase');
+
+        $this->postItn($body)->assertStatus(400);
+
+        $this->assertSame('unpaid', $this->sale->fresh()->status);
+    }
+
+    public function test_an_in_flight_payment_survives_the_owner_connecting_their_own_account(): void
+    {
+        // Instant EFT clears slowly, so an ITN can land hours after checkout. If the owner connects
+        // their own Payfast account in that window, verifying against only the set a FRESH checkout
+        // would use would reject a notification the installation's account really did sign: the buyer
+        // charged, the seats held, and no ticket ever issued.
+        //
+        // setUp()'s sale is only a fixture - it was checked out before any of this, on the owner's own
+        // account. What matters below is the state at ITN time: the installation supplies an account,
+        // the owner supplies another, and the notification names the installation's.
+        $this->installWideAccount();
+
+        $body = $this->itnBody(['merchant_id' => '20000200'], passphrase: 'platform-passphrase');
+
+        // ...and only now does the owner connect their own.
+        $this->owner->forceFill([
+            'payfast_merchant_id' => '10000100',
+            'payfast_merchant_key' => '46f0cd694581a',
+            'payfast_passphrase' => self::PASSPHRASE,
+        ])->save();
+
+        $this->sale->refresh()->load('event.user');
+
+        $this->postItn($body)->assertNoContent();
+
+        $this->assertSame('paid', $this->sale->fresh()->status);
+    }
+
+    public function test_an_owner_with_their_own_account_still_settles_on_it(): void
+    {
+        // The reverse of the above, and the case that must not regress: with both sets in play, the
+        // owner's own account settles its own payments.
+        $this->installWideAccount(clearOwner: false);
+
+        $this->postItn($this->itnBody())->assertNoContent();
+
+        $this->assertSame('paid', $this->sale->fresh()->status);
+    }
+
+    public function test_an_itn_is_refused_when_the_install_provides_nothing_and_the_owner_disconnects(): void
+    {
+        $this->owner->forceFill([
+            'payfast_merchant_id' => null,
+            'payfast_merchant_key' => null,
+            'payfast_passphrase' => null,
+        ])->save();
+
+        $this->sale->refresh()->load('event.user');
+
+        // The body, not just the status: every rejection here is a 400, and "not configured" is the
+        // one that tells an operator the account went away rather than that somebody is forging
+        // notifications. Getting the generic merchant-mismatch line instead would send them hunting
+        // for an attacker that does not exist.
+        $response = $this->postItn($this->itnBody());
+
+        $response->assertStatus(400);
+        $this->assertSame('not configured', $response->getContent());
+
+        $this->assertSame('unpaid', $this->sale->fresh()->status);
+    }
+
+    public function test_two_accounts_sharing_a_merchant_id_both_get_their_signature_tried(): void
+    {
+        // An operator rotates PAYFAST_PASSPHRASE in .env while the owner still holds the old one in
+        // their profile, so both candidate sets name the SAME merchant id with different passphrases.
+        // Selecting by merchant id and stopping at the first match would check an in-flight ITN
+        // against the wrong passphrase and reject it: buyer charged, ticket never issued.
+        $this->installWideAccount(clearOwner: false);
+
+        // Same merchant id as the owner's, different passphrase.
+        config([
+            'payments.payfast.merchant_id' => '10000100',
+            'payments.payfast.passphrase' => 'rotated-passphrase',
+        ]);
+
+        $this->sale->refresh()->load('event.user');
+
+        // Signed by the installation's rotated passphrase; the owner's set is tried first and fails.
+        $body = $this->itnBody(['merchant_id' => '10000100'], passphrase: 'rotated-passphrase');
+
+        $this->postItn($body)->assertNoContent();
+
+        $this->assertSame('paid', $this->sale->fresh()->status);
+    }
+
+    public function test_a_shared_merchant_id_still_refuses_a_passphrase_neither_side_holds(): void
+    {
+        // The flip side: trying both candidates must not become "accept anything from this merchant".
+        $this->installWideAccount(clearOwner: false);
+
+        config([
+            'payments.payfast.merchant_id' => '10000100',
+            'payments.payfast.passphrase' => 'rotated-passphrase',
+        ]);
+
+        $this->sale->refresh()->load('event.user');
+
+        $body = $this->itnBody(['merchant_id' => '10000100'], passphrase: 'neither-of-them');
+
+        $this->postItn($body)->assertStatus(400);
+
+        $this->assertSame('unpaid', $this->sale->fresh()->status);
+    }
 }

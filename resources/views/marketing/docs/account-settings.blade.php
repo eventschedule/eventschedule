@@ -251,7 +251,11 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Removing it</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Unlink Account</strong> and confirm. Any event still set to Payfast keeps the setting but shows it as no longer available, so you can see it and pick something else.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Unlink Account</strong> and confirm. Any event still set to Payfast keeps the setting but shows it as no longer available, so you can see it and pick something else. The exception is a site that provides its own Payfast account (below): there, unlinking hands your events back to the site's account rather than stopping them selling, and the money goes there instead.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">"Provided by this installation"</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">On a selfhosted site, the administrator can set up one Payfast account for everyone. If you see this, you can start selling immediately and there is nothing to fill in - payments settle into the site's account. Enter your own details to be paid into your own account instead, and unlink them again to go back.</p>
             </div>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mb-6">

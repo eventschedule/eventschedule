@@ -4668,4 +4668,10 @@ return [
     'seating_too_many_tables' => 'Una pianta della sala può avere fino a :max tavoli.',
     'seating_whole_table_only' => ':table si prenota solo come tavolo intero, quindi i :count posti vanno presi insieme.',
     'seating_whole_table_gone' => 'Quel tavolo si vende solo intero, e una parte è già stata presa.',
+    'gateway_provided_by_install' => 'Fornito da questa installazione',
+    'gateway_provided_by_install_help' => 'È stato configurato un account per tutti gli utenti di questo sito, quindi puoi iniziare a vendere senza collegare il tuo. Per usare un account diverso, inserisci i suoi dati qui sotto.',
+    'gateway_own_account_in_use' => 'Stai usando il tuo account',
+    'gateway_own_account_in_use_help' => 'Anche questa installazione fornisce un account. Scollega il tuo qui sotto per tornare a usarlo.',
+    'no_payment_method_for_currency' => 'Nessun metodo di pagamento per :currency',
+    'no_payment_method_for_currency_body' => 'Hai un metodo di pagamento collegato, ma nessuno di essi può regolare in :currency. Cambia la valuta di questo evento oppure collegane uno adatto. Fino ad allora puoi comunque incassare all\'ingresso.',
 ];

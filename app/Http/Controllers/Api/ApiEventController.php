@@ -284,6 +284,27 @@ class ApiEventController extends Controller
             'members', 'schedule', 'tickets', 'event_parts', 'addons',
         ]));
 
+        // Honour DEFAULT_PAYMENT_METHOD when the caller said nothing, the same as the event form
+        // does. Only on create: an update that omits the field must leave the stored value alone.
+        // saveEvent() builds the row with fill($request->all()), so an absent key would otherwise
+        // take the events.payment_method column default of 'cash'.
+        //
+        // The currency is whatever the caller sent; omitting it takes the column default of USD, so
+        // a rand-only gateway like Payfast correctly does not apply and this resolves back to cash.
+        // has(), not filled(): the rule at the top of this method is `nullable` and
+        // events.payment_method is a nullable column, so an explicit "payment_method": null is a
+        // caller saying "no method", not a caller saying nothing. Only an absent key takes the default.
+        if (! $request->has('payment_method')) {
+            $default = payment_gateways()->defaultMethodFor(
+                auth()->user(),
+                $request->input('ticket_currency_code'),
+            );
+
+            if ($default !== 'cash') {
+                $request->merge(['payment_method' => $default]);
+            }
+        }
+
         // Convert the incoming UTC starts_at to the SCHEDULE's local time, because saveEvent()
         // interprets the submitted wall-clock in the schedule's timezone (not the user's account tz).
         if ($request->has('starts_at')) {

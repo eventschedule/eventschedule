@@ -321,7 +321,7 @@
             <li><code class="doc-inline-code">STRIPE_PRICE_MONTHLY</code> and <code class="doc-inline-code">STRIPE_PRICE_YEARLY</code>: Pro price IDs</li>
             <li><code class="doc-inline-code">STRIPE_ENTERPRISE_PRICE_MONTHLY</code> and <code class="doc-inline-code">STRIPE_ENTERPRISE_PRICE_YEARLY</code>: Enterprise price IDs. Leave both unset to sell Pro only.</li>
             <li><code class="doc-inline-code">STRIPE_PRICE_MONTHLY_AMOUNT</code>, <code class="doc-inline-code">STRIPE_PRICE_YEARLY_AMOUNT</code>, <code class="doc-inline-code">STRIPE_ENTERPRISE_PRICE_MONTHLY_AMOUNT</code> and <code class="doc-inline-code">STRIPE_ENTERPRISE_PRICE_YEARLY_AMOUNT</code>: the amounts <em>displayed</em> in the app. They are labels only, so set them to match your Stripe prices or your pages will show the defaults of 9, 90, 29 and 290.</li>
-            <li><code class="doc-inline-code">PLATFORM_CURRENCY</code>: the currency those amounts are shown in, everywhere the platform quotes its own price. A label only, like the amounts, so set it to match the currency of your Stripe prices. Defaults to <code class="doc-inline-code">USD</code>, and a super-admin can change it at <code class="doc-inline-code">/admin/settings</code> without touching <code class="doc-inline-code">.env</code>.</li>
+            <li><code class="doc-inline-code">PLATFORM_CURRENCY</code>: the currency the platform quotes its own price in - a label there, like the amounts, so set it to match the currency of your Stripe prices. It does one real job beyond that: it is the currency a new event starts in when its schedule has no country set, or a country outside the built-in currency map. Defaults to <code class="doc-inline-code">USD</code>, and a super-admin can change it at <code class="doc-inline-code">/admin/settings</code> without touching <code class="doc-inline-code">.env</code>.</li>
             <li><code class="doc-inline-code">STRIPE_LEGACY_PRICE_MONTHLY</code>, <code class="doc-inline-code">STRIPE_LEGACY_PRICE_YEARLY</code>, <code class="doc-inline-code">STRIPE_LEGACY_ENTERPRISE_PRICE_MONTHLY</code> and <code class="doc-inline-code">STRIPE_LEGACY_ENTERPRISE_PRICE_YEARLY</code>: comma-separated retired price IDs. Stripe prices cannot be edited, so changing what a plan costs means creating a new price and pointing the variables above at it. List the old IDs here and anyone still billing on them keeps the tier and term they pay for. Leave empty until you have actually retired a price.</li>
             <li><code class="doc-inline-code">STRIPE_LEGACY_PRICE_AMOUNTS</code>: what those retired prices charge, as <code class="doc-inline-code">price_id:amount</code> pairs (for example <code class="doc-inline-code">price_abc:9,price_def:90</code>), so grandfathered subscribers are not counted at zero in reporting or quoted a price they are not paying.</li>
         </ul>
@@ -486,10 +486,65 @@
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-6"><a href="https://payfast.io" target="_blank" rel="noopener noreferrer" class="doc-link">Payfast</a> is a South African gateway, useful where Stripe is not available. It settles in South African rand only. Setup is documented in the <a href="{{ route('marketing.docs.tickets') }}#payfast" class="doc-link">user guide</a>; the notes below are the parts specific to running your own install.</p>
 
-        <div class="doc-callout doc-callout-info mb-6">
-            <div class="doc-callout-title">No server configuration required</div>
-            <p>Like Invoice Ninja, Payfast needs no <code class="doc-inline-code">.env</code> configuration. Each user connects their own merchant account from <strong>Settings &rarr; Payment Methods &rarr; Payfast</strong>, so different event owners on the same install can use different Payfast accounts.</p>
+        <h3 class="doc-subheading">Two ways to set it up</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Payfast works either way round, and you can mix the two on one install:</p>
+
+        <div class="doc-fields doc-fields--2 mb-6">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">One account for the whole install</h4>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Put your merchant details in <code class="doc-inline-code">.env</code>, exactly as you would <code class="doc-inline-code">STRIPE_PLATFORM_SECRET</code>. Every schedule can then sell tickets straight away, with no setup of their own, and all the money reaches your account.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Each user brings their own</h4>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Leave <code class="doc-inline-code">.env</code> alone and each user connects a merchant account from <strong>Settings &rarr; Payment Methods &rarr; Payfast</strong>, so different event owners on the same install are paid into different Payfast accounts.</p>
+            </div>
         </div>
+
+        <h3 class="doc-subheading">Install-wide configuration</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Take these from your Payfast dashboard, under <strong>Settings</strong>, and add them to your <code class="doc-inline-code">.env</code> file:</p>
+
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>.env</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code><span class="code-comment"># Payfast for every schedule on this install</span>
+<span class="code-variable">PAYFAST_MERCHANT_ID</span>=<span class="code-string">your_merchant_id</span>
+<span class="code-variable">PAYFAST_MERCHANT_KEY</span>=<span class="code-string">your_merchant_key</span>
+<span class="code-variable">PAYFAST_PASSPHRASE</span>=<span class="code-string">your_passphrase</span>
+<span class="code-variable">PAYFAST_SANDBOX</span>=<span class="code-string">false</span></code></pre>
+        </div>
+
+        <ul class="doc-list mb-6">
+            <li><code class="doc-inline-code">PAYFAST_PASSPHRASE</code> is optional at Payfast, but required here. Without one, the payment notification signature is a plain MD5 that anyone could reproduce, so Payfast is simply not offered until all three values are set.</li>
+            <li><code class="doc-inline-code">PAYFAST_SANDBOX</code> sends payments to Payfast's sandbox instead of taking real money. Sandbox tickets look completely normal, so leave it <code class="doc-inline-code">false</code> outside of testing. When it is on, "Test mode" is shown next to Payfast wherever an owner picks it.</li>
+            <li><code class="doc-inline-code">PAYFAST_PAYMENT_TYPES</code> (optional) pins the checkout to a single instrument, for example <code class="doc-inline-code">ef</code> for Instant EFT. Leave it empty to let Payfast offer everything your account supports.</li>
+        </ul>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">If you cache your configuration, run <code class="doc-inline-code">php artisan config:clear</code> after editing <code class="doc-inline-code">.env</code> so the new values are picked up.</p>
+
+        <div class="doc-callout doc-callout-info mb-6">
+            <div class="doc-callout-title">A user's own account always wins</div>
+            <p>The values above are a default, never an override. A user who has connected their own Payfast account in <strong>Settings &rarr; Payment Methods</strong> keeps using it, and their sales keep reaching them - so adding these to an install that has been running for a while cannot quietly re-route anybody's money. Users who have connected nothing see "Provided by this installation" on that tab instead, and can still enter their own account to opt out. Ignored entirely in hosted mode, where every owner must connect their own.</p>
+        </div>
+
+        <div class="doc-callout doc-callout-warning mb-6">
+            <div class="doc-callout-title">Payfast settles in rand only</div>
+            <p>It is offered only on events priced in ZAR. Separately, a single payment below R5.00 is refused at checkout rather than hidden from the dropdown, because Payfast will not process it. If Payfast is not appearing in an event's Payment dropdown at all, check the event's ticket currency first: a schedule whose country is blank, or not in the built-in currency map, starts its events in your installation currency - <code class="doc-inline-code">PLATFORM_CURRENCY</code>, or whatever is set at <code class="doc-inline-code">/admin/settings</code> - which defaults to USD.</p>
+        </div>
+
+        <h3 class="doc-subheading">Making Payfast the default for new events</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">New events start on <strong>Cash</strong> unless you say otherwise. On an install where Payfast is the only way to take money, that means choosing it by hand every time. Name it once instead:</p>
+
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>.env</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code><span class="code-variable">DEFAULT_PAYMENT_METHOD</span>=<span class="code-string">payfast</span></code></pre>
+        </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Accepts any gateway key - <code class="doc-inline-code">cash</code>, <code class="doc-inline-code">stripe</code>, <code class="doc-inline-code">invoiceninja</code>, <code class="doc-inline-code">payment_url</code> or <code class="doc-inline-code">payfast</code> - and applies to events created through the API as well as the form. It only takes effect where the gateway can actually be used: an owner who has not connected it, or an event in a currency it cannot settle, still starts on Cash. On the event form a schedule's own saved ticket defaults take priority over it; the API has never read those, so there it applies whenever <code class="doc-inline-code">payment_method</code> is omitted.</p>
 
         <div class="doc-callout doc-callout-warning mb-6">
             <div class="doc-callout-title">Your install must be publicly reachable</div>

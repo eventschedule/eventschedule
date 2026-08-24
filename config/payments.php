@@ -45,6 +45,38 @@ return [
             'w2w.payfast.co.za',
         ],
 
+        /*
+         * Installation-wide credentials, read by PayfastGateway::platformCredentials().
+         *
+         * Selfhost only, and a DEFAULT rather than an override: an owner who has connected their own
+         * Payfast account keeps using it. See PaymentGatewayDriver::credentialsFor().
+         */
+        'merchant_id' => env('PAYFAST_MERCHANT_ID'),
+        'merchant_key' => env('PAYFAST_MERCHANT_KEY'),
+        'passphrase' => env('PAYFAST_PASSPHRASE'),
+        'sandbox' => env('PAYFAST_SANDBOX', false),
+        'payment_types' => env('PAYFAST_PAYMENT_TYPES'),
+
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Default payment method for a new event
+    |--------------------------------------------------------------------------
+    |
+    | What the event form and the API start a new event on. 'cash' is the historical default and the
+    | events.payment_method column default; an operator whose install runs on one gateway can point
+    | this at it so owners are not selecting the same thing every time.
+    |
+    | Only honoured when the gateway is genuinely usable for that event - connected for the owner and
+    | able to settle the event's currency - so a typo or a stale value degrades to cash rather than
+    | producing an event nobody can buy from. See PaymentGatewayManager::defaultMethodFor().
+    |
+    | `?:` rather than an env() default: .env.example ships the key blank, and a blank value wins over
+    | the second argument, so env('DEFAULT_PAYMENT_METHOD', 'cash') would yield '' on a fresh install.
+    |
+    */
+
+    'default_method' => env('DEFAULT_PAYMENT_METHOD') ?: 'cash',
 
 ];
