@@ -160,13 +160,16 @@
                                 @keydown="onSeatKey($event, seat, s)">
                                 <!-- Shape carries the kind, never colour alone. -->
                                 <rect v-if="seat.kind === 'wheelchair'" x="-9" y="-9" width="18" height="18" rx="3"
-                                    :fill="seatFill(seat)" :stroke="seatStroke(seat)" stroke-width="1.5" />
-                                <circle v-else r="8" :fill="seatFill(seat)" :stroke="seatStroke(seat)" stroke-width="1.5"
+                                    :fill="seatFill(seat)" :stroke="seatStroke(seat)" :stroke-width="seatStrokeWidth(seat)" />
+                                <circle v-else r="8" :fill="seatFill(seat)" :stroke="seatStroke(seat)" :stroke-width="seatStrokeWidth(seat)"
                                     :stroke-dasharray="seat.kind === 'companion' ? '3 2' : null" />
                                 <circle v-if="seat.kind === 'restricted_view'" r="8" fill="url(#restrictedHatch)"
                                     class="text-gray-700 dark:text-gray-200" />
                                 <text v-if="seat.kind === 'wheelchair'" text-anchor="middle" dy="4" font-size="10"
-                                    class="fill-gray-900 dark:fill-gray-900">&#9855;</text>
+                                    :class="seat.locked ? 'fill-white' : 'fill-gray-900 dark:fill-gray-900'">&#9855;</text>
+                                <!-- The same mark the box office puts on a sold seat. -->
+                                <text v-else-if="seat.locked" text-anchor="middle" dy="3.5" font-size="9"
+                                    fill="#ffffff">&#10005;</text>
                                 <!-- No dark: variant. The seat itself is light in BOTH themes, so a
                                      dark-mode text colour put light grey on a light grey disc and the
                                      numbers vanished entirely. -->
@@ -283,7 +286,7 @@
                         </button>
                     </div>
 
-                    <button type="button" @click="removeSection(section)" class="px-3 py-2 rounded-md text-xs font-medium border border-red-300 dark:border-red-700 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200">{{ t.removeSection }}</button>
+                    <button id="seating-remove-section" type="button" @click="removeSection(section)" class="px-3 py-2 rounded-md text-xs font-medium border border-red-300 dark:border-red-700 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200">{{ t.removeSection }}</button>
                 </template>
 
                 <template v-if="selectedSeats.length">
@@ -442,14 +445,32 @@ function sectionBox(s) {
     return { x: minX, y: minY, w: Math.max(80, maxX - minX), h: Math.max(60, maxY - minY) };
 }
 
+/**
+ * A sold seat looks sold.
+ *
+ * The structure payload has carried `locked` all along, and the only thing reading it was the guard
+ * in removeSelectedSeats - so the one screen where sold seats exist, "Modify this date only", drew
+ * them identically to empty ones. An organizer restructuring a room that is already selling could
+ * not see the seats that were about to make Save fail.
+ *
+ * Red matches the box office, so the same seat reads the same on both screens. Template seats are
+ * never locked: the status lives on the per-date snapshots.
+ */
 function seatFill(seat) {
     if (selectedSeats.value.includes(seat.id)) return 'var(--brand-blue)';
+    if (seat.locked) return '#dc2626';
     if (seat.kind === 'wheelchair') return '#bfdbfe';
     if (seat.kind === 'companion') return 'transparent';
     return '#e5e7eb';
 }
 function seatStroke(seat) {
-    return selectedSeats.value.includes(seat.id) ? 'var(--brand-blue)' : '#9ca3af';
+    if (selectedSeats.value.includes(seat.id)) return 'var(--brand-blue)';
+    return seat.locked ? '#7f1d1d' : '#9ca3af';
+}
+
+/** Thicker for a sold seat: status is never carried by colour alone. */
+function seatStrokeWidth(seat) {
+    return seat.locked ? 2.5 : 1.5;
 }
 
 // ---- selection
@@ -528,6 +549,8 @@ function seatAriaLabel(s, seat) {
     if (seat.row_label) bits.push((t.rowPattern || 'Row :row').replace(':row', seat.row_label));
     if (seat.seat_label) bits.push((t.seatPattern || 'Seat :seat').replace(':seat', seat.seat_label));
     bits.push(t['kind_' + seat.kind] || seat.kind);
+    if (seat.locked) bits.push(t.soldSeat || '');
+
     return bits.filter(Boolean).join(', ');
 }
 
@@ -616,9 +639,24 @@ function addLevel(name) {
     activeLevel.value = levels.value.length - 1;
     dirty.value = true;
 }
+/**
+ * The sold-seat rule, applied before the work rather than after it.
+ *
+ * removeSelectedSeats has always refused outright, and the server refuses too - but removing the
+ * SECTION or the LEVEL that holds those same seats did not, so an organizer could restructure a
+ * live room and only meet the rejection at Save. Deleting three seats one at a time being stricter
+ * than deleting the section around them is the wrong way round.
+ */
+function hasSoldSeats(sections) {
+    return sections.some((s) => (s.seats || []).some((seat) => seat.locked));
+}
+
 function removeLevel(i) {
     const lvl = levels.value[i];
-    if (! confirmRemoval(t.confirmRemoveLevel, { ':level': lvl?.name || '', ':count': seatsInLevel(lvl) })) return;
+    if (! lvl) return;
+
+    if (hasSoldSeats(lvl.sections || [])) { error.value = t.cannotRemoveSold; return; }
+    if (! confirmRemoval(t.confirmRemoveLevel, { ':level': lvl.name || '', ':count': seatsInLevel(lvl) })) return;
 
     levels.value.splice(i, 1);
     activeLevel.value = Math.max(0, i - 1);
@@ -647,6 +685,7 @@ function addSection(kind, attrs = {}) {
     return s;
 }
 function removeSection(s) {
+    if (hasSoldSeats([s])) { error.value = t.cannotRemoveSold; return; }
     if (! confirmRemoval(t.confirmRemoveSection, { ':section': s.name || '', ':count': s.seats.length })) return;
 
     const i = level.value.sections.indexOf(s);

@@ -95,6 +95,7 @@
                 'removeSeats' => __('messages.seating_remove_seats'),
                 'standing' => __('messages.seating_standing'), 'seating' => __('messages.seating_seating'),
                 'cannotRemoveSold' => __('messages.seating_cannot_remove_sold'),
+                'soldSeat' => __('messages.seating_count_sold'),
                 'presetTheatre' => __('messages.seating_preset_theatre'),
                 'presetTheatreHelp' => __('messages.seating_preset_theatre_help'),
                 'presetCabaret' => __('messages.seating_preset_cabaret'),

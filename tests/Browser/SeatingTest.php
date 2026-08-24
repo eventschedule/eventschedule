@@ -318,6 +318,9 @@ class SeatingTest extends DuskTestCase
             // A real booking to act on.
             $sale = Sale::create([
                 'event_id' => $event->id, 'event_date' => $map->event_date,
+                // NOT NULL with no default, and nothing fills it in - Sale's saving hook touches
+                // only phone and paid_at, and there is no observer.
+                'subdomain' => 'talent',
                 'name' => 'Jane Smith', 'email' => 'jane@example.com',
                 'status' => 'paid', 'payment_method' => 'box_office', 'secret' => Str::random(32),
             ]);
@@ -355,6 +358,48 @@ class SeatingTest extends DuskTestCase
             $browser->pause(300)->acceptDialog()->pause(1500);
 
             $this->assertSame('available', $sold->fresh()->status, 'accepting the confirm did not release the seat');
+        });
+    }
+
+    /**
+     * A section holding a sold seat cannot be removed, and says so straight away.
+     *
+     * The server has always refused - but only at Save, after the room had been restructured. The
+     * seat-by-seat path refused immediately, so deleting the section AROUND those seats being the
+     * lenient one was exactly backwards. Only reachable on the occurrence editor, because a
+     * template seat is never sold.
+     */
+    public function test_a_section_with_a_sold_seat_cannot_be_removed(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->setupTestAccount($browser);
+            $this->createTestVenue($browser);
+            $this->createTestTalent($browser);
+            $this->createTestEventWithTickets($browser);
+
+            [$event] = $this->makeSeated();
+            $map = app(SeatingMapService::class)->materialize($event);
+            $seat = SeatingSeat::where('event_seating_map_id', $map->id)->orderBy('position')->firstOrFail();
+            $seat->update(['status' => 'sold']);
+
+            $browser->visit('/talent/seating/occurrence/'.UrlUtils::encodeId($event->id).'/design?date='.$map->event_date)
+                ->waitFor('#seating-designer', 20)
+                ->waitFor('#seating-designer svg > g > g', 20)
+                ->pause(700);
+
+            // Select the section, which is what reveals its Remove button.
+            $browser->script('document.querySelector("#seating-designer svg > g > g > rect").dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));');
+            $browser->waitFor('#seating-remove-section', 15)->pause(300);
+
+            $before = $browser->script('return document.querySelectorAll("#seating-designer svg > g > g circle, #seating-designer svg > g > g rect").length')[0];
+
+            $browser->script('document.getElementById("seating-remove-section").click();');
+            $browser->waitFor('#seating-error', 10);
+
+            $after = $browser->script('return document.querySelectorAll("#seating-designer svg > g > g circle, #seating-designer svg > g > g rect").length')[0];
+
+            $this->assertSame($before, $after, 'the section was removed despite holding a sold seat');
+            $this->assertSame('sold', $seat->fresh()->status);
         });
     }
 }
