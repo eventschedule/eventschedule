@@ -3,6 +3,7 @@
 namespace App\Utils;
 
 use Illuminate\Database\DetectsConcurrencyErrors;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -20,6 +21,10 @@ use Throwable;
  * out of AnalyticsDaily::incrementView() and 500'd a public schedule page. A counter must
  * never break the page it is counting, so outside a transaction we retry a few times and
  * then give up quietly, reporting to Sentry.
+ *
+ * That same foreign key has a second failure mode, which is why 1452 is singled out below:
+ * nothing in this app soft-deletes, so the parent roles/events row can stop existing
+ * outright between the page's SELECT and the counter's INSERT.
  */
 final class CounterUtils
 {
@@ -60,6 +65,20 @@ final class CounterUtils
                     usleep(random_int(20, 60) * 1000 * $attempt);
 
                     continue;
+                }
+
+                // 1452: the parent roles/events row was deleted between the page's SELECT
+                // and this INSERT. Not worth retrying and not worth reporting - the row is
+                // permanently gone, and ON DELETE CASCADE has already taken whatever
+                // counters landed before it went. The hourly demo reset
+                // (DemoService::resetDemoData) hard-deletes and recreates every demo-%
+                // schedule and its events, so a guest mid-render on a demo page loses this
+                // race roughly once an hour; a user deleting an event under a live visitor
+                // loses it the same way on any schedule. Sentry EVENTSCHEDULE-PHP-46.
+                // Every other failure still reports - see the 42S02 case in
+                // AnalyticsCounterResilienceTest, which pins that boundary.
+                if ($e instanceof QueryException && ($e->errorInfo[1] ?? null) === 1452) {
+                    return;
                 }
 
                 report($e);
