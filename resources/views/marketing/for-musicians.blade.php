@@ -692,7 +692,7 @@
 
                         <div class="es-poster-od relative mt-auto rounded-xl border-2 border-[color:var(--esp-line)] bg-[#fdfcf8] p-4 font-mono text-xs dark:bg-[#171c26]" dir="ltr" aria-hidden="true">
                             <div class="mb-1 flex justify-between text-[color:var(--esp-ink)]"><span>GA TICKET x2</span><span>$50.00</span></div>
-                            <div class="mb-3 flex justify-between font-bold"><span class="text-[color:var(--esp-ink)]">PLATFORM FEE</span><span class="text-[#0f766e] dark:text-[#2dd4bf]">$0.00</span></div>
+                            <div class="mb-3 flex justify-between font-bold"><span class="text-[color:var(--esp-ink)]">PLATFORM FEE</span><span class="text-[#0f766e] dark:text-[#2dd4bf]">{{ plan_price(0) }}</span></div>
                             <div class="es-poster-perf -mx-4 mb-3"></div>
                             <div class="flex items-end justify-between gap-3">
                                 <div>

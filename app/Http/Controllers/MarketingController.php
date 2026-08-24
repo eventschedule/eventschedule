@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Services\AuditService;
 use App\Services\DemoService;
 use App\Utils\DocsUtils;
+use App\Utils\PlatformPricing;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -22,12 +23,13 @@ class MarketingController extends Controller
      * assemble their tables, FAQs and JSON-LD in PHP arrays here, where that composer has not run
      * yet - which is how ~94 quotes of the old $5/mo survived a price change and shipped beside
      * an offers block already emitting the new one. Same source, read directly.
+     *
+     * Returns a float: the amounts are admin-settable to two decimal places, and the (int) cast
+     * this used to carry would quote 14.50 as 14. plan_price() formats either shape.
      */
-    private function planPrice(bool $enterprise = false): int
+    private function planPrice(bool $enterprise = false): float
     {
-        return (int) config($enterprise
-            ? 'services.stripe_platform.enterprise_price_monthly_amount'
-            : 'services.stripe_platform.price_monthly_amount', $enterprise ? 29 : 9);
+        return PlatformPricing::amount($enterprise ? 'enterprise' : 'pro', 'monthly');
     }
 
     /**
@@ -714,7 +716,7 @@ class MarketingController extends Controller
 
             'eventschedule' => [
                 'name' => 'Event Schedule',
-                'monthly' => (int) config('services.stripe_platform.price_monthly_amount', 9),
+                'monthly' => PlatformPricing::proMonthly(),
                 'percent' => 0.0,
                 'fixed' => 0.0,
                 'label' => '0% platform fee',
@@ -3870,7 +3872,7 @@ class MarketingController extends Controller
                 'about' => 'Google Forms is a free form builder used by many event organizers to collect RSVPs and registrations. While it works for basic data collection, it was never designed for event management - leaving organizers to manually handle payments, confirmations, and attendee tracking outside the form.',
                 'pricing_note' => 'Google Forms is free, but when you add Stripe for payments and Mailchimp for emails, costs add up quickly. Event Schedule combines registration, payments, emails, and check-in from '.plan_price($this->planPrice()).'/month total.',
                 'competitor_price' => 'Free (but $50+/mo with add-ons)',
-                'es_price' => 'From $0/mo (Pro '.plan_price($this->planPrice()).'/mo)',
+                'es_price' => 'From '.plan_price(0).'/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [
                     ['feature' => 'Event registration', 'competitor' => 'Manual form setup', 'es' => 'Built-in with tickets'],
                     ['feature' => 'Payment processing', 'competitor' => false, 'es' => true],
@@ -3941,7 +3943,7 @@ class MarketingController extends Controller
                 'about' => 'Mailchimp is a popular email marketing platform that many event organizers use to promote events and communicate with attendees. However, using Mailchimp means managing a separate tool alongside your event platform, manually syncing attendee lists, and paying for email marketing on top of your event tools.',
                 'pricing_note' => 'Mailchimp starts at $13/month for 500 contacts and goes up from there. Event Schedule newsletters are free for unlimited subscribers, and Pro at '.plan_price($this->planPrice()).'/month adds ticketing with zero platform fees.',
                 'competitor_price' => 'From $13/mo',
-                'es_price' => 'From $0/mo (Pro '.plan_price($this->planPrice()).'/mo)',
+                'es_price' => 'From '.plan_price(0).'/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [
                     ['feature' => 'Email newsletters', 'competitor' => true, 'es' => 'With A/B testing'],
                     ['feature' => 'Subscriber management', 'competitor' => true, 'es' => 'Auto from ticket sales'],
@@ -4012,7 +4014,7 @@ class MarketingController extends Controller
                 'about' => 'Canva is a popular graphic design platform that event organizers use to create flyers, social media posts, and promotional graphics. While Canva offers great design flexibility, creating event graphics manually takes time and requires updating multiple designs whenever event details change.',
                 'pricing_note' => 'Canva Pro costs $15/month for premium design features. Event Schedule generates event graphics automatically on the Pro plan at '.plan_price($this->planPrice()).'/month, which also includes ticketing and newsletters.',
                 'competitor_price' => 'From $15/mo (Pro)',
-                'es_price' => 'From $0/mo (Pro '.plan_price($this->planPrice()).'/mo)',
+                'es_price' => 'From '.plan_price(0).'/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [
                     ['feature' => 'Event graphics', 'competitor' => 'Manual design', 'es' => 'Auto-generated'],
                     ['feature' => 'AI flyer generation', 'competitor' => 'AI design tools', 'es' => 'Event-specific AI'],
@@ -4085,7 +4087,7 @@ class MarketingController extends Controller
                 // on being cheaper. It compares what the same money buys instead.
                 'pricing_note' => 'Linktree Pro costs $9/month for analytics and customization on what is still a list of links. Event Schedule starts free, and Pro at '.plan_price($this->planPrice()).'/month buys a full event schedule page with ticketing, newsletters, and subscriber signups.',
                 'competitor_price' => 'From $9/mo (Pro)',
-                'es_price' => 'From $0/mo (Pro '.plan_price($this->planPrice()).'/mo)',
+                'es_price' => 'From '.plan_price(0).'/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [
                     ['feature' => 'Event details on page', 'competitor' => 'Links only', 'es' => 'Full event info'],
                     ['feature' => 'Ticket sales', 'competitor' => false, 'es' => 'Zero platform fees'],
@@ -4156,7 +4158,7 @@ class MarketingController extends Controller
                 'about' => 'Google Sheets is a go-to tool for event organizers who need to track attendees, manage guest lists, and organize event details. But spreadsheets were not built for event management - they require manual data entry, have no attendee-facing features, and become unwieldy as events grow.',
                 'pricing_note' => 'Google Sheets is free, but tracking events manually costs time. Event Schedule automates attendee tracking, and the Pro plan at '.plan_price($this->planPrice()).'/month adds ticketing with automatic sales data.',
                 'competitor_price' => 'Free (manual effort)',
-                'es_price' => 'From $0/mo (Pro '.plan_price($this->planPrice()).'/mo)',
+                'es_price' => 'From '.plan_price(0).'/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [
                     ['feature' => 'Attendee tracking', 'competitor' => 'Manual entry', 'es' => 'Automatic'],
                     ['feature' => 'Ticket sales tracking', 'competitor' => 'Manual entry', 'es' => 'Real-time dashboard'],
@@ -4227,7 +4229,7 @@ class MarketingController extends Controller
                 'about' => 'Calendly is a scheduling tool designed for booking one-on-one meetings and appointments. Some event organizers use it to schedule events, but it lacks public event pages, ticketing, and the ability to share a calendar of events with an audience.',
                 'pricing_note' => 'Calendly charges $10/month per user for its Standard plan. Event Schedule is free for unlimited events and public pages, with ticketing at '.plan_price($this->planPrice()).'/month and no per-user fees.',
                 'competitor_price' => 'From $10/mo per user',
-                'es_price' => 'From $0/mo (Pro '.plan_price($this->planPrice()).'/mo)',
+                'es_price' => 'From '.plan_price(0).'/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [
                     ['feature' => 'Public event pages', 'competitor' => 'Booking pages', 'es' => 'Full event pages'],
                     ['feature' => 'One-on-one appointment booking', 'competitor' => true, 'es' => 'Built in (free, 1 type)'],
@@ -4299,7 +4301,7 @@ class MarketingController extends Controller
                 'about' => 'SurveyMonkey is a survey platform that some event organizers repurpose for event registration and feedback collection. While it offers form building capabilities, it was designed for surveys and research - not for managing events, selling tickets, or handling attendee logistics.',
                 'pricing_note' => 'SurveyMonkey charges $25+/month for features like payment collection and custom branding. Event Schedule Pro is '.plan_price($this->planPrice()).'/month with zero platform fees on ticket sales.',
                 'competitor_price' => 'From $25+/mo',
-                'es_price' => 'From $0/mo (Pro '.plan_price($this->planPrice()).'/mo)',
+                'es_price' => 'From '.plan_price(0).'/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [
                     ['feature' => 'Event registration', 'competitor' => 'Survey forms', 'es' => 'Purpose-built'],
                     ['feature' => 'Payment processing', 'competitor' => 'Paid add-on', 'es' => 'Zero platform fees'],
@@ -4370,7 +4372,7 @@ class MarketingController extends Controller
                 'about' => 'Doodle is a scheduling poll tool that helps groups find a common time to meet. Event organizers sometimes use it to pick event dates, but Doodle stops at the poll - it does not help you create, promote, or manage the actual event once a date is chosen.',
                 'pricing_note' => 'Doodle charges $7+/month per user for its Pro plan. Event Schedule is free for unlimited events with a public schedule, and '.plan_price($this->planPrice()).'/month for ticketing with no per-user fees.',
                 'competitor_price' => 'From $7+/mo per user',
-                'es_price' => 'From $0/mo (Pro '.plan_price($this->planPrice()).'/mo)',
+                'es_price' => 'From '.plan_price(0).'/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [
                     ['feature' => 'Event creation', 'competitor' => 'Date polls only', 'es' => 'Full event management'],
                     ['feature' => 'Public event pages', 'competitor' => false, 'es' => true],
@@ -4442,7 +4444,7 @@ class MarketingController extends Controller
                 'about' => 'QR code generators are standalone tools that event organizers use to create scannable codes for event check-in, links to event pages, or ticket verification. Using a separate QR tool means manually creating codes, linking them to attendee data, and building your own check-in process.',
                 'pricing_note' => 'Many QR generators charge $5 to $15/month for dynamic QR codes. Event Schedule includes QR codes on every ticket automatically with the Pro plan at '.plan_price($this->planPrice()).'/month, which also covers ticketing, check-in, and a live dashboard.',
                 'competitor_price' => '$5 to $15/mo',
-                'es_price' => 'From $0/mo (Pro '.plan_price($this->planPrice()).'/mo)',
+                'es_price' => 'From '.plan_price(0).'/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [
                     ['feature' => 'QR codes on tickets', 'competitor' => 'Manual creation', 'es' => 'Automatic'],
                     ['feature' => 'Scan-to-check-in', 'competitor' => false, 'es' => true],
@@ -4513,7 +4515,7 @@ class MarketingController extends Controller
                 'about' => 'Squarespace is a general website builder that some event organizers use to create event pages and sell tickets through third-party integrations. While it produces beautiful websites, building event functionality on top of a website builder means extra complexity, plugins, and ongoing maintenance for features that should be built in.',
                 'pricing_note' => 'Squarespace costs $16+/month for a basic site, plus extra for third-party ticketing. Event Schedule is free for event pages, and '.plan_price($this->planPrice()).'/month for ticketing with zero platform fees.',
                 'competitor_price' => 'From $16+/mo',
-                'es_price' => 'From $0/mo (Pro '.plan_price($this->planPrice()).'/mo)',
+                'es_price' => 'From '.plan_price(0).'/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [
                     ['feature' => 'Event pages', 'competitor' => 'Manual page build', 'es' => 'Auto-generated'],
                     ['feature' => 'Ticketing', 'competitor' => 'Third-party plugins', 'es' => 'Zero platform fees'],
@@ -4584,7 +4586,7 @@ class MarketingController extends Controller
                 'about' => 'Notion is a workspace and productivity tool that some event organizers use to plan events with databases, calendars, and shared pages. While Notion is excellent for internal project management, it has no public-facing event pages, no ticketing or RSVP functionality, and a steep learning curve for setting up event workflows.',
                 'pricing_note' => 'Notion Plus costs $10/month per user. Event Schedule is free for unlimited events, public pages, and team features. Pro at '.plan_price($this->planPrice()).'/month adds ticketing with zero platform fees and no per-user charges.',
                 'competitor_price' => 'From $10/mo per user',
-                'es_price' => 'From $0/mo (Pro '.plan_price($this->planPrice()).'/mo)',
+                'es_price' => 'From '.plan_price(0).'/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [
                     ['feature' => 'Public event pages', 'competitor' => false, 'es' => true],
                     ['feature' => 'Ticketing & payments', 'competitor' => false, 'es' => 'Zero platform fees'],
@@ -4655,7 +4657,7 @@ class MarketingController extends Controller
                 'about' => 'Trello is a kanban-style project management tool that some event organizers use to track event planning tasks. While Trello is great for organizing workflows with boards and cards, it has no attendee-facing features, no registration or ticketing, and task boards do not map well to the event lifecycle of creating, promoting, and managing events.',
                 'pricing_note' => 'Trello Standard costs $6/month per user. Event Schedule is free for unlimited events and public pages with team collaboration, and '.plan_price($this->planPrice()).'/month for ticketing with no per-user fees.',
                 'competitor_price' => 'From $6/mo per user',
-                'es_price' => 'From $0/mo (Pro '.plan_price($this->planPrice()).'/mo)',
+                'es_price' => 'From '.plan_price(0).'/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [
                     ['feature' => 'Public event pages', 'competitor' => false, 'es' => true],
                     ['feature' => 'Ticketing & payments', 'competitor' => false, 'es' => 'Zero platform fees'],
@@ -5564,6 +5566,7 @@ class MarketingController extends Controller
             ['page' => 'Stripe Integration', 'section' => 'Choose Your Setup', 'description' => 'Select the right deployment option.', 'url' => $r['selfhost_stripe'].'#choose-setup', 'category' => 'Selfhost', 'keywords' => 'setup option deployment'],
             ['page' => 'Stripe Integration', 'section' => 'For Selfhosted Users', 'description' => 'Stripe configuration for selfhosted deployments.', 'url' => $r['selfhost_stripe'].'#selfhosted-users', 'category' => 'Selfhost', 'keywords' => 'selfhosted stripe configuration'],
             ['page' => 'Stripe Integration', 'section' => 'For SaaS Operators', 'description' => 'Stripe Connect setup for SaaS platforms.', 'url' => $r['selfhost_stripe'].'#saas-operators', 'category' => 'Selfhost', 'keywords' => 'saas stripe connect'],
+            ['page' => 'Stripe Integration', 'section' => 'Plan pricing', 'description' => 'Set what you advertise Pro and Enterprise at, from the admin panel or the STRIPE_PRICE_*_AMOUNT variables.', 'url' => $r['selfhost_stripe'].'#saas-operators', 'category' => 'Selfhost', 'keywords' => 'plan pricing custom pricing price amount pro enterprise monthly yearly STRIPE_PRICE_MONTHLY_AMOUNT selfhost change price'],
             ['page' => 'Stripe Integration', 'section' => 'Plan currency', 'description' => 'PLATFORM_CURRENCY decides the symbol beside your plan prices, and the currency a new event starts in when its schedule has no country; the Stripe price decides what is charged.', 'url' => $r['selfhost_stripe'].'#saas-operators', 'category' => 'Selfhost', 'keywords' => 'PLATFORM_CURRENCY plan price currency symbol dollar euro pound rand default event currency no country'],
             ['page' => 'Stripe Integration', 'section' => 'Invoice Ninja Integration', 'description' => 'Configure Invoice Ninja as a payment gateway.', 'url' => $r['selfhost_stripe'].'#invoice-ninja', 'category' => 'Selfhost', 'keywords' => 'invoice ninja payment gateway'],
             ['page' => 'Stripe Integration', 'section' => 'Testing', 'description' => 'Test your payment setup.', 'url' => $r['selfhost_stripe'].'#testing', 'category' => 'Selfhost', 'keywords' => 'test payment debug'],
@@ -5637,6 +5640,7 @@ class MarketingController extends Controller
             ['page' => 'Admin Panel', 'section' => 'Queue', 'description' => 'Monitor background job queue.', 'url' => $r['selfhost_admin'].'#system-queue', 'category' => 'Selfhost', 'keywords' => 'queue jobs background worker'],
             ['page' => 'Admin Panel', 'section' => 'Logs', 'description' => 'View application error logs.', 'url' => $r['selfhost_admin'].'#system-logs', 'category' => 'Selfhost', 'keywords' => 'logs errors debug'],
             ['page' => 'Admin Panel', 'section' => 'Settings', 'description' => 'Add custom header and footer code (Google Tag Manager, analytics) injected into all public guest pages.', 'url' => $r['selfhost_admin'].'#system-settings', 'category' => 'Selfhost', 'keywords' => 'settings header footer code google tag manager gtm analytics tracking script head body'],
+            ['page' => 'Admin Panel', 'section' => 'Plan pricing', 'description' => 'Set what your platform advertises Pro and Enterprise at, without editing .env, and move every page at once.', 'url' => $r['selfhost_admin'].'#system-settings', 'category' => 'Selfhost', 'keywords' => 'plan pricing custom pricing price amount pro enterprise monthly yearly advertise marketing prices upgrade prompts STRIPE_PRICE_MONTHLY_AMOUNT selfhost'],
             ['page' => 'Admin Panel', 'section' => 'Platform Currency', 'description' => 'Set the currency your platform shows its own prices in, and the fallback currency for a new event.', 'url' => $r['selfhost_admin'].'#system-settings', 'category' => 'Selfhost', 'keywords' => 'platform currency symbol dollar euro pound rand yen PLATFORM_CURRENCY plan price marketing prices default currency white label'],
             ['page' => 'Admin Panel', 'section' => 'Cookie consent banner', 'description' => 'When the cookie banner appears, what the UTM attribution cookies do, and why the built-in analytics need no consent.', 'url' => $r['selfhost_admin'].'#system-settings', 'category' => 'Selfhost', 'keywords' => 'cookie consent banner gdpr privacy COOKIE_CONSENT_BANNER utm_params utm_referrer_url utm_landing_page attribution tracking analytics anonymous aggregate hashed ip'],
             ['page' => 'Admin Panel', 'section' => 'App Update', 'description' => 'See the installed version next to the latest release, and apply an update in one click.', 'url' => $r['selfhost_admin'].'#system-app-update', 'category' => 'Selfhost', 'keywords' => 'update upgrade version release github selfhost one click migrations app:update update app missing notification badge'],
@@ -5667,6 +5671,7 @@ class MarketingController extends Controller
             ['page' => 'SaaS Setup', 'section' => 'DNS Setup', 'description' => 'Configure subdomain DNS for SaaS.', 'url' => $r['saas_setup'].'#dns', 'category' => 'SaaS', 'keywords' => 'dns subdomain wildcard'],
             ['page' => 'SaaS Setup', 'section' => 'Web Server', 'description' => 'Web server configuration for SaaS mode.', 'url' => $r['saas_setup'].'#webserver', 'category' => 'SaaS', 'keywords' => 'webserver nginx apache'],
             ['page' => 'SaaS Setup', 'section' => 'Stripe Integration', 'description' => 'Configure Stripe for SaaS subscriptions.', 'url' => $r['saas_setup'].'#stripe', 'category' => 'SaaS', 'keywords' => 'stripe payment subscription'],
+            ['page' => 'SaaS Setup', 'section' => 'Plan pricing', 'description' => 'Set your own Pro and Enterprise prices, from the admin panel or the STRIPE_PRICE_*_AMOUNT variables.', 'url' => $r['saas_setup'].'#stripe', 'category' => 'SaaS', 'keywords' => 'plan pricing custom pricing price amount pro enterprise monthly yearly white label STRIPE_PRICE_MONTHLY_AMOUNT'],
             ['page' => 'SaaS Setup', 'section' => 'Plan currency', 'description' => 'Set PLATFORM_CURRENCY so your plan prices show in your own currency rather than dollars.', 'url' => $r['saas_setup'].'#stripe', 'category' => 'SaaS', 'keywords' => 'PLATFORM_CURRENCY plan price currency symbol dollar euro pound rand white label branding'],
             ['page' => 'SaaS Setup', 'section' => 'Example', 'description' => 'Complete SaaS setup example.', 'url' => $r['saas_setup'].'#example', 'category' => 'SaaS', 'keywords' => 'example tutorial walkthrough'],
             ['page' => 'SaaS Setup', 'section' => 'Verification', 'description' => 'Verify your SaaS setup is working.', 'url' => $r['saas_setup'].'#verification', 'category' => 'SaaS', 'keywords' => 'verify test check'],

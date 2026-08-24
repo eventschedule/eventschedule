@@ -29,12 +29,13 @@ class ReferralCreditEarned extends Mailable
 
     public function content(): Content
     {
-        // From config, like every other price the site quotes. Hardcoded, this email told the
-        // referrer their credit was worth one number while /referrals - which now reads the same
-        // config through a view composer - told them another.
-        $creditValue = plan_price((int) ($this->referral->plan_type === 'enterprise'
-            ? config('services.stripe_platform.enterprise_price_monthly_amount', 29)
-            : config('services.stripe_platform.price_monthly_amount', 9)));
+        // From PlatformPricing, like every other price the site quotes. Hardcoded, this email
+        // told the referrer their credit was worth one number while /referrals - which reads
+        // the same source through a view composer - told them another.
+        $creditValue = plan_price(\App\Utils\PlatformPricing::amount(
+            $this->referral->plan_type === 'enterprise' ? 'enterprise' : 'pro',
+            'monthly'
+        ));
 
         return new Content(
             view: 'emails.referral.credit-earned',

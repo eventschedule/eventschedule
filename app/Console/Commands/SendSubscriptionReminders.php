@@ -78,9 +78,7 @@ class SendSubscriptionReminders extends Command
 
                 try {
                     $isEnterprise = $role->plan_type === 'enterprise';
-                    $amount = (int) config($isEnterprise
-                        ? 'services.stripe_platform.enterprise_price_monthly_amount'
-                        : 'services.stripe_platform.price_monthly_amount', $isEnterprise ? 29 : 9);
+                    $amount = \App\Utils\PlatformPricing::amount($isEnterprise ? 'enterprise' : 'pro', 'monthly');
 
                     Mail::to($role->user->email)->send(new SubscriptionTrialEnding(
                         $role,

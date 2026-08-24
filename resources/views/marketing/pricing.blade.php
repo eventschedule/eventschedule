@@ -4,13 +4,9 @@
     <x-slot name="breadcrumbTitle">Pricing</x-slot>
 
     @php
-        // Single source for every price on the page. Marketing used to hardcode these
-        // in three places (JSON-LD, cards, FAQ prose), so an env override silently
-        // desynced the site from billing.
-        $proMonthly = (int) config('services.stripe_platform.price_monthly_amount', 9);
-        $proYearly = (int) config('services.stripe_platform.price_yearly_amount', 90);
-        $entMonthly = (int) config('services.stripe_platform.enterprise_price_monthly_amount', 29);
-        $entYearly = (int) config('services.stripe_platform.enterprise_price_yearly_amount', 290);
+        // $proMonthly / $proYearly / $entMonthly / $entYearly come from the marketing.* view
+        // composer, which reads PlatformPricing. Re-deriving them here would shadow the shared
+        // values and quietly ignore whatever a super-admin set at /admin/settings.
         // Raw, not number_format'd: plan_price() formats to the platform currency's own
         // precision, which is zero decimals for JPY and friends.
         $proPerMonth = $proYearly / 12;

@@ -675,7 +675,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for hotels and resorts?',
-                'a' => 'Yes. The activity page and its link, the QR code, standing activities that repeat on chosen days of the week, date exceptions, sub-schedules, free sign-ups with a capacity, the embeddable calendar, two-way Google, Outlook and CalDAV sync and built-in analytics are all free forever. Newsletters are on the free plan too, at 10 emails a month counted per recipient, which Pro raises to 100 and Enterprise to 1,000. Selling the paid experiences is free as well, up to 25 paid tickets a month per schedule, and Event Schedule charges zero platform fees on sales. Pro, at $'.(int) config('services.stripe_platform.price_monthly_amount', 9).' a month, takes the cap off and adds the extras: promo codes, passes, waitlists, add-ons and the live check-in dashboard.',
+                'a' => 'Yes. The activity page and its link, the QR code, standing activities that repeat on chosen days of the week, date exceptions, sub-schedules, free sign-ups with a capacity, the embeddable calendar, two-way Google, Outlook and CalDAV sync and built-in analytics are all free forever. Newsletters are on the free plan too, at 10 emails a month counted per recipient, which Pro raises to 100 and Enterprise to 1,000. Selling the paid experiences is free as well, up to 25 paid tickets a month per schedule, and Event Schedule charges zero platform fees on sales. Pro, at '.plan_price($proMonthly).' a month, takes the cap off and adds the extras: promo codes, passes, waitlists, add-ons and the live check-in dashboard.',
             ],
             [
                 'q' => 'How do guests find out what is on during their stay?',

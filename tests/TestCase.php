@@ -24,5 +24,12 @@ abstract class TestCase extends BaseTestCase
         // Its counts are memoized for the request; tests share a process, so a
         // previous test's totals would otherwise carry over.
         \App\Services\AdminAlertService::flush();
+
+        // Same reasoning, and the same trap: these two resolve once per process and are NOT
+        // reset by RefreshDatabase. A test that config()s an amount or a currency and then
+        // asserts on rendered output would silently read whatever an earlier test warmed - so
+        // the failure lands in an innocent file and only shows up in some orderings.
+        \App\Utils\PlatformCurrency::flush();
+        \App\Utils\PlatformPricing::flush();
     }
 }

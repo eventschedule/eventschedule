@@ -455,13 +455,13 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">STRIPE_PRICE_MONTHLY_AMOUNT</code><br><code class="doc-inline-code">STRIPE_PRICE_YEARLY_AMOUNT</code></td>
-                        <td><code class="doc-inline-code">5</code> / <code class="doc-inline-code">50</code></td>
-                        <td>Display-only Pro amounts shown on the subscribe page, the Plan tab and upgrade prompts</td>
+                        <td><code class="doc-inline-code">9</code> / <code class="doc-inline-code">90</code></td>
+                        <td>Display-only Pro amounts shown on the subscribe page, the Plan tab and upgrade prompts. A super-admin can change them at <code class="doc-inline-code">/admin/settings</code>, which overrides these for everything the site displays</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">STRIPE_ENTERPRISE_PRICE_MONTHLY_AMOUNT</code><br><code class="doc-inline-code">STRIPE_ENTERPRISE_PRICE_YEARLY_AMOUNT</code></td>
-                        <td><code class="doc-inline-code">15</code> / <code class="doc-inline-code">150</code></td>
-                        <td>Display-only Enterprise amounts</td>
+                        <td><code class="doc-inline-code">29</code> / <code class="doc-inline-code">290</code></td>
+                        <td>Display-only Enterprise amounts, overridable at <code class="doc-inline-code">/admin/settings</code> in the same way</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">PLATFORM_CURRENCY</code></td>
@@ -478,6 +478,10 @@ yourdomain.com.    CNAME    your-server.hosting.com.
             variables only decide what the interface prints. What a customer is actually charged comes from the Stripe
             Price the matching Price ID points at, including its currency. Set them all, and keep them in step, or your
             platform will advertise one figure and bill another.</p>
+            <p>Keep the <code class="doc-inline-code">*_AMOUNT</code> variables set even once you are editing the numbers
+            from <code class="doc-inline-code">/admin/settings</code>. Revenue reporting and renewal emails read these,
+            not the admin panel, so that an amount changed to run a promotion cannot restate revenue you have already
+            booked or quote an existing subscriber a figure their card will never be charged.</p>
         </div>
 
         <h3 class="doc-subheading">Webhook Endpoint</h3>

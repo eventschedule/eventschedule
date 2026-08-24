@@ -700,7 +700,7 @@
                             <div>
                                 <p class="text-sm font-medium uppercase tracking-[0.14em] text-gray-500 dark:text-gray-400" data-reveal>Ticket platforms take a cut of every seat you fill.</p>
                                 <span class="es-comic-beat my-3" data-reveal style="--reveal-delay: 0.15s;" aria-hidden="true"><i></i><i></i><i></i></span>
-                                <h3 class="mb-5 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl" data-reveal style="--reveal-delay: 0.3s;">We take <span class="es-comic-neon">$0.</span> That's the whole bit.</h3>
+                                <h3 class="mb-5 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl" data-reveal style="--reveal-delay: 0.3s;">We take <span class="es-comic-neon">{{ plan_price(0) }}.</span> That's the whole bit.</h3>
                                 <p class="mb-4 text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.45s;">Producing your own show? Sell tickets directly. Money goes straight to your Stripe - we don't take a cut. Your hustle, your earnings.</p>
                                 <p class="text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.55s;">General admission, VIP, early bird - every ticket gets a QR code for the door. Promo codes for your regulars, waitlists for the sellouts.</p>
                             </div>

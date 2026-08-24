@@ -884,6 +884,13 @@ class GrowthExportService
 
         // Only NULL plan_source is a genuine Stripe conversion; admin grants and referral
         // credits pay nothing and would inflate MRR.
+        //
+        // config(), NOT PlatformPricing - do not "fix" this. These four are the fallback for a
+        // paid schedule with no subscription row, and the primary branch below is
+        // PlanPriceUtils::amountFor(), which stays on config because it answers what Stripe
+        // actually charges. Sourcing the fallback from the admin-settable amounts would build
+        // one MRR figure from two sources and let a marketing change restate revenue that was
+        // already booked. MarketingPriceTest pins this in both directions.
         $monthly = (float) config('services.stripe_platform.price_monthly_amount', 9);
         $yearly = (float) config('services.stripe_platform.price_yearly_amount', 90);
         $entMonthly = (float) config('services.stripe_platform.enterprise_price_monthly_amount', 29);

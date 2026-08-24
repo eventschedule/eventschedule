@@ -1164,10 +1164,8 @@
         // does it for you, 'you' = you do it. Amber stays out of it - the
         // operator-responsibility rule is spent on the dark band above, and
         // reusing it here would read as a warning rather than a comparison.
-        // Plan prices come from the same config keys /pricing reads, so the two pages
-        // can never quote different numbers.
-        $hostedProMonthly = (int) config('services.stripe_platform.price_monthly_amount', 9);
-        $hostedEntMonthly = (int) config('services.stripe_platform.enterprise_price_monthly_amount', 29);
+        // Plan prices come from the marketing.* view composer as $proMonthly / $entMonthly,
+        // so this page and /pricing can never quote different numbers.
         $comparison = [
             [
                 'title' => 'Hosted',
@@ -1177,7 +1175,7 @@
                     ['Setup', 'We have it running before you finish your coffee'],
                     ['Infrastructure', 'We run the servers, backups and updates'],
                     ['Updates', 'Automatic, you never think about it'],
-                    ['Features', 'Free, Pro at '.plan_price($hostedProMonthly).'/mo or Enterprise at '.plan_price($hostedEntMonthly).'/mo'],
+                    ['Features', 'Free, Pro at '.plan_price($proMonthly).'/mo or Enterprise at '.plan_price($entMonthly).'/mo'],
                     ['Your data', 'Hosted by us, exportable at any time'],
                     ['Support', 'Email support, priority on Enterprise'],
                 ],

@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Referral;
 use App\Models\Role;
-use App\Utils\MoneyUtils;
+use App\Utils\PlatformPricing;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -80,7 +80,7 @@ class ReferralController extends Controller
                     ->where('status', 'qualified')
                     ->firstOrFail();
 
-                // In the currency's smallest unit, from the same config the referral page and
+                // In the currency's smallest unit, from the same source the referral page and
                 // the credit email quote. Hardcoded, a price change moved what we advertise
                 // without moving what we actually credit.
                 //
@@ -91,9 +91,14 @@ class ReferralController extends Controller
                 // It comes from cashier.currency, NOT the platform currency: applyBalance()
                 // below posts the transaction in Cashier's preferredCurrency(), so reading the
                 // multiplier from anywhere else lets the two disagree and mis-credits by 100x.
-                $creditAmount = -MoneyUtils::getSmallestUnitMultiplier(config('cashier.currency', 'usd')) * (int) ($referral->plan_type === 'enterprise'
-                    ? config('services.stripe_platform.enterprise_price_monthly_amount', 29)
-                    : config('services.stripe_platform.price_monthly_amount', 9));
+                //
+                // minorUnits() owns the multiply-then-round order; doing it the other way round
+                // truncated 9.99 to 9 and credited 900 instead of 999.
+                $creditAmount = -PlatformPricing::minorUnits(
+                    $referral->plan_type === 'enterprise' ? 'enterprise' : 'pro',
+                    'monthly',
+                    config('cashier.currency', 'usd')
+                );
 
                 if ($role->hasActiveSubscription()) {
                     $role->applyBalance($creditAmount, __('messages.referral_credit'));

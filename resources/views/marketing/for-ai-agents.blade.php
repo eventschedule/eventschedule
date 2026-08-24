@@ -1,9 +1,7 @@
 <x-marketing-layout>
     @php
-        // Single source for the price quoted in the JSON-LD offer and the FAQ,
-        // read the same way /pricing reads it so an env override cannot desync
-        // this page from billing.
-        $proMonthly = (int) config('services.stripe_platform.price_monthly_amount', 9);
+        // $proMonthly, quoted in the JSON-LD offer and the FAQ, comes from the marketing.*
+        // view composer - the same value /pricing renders.
     @endphp
 
     <x-slot name="title">REST API for AI Agents & Developers - Event Schedule</x-slot>

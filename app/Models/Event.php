@@ -3669,7 +3669,11 @@ class Event extends Model
             [
                 '@type' => 'Offer',
                 'price' => '0',
-                'priceCurrency' => 'USD',
+                // The event's own currency where it has one, then the installation's - never a
+                // hardcoded USD. A free offer still has to name a currency Google will accept,
+                // and a ZAR operator's every free event was publishing "USD" to search engines
+                // while the page beside it printed R.
+                'priceCurrency' => $this->ticket_currency_code ?: platform_currency(),
                 'url' => $url,
                 'availability' => 'https://schema.org/InStock',
                 'validFrom' => $validFrom,

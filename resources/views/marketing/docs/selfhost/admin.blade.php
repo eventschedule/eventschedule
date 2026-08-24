@@ -698,6 +698,11 @@
                         <td><code class="doc-inline-code">ADS_ENABLED=true</code> on a multi-tenant hosted install</td>
                     </tr>
                     <tr>
+                        <td>Plan pricing</td>
+                        <td>What you advertise Pro and Enterprise at</td>
+                        <td>A multi-tenant hosted install, or one serving the marketing pages</td>
+                    </tr>
+                    <tr>
                         <td>Platform currency</td>
                         <td>The currency this installation shows its own prices in</td>
                         <td>Always</td>
@@ -745,6 +750,15 @@
 
         <h3 class="doc-subheading">Monetization</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-6">This card configures advertising on free schedules: whether to show AdSense, the publisher and ad slot IDs, whether personalized ads are allowed, whether to run your own promotions marketplace, whether promotions take priority over AdSense, and the prices you charge per thousand impressions and per click. It stays hidden unless <code class="doc-inline-code">ADS_ENABLED=true</code> and the install is a multi-tenant hosted platform, because a selfhosted install resolves every schedule to Enterprise and so has no free tier for an ad to appear on.</p>
+
+        <h3 class="doc-subheading">Plan pricing</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Four fields, the monthly and yearly amount for Pro and for Enterprise, decided in one place and used everywhere the platform quotes itself: the pricing page and the rest of the marketing site, the user guide, the referral program, the upgrade prompts and Plan tab inside the admin portal, and the structured data search engines read. Saving moves all of them at once, with no deploy and no <code class="doc-inline-code">php artisan config:cache</code>.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Leave a field empty to fall back to the matching <code class="doc-inline-code">STRIPE_PRICE_*_AMOUNT</code> variable in <code class="doc-inline-code">.env</code>; the value in force is shown as the field's placeholder, so an empty box is never ambiguous. Amounts take two decimal places and are printed in the platform currency set below, which means a currency with no minor unit, such as the yen, rounds them to whole numbers. The card is hidden on a single-tenant selfhosted install, where every schedule resolves to Enterprise and nothing quotes a plan price at all.</p>
+        <div class="doc-callout doc-callout-warning mb-6">
+            <div class="doc-callout-title">A label, not a price</div>
+            <p>Nothing here charges anyone. What a customer pays comes from the Stripe price your <code class="doc-inline-code">STRIPE_PRICE_*</code> IDs point at, and nothing reconciles the two. Changing a price is three steps in order: create the new price in Stripe, point the price ID at it in <code class="doc-inline-code">.env</code>, then set the number here. Do only the last and your site advertises one figure and bills another.</p>
+            <p>Keep the <code class="doc-inline-code">.env</code> amounts up to date as well. Revenue reporting and renewal emails read those, not this card, on purpose: an amount you change to run a promotion must not restate revenue you have already booked, or quote an existing subscriber a figure their card will never be charged.</p>
+        </div>
 
         <h3 class="doc-subheading">Platform currency</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-6">The currency this installation quotes <em>its own</em> prices in. It decides the symbol printed beside every plan price and upgrade prompt, and it is the currency a new event falls back to when its schedule has no country set. Pick from the same list the ticket and gift-card pickers offer. It defaults to <code class="doc-inline-code">PLATFORM_CURRENCY</code> from <code class="doc-inline-code">.env</code>, and to US dollars when that is unset.</p>

@@ -18,10 +18,10 @@
             $isCompedWindDown = $role->plan_source === 'admin'
                 && $role->onGenericTrial()
                 && $isOwner;
-            $windDownPrice = (int) config($role->plan_type === 'enterprise'
-                ? 'services.stripe_platform.enterprise_price_monthly_amount'
-                : 'services.stripe_platform.price_monthly_amount',
-                $role->plan_type === 'enterprise' ? 29 : 9);
+            $windDownPrice = \App\Utils\PlatformPricing::amount(
+                $role->plan_type === 'enterprise' ? 'enterprise' : 'pro',
+                'monthly'
+            );
         @endphp
 
         @if ($isCompedWindDown)
@@ -295,7 +295,7 @@
                     </button>
                 </form>
                 <span class="ms-3 text-sm text-gray-500 dark:text-gray-400">
-                    {{ $role->currentPlanTerm() == 'yearly' ? plan_price(config('services.stripe_platform.enterprise_price_yearly_amount')) . '/' . __('messages.year') : plan_price(config('services.stripe_platform.enterprise_price_monthly_amount')) . '/' . __('messages.month') }}
+                    {{ $role->currentPlanTerm() == 'yearly' ? plan_price(\App\Utils\PlatformPricing::enterpriseYearly()) . '/' . __('messages.year') : plan_price(\App\Utils\PlatformPricing::enterpriseMonthly()) . '/' . __('messages.month') }}
                 </span>
             </div>
             @endif
@@ -313,9 +313,9 @@
             {{-- Swap Plan (Monthly/Yearly) --}}
             @if ($subscription && $subscription->active() && !$subscription->onGracePeriod())
             @php
-                $isEnterpriseTier = $planTier === 'enterprise';
-                $swapMonthlyAmount = $isEnterpriseTier ? config('services.stripe_platform.enterprise_price_monthly_amount') : config('services.stripe_platform.price_monthly_amount');
-                $swapYearlyAmount = $isEnterpriseTier ? config('services.stripe_platform.enterprise_price_yearly_amount') : config('services.stripe_platform.price_yearly_amount');
+                $swapTierKey = $planTier === 'enterprise' ? 'enterprise' : 'pro';
+                $swapMonthlyAmount = \App\Utils\PlatformPricing::amount($swapTierKey, 'monthly');
+                $swapYearlyAmount = \App\Utils\PlatformPricing::amount($swapTierKey, 'yearly');
             @endphp
             <div class="flex items-center gap-4">
                 <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.switch_plan') }}:</span>

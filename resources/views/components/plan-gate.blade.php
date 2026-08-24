@@ -21,13 +21,11 @@
 {{-- Selfhosted installs resolve to Enterprise, so there is no plan to explain and nothing to buy. --}}
 @if (config('app.hosted'))
 @php
+    // Not the marketing.* composer: $tier is a PROP, which a composer cannot see.
     $isEnterprise = $tier === 'enterprise';
-    $monthly = (int) config($isEnterprise
-        ? 'services.stripe_platform.enterprise_price_monthly_amount'
-        : 'services.stripe_platform.price_monthly_amount', $isEnterprise ? 29 : 9);
-    $yearly = (int) config($isEnterprise
-        ? 'services.stripe_platform.enterprise_price_yearly_amount'
-        : 'services.stripe_platform.price_yearly_amount', $isEnterprise ? 290 : 90);
+    $tierKey = $isEnterprise ? 'enterprise' : 'pro';
+    $monthly = \App\Utils\PlatformPricing::amount($tierKey, 'monthly');
+    $yearly = \App\Utils\PlatformPricing::amount($tierKey, 'yearly');
 
     // Nearly every free schedule is trial-eligible, and "start a free trial" converts far better
     // than "subscribe". Demo schedules see the explanation but never a way to buy.

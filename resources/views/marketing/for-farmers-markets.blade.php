@@ -466,9 +466,7 @@
     </style>
 
     @php
-        // Prices come from config, never hard-coded: an env override used to
-        // silently desync the marketing copy from what billing actually charges.
-        $proMonthly = (int) config('services.stripe_platform.price_monthly_amount', 9);
+        // $proMonthly comes from the marketing.* view composer.
 
         // The free paid-ticket allowance, straight from the setting the app
         // enforces in Role::ticketSaleLimit(). Selling is FREE up to this many

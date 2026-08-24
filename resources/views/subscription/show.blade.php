@@ -11,12 +11,14 @@
         // Each tier gets its own figure because the two ratios are free to diverge.
         $planPrices = [];
 
-        foreach (['pro' => '', 'enterprise' => 'enterprise_'] as $tier => $prefix) {
-            $monthly = config('services.stripe_platform.'.$prefix.'price_monthly_amount');
-            $yearly = config('services.stripe_platform.'.$prefix.'price_yearly_amount');
-            $monthlyTotal = (float) $monthly * 12;
+        foreach (['pro', 'enterprise'] as $tier) {
+            $monthly = \App\Utils\PlatformPricing::amount($tier, 'monthly');
+            $yearly = \App\Utils\PlatformPricing::amount($tier, 'yearly');
+            $monthlyTotal = $monthly * 12;
+            // Clamped at zero. Nothing stops an operator pricing the year at or above twelve
+            // months, and "Save -8%" on an upgrade button is worse than showing no saving.
             $percent = $monthlyTotal > 0
-                ? (int) round((($monthlyTotal - (float) $yearly) / $monthlyTotal) * 100)
+                ? max(0, (int) round((($monthlyTotal - $yearly) / $monthlyTotal) * 100))
                 : 0;
 
             $planPrices[$tier] = [

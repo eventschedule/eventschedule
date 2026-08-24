@@ -155,6 +155,12 @@ class PlanPriceUtils
      *
      * Returns null rather than a guess: quoting a grandfathered subscriber the current price
      * would state a number they are not being charged.
+     *
+     * Reads config, NOT PlatformPricing, and must keep doing so. This stands in for a Stripe API
+     * call - SendSubscriptionReminders prefers the live unit_amount and only falls back here -
+     * and it feeds ARR and MRR. Wiring it to the admin-settable amounts would let a marketing
+     * change quote a customer a renewal figure their card will never be charged, and restate
+     * revenue that was already booked. MarketingPriceTest pins this in both directions.
      */
     public static function amountFor(?string $priceId): ?float
     {

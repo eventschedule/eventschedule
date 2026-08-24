@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Utils\PlatformPricing;
 use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
@@ -16,6 +17,24 @@ use Tests\TestCase;
  */
 class MarketingPriceTest extends TestCase
 {
+    /**
+     * PlatformPricing memoizes all four amounts for the process, and this class has no
+     * RefreshDatabase, so the static outlives every test in the run. Without these two the
+     * config([...]) overrides in the render tests below would be swallowed by a memo an earlier
+     * test had already warmed, and the failure would depend on test order.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+        PlatformPricing::flush();
+    }
+
+    protected function tearDown(): void
+    {
+        PlatformPricing::flush();
+        parent::tearDown();
+    }
+
     /** Words that mark a number as a PLAN price rather than an example ticket price. */
     private const PLAN_WORDS = '\bPro\b|Enterprise|\bEnt\b|\bplan\b|a month|per month|a year|per year|/mo\b|monthly|yearly';
 
@@ -98,6 +117,11 @@ class MarketingPriceTest extends TestCase
      * show-admin-plan's wind-down banner and in two Chart.js axis callbacks.
      */
     private const AP_PRICE_VIEWS = [
+        // admin/dashboard was the file the bug report named. It quotes ARR through plan_price()
+        // and used to print the boost markup tile through a hardcoded Meta currency, and it was
+        // the one admin money page this list did not cover.
+        'admin/dashboard.blade.php',
+        'admin/settings.blade.php',
         'role/show-admin-plan.blade.php',
         'subscription/show.blade.php',
         'referral/index.blade.php',
@@ -417,6 +441,10 @@ class MarketingPriceTest extends TestCase
             'services.stripe_platform.price_monthly_amount' => '77',
             'services.stripe_platform.enterprise_price_monthly_amount' => '88',
         ]);
+        // Deliberately still config-driven: with no Setting rows this is the FRESH-INSTALL path,
+        // proving an operator who never opens /admin/settings still tracks .env. The
+        // admin-set path is covered by PlatformPricingTest, which has a database.
+        PlatformPricing::flush();
 
         $controller = app(\App\Http\Controllers\MarketingController::class);
         $method = new \ReflectionMethod($controller, 'planPrice');
@@ -425,8 +453,10 @@ class MarketingPriceTest extends TestCase
         // Both halves assert a literal. Comparing the enterprise half against
         // config() instead restates the implementation, so it passed even while
         // an empty STRIPE_ENTERPRISE_PRICE_MONTHLY_AMOUNT priced the plan at 0.
-        $this->assertSame(77, $method->invoke($controller, false));
-        $this->assertSame(88, $method->invoke($controller, true));
+        // Floats: plan amounts are settable to two decimal places, so planPrice() stopped
+        // casting to int - 14.50 used to be quoted as 14.
+        $this->assertSame(77.0, $method->invoke($controller, false));
+        $this->assertSame(88.0, $method->invoke($controller, true));
     }
 
     public function test_no_hardcoded_plan_price_in_structured_data(): void
@@ -467,6 +497,7 @@ class MarketingPriceTest extends TestCase
             'services.stripe_platform.price_monthly_amount' => '77',
             'services.stripe_platform.enterprise_price_monthly_amount' => '88',
         ]);
+        PlatformPricing::flush();
 
         // One view per context the sweep had to handle: HTML prose, an @php FAQ array,
         // JSON-LD structured data, and an Enterprise-priced page.
@@ -487,5 +518,218 @@ class MarketingPriceTest extends TestCase
                 "{$view} still renders a hardcoded plan price."
             );
         }
+    }
+
+    /**
+     * Our own ZERO. The free tier's price and "we take $0" platform-fee figures are just as much
+     * our own money as the plan amounts, and PLAN_AMOUNTS has no 0 in it, so every one of them
+     * was invisible to every check above. Six survived the sweep and shipped, one of them
+     * rendering "From $0/mo (Pro R9/mo)" - two currencies in eight words.
+     *
+     * Not solved by adding 0 to PLAN_AMOUNTS: that would fire on Stripe's $0.30, which is
+     * genuinely their USD. Anchored on the wording that makes a zero OURS instead.
+     */
+    public function test_no_hardcoded_zero_on_our_own_price(): void
+    {
+        $offenders = [];
+
+        $sources = [];
+        foreach ($this->marketingViews() as $file) {
+            $sources[str_replace(resource_path('views/marketing').'/', '', $file->getPathname())] = $file->getPathname();
+        }
+        $sources['MarketingController.php'] = app_path('Http/Controllers/MarketingController.php');
+
+        // "platform fee", "we take", "0% platform fee", "From $0/mo" - the phrases that make a
+        // zero a claim about what WE charge.
+        $ourZero = '~(platform fee|we take|our fee|free forever|\bFrom\b)~i';
+
+        foreach ($sources as $relative => $path) {
+            foreach (explode("\n", File::get($path)) as $index => $line) {
+                if ($this->isAllowed($relative, $line)) {
+                    continue;
+                }
+
+                // A bare $0 or $0.00, but never $0.30 / $0.28 and friends - those are the payment
+                // processors' own published fees.
+                if (preg_match('~\$0(\.00)?\b(?!\.)~', $line) && preg_match($ourZero, $line)) {
+                    $offenders[] = "{$relative}:".($index + 1).': '.trim(mb_substr($line, 0, 140));
+                }
+            }
+        }
+
+        $this->assertSame([], $offenders,
+            'Hardcoded zero on one of our own figures. The free tier and the platform fee follow '
+            ."the installation's currency like every other price we quote - use plan_price(0):\n"
+            .implode("\n", $offenders));
+    }
+
+    /**
+     * The currency SOURCE, not the glyph.
+     *
+     * The bug that prompted this test had no '$' anywhere near it: three admin tiles formatted
+     * with config('services.meta.default_currency', 'USD'), a variable absent from .env.example
+     * and therefore USD on every selfhost. So "Boost markup revenue" printed $0 on an install
+     * set to ZAR, directly above a chart axis already rendering R. No $-anchored check can see
+     * that - it has to look at where the code gets a currency from.
+     */
+    public function test_no_admin_view_takes_a_display_currency_from_an_ad_platform_config(): void
+    {
+        $offenders = [];
+
+        // Deliberately not the whole admin tree: admin/boost's Meta-only spend tiles and its
+        // per-campaign budget ceiling really are denominated in the Meta ad account's currency,
+        // and that file declares $boostCurrency once at the top for them.
+        $views = [
+            'admin/dashboard.blade.php',
+            'admin/revenue.blade.php',
+            'admin/growth.blade.php',
+            'home/panels/revenue.blade.php',
+            'home/panels/boosts.blade.php',
+        ];
+
+        foreach ($views as $relative) {
+            $path = resource_path('views/'.$relative);
+
+            foreach (explode("\n", File::get($path)) as $index => $line) {
+                if (preg_match("~config\(\s*['\"](services\.meta\.default_currency|ads\.native_currency)~", $line)) {
+                    $offenders[] = "{$relative}:".($index + 1).': '.trim(mb_substr($line, 0, 140));
+                }
+            }
+        }
+
+        $this->assertSame([], $offenders,
+            'A display currency taken from an ad-platform config. Those name the Meta ad account '
+            .'and the promotions rail, default to USD and are unset on nearly every install, so '
+            .'they print dollars on a platform that quotes something else. Resolve it from the '
+            ."rows (BoostBillingService::markupCurrency()) or from PlatformCurrency:\n"
+            .implode("\n", $offenders));
+    }
+
+    /**
+     * JSON-LD is emitted from PHP too. Event::getStructuredDataOffers() hardcoded USD on the
+     * free-event offer, which the views-only scan above could never reach.
+     */
+    public function test_no_hardcoded_price_currency_outside_the_views(): void
+    {
+        $offenders = [];
+
+        $paths = [
+            'app/Models/Event.php' => app_path('Models/Event.php'),
+            'app/Http/Controllers/MarketingController.php' => app_path('Http/Controllers/MarketingController.php'),
+            'app/Http/Controllers/RoleController.php' => app_path('Http/Controllers/RoleController.php'),
+        ];
+
+        foreach ($paths as $relative => $path) {
+            if (! File::exists($path)) {
+                continue;
+            }
+
+            foreach (explode("\n", File::get($path)) as $index => $line) {
+                if (preg_match("~['\"]priceCurrency['\"]\s*=>\s*['\"][A-Z]{3}['\"]~", $line)) {
+                    $offenders[] = "{$relative}:".($index + 1).': '.trim(mb_substr($line, 0, 140));
+                }
+            }
+        }
+
+        $this->assertSame([], $offenders,
+            'Hardcoded priceCurrency in PHP-built structured data. Use the row currency where '
+            ."there is one, then platform_currency():\n".implode("\n", $offenders));
+    }
+
+    /**
+     * The display/billing split, from the display side.
+     *
+     * Plan amounts are admin-settable through App\Utils\PlatformPricing. If any surface keeps
+     * reading the raw config key, the admin panel moves /pricing and leaves /faq advertising the
+     * old number - the exact desync the view composer was created to prevent.
+     */
+    public function test_nothing_outside_the_allow_list_reads_the_raw_amount_config(): void
+    {
+        // Each entry states WHY, so an exemption cannot be added without one.
+        $allowed = [
+            'config/services.php' => 'defines the keys',
+            'app/Utils/PlatformPricing.php' => 'is the reader every other caller goes through',
+            'app/Utils/PlanPriceUtils.php' => 'answers what Stripe charges, not what we advertise',
+            'app/Services/GrowthExportService.php' => 'is revenue reporting, which must not follow a marketing change',
+        ];
+
+        $offenders = [];
+
+        foreach ($this->allSourceFiles() as $relative => $path) {
+            if (isset($allowed[$relative])) {
+                continue;
+            }
+
+            foreach (explode("\n", File::get($path)) as $index => $line) {
+                // The comments in PlanPriceUtils and GrowthExportService that explain the split
+                // name the class, not the config key, so nothing here needs a comment skip.
+                if (preg_match('~stripe_platform\.[a-z_]*price_[a-z_]*amount~', $line)) {
+                    $offenders[] = "{$relative}:".($index + 1).': '.trim(mb_substr($line, 0, 140));
+                }
+            }
+        }
+
+        $this->assertSame([], $offenders,
+            'Raw plan-amount config read outside the allow list. Use App\Utils\PlatformPricing, '
+            ."or the composer-provided \$proMonthly / \$proYearly / \$entMonthly / \$entYearly:\n"
+            .implode("\n", $offenders));
+    }
+
+    /**
+     * And from the billing side, which is the half that actually costs money if it drifts.
+     *
+     * amountFor() stands in for a Stripe API call and feeds ARR, MRR and renewal emails. Wiring
+     * it to the admin-settable amounts would let someone running a promotion quote a customer a
+     * renewal figure their card will never be charged, and restate revenue already booked.
+     */
+    public function test_the_billing_fact_readers_stay_on_config(): void
+    {
+        $mustNotUse = [
+            'app/Utils/PlanPriceUtils.php' => app_path('Utils/PlanPriceUtils.php'),
+            'app/Services/GrowthExportService.php' => app_path('Services/GrowthExportService.php'),
+        ];
+
+        foreach ($mustNotUse as $relative => $path) {
+            $offenders = [];
+
+            foreach (explode("\n", File::get($path)) as $index => $line) {
+                // Comments are where the rule is written down, so they are allowed to name it.
+                $trimmed = ltrim($line);
+
+                if (str_starts_with($trimmed, '*') || str_starts_with($trimmed, '//') || str_starts_with($trimmed, '/*')) {
+                    continue;
+                }
+
+                if (str_contains($line, 'PlatformPricing')) {
+                    $offenders[] = "{$relative}:".($index + 1).': '.trim(mb_substr($line, 0, 140));
+                }
+            }
+
+            $this->assertSame([], $offenders,
+                "{$relative} answers what Stripe actually charges and must keep reading config, "
+                ."not the admin-settable amounts:\n".implode("\n", $offenders));
+        }
+    }
+
+    /**
+     * Every PHP and Blade source under app/ and resources/views/, keyed by repo-relative path.
+     */
+    private function allSourceFiles(): array
+    {
+        $out = [];
+
+        foreach ([app_path() => 'app', resource_path('views') => 'resources/views'] as $root => $prefix) {
+            foreach (File::allFiles($root) as $file) {
+                if (! in_array($file->getExtension(), ['php'], true)) {
+                    continue;
+                }
+
+                $out[$prefix.'/'.str_replace($root.DIRECTORY_SEPARATOR, '', $file->getPathname())] = $file->getPathname();
+            }
+        }
+
+        $out['config/services.php'] = config_path('services.php');
+
+        return $out;
     }
 }

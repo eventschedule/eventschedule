@@ -20,7 +20,7 @@
                 {{ number_format($activeCampaigns) }}
             </x-stat-panel>
             <x-stat-panel label="{{ __('messages.markup_revenue') }}" padding="p-4">
-                {{ \App\Utils\MoneyUtils::format($markupRevenue, $boostCurrency) }}
+                {{ \App\Utils\MoneyUtils::format($markupRevenue, $markupCurrency) }}
             </x-stat-panel>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -426,8 +426,8 @@
                                     {{ ucfirst($record->type) }}
                                 </span>
                             </td>
-                            <td class="py-2 text-gray-700 dark:text-gray-300 text-end">{{ \App\Utils\MoneyUtils::format($record->amount, $boostCurrency) }}</td>
-                            <td class="py-2 text-gray-700 dark:text-gray-300 text-end">{{ \App\Utils\MoneyUtils::format($record->markup_amount ?? 0, $boostCurrency) }}</td>
+                            <td class="py-2 text-gray-700 dark:text-gray-300 text-end">{{ \App\Utils\MoneyUtils::format($record->amount, $record->campaign?->currency_code) }}</td>
+                            <td class="py-2 text-gray-700 dark:text-gray-300 text-end">{{ \App\Utils\MoneyUtils::format($record->markup_amount ?? 0, $record->campaign?->currency_code) }}</td>
                             <td class="py-2 text-gray-700 dark:text-gray-300">{{ ucfirst($record->status) }}</td>
                             <td class="py-2 text-gray-500 dark:text-gray-400 text-xs max-w-[200px] truncate">{{ $record->notes ?? '-' }}</td>
                             <td class="py-2 text-gray-500 dark:text-gray-400 text-xs">{{ $record->created_at->format('M j, Y H:i') }}</td>
@@ -447,10 +447,13 @@
     {{-- Chart.js --}}
     <script src="{{ asset('js/chart.min.js') }}" {!! nonce_attr() !!}></script>
     <script {!! nonce_attr() !!}>
-        // Same currency as every figure on the page above, so the axis cannot disagree
-        // with the cards. JSON-encoded rather than interpolated, so a glyph is quoted safely.
+        // The markup currency, not the Meta one. This chart plots two datasets that can be
+        // denominated differently - ad spend is always Meta, markup revenue spans both rails -
+        // so the axis follows the one that varies. They agree whenever a single rail is in use,
+        // and on a selfhost, where there is no Meta spend to plot, this is the only honest label.
+        // JSON-encoded rather than interpolated, so a glyph is quoted safely.
         // (Do not write the directive name in this comment - Blade compiles it here too.)
-        const BOOST_CURRENCY_SYMBOL = @json(\App\Utils\MoneyUtils::symbol($boostCurrency));
+        const BOOST_CURRENCY_SYMBOL = @json(\App\Utils\MoneyUtils::symbol($markupCurrency));
         const isDarkMode = document.documentElement.classList.contains('dark') ||
             (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && !document.documentElement.classList.contains('light'));
         const textColor = isDarkMode ? '#9CA3AF' : '#6B7280';

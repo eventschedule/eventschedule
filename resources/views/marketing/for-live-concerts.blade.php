@@ -992,7 +992,7 @@
                         </div>
                         <div class="mt-4 flex items-baseline justify-between es-stage-edge-hard border-t-2 pt-3">
                             <span class="es-stage-tag">Platform fee</span>
-                            <span class="es-stage-accent es-stage-num text-lg font-black">$0.00</span>
+                            <span class="es-stage-accent es-stage-num text-lg font-black">{{ plan_price(0) }}</span>
                         </div>
                         <p class="es-stage-muted mt-3 text-xs">
                             Quantities are held per date. Read the detail on

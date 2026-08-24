@@ -108,7 +108,7 @@
                 {{ number_format($activeBoostCampaigns) }}
             </x-stat-panel>
             <x-stat-panel label="{{ __('messages.boost_markup_revenue') }}" color="green">
-                {{ \App\Utils\MoneyUtils::format($boostMarkupRevenue, config('services.meta.default_currency', 'USD')) }}
+                {{ \App\Utils\MoneyUtils::format($boostMarkupRevenue, $boostMarkupCurrency) }}
             </x-stat-panel>
         </div>
 

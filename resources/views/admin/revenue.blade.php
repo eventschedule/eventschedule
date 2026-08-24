@@ -25,8 +25,8 @@
                 <x-slot:subtitle>{{ number_format($pendingSales) }} @lang('messages.pending_sales')</x-slot:subtitle>
             </x-stat-panel>
             <x-stat-panel label="{{ __('messages.boost_markup_revenue') }}" color="green">
-                {{ \App\Utils\MoneyUtils::format($boostMarkupTotal, config('services.meta.default_currency', 'USD')) }}
-                <x-slot:subtitle>+{{ \App\Utils\MoneyUtils::format($boostMarkupInPeriod, config('services.meta.default_currency', 'USD')) }} @lang('messages.in_period')</x-slot:subtitle>
+                {{ \App\Utils\MoneyUtils::format($boostMarkupTotal, $boostMarkupCurrency) }}
+                <x-slot:subtitle>+{{ \App\Utils\MoneyUtils::format($boostMarkupInPeriod, $boostMarkupCurrency) }} @lang('messages.in_period')</x-slot:subtitle>
             </x-stat-panel>
         </div>
 

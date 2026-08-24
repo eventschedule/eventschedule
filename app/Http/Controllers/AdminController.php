@@ -34,6 +34,7 @@ use App\Services\WebhookService;
 use App\Utils\MoneyUtils;
 use App\Utils\PlanPriceUtils;
 use App\Utils\PlatformCurrency;
+use App\Utils\PlatformPricing;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Codedge\Updater\UpdaterManager;
@@ -274,6 +275,10 @@ class AdminController extends Controller
             ->where('status', 'completed')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->sum('markup_amount');
+        // Off the campaigns, not off META_DEFAULT_CURRENCY: that config names the Meta ad
+        // account, defaults to USD and is absent from .env.example, so this tile printed "$0"
+        // on every selfhost no matter what currency the operator had picked.
+        $boostMarkupCurrency = BoostBillingService::markupCurrency($startDate, $endDate);
         $adminNewslettersSent = Newsletter::admin()->where('status', 'sent')->count();
         $newsletterSubscribers = User::whereNotNull('email_verified_at')
             ->where('email', '!=', DemoService::DEMO_EMAIL)
@@ -410,6 +415,7 @@ class AdminController extends Controller
             'range',
             'activeBoostCampaigns',
             'boostMarkupRevenue',
+            'boostMarkupCurrency',
             'adminNewslettersSent',
             'newsletterSubscribers',
             'emailUsersInPeriod',
@@ -668,6 +674,9 @@ class AdminController extends Controller
             ->where('status', 'completed')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->sum('markup_amount');
+        // One code for both figures, resolved over ALL markup rather than the window's: the
+        // in-period number is a slice of the total and the two must not disagree on a label.
+        $boostMarkupCurrency = BoostBillingService::markupCurrency();
 
         // Subscription Health (for hosted mode)
         $activeSubscriptions = 0;
@@ -748,6 +757,7 @@ class AdminController extends Controller
             'pendingRevenue',
             'boostMarkupTotal',
             'boostMarkupInPeriod',
+            'boostMarkupCurrency',
             'activeSubscriptions',
             'trialingSubscriptions',
             'canceledSubscriptions',
@@ -2432,6 +2442,12 @@ class AdminController extends Controller
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->sum('markup_amount');
 
+        // The markup tile spans both rails, so its label comes off the campaigns rather than
+        // from META_DEFAULT_CURRENCY. $boostCurrency below stays on the Meta config: the tiles
+        // that use it are Meta-only spend and the per-campaign budget ceiling, which really are
+        // denominated in the Meta ad account's currency.
+        $markupCurrency = BoostBillingService::markupCurrency($startDate, $endDate);
+
         // Meta only. This tile means "money that left for an external ad platform"; a network
         // promotion buys inventory on this instance, so its delivery is revenue the operator
         // KEPT, not a cost. Summing both channels counted the same money as spend and as
@@ -2624,6 +2640,7 @@ class AdminController extends Controller
             'totalCampaignsInPeriod',
             'activeCampaigns',
             'markupRevenue',
+            'markupCurrency',
             'totalAdSpend',
             'totalRefunds',
             'avgCtr',
@@ -2732,6 +2749,27 @@ class AdminController extends Controller
             // Always rendered: even a single-tenant selfhost, which has no plans to price,
             // uses this as the default currency for a new event.
             'platformCurrency' => PlatformCurrency::code(),
+            // Gated, unlike the currency above. On a plain single-tenant selfhost nothing quotes
+            // a plan price at all - marketing and docs live inside if (config('app.is_nexus')),
+            // /referrals is hosted-only, the Plan tab is @if (config('app.hosted')) and
+            // actualPlanTier() returns enterprise for everyone - so the card would change
+            // nothing that renders. The currency card has a second job (the default currency for
+            // a new event); plan amounts have none.
+            'planPricingAvailable' => config('app.hosted') || config('app.is_nexus'),
+            'planPricingStored' => [
+                'pro_monthly' => PlatformPricing::stored('pro', 'monthly'),
+                'pro_yearly' => PlatformPricing::stored('pro', 'yearly'),
+                'enterprise_monthly' => PlatformPricing::stored('enterprise', 'monthly'),
+                'enterprise_yearly' => PlatformPricing::stored('enterprise', 'yearly'),
+            ],
+            // The value actually in force, rendered as the field's placeholder so an operator
+            // can tell "unset, falling back to .env" from "explicitly set to the same number".
+            'planPricingEffective' => [
+                'pro_monthly' => PlatformPricing::proMonthly(),
+                'pro_yearly' => PlatformPricing::proYearly(),
+                'enterprise_monthly' => PlatformPricing::enterpriseMonthly(),
+                'enterprise_yearly' => PlatformPricing::enterpriseYearly(),
+            ],
             'currencies' => MoneyUtils::currencies(),
             // Federation is an instance-side feature; the nexus has the moderation
             // queue instead.
@@ -2891,6 +2929,68 @@ class AdminController extends Controller
             $old,
             $new,
             'Updated platform currency',
+        );
+
+        return redirect()->route('admin.settings')->with('success', __('messages.settings_saved'));
+    }
+
+    /**
+     * Persist what this installation ADVERTISES its plans at.
+     *
+     * A label, not a price. What a customer is charged comes from the Stripe Price the matching
+     * price ID points at, and nothing reconciles the two - so a real price change is three edits
+     * (Stripe, the price ID, then this form) and doing only the last one makes the site advertise
+     * a figure it will not bill.
+     *
+     * Blank clears the override and falls back to STRIPE_PRICE_*_AMOUNT. Revenue reporting
+     * deliberately keeps reading that env value: see PlanPriceUtils::amountFor().
+     */
+    public function updatePlanPricingSettings(Request $request): RedirectResponse
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        // nullable, so clearing a field is how an operator reverts to .env - there is no other
+        // reset affordance. gt:0 rather than min:0 because a paid plan priced at zero renders
+        // "0/month" across ~60 marketing pages and the JSON-LD offers Google reads; an operator
+        // who does not sell a tier leaves it blank instead. decimal:0,2 because plan amounts are
+        // money, and max bounds a fat-finger before it reaches structured data.
+        $rules = ['nullable', 'numeric', 'gt:0', 'max:99999', 'decimal:0,2'];
+
+        $request->validate([
+            'plan_price_pro_monthly' => $rules,
+            'plan_price_pro_yearly' => $rules,
+            'plan_price_enterprise_monthly' => $rules,
+            'plan_price_enterprise_yearly' => $rules,
+        ]);
+
+        if (is_demo_mode()) {
+            return redirect()->route('admin.settings')->with('error', __('messages.demo_mode_settings_disabled'));
+        }
+
+        $old = [];
+        $new = [];
+
+        foreach (PlatformPricing::settingKeys() as $key) {
+            $old[$key] = Setting::get($key);
+            $new[$key] = $request->filled($key) ? (string) $request->input($key) : null;
+
+            Setting::set($key, $new[$key]);
+        }
+
+        // Setting::set() already forgot the shared cache; this drops the per-request memo so the
+        // redirect below re-renders the new prices rather than the ones this request started with.
+        PlatformPricing::flush();
+
+        AuditService::log(
+            AuditService::ADMIN_SETTINGS_UPDATE,
+            auth()->id(),
+            null,
+            null,
+            $old,
+            $new,
+            'Updated plan pricing',
         );
 
         return redirect()->route('admin.settings')->with('success', __('messages.settings_saved'));

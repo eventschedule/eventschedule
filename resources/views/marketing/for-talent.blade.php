@@ -19,7 +19,7 @@
         // calculator verbatim, so the three pages can never quote different totals.
         // Eventbrite's 3.7% + $1.79 bundles payment processing; ours does not, so
         // the Stripe fee is shown on our side rather than claimed as zero.
-        $proMonthly = (int) config('services.stripe_platform.price_monthly_amount', 9);
+        // $proMonthly comes from the marketing.* view composer.
         $feeTickets = 200;
         $feePrice = 25;
         $feeRevenue = $feeTickets * $feePrice;
@@ -479,7 +479,7 @@
                     <div class="rounded-2xl border border-cyan-400/30 bg-cyan-500/10 p-6 text-center backdrop-blur-sm" data-reveal="panel">
                         <div class="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300">Event Schedule</div>
                         <div class="mb-2 text-4xl font-black text-white">${{ number_format($feeEs, 2) }}</div>
-                        <p class="text-sm text-gray-400">{{ plan_price($proMonthly) }} for Pro plus Stripe's 2.9% + $0.30. Our platform fee is $0.</p>
+                        <p class="text-sm text-gray-400">{{ plan_price($proMonthly) }} for Pro plus Stripe's 2.9% + $0.30. Our platform fee is {{ plan_price(0) }}.</p>
                     </div>
 
                     <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-6 text-center backdrop-blur-sm" data-reveal="panel">

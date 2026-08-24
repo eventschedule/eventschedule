@@ -51,13 +51,16 @@ class WindDownReminderTest extends TestCase
     }
 
     /**
-     * The memo is a process-lifetime static, and RefreshDatabase does not reset it. Without
+     * The memos are process-lifetime statics, and RefreshDatabase does not reset them. Without
      * this, a failed assertion in the ZAR test below would leave every later test in the
-     * process rendering prices in rand.
+     * process rendering prices in rand - and the amount memo would do the same with the price.
+     * TestCase::setUp() flushes both as well; this keeps the guarantee local to the file that
+     * needs it.
      */
     protected function tearDown(): void
     {
         \App\Utils\PlatformCurrency::flush();
+        \App\Utils\PlatformPricing::flush();
 
         parent::tearDown();
     }

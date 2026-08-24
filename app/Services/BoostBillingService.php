@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\BoostBillingRecord;
 use App\Models\BoostCampaign;
 use App\Models\Role;
+use App\Utils\PlatformCurrency;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -428,5 +429,44 @@ class BoostBillingService
                 return false;
             }
         });
+    }
+
+    /**
+     * The currency to LABEL a markup-revenue aggregate with.
+     *
+     * markup_amount is written by BOTH rails: a Meta boost bills in META_DEFAULT_CURRENCY, a
+     * network promotion in PROMOTIONS_CURRENCY. The admin tiles used to format with the Meta
+     * config alone, so they named the wrong money on any install selling promotions - and on a
+     * selfhost, where BoostController forces the Meta markup rate to 0, every non-zero markup is
+     * network revenue and the tile still printed it in dollars.
+     *
+     * Reads the code off the campaigns themselves, the way AnalyticsService::getBoostStats()
+     * already does, and takes the one carrying the most markup rather than whichever campaign is
+     * newest - the newest would make a fixed historical total change its label every time a
+     * campaign in the other currency was created.
+     *
+     * Falls back to the platform currency, not USD: with no campaigns at all the tile reads zero,
+     * and zero should print in the currency the rest of the admin panel quotes.
+     */
+    public static function markupCurrency($startDate = null, $endDate = null): string
+    {
+        $query = BoostBillingRecord::query()
+            ->join('boost_campaigns', 'boost_campaigns.id', '=', 'boost_billing_records.boost_campaign_id')
+            ->where('boost_billing_records.type', 'charge')
+            ->where('boost_billing_records.status', 'completed')
+            ->whereNotNull('boost_campaigns.currency_code')
+            ->where('boost_campaigns.currency_code', '!=', '');
+
+        if ($startDate && $endDate) {
+            $query->whereBetween('boost_billing_records.created_at', [$startDate, $endDate]);
+        }
+
+        // Group and order by the qualified column, never a select alias - MySQL binds a bare
+        // alias back to the column and fails with 1055 under ONLY_FULL_GROUP_BY.
+        $code = $query->groupBy('boost_campaigns.currency_code')
+            ->orderByRaw('SUM(boost_billing_records.markup_amount) DESC')
+            ->value('boost_campaigns.currency_code');
+
+        return $code ?: PlatformCurrency::code();
     }
 }

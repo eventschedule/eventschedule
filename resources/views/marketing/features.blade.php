@@ -256,7 +256,7 @@
             </div>
             <div class="flex items-center justify-between border-t border-gray-200 pt-3 dark:border-white/10">
                 <span class="text-xs text-gray-500 dark:text-gray-400">Platform fee</span>
-                <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">$0.00</span>
+                <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">{{ plan_price(0) }}</span>
             </div>
         </div>
     </x-marketing.feature-banner>
