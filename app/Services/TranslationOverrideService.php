@@ -44,7 +44,15 @@ class TranslationOverrideService
             return [];
         }
 
-        $values = require $path;
+        try {
+            $values = require $path;
+        } catch (\Throwable $e) {
+            // Same reasoning as SafeTranslationLoader: a file we cannot parse must not take the
+            // translations editor down, because the editor is how it gets fixed.
+            report($e);
+
+            return [];
+        }
 
         return is_array($values) ? $values : [];
     }
@@ -87,7 +95,15 @@ class TranslationOverrideService
             return 0;
         }
 
-        $values = require $path;
+        try {
+            $values = require $path;
+        } catch (\Throwable $e) {
+            // Reachable from a plain GET of the translations page, so a broken hand-made file
+            // would 500 the very screen an operator would use to replace it.
+            report($e);
+
+            return 0;
+        }
 
         if (! is_array($values)) {
             return 0;

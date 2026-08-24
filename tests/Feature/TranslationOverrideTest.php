@@ -438,4 +438,82 @@ class TranslationOverrideTest extends TestCase
 
         $this->assertDatabaseCount('translation_overrides', 0);
     }
+
+    /**
+     * Issue #117. The override directory is operator-writable and the selfhost docs invite
+     * hand-edited files into it, so one typo used to throw out of the bare require inside
+     * Laravel's FileLoader on the first __() of the request - every page, including the
+     * translations editor that is the only way to remove the file. SafeTranslationLoader skips
+     * the unreadable file so the shipped catalog still loads.
+     */
+    public function test_a_malformed_override_file_falls_back_to_shipped_instead_of_throwing(): void
+    {
+        $shipped = $this->service()->readShipped('en', 'messages')['home'];
+
+        File::ensureDirectoryExists(dirname($this->overrideFilePath('en')));
+        File::put($this->overrideFilePath('en'), "<?php\n\nreturn ['home' => ;\n");
+        app('translator')->setLoaded([]);
+
+        $this->assertSame($shipped, __('messages.home'));
+
+        // The recovery screen itself must render, or the operator is locked out.
+        $admin = $this->createOwner(true);
+        $this->adminActing($admin)->get(route('admin.translations'))->assertOk();
+    }
+
+    public function test_a_malformed_json_override_does_not_throw(): void
+    {
+        // loadJsonPaths() merges the override directory into its own search list, so a stray
+        // en.json there could take the app down the same way a broken PHP file could.
+        File::ensureDirectoryExists(config('app.lang_overrides_path'));
+        File::put(config('app.lang_overrides_path').'/en.json', '{ "Broken": ');
+        app('translator')->setLoaded([]);
+
+        $this->assertSame([], app('translator')->getLoader()->load('en', '*', '*'));
+        $this->assertSame($this->service()->readShipped('en', 'messages')['home'], __('messages.home'));
+    }
+
+    public function test_an_override_file_that_returns_no_array_is_ignored(): void
+    {
+        // Parses fine, but forgets its return statement, so require yields int 1 and
+        // array_replace_recursive() would raise a TypeError on it.
+        File::ensureDirectoryExists(dirname($this->overrideFilePath('en')));
+        File::put($this->overrideFilePath('en'), "<?php\n\n\$x = 1;\n");
+        app('translator')->setLoaded([]);
+
+        $this->assertSame($this->service()->readShipped('en', 'messages')['home'], __('messages.home'));
+    }
+
+    public function test_adopting_a_malformed_override_file_returns_zero_instead_of_throwing(): void
+    {
+        // adoptFileOverrides() runs on a plain GET of the translations page.
+        File::ensureDirectoryExists(dirname($this->overrideFilePath('fr')));
+        File::put($this->overrideFilePath('fr'), "<?php\n\nreturn ['home' => ;\n");
+
+        $this->assertSame(0, $this->service()->adoptFileOverrides('fr', 'messages'));
+        $this->assertDatabaseCount('translation_overrides', 0);
+
+        // And the editor still opens on that locale, which is where the file gets replaced.
+        $admin = $this->createOwner(true);
+        $this->adminActing($admin)->getJson(route('admin.translations.data', [
+            'locale' => 'fr',
+            'group' => 'messages',
+        ]))->assertOk();
+    }
+
+    public function test_the_translator_resolves_through_the_safe_loader(): void
+    {
+        // Pins the container wiring: 'translation.loader' is a deferred binding, so an extender
+        // registered in AppServiceProvider is the only thing keeping this class in place.
+        $this->assertInstanceOf(
+            \App\Support\SafeTranslationLoader::class,
+            app('translator')->getLoader()
+        );
+
+        // And the overrides directory is still on the search path after the rewrap.
+        $this->assertContains(
+            config('app.lang_overrides_path'),
+            app('translator')->getLoader()->paths()
+        );
+    }
 }

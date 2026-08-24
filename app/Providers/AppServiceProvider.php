@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Policies\EventPolicy;
 use App\Policies\RolePolicy;
+use App\Support\SafeTranslationLoader;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -28,6 +29,17 @@ class AppServiceProvider extends ServiceProvider
         // PaymentGatewayManager::all() are shared across a request. The sales table asks it about
         // every row on the page.
         $this->app->singleton(\App\Services\Payments\PaymentGatewayManager::class);
+
+        // The override directory is operator-writable and the selfhost docs invite hand-edited
+        // files into it, so a typo there would otherwise throw out of the bare require inside
+        // FileLoader on the first __() of every request - including the admin translations page
+        // that is the only way to fix the file. SafeTranslationLoader skips the unreadable file
+        // instead. Extending rather than re-binding because 'translation.loader' is a DEFERRED
+        // binding: TranslationServiceProvider registers it on demand and would overwrite a
+        // straight bind(), while Container::dropStaleInstances() never clears extenders.
+        $this->app->extend('translation.loader', function ($loader, $app) {
+            return SafeTranslationLoader::wrap($loader, $app['files']);
+        });
 
         $this->callAfterResolving('translator', function ($translator) {
             $translator->getLoader()->addPath(config('app.lang_overrides_path'));
