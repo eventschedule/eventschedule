@@ -102,11 +102,18 @@ class SeatingTest extends DuskTestCase
             $browser->visit('/talent/seating')
                 ->waitFor('#new_seating_plan_name', 15)
                 ->type('#new_seating_plan_name', 'Main House');
-            $browser->script('document.querySelector(\'#new_seating_plan_name\').form.requestSubmit();');
+            // assertPathIs does not wait - it reads getCurrentURL() once - and the URL only
+            // becomes .../design after POST -> 302 -> GET. waitForReload watches for the new
+            // document, which is what the rest of this suite does after a requestSubmit().
+            $browser->waitForReload(function (Browser $b) {
+                $b->script('document.querySelector(\'#new_seating_plan_name\').form.requestSubmit();');
+            }, 20);
 
+            // #seating-loading is v-if="loading" INSIDE the component, so waiting for it to go
+            // before Vue has mounted passes instantly and proves nothing. Mount first, load second.
             $browser->assertPathIs('/talent/seating/*/design')
-                ->waitUntilMissing('#seating-loading', 20)
                 ->waitFor('#seating-designer', 20)
+                ->waitUntilMissing('#seating-loading', 20)
                 ->waitFor('button[data-preset="theatre"]', 20);
 
             // The empty state offers presets rather than a blank canvas. Theatre lays out stalls
@@ -156,15 +163,23 @@ class SeatingTest extends DuskTestCase
             $browser->visit('/talent/seating')
                 ->waitFor('#new_seating_plan_name', 15)
                 ->type('#new_seating_plan_name', 'Drag House');
-            $browser->script('document.querySelector(\'#new_seating_plan_name\').form.requestSubmit();');
+            $browser->waitForReload(function (Browser $b) {
+                $b->script('document.querySelector(\'#new_seating_plan_name\').form.requestSubmit();');
+            }, 20);
 
             // One level, one section - the least there is to grab hold of. The presets are not
-            // offered until the plan has loaded, so clicking one cannot be undone by the fetch.
+            // offered until the plan has loaded, so clicking one cannot be undone by the fetch -
+            // but only if the wait for that load happens after Vue has mounted.
             $browser->assertPathIs('/talent/seating/*/design')
+                ->waitFor('#seating-designer', 20)
                 ->waitUntilMissing('#seating-loading', 20)
                 ->waitFor('button[data-preset="rows"]', 20);
             $browser->script('document.querySelector(\'button[data-preset="rows"]\').click();');
-            $browser->waitFor('#seating-designer svg > g > g > rect', 15)->pause(700);
+            // The preset only touches client state, so the toolbar saying so is proof the layout
+            // was built, where a bare pause is a guess.
+            $browser->waitFor('#seating-dirty', 15)
+                ->waitFor('#seating-designer svg > g > g > rect', 15)
+                ->pause(700);
 
             $read = 'return {'
                 .' pan: document.querySelector("#seating-designer svg > g").getAttribute("transform"),'
@@ -178,6 +193,15 @@ class SeatingTest extends DuskTestCase
             );
             // A real WebDriver drag, so the browser emits the pointer and mouse events itself in
             // the order it really would - which is the whole point.
+            //
+            // clickAndHold($el) presses the element's CENTRE, and that has to be section
+            // background rather than a seat, or the seat's own @mousedown.stop wins and the
+            // section never moves. It is, by construction: sectionBox() is the seat extent plus
+            // 16 units of padding, so a preset with an EVEN number of rows and an even number of
+            // seats per row centres in the gap between four seats. `rows` is 8 x 10, spaced 26 x
+            // 30, giving a centre of (117, 105) - 13 units clear horizontally, 15 vertically.
+            // Change those preset numbers to odd ones and this test fails on "the section did not
+            // move", which is the readable failure to fix by aiming at the padding ring instead.
             $browser->driver->action()->clickAndHold($rect)->moveByOffset(60, 40)->release()->perform();
             $browser->pause(500);
 
