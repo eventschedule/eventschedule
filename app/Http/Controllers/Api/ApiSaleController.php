@@ -47,13 +47,12 @@ class ApiSaleController extends Controller
             self::MAX_PER_PAGE
         );
 
+        // Same rule as the web Sales page and as this controller's own show/update/destroy.
+        // It used to be a bare owner|admin pivot pluck, which listed sales that show() then
+        // refused: no curator exception, no events.user_id arm, no hosted-Enterprise filter.
         $sales = Sale::with(['saleTickets.ticket', 'event'])
             ->where('is_deleted', false)
-            ->whereHas('event.roles', function ($q) {
-                $q->whereIn('roles.id', auth()->user()->roles()
-                    ->wherePivotIn('level', ['owner', 'admin'])
-                    ->pluck('roles.id'));
-            })
+            ->whereHas('event', fn ($q) => $q->managedBy(auth()->user()))
             ->whereHas('event.roles', function ($q) {
                 $q->wherePro();
             });
@@ -104,7 +103,10 @@ class ApiSaleController extends Controller
             return response()->json(['error' => 'Sale not found'], 404);
         }
 
-        if (! auth()->user()->canEditEvent($sale->event)) {
+        // canViewEventData(), not canEditEvent(): the latter has no curator exception, so a
+        // curator's admin could act on a sale for an event the curator merely lists and whose
+        // money settles into somebody else's account.
+        if (! $sale->event || ! auth()->user()->canViewEventData($sale->event)) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -125,7 +127,10 @@ class ApiSaleController extends Controller
             return response()->json(['error' => 'Sale not found'], 404);
         }
 
-        if (! auth()->user()->canEditEvent($sale->event)) {
+        // canViewEventData(), not canEditEvent(): the latter has no curator exception, so a
+        // curator's admin could act on a sale for an event the curator merely lists and whose
+        // money settles into somebody else's account.
+        if (! $sale->event || ! auth()->user()->canViewEventData($sale->event)) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -225,7 +230,10 @@ class ApiSaleController extends Controller
             return response()->json(['error' => 'Sale not found'], 404);
         }
 
-        if (! auth()->user()->canEditEvent($sale->event)) {
+        // canViewEventData(), not canEditEvent(): the latter has no curator exception, so a
+        // curator's admin could act on a sale for an event the curator merely lists and whose
+        // money settles into somebody else's account.
+        if (! $sale->event || ! auth()->user()->canViewEventData($sale->event)) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -287,8 +295,10 @@ class ApiSaleController extends Controller
             return response()->json(['error' => 'Event not found'], 404);
         }
 
-        // Verify user can edit the event (owner or owner/admin on associated schedule)
-        if (! auth()->user()->canEditEvent($event)) {
+        // Verify the user owns this event's data (owner/admin on an associated schedule, with a
+        // curator only counting for events it created - a sale settles into the event owner's
+        // account, so a curator that merely lists it must not be able to create one).
+        if (! auth()->user()->canViewEventData($event)) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 

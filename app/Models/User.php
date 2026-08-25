@@ -6,7 +6,9 @@ use App\Casts\EncryptedString;
 use App\Notifications\VerifyEmail as CustomVerifyEmail;
 use App\Services\DemoService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
@@ -258,6 +260,54 @@ class User extends Authenticatable implements MustVerifyEmail
     public function following()
     {
         return $this->roles()->wherePivot('level', 'follower');
+    }
+
+    /**
+     * Schedules whose ticketing LISTS this user may read: the ones they own or administer.
+     *
+     * On hosted this mirrors RoleController::viewAdmin() - a team member only reaches somebody
+     * else's schedule while it is Enterprise - so a downgrade empties the Sales page, and a
+     * previous owner whom ScheduleTransferService demoted to 'admin' stops reading the new
+     * owner's sales on a Pro schedule.
+     *
+     * Scoped claim on purpose: this closes the PAGES, not the endpoints. /sales/action/{id} and
+     * the /api/sales routes authorize through canViewEventData(), which carries no Enterprise
+     * clause, so a downgraded team member who still holds a sale id can act on it. That gap
+     * predates this method (canEditEvent never filtered either) and closing it means re-gating
+     * Analytics and check-in stats too, which have no such filter on their own role scopes.
+     *
+     * Keys on roles.user_id exactly like viewAdmin(); CheckData::checkRoleOwnership() repairs
+     * drift from the pivot.
+     *
+     * Memoized for the request - the Sales page asks six separate getters for this set.
+     */
+    public function manageableRoles(): EloquentCollection
+    {
+        return once(fn () => $this->filterTeamRoles($this->editor()));
+    }
+
+    /**
+     * Schedules this user may scan tickets for. Same as manageableRoles() plus viewers, matching
+     * canScanEvent() - a viewer is exactly the person you hand the door to.
+     */
+    public function scannableRoles(): EloquentCollection
+    {
+        return once(fn () => $this->filterTeamRoles($this->member()));
+    }
+
+    private function filterTeamRoles(BelongsToMany $relation): EloquentCollection
+    {
+        // Selfhost has no plan to check (isEnterprise() is unconditionally true there), so it must
+        // not pay for the relation either.
+        if (! config('app.hosted')) {
+            return $relation->get();
+        }
+
+        // Load-bearing eager load, not decoration: isEnterprise() reads subscription('default'),
+        // so without it every role fires its own query.
+        return $relation->with('subscriptions')->get()->filter(
+            fn (Role $role) => (int) $this->id === (int) $role->user_id || $role->isEnterprise()
+        )->values();
     }
 
     public function carpoolOffers()

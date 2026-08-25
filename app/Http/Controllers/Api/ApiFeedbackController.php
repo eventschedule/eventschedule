@@ -83,10 +83,11 @@ class ApiFeedbackController extends Controller
             ], 422);
         }
 
-        $roleIds = $this->managedRoleIds();
-
+        // Buyer-adjacent data (feedback carries the attendee through the joined sale), so it
+        // follows the Sales rule rather than managedRoleIds() - that helper stays as-is for its
+        // other caller, which scopes fan-content moderation, not money.
         $query = EventFeedback::with(['event', 'sale'])
-            ->whereHas('event.roles', fn ($q) => $q->whereIn('roles.id', $roleIds))
+            ->whereHas('event', fn ($q) => $q->managedBy(auth()->user()))
             ->whereHas('event.roles', fn ($q) => $q->wherePro())
             // A deleted or unpaid sale is not a real attendee, and the guest page hides
             // those too.

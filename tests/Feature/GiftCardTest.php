@@ -258,6 +258,32 @@ class GiftCardTest extends TestCase
         $this->assertSame('unpaid', $card->fresh()->status);
     }
 
+    public function test_an_admin_may_act_on_a_card_but_a_viewer_may_not(): void
+    {
+        // The Gift cards tab now spans schedules the user administers, not only the ones they
+        // own, so the actions behind it have to agree - otherwise the tab lists cards whose
+        // buttons 403.
+        $owner = $this->createOwner();
+        $role = $this->enableGiftCards($this->createRole($owner));
+
+        $admin = $this->createOwner();
+        $this->followRole($admin, $role, 'admin');
+        $viewer = $this->createOwner();
+        $this->followRole($viewer, $role, 'viewer');
+
+        $viewerCard = $this->activeGiftCard($role, ['status' => 'unpaid']);
+        $this->actingAs($viewer)->post(route('gift_card.action', [
+            'gift_card_id' => UrlUtils::encodeId($viewerCard->id),
+        ]), ['action' => 'mark_paid'])->assertStatus(403);
+        $this->assertSame('unpaid', $viewerCard->fresh()->status);
+
+        $adminCard = $this->activeGiftCard($role, ['status' => 'unpaid']);
+        $this->actingAs($admin)->post(route('gift_card.action', [
+            'gift_card_id' => UrlUtils::encodeId($adminCard->id),
+        ]), ['action' => 'mark_paid'])->assertOk();
+        $this->assertSame('active', $adminCard->fresh()->status);
+    }
+
     public function test_view_page_requires_secret(): void
     {
         $owner = $this->createOwner();

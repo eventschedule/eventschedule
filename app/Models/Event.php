@@ -1301,6 +1301,103 @@ class Event extends Model
         return $value;
     }
 
+    /**
+     * Events whose private data (sales, revenue, check-ins) this user may read.
+     *
+     * A deliberate SUBSET of User::canViewEventData(), never a mirror of it. That is the whole
+     * invariant: a row that is listed is always actionable, and a row this misses is only ever
+     * one the check would have allowed anyway. Equality is what produced both of the bugs below.
+     *
+     * Two tightenings on top of the check's own rule, both load-bearing:
+     *
+     * 1. A pivot row is REQUIRED. canViewEventData() walks $event->roles, so granting on the
+     *    events.creator_role_id column alone would list rows whose every action button 403s.
+     *    roles()->sync() in EventRepo detaches pivot rows while creator_role_id is write-once,
+     *    so that state is real - CheckData::checkEventCreatorRoles() exists to find it.
+     *
+     * 2. Someone ELSE's event needs an ACCEPTED pivot. A decline does not detach: both
+     *    EventController::decline() and ::uncurate() leave the row at is_accepted = false, so
+     *    without this a venue that turned an event down keeps its buyer names, emails and revenue
+     *    on the Sales page. Your OWN schedule's event (er.role_id = creator_role_id) is exempt,
+     *    because an appointment booking sits at is_accepted null while it awaits approval and
+     *    false once cancelled, and paid bookings are meant to appear on the Sales page.
+     *
+     *    SCOPED CLAIM: this is a LIST-side rule only. canViewEventData() does not read
+     *    is_accepted, so a declined schedule that still holds an event or sale id can read the
+     *    same data through BoxOfficeController::resolve(), CheckInController::stats() and
+     *    Api/ApiSaleController::show(). That gap predates this scope and closing it means teaching
+     *    canEditEvent() the rule too (canScanEvent delegates to it), which the Requests tab's Edit
+     *    button relies on staying open while a pivot is pending. Its own change.
+     *
+     * Curators are the third rule, inherited from the check: a curator that only LISTS an event
+     * does not own the creator's private data, so it qualifies only for what it created.
+     */
+    public function scopeManagedBy(Builder $query, User $user): Builder
+    {
+        $roles = $user->manageableRoles();
+
+        return $query->managedThrough(
+            $user,
+            $roles->pluck('id')->all(),
+            $roles->where('type', '!=', 'curator')->pluck('id')->all(),
+        );
+    }
+
+    /**
+     * Events this user may scan tickets for: a subset of User::canScanEvent().
+     *
+     * Wider than managedBy() in exactly one way, and narrower in one. Viewers are included,
+     * because a viewer is who you hand the door to. And there is NO curator exception, because
+     * canScanEvent() builds on canEditEvent(), which has none - a curator's staff can already
+     * scan for an event the curator lists. The accepted-pivot rule from managedBy() still applies,
+     * so a declined schedule's staff are not offered the event in the picker - but the same scoped
+     * claim holds as there: canScanEvent() does not read is_accepted either, so the POST at
+     * TicketController::scanned() would still admit their ticket holders.
+     */
+    public function scopeScannableBy(Builder $query, User $user): Builder
+    {
+        $roleIds = $user->scannableRoles()->pluck('id')->all();
+
+        return $query->managedThrough($user, $roleIds, $roleIds);
+    }
+
+    /**
+     * Shared body of managedBy()/scannableBy(). $curatorExemptRoleIds are the roles allowed to
+     * qualify through an accepted pivot on somebody else's event - i.e. every non-curator role
+     * for managedBy(), and every role for scannableBy().
+     */
+    public function scopeManagedThrough(
+        Builder $query,
+        User $user,
+        array $roleIds,
+        array $curatorExemptRoleIds
+    ): Builder {
+        return $query->where(function ($q) use ($user, $roleIds, $curatorExemptRoleIds) {
+            $q->where('events.user_id', $user->id);
+
+            if (! $roleIds) {
+                return;
+            }
+
+            $q->orWhereExists(function ($sub) use ($roleIds, $curatorExemptRoleIds) {
+                $sub->selectRaw('1')
+                    ->from('event_role')
+                    ->whereColumn('event_role.event_id', 'events.id')
+                    ->whereIn('event_role.role_id', $roleIds)
+                    ->where(function ($w) use ($curatorExemptRoleIds) {
+                        // My own schedule's event: mine whatever the pivot says.
+                        $w->whereColumn('event_role.role_id', 'events.creator_role_id');
+
+                        // Somebody else's: only once this schedule accepted it.
+                        if ($curatorExemptRoleIds) {
+                            $w->orWhere(fn ($a) => $a->where('event_role.is_accepted', true)
+                                ->whereIn('event_role.role_id', $curatorExemptRoleIds));
+                        }
+                    });
+            });
+        });
+    }
+
     public function scopeInMonth($query, $gridStartUtc, $gridEndUtc = null)
     {
         return $query->where(function ($q) use ($gridStartUtc, $gridEndUtc) {

@@ -105,7 +105,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Your access level changes what you see</div>
-            <p>Schedules have three access levels: <strong>owner</strong>, <strong>admin</strong>, and <strong>viewer</strong>. Viewers get a read-only admin panel, and cannot open the schedule settings page at all. Following a schedule is not an access level and grants nothing in the admin panel. See <a href="#team" class="doc-link">Team</a>.</p>
+            <p>Schedules have three access levels: <strong>owner</strong>, <strong>admin</strong>, and <strong>viewer</strong>. Viewers get a read-only admin panel, cannot see ticket sales, and cannot open the schedule settings page at all. Following a schedule is not an access level and grants nothing in the admin panel. See <a href="#team" class="doc-link">Team</a>.</p>
         </div>
     </section>
 
@@ -449,13 +449,13 @@
                     </tr>
                     <tr>
                         <td><strong>Admin</strong></td>
-                        <td>Run the schedule day to day: add and edit events, accept and decline requests, edit the schedule settings, sell tickets, invite new members</td>
+                        <td>Run the schedule day to day: add and edit events, accept and decline requests, edit the schedule settings, sell tickets, see the schedule's sales and run check-in, invite new members</td>
                         <td>Change anyone's level, remove another member, or delete the schedule</td>
                     </tr>
                     <tr>
                         <td><strong>Viewer</strong></td>
-                        <td>Read the admin panel: browse the calendar, requests, followers, team and bookings, generate a graphic, grab the embed code</td>
-                        <td>Add or change anything, act on requests, or open the schedule settings page at all</td>
+                        <td>Read the admin panel: browse the calendar, requests, followers, team and bookings, generate a graphic, grab the embed code, and scan tickets at the door</td>
+                        <td>Add or change anything, act on requests, see ticket sales, or open the schedule settings page at all</td>
                     </tr>
                 </tbody>
             </table>

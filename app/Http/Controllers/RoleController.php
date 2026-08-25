@@ -3331,7 +3331,7 @@ class RoleController extends Controller
                 return redirect()->back()->with('error', __('messages.not_authorized'));
             }
         } else {
-            $this->authorize('manageMembers', $role);
+            $this->authorize('manageMemberLevels', $role);
         }
 
         if ($userId == $role->user_id) {
@@ -3370,7 +3370,7 @@ class RoleController extends Controller
         $userId = UrlUtils::decodeId($hash);
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        $this->authorize('manageMembers', $role);
+        $this->authorize('manageMemberLevels', $role);
 
         $request->validate([
             'level' => ['required', 'in:admin,viewer'],

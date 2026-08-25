@@ -418,14 +418,17 @@ class GiftCardController extends Controller
     }
 
     /**
-     * Owner actions on a gift card from the Sales page tab.
+     * Owner/admin actions on a gift card from the Sales page tab.
+     *
+     * Scoped like the tab that lists them. The redeem-time check in validateGiftCard() stays on
+     * roles.user_id - that one is a payout-integrity rule, not an access rule.
      */
     public function handleAction(Request $request, $gift_card_id)
     {
         $giftCard = GiftCard::with('role')->findOrFail(UrlUtils::decodeId($gift_card_id));
         $user = auth()->user();
 
-        if ($giftCard->role->user_id !== $user->id) {
+        if (! $user->manageableRoles()->contains('id', $giftCard->role_id)) {
             return response()->json(['error' => __('messages.unauthorized')], 403);
         }
 
@@ -501,7 +504,7 @@ class GiftCardController extends Controller
         $giftCard = GiftCard::with('role')->findOrFail(UrlUtils::decodeId($gift_card_id));
         $user = auth()->user();
 
-        if ($giftCard->role->user_id !== $user->id) {
+        if (! $user->manageableRoles()->contains('id', $giftCard->role_id)) {
             return response()->json(['error' => __('messages.unauthorized')], 403);
         }
 

@@ -122,9 +122,7 @@ class WaitlistController extends Controller
         $includePast = $request->query('include_past') == 1;
 
         $query = TicketWaitlist::with('event')
-            ->whereHas('event', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
-            })
+            ->whereHas('event', fn ($q) => $q->managedBy($user))
             ->whereIn('status', ['waiting', 'notified']);
 
         if (! $includePast) {
@@ -181,9 +179,10 @@ class WaitlistController extends Controller
         $id = UrlUtils::decodeId($id);
         $user = auth()->user();
 
-        $entry = TicketWaitlist::whereHas('event', function ($q) use ($user) {
-            $q->where('user_id', $user->id);
-        })->findOrFail($id);
+        // This whereHas IS the authorization for the delete, so it must stay in step with the
+        // list above: scoping the two differently would either hide rows or orphan the button.
+        $entry = TicketWaitlist::whereHas('event', fn ($q) => $q->managedBy($user))
+            ->findOrFail($id);
 
         $entry->delete();
 

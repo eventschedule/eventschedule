@@ -164,15 +164,15 @@ class FeedbackController extends Controller
     {
         $user = auth()->user();
 
-        $hasPro = $user->roles()->get()->contains(fn ($role) => $role->isPro());
+        // manageableRoles(), not roles(): the latter includes 'follower' pivots, so following any
+        // Pro schedule used to unlock this export.
+        $hasPro = $user->manageableRoles()->contains(fn ($role) => $role->isPro());
 
         if (! $hasPro) {
             abort(403);
         }
 
-        $query = EventFeedback::whereHas('event', function ($q) use ($user) {
-            $q->where('user_id', $user->id);
-        })
+        $query = EventFeedback::whereHas('event', fn ($q) => $q->managedBy($user))
             ->whereHas('sale', fn ($q) => $q->where('is_deleted', false))
             ->with(['event', 'sale'])
             ->orderBy('created_at', 'desc');

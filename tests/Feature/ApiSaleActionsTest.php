@@ -167,6 +167,37 @@ class ApiSaleActionsTest extends TestCase
         $this->assertSame(60.0, $this->revenueFor($event->id));
     }
 
+    public function test_the_api_list_returns_only_sales_its_own_detail_route_will_serve(): void
+    {
+        // GET /api/sales used to scope by a bare owner|admin pivot pluck while show()/update()/
+        // destroy() used canViewEventData(), so a curator's admin could list a sale and then 403
+        // fetching it. Both sides are on Event::managedBy() now; this pins that they agree.
+        $curator = $this->createCurator($this->createOwner());
+        $curatorAdmin = $this->createOwner();
+        $this->followRole($curatorAdmin, $curator, 'admin');
+        $key = $this->apiKey($curatorAdmin);
+
+        // Created by the curator - visible, and actionable.
+        $own = $this->createEvent($curator, ['name' => 'Curator Own', 'creator_role_id' => $curator->id]);
+        $ownSale = $this->createSale($own, $curator, ['name' => 'Own Buyer', 'status' => 'paid']);
+
+        // Only LISTED by the curator - the money settles elsewhere.
+        $foreign = $this->createEvent($this->createRole($this->createOwner()), ['name' => 'Foreign']);
+        $foreign->roles()->attach($curator->id, ['is_accepted' => true]);
+        $foreignSale = $this->createSale($foreign, $curator, ['name' => 'Foreign Buyer', 'status' => 'paid']);
+
+        $list = $this->getJson('/api/sales', ['X-API-Key' => $key])->assertOk();
+        $names = collect($list->json('data'))->pluck('name')->all();
+
+        $this->assertContains('Own Buyer', $names);
+        $this->assertNotContains('Foreign Buyer', $names, 'a curator that only lists does not own the buyers');
+
+        // And every listed row is fetchable - the invariant the mismatch broke.
+        $this->getJson('/api/sales/'.UrlUtils::encodeId($ownSale->id), ['X-API-Key' => $key])->assertOk();
+        $this->getJson('/api/sales/'.UrlUtils::encodeId($foreignSale->id), ['X-API-Key' => $key])
+            ->assertStatus(403);
+    }
+
     public function test_api_refund_rejects_a_sale_that_is_not_paid(): void
     {
         [$primary, , $key] = $this->createGroupedPaidOrder();

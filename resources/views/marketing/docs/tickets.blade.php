@@ -881,7 +881,7 @@
             </svg>
             Managing Sales
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Track and manage your ticket sales from <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Sales</strong>. The page spans every schedule you own, and carries tabs for <strong class="text-gray-900 dark:text-white">Sales</strong>, <strong class="text-gray-900 dark:text-white">Waitlist</strong>, <strong class="text-gray-900 dark:text-white">Feedback</strong>, <strong class="text-gray-900 dark:text-white">Subscriptions</strong>, <strong class="text-gray-900 dark:text-white"><a href="#installments" class="doc-link">Installments</a></strong> and <strong class="text-gray-900 dark:text-white">Gift Cards</strong>.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Track and manage your ticket sales from <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Sales</strong>. The page spans every schedule you own or administer, and carries tabs for <strong class="text-gray-900 dark:text-white">Sales</strong>, <strong class="text-gray-900 dark:text-white">Waitlist</strong>, <strong class="text-gray-900 dark:text-white">Feedback</strong>, <strong class="text-gray-900 dark:text-white">Subscriptions</strong>, <strong class="text-gray-900 dark:text-white"><a href="#installments" class="doc-link">Installments</a></strong> and <strong class="text-gray-900 dark:text-white">Gift Cards</strong>.</p>
 
         <h3 class="doc-subheading">What You Can See</h3>
         <ul class="doc-list mb-6">
@@ -948,7 +948,7 @@
     <!-- Export -->
     <section id="export" class="doc-section">
         <h3 class="doc-subheading">Exporting Sales Data <x-doc-badge plan="pro" /></h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Export your sales data for accounting, tax purposes, or to import into other systems. The export covers every schedule you own.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Export your sales data for accounting, tax purposes, or to import into other systems. The export covers every schedule you own or administer.</p>
 
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Sales</strong></li>

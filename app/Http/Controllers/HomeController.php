@@ -384,9 +384,9 @@ class HomeController extends Controller
 
         // Overdue installment payments.
         //
-        // Scoped by events.user_id - schedules the user OWNS - to match the Installments tab it
-        // links to. Scoping it by editable schedules instead would give an editor a badge that
-        // opens an empty page.
+        // Scoped to match the Installments tab it links to, so the badge never opens an empty
+        // page. That tab now spans schedules the user administers as well as the ones they own,
+        // so this follows it - it used to be events.user_id on both sides.
         //
         // Counts only genuinely overdue plans, never the whole live book: the panel's header
         // badge is a plain sum, so a count that never drains reads as a permanent to-do. That is
@@ -395,7 +395,7 @@ class HomeController extends Controller
             ->where('status', 'delinquent')
             ->whereHas('sale', function ($q) {
                 $q->where('is_deleted', false)
-                    ->whereHas('event', fn ($eq) => $eq->where('user_id', auth()->id())->where('is_cancelled', false));
+                    ->whereHas('event', fn ($eq) => $eq->managedBy(auth()->user())->where('is_cancelled', false));
             })
             ->count();
 

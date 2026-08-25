@@ -17,7 +17,7 @@ class CheckInController extends Controller
         // paid sales, so the dashboard had nothing to show. Now that it can sell, the gate has to be
         // explicit or check-in becomes a free feature by accident.
         $events = Event::with(['creatorRole', 'roles'])
-            ->where('user_id', $user->id)
+            ->managedBy($user)
             ->whereNull('appointment_type_id') // appointment bookings are not check-in events
             ->where(fn ($q) => $q->whereHas('tickets')->orWhere('rsvp_enabled', true))
             ->orderBy('starts_at', 'desc')

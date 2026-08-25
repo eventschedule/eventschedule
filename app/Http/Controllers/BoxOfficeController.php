@@ -441,7 +441,11 @@ class BoxOfficeController extends Controller
         $event = Event::whereHas('roles', fn ($q) => $q->where('roles.id', $role->id))
             ->findOrFail(UrlUtils::decodeId($hash));
 
-        if (! $request->user()->canEditEvent($event)) {
+        // canViewEventData(), not canEditEvent(): the report renders buyer names and emails, and
+        // canEditEvent() has no curator exception - so a curator's admin could read the buyer list
+        // for an event the curator merely lists. It also keeps this in step with the Sales page:
+        // on the edit rule that admin could BOOK a seat here and then not be able to refund it.
+        if (! $request->user()->canViewEventData($event)) {
             abort(403);
         }
 

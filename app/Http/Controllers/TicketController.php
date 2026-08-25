@@ -171,7 +171,7 @@ class TicketController extends Controller
             $tab = request()->query('tab');
             if ($tab === 'feedback') {
                 $user = auth()->user();
-                $hasPro = $user->roles()->get()->contains(fn ($role) => $role->isPro());
+                $hasPro = $user->manageableRoles()->contains(fn ($role) => $role->isPro());
                 if (! $hasPro) {
                     abort(403);
                 }
@@ -182,13 +182,12 @@ class TicketController extends Controller
             return view('ticket.sales_table', compact('sales', 'groupCounts', 'sortBy', 'sortDir'));
         } else {
             $user = auth()->user();
-            $waitlistCount = TicketWaitlist::whereHas('event', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
-            })->whereIn('status', ['waiting', 'notified'])->count();
+            $waitlistCount = TicketWaitlist::whereHas('event', fn ($q) => $q->managedBy($user))
+                ->whereIn('status', ['waiting', 'notified'])->count();
 
             $waitlistEntries = collect();
 
-            $hasPro = $user->roles()->get()->contains(fn ($role) => $role->isPro());
+            $hasPro = $user->manageableRoles()->contains(fn ($role) => $role->isPro());
 
             $subscriptions = $this->getSubscriptionsData();
             $subscriptionsCount = $subscriptions->count();
@@ -254,7 +253,7 @@ class TicketController extends Controller
     {
         $user = auth()->user();
 
-        return GiftCard::whereHas('role', fn ($q) => $q->where('user_id', $user->id))
+        return GiftCard::whereIn('role_id', $user->manageableRoles()->pluck('id'))
             ->with(['role:id,name,subdomain', 'sales' => function ($q) {
                 $q->where('is_deleted', false)->whereNotNull('gift_card_amount')->with('event:id,name');
             }])
@@ -304,7 +303,7 @@ class TicketController extends Controller
             ->whereHas('sale', function ($q) use ($user) {
                 $q->where('is_deleted', false)
                     ->where('status', 'paid')
-                    ->whereHas('event', fn ($eq) => $eq->where('user_id', $user->id));
+                    ->whereHas('event', fn ($eq) => $eq->managedBy($user));
             })
             ->with(['sale:id,name,email,event_id,secret', 'ticket:id,type,pass_usage_type,pass_max_uses'])
             ->get();
@@ -384,7 +383,7 @@ class TicketController extends Controller
                 // "Expected by month" forecast with money nobody ever committed to paying.
                 $q->where('is_deleted', false)
                     ->where('status', 'paid')
-                    ->whereHas('event', fn ($eq) => $eq->where('user_id', $user->id));
+                    ->whereHas('event', fn ($eq) => $eq->managedBy($user));
             })
             ->with(['installments', 'sale:id,name,email,event_id,secret', 'sale.event:id,name'])
             ->get();
@@ -487,9 +486,7 @@ class TicketController extends Controller
 
         $query = Sale::with('event.creatorRole', 'saleTickets.ticket', 'promoCode', 'feedback')
             ->where('is_deleted', false)
-            ->whereHas('event', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            });
+            ->whereHas('event', fn ($query) => $query->managedBy($user));
 
         if (! $includePast) {
             $query->where(function ($q) {
@@ -555,9 +552,7 @@ class TicketController extends Controller
             $sortBy = 'created_at';
         }
 
-        $feedbackQuery = EventFeedback::whereHas('event', function ($q) use ($user) {
-            $q->where('user_id', $user->id);
-        })
+        $feedbackQuery = EventFeedback::whereHas('event', fn ($q) => $q->managedBy($user))
             ->whereHas('sale', fn ($q) => $q->where('is_deleted', false))
             ->with(['event', 'sale']);
 
@@ -577,7 +572,7 @@ class TicketController extends Controller
 
         $feedbacks = $feedbackQuery->paginate(50, ['*'], 'feedback_page')->withQueryString();
 
-        $stats = EventFeedback::whereHas('event', fn ($q) => $q->where('user_id', $user->id))
+        $stats = EventFeedback::whereHas('event', fn ($q) => $q->managedBy($user))
             ->whereHas('sale', fn ($q) => $q->where('is_deleted', false)->where('status', 'paid'))
             ->selectRaw('COUNT(*) as feedback_count, AVG(rating) as avg_rating')
             ->first();
@@ -591,9 +586,7 @@ class TicketController extends Controller
                 $q->where(fn ($q2) => $q2->whereNotNull('feedback_sent_at')->where('feedback_sent_at', '>', '2000-01-02'))
                     ->orWhereHas('feedback');
             })
-            ->whereHas('event', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
-            })
+            ->whereHas('event', fn ($q) => $q->managedBy($user))
             ->count();
 
         $responseRate = $totalEligibleSales > 0 ? round(($feedbackCount / $totalEligibleSales) * 100) : 0;
@@ -611,7 +604,7 @@ class TicketController extends Controller
             ->whereDoesntHave('feedback')
             ->where(fn ($q) => $q->whereNull('group_id')->orWhereColumn('group_id', 'id'))
             ->excludeTestEmails()
-            ->whereHas('event', fn ($q) => $q->where('user_id', $user->id))
+            ->whereHas('event', fn ($q) => $q->managedBy($user))
             ->with(['event.creatorRole'])
             ->get();
 
@@ -702,7 +695,7 @@ class TicketController extends Controller
             ->whereNotNull('feedback_sent_at')
             ->where('feedback_sent_at', '>', '2000-01-02')
             ->whereDoesntHave('feedback')
-            ->whereHas('event', fn ($q) => $q->where('user_id', $user->id));
+            ->whereHas('event', fn ($q) => $q->managedBy($user));
 
         $awaitingCount = $awaitingQuery->count();
 
@@ -767,7 +760,7 @@ class TicketController extends Controller
             ->whereDoesntHave('feedback')
             ->where(fn ($q) => $q->whereNull('group_id')->orWhereColumn('group_id', 'id'))
             ->excludeTestEmails()
-            ->whereHas('event', fn ($q) => $q->where('user_id', $user->id))
+            ->whereHas('event', fn ($q) => $q->managedBy($user))
             ->with(['event'])
             ->get();
 
@@ -856,7 +849,7 @@ class TicketController extends Controller
             ->whereDoesntHave('feedback')
             ->where(fn ($q) => $q->whereNull('group_id')->orWhereColumn('group_id', 'id'))
             ->excludeTestEmails()
-            ->whereHas('event', fn ($q) => $q->where('user_id', $user->id))
+            ->whereHas('event', fn ($q) => $q->managedBy($user))
             ->with(['event'])
             ->get();
 
@@ -912,9 +905,12 @@ class TicketController extends Controller
         // Pro only. The export already carries Pro-only columns (promo code, discount, gift card,
         // check-in status, pass usage), and it needed no gate while only Pro schedules had sales to
         // export. $hasPro here is user-level on purpose, matching the Sales page it is reached from:
-        // the export spans every schedule the user owns, so a per-schedule check has nothing to bind
-        // to. It is the same shape as the Feedback tab guard above.
-        $hasPro = auth()->user()->roles()->get()->contains(fn ($role) => $role->isPro());
+        // the export spans every schedule the user owns or administers, so a per-schedule check has
+        // nothing to bind to. It is the same shape as the Feedback tab guard above.
+        //
+        // manageableRoles(), not roles(): the latter includes 'follower' pivots, so following any
+        // Pro schedule used to unlock this export over your own free schedule's sales.
+        $hasPro = auth()->user()->manageableRoles()->contains(fn ($role) => $role->isPro());
 
         if (! $hasPro) {
             abort(403);
@@ -2655,7 +2651,7 @@ class TicketController extends Controller
         // organizer admit them at the door. The Pro feature is the check-in DASHBOARD (live stats,
         // per-ticket breakdown), not scanning itself.
         $events = Event::with(['creatorRole', 'roles'])
-            ->where('user_id', $user->id)
+            ->scannableBy($user)
             ->whereNotNull('starts_at')
             ->whereNull('appointment_type_id') // appointment bookings are not scannable events
             ->orderBy('starts_at', 'desc')
@@ -2947,7 +2943,10 @@ class TicketController extends Controller
         $sale = Sale::findOrFail(UrlUtils::decodeId($sale_id));
         $user = auth()->user();
 
-        if (! $user->canEditEvent($sale->event)) {
+        // canViewEventData(), not canEditEvent(): the latter has no curator exception, so a
+        // curator's admin could act on a sale for an event the curator merely lists and whose
+        // money settles into somebody else's account.
+        if (! $sale->event || ! $user->canViewEventData($sale->event)) {
             return response()->json(['error' => __('messages.unauthorized')], 403);
         }
 
@@ -3293,7 +3292,10 @@ class TicketController extends Controller
         $sale = Sale::findOrFail(UrlUtils::decodeId($sale_id));
         $user = auth()->user();
 
-        if (! $user->canEditEvent($sale->event)) {
+        // canViewEventData(), not canEditEvent(): the latter has no curator exception, so a
+        // curator's admin could act on a sale for an event the curator merely lists and whose
+        // money settles into somebody else's account.
+        if (! $sale->event || ! $user->canViewEventData($sale->event)) {
             return response()->json(['error' => __('messages.unauthorized')], 403);
         }
 
@@ -3335,7 +3337,10 @@ class TicketController extends Controller
         $sale = Sale::findOrFail(UrlUtils::decodeId($sale_id));
         $user = auth()->user();
 
-        if (! $sale->event || ! $user->canEditEvent($sale->event)) {
+        // canViewEventData(), not canEditEvent(): the latter has no curator exception, so a
+        // curator's admin could act on a sale for an event the curator merely lists and whose
+        // money settles into somebody else's account.
+        if (! $sale->event || ! $user->canViewEventData($sale->event)) {
             return response()->json(['error' => __('messages.unauthorized')], 403);
         }
 
@@ -3408,7 +3413,10 @@ class TicketController extends Controller
     {
         $user = auth()->user();
 
-        $roles = $user->roles()->wherePivot('level', '!=', 'follower')->get();
+        // Same set the POST authorizes against (importAttendeesStore -> canViewEventData). The
+        // old level != 'follower' included viewers, who got through a CSV upload and a column
+        // mapping step only to hit a bare abort(403).
+        $roles = $user->manageableRoles();
 
         if ($roles->isEmpty()) {
             abort(403);
@@ -3515,7 +3523,10 @@ class TicketController extends Controller
         $event = Event::with(['tickets', 'roles', 'creatorRole'])
             ->findOrFail(UrlUtils::decodeId($request->event_id));
 
-        if (! $user->canEditEvent($event)) {
+        // canViewEventData(), not canEditEvent(): the latter has no curator exception, so a
+        // curator's admin could act on a sale for an event the curator merely lists and whose
+        // money settles into somebody else's account.
+        if (! $user->canViewEventData($event)) {
             abort(403);
         }
 
