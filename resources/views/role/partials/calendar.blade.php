@@ -2349,9 +2349,9 @@ const calendarApp = createApp({
             }
             today.setHours(0, 0, 0, 0);
             
-            // Calculate upcoming dates for the next 4 months
+            // Calculate upcoming dates for the next 6 months
             const endDate = new Date(today);
-            endDate.setMonth(endDate.getMonth() + 4);
+            endDate.setMonth(endDate.getMonth() + 6);
             
             // Helper function to check if a date should be included based on recurring end settings
             const shouldIncludeDate = (event, dateStr) => {
@@ -2498,7 +2498,7 @@ const calendarApp = createApp({
                     return new Date(a.local_starts_at) - new Date(b.local_starts_at);
                 }
                 return 0;
-            }).slice(0, 100);
+            }).slice(0, this.maxEvents || 200);
         },
         eventsGroupedByDate() {
             const grouped = {};
@@ -2532,7 +2532,7 @@ const calendarApp = createApp({
                     });
                 }
             });
-            return events.slice(0, 100);
+            return events.slice(0, this.maxEvents || 200);
         },
         flatPastEvents() {
             if (this.activeFilterCount > 0) return [];

@@ -77,10 +77,10 @@ class RoleController extends Controller
     use Traits\ResolvesGuestLanguage;
 
     // Max events loaded whenever the month window is dropped, which is now both calendar-events
-    // endpoints, guest and admin, in either layout. They display at most 100 upcoming events
-    // client-side, so the nearest 200 upcoming rows are a safe superset while keeping the query
+    // endpoints, guest and admin, in either layout. They display at most 200 upcoming events
+    // client-side, so the nearest 400 upcoming rows are a safe superset while keeping the query
     // bounded (prevents hydrating the full event table on large schedules).
-    private const LIST_EVENT_CAP = 200;
+    private const LIST_EVENT_CAP = 400;
 
     protected $eventRepo;
 
@@ -2540,7 +2540,7 @@ class RoleController extends Controller
 
         // No upper date bound, for the same reason adminCalendarEvents has none. The list layout
         // renders every upcoming event in one flat list, and the calendar layout's mobile view is
-        // a flat agenda spanning four months with no month navigation at all (the controls are
+        // a flat agenda spanning six months with no month navigation at all (the controls are
         // hidden below md), so stopping at the month boundary left later events permanently
         // unreachable there. Cap the row count instead: bounded memory (this is what prevents the
         // original OOM) and a safe superset of what either layout displays. The desktop month grid
@@ -2668,7 +2668,7 @@ class RoleController extends Controller
         $startOfGridUtc = $startOfGrid->copy()->setTimezone('UTC');
 
         // No upper date bound. The desktop grid only renders the viewed month, but the mobile
-        // agenda is a flat list spanning four months and has no month navigation at all (the
+        // agenda is a flat list spanning six months and has no month navigation at all (the
         // controls are hidden below md), so stopping at the month boundary left later events
         // permanently unreachable there. Cap the row count instead: bounded memory on large
         // schedules, and a safe superset of what either layout displays.
