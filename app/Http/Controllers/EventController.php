@@ -1269,32 +1269,90 @@ class EventController extends Controller
             }
         }
 
-        // Send email to the user who submitted the event
-        // Only send if they have an email and aren't a member of the accepting role
-        // (Guest submissions without accounts have user_id set to venue's user)
-        if ($event->user && $event->user->email && ! is_demo_mode()) {
-            if (! $event->user->isMember($subdomain)) {
-                SendQueuedEmail::dispatch(
-                    new EventDeclined($event, $role),
-                    $event->user->email,
-                    null,
-                    $event->user->language_code
-                );
+        // Tell whoever asked this schedule for a listing - if anybody actually did.
+        if ($recipient = $this->declineNotificationRecipient($event, $role)) {
+            SendQueuedEmail::dispatch(
+                new EventDeclined($event, $role),
+                $recipient->email,
+                null,
+                $recipient->language_code
+            );
 
-                OneSignalService::pushToUser($event->user, [
-                    'title_key' => 'messages.push_event_declined_title',
-                    'body_key' => 'messages.push_event_declined_body',
-                    'body_params' => ['event' => $event->name],
-                    'url' => $event->getGuestUrl(false, null, true),
-                    'options' => ['icon' => $role->profile_image_url],
-                ], $role);
-            }
+            OneSignalService::pushToUser($recipient, [
+                'title_key' => 'messages.push_event_declined_title',
+                'body_key' => 'messages.push_event_declined_body',
+                'body_params' => ['event' => $event->name],
+                'url' => $event->getGuestUrl(false, null, true),
+                'options' => ['icon' => $role->profile_image_url],
+            ], $role);
         }
 
         AuditService::log(AuditService::EVENT_DECLINE, $user->id, 'Event', $event->id, null, null, $role->name);
 
         return $this->redirectAfterRequestDecision($request, $subdomain, 'requests')
             ->with('message', __('messages.request_declined'));
+    }
+
+    /**
+     * Who to tell that $role turned this event down, or null if nobody asked $role for anything.
+     *
+     * events.user_id is the event's CREATOR, stamped once at creation (EventRepo::saveEvent, behind
+     * an $isNewEvent guard) and never updated. It is NOT a record of who requested this schedule, so
+     * "your event request at X has been declined" is only true for some of the rows that reach here.
+     * Three shapes put a user in user_id who never made a request; each gets its own skip.
+     */
+    private function declineNotificationRecipient(Event $event, Role $role): ?User
+    {
+        // The curator pulled this event in themselves via a source, so declining it is a removal
+        // from their own listing, not an answer to anybody. uncurate() already makes the identical
+        // pivot write silently - this is what keeps the two routes agreeing.
+        //
+        // Defensive today rather than a live path: CuratorSourceService::linkMissing() inserts
+        // is_accepted = 1, so these rows miss the Requests tab (pending only), and the Schedule
+        // tab's Unscheduled list is populated for non-curators only (RoleController) while
+        // auto-sourced rows exist on curators only. This route is a plain isEditor()-gated POST
+        // though, so it stays reachable outside those two buttons.
+        //
+        // Known trade-off of keying on the flag: a GENUINE request can be adopted as auto-sourced.
+        // EventRepo's roles()->sync() detaches curators absent from the posted list, and the next
+        // CuratorSourceService::linkMissing() pass re-inserts them with is_accepted, is_auto_sourced
+        // = 1, 1 (EventRepo notes the same adoption path where it repairs those rows). Such a row
+        // would be suppressed here. Exposure is small - it comes back accepted, so it leaves the
+        // Requests queue - but it is a real edge, not an impossible one.
+        $isAutoSourced = $event->roles()
+            ->wherePivot('role_id', $role->id)
+            ->wherePivot('is_auto_sourced', true)
+            ->exists();
+
+        if ($isAutoSourced) {
+            return null;
+        }
+
+        // An appointment booking: the guest already got AppointmentDeclined from the branch above,
+        // and user_id here is the schedule's own owner (AppointmentService sets it that way), so
+        // this would be a second mail with the wrong wording to the wrong person.
+        if ($event->appointment_type_id) {
+            return null;
+        }
+
+        // An anonymous submission borrowed the receiving schedule owner's id to satisfy a NOT NULL
+        // column. They are a stand-in, never a submitter.
+        if ($event->is_guest_submission) {
+            return null;
+        }
+
+        $user = $event->user;
+
+        if (! $user || ! $user->email || is_demo_mode()) {
+            return null;
+        }
+
+        // Somebody on the declining schedule's own team: they can see the decision in the UI.
+        if ($user->isMember($role->subdomain)) {
+            return null;
+        }
+
+        return $user;
     }
 
     public function publish(Request $request, $subdomain, $hash)
@@ -3181,8 +3239,16 @@ class EventController extends Controller
         $event->timezone = $startsAtTimezone;
         $event->event_url = $isOnline ? ($request->event_url ?: 'online') : null;
 
+        // Same stand-in as EventRepo::saveEvent(): user_id is NOT NULL, so an anonymous request has
+        // to borrow the schedule owner. This path hand-builds the Event and never reaches
+        // saveEvent(), so it sets the flag itself - autoCurateEvent() below fans the row onto the
+        // schedule's default curators, and a decline there would otherwise mail the owner about a
+        // request a stranger made. Ticking "create an account" logs the submitter in further up, so
+        // they stay false: they really are the submitter.
+        $isGuestSubmission = ! $user;
         $user = $user ?: $role->user;
         $event->user_id = $user->id;
+        $event->is_guest_submission = $isGuestSubmission;
 
         // This path builds the Event by hand instead of going through EventRepo::saveEvent(), so it
         // has to run the same option whitelist itself.

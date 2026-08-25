@@ -139,6 +139,10 @@ class Event extends Model
         'ical_sequence' => 'integer',
         // Set only by the platform-admin discovery toggle (intentionally NOT in $fillable).
         'is_hidden_from_discovery' => 'boolean',
+        // True when user_id is the receiving schedule's owner standing in for an anonymous
+        // submitter (EventRepo::saveEvent). Written once at creation, so deliberately NOT in
+        // $fillable - the edit form must never flip it.
+        'is_guest_submission' => 'boolean',
         'rsvp_enabled' => 'boolean',
         'custom_fields' => 'array',
         'custom_field_values' => 'array',

@@ -78,6 +78,12 @@ class EventDeclined extends Mailable
     {
         $creatorRole = $this->event->creatorRole;
 
+        // creator_role_id is nullable, and dereferencing it here would fatal inside SendQueuedEmail
+        // rather than fail the send visibly. No creator schedule means no list to unsubscribe from.
+        if (! $creatorRole) {
+            return new Headers;
+        }
+
         return new Headers(
             text: [
                 'List-Unsubscribe' => '<'.route('role.unsubscribe', ['subdomain' => $creatorRole->subdomain]).'>',

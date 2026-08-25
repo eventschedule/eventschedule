@@ -31,9 +31,11 @@
             @endif
         </div>
 
+        @if ($creatorRole)
         <p style="font-size: 12px; color: #999; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
             {!! __('messages.claim_email_line2', ['click_here' => '<a href="' . route('role.show_unsubscribe', ['email' => base64_encode($creatorRole->email)]) . '" style="color: #4E81FA;">' . __('messages.click_here') . '</a>']) !!}
         </p>
+        @endif
 
         <p style="font-size: 12px; color: #999; margin-top: 10px;">
             {{ __('messages.thanks') }},<br>

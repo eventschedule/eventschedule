@@ -538,6 +538,10 @@ class BackupService
         // Also not fillable: it gates the reschedule cooldown, so losing it on restore would let a
         // just-moved booking be moved again immediately.
         $eventData['rescheduled_at'] = optional($event->rescheduled_at)->toDateTimeString();
+        // Also not fillable: it marks a user_id that is a stand-in for an anonymous submitter.
+        // Losing it on restore makes EventController::decline() mail that person about a request
+        // they never made - the exact bug the column exists to prevent.
+        $eventData['is_guest_submission'] = (bool) $event->is_guest_submission;
 
         if ($includeImages) {
             $this->collectEventImages($event, $eventData, $imageFiles);
@@ -1676,6 +1680,8 @@ class BackupService
         $event->cancelled_at = $data['cancelled_at'] ?? null;
         $event->ical_sequence = (int) ($data['ical_sequence'] ?? 0);
         $event->rescheduled_at = $data['rescheduled_at'] ?? null;
+        // ?? false keeps archives written before the column existed importable.
+        $event->is_guest_submission = (bool) ($data['is_guest_submission'] ?? false);
 
         // Remap the appointment type (not fillable). Drop the link if the type didn't import.
         $apptRefId = $data['_appointment_type_ref_id'] ?? null;

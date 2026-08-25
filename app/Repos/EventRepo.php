@@ -427,8 +427,13 @@ class EventRepo
             }
         }
 
+        // events.user_id is NOT NULL, so an anonymous save has to borrow somebody. The schedule's
+        // owner is the least-wrong choice, but they are a stand-in and never a submitter - flag it
+        // so EventController::decline() does not mail them about a request they never made.
+        $isGuestSubmission = false;
         if (! $user) {
             $user = $currentRole->user;
+            $isGuestSubmission = true;
         }
 
         // The "I manage this venue" checkbox. A brand-new venue is the submitter's own creation,
@@ -735,6 +740,7 @@ class EventRepo
         if ($isNewEvent) {
             $event = new Event;
             $event->user_id = $user->id;
+            $event->is_guest_submission = $isGuestSubmission;
             $event->creator_role_id = $creatorRoleId;
         }
 
