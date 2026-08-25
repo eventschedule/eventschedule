@@ -40,6 +40,7 @@ All users get these features with no subscription required.
 | Mobile-optimized, professional design | Responsive layout |
 | Custom schedule URLs | Subdomain-based URLs |
 | Team collaboration (single member) | One team member per schedule |
+| Schedule ownership transfer | Hand a schedule and everything on it to another account (`ScheduleTransferService`). The recipient accepts by signing in as the invited address; `events.user_id` re-points so ticket revenue follows, and on hosted the previous owner's subscription is cancelled at the end of the period already paid for |
 | Venue location maps | Google Maps integration |
 | Google Calendar sync | Bidirectional sync; per-schedule delete-sync action (keep, mark cancelled, or delete a local event when it is deleted in the external calendar) |
 | Outlook Calendar sync | Microsoft 365 / Graph two-way sync, optional Teams meeting links; shares the per-schedule delete-sync action |

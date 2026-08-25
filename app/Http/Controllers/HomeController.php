@@ -92,6 +92,14 @@ class HomeController extends Controller
             }
         }
 
+        // A recipient sent to sign in from the public handover page comes back here first.
+        // Same shape as pending_follow below, and it has to run BEFORE the new-user bounce
+        // to /getting-started further down, or someone whose only tie to the app is the
+        // schedule they were offered never reaches the offer.
+        if ($pendingTransfer = session()->pull('pending_transfer')) {
+            return redirect()->route('role.transfer.show', ['token' => $pendingTransfer]);
+        }
+
         $subdomain = session('pending_follow');
 
         if (! $subdomain) {
@@ -123,11 +131,17 @@ class HomeController extends Controller
         // schedule" chooser. Matches post_signup_redirect_url(), and stays loop-safe
         // because member() is a subset of roles(), so gettingStarted()'s member() guard
         // never bounces a user this forwards.
+        // The incoming-handover check is last because it is the only extra query, and the
+        // cheaper conditions in front of it already exclude almost everybody. Someone who
+        // has been offered a schedule must not be pushed into "create your first
+        // schedule": they are about to receive one, and the dashboard is where the offer
+        // is waiting for them.
         if (! is_demo_mode()
             && ! session('onboarding_skipped')
             && in_array($user->signup_intent, [null, 'organizer'], true)
             && ! $user->roles()->exists()
-            && $user->tickets()->count() === 0) {
+            && $user->tickets()->count() === 0
+            && $this->incomingTransfers($user)->isEmpty()) {
             if (in_array($signupType, ['talent', 'venue', 'curator'], true)) {
                 return redirect()->route('new', ['type' => $signupType]);
             }
@@ -322,6 +336,21 @@ class HomeController extends Controller
     }
 
     /**
+     * Ownership handovers waiting on this user, live rows only.
+     *
+     * Shared by the onboarding bounce in home() and the "Needs attention" row, so the two
+     * can never disagree about whether there is an offer to answer.
+     */
+    private function incomingTransfers(\App\Models\User $user)
+    {
+        return \App\Models\RoleTransfer::open()
+            ->where('to_email', strtolower($user->email))
+            ->with('role')
+            ->get()
+            ->filter(fn ($transfer) => $transfer->role && ! $transfer->role->is_deleted);
+    }
+
+    /**
      * Aggregate the pending items a user needs to act on across every schedule they
      * can edit (owner/admin), as a flat, sorted collection of to-do rows. Each row is
      * an array: type, count, title, subtitle, url, color. Mirrors the count logic used
@@ -331,6 +360,21 @@ class HomeController extends Controller
     private function getPendingActionItems($roleIds)
     {
         $items = collect();
+
+        // Incoming ownership handovers, ABOVE the early return: a recipient whose only
+        // reason to be here is the schedule they were offered has no editable schedules
+        // yet. Only the incoming side is listed - a pending OUTGOING offer drains when
+        // someone else acts, which AdminAlertService calls a metric, not a queue.
+        foreach ($this->incomingTransfers(auth()->user()) as $transfer) {
+            $items->push([
+                'type' => 'schedule_transfer',
+                'count' => 1,
+                'title' => __('messages.pending_action_schedule_transfer'),
+                'subtitle' => $transfer->role->name,
+                'url' => route('role.transfer.show', ['token' => $transfer->token]),
+                'color' => 'amber',
+            ]);
+        }
 
         if ($roleIds->isEmpty()) {
             return $items;

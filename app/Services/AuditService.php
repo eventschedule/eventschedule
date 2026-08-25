@@ -56,6 +56,17 @@ class AuditService
     // clearing a broken video off an unclaimed act), so worth a trail.
     const SCHEDULE_VIDEO_REMOVE = 'schedule.video_remove';
 
+    // Ownership handover. The accept entry is logged against the RECIPIENT, who is the one
+    // who acted; its metadata carries the user_id it came from, so the trail reads in both
+    // directions on a schedule that has changed hands more than once.
+    const SCHEDULE_TRANSFER_INITIATE = 'schedule.transfer_initiate';
+
+    const SCHEDULE_TRANSFER_ACCEPT = 'schedule.transfer_accept';
+
+    const SCHEDULE_TRANSFER_DECLINE = 'schedule.transfer_decline';
+
+    const SCHEDULE_TRANSFER_CANCEL = 'schedule.transfer_cancel';
+
     // Event actions
     const EVENT_CREATE = 'event.create';
 

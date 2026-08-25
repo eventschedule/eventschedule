@@ -1,4 +1,44 @@
-@php $isOwner = auth()->user()->id == $role->user_id; @endphp
+@php
+    $isOwner = auth()->user()->id == $role->user_id;
+    // Set by RoleController::viewAdmin, owner-only. An admin can manage members but
+    // cannot give the schedule away.
+    $openTransfer = $openTransfer ?? null;
+@endphp
+
+@if ($isOwner && $openTransfer)
+{{-- Pending handover. Replaces the Transfer button until it is answered or withdrawn. --}}
+<div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex gap-3">
+            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+            <div class="text-sm text-amber-800 dark:text-amber-200">
+                <p class="font-semibold">{{ __('messages.schedule_transfer_pending', ['email' => $openTransfer->to_email]) }}</p>
+                <p class="mt-1">{{ __('messages.schedule_transfer_pending_expires', ['date' => $openTransfer->expires_at?->format('M j, Y')]) }}</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+            <form method="POST" action="{{ route('role.transfer.resend', ['subdomain' => $role->subdomain]) }}" class="inline">
+                @csrf
+                <button type="submit"
+                    class="inline-flex items-center rounded-lg bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
+                    {{ __('messages.resend_invite') }}
+                </button>
+            </form>
+            <form method="POST" action="{{ route('role.transfer.cancel', ['subdomain' => $role->subdomain]) }}" class="inline"
+                data-confirm="{{ __('messages.are_you_sure') }}">
+                @csrf
+                <button type="submit"
+                    class="inline-flex items-center rounded-lg bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
+                    {{ __('messages.cancel') }}
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
+
 <div class="sm:flex sm:items-center">
     <div class="sm:flex-auto">
         <!--
@@ -7,7 +47,14 @@
             email and role.</p>
         -->
     </div>
-    <div class="mt-6 sm:ms-16 sm:mt-0 sm:flex-none">
+    <div class="mt-6 sm:ms-16 sm:mt-0 sm:flex-none flex flex-col gap-2 md:flex-row md:items-center">
+        @if ($isOwner && ! $openTransfer)
+        {{-- Not plan gated, unlike Add member below: handing a schedule over is account --}}
+        {{-- management, available on Free, Pro and Enterprise alike. --}}
+        <x-secondary-link href="{{ route('role.transfer.create', ['subdomain' => $role->subdomain]) }}" class="w-full md:w-auto">
+            {{ __('messages.transfer_ownership') }}
+        </x-secondary-link>
+        @endif
         @if (!$isViewer)
         @if ($role->isEnterprise())
         <x-brand-link href="{{ route('role.create_member', ['subdomain' => $role->subdomain]) }}" class="w-full md:w-auto">

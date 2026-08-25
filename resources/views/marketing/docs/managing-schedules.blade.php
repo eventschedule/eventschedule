@@ -482,6 +482,28 @@
             <div class="doc-callout-title">If the plan lapses</div>
             <p>On eventschedule.com, invited members can only open the admin panel while the schedule is on Enterprise. If it drops to a lower plan they are turned away with a message asking the owner to upgrade, and the owner keeps full access on their own. Nobody is removed, so restoring Enterprise restores their access.</p>
         </div>
+
+        <h3 id="transfer-ownership" class="doc-subheading">Transferring Ownership</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Ownership can be handed to another account: a venue changes hands, an organizer leaves, or you set a schedule up for someone and want it to be theirs. It is available on every plan, and only the owner can start it.
+        </p>
+        <ol class="doc-list doc-list-numbered mb-6">
+            <li>On the Team tab click <strong>Transfer ownership</strong> and enter the new owner's email address.</li>
+            <li>On <strong>Enterprise</strong> and selfhosted installs you can turn off <strong>Remove me from this schedule</strong> to stay on as an admin afterwards. Free and Pro schedules hold a single member, so there you are always removed.</li>
+            <li>They are emailed a link. Nothing moves yet: the request sits on the Team tab with <strong>Resend Invite</strong> and <strong>Cancel</strong> buttons, and expires after seven days.</li>
+            <li>To accept, they sign in with the address you sent it to. The link on its own is not enough, and if they do not have an account yet they can create one with that address.</li>
+            <li>As soon as they accept, the schedule is theirs: every event, follower, image and setting comes with it.</li>
+        </ol>
+
+        <div class="doc-callout doc-callout-warning mb-6">
+            <div class="doc-callout-title">What changes for the previous owner</div>
+            <p>Ticket payments for this schedule's events start settling into the new owner's payment account, so the new owner should check their payment settings before the next sale. The previous owner's calendar sync for the schedule is disconnected, and their events, followers and settings all move across. Events curated in from other schedules are untouched: those still belong to whoever created them.</p>
+        </div>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Billing on eventschedule.com</div>
+            <p>The previous owner is never charged for the schedule again: their subscription is cancelled at the end of the billing period already paid for and their saved card is removed. The schedule keeps its plan until that period ends. Before then the new owner adds their own billing details to keep it, otherwise the schedule moves to the free plan. Selfhosted installs have no billing step at all.</p>
+        </div>
     </section>
 
     <!-- Plan -->

@@ -9,6 +9,7 @@ use App\Http\Requests\RoleUpdateRequest;
 use App\Http\Requests\RoleVideoRemoveRequest;
 use App\Http\Requests\RoleVideoSaveRequest;
 use App\Http\Requests\RoleVideosSaveRequest;
+use App\Http\Requests\ScheduleTransferRequest;
 use App\Jobs\SendQueuedSms;
 use App\Mail\FeedbackRequest;
 use App\Models\AnalyticsAppearancesDaily;
@@ -24,6 +25,7 @@ use App\Models\Event;
 use App\Models\Group;
 use App\Models\PageView;
 use App\Models\Role;
+use App\Models\RoleTransfer;
 use App\Models\RoleUser;
 use App\Models\Sale;
 use App\Models\User;
@@ -39,6 +41,7 @@ use App\Services\DigitalOceanService;
 use App\Services\EmailService;
 use App\Services\MetaAdsService;
 use App\Services\OneSignalService;
+use App\Services\ScheduleTransferService;
 use App\Services\SmsService;
 use App\Services\UsageTrackingService;
 use App\Utils\ColorUtils;
@@ -2815,6 +2818,12 @@ class RoleController extends Controller
         $followers = $role->followers()->get();
         $followersWithRoles = [];
 
+        // The pending-handover panel replaces the Transfer button on the Team tab. Owner
+        // only: an admin can manage members but cannot give the schedule away.
+        $openTransfer = $tab == 'team' && auth()->user()->id == $role->user_id
+            ? $role->openTransfer()
+            : null;
+
         $events = collect();
         $eventTemplates = collect();
         $unscheduled = [];
@@ -3017,6 +3026,7 @@ class RoleController extends Controller
             'appointmentBookingCounts',
             'pendingBookingCount',
             'currencies',
+            'openTransfer',
         ));
     }
 
@@ -3383,6 +3393,223 @@ class RoleController extends Controller
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']))
             ->with('message', __('messages.member_level_updated'));
+    }
+
+    /**
+     * Ownership handover, owner side (discussion #119).
+     *
+     * Guarded exactly like delete(): demo first, then roles.user_id - NOT isEditor(), which
+     * would let an admin give away a schedule that is not theirs. Deliberately not plan
+     * gated; the discussion puts this on Free, Pro and Enterprise alike.
+     */
+    private function authorizeTransfer(Role $role): ?RedirectResponse
+    {
+        if (is_demo_role($role)) {
+            return redirect()->back()->with('error', __('messages.demo_mode_settings_disabled'));
+        }
+
+        if (auth()->user()->id != $role->user_id) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        return null;
+    }
+
+    public function createTransfer(Request $request, $subdomain)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if ($denied = $this->authorizeTransfer($role)) {
+            return $denied;
+        }
+
+        return view('role/transfer', [
+            'role' => $role,
+            'title' => __('messages.transfer_ownership'),
+            // The Team tab hides the button while an offer is open, but this URL is
+            // reachable directly, so the form says what sending a second one does.
+            'openTransfer' => $role->openTransfer(),
+        ]);
+    }
+
+    public function storeTransfer(ScheduleTransferRequest $request, $subdomain)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if ($denied = $this->authorizeTransfer($role)) {
+            return $denied;
+        }
+
+        $data = $request->validated();
+        $email = strtolower(trim($data['email']));
+
+        // The recipient has to be able to reach the schedule afterwards, and a schedule
+        // whose contact channel was never verified cannot send them anything.
+        if (! $role->isClaimed()) {
+            return redirect()->back()->withInput()->with('error', __('messages.email_not_verified'));
+        }
+
+        $existing = User::whereEmail($email)->first();
+        if ($existing && $existing->id == $role->user_id) {
+            return redirect()->back()->withInput()->with('error', __('messages.schedule_transfer_to_self'));
+        }
+
+        // The form's toggle is "Remove me from this schedule", pre-checked, so keeping the
+        // previous owner is its inverse. Only honoured where a second team member is
+        // allowed at all - createMember is Enterprise-gated - so the field is ignored
+        // elsewhere rather than promising a seat the accept path would then drop.
+        $keepPreviousOwner = $role->isEnterprise() && ! $request->boolean('remove_me');
+
+        app(ScheduleTransferService::class)->initiate($role, $request->user(), $email, $keepPreviousOwner);
+
+        return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']))
+            ->with('message', __('messages.schedule_transfer_sent', ['email' => $email]));
+    }
+
+    public function cancelTransfer(Request $request, $subdomain)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if ($denied = $this->authorizeTransfer($role)) {
+            return $denied;
+        }
+
+        $transfer = $role->openTransfer();
+
+        if (! $transfer) {
+            return redirect()->back()->with('error', __('messages.not_found'));
+        }
+
+        app(ScheduleTransferService::class)->cancel($transfer, $request->user());
+
+        return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']))
+            ->with('message', __('messages.schedule_transfer_cancelled'));
+    }
+
+    public function resendTransfer(Request $request, $subdomain)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if ($denied = $this->authorizeTransfer($role)) {
+            return $denied;
+        }
+
+        $transfer = $role->openTransfer();
+
+        if (! $transfer) {
+            return redirect()->back()->with('error', __('messages.not_found'));
+        }
+
+        app(ScheduleTransferService::class)->sendInvite($transfer);
+
+        return redirect()->back()->with('message', __('messages.invite_resent'));
+    }
+
+    /**
+     * Ownership handover, recipient side. Public: the invitee may not have an account yet,
+     * and bouncing them straight into a login form tells them nothing about what they were
+     * offered.
+     *
+     * The token identifies the offer, it never authorises it - accepting additionally
+     * requires being signed in as the address it was sent to. That email match is the
+     * verification half of the flow, so a leaked link on its own hands over nothing.
+     */
+    public function showTransfer(Request $request, $token)
+    {
+        $transfer = RoleTransfer::where('token', $token)->with(['role', 'fromUser'])->first();
+
+        if (! $transfer || ! $transfer->role || $transfer->role->is_deleted) {
+            return view('role/transfer-accept', ['transfer' => null, 'state' => 'missing']);
+        }
+
+        $user = auth()->user();
+
+        if (! $transfer->isOpen()) {
+            // An owner re-reading their own accepted offer should see that it went through,
+            // not a bare "unavailable".
+            $state = $transfer->status === 'accepted' ? 'accepted' : 'closed';
+
+            return view('role/transfer-accept', ['transfer' => $transfer, 'state' => $state]);
+        }
+
+        if (! $user) {
+            // Same pending-action shape as pending_follow / pending_request: park the token
+            // in the session, send them to the app host to sign in or register, and
+            // HomeController::home() brings them straight back here afterwards. The marker
+            // also keeps a brand-new account out of the "create your first schedule"
+            // chooser, which would otherwise swallow them (post_signup_redirect_url).
+            session(['pending_transfer' => $transfer->token]);
+
+            return view('role/transfer-accept', [
+                'transfer' => $transfer,
+                'state' => 'guest',
+                'signInUrl' => app_url(route('login', [], false)),
+                'signUpUrl' => app_url(route('sign_up', ['email' => base64_encode($transfer->to_email)], false)),
+            ]);
+        }
+
+        // Signed in and past the guest branch: the marker has done its job. Leaving it set
+        // would bounce them back here from the dashboard on their next visit.
+        session()->forget('pending_transfer');
+
+        if (! $transfer->isFor($user)) {
+            return view('role/transfer-accept', ['transfer' => $transfer, 'state' => 'wrong_account']);
+        }
+
+        if ($transfer->role->user_id == $user->id) {
+            return view('role/transfer-accept', ['transfer' => $transfer, 'state' => 'accepted']);
+        }
+
+        return view('role/transfer-accept', ['transfer' => $transfer, 'state' => 'ready']);
+    }
+
+    public function acceptTransfer(Request $request, $token)
+    {
+        $transfer = RoleTransfer::where('token', $token)->first();
+
+        if (! $transfer || ! $transfer->isOpen() || ! $transfer->isFor($request->user())) {
+            return redirect(route('home'))->with('error', __('messages.schedule_transfer_unavailable'));
+        }
+
+        try {
+            $accepted = app(ScheduleTransferService::class)->accept($transfer, $request->user());
+        } catch (\Illuminate\Database\QueryException $e) {
+            // A deadlock (or any DB failure) on a money-adjacent write must not reach the
+            // user as a 500 with no idea whether ownership moved. The transaction rolled
+            // back, so the offer is still open and retrying is safe.
+            report($e);
+
+            return redirect(route('home'))->with('error', __('messages.schedule_transfer_failed'));
+        } catch (\Exception $e) {
+            // Most likely Stripe refusing to cancel the previous owner's subscription,
+            // which cancelSubscription() deliberately does not swallow: we must not take
+            // the schedule away from someone we are still charging.
+            report($e);
+
+            return redirect(route('home'))->with('error', __('messages.schedule_transfer_failed'));
+        }
+
+        if (! $accepted) {
+            return redirect(route('home'))->with('error', __('messages.schedule_transfer_unavailable'));
+        }
+
+        $role = $transfer->refresh()->role;
+
+        return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']))
+            ->with('message', __('messages.schedule_transfer_accepted', ['name' => $role->name]));
+    }
+
+    public function declineTransfer(Request $request, $token)
+    {
+        $transfer = RoleTransfer::where('token', $token)->first();
+
+        if (! $transfer || ! $transfer->isOpen() || ! $transfer->isFor($request->user())) {
+            return redirect(route('home'))->with('error', __('messages.schedule_transfer_unavailable'));
+        }
+
+        app(ScheduleTransferService::class)->decline($transfer, $request->user());
+
+        return redirect(route('home'))->with('message', __('messages.schedule_transfer_declined'));
     }
 
     public function following()

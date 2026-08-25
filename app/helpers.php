@@ -762,6 +762,13 @@ if (! function_exists('signup_intent_from_session')) {
             return 'fan';
         }
 
+        // Someone accepting a schedule handover is signing up to run somebody else's
+        // schedule, exactly like an invited team member - so reuse 'team' rather than
+        // minting an intent the funnel reporting has never seen.
+        if (session()->has('pending_transfer')) {
+            return 'team';
+        }
+
         if (session()->has('sms_token')) {
             return 'claim';
         }
@@ -790,6 +797,10 @@ if (! function_exists('post_signup_redirect_url')) {
         if (session()->has('pending_follow')
             || session()->has('pending_request')
             || session()->has('pending_fan_content')
+            // Not yet a member of anything - the schedule only becomes theirs once they
+            // accept - so this marker is what keeps them out of the "create your first
+            // schedule" chooser. home() consumes it and returns them to the offer.
+            || session()->has('pending_transfer')
             || $user->roles()->exists()) {
             return route('home', absolute: false);
         }

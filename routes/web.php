@@ -294,6 +294,21 @@ Route::get('/nl/c/{token}/{encodedUrl}', [NewsletterTrackingController::class, '
 Route::get('/nl/u/{token}', [NewsletterTrackingController::class, 'showUnsubscribe'])->name('newsletter.show_unsubscribe');
 Route::post('/nl/u/{token}', [NewsletterTrackingController::class, 'unsubscribe'])->name('newsletter.unsubscribe')->middleware('throttle:2,2');
 
+// Schedule ownership handover, recipient side (discussion #119).
+//
+// Top level rather than nested under /{subdomain}, so all three sit on the host the emailed
+// link points at (app_url()) - which on hosted is where the auth session cookie applies. That
+// costs the same theoretical selfhost shadowing the /nl/* routes above already accept: a
+// schedule whose subdomain were literally "schedule-transfer" would lose these paths.
+// Role::generateSubdomain()'s reserved list stops one ever being auto-assigned.
+//
+// The GET is public because the invitee may have no account yet; the token identifies the
+// offer but never authorises it, so accepting is auth-gated and additionally requires being
+// signed in as the address the offer was sent to.
+Route::get('/schedule-transfer/{token}', [RoleController::class, 'showTransfer'])->name('role.transfer.show')->middleware('throttle:20,1');
+Route::post('/schedule-transfer/{token}/accept', [RoleController::class, 'acceptTransfer'])->name('role.transfer.accept')->middleware(['auth', 'verified', 'throttle:10,1']);
+Route::post('/schedule-transfer/{token}/decline', [RoleController::class, 'declineTransfer'])->name('role.transfer.decline')->middleware(['auth', 'verified', 'throttle:10,1']);
+
 Route::post('/stripe/webhook', [StripeController::class, 'webhook'])->name('stripe.webhook');
 Route::post('/stripe/subscription-webhook', [SubscriptionWebhookController::class, 'handleWebhook'])->name('stripe.subscription_webhook');
 Route::post('/invoiceninja/webhook/{secret?}', [InvoiceNinjaController::class, 'webhook'])->name('invoiceninja.webhook')->middleware('throttle:60,1');
@@ -677,6 +692,12 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::post('/{subdomain}/team/add-member', [RoleController::class, 'storeMember'])->name('role.store_member');
     Route::delete('/{subdomain}/team/remove-member/{hash}', [RoleController::class, 'removeMember'])->name('role.remove_member');
     Route::patch('/{subdomain}/team/update-member-level/{hash}', [RoleController::class, 'updateMemberLevel'])->name('role.update_member_level');
+    // Ownership handover, owner side. Owner-only in the controller (roles.user_id, not
+    // isEditor) - an admin can manage members but cannot give the schedule away.
+    Route::get('/{subdomain}/team/transfer', [RoleController::class, 'createTransfer'])->name('role.transfer.create');
+    Route::post('/{subdomain}/team/transfer', [RoleController::class, 'storeTransfer'])->name('role.transfer.store')->middleware('throttle:5,1');
+    Route::post('/{subdomain}/team/transfer/cancel', [RoleController::class, 'cancelTransfer'])->name('role.transfer.cancel');
+    Route::post('/{subdomain}/team/transfer/resend', [RoleController::class, 'resendTransfer'])->name('role.transfer.resend')->middleware('throttle:5,1');
     Route::delete('/{subdomain}/uncurate-event/{hash}', [EventController::class, 'uncurate'])->name('event.uncurate');
     Route::get('/{subdomain}/import', [EventController::class, 'showImportHub'])->name('event.show_import');
     Route::get('/{subdomain}/import/ai', [EventController::class, 'showImport'])->name('event.show_import_ai');

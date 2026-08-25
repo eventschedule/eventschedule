@@ -529,6 +529,21 @@ class Role extends Model implements MustVerifyEmail
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Ownership handover offers, open and resolved. See App\Models\RoleTransfer and
+     * App\Services\ScheduleTransferService.
+     */
+    public function transfers()
+    {
+        return $this->hasMany(RoleTransfer::class);
+    }
+
+    /** The one offer currently awaiting a decision, if any. */
+    public function openTransfer(): ?RoleTransfer
+    {
+        return $this->transfers()->open()->latest('id')->first();
+    }
+
     public function events()
     {
         return $this->belongsToMany(Event::class)
@@ -1394,6 +1409,9 @@ class Role extends Model implements MustVerifyEmail
             'promo',
             'promotions',
             'boost',
+            // Owned by the public ownership-handover route, which is registered ahead of
+            // the selfhost /{subdomain} catch-all and would shadow this schedule's pages.
+            'schedule-transfer',
         ];
 
         if (config('app.hosted') && in_array($subdomain, $reserved)) {
