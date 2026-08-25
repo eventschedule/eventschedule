@@ -61,13 +61,37 @@ class NewsletterSegment extends Model
             ]);
     }
 
+    /**
+     * Event ids whose buyers this schedule may mail: its ACCEPTED attachments.
+     *
+     * Keyed on the event_role pivot, NOT sales.subdomain. That column is a booking-time snapshot of
+     * the storefront the buyer checked out through, and RoleController::update() never rewrites it
+     * on rename - so a renamed schedule silently lost its own audience, and whoever next claimed the
+     * freed subdomain inherited it and could mail those people. Same hazard
+     * RoleController::appointmentsTabData() documents and routes around via creator_role_id.
+     *
+     * The pivot is also what the docs promise: "everyone who has bought a ticket ... for one of your
+     * events", not everyone who happened to check out through your page. is_accepted keeps a
+     * schedule that DECLINED an event from mailing its buyers - a decline does not detach the row.
+     *
+     * Returned as a subquery, never a plucked list: a curator can list tens of thousands of events
+     * and binding one placeholder each can exceed MySQL's prepared-statement limit.
+     */
+    private function mailableEventIds(): \Illuminate\Database\Query\Builder
+    {
+        return \Illuminate\Support\Facades\DB::table('event_role')
+            ->where('event_role.role_id', $this->role->id)
+            ->where('event_role.is_accepted', true)
+            ->select('event_role.event_id');
+    }
+
     protected function resolveTicketBuyers(): Collection
     {
         if (! $this->role) {
             return collect();
         }
 
-        $query = Sale::where('subdomain', $this->role->subdomain)
+        $query = Sale::whereIn('event_id', $this->mailableEventIds())
             ->whereNotNull('email')
             ->where('email', '!=', '');
 
@@ -114,12 +138,11 @@ class NewsletterSegment extends Model
             return collect();
         }
 
-        return Sale::where('subdomain', $this->role->subdomain)
-            ->whereHas('event', function ($q) use ($criteria) {
-                $q->whereHas('roles', function ($q2) use ($criteria) {
-                    $q2->where('event_role.group_id', $criteria['group_id']);
-                });
-            })
+        // The sub-schedule filter goes on THIS role's pivot row, not on any row carrying that
+        // group_id - groups belong to one schedule, so the two agree, but pinning the role keeps a
+        // hand-crafted group_id from another schedule out.
+        return Sale::whereIn('event_id', $this->mailableEventIds()
+            ->where('event_role.group_id', $criteria['group_id']))
             ->whereNotNull('email')
             ->where('email', '!=', '')
             ->select('user_id', 'email', 'name')
@@ -138,7 +161,7 @@ class NewsletterSegment extends Model
             return collect();
         }
 
-        $query = TicketWaitlist::where('subdomain', $this->role->subdomain)
+        $query = TicketWaitlist::whereIn('event_id', $this->mailableEventIds())
             ->whereIn('status', ['waiting', 'notified'])
             ->whereNotNull('email')
             ->where('email', '!=', '');
