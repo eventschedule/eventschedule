@@ -74,14 +74,32 @@ class NewsletterSegment extends Model
      * events", not everyone who happened to check out through your page. is_accepted keeps a
      * schedule that DECLINED an event from mailing its buyers - a decline does not detach the row.
      *
+     * The own-schedule arm is the same one Event::scopeManagedThrough() carries, for the same
+     * reason. is_accepted is nullable, and `= true` drops NULL as well as false - which is right
+     * for somebody ELSE's event and wrong for your own. An appointment booking is the live case:
+     * AppointmentService attaches it with creator_role_id = this schedule and is_accepted null
+     * while it awaits approval (null again on reschedule), false once cancelled - and it sets
+     * sales.subdomain to this schedule, so the old subdomain rule DID reach those buyers. Without
+     * this arm a cancelled booking's buyer leaves the segment permanently.
+     *
      * Returned as a subquery, never a plucked list: a curator can list tens of thousands of events
      * and binding one placeholder each can exceed MySQL's prepared-statement limit.
      */
     private function mailableEventIds(): \Illuminate\Database\Query\Builder
     {
         return \Illuminate\Support\Facades\DB::table('event_role')
+            // Joined only to reach creator_role_id. Many-to-one on event_role.event_id, so this
+            // cannot multiply rows, and the subquery still yields exactly one column.
+            ->join('events', 'events.id', '=', 'event_role.event_id')
             ->where('event_role.role_id', $this->role->id)
-            ->where('event_role.is_accepted', true)
+            ->where(function ($q) {
+                // My own schedule's event: mine whatever the pivot says.
+                $q->whereColumn('event_role.role_id', 'events.creator_role_id')
+                    // Somebody else's: only once this schedule accepted it. A legacy row with a
+                    // null creator_role_id fails the arm above and lands here, which is the
+                    // pre-existing behaviour.
+                    ->orWhere('event_role.is_accepted', true);
+            })
             ->select('event_role.event_id');
     }
 

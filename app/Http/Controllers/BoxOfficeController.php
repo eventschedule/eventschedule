@@ -451,7 +451,16 @@ class BoxOfficeController extends Controller
 
         $date = $request->input('date');
 
-        if ($date !== null && ! Event::isOccurrenceDate($date)) {
+        // Format AND membership, the same pair SeatingPickerController::resolveEvent() applies, and
+        // for the reason its comment gives: materialize() below CREATES the map, so an unvalidated
+        // date is a write. Every distinct string is a distinct row keyed (event_id, event_date),
+        // each costing up to SeatingStructureService::MAX_SEATS seat rows - and these endpoints are
+        // GETs with no throttle. isOccurrenceDate() alone only proves "2099-01-01" is a real
+        // calendar day, not that this event ever happens on it, so without matchesDate() every
+        // well-formed string snapshots a house nobody will ever sell from, which then shows up in
+        // the box-office report and in BackupService::exportSeatingMaps().
+        if ($date !== null
+            && (! Event::isOccurrenceDate($date) || ! $event->matchesDate($date, $event->scheduleTimezone()))) {
             abort(404);
         }
 

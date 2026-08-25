@@ -39,6 +39,24 @@ class ScheduleTransferService
     {
         $email = strtolower(trim($email));
 
+        // Audited like every other transition in this file. The raw update() fires no model events,
+        // so without this the only handover whose end is not in the trail is the one an owner
+        // superseded - which is exactly the case where "who offered this schedule to whom, and
+        // when did that stop being true" gets asked.
+        //
+        // Read before the update: afterwards the rows no longer match scopeOpen().
+        foreach ($role->transfers()->open()->get() as $superseded) {
+            AuditService::log(
+                AuditService::SCHEDULE_TRANSFER_CANCEL,
+                $from->id,
+                'Role',
+                $role->id,
+                null,
+                null,
+                'superseded: '.$superseded->to_email,
+            );
+        }
+
         $role->transfers()->open()->update([
             'status' => 'cancelled',
             'responded_at' => now(),
@@ -271,6 +289,24 @@ class ScheduleTransferService
         });
 
         if (! $moved) {
+            // The offer stopped being valid between the unlocked pre-check and the locked one:
+            // somebody else accepted, the owner cancelled, or the role was deleted. Nothing moved,
+            // which is the right outcome - EXCEPT that step 1 has already cancelled the previous
+            // owner's subscription, and nothing here can put it back (resuming is the customer's
+            // intent to express, not ours). They keep the schedule, so they CAN resume it from the
+            // plan page, but the caller only renders a generic "unavailable" and would never tell
+            // them. Loud on purpose, so the operator sees it even though the user will not.
+            //
+            // Closing the window properly means claiming the offer under lock BEFORE the Stripe
+            // call, which needs a fifth status the enum does not have. Deliberately not done here.
+            if ($hadSubscription) {
+                report(new \RuntimeException(
+                    'Schedule transfer '.$transfer->id.' (role '.$transfer->role_id.') aborted after its '
+                    .'subscription had already been cancelled. The previous owner keeps the schedule with '
+                    .'a subscription cancelling at period end and must resume it themselves.'
+                ));
+            }
+
             return false;
         }
 

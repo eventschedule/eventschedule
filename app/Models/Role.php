@@ -1414,7 +1414,17 @@ class Role extends Model implements MustVerifyEmail
             'schedule-transfer',
         ];
 
-        if (config('app.hosted') && in_array($subdomain, $reserved)) {
+        // Unconditional, NOT hosted-only. The list's own entries explain why: several are there
+        // because "selfhost serves tenants from the same path space", and 'schedule-transfer' was
+        // added for a route registered ahead of the selfhost /{subdomain} catch-all - so gating the
+        // check on config('app.hosted') skipped it in the exact deployment mode it was written for.
+        // On hosted a reserved name is a DNS subdomain that could not shadow an app-domain route
+        // anyway; on selfhost it takes the path outright.
+        //
+        // RoleController::update() only calls this when new_subdomain actually differs from the
+        // stored value, so a schedule already holding one of these keeps it rather than being
+        // silently renamed on its next unrelated save.
+        if (in_array($subdomain, $reserved)) {
             $subdomain = '';
         }
 

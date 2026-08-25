@@ -41,6 +41,60 @@ class NewsletterSegmentScopeTest extends TestCase
         return $segment->resolveRecipients()->pluck('email')->all();
     }
 
+    /**
+     * `is_accepted = true` is the right rule for somebody ELSE's event and the wrong one for yours.
+     *
+     * The column is nullable, so `= true` drops NULL as well as false. On your own schedule that
+     * silently deleted an audience the previous subdomain rule reached: AppointmentService attaches
+     * a booking with creator_role_id = this schedule and is_accepted null while it awaits approval
+     * (null again on reschedule), false once cancelled - and it sets sales.subdomain to this
+     * schedule, so those buyers WERE in Ticket Buyers before. The cancelled ones would never have
+     * come back.
+     *
+     * Event::scopeManagedThrough() carries the same own-schedule arm for the same reason.
+     */
+    public function test_your_own_schedules_events_are_mailable_whatever_the_pivot_says(): void
+    {
+        $role = $this->createRole($this->createOwner());
+
+        // A booking still awaiting approval, and one that was cancelled - the two states
+        // AppointmentService leaves behind on a schedule's OWN event.
+        foreach ([['pending@gmail.com', null], ['cancelled@gmail.com', false]] as [$email, $accepted]) {
+            $event = $this->createEvent($role, [
+                'creator_role_id' => $role->id,
+                'is_accepted' => $accepted,
+            ]);
+            $this->createSale($event, $role, [
+                'name' => 'Booker', 'email' => $email, 'status' => 'paid',
+            ], $this->createTicket($event, ['price' => 20]));
+        }
+
+        $emails = $this->emails($this->segment($role, 'ticket_buyers'));
+
+        $this->assertContains('pending@gmail.com', $emails, 'a booking awaiting approval is still your customer');
+        $this->assertContains('cancelled@gmail.com', $emails, 'a cancelled booking is still your customer');
+    }
+
+    /**
+     * The other half of the same rule, asserted here so a fix to the one above cannot quietly
+     * reopen it: a schedule that DECLINED somebody else's event still may not mail its buyers.
+     */
+    public function test_a_declined_event_from_another_schedule_stays_unmailable(): void
+    {
+        $mine = $this->createRole($this->createOwner());
+        $theirs = $this->createRole($this->createOwner());
+
+        $event = $this->createEvent($theirs, ['creator_role_id' => $theirs->id]);
+        $this->createSale($event, $theirs, [
+            'name' => 'Someone', 'email' => 'notmine@gmail.com', 'status' => 'paid',
+        ], $this->createTicket($event, ['price' => 20]));
+
+        // Cross-listed on my schedule, and I turned it down. A decline does not detach the row.
+        $event->roles()->attach($mine->id, ['is_accepted' => false]);
+
+        $this->assertNotContains('notmine@gmail.com', $this->emails($this->segment($mine, 'ticket_buyers')));
+    }
+
     public function test_a_freed_subdomain_does_not_inherit_the_previous_schedules_buyers(): void
     {
         $original = $this->createRole($this->createOwner());

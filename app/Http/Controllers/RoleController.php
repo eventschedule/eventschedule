@@ -4406,12 +4406,20 @@ class RoleController extends Controller
             }
         }
 
-        $newSubdomain = Role::cleanSubdomain($request->new_subdomain);
-        if ($newSubdomain != $subdomain) {
-            if (Role::subdomain($newSubdomain)->first()) {
-                return redirect()->back()->withErrors(['new_subdomain' => __('messages.subdomain_taken')]);
+        // Only a CHANGE is cleaned, and the outer guard is load-bearing now that cleanSubdomain()
+        // applies its reserved list on selfhost too. new_subdomain is rendered on every settings
+        // page and posted on every save, so running the list over an ALREADY-STORED reserved value
+        // would replace it with a random string - silently renaming a live schedule on a save that
+        // never touched the field, breaking every link to it. Grandfathering the stored value is
+        // the same call the custom_domain rule in RoleUpdateRequest makes, for the same reason.
+        if ($request->new_subdomain !== $subdomain) {
+            $newSubdomain = Role::cleanSubdomain($request->new_subdomain);
+            if ($newSubdomain != $subdomain) {
+                if (Role::subdomain($newSubdomain)->first()) {
+                    return redirect()->back()->withErrors(['new_subdomain' => __('messages.subdomain_taken')]);
+                }
+                $role->subdomain = $newSubdomain;
             }
-            $role->subdomain = $newSubdomain;
         }
 
         if (! $request->background_colors) {

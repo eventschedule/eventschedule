@@ -66,4 +66,34 @@ class RoleSubdomainTest extends TestCase
         // fallback still applies.
         $this->assertMatchesRegularExpression('/^[a-z0-9]{8}$/', Role::cleanSubdomain('א'));
     }
+
+    /**
+     * The reserved list applies on SELFHOST, which is the deployment it mostly exists for.
+     *
+     * Several entries are there because selfhost serves tenants out of the same path space as the
+     * app's own routes, and 'schedule-transfer' was added for a route registered ahead of the
+     * /{subdomain} catch-all - yet the check was gated on config('app.hosted'), so it never ran
+     * where it was needed. On hosted a reserved name is a DNS subdomain and could not shadow an
+     * app-domain route anyway, so the gate was backwards.
+     *
+     * Asserted with app.hosted BOTH ways: this is a rule about the list, not about the mode.
+     */
+    public function test_reserved_subdomains_are_refused_in_both_deployment_modes(): void
+    {
+        foreach ([true, false] as $hosted) {
+            config(['app.hosted' => $hosted]);
+
+            foreach (['schedule-transfer', 'docs', 'checkout'] as $reserved) {
+                $this->assertMatchesRegularExpression(
+                    '/^[a-z0-9]{8}$/',
+                    Role::cleanSubdomain($reserved),
+                    "'{$reserved}' must not be handed out with app.hosted=".var_export($hosted, true),
+                );
+            }
+
+            // An ordinary name is untouched either way, so the list has not simply swallowed
+            // everything.
+            $this->assertSame('blue-note', Role::cleanSubdomain('Blue Note'));
+        }
+    }
 }

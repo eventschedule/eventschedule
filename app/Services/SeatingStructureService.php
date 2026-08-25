@@ -126,7 +126,22 @@ class SeatingStructureService
             // current read. Without the lock a checkout committing between the two could have its
             // paid seat deleted out from under it - and seating_seats.sale_id is on the deleted
             // side, so no foreign key would stop it.
-            $existingSeats = SeatingSeat::forOwner($owner)->lockForUpdate()->get()->keyBy('id');
+            //
+            // Scoped to the LIVE sections, matching toArray() - which is what builds the payload
+            // this is diffed against. Unscoped, a seat whose section is already soft-deleted can
+            // never appear in the post and so always lands in $droppedSeats: if it is sold, every
+            // later save of this plan throws seating_cannot_remove_sold_seat naming a seat the
+            // designer cannot see or restore, and the designer is bricked with no way back.
+            // removeMissing() below makes that state unreachable through the app today (it deletes
+            // a section's seats in the same save that soft-deletes the section, and refuses
+            // outright if any is sold), but BackupService::importSeatingStructure() restores
+            // sections and seats independently, so an archive can still carry it.
+            //
+            // whereIn on the keys already fetched, not inLiveSection(): that scope is a correlated
+            // whereHas, and under FOR UPDATE it would take locks on seating_sections too.
+            $existingSeats = SeatingSeat::forOwner($owner)
+                ->whereIn('seating_section_id', $existingSections->keys())
+                ->lockForUpdate()->get()->keyBy('id');
             $existingTables = SeatingTable::whereIn('seating_section_id', $existingSections->keys())->get()->keyBy('id');
 
             $keptLevels = [];

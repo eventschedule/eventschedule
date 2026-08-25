@@ -255,7 +255,16 @@ class BoxOfficeSeatingService
                 throw new BusinessException(__('messages.seating_section_has_no_ticket'));
             }
 
-            $tickets = $event->tickets()->whereIn('id', $byTicket->keys())->get()->keyBy('id');
+            // Locked, and locked HERE - before $map->bumpVersion() below. Same rule releaseSeat()
+            // spells out: the tickets rows are taken BEFORE the map row, because
+            // PassBookingService::book() locks every ticket of the event and only then reaches the
+            // map, and guest checkout does the same (assertLegTicketsAvailable locks tickets, then
+            // claimSeatsForLeg bumps the version). Taking them the other way round - bumpVersion(),
+            // an UPDATE on event_seating_maps holding an X lock to commit, and only then
+            // SaleTicket::created -> Ticket::updateSold() -> lockForUpdate - is a live cycle on
+            // {event_seating_maps, tickets} against both of them. DB::transaction here is
+            // single-attempt, so the victim gets a hard 500 rather than a retry.
+            $tickets = $event->tickets()->whereIn('id', $byTicket->keys())->lockForUpdate()->get()->keyBy('id');
 
             $sale = new Sale;
             $sale->event_id = $event->id;

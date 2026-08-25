@@ -88,6 +88,63 @@ class SeatingE2EFixesTest extends TestCase
             ->orderBy('position')->get();
     }
 
+    // ------------------------------------------------------------ occurrence date guard
+
+    /**
+     * A well-formed date is not the same question as a date this event happens on.
+     *
+     * materialize() CREATES the map, so the owner-side resolvers were an authenticated write keyed
+     * on an unvalidated string: every distinct value is its own (event_id, event_date) row costing
+     * thousands of seat rows, and both of these are GETs with no throttle. The guest picker has
+     * always paired isOccurrenceDate() with matchesDate(); these two only had the former.
+     *
+     * Counting the maps is the whole point - the status alone was already 200, and would stay 200
+     * for a garbage date if somebody only asserted on that.
+     */
+    public function test_the_box_office_refuses_a_date_the_event_does_not_happen_on(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+        $event = $this->seatedEvent($role, $this->makePlan($role));
+        $args = ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($event->id)];
+
+        $notAnOccurrence = now()->addYears(9)->format('Y-m-d');
+        $this->assertFalse($event->matchesDate($notAnOccurrence, $event->scheduleTimezone()));
+
+        $this->actingAs($owner)
+            ->get(route('box_office.show', $args + ['date' => $notAnOccurrence]))
+            ->assertNotFound();
+
+        $this->assertSame(0, EventSeatingMap::count(), 'no snapshot is written for a date the event never runs on');
+
+        // The real occurrence still materializes, so the guard has not simply broken the page.
+        $this->actingAs($owner)
+            ->get(route('box_office.show', $args + ['date' => $event->saleEventDateFromStartsAt()]))
+            ->assertOk();
+
+        $this->assertSame(1, EventSeatingMap::count());
+    }
+
+    public function test_the_per_date_designer_refuses_a_date_the_event_does_not_happen_on(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+        $event = $this->seatedEvent($role, $this->makePlan($role));
+        $args = ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($event->id)];
+
+        $this->actingAs($owner)
+            ->get(route('seating.occurrence_design', $args + ['date' => now()->addYears(9)->format('Y-m-d')]))
+            ->assertNotFound();
+
+        $this->assertSame(0, EventSeatingMap::count());
+
+        $this->actingAs($owner)
+            ->getJson(route('seating.occurrence_structure', $args + ['date' => now()->addYears(9)->format('Y-m-d')]))
+            ->assertNotFound();
+
+        $this->assertSame(0, EventSeatingMap::count());
+    }
+
     // ------------------------------------------------------------ B1
 
     public function test_payment_link_mode_refuses_an_allocated_event_instead_of_freeing_the_seats(): void

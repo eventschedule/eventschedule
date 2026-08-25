@@ -345,6 +345,69 @@ class SeatingBoxOfficeTest extends TestCase
         $this->assertStringNotContainsString('hold_note', $guest);
     }
 
+    /**
+     * Lock ORDER, not just lock presence.
+     *
+     * releaseSeat() carries a long note explaining that the tickets rows must be taken BEFORE the
+     * map row, because PassBookingService::book() locks every ticket of the event and only then
+     * reaches the map, and guest checkout does the same (assertLegTicketsAvailable locks tickets,
+     * then claimSeatsForLeg bumps the version). bookSeats() took them the other way round -
+     * bumpVersion() first, then Ticket::updateSold()'s lockForUpdate via SaleTicket::created -
+     * which is a live cycle on {event_seating_maps, tickets}. DB::transaction is single-attempt
+     * here, so the loser got a hard 500 rather than a retry.
+     *
+     * A deadlock cannot be provoked from a single-threaded test, so this pins the ORDER instead:
+     * the statement that locks tickets has to appear before the one that writes the map version.
+     */
+    public function test_booking_locks_the_tickets_before_it_touches_the_map_row(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+        $event = $this->seatedEvent($role, $this->makePlan($role));
+        $map = $this->maps()->materialize($event);
+        $seats = $this->seats($map)->take(2);
+
+        \Illuminate\Support\Facades\DB::enableQueryLog();
+
+        $this->actingAs($owner)->postJson(route('box_office.book', [
+            'subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($event->id),
+        ]), [
+            'seat_ids' => $seats->pluck('id')->all(),
+            'name' => 'Phone Caller', 'email' => 'caller@gmail.com',
+            'status' => 'paid',
+        ])->assertOk();
+
+        $sql = array_column(\Illuminate\Support\Facades\DB::getQueryLog(), 'query');
+        \Illuminate\Support\Facades\DB::disableQueryLog();
+
+        $ticketLock = null;
+        $mapWrite = null;
+
+        foreach ($sql as $i => $q) {
+            $normalized = strtolower($q);
+
+            if ($ticketLock === null
+                && str_contains($normalized, 'from `tickets`')
+                && str_contains($normalized, 'for update')) {
+                $ticketLock = $i;
+            }
+
+            if ($mapWrite === null
+                && str_contains($normalized, 'update `event_seating_maps`')
+                && str_contains($normalized, '`version`')) {
+                $mapWrite = $i;
+            }
+        }
+
+        $this->assertNotNull($ticketLock, 'bookSeats must take a row lock on tickets');
+        $this->assertNotNull($mapWrite, 'bookSeats must bump the map version');
+        $this->assertLessThan(
+            $mapWrite,
+            $ticketLock,
+            'tickets must be locked BEFORE event_seating_maps - see the note on releaseSeat()',
+        );
+    }
+
     public function test_staff_can_sell_the_selected_seats_to_a_phone_caller(): void
     {
         $owner = $this->createOwner();

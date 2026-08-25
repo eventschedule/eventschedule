@@ -104,11 +104,18 @@ class SeatingSeat extends Model
     /**
      * Seats whose section is still live.
      *
-     * A section is soft-deleted (is_deleted), and its seats are deliberately left behind so a
-     * sold one keeps its history. Every count and every availability read must therefore filter
-     * on this or a section removed from one date's map goes on offering its seats - and the
-     * template and its own snapshot start reporting different totals, because copyStructure()
-     * already skips deleted sections.
+     * A section is soft-deleted (is_deleted) rather than removed, because a sold seat may still
+     * name it. Every count and every availability read must therefore filter on this, or a section
+     * removed from one date's map goes on offering its seats - and the template and its own
+     * snapshot start reporting different totals, because copyStructure() already skips deleted
+     * sections.
+     *
+     * Note what the designer actually does, which this docblock used to overstate:
+     * SeatingStructureService::removeMissing() DELETES a section's seats in the same save that
+     * soft-deletes the section, and refuses the save outright if any of them is sold. So through
+     * the app a soft-deleted section is left with no seats at all. Seats can still outlive one via
+     * BackupService::importSeatingStructure(), which restores sections and seats independently -
+     * which is why this scope has to exist regardless.
      */
     public function scopeInLiveSection(Builder $query): Builder
     {
