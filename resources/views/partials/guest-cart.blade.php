@@ -139,13 +139,29 @@
                     </template>
                 </template>
 
-                <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1" for="es-cart-name">{{ __('messages.name') }}</label>
-                <input id="es-cart-name" name="name" v-model="name" required
-                    class="w-full mb-3 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 text-sm">
+                {{-- Asked ONCE. A signed-in buyer is already known, and a signed-out one typed
+                     their name and email into the ticket form on the way here - addToCart() sends
+                     them along with the leg. Asking again in this panel was the same two questions
+                     twice on one screen.
 
-                <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1" for="es-cart-email">{{ __('messages.email') }}</label>
-                <input id="es-cart-email" name="email" type="email" v-model="email" required
-                    class="w-full mb-4 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 text-sm">
+                     The fields are still here for the case where we genuinely do not know: a cart
+                     restored from a browser that stored legs before this existed, or a leg added
+                     while the ticket form's own fields were empty. Hiding them unconditionally
+                     would post a blank name, and the refusal would come back with nothing on
+                     screen to fix. --}}
+                <template v-if="knowsBuyer">
+                    <input type="hidden" name="name" :value="name">
+                    <input type="hidden" name="email" :value="email">
+                </template>
+                <template v-else>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1" for="es-cart-name">{{ __('messages.name') }}</label>
+                    <input id="es-cart-name" name="name" v-model="name" required
+                        class="w-full mb-3 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 text-sm">
+
+                    <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1" for="es-cart-email">{{ __('messages.email') }}</label>
+                    <input id="es-cart-email" name="email" type="email" v-model="email" required
+                        class="w-full mb-4 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 text-sm">
+                </template>
 
                 {{-- Shown when ANY leg asks for a phone and required when ANY leg requires one -
                      the same union TicketCheckoutRequest applies across legs. Without the field the
@@ -196,7 +212,7 @@
                     <input type="hidden" name="cf-turnstile-response" :value="turnstileToken">
                 @endif
 
-                <button type="submit"
+                <button type="submit" dusk="cart-checkout"
                     class="w-full rounded-lg bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white font-semibold px-4 py-3 transition-all duration-200">
                     {{ strtoupper(__('messages.checkout')) }}
                 </button>
@@ -212,6 +228,7 @@ window.addEventListener('DOMContentLoaded', function () {
     }
 
     var storageKey = 'es_cart_' + @json($role->subdomain);
+    var buyerKey = storageKey + '_buyer';
     var invalidLegs = @json(array_values((array) $cartInvalidLegs));
 
     Vue.createApp({
@@ -224,15 +241,19 @@ window.addEventListener('DOMContentLoaded', function () {
                 // Restored from old() so a refused checkout - a wrong gift-card code, an
                 // unavailable leg, a failed challenge - does not also throw away everything the
                 // buyer typed. withInput() was already being sent; nothing was reading it.
-                name: @json(old('name', '')),
-                email: @json(old('email', '')),
-                phone: @json(old('phone', '')),
+                name: @json(old('name', auth()->check() ? auth()->user()->name : '')),
+                email: @json(old('email', auth()->check() ? auth()->user()->email : '')),
+                phone: @json(old('phone', auth()->check() ? auth()->user()->phone : '')),
                 giftCardCode: @json(old('gift_card_code', '')),
                 turnstileToken: '',
                 turnstileWidgetId: null,
             };
         },
         computed: {
+            // Enough to check out without asking again. Both, because the server requires both.
+            knowsBuyer: function () {
+                return !! (String(this.name || '').trim() && String(this.email || '').trim());
+            },
             // Union across legs, matching TicketCheckoutRequest::rules().
             //
             // A leg stored before these flags existed counts as "asks": the server unions
@@ -276,10 +297,20 @@ window.addEventListener('DOMContentLoaded', function () {
         },
         created: function () {
             this.legs = this.read();
+            this.restoreBuyer();
 
             var self = this;
             window.addEventListener('es-cart-add', function (event) {
-                self.add(event.detail);
+                var detail = Object.assign({}, event.detail || {});
+
+                // buyer is order-level and must not ride along as leg data - the legs are keyed by
+                // event and date, and one buyer covers the whole order.
+                if (detail.buyer) {
+                    self.rememberBuyer(detail.buyer);
+                    delete detail.buyer;
+                }
+
+                self.add(detail);
             });
         },
         mounted: function () {
@@ -325,6 +356,38 @@ window.addEventListener('DOMContentLoaded', function () {
             persist: function () {
                 try {
                     localStorage.setItem(storageKey, JSON.stringify(this.legs));
+                } catch (e) {}
+            },
+            /**
+             * Remember who is buying, so the panel does not have to ask.
+             *
+             * Beside the cart rather than in it, because a buyer is order-level while a leg is per
+             * event and date. Only ever filled in from what the buyer has already typed on this
+             * site, and only overwritten by a later non-empty value - adding a second leg from a
+             * form they left blank must not wipe the details the first one carried.
+             */
+            rememberBuyer: function (buyer) {
+                ['name', 'email', 'phone'].forEach(function (field) {
+                    var value = String((buyer || {})[field] || '').trim();
+                    if (value) this[field] = value;
+                }, this);
+
+                try {
+                    localStorage.setItem(buyerKey, JSON.stringify({
+                        name: this.name, email: this.email, phone: this.phone,
+                    }));
+                } catch (e) {}
+            },
+            restoreBuyer: function () {
+                // old() and the signed-in account both beat storage: one is what they just typed,
+                // the other is who they actually are.
+                if (this.knowsBuyer) return;
+
+                try {
+                    var saved = JSON.parse(localStorage.getItem(buyerKey) || '{}');
+                    this.name = this.name || saved.name || '';
+                    this.email = this.email || saved.email || '';
+                    this.phone = this.phone || saved.phone || '';
                 } catch (e) {}
             },
             /**

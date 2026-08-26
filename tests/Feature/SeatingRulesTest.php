@@ -287,6 +287,42 @@ class SeatingRulesTest extends TestCase
         $this->assertSame('held', $access[1]->fresh()->status);
     }
 
+    /**
+     * The same stale-baseline bug as the orphan warning, with a worse ending.
+     *
+     * Take the wheelchair space and its companion together (allowed), then drop the wheelchair
+     * space. The companion rule asks whether the partner isAvailable() - it is `held`, by this very
+     * token, and about to be released three lines further down - so nothing refuses. The buyer
+     * walks away with a companion seat and the wheelchair space it belongs to sitting free.
+     */
+    public function test_a_companion_seat_cannot_outlive_the_wheelchair_space_it_was_taken_with(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue');
+        $event = $this->seatedEvent($role, $this->makePlan($role));
+        $map = $this->maps()->materialize($event);
+
+        // Orphan rule off for the same reason as the tests above: dropping the wheelchair space
+        // also strands it, so with the rule on this would refuse even with the companion gate gone.
+        $map->update(['orphan_rule_enabled' => false]);
+        $map = $map->fresh();
+
+        $access = $this->row($map, 'Access');
+        $this->holds()->acquire($map, [$access[0]->id, $access[1]->id], 'tok-drop');
+
+        try {
+            $this->holds()->acquire($map, [$access[1]->id], 'tok-drop');
+            $this->fail('the companion seat must not be keepable once its wheelchair space is dropped');
+        } catch (BusinessException $e) {
+            $this->assertSame(__('messages.seating_companion_reserved', [
+                'seat' => $access[1]->fullLabel() ?: $access[1]->id,
+            ]), $e->getMessage());
+        }
+
+        // The refused call must not have released anything on its way out.
+        $this->assertSame('held', $access[0]->fresh()->status, 'the wheelchair space is still held');
+        $this->assertSame('held', $access[1]->fresh()->status);
+    }
+
     public function test_a_companion_seat_is_free_once_the_wheelchair_space_is_gone(): void
     {
         $role = $this->createRole($this->createOwner(), 'venue');

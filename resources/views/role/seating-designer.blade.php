@@ -30,10 +30,17 @@
                 : route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'seating'], false),
             // Renaming is a TEMPLATE operation. On one date it would be meaningless and confusing.
             'nameEditable' => ! $isOccurrence,
+            // Set only on the redirect out of seating.store. The tab no longer asks for a name, so
+            // the name box here IS the naming step - without focusing it, a toolbar input carrying
+            // only an aria-label and a pre-filled value is easy to walk straight past.
+            'focusName' => (bool) session('seating_plan_created'),
             'usage' => $usage ?? ['events' => 0, 'sold' => 0],
             // Which story the sold-seat warning tells: a plan used by other events, or one
             // date of one event. Getting this wrong stacked two amber banners that disagreed.
             'isOccurrence' => $isOccurrence,
+            'subtitle' => $isOccurrence
+                ? \Carbon\Carbon::parse($occurrence->event_date)->translatedFormat('l, F j, Y')
+                : '',
             'csrfToken' => csrf_token(),
             // Flat map rather than a nested lang array: check_translations.php walks top-level
             // keys, and a nested blob would hide every missing translation inside it.
@@ -45,6 +52,33 @@
                 'confirmRemoveSeats' => __('messages.seating_confirm_remove_seats'),
                 'inUseSold' => __('messages.seating_plan_in_use_sold'),
                 'back' => __('messages.back'), 'planName' => __('messages.name'),
+                'planLabel' => __('messages.seating_plan'),
+                'seatCount' => __('messages.seating_seat_count'),
+                'rotation' => __('messages.seating_rotation'),
+                'rotateLeft' => __('messages.seating_rotate_left'),
+                'rotateRight' => __('messages.seating_rotate_right'),
+                'tableSelected' => __('messages.seating_table_selected'),
+                'removeTable' => __('messages.seating_remove_table'),
+                'confirmRemoveTable' => __('messages.seating_confirm_remove_table'),
+                'undo' => __('messages.seating_undo'), 'redo' => __('messages.seating_redo'),
+                'saved' => __('messages.saved'), 'dismiss' => __('messages.dismiss'),
+                'areYouSure' => __('messages.are_you_sure'),
+                'planTooLarge' => __('messages.seating_plan_too_large'),
+                // The other three server caps. All four already exist and are already translated;
+                // only the seat one was ever shown before the save failed.
+                'tooManyLevels' => __('messages.seating_too_many_levels'),
+                'tooManySections' => __('messages.seating_too_many_sections'),
+                'tooManyTables' => __('messages.seating_too_many_tables'),
+                'generateNeedsNumbers' => __('messages.seating_generate_needs_numbers'),
+                'cannotRemoveSoldHere' => __('messages.seating_cannot_remove_sold_here'),
+                'curveHelp' => __('messages.seating_curve_help'),
+                'zoomForNumbers' => __('messages.seating_zoom_for_numbers'),
+                // Defined and translated in all 12 locales, and referenced by nothing since the
+                // Seating tab stopped asking for a name up front. This is where it belongs.
+                'planNamePlaceholder' => __('messages.seating_plan_name_placeholder'),
+                'emptyLevel' => __('messages.seating_empty_level'),
+                'nothingSelected' => __('messages.seating_nothing_selected'),
+                'issueWheelchairOutside' => __('messages.seating_issue_wheelchair_outside'),
                 // Already translated into all 12 locales in Phase 1; reused verbatim for the
                 // seat aria-labels rather than minting English-only duplicates.
                 'rowPattern' => __('messages.seat_row_label'),
@@ -119,6 +153,8 @@
                 'issueDuplicateSeat' => __('messages.seating_issue_duplicate_seat'),
                 'loadFailed' => __('messages.seating_load_failed'),
                 'saveFailed' => __('messages.seating_save_failed'),
+                'staleRevision' => __('messages.seating_stale_revision'),
+                'retry' => __('messages.retry'),
             ],
         ];
     @endphp
@@ -143,8 +179,11 @@
                                 {{ __('messages.seating_editing_one_date_help') }}
                             </p>
                         </div>
+                        {{-- Names the consequence. revertToTemplate() deliberately does NOT refuse
+                             over staff holds - it deletes the map and they go with it - and a
+                             generic "are you sure" never said so. The docs had to. --}}
                         <form method="POST" class="form-confirm shrink-0"
-                              data-confirm="{{ __('messages.are_you_sure') }}"
+                              data-confirm="{{ __('messages.seating_confirm_revert') }}"
                               action="{{ route('seating.occurrence_revert', ['subdomain' => $subdomain, 'hash' => $hash] + $occurrenceQuery) }}">
                             @csrf
                             <button type="submit" class="text-xs font-medium text-amber-800 dark:text-amber-200 hover:underline">

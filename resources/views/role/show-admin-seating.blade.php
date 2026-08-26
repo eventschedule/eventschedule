@@ -35,16 +35,12 @@
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 max-w-2xl">{{ __('messages.seating_plans_help') }}</p>
                 </div>
                 @if ($canEdit)
+                {{-- No name field here on purpose. You do not know what to call a room until you
+                     have drawn it, and store() already names the row "Untitled plan" and drops you
+                     straight into the designer, whose toolbar carries the real name box. --}}
                 <form method="POST" action="{{ route('seating.store', ['subdomain' => $role->subdomain]) }}"
-                      class="flex items-end gap-2 shrink-0">
+                      class="shrink-0">
                     @csrf
-                    <div>
-                        <x-input-label for="new_seating_plan_name" :value="__('messages.name')" class="sr-only" />
-                        <x-text-input id="new_seating_plan_name" name="name" type="text" required
-                                      maxlength="255"
-                                      placeholder="{{ __('messages.seating_plan_name_placeholder') }}"
-                                      class="w-56" />
-                    </div>
                     <x-brand-button type="submit">{{ __('messages.seating_new_plan') }}</x-brand-button>
                 </form>
                 @endif

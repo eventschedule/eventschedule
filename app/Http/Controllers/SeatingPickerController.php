@@ -10,6 +10,7 @@ use App\Models\SeatingSeat;
 use App\Models\SeatingSection;
 use App\Models\Ticket;
 use App\Services\BestAvailableService;
+use App\Services\OrphanSeatRule;
 use App\Services\SeatHoldService;
 use App\Services\SeatingMapService;
 use App\Utils\UrlUtils;
@@ -65,13 +66,22 @@ class SeatingPickerController extends Controller
                 ->inLiveSection()
                 ->get(['id', 'status', 'hold_token', 'hold_expires_at']);
 
-            return response()->json([
+            $payload = [
                 'version' => (int) $map->version,
                 'seats' => $changed->map(fn ($s) => [
                     'id' => $s->id,
                     'state' => $this->guestState($s, $token),
                 ])->values(),
-            ]);
+            ];
+
+            // Only when something actually moved: an idle poll on a busy on-sale must not pay for
+            // this. An ABSENT key means "unchanged" to the picker, not "no warning" - sending null
+            // on every quiet tick would wipe a notice that is still true.
+            if ($changed->isNotEmpty()) {
+                $payload['warning'] = $this->advisoryFor($map, $token);
+            }
+
+            return response()->json($payload);
         }
 
         return response()->json($this->fullPayload($map, $token));
@@ -104,7 +114,9 @@ class SeatingPickerController extends Controller
         }
 
         try {
-            $result = $this->holds->acquire($map, $seatIds, $token);
+            // orphanAdvisory: a guest builds a selection one click at a time, so the single-seat
+            // rule warns here and is enforced once, on the finished selection, at checkout.
+            $result = $this->holds->acquire($map, $seatIds, $token, null, false, true);
         } catch (BusinessException $e) {
             // The seat's own name is in the message on purpose: the picker drops that one seat and
             // keeps the rest of the selection rather than failing the whole thing.
@@ -129,6 +141,9 @@ class SeatingPickerController extends Controller
             'held' => $result['seat_ids'],
             'expires_at' => $result['expires_at']->toIso8601String(),
             'version' => $result['version'],
+            // Always present, null when the selection is fine - the picker replaces its notice from
+            // every response, so a warning that has been fixed clears itself.
+            'warning' => $result['warning'] ?? null,
         ]);
     }
 
@@ -205,6 +220,69 @@ class SeatingPickerController extends Controller
         return (int) ($ticket->max_per_order ?: (config('app.max_tickets_per_order') ?: 20));
     }
 
+    /**
+     * Would AccessibleSeatingRule refuse this seat outright?
+     *
+     * Mirrors the rule rather than reimplementing its judgement: a wheelchair space is sellable only
+     * from an accessibility_only section, and a companion may not be taken while the wheelchair
+     * space beside it is still free.
+     */
+    private function ruleWouldRefuse(SeatingSeat $seat, ?SeatingSection $section): bool
+    {
+        if ($seat->kind === 'wheelchair') {
+            return ! ($section->accessibility_only ?? false);
+        }
+
+        if ($seat->kind !== 'companion') {
+            return false;
+        }
+
+        $row = SeatingSeat::where('event_seating_map_id', $seat->event_seating_map_id)
+            ->where('seating_section_id', $seat->seating_section_id)
+            ->where('row_position', $seat->row_position)
+            ->orderBy('position')
+            ->get();
+
+        $index = $row->search(fn ($x) => $x->id === $seat->id);
+
+        if ($index === false) {
+            return false;
+        }
+
+        foreach ([-1, 1] as $step) {
+            $neighbour = $row[$index + $step] ?? null;
+
+            if (! $neighbour || $neighbour->kind !== 'wheelchair') {
+                continue;
+            }
+
+            // A gangway between them means they are not neighbours.
+            $between = $step === -1 ? $neighbour : $seat;
+
+            if (! $between->aisle_after && $neighbour->isAvailable()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * The advisory this token should be seeing for what it is currently HOLDING, or null.
+     *
+     * heldByToken(), not a raw hold_token match: a lapsed hold is already free, and reporting on it
+     * would leave a buyer staring at a warning about seats they no longer have.
+     */
+    private function advisoryFor(EventSeatingMap $map, string $token): ?array
+    {
+        $held = SeatingSeat::where('event_seating_map_id', $map->id)
+            ->heldByToken($token)
+            ->inLiveSection()
+            ->pluck('id')->all();
+
+        return $held ? app(OrphanSeatRule::class)->advisoryFor($map, $held) : null;
+    }
+
     private function fullPayload(EventSeatingMap $map, string $token): array
     {
         $sections = SeatingSection::with('tables')
@@ -221,6 +299,9 @@ class SeatingPickerController extends Controller
 
         return [
             'version' => (int) $map->version,
+            // Part of the map's state, not a one-off reply to a click: without it a reload restored
+            // the buyer's seats and quietly dropped the reason they could not check out.
+            'warning' => $this->advisoryFor($map, $token),
             'levels' => $levels->map(fn ($level) => [
                 'id' => $level->id,
                 'name' => $level->name,
@@ -251,16 +332,30 @@ class SeatingPickerController extends Controller
                         'aisle_after' => (bool) $seat->aisle_after,
                         // NOT the raw status: hold_note, hold_kind and the buying customer are
                         // organizer-only. A guest learns nothing beyond "can I sit here".
-                        'state' => $this->guestState($seat, $token),
+                        'state' => $this->guestState($seat, $token, $s),
                     ])->values()->all(),
                 ])->all(),
             ])->all(),
         ];
     }
 
-    /** available | mine | taken - the only three things a guest may know about a seat. */
-    private function guestState(SeatingSeat $seat, string $token): string
+    /**
+     * available | mine | taken | unavailable - all a guest may know about a seat.
+     *
+     * `unavailable` is a seat AccessibleSeatingRule will never sell to this buyer, however free it
+     * looks. Before this it came back `available`, so the picker drew it as an ordinary seat, the
+     * buyer clicked it, and the hold was refused - which on a plan with a wheelchair space drawn
+     * mid-row is the most attractive seat on the map.
+     *
+     * Distinct from `taken` on purpose: nobody has it, and an organizer reading a support ticket
+     * needs to be able to tell "sold" from "you drew this wrong".
+     */
+    private function guestState(SeatingSeat $seat, string $token, ?SeatingSection $section = null): string
     {
+        if ($seat->isAvailable() && $this->ruleWouldRefuse($seat, $section)) {
+            return 'unavailable';
+        }
+
         // Order matters: a LAPSED hold of my own is available again, to me and to everybody else.
         if ($seat->isAvailable()) {
             return 'available';

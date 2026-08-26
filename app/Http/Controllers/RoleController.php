@@ -2870,6 +2870,10 @@ class RoleController extends Controller
             return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']));
         } elseif ($tab == 'videos' && ! $role->isCurator()) {
             return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']));
+        } elseif ($tab == 'seating' && ! $role->isVenue()) {
+            // A seating plan is a drawing of a ROOM, so only a venue owns one. Above the plan
+            // load below, so a talent or curator schedule never runs the query either.
+            return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']));
         }
 
         if ($tab == 'schedule' || $tab == 'availability') {

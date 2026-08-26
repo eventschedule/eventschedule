@@ -39,7 +39,11 @@
     <section id="build" class="doc-section">
         <h2 class="doc-heading">Step 1 - Build the plan</h2>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Open <strong class="text-gray-900 dark:text-white">Seating</strong> on your schedule and choose <strong class="text-gray-900 dark:text-white">New plan</strong>. Plans belong to the schedule, not to an event, so one plan serves every show you put in that room.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Open <strong class="text-gray-900 dark:text-white">Seating</strong> on your venue schedule and choose <strong class="text-gray-900 dark:text-white">New plan</strong>. A plan is a drawing of a room, so the tab appears on venue schedules only. Plans belong to the schedule, not to an event, so one plan serves every show you put in that room.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">New plan takes you straight into the designer. Name the plan in the box at the top left, whenever you like - a new plan starts out called <strong class="text-gray-900 dark:text-white">Untitled plan</strong> and the name saves along with the layout.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The room is on the left and everything that edits it is on the right. Switch levels and zoom from the strip above the map, pick a section to edit it, and click a seat to change its type - seat controls appear under the map, beside the seats themselves. <strong class="text-gray-900 dark:text-white">Undo</strong> (Ctrl+Z, or Cmd+Z on a Mac) covers every change you make here, and <strong class="text-gray-900 dark:text-white">Ctrl+S</strong> saves.</p>
 
         <x-doc-screenshot id="allocated-seating--plans" alt="The Seating tab listing seating plans" loading="eager" />
 
@@ -68,7 +72,7 @@
 
         <div class="doc-callout doc-callout-warning mb-6">
             <div class="doc-callout-title">Generate rows adds, it does not replace</div>
-            <p>Both <strong>Generate rows</strong> and <strong>Generate tables</strong> append to what the section already has, so you can build a block at a time - six rows of ten at the front, then four of twelve behind. Press either button twice by accident and you have double the seats. Delete the extras rather than pressing it again.</p>
+            <p>Both <strong>Generate rows</strong> and <strong>Generate tables</strong> append to what the section already has, so you can build a block at a time - six rows of ten at the front, then four of twelve behind. Press either button twice by accident and you have double the seats - press <strong>Undo</strong> in the toolbar, or Ctrl+Z (Cmd+Z on a Mac).</p>
         </div>
 
         <h3 id="build-accessible" class="doc-subheading">Wheelchair spaces and companion seats</h3>
@@ -111,7 +115,7 @@
 
         <div class="doc-callout doc-callout-warning mb-6">
             <div class="doc-callout-title">Two screens that look identical</div>
-            <p>The one-date designer and the plan designer are the same screen; only the amber banner tells them apart. Check for it before you start editing, or you will change every date of the run instead of one. Note also that reverting a date discards any seats your box office had <em>held back</em> for it, not just layout changes.</p>
+            <p>The one-date designer and the plan designer are the same screen. When you are on one date the heading names the event and the night, and an amber banner says so as well; on the template the heading is the plan name and there is no banner. Reverting a date discards any seats your box office had <em>held back</em> for it, not just layout changes - the confirmation says so before you commit.</p>
         </div>
     </section>
 

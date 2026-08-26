@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\BusinessException;
 use App\Models\Event;
+use App\Models\EventSeatingMap;
 use App\Models\Role;
 use App\Models\SeatingPlan;
 use App\Models\SeatingSeat;
 use App\Services\SeatingStructureService;
 use App\Utils\UrlUtils;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -52,10 +54,13 @@ class SeatingPlanController extends Controller
             'name' => $this->cleanName($request->input('name')) ?: __('messages.seating_untitled_plan'),
         ]);
 
+        // The tab has no name field: this is a one-click create. The flash tells the designer to
+        // focus and select its name box so the first keystroke replaces "Untitled plan". A flash
+        // rather than a ?new=1 query param, so it fires once and does not survive a refresh.
         return redirect()->route('seating.design', [
             'subdomain' => $subdomain,
             'hash' => UrlUtils::encodeId($plan->id),
-        ]);
+        ])->with('seating_plan_created', true);
     }
 
     public function update(Request $request, $subdomain, $hash)
@@ -128,13 +133,17 @@ class SeatingPlanController extends Controller
         $role = $this->gate($request, $subdomain, json: true);
         $plan = $this->resolvePlan($role, $hash);
 
-        return response()->json($this->structure->toArray($plan));
+        return response()->json($this->structurePayload($plan));
     }
 
     public function saveStructure(Request $request, $subdomain, $hash)
     {
         $role = $this->gate($request, $subdomain, json: true);
         $plan = $this->resolvePlan($role, $hash);
+
+        if ($stale = $this->staleRevision($request, $plan)) {
+            return $stale;
+        }
 
         $data = ['levels' => $request->input('levels', [])];
 
@@ -155,10 +164,15 @@ class SeatingPlanController extends Controller
 
         if ($name = $this->cleanName($request->input('name'))) {
             $plan->name = $name;
-            $plan->save();
         }
 
-        return response()->json($this->structure->toArray($plan));
+        $plan->save();
+
+        // Always, even when nothing else on the row changed: without it a second editor's stale
+        // payload still looks current and overwrites this one.
+        $plan->bumpStructureRevision();
+
+        return response()->json($this->structurePayload($plan));
     }
 
     // ---------------------------------------------------------------- per-occurrence editing
@@ -192,12 +206,16 @@ class SeatingPlanController extends Controller
     {
         [, , $map] = $this->resolveOccurrence($request, $subdomain, $hash);
 
-        return response()->json($this->structure->toArray($map));
+        return response()->json($this->structurePayload($map));
     }
 
     public function saveOccurrenceStructure(Request $request, $subdomain, $hash)
     {
         [, , $map] = $this->resolveOccurrence($request, $subdomain, $hash);
+
+        if ($stale = $this->staleRevision($request, $map)) {
+            return $stale;
+        }
 
         try {
             $this->structure->save($map, ['levels' => $request->input('levels', [])]);
@@ -209,7 +227,12 @@ class SeatingPlanController extends Controller
             return response()->json(['error' => __('messages.seating_save_failed')], 500);
         }
 
-        return response()->json($this->structure->toArray($map));
+        // Doubles as the poll cursor: nothing else bumped a snapshot's version on a structural
+        // edit, so a picker or box office console left open on this date never learned that the
+        // layout under it had changed.
+        $map->bumpStructureRevision();
+
+        return response()->json($this->structurePayload($map));
     }
 
     /**
@@ -274,6 +297,39 @@ class SeatingPlanController extends Controller
      * than silently scrubbed: unlike a checkbox on a bigger form, every one of these endpoints
      * exists only to edit a seat map, so there is nothing left to save.
      */
+    /**
+     * The structure, plus a revision the designer hands back when it saves.
+     *
+     * A counter, never updated_at: SeatingStructureService::save() writes only the CHILD rows, so
+     * the owner row does not move on its own - and a MySQL timestamp is second-resolution, so a
+     * read and a save inside the same second would compare equal and let the overwrite through.
+     */
+    private function structurePayload(SeatingPlan|EventSeatingMap $owner): array
+    {
+        return $this->structure->toArray($owner) + ['revision' => $owner->structureRevision()];
+    }
+
+    /**
+     * Refuse a save built on a structure that somebody else has since replaced.
+     *
+     * The designer posts the WHOLE structure and `removeMissing` deletes anything not in it, so
+     * two admins with the same plan open would otherwise silently erase each other's work: last
+     * writer wins, no warning, and nothing on either screen to notice it happened.
+     *
+     * A payload with no revision at all is allowed through - it is an older client or a caller
+     * that never read one, and refusing those would break them for no gain.
+     */
+    private function staleRevision(Request $request, SeatingPlan|EventSeatingMap $owner): ?JsonResponse
+    {
+        $sent = $request->input('revision');
+
+        if ($sent === null || ! is_scalar($sent) || (int) $sent === $owner->structureRevision()) {
+            return null;
+        }
+
+        return response()->json(['error' => __('messages.seating_stale_revision')], 409);
+    }
+
     protected function gate(Request $request, $subdomain, bool $json = false): Role
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
@@ -283,6 +339,17 @@ class SeatingPlanController extends Controller
         }
 
         if (! $role->seatingEnabled()) {
+            abort(403, __('messages.not_authorized'));
+        }
+
+        // Venues only. A plan is a drawing of a room, and only a venue has one - the tab is
+        // hidden everywhere else, so reaching any of these is a hand-typed URL. resolveOccurrence()
+        // calls through here too, which is what closes the four per-date editor routes as well.
+        //
+        // Deliberately NOT folded into seatingEnabled(): BoxOfficeController resolves its role from
+        // the URL subdomain, so a curator cross-listing a venue's seated show must still be able to
+        // sell from the map and run the door. Owning the drawing is venue work; the door is not.
+        if (! $role->isVenue()) {
             abort(403, __('messages.not_authorized'));
         }
 

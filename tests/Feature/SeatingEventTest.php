@@ -474,4 +474,26 @@ class SeatingEventTest extends TestCase
         $bands = collect($payload['tickets'] ?? [])->pluck('seating_band')->filter()->values()->all();
         $this->assertContains('Stalls', $bands, 'Ticket::toClonePayload must carry the band');
     }
+
+    /**
+     * The "no plans yet" panel is an advert for the Seating tab, and that tab is now venue only -
+     * so on any other schedule type it would link straight into a redirect. A venue with no plans
+     * must still see it, or the guard has just deleted the panel for everyone.
+     */
+    public function test_the_build_a_plan_panel_is_venue_only(): void
+    {
+        foreach (['venue' => true, 'curator' => false, 'talent' => false] as $type => $expected) {
+            $owner = $this->createOwner();
+            $role = $this->createRole($owner, $type);
+            $event = $this->save(['tickets' => [['type' => 'General', 'price' => 10, 'quantity' => 50]]], null, $role)->fresh();
+
+            $html = $this->actingAs($owner)
+                ->get(route('event.edit', ['subdomain' => $role->subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]))
+                ->assertOk()
+                ->getContent();
+
+            $this->assertSame($expected, str_contains($html, __('messages.seating_no_plans_yet')),
+                "the build-a-plan panel on a {$type} schedule");
+        }
+    }
 }

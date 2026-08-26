@@ -1,31 +1,56 @@
 <template>
     <div class="space-y-4">
 
-        <!-- Toolbar -->
+        <!-- Toolbar: what this page IS, and what is happening to it. The zoom cluster used to live
+             here, two cards away from the thing it zooms; it is on the map card now. -->
         <div class="ap-card rounded-xl p-4 flex flex-wrap items-center gap-3">
             <a :href="backUrl" class="text-sm font-medium text-gray-500 dark:text-gray-400 hover:underline">&larr; {{ t.back }}</a>
 
-            <!-- Hidden when editing a single date. saveOccurrenceStructure() only reads `levels`,
-                 so the field looked editable and silently discarded whatever was typed into it. -->
-            <input v-if="nameEditable" v-model="planName" type="text" maxlength="255" @input="dirty = true"
-                class="rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm text-sm w-64"
-                :aria-label="t.planName" />
-            <span v-else class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ planName }}</span>
-
-            <div class="flex items-center gap-1 rounded-xl bg-gray-100 dark:bg-gray-800 p-1">
-                <button type="button" @click="zoomBy(-0.15)" class="px-2 py-1 rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 transition-all duration-200" :aria-label="t.zoomOut">&minus;</button>
-                <span class="px-2 text-xs tabular-nums text-gray-500 dark:text-gray-400">{{ Math.round(zoom * 100) }}%</span>
-                <button type="button" @click="zoomBy(0.15)" class="px-2 py-1 rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 transition-all duration-200" :aria-label="t.zoomIn">+</button>
-                <button type="button" @click="fitToView" class="px-2 py-1 rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 transition-all duration-200">{{ t.fit }}</button>
+            <!-- The page named neither the plan nor, on one date, the night - there is no heading
+                 in the host view and the admin layout renders no header slot, so this is the only
+                 place it can go. The box office reached the same conclusion. -->
+            <div class="min-w-0 flex-1">
+                <p class="text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                    {{ isOccurrence ? planName : t.planLabel }}
+                </p>
+                <!-- Editable only on the template. saveOccurrenceStructure() reads `levels` alone,
+                     so on one date the field looked editable and silently discarded what was typed. -->
+                <label v-if="nameEditable" for="seating-plan-name" class="sr-only">{{ t.planName }}</label>
+                <input v-if="nameEditable" id="seating-plan-name" ref="nameInput" v-model="planName" type="text"
+                    maxlength="255" @input="dirty = true" :placeholder="t.planNamePlaceholder"
+                    class="mt-0.5 w-full max-w-sm rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm text-sm" />
+                <h1 v-else class="mt-0.5 text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">{{ subtitle || planName }}</h1>
             </div>
 
             <div class="ms-auto flex items-center gap-3">
-                <span v-if="issues.length" class="text-sm text-amber-600 dark:text-amber-400">
+                <div class="flex items-center gap-1 rounded-lg bg-gray-100 dark:bg-gray-800 p-1">
+                    <button id="seating-undo" type="button" @click="undo" :disabled="!canUndo" :title="t.undo" :aria-label="t.undo"
+                        class="px-2 py-1 rounded text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 disabled:opacity-40 disabled:hover:bg-transparent dark:disabled:hover:bg-transparent transition-all duration-200">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+                        </svg>
+                    </button>
+                    <button id="seating-redo" type="button" @click="redo" :disabled="!canRedo" :title="t.redo" :aria-label="t.redo"
+                        class="px-2 py-1 rounded text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 disabled:opacity-40 disabled:hover:bg-transparent dark:disabled:hover:bg-transparent transition-all duration-200">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m15 15 6-6m0 0-6-6m6 6H9a6 6 0 0 0 0 12h3" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Clickable, unlike the count it replaces: it now takes you to the first problem
+                     rather than telling you a number and leaving you to find it. -->
+                <button v-if="issues.length" type="button" @click="goToIssue(issues[0])"
+                    class="text-sm text-amber-600 dark:text-amber-400 hover:underline">
                     {{ issues.length }} {{ issues.length === 1 ? t.issue : t.issues }}
-                </span>
+                </button>
                 <span v-if="dirty" id="seating-dirty" class="text-sm text-gray-500 dark:text-gray-400">{{ t.unsaved }}</span>
-                <span class="text-sm text-gray-500 dark:text-gray-400">{{ totalSeats }} {{ t.seats }}</span>
-                <button id="seating-save" type="button" @click="save" :disabled="saving"
+                <span v-else-if="savedAt" id="seating-saved" class="text-sm text-green-600 dark:text-green-400">{{ t.saved }}</span>
+                <span class="text-sm text-gray-500 dark:text-gray-400">{{ seatCountLabel }}</span>
+                <!-- loading/loadFailed as well as saving: `levels` is [] until the fetch lands, and
+                     this payload is the whole structure, so a click in that window saved an empty
+                     plan over a real one. The preset half of this race was fixed; Save was not. -->
+                <button id="seating-save" type="button" @click="save" :disabled="saving || loading || loadFailed"
                     class="px-4 py-3 text-base rounded-md font-medium text-white bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] disabled:opacity-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
                     {{ saving ? t.saving : t.save }}
                 </button>
@@ -42,8 +67,12 @@
             <p class="text-sm text-amber-800 dark:text-amber-200">{{ usageNotice }}</p>
         </div>
 
-        <div v-if="error" id="seating-error" class="rounded-lg border border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-300">
-            {{ error }}
+        <!-- role=alert: this used to appear silently at the top of the page while the button that
+             raised it sat at the bottom of the rail, so nothing announced it and nothing scrolled. -->
+        <div v-if="error" id="seating-error" ref="errorEl" role="alert"
+            class="rounded-lg border border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-300 flex items-start gap-2">
+            <span class="flex-1">{{ error }}</span>
+            <button type="button" @click="error = ''" class="shrink-0 text-red-600 dark:text-red-400 hover:underline text-xs">{{ t.dismiss }}</button>
         </div>
 
         <!-- Nothing is offered until the plan has actually arrived: the empty state below keys off
@@ -51,6 +80,22 @@
              early was built and then wiped by the fetch landing behind it. -->
         <div v-if="loading" id="seating-loading" class="ap-card rounded-xl p-8 text-sm text-gray-500 dark:text-gray-400">
             {{ t.loading }}
+        </div>
+
+        <!-- A failed load must never fall through to the empty state below. `levels` is [] either
+             way, so the preset gallery used to render over a plan that is very much still on the
+             server - and saving a preset from it deletes the real structure. -->
+        <div v-else-if="loadFailed" id="seating-load-failed" class="ap-card rounded-xl p-8 text-center">
+            <svg class="mx-auto h-10 w-10 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24"
+                 stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+            </svg>
+            <p class="mt-3 text-sm text-gray-600 dark:text-gray-300">{{ t.loadFailed }}</p>
+            <button type="button" @click="load"
+                class="mt-4 px-4 py-3 text-base rounded-md font-medium text-white bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
+                {{ t.retry }}
+            </button>
         </div>
 
         <!-- Empty state: presets rather than a blank canvas -->
@@ -67,66 +112,70 @@
             <button type="button" @click="addLevel()" class="mt-4 text-sm text-[var(--brand-blue)] hover:underline">{{ t.blankCanvas }}</button>
         </div>
 
-        <!-- Three columns only past 1400px. At xl the canvas got ~290px once the AP sidebar was
-             subtracted, so "Fit" landed on 41% and the plan you are drawing was the smallest thing
-             on the screen. Below that the canvas takes the full width and the panels stack. -->
-        <div v-else-if="!loading" class="grid grid-cols-1 min-[1400px]:grid-cols-[17rem_1fr_19rem] gap-4">
+        <!-- One rail, not two. Two rails needed 1400px to avoid squeezing the canvas to ~290px, and
+             below that everything stacked - which put the canvas of a drawing tool BELOW THE FOLD on
+             a 1280 laptop. The box office solved this first: a single 22rem rail fits at xl and
+             leaves the map ~560px. Level switcher and zoom live on the map card, as they do there. -->
+        <div v-else class="grid grid-cols-1 xl:grid-cols-[1fr_22rem] gap-4">
 
-            <!-- Left: levels and sections -->
-            <div class="ap-card rounded-xl p-4 space-y-4">
-                <div>
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ t.levels }}</h3>
-                        <button type="button" @click="addLevel()" class="text-sm text-[var(--brand-blue)] hover:underline">{{ t.add }}</button>
+            <!-- The map. self-start so the grid does not stretch it to the rail's height, which is
+                 what would otherwise leave `sticky` nothing to move within. -->
+            <!-- top-20, not top-4: layouts/app-admin.blade.php pins a 64px opaque header at
+                 `sticky top-0 z-40`, so a card stuck at 16px slid its own top 48px - the level
+                 switcher and the zoom cluster - underneath it. z-30 keeps the card above the page
+                 and below that header. -->
+            <!-- max-h + flex column is what makes the rest of this card reachable. A sticky box
+                 taller than its slot pins its top and never moves again, so its bottom cannot be
+                 scrolled to - and the bottom is where the seat actions and the hint live. The
+                 canvas is the flexible child, so it gives up height instead of the controls. -->
+            <div class="ap-card rounded-xl p-2 relative flex flex-col xl:sticky xl:top-20 xl:z-30 xl:self-start
+                        xl:max-h-[calc(100vh-6rem)]">
+                <div class="flex flex-wrap items-center gap-2 px-1 pb-2 shrink-0">
+                    <div v-if="levels.length > 1" class="flex items-center gap-1 rounded-lg bg-gray-100 dark:bg-gray-800 p-1">
+                        <button v-for="(lvl, i) in levels" :key="lvl.id" type="button" @click="selectLevel(i)"
+                            :aria-pressed="i === activeLevel"
+                            class="px-2 py-1 rounded text-xs transition-all duration-200"
+                            :class="i === activeLevel
+                                ? 'bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-gray-100'
+                                : 'text-gray-500 dark:text-gray-400'">{{ lvl.name || t.level }}
+                            <span class="text-gray-400">{{ seatsInLevel(lvl) }}</span>
+                        </button>
                     </div>
-                    <ul class="mt-2 space-y-1">
-                        <li v-for="(lvl, i) in levels" :key="lvl.id">
-                            <button type="button" @click="selectLevel(i)"
-                                class="w-full text-start px-3 py-2 rounded-lg text-sm transition-all duration-200"
-                                :class="i === activeLevel ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-[inset_0_2px_4px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'">
-                                {{ lvl.name }}
-                                <span class="text-xs text-gray-400">({{ seatsInLevel(lvl) }})</span>
-                            </button>
-                        </li>
-                    </ul>
-                </div>
+                    <button type="button" @click="addLevel()"
+                        class="px-2 py-1 rounded-lg text-xs font-medium text-[var(--brand-blue)] hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200">
+                        + {{ t.level }}
+                    </button>
 
-                <div v-if="level">
-                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400">{{ t.levelName }}</label>
-                    <input v-model="level.name" type="text" maxlength="100" @input="dirty = true"
-                        class="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm text-sm" />
-                    <!-- A bordered danger button, not underlined red text: this deletes the
-                         level and every seat on it. -->
-                    <button v-if="levels.length > 1" type="button" @click="removeLevel(activeLevel)"
-                        class="mt-3 px-3 py-2 rounded-md text-xs font-medium border border-red-300 dark:border-red-700 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200">{{ t.removeLevel }}</button>
-                </div>
-
-                <div v-if="level">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ t.sections }}</h3>
-                    </div>
-                    <ul class="mt-2 space-y-1">
-                        <li v-for="s in level.sections" :key="s.id">
-                            <button type="button" @click="selectSection(s)"
-                                class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-start transition-all duration-200"
-                                :class="isSelectedSection(s) ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-800'">
-                                <span class="w-3 h-3 rounded-sm shrink-0" :style="{ backgroundColor: s.color }"></span>
-                                <span class="truncate text-gray-700 dark:text-gray-300">{{ s.name }}</span>
-                                <span class="ms-auto text-xs text-gray-400">{{ s.kind === 'standing' ? s.capacity : s.seats.length }}</span>
-                            </button>
-                        </li>
-                    </ul>
-                    <div class="mt-2 flex flex-wrap gap-2">
-                        <button type="button" @click="addSection('seated')" class="text-xs text-[var(--brand-blue)] hover:underline">{{ t.addSeated }}</button>
-                        <button type="button" @click="addSection('table')" class="text-xs text-[var(--brand-blue)] hover:underline">{{ t.addTables }}</button>
-                        <button type="button" @click="addSection('standing')" class="text-xs text-[var(--brand-blue)] hover:underline">{{ t.addStanding }}</button>
+                    <div class="ms-auto flex items-center gap-1 rounded-lg bg-gray-100 dark:bg-gray-800 p-1">
+                        <!-- Multiplicative, like the wheel. A flat +-0.15 was a 50% jump at 0.3x
+                             and 5% at 3x, and neither button ever showed it had stopped working. -->
+                        <button type="button" @click="stepZoom(-1)" :disabled="zoom <= MIN_ZOOM"
+                            class="px-2 py-1 rounded text-sm text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 disabled:opacity-40 disabled:hover:bg-transparent dark:disabled:hover:bg-transparent transition-all duration-200" :aria-label="t.zoomOut">&minus;</button>
+                        <span class="px-1 text-xs tabular-nums text-gray-500 dark:text-gray-400">{{ Math.round(zoom * 100) }}%</span>
+                        <button type="button" @click="stepZoom(1)" :disabled="zoom >= MAX_ZOOM"
+                            class="px-2 py-1 rounded text-sm text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 disabled:opacity-40 disabled:hover:bg-transparent dark:disabled:hover:bg-transparent transition-all duration-200" :aria-label="t.zoomIn">+</button>
+                        <button type="button" @click="fitToView()" class="px-2 py-1 rounded text-xs text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 transition-all duration-200">{{ t.fit }}</button>
                     </div>
                 </div>
-            </div>
 
-            <!-- Centre: the canvas -->
-            <div class="ap-card rounded-xl p-2 overflow-hidden">
-                <svg v-if="level" ref="svgEl" v-bind="viewportBind" class="w-full select-none" :viewBox="viewBox"
+                <!-- Above the map, not below it. Below a canvas up to 704px tall this was
+                     unreachable - including the zoomForNumbers warning, which explains a
+                     disappearance the user is looking at right now. -->
+                <p class="px-2 pb-2 text-xs text-gray-400 dark:text-gray-500 shrink-0">
+                    {{ t.canvasHint }}
+                    <span v-if="zoom <= 0.7 && totalSeats">{{ t.zoomForNumbers }}</span>
+                </p>
+
+                <!-- Over the canvas, not after it: the svg renders on `level`, not on section
+                     count, so an empty level drew 544px of blank box with the explanation below
+                     the fold. -->
+                <p v-if="level && !level.sections.length"
+                    class="absolute inset-x-0 top-1/2 -translate-y-1/2 px-6 text-center text-sm text-gray-500 dark:text-gray-400 pointer-events-none">
+                    {{ t.emptyLevel }}
+                </p>
+
+                <svg v-if="level" ref="svgEl" v-bind="viewportBind" class="w-full select-none seat-canvas"
+                    role="group" :aria-label="planName" :viewBox="viewBox"
                     :style="{ height: canvasHeight, touchAction: 'none' }"
                     @mousedown="onCanvasDown" @mousemove="onMove" @mouseup="endDrag" @mouseleave="endDrag">
                     <defs>
@@ -150,28 +199,36 @@
                             </template>
 
                             <g v-for="tb in s.tables" :key="tb.id" :transform="`translate(${tb.x} ${tb.y})`">
-                                <circle v-if="tb.shape === 'round'" :r="tb.width / 2" :fill="s.color" fill-opacity="0.25"
-                                    :stroke="s.color" style="cursor: move" @mousedown.stop="startTableDrag($event, tb)" />
+                                <circle v-if="tb.shape === 'round'" :r="tb.width / 2" :fill="s.color"
+                                    :fill-opacity="tb.id === selectedTableId ? 0.45 : 0.25"
+                                    :stroke="s.color" style="cursor: move" @mousedown.stop="startTableDrag($event, tb, s)" />
                                 <rect v-else :x="-tb.width / 2" :y="-tb.height / 2" :width="tb.width" :height="tb.height" rx="4"
-                                    :fill="s.color" fill-opacity="0.25" :stroke="s.color" style="cursor: move"
-                                    @mousedown.stop="startTableDrag($event, tb)" />
+                                    :fill="s.color" :fill-opacity="tb.id === selectedTableId ? 0.45 : 0.25" :stroke="s.color" style="cursor: move"
+                                    @mousedown.stop="startTableDrag($event, tb, s)" />
                                 <text text-anchor="middle" dy="4" font-size="11" class="fill-gray-700 dark:fill-gray-200">{{ tb.label }}</text>
                             </g>
 
                             <g v-for="seat in s.seats" :key="seat.id"
                                 :transform="`translate(${seatX(s, seat)} ${seatY(s, seat)})`"
                                 style="cursor: pointer" @mousedown.stop="onSeatDown($event, seat, s)"
-                                tabindex="0" role="button"
+                                class="seat-node"
+                                :data-seat-id="seat.id"
+                                :tabindex="seat.id === tabbableSeatId ? 0 : -1"
+                                role="button"
                                 :aria-label="seatAriaLabel(s, seat)"
                                 :aria-pressed="selectedSeats.includes(seat.id)"
+                                @focus="focusedSeatId = seat.id"
                                 @keydown="onSeatKey($event, seat, s)">
                                 <!-- Shape carries the kind, never colour alone. -->
                                 <rect v-if="seat.kind === 'wheelchair'" x="-9" y="-9" width="18" height="18" rx="3"
                                     :fill="seatFill(seat)" :stroke="seatStroke(seat)" :stroke-width="seatStrokeWidth(seat)" />
                                 <circle v-else r="8" :fill="seatFill(seat)" :stroke="seatStroke(seat)" :stroke-width="seatStrokeWidth(seat)"
                                     :stroke-dasharray="seat.kind === 'companion' ? '3 2' : null" />
-                                <circle v-if="seat.kind === 'restricted_view'" r="8" fill="url(#restrictedHatch)"
-                                    class="text-gray-700 dark:text-gray-200" />
+                                <!-- No dark: variant, and not by omission: currentColor inside a
+                                     <pattern> resolves against the pattern's own inherited colour in
+                                     <defs>, not against the shape referencing it, so the class here
+                                     never did anything. The disc under it is light in both themes. -->
+                                <circle v-if="seat.kind === 'restricted_view'" r="8" fill="url(#restrictedHatch)" />
                                 <text v-if="seat.kind === 'wheelchair'" text-anchor="middle" dy="4" font-size="10"
                                     :class="seat.locked ? 'fill-white' : 'fill-gray-900 dark:fill-gray-900'">&#9855;</text>
                                 <!-- The same mark the box office puts on a sold seat. -->
@@ -188,49 +245,176 @@
                         </g>
                     </g>
                 </svg>
-                <p class="px-2 pb-1 text-xs text-gray-400 dark:text-gray-500">{{ t.canvasHint }}</p>
+
+
+                <!-- Seat actions belong NEXT TO THE SEATS. In the rail they sat below a section
+                     inspector tall enough to push them off the screen you just clicked on. -->
+                <!-- shrink-0 so the flex column takes height off the canvas, never off these
+                     controls. aria-live because it appears on selection and announced nothing. -->
+                <div v-if="selectedSeats.length" id="seating-seat-bar" aria-live="polite"
+                    class="mt-2 shrink-0 rounded-xl bg-gray-50 dark:bg-[#252526] border border-gray-200 dark:border-gray-700 p-3 flex flex-wrap items-center gap-2">
+                    <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                        {{ selectedSeats.length }} {{ selectedSeats.length === 1 ? t.seatSelected : t.seatsSelected }}
+                    </span>
+                    <div class="flex flex-wrap gap-1">
+                        <button v-for="k in seatKinds" :key="k" type="button" @click="applyKind(k)"
+                            :aria-pressed="k === selectedKind"
+                            class="px-2 py-1 rounded-md text-xs border transition-all duration-200"
+                            :class="k === selectedKind
+                                ? 'border-[var(--brand-blue)] bg-[var(--brand-blue)]/10 text-[var(--brand-blue)] font-medium'
+                                : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-[var(--brand-blue)]'">
+                            {{ t['kind_' + k] }}
+                        </button>
+                    </div>
+                    <button type="button" @click="toggleAisle"
+                        class="px-2 py-1 rounded-md text-xs border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-[var(--brand-blue)] transition-all duration-200">{{ t.toggleAisle }}</button>
+                    <button type="button" @click="removeSelectedSeats"
+                        class="ms-auto px-2 py-1 rounded-md text-xs font-medium border border-red-300 dark:border-red-700 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200">{{ t.removeSeats }}</button>
+                </div>
+
             </div>
 
-            <!-- Right: inspector -->
+            <!-- The rail: one column, everything that is not the map. -->
+            <div class="space-y-4">
+
+                <!-- Level, then its sections. -->
+            <div class="ap-card rounded-xl p-4 space-y-4">
+                <div v-if="level">
+                    <label for="seating-level-name" class="block text-xs font-medium text-gray-500 dark:text-gray-400">{{ t.levelName }}</label>
+                    <input id="seating-level-name" v-model="level.name" type="text" maxlength="100"
+                        @input="dirty = true" @focus="beginFieldEdit" @blur="endFieldEdit"
+                        class="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm text-sm" />
+                </div>
+
+                <div v-if="level">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ t.sections }}</h3>
+                    <ul class="mt-2 space-y-1">
+                        <li v-for="s in level.sections" :key="s.id">
+                            <button type="button" @click="selectSection(s)"
+                                class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-start transition-all duration-200"
+                                :class="isSelectedSection(s) ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-800'">
+                                <span class="w-3 h-3 rounded-sm shrink-0" :style="{ backgroundColor: s.color }"></span>
+                                <span class="truncate text-gray-700 dark:text-gray-300">{{ s.name }}</span>
+                                <span class="ms-auto text-xs text-gray-400">{{ s.kind === 'standing' ? s.capacity : s.seats.length }}</span>
+                            </button>
+                        </li>
+                    </ul>
+                    <!-- Real buttons. These are the primary creative actions in the tool and were
+                         the quietest controls on the screen, while "Remove this level" was a
+                         bordered danger button. -->
+                    <div class="mt-3 flex flex-wrap gap-2">
+                        <button v-for="a in addActions" :key="a.kind" type="button" @click="addSection(a.kind)"
+                            class="px-3 py-2 rounded-md text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
+                            + {{ a.label }}
+                        </button>
+                    </div>
+
+                <!-- In the rail, where the box office keeps its own. Under the map it trailed a 704px
+                         canvas and was never on screen. Only shown when the level has seats to key. -->
+                    <div v-if="levelHasSeats"
+                        class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 flex flex-wrap gap-3 text-xs text-gray-500 dark:text-gray-400">
+                        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full border" style="background:#e5e7eb;border-color:#9ca3af"></span>{{ t.kind_standard }}</span>
+                        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-sm border" style="background:#bfdbfe;border-color:#9ca3af"></span>{{ t.kind_wheelchair }}</span>
+                        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full border border-dashed" style="background:#e5e7eb;border-color:#6b7280"></span>{{ t.kind_companion }}</span>
+                        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full border" style="border-color:#9ca3af;background:repeating-linear-gradient(45deg,#9ca3af,#9ca3af 1.5px,transparent 1.5px,transparent 3px)"></span>{{ t.kind_restricted_view }}</span>
+                        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full" style="background:#dc2626"></span>{{ t.soldSeat }}</span>
+                    </div>
+
+                    <!-- Destructive, so it goes last and stays quiet. -->
+                    <button v-if="levels.length > 1" type="button" @click="removeLevel(activeLevel)"
+                        class="mt-4 text-xs font-medium text-red-600 dark:text-red-400 hover:underline">{{ t.removeLevel }}</button>
+                </div>
+            </div>
+
             <div class="ap-card rounded-xl p-4 space-y-4">
                 <template v-if="section">
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ t.section }}</h3>
 
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400">{{ t.name }}</label>
-                        <input v-model="section.name" @input="dirty = true" type="text" maxlength="100"
+                        <label for="seating-section-name" class="block text-xs font-medium text-gray-500 dark:text-gray-400">{{ t.name }}</label>
+                        <input id="seating-section-name" v-model="section.name" type="text" maxlength="100"
+                            @input="dirty = true" @focus="beginFieldEdit" @blur="endFieldEdit"
                             class="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm text-sm" />
                     </div>
 
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400">{{ t.band }}</label>
-                        <input v-model="section.band" @input="dirty = true" type="text" maxlength="100"
+                        <label for="seating-section-band" class="block text-xs font-medium text-gray-500 dark:text-gray-400">{{ t.band }}</label>
+                        <!-- A band must match tickets.seating_band EXACTLY or the section is never
+                             priced, and this was an unguarded text box. Free entry still works; the
+                             list just stops a typo being the usual way to create a new band. -->
+                        <input id="seating-section-band" v-model="section.band" type="text" maxlength="100"
+                            @input="dirty = true" @focus="beginFieldEdit" @blur="endFieldEdit"
+                            list="seating-bands"
                             class="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm text-sm" />
+                        <datalist id="seating-bands">
+                            <option v-for="b in knownBands" :key="b" :value="b"></option>
+                        </datalist>
                         <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ t.bandHelp }}</p>
                     </div>
 
-                    <div class="flex items-center gap-3">
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400">{{ t.colour }}</label>
-                            <input v-model="section.color" @input="dirty = true" type="color"
-                                class="mt-1 h-9 w-16 rounded border border-gray-300 dark:border-gray-700 bg-transparent" />
+                    <div>
+                        <label for="seating-section-rotation" class="block text-xs font-medium text-gray-500 dark:text-gray-400">{{ t.rotation }}</label>
+                        <div class="mt-1 flex items-center gap-2">
+                            <button type="button" @click="rotateSection(-15)" :aria-label="t.rotateLeft"
+                                class="px-2 py-1 rounded-md text-xs border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-[var(--brand-blue)] transition-all duration-200">&#8630;</button>
+                            <input id="seating-section-rotation" :value="section.rotation || 0"
+                                @change="setRotation($event.target.value)" type="number" min="-360" max="360" step="5"
+                                class="w-20 rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm" />
+                            <span class="text-xs text-gray-400 dark:text-gray-500">&deg;</span>
+                            <button type="button" @click="rotateSection(15)" :aria-label="t.rotateRight"
+                                class="px-2 py-1 rounded-md text-xs border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-[var(--brand-blue)] transition-all duration-200">&#8631;</button>
                         </div>
-                        <label class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mt-5">
-                            <input type="checkbox" v-model="section.accessibility_only" @change="dirty = true"
-                                class="rounded border-gray-300 dark:border-gray-700 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
+                    </div>
+
+                    <!-- Stacked, not side by side: at 22rem the toggle's label wrapped into the
+                         swatches and the row read as one broken control. -->
+                    <div class="space-y-3">
+                        <div>
+                            <label for="seating-section-colour" class="block text-xs font-medium text-gray-500 dark:text-gray-400">{{ t.colour }}</label>
+                            <div class="mt-1 flex items-center gap-2">
+                                <input :value="section.color" @change="setSectionColor($event.target.value)" type="color"
+                                    id="seating-section-colour"
+                                    class="h-9 w-12 rounded border border-gray-300 dark:border-gray-700 bg-transparent" />
+                                <div class="flex gap-1">
+                                    <button v-for="(c, i) in SECTION_COLORS" :key="c" type="button"
+                                        @click="setSectionColor(c)" :aria-label="`${t.colour} ${i + 1}`"
+                                        class="w-5 h-5 rounded-sm border border-black/10 dark:border-white/20"
+                                        :class="section.color === c ? 'ring-2 ring-offset-1 ring-[var(--brand-blue)] dark:ring-offset-gray-800' : ''"
+                                        :style="{ backgroundColor: c }"></button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" role="switch" :aria-checked="!!section.accessibility_only"
+                            @click="toggleAccessibilityOnly"
+                            class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]">
+                            <span class="relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors duration-200"
+                                :class="section.accessibility_only ? 'bg-[var(--brand-button-bg)]' : 'bg-gray-200 dark:bg-gray-700'">
+                                <span class="inline-block h-5 w-5 mt-0.5 rounded-full bg-white shadow transition-transform duration-200"
+                                    :class="section.accessibility_only ? 'translate-x-[1.375rem]' : 'translate-x-0.5'"></span>
+                            </span>
                             {{ t.accessibilityOnly }}
-                        </label>
+                        </button>
                     </div>
 
                     <div v-if="section.kind === 'standing'">
-                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400">{{ t.capacity }}</label>
-                        <input v-model.number="section.capacity" @input="dirty = true" type="number" min="0" max="65535"
+                        <label for="seating-section-capacity" class="block text-xs font-medium text-gray-500 dark:text-gray-400">{{ t.capacity }}</label>
+                        <input id="seating-section-capacity" :value="section.capacity"
+                            @change="setCapacity($event.target.value)" type="number" min="0" max="65535"
                             class="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm text-sm" />
                     </div>
 
-                    <!-- Row builder -->
+                    <!-- Row builder. Eight fields used once per section, so it is behind a
+                         disclosure - open by default only while the section has nothing in it. -->
                     <div v-if="section.kind === 'seated'" class="border-t border-gray-200 dark:border-gray-700 pt-3 space-y-2">
-                        <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300">{{ t.addRows }}</h4>
+                        <button type="button" @click="toggleBuilder" :aria-expanded="showBuilder"
+                            class="w-full flex items-center justify-between text-xs font-semibold text-gray-700 dark:text-gray-300">
+                            {{ t.addRows }}
+                            <svg class="w-4 h-4 transition-transform duration-200" :class="showBuilder ? 'rotate-180' : ''"
+                                fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                            </svg>
+                        </button>
+                        <template v-if="showBuilder">
                         <div class="grid grid-cols-2 gap-2">
                             <label class="text-xs text-gray-500 dark:text-gray-400">{{ t.rows }}
                                 <input v-model.number="rowForm.rows" type="number" min="1" max="60" class="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm" />
@@ -244,8 +428,9 @@
                                     <option value="numeric">1, 2, 3</option>
                                 </select>
                             </label>
-                            <label class="text-xs text-gray-500 dark:text-gray-400">{{ t.curve }}
+                            <label class="text-xs text-gray-500 dark:text-gray-400" :title="t.curveHelp">{{ t.curve }}
                                 <input v-model.number="rowForm.curve" type="number" min="0" max="120" class="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm" />
+                                <span class="mt-1 block font-normal text-gray-400 dark:text-gray-500">{{ t.curveHelp }}</span>
                             </label>
                             <label class="text-xs text-gray-500 dark:text-gray-400 col-span-2">{{ t.aisleAfterSeats }}
                                 <input v-model="rowForm.aisles" type="text" placeholder="6, 14"
@@ -257,11 +442,20 @@
                             {{ t.generateRows }}
                         </button>
                         <p class="text-xs text-gray-400 dark:text-gray-500">{{ t.generateRowsHelp }}</p>
+                        </template>
                     </div>
 
                     <!-- Table builder -->
                     <div v-if="section.kind === 'table'" class="border-t border-gray-200 dark:border-gray-700 pt-3 space-y-2">
-                        <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300">{{ t.addTablesTitle }}</h4>
+                        <button type="button" @click="toggleBuilder" :aria-expanded="showBuilder"
+                            class="w-full flex items-center justify-between text-xs font-semibold text-gray-700 dark:text-gray-300">
+                            {{ t.addTablesTitle }}
+                            <svg class="w-4 h-4 transition-transform duration-200" :class="showBuilder ? 'rotate-180' : ''"
+                                fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                            </svg>
+                        </button>
+                        <template v-if="showBuilder">
                         <div class="grid grid-cols-2 gap-2">
                             <label class="text-xs text-gray-500 dark:text-gray-400">{{ t.tables }}
                                 <input v-model.number="tableForm.count" type="number" min="1" max="60" class="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm" />
@@ -283,52 +477,82 @@
                                 </select>
                             </label>
                         </div>
-                        <label class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                            <input type="checkbox" v-model="tableForm.numbered" class="rounded border-gray-300 dark:border-gray-700 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
+                        <button type="button" role="switch" :aria-checked="tableForm.numbered"
+                            @click="tableForm.numbered = !tableForm.numbered"
+                            class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]">
+                            <span class="relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors duration-200"
+                                :class="tableForm.numbered ? 'bg-[var(--brand-button-bg)]' : 'bg-gray-200 dark:bg-gray-700'">
+                                <span class="inline-block h-5 w-5 mt-0.5 rounded-full bg-white shadow transition-transform duration-200"
+                                    :class="tableForm.numbered ? 'translate-x-[1.375rem]' : 'translate-x-0.5'"></span>
+                            </span>
                             {{ t.numberSeats }}
-                        </label>
+                        </button>
                         <button type="button" @click="generateTables"
                             class="w-full px-3 py-2 rounded-md text-sm font-medium text-white bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] transition-all duration-200">
                             {{ t.generateTables }}
                         </button>
+                        </template>
                     </div>
 
                     <button id="seating-remove-section" type="button" @click="removeSection(section)" class="px-3 py-2 rounded-md text-xs font-medium border border-red-300 dark:border-red-700 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200">{{ t.removeSection }}</button>
                 </template>
 
-                <template v-if="selectedSeats.length">
+                <!-- One table at a time. Everything here was fixed at generation before: getting a
+                     booking mode wrong meant regenerating the section and losing every other
+                     table's position. -->
+                <template v-if="selectedTable">
                     <div class="border-t border-gray-200 dark:border-gray-700 pt-3 space-y-2">
-                        <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300">
-                            {{ selectedSeats.length }} {{ selectedSeats.length === 1 ? t.seatSelected : t.seatsSelected }}
-                        </h4>
-                        <div class="flex flex-wrap gap-1">
-                            <button v-for="k in seatKinds" :key="k" type="button" @click="applyKind(k)"
-                                :aria-pressed="k === selectedKind"
-                                class="px-2 py-1 rounded-md text-xs border transition-all duration-200"
-                                :class="k === selectedKind
-                                    ? 'border-[var(--brand-blue)] bg-[var(--brand-blue)]/10 text-[var(--brand-blue)] font-medium'
-                                    : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-[var(--brand-blue)]'">
-                                {{ t['kind_' + k] }}
-                            </button>
-                        </div>
-                        <button type="button" @click="toggleAisle" class="text-xs text-[var(--brand-blue)] hover:underline">{{ t.toggleAisle }}</button>
-                        <button type="button" @click="removeSelectedSeats" class="px-3 py-2 rounded-md text-xs font-medium border border-red-300 dark:border-red-700 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200">{{ t.removeSeats }}</button>
+                        <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300">{{ t.tableSelected }}</h4>
+                        <label for="seating-table-label" class="block text-xs text-gray-500 dark:text-gray-400">{{ t.name }}</label>
+                        <input id="seating-table-label" :value="selectedTable.label" maxlength="100" type="text"
+                            @change="updateTable({ label: $event.target.value })"
+                            class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm" />
+
+                        <label for="seating-table-shape" class="block text-xs text-gray-500 dark:text-gray-400">{{ t.shape }}</label>
+                        <select id="seating-table-shape" :value="selectedTable.shape"
+                            @change="updateTable({ shape: $event.target.value, height: $event.target.value === 'round' ? selectedTable.width : 80 })"
+                            class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
+                            <option value="round">{{ t.round }}</option>
+                            <option value="rect">{{ t.rectangular }}</option>
+                        </select>
+
+                        <label for="seating-table-mode" class="block text-xs text-gray-500 dark:text-gray-400">{{ t.booking }}</label>
+                        <select id="seating-table-mode" :value="selectedTable.booking_mode"
+                            @change="updateTable({ booking_mode: $event.target.value })"
+                            class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
+                            <option value="seat">{{ t.bookSeat }}</option>
+                            <option value="whole">{{ t.bookWhole }}</option>
+                            <option value="either">{{ t.bookEither }}</option>
+                        </select>
+
+                        <button type="button" @click="removeTable"
+                            class="px-3 py-2 rounded-md text-xs font-medium border border-red-300 dark:border-red-700 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200">{{ t.removeTable }}</button>
                     </div>
                 </template>
 
-                <!-- Validation -->
-                <div v-if="issues.length" class="border-t border-gray-200 dark:border-gray-700 pt-3">
-                    <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
-                        <div class="flex gap-2">
-                            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-                            </svg>
-                            <ul class="text-xs text-amber-800 dark:text-amber-200 space-y-1">
-                                <li v-for="(issue, i) in issues" :key="i">{{ issue }}</li>
-                            </ul>
-                        </div>
+                <!-- Nothing selected: an empty 22rem card said nothing at all. -->
+                <p v-if="!section" class="text-sm text-gray-500 dark:text-gray-400">{{ t.nothingSelected }}</p>
+
+            </div>
+
+            <!-- Validation. Advisory - you can save with these outstanding - but each row now
+                 takes you to the section it is about instead of naming one and leaving you to
+                 hunt for it across levels. -->
+            <div v-if="issues.length" class="ap-card rounded-xl p-4">
+                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                    <div class="flex gap-2">
+                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                        </svg>
+                        <ul class="text-xs text-amber-800 dark:text-amber-200 space-y-1">
+                            <li v-for="issue in issues" :key="issue.key">
+                                <button type="button" @click="goToIssue(issue)" class="text-start hover:underline">{{ issue.text }}</button>
+                            </li>
+                        </ul>
                     </div>
                 </div>
+            </div>
+
             </div>
         </div>
     </div>
@@ -341,8 +565,14 @@ import { useMapViewport } from '../seat-map-viewport';
 const props = defineProps({
     planName: { type: String, default: '' },
     nameEditable: { type: Boolean, default: true },
+    // Flashed by seating.store on a brand new plan. The seating tab has no name field any more,
+    // so this box is where a plan gets named.
+    focusName: { type: Boolean, default: false },
     usage: { type: Object, default: () => ({ events: 0, sold: 0 }) },
     isOccurrence: { type: Boolean, default: false },
+    // On one date, the night being edited. The page had no heading of any kind, so on a thirty
+    // date run nothing but the URL said which one you were about to restructure.
+    subtitle: { type: String, default: '' },
     structureUrl: { type: String, required: true },
     saveUrl: { type: String, required: true },
     backUrl: { type: String, default: '' },
@@ -352,8 +582,18 @@ const props = defineProps({
 
 const t = props.strings;
 const seatKinds = ['standard', 'wheelchair', 'companion', 'restricted_view'];
+// The WP brand ramp. Cycled so two sections are never the same colour by default, which made them
+// indistinguishable on the canvas until somebody opened the colour picker.
+const SECTION_COLORS = ['#4E81FA', '#0EA5E9', '#22D3EE', '#F59E0B', '#10B981', '#8B5CF6'];
+// Short labels: the buttons carry a "+" so "+ Add seating" would stutter.
+const addActions = [
+    { kind: 'seated', label: t.seating },
+    { kind: 'table', label: t.tablesLabel },
+    { kind: 'standing', label: t.standing },
+];
 
 const planName = ref(props.planName);
+const nameInput = ref(null);
 const levels = ref([]);
 const activeLevel = ref(0);
 const selectedSectionId = ref(null);
@@ -361,13 +601,184 @@ const selectedSeats = ref([]);
 const dirty = ref(false);
 const loading = ref(true);
 const saving = ref(false);
+// The only sign a save had worked was "Unsaved changes" disappearing, which is a thing NOT
+// happening. Brief and self-clearing; the dirty marker still carries the ongoing state.
+const savedAt = ref(0);
 const error = ref('');
+// Distinct from `error`: a plan that FAILED to load is not the same as a plan that is empty, and
+// the template below has to be able to tell them apart. See the retry card.
+const loadFailed = ref(false);
+const errorEl = ref(null);
+const viewportH = ref(typeof window === 'undefined' ? 900 : window.innerHeight);
+// The owner's updated_at when this structure was read. Sent back on save so a second editor
+// cannot silently overwrite the first - the payload is the WHOLE structure, and anything the
+// server does not recognise is removed.
+const revision = ref(null);
 const svgEl = ref(null);
+// Roving tabindex: ONE tab stop into the map, arrows move within it. Every seat used to be
+// tabindex="0", so a 1,200-seat house was 1,200 presses of Tab to get past the canvas. The guest
+// picker and the box office both learned this; the designer was the last one still doing it.
+const focusedSeatId = ref(null);
+// A table was created in bulk and then immutable: no rename, no delete, no shape or booking-mode
+// change. Selecting one is what makes any of that reachable.
+const selectedTableId = ref(null);
+const selectedTable = computed(() => {
+    const s = section.value;
+    if (!s || selectedTableId.value === null) return null;
+
+    return s.tables.find((x) => x.id === selectedTableId.value) ?? null;
+});
 
 // Client-side ids are negative so the server, which treats any id it does not already own as new,
 // can never mistake one for a real row - and a hand-edited payload cannot adopt somebody else's.
 let tempId = -1;
 const nextId = () => tempId--;
+
+/**
+ * Undo.
+ *
+ * Every edit here is permanent for the session: a mis-clicked "Generate rows" adds thousands of
+ * seats, a stray drag moves somebody's row, and the only recovery was a reload that threw away
+ * everything else too. The docs had to carry a warning callout telling organizers to delete the
+ * extras by hand rather than press the button twice - which is this gap written out in prose.
+ *
+ * Coarse and cheap: `levels` is a plain serialisable tree, so one structural clone per OPERATION
+ * (drags coalesced on endDrag, not per frame) is enough, bounded so a long session cannot grow
+ * without limit. Selection is deliberately not restored - only the document is.
+ */
+const UNDO_LIMIT = 25;
+const undoStack = ref([]);
+const redoStack = ref([]);
+const canUndo = computed(() => undoStack.value.length > 0);
+const canRedo = computed(() => redoStack.value.length > 0);
+
+// Mirrors SeatingStructureService::MAX_SEATS. Duplicated deliberately: the server is still the
+// authority and still refuses, this only stops the organizer finding out the expensive way.
+const MAX_SEATS = 6000;
+const MAX_LEVELS = 12;
+const MAX_SECTIONS = 200;
+const MAX_TABLES = 500;
+
+/**
+ * The banner sits at the top of the page while the buttons that raise it are at the bottom of the
+ * rail. role="alert" covered screen readers; a sighted user pressed Generate and saw nothing happen.
+ */
+function showError(message) {
+    error.value = message;
+    nextTick(() => errorEl.value?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }));
+}
+
+/**
+ * NaN and out-of-range in one place - the min/max attributes on the inputs enforce nothing.
+ *
+ * An EMPTY field is rejected rather than clamped: Number('') is 0, so clamping would quietly turn
+ * "I have not filled this in yet" into the minimum and generate a row the organizer never asked
+ * for. A typed 0 is out of range and clamps normally.
+ */
+function clampInt(value, min, max) {
+    if (value === '' || value === null || value === undefined) return null;
+
+    const n = Math.round(Number(value));
+    if (! Number.isFinite(n)) return null;
+
+    return Math.min(max, Math.max(min, n));
+}
+
+const snapshot = () => JSON.parse(JSON.stringify(levels.value));
+// The structure as last read or written, so "is this dirty?" can be answered by comparison rather
+// than by a flag that only ever gets set.
+let savedSnapshot = '[]';
+
+// A drag is one operation, not one per mousemove frame: hold the before-state at the press and
+// keep it only if the pointer actually moved something.
+let dragSnapshot = null;
+
+/**
+ * Call BEFORE mutating. A redo branch is discarded the moment a new edit is made, as everywhere.
+ *
+ * Re-entrant: applyPreset calls addLevel, addSection and generateRows, each of which checkpoints,
+ * so one preset click pushed SEVEN snapshots - seven Ctrl+Z presses to reverse, replaying the
+ * construction backwards, and seven of the 25 slots gone. Nested calls now join the outer entry.
+ */
+let checkpointDepth = 0;
+
+/** The one place history is written. endDrag and the field editors below share it. */
+function pushHistory(snap) {
+    undoStack.value.push(snap);
+    if (undoStack.value.length > UNDO_LIMIT) undoStack.value.shift();
+    redoStack.value = [];
+}
+
+function checkpoint() {
+    if (checkpointDepth > 0) return;
+    pushHistory(snapshot());
+}
+
+/**
+ * Text fields, which mutate on every keystroke.
+ *
+ * Snapshot on focus, commit on blur only if something changed - one undo entry per edit rather than
+ * one per character. Without this, Ctrl+Z covered every structural change but silently skipped
+ * every rename, which is not a distinction a user has any reason to expect.
+ */
+let fieldEdit = null;
+function beginFieldEdit() {
+    fieldEdit = { snap: snapshot(), before: JSON.stringify(levels.value) };
+}
+function endFieldEdit() {
+    if (! fieldEdit) return;
+    if (JSON.stringify(levels.value) !== fieldEdit.before) pushHistory(fieldEdit.snap);
+    fieldEdit = null;
+}
+
+/** Everything inside is one undoable operation, however many checkpointing helpers it calls. */
+function asOneOperation(fn) {
+    checkpoint();
+    checkpointDepth++;
+    try {
+        return fn();
+    } finally {
+        checkpointDepth--;
+    }
+}
+
+function applyHistory(from, to) {
+    if (!from.value.length) return;
+    to.value.push(snapshot());
+    levels.value = from.value.pop();
+    // The ids in the restored tree are real, but whatever was selected may not be in it.
+    activeLevel.value = Math.min(activeLevel.value, Math.max(0, levels.value.length - 1));
+    const sections = levels.value[activeLevel.value]?.sections ?? [];
+    if (! sections.some((x) => x.id === selectedSectionId.value)) {
+        selectedSectionId.value = sections[0]?.id ?? null;
+    }
+    selectedSeats.value = [];
+    // Not unconditionally true: undoing all the way back to what was saved leaves the plan clean,
+    // and saying otherwise arms the beforeunload guard over nothing.
+    dirty.value = JSON.stringify(levels.value) !== savedSnapshot;
+}
+
+const undo = () => applyHistory(undoStack, redoStack);
+const redo = () => applyHistory(redoStack, undoStack);
+
+function onKeydown(evt) {
+    if (! (evt.metaKey || evt.ctrlKey)) return;
+
+    // Cmd+Z inside a text field means "undo my typing" everywhere else in the OS. Hijacking it
+    // rolled back the last STRUCTURAL edit instead - and since text edits were not checkpointed,
+    // the typed characters stayed too, so the user lost a generate they never touched.
+    const el = evt.target;
+    if (el && (el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName))) {
+        // Save is still ours: no field implements Cmd+S.
+        if ((evt.key || '').toLowerCase() !== 's') return;
+    }
+
+    const key = (evt.key || '').toLowerCase();
+
+    if (key === 's') { evt.preventDefault(); if (!saving.value && !loading.value && !loadFailed.value) save(); return; }
+    if (key === 'z') { evt.preventDefault(); evt.shiftKey ? redo() : undo(); return; }
+    if (key === 'y') { evt.preventDefault(); redo(); }
+}
 
 const rowForm = reactive({ rows: 10, perRow: 12, rowStyle: 'alpha', curve: 0, aisles: '' });
 const tableForm = reactive({ count: 8, seats: 8, shape: 'round', mode: 'either', numbered: true });
@@ -383,10 +794,54 @@ const section = computed(() => {
 // toolbar's zoom percentage was then a lie.
 // Panning must never fight an element drag: a mousedown on a section, table or seat starts that
 // drag instead, and the viewport stays out of the way until it ends.
-const { zoom, pan, canvas, bind: viewportBind, fit: fitToView, zoomBy, measure: measureCanvas, observe: observeCanvas } =
+const { zoom, pan, canvas, bind: viewportBind, fit: fitToView, zoomBy, observe: observeCanvas, revealPoint } =
     useMapViewport({ svgEl, contentBounds, canPan: () => !drag.mode, panFromChildren: false });
 
 const viewBox = computed(() => `0 0 ${canvas.w} ${canvas.h}`);
+
+// Mirrors seat-map-viewport's own clamps, so the buttons can show when they have hit them.
+const MIN_ZOOM = 0.2;
+const MAX_ZOOM = 3;
+const stepZoom = (dir) => zoomBy(zoom.value * (dir > 0 ? 0.12 : -0.107));
+
+/**
+ * The single tab stop. Falls back to a selected seat, then to the first one - without a fallback a
+ * roving tabindex with nothing yet focused makes the whole map unreachable from the keyboard.
+ */
+/**
+ * Open while the section is empty, closed once it has content, and pinned per SECTION once clicked.
+ *
+ * It was one shared ref holding null/true/false, which broke twice: `!null` is `true`, so the first
+ * click on an auto-open builder set it to the value it already had and nothing moved; and a pin on
+ * one section followed you to every other section for the rest of the session.
+ */
+const builderPinned = ref({});
+const autoOpen = (s) => !s || (s.kind === 'table' ? !s.tables.length : !s.seats.length);
+const showBuilder = computed(() => {
+    const s = section.value;
+    const pinned = s ? builderPinned.value[s.id] : undefined;
+
+    return pinned === undefined ? autoOpen(s) : pinned;
+});
+
+function toggleBuilder() {
+    const s = section.value;
+    if (!s) return;
+    builderPinned.value = { ...builderPinned.value, [s.id]: !showBuilder.value };
+}
+
+/** Every band already used anywhere in this plan, so the field can offer them back. */
+const knownBands = computed(() => [...new Set(
+    levels.value.flatMap((l) => l.sections.map((x) => (x.band || '').trim())).filter(Boolean),
+)].sort());
+
+const tabbableSeatId = computed(() => {
+    const all = (level.value?.sections ?? []).flatMap((x) => x.seats);
+    if (! all.length) return null;
+    if (focusedSeatId.value && all.some((x) => x.id === focusedSeatId.value)) return focusedSeatId.value;
+
+    return selectedSeats.value.find((id) => all.some((x) => x.id === id)) ?? all[0].id;
+});
 
 const usageNotice = computed(() => {
     const events = Number(props.usage?.events || 0);
@@ -408,13 +863,32 @@ const usageNotice = computed(() => {
 });
 
 /** Tall enough to work in, proportioned to the room rather than fixed at 34rem. */
+/**
+ * Bounded by the WINDOW as well as by the content.
+ *
+ * It used to be `min(704, max(384, canvas.w * ratio))` - no viewport term at all, so a wider window
+ * meant a taller canvas, and everything below the map went further off screen the bigger the screen
+ * got. The card's own budget now wins whenever it is the smaller of the two.
+ */
 const canvasHeight = computed(() => {
+    // Header, toolbar, the card's chrome and a margin - the same 6rem the card's max-height reserves.
+    const budget = Math.max(260, viewportH.value - 320);
     const b = contentBounds();
-    if (!b) return '34rem';
+    if (!b) return `${Math.min(544, budget)}px`;
+
     const ratio = Math.min(1.0, Math.max(0.45, b.h / b.w));
-    return `${Math.round(Math.min(704, Math.max(384, canvas.w * ratio)))}px`;
+
+    return `${Math.round(Math.min(704, budget, Math.max(320, canvas.w * ratio)))}px`;
 });
 const totalSeats = computed(() => levels.value.reduce((n, l) => n + seatsInLevel(l), 0));
+/**
+ * Interpolated, not concatenated. This file already documents why - the events count deliberately
+ * avoids sitting next to a count-noun - and then rendered "1 Seats" three lines from that comment.
+ */
+const seatCountLabel = computed(() => (t.seatCount || ':count').replace(':count', String(totalSeats.value)));
+
+/** The legend keys seat states, so a standing-only level has nothing for it to explain. */
+const levelHasSeats = computed(() => (level.value?.sections ?? []).some((s) => s.seats.length));
 
 function seatsInLevel(lvl) {
     return lvl.sections.reduce((n, s) => n + s.seats.length, 0);
@@ -436,7 +910,14 @@ function seatY(s, seat) {
  * anchored at a constant -26 clipped them and ran the section label straight through seat 1.
  */
 function sectionBox(s) {
-    if (s.kind === 'standing') return { x: 0, y: 0, w: 240, h: 90 };
+    // Scaled, not fixed: a 20-person and a 2,000-person standing area drew identically, which
+    // made the map lie about the shape of the room. Bounded so it stays drawable either way.
+    if (s.kind === 'standing') {
+        const cap = Math.max(0, Number(s.capacity) || 0);
+        const w = Math.round(Math.min(560, Math.max(160, 140 + Math.sqrt(cap) * 11)));
+
+        return { x: 0, y: 0, w, h: Math.round(w * 0.4) };
+    }
 
     const xs = [], ys = [];
     s.seats.forEach((seat) => { xs.push(seatX(s, seat)); ys.push(seatY(s, seat)); });
@@ -468,7 +949,11 @@ function seatFill(seat) {
     if (selectedSeats.value.includes(seat.id)) return 'var(--brand-blue)';
     if (seat.locked) return '#dc2626';
     if (seat.kind === 'wheelchair') return '#bfdbfe';
-    if (seat.kind === 'companion') return 'transparent';
+    // NOT transparent. The seat number is drawn in #4b5563 on the assumption - true of every other
+    // kind - that the disc under it is light in both themes. A transparent companion disc put that
+    // grey on the dark page background at 2.3:1, so the numbers were invisible in dark mode. The
+    // dashed stroke is what marks a companion seat; the missing fill never was.
+    if (seat.kind === 'companion') return '#e5e7eb';
     return '#e5e7eb';
 }
 function seatStroke(seat) {
@@ -485,8 +970,9 @@ function seatStrokeWidth(seat) {
 function selectLevel(i) {
     activeLevel.value = i;
     selectedSeats.value = [];
+    focusedSeatId.value = null;
     selectedSectionId.value = levels.value[i]?.sections[0]?.id ?? null;
-    fitToView();
+    fitToView({ auto: true });
 }
 function selectSection(s) {
     selectedSectionId.value = s.id;
@@ -497,7 +983,34 @@ function isSelectedSection(s) {
 }
 
 // ---- drag
-const drag = reactive({ mode: null, id: null, startX: 0, startY: 0, originX: 0, originY: 0 });
+// `seats` holds the origin of EVERY seat being moved, so a multi-seat selection travels together.
+// `moved` distinguishes a drag from a plain click, which is what lets a click on an already
+// selected seat collapse the selection on release rather than destroying it on press.
+const drag = reactive({ mode: null, id: null, startX: 0, startY: 0, originX: 0, originY: 0, seats: [], moved: false });
+
+/** A point in a section's own coordinates expressed in canvas space, rotation included. */
+function toCanvasFrame(s, x, y) {
+    const deg = Number(s?.rotation) || 0;
+    if (! deg) return [s.x + x, s.y + y];
+
+    const r = (deg * Math.PI) / 180;
+    const cos = Math.cos(r);
+    const sin = Math.sin(r);
+
+    return [s.x + x * cos - y * sin, s.y + x * sin + y * cos];
+}
+
+/** A canvas-space delta expressed in the section's own (rotated) coordinates. */
+function toSectionFrame(s, dx, dy) {
+    const deg = Number(s?.rotation) || 0;
+    if (! deg) return [dx, dy];
+
+    const r = (-deg * Math.PI) / 180;
+    const cos = Math.cos(r);
+    const sin = Math.sin(r);
+
+    return [Math.round(dx * cos - dy * sin), Math.round(dx * sin + dy * cos)];
+}
 
 function svgPoint(evt) {
     const svg = svgEl.value;
@@ -513,13 +1026,22 @@ function svgPoint(evt) {
 }
 
 function startSectionDrag(evt, s) {
+    dragSnapshot = snapshot();
     selectSection(s);
     const p = svgPoint(evt);
-    Object.assign(drag, { mode: 'section', id: s.id, startX: p.x, startY: p.y, originX: s.x, originY: s.y });
+    // moved:false matters as much as the rest: endDrag pushes an undo entry on it, so leaving it
+    // set from a PREVIOUS drag makes every later click on a section forge a no-op snapshot.
+    Object.assign(drag, { mode: 'section', id: s.id, startX: p.x, startY: p.y, originX: s.x, originY: s.y, moved: false });
 }
-function startTableDrag(evt, tb) {
+function startTableDrag(evt, tb, owner) {
+    dragSnapshot = snapshot();
+    selectedTableId.value = tb.id;
+    selectedSeats.value = [];
+    // onMove resolves the table through the SELECTED section, so without this a table in any other
+    // section silently refuses to move while still marking the plan dirty and pushing an undo entry.
+    if (owner && owner.id !== selectedSectionId.value) selectedSectionId.value = owner.id;
     const p = svgPoint(evt);
-    Object.assign(drag, { mode: 'table', id: tb.id, startX: p.x, startY: p.y, originX: tb.x, originY: tb.y });
+    Object.assign(drag, { mode: 'table', id: tb.id, startX: p.x, startY: p.y, originX: tb.x, originY: tb.y, moved: false });
 }
 /**
  * Selecting a seat also makes its SECTION the active one.
@@ -536,21 +1058,43 @@ function onSeatDown(evt, seat, owner) {
     const crossSection = owner && owner.id !== selectedSectionId.value;
     if (crossSection) selectedSectionId.value = owner.id;
 
+    // Pressing a seat that is already part of the selection must KEEP that selection, or dragging
+    // a block of twenty seats throws nineteen of them away before the drag has even started.
+    // A press that turns out to be a click (no movement) collapses to this one seat in endDrag.
+    selectedTableId.value = null;
+    const inSelection = !crossSection && selectedSeats.value.includes(seat.id);
+
     if (evt.shiftKey && !crossSection) {
         const i = selectedSeats.value.indexOf(seat.id);
         if (i >= 0) selectedSeats.value.splice(i, 1);
         else selectedSeats.value.push(seat.id);
-    } else {
+    } else if (!inSelection) {
         selectedSeats.value = [seat.id];
     }
+
+    dragSnapshot = snapshot();
     const p = svgPoint(evt);
-    Object.assign(drag, { mode: 'seat', id: seat.id, startX: p.x, startY: p.y, originX: seat.x, originY: seat.y });
+    const moving = (owner.seats || []).filter((x) => selectedSeats.value.includes(x.id));
+    Object.assign(drag, {
+        mode: 'seat',
+        id: seat.id,
+        startX: p.x,
+        startY: p.y,
+        originX: seat.x,
+        originY: seat.y,
+        moved: false,
+        collapseTo: inSelection && !evt.shiftKey && selectedSeats.value.length > 1 ? seat.id : null,
+        seats: moving.map((x) => ({ id: x.id, x: x.x, y: x.y })),
+    });
 }
 
 /**
- * Finding 8: the canvas was mouse-only, which is a poor look on the feature that sells wheelchair
- * spaces. Seats are focusable and describe themselves; Enter/Space selects, arrows nudge. The row
- * and table builders in the inspector remain the primary keyboard construction path.
+ * The canvas was mouse-only, which is a poor look on the feature that sells wheelchair spaces.
+ *
+ * Arrows MOVE FOCUS, as they do in the guest picker and the box office - with a roving tabindex,
+ * arrows that nudged instead left a keyboard user able to reach exactly one seat in the house.
+ * Nudging is still the designer's own job, on Shift (1 unit) and Shift+Alt (10), and it moves the
+ * whole selection rather than only the seat under focus.
  */
 function seatAriaLabel(s, seat) {
     const bits = [s.name];
@@ -563,7 +1107,7 @@ function seatAriaLabel(s, seat) {
 }
 
 function onSeatKey(evt, seat, owner) {
-    const nudge = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[evt.key];
+    const step = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[evt.key];
 
     if (evt.key === 'Enter' || evt.key === ' ') {
         evt.preventDefault();
@@ -572,19 +1116,65 @@ function onSeatKey(evt, seat, owner) {
         return;
     }
 
-    if (nudge) {
-        evt.preventDefault();
+    if (! step) return;
+    evt.preventDefault();
+
+    if (evt.shiftKey) {
         if (owner && owner.id !== selectedSectionId.value) selectedSectionId.value = owner.id;
         if (!selectedSeats.value.includes(seat.id)) selectedSeats.value = [seat.id];
-        const step = evt.shiftKey ? 10 : 1;
-        seat.x += nudge[0] * step;
-        seat.y += nudge[1] * step;
+        // One entry per press. A nudge is a discrete, deliberate act, unlike a drag's frames.
+        checkpoint();
+        const size = evt.altKey ? 10 : 1;
+        const sec = owner || section.value;
+        (sec?.seats ?? []).forEach((x) => {
+            if (! selectedSeats.value.includes(x.id)) return;
+            x.x += step[0] * size;
+            x.y += step[1] * size;
+        });
         dirty.value = true;
+        return;
     }
+
+    moveFocus(owner, seat, step);
+}
+
+/**
+ * Nearest seat in the pressed direction, across the whole level rather than one section - a row
+ * that ends at a gangway should hand off to the next section, not dead-end.
+ */
+function moveFocus(owner, seat, [sx, sy]) {
+    const here = { x: seatX(owner, seat), y: seatY(owner, seat) };
+    let best = null;
+    let bestScore = Infinity;
+
+    (level.value?.sections ?? []).forEach((sec) => {
+        sec.seats.forEach((other) => {
+            if (other.id === seat.id) return;
+            const dx = seatX(sec, other) - here.x;
+            const dy = seatY(sec, other) - here.y;
+            const along = dx * sx + dy * sy;
+            if (along <= 0) return;
+            // Distance along the press, plus a heavy penalty for drifting off that line.
+            const across = Math.abs(dx * sy - dy * sx);
+            const score = along + across * 3;
+            if (score < bestScore) { bestScore = score; best = { sec, other }; }
+        });
+    });
+
+    if (! best) return;
+    focusedSeatId.value = best.other.id;
+    // Otherwise arrowing off the visible area gives a focus ring nobody can see. The viewport
+    // exports this for exactly that; the designer was the only consumer not using it.
+    const [rx, ry] = toCanvasFrame(best.sec, seatX(best.sec, best.other), seatY(best.sec, best.other));
+    revealPoint(rx, ry);
+    nextTick(() => {
+        svgEl.value?.querySelector(`[data-seat-id="${best.other.id}"]`)?.focus();
+    });
 }
 // Panning is the viewport's job; a press on bare canvas only drops the seat selection.
 function onCanvasDown() {
     selectedSeats.value = [];
+    selectedTableId.value = null;
 }
 function onMove(evt) {
     if (!drag.mode) return;
@@ -593,19 +1183,40 @@ function onMove(evt) {
     const dy = Math.round(p.y - drag.startY);
 
     if (drag.mode === 'section' && section.value) {
+        // The section's own translate is applied BEFORE its rotate, so this one is already in the
+        // right frame.
         section.value.x = drag.originX + dx;
         section.value.y = drag.originY + dy;
     } else if (drag.mode === 'table' && section.value) {
+        // Everything inside a section lives in the section's ROTATED frame, so a canvas-space
+        // delta has to be counter-rotated or the thing slides off at an angle to the cursor.
+        const [ldx, ldy] = toSectionFrame(section.value, dx, dy);
         const tb = section.value.tables.find((x) => x.id === drag.id);
-        if (tb) { tb.x = drag.originX + dx; tb.y = drag.originY + dy; }
+        if (tb) { tb.x = drag.originX + ldx; tb.y = drag.originY + ldy; }
     } else if (drag.mode === 'seat' && section.value) {
-        const seat = section.value.seats.find((x) => x.id === drag.id);
-        if (seat) { seat.x = drag.originX + dx; seat.y = drag.originY + dy; }
+        const [ldx, ldy] = toSectionFrame(section.value, dx, dy);
+        // Every seat in the selection, not just the one under the cursor.
+        drag.seats.forEach((origin) => {
+            const seat = section.value.seats.find((x) => x.id === origin.id);
+            if (seat) { seat.x = origin.x + ldx; seat.y = origin.y + ldy; }
+        });
     }
+    if (dx || dy) drag.moved = true;
     dirty.value = true;
 }
 function endDrag() {
+    if (drag.moved && dragSnapshot) pushHistory(dragSnapshot);
+    dragSnapshot = null;
+
+    // A press on an already-selected seat kept the whole selection so it could be dragged. If it
+    // turned out to be a plain click, honour what a click means everywhere else and collapse.
+    if (drag.mode === 'seat' && !drag.moved && drag.collapseTo) {
+        selectedSeats.value = [drag.collapseTo];
+    }
     drag.mode = null;
+    drag.seats = [];
+    drag.collapseTo = null;
+    drag.moved = false;
 }
 
 /**
@@ -614,18 +1225,41 @@ function endDrag() {
  * 16-seat row occupies about a third of a 1200-unit level, and at a fixed zoom of 1 that
  * renders unreadably small once the viewBox is scaled down into the centre column.
  */
+/**
+ * The four corners of a section's box in CANVAS space, rotation included.
+ *
+ * -20 on the top edge leaves room for the section label, which sits above the box.
+ */
+function sectionFootprint(s) {
+    const b = sectionBox(s);
+    const corners = [
+        [b.x, b.y - 20], [b.x + b.w, b.y - 20],
+        [b.x + b.w, b.y + b.h], [b.x, b.y + b.h],
+    ];
+    const deg = Number(s.rotation) || 0;
+    if (! deg) return corners.map(([x, y]) => [s.x + x, s.y + y]);
+
+    const r = (deg * Math.PI) / 180;
+    const cos = Math.cos(r);
+    const sin = Math.sin(r);
+
+    return corners.map(([x, y]) => [s.x + x * cos - y * sin, s.y + x * sin + y * cos]);
+}
+
 function contentBounds() {
     const lvl = level.value;
     if (!lvl || !lvl.sections.length) return null;
 
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
     lvl.sections.forEach((s) => {
-        const b = sectionBox(s);
-        // -20 on the top edge leaves room for the section label, which sits above the box.
-        minX = Math.min(minX, s.x + b.x);
-        minY = Math.min(minY, s.y + b.y - 20);
-        maxX = Math.max(maxX, s.x + b.x + b.w);
-        maxY = Math.max(maxY, s.y + b.y + b.h);
+        // The ROTATED footprint. Taking the raw box would let Fit clip a turned section, since a
+        // rotated rectangle needs a bigger axis-aligned box than the one it started as.
+        sectionFootprint(s).forEach(([x, y]) => {
+            minX = Math.min(minX, x);
+            minY = Math.min(minY, y);
+            maxX = Math.max(maxX, x);
+            maxY = Math.max(maxY, y);
+        });
     });
 
     if (!isFinite(minX)) return null;
@@ -636,10 +1270,14 @@ function contentBounds() {
 
 // ---- structure editing
 function addLevel(name) {
+    if (wouldExceedCap(levels.value.length, 1, MAX_LEVELS, t.tooManyLevels)) return null;
+    checkpoint();
     levels.value.push({
         id: nextId(),
         name: name || `${t.level} ${levels.value.length + 1}`,
         position: levels.value.length,
+        // Persisted for the API's benefit; the client has not read them since the viewBox started
+        // tracking the rendered element rather than the level.
         width: 1200,
         height: 800,
         sections: [],
@@ -663,22 +1301,36 @@ function removeLevel(i) {
     const lvl = levels.value[i];
     if (! lvl) return;
 
-    if (hasSoldSeats(lvl.sections || [])) { error.value = t.cannotRemoveSold; return; }
+    if (hasSoldSeats(lvl.sections || [])) { showError(t.cannotRemoveSoldHere); return; }
     if (! confirmRemoval(t.confirmRemoveLevel, { ':level': lvl.name || '', ':count': seatsInLevel(lvl) })) return;
+    checkpoint();
 
     levels.value.splice(i, 1);
     activeLevel.value = Math.max(0, i - 1);
+    selectedSectionId.value = levels.value[activeLevel.value]?.sections[0]?.id ?? null;
+    selectedSeats.value = [];
     dirty.value = true;
 }
 function addSection(kind, attrs = {}) {
+    return asOneOperation(() => addSectionInner(kind, attrs));
+}
+
+function addSectionInner(kind, attrs = {}) {
+    if (wouldExceedCap(countSections(), 1, MAX_SECTIONS, t.tooManySections)) return null;
+    checkpoint();
     if (!level.value) addLevel();
+    // Every manually added section used to be born the same blue, overlapping the last one, with
+    // an empty band - which raised two validation issues the instant it appeared. Name it, band it
+    // and colour it from the ramp, exactly as the presets do.
+    const name = kind === 'standing' ? t.standing : kind === 'table' ? t.tablesLabel : t.seating;
+    const used = level.value.sections.length;
     const s = Object.assign({
         id: nextId(),
-        name: kind === 'standing' ? t.standing : kind === 'table' ? t.tablesLabel : t.seating,
-        color: '#4E81FA',
+        name,
+        color: SECTION_COLORS[used % SECTION_COLORS.length],
         kind,
         capacity: kind === 'standing' ? 100 : null,
-        band: '',
+        band: name,
         accessibility_only: false,
         x: 60 + level.value.sections.length * 40,
         y: 80 + level.value.sections.length * 40,
@@ -693,12 +1345,17 @@ function addSection(kind, attrs = {}) {
     return s;
 }
 function removeSection(s) {
-    if (hasSoldSeats([s])) { error.value = t.cannotRemoveSold; return; }
+    if (hasSoldSeats([s])) { showError(t.cannotRemoveSoldHere); return; }
     if (! confirmRemoval(t.confirmRemoveSection, { ':section': s.name || '', ':count': s.seats.length })) return;
+    checkpoint();
 
     const i = level.value.sections.indexOf(s);
     if (i >= 0) level.value.sections.splice(i, 1);
     selectedSectionId.value = null;
+    // Or the seat panel stays on screen listing seats that no longer exist, with every control in
+    // it reading a null section and silently doing nothing - the exact failure the comment on
+    // cross-section selection above calls worse than either supporting or refusing it.
+    selectedSeats.value = [];
     dirty.value = true;
 }
 
@@ -710,9 +1367,44 @@ function rowLabel(i) {
     return out;
 }
 
+/**
+ * The server caps a plan at MAX_SEATS and refuses the whole save past it. The designer knew the
+ * running total all along and said nothing, so the way an organizer found out was by losing a save.
+ */
+function wouldExceedSeatCap(extra) {
+    if (totalSeats.value + extra <= MAX_SEATS) return false;
+    showError((t.planTooLarge || '').replace(':max', String(MAX_SEATS)));
+
+    return true;
+}
+
+/** Seats were the only one of the server's four caps mirrored here; the other three still cost a save. */
+const countSections = () => levels.value.reduce((n, l) => n + l.sections.length, 0);
+const countTables = () => levels.value.reduce((n, l) => n + l.sections.reduce((m, x) => m + x.tables.length, 0), 0);
+
+function wouldExceedCap(current, extra, max, message) {
+    if (current + extra <= max) return false;
+    showError((message || '').replace(':max', String(max)));
+
+    return true;
+}
+
 function generateRows() {
     const s = section.value;
     if (!s) return;
+
+    // A cleared field is NaN, and the loop below simply never ran - nothing happened and nothing
+    // said why. Clamp to the same bounds the inputs advertise, which were decorative until now.
+    const rows = clampInt(rowForm.rows, 1, 60);
+    const perRow = clampInt(rowForm.perRow, 1, 80);
+    if (! rows || ! perRow) { showError(t.generateNeedsNumbers); return; }
+    if (wouldExceedSeatCap(rows * perRow)) return;
+
+    rowForm.rows = rows;
+    rowForm.perRow = perRow;
+    rowForm.curve = clampInt(rowForm.curve, 0, 120) ?? 0;
+    error.value = '';
+    checkpoint();
     const aisles = String(rowForm.aisles || '').split(',').map((x) => parseInt(x.trim(), 10)).filter((x) => x > 0);
     const gapX = 26, gapY = 30;
     const mid = (rowForm.perRow - 1) / 2;
@@ -740,13 +1432,26 @@ function generateRows() {
             if (aisles.includes(c + 1)) extra += 18;
         }
     }
-    fitToView();
+    fitToView({ auto: true });
     dirty.value = true;
 }
 
 function generateTables() {
     const s = section.value;
     if (!s) return;
+
+    const count = clampInt(tableForm.count, 1, 60);
+    const seats = clampInt(tableForm.seats, 1, 24);
+    if (! count || ! seats) { showError(t.generateNeedsNumbers); return; }
+    if (wouldExceedSeatCap(count * seats)) return;
+    // A table costs a row of its own: 60 tables of one seat, nine times over, blows MAX_TABLES
+    // while the seat cap sits untouched.
+    if (wouldExceedCap(countTables(), count, MAX_TABLES, t.tooManyTables)) return;
+
+    tableForm.count = count;
+    tableForm.seats = seats;
+    error.value = '';
+    checkpoint();
     const perRow = Math.ceil(Math.sqrt(tableForm.count));
     const spacing = 170;
     const startIndex = s.tables.length;
@@ -784,7 +1489,7 @@ function generateTables() {
             });
         }
     }
-    fitToView();
+    fitToView({ auto: true });
     dirty.value = true;
 }
 
@@ -798,7 +1503,9 @@ function confirmRemoval(message, replacements = {}) {
     let text = message || '';
     Object.entries(replacements).forEach(([token, value]) => { text = text.split(token).join(value); });
 
-    return window.confirm(text || '?');
+    // Never `|| '?'`: a missing translation used to put a native dialog reading literally "?" in
+    // front of an irreversible delete. Fall back to the app's own generic confirmation instead.
+    return window.confirm(text.trim() || t.areYouSure || 'Are you sure?');
 }
 
 /**
@@ -821,12 +1528,14 @@ const selectedKind = computed(() => {
 function applyKind(kind) {
     const s = section.value;
     if (!s) return;
+    checkpoint();
     s.seats.forEach((seat) => { if (selectedSeats.value.includes(seat.id)) seat.kind = kind; });
     dirty.value = true;
 }
 function toggleAisle() {
     const s = section.value;
     if (!s) return;
+    checkpoint();
     s.seats.forEach((seat) => { if (selectedSeats.value.includes(seat.id)) seat.aisle_after = !seat.aisle_after; });
     dirty.value = true;
 }
@@ -834,11 +1543,12 @@ function removeSelectedSeats() {
     const s = section.value;
     if (!s) return;
     const locked = s.seats.filter((x) => selectedSeats.value.includes(x.id) && x.locked);
-    if (locked.length) { error.value = t.cannotRemoveSold; return; }
+    if (locked.length) { showError(t.cannotRemoveSold); return; }
 
     // After the sold-seat guard, never before it: asking and then refusing is worse than refusing.
     if (! confirmRemoval(t.confirmRemoveSeats, { ':count': selectedSeats.value.length })) return;
 
+    checkpoint();
     s.seats = s.seats.filter((x) => !selectedSeats.value.includes(x.id));
     selectedSeats.value = [];
     dirty.value = true;
@@ -853,6 +1563,11 @@ const presets = computed(() => [
 ]);
 
 function applyPreset(key) {
+    return asOneOperation(() => applyPresetInner(key));
+}
+
+function applyPresetInner(key) {
+    checkpoint();
     levels.value = [];
     tempId = -1;
 
@@ -884,31 +1599,155 @@ function applyPreset(key) {
     }
 
     activeLevel.value = 0;
-    fitToView();
+    // addSection() selects as it goes, so on a two-level preset the selection ends up on the
+    // BALCONY section while the active level is reset to the stalls - and `section` only ever
+    // searches the active level, so the first thing a new user saw was an empty inspector.
+    selectedSectionId.value = levels.value[0]?.sections[0]?.id ?? null;
+    fitToView({ auto: true });
     dirty.value = true;
 }
 
 // ---- validation
+/**
+ * Advisory, never blocking - but each entry now knows WHICH section it is about, so the panel can
+ * take you there. Keyed by section and rule rather than deduped by message text: two unnamed
+ * sections are two problems, and collapsing them to one line under-reported the count.
+ */
 const issues = computed(() => {
     const out = [];
-    levels.value.forEach((lvl) => {
+    const push = (levelIndex, s, rule, text) => out.push({ key: `${s.id}|${rule}`, levelIndex, sectionId: s.id, text });
+
+    levels.value.forEach((lvl, levelIndex) => {
         lvl.sections.forEach((s) => {
-            if (!s.name || !s.name.trim()) out.push(t.issueUnnamedSection);
-            if (s.kind === 'seated' && !s.seats.length) out.push(`${s.name}: ${t.issueNoSeats}`);
-            if (s.kind === 'standing' && !(s.capacity > 0)) out.push(`${s.name}: ${t.issueNoCapacity}`);
-            if (!s.band || !s.band.trim()) out.push(`${s.name}: ${t.issueNoBand}`);
+            if (!s.name || !s.name.trim()) push(levelIndex, s, 'name', t.issueUnnamedSection);
+            if (s.kind === 'seated' && !s.seats.length) push(levelIndex, s, 'seats', `${s.name}: ${t.issueNoSeats}`);
+            if (s.kind === 'standing' && !(s.capacity > 0)) push(levelIndex, s, 'capacity', `${s.name}: ${t.issueNoCapacity}`);
+            if (!s.band || !s.band.trim()) push(levelIndex, s, 'band', `${s.name}: ${t.issueNoBand}`);
+
+            // A wheelchair space is only sellable out of an accessibility-only section, so one
+            // drawn anywhere else is bookable by NOBODY. The docs warn about this twice; nothing
+            // in the product did, and it is the only issue here that silently costs a sale.
+            if (! s.accessibility_only && s.seats.some((seat) => seat.kind === 'wheelchair')) {
+                push(levelIndex, s, 'wheelchair', `${s.name}: ${t.issueWheelchairOutside}`);
+            }
 
             const seen = new Set();
+            const dupes = new Set();
             s.seats.forEach((seat) => {
                 if (!seat.seat_label) return;
                 const key = `${seat.table_id || ''}|${seat.row_label || ''}|${seat.seat_label}`;
-                if (seen.has(key)) out.push(`${s.name}: ${t.issueDuplicateSeat} ${seat.row_label || ''} ${seat.seat_label}`);
+                if (seen.has(key) && !dupes.has(key)) {
+                    dupes.add(key);
+                    push(levelIndex, s, `dup:${key}`, `${s.name}: ${t.issueDuplicateSeat} ${seat.row_label || ''} ${seat.seat_label}`);
+                }
                 seen.add(key);
             });
         });
     });
-    return [...new Set(out)];
+    return out;
 });
+
+/**
+ * The one control that decides whether wheelchair seats are sellable at all, so of everything that
+ * was missing a checkpoint this is the one that mattered.
+ */
+function toggleAccessibilityOnly() {
+    const s = section.value;
+    if (!s) return;
+    checkpoint();
+    s.accessibility_only = !s.accessibility_only;
+    dirty.value = true;
+}
+
+function setCapacity(value) {
+    const s = section.value;
+    if (!s) return;
+    // max="65535" was decorative, exactly as clampInt's docblock says these attributes are.
+    const next = clampInt(value, 0, 65535);
+    if (next === null || next === s.capacity) return;
+    checkpoint();
+    s.capacity = next;
+    dirty.value = true;
+}
+
+/**
+ * Rotation was rendered (`rotate(${s.rotation})`), stored, round-tripped and range-validated by the
+ * server all along - and no control ever wrote it, so every section sat at 0 degrees and an angled
+ * side block could not be drawn at all.
+ */
+function setRotation(value) {
+    const s = section.value;
+    if (!s) return;
+    const next = clampInt(value, -360, 360);
+    if (next === null || next === (s.rotation || 0)) return;
+    checkpoint();
+    s.rotation = next;
+    dirty.value = true;
+    fitToView({ auto: true });
+}
+
+function rotateSection(delta) {
+    const s = section.value;
+    if (!s) return;
+    let next = ((Number(s.rotation) || 0) + delta) % 360;
+    if (next > 180) next -= 360;
+    if (next < -180) next += 360;
+    setRotation(next);
+}
+
+function updateTable(patch) {
+    const tb = selectedTable.value;
+    if (!tb) return;
+    checkpoint();
+    Object.assign(tb, patch);
+    dirty.value = true;
+}
+
+/**
+ * Reuses hasSoldSeats, as every other delete path does. Without it the designer drops a seat
+ * somebody holds a ticket for, and the server refuses the whole save naming a seat that is no
+ * longer on screen to find.
+ */
+function removeTable() {
+    const s = section.value;
+    const tb = selectedTable.value;
+    if (!s || !tb) return;
+
+    const seats = s.seats.filter((x) => x.table_id === tb.id);
+    if (seats.some((x) => x.locked)) { showError(t.cannotRemoveSoldHere); return; }
+    if (! confirmRemoval(t.confirmRemoveTable, { ':table': tb.label || '', ':count': seats.length })) return;
+
+    checkpoint();
+    s.seats = s.seats.filter((x) => x.table_id !== tb.id);
+    s.tables = s.tables.filter((x) => x.id !== tb.id);
+    selectedTableId.value = null;
+    dirty.value = true;
+}
+
+function setSectionColor(color) {
+    const s = section.value;
+    if (!s) return;
+    checkpoint();
+    s.color = color;
+    dirty.value = true;
+}
+
+/** Naming a problem and leaving the organizer to find it across twelve levels is half a feature. */
+function goToIssue(issue) {
+    if (!issue) return;
+    activeLevel.value = issue.levelIndex;
+    selectedSectionId.value = issue.sectionId;
+    selectedSeats.value = [];
+
+    // Selecting it is not "going to" it: if the section was already selected and sits off-canvas,
+    // the click produced nothing observable at all. Bring it into frame.
+    nextTick(() => {
+        const s = section.value;
+        if (!s) return;
+        const b = sectionBox(s);
+        revealPoint(s.x + b.x + b.w / 2, s.y + b.y + b.h / 2);
+    });
+}
 
 // ---- persistence
 /**
@@ -921,12 +1760,15 @@ const issues = computed(() => {
  */
 async function load() {
     loading.value = true;
+    loadFailed.value = false;
+    error.value = '';
 
     try {
         const res = await fetch(props.structureUrl, { headers: { Accept: 'application/json' }, credentials: 'same-origin' });
-        if (!res.ok) { error.value = t.loadFailed; return; }
+        if (!res.ok) { loadFailed.value = true; return; }
 
         const data = await res.json();
+        revision.value = data.revision ?? null;
 
         levels.value = (data.levels || []).map((l) => Object.assign({}, l, {
             sections: (l.sections || []).map((s) => Object.assign({}, s, {
@@ -937,7 +1779,16 @@ async function load() {
         }));
 
         if (levels.value.length) selectedSectionId.value = levels.value[0].sections[0]?.id ?? null;
+        // Nothing before the load is worth undoing to - and after a save the ids in an older
+        // snapshot no longer exist, so restoring one would post seats the server has renumbered.
+        savedSnapshot = JSON.stringify(levels.value);
+        undoStack.value = [];
+        redoStack.value = [];
         fitToView();
+    } catch (e) {
+        // There was no catch here at all, so an offline fetch threw, set nothing, and left the
+        // empty-state preset gallery rendering over a plan that still exists on the server.
+        loadFailed.value = true;
     } finally {
         loading.value = false;
     }
@@ -956,10 +1807,14 @@ async function save() {
                 'X-CSRF-TOKEN': props.csrfToken,
             },
             credentials: 'same-origin',
-            body: JSON.stringify({ name: planName.value, levels: levels.value }),
+            body: JSON.stringify({ name: planName.value, levels: levels.value, revision: revision.value }),
         });
         const data = await res.json().catch(() => ({}));
+        // 409: somebody else saved this plan since we read it. Never retry - the payload is the
+        // WHOLE structure, so retrying is precisely the overwrite the check exists to prevent.
+        if (res.status === 409) { error.value = data.error || t.staleRevision; return; }
         if (!res.ok) { error.value = data.error || t.saveFailed; return; }
+        revision.value = data.revision ?? revision.value;
         // Re-seed from the server so temporary ids become real ones; a second save would
         // otherwise create everything again.
         levels.value = (data.levels || []).map((l) => Object.assign({}, l, {
@@ -975,7 +1830,14 @@ async function save() {
             : null;
         selectedSectionId.value = (stillThere ?? sections[0])?.id ?? null;
         selectedSeats.value = [];
+        // Temporary ids became real ones in the response, so every snapshot above still refers to
+        // rows that no longer exist under those numbers. Undoing into one would re-create them.
+        savedSnapshot = JSON.stringify(levels.value);
+        undoStack.value = [];
+        redoStack.value = [];
         dirty.value = false;
+        savedAt.value = Date.now();
+        setTimeout(() => { if (Date.now() - savedAt.value >= 2500) savedAt.value = 0; }, 2600);
     } catch (e) {
         error.value = t.saveFailed;
     } finally {
@@ -994,15 +1856,50 @@ function guardUnload(e) {
     return '';
 }
 
-onBeforeUnmount(() => window.removeEventListener('beforeunload', guardUnload));
+const onResize = () => { viewportH.value = window.innerHeight; };
+
+onBeforeUnmount(() => {
+    window.removeEventListener('beforeunload', guardUnload);
+    window.removeEventListener('keydown', onKeydown);
+    window.removeEventListener('resize', onResize);
+});
 
 onMounted(async () => {
     window.addEventListener('beforeunload', guardUnload);
+    window.addEventListener('keydown', onKeydown);
+    window.addEventListener('resize', onResize);
     observeCanvas();
     await load();
     // The svg only has a size once v-else has rendered it, which is after load() sets levels.
     await nextTick();
     observeCanvas();
     fitToView();
+
+    // Select, not just focus: the value is "Untitled plan", so the first keystroke should replace
+    // it. Neither call fires @input, so this must NOT arm the unsaved guard.
+    if (props.focusName && props.nameEditable) {
+        nameInput.value?.focus();
+        nameInput.value?.select();
+    }
 });
 </script>
+
+<style scoped>
+/*
+ * Keyboard focus on a seat was completely invisible: an SVG <g> takes no useful default outline,
+ * and nothing else changed. Paired with the roving tabindex, this is the only thing telling a
+ * keyboard user where they are in a 1,200-seat house.
+ */
+.seat-node:focus {
+    outline: none;
+}
+.seat-node:focus-visible > :first-child {
+    stroke: var(--brand-blue);
+    stroke-width: 3;
+    paint-order: stroke;
+}
+.seat-canvas:focus-within .seat-node:focus > :first-child {
+    stroke: var(--brand-blue);
+    stroke-width: 3;
+}
+</style>

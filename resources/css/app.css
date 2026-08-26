@@ -405,6 +405,17 @@ html.dark[data-theme] {
 select:not([multiple]):not([size]:not([size="1"])) {
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
 }
+
+/*
+ * The plugin reserves 2.5rem on the trailing edge for that arrow but sets no minimum width, so a
+ * select with no width class shrink-to-fits to roughly the padding alone and its own value runs
+ * under the chevron - which is exactly what the guest picker's "How many seats?" control did from
+ * two digits upwards. A floor wide enough for the padding plus a few characters costs nothing to
+ * any select that already sets its own width.
+ */
+select:not([multiple]):not([size]:not([size="1"])) {
+    min-width: 5rem;
+}
 html[data-theme="sand"] select:not([multiple]):not([size]:not([size="1"])) {
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23857f73' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
 }

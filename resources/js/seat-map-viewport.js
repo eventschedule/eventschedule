@@ -12,6 +12,9 @@ import { onBeforeUnmount, reactive, ref } from 'vue';
  * touch - and the other two owned none of it. This is that logic, finished and shared.
  */
 
+// How far a press may wander before it counts as a drag rather than a click.
+const PAN_THRESHOLD = 3;
+
 const MIN_ZOOM = 0.2;
 const MAX_ZOOM = 3;
 
@@ -159,9 +162,12 @@ export function useMapViewport({ svgEl, contentBounds, canPan = () => true, panF
         pointers.set(evt.pointerId, { x: evt.clientX, y: evt.clientY });
 
         if (pointers.size === 1) {
-            panFrom = { x: evt.clientX, y: evt.clientY, panX: pan.x, panY: pan.y };
+            // Armed, not active. Capture is deliberately NOT taken here - see onPointerMove.
+            panFrom = {
+                x: evt.clientX, y: evt.clientY, panX: pan.x, panY: pan.y,
+                el: evt.currentTarget, id: evt.pointerId, active: false,
+            };
             pinchFrom = null;
-            evt.currentTarget?.setPointerCapture?.(evt.pointerId);
         } else if (pointers.size === 2) {
             const [a, b] = [...pointers.values()];
             pinchFrom = { dist: distance(a, b) || 1, zoom: zoom.value };
@@ -183,10 +189,28 @@ export function useMapViewport({ svgEl, contentBounds, canPan = () => true, panF
 
         if (!panFrom) return;
 
-        // Taking control is a MOVE, not a press: setting the flag on pointerdown meant the first
-        // tap on a seat switched off the automatic re-fit for the rest of the session.
-        if (Math.hypot(evt.clientX - panFrom.x, evt.clientY - panFrom.y) > 3) {
+        const dx = evt.clientX - panFrom.x;
+        const dy = evt.clientY - panFrom.y;
+
+        /**
+         * A press only becomes a pan once it has actually moved.
+         *
+         * Capture used to be taken on pointerdown. With panFromChildren (the picker and the box
+         * office), that meant pressing a SEAT gave the <svg> the pointer - and the browser then
+         * dispatches the resulting `click` at the capturing element, never at the <circle> that
+         * carries the click handler. The seat still took focus on mousedown, so selecting a seat
+         * needed a click AND a press of Enter. Deferring capture past a dead zone leaves an
+         * ordinary click to reach the seat, while a finger that moves still pans, because it
+         * crosses the threshold within a pixel or two of setting off.
+         */
+        if (!panFrom.active) {
+            if (Math.hypot(dx, dy) <= PAN_THRESHOLD) return;
+
+            panFrom.active = true;
+            // Taking control is a MOVE, not a press: setting this on pointerdown meant the first
+            // tap on a seat switched off the automatic re-fit for the rest of the session.
             userAdjusted = true;
+            panFrom.el?.setPointerCapture?.(panFrom.id);
         }
 
         const el = svgEl.value;
@@ -194,11 +218,20 @@ export function useMapViewport({ svgEl, contentBounds, canPan = () => true, panF
         // Drag in client pixels, move in viewBox units.
         const sx = r ? canvas.w / (r.width || 1) : 1;
         const sy = r ? canvas.h / (r.height || 1) : 1;
-        pan.x = panFrom.panX + (evt.clientX - panFrom.x) * sx;
-        pan.y = panFrom.panY + (evt.clientY - panFrom.y) * sy;
+        pan.x = panFrom.panX + dx * sx;
+        pan.y = panFrom.panY + dy * sy;
     }
 
     function onPointerUp(evt) {
+        // Only ever taken once a drag was real, so only ever released here.
+        if (panFrom?.active && panFrom.id === evt.pointerId) {
+            try {
+                panFrom.el?.releasePointerCapture?.(evt.pointerId);
+            } catch (e) {
+                // Already released, or the pointer is gone. Nothing to do either way.
+            }
+        }
+
         pointers.delete(evt.pointerId);
         if (pointers.size < 2) pinchFrom = null;
         if (pointers.size === 0) panFrom = null;

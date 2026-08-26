@@ -39,7 +39,7 @@ class SeatingTest extends DuskTestCase
      * Building it through the designer is test one's job; the other two need a house to sell, not
      * another pass over the same screen.
      */
-    private function makePlan(Role $role): SeatingPlan
+    private function makePlan(Role $role, int $rows = 1): SeatingPlan
     {
         $plan = SeatingPlan::create(['role_id' => $role->id, 'name' => 'Main House']);
         $level = SeatingLevel::create(['seating_plan_id' => $plan->id, 'name' => 'Ground', 'position' => 0]);
@@ -49,12 +49,14 @@ class SeatingTest extends DuskTestCase
             'color' => '#4E81FA', 'x' => 40, 'y' => 40,
         ]);
 
-        for ($n = 1; $n <= 6; $n++) {
-            SeatingSeat::create([
-                'seating_plan_id' => $plan->id, 'seating_section_id' => $section->id,
-                'row_label' => 'A', 'row_position' => 1, 'seat_label' => (string) $n,
-                'position' => $n, 'x' => $n * 26, 'y' => 0, 'kind' => 'standard',
-            ]);
+        for ($rp = 1; $rp <= $rows; $rp++) {
+            for ($n = 1; $n <= 6; $n++) {
+                SeatingSeat::create([
+                    'seating_plan_id' => $plan->id, 'seating_section_id' => $section->id,
+                    'row_label' => chr(64 + $rp), 'row_position' => $rp, 'seat_label' => (string) $n,
+                    'position' => $n, 'x' => $n * 26, 'y' => ($rp - 1) * 30, 'kind' => 'standard',
+                ]);
+            }
         }
 
         return $plan->fresh();
@@ -68,11 +70,16 @@ class SeatingTest extends DuskTestCase
      *
      * @return array{0: \App\Models\Event, 1: SeatingPlan}
      */
-    private function makeSeated(string $slug = 'talent'): array
+    private function makeSeated(string $slug = 'talent', int $rows = 1): array
     {
         $role = Role::subdomain($slug)->firstOrFail();
+
+        // The plan lives on the VENUE even when the event is the talent's - plan routes are
+        // venue-only, and the occurrence designer resolves through the subdomain in the URL.
+        $venue = Role::subdomain('venue')->firstOrFail();
+        $this->upgradeToEnterprise('venue');
         $this->upgradeToEnterprise($slug);
-        $plan = $this->makePlan($role->fresh());
+        $plan = $this->makePlan($venue->fresh(), $rows);
 
         $event = $role->events()->latest('events.id')->firstOrFail();
         $event->seating_plan_id = $plan->id;
@@ -95,23 +102,26 @@ class SeatingTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $this->setupTestAccount($browser);
-            $this->createTestTalent($browser);
-            $this->upgradeToEnterprise('talent');
+            // A VENUE schedule: seating plans are a drawing of a room, so the Seating tab and
+            // every plan route are venue-only.
+            $this->createTestVenue($browser);
+            $this->upgradeToEnterprise('venue');
 
             // Creating a plan redirects straight into the designer.
-            $browser->visit('/talent/seating')
-                ->waitFor('#new_seating_plan_name', 15)
-                ->type('#new_seating_plan_name', 'Main House');
+            // The tab has no name field: New plan creates an "Untitled plan" and redirects into
+            // the designer, where the toolbar's name box is focused and selected.
+            $browser->visit('/venue/seating')
+                ->waitFor('form[action*="/seating"] button[type="submit"]', 15);
             // assertPathIs does not wait - it reads getCurrentURL() once - and the URL only
             // becomes .../design after POST -> 302 -> GET. waitForReload watches for the new
             // document, which is what the rest of this suite does after a requestSubmit().
             $browser->waitForReload(function (Browser $b) {
-                $b->script('document.querySelector(\'#new_seating_plan_name\').form.requestSubmit();');
+                $b->script('document.querySelector(\'form[action*="/seating"] button[type="submit"]\').form.requestSubmit();');
             }, 20);
 
             // #seating-loading is v-if="loading" INSIDE the component, so waiting for it to go
             // before Vue has mounted passes instantly and proves nothing. Mount first, load second.
-            $browser->assertPathIs('/talent/seating/*/design')
+            $browser->assertPathIs('/venue/seating/*/design')
                 ->waitFor('#seating-designer', 20)
                 ->waitUntilMissing('#seating-loading', 20)
                 ->waitFor('button[data-preset="theatre"]', 20);
@@ -124,6 +134,12 @@ class SeatingTest extends DuskTestCase
             $browser->waitFor('#seating-dirty', 15)
                 ->pause(500);
 
+            // Naming happens HERE now, not on the tab: New plan creates an "Untitled plan" and
+            // the designer's toolbar box is where it gets its real name.
+            $browser->assertPresent('#seating-plan-name')
+                ->type('#seating-plan-name', 'Main House')
+                ->pause(300);
+
             $browser->script('document.querySelector(\'#seating-save\').click();');
 
             // Save clears the dirty flag once the PUT comes back OK - a precise signal, where a
@@ -131,10 +147,10 @@ class SeatingTest extends DuskTestCase
             $browser->waitUntilMissing('#seating-dirty', 30)
                 ->assertMissing('#seating-error');
 
-            $role = Role::subdomain('talent')->firstOrFail();
+            $role = Role::subdomain('venue')->firstOrFail();
             $plan = SeatingPlan::where('role_id', $role->id)->firstOrFail();
 
-            $this->assertSame('Main House', $plan->name);
+            $this->assertSame('Main House', $plan->name, 'the name typed in the designer never saved');
             $this->assertGreaterThan(1, SeatingLevel::where('seating_plan_id', $plan->id)->count(), 'the balcony never saved');
             $this->assertGreaterThan(0, SeatingSection::where('seating_plan_id', $plan->id)->count());
             $this->assertGreaterThan(20, SeatingSeat::where('seating_plan_id', $plan->id)->count(), 'the generated rows never saved');
@@ -157,20 +173,23 @@ class SeatingTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $this->setupTestAccount($browser);
-            $this->createTestTalent($browser);
-            $this->upgradeToEnterprise('talent');
+            // A VENUE schedule: seating plans are a drawing of a room, so the Seating tab and
+            // every plan route are venue-only.
+            $this->createTestVenue($browser);
+            $this->upgradeToEnterprise('venue');
 
-            $browser->visit('/talent/seating')
-                ->waitFor('#new_seating_plan_name', 15)
-                ->type('#new_seating_plan_name', 'Drag House');
+            // The tab has no name field: New plan creates an "Untitled plan" and redirects into
+            // the designer, where the toolbar's name box is focused and selected.
+            $browser->visit('/venue/seating')
+                ->waitFor('form[action*="/seating"] button[type="submit"]', 15);
             $browser->waitForReload(function (Browser $b) {
-                $b->script('document.querySelector(\'#new_seating_plan_name\').form.requestSubmit();');
+                $b->script('document.querySelector(\'form[action*="/seating"] button[type="submit"]\').form.requestSubmit();');
             }, 20);
 
             // One level, one section - the least there is to grab hold of. The presets are not
             // offered until the plan has loaded, so clicking one cannot be undone by the fetch -
             // but only if the wait for that load happens after Vue has mounted.
-            $browser->assertPathIs('/talent/seating/*/design')
+            $browser->assertPathIs('/venue/seating/*/design')
                 ->waitFor('#seating-designer', 20)
                 ->waitUntilMissing('#seating-loading', 20)
                 ->waitFor('button[data-preset="rows"]', 20);
@@ -235,16 +254,27 @@ class SeatingTest extends DuskTestCase
             $browser->script("window.dispatchEvent(new CustomEvent('show-event-form'))");
 
             // The picker mounts itself into a placeholder the ticket form renders, so waiting on
-            // the form is not enough - wait for the picker's own control.
-            $browser->waitFor('select[id^="seatqty-"]', 20)
-                ->pause(500);
+            // the form is not enough - wait for the picker's own map. It loads when the picker
+            // first becomes visible, which is the moment the form is revealed above.
+            $browser->waitFor('.seating-picker-mount svg circle[role="button"]', 20)
+                ->pause(1000);
 
-            // Two seats, best available. The change handler picks and holds them.
-            $browser->script('
-                var sel = document.querySelector(\'select[id^="seatqty-"]\');
-                sel.value = "2";
-                sel.dispatchEvent(new Event("change", { bubbles: true }));
-            ');
+            // Two seats, chosen by clicking them. There is no quantity step and no best-available
+            // shortcut any more: the click IS the quantity.
+            //
+            // Dusk's own click(), NOT ->script(): a synthetic click event bypasses pointer capture
+            // entirely, which is precisely how a bug that made clicking a seat do nothing at all
+            // survived a CDP pass. Only a real WebDriver click exercises the path a buyer uses.
+            $seats = SeatingSeat::whereNotNull('event_seating_map_id')
+                ->orderBy('row_position')->orderBy('position')
+                ->take(2)->pluck('id');
+            $this->assertCount(2, $seats, 'the occurrence map was never materialized');
+
+            foreach ($seats as $seatId) {
+                $browser->scrollIntoView('#seat-1-'.$seatId)
+                    ->click('#seat-1-'.$seatId)
+                    ->pause(700);
+            }
 
             // The hold is a POST, and the hidden inputs are what the checkout will claim. waitFor()
             // is no use here: it requires isDisplayed(), and a type="hidden" input never is.
@@ -268,6 +298,182 @@ class SeatingTest extends DuskTestCase
             $map = $sold->first()->eventSeatingMap;
             $this->assertSame($event->saleEventDateFromStartsAt(), $map->event_date);
         });
+    }
+
+    /**
+     * The stranded-seat warning has to survive the buyer changing their mind.
+     *
+     * Reported as "I can click and then unclick a seat to clear the error". acquire() validated
+     * before releasing the token's own cart holds, so the seat being dropped was still `held` and
+     * counted as taken - both orphan passes saw the same room and the warning quietly vanished
+     * while the selection was still stranding a seat.
+     *
+     * Real WebDriver clicks throughout, for the same reason as the checkout journey: this whole
+     * area has already shipped one bug that only a real press could see.
+     */
+    public function test_a_stranded_seat_warning_comes_back_when_the_buyer_changes_their_mind(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->setupTestAccount($browser);
+            $this->createTestVenue($browser);
+            $this->createTestTalent($browser);
+            $this->createTestEventWithTickets($browser);
+
+            // Two rows, so the map holds twelve seats. With a single row of six, filling it would
+            // put the map at 100% taken and the orphan rule lifts itself once nearly sold out -
+            // the test would then pass whatever the code did.
+            [$event] = $this->makeSeated('talent', 2);
+
+            $browser->visit('/talent/venue')
+                ->waitForText('Buy Tickets', 15)
+                ->pause(500);
+            $browser->script("window.dispatchEvent(new CustomEvent('show-event-form'))");
+
+            $browser->waitFor('.seating-picker-mount svg circle[role="button"]', 20)
+                ->pause(1000);
+
+            $rowA = SeatingSeat::whereNotNull('event_seating_map_id')
+                ->where('row_position', 1)->orderBy('position')->pluck('id');
+            $this->assertCount(6, $rowA, 'the occurrence map was never materialized');
+
+            // Five of six: the sixth is left on its own.
+            foreach ($rowA->take(5) as $seatId) {
+                $browser->scrollIntoView('#seat-1-'.$seatId)->click('#seat-1-'.$seatId)->pause(700);
+            }
+
+            $browser->waitFor('#seatpick-warning', 15);
+            $this->assertCount(1, $browser->elements('#seatpick-warning'), 'the notice must not double up');
+
+            // Taking the sixth as well strands nobody, so the warning clears.
+            $browser->scrollIntoView('#seat-1-'.$rowA[5])->click('#seat-1-'.$rowA[5])->pause(700);
+            $browser->waitUntil('document.querySelectorAll("#seatpick-warning").length === 0', 15);
+
+            // ...and letting it go again strands it once more. THIS is the reported bug.
+            $browser->click('#seat-1-'.$rowA[5])->pause(700);
+            $browser->waitFor('#seatpick-warning', 15);
+
+            $browser->waitUntil('document.querySelectorAll(\'input[name="seat_ids[]"]\').length === 5', 15);
+            $this->assertSame(5, SeatingSeat::whereNotNull('hold_token')->count(), 'the buyer keeps the five seats they chose');
+        });
+    }
+
+    /**
+     * A stranded selection has to stop the buyer moving forward, and has to still be stopping them
+     * after a reload.
+     *
+     * Both halves were reported together: "if an error is shown i'm still able to add the seats to
+     * my cart and/or checkout" and "if I refresh the page I still have the seats but no invalid
+     * error". The warning lived only on a hold response, so nothing else in the page knew about it.
+     */
+    public function test_a_stranded_selection_blocks_checkout_and_survives_a_reload(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->setupTestAccount($browser);
+            $this->createTestVenue($browser);
+            $this->createTestTalent($browser);
+            $this->createTestEventWithTickets($browser);
+
+            [$event] = $this->makeSeated('talent', 2);
+
+            $this->openSeatedForm($browser);
+
+            $rowA = SeatingSeat::whereNotNull('event_seating_map_id')
+                ->where('row_position', 1)->orderBy('position')->pluck('id');
+
+            // Five of six strands the sixth.
+            foreach ($rowA->take(5) as $seatId) {
+                $browser->scrollIntoView('#seat-1-'.$seatId)->click('#seat-1-'.$seatId)->pause(700);
+            }
+
+            $browser->waitFor('#seatpick-warning', 15);
+            $this->assertStringContainsString('6', $browser->text('#seatpick-warning'), 'the notice must name the stranded seat');
+
+            $this->assertBlocked($browser, true);
+
+            // Add to cart must refuse too - it is client-side only, so nothing else would stop it.
+            // Add to cart is client-side only, so nothing but this guard would stop it. It stays
+            // on its resting label rather than flipping to "ADDED TO CART".
+            $browser->scrollIntoView('@add-to-cart')->click('@add-to-cart')->pause(700);
+            $browser->assertSeeIn('@add-to-cart', strtoupper(__('messages.add_to_cart')));
+
+            // THE RELOAD. The seats come back; so must the reason.
+            $browser->refresh();
+            $this->openSeatedForm($browser);
+
+            $browser->waitUntil('document.querySelectorAll(\'input[name="seat_ids[]"]\').length === 5', 20);
+            $browser->waitFor('#seatpick-warning', 15);
+            $this->assertBlocked($browser, true);
+
+            // The one-click remedy: take the seat the notice named.
+            $browser->scrollIntoView('#seatpick-fix')->click('#seatpick-fix')->pause(900);
+            $browser->waitUntil('document.querySelectorAll("#seatpick-warning").length === 0', 15);
+            $this->assertBlocked($browser, false);
+
+            $browser->waitUntil('document.querySelectorAll(\'input[name="seat_ids[]"]\').length === 6', 15);
+            $this->assertSame(6, SeatingSeat::whereNotNull('hold_token')->count());
+        });
+    }
+
+    /**
+     * The client guard is an affordance. The server is the authority.
+     *
+     * Strips the block and submits anyway, which is what a hand-posted form does - the buyer must
+     * still be turned away, and no half-seated sale may be written.
+     */
+    public function test_the_server_still_refuses_a_stranded_selection_when_the_block_is_forced(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->setupTestAccount($browser);
+            $this->createTestVenue($browser);
+            $this->createTestTalent($browser);
+            $this->createTestEventWithTickets($browser);
+
+            $this->makeSeated('talent', 2);
+            $this->openSeatedForm($browser);
+
+            $rowA = SeatingSeat::whereNotNull('event_seating_map_id')
+                ->where('row_position', 1)->orderBy('position')->pluck('id');
+
+            foreach ($rowA->take(5) as $seatId) {
+                $browser->scrollIntoView('#seat-1-'.$seatId)->click('#seat-1-'.$seatId)->pause(700);
+            }
+
+            $browser->waitFor('#seatpick-warning', 15);
+            $this->assertBlocked($browser, true);
+
+            // Defeat the guard exactly as a determined buyer or a scripted post would.
+            // form.submit() fires no submit EVENT, so validateForm() never runs - the same thing a
+            // hand-rolled POST does.
+            $browser->script('document.querySelector(\'#ticket-selector form\').submit();');
+            $browser->pause(4000);
+
+            $this->assertSame(0, Sale::count(), 'a stranded selection must never become a sale');
+            $this->assertSame(0, SeatingSeat::where('status', 'sold')->count());
+            $this->assertSame(5, SeatingSeat::whereNotNull('hold_token')->count(), 'the buyer keeps their seats to fix');
+        });
+    }
+
+    /** Reveal the ticket form and wait for the picker to draw itself. */
+    private function openSeatedForm(Browser $browser): void
+    {
+        $browser->visit('/talent/venue')
+            ->waitForText('Buy Tickets', 15)
+            ->pause(500);
+        $browser->script("window.dispatchEvent(new CustomEvent('show-event-form'))");
+        $browser->waitFor('.seating-picker-mount svg circle[role="button"]', 20)->pause(1200);
+    }
+
+    /** The checkout button carries aria-disabled, not disabled - see the note in tickets.blade.php. */
+    private function assertBlocked(Browser $browser, bool $blocked): void
+    {
+        $browser->waitUntil(sprintf(
+            '(document.querySelector(\'#ticket-selector button[type="submit"]\')?.getAttribute("aria-disabled") === "true") === %s',
+            $blocked ? 'true' : 'false',
+        ), 15);
+
+        $blocked
+            ? $browser->waitFor('#seats-blocked-reason', 10)
+            : $browser->waitUntil('document.querySelectorAll("#seats-blocked-reason").length === 0', 10);
     }
 
     /**
@@ -419,7 +625,7 @@ class SeatingTest extends DuskTestCase
             $seat = SeatingSeat::where('event_seating_map_id', $map->id)->orderBy('position')->firstOrFail();
             $seat->update(['status' => 'sold']);
 
-            $browser->visit('/talent/seating/occurrence/'.UrlUtils::encodeId($event->id).'/design?date='.$map->event_date)
+            $browser->visit('/venue/seating/occurrence/'.UrlUtils::encodeId($event->id).'/design?date='.$map->event_date)
                 ->waitUntilMissing('#seating-loading', 20)
                 ->waitFor('#seating-designer', 20)
                 ->waitFor('#seating-designer svg > g > g', 20)

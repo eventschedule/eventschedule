@@ -3661,7 +3661,10 @@
                                     // Deliberately distinctive names: these blocks share the VIEW
                                     // scope, so a plain $plans here would be visible to every
                                     // block below it.
-                                    $seatingPlanList = $role->seatingEnabled()
+                                    // isVenue() as well as the plan gate: only a venue owns a
+                                    // plan, so on any other schedule type this is a query that
+                                    // can only ever come back empty.
+                                    $seatingPlanList = $role->isVenue() && $role->seatingEnabled()
                                         ? \App\Models\SeatingPlan::with('sections')
                                             ->where('role_id', $role->id)->where('is_deleted', false)
                                             ->orderBy('name')->get()
@@ -3677,7 +3680,7 @@
                                      allocated seating was invisible unless you already knew to go
                                      looking for the tab. Say it exists, and link to where it is
                                      built. --}}
-                                @if ($role->seatingEnabled() && $seatingPlanOptions->isEmpty())
+                                @if ($role->isVenue() && $role->seatingEnabled() && $seatingPlanOptions->isEmpty())
                                 <div class="mb-6 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
                                     <x-input-label :value="__('messages.seating_plan')" />
                                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.seating_no_plans_yet') }}</p>

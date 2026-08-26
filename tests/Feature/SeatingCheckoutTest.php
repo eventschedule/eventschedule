@@ -136,6 +136,96 @@ class SeatingCheckoutTest extends TestCase
         }
     }
 
+    /**
+     * The other half of the venue-wide picker's premise: ONE hold spanning two price bands, claimed
+     * in one checkout, with every seat landing on the line for its own band.
+     *
+     * claimForSale maps seating_section_id -> ticket_id and queues each seat onto the next line for
+     * that ticket, so this should hold - but nothing exercised a mixed-band order, because the guest
+     * client cannot currently produce one (each per-band picker replaces the other's hold).
+     */
+    /**
+     * The other end of the advisory orphan rule: selection only warns, so checkout has to be the
+     * thing that actually refuses.
+     *
+     * This is the case that would silently pass if validateFinal() were wrong. At claim time the
+     * buyer's seats are already `held`, so a plain validate() sees them as taken in BOTH the before
+     * and after passes, the counts match, and the guard fires never. Assert the refusal itself.
+     */
+    public function test_checkout_refuses_a_selection_that_strands_a_seat(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue');
+        $event = $this->seatedEvent($role, $this->makePlan($role));
+        $map = $this->maps()->materialize($event);
+        $stalls = $event->tickets->firstWhere('type', 'Stalls');
+
+        // Seven of the eight Stalls seats: the eighth is left on its own.
+        $seats = $this->seatsIn($map, 'Stalls')->take(7);
+        $this->hold($role, $event, $seats->pluck('id')->all())->assertOk();
+
+        $this->checkout($role, $event, [UrlUtils::encodeId($stalls->id) => 7]);
+
+        $this->assertSame(0, Sale::count(), 'the sale must roll back entirely');
+        foreach ($seats as $seat) {
+            $this->assertNotSame('sold', $seat->fresh()->status);
+        }
+    }
+
+    /** ...and a clean selection still goes through, or the guard is just a wall. */
+    public function test_checkout_allows_a_selection_that_strands_nobody(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue');
+        $event = $this->seatedEvent($role, $this->makePlan($role));
+        $map = $this->maps()->materialize($event);
+        $stalls = $event->tickets->firstWhere('type', 'Stalls');
+
+        // The whole row: nothing left behind at all.
+        $seats = $this->seatsIn($map, 'Stalls');
+        $this->hold($role, $event, $seats->pluck('id')->all())->assertOk();
+
+        $this->checkout($role, $event, [UrlUtils::encodeId($stalls->id) => $seats->count()])->assertRedirect();
+
+        $this->assertSame(1, Sale::count());
+        $this->assertSame($seats->count(), SeatingSeat::where('status', 'sold')->count());
+    }
+
+    public function test_one_checkout_claims_seats_across_two_price_bands(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue');
+        $event = $this->seatedEvent($role, $this->makePlan($role));
+        $map = $this->maps()->materialize($event);
+
+        $stallsTicket = $event->tickets->firstWhere('type', 'Stalls');
+        $circleTicket = $event->tickets->firstWhere('type', 'Circle');
+        $stallsSeats = $this->seatsIn($map, 'Stalls')->take(2);
+        $circleSeats = $this->seatsIn($map, 'Circle')->take(1);
+
+        $this->hold($role, $event, $stallsSeats->pluck('id')->merge($circleSeats->pluck('id'))->all())
+            ->assertOk();
+
+        $this->checkout($role, $event, [
+            UrlUtils::encodeId($stallsTicket->id) => 2,
+            UrlUtils::encodeId($circleTicket->id) => 1,
+        ])->assertRedirect();
+
+        $sale = Sale::latest('id')->firstOrFail();
+        $lines = $sale->saleTickets()->get()->keyBy('ticket_id');
+        $this->assertCount(2, $lines, 'a mixed order must produce a line per band');
+
+        foreach ([[$stallsSeats, $stallsTicket], [$circleSeats, $circleTicket]] as [$seats, $ticket]) {
+            foreach ($seats as $seat) {
+                $seat->refresh();
+                $this->assertSame('sold', $seat->status);
+                $this->assertSame($sale->id, $seat->sale_id);
+                $this->assertSame(
+                    $lines[$ticket->id]->id,
+                    $seat->sale_ticket_id,
+                    "a {$ticket->type} seat must be billed to the {$ticket->type} line"
+                );
+            }
+        }
+    }
+
     public function test_a_quantity_typed_past_the_held_seats_is_refused_and_writes_nothing(): void
     {
         $role = $this->createRole($this->createOwner(), 'venue');

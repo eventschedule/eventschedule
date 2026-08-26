@@ -21,6 +21,66 @@ use Carbon\Carbon;
 class BestAvailableService
 {
     /**
+     * Seats AccessibleSeatingRule would refuse, so they are never offered in the first place.
+     *
+     * Deliberately mirrors that rule rather than reinventing it: a wheelchair space is sellable only
+     * out of an accessibility_only section, and a companion seat may not be taken while the
+     * wheelchair space beside it is still free. "Beside" means the same row with no gangway between,
+     * which is the rule's own definition.
+     */
+    private function ruleWouldRefuse(SeatingSeat $seat, $accessibleOnly): bool
+    {
+        if ($seat->kind === 'wheelchair') {
+            // Offered only where the rule would actually allow it. Refusing wheelchair spaces
+            // outright would make an accessible band unbuyable by best available, which is a worse
+            // bug than the one this fixes - the section flag is the whole distinction.
+            return ! ($accessibleOnly[$seat->seating_section_id] ?? false);
+        }
+
+        if ($seat->kind !== 'companion') {
+            return false;
+        }
+
+        $partner = $this->wheelchairBeside($seat);
+
+        // Free and nobody is taking it in the same breath: it is still being held for its user.
+        return $partner && $partner->isAvailable();
+    }
+
+    /** The nearest wheelchair seat in the same row, not across a gangway. */
+    private function wheelchairBeside(SeatingSeat $companion): ?SeatingSeat
+    {
+        $row = SeatingSeat::where('event_seating_map_id', $companion->event_seating_map_id)
+            ->where('seating_section_id', $companion->seating_section_id)
+            ->where('row_position', $companion->row_position)
+            ->orderBy('position')
+            ->get();
+
+        $index = $row->search(fn ($s) => $s->id === $companion->id);
+
+        if ($index === false) {
+            return null;
+        }
+
+        foreach ([-1, 1] as $step) {
+            $neighbour = $row[$index + $step] ?? null;
+
+            if (! $neighbour || $neighbour->kind !== 'wheelchair') {
+                continue;
+            }
+
+            // A gangway between them means they are not neighbours.
+            $between = $step === -1 ? $neighbour : $companion;
+
+            if (! $between->aisle_after) {
+                return $neighbour;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * The best block of $qty seats for this ticket's bands, as seat ids.
      *
      * Preference order: earlier section, then earlier row, then closest to the centre of its row.
@@ -32,14 +92,17 @@ class BestAvailableService
             return [];
         }
 
-        $sections = SeatingSection::where('event_seating_map_id', $map->id)
+        $rows = SeatingSection::where('event_seating_map_id', $map->id)
             ->where('is_deleted', false)
             ->where('ticket_id', $ticket->id)
-            ->pluck('position', 'id');
+            ->get(['id', 'position', 'accessibility_only']);
 
-        if ($sections->isEmpty()) {
+        if ($rows->isEmpty()) {
             return [];
         }
+
+        $sections = $rows->pluck('position', 'id');
+        $accessibleOnly = $rows->pluck('accessibility_only', 'id');
 
         $seats = SeatingSeat::where('event_seating_map_id', $map->id)
             ->whereIn('seating_section_id', $sections->keys())
@@ -56,6 +119,13 @@ class BestAvailableService
         // precisely what WholeTableRule now refuses. Split them out and offer them separately,
         // whole, if the party is big enough to take one.
         [$wholeTableSeats, $seats] = $this->splitWholeTables($seats);
+
+        // The same courtesy for AccessibleSeatingRule, which this had never been taught.
+        //
+        // A wheelchair space outside an accessibility_only section is sellable to NOBODY, and the
+        // row centre is exactly where the scoring below aims - so on a plan with one drawn mid-row,
+        // best available picked it and acquire() refused it in the same request, every time.
+        $seats = $seats->reject(fn (SeatingSeat $seat) => $this->ruleWouldRefuse($seat, $accessibleOnly));
 
         $best = null;
 

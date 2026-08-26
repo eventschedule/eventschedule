@@ -62,15 +62,17 @@ class SeatHoldService
      * Throws if any requested seat is not free, naming it, so the picker can drop that one seat and
      * keep the rest of the selection instead of failing the whole thing.
      */
-    public function acquire(EventSeatingMap $map, array $seatIds, string $token, ?Carbon $now = null, bool $isBoxOffice = false): array
+    public function acquire(EventSeatingMap $map, array $seatIds, string $token, ?Carbon $now = null, bool $isBoxOffice = false, bool $orphanAdvisory = false): array
     {
+        $warning = null;
+
         $now = $now ?: now();
         // Sorted so concurrent carts always take row locks in the same order. Two carts grabbing
         // an overlapping pair in opposite orders is a textbook deadlock.
         $seatIds = array_values(array_unique(array_map('intval', $seatIds)));
         sort($seatIds);
 
-        return DB::transaction(function () use ($map, $seatIds, $token, $now, $isBoxOffice) {
+        return DB::transaction(function () use ($map, $seatIds, $token, $now, $isBoxOffice, $orphanAdvisory, &$warning) {
             $seats = collect();
 
             if ($seatIds) {
@@ -98,12 +100,50 @@ class SeatHoldService
                     }
                 }
 
+                // Every rule below asks whether some seat is free, and the answer has to describe
+                // the room as it will be a few lines from now - not as it is stored right this
+                // second. The token's existing cart holds are released at the bottom of this
+                // transaction, so a seat this buyer is dropping from their selection is FREE for
+                // the purposes of judging that selection.
+                //
+                // Without this the rules compare a room against itself. The picker posts the whole
+                // selection on every click, so from the second click onward every seat being judged
+                // is already `held` by this token: the orphan before/after delta is always zero,
+                // and a companion seat's wheelchair space never looks available. Both rules go
+                // quiet exactly when the buyer starts adjusting their selection.
+                //
+                // Same set the release below acts on, so the two cannot disagree.
+                $mine = SeatingSeat::where('event_seating_map_id', $map->id)
+                    ->where('hold_token', $token)
+                    ->where('hold_kind', 'cart')
+                    ->where('status', 'held')
+                    ->pluck('id')
+                    ->all();
+
                 if (! $isBoxOffice) {
-                    app(AccessibleSeatingRule::class)->validate($map, $seats);
+                    app(AccessibleSeatingRule::class)->validate($map, $seats, $mine);
                     app(WholeTableRule::class)->validate($map, $seats);
                 }
 
-                app(OrphanSeatRule::class)->validate($map, $seatIds, $isBoxOffice, $now);
+                // Advisory for a guest picking seats: a selection is built one click at a time,
+                // and judging every intermediate state makes some valid final selections literally
+                // unreachable - to take a whole row of eight you must pass through seven, which
+                // strands the eighth. The warning travels back with the hold and checkout asks the
+                // question again once the selection is finished.
+                $advisory = $isBoxOffice
+                    ? null
+                    : app(OrphanSeatRule::class)->advisoryFor($map, $seatIds, $now, $mine);
+
+                if ($advisory) {
+                    if (! $orphanAdvisory) {
+                        throw new BusinessException(__('messages.seating_orphan_seat'));
+                    }
+
+                    // The whole advisory, not just its text: it names the stranded seat so the
+                    // picker can offer to add it. The terser original is kept for the checkout
+                    // refusal, where there is nothing left to adjust in place.
+                    $warning = $advisory;
+                }
             }
 
             $version = $map->bumpVersion();
@@ -128,7 +168,7 @@ class SeatHoldService
                 ]);
             }
 
-            return ['seat_ids' => $seatIds, 'expires_at' => $expires, 'version' => $version];
+            return ['seat_ids' => $seatIds, 'expires_at' => $expires, 'version' => $version, 'warning' => $warning];
         });
     }
 
@@ -206,6 +246,12 @@ class SeatHoldService
         if ($seats->isEmpty()) {
             return [];
         }
+
+        // The selection is finished now, so the orphan rule gets its say - the guest picker only
+        // warned about it while seats were being chosen. validateFinal(), not validate(): these
+        // seats are already held, and the plain call would compare an identical before and after
+        // and never fire.
+        app(OrphanSeatRule::class)->validateFinal($map, $seats->pluck('id')->all());
 
         $sectionTicket = SeatingSection::where('event_seating_map_id', $map->id)
             ->where('is_deleted', false)

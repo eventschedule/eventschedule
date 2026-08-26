@@ -74,6 +74,20 @@ class EventSeatingMap extends Model
      * transaction - that is what makes a batch land atomically, and is separate from this
      * method's job of handing out a unique number.
      */
+    /**
+     * The owner-agnostic half of the concurrency protocol SeatingPlanController uses. A snapshot
+     * already has a monotonic cursor, so this is just `version` under the shared name.
+     */
+    public function structureRevision(): int
+    {
+        return (int) ($this->version ?? 1);
+    }
+
+    public function bumpStructureRevision(): int
+    {
+        return $this->bumpVersion();
+    }
+
     public function bumpVersion(): int
     {
         DB::update('update `'.$this->getTable().'` set `version` = LAST_INSERT_ID(`version` + 1) where `id` = ?', [$this->id]);

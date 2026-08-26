@@ -58,9 +58,14 @@
         'holdUrl' => route('seating.hold', ['subdomain' => $subdomain], false),
         'csrfToken' => csrf_token(),
         'strings' => [
-            'howMany' => __('messages.seating_how_many'),
-            'chooseOwn' => __('messages.seating_choose_own'),
-            'backToQuantity' => __('messages.seating_back_to_quantity'),
+        'legendUnavailable' => __('messages.seating_legend_unavailable'),
+        'pickYourSeats' => __('messages.seating_pick_your_seats'),
+        'clickToChoose' => __('messages.seating_click_to_choose'),
+        'bandFull' => __('messages.seating_band_full'),
+        'someSeatsGone' => __('messages.seating_some_seats_gone'),
+        'seatCountOne' => __('messages.seating_seat_count_one'),
+        'seatCountMany' => __('messages.seating_seat_count_many'),
+        'zoomForNumbers' => __('messages.seating_zoom_for_numbers'),
             'mapView' => __('messages.seating_map_view'),
             'listView' => __('messages.seating_list_view'),
             'mapLabel' => __('messages.seating_map_label'),
@@ -76,9 +81,9 @@
             'wheelchair' => __('messages.seating_kind_wheelchair'),
             'maxReached' => __('messages.seating_max_reached'),
             'wholeTableGone' => __('messages.seating_whole_table_gone'),
-            'fewerSeats' => __('messages.seating_fewer_seats'),
             'holdFailed' => __('messages.seating_hold_failed'),
             'loadFailed' => __('messages.seating_load_failed'),
+            'addSeat' => __('messages.seating_add_seat'),
             'keyboardHint' => __('messages.seating_keyboard_hint'),
             'rowPattern' => __('messages.seat_row_label'),
             'seatPattern' => __('messages.seat_number_label'),
@@ -161,6 +166,12 @@
                          ticket's own number is what let a single ticket's max_per_order
                          become the whole event's ceiling. --}}
                     seatingPicker: @json($seatingPickerProps),
+                    // Per-band counts from the venue map, so each band row can say what it got.
+                    allocatedCounts: {},
+                    // Set from the picker's es-seats-changed verdict. Stays false for every event
+                    // without a seating plan, so nothing else on this form changes.
+                    seatsBlocked: false,
+                    seatsBlockedReason: @json(__('messages.seating_selection_blocked')),
                     sharedSeatsRemaining: @json($event->seatsRemainingForSale($date ?? request()->date)),
                     turnstileEnabled: @json(\App\Utils\TurnstileUtils::isActiveForRequest()),
                     turnstileSiteKey: @json(\App\Utils\TurnstileUtils::getSiteKey()),
@@ -285,12 +296,25 @@
             mounted() {
                 // The picker owns its own seats but this form owns the running total and the
                 // submit validation, so it reports its selection rather than reaching in here.
+                //
+                // One venue map reports EVERY band's count in a single event, so apply the whole
+                // map and recalculate once rather than once per band.
                 document.addEventListener('es-seats-changed', (e) => {
-                    const ticket = this.tickets.find(t => t.id === e.detail.ticketId);
-                    if (ticket) {
-                        ticket.selectedQty = e.detail.quantity;
-                        this.onTicketChange();
-                    }
+                    const quantities = e.detail.quantities || {};
+                    this.allocatedCounts = { ...quantities };
+
+                    // The seats are held either way; what is refused is moving FORWARD with them.
+                    // The server refuses it too, in claimForSale() - this is the affordance, not
+                    // the enforcement, so a hand-posted form is still turned away.
+                    this.seatsBlocked = !! e.detail.blocked;
+                    this.seatsBlockedReason = e.detail.reason || @json(__('messages.seating_selection_blocked'));
+
+                    Object.entries(quantities).forEach(([id, qty]) => {
+                        const ticket = this.tickets.find(t => String(t.id) === String(id));
+                        if (ticket) ticket.selectedQty = qty;
+                    });
+
+                    this.onTicketChange();
                 });
 
                 if (this.turnstileEnabled && this.turnstileSiteKey) {
@@ -553,6 +577,14 @@
                     }).format(num);
                 },
                 validateForm(e) {
+                    // The button carries aria-disabled rather than disabled, so the submit still
+                    // has to be stopped here. Nothing is lost by trying: claimForSale() refuses
+                    // the same selection server-side, which is what a hand-posted form meets.
+                    if (this.seatsBlocked) {
+                        e.preventDefault();
+                        this.showSeatProblem();
+                        return;
+                    }
                     if (!this.isPaymentLinkMode && !this.tickets.some(t => t.selectedQty > 0)) {
                         e.preventDefault();
                         alert(@json(__('messages.please_select_ticket')));
@@ -588,18 +620,32 @@
                  * with the runtime compiler, and an SFC from the bundle belongs to a different Vue
                  * runtime, so it cannot simply be registered as a child component here.
                  */
-                pickerProps(ticket) {
+                pickerProps() {
+                    const allocated = this.tickets.filter(t => t.is_allocated
+                        && ! t.sales_ended && ! t.sales_not_started);
+
                     return JSON.stringify(Object.assign({
-                        ticket: {
-                            id: ticket.id,
-                            type: ticket.type,
-                            price: ticket.price,
-                            quantity: ticket.quantity,
-                        },
-                        // Formatted here rather than in the picker: this form owns the currency,
-                        // and a second money formatter is how a hardcoded symbol gets in.
-                        priceLabel: ticket.price > 0 ? this.formatPrice(ticket.price) : '',
+                        tickets: allocated.map(t => ({
+                            id: t.id,
+                            type: t.type,
+                            price: t.price,
+                            // Formatted here rather than in the picker: this form owns the currency,
+                            // and a second money formatter is how a hardcoded symbol gets in.
+                            priceLabel: t.price > 0 ? this.formatPrice(t.price) : '',
+                            quantity: this.getAvailableQuantity(t),
+                        })),
+                        // `|| 0`, not `|| 1`: a sold-out band reported 1, which made the order
+                        // ceiling 1 whenever the biggest band happened to be the empty one - and
+                        // the second seat was then refused with "you have selected the maximum".
+                        perOrderMax: Math.max(1, ...allocated.map(t => Number(t.quantity) || 0)),
                     }, this.seatingPicker));
+                },
+
+                /** The band row shows what the map gave it, since it no longer has its own control. */
+                allocatedQtyLabel(ticket) {
+                    const n = this.allocatedCounts[ticket.id] || 0;
+
+                    return n ? @json(__('messages.seating_seats_chosen')).replace(':count', n) : '';
                 },
 
                 getAvailableQuantity(ticket) {
@@ -698,6 +744,8 @@
                  * re-reads every ticket from the database.
                  */
                 addToCart() {
+                    if (this.seatsBlocked) { this.showSeatProblem(); return; }
+
                     var leg = {
                         event_id: @json(\App\Utils\UrlUtils::encodeId($event->id)),
                         event_date: this.event_date,
@@ -715,6 +763,10 @@
                         tickets: {},
                         addons: {},
                         promo_code: this.promoCode || null,
+                        // Order-level, not part of the leg: the cart lifts this straight back out.
+                        // It is what lets the cart panel stop asking for a name and email the buyer
+                        // has just typed into this form.
+                        buyer: { name: this.name, email: this.email, phone: this.phone },
                     };
 
                     this.tickets.forEach(function (ticket) {
@@ -738,6 +790,16 @@
                     this.addedToCart = true;
                     var self = this;
                     setTimeout(function () { self.addedToCart = false; }, 2500);
+                },
+                /**
+                 * Take the buyer to the seat, rather than leaving them to work out why a button
+                 * did nothing. The reason is already rendered beside the button; this is for the
+                 * seat itself, which can be a long way up the page.
+                 */
+                showSeatProblem() {
+                    // Always present when blocked: the verdict and the notice are the same thing.
+                    var el = document.getElementById('seatpick-warning');
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 },
                 saveFormState() {
                     try {
@@ -1392,6 +1454,15 @@
             </div>
         </div>
 
+        {{-- ONE picker for the whole venue, full width, above the bands.
+             It used to be one instance per band, mounted in the narrow right-hand cell of a ticket
+             row - which gave the seat map 22% of the screen, and, because each instance posted only
+             its own seats while the server replaces the session's whole selection, made picking in
+             a second band silently release the first. --}}
+        @if ($event->hasAllocatedSeating())
+        <div v-if="!isPaymentLinkMode && !isAllSoldOut" class="mb-6 w-full seating-picker-mount" :data-props="pickerProps()"></div>
+        @endif
+
         <template v-for="(ticket, index) in tickets" :key="ticket.id">
         <div v-if="!isPaymentLinkMode && (!isAllSoldOut || ticket.sales_ended || ticket.sales_not_started)" class="mb-6 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-s-4" :class="{'opacity-50': ticket.sales_ended || ticket.sales_not_started}" style="border-inline-start-color: {{ $accentColor }}">
             <div class="flex items-center justify-between">
@@ -1419,12 +1490,16 @@
                     <p v-if="ticket.sales_ended" class="text-lg font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sales_ended') }}</p>
                     <p v-else-if="ticket.sales_not_started" class="text-lg font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sales_not_started') }}</p>
                     <p v-else-if="getAvailableQuantity(ticket) === 0" class="text-lg font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sold_out') }}</p>
-                    <div v-else-if="ticket.is_allocated" class="seating-picker-mount" :data-props="pickerProps(ticket)"></div>
+                    {{-- Allocated bands have no quantity control of their own: the venue map above
+                         owns the whole selection and posts a tickets[] line per band. --}}
+                    <p v-else-if="ticket.is_allocated" class="text-sm text-gray-500 dark:text-gray-400">
+                        @{{ allocatedQtyLabel(ticket) }}
+                    </p>
                     <p v-else>
                     <select
                         v-model="ticket.selectedQty"
                         @change="onTicketChange"
-                        class="block w-24 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-center font-medium"
+                        class="block w-28 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] font-medium"
                         :name="`tickets[${ticket.id}]`" :id="`ticket-${index}`"
                     >
                         <option :value="0">0</option>
@@ -1521,7 +1596,7 @@
                         <p v-if="getAvailableQuantity(addon) === 0" class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sold_out') }}</p>
                         <select v-else
                             v-model="addon.selectedQty"
-                            class="block w-24 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-center font-medium"
+                            class="block w-28 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] font-medium"
                         >
                             <option :value="0">0</option>
                             <template v-for="n in getAvailableQuantity(addon)">
@@ -1727,15 +1802,15 @@
             <div v-if="waitlistMessage" class="mb-4 p-4 rounded-lg text-sm" :class="waitlistSuccess ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300'">
                 @{{ waitlistMessage }}
             </div>
-            <div v-if="!waitlistSuccess" class="flex justify-end items-center pt-2 gap-8">
+            <div v-if="!waitlistSuccess" class="flex flex-wrap justify-end items-center pt-2 gap-x-4 gap-y-2">
                 @if (! request()->embed)
-                <button type="button" @click="hideForm" class="mt-4 px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
+                <button type="button" @click="hideForm" class="mt-4 whitespace-nowrap px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
                     {{ strtoupper(__('messages.cancel')) }}
                 </button>
                 @endif
                 <button type="button" @click="joinWaitlist"
                     :disabled="!name.trim() || !email.trim() || waitlistSubmitting"
-                    class="mt-4 text-lg px-6 inline-flex items-center rounded-lg border border-transparent py-3 font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105"
+                    class="mt-4 whitespace-nowrap text-lg px-6 inline-flex items-center rounded-lg border border-transparent py-3 font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105"
                     style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
                     <span v-if="waitlistSubmitting">{{ strtoupper(__('messages.processing')) }}</span>
                     <span v-else>{{ strtoupper(__('messages.join_waitlist')) }}</span>
@@ -1743,7 +1818,7 @@
             </div>
             @if (! request()->embed)
             <div v-else class="flex justify-end pt-2">
-                <button type="button" @click="hideForm" class="mt-4 px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
+                <button type="button" @click="hideForm" class="mt-4 whitespace-nowrap px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
                     {{ strtoupper(__('messages.back')) }}
                 </button>
             </div>
@@ -1751,9 +1826,17 @@
         </div>
         @endif
 
-        <div v-if="!isAllSoldOut" class="flex justify-end items-center pt-2 gap-8">
+        {{-- Beside the buttons, not only up in the map: a refused action whose cause is off screen
+             is indistinguishable from a broken one. OUTSIDE the button row - dropped inside it,
+             a full-width notice wrapped the three actions onto two lines. --}}
+        <p v-if="!isAllSoldOut && seatsBlocked" id="seats-blocked-reason" role="status" aria-live="polite"
+            class="mt-4 rounded-lg border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-3 text-sm text-amber-800 dark:text-amber-200">
+            @{{ seatsBlockedReason }}
+        </p>
+
+        <div v-if="!isAllSoldOut" class="flex flex-wrap justify-end items-center pt-2 gap-x-4 gap-y-2">
             @if (! request()->embed)
-            <button type="button" @click="hideForm" class="mt-4 px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
+            <button type="button" @click="hideForm" class="mt-4 whitespace-nowrap px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
                 {{ strtoupper(__('messages.cancel')) }}
             </button>
             @endif
@@ -1761,10 +1844,13 @@
             @if ($cartEligible)
             {{-- Adds this event to the cart instead of paying for it now, so the buyer can carry on
                  browsing. The cart widget in the guest layout owns the storage and the checkout. --}}
-            <button type="button"
+            <button type="button" dusk="add-to-cart"
                 v-if="cartEligible && selectedTicketCount > 0 && !(payMonthly && installmentsOffered)"
                 @click="addToCart"
-                class="mt-4 inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-lg border-2 transition-all duration-200 hover:scale-105"
+                v-bind:aria-disabled="seatsBlocked ? 'true' : null"
+                v-bind:aria-describedby="seatsBlocked ? 'seats-blocked-reason' : null"
+                v-bind:class="seatsBlocked ? 'opacity-50 cursor-not-allowed hover:scale-100' : ''"
+                class="mt-4 whitespace-nowrap inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-lg border-2 transition-all duration-200 hover:scale-105"
                 style="border-color: {{ $accentColor }}; color: {{ $accentColor }};">
                 <span v-if="addedToCart">{{ strtoupper(__('messages.added_to_cart')) }}</span>
                 <span v-else>{{ strtoupper(__('messages.add_to_cart')) }}</span>
@@ -1778,7 +1864,15 @@
                  holding no record of the mandate. --}}
             <button type="submit"
                 v-bind:disabled="isSubmitting || (payMonthly && installmentsOffered && !installmentConsent)"
-                class="mt-4 inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-lg font-semibold text-lg shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm"
+                {{-- aria-disabled, NOT disabled: a disabled button leaves the tab order, so a
+                     screen reader never reaches it and never hears the reason. This one keeps
+                     focus, points at the reason, and refuses the submit in onSubmit(). The
+                     installment gate above stays on plain disabled - its cause is a checkbox two
+                     lines away, not a seat map several hundred pixels up the page. --}}
+                v-bind:aria-disabled="seatsBlocked ? 'true' : null"
+                v-bind:aria-describedby="seatsBlocked ? 'seats-blocked-reason' : null"
+                v-bind:class="seatsBlocked ? 'opacity-50 cursor-not-allowed hover:scale-100 hover:shadow-sm' : ''"
+                class="mt-4 whitespace-nowrap inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-lg font-semibold text-lg shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm"
                 style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
                 <span v-if="isSubmitting">{{ strtoupper(__('messages.processing')) }}</span>
                 <span v-else-if="payMonthly && installmentsOffered">@{{ payNowLabel }}</span>

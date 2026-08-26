@@ -483,4 +483,206 @@ class SeatingDesignerTest extends TestCase
             ->assertSee(__('messages.seating_gate_designer'))
             ->assertDontSee(__('messages.seating_new_plan'));
     }
+
+    /**
+     * A seating plan is a drawing of a ROOM, so only a venue owns one. Three separate guards have
+     * to hold for this: the nav entry, the tab redirect and the controller gate. Enterprise gates
+     * are bypassed in tests (selfhost gets everything free), so a talent role still passes
+     * seatingEnabled() - which is what makes this isolate the venue rule rather than pass for the
+     * wrong reason.
+     */
+    public function test_the_seating_tab_is_venue_only(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent');
+
+        // The nav entry is gone from both the desktop nav and the mobile select.
+        $this->actingAs($owner)
+            ->get(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']))
+            ->assertOk()
+            ->assertDontSee(__('messages.seating_plans'));
+
+        // And the tab itself bounces rather than rendering the Enterprise pitch for something a
+        // talent schedule can never use.
+        $this->actingAs($owner)
+            ->get(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'seating']))
+            ->assertRedirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']));
+
+        // Hiding the tab is not enough - the write endpoint is a hand-typed URL away.
+        $this->actingAs($owner)
+            ->post(route('seating.store', ['subdomain' => $role->subdomain]), ['name' => 'X'])
+            ->assertStatus(403);
+
+        $this->assertSame(0, SeatingPlan::where('role_id', $role->id)->count());
+    }
+
+    /**
+     * resolveOccurrence() shares gate(), so the per-date editor closes with the template routes.
+     * The plan is inserted directly because the UI can no longer create one here.
+     */
+    public function test_a_curator_cannot_reach_the_designer(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'curator');
+        $plan = SeatingPlan::create(['role_id' => $role->id, 'name' => 'Grand Theatre']);
+
+        $this->actingAs($owner)->get(
+            route('seating.design', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($plan->id)])
+        )->assertStatus(403);
+    }
+
+    /**
+     * The tab asks for nothing: New plan is a single button. You do not know what to call a room
+     * until you have drawn it, so the name is made in the designer instead - and the designer is
+     * told to focus its name box, or a pre-filled toolbar input is easy to walk straight past.
+     */
+    public function test_new_plan_needs_no_name_and_opens_the_designer_focused(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+
+        $response = $this->actingAs($owner)
+            ->post(route('seating.store', ['subdomain' => $role->subdomain]));
+
+        $plan = SeatingPlan::where('role_id', $role->id)->firstOrFail();
+        $response->assertRedirect(route('seating.design', [
+            'subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($plan->id),
+        ]));
+        $this->assertSame(__('messages.seating_untitled_plan'), $plan->name);
+
+        // json_encode of the props array, so the flag travels as a real boolean.
+        $this->actingAs($owner)
+            ->get(route('seating.design', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($plan->id)]))
+            ->assertOk()
+            ->assertSee('&quot;focusName&quot;:true', false);
+    }
+
+    /** Arriving at the designer any other way must NOT steal focus into the name box. */
+    public function test_the_designer_only_focuses_the_name_box_on_a_new_plan(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+        $plan = SeatingPlan::create(['role_id' => $role->id, 'name' => 'Grand Theatre']);
+
+        $this->actingAs($owner)
+            ->get(route('seating.design', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($plan->id)]))
+            ->assertOk()
+            ->assertSee('&quot;focusName&quot;:false', false);
+    }
+
+    /**
+     * The designer posts the WHOLE structure and removeMissing deletes anything not in it, so two
+     * admins with one plan open would silently erase each other: last writer wins, no warning.
+     */
+    public function test_a_second_editor_cannot_silently_overwrite_the_first(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+        $plan = SeatingPlan::create(['role_id' => $role->id, 'name' => 'Main House']);
+        $args = ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($plan->id)];
+
+        // Both editors open the designer and read the same structure.
+        $read = $this->actingAs($owner)->getJson(route('seating.structure', $args))->assertOk()->json();
+        $shared = $read['revision'] ?? null;
+        $this->assertNotNull($shared, 'the read must hand out a revision to check against');
+
+        // Editor A saves a real section.
+        $this->actingAs($owner)
+            ->putJson(route('seating.save_structure', $args), [
+                'revision' => $shared,
+                'levels' => $this->payload([$this->section(['name' => 'Stalls'], [
+                    ['id' => -20, 'row_label' => 'A', 'seat_label' => '1', 'x' => 0, 'y' => 0],
+                ])])['levels'],
+            ])
+            ->assertOk();
+
+        // Editor B is still holding the revision from before A saved.
+        $this->actingAs($owner)
+            ->putJson(route('seating.save_structure', $args), ['revision' => $shared, 'levels' => []])
+            ->assertStatus(409)
+            ->assertJsonPath('error', __('messages.seating_stale_revision'));
+
+        // A's work is still there - B's empty payload was refused, not applied.
+        $this->assertSame(1, SeatingSection::where('seating_plan_id', $plan->id)
+            ->where('is_deleted', false)->count());
+
+        // A second-resolution timestamp would have compared equal here; the counter does not.
+        $this->assertNotSame($shared, $plan->fresh()->structureRevision());
+    }
+
+    /** A payload with no revision is an older client, and must not be broken by the guard. */
+    public function test_a_save_without_a_revision_is_still_accepted(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+        $plan = SeatingPlan::create(['role_id' => $role->id, 'name' => 'Main House']);
+
+        $this->actingAs($owner)
+            ->putJson(route('seating.save_structure', [
+                'subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($plan->id),
+            ]), ['levels' => $this->payload([$this->section(['name' => 'Stalls'])])['levels']])
+            ->assertOk();
+    }
+
+    /**
+     * Rotation was rendered, stored and range-validated by the server all along, with no control
+     * writing it. Now that one exists, the value has to survive the round trip.
+     */
+    public function test_a_rotated_section_survives_a_save(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+        $plan = SeatingPlan::create(['role_id' => $role->id, 'name' => 'Main House']);
+        $args = ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($plan->id)];
+
+        $this->actingAs($owner)
+            ->putJson(route('seating.save_structure', $args), $this->payload([
+                $this->section(['name' => 'Side block', 'rotation' => 30], [$this->seat(-20, 'A', 1)]),
+            ]))
+            ->assertOk()
+            ->assertJsonPath('levels.0.sections.0.rotation', 30);
+
+        $this->assertSame(30, (int) SeatingSection::where('seating_plan_id', $plan->id)
+            ->where('is_deleted', false)->firstOrFail()->rotation);
+    }
+
+    /**
+     * A table used to be immutable after generation - the label, shape and booking mode were all
+     * fixed at creation. The per-table panel edits them, so they have to persist.
+     */
+    public function test_an_edited_table_survives_a_save(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+        $plan = SeatingPlan::create(['role_id' => $role->id, 'name' => 'Main House']);
+        $args = ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($plan->id)];
+
+        $table = [
+            'id' => -50, 'label' => 'Top table', 'shape' => 'rect', 'booking_mode' => 'whole',
+            'x' => 100, 'y' => 100, 'width' => 110, 'height' => 80, 'seat_count' => 1, 'position' => 0,
+        ];
+        $seat = $this->seat(-51, '', 1, ['table_id' => -50, 'row_label' => null]);
+
+        $this->actingAs($owner)
+            ->putJson(route('seating.save_structure', $args), $this->payload([
+                $this->section(['kind' => 'table', 'name' => 'Cabaret', 'band' => 'Cabaret', 'tables' => [$table]], [$seat]),
+            ]))
+            ->assertOk()
+            ->assertJsonPath('levels.0.sections.0.tables.0.label', 'Top table')
+            ->assertJsonPath('levels.0.sections.0.tables.0.shape', 'rect')
+            ->assertJsonPath('levels.0.sections.0.tables.0.booking_mode', 'whole');
+    }
+
+    /** The name field is gone from the tab, and must not creep back. */
+    public function test_the_tab_does_not_ask_for_a_name(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+
+        $this->actingAs($owner)
+            ->get(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'seating']))
+            ->assertOk()
+            ->assertSee(__('messages.seating_new_plan'))
+            ->assertDontSee('new_seating_plan_name');
+    }
 }

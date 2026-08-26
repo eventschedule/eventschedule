@@ -26,8 +26,10 @@ class AccessibleSeatingRule
 {
     /**
      * @param  \Illuminate\Support\Collection<int,SeatingSeat>  $seats  the seats being taken
+     * @param  array<int,int>  $treatAsFree  seats the caller is about to release, so they must be
+     *                                       judged free even though they are still `held`
      */
-    public function validate(EventSeatingMap $map, $seats): void
+    public function validate(EventSeatingMap $map, $seats, array $treatAsFree = []): void
     {
         if ($seats->isEmpty()) {
             return;
@@ -48,7 +50,7 @@ class AccessibleSeatingRule
             }
         }
 
-        $this->assertCompanionsNotOrphaned($map, $seats);
+        $this->assertCompanionsNotOrphaned($map, $seats, $treatAsFree);
     }
 
     /**
@@ -58,7 +60,7 @@ class AccessibleSeatingRule
      * gangway - `aisle_after` marks a physical break, so a companion across the aisle is an
      * ordinary seat.
      */
-    private function assertCompanionsNotOrphaned(EventSeatingMap $map, $seats): void
+    private function assertCompanionsNotOrphaned(EventSeatingMap $map, $seats, array $treatAsFree = []): void
     {
         $companions = $seats->where('kind', 'companion');
 
@@ -83,7 +85,13 @@ class AccessibleSeatingRule
             }
 
             // Free and not being taken in the same breath: it is still being held for its user.
-            if ($partner->isAvailable() && ! in_array($partner->id, $takenIds, true)) {
+            //
+            // $treatAsFree covers the buyer who takes the pair and then drops the wheelchair space:
+            // it is still `held` by their own token at this point, so isAvailable() alone would say
+            // "spoken for" and wave the lone companion seat through.
+            $free = $partner->isAvailable() || in_array($partner->id, $treatAsFree, true);
+
+            if ($free && ! in_array($partner->id, $takenIds, true)) {
                 throw new BusinessException(__('messages.seating_companion_reserved', [
                     'seat' => $companion->fullLabel() ?: $companion->id,
                 ]));

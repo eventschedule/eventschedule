@@ -66,7 +66,8 @@ export function startPolling(stateUrl, eventId, date, map, onChange, intervalMs 
                 if (byId.has(seat.id)) seat.state = byId.get(seat.id);
             })));
 
-            entry.listeners.forEach((fn) => fn());
+            // The payload, not a bare ping: it carries the seat advisory alongside the diff.
+            entry.listeners.forEach((fn) => fn(data));
         } catch (e) {
             // A failed poll is not worth surfacing: the next one is five seconds away.
         }

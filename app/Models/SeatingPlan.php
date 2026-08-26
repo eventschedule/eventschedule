@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 /**
  * A reusable seating plan template owned by a schedule. Never sold from directly -
@@ -117,5 +118,29 @@ class SeatingPlan extends Model
         )->where('status', 'sold')->count();
 
         return ['events' => $eventIds->count(), 'sold' => $sold];
+    }
+
+    /**
+     * A token that changes whenever this plan's structure is replaced.
+     *
+     * Deliberately a counter and not updated_at: MySQL timestamps are second-resolution, so a read
+     * and a save inside the same second would compare equal and the concurrent-edit check would
+     * wave the overwrite through. event_seating_maps already carries `version` for the same reason.
+     */
+    public function structureRevision(): int
+    {
+        return (int) ($this->revision ?? 1);
+    }
+
+    /** Mirrors EventSeatingMap::bumpVersion() - atomic, and readable back in the same round trip. */
+    public function bumpStructureRevision(): int
+    {
+        DB::update('update `'.$this->getTable().'` set `revision` = LAST_INSERT_ID(`revision` + 1) where `id` = ?', [$this->id]);
+
+        $revision = (int) DB::selectOne('select LAST_INSERT_ID() as v')->v;
+        $this->setAttribute('revision', $revision);
+        $this->syncOriginalAttribute('revision');
+
+        return $revision;
     }
 }
