@@ -17,8 +17,10 @@
                 <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">{{ $event->name }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                     @php
-                        $tz = $eventRole?->timezone ?? auth()->user()->timezone ?? 'UTC';
-                        $startDt = $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->setTimezone($tz) : null;
+                        // The event's own schedule decides its date, same as every other surface.
+                        // Not $eventRole: roles->first() is the first ATTACHED role (a venue or a
+                        // talent), which need not share the creator's timezone.
+                        $startDt = $event->starts_at ? $event->getStartDateTime(null, true) : null;
                     @endphp
                     @if($startDt)
                         @if($event->is_multi_day)

@@ -242,7 +242,7 @@ class AdminController extends Controller
             ->get();
 
         // Recent events (excluding demo and private events)
-        $recentEvents = Event::with('roles')
+        $recentEvents = Event::with('roles', 'creatorRole')
             ->where('is_private', false)
             ->whereDoesntHave('roles', function ($query) {
                 $query->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)

@@ -174,10 +174,9 @@ class InstallmentService
     /**
      * Resolve the UTC start of the occurrence the buyer picked.
      *
-     * Built explicitly rather than via Event::getStartDateTime(), which selects its timezone from
-     * auth()->user() when there is one. That is fine on a request but wrong in the cron, where
-     * there is no authenticated user and the answer would silently change depending on who
-     * happened to trigger it. Mirrors the construction in TicketController::scanned().
+     * Built explicitly rather than via Event::getStartDateTime() so the cron and a web request
+     * provably agree on one instant, whatever either is handed. Mirrors the construction in
+     * TicketController::scanned().
      *
      * $occurrenceDate is a calendar date in the SCHEDULE's zone, which is how sales.event_date is
      * stored. Falling back to starts_at is only correct for a non-recurring event; for a

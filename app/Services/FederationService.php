@@ -639,9 +639,8 @@ class FederationService
         while ($cursor->lte($end) && count($found) < self::OCCURRENCES_AHEAD) {
             if ($event->matchesDate($cursor, $timezone)) {
                 // occurrenceStartUtc() takes a schedule-LOCAL calendar date and returns
-                // the UTC instant. Deliberately not getStartDateTime(), which falls back
-                // to the authenticated user's timezone - there is no user in a scheduled
-                // command, and an evening event would land on the wrong day.
+                // the UTC instant. Deliberately not getStartDateTime(), which would stamp
+                // the anchor's time-of-day onto the occurrence date.
                 $found[] = $event->occurrenceStartUtc($cursor->format('Y-m-d'), $timezone)->toIso8601String();
             }
             $cursor->addDay();

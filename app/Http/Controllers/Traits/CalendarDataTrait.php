@@ -216,7 +216,7 @@ trait CalendarDataTrait
         ];
     }
 
-    protected function buildCalendarResponse($events, $pastEvents, bool $hasMorePastEvents, ?Role $role, ?string $subdomain, int $month, int $year, string $timezone, int $firstDayOfWeek = 0, bool $guestView = false, ?string $displayLang = null): JsonResponse
+    protected function buildCalendarResponse($events, $pastEvents, bool $hasMorePastEvents, ?Role $role, ?string $subdomain, int $month, int $year, int $firstDayOfWeek = 0, bool $guestView = false, ?string $displayLang = null): JsonResponse
     {
         $month = DateUtils::normalizeMonth($month);
         $year = DateUtils::normalizeYear($year);

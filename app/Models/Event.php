@@ -1454,7 +1454,9 @@ class Event extends Model
      */
     public function scheduleTimezone(): string
     {
-        return $this->creatorRole?->timezone ?? config('app.timezone');
+        // ?: not ??: roles.timezone is a nullable string, and an empty one is a DateTimeZone
+        // error rather than a fallback.
+        return $this->creatorRole?->timezone ?: config('app.timezone');
     }
 
     /**
@@ -1487,12 +1489,13 @@ class Event extends Model
     }
 
     /**
-     * A UTC instant rendered the way localStartsAt() renders occurrence dates:
-     * the authenticated viewer's timezone and 12/24-hour preference when set
-     * (so it never disagrees with the date_label beside it), otherwise the
-     * schedule's; language from the schedule. Used for instants that are not
-     * occurrence starts (e.g. a booking's cancellation deadline). Queued mail
-     * has no auth user, so emails render in the schedule's timezone.
+     * A UTC instant rendered the way localStartsAt() renders occurrence dates: the schedule's
+     * timezone, the viewer's 12/24-hour preference when set, language from the schedule. Used for
+     * instants that are not occurrence starts (e.g. a booking's cancellation deadline).
+     *
+     * The timezone deliberately does NOT follow the viewer, for the reason this method always
+     * gave for following it - it must never disagree with the date_label printed beside it, and
+     * that label is the schedule's clock.
      */
     public function localizedInstantLabel(Carbon $utcInstant): string
     {
@@ -1500,11 +1503,8 @@ class Event extends Model
         $role = $this->creatorRole;
         $enable24 = (bool) ($role?->use_24_hour_time);
 
-        if ($user = auth()->user()) {
-            $tz = $user->timezone ?? 'UTC';
-            if ($user->use_24_hour_time !== null) {
-                $enable24 = $user->use_24_hour_time;
-            }
+        if (($user = auth()->user()) && $user->use_24_hour_time !== null) {
+            $enable24 = $user->use_24_hour_time;
         }
 
         $local = $utcInstant->copy()->setTimezone($tz);
@@ -1646,10 +1646,9 @@ class Event extends Model
     /**
      * The event's start as a naive Carbon holding local wall-clock time.
      *
-     * Equivalent to Carbon::parse($this->localStartsAt()) when no timezone is passed. Callers
-     * that care which day an occurrence falls on should pass scheduleTimezone(); otherwise
-     * getStartDateTime() resolves against the authenticated user's timezone, and a late-evening
-     * event lands on tomorrow's date for an operator in a different zone.
+     * Equivalent to Carbon::parse($this->localStartsAt()) when no timezone is passed, which
+     * resolves to the schedule's own zone - so which day an occurrence falls on is a property of
+     * the event. $timezone is for the rare caller that must answer the question somewhere else.
      */
     protected function localStartCarbon(?string $timezone = null): Carbon
     {
@@ -1920,9 +1919,9 @@ class Event extends Model
         // validity is governed by pass expiry, so don't block their sale on date.
         $hasPassTicket = $this->tickets->contains(fn ($t) => $t->is_pass);
 
-        // For recurring events, check if the specific occurrence is in the past. Resolve the
-        // occurrence in the venue's timezone: whether a ticket may be sold is a property of the
-        // event, not of who is asking, and getStartDateTime() would otherwise use the viewer's.
+        // For recurring events, check if the specific occurrence is in the past. Resolved in the
+        // venue's timezone: whether a ticket may be sold is a property of the event, not of who
+        // is asking.
         if ($this->days_of_week && $date) {
             $tz = $this->scheduleTimezone();
             if ($this->sell_after_start) {
@@ -2596,18 +2595,20 @@ class Event extends Model
         return $url;
     }
 
+    /**
+     * The occurrence as a Carbon. With $locale it is rendered in the SCHEDULE's timezone - an
+     * event falls on a given day, at a given clock time, because of where it happens and not
+     * because of who is looking at it. $timezoneOverride is the only way to render it anywhere
+     * else - AppointmentTimeUtils uses it to show a guest their own local time, and a few callers
+     * pass scheduleTimezone() explicitly where the pinning is the point being documented.
+     *
+     * This used to prefer the authenticated viewer's account timezone, which quietly made every
+     * unpinned read site viewer-dependent: a 7:30pm London show read as the next day at 00:00 for
+     * a signed-in viewer at UTC+5:30, on the calendar payload, the day cells, the guest list and
+     * the feeds, while the edit form (which always pinned the schedule) disagreed.
+     */
     public function getStartDateTime($date = null, $locale = false, $timezoneOverride = null)
     {
-        $timezone = 'UTC';
-
-        if ($timezoneOverride) {
-            $timezone = $timezoneOverride;
-        } elseif ($user = auth()->user()) {
-            $timezone = $user->timezone ?? 'UTC';
-        } elseif ($this->creatorRole) {
-            $timezone = $this->creatorRole->timezone ?? 'UTC';
-        }
-
         if (strlen($this->starts_at) === 10) {
             // Date-only format (Y-m-d), assume midnight
             $startAt = Carbon::createFromFormat('Y-m-d', $this->starts_at, 'UTC')->startOfDay();
@@ -2618,8 +2619,11 @@ class Event extends Model
         // Convert before applying the occurrence date. $date is a calendar date in the
         // schedule's zone (that is how sales.event_date is stored), so setting it on the UTC
         // datetime and converting afterwards slides an evening event back a day.
+        //
+        // Resolved here rather than above so a $locale=false caller - ICS export, Google and
+        // CalDAV sync, the isPast() gates - never lazy-loads creatorRole for a zone it discards.
         if ($locale) {
-            $startAt->setTimezone($timezone);
+            $startAt->setTimezone($timezoneOverride ?: $this->scheduleTimezone());
         }
 
         // isOccurrenceDate() rather than the bare shape regex: guest views hand this raw request

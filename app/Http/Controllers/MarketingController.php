@@ -5196,7 +5196,8 @@ class MarketingController extends Controller
         $excludeCountry = strtolower(trim((string) config('app.search_exclude_country', '')));
         $publicScheduleFilter = $this->publicScheduleFilter();
 
-        return Event::with(['roles'])
+        // creatorRole: every card renders the date in its own schedule's timezone.
+        return Event::with(['roles', 'creatorRole'])
             ->where(function ($q) {
                 $q->where('starts_at', '>=', Carbon::today())
                     ->orWhereNotNull('days_of_week')

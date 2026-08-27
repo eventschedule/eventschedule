@@ -40,10 +40,16 @@
     $totalWeeks = ceil($totalDays / 7);
     $unavailable = [];
     
-    // Calculate today's date considering user's timezone if logged in
-    $today = auth()->check() && auth()->user()->timezone 
-        ? Carbon\Carbon::now(auth()->user()->timezone)->startOfDay()
-        : Carbon\Carbon::now()->startOfDay();
+    // The zone this whole calendar reasons in. Events are placed by their own schedule's
+    // calendar date, so anything that decides which day a date belongs to - the "today"
+    // highlight, and the past-event filters in the Vue app below - has to agree with it, or an
+    // event is highlighted on one day and filtered out as though it were on another.
+    //
+    // The dashboard (home.blade.php includes this with route => 'home') passes no $role: it
+    // aggregates many schedules, so there is no schedule clock and the viewer's own day is the
+    // right answer there.
+    $calendarTimezone = ($role ?? null)?->timezone ?: (auth()->user()?->timezone ?: config('app.timezone'));
+    $today = Carbon\Carbon::now($calendarTimezone)->startOfDay();
 
     $subdomain = $subdomain ?? null;
 
@@ -1981,7 +1987,10 @@ const calendarApp = createApp({
             {{-- Also the language forwarded to the guest calendar endpoints, so their payload can no
                  longer disagree with the server-rendered chrome around it. --}}
             languageCode: '{{ $isAdminRoute && auth()->check() ? app()->getLocale() : (isset($role) ? $role->displayLanguageCode() : 'en') }}',
-            userTimezone: '{{ auth()->check() && auth()->user()->timezone ? auth()->user()->timezone : null }}',
+            {{-- The zone the past-event filters resolve "today" in. Must be the same one $today
+                 above uses: these compare against occurrenceDate, which is the SCHEDULE's calendar
+                 date, so a viewer-anchored today hides an event that is still running. --}}
+            userTimezone: '{{ $calendarTimezone }}',
             popupTimeout: null,
             showFiltersDrawer: false,
             showDesktopFiltersModal: false,

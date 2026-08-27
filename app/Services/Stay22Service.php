@@ -187,12 +187,11 @@ class Stay22Service
 
         $tz = $event->scheduleTimezone();
 
-        // Passing $tz explicitly is load-bearing twice over. With no override,
-        // getStartDateTime() resolves against the AUTHENTICATED VIEWER's timezone, so a
-        // signed-in owner in Berlin would be handed different dates from an anonymous
-        // visitor at the identical URL; and with no viewer and no creatorRole it falls
-        // back to hardcoded 'UTC', which slides an evening event west of UTC onto the
-        // wrong calendar day. The second argument enables the conversion at all.
+        // $tz is the same zone getStartDateTime() now resolves on its own; passed
+        // explicitly because this URL is handed to a third party and must read the same for
+        // every visitor. The second argument is the load-bearing one: it enables the
+        // conversion at all, and without it an evening event west of UTC is exported on the
+        // wrong calendar day.
         $start = $event->getStartDateTime($date, true, $tz);
 
         if (! $start) {

@@ -74,7 +74,7 @@ class BoostController extends Controller
 
         $eventsData = collect();
         if ($proRoleIds->isNotEmpty()) {
-            $eventsData = Event::with('roles')
+            $eventsData = Event::with('roles', 'creatorRole')
                 ->whereHas('roles', fn ($q) => $q->whereIn('roles.id', $proRoleIds))
                 ->upcomingOrOngoing()
                 ->where('is_draft', false)

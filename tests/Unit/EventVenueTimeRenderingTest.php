@@ -215,6 +215,47 @@ class EventVenueTimeRenderingTest extends TestCase
         $this->assertTrue($event->canAcceptRsvp(now()->addYear()->format('Y-m-d')));
     }
 
+    /**
+     * The calendar payload asks for the occurrence with NO date - CalendarDataTrait builds
+     * local_starts_at / local_date / occurrenceDate that way, and buildEventsMap() buckets day
+     * cells through matchesDate(), which resolves the same way. That is the path that put a 7:30pm
+     * London show on the next day at 00:00 for a viewer east of the schedule.
+     *
+     * The dated test above cannot catch it: passing $date sends getStartDateTime() through
+     * setDate(), which overwrites the shifted day and hides the bug for every viewer.
+     */
+    public function test_undated_occurrence_render_is_the_venues_clock_for_every_viewer(): void
+    {
+        $event = $this->eveningShow();
+
+        foreach ($this->viewers() as $label => $timezone) {
+            $this->actAs($timezone);
+
+            $this->assertSame(
+                'Jul 10, 2026 9:00 PM',
+                $event->getStartDateTime(null, true)->format('M j, Y g:i A'),
+                "the undated render must be the venue's wall clock for: {$label}"
+            );
+
+            // Handed to the calendar Vue app verbatim as local_starts_at, where new Date() reads
+            // both the day cell and the printed time off it.
+            $this->assertSame(
+                '2026-07-10 21:00:00',
+                $event->localStartsAt(),
+                "local_starts_at must be the venue's wall clock for: {$label}"
+            );
+
+            $this->assertTrue(
+                $event->matchesDate(Carbon::parse('2026-07-10')),
+                "the day cell must be the venue's calendar date for: {$label}"
+            );
+            $this->assertFalse(
+                $event->matchesDate(Carbon::parse('2026-07-11')),
+                "the event must not also occupy the UTC date for: {$label}"
+            );
+        }
+    }
+
     protected function tearDown(): void
     {
         Auth::logout();

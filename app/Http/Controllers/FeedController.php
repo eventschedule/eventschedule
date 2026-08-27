@@ -36,7 +36,7 @@ class FeedController extends Controller
             ->where('is_draft', false)
             ->where('is_cancelled', false)
             ->whereNull('event_password')
-            ->with(['roles', 'venue'])
+            ->with(['roles', 'venue', 'creatorRole'])
             ->orderBy('starts_at')
             ->get();
 
@@ -106,7 +106,7 @@ class FeedController extends Controller
             ->where('is_draft', false)
             ->where('is_cancelled', false)
             ->whereNull('event_password')
-            ->with(['roles', 'venue'])
+            ->with(['roles', 'venue', 'creatorRole'])
             ->orderBy('starts_at')
             ->get();
 

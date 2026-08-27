@@ -2730,7 +2730,7 @@ class EventController extends Controller
             // A schedule created solely to post to this curator inherits the curator's timezone, not
             // the guest's browser timezone: its events are entered as curator-local times, and the
             // talent's own guest page renders them in its own timezone (Event::getStartDateTime()
-            // falls back to creatorRole->timezone for logged-out viewers). The form warns the guest
+            // resolves creatorRole->timezone for every viewer). The form warns the guest
             // when their device timezone differs. The user *account* still keeps the browser value.
             $talent = $this->createTalentSchedule($user, $name, $role->timezone, $contentLang ?: $user->language_code);
         }
@@ -4024,7 +4024,7 @@ class EventController extends Controller
         }
 
         // Load all recent events for manual selection
-        $events = Event::whereHas('roles', function ($query) use ($role) {
+        $events = Event::with('creatorRole')->whereHas('roles', function ($query) use ($role) {
             $query->where('role_id', $role->id);
         })
             ->whereDoesntHave('parts')

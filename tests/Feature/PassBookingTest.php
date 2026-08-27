@@ -907,7 +907,7 @@ class PassBookingTest extends TestCase
         Carbon::setTestNow();
     }
 
-    public function test_deadline_label_follows_the_authenticated_viewer(): void
+    public function test_deadline_label_follows_the_schedule_and_the_viewers_clock_format(): void
     {
         $owner = $this->createOwner();
         $role = $this->createRole($owner, 'venue', ['timezone' => 'America/New_York']);
@@ -920,14 +920,20 @@ class PassBookingTest extends TestCase
         // Anonymous guest: schedule timezone (New York = UTC-4 in August).
         $this->assertStringContainsString('6:00 PM', $event->localizedInstantLabel($instant));
 
-        // Logged-in viewer in Los Angeles with 24-hour time: their zone, their clock -
-        // matching how localStartsAt renders the date beside it.
+        // Logged-in viewer in Los Angeles with 24-hour time: the SCHEDULE's zone, the viewer's
+        // clock format. Same instant as the anonymous assertion above (6:00 PM New York), so this
+        // pins both halves at once - the 24-hour preference follows the viewer, the zone does not.
+        //
+        // The zone must not follow the viewer because PassBookingService::bookedOccurrences()
+        // builds this label and date_label into the SAME row (and PassBookingConfirmation into the
+        // same email), and date_label is the schedule's clock. Two zones in one row, neither
+        // labelled, is worse than either alone.
         $viewer = $this->createOwner();
         $viewer->timezone = 'America/Los_Angeles';
         $viewer->use_24_hour_time = true;
         $viewer->save();
         $this->actingAs($viewer);
-        $this->assertStringContainsString('15:00', $event->fresh()->localizedInstantLabel($instant));
+        $this->assertStringContainsString('18:00', $event->fresh()->localizedInstantLabel($instant));
 
         auth()->logout();
     }

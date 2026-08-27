@@ -616,7 +616,12 @@ class NewsletterController extends Controller
             ->upcomingOrOngoing()
             ->where('is_draft', false)
             ->orderBy('starts_at')
-            ->get(['events.id', 'events.name', 'events.starts_at', 'events.duration'])
+            // creator_role_id is load-bearing in this select: getShortDateRangeDisplay() resolves
+            // scheduleTimezone() through the creatorRole relation, and BelongsTo short-circuits on
+            // a null foreign key - so omitting it silently renders every date in the app timezone
+            // rather than the schedule's, with no query and no error to notice.
+            ->with('creatorRole')
+            ->get(['events.id', 'events.name', 'events.starts_at', 'events.duration', 'events.creator_role_id'])
             ->map(fn ($e) => [
                 'id' => $e->id,
                 'hash' => UrlUtils::encodeId($e->id),
@@ -644,6 +649,7 @@ class NewsletterController extends Controller
         $groups = $role->groups()->orderBy('name')->get();
 
         $eventsData = $role->events()
+            ->with('creatorRole')
             ->where('event_role.is_accepted', true)
             ->where('is_draft', false)
             ->where('name', '!=', '')

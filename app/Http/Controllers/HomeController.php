@@ -641,7 +641,7 @@ class HomeController extends Controller
             ->orderBy('starts_at')
             ->get();
 
-        return $this->buildCalendarResponse($events, collect(), false, null, null, (int) $month, (int) $year, $timezone, 0);
+        return $this->buildCalendarResponse($events, collect(), false, null, null, (int) $month, (int) $year, 0);
     }
 
     public function saveDashboardConfig(Request $request): JsonResponse
@@ -757,7 +757,8 @@ class HomeController extends Controller
             ->whereNull('days_of_week')
             ->orderBy('starts_at')
             ->limit($count)
-            ->with(['roles', 'tickets'])
+            // creatorRole: the panel renders each date in its own schedule's timezone.
+            ->with(['roles', 'tickets', 'creatorRole'])
             ->get();
     }
 

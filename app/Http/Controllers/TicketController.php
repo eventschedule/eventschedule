@@ -59,7 +59,8 @@ class TicketController extends Controller
             $sortBy = 'event_date';
         }
 
-        $query = Sale::with('event', 'saleTickets')
+        // event.creatorRole: each row renders localStartsAt(), which resolves the schedule's zone.
+        $query = Sale::with('event.creatorRole', 'saleTickets')
             ->where('user_id', $user->id)
             ->where('is_deleted', false);
 
@@ -3456,7 +3457,8 @@ class TicketController extends Controller
 
         $events = collect();
         if ($selectedRoleId) {
-            $events = Event::whereHas('roles', fn ($q) => $q->where('roles.id', $selectedRoleId))
+            $events = Event::with('creatorRole')
+                ->whereHas('roles', fn ($q) => $q->where('roles.id', $selectedRoleId))
                 ->where('is_draft', false)
                 ->orderBy('starts_at', 'desc')
                 ->get()

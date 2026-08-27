@@ -384,7 +384,9 @@ class AnalyticsService
 
         $isCurator = Role::where('id', $roleId)->where('type', 'curator')->exists();
 
+        // creatorRole: the top-events list renders getShortDateRangeDisplay() per row.
         $query = Event::query()
+            ->with('creatorRole')
             ->where('is_draft', false)
             ->where(function ($q) use ($cutoff) {
                 $q->where('starts_at', '>=', $cutoff)

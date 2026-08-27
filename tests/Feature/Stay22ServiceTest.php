@@ -213,10 +213,9 @@ class Stay22ServiceTest extends TestCase
     }
 
     /**
-     * The check-in date is a property of where the event happens, not of who is looking.
-     * getStartDateTime() resolves against the authenticated viewer's timezone unless one is
-     * passed explicitly, so without the override a signed-in owner abroad would be shown a
-     * different date from an anonymous visitor at the identical URL.
+     * The check-in date is a property of where the event happens, not of who is looking - this
+     * URL is handed to a third party, so a signed-in owner abroad and an anonymous visitor at the
+     * identical URL must be shown the same date.
      */
     public function test_the_checkin_date_is_venue_local_and_ignores_the_viewers_timezone(): void
     {

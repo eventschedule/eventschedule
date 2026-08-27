@@ -1930,8 +1930,10 @@ class RoleController extends Controller
             $year = now()->year;
         }
 
-        // Get timezone from user or role
-        $timezone = $user?->timezone ?? $role->timezone ?? 'UTC';
+        // The schedule's, not the viewer's: buildEventsMap() places every event by its own
+        // schedule's calendar date, so a window built around the viewer's day can clip an edge
+        // event out of the query before it is ever bucketed.
+        $timezone = $role->timezone ?: config('app.timezone');
 
         // Calculate calendar grid start (including overflow days from previous month)
         $firstDayOfWeek = $role->first_day_of_week ?? 0;
@@ -2529,7 +2531,8 @@ class RoleController extends Controller
         $year = DateUtils::normalizeYear($request->year);
 
         $user = auth()->user();
-        $timezone = ($user ? $user->timezone : null) ?? $role->timezone ?? 'UTC';
+        // The schedule's timezone bounds the query because the schedule's timezone renders it.
+        $timezone = $role->timezone ?: config('app.timezone');
 
         $firstDayOfWeek = $role->first_day_of_week ?? 0;
         $startOfGrid = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth()->startOfWeek($firstDayOfWeek);
@@ -2646,7 +2649,7 @@ class RoleController extends Controller
             }
         }
 
-        return $this->buildCalendarResponse($events, $pastEvents, $hasMorePastEvents, $role, $subdomain, (int) $month, (int) $year, $timezone, $firstDayOfWeek, true, $displayLang);
+        return $this->buildCalendarResponse($events, $pastEvents, $hasMorePastEvents, $role, $subdomain, (int) $month, (int) $year, $firstDayOfWeek, true, $displayLang);
     }
 
     public function adminCalendarEvents(Request $request, $subdomain): JsonResponse
@@ -2660,8 +2663,8 @@ class RoleController extends Controller
         $month = DateUtils::normalizeMonth($request->month);
         $year = DateUtils::normalizeYear($request->year);
 
-        $user = $request->user();
-        $timezone = $user->timezone ?? $role->timezone ?? 'UTC';
+        // The schedule's timezone bounds the query because the schedule's timezone renders it.
+        $timezone = $role->timezone ?: config('app.timezone');
 
         $firstDayOfWeek = $role->first_day_of_week ?? 0;
         $startOfGrid = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth()->startOfWeek($firstDayOfWeek);
@@ -2698,7 +2701,7 @@ class RoleController extends Controller
                 ->get();
         }
 
-        return $this->buildCalendarResponse($events, collect(), false, $role, $subdomain, (int) $month, (int) $year, $timezone, $firstDayOfWeek);
+        return $this->buildCalendarResponse($events, collect(), false, $role, $subdomain, (int) $month, (int) $year, $firstDayOfWeek);
     }
 
     public function auditLog(Request $request, $subdomain)
@@ -2840,8 +2843,9 @@ class RoleController extends Controller
         $appointmentBookingCounts = [];
         $currencies = [];
 
-        // sales + appointmentType are read by the appointment branch of show-admin-requests.
-        $requests = Event::with(['roles', 'sales', 'appointmentType'])
+        // sales + appointmentType are read by the appointment branch of show-admin-requests;
+        // creatorRole by the localStartsAt() on each row.
+        $requests = Event::with(['roles', 'sales', 'appointmentType', 'creatorRole'])
             ->where(function ($query) use ($role) {
                 $query->whereHas('roles', function ($query) use ($role) {
                     $query->where('role_id', $role->id)
@@ -2877,9 +2881,8 @@ class RoleController extends Controller
         }
 
         if ($tab == 'schedule' || $tab == 'availability') {
-            // Get timezone from user or role
-            $user = $request->user();
-            $timezone = $user->timezone ?? $role->timezone ?? 'UTC';
+            // The schedule's timezone bounds the query because the schedule's timezone renders it.
+            $timezone = $role->timezone ?: config('app.timezone');
 
             // Calculate calendar grid start (including overflow days from previous month)
             $firstDayOfWeek = $role->first_day_of_week ?? 0;
