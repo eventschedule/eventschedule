@@ -149,6 +149,12 @@ jobs:
           sed -i 's/APP_URL=.*/APP_URL=http:\/\/127.0.0.1:8000\nAPP_TESTING=true/' .env
           sed -i 's/APP_DEBUG=.*/APP_DEBUG=true/' .env
           sed -i 's/SESSION_SECURE_COOKIE=.*/SESSION_SECURE_COOKIE=false/' .env
+          # Dusk reuses one browser across every test method in a class, so a session that
+          # outlives a test can poison the next one's signup. DatabaseTruncation wipes the
+          # sessions and cache tables, but only when they ARE the store - .env.example ships
+          # the file drivers. Match the checked-in .env.dusk.local so CI behaves like local.
+          sed -i 's/SESSION_DRIVER=.*/SESSION_DRIVER=database/' .env
+          sed -i 's/CACHE_STORE=.*/CACHE_STORE=database/' .env
           echo "" >> .env && echo "IS_NEXUS=true" >> .env
           echo "DEBUGBAR_ENABLED=false" >> .env
 
@@ -169,8 +175,14 @@ jobs:
         env:
           LARAVEL_BYPASS_ENV_CHECK: 1
 
+      # --no-reload is what makes PHP_CLI_SERVER_WORKERS take effect (ServeCommand disables
+      # workers whenever the env watcher is on), and it also stops the watcher restarting the
+      # server when `php artisan dusk` swaps .env. A single-worker server serializes every
+      # request, which is what lets one slow POST outlive the test that fired it.
       - name: Start Laravel server in background
-        run: php artisan serve > /dev/null 2>&1 &
+        run: php artisan serve --no-reload > /dev/null 2>&1 &
+        env:
+          PHP_CLI_SERVER_WORKERS: 4
 
       - name: Wait for server to be ready
         run: |

@@ -49,15 +49,19 @@ class CartTest extends DuskTestCase
             // Signed out with nothing remembered, the fields have to come back - hiding them
             // unconditionally would post a blank name and bounce with nothing on screen to fix.
             $browser->script('localStorage.clear();');
-            $browser->script('
-                var f = document.createElement("form");
-                f.method = "POST"; f.action = "/logout";
-                var t = document.createElement("input");
-                t.type = "hidden"; t.name = "_token";
-                t.value = document.querySelector("meta[name=csrf-token]").content;
-                f.appendChild(t); document.body.appendChild(f); f.submit();
-            ');
-            $browser->pause(2500);
+            // waitForReload, not a pause: a logout still in flight when the next step navigates
+            // re-installs the session cookie it was meant to drop.
+            $browser->waitForReload(function (Browser $b) {
+                $b->script('
+                    var f = document.createElement("form");
+                    f.method = "POST"; f.action = "/logout";
+                    var t = document.createElement("input");
+                    t.type = "hidden"; t.name = "_token";
+                    t.value = document.querySelector("meta[name=csrf-token]").content;
+                    f.appendChild(t); document.body.appendChild(f); f.submit();
+                ');
+            }, 30);
+            $browser->waitUntil('document.readyState === "complete"', 15);
 
             $this->openCartWithOneTicket($browser);
             $browser->waitFor('#es-cart-name', 10)->assertVisible('#es-cart-email');

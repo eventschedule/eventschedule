@@ -444,8 +444,15 @@ class SeatingTest extends DuskTestCase
             // Defeat the guard exactly as a determined buyer or a scripted post would.
             // form.submit() fires no submit EVENT, so validateForm() never runs - the same thing a
             // hand-rolled POST does.
-            $browser->script('document.querySelector(\'#ticket-selector form\').submit();');
-            $browser->pause(4000);
+            //
+            // waitForReload, never a fixed pause: the assertions below check the post did NOTHING,
+            // so on their own they cannot tell "the server refused it" from "it never arrived". A
+            // pause also lets the response land after the NEXT test has already cleared its
+            // cookies, which re-installs this test's session cookie and poisons that test's signup.
+            $browser->waitForReload(function (Browser $b) {
+                $b->script('document.querySelector(\'#ticket-selector form\').submit();');
+            }, 30);
+            $browser->waitUntil('document.readyState === "complete"', 15);
 
             $this->assertSame(0, Sale::count(), 'a stranded selection must never become a sale');
             $this->assertSame(0, SeatingSeat::where('status', 'sold')->count());
