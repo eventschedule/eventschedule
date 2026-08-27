@@ -146,6 +146,20 @@ From Duff-fueled nights at Moe\'s to cultural enlightenment at the Aztec Theater
             $role->users()->attach($user->id, ['level' => 'owner']);
         }
 
+        // A pre-existing demo curator whose owner has gone away - a restored backup, a deleted
+        // user - leaves populateDemoData() with a null $user and fatals the hourly seeder.
+        // Repoint it rather than crash. setRelation() matters: the null from the check above is
+        // cached on the instance, and populateDemoData() reads $role->user off this same object.
+        if (! $role->user) {
+            $role->user_id = $user->id;
+            $role->save();
+            $role->setRelation('user', $user);
+        }
+
+        if (! $role->users()->whereKey($user->id)->exists()) {
+            $role->users()->attach($user->id, ['level' => 'owner']);
+        }
+
         return $role;
     }
 
@@ -159,6 +173,13 @@ From Duff-fueled nights at Moe\'s to cultural enlightenment at the Aztec Theater
     public function populateDemoData(Role $role, bool $seedAnalytics = true): array
     {
         $user = $role->user;
+
+        // Everything below needs a real owner, and createDemoTalents(User $user) fatals on null.
+        // getOrCreateDemoRole() repairs it, but resetDemoData() reaches here directly having
+        // already guarded the same value - bail rather than take the scheduled run down.
+        if (! $user) {
+            return [];
+        }
 
         // Ensure curator has all demo properties set (in case of reset)
         $role->description = '# Welcome to Springfield Events! 🍩
