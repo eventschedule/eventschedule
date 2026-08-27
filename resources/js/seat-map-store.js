@@ -59,11 +59,18 @@ export function startPolling(stateUrl, eventId, date, map, onChange, intervalMs 
 
             const data = await res.json();
             map.version = data.version;
+            // The box office's summary bar reads these. Only the box office endpoint sends them,
+            // and only on a tick where something moved.
+            if (data.counts) map.counts = data.counts;
             if (!data.seats || !data.seats.length) return;
 
-            const byId = new Map(data.seats.map((s) => [s.id, s.state]));
+            // The WHOLE seat object, not just its state: the box office diff carries the booker,
+            // the hold note and the hold kind, and applying only `state` left a seat that had just
+            // sold showing no buyer until the next full load. The guest diff sends {id, state}
+            // alone, so this is identical for it.
+            const byId = new Map(data.seats.map((s) => [s.id, s]));
             (map.levels || []).forEach((lvl) => (lvl.sections || []).forEach((s) => s.seats.forEach((seat) => {
-                if (byId.has(seat.id)) seat.state = byId.get(seat.id);
+                if (byId.has(seat.id)) Object.assign(seat, byId.get(seat.id));
             })));
 
             // The payload, not a bare ping: it carries the seat advisory alongside the diff.

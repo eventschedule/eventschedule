@@ -5,20 +5,28 @@
         // component slot, which compiles to a closure body.
         $hash = \App\Utils\UrlUtils::encodeId($event->id);
         $args = ['subdomain' => $subdomain, 'hash' => $hash];
+        // Every box office route resolves its own occurrence, and with no date it falls back to
+        // the series anchor - so a console opened on one night of a run linked to another night's
+        // report. event.edit is deliberately left on $args: it has no occurrence to pin.
+        $dateArgs = $args + ['date' => $map->event_date];
+        $occurrenceDates = $event->adminOccurrenceDates();
 
         $boxOfficeProps = [
             'eventId' => $hash,
             'date' => $map->event_date,
             'eventName' => $event->translatedName(),
             'dateLabel' => \Carbon\Carbon::parse($map->event_date)->translatedFormat('l, F j, Y'),
+            // Bare $args on purpose: seat-map-store appends `?event_id=..&date=..` to this one
+            // unconditionally, so a query string already on it produces a second `?` and a
+            // malformed request. The store sends the same date from the `date` prop below.
             'stateUrl' => route('box_office.state', $args, false),
-            'blockUrl' => route('box_office.block', $args, false),
-            'unblockUrl' => route('box_office.unblock', $args, false),
-            'releaseUrl' => route('box_office.release_seat', $args, false),
-            'exchangeUrl' => route('box_office.exchange', $args, false),
-            'bookUrl' => route('box_office.book', $args, false),
+            'blockUrl' => route('box_office.block', $dateArgs, false),
+            'unblockUrl' => route('box_office.unblock', $dateArgs, false),
+            'releaseUrl' => route('box_office.release_seat', $dateArgs, false),
+            'exchangeUrl' => route('box_office.exchange', $dateArgs, false),
+            'bookUrl' => route('box_office.book', $dateArgs, false),
             'backUrl' => route('event.edit', $args, false),
-            'reportUrl' => route('box_office.report', $args, false),
+            'reportUrl' => route('box_office.report', $dateArgs, false),
             'csrfToken' => csrf_token(),
             'strings' => [
                 'back' => __('messages.back'),
@@ -36,9 +44,13 @@
                 'lookup' => __('messages.seating_lookup'),
                 'lookupPlaceholder' => __('messages.seating_lookup_placeholder'),
                 'lookupNothing' => __('messages.seating_lookup_nothing'),
+                'lookupMatches' => __('messages.seating_lookup_matches'),
                 'count_sold' => __('messages.seating_count_sold'),
                 'count_blocked' => __('messages.seating_count_blocked'),
                 'count_held' => __('messages.seating_count_held'),
+                'arrived' => __('messages.seating_arrived'),
+                'sold_label' => __('messages.seating_percent_sold'),
+                'countArrived' => __('messages.seating_count_arrived'),
                 'count_available' => __('messages.seating_legend_available'),
                 'seatSelected' => __('messages.seating_seat_selected'),
                 'seatsSelected' => __('messages.seating_seats_selected'),
@@ -52,6 +64,11 @@
                 'exchangeChoose' => __('messages.seating_exchange_choose'),
                 'exchangePrompt' => __('messages.seating_exchange_prompt'),
                 'releaseSeat' => __('messages.seating_release_seat'),
+                'releaseSeats' => __('messages.seating_release_seats'),
+                'viewOrder' => __('messages.seating_view_order'),
+                'confirmReleaseMany' => __('messages.seating_confirm_release_many'),
+                'selectRow' => __('messages.seating_select_row'),
+                'multiSelect' => __('messages.seating_multi_select'),
                 'confirmRelease' => __('messages.seating_confirm_release'),
                 'cancelExchange' => __('messages.seating_cancel_exchange'),
                 'releaseHelp' => __('messages.seating_release_help'),
@@ -77,6 +94,15 @@
 
     <div class="py-6">
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+            {{-- Outside the Vue mount, not inside it: everything about this screen changes with the
+                 date - the map, the counts, every action URL - so it is a navigation, and the mount
+                 point must stay empty for seating-box-office.js to own. --}}
+            <div class="mb-4 flex justify-end">
+                <x-seating-date-picker
+                    :action="route('box_office.show', $args)"
+                    :dates="$occurrenceDates"
+                    :current="$map->event_date" />
+            </div>
             <div id="seating-box-office" data-props="{{ json_encode($boxOfficeProps) }}"></div>
         </div>
     </div>

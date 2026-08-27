@@ -39,10 +39,12 @@ class SeatingSeat extends Model
         'hold_expires_at',
         'sale_id',
         'sale_ticket_id',
+        'checked_in_at',
         'state_version',
     ];
 
     protected $casts = [
+        'checked_in_at' => 'datetime',
         'row_position' => 'integer',
         'x' => 'integer',
         'y' => 'integer',

@@ -306,6 +306,14 @@ class SeatingEventTest extends TestCase
         $this->assertStringContainsString('seatingPlanOptions', $html);
         // The plan's bands reached the client so the select has something to offer.
         $this->assertStringContainsString('Stalls', $html);
+
+        // The FIGURES, not just the markup. These come from a grouped count now rather than a query
+        // pair per band, and they are what the organizer prices against: Stalls is 2x3, Circle 1x2,
+        // and Standing holds a capacity rather than seats.
+        $this->assertStringContainsString('"Stalls":6', $html);
+        $this->assertStringContainsString('"Circle":2', $html);
+        $this->assertStringContainsString('"Standing":50', $html, 'a standing band reports its capacity');
+        $this->assertStringContainsString('"seats":8', $html, 'the plan total counts seats only');
     }
 
     public function test_a_schedule_with_no_plans_sees_none_of_it(): void

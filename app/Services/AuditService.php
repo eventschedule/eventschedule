@@ -104,6 +104,21 @@ class AuditService
 
     const SALE_INSTALLMENT_FAILED = 'sale.installment_failed';
 
+    // Box office seat actions. Prefixed `sale.` for the reason given above: RoleController's
+    // organizer log only surfaces `sale.%` rows carrying an `event_id:<id>` metadata suffix, and
+    // "who released whose seat" is exactly the question a schedule owner asks after a refund
+    // dispute. Nothing recorded any of these before - neither the controller nor the service
+    // wrote an audit row for block, unblock, release, exchange or a counter booking.
+    const SALE_SEAT_BLOCKED = 'sale.seat_blocked';
+
+    const SALE_SEAT_UNBLOCKED = 'sale.seat_unblocked';
+
+    const SALE_SEAT_RELEASED = 'sale.seat_released';
+
+    const SALE_SEAT_EXCHANGED = 'sale.seat_exchanged';
+
+    const SALE_SEAT_BOOKED = 'sale.seat_booked';
+
     // Gift card actions
     const GIFT_CARD_CREATED = 'gift_card.created';
 

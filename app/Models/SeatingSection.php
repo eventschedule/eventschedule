@@ -33,12 +33,21 @@ class SeatingSection extends Model
         'capacity',
         'band',
         'ticket_id',
+        // RESERVED, not wired. Whole-table PRICING - one unit for the table rather than N x the
+        // band price - is a real cabaret ask, but it changes the arithmetic the books-balance guard
+        // in TicketController::claimSeatsForLeg() depends on, so it is a feature in its own right
+        // rather than a column to quietly start reading. Nothing sets it today.
         'table_ticket_id',
         'accessibility_only',
         'x',
         'y',
         'rotation',
         'position',
+        // RESERVED, not wired. The migration describes it as a polygon outline for stadium tiers
+        // and in-the-round, and nothing writes or draws it: the designer has no polygon tool and
+        // every renderer derives a section's box from its seats. Kept because the column exists on
+        // production and the shape is the right one for that feature; do not treat its presence as
+        // evidence the feature works.
         'shape',
         'is_deleted',
     ];
@@ -62,6 +71,34 @@ class SeatingSection extends Model
     public function ticket()
     {
         return $this->belongsTo(Ticket::class);
+    }
+
+    /**
+     * A point in this section's own coordinates, expressed in canvas space.
+     *
+     * The PHP twin of toCanvasFrame() in resources/js/seat-map-geometry.js, for the printed report,
+     * which resolves absolute seat positions server-side instead of drawing a transformed group.
+     * Without it a rotated section printed straight while the same room rendered angled in the
+     * designer, so the front-of-house sheet did not match the map staff had drawn.
+     *
+     * @return array{0: float, 1: float}
+     */
+    public function canvasPoint($x, $y): array
+    {
+        $deg = (int) $this->rotation;
+
+        if (! $deg) {
+            return [$this->x + $x, $this->y + $y];
+        }
+
+        $r = deg2rad($deg);
+        $cos = cos($r);
+        $sin = sin($r);
+
+        return [
+            $this->x + $x * $cos - $y * $sin,
+            $this->y + $x * $sin + $y * $cos,
+        ];
     }
 
     public function tableTicket()

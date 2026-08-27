@@ -16,11 +16,29 @@ class SeatingPlan extends Model
         'name',
         'description',
         'is_deleted',
+        // Template defaults for the single-seat rule, inherited by every occurrence at
+        // materialize(). Mirrors the identically named columns on event_seating_maps.
+        'orphan_rule_enabled',
+        'orphan_rule_min_gap',
+        'orphan_rule_lift_pct',
     ];
 
     protected $casts = [
         'is_deleted' => 'boolean',
+        'orphan_rule_enabled' => 'boolean',
+        'orphan_rule_min_gap' => 'integer',
+        'orphan_rule_lift_pct' => 'integer',
     ];
+
+    /** The rule settings an occurrence inherits from this template. */
+    public function orphanRuleDefaults(): array
+    {
+        return [
+            'orphan_rule_enabled' => (bool) $this->orphan_rule_enabled,
+            'orphan_rule_min_gap' => (int) $this->orphan_rule_min_gap,
+            'orphan_rule_lift_pct' => (int) $this->orphan_rule_lift_pct,
+        ];
+    }
 
     public function role()
     {
@@ -86,6 +104,91 @@ class SeatingPlan extends Model
     public function standingCapacityForBand(?string $band): int
     {
         return $band ? (int) $this->sections()->where('band', $band)->where('kind', 'standing')->sum('capacity') : 0;
+    }
+
+    /**
+     * A tiny SVG of the room, for anywhere a plan is CHOSEN rather than edited.
+     *
+     * The plans list, the event editor's plan select and the band picker were all text: a venue
+     * with four plans saw four identical cards, and priced bands from names alone with no idea
+     * which part of the room each one was. A thumbnail is the cheapest possible answer to
+     * "which room is this?".
+     *
+     * One dot per seat, no labels, no interactivity - and only the FIRST level, because levels are
+     * separate coordinate spaces and flattening them stacks the balcony on the stalls
+     * (see the seating-levels note in the designer).
+     *
+     * @return array{viewBox: string, dots: array<int, array{x: int, y: int, c: string}>}|null
+     */
+    public function thumbnail(int $maxDots = 400): ?array
+    {
+        $level = $this->levels()->orderBy('position')->first();
+
+        if (! $level) {
+            return null;
+        }
+
+        $sections = $this->sections()->where('seating_level_id', $level->id)->get();
+
+        if ($sections->isEmpty()) {
+            return null;
+        }
+
+        // toBase(): plain rows, not models. This samples 400 dots but has to read every seat on the
+        // level to space them evenly, and the event editor builds a thumbnail for EVERY plan the
+        // venue owns on every page load - eight 2,000-seat rooms was 16,000 Eloquent instantiations
+        // for a dropdown that may never be opened. Nothing here needs an accessor or a cast.
+        $seats = SeatingSeat::whereIn('seating_section_id', $sections->pluck('id'))
+            ->orderBy('seating_section_id')->orderBy('row_position')->orderBy('position')
+            ->toBase()->get(['seating_section_id', 'x', 'y', 'seating_table_id']);
+
+        if ($seats->isEmpty()) {
+            return null;
+        }
+
+        $tables = SeatingTable::whereIn('seating_section_id', $sections->pluck('id'))
+            ->toBase()->get(['id', 'x', 'y'])->keyBy('id');
+        $sectionById = $sections->keyBy('id');
+
+        // Evenly sampled rather than truncated: taking the first N of a 2,000-seat house draws the
+        // stalls and silently omits the circle.
+        $step = max(1, (int) ceil($seats->count() / $maxDots));
+        $dots = [];
+        $xs = [];
+        $ys = [];
+
+        foreach ($seats as $i => $seat) {
+            if ($i % $step !== 0) {
+                continue;
+            }
+
+            $section = $sectionById[$seat->seating_section_id] ?? null;
+            if (! $section) {
+                continue;
+            }
+
+            $table = $seat->seating_table_id ? ($tables[$seat->seating_table_id] ?? null) : null;
+            [$x, $y] = $section->canvasPoint(
+                ($table->x ?? 0) + $seat->x,
+                ($table->y ?? 0) + $seat->y,
+            );
+
+            $dots[] = ['x' => (int) round($x), 'y' => (int) round($y), 'c' => $section->color];
+            $xs[] = $x;
+            $ys[] = $y;
+        }
+
+        if (! $dots) {
+            return null;
+        }
+
+        $pad = 20;
+
+        return [
+            'viewBox' => sprintf('%d %d %d %d', min($xs) - $pad, min($ys) - $pad,
+                max(20, max($xs) - min($xs) + $pad * 2), max(20, max($ys) - min($ys) + $pad * 2)),
+            'dots' => $dots,
+        ];
     }
 
     public function standingCapacity(): int

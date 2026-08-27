@@ -157,6 +157,36 @@ class OrphanSeatRule
      *
      * @return array<int,array<int,SeatingSeat>>
      */
+    /**
+     * Is this rule live for this map right now?
+     *
+     * Exposed so BestAvailableService can stop RECOMMENDING selections this rule then refuses.
+     * It already mirrors AccessibleSeatingRule and WholeTableRule for exactly that reason - a pick
+     * the very next line rejects is not an offer, it is a dead end with a button on it.
+     */
+    public function appliesTo(EventSeatingMap $map): bool
+    {
+        return (bool) $map->orphan_rule_enabled
+            && $this->soldPercent($map) < (int) $map->orphan_rule_lift_pct;
+    }
+
+    /** The gap this map treats as stranded. */
+    public function gapFor(EventSeatingMap $map): int
+    {
+        return max(1, (int) $map->orphan_rule_min_gap);
+    }
+
+    /**
+     * How many stranded runs $row would be left with once $alsoTaken is gone.
+     *
+     * The count, not the seats: a row that merely swaps one orphan for another has not been made
+     * worse, which is the same comparison strandedBy() makes.
+     */
+    public function orphanRunCount($row, array $alsoTaken, int $gap, ?Carbon $now = null, array $treatAsFree = []): int
+    {
+        return count($this->orphanRuns($row, $alsoTaken, $gap, $now, $treatAsFree));
+    }
+
     private function orphanRuns($row, array $alsoTaken, int $gap, ?Carbon $now, array $treatAsFree = []): array
     {
         $runs = [];

@@ -1316,3 +1316,22 @@ a.text-blue-600:visited { color: rgb(37 99 235); }
     opacity: 0;
     transition: opacity 150ms ease-out;
 }
+
+/*
+ * A visible focus ring on a guest seat.
+ *
+ * The map's hit target is a transparent <circle>, and an SVG element takes no useful default
+ * outline - so a keyboard user arrowing across the map had no idea which seat they were on. The
+ * designer already solved this for its own canvas with .seat-node:focus-visible.
+ */
+.bo-seat-target:focus-visible {
+    outline: none;
+    stroke: var(--brand-blue);
+    stroke-width: 2.5;
+}
+
+.seatpick-target:focus-visible {
+    outline: none;
+    stroke: var(--brand-blue);
+    stroke-width: 2.5;
+}

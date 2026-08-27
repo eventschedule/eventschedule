@@ -327,7 +327,7 @@
                                                         @change="uploadImageItem(block.id, img._id, $event.target.files[0]); $event.target.value = ''" />
                                                     <div class="flex items-center gap-3">
                                                         <button type="button"
-                                                            @click="document.getElementById('image-upload-' + img._id).click()"
+                                                            @click="openImagePicker(img._id)"
                                                             :disabled="imageUploading[img._id]"
                                                             class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-md transition-colors border border-gray-300 dark:border-gray-600 disabled:opacity-50">
                                                             <svg class="w-4 h-4 me-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1160,6 +1160,17 @@ function removeImageItem(blockId, imgId) {
         const idx = block.data.images.findIndex(i => i._id === imgId);
         if (idx > -1) block.data.images.splice(idx, 1);
     }
+}
+
+/**
+ * Open the hidden file input for this image.
+ *
+ * `document` is not a setup binding and is not in Vue's template globals allowlist, so calling it
+ * straight from an @click resolved against the render context instead of the global - undefined at
+ * runtime, so the Choose file button threw and did nothing. Found by tools/check-vue-bindings.mjs.
+ */
+function openImagePicker(imageId) {
+    document.getElementById('image-upload-' + imageId)?.click();
 }
 
 function uploadImageItem(blockId, imgId, file) {

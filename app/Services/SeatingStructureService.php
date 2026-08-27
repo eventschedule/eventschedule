@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\BusinessException;
 use App\Models\EventSeatingMap;
+use App\Models\SeatingDecoration;
 use App\Models\SeatingLevel;
 use App\Models\SeatingPlan;
 use App\Models\SeatingSeat;
@@ -34,6 +35,9 @@ class SeatingStructureService
 
     public const MAX_TABLES = 500;
 
+    /** Generous: a stage plus a handful of labels per level is the realistic use. */
+    public const MAX_DECORATIONS = 200;
+
     /**
      * The whole structure as the designer consumes it. Ids are raw integers: this never leaves
      * an authenticated owner-scoped endpoint, and the save path re-checks every id against the
@@ -48,6 +52,8 @@ class SeatingStructureService
             ->whereIn('seating_section_id', $sections->pluck('id'))
             ->orderBy('row_position')->orderBy('position')
             ->get()->groupBy('seating_section_id');
+        $decorations = SeatingDecoration::forOwner($owner)
+            ->orderBy('position')->get()->groupBy('seating_level_id');
 
         return [
             'levels' => $levels->map(fn (SeatingLevel $level) => [
@@ -56,6 +62,16 @@ class SeatingStructureService
                 'position' => $level->position,
                 'width' => $level->width,
                 'height' => $level->height,
+                'decorations' => ($decorations[$level->id] ?? collect())->values()
+                    ->map(fn (SeatingDecoration $d) => [
+                        'id' => $d->id,
+                        'kind' => $d->kind,
+                        'label' => $d->label,
+                        'x' => $d->x, 'y' => $d->y,
+                        'width' => $d->width, 'height' => $d->height,
+                        'rotation' => $d->rotation,
+                        'position' => $d->position,
+                    ])->all(),
                 'sections' => $sections->where('seating_level_id', $level->id)->values()
                     ->map(fn (SeatingSection $section) => [
                         'id' => $section->id,
@@ -143,11 +159,18 @@ class SeatingStructureService
                 ->whereIn('seating_section_id', $existingSections->keys())
                 ->lockForUpdate()->get()->keyBy('id');
             $existingTables = SeatingTable::whereIn('seating_section_id', $existingSections->keys())->get()->keyBy('id');
+            $existingDecorations = SeatingDecoration::forOwner($owner)->get()->keyBy('id');
 
             $keptLevels = [];
             $keptSections = [];
             $keptSeats = [];
             $keptTables = [];
+            $keptDecorations = [];
+            // Whether the client SAID anything about decorations at all. Collecting only what was
+            // posted and hard-deleting the rest means a payload that simply omits the key wipes
+            // every stage marker and label on the plan - the opposite of the "not posted means
+            // leave alone" rule the orphan-rule columns follow.
+            $decorationsDeclared = false;
 
             foreach (array_values($data['levels'] ?? []) as $levelIndex => $levelData) {
                 $level = $this->upsert(
@@ -156,11 +179,36 @@ class SeatingStructureService
                     [
                         'name' => $this->str($levelData['name'] ?? '', 100) ?: __('messages.seating_level'),
                         'position' => $levelIndex,
+                        // Persisted for the API's benefit only. The client stopped reading these
+                        // when the viewBox began tracking the rendered element rather than the
+                        // level, so they are a constant on both sides - kept round-tripping so an
+                        // API-built plan is not lossy.
                         'width' => $this->int($levelData['width'] ?? 1200, 200, 20000),
                         'height' => $this->int($levelData['height'] ?? 800, 200, 20000),
                     ]
                 );
                 $keptLevels[] = $level->id;
+
+                $decorationsDeclared = $decorationsDeclared || array_key_exists('decorations', $levelData);
+
+                foreach (array_values($levelData['decorations'] ?? []) as $decorationIndex => $decorationData) {
+                    $decoration = $this->upsert(
+                        $existingDecorations, $decorationData['id'] ?? null,
+                        fn () => new SeatingDecoration($ownerAttrs),
+                        [
+                            'seating_level_id' => $level->id,
+                            'kind' => ($decorationData['kind'] ?? 'stage') === 'text' ? 'text' : 'stage',
+                            'label' => $this->str($decorationData['label'] ?? null, 100),
+                            'x' => $this->int($decorationData['x'] ?? 0, -20000, 20000),
+                            'y' => $this->int($decorationData['y'] ?? 0, -20000, 20000),
+                            'width' => $this->int($decorationData['width'] ?? 320, 10, 20000),
+                            'height' => $this->int($decorationData['height'] ?? 40, 10, 20000),
+                            'rotation' => $this->int($decorationData['rotation'] ?? 0, -360, 360),
+                            'position' => $decorationIndex,
+                        ]
+                    );
+                    $keptDecorations[] = $decoration->id;
+                }
 
                 foreach (array_values($levelData['sections'] ?? []) as $sectionIndex => $sectionData) {
                     $kind = in_array($sectionData['kind'] ?? '', ['seated', 'table', 'standing'], true)
@@ -245,7 +293,8 @@ class SeatingStructureService
             }
 
             $this->removeMissing($existingSeats, $existingSections, $existingTables, $existingLevels,
-                $keptSeats, $keptSections, $keptTables, $keptLevels);
+                $keptSeats, $keptSections, $keptTables, $keptLevels,
+                $decorationsDeclared ? $existingDecorations : null, $keptDecorations);
         });
     }
 
@@ -263,7 +312,7 @@ class SeatingStructureService
         return $model;
     }
 
-    private function removeMissing($seats, $sections, $tables, $levels, array $keptSeats, array $keptSections, array $keptTables, array $keptLevels): void
+    private function removeMissing($seats, $sections, $tables, $levels, array $keptSeats, array $keptSections, array $keptTables, array $keptLevels, $decorations = null, array $keptDecorations = []): void
     {
         $droppedSeats = $seats->keys()->diff($keptSeats);
 
@@ -298,6 +347,12 @@ class SeatingStructureService
         // Sections are soft-deleted: a removed one may still be named by a sold seat's history.
         SeatingSection::whereIn('id', $sections->keys()->diff($keptSections))->update(['is_deleted' => true]);
         SeatingLevel::whereIn('id', $levels->keys()->diff($keptLevels))->delete();
+
+        // Hard-deleted, unlike a section: nothing else ever references a decoration, so there is no
+        // sold seat whose history could still name one.
+        if ($decorations) {
+            SeatingDecoration::whereIn('id', $decorations->keys()->diff($keptDecorations))->delete();
+        }
     }
 
     private function str($value, int $max): ?string
@@ -329,8 +384,11 @@ class SeatingStructureService
         $sections = 0;
         $seats = 0;
         $tables = 0;
+        $decorations = 0;
 
         foreach ($levels as $level) {
+            $decorations += count($level['decorations'] ?? []);
+
             foreach ($level['sections'] ?? [] as $section) {
                 $sections++;
                 $seats += count($section['seats'] ?? []);
@@ -344,6 +402,7 @@ class SeatingStructureService
             count($levels) > self::MAX_LEVELS => ['messages.seating_too_many_levels', self::MAX_LEVELS],
             $sections > self::MAX_SECTIONS => ['messages.seating_too_many_sections', self::MAX_SECTIONS],
             $tables > self::MAX_TABLES => ['messages.seating_too_many_tables', self::MAX_TABLES],
+            $decorations > self::MAX_DECORATIONS => ['messages.seating_too_many_decorations', self::MAX_DECORATIONS],
             $seats > self::MAX_SEATS => ['messages.seating_plan_too_large', self::MAX_SEATS],
             default => null,
         };

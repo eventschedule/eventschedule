@@ -1169,6 +1169,18 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             'seating_plan_id' => $plan->id, 'name' => 'Circle', 'position' => 1,
         ]);
 
+        // A stage on each level, because a level is its own coordinate space and both the stalls
+        // and the circle face the same room. Without it every seating screen in the demo - and the
+        // docs screenshots that come from them - shows a grid of circles with no way to tell the
+        // front row from the back.
+        foreach ([$stalls, $circle] as $level) {
+            \App\Models\SeatingDecoration::create([
+                'seating_plan_id' => $plan->id, 'seating_level_id' => $level->id,
+                'kind' => 'stage', 'label' => 'STAGE',
+                'x' => 20, 'y' => -90, 'width' => 300, 'height' => 40, 'position' => 0,
+            ]);
+        }
+
         // Stalls: rows A-F of 12, split 6+6 by a centre gangway.
         $this->seedDemoSection($plan, $stalls, [
             'name' => 'Stalls', 'band' => 'Stalls', 'color' => '#DAA520', 'position' => 0,

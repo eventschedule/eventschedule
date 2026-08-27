@@ -582,6 +582,8 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
 
     Route::get('/checkin', [CheckInController::class, 'index'])->name('checkin.index');
     Route::get('/checkin/{event_id}/stats', [CheckInController::class, 'stats'])->name('checkin.stats');
+    // Find an attendee at the door. Read-only: admitting still goes through the scan.
+    Route::get('/checkin/{event_id}/search', [CheckInController::class, 'search'])->name('checkin.search')->middleware('throttle:60,1');
 
     Route::get('/{subdomain}/api/admin-calendar-events', [RoleController::class, 'adminCalendarEvents'])->name('role.admin_calendar_events');
     Route::post('/{subdomain}/change-plan/{plan_type}', [RoleController::class, 'changePlan'])->name('role.change_plan');

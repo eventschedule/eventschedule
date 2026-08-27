@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Event;
 use App\Models\EventSeatingMap;
+use App\Models\SeatingDecoration;
 use App\Models\SeatingLevel;
 use App\Models\SeatingPlan;
 use App\Models\SeatingSeat;
@@ -99,11 +100,13 @@ class SeatingMapService
                     return $map;
                 }
 
+                // Inherited, not defaulted: a venue that turned the single-seat rule off for the
+                // room should not have it come back on for every new date.
                 $map = EventSeatingMap::create([
                     'event_id' => $event->id,
                     'event_date' => $date,
                     'seating_plan_id' => $plan->id,
-                ]);
+                ] + $plan->orphanRuleDefaults());
 
                 $this->copyStructure($plan, $map);
                 $this->applyBandMapping($event, $map);
@@ -150,6 +153,26 @@ class SeatingMapService
                 'height' => $level->height,
             ]));
             $levelIds[$level->id] = $copy->id;
+        }
+
+        // Copied with the rest of the room: the stage is what tells a buyer which way the seats
+        // face, so a snapshot without it is a different map from the one the organizer drew.
+        foreach (SeatingDecoration::where('seating_plan_id', $plan->id)->orderBy('position')->get() as $decoration) {
+            if (! isset($levelIds[$decoration->seating_level_id])) {
+                continue;
+            }
+
+            SeatingDecoration::create(array_merge($owner, [
+                'seating_level_id' => $levelIds[$decoration->seating_level_id],
+                'kind' => $decoration->kind,
+                'label' => $decoration->label,
+                'x' => $decoration->x,
+                'y' => $decoration->y,
+                'width' => $decoration->width,
+                'height' => $decoration->height,
+                'rotation' => $decoration->rotation,
+                'position' => $decoration->position,
+            ]));
         }
 
         $sectionIds = [];

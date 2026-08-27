@@ -1536,6 +1536,87 @@ class Event extends Model
     }
 
     /**
+     * The occurrence dates an operator can act on in the admin portal (Y-m-d, ascending).
+     *
+     * The box office, the printed report and the one-date designer are all keyed to a single
+     * occurrence, and none of them had any way to reach a second one: with no ?date= they fall back
+     * to saleEventDateFromStartsAt(), the series anchor, so a thirty-night run only ever exposed
+     * its first night. This is what their date pickers list.
+     *
+     * The window reaches BACKWARDS as well as forwards on purpose. Recording a walk-up after the
+     * doors opened is ordinary desk work - BoxOfficeSeatingService::bookSeats() deliberately allows
+     * a past date, refusing only a cancelled event - and a front-of-house sheet is often reprinted
+     * for the night that has just finished.
+     *
+     * Deliberately NOT canSellTickets()-filtered, for the same reason.
+     *
+     * @return string[]
+     */
+    public function adminOccurrenceDates(int $daysBack = 30, int $daysForward = 365, int $limit = 60): array
+    {
+        if (! $this->starts_at) {
+            return [];
+        }
+
+        if (! $this->days_of_week) {
+            $date = $this->saleEventDateFromStartsAt();
+
+            return $date ? [$date] : [];
+        }
+
+        $tz = $this->scheduleTimezone();
+        $today = Carbon::parse($this->scheduleToday())->startOfDay();
+        $cursor = $today->copy()->subDays(max(0, $daysBack));
+
+        // Never walk from before the run begins: matchesDate() rejects those anyway, and on a
+        // series starting next year it would burn the whole day budget before the first hit.
+        $start = $this->localStartCarbon($tz)->startOfDay();
+        if ($cursor->lt($start)) {
+            $cursor = $start->copy();
+        }
+
+        $end = $today->copy()->addDays(max(1, $daysForward));
+        $dates = [];
+
+        while ($cursor->lte($end) && count($dates) < $limit) {
+            if ($this->matchesDate($cursor->copy(), $tz)) {
+                $dates[] = $cursor->format('Y-m-d');
+            }
+            $cursor->addDay();
+        }
+
+        return $dates;
+    }
+
+    /**
+     * The occurrence an admin screen should open on when no ?date= was given.
+     *
+     * Tonight or the next night of the run, falling back to the most recent past one so a finished
+     * run still opens on something real, and finally to the anchor. Scoped to the two AP screens by
+     * their controllers rather than changed inside SeatingMapService::resolveDate(), whose null-date
+     * fallback is shared with the guest picker and with the memoized availability read behind
+     * "sold out" on every card.
+     */
+    public function defaultAdminOccurrenceDate(): ?string
+    {
+        $dates = $this->adminOccurrenceDates();
+
+        if (! $dates) {
+            return $this->saleEventDateFromStartsAt();
+        }
+
+        $today = $this->scheduleToday();
+
+        foreach ($dates as $date) {
+            if ($date >= $today) {
+                return $date;
+            }
+        }
+
+        return end($dates);
+    }
+
+    /**
      * The UTC instant at which this event's occurrence on $date starts.
      *
      * $date is a venue-local calendar date; the time of day comes from `starts_at`. Setting

@@ -166,6 +166,7 @@ class SeatingPlanController extends Controller
             $plan->name = $name;
         }
 
+        $plan->forceFill($this->orphanRuleInput($request));
         $plan->save();
 
         // Always, even when nothing else on the row changed: without it a second editor's stale
@@ -218,13 +219,21 @@ class SeatingPlanController extends Controller
         }
 
         try {
-            $this->structure->save($map, ['levels' => $request->input('levels', [])]);
+            // The same ceiling the template path enforces. Without it a per-date edit could grow a
+            // room past every cap the designer, the report and the box office are sized for.
+            $data = ['levels' => $request->input('levels', [])];
+            $this->structure->assertWithinLimits($data);
+            $this->structure->save($map, $data);
         } catch (BusinessException $e) {
             return response()->json(['error' => $e->getMessage()], 422);
         } catch (\Illuminate\Database\QueryException $e) {
             report($e);
 
             return response()->json(['error' => __('messages.seating_save_failed')], 500);
+        }
+
+        if ($rules = $this->orphanRuleInput($request)) {
+            $map->forceFill($rules)->save();
         }
 
         // Doubles as the poll cursor: nothing else bumped a snapshot's version on a structural
@@ -257,6 +266,29 @@ class SeatingPlanController extends Controller
     /**
      * @return array{0: Role, 1: \App\Models\Event, 2: \App\Models\EventSeatingMap}
      */
+    /**
+     * The single-seat rule's settings, clamped, or [] when the request did not send them.
+     *
+     * "Not posted = leave alone", the same rule seating_plan_id and seating_band already follow: an
+     * older client, or a payload built by hand, must not silently reset a venue's decision to the
+     * column defaults.
+     */
+    private function orphanRuleInput(Request $request): array
+    {
+        if (! $request->has('orphan_rule_enabled')) {
+            return [];
+        }
+
+        return [
+            'orphan_rule_enabled' => $request->boolean('orphan_rule_enabled'),
+            // 1 = never leave a single seat alone. Above 4 the rule starts refusing ordinary
+            // selections, so the input is bounded rather than free.
+            'orphan_rule_min_gap' => max(1, min(4, (int) $request->input('orphan_rule_min_gap', 1))),
+            // Percent sold past which the rule lifts, so it cannot block the last few seats.
+            'orphan_rule_lift_pct' => max(0, min(100, (int) $request->input('orphan_rule_lift_pct', 90))),
+        ];
+    }
+
     protected function resolveOccurrence(Request $request, $subdomain, $hash): array
     {
         $role = $this->gate($request, $subdomain);
@@ -283,6 +315,13 @@ class SeatingPlanController extends Controller
             abort(404);
         }
 
+        // Tonight rather than the series anchor. saleEventDateFromStartsAt() - what
+        // SeatingMapService::resolveDate() falls back to - is the date the RUN began, so on a
+        // recurring event every AP screen opened on night one, usually already in the past, and
+        // there was no way to reach any other night. Defaulted here and not in resolveDate(), whose
+        // null-date fallback is shared with the guest picker and with Event::seatingMapCache.
+        $date = $date ?? $event->defaultAdminOccurrenceDate();
+
         $map = app(\App\Services\SeatingMapService::class)->materialize($event, $date);
 
         if (! $map) {
@@ -306,7 +345,16 @@ class SeatingPlanController extends Controller
      */
     private function structurePayload(SeatingPlan|EventSeatingMap $owner): array
     {
-        return $this->structure->toArray($owner) + ['revision' => $owner->structureRevision()];
+        return $this->structure->toArray($owner) + [
+            'revision' => $owner->structureRevision(),
+            // Same three keys whichever owner this is: the designer edits a template's defaults or
+            // one date's own settings through one panel, exactly as it does the layout.
+            'rules' => [
+                'orphan_rule_enabled' => (bool) $owner->orphan_rule_enabled,
+                'orphan_rule_min_gap' => (int) $owner->orphan_rule_min_gap,
+                'orphan_rule_lift_pct' => (int) $owner->orphan_rule_lift_pct,
+            ],
+        ];
     }
 
     /**

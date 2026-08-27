@@ -151,6 +151,14 @@
             if (pending) pending.submit();
         });
 
+        // data-print on a button: print the page. A delegated handler rather than an inline
+        // onclick, which the CSP blocks.
+        document.addEventListener('click', function (e) {
+            if (e.target.closest && e.target.closest('[data-print]')) {
+                window.print();
+            }
+        }, true);
+
         // data-auto-submit on a control (e.g. <select>): submit its form on change
         document.addEventListener('change', function (e) {
             if (! e.target.closest) return;

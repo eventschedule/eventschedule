@@ -105,6 +105,11 @@
                                         'sale.expired' => __('messages.expired'),
                                         'sale.installment_paid' => __('messages.audit_installment_paid'),
                                         'sale.installment_failed' => __('messages.audit_installment_failed'),
+                                        'sale.seat_blocked' => __('messages.audit_seat_blocked'),
+                                        'sale.seat_unblocked' => __('messages.audit_seat_unblocked'),
+                                        'sale.seat_released' => __('messages.audit_seat_released'),
+                                        'sale.seat_exchanged' => __('messages.audit_seat_exchanged'),
+                                        'sale.seat_booked' => __('messages.audit_seat_booked'),
                                         default => $log->action,
                                     };
                                     $actionColor = match(explode('.', $log->action)[0] ?? '') {
@@ -119,6 +124,9 @@
                                             'sale.expired' => 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
                                             'sale.installment_paid' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
                                             'sale.installment_failed' => 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+                                            'sale.seat_released' => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+                                            'sale.seat_booked' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+                                            'sale.seat_blocked', 'sale.seat_unblocked', 'sale.seat_exchanged' => 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
                                             default => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
                                         },
                                         default => 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300',

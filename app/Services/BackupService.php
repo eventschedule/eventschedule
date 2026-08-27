@@ -25,6 +25,7 @@ use App\Models\PromoCode;
 use App\Models\Role;
 use App\Models\Sale;
 use App\Models\SaleTicket;
+use App\Models\SeatingDecoration;
 use App\Models\SeatingLevel;
 use App\Models\SeatingPlan;
 use App\Models\SeatingSeat;
@@ -278,6 +279,12 @@ class BackupService
             'name' => $plan->name,
             'description' => $plan->description,
             'is_deleted' => (bool) $plan->is_deleted,
+            // The room's own selling rules. Dropped, a restore silently turns the single-seat rule
+            // back ON for a venue that deliberately turned it off - and materialize() then seeds
+            // every future date from the wrong default.
+            'orphan_rule_enabled' => (bool) $plan->orphan_rule_enabled,
+            'orphan_rule_min_gap' => (int) $plan->orphan_rule_min_gap,
+            'orphan_rule_lift_pct' => (int) $plan->orphan_rule_lift_pct,
         ], $this->exportSeatingStructure('seating_plan_id', $plan->id)))->toArray();
     }
 
@@ -378,6 +385,14 @@ class BackupService
             return true;
         }
 
+        // Decorations too, on the same reasoning as the seat count: a date that has had its stage
+        // moved or a label added is no longer a copy of the template, and dropping it would restore
+        // the template's layout over the operator's per-date edit.
+        if (SeatingDecoration::where('event_seating_map_id', $map->id)->count()
+            !== SeatingDecoration::where('seating_plan_id', $planId)->count()) {
+            return true;
+        }
+
         return SeatingSeat::where('event_seating_map_id', $map->id)->count()
             !== SeatingSeat::where('seating_plan_id', $planId)->count();
     }
@@ -397,12 +412,20 @@ class BackupService
         $tables = SeatingTable::whereIn('seating_section_id', $sections->pluck('id'))->get();
         $seats = SeatingSeat::where($ownerColumn, $ownerId)
             ->orderBy('row_position')->orderBy('position')->get();
+        $decorations = SeatingDecoration::where($ownerColumn, $ownerId)->orderBy('position')->get();
 
         return [
             'levels' => $levels->map(fn ($l) => [
                 '_ref_id' => $l->id,
                 'name' => $l->name, 'position' => $l->position,
                 'width' => $l->width, 'height' => $l->height,
+            ])->all(),
+            'decorations' => $decorations->map(fn ($d) => [
+                '_level_ref_id' => $d->seating_level_id,
+                'kind' => $d->kind, 'label' => $d->label,
+                'x' => $d->x, 'y' => $d->y,
+                'width' => $d->width, 'height' => $d->height,
+                'rotation' => $d->rotation, 'position' => $d->position,
             ])->all(),
             'sections' => $sections->map(fn ($sec) => [
                 '_ref_id' => $sec->id,
@@ -438,6 +461,9 @@ class BackupService
                 'status' => $seat->status,
                 'hold_kind' => $seat->hold_kind, 'hold_note' => $seat->hold_note,
                 'hold_expires_at' => $seat->hold_expires_at,
+                // Who is already through the door. Restoring a night in progress without this
+                // silently empties the arrivals the sheet and the console are drawing.
+                'checked_in_at' => $seat->checked_in_at,
             ])->all(),
         ];
     }
@@ -1876,6 +1902,11 @@ class BackupService
             'name' => $data['name'] ?? __('messages.seating_plan'),
             'description' => $data['description'] ?? null,
             'is_deleted' => (bool) ($data['is_deleted'] ?? false),
+            // Defaults match the migration, so a backup taken before these columns existed restores
+            // to the same behaviour it had when it was written.
+            'orphan_rule_enabled' => (bool) ($data['orphan_rule_enabled'] ?? true),
+            'orphan_rule_min_gap' => (int) ($data['orphan_rule_min_gap'] ?? 1),
+            'orphan_rule_lift_pct' => (int) ($data['orphan_rule_lift_pct'] ?? 90),
         ]);
 
         $this->importSeatingStructure($data, ['seating_plan_id' => $plan->id], $idMap);
@@ -1929,6 +1960,27 @@ class BackupService
             if (isset($row['_ref_id'])) {
                 $levelIds[$row['_ref_id']] = $level->id;
             }
+        }
+
+        // No _ref_id of their own: nothing else in the archive points at a decoration, so there is
+        // no id to resolve later. The level reference is the only link it needs.
+        foreach ($data['decorations'] ?? [] as $row) {
+            $levelRef = $row['_level_ref_id'] ?? null;
+            $levelId = $levelRef ? ($levelIds[$levelRef] ?? null) : null;
+
+            if (! $levelId) {
+                continue;
+            }
+
+            SeatingDecoration::create($ownerAttrs + [
+                'seating_level_id' => $levelId,
+                'kind' => ($row['kind'] ?? 'stage') === 'text' ? 'text' : 'stage',
+                'label' => $row['label'] ?? null,
+                'x' => $row['x'] ?? 0, 'y' => $row['y'] ?? 0,
+                'width' => $row['width'] ?? 320, 'height' => $row['height'] ?? 40,
+                'rotation' => $row['rotation'] ?? 0,
+                'position' => $row['position'] ?? 0,
+            ]);
         }
 
         $sectionIds = [];
@@ -2025,6 +2077,9 @@ class BackupService
                 'hold_token' => null,
                 'sale_id' => $saleId,
                 'sale_ticket_id' => $saleTicketId,
+                // Only meaningful for a seat that came back sold; $saleId is already null when the
+                // sale did not survive the restore, and an arrival without a buyer is noise.
+                'checked_in_at' => $saleId ? ($row['checked_in_at'] ?? null) : null,
                 'state_version' => 1,
                 'created_at' => $now,
                 'updated_at' => $now,

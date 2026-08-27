@@ -89,6 +89,37 @@
                 <p class="text-gray-500 dark:text-gray-400">{{ __('messages.no_checkins_yet') }}</p>
             </div>
 
+            <!-- Find somebody at the door.
+                 This screen had no search of ANY kind - not by name, not by seat, not by order -
+                 only a rear-view feed of the last ten arrivals. So "is C14 here yet", and "they say
+                 they booked but the scanner will not read their phone", had no answer here. -->
+            <div class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+                <label for="checkin-search" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.checkin_search') }}</label>
+                <input id="checkin-search" v-model="searchQuery" @input="onSearch" type="search"
+                    :placeholder="@json(__('messages.checkin_search_placeholder'))"
+                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
+
+                <p v-if="searchQuery.length >= 2 && !searching && !searchResults.length"
+                   class="mt-3 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.checkin_search_none') }}</p>
+
+                <div v-if="searchResults.length" class="mt-3 divide-y divide-gray-100 dark:divide-gray-700">
+                    <div v-for="(hit, i) in searchResults" :key="i" class="flex items-center justify-between py-2">
+                        <div class="min-w-0">
+                            <p class="font-medium text-gray-800 dark:text-gray-200 truncate">@{{ hit.name }}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 truncate">
+                                @{{ hit.seat }}<template v-if="hit.ticket_type"> &middot; @{{ hit.ticket_type }}</template>
+                            </p>
+                        </div>
+                        <span class="shrink-0 ms-3 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+                              :class="hit.arrived
+                                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                                : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'">
+                            @{{ hit.arrived ? @json(__('messages.checked_in')) : @json(__('messages.checkin_not_yet')) }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
             <!-- Recent activity -->
             <div v-if="stats.recent_checkins.length > 0"
                 class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
@@ -126,6 +157,10 @@
                     loading: false,
                     pollInterval: null,
                     dropdownOpen: false,
+                    searchQuery: '',
+                    searchResults: [],
+                    searching: false,
+                    searchTimer: null,
                 }
             },
             computed: {
@@ -138,6 +173,37 @@
                 }
             },
             methods: {
+                /** Debounced, because this fires on every keystroke at a door with poor signal. */
+                onSearch() {
+                    clearTimeout(this.searchTimer);
+
+                    if (this.searchQuery.trim().length < 2) {
+                        this.searchResults = [];
+                        return;
+                    }
+
+                    this.searchTimer = setTimeout(this.runSearch, 300);
+                },
+                async runSearch() {
+                    if (! this.selectedEventId) return;
+
+                    this.searching = true;
+                    try {
+                        // Built the same way the stats URL beside it is, so both follow whatever
+                        // routing the install uses (subdomain on hosted, path on selfhost).
+                        const url = '{{ route("checkin.search", ["event_id" => "__EVENT_ID__"]) }}'.replace('__EVENT_ID__', this.selectedEventId);
+                        const res = await fetch(url + '?q=' + encodeURIComponent(this.searchQuery) + '&date=' + encodeURIComponent(this.selectedDate), {
+                            headers: { Accept: 'application/json' },
+                            credentials: 'same-origin',
+                        });
+                        const data = res.ok ? await res.json() : { results: [] };
+                        this.searchResults = data.results || [];
+                    } catch (e) {
+                        this.searchResults = [];
+                    } finally {
+                        this.searching = false;
+                    }
+                },
                 ticketPercent(ticket) {
                     if (ticket.sold === 0) return 0;
                     return Math.min(100, Math.round((ticket.checked_in / ticket.sold) * 100));

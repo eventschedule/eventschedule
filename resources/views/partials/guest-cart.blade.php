@@ -97,6 +97,20 @@
                             @{{ leg.event_date }} &middot; @{{ ticketCount(leg) }} {{ __('messages.tickets') }}
                             <template v-if="legPrice(leg) !== null">&middot; @{{ formatMoney(legPrice(leg), leg.currency) }}</template>
                         </div>
+                        {{-- Allocated seating only. The basket used to say "4 tickets" for a buyer
+                             holding Row C 12-15, and said nothing at all about the twelve-minute
+                             hold those seats are on - which expires while they carry on browsing,
+                             and is then refused at checkout with no way back to the same seats. --}}
+                        <div v-if="leg.seat_labels && leg.seat_labels.length"
+                             class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                            {{-- A real middle dot, not the entity: a mustache sets textContent, so
+                                 &middot; reaches the buyer as those eight characters. --}}
+                            @{{ leg.seat_labels.join(' · ') }}
+                        </div>
+                        <div v-if="seatHoldLabel(leg)" class="mt-0.5 text-xs"
+                             :class="seatsLapsed(leg) ? 'text-amber-700 dark:text-amber-400 font-medium' : 'text-gray-500 dark:text-gray-400'">
+                            @{{ seatHoldLabel(leg) }}
+                        </div>
                     </div>
                     <button type="button" @click="remove(index)"
                         class="text-xs shrink-0"
@@ -235,6 +249,9 @@ window.addEventListener('DOMContentLoaded', function () {
         data: function () {
             return {
                 legs: [],
+                // Ticks the seat-hold countdown above. One interval for the whole panel.
+                now: Date.now(),
+                clock: null,
                 // Opened when the last checkout was refused, so the message below is on screen
                 // rather than hidden behind the cart button.
                 open: @json((bool) $cartHasError),
@@ -317,6 +334,20 @@ window.addEventListener('DOMContentLoaded', function () {
             if (this.legs.length) {
                 this.$nextTick(this.renderTurnstile);
             }
+
+            // Only while something in the basket is actually on a clock, so an ordinary cart pays
+            // nothing for this.
+            var self = this;
+            this.clock = setInterval(function () {
+                if (self.legs.some(function (leg) { return !! leg.seats_expire_at; })) {
+                    self.now = Date.now();
+                }
+            }, 1000);
+        },
+        beforeUnmount: function () {
+            if (this.clock) {
+                clearInterval(this.clock);
+            }
         },
         watch: {
             // The panel (and so the widget container) only exists once there is something in the
@@ -343,6 +374,32 @@ window.addEventListener('DOMContentLoaded', function () {
             },
         },
         methods: {
+            /**
+             * How long this leg's seats are still held, or that they have gone.
+             *
+             * Display only. The hold lives in the session and the checkout claims from there, so
+             * nothing here is trusted - this exists because a buyer who leaves the event page had
+             * no way at all to know the clock was running.
+             */
+            seatHoldLabel: function (leg) {
+                if (! leg.seats_expire_at) {
+                    return '';
+                }
+
+                var left = Math.floor((leg.seats_expire_at - this.now) / 1000);
+
+                if (left <= 0) {
+                    return @json(__('messages.seating_hold_lapsed'));
+                }
+
+                var m = Math.floor(left / 60);
+                var sec = left % 60;
+
+                return @json(__('messages.seating_holding_for')) + ' ' + m + ':' + String(sec).padStart(2, '0');
+            },
+            seatsLapsed: function (leg) {
+                return !! leg.seats_expire_at && leg.seats_expire_at <= this.now;
+            },
             read: function () {
                 try {
                     var raw = localStorage.getItem(storageKey);

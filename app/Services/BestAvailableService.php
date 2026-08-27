@@ -129,8 +129,27 @@ class BestAvailableService
 
         $best = null;
 
-        foreach ($seats->groupBy(fn ($s) => $s->seating_section_id.'|'.$s->row_position) as $row) {
+        // The third rule this has to mirror, for the same reason as the other two: a block that
+        // strands a single seat is refused by OrphanSeatRule the moment acquire() runs, so
+        // recommending one hands the buyer a selection the checkout will not take. Scoring rather
+        // than filtering, because when EVERY block strands a seat, offering one the buyer can
+        // adjust still beats offering nothing.
+        $orphanRule = app(OrphanSeatRule::class);
+        $orphanApplies = $orphanRule->appliesTo($map);
+        $orphanGap = $orphanRule->gapFor($map);
+        $fullRows = $orphanApplies
+            ? SeatingSeat::where('event_seating_map_id', $map->id)
+                ->whereIn('seating_section_id', $sections->keys())
+                ->orderBy('position')->get()
+                ->groupBy(fn ($s) => $s->seating_section_id.'|'.$s->row_position)
+            : collect();
+
+        foreach ($seats->groupBy(fn ($s) => $s->seating_section_id.'|'.$s->row_position) as $rowKey => $row) {
             $row = $row->values();
+
+            // Once per row, not once per candidate block.
+            $fullRow = $fullRows[$rowKey] ?? null;
+            $orphansBefore = $fullRow ? $orphanRule->orphanRunCount($fullRow, [], $orphanGap, $now) : 0;
             $positions = $row->pluck('position');
             // Centre of what is still free in this row. Using the free seats rather than the row's
             // full width keeps the pick sensible as a row fills from the outside in.
@@ -144,14 +163,24 @@ class BestAvailableService
                 }
 
                 $centre = ($block->first()->position + $block->last()->position) / 2;
+
+                // Leads the score: a stranding block is not a worse seat, it is an unbuyable one,
+                // so it must lose to any block that does not strand - even one further back.
+                $strands = 0;
+                if ($fullRow) {
+                    $after = $orphanRule->orphanRunCount($fullRow, $block->pluck('id')->all(), $orphanGap, $now);
+                    $strands = max(0, $after - $orphansBefore);
+                }
+
                 $score = [
+                    $strands,
                     (int) ($sections[$block->first()->seating_section_id] ?? 0),
                     (int) $block->first()->row_position,
                     abs($centre - $rowCentre),
                 ];
 
                 // PHP compares equal-length arrays element by element, which is exactly the
-                // section-then-row-then-centre precedence we want.
+                // no-orphan-then-section-then-row-then-centre precedence we want.
                 if ($best === null || $score < $best['score']) {
                     $best = ['score' => $score, 'ids' => $block->pluck('id')->all()];
                 }

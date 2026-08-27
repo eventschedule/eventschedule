@@ -62,6 +62,7 @@ class BoxOfficeSeatingService
                 'hold_note' => $note ? mb_substr(trim($note), 0, 255) : null,
                 'hold_token' => null,
                 'hold_expires_at' => null,
+                'checked_in_at' => null,
                 'state_version' => $version,
             ]);
         });
@@ -92,7 +93,8 @@ class BoxOfficeSeatingService
 
             return SeatingSeat::whereIn('id', $ids)->update([
                 'status' => 'available', 'hold_kind' => null, 'hold_note' => null,
-                'hold_token' => null, 'hold_expires_at' => null, 'state_version' => $version,
+                'hold_token' => null, 'hold_expires_at' => null, 'checked_in_at' => null,
+                'state_version' => $version,
             ]);
         });
 
@@ -113,6 +115,103 @@ class BoxOfficeSeatingService
      *
      * The money is the organizer's to refund, exactly as `refundSale()` works today.
      */
+    /**
+     * Release several sold seats at once - a party refunding together.
+     *
+     * releaseSeat() handles one, and a party of six was six click-confirm cycles at the counter.
+     * This is NOT a loop over that method: it takes the tickets lock BEFORE the map lock exactly
+     * once, for the whole set. Looping would take ticket-1, then the map (bumpVersion is an UPDATE
+     * and holds an X lock to commit), then ticket-2 - which acquires a tickets lock while already
+     * holding the map lock, and that is precisely the {event_seating_maps, tickets} inversion the
+     * single-seat version documents and avoids. Seat ids are sorted, as everywhere that locks them.
+     *
+     * All or nothing: a mixed selection is refused naming the offending seat, rather than half
+     * released, because "six seats" is what the staff member believes they acted on.
+     */
+    public function releaseSeats(EventSeatingMap $map, array $seatIds): int
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $seatIds))));
+        sort($ids);
+
+        if (! $ids) {
+            return 0;
+        }
+
+        if (count($ids) === 1) {
+            $this->releaseSeat($map, $ids[0]);
+
+            return 1;
+        }
+
+        $released = 0;
+
+        DB::transaction(function () use ($map, $ids, &$released) {
+            $seats = SeatingSeat::where('event_seating_map_id', $map->id)
+                ->whereIn('id', $ids)
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get();
+
+            // The not-sold guard below only ever sees the seats that were FOUND, so an id that does
+            // not exist - or belongs to another map - used to slip through it silently. Two such ids
+            // meant an empty set, a version bump, an update that touched nothing, and a cheerful
+            // "2 released" for a refund that never happened. One id threw. Same input, two answers.
+            if ($seats->count() !== count($ids)) {
+                throw new BusinessException(__('messages.seating_seat_not_sold'));
+            }
+
+            $released = $seats->count();
+
+            foreach ($seats as $seat) {
+                if ($seat->status !== 'sold') {
+                    throw new BusinessException(__('messages.seating_seat_not_sold_named', [
+                        'seat' => $seat->fullLabel() ?: $seat->id,
+                    ]));
+                }
+            }
+
+            // How many seats each sale line is losing, so a line is touched once rather than once
+            // per seat - and so the quantity and the sold counter move by the same number.
+            $perLine = $seats->whereNotNull('sale_ticket_id')
+                ->groupBy('sale_ticket_id')
+                ->map(fn ($group) => $group->count());
+
+            $lines = $perLine->isEmpty()
+                ? collect()
+                : SaleTicket::with(['ticket', 'sale'])
+                    ->whereIn('id', $perLine->keys())
+                    ->orderBy('id')
+                    ->lockForUpdate()
+                    ->get();
+
+            // Tickets first, for the whole set, then the map. See the docblock.
+            foreach ($lines as $line) {
+                $line->ticket?->updateSold($line->sale?->event_date, -$perLine[$line->id]);
+            }
+
+            $version = $map->bumpVersion();
+
+            SeatingSeat::whereIn('id', $seats->pluck('id'))->update([
+                'status' => 'available', 'hold_kind' => null, 'hold_note' => null,
+                'hold_token' => null, 'hold_expires_at' => null,
+                // The arrival belonged to the person who just lost the seat. Left behind, it makes
+                // the next buyer read as already through the door.
+                'sale_id' => null, 'sale_ticket_id' => null, 'checked_in_at' => null,
+                'state_version' => $version,
+            ]);
+
+            foreach ($lines as $line) {
+                $line->quantity = max(0, (int) $line->quantity - $perLine[$line->id]);
+                $line->save();
+            }
+        });
+
+        // Once for the batch. Six releases used to mean six dispatches for the same map.
+        $this->notifyWaitlist($map);
+
+        return $released;
+    }
+
     public function releaseSeat(EventSeatingMap $map, int $seatId): void
     {
         DB::transaction(function () use ($map, $seatId) {
@@ -147,7 +246,8 @@ class BoxOfficeSeatingService
             $seat->forceFill([
                 'status' => 'available', 'hold_kind' => null, 'hold_note' => null,
                 'hold_token' => null, 'hold_expires_at' => null,
-                'sale_id' => null, 'sale_ticket_id' => null, 'state_version' => $version,
+                'sale_id' => null, 'sale_ticket_id' => null, 'checked_in_at' => null,
+                'state_version' => $version,
             ])->save();
 
             if (! $line) {
@@ -308,6 +408,8 @@ class BoxOfficeSeatingService
                     'status' => 'sold',
                     'hold_kind' => null, 'hold_note' => null, 'hold_token' => null, 'hold_expires_at' => null,
                     'sale_id' => $sale->id, 'sale_ticket_id' => $line->id,
+                    // A fresh booking has not arrived yet, whatever the seat carried before.
+                    'checked_in_at' => null,
                     'state_version' => $version,
                 ]);
             }
@@ -350,13 +452,17 @@ class BoxOfficeSeatingService
                 'status' => 'sold',
                 'hold_kind' => null, 'hold_note' => null, 'hold_token' => null, 'hold_expires_at' => null,
                 'sale_id' => $from->sale_id, 'sale_ticket_id' => $from->sale_ticket_id,
+                // Somebody already inside the building who is moved to a different seat is still
+                // inside it. The arrival travels with the person, not with the seat.
+                'checked_in_at' => $from->checked_in_at,
                 'state_version' => $version,
             ])->save();
 
             $from->forceFill([
                 'status' => 'available',
                 'hold_kind' => null, 'hold_note' => null, 'hold_token' => null, 'hold_expires_at' => null,
-                'sale_id' => null, 'sale_ticket_id' => null, 'state_version' => $version,
+                'sale_id' => null, 'sale_ticket_id' => null, 'checked_in_at' => null,
+                'state_version' => $version,
             ])->save();
         });
     }

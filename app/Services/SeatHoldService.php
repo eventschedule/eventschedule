@@ -286,6 +286,8 @@ class SeatHoldService
                 // The ATTENDEE's own sale, so their ticket page and email show their own seat.
                 'sale_id' => $line->sale_id,
                 'sale_ticket_id' => $line->id,
+                // Whoever arrived on this seat before, it is not this buyer.
+                'checked_in_at' => null,
                 'state_version' => $version,
             ])->save();
 
@@ -295,7 +297,7 @@ class SeatHoldService
         if ($orphaned) {
             SeatingSeat::whereIn('id', $orphaned)->update([
                 'status' => 'available', 'hold_kind' => null, 'hold_token' => null,
-                'hold_expires_at' => null, 'state_version' => $version,
+                'hold_expires_at' => null, 'checked_in_at' => null, 'state_version' => $version,
             ]);
         }
 
@@ -359,6 +361,7 @@ class SeatHoldService
             'status' => 'sold',
             'hold_kind' => null, 'hold_token' => null, 'hold_expires_at' => null,
             'sale_id' => $saleId, 'sale_ticket_id' => $saleTicketId,
+            'checked_in_at' => null,
             'state_version' => $version ?? $map->bumpVersion(),
         ]);
 
@@ -483,6 +486,8 @@ class SeatHoldService
             SeatingSeat::whereIn('id', $group->pluck('id'))->update([
                 'status' => 'available', 'hold_kind' => null, 'hold_token' => null,
                 'hold_expires_at' => null, 'sale_id' => null, 'sale_ticket_id' => null,
+                // A refunded seat carries no arrival into its next buyer's hands.
+                'checked_in_at' => null,
                 'state_version' => $version,
             ]);
         }
@@ -507,7 +512,7 @@ class SeatHoldService
             ->where('hold_expires_at', '<', $now)
             ->update([
                 'status' => 'available', 'hold_kind' => null,
-                'hold_token' => null, 'hold_expires_at' => null,
+                'hold_token' => null, 'hold_expires_at' => null, 'checked_in_at' => null,
             ]);
     }
 

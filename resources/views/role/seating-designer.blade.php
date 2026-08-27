@@ -14,6 +14,7 @@
             : \App\Utils\UrlUtils::encodeId($plan->id);
 
         $occurrenceQuery = $isOccurrence ? ['date' => $occurrence->event_date] : [];
+        $occurrenceDates = $isOccurrence ? $occurrenceEvent->adminOccurrenceDates() : [];
 
         // Path-relative routes: the AP is reachable on a custom domain, and an absolute URL built
         // from app.url would be cross-origin there and fail CORS on the designer's fetch calls.
@@ -55,6 +56,13 @@
                 'planLabel' => __('messages.seating_plan'),
                 'seatCount' => __('messages.seating_seat_count'),
                 'rotation' => __('messages.seating_rotation'),
+                'stage' => __('messages.seating_stage'),
+                'textLabel' => __('messages.seating_text_label'),
+                'label' => __('messages.seating_text_label'),
+                'width' => __('messages.width'),
+                'height' => __('messages.seating_decoration_height'),
+                'removeDecoration' => __('messages.seating_remove_decoration'),
+                'tooManyDecorations' => __('messages.seating_too_many_decorations'),
                 'rotateLeft' => __('messages.seating_rotate_left'),
                 'rotateRight' => __('messages.seating_rotate_right'),
                 'tableSelected' => __('messages.seating_table_selected'),
@@ -105,6 +113,28 @@
                 'addRows' => __('messages.seating_add_rows'), 'rows' => __('messages.seating_rows'),
                 'seatsPerRow' => __('messages.seating_seats_per_row'),
                 'rowLabels' => __('messages.seating_row_labels'), 'curve' => __('messages.seating_curve'),
+                'numbering' => __('messages.seating_numbering'),
+                'seatLabel' => __('messages.seating_seat_label'),
+                'reload' => __('messages.reload'),
+                'confirmReload' => __('messages.seating_confirm_reload'),
+                'rules' => __('messages.seating_rules'),
+                'orphanRule' => __('messages.seating_orphan_rule'),
+                'orphanRuleHelp' => __('messages.seating_orphan_rule_help'),
+                'orphanGap' => __('messages.seating_orphan_gap'),
+                'orphanGapHelp' => __('messages.seating_orphan_gap_help'),
+                'orphanLift' => __('messages.seating_orphan_lift'),
+                'orphanLiftHelp' => __('messages.seating_orphan_lift_help'),
+                'rulesTemplateNote' => __('messages.seating_rules_template_note'),
+                'rowLabel' => __('messages.seating_row_label'),
+                'seatNumbering' => __('messages.seating_seat_numbering'),
+                'firstSeat' => __('messages.seating_first_seat'),
+                'firstRow' => __('messages.seating_first_row'),
+                'rowPrefix' => __('messages.seating_row_prefix'),
+                'skipLetters' => __('messages.seating_skip_letters'),
+                'skipLettersHelp' => __('messages.seating_skip_letters_help'),
+                'seatPitch' => __('messages.seating_seat_pitch'),
+                'rowPitch' => __('messages.seating_row_pitch'),
+                'numberingPreview' => __('messages.seating_numbering_preview'),
                 'aisleAfterSeats' => __('messages.seating_aisle_after_seats'),
                 'generateRows' => __('messages.seating_generate_rows'),
                 'generateRowsHelp' => __('messages.seating_generate_rows_help'),
@@ -178,6 +208,23 @@
                             <p class="mt-1 text-xs text-amber-700 dark:text-amber-300">
                                 {{ __('messages.seating_editing_one_date_help') }}
                             </p>
+                            {{-- materialized_at has been written since the feature shipped and read
+                                 by nothing, while "will a template edit reach this date?" is the
+                                 exact question this screen exists to raise. Once a date has its own
+                                 copy, the answer is no. --}}
+                            @if ($occurrence->materialized_at)
+                                <p class="mt-1 text-xs text-amber-700 dark:text-amber-300">
+                                    {{ __('messages.seating_snapshotted_on', ['date' => $occurrence->materialized_at->translatedFormat('M j, Y')]) }}
+                                </p>
+                            @endif
+                            {{-- In the banner rather than the toolbar: the banner is what names the
+                                 date, so the control that changes it belongs beside the claim. --}}
+                            <div class="mt-2">
+                                <x-seating-date-picker
+                                    :action="route('seating.occurrence_design', ['subdomain' => $subdomain, 'hash' => $hash])"
+                                    :dates="$occurrenceDates"
+                                    :current="$occurrence->event_date" />
+                            </div>
                         </div>
                         {{-- Names the consequence. revertToTemplate() deliberately does NOT refuse
                              over staff holds - it deletes the map and they go with it - and a

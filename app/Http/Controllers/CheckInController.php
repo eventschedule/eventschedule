@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\Sale;
 use App\Models\SaleTicket;
+use App\Models\SeatingSeat;
 use App\Utils\UrlUtils;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class CheckInController extends Controller
 {
@@ -52,6 +55,90 @@ class CheckInController extends Controller
         return view('ticket.checkin', [
             'events' => $eventsData,
             'selectedEventId' => $selectedEventId ? UrlUtils::encodeId($selectedEventId) : null,
+        ]);
+    }
+
+    /**
+     * Find an attendee at the door.
+     *
+     * The check-in screen had no search of ANY kind - not by name, not by seat, not by order - only
+     * a rear-view feed of the last ten arrivals. So "is C14 here yet", and "this person says they
+     * booked but the scanner will not read their phone", both had no answer on this screen at all.
+     *
+     * Read-only on purpose: this tells staff what they are looking at. Admitting somebody still
+     * goes through the scan, which is the one path that writes.
+     */
+    public function search(Request $request, $eventId)
+    {
+        $user = auth()->user();
+        $event = Event::with(['tickets', 'creatorRole'])->find(UrlUtils::decodeId($eventId));
+
+        if (! $event) {
+            return response()->json(['error' => 'Event not found'], 404);
+        }
+
+        if (! $user || ! $user->canViewEventData($event)) {
+            abort(403);
+        }
+
+        // Explicit, like index() and stats(). Attendee lookup is part of check-in, and check-in is
+        // Pro - without this line it becomes a free feature by accident.
+        if (! $event->isPro()) {
+            abort(403);
+        }
+
+        $query = trim((string) $request->input('q'));
+
+        if (mb_strlen($query) < 2) {
+            return response()->json(['results' => []]);
+        }
+
+        // Through Carbon like stats() does. input('date') is whatever was sent: an array or a
+        // malformed string does not throw - it binds and matches nothing - so the door searched a
+        // night that does not exist and got a confident empty list back. Falling back to tonight is
+        // the same answer stats() gives, and an empty result here reads as "not on the list".
+        $date = $event->scheduleToday();
+
+        try {
+            $raw = $request->input('date');
+            $date = is_string($raw) && $raw !== ''
+                ? Carbon::createFromFormat('Y-m-d', $raw)->format('Y-m-d')
+                : $date;
+        } catch (\Exception $e) {
+            // keep today
+        }
+
+        // The backslash first, or escaping the wildcards re-breaks a term that contains one.
+        $like = '%'.str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $query).'%';
+
+        // Seat first: "C14" is what somebody at the door is holding. Row and seat are matched
+        // separately so "C14", "C 14" and "row C seat 14" all land on the same seat.
+        $seatMatch = preg_match('/^\s*([a-z]+)\s*-?\s*(\d+)\s*$/i', $query, $m)
+            || preg_match('/row\s+([a-z0-9]+)\s+seat\s+(\d+)/i', $query, $m);
+
+        $seats = SeatingSeat::with(['sale', 'saleTicket.ticket', 'section'])
+            ->whereHas('eventSeatingMap', fn ($q) => $q->where('event_id', $event->id)->where('event_date', $date))
+            ->where('status', 'sold')
+            ->where(function ($q) use ($seatMatch, $m, $like) {
+                if ($seatMatch) {
+                    $q->where(fn ($sq) => $sq->where('row_label', $m[1])->where('seat_label', $m[2]));
+                }
+
+                $q->orWhereHas('sale', fn ($sq) => $sq->where('name', 'like', $like)->orWhere('email', 'like', $like));
+            })
+            ->orderBy('row_position')->orderBy('position')
+            ->limit(30)
+            ->get();
+
+        return response()->json([
+            'results' => $seats->map(fn (SeatingSeat $seat) => [
+                'seat' => $seat->fullLabel(),
+                'name' => $seat->sale?->name,
+                'ticket_type' => $seat->saleTicket?->ticket?->type,
+                'status' => $seat->sale?->status,
+                'arrived' => $seat->checked_in_at !== null,
+                'arrived_at' => $seat->checked_in_at?->getTimestamp(),
+            ])->values(),
         ]);
     }
 

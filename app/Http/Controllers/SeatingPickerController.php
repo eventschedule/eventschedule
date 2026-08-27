@@ -144,6 +144,9 @@ class SeatingPickerController extends Controller
             // Always present, null when the selection is fine - the picker replaces its notice from
             // every response, so a warning that has been fixed clears itself.
             'warning' => $result['warning'] ?? null,
+            // The per-band limit, when it is what shortened the selection. Absent otherwise, so the
+            // picker can tell our own refusal apart from another buyer getting there first.
+            'capped' => $this->cappedAt,
         ]);
     }
 
@@ -151,8 +154,18 @@ class SeatingPickerController extends Controller
      * Either an explicit seat list or a best-available request. Explicit ids are filtered to this
      * map, so a hand-posted id from another event resolves to nothing rather than being held.
      */
+    /**
+     * The cap applied by the last requestedSeatIds() call, or null if nothing was clamped.
+     *
+     * A selection can come back shorter for two reasons - somebody else took a seat, or WE refused
+     * the surplus - and the picker was blaming the other buyer for both.
+     */
+    private ?int $cappedAt = null;
+
     private function requestedSeatIds(Request $request, Event $event, EventSeatingMap $map): ?array
     {
+        $this->cappedAt = null;
+
         if ($request->filled('ticket_id') && $request->filled('quantity')) {
             $ticket = $event->tickets->firstWhere('id', UrlUtils::decodeId($request->input('ticket_id')));
             if (! $ticket) {
@@ -205,6 +218,8 @@ class SeatingPickerController extends Controller
             $used = $perTicket[$ticketId] ?? 0;
 
             if ($used >= $cap) {
+                $this->cappedAt = $cap;
+
                 continue;
             }
 
@@ -297,6 +312,9 @@ class SeatingPickerController extends Controller
 
         $levels = $map->levels()->get();
 
+        $decorations = \App\Models\SeatingDecoration::where('event_seating_map_id', $map->id)
+            ->orderBy('position')->get()->groupBy('seating_level_id');
+
         return [
             'version' => (int) $map->version,
             // Part of the map's state, not a one-off reply to a click: without it a reload restored
@@ -307,6 +325,13 @@ class SeatingPickerController extends Controller
                 'name' => $level->name,
                 'width' => $level->width,
                 'height' => $level->height,
+                // Not inventory and never interactive - this is only what tells the buyer which way
+                // the room faces, which nothing in the payload said before.
+                'decorations' => ($decorations[$level->id] ?? collect())->map(fn ($d) => [
+                    'id' => $d->id, 'kind' => $d->kind, 'label' => $d->label,
+                    'x' => $d->x, 'y' => $d->y,
+                    'width' => $d->width, 'height' => $d->height, 'rotation' => $d->rotation,
+                ])->values()->all(),
                 'sections' => $sections->where('seating_level_id', $level->id)->values()->map(fn ($s) => [
                     'id' => $s->id,
                     'name' => $s->name,
@@ -320,7 +345,10 @@ class SeatingPickerController extends Controller
                     'tables' => $s->tables->map(fn ($t) => [
                         'id' => $t->id, 'label' => $t->label, 'shape' => $t->shape,
                         'booking_mode' => $t->booking_mode,
-                        'x' => $t->x, 'y' => $t->y, 'width' => $t->width, 'height' => $t->height,
+                        // Now that the designer can rotate a table, the buyer has to see the same
+                        // room - a rotated rectangular table drawn square is a different layout.
+                        'x' => $t->x, 'y' => $t->y, 'rotation' => (int) $t->rotation,
+                        'width' => $t->width, 'height' => $t->height,
                     ])->all(),
                     'seats' => ($seats[$s->id] ?? collect())->map(fn ($seat) => [
                         'id' => $seat->id,

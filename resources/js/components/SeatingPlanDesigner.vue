@@ -72,7 +72,13 @@
         <div v-if="error" id="seating-error" ref="errorEl" role="alert"
             class="rounded-lg border border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-300 flex items-start gap-2">
             <span class="flex-1">{{ error }}</span>
-            <button type="button" @click="error = ''" class="shrink-0 text-red-600 dark:text-red-400 hover:underline text-xs">{{ t.dismiss }}</button>
+            <!-- A stale-revision refusal offered only Dismiss, which leaves the tab holding work it
+                 can never save - the whole payload is the structure, so retrying is exactly the
+                 overwrite the check exists to prevent. Reloading is the only way forward, and it
+                 warns first because the unsaved work is real. -->
+            <button v-if="stale" type="button" @click="reloadForTheirs"
+                class="shrink-0 font-medium text-red-700 dark:text-red-300 hover:underline text-xs">{{ t.reload }}</button>
+            <button type="button" @click="error = ''; stale = false" class="shrink-0 text-red-600 dark:text-red-400 hover:underline text-xs">{{ t.dismiss }}</button>
         </div>
 
         <!-- Nothing is offered until the plan has actually arrived: the empty state below keys off
@@ -174,10 +180,9 @@
                     {{ t.emptyLevel }}
                 </p>
 
-                <svg v-if="level" ref="svgEl" v-bind="viewportBind" class="w-full select-none seat-canvas"
+                <svg v-if="level" ref="svgEl" v-bind="canvasBind" class="w-full select-none seat-canvas"
                     role="group" :aria-label="planName" :viewBox="viewBox"
-                    :style="{ height: canvasHeight, touchAction: 'none' }"
-                    @mousedown="onCanvasDown" @mousemove="onMove" @mouseup="endDrag" @mouseleave="endDrag">
+                    :style="{ height: canvasHeight, touchAction: 'none' }">
                     <defs>
                         <pattern id="restrictedHatch" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
                             <line x1="0" y1="0" x2="0" y2="4" stroke="currentColor" stroke-width="1.5" opacity="0.6" />
@@ -185,10 +190,29 @@
                     </defs>
 
                     <g :transform="`translate(${pan.x} ${pan.y}) scale(${zoom})`">
+                        <!-- Before the sections, so a stage never covers a seat. This is the only
+                             surface where a decoration is interactive; everywhere else it is inert. -->
+                        <g v-for="d in (level.decorations || [])" :key="`dec-${d.id}`"
+                            :transform="`translate(${d.x} ${d.y}) rotate(${d.rotation || 0})`"
+                            style="cursor: move" @pointerdown.stop="startDecorationDrag($event, d)">
+                            <rect v-if="d.kind === 'stage'" :width="d.width" :height="d.height" rx="4"
+                                class="fill-gray-300 dark:fill-gray-600"
+                                :stroke="d.id === selectedDecorationId ? 'var(--brand-blue)' : 'none'" stroke-width="2" />
+                            <rect v-else :width="d.width" :height="d.height" rx="4"
+                                fill="transparent"
+                                :stroke="d.id === selectedDecorationId ? 'var(--brand-blue)' : 'none'"
+                                stroke-width="2" stroke-dasharray="4 3" />
+                            <text :x="d.width / 2" :y="d.height / 2" text-anchor="middle" dy="4"
+                                :font-size="d.kind === 'stage' ? 14 : 12"
+                                :class="d.kind === 'stage'
+                                    ? 'fill-gray-700 dark:fill-gray-200 uppercase tracking-widest'
+                                    : 'fill-gray-500 dark:fill-gray-400'">{{ d.label }}</text>
+                        </g>
+
                         <g v-for="s in level.sections" :key="s.id" :transform="`translate(${s.x} ${s.y}) rotate(${s.rotation})`">
                             <rect :x="sectionBox(s).x" :y="sectionBox(s).y" :width="sectionBox(s).w" :height="sectionBox(s).h" rx="8"
                                 :fill="s.color" fill-opacity="0.10" :stroke="s.color" stroke-opacity="0.5"
-                                style="cursor: move" @mousedown.stop="startSectionDrag($event, s)" />
+                                style="cursor: move" @pointerdown.stop="startSectionDrag($event, s)" />
                             <text :x="sectionBox(s).x + 2" :y="sectionBox(s).y - 8"
                                 class="fill-gray-600 dark:fill-gray-300" font-size="13">{{ s.name }}</text>
 
@@ -198,19 +222,19 @@
                                 </text>
                             </template>
 
-                            <g v-for="tb in s.tables" :key="tb.id" :transform="`translate(${tb.x} ${tb.y})`">
+                            <g v-for="tb in s.tables" :key="tb.id" :transform="`translate(${tb.x} ${tb.y}) rotate(${tb.rotation || 0})`">
                                 <circle v-if="tb.shape === 'round'" :r="tb.width / 2" :fill="s.color"
                                     :fill-opacity="tb.id === selectedTableId ? 0.45 : 0.25"
-                                    :stroke="s.color" style="cursor: move" @mousedown.stop="startTableDrag($event, tb, s)" />
+                                    :stroke="s.color" style="cursor: move" @pointerdown.stop="startTableDrag($event, tb, s)" />
                                 <rect v-else :x="-tb.width / 2" :y="-tb.height / 2" :width="tb.width" :height="tb.height" rx="4"
                                     :fill="s.color" :fill-opacity="tb.id === selectedTableId ? 0.45 : 0.25" :stroke="s.color" style="cursor: move"
-                                    @mousedown.stop="startTableDrag($event, tb, s)" />
+                                    @pointerdown.stop="startTableDrag($event, tb, s)" />
                                 <text text-anchor="middle" dy="4" font-size="11" class="fill-gray-700 dark:fill-gray-200">{{ tb.label }}</text>
                             </g>
 
                             <g v-for="seat in s.seats" :key="seat.id"
                                 :transform="`translate(${seatX(s, seat)} ${seatY(s, seat)})`"
-                                style="cursor: pointer" @mousedown.stop="onSeatDown($event, seat, s)"
+                                style="cursor: pointer" @pointerdown.stop="onSeatDown($event, seat, s)"
                                 class="seat-node"
                                 :data-seat-id="seat.id"
                                 :tabindex="seat.id === tabbableSeatId ? 0 : -1"
@@ -268,6 +292,27 @@
                     </div>
                     <button type="button" @click="toggleAisle"
                         class="px-2 py-1 rounded-md text-xs border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-[var(--brand-blue)] transition-all duration-200">{{ t.toggleAisle }}</button>
+
+                    <!-- Labels were generator-only: once a block of rows existed, neither the seat
+                         number nor the row letter could be changed. A house that renumbers one row,
+                         or adds a "BOX" beside the stalls, had to delete the section and start over
+                         - and the box office lookup resolves against exactly these strings. -->
+                    <label class="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                        {{ t.seatLabel }}
+                        <input id="seating-seat-label" :value="oneSeat ? (oneSeat.seat_label || '') : ''"
+                            :disabled="!oneSeat" type="text" maxlength="10" size="4"
+                            @input="renameSeat($event.target.value)"
+                            @focus="beginFieldEdit" @blur="endFieldEdit"
+                            class="w-16 rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-xs disabled:opacity-50" />
+                    </label>
+                    <label class="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                        {{ t.rowLabel }}
+                        <input id="seating-row-label" :value="selectedRowLabel"
+                            :disabled="selectedRowLabel === null" type="text" maxlength="10" size="4"
+                            @input="renameRow($event.target.value)"
+                            @focus="beginFieldEdit" @blur="endFieldEdit"
+                            class="w-16 rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-xs disabled:opacity-50" />
+                    </label>
                     <button type="button" @click="removeSelectedSeats"
                         class="ms-auto px-2 py-1 rounded-md text-xs font-medium border border-red-300 dark:border-red-700 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200">{{ t.removeSeats }}</button>
                 </div>
@@ -305,6 +350,11 @@
                     <div class="mt-3 flex flex-wrap gap-2">
                         <button v-for="a in addActions" :key="a.kind" type="button" @click="addSection(a.kind)"
                             class="px-3 py-2 rounded-md text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
+                            + {{ a.label }}
+                        </button>
+                        <!-- Not sellable inventory, so kept visually apart from the three that are. -->
+                        <button v-for="a in decorationActions" :key="a.kind" type="button" @click="addDecoration(a.kind)"
+                            class="px-3 py-2 rounded-md text-xs font-medium text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
                             + {{ a.label }}
                         </button>
                     </div>
@@ -436,6 +486,53 @@
                                 <input v-model="rowForm.aisles" type="text" placeholder="6, 14"
                                     class="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm" />
                             </label>
+
+                            <!-- Everything a house needs to match the numbers screwed to its own
+                                 seats. Collapsed, because the defaults reproduce exactly what this
+                                 generated before and most rooms never open it. -->
+                            <details class="col-span-2 mt-1">
+                                <summary class="cursor-pointer text-xs font-medium text-gray-600 dark:text-gray-400">{{ t.numbering }}</summary>
+                                <div class="mt-2 grid grid-cols-2 gap-2">
+                                    <label class="text-xs text-gray-500 dark:text-gray-400">{{ t.seatNumbering }}
+                                        <select v-model="rowForm.seatStyle" class="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
+                                            <option value="seq">1, 2, 3</option>
+                                            <option value="oddEven">5, 3, 1 &middot; 2, 4, 6</option>
+                                            <option value="rtl">3, 2, 1</option>
+                                        </select>
+                                    </label>
+                                    <label class="text-xs text-gray-500 dark:text-gray-400">{{ t.firstSeat }}
+                                        <input v-model.number="rowForm.seatStart" type="number" min="0" max="9999"
+                                            :disabled="rowForm.seatStyle === 'oddEven'"
+                                            class="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm disabled:opacity-50" />
+                                    </label>
+                                    <label class="text-xs text-gray-500 dark:text-gray-400">{{ t.firstRow }}
+                                        <input v-model.number="rowForm.rowStart" type="number" min="1" max="9999"
+                                            class="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm" />
+                                    </label>
+                                    <label class="text-xs text-gray-500 dark:text-gray-400">{{ t.rowPrefix }}
+                                        <input v-model="rowForm.rowPrefix" type="text" maxlength="4" placeholder="AA"
+                                            class="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm" />
+                                    </label>
+                                    <label class="text-xs text-gray-500 dark:text-gray-400 col-span-2">{{ t.skipLetters }}
+                                        <input v-model="rowForm.skipLetters" type="text" maxlength="26" placeholder="I, O"
+                                            :disabled="rowForm.rowStyle === 'numeric'"
+                                            class="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm disabled:opacity-50" />
+                                        <span class="mt-1 block font-normal text-gray-400 dark:text-gray-500">{{ t.skipLettersHelp }}</span>
+                                    </label>
+                                    <label class="text-xs text-gray-500 dark:text-gray-400">{{ t.seatPitch }}
+                                        <input v-model.number="rowForm.seatPitch" type="number" min="12" max="200"
+                                            class="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm" />
+                                    </label>
+                                    <label class="text-xs text-gray-500 dark:text-gray-400">{{ t.rowPitch }}
+                                        <input v-model.number="rowForm.rowPitch" type="number" min="12" max="200"
+                                            class="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm" />
+                                    </label>
+                                    <!-- What Generate will actually produce, before pressing it. -->
+                                    <p class="col-span-2 text-xs text-gray-400 dark:text-gray-500">
+                                        {{ t.numberingPreview }} <span class="font-mono">{{ numberingPreview }}</span>
+                                    </p>
+                                </div>
+                            </details>
                         </div>
                         <button type="button" @click="generateRows"
                             class="w-full px-3 py-2 rounded-md text-sm font-medium text-white bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] transition-all duration-200">
@@ -516,6 +613,18 @@
                             <option value="rect">{{ t.rectangular }}</option>
                         </select>
 
+                        <label for="seating-table-rotation" class="block text-xs text-gray-500 dark:text-gray-400">{{ t.rotation }}</label>
+                        <div class="flex items-center gap-2">
+                            <button type="button" @click="updateTable({ rotation: (Number(selectedTable.rotation) || 0) - 15 })"
+                                class="px-2 py-1 rounded-md border border-gray-300 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-300">&#8634;</button>
+                            <input id="seating-table-rotation" :value="selectedTable.rotation || 0" type="number" min="-360" max="360" step="5"
+                                @input="updateTable({ rotation: clampInt($event.target.value, -360, 360) ?? 0 })"
+                                class="w-20 rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm" />
+                            <span class="text-xs text-gray-500 dark:text-gray-400">&deg;</span>
+                            <button type="button" @click="updateTable({ rotation: (Number(selectedTable.rotation) || 0) + 15 })"
+                                class="px-2 py-1 rounded-md border border-gray-300 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-300">&#8635;</button>
+                        </div>
+
                         <label for="seating-table-mode" class="block text-xs text-gray-500 dark:text-gray-400">{{ t.booking }}</label>
                         <select id="seating-table-mode" :value="selectedTable.booking_mode"
                             @change="updateTable({ booking_mode: $event.target.value })"
@@ -530,9 +639,95 @@
                     </div>
                 </template>
 
-                <!-- Nothing selected: an empty 22rem card said nothing at all. -->
-                <p v-if="!section" class="text-sm text-gray-500 dark:text-gray-400">{{ t.nothingSelected }}</p>
+                <!-- The decoration inspector. Mutually exclusive with the section one above: a
+                     decoration belongs to the level, so nothing here is about a section. -->
+                <template v-if="decoration">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                        {{ decoration.kind === 'stage' ? t.stage : t.textLabel }}
+                    </h3>
 
+                    <div>
+                        <label for="seating-decoration-label" class="block text-xs font-medium text-gray-500 dark:text-gray-400">{{ t.label }}</label>
+                        <input id="seating-decoration-label" :value="decoration.label" type="text" maxlength="100"
+                            @input="updateDecoration({ label: $event.target.value })"
+                            @focus="beginFieldEdit" @blur="endFieldEdit"
+                            class="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm text-sm" />
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label for="seating-decoration-width" class="block text-xs font-medium text-gray-500 dark:text-gray-400">{{ t.width }}</label>
+                            <input id="seating-decoration-width" :value="decoration.width" type="number" min="10" max="20000"
+                                @input="updateDecoration({ width: clampInt($event.target.value, 10, 20000) ?? 10 })"
+                                @focus="beginFieldEdit" @blur="endFieldEdit"
+                                class="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm" />
+                        </div>
+                        <div>
+                            <label for="seating-decoration-height" class="block text-xs font-medium text-gray-500 dark:text-gray-400">{{ t.height }}</label>
+                            <input id="seating-decoration-height" :value="decoration.height" type="number" min="10" max="20000"
+                                @input="updateDecoration({ height: clampInt($event.target.value, 10, 20000) ?? 10 })"
+                                @focus="beginFieldEdit" @blur="endFieldEdit"
+                                class="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="seating-decoration-rotation" class="block text-xs font-medium text-gray-500 dark:text-gray-400">{{ t.rotation }}</label>
+                        <div class="mt-1 flex items-center gap-2">
+                            <button type="button" @click="updateDecoration({ rotation: ((decoration.rotation || 0) - 15) })"
+                                class="px-2 py-1 rounded-md border border-gray-300 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-300">&#8634;</button>
+                            <input id="seating-decoration-rotation" :value="decoration.rotation || 0" type="number" min="-360" max="360" step="5"
+                                @input="updateDecoration({ rotation: clampInt($event.target.value, -360, 360) ?? 0 })"
+                                @focus="beginFieldEdit" @blur="endFieldEdit"
+                                class="w-20 rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm" />
+                            <span class="text-xs text-gray-500 dark:text-gray-400">&deg;</span>
+                            <button type="button" @click="updateDecoration({ rotation: ((decoration.rotation || 0) + 15) })"
+                                class="px-2 py-1 rounded-md border border-gray-300 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-300">&#8635;</button>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <button id="seating-remove-decoration" type="button" @click="removeDecoration"
+                            class="px-3 py-2 rounded-md text-xs font-medium border border-red-300 dark:border-red-700 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200">{{ t.removeDecoration }}</button>
+                    </div>
+                </template>
+
+                <!-- Nothing selected: an empty 22rem card said nothing at all. -->
+                <p v-if="!section && !decoration" class="text-sm text-gray-500 dark:text-gray-400">{{ t.nothingSelected }}</p>
+
+            </div>
+
+            <!-- How this room sells, as opposed to how it is laid out. On the template these are
+                 the defaults every new date inherits; on one date they are that date's own. -->
+            <div class="ap-card rounded-xl p-4 space-y-3">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ t.rules }}</h3>
+
+                <label class="flex items-start gap-2">
+                    <input id="seating-orphan-enabled" type="checkbox" v-model="rules.orphan_rule_enabled"
+                        @change="dirty = true"
+                        class="mt-0.5 h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
+                    <span class="text-xs">
+                        <span class="block font-medium text-gray-700 dark:text-gray-300">{{ t.orphanRule }}</span>
+                        <span class="block text-gray-500 dark:text-gray-400">{{ t.orphanRuleHelp }}</span>
+                    </span>
+                </label>
+
+                <div v-if="rules.orphan_rule_enabled" class="grid grid-cols-2 gap-3">
+                    <label class="text-xs text-gray-500 dark:text-gray-400">{{ t.orphanGap }}
+                        <input id="seating-orphan-gap" :value="rules.orphan_rule_min_gap" type="number" min="1" max="4"
+                            @input="rules.orphan_rule_min_gap = clampInt($event.target.value, 1, 4) ?? 1; dirty = true"
+                            class="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm" />
+                        <span class="mt-1 block font-normal text-gray-400 dark:text-gray-500">{{ t.orphanGapHelp }}</span>
+                    </label>
+                    <label class="text-xs text-gray-500 dark:text-gray-400">{{ t.orphanLift }}
+                        <input id="seating-orphan-lift" :value="rules.orphan_rule_lift_pct" type="number" min="0" max="100"
+                            @input="rules.orphan_rule_lift_pct = clampInt($event.target.value, 0, 100) ?? 90; dirty = true"
+                            class="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm" />
+                        <span class="mt-1 block font-normal text-gray-400 dark:text-gray-500">{{ t.orphanLiftHelp }}</span>
+                    </label>
+                </div>
+
+                <p v-if="!isOccurrence" class="text-xs text-gray-400 dark:text-gray-500">{{ t.rulesTemplateNote }}</p>
             </div>
 
             <!-- Validation. Advisory - you can save with these outstanding - but each row now
@@ -561,6 +756,7 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import { useMapViewport } from '../seat-map-viewport';
+import { toCanvasFrame, toSectionFrame } from '../seat-map-geometry';
 
 const props = defineProps({
     planName: { type: String, default: '' },
@@ -586,6 +782,11 @@ const seatKinds = ['standard', 'wheelchair', 'companion', 'restricted_view'];
 // indistinguishable on the canvas until somebody opened the colour picker.
 const SECTION_COLORS = ['#4E81FA', '#0EA5E9', '#22D3EE', '#F59E0B', '#10B981', '#8B5CF6'];
 // Short labels: the buttons carry a "+" so "+ Add seating" would stutter.
+const decorationActions = [
+    { kind: 'stage', label: t.stage },
+    { kind: 'text', label: t.textLabel },
+];
+
 const addActions = [
     { kind: 'seated', label: t.seating },
     { kind: 'table', label: t.tablesLabel },
@@ -597,6 +798,7 @@ const nameInput = ref(null);
 const levels = ref([]);
 const activeLevel = ref(0);
 const selectedSectionId = ref(null);
+const selectedDecorationId = ref(null);
 const selectedSeats = ref([]);
 const dirty = ref(false);
 const loading = ref(true);
@@ -647,6 +849,17 @@ const nextId = () => tempId--;
  * without limit. Selection is deliberately not restored - only the document is.
  */
 const UNDO_LIMIT = 25;
+/** A save was refused because somebody else got there first; only a reload moves this on. */
+/**
+ * The single-seat rule's settings for whatever this designer is editing.
+ *
+ * Enforced on every guest selection since the feature shipped, with no writer and no screen - the
+ * user guide documents the absence as a limitation. On the template these are the defaults every
+ * new date inherits; on one date they are that date's own.
+ */
+const rules = reactive({ orphan_rule_enabled: true, orphan_rule_min_gap: 1, orphan_rule_lift_pct: 90 });
+
+const stale = ref(false);
 const undoStack = ref([]);
 const redoStack = ref([]);
 const canUndo = computed(() => undoStack.value.length > 0);
@@ -658,6 +871,7 @@ const MAX_SEATS = 6000;
 const MAX_LEVELS = 12;
 const MAX_SECTIONS = 200;
 const MAX_TABLES = 500;
+const MAX_DECORATIONS = 200;
 
 /**
  * The banner sits at the top of the page while the buttons that raise it are at the bottom of the
@@ -780,13 +994,37 @@ function onKeydown(evt) {
     if (key === 'y') { evt.preventDefault(); redo(); }
 }
 
-const rowForm = reactive({ rows: 10, perRow: 12, rowStyle: 'alpha', curve: 0, aisles: '' });
+const rowForm = reactive({
+    rows: 10, perRow: 12, rowStyle: 'alpha', curve: 0, aisles: '',
+    // Defaults chosen to reproduce exactly what this generated before, so an existing plan drawn
+    // with the old builder comes out identical.
+    rowStart: 1, rowPrefix: '', skipLetters: '', seatStyle: 'seq', seatStart: 1,
+    seatPitch: 26, rowPitch: 30,
+});
+/** "A1 A2 A3 ... / B1 ..." for the settings as they stand, so Generate is not a guess. */
+const numberingPreview = computed(() => {
+    const perRow = Math.min(6, Math.max(1, Number(rowForm.perRow) || 1));
+    const seats = [];
+
+    for (let c = 0; c < perRow; c++) {
+        seats.push(seatLabelFor(c, Number(rowForm.perRow) || perRow));
+    }
+
+    const more = (Number(rowForm.perRow) || 0) > perRow ? '...' : '';
+
+    return `${rowLabel(0)}: ${seats.join(' ')}${more}   ${rowLabel(1)}: ...`;
+});
+
 const tableForm = reactive({ count: 8, seats: 8, shape: 'round', mode: 'either', numbered: true });
 
 const level = computed(() => levels.value[activeLevel.value] || null);
 const section = computed(() => {
     if (!level.value) return null;
     return level.value.sections.find((s) => s.id === selectedSectionId.value) || null;
+});
+const decoration = computed(() => {
+    if (! level.value) return null;
+    return (level.value.decorations || []).find((d) => d.id === selectedDecorationId.value) || null;
 });
 // The viewBox tracks the rendered ELEMENT rather than the level, so one design unit is one CSS
 // pixel. Tying it to level.width/height meant the browser scaled the whole map down a second time
@@ -874,12 +1112,21 @@ const canvasHeight = computed(() => {
     // Header, toolbar, the card's chrome and a margin - the same 6rem the card's max-height reserves.
     const budget = Math.max(260, viewportH.value - 320);
     const b = contentBounds();
-    if (!b) return `${Math.min(544, budget)}px`;
+
+    // Below xl the two columns collapse and the whole rail - section inspector, row builder,
+    // selling rules, validation - stacks UNDERNEATH the canvas. At the full 704px that puts every
+    // control a tablet has off screen, so the map gives up height rather than the tools.
+    const ceiling = stacked.value ? 380 : 704;
+
+    if (!b) return `${Math.min(Math.min(544, ceiling), budget)}px`;
 
     const ratio = Math.min(1.0, Math.max(0.45, b.h / b.w));
 
-    return `${Math.round(Math.min(704, budget, Math.max(320, canvas.w * ratio)))}px`;
+    return `${Math.round(Math.min(ceiling, budget, Math.max(320, canvas.w * ratio)))}px`;
 });
+
+/** True while the rail is below the map rather than beside it (Tailwind's xl breakpoint). */
+const stacked = ref(typeof window !== 'undefined' && window.innerWidth < 1280);
 const totalSeats = computed(() => levels.value.reduce((n, l) => n + seatsInLevel(l), 0));
 /**
  * Interpolated, not concatenated. This file already documents why - the events count deliberately
@@ -977,10 +1224,42 @@ function selectLevel(i) {
 function selectSection(s) {
     selectedSectionId.value = s.id;
     selectedSeats.value = [];
+    // The two inspectors are mutually exclusive, and a section is selected on load - so without
+    // clearing it here the decoration inspector could never appear at all.
+    selectedDecorationId.value = null;
+}
+
+/** The mirror of selectSection. Picking a stage has to release the section, or the rail keeps
+ *  showing the section's row builder while the thing you just clicked is a stage. */
+function selectDecoration(d) {
+    selectedDecorationId.value = d.id;
+    selectedSectionId.value = null;
+    selectedSeats.value = [];
 }
 function isSelectedSection(s) {
     return s.id === selectedSectionId.value;
 }
+
+/**
+ * The canvas listens for pointer events TWICE - once for element dragging, once for pan and pinch -
+ * so the two have to be composed rather than both declared.
+ *
+ * These were mouse events until touch support: `@mousedown` beside the viewport's `onPointerdown`
+ * were different events and coexisted happily. Once the drag moved to pointer events they collided
+ * on the same prop, one silently replaced the other, and dragging stopped working with a mouse as
+ * well as a finger - while the seat still SELECTED, so the screen looked alive.
+ *
+ * Element drag runs first: on bare canvas it clears the selection and the viewport then arms a pan,
+ * and on a child the child's own `.stop` means neither of these ever runs.
+ */
+const canvasBind = computed(() => ({
+    ...viewportBind,
+    onPointerdown: (evt) => { onCanvasDown(evt); viewportBind.onPointerdown?.(evt); },
+    onPointermove: (evt) => { onMove(evt); viewportBind.onPointermove?.(evt); },
+    onPointerup: (evt) => { endDrag(evt); viewportBind.onPointerup?.(evt); },
+    onPointercancel: (evt) => { endDrag(evt); viewportBind.onPointercancel?.(evt); },
+    onPointerleave: (evt) => { endDrag(evt); viewportBind.onPointerleave?.(evt); },
+}));
 
 // ---- drag
 // `seats` holds the origin of EVERY seat being moved, so a multi-seat selection travels together.
@@ -988,30 +1267,14 @@ function isSelectedSection(s) {
 // selected seat collapse the selection on release rather than destroying it on press.
 const drag = reactive({ mode: null, id: null, startX: 0, startY: 0, originX: 0, originY: 0, seats: [], moved: false });
 
-/** A point in a section's own coordinates expressed in canvas space, rotation included. */
-function toCanvasFrame(s, x, y) {
-    const deg = Number(s?.rotation) || 0;
-    if (! deg) return [s.x + x, s.y + y];
-
-    const r = (deg * Math.PI) / 180;
-    const cos = Math.cos(r);
-    const sin = Math.sin(r);
-
-    return [s.x + x * cos - y * sin, s.y + x * sin + y * cos];
-}
-
-/** A canvas-space delta expressed in the section's own (rotated) coordinates. */
-function toSectionFrame(s, dx, dy) {
-    const deg = Number(s?.rotation) || 0;
-    if (! deg) return [dx, dy];
-
-    const r = (-deg * Math.PI) / 180;
-    const cos = Math.cos(r);
-    const sin = Math.sin(r);
-
-    return [Math.round(dx * cos - dy * sin), Math.round(dx * sin + dy * cos)];
-}
-
+/**
+ * Pointer position in CANVAS units.
+ *
+ * Deleted by the same over-greedy cut that took startSectionDrag and startTableDrag, and unlike
+ * those it is called only from SCRIPT - so tools/check-vue-bindings.mjs, which inspects template
+ * identifiers, could not see the hole. Every drag threw "svgPoint is not defined" on the first
+ * pointerdown, which is silent: the seat still selected, so the screen looked alive.
+ */
 function svgPoint(evt) {
     const svg = svgEl.value;
     if (!svg) return { x: 0, y: 0 };
@@ -1187,6 +1450,11 @@ function onMove(evt) {
         // right frame.
         section.value.x = drag.originX + dx;
         section.value.y = drag.originY + dy;
+    } else if (drag.mode === 'decoration') {
+        // A decoration hangs off the LEVEL, not a section, so its translate is already in canvas
+        // space and needs no counter-rotation.
+        const d = (level.value?.decorations || []).find((x) => x.id === drag.id);
+        if (d) { d.x = drag.originX + dx; d.y = drag.originY + dy; }
     } else if (drag.mode === 'table' && section.value) {
         // Everything inside a section lives in the section's ROTATED frame, so a canvas-space
         // delta has to be counter-rotated or the thing slides off at an angle to the cursor.
@@ -1246,11 +1514,34 @@ function sectionFootprint(s) {
     return corners.map(([x, y]) => [s.x + x * cos - y * sin, s.y + x * sin + y * cos]);
 }
 
+/** The four corners of a decoration in canvas space, rotation included. */
+function decorationFootprint(d) {
+    const w = Number(d.width) || 0;
+    const h = Number(d.height) || 0;
+    const corners = [[0, 0], [w, 0], [w, h], [0, h]];
+    const deg = Number(d.rotation) || 0;
+    if (! deg) return corners.map(([x, y]) => [d.x + x, d.y + y]);
+
+    const r = (deg * Math.PI) / 180;
+    const cos = Math.cos(r);
+    const sin = Math.sin(r);
+
+    return corners.map(([x, y]) => [d.x + x * cos - y * sin, d.y + x * sin + y * cos]);
+}
+
 function contentBounds() {
     const lvl = level.value;
-    if (!lvl || !lvl.sections.length) return null;
+    if (!lvl || (!lvl.sections.length && !(lvl.decorations || []).length)) return null;
 
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    // A stage sits ABOVE row A, so leaving decorations out of the framing puts it off screen the
+    // moment Fit is pressed - which reads as "my stage disappeared".
+    (lvl.decorations || []).forEach((d) => {
+        decorationFootprint(d).forEach(([x, y]) => {
+            minX = Math.min(minX, x); minY = Math.min(minY, y);
+            maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
+        });
+    });
     lvl.sections.forEach((s) => {
         // The ROTATED footprint. Taking the raw box would let Fit clip a turned section, since a
         // rotated rectangle needs a bigger axis-aligned box than the one it started as.
@@ -1280,6 +1571,7 @@ function addLevel(name) {
         // tracking the rendered element rather than the level.
         width: 1200,
         height: 800,
+        decorations: [],
         sections: [],
     });
     activeLevel.value = levels.value.length - 1;
@@ -1311,7 +1603,78 @@ function removeLevel(i) {
     selectedSeats.value = [];
     dirty.value = true;
 }
+/**
+ * A stage or a text label. Seeded ABOVE the seats (a negative y) because that is where a stage is
+ * in every room that has one, and because it makes the orientation read immediately.
+ */
+function addDecoration(kind) {
+    // OUTSIDE asOneOperation, which opens by checkpointing. Refusing the add from inside it still
+    // leaves a history entry identical to the state already on screen, so the first Undo afterwards
+    // appears to do nothing. addLevel() is the shape to copy: cap first, checkpoint second.
+    // (countDecorations only reads levels.value, and adding a level below adds no decorations, so
+    // the count is the same either side of it.)
+    if (wouldExceedCap(countDecorations(), 1, MAX_DECORATIONS, t.tooManyDecorations)) return;
+
+    const lvl = level.value;
+    if (! lvl) { addLevel(); }
+
+    asOneOperation(() => {
+        const target = level.value;
+        target.decorations = target.decorations || [];
+
+        const n = target.decorations.length;
+        target.decorations.push({
+            id: nextId(),
+            kind,
+            label: kind === 'stage' ? t.stage : t.textLabel,
+            x: kind === 'stage' ? 60 : 60 + n * 30,
+            y: kind === 'stage' ? -80 : 20 + n * 30,
+            width: kind === 'stage' ? 320 : 120,
+            height: kind === 'stage' ? 40 : 24,
+            rotation: 0,
+            position: n,
+        });
+        selectDecoration(target.decorations[target.decorations.length - 1]);
+        dirty.value = true;
+    });
+
+    nextTick(() => fitToView());
+}
+
+function updateDecoration(patch) {
+    const d = decoration.value;
+    if (! d) return;
+    Object.assign(d, patch);
+    dirty.value = true;
+}
+
+function removeDecoration() {
+    const lvl = level.value;
+    const d = decoration.value;
+    if (! lvl || ! d) return;
+
+    checkpoint();
+    lvl.decorations = (lvl.decorations || []).filter((x) => x.id !== d.id);
+    selectedDecorationId.value = null;
+    dirty.value = true;
+}
+
+function startDecorationDrag(evt, d) {
+    selectDecoration(d);
+    dragSnapshot = snapshot();
+    const p = svgPoint(evt);
+    Object.assign(drag, {
+        mode: 'decoration', id: d.id,
+        startX: p.x, startY: p.y, originX: d.x, originY: d.y,
+        seats: [], moved: false, collapseTo: null,
+    });
+}
+
 function addSection(kind, attrs = {}) {
+    // Checked before asOneOperation for the same reason as addDecoration: that wrapper checkpoints
+    // on entry, so a refusal from inside it leaves a no-op entry on the undo stack.
+    if (wouldExceedCap(countSections(), 1, MAX_SECTIONS, t.tooManySections)) return null;
+
     return asOneOperation(() => addSectionInner(kind, attrs));
 }
 
@@ -1359,12 +1722,60 @@ function removeSection(s) {
     dirty.value = true;
 }
 
+/**
+ * The alphabet used for row letters.
+ *
+ * Most houses skip I (reads as 1) and O (reads as 0) on the physical signage, and a plan that does
+ * not skip them has labels that no longer match the letters screwed to the seats - which is exactly
+ * what the box office "row C seat 14" lookup has to resolve against.
+ */
+function rowAlphabet() {
+    const skip = String(rowForm.skipLetters || '').toUpperCase().replace(/[^A-Z]/g, '');
+
+    return 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').filter((c) => ! skip.includes(c));
+}
+
 function rowLabel(i) {
-    if (rowForm.rowStyle === 'numeric') return String(i + 1);
-    // A..Z then AA, AB - the label is cosmetic, row_position is what actually orders.
-    let n = i, out = '';
-    do { out = String.fromCharCode(65 + (n % 26)) + out; n = Math.floor(n / 26) - 1; } while (n >= 0);
-    return out;
+    const start = Math.max(1, clampInt(rowForm.rowStart, 1, 9999) ?? 1);
+
+    if (rowForm.rowStyle === 'numeric') return String(start + i);
+
+    // A..Z then AA, AB, over whatever alphabet is in force. The label is cosmetic; row_position is
+    // what actually orders, which is why a skipped letter costs nothing downstream.
+    const alpha = rowAlphabet();
+    const base = alpha.length;
+    let n = i + (start - 1), out = '';
+
+    do { out = alpha[n % base] + out; n = Math.floor(n / base) - 1; } while (n >= 0);
+
+    return (rowForm.rowPrefix || '') + out;
+}
+
+/**
+ * The number printed on the seat itself.
+ *
+ * `seq`      1, 2, 3 ... from the left. What this always did, and the only thing it could do.
+ * `oddEven`  continental: odd numbers rising to the left of centre, even to the right - the
+ *            standard in most European houses, and impossible to represent before.
+ * `rtl`      counted from the right, which is how a great many rooms are numbered.
+ *
+ * @param {number} c zero-based index of the seat within its row
+ */
+function seatLabelFor(c, perRow) {
+    const start = Math.max(0, clampInt(rowForm.seatStart, 0, 9999) ?? 1);
+
+    if (rowForm.seatStyle === 'rtl') return String(start + (perRow - 1 - c));
+
+    if (rowForm.seatStyle === 'oddEven') {
+        const mid = Math.floor(perRow / 2);
+
+        // Left half counts outward in odd numbers, right half in even ones.
+        return c < mid
+            ? String(1 + (mid - 1 - c) * 2)
+            : String(2 + (c - mid) * 2);
+    }
+
+    return String(start + c);
 }
 
 /**
@@ -1381,6 +1792,7 @@ function wouldExceedSeatCap(extra) {
 /** Seats were the only one of the server's four caps mirrored here; the other three still cost a save. */
 const countSections = () => levels.value.reduce((n, l) => n + l.sections.length, 0);
 const countTables = () => levels.value.reduce((n, l) => n + l.sections.reduce((m, x) => m + x.tables.length, 0), 0);
+const countDecorations = () => levels.value.reduce((n, l) => n + (l.decorations || []).length, 0);
 
 function wouldExceedCap(current, extra, max, message) {
     if (current + extra <= max) return false;
@@ -1406,7 +1818,10 @@ function generateRows() {
     error.value = '';
     checkpoint();
     const aisles = String(rowForm.aisles || '').split(',').map((x) => parseInt(x.trim(), 10)).filter((x) => x > 0);
-    const gapX = 26, gapY = 30;
+    // Seat pitch and row pitch, which were hard-coded - so a room with wide seats or tight rows
+    // could not be drawn to its own proportions.
+    const gapX = clampInt(rowForm.seatPitch, 12, 200) ?? 26;
+    const gapY = clampInt(rowForm.rowPitch, 12, 200) ?? 30;
     const mid = (rowForm.perRow - 1) / 2;
 
     // Appended, not replaced, so a second block of rows can sit below the first.
@@ -1422,7 +1837,7 @@ function generateRows() {
                 table_id: null,
                 row_label: rowLabel(rp - 1),
                 row_position: rp,
-                seat_label: String(c + 1),
+                seat_label: seatLabelFor(c, rowForm.perRow),
                 x: c * gapX + extra,
                 y: (rp - 1) * gapY - curveY,
                 kind: 'standard',
@@ -1532,6 +1947,64 @@ function applyKind(kind) {
     s.seats.forEach((seat) => { if (selectedSeats.value.includes(seat.id)) seat.kind = kind; });
     dirty.value = true;
 }
+/** The one selected seat, or null - a seat number is per seat, so a multi-selection has none. */
+const oneSeat = computed(() => {
+    if (selectedSeats.value.length !== 1 || ! section.value) return null;
+
+    return section.value.seats.find((x) => x.id === selectedSeats.value[0]) || null;
+});
+
+/**
+ * The row label shared by the whole selection, or null when it spans more than one row.
+ *
+ * A row letter belongs to the ROW, so editing it from a single seat has to move every seat in that
+ * row - otherwise a row ends up half A and half B, which the orphan rule and the box office lookup
+ * both read as two different rows.
+ */
+const selectedRowLabel = computed(() => {
+    if (! section.value || ! selectedSeats.value.length) return null;
+
+    const rows = new Set(section.value.seats
+        .filter((x) => selectedSeats.value.includes(x.id))
+        .map((x) => x.row_position));
+
+    if (rows.size !== 1) return null;
+
+    const first = section.value.seats.find((x) => x.row_position === [...rows][0]);
+
+    return first ? (first.row_label || '') : null;
+});
+
+function renameSeat(value) {
+    const seat = oneSeat.value;
+    if (! seat) return;
+
+    seat.seat_label = String(value).slice(0, 10);
+    dirty.value = true;
+}
+
+function renameRow(value) {
+    if (! section.value || selectedRowLabel.value === null) return;
+
+    const target = section.value.seats.find((x) => selectedSeats.value.includes(x.id));
+    if (! target) return;
+
+    const label = String(value).slice(0, 10);
+    section.value.seats.forEach((seat) => {
+        if (seat.row_position === target.row_position) seat.row_label = label;
+    });
+    dirty.value = true;
+}
+
+/** Take their version. Warns first - `dirty` is real work that reloading throws away. */
+function reloadForTheirs() {
+    if (dirty.value && ! window.confirm(t.confirmReload || '')) return;
+
+    // guardUnload would otherwise ask a second time, about the same decision.
+    dirty.value = false;
+    window.location.reload();
+}
+
 function toggleAisle() {
     const s = section.value;
     if (!s) return;
@@ -1769,6 +2242,7 @@ async function load() {
 
         const data = await res.json();
         revision.value = data.revision ?? null;
+        if (data.rules) Object.assign(rules, data.rules);
 
         levels.value = (data.levels || []).map((l) => Object.assign({}, l, {
             sections: (l.sections || []).map((s) => Object.assign({}, s, {
@@ -1807,14 +2281,20 @@ async function save() {
                 'X-CSRF-TOKEN': props.csrfToken,
             },
             credentials: 'same-origin',
-            body: JSON.stringify({ name: planName.value, levels: levels.value, revision: revision.value }),
+            body: JSON.stringify({
+                name: planName.value,
+                levels: levels.value,
+                revision: revision.value,
+                ...rules,
+            }),
         });
         const data = await res.json().catch(() => ({}));
         // 409: somebody else saved this plan since we read it. Never retry - the payload is the
         // WHOLE structure, so retrying is precisely the overwrite the check exists to prevent.
-        if (res.status === 409) { error.value = data.error || t.staleRevision; return; }
+        if (res.status === 409) { error.value = data.error || t.staleRevision; stale.value = true; return; }
         if (!res.ok) { error.value = data.error || t.saveFailed; return; }
         revision.value = data.revision ?? revision.value;
+        if (data.rules) Object.assign(rules, data.rules);
         // Re-seed from the server so temporary ids become real ones; a second save would
         // otherwise create everything again.
         levels.value = (data.levels || []).map((l) => Object.assign({}, l, {
@@ -1856,7 +2336,7 @@ function guardUnload(e) {
     return '';
 }
 
-const onResize = () => { viewportH.value = window.innerHeight; };
+const onResize = () => { viewportH.value = window.innerHeight; stacked.value = window.innerWidth < 1280; };
 
 onBeforeUnmount(() => {
     window.removeEventListener('beforeunload', guardUnload);

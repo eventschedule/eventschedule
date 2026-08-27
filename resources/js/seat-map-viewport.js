@@ -31,7 +31,7 @@ const clampZoom = (z) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z));
  *        True for the guest picker and the box office, where dragging off a seat is how a finger
  *        moves the map. False for the designer, where everything drawn is itself draggable.
  */
-export function useMapViewport({ svgEl, contentBounds, canPan = () => true, panFromChildren = true }) {
+export function useMapViewport({ svgEl, contentBounds, canPan = () => true, panFromChildren = true, wheelNeedsModifier = false }) {
     const zoom = ref(1);
     const pan = reactive({ x: 40, y: 60 });
     const canvas = reactive({ w: 900, h: 540 });
@@ -111,6 +111,28 @@ export function useMapViewport({ svgEl, contentBounds, canPan = () => true, panF
         // The buttons have no cursor, so anchor on the middle of the canvas.
         const r = el.getBoundingClientRect();
         zoomAt(zoom.value + d, r.left + r.width / 2, r.top + r.height / 2);
+    }
+
+    /**
+     * Frame an arbitrary box, in content units.
+     *
+     * fit() can only ever frame EVERYTHING, which is no help on a house too big to read at once -
+     * the guest picker uses this to zoom into one section.
+     */
+    function fitTo(b) {
+    // A zero-size box is fine (it clamps to MAX_ZOOM); a NaN one is not - clampZoom(NaN) is NaN and
+    // the pan follows it, which blanks the map with no error anywhere.
+    if (! b || ! Number.isFinite(b.w) || ! Number.isFinite(b.h)) return;
+
+        measure();
+        if (!b) return;
+
+        userAdjusted = true;
+        const pad = Math.max(10, Math.min(32, Math.min(canvas.w, canvas.h) * 0.05));
+        const z = Math.min((canvas.w - pad * 2) / b.w, (canvas.h - pad * 2) / b.h);
+        zoom.value = clampZoom(Math.round(z * 100) / 100);
+        pan.x = Math.round((canvas.w - b.w * zoom.value) / 2 - b.minX * zoom.value);
+        pan.y = Math.round((canvas.h - b.h * zoom.value) / 2 - b.minY * zoom.value);
     }
 
     /** Fill the canvas with the content, centred. */
@@ -237,7 +259,24 @@ export function useMapViewport({ svgEl, contentBounds, canPan = () => true, panF
         if (pointers.size === 0) panFrom = null;
     }
 
+    /** True while the map is refusing the wheel, so a host can explain why. */
+    const wheelBlocked = ref(false);
+    let wheelBlockTimer = null;
+
     function onWheel(evt) {
+        // On the guest map this sits inside a long checkout form, where swallowing every wheel
+        // event traps the page: the buyer scrolls, nothing moves, and the only way past is to move
+        // the pointer off the map. Google Maps solved this the same way - hold a modifier to zoom,
+        // otherwise the page scrolls - and the -/+/Fit buttons and pinch are unaffected either way.
+        if (wheelNeedsModifier && ! (evt.ctrlKey || evt.metaKey)) {
+            wheelBlocked.value = true;
+            clearTimeout(wheelBlockTimer);
+            wheelBlockTimer = setTimeout(() => { wheelBlocked.value = false; }, 1600);
+
+            return;
+        }
+
+        wheelBlocked.value = false;
         // Without this the page scrolls behind the map and the map never zooms.
         evt.preventDefault();
         userAdjusted = true;
@@ -271,7 +310,12 @@ export function useMapViewport({ svgEl, contentBounds, canPan = () => true, panF
         if (ro && svgEl.value) ro.observe(svgEl.value);
     }
 
-    onBeforeUnmount(() => ro?.disconnect());
+    onBeforeUnmount(() => {
+        ro?.disconnect();
+        // The wheel-block timer outlives the component otherwise, and fires a write into a ref
+        // nothing is watching any more.
+        clearTimeout(wheelBlockTimer);
+    });
 
-    return { zoom, pan, canvas, bind, fit, zoomBy, zoomAt, measure, observe, revealPoint, toContent };
+    return { zoom, pan, canvas, bind, fit, fitTo, zoomBy, zoomAt, measure, observe, revealPoint, toContent, wheelBlocked };
 }

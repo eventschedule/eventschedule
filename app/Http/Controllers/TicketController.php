@@ -2854,6 +2854,14 @@ class TicketController extends Controller
                 $saleTicket->seats = json_encode($seats);
                 $saleTicket->save();
             }
+
+            // Arrival state on the MAP, so the box office console and the printed sheet can answer
+            // "is C14 here yet". Stamped per LINE rather than per slot: a scan admits the whole
+            // line, and sale_tickets.seats is a slot map that carries no location - lining the two
+            // up positionally is fine for labelling a scan and far too fragile to key state on.
+            \App\Models\SeatingSeat::where('sale_ticket_id', $saleTicket->id)
+                ->whereNull('checked_in_at')
+                ->update(['checked_in_at' => now()]);
         }
 
         WebhookService::dispatch('ticket.scanned', $sale);

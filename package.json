@@ -3,7 +3,8 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "vite build"
+        "build": "npm run check:vue && vite build",
+        "check:vue": "node tools/check-vue-bindings.mjs resources/js/components/*.vue"
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.2",

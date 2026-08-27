@@ -67,9 +67,22 @@
                         // What the plan is committed to, so Delete and Duplicate are decisions
                         // rather than guesses. Per-row for the same reason seatCount() is.
                         $usage = $plan->usage();
+                        $thumb = $plan->thumbnail();
                     @endphp
                     <div class="ap-card rounded-xl p-6 flex flex-col">
                         <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 break-words">{{ $plan->name }}</h3>
+
+                        {{-- A venue with four plans saw four identical text cards. One dot per seat
+                             is enough to tell a room from a room. Decorative: everything it conveys
+                             is also in the figures below, so it is hidden from a screen reader. --}}
+                        @if ($thumb)
+                            <svg viewBox="{{ $thumb['viewBox'] }}" class="mt-3 w-full h-24" aria-hidden="true" focusable="false"
+                                 preserveAspectRatio="xMidYMid meet">
+                                @foreach ($thumb['dots'] as $dot)
+                                    <circle cx="{{ $dot['x'] }}" cy="{{ $dot['y'] }}" r="6" fill="{{ $dot['c'] }}" opacity="0.75" />
+                                @endforeach
+                            </svg>
+                        @endif
 
                         <dl class="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-500 dark:text-gray-400">
                             <div class="flex gap-1">
@@ -97,6 +110,12 @@
                                     <dd class="font-medium text-gray-700 dark:text-gray-300">{{ number_format($usage['sold']) }}</dd>
                                 </div>
                             @endif
+                            @if ($plan->updated_at)
+                                <div class="flex gap-1">
+                                    <dt>{{ __('messages.last_updated') }}:</dt>
+                                    <dd class="font-medium text-gray-700 dark:text-gray-300">{{ $plan->updated_at->translatedFormat('M j, Y') }}</dd>
+                                </div>
+                            @endif
                         </dl>
 
                         @if ($plan->description)
@@ -118,8 +137,13 @@
                                 </button>
                             </form>
 
+                            {{-- Names the plan and what it is committed to. A bare "Are you sure?"
+                                 asked the organizer to confirm a decision it had just declined to
+                                 describe, while $usage - events and sold seats - is right here. --}}
                             <form method="POST" class="form-confirm ms-auto"
-                                  data-confirm="{{ __('messages.are_you_sure') }}"
+                                  data-confirm="{{ $usage['events']
+                                      ? __('messages.seating_confirm_delete_in_use', ['plan' => $plan->name, 'events' => $usage['events']])
+                                      : __('messages.seating_confirm_delete', ['plan' => $plan->name]) }}"
                                   action="{{ route('seating.destroy', ['subdomain' => $role->subdomain, 'hash' => $hash]) }}">
                                 @csrf
                                 @method('DELETE')

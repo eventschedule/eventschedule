@@ -60,12 +60,21 @@
         'strings' => [
         'legendUnavailable' => __('messages.seating_legend_unavailable'),
         'pickYourSeats' => __('messages.seating_pick_your_seats'),
+        'howMany' => __('messages.seating_how_many'),
+        'findBest' => __('messages.seating_find_best'),
+        'orPick' => __('messages.seating_or_pick'),
+        'bestNone' => __('messages.seating_best_none'),
+        'band' => __('messages.seating_band'),
         'clickToChoose' => __('messages.seating_click_to_choose'),
         'bandFull' => __('messages.seating_band_full'),
+        'bandMax' => __('messages.seating_band_max'),
         'someSeatsGone' => __('messages.seating_some_seats_gone'),
+        'someSeatsCapped' => __('messages.seating_some_seats_capped'),
         'seatCountOne' => __('messages.seating_seat_count_one'),
         'seatCountMany' => __('messages.seating_seat_count_many'),
         'zoomForNumbers' => __('messages.seating_zoom_for_numbers'),
+        'wheelHint' => __('messages.seating_wheel_hint'),
+        'wholeMap' => __('messages.seating_whole_map'),
             'mapView' => __('messages.seating_map_view'),
             'listView' => __('messages.seating_list_view'),
             'mapLabel' => __('messages.seating_map_label'),
@@ -79,6 +88,10 @@
             'legendSelected' => __('messages.seating_legend_selected'),
             'legendTaken' => __('messages.seating_legend_taken'),
             'wheelchair' => __('messages.seating_kind_wheelchair'),
+            'companion' => __('messages.seating_kind_companion'),
+            'restrictedView' => __('messages.seating_kind_restricted_view'),
+            'wholeTable' => __('messages.seating_sold_whole_table'),
+            'showAccessible' => __('messages.seating_show_accessible'),
             'maxReached' => __('messages.seating_max_reached'),
             'wholeTableGone' => __('messages.seating_whole_table_gone'),
             'holdFailed' => __('messages.seating_hold_failed'),
@@ -172,6 +185,8 @@
                     // without a seating plan, so nothing else on this form changes.
                     seatsBlocked: false,
                     seatsBlockedReason: @json(__('messages.seating_selection_blocked')),
+                    seatLabels: [],
+                    seatsExpireAt: null,
                     sharedSeatsRemaining: @json($event->seatsRemainingForSale($date ?? request()->date)),
                     turnstileEnabled: @json(\App\Utils\TurnstileUtils::isActiveForRequest()),
                     turnstileSiteKey: @json(\App\Utils\TurnstileUtils::getSiteKey()),
@@ -308,6 +323,11 @@
                     // the enforcement, so a hand-posted form is still turned away.
                     this.seatsBlocked = !! e.detail.blocked;
                     this.seatsBlockedReason = e.detail.reason || @json(__('messages.seating_selection_blocked'));
+
+                    // Carried into the cart leg below. Without them the panel could only ever say
+                    // "N tickets", and nothing anywhere showed that the seats expire.
+                    this.seatLabels = e.detail.seatLabels || [];
+                    this.seatsExpireAt = e.detail.expiresAt || null;
 
                     Object.entries(quantities).forEach(([id, qty]) => {
                         const ticket = this.tickets.find(t => String(t.id) === String(id));
@@ -633,11 +653,17 @@
                             // and a second money formatter is how a hardcoded symbol gets in.
                             priceLabel: t.price > 0 ? this.formatPrice(t.price) : '',
                             quantity: this.getAvailableQuantity(t),
+                            // The server's own per-band ceiling, so the picker refuses the same
+                            // thing rather than letting the surplus be silently dropped.
+                            maxPerOrder: Number(t.max_per_order) || 0,
                         })),
-                        // `|| 0`, not `|| 1`: a sold-out band reported 1, which made the order
-                        // ceiling 1 whenever the biggest band happened to be the empty one - and
-                        // the second seat was then refused with "you have selected the maximum".
-                        perOrderMax: Math.max(1, ...allocated.map(t => Number(t.quantity) || 0)),
+                        // The REAL order ceiling. This used to be the largest single band's
+                        // remaining stock, which is not a cap at all: on a house with 400 seats left
+                        // it let one order take 400 while the server clamped every band to
+                        // max_tickets_per_order and simply dropped the rest - so seats vanished from
+                        // the selection with no message. The refusal also read "the maximum for this
+                        // ticket" while enforcing an order-wide limit.
+                        perOrderMax: {{ (int) (config('app.max_tickets_per_order') ?: 20) }},
                     }, this.seatingPicker));
                 },
 
@@ -767,6 +793,12 @@
                         // It is what lets the cart panel stop asking for a name and email the buyer
                         // has just typed into this form.
                         buyer: { name: this.name, email: this.email, phone: this.phone },
+                        // Display only, like `prices`. Checkout claims seats from the SESSION hold
+                        // token and never reads these - but a basket that says "4 tickets" for a
+                        // seated event tells the buyer nothing about what they are holding, or that
+                        // it is on a clock.
+                        seat_labels: this.seatLabels.slice(),
+                        seats_expire_at: this.seatsExpireAt,
                     };
 
                     this.tickets.forEach(function (ticket) {

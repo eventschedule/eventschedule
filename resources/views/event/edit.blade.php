@@ -3669,11 +3669,42 @@
                                             ->where('role_id', $role->id)->where('is_deleted', false)
                                             ->orderBy('name')->get()
                                         : collect();
-                                    $seatingPlanOptions = $seatingPlanList->map(fn ($p) => [
-                                        'id' => $p->id,
-                                        'name' => $p->name,
-                                        'bands' => $p->sections->pluck('band')->filter()->unique()->values()->all(),
-                                    ])->values();
+                                    // bandCounts: how many seats each band actually holds. The band
+                                    // select was names alone, so the organizer priced blind - and a
+                                    // band no ticket claims is invisible until the box office
+                                    // refuses a sale from it. thumb: which room this is, since four
+                                    // plans in a dropdown are four indistinguishable strings.
+                                    // One grouped count per plan rather than a query PAIR per band.
+                                    // sections is already eager-loaded and the relation excludes
+                                    // deleted ones, so the section ids and the standing capacities
+                                    // both come from memory.
+                                    $seatingPlanOptions = $seatingPlanList->map(function ($p) {
+                                        $byBand = $p->sections->filter(fn ($s) => filled($s->band))->groupBy('band');
+
+                                        $seatsPerSection = $p->seats()
+                                            ->whereIn('seating_section_id', $p->sections->pluck('id'))
+                                            ->toBase()
+                                            ->selectRaw('seating_section_id, count(*) as aggregate')
+                                            ->groupBy('seating_section_id')
+                                            ->pluck('aggregate', 'seating_section_id');
+
+                                        $countFor = function ($sections) use ($seatsPerSection) {
+                                            $seats = $sections->sum(fn ($s) => (int) ($seatsPerSection[$s->id] ?? 0));
+
+                                            // Standing sections hold a capacity, not seats, and the
+                                            // band select shows whichever the room actually uses.
+                                            return $seats ?: (int) $sections->where('kind', 'standing')->sum('capacity');
+                                        };
+
+                                        return [
+                                            'id' => $p->id,
+                                            'name' => $p->name,
+                                            'bands' => $byBand->keys()->values()->all(),
+                                            'bandCounts' => $byBand->map($countFor)->all(),
+                                            'seats' => (int) $seatsPerSection->sum(),
+                                            'thumb' => $p->thumbnail(200),
+                                        ];
+                                    })->values();
                                 @endphp
 
                                 {{-- A schedule with no plan yet used to see nothing at all here, so
@@ -3702,6 +3733,34 @@
                                         @endforeach
                                     </select>
                                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.seating_plan_help') }}</p>
+
+                                    {{-- The room, once one is chosen. Decorative - the seat count
+                                         beside it says the same thing in words. --}}
+                                    <div v-if="selectedSeatingPlan && selectedSeatingPlan.thumb" class="mt-3 flex items-center gap-4">
+                                        <svg :viewBox="selectedSeatingPlan.thumb.viewBox" class="h-20 w-40 shrink-0"
+                                             aria-hidden="true" focusable="false" preserveAspectRatio="xMidYMid meet">
+                                            <circle v-for="(dot, i) in selectedSeatingPlan.thumb.dots" :key="i"
+                                                :cx="dot.x" :cy="dot.y" r="6" :fill="dot.c" opacity="0.75" />
+                                        </svg>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                                            @{{ selectedSeatingPlan.seats }} {{ __('messages.seating_seats') }}
+                                        </p>
+                                    </div>
+
+                                    {{-- A section whose band no ticket prices is unsellable, and the
+                                         only place that ever surfaced was a box-office refusal at
+                                         the counter. Say it while the prices are being set. --}}
+                                    <div v-if="unmappedSeatingBands.length"
+                                         class="mt-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2">
+                                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24"
+                                             stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                        </svg>
+                                        <p class="text-sm text-amber-800 dark:text-amber-200">
+                                            @{{ unmappedBandWarning }}
+                                        </p>
+                                    </div>
                                     @if ($event->exists && $event->hasAllocatedSeating())
                                         <div v-if="event.seating_plan_id" class="mt-3 flex flex-wrap gap-3">
                                             <x-secondary-link :href="route('box_office.show', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)])">
@@ -3737,7 +3796,7 @@
                                                 <select v-bind:name="`tickets[${index}][seating_band]`" v-model="ticket.seating_band"
                                                     class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm">
                                                     <option value="">{{ __('messages.seating_band_none') }}</option>
-                                                    <option v-for="band in seatingBands" :key="band" :value="band">@{{ band }}</option>
+                                                    <option v-for="band in seatingBands" :key="band" :value="band">@{{ bandOptionLabel(band) }}</option>
                                                 </select>
                                                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.seating_band_ticket_help') }}</p>
                                             </div>
@@ -5532,6 +5591,16 @@
       }
     },
     methods: {
+      /** "Stalls (72 seats)" - the band select was names alone, so bands were priced blind. */
+      bandOptionLabel(band) {
+        const plan = this.selectedSeatingPlan;
+        const count = plan && plan.bandCounts ? plan.bandCounts[band] : 0;
+
+        return count
+          ? band + ' (' + count + ' ' + @json(__('messages.seating_seats')).toLowerCase() + ')'
+          : band;
+      },
+
       previewEventSponsorLogo(e) {
         var file = e.target.files[0];
         if (!file) {
@@ -7354,6 +7423,39 @@
         if (!id) return [];
         const plan = (this.seatingPlanOptions || []).find(p => String(p.id) === String(id));
         return plan ? plan.bands : [];
+      },
+
+      /** The whole option row for the attached plan, or null. */
+      selectedSeatingPlan() {
+        const id = this.event.seating_plan_id;
+        if (!id) return null;
+
+        return (this.seatingPlanOptions || []).find(p => String(p.id) === String(id)) || null;
+      },
+
+      /**
+       * Bands of the attached plan that no ticket prices.
+       *
+       * Those sections exist, hold seats, and are unsellable - the docs call this "the usual reason
+       * a freshly attached plan shows fewer seats than expected", and until now the only surface
+       * that ever said so was a box-office refusal at the counter.
+       */
+      unmappedSeatingBands() {
+        if (!this.selectedSeatingPlan) return [];
+
+        const priced = new Set((this.tickets || []).filter(t => t.seating_band).map(t => String(t.seating_band)));
+
+        return this.seatingBands.filter(band => !priced.has(String(band)));
+      },
+
+      unmappedBandWarning() {
+        const plan = this.selectedSeatingPlan;
+        const bands = this.unmappedSeatingBands;
+        const seats = bands.reduce((n, b) => n + ((plan && plan.bandCounts && plan.bandCounts[b]) || 0), 0);
+
+        return @json(__('messages.seating_bands_unmapped'))
+          .replace(':bands', bands.join(', '))
+          .replace(':count', String(seats));
       },
 
       /**

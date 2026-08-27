@@ -453,6 +453,12 @@ class FreePlanLimitsTest extends TestCase
             'event_id' => \App\Utils\UrlUtils::encodeId($event->id),
             'date' => now()->format('Y-m-d'),
         ]))->assertStatus(403);
+
+        // And so is looking an attendee up by name or seat, which is part of the same dashboard.
+        // It shipped guarded only by canViewEventData, so it answered on a free schedule.
+        $this->actingAs($owner)->getJson(route('checkin.search', [
+            'event_id' => \App\Utils\UrlUtils::encodeId($event->id),
+        ]).'?q=smith')->assertStatus(403);
     }
 
     public function test_the_ticket_waitlist_stays_pro_but_the_rsvp_waitlist_stays_free(): void

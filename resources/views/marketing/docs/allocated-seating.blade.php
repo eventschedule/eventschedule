@@ -75,6 +75,18 @@
             <p>Both <strong>Generate rows</strong> and <strong>Generate tables</strong> append to what the section already has, so you can build a block at a time - six rows of ten at the front, then four of twelve behind. Press either button twice by accident and you have double the seats - press <strong>Undo</strong> in the toolbar, or Ctrl+Z (Cmd+Z on a Mac).</p>
         </div>
 
+        <h3 id="build-numbering" class="doc-subheading">How rows and seats are numbered</h3>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">When you generate rows you choose how they are labelled, and a preview shows the first few before anything is created. Rows can be lettered <strong class="text-gray-900 dark:text-white">A, B, C</strong> (skipping I and O, which are misread as 1 and 0 on a printed ticket) or numbered <strong class="text-gray-900 dark:text-white">1, 2, 3</strong>. Seats within a row can run straight across, or <strong class="text-gray-900 dark:text-white">odds one side and evens the other</strong>, which is how most older theatres are numbered from the centre aisle out.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Whatever you choose, a seat's label is what the buyer sees on their ticket and what the door staff read off the sheet, so it is worth matching the numbers already painted on the seats. You can rename any row or seat afterwards by selecting it and editing the label.</p>
+
+        <h3 id="build-decorations" class="doc-subheading">The stage, and labels on the map</h3>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A room full of seats and nothing else does not tell a buyer which way they will be facing. Add a <strong class="text-gray-900 dark:text-white">stage</strong> marker and put it where the stage actually is - buyers use it to orient the whole map, and it appears on the guest picker, the box office console and the printed sheet.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Add <strong class="text-gray-900 dark:text-white">text</strong> labels for anything else worth naming: BAR, ENTRANCE, the door a latecomer should use. Both can be dragged, resized and rotated, so a stage along one side of the room reads the right way round. They are decoration only - nothing is sold from them and they never affect a seat.</p>
+
         <h3 id="build-accessible" class="doc-subheading">Wheelchair spaces and companion seats</h3>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">Mark a seat as a <strong class="text-gray-900 dark:text-white">wheelchair space</strong> and the seat beside it as a <strong class="text-gray-900 dark:text-white">companion</strong> seat. A companion seat cannot be bought on its own while the wheelchair space next to it is still free - only together with it, or once it has gone. That is what stops a wheelchair user ending up three rows from the person they came with.</p>
@@ -147,7 +159,7 @@
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">A selection is refused if it would strand one seat on its own between two bookings, because a lone seat mid-row rarely sells. A gap that already existed is not blamed on the buyer, and a gangway counts as the end of a run.</p>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The rule <strong class="text-gray-900 dark:text-white">lifts automatically once the house is about 90% sold</strong>, when one more seat sold matters more than a tidy row. It is on for every allocated event and there is currently no setting to turn it off or tune it.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The rule <strong class="text-gray-900 dark:text-white">lifts automatically once the house is about 90% sold</strong>, when one more seat sold matters more than a tidy row. It is on by default, and the <strong class="text-gray-900 dark:text-white">Selling rules</strong> panel in the designer turns it off or tunes it - both the run it protects and the percentage at which it lifts. Set it on the plan and every date inherits it; change it on one date and only that night differs. A room where single seats are normal, a bar or a comedy club, should simply turn it off.</p>
 
         <h3 id="rules-accessible" class="doc-subheading">Accessible seating</h3>
 
@@ -162,7 +174,11 @@
     <section id="box-office" class="doc-section">
         <h2 class="doc-heading">Run the door</h2>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The box office console is the same map with the names on. Open it from the event. Click a seat to see who has it, shift-click for several, or take a whole section from the sidebar. The lookup box jumps to a seat typed as <code class="doc-inline-code">C14</code> or <code class="doc-inline-code">row C seat 14</code>, or to a customer by name or email.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The box office console is the same map with the names on. Open it from the event, and use the date picker in the header to move between nights of a run. Click a seat to see who has it, turn on <strong class="text-gray-900 dark:text-white">Pick several</strong> to add more by tapping (a tablet has no shift key), or take a whole section from the sidebar - and a whole row from the seat you have selected.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The lookup box jumps to a seat typed as <code class="doc-inline-code">C14</code> or <code class="doc-inline-code">row C seat 14</code>, a range typed as <code class="doc-inline-code">C1-C12</code>, or a customer by name or email. It selects <strong class="text-gray-900 dark:text-white">every</strong> match, so searching a name finds the whole party rather than one seat of it, and the bulk actions then apply to all of them.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A sold seat shows who holds it, what they bought, when they bought it, and whether they have come through the door yet - with their email and phone as links, and a way through to the order in Sales. Releasing takes seats off a booking and can do a whole party at once; it does not move any money, so refund the customer in your payment provider as usual. Every hold, release, exchange and counter booking is recorded in the schedule's audit log, with who did it.</p>
 
         <x-doc-screenshot id="allocated-seating--box-office" alt="The box office console" />
 
@@ -187,7 +203,11 @@
 
         <x-doc-screenshot id="allocated-seating--report" alt="The printable seating plan report" />
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">It covers <strong class="text-gray-900 dark:text-white">one date</strong>, not the whole run. <strong class="text-gray-900 dark:text-white">Download as CSV</strong> gives you the same rows for a spreadsheet, and the CSV additionally carries each booker's email, which the printed sheet leaves out.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Three views, because a full house and a door list are different sheets. <strong class="text-gray-900 dark:text-white">Taken seats</strong> lists only what is sold, held back or in a basket - on a half-sold room that is half the paper. <strong class="text-gray-900 dark:text-white">By name</strong> orders the same rows by surname, which is how you look up somebody standing in front of you. <strong class="text-gray-900 dark:text-white">Every seat</strong> is the whole house. The map always draws the whole room whichever you pick.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Each sold seat carries a box you can tick, and it arrives already ticked for anybody the scanner has let in - so the sheet works whether or not you are scanning. The header shows <strong class="text-gray-900 dark:text-white">how full the house is</strong>, section by section, and on a run it lists every night beside it, so you can see which dates are soft without opening them one at a time.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The figures cover <strong class="text-gray-900 dark:text-white">one date</strong>; the run summary is the exception. <strong class="text-gray-900 dark:text-white">Download as CSV</strong> gives you the same rows for a spreadsheet, and the CSV additionally carries each booker's email, which the printed sheet leaves out.</p>
     </section>
 
     <!-- Reference -->
@@ -222,6 +242,14 @@
                     <tr>
                         <td>Row labels</td>
                         <td><code class="doc-inline-code">A, B, C</code> or <code class="doc-inline-code">1, 2, 3</code>. Letters continue past Z as AA, AB.</td>
+                    </tr>
+                    <tr>
+                        <td>Seat numbering</td>
+                        <td>Straight across the row, or <strong>odds and evens</strong> from the centre out.</td>
+                    </tr>
+                    <tr>
+                        <td>Decorations</td>
+                        <td><strong>Stage</strong> marker and free <strong>text</strong> labels. Draggable, resizable and rotatable; never sold.</td>
                     </tr>
                     <tr>
                         <td>Curve</td>
@@ -265,10 +293,9 @@
         <h2 class="doc-heading">What it does not do</h2>
 
         <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Decorations are not seats.</strong> A stage marker or text label is never sold, counted or reported on - it only tells the buyer which way the room faces.</li>
             <li><strong class="text-gray-900 dark:text-white">Invoice Ninja payment links</strong> cannot be used with allocated seating, because quantities are chosen after checkout there rather than before. The refusal happens at checkout, not when you attach the plan.</li>
             <li><strong class="text-gray-900 dark:text-white">Passes are house-wide.</strong> A pass holder booking an allocated date gets a real seat assigned automatically - best available, with no picker - but a pass cannot be restricted to one band.</li>
-            <li><strong class="text-gray-900 dark:text-white">The single-seat rule has no setting.</strong> It is on for every allocated event.</li>
-            <li><strong class="text-gray-900 dark:text-white">The report is per date</strong>, not per run.</li>
         </ul>
 
         <div class="doc-callout doc-callout-warning mb-6">

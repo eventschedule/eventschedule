@@ -5,6 +5,41 @@
         <div ref="rootEl" class="rounded-xl border border-gray-200 dark:border-gray-700 p-3">
             <p class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">{{ t.pickYourSeats }}</p>
 
+            <!-- The fast path, first, because most buyers do not want to choose a seat - they want
+                 N seats together. This is what the docs and the feature page have always described.
+                 It is an affordance over the same hold the map uses, so the two cannot disagree. -->
+            <div v-if="!loading && mySections.length" class="mb-3 flex flex-wrap items-end gap-2">
+                <div>
+                    <label for="seatpick-party" class="block text-xs text-gray-500 dark:text-gray-400">{{ t.howMany }}</label>
+                    <select id="seatpick-party" v-model.number="partySize"
+                        class="mt-1 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                        <option v-for="n in maxSelectable" :key="n" :value="n">{{ n }}</option>
+                    </select>
+                </div>
+                <!-- Only when there is a choice to make. With one band the server picks it anyway. -->
+                <div v-if="priceKey.length > 1">
+                    <label for="seatpick-band" class="block text-xs text-gray-500 dark:text-gray-400">{{ t.band }}</label>
+                    <select id="seatpick-band" v-model="bestBandId"
+                        class="mt-1 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                        <option v-for="row in priceKey" :key="row.id" :value="row.id" :disabled="row.soldOut">
+                            {{ row.label }}<template v-if="row.price"> &middot; {{ row.price }}</template>
+                        </option>
+                    </select>
+                </div>
+                <button type="button" id="seatpick-best" @click="findBestSeats" :disabled="finding || soldOut"
+                    class="px-4 py-2 rounded-lg text-sm font-medium text-white bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] disabled:opacity-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)]">
+                    {{ t.findBest }}
+                </button>
+                <span class="text-xs text-gray-500 dark:text-gray-400 self-center">{{ t.orPick }}</span>
+                <!-- accessibility_only shipped in the payload from the start and nothing used it, so
+                     finding a wheelchair space meant spotting a 10-unit glyph across the whole map -
+                     and it is illegible below the zoom at which seat numbers appear. -->
+                <button v-if="accessibleSeat" type="button" id="seatpick-accessible" @click="goToAccessible"
+                    class="ms-auto self-center inline-flex items-center gap-1 text-xs text-[var(--brand-blue)] hover:underline focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] rounded">
+                    <span aria-hidden="true">&#9855;</span>{{ t.showAccessible }}
+                </button>
+            </div>
+
             <div class="flex flex-wrap items-center gap-3 mb-3">
                 <div class="flex items-center gap-1 rounded-lg bg-gray-100 dark:bg-gray-800 p-1">
                     <button type="button" @click="mode = 'map'" :aria-pressed="mode === 'map'"
@@ -34,6 +69,25 @@
                     <button type="button" @click="fit" class="px-2 py-1 rounded text-xs text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 transition-all duration-200">{{ t.fit }}</button>
                 </div>
 
+            </div>
+
+            <!-- Where to look. A fitted 1,200-seat house is a grey field: seat numbers vanish below
+                 0.75 zoom and there is no way in short of pinching around hunting for a gap. Each
+                 chip zooms to one section and says how much of it is left, which is the question
+                 ahead of "which seat" - and it doubles as the sold-out signal a section never had. -->
+            <div v-if="mode === 'map' && sectionJumps.length > 1" class="mb-3 flex flex-wrap gap-1.5">
+                <button v-for="jump in sectionJumps" :key="jump.id" type="button"
+                    @click="zoomToSection(jump.id)" :disabled="!jump.free"
+                    class="inline-flex items-center gap-1.5 rounded-lg border px-2 py-1 text-xs transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    :class="jump.id === zoomedSectionId
+                        ? 'border-[var(--brand-blue)] text-[var(--brand-blue)] font-medium'
+                        : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-[var(--brand-blue)]'">
+                    <span class="w-2.5 h-2.5 rounded-full border shrink-0" :style="{ background: jump.color, borderColor: jump.stroke }"></span>
+                    {{ jump.name }}
+                    <span class="text-gray-400 dark:text-gray-500">{{ jump.free ? jump.free : t.soldOut }}</span>
+                </button>
+                <button v-if="zoomedSectionId" type="button" @click="showWholeMap"
+                    class="rounded-lg px-2 py-1 text-xs text-[var(--brand-blue)] hover:underline">{{ t.wholeMap }}</button>
             </div>
 
             <!-- A lapsed hold is a thing that happened TO the buyer, so it says so rather than
@@ -80,9 +134,28 @@
                             <pattern id="seatTakenHatch" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
                                 <line x1="0" y1="0" x2="0" y2="4" stroke="#6b7280" stroke-width="1.6" />
                             </pattern>
+                            <!-- Restricted view. Same 45-degree hatch the designer draws it with,
+                                 lighter, so the organizer and the buyer see the same seat. -->
+                            <pattern id="seatRestrictedHatch" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                                <line x1="0" y1="0" x2="0" y2="4" stroke="#6b7280" stroke-width="1" opacity="0.55" />
+                            </pattern>
                         </defs>
                         <g :transform="`translate(${pan.x} ${pan.y}) scale(${zoom})`">
-                        <g v-for="s in mySections" :key="s.id" :transform="`translate(${s.x} ${s.y})`">
+                        <!-- Drawn first so it can never sit over a seat, and pointer-events none
+                             throughout so it can never take a press meant for one. This is what
+                             tells the buyer which way the room faces. -->
+                        <g v-for="d in myDecorations" :key="`dec-${d.id}`" pointer-events="none"
+                            :transform="`translate(${d.x} ${d.y}) rotate(${d.rotation || 0})`">
+                            <rect v-if="d.kind === 'stage'" :width="d.width" :height="d.height" rx="4"
+                                class="fill-gray-200 dark:fill-gray-700" />
+                            <text :x="d.width / 2" :y="d.height / 2" text-anchor="middle" dy="4"
+                                :font-size="d.kind === 'stage' ? 13 : 11"
+                                :class="d.kind === 'stage'
+                                    ? 'fill-gray-600 dark:fill-gray-300 uppercase tracking-widest'
+                                    : 'fill-gray-400 dark:fill-gray-500'">{{ d.label }}</text>
+                        </g>
+
+                        <g v-for="s in mySections" :key="s.id" :transform="sectionTransform(s)">
                             <text :x="0" :y="-10" font-size="12" class="fill-gray-500 dark:fill-gray-400">
                                 {{ s.name }}<tspan v-if="priceForSection(s)"> &middot; {{ priceForSection(s) }}</tspan>
                             </text>
@@ -90,8 +163,25 @@
                             <template v-if="showSeatLabels">
                                 <text v-for="row in rowsOf(s)" :key="`rl-${row.key}`"
                                     :x="rowLabelX(s, row) - 16" :y="rowLabelY(s, row) + 4"
-                                    text-anchor="end" font-size="9" class="fill-gray-400 dark:fill-gray-500">{{ row.key.split('-').pop() }}</text>
+                                    text-anchor="end" font-size="9" class="fill-gray-400 dark:fill-gray-500">{{ row.gutter }}</text>
                             </template>
+                            <!-- The table itself. The designer draws these and the picker never did,
+                                 so a cabaret plan reached the buyer as floating rings of anonymous
+                                 seats with no way to tell one table from the next - while the
+                                 ticket and the confirmation email both say "Table 4, Seat 3".
+                                 Inert, like the decorations: a press belongs to a chair. -->
+                            <g v-for="tb in (s.tables || [])" :key="`tb-${tb.id}`" pointer-events="none"
+                                :transform="`translate(${tb.x} ${tb.y}) rotate(${tb.rotation || 0})`">
+                                <circle v-if="tb.shape === 'round'" :r="tb.width / 2" :fill="s.color" fill-opacity="0.18"
+                                    :stroke="s.color" stroke-opacity="0.5"
+                                    :stroke-dasharray="tb.booking_mode === 'whole' ? '5 3' : null" />
+                                <rect v-else :x="-tb.width / 2" :y="-tb.height / 2" :width="tb.width" :height="tb.height" rx="4"
+                                    :fill="s.color" fill-opacity="0.18" :stroke="s.color" stroke-opacity="0.5"
+                                    :stroke-dasharray="tb.booking_mode === 'whole' ? '5 3' : null" />
+                                <text text-anchor="middle" dy="4" font-size="11"
+                                    class="fill-gray-600 dark:fill-gray-300">{{ tb.label }}</text>
+                            </g>
+
                             <g v-for="seat in s.seats" :key="seat.id"
                                 :transform="`translate(${seatX(s, seat)} ${seatY(s, seat)})`">
                                 <!-- The drawn disc, and nothing else: it takes no pointer events so
@@ -106,10 +196,11 @@
                                 <!-- The id lives on THIS one, not on the drawn disc: the disc takes
                                      no pointer events, so anything driving a click needs the target. -->
                                 <circle :id="`seat-${uid}-${seat.id}`" r="15" fill="transparent"
+                                    class="seatpick-target"
                                     :class="isBlocked(seat) ? '' : 'cursor-pointer'"
                                     role="button"
                                     :tabindex="seat.id === focusedSeatId ? 0 : -1"
-                                    :aria-label="labelFor(s, seat)"
+                                    :aria-label="priced(s, seat)"
                                     :aria-pressed="isSelected(seat)"
                                     :aria-disabled="isBlocked(seat)"
                                     @focus="focusedSeatId = seat.id; hovered = { s, seat }"
@@ -122,6 +213,8 @@
                                      never be encoded by colour alone, and two greys is exactly that. -->
                                 <circle v-if="seat.state === 'taken'" r="9" fill="url(#seatTakenHatch)"
                                     opacity="0.55" pointer-events="none" />
+                                <circle v-else-if="seat.kind === 'restricted_view'" r="9" fill="url(#seatRestrictedHatch)"
+                                    pointer-events="none" />
                                 <!-- pointer-events none, like every other overlay here: without it a
                                      press landing on the glyph targets the <text>, which has no
                                      handler, so wheelchair seats were dead to the mouse. -->
@@ -147,6 +240,8 @@
                     <!-- Keyboard advice belongs to keyboard users, not to everyone with a mouse. -->
                     <span v-else-if="keyboardActive" class="text-gray-400 dark:text-gray-500">{{ t.keyboardHint }}</span>
                 </p>
+                <p v-if="wheelBlocked" class="mt-1 text-xs text-gray-500 dark:text-gray-400" role="status">{{ t.wheelHint }}
+                </p>
                 </div>
 
                 <!-- LIST: a complete alternative path, not a summary. A purchase can be finished
@@ -164,13 +259,14 @@
                             <button v-for="seat in row.seats" :key="seat.id" type="button"
                                 @click="toggle(seat)"
                                 :disabled="isBlocked(seat)"
-                                :aria-label="labelFor(s, seat)"
+                                :aria-label="priced(s, seat)"
                                 :aria-pressed="isSelected(seat)"
                                 class="inline-flex items-center justify-center w-11 h-11 m-0.5 rounded text-xs border transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
                                 :class="isSelected(seat)
                                     ? 'bg-[var(--brand-button-bg)] text-white border-transparent'
                                     : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-[var(--brand-blue)]'">
-                                {{ seat.seat || '&middot;' }}
+                                {{ seat.seat || '&middot;' }}<span v-if="kindMark(seat)" aria-hidden="true"
+                                    class="ms-0.5 text-[10px] leading-none">{{ kindMark(seat) }}</span>
                             </button>
                         </div>
                     </div>
@@ -197,6 +293,12 @@
                     <!-- Only when the map actually has one, or it is a key to nothing. -->
                     <span v-if="hasUnavailable" class="flex items-center gap-1"><span class="w-3 h-3 rounded-full border"
                         style="background:#9ca3af;border-color:#6b7280"></span>{{ t.legendUnavailable }}</span>
+                    <span v-if="hasKind('restricted_view')" class="flex items-center gap-1"><span class="w-3 h-3 rounded-full border"
+                        style="border-color:#9ca3af;background:repeating-linear-gradient(45deg,#e5e7eb,#e5e7eb 1px,#9ca3af 1px,#9ca3af 2px)"></span>{{ t.restrictedView }}</span>
+                    <span v-if="hasKind('companion')" class="flex items-center gap-1"><span class="w-3 h-3 rounded-full border border-dashed"
+                        style="background:#e5e7eb;border-color:#6b7280"></span>{{ t.companion }}</span>
+                    <span v-if="hasKind('wheelchair')" class="flex items-center gap-1"><span class="w-3 h-3 rounded-full border"
+                        style="background:#bfdbfe;border-color:#9ca3af"></span>{{ t.wheelchair }}</span>
                 </div>
             </template>
 
@@ -268,6 +370,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { loadMap, startPolling } from '../seat-map-store';
 import { useMapViewport } from '../seat-map-viewport';
+import { sectionTransform, toCanvasFrame } from '../seat-map-geometry';
 
 let instanceSeq = 0;
 
@@ -315,12 +418,17 @@ const hoveredLabel = computed(() => {
     const h = hovered.value;
     if (! h) return '';
 
-    const price = ticketById.value[h.s.ticket_id]?.priceLabel || '';
-    const label = labelFor(h.s, h.seat);
-
-    return price ? `${label} \u00b7 ${price}` : label;
+    return priced(h.s, h.seat);
 });
 const selected = ref([]);
+/** The party size for the best-available path. Not the selection - that is `selected`. */
+const partySize = ref(2);
+// Seeded, not null: the select is bound to this, so leaving it empty rendered a blank dropdown
+// beside a button that quietly used the first band anyway.
+const bestBandId = ref(
+    (props.tickets.find((x) => (Number(x.quantity) || 0) > 0) || props.tickets[0] || {}).id ?? null
+);
+const finding = ref(false);
 const map = ref(null);
 const loading = ref(false);
 const error = ref('');
@@ -412,10 +520,103 @@ const myLevels = computed(() => {
         .map((lvl) => ({
             id: lvl.id,
             name: lvl.name,
+            // Kept whole even though the SECTIONS are filtered to this form's bands: the stage is
+            // where the room faces, not something this ticket owns, and a buyer looking at the
+            // circle needs it as much as one looking at the stalls.
+            decorations: lvl.decorations || [],
             sections: (lvl.sections || []).filter((s) => ticketById.value[s.ticket_id]),
         }))
         .filter((lvl) => lvl.sections.length);
 });
+
+/**
+ * The first takeable wheelchair space anywhere this form sells, or null.
+ *
+ * Every level, not just the one on screen - accessible seating is commonly its own section on the
+ * ground floor while the buyer is looking at the circle.
+ */
+const accessibleSeat = computed(() => {
+    for (const lvl of myLevels.value) {
+        for (const sec of lvl.sections) {
+            if (! sec.accessibility_only) continue;
+
+            const seat = sec.seats.find((x) => x.kind === 'wheelchair' && ! isBlocked(x));
+            if (seat) return { levelId: lvl.id, section: sec, seat };
+        }
+    }
+
+    return null;
+});
+
+/** Show it, switching level if it is elsewhere, and put the keyboard on it. */
+function goToAccessible() {
+    const hit = accessibleSeat.value;
+    if (! hit) return;
+
+    if (hit.levelId !== activeLevel.value?.id) activeLevelId.value = hit.levelId;
+
+    nextTick(() => {
+        revealPoint(...toCanvasFrame(hit.section, seatX(hit.section, hit.seat), seatY(hit.section, hit.seat)));
+        focusedSeatId.value = hit.seat.id;
+        nextTick(() => document.getElementById(`seat-${uid}-${hit.seat.id}`)?.focus());
+    });
+}
+
+/** The table a seat belongs to, if any. */
+function tableOf(s, seat) {
+    return seat.table_id ? (s.tables || []).find((x) => x.id === seat.table_id) || null : null;
+}
+
+/**
+ * The next seat in this direction that can actually be taken.
+ *
+ * focusableSeats holds every seat regardless of state, so arrowing walked through sold ones - a
+ * keyboard user crossed a block of seats none of which would respond to Enter. Falls back to the
+ * immediate neighbour when everything ahead is blocked, so focus still moves.
+ */
+function nextTakeable(list, from, step) {
+    for (let i = from + step; i >= 0 && i < list.length; i += step) {
+        if (! isBlocked(list[i])) return list[i];
+    }
+
+    return list[from + step] || null;
+}
+
+/** The nearest takeable seat one row away, matched on horizontal position. */
+function seatInAdjacentRow(seat, step) {
+    const owner = mySections.value.find((s) => s.seats.includes(seat));
+    if (! owner) return null;
+
+    const rows = rowsOf(owner);
+    const index = rows.findIndex((r) => r.seats.includes(seat));
+    const target = rows[index + step];
+    if (! target || ! target.seats.length) return null;
+
+    const x = seatX(owner, seat);
+    const free = target.seats.filter((s) => ! isBlocked(s));
+
+    return (free.length ? free : target.seats)
+        .reduce((best, s) => (Math.abs(seatX(owner, s) - x) < Math.abs(seatX(owner, best) - x) ? s : best));
+}
+
+/**
+ * A one-glyph mark for the list view, which rendered the seat number and nothing else.
+ *
+ * The list is the complete alternative path - a purchase can be finished there with no map at all -
+ * so a wheelchair space, a companion seat and a restricted view were all indistinguishable from an
+ * ordinary seat for anyone using it. aria-hidden because labelFor() already says it in words.
+ */
+function kindMark(seat) {
+    if (seat.kind === 'wheelchair') return '\u267F';
+    if (seat.kind === 'companion') return '\u00B7';
+    if (seat.kind === 'restricted_view') return '\u2298';
+    return '';
+}
+
+/** Whether this level draws a seat of that kind, so the legend only keys what is on screen. */
+function hasKind(kind) {
+    return mySections.value.some((s) => s.seats.some((seat) => seat.kind === kind));
+}
 
 /** Whether anything on this level is rule-blocked, so the legend only keys what is drawn. */
 const hasUnavailable = computed(() => mySections.value.some((sec) => (sec.seats || []).some((x) => x.state === 'unavailable')));
@@ -455,16 +656,76 @@ const activeLevel = computed(() => myLevels.value.find((l) => l.id === activeLev
 /** Only what is on screen. */
 const mySections = computed(() => (activeLevel.value && activeLevel.value.sections) || []);
 
+/** One chip per section on this level: its colour, its name, and how many seats are left in it. */
+const sectionJumps = computed(() => mySections.value.map((sec) => ({
+    id: sec.id,
+    name: sec.name,
+    color: tint(sec.color) || '#e5e7eb',
+    stroke: sec.color || '#9ca3af',
+    free: sec.seats.filter((seat) => seat.state === 'available').length,
+})));
+
+const zoomedSectionId = ref(null);
+
+/** Frame one section, so a big house is entered rather than searched. */
+function zoomToSection(id) {
+    const sec = mySections.value.find((x) => x.id === id);
+    if (! sec || ! sec.seats.length) return;
+
+    zoomedSectionId.value = id;
+
+    const xs = [], ys = [];
+    sec.seats.forEach((seat) => {
+        const [cx, cy] = toCanvasFrame(sec, seatX(sec, seat), seatY(sec, seat));
+        xs.push(cx); ys.push(cy);
+    });
+
+    fitTo({
+        minX: Math.min(...xs) - 30,
+        minY: Math.min(...ys) - 40,
+        w: Math.max(1, Math.max(...xs) - Math.min(...xs) + 60),
+        h: Math.max(1, Math.max(...ys) - Math.min(...ys) + 70),
+    });
+}
+
+function showWholeMap() {
+    zoomedSectionId.value = null;
+    fit();
+}
+
+/** The stage and any labels on the level being drawn. Never interactive. */
+const myDecorations = computed(() => (activeLevel.value && activeLevel.value.decorations) || []);
+
 /** Every section this ticket prices, on every level - what a held seat is resolved against. */
 const allMySections = computed(() => myLevels.value.flatMap((l) => l.sections));
 
 const svgEl = ref(null);
 
+/** The four corners of a decoration in canvas space, rotation included. */
+function decorationCorners(d) {
+    const w = Number(d.width) || 0;
+    const h = Number(d.height) || 0;
+    const deg = Number(d.rotation) || 0;
+    const pts = [[0, 0], [w, 0], [w, h], [0, h]];
+    if (! deg) return pts.map(([x, y]) => [d.x + x, d.y + y]);
+
+    const r = (deg * Math.PI) / 180;
+    const cos = Math.cos(r);
+    const sin = Math.sin(r);
+
+    return pts.map(([x, y]) => [d.x + x * cos - y * sin, d.y + x * sin + y * cos]);
+}
+
 /** Bounding box of the level on screen, in content units. */
 function contentBounds() {
     const xs = [], ys = [];
+    // A stage sits above row A, so leaving it out means Fit frames it off screen.
+    myDecorations.value.forEach((d) => {
+        decorationCorners(d).forEach(([x, y]) => { xs.push(x); ys.push(y); });
+    });
     mySections.value.forEach((s) => s.seats.forEach((seat) => {
-        xs.push(s.x + seatX(s, seat)); ys.push(s.y + seatY(s, seat));
+        const [cx, cy] = toCanvasFrame(s, seatX(s, seat), seatY(s, seat));
+        xs.push(cx); ys.push(cy);
     }));
     if (!xs.length) return null;
     const pad = 18;
@@ -472,7 +733,7 @@ function contentBounds() {
     return { minX, minY, w: Math.max(1, Math.max(...xs) - minX + pad), h: Math.max(1, Math.max(...ys) - minY + pad) };
 }
 
-const { zoom, pan, canvas, bind, fit, zoomBy, observe, revealPoint } = useMapViewport({ svgEl, contentBounds });
+const { zoom, pan, canvas, bind, fit, fitTo, zoomBy, observe, revealPoint, wheelBlocked } = useMapViewport({ svgEl, contentBounds, wheelNeedsModifier: true });
 
 /**
  * The canvas IS the viewBox, and zoom/pan move the content inside it. Fitting the viewBox to the
@@ -553,18 +814,28 @@ function onSeatKey(evt, seat) {
         return;
     }
 
-    const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[evt.key];
-    if (!step) return;
-
-    evt.preventDefault();
     const list = focusableSeats.value;
     const i = list.findIndex((x) => x.id === seat.id);
-    const next = list[Math.min(list.length - 1, Math.max(0, i + step))];
-    if (!next) return;
+    let next = null;
+
+    // Up and Down used to be the same +-1 step as Left and Right, so walking from Row A Seat 1 to
+    // Row B Seat 1 meant arrowing through every remaining seat in Row A. They now move by ROW.
+    if (evt.key === 'ArrowUp' || evt.key === 'ArrowDown') {
+        next = seatInAdjacentRow(seat, evt.key === 'ArrowDown' ? 1 : -1);
+    } else if (evt.key === 'ArrowLeft' || evt.key === 'ArrowRight') {
+        next = nextTakeable(list, i, evt.key === 'ArrowRight' ? 1 : -1);
+    } else if (evt.key === 'Home' || evt.key === 'End') {
+        const ordered = evt.key === 'Home' ? list : [...list].reverse();
+        next = ordered.find((x) => ! isBlocked(x)) || null;
+    }
+
+    if (! next) return;
+
+    evt.preventDefault();
 
     focusedSeatId.value = next.id;
     const owner = mySections.value.find((s) => s.seats.includes(next));
-    if (owner) revealPoint(owner.x + seatX(owner, next), owner.y + seatY(owner, next));
+    if (owner) revealPoint(...toCanvasFrame(owner, seatX(owner, next), seatY(owner, next)));
     nextTick(() => document.getElementById(`seat-${uid}-${next.id}`)?.focus());
 }
 
@@ -616,11 +887,36 @@ function labelInkFor(seat) {
     return isSelected(seat) ? '#ffffff' : '#374151';
 }
 
+/**
+ * The seat's label with its price.
+ *
+ * The hover line is aria-hidden, so price used to reach sighted users only - a screen-reader user
+ * could hear the seat and its state but never what it costs.
+ */
+function priced(s, seat) {
+    const price = ticketById.value[s.ticket_id]?.priceLabel || '';
+    const label = labelFor(s, seat);
+
+    return price ? `${label}, ${price}` : label;
+}
+
 function labelFor(s, seat) {
     const bits = [s.name];
+    // "Table 4" where the seat belongs to one, matching SeatingSeat::label() - which is what the
+    // ticket and the confirmation email print. Without it the buyer chose "Seat 3" and was later
+    // told they had "Table 4, Seat 3", with nothing on the map connecting the two.
+    const table = tableOf(s, seat);
+    if (table) bits.push(table.label);
     if (seat.row) bits.push((t.rowPattern || 'Row :row').replace(':row', seat.row));
     if (seat.seat) bits.push((t.seatPattern || 'Seat :seat').replace(':seat', seat.seat));
+    // Every kind the designer can draw. Companion had only a dashed outline and restricted view had
+    // nothing at all, so a buyer could pay full price for a restricted seat with no disclosure
+    // anywhere on the page, and a screen reader user was never told either.
     if (seat.kind === 'wheelchair') bits.push(t.wheelchair || '');
+    if (seat.kind === 'companion') bits.push(t.companion || '');
+    if (seat.kind === 'restricted_view') bits.push(t.restrictedView || '');
+    // Said before the click, not only as a refusal afterwards.
+    if (table && table.booking_mode === 'whole') bits.push(t.wholeTable || '');
     if (seat.state === 'unavailable') bits.push(t.legendUnavailable || '');
     else bits.push(seat.state === 'taken' ? (t.legendTaken || '') : (isSelected(seat) ? (t.legendSelected || '') : (t.legendAvailable || '')));
     return bits.filter(Boolean).join(', ');
@@ -639,12 +935,17 @@ const selectedSeats = computed(() => {
         if (seat.row) bits.push((t.rowPattern || 'Row :row').replace(':row', seat.row));
         if (seat.seat) bits.push((t.seatPattern || 'Seat :seat').replace(':seat', seat.seat));
 
+        // A level is commonly named after the section it holds - the demo house has a Stalls level
+        // whose only seated section is Stalls - and naming both gave "Stalls, Stalls, Row A, Seat 4"
+        // wherever the full label is shown.
+        const levelName = multiLevel && lvl.name !== sec.name ? lvl.name : null;
+
         out.push({
             id: seat.id,
             ticketId: sec.ticket_id,
             // Commas, matching the aria-label and the list view. The old label ran the section and
             // the row together - "Stalls Row C Seat 14".
-            label: [multiLevel ? lvl.name : null, sec.name, ...bits].filter(Boolean).join(', '),
+            label: [levelName, sec.name, ...bits].filter(Boolean).join(', '),
             // Inside a band's row the band name is already the heading, so only the seat is needed.
             short: bits.join(', ') || String(seat.id),
         });
@@ -688,14 +989,32 @@ const basket = computed(() => {
 
 function rowsOf(s) {
     const groups = new Map();
+    const labels = new Map();
+
     s.seats.forEach((seat) => {
-        const key = seat.row || '';
-        if (!groups.has(key)) groups.set(key, []);
+        // A table seat carries no row_label, so keying on the row alone collapsed EVERY table in a
+        // section into one unlabelled group - a wall of buttons with the numbers 1..8 repeating
+        // once per table and nothing to say which table any of them belonged to.
+        const table = tableOf(s, seat);
+        const key = table ? `t${table.id}` : (seat.row || '');
+
+        if (! groups.has(key)) {
+            groups.set(key, []);
+            labels.set(key, table
+                ? table.label
+                : (seat.row ? (t.rowPattern || 'Row :row').replace(':row', seat.row) : ''));
+        }
+
         groups.get(key).push(seat);
     });
+
     return [...groups.entries()].map(([key, seats]) => ({
         key: `${s.id}-${key}`,
-        label: key ? (t.rowPattern || 'Row :row').replace(':row', key) : '',
+        label: labels.get(key) || '',
+        // The bare row letter for the map's gutter. Empty for a table, whose own shape already
+        // carries its name - and deriving this from the key printed the internal "t7" once table
+        // seats started grouping by table rather than by row.
+        gutter: key.startsWith('t') && seats.some((x) => x.table_id) ? '' : key,
         seats,
     }));
 }
@@ -784,8 +1103,20 @@ function ensurePolling() {
     startPolling(props.stateUrl, props.eventId, props.date, map.value, onPolled);
 }
 
+/**
+ * One request shape for both paths: an explicit seat list, or a party size the server picks for.
+ *
+ * Best available has been implemented server-side since the picker shipped - hold() takes
+ * ticket_id + quantity and runs BestAvailableService - and nothing ever called it. The docs and the
+ * feature page both promised the buyer a "how many seats" step, so the product was advertising a
+ * control that did not exist, and every buyer had to pick seat by seat.
+ */
 async function sendHold(ids, attempt = 0) {
-    const { ok, status, data } = await post(props.holdUrl, { ...base(), seat_ids: ids });
+    return requestHold({ seat_ids: ids }, attempt);
+}
+
+async function requestHold(payload, attempt = 0) {
+    const { ok, status, data } = await post(props.holdUrl, { ...base(), ...payload });
 
     if (!ok) {
         showError(data.error || t.holdFailed);
@@ -803,8 +1134,9 @@ async function sendHold(ids, attempt = 0) {
             selected.value = selected.value.filter((id) => seatState(id) !== 'taken');
 
             if (selected.value.length < before && attempt < 3) {
-                await sendHold(selected.value, attempt + 1);
-                return;
+                // Always by seat id, even when this began as a best-available request: repeating
+                // that would quietly hand the buyer a different block from the one just shown.
+                return await requestHold({ seat_ids: selected.value }, attempt + 1);
             }
         }
 
@@ -816,16 +1148,95 @@ async function sendHold(ids, attempt = 0) {
         warning.value = null;
         emitChange();
 
-        return;
+        // False, so a caller can tell a refusal from a short answer. findBestSeats() used to read
+        // an empty selection as "no block big enough" and overwrite the real reason - sold out, a
+        // rule refusal, a 500 - with its own generic one.
+        return false;
     }
+
+    // The server clamps per band and simply DROPS the surplus ids, so a selection could come back
+    // quietly smaller than the one that was sent - seats vanishing off the map with no word.
+    const asked = Array.isArray(payload.seat_ids) ? payload.seat_ids.length : null;
 
     selected.value = data.held || [];
     warning.value = data.warning || null;
+    followSelection();
+
+    // Cleared BEFORE the branch below, not after it. Setting the message and then blanking it two
+    // statements later meant the seats vanished off the map with no word at all - which is the
+    // exact failure this branch exists to prevent.
+    error.value = '';
+
+    if (asked !== null && selected.value.length < asked) {
+        const dropped = String(asked - selected.value.length);
+
+        // Two different things can shorten a selection, and blaming the wrong one is worse than
+        // saying nothing: another buyer taking the seat, or OUR OWN per-band limit refusing the
+        // surplus. The server says which by echoing the cap it applied.
+        showError(data.capped
+            ? (t.someSeatsCapped || '').replace(':count', dropped).replace(':max', String(data.capped))
+            : (t.someSeatsGone || '').replace(':count', dropped));
+    }
     // The local map still calls these free until the next poll, and heldByServer() reads it.
     markMine(selected.value);
     expiresAt.value = data.expires_at ? Date.parse(data.expires_at) : null;
-    error.value = '';
     emitChange();
+
+    return true;
+}
+
+/**
+ * Let the server choose. BestAvailableService scores contiguous runs by section, then row, then
+ * distance from the centre of the row, honours gangways, and never offers a wheelchair space or a
+ * lone companion seat - so this is a better choice than most buyers would make by hand.
+ *
+ * The result lands as an ordinary selection, so it can then be adjusted seat by seat. One selection
+ * model, one hold, and the map below stays the authority on what is taken.
+ */
+async function findBestSeats() {
+    const ticket = bestBandId.value
+        ? ticketById.value[bestBandId.value]
+        : props.tickets.find((x) => (Number(x.quantity) || 0) > 0);
+
+    if (! ticket || finding.value) return;
+
+    const wanted = Math.max(1, Math.min(Number(partySize.value) || 1, maxSelectable.value));
+
+    finding.value = true;
+    try {
+        const held = await requestHold({ ticket_id: ticket.id, quantity: wanted });
+
+        // pick() returns fewer ids than asked - or none - when it cannot find a block that satisfies
+        // the rules. Silence there reads as a broken button, so say what happened and leave the map
+        // open for them to choose by hand.
+        //
+        // Only when the request SUCCEEDED, though: on a refusal requestHold has already put the
+        // server's own reason on screen, and this would replace it with a vaguer one.
+        if (held && selected.value.length < wanted) {
+            showError((t.bestNone || '').replace(':count', String(wanted)));
+        }
+    } finally {
+        finding.value = false;
+    }
+}
+
+/**
+ * Show the level the selection is actually on.
+ *
+ * Best available can land in a band on another level - ask for four in the Circle while looking at
+ * the Stalls and the seats are held, the basket fills, and the map still shows the stalls. The
+ * buyer is told they have seats and cannot see one of them.
+ */
+function followSelection() {
+    if (! selected.value.length) return;
+
+    const owner = myLevels.value.find((lvl) =>
+        lvl.sections.some((sec) => sec.seats.some((seat) => selected.value.includes(seat.id))));
+
+    if (owner && owner.id !== activeLevel.value?.id) {
+        activeLevelId.value = owner.id;
+        nextTick(() => fit());
+    }
 }
 
 function seatState(id) {
@@ -875,6 +1286,13 @@ function toggle(seat) {
         const ticket = ticketFor(seat.id);
         if (ticket && (quantities.value[ticket.id] || 0) + additions.length > (Number(ticket.quantity) || 0)) {
             showError((t.bandFull || t.maxReached || '').replace(':band', ticket.type));
+            return;
+        }
+        // The band's own per-order ceiling, which the server applies and the client did not - so the
+        // surplus was accepted here, dropped there, and the seats simply left the selection.
+        const bandCap = Number(ticket?.maxPerOrder) || 0;
+        if (bandCap && (quantities.value[ticket.id] || 0) + additions.length > bandCap) {
+            showError((t.bandMax || t.maxReached || '').replace(':band', ticket.type).replace(':max', String(bandCap)));
             return;
         }
         selected.value.push(...additions);
@@ -1010,6 +1428,32 @@ const countdown = computed(() => {
 });
 const countdownSoon = computed(() => expiresAt.value && (expiresAt.value - now.value) < 120000);
 
+/**
+ * Say it when the clock runs out, without waiting for the poll to notice.
+ *
+ * Hold expiry is evaluated at READ time and sweepExpiredHolds() does not touch state_version, so a
+ * hold that simply lapses produces no diff - and the `?since=` poll only returns seats whose
+ * version moved. onPolled() therefore fires only when some OTHER buyer, or the box office, happens
+ * to move the map. Left to itself the countdown sat at 0:00 with the seats still blue, still in
+ * seat_ids[], still counted in the form's quantities, and the buyer found out at checkout.
+ *
+ * This does not touch the server: the seats are already free the moment they lapse. It only stops
+ * the screen from claiming otherwise.
+ */
+watch(now, () => {
+    if (! expiresAt.value || ! selected.value.length) return;
+    if (now.value < expiresAt.value) return;
+
+    expiresAt.value = null;
+    selected.value = [];
+    warning.value = null;
+    lapsed.value = true;
+    // The SHARED store too, or the seats stay drawn as mine and heldByServer() - documented as the
+    // only trustworthy answer after a refusal - hands them straight back on the next failed hold.
+    markMine([]);
+    emitChange();
+});
+
 async function pushHold() { await sendHold(selected.value); }
 
 /** Drop one seat without clearing the lot - what the comma-joined list gave no way to do. */
@@ -1038,6 +1482,11 @@ function emitChange() {
             // way - the buyer is being asked to rearrange, not to start again.
             blocked: !! warning.value,
             reason: warning.value?.message || '',
+            // For the cart, which stored quantities alone: a buyer who picked Row C 12-15 and put
+            // the event in their basket saw "4 tickets" and nothing else, with no sign that the
+            // seats were on a twelve-minute clock.
+            seatLabels: selectedSeats.value.map((x) => x.label),
+            expiresAt: expiresAt.value,
         },
     }));
 }
@@ -1046,7 +1495,12 @@ function emitChange() {
 watch(warning, emitChange);
 
 // Each level has its own extent, so a switch has to reframe or the new level lands off screen.
-watch(activeLevelId, () => nextTick(fit));
+watch(activeLevelId, () => {
+    // The zoom chip belongs to the level that was on screen. Left set, the strip claims you are
+    // zoomed into a section of a level you have left.
+    zoomedSectionId.value = null;
+    nextTick(fit);
+});
 
 /**
  * Fetch the map the first time this picker is actually on screen - not on mount.

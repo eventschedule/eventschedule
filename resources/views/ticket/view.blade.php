@@ -395,9 +395,13 @@
                     if (! $st->ticket) continue;
                     $key = $st->ticket_id;
                     if (! isset($aggregated[$key])) {
-                        $aggregated[$key] = (object) ['ticket' => $st->ticket, 'quantity' => 0];
+                        // seat_labels is carried here rather than looked up in the loop below: these
+                        // rows are stdClass totals for the whole group, not SaleTicket models, so
+                        // seatLabels() cannot be called on them.
+                        $aggregated[$key] = (object) ['ticket' => $st->ticket, 'quantity' => 0, 'seat_labels' => []];
                     }
                     $aggregated[$key]->quantity += $st->quantity;
+                    $aggregated[$key]->seat_labels = array_merge($aggregated[$key]->seat_labels, $st->seatLabels());
                 }
                 $aggregatedCollection = collect(array_values($aggregated));
                 $regularTickets = $aggregatedCollection->filter(fn($st) => ! $st->ticket->is_addon);
@@ -406,6 +410,12 @@
                 $regularTickets = $sale->saleTickets->filter(fn($st) => $st->ticket && !$st->ticket->is_addon);
                 $addonTickets = $sale->saleTickets->filter(fn($st) => $st->ticket && $st->ticket->is_addon);
             }
+
+            // The two branches hand back different types - real SaleTicket models, or the stdClass
+            // totals a grouped primary buyer gets - and only one of them answers seatLabels().
+            $seatLabelsFor = fn ($st) => $st instanceof \App\Models\SaleTicket
+                ? $st->seatLabels()
+                : ($st->seat_labels ?? []);
         @endphp
         @if ($regularTickets->count() > 0)
         <div class="glass p-[20px] sm:p-[24px] print:bg-slate-50">
@@ -418,7 +428,7 @@
                   @if ($saleTicket->ticket->is_pass)
                   <span class="ms-1 inline-block px-[8px] py-[2px] rounded-full bg-blue-500/20 print:bg-blue-100 text-blue-300 print:text-blue-700 text-[11px] font-semibold">{{ __('messages.season_pass') }} &middot; {{ __('messages.pass_valid_all_dates') }}</span>
                   @endif
-                  @php $seatLabels = $saleTicket->seatLabels(); @endphp
+                  @php $seatLabels = $seatLabelsFor($saleTicket); @endphp
                   @if (count($seatLabels))
                   <span class="block text-[12px] text-white/70 print-text-gray mt-[2px]">{{ implode(' &middot; ', $seatLabels) }}</span>
                   @endif
