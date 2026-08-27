@@ -28,6 +28,19 @@ class EventUpdateRequest extends FormRequest
             'name' => ['sometimes', 'required', 'string', 'max:255'],
 
             'flyer_image_url' => ['image', 'max:2500'],
+
+            // Each max matches its column exactly - see Event::CLAMPED_COLUMNS, which a schema
+            // test holds against the live widths. Length only, deliberately not 'url': only the
+            // length is wrong today, whereas a format rule would start rejecting the scheme-less
+            // values that currently save. Same reasoning as roles.website in RoleUpdateRequest.
+            // agenda_ai_prompt is pointedly absent: it is a hidden input carried by every event
+            // save, so a rule on it would reject someone editing tickets with a page-top message
+            // naming a field that is not on screen. Its ceiling is the model saving hook instead.
+            'event_url' => ['nullable', 'string', 'max:500'],
+            'terms_url' => ['nullable', 'string', 'max:255'],
+            'coupon_code' => ['nullable', 'string', 'max:255'],
+            'event_password' => ['nullable', 'string', 'max:255'],
+
             'slug' => ['nullable', 'string', 'max:255'],
 
             'promo_codes' => ['nullable', 'array'],

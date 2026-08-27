@@ -1637,6 +1637,7 @@
                                 <x-input-label for="event_password" :value="__('messages.event_password')" />
                                 <x-text-input id="event_password" name="event_password" type="text" class="mt-1 block w-full"
                                     v-model="event.event_password" maxlength="255" />
+                                <x-input-error class="mt-2" :messages="$errors->get('event_password')" />
                                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.event_password_help') }}</p>
                             </div>
                             @endif
@@ -3117,6 +3118,7 @@
                                 <x-input-label for="coupon_code" :value="__('messages.coupon_code')" />
                                 <x-text-input id="coupon_code" name="coupon_code" type="text" class="mt-1 block w-full"
                                     v-model="event.coupon_code" maxlength="255" />
+                                <x-input-error class="mt-2" :messages="$errors->get('coupon_code')" />
                             </div>
 
                             <!-- What the coupon is worth (only visible when tickets and RSVP are disabled) -->
@@ -4203,6 +4205,7 @@
                                     <x-text-input id="terms_url" name="terms_url" type="url" class="mt-1 block w-full"
                                         :value="old('terms_url', $event->terms_url)"
                                         v-model="event.terms_url" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('terms_url')" />
                                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                         {{ __('messages.terms_url_help') }}
                                     </p>

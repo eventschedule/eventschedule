@@ -213,7 +213,10 @@ class ApiEventController extends Controller
                 'duration' => 'nullable|numeric|min:0|max:8760',
                 'description' => 'nullable|string|max:10000',
                 'short_description' => 'nullable|string|max:500',
-                'event_url' => 'nullable|url|max:255',
+                // 500, matching the column - see Event::CLAMPED_COLUMNS. A 400-character Teams
+                // or Zoom join URL is legal on every other write path, so a stricter rule here
+                // would 422 an ordinary read-modify-write round-trip of an untouched field.
+                'event_url' => 'nullable|url|max:500',
                 'event_password' => 'nullable|string|max:255',
                 'is_private' => 'nullable|boolean',
                 'is_draft' => 'nullable|boolean',
@@ -383,7 +386,10 @@ class ApiEventController extends Controller
                 'duration' => 'nullable|numeric|min:0|max:8760',
                 'description' => 'nullable|string|max:10000',
                 'short_description' => 'nullable|string|max:500',
-                'event_url' => 'nullable|url|max:255',
+                // 500, matching the column - see Event::CLAMPED_COLUMNS. A 400-character Teams
+                // or Zoom join URL is legal on every other write path, so a stricter rule here
+                // would 422 an ordinary read-modify-write round-trip of an untouched field.
+                'event_url' => 'nullable|url|max:500',
                 'event_password' => 'nullable|string|max:255',
                 'is_private' => 'nullable|boolean',
                 'is_draft' => 'nullable|boolean',

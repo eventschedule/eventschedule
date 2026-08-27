@@ -301,6 +301,17 @@ class Role extends Model implements MustVerifyEmail
                 $model->website = \App\Utils\TextUtils::clamp(UrlUtils::normalizeWebsiteUrl($model->website), 255);
             }
 
+            // roles.agenda_ai_prompt is the same shape as the events column: a varchar(500) fed by
+            // a textarea capped at maxlength="500", which a form submits with CRLF line breaks, so
+            // a full-length prompt arrives over the ceiling. Normalizing stores exactly what was
+            // typed; the clamp is the last resort. saveQuietly() skips this - see
+            // BackupService::importRole().
+            if (! $model->exists || $model->isDirty('agenda_ai_prompt')) {
+                $model->agenda_ai_prompt = \App\Utils\TextUtils::clamp(
+                    \App\Utils\TextUtils::normalizeNewlines($model->agenda_ai_prompt), 500
+                );
+            }
+
             // Recompute the *_normalized columns used by the venue dedup lookup
             // whenever the source field changes (or on initial create).
             foreach (['name', 'name_en', 'city', 'address1', 'address1_en'] as $source) {

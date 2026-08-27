@@ -9,6 +9,7 @@ use App\Services\TicketVolumeDiscount;
 use App\Utils\EventTextGenerator;
 use App\Utils\MarkdownUtils;
 use App\Utils\MoneyUtils;
+use App\Utils\TextUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -206,11 +207,61 @@ class Event extends Model
         'event_password',
     ];
 
+    /**
+     * varchar columns that EventRepo::saveEvent()'s blanket fill($request->all()) funnels
+     * straight from the POST body into the database, with no FormRequest rule in between for
+     * most write paths. Under a strict connection an over-long value is a QueryException
+     * (MySQL 1406), not a truncation, so the save fails and the user loses the whole edit.
+     *
+     * Each width must equal the real column - EventFieldLengthGuardTest asserts that against
+     * the live schema so this cannot drift away from a future migration.
+     */
+    public const CLAMPED_COLUMNS = [
+        'agenda_ai_prompt' => 500,
+        'event_url' => 500,
+        'terms_url' => 255,
+        'coupon_code' => 255,
+        'event_password' => 255,
+    ];
+
     protected static function boot()
     {
         parent::boot();
 
         static::saving(function ($model) {
+            // MUST come before the federation check below, which reads isDirty(FEDERATION_FIELDS)
+            // and event_url and event_password are both in that list. Clamping can cancel a change
+            // out - an over-long event_url that cuts back to the value already stored - and a
+            // federation check run first would have nulled federated_at and re-published an event
+            // that did not actually change. Deciding on the values that will really be written is
+            // what keeps that check honest.
+            //
+            // agenda_ai_prompt is the one multi-line field of the five, so it is the only one CRLF
+            // can reach: its textarea caps typing at maxlength="500", but a form serializes a line
+            // break as CRLF, so a 500-character prompt with six of them arrives as 506 and 1406s a
+            // save that never touched the field - it rides along in a hidden input, so the user was
+            // editing tickets. Normalizing is what makes the value fit and stores exactly what was
+            // typed; the clamp below is only the last resort.
+            //
+            // Deliberately NOT applied to the other four: event_password is stored in plaintext and
+            // checked with hash_equals() against a raw, un-normalized request value, so rewriting
+            // the stored side alone would make a password containing a CR unmatchable.
+            if (! $model->exists || $model->isDirty('agenda_ai_prompt')) {
+                $model->agenda_ai_prompt = TextUtils::normalizeNewlines($model->agenda_ai_prompt);
+            }
+
+            // Guarded on dirty, like the roles.website clamp this mirrors: the column can only
+            // overflow on a fresh assignment, and re-clamping an untouched legacy value would
+            // rewrite stored data during an unrelated save. clamp() is identity below the ceiling,
+            // so an in-range password or coupon code is returned byte-for-byte. saveQuietly() fires
+            // no events and so skips all of this - see BackupService::importEvent().
+            foreach (self::CLAMPED_COLUMNS as $column => $width) {
+                if ($model->exists && ! $model->isDirty($column)) {
+                    continue;
+                }
+                $model->{$column} = TextUtils::clamp($model->{$column}, $width);
+            }
+
             // Re-queue for federation when something a federated listing actually shows
             // changes. Hooked here rather than in EventRepo::saveEvent() because that is
             // not the only write path - inbound Google and Microsoft calendar sync call

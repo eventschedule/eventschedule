@@ -1593,6 +1593,7 @@ class BackupService
         // varchar(255). A backup carrying a link-shim URL longer than that would be a 1406 on
         // restore, failing the whole import.
         $role->website = TextUtils::clamp(UrlUtils::normalizeWebsiteUrl($role->website), 255);
+        $role->agenda_ai_prompt = TextUtils::clamp(TextUtils::normalizeNewlines($role->agenda_ai_prompt), 500);
 
         if ($role->custom_css) {
             $role->custom_css = CssUtils::sanitizeCss($role->custom_css);
@@ -1687,6 +1688,15 @@ class BackupService
         if ($event->is_internal) {
             $event->is_draft = true;
             $event->is_private = false;
+        }
+
+        // Same reason: the hook is also where the short varchar columns are normalized and clamped
+        // to their widths. A backup carrying a value longer than its column - hand-edited, or taken
+        // from an install whose schema differs - would be a 1406 on restore, failing the whole
+        // import. Mirrors Event::boot()'s saving hook, including which field gets newline handling.
+        $event->agenda_ai_prompt = TextUtils::normalizeNewlines($event->agenda_ai_prompt);
+        foreach (Event::CLAMPED_COLUMNS as $column => $width) {
+            $event->{$column} = TextUtils::clamp($event->{$column}, $width);
         }
 
         $event->creator_role_id = $role->id;

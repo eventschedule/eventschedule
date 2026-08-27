@@ -71,4 +71,36 @@ class TextClampTest extends TestCase
         $this->assertSame('0', TextUtils::clamp('0', 255));
         $this->assertSame('0', TextUtils::clamp('0'.str_repeat(' ', 300), 1));
     }
+
+    /**
+     * The gap that caused EVENTSCHEDULE-PHP-49: a textarea's maxlength counts a line break as one
+     * LF, but a form submits it as CRLF, so a box capped at 500 puts up to 500 + N on the wire.
+     */
+    public function test_newlines_are_collapsed_to_lf(): void
+    {
+        $this->assertSame("a\nb", TextUtils::normalizeNewlines("a\r\nb"));
+        $this->assertSame("a\nb", TextUtils::normalizeNewlines("a\rb"), 'a lone CR is a line break too');
+        $this->assertSame("a\nb\nc", TextUtils::normalizeNewlines("a\r\nb\rc"));
+    }
+
+    public function test_normalizing_leaves_everything_else_alone(): void
+    {
+        $this->assertNull(TextUtils::normalizeNewlines(null));
+        $this->assertSame('', TextUtils::normalizeNewlines(''));
+        $this->assertSame('no breaks here', TextUtils::normalizeNewlines('no breaks here'));
+        $this->assertSame("already\nlf", TextUtils::normalizeNewlines("already\nlf"));
+    }
+
+    /** The production shape: exactly at the ceiling in LF, over it in CRLF. */
+    public function test_a_crlf_value_at_the_ceiling_fits_once_normalized(): void
+    {
+        $lf = str_repeat("0123456789\n", 45).str_repeat('x', 50 - 5);
+        $this->assertSame(540, mb_strlen($lf), 'fixture sanity');
+
+        $crlf = str_replace("\n", "\r\n", $lf);
+        $this->assertSame(540 + 45, mb_strlen($crlf), 'CRLF adds one character per line break');
+
+        $this->assertSame($lf, TextUtils::clamp(TextUtils::normalizeNewlines($crlf), 540));
+        $this->assertNotSame($lf, TextUtils::clamp($crlf, 540), 'without normalizing, the tail is cut');
+    }
 }
