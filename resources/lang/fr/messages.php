@@ -3826,6 +3826,8 @@ return [
     'funnel_no_signups_period' => 'Aucune inscription sur cette période',
     'funnel_group_traffic' => 'Trafic du site (anonyme)',
     'funnel_group_cohort' => 'Inscriptions sur cette période',
+    'funnel_group_tickets' => 'Vente de billets',
+    'funnel_group_plan' => 'Passage à un forfait',
     'funnel_stage_visited' => 'A visité le site',
     'funnel_stage_signup_view' => 'A vu la page d\'inscription',
     'funnel_stage_account' => 'A créé un compte',

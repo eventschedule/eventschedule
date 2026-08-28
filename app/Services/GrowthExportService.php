@@ -80,11 +80,13 @@ class GrowthExportService
     }
 
     /**
-     * Onboarding funnel: the 7 stage counts + conversions for the selected period, plus
+     * Onboarding funnel: the 11 stage counts + conversions for the selected period, plus
      * the north-star (signup -> first event) with its period-over-period change and the
      * biggest onboarding leak. See the correctness rules in the funnel plan: stages 4/6 are
      * OR-defined so the funnel stays monotonic across all creation paths and history; the
      * anonymous traffic stages (1-2) are only shown for windows inside the tracked period.
+     * Monotonicity holds WITHIN a group, not across the group boundaries - see $noStepConv
+     * below, which is what stops a cross-population ratio being rendered as a conversion.
      */
     public function funnelData(Carbon $startDate, Carbon $endDate, Carbon $prevStartDate, Carbon $prevEndDate): array
     {
@@ -140,15 +142,24 @@ class GrowthExportService
                 $query->whereHas('tickets', fn ($t) => $t->where('price', '>', 0));
             })->count();
 
+        // A conversion is not "has a subscriptions row". Cashier's subscriptions() relation
+        // carries no status filter, so an `incomplete` row - a checkout whose card was declined
+        // at creation - would count as a sale, which is the exact population the
+        // stripe_subscription_failed counter exists to separate out. Cancelled and past_due DO
+        // count: they converted once, which is what a conversion funnel measures.
+        $converted = function ($query) {
+            $query->whereNotIn('stripe_status', ['incomplete', 'incomplete_expired']);
+        };
+
         // OR-defined like stages 4/6, so it can never undercut the stage below it: a user who
         // subscribed before this column existed still counts as having reached checkout.
         $reachedCheckout = $this->cohort($startDate, $endDate)
-            ->where(function ($query) {
+            ->where(function ($query) use ($converted) {
                 $query->whereNotNull('subscribe_form_viewed_at')
-                    ->orWhereHas('createdRoles.subscriptions');
+                    ->orWhereHas('createdRoles.subscriptions', $converted);
             })->count();
         $subscribed = $this->cohort($startDate, $endDate)
-            ->whereHas('createdRoles.subscriptions')->count();
+            ->whereHas('createdRoles.subscriptions', $converted)->count();
 
         // Traffic stages (1-2): anonymous, only meaningful for a window inside the tracked period.
         $trackingStart = MarketingDailyStat::min('date');
@@ -173,10 +184,15 @@ class GrowthExportService
             ['key' => 'saved_schedule', 'group' => 'cohort', 'count' => $savedSchedule],
             ['key' => 'reached_event', 'group' => 'cohort', 'count' => $reachedEvent],
             ['key' => 'saved_event', 'group' => 'cohort', 'count' => $savedEvent],
-            ['key' => 'saved_ticket', 'group' => 'money', 'count' => $savedTicket],
-            ['key' => 'saved_paid_ticket', 'group' => 'money', 'count' => $savedPaidTicket],
-            ['key' => 'reached_checkout', 'group' => 'money', 'count' => $reachedCheckout],
-            ['key' => 'subscribed', 'group' => 'money', 'count' => $subscribed],
+            // Two groups, not one. The ticket stages continue the cohort chain (a ticket needs
+            // an event, so each is a genuine subset). The plan stages do NOT: buying Pro has
+            // nothing to do with selling tickets, and of the nine real payers on this install
+            // three have no paid ticket type and one has no events at all. Dividing one by the
+            // other renders a conversion above 100% and a funnel that visibly widens.
+            ['key' => 'saved_ticket', 'group' => 'tickets', 'count' => $savedTicket],
+            ['key' => 'saved_paid_ticket', 'group' => 'tickets', 'count' => $savedPaidTicket],
+            ['key' => 'reached_checkout', 'group' => 'plan', 'count' => $reachedCheckout],
+            ['key' => 'subscribed', 'group' => 'plan', 'count' => $subscribed],
         ];
 
         // Bar width denominator: stage-1 visitors when present, else the largest stage.
@@ -191,13 +207,16 @@ class GrowthExportService
         // The 'account' stage is skipped: it is the first cohort stage, so comparing it to
         // 'signup_view' would draw a conversion/drop across the anonymous-traffic -> signup-cohort
         // divider (different populations, a cross-population ratio, not a real in-funnel drop).
+        // 'reached_checkout' is skipped for exactly the same reason: it opens the plan group,
+        // and the stage above it is about selling tickets, which is a different question.
+        $noStepConv = ['account', 'reached_checkout'];
         $prevCount = null;
         foreach ($stages as &$stage) {
             $c = $stage['count'];
             $stage['width'] = $c === null ? 0 : min(100, round($c / $widthDenom * 100, 1));
             $stage['step_conv'] = null;
             $stage['drop_count'] = null;
-            if ($c !== null && $prevCount !== null && $prevCount > 0 && $stage['key'] !== 'account') {
+            if ($c !== null && $prevCount !== null && $prevCount > 0 && ! in_array($stage['key'], $noStepConv, true)) {
                 $stage['step_conv'] = round($c / $prevCount * 100, 1);
                 $stage['drop_count'] = max(0, $prevCount - $c);
             }
@@ -1054,6 +1073,7 @@ class GrowthExportService
             ->selectRaw("DATE_FORMAT(date, '%Y-%m') as ym, SUM(visitors) as visitors, "
                 .'SUM(page_views) as page_views, SUM(signup_views) as signup_views, '
                 .'SUM(docs_page_views) as docs_page_views, SUM(docs_visitors) as docs_visitors, '
+                .'SUM(pricing_views) as pricing_views, SUM(pricing_visitors) as pricing_visitors, '
                 .'SUM(signup_code_requests) as signup_code_requests, '
                 .'SUM(signup_code_verified) as signup_code_verified')
             ->orderBy('ym')
@@ -1084,6 +1104,15 @@ class GrowthExportService
                 'docs_visitors' => $isNexus ? $docsVisitors : null,
                 'docs_page_views' => $isNexus ? (int) ($stats[$m]->docs_page_views ?? 0) : null,
                 'commercial_visitors' => $isNexus ? max(0, $visitors - $docsVisitors) : null,
+                // Also a subset of the totals, and overlapping the docs buckets rather than
+                // excluding them - never add the three together. This is the one page whose
+                // visit is an explicit buying signal, and the only acquisition-side number that
+                // moves fast enough to read a pricing change against: the conversions below it
+                // run at about one a month, where nothing is distinguishable from noise.
+                // It cannot see SIGNED-IN owners weighing an upgrade - TrackMarketingVisit
+                // skips auth()->check() - which is what users.subscribe_form_viewed_at covers.
+                'pricing_visitors' => $isNexus ? (int) ($stats[$m]->pricing_visitors ?? 0) : null,
+                'pricing_views' => $isNexus ? (int) ($stats[$m]->pricing_views ?? 0) : null,
                 'signup_views' => (int) ($stats[$m]->signup_views ?? 0),
                 // The 6-digit-code wall, which sits between signup_views and an account.
                 'signup_code_requests' => (int) ($stats[$m]->signup_code_requests ?? 0),

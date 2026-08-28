@@ -3820,6 +3820,8 @@ return [
     'funnel_no_signups_period' => 'لا توجد تسجيلات في هذه الفترة',
     'funnel_group_traffic' => 'حركة مرور الموقع (مجهولة)',
     'funnel_group_cohort' => 'التسجيلات في هذه الفترة',
+    'funnel_group_tickets' => 'بيع التذاكر',
+    'funnel_group_plan' => 'ترقية الخطة',
     'funnel_stage_visited' => 'زار الموقع',
     'funnel_stage_signup_view' => 'شاهد صفحة التسجيل',
     'funnel_stage_account' => 'أنشأ حسابًا',

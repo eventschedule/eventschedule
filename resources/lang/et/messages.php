@@ -3838,6 +3838,8 @@ return [
     'funnel_no_signups_period' => 'Sel perioodil registreerimisi pole',
     'funnel_group_traffic' => 'Saidi liiklus (anonüümne)',
     'funnel_group_cohort' => 'Registreerimised sel perioodil',
+    'funnel_group_tickets' => 'Piletimüük',
+    'funnel_group_plan' => 'Paketi uuendus',
     'funnel_stage_visited' => 'Külastas saiti',
     'funnel_stage_signup_view' => 'Vaatas registreerimislehte',
     'funnel_stage_account' => 'Lõi konto',

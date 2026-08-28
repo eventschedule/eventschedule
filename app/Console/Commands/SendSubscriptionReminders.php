@@ -124,7 +124,16 @@ class SendSubscriptionReminders extends Command
                         windDown: true,
                     ),
                         $role->user->email,
-                        $role->id,
+                        // NULL role id, deliberately, so this goes out on the PLATFORM mailer.
+                        // Passing $role->id routes delivery through RoleMailerService::sendForRole(),
+                        // which returns false and sends NOTHING when the schedule has its own SMTP
+                        // inside its 24h failure window - and the window above is already claimed,
+                        // so the notice would be silently dropped and never retried. This is a
+                        // platform billing notice about our plan, not the schedule's own mail:
+                        // it should come from us, and it must not count against the schedule's
+                        // email usage. Same reasoning as ScheduleTransferService::sendInvite()
+                        // and SendOnboardingNudges.
+                        null,
                         $role->user->language_code ?? app()->getLocale()
                     );
 
@@ -140,7 +149,10 @@ class SendSubscriptionReminders extends Command
             }
         }
 
-        $this->info("Wind-down reminders: {$sent} sent.");
+        // "queued", not "sent": nothing goes out inline any more. $sent also undercounts
+        // consumed windows, because the claim is taken before the dispatch - a row whose
+        // dispatch throws has burned its window without being counted here.
+        $this->info("Wind-down reminders: {$sent} queued.");
     }
 
     protected function sendTrialReminders(): void

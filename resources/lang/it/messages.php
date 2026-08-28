@@ -3819,6 +3819,8 @@ return [
     'funnel_no_signups_period' => 'Nessuna registrazione in questo periodo',
     'funnel_group_traffic' => 'Traffico del sito (anonimo)',
     'funnel_group_cohort' => 'Registrazioni in questo periodo',
+    'funnel_group_tickets' => 'Vendita biglietti',
+    'funnel_group_plan' => 'Upgrade del piano',
     'funnel_stage_visited' => 'Ha visitato il sito',
     'funnel_stage_signup_view' => 'Ha visto la pagina di registrazione',
     'funnel_stage_account' => 'Ha creato un account',

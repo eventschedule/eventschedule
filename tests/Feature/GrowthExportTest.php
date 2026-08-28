@@ -149,10 +149,97 @@ class GrowthExportTest extends TestCase
         $this->assertSame(1, $reached['reached_checkout']);
         $this->assertSame(0, $reached['subscribed'], 'saw the form, did not buy');
 
-        // Every money stage is a subset of saved_event.
-        foreach (['saved_ticket', 'saved_paid_ticket', 'reached_checkout', 'subscribed'] as $key) {
+        // The ticket stages continue the cohort chain, so they ARE subsets of saved_event.
+        foreach (['saved_ticket', 'saved_paid_ticket'] as $key) {
             $this->assertLessThanOrEqual($reached['saved_event'], $reached[$key], $key);
         }
+    }
+
+    /**
+     * The plan stages are NOT a continuation of the ticket stages - buying Pro has nothing to do
+     * with selling tickets, and on the real install three of nine payers have no paid ticket type
+     * and one has no events at all. Dividing one by the other rendered "300%" on the funnel with
+     * a bar wider than the stage above it. The earlier version of the test above missed this
+     * because its fixture happened to give every stage the same count.
+     */
+    public function test_the_plan_stages_do_not_draw_a_conversion_off_the_ticket_stages(): void
+    {
+        // A user who subscribes having never created an event, let alone a ticket type.
+        $buyer = $this->createOwner();
+        $role = $this->freeRole($buyer);
+        $role->subscriptions()->create([
+            'type' => 'default',
+            'stripe_id' => 'sub_'.Str::random(14),
+            'stripe_status' => 'active',
+            'stripe_price' => 'price_test_monthly',
+            'quantity' => 1,
+        ]);
+
+        $stages = $this->build()['funnel']['stages'];
+        $byKey = array_column($stages, null, 'key');
+        $counts = array_column($stages, 'count', 'key');
+
+        // The shape that used to produce a >100% conversion.
+        $this->assertSame(0, $counts['saved_event']);
+        $this->assertSame(0, $counts['saved_paid_ticket']);
+        $this->assertSame(1, $counts['subscribed']);
+
+        // No ratio is drawn across the boundary, exactly as 'account' is skipped where the
+        // anonymous-traffic stages meet the cohort.
+        $this->assertNull($byKey['reached_checkout']['step_conv'],
+            'a conversion across the tickets -> plan boundary compares two different populations');
+
+        // And the groups are distinct, which is what the admin funnel renders its headers from.
+        $this->assertSame('tickets', $byKey['saved_paid_ticket']['group']);
+        $this->assertSame('plan', $byKey['reached_checkout']['group']);
+
+        // Whatever else is true, no stage may ever report more than 100% of the one above it.
+        foreach ($stages as $stage) {
+            if ($stage['step_conv'] !== null) {
+                $this->assertLessThanOrEqual(100, $stage['step_conv'], $stage['key']);
+            }
+        }
+    }
+
+    /**
+     * Cashier's subscriptions() relation has no status filter, so "has a subscriptions row"
+     * counted a declined card as a sale - the very population stripe_subscription_failed exists
+     * to separate out.
+     */
+    public function test_an_incomplete_checkout_is_not_a_conversion(): void
+    {
+        $user = $this->createOwner();
+        $role = $this->freeRole($user);
+        $role->subscriptions()->create([
+            'type' => 'default',
+            'stripe_id' => 'sub_'.Str::random(14),
+            'stripe_status' => 'incomplete',
+            'stripe_price' => 'price_test_monthly',
+            'quantity' => 1,
+        ]);
+
+        $counts = array_column($this->build()['funnel']['stages'], 'count', 'key');
+
+        $this->assertSame(0, $counts['subscribed'], 'a declined card is not a sale');
+        $this->assertSame(0, $counts['reached_checkout'], 'nor does it imply the form was seen');
+    }
+
+    /** A cancelled subscriber still converted once, which is what a conversion funnel counts. */
+    public function test_a_cancelled_subscription_still_counts_as_a_conversion(): void
+    {
+        $user = $this->createOwner();
+        $role = $this->freeRole($user);
+        $role->subscriptions()->create([
+            'type' => 'default',
+            'stripe_id' => 'sub_'.Str::random(14),
+            'stripe_status' => 'canceled',
+            'stripe_price' => 'price_test_monthly',
+            'quantity' => 1,
+        ]);
+
+        $counts = array_column($this->build()['funnel']['stages'], 'count', 'key');
+
+        $this->assertSame(1, $counts['subscribed']);
     }
 
     /**

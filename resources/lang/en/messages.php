@@ -4241,6 +4241,8 @@ return [
     'funnel_no_signups_period' => 'No signups in this period',
     'funnel_group_traffic' => 'Site traffic (anonymous)',
     'funnel_group_cohort' => 'Signups this period',
+    'funnel_group_tickets' => 'Selling tickets',
+    'funnel_group_plan' => 'Plan upgrade',
     'funnel_stage_visited' => 'Visited site',
     'funnel_stage_signup_view' => 'Viewed sign-up page',
     'funnel_stage_account' => 'Created account',

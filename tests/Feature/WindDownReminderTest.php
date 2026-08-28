@@ -100,6 +100,35 @@ class WindDownReminderTest extends TestCase
     }
 
     /**
+     * The role id must be NULL so this goes out on the platform mailer.
+     *
+     * Passing $role->id routes SendQueuedEmail through RoleMailerService::sendForRole(), which
+     * returns false and sends NOTHING when the schedule has its own SMTP inside its 24h failure
+     * window. The reminder window is claimed before the dispatch, so the notice would be
+     * silently dropped and never retried, and the plan would lapse with no warning at all -
+     * the precise outcome this command exists to prevent. It would also send a platform billing
+     * notice from the customer's own address and bill it to their email usage.
+     */
+    public function test_the_reminder_goes_out_on_the_platform_mailer(): void
+    {
+        \Illuminate\Support\Facades\Queue::fake();
+
+        $role = $this->windingDown();
+
+        $this->remind();
+
+        \Illuminate\Support\Facades\Queue::assertPushed(
+            \App\Jobs\SendQueuedEmail::class,
+            function ($job) {
+                $ref = new \ReflectionProperty($job, 'roleId');
+                $ref->setAccessible(true);
+
+                return $ref->getValue($job) === null;
+            }
+        );
+    }
+
+    /**
      * The stamp is claimed with a conditional UPDATE before the send, so a second runner cannot
      * read the same row and mail the owner twice. The two schedulers hold different mutexes, so
      * a read-then-write genuinely can overlap.

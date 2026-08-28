@@ -49,17 +49,19 @@ class SubscriptionController extends Controller
             $requestedTier = 'pro';
         }
 
-        // Onboarding funnel: "reached checkout". First-touch stamp, deliberately placed AFTER
-        // every redirect above so it only counts a checkout page that actually rendered - a user
-        // bounced back because they are already subscribed never saw the form.
+        $intent = $role->createSetupIntent();
+
+        // Onboarding funnel: "reached checkout". First-touch stamp, deliberately placed after
+        // every redirect above AND after createSetupIntent() - a user bounced back because they
+        // are already subscribed never saw the form, and neither did one whose page 500'd
+        // because the Stripe call threw. The stamp has to mean the form actually rendered, or
+        // the stage it feeds measures something else.
         // Base query builder + whereNull writes at most once and does not bump users.updated_at
         // (which the admin active-users metric keys off).
         DB::table('users')
             ->where('id', auth()->id())
             ->whereNull('subscribe_form_viewed_at')
             ->update(['subscribe_form_viewed_at' => now()]);
-
-        $intent = $role->createSetupIntent();
 
         return view('subscription.show', [
             'role' => $role,

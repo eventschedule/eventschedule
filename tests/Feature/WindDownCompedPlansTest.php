@@ -219,6 +219,61 @@ class WindDownCompedPlansTest extends TestCase
         }
     }
 
+    /**
+     * The spread may move a date; it must not change WHO is wound down.
+     *
+     * The never-extend guard compares against the unoffset floor. Testing the offset target
+     * instead made the guard trip for a band up to spread-days wide, selected by `id % spread` -
+     * so two identical schedules got opposite outcomes on role id parity, and the skipped one
+     * got no trial_ends_at, never entered SendSubscriptionReminders, and lapsed in silence.
+     *
+     * The existing fixtures cannot see this: comped() sets plan_expires three years out, so the
+     * guard never fires in any other test.
+     */
+    public function test_the_spread_does_not_change_which_schedules_are_wound_down(): void
+    {
+        // Addressable, and expiring INSIDE the spread band: after the 30-day floor, before
+        // floor + spread. This is the band where the offset used to decide the outcome.
+        $roles = collect(range(1, 8))->map(function () {
+            $role = $this->comped(['plan_expires' => now()->addDays(35)->format('Y-m-d')]);
+            for ($i = 0; $i < 6; $i++) {
+                DB::table('role_user')->insert([
+                    'role_id' => $role->id, 'user_id' => $this->createOwner()->id, 'level' => 'follower',
+                ]);
+            }
+
+            return $role;
+        });
+
+        $this->windDown(['--apply' => true, '--trial-days' => 30, '--spread-days' => 14]);
+
+        foreach ($roles as $role) {
+            $fresh = $role->fresh();
+
+            // The property that matters. A skipped role gets no trial_ends_at, so it never
+            // enters SendSubscriptionReminders and its plan lapses with no email at all -
+            // and which roles were skipped used to depend on `id % spread`.
+            $this->assertNotNull(
+                $fresh->trial_ends_at,
+                'id '.$role->id.' was skipped because of its offset, so it would lapse in silence'
+            );
+
+            // Never later than what it already had, and never earlier than the floor.
+            $this->assertLessThanOrEqual(now()->addDays(35)->format('Y-m-d'), $fresh->plan_expires);
+            $this->assertGreaterThanOrEqual(now()->addDays(30)->format('Y-m-d'), $fresh->plan_expires);
+        }
+    }
+
+    /** The guard itself still holds: a plan already ending before the floor keeps its own date. */
+    public function test_a_plan_ending_before_the_floor_is_still_left_alone(): void
+    {
+        $role = $this->comped(['plan_expires' => now()->addDays(5)->format('Y-m-d')]);
+
+        $this->windDown(['--apply' => true, '--lapse-days' => 30, '--spread-days' => 14]);
+
+        $this->assertSame(now()->addDays(5)->format('Y-m-d'), $role->fresh()->plan_expires);
+    }
+
     /** A second run must not re-spread an already-wound-down role onto a new date. */
     public function test_the_spread_is_stable_across_runs(): void
     {

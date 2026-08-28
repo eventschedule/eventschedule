@@ -3814,6 +3814,8 @@ return [
     'funnel_no_signups_period' => 'אין הרשמות בתקופה זו',
     'funnel_group_traffic' => 'תעבורת האתר (אנונימי)',
     'funnel_group_cohort' => 'הרשמות בתקופה זו',
+    'funnel_group_tickets' => 'מכירת כרטיסים',
+    'funnel_group_plan' => 'שדרוג תוכנית',
     'funnel_stage_visited' => 'ביקר באתר',
     'funnel_stage_signup_view' => 'צפה בעמוד ההרשמה',
     'funnel_stage_account' => 'יצר חשבון',

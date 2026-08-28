@@ -3840,6 +3840,8 @@ return [
     'funnel_no_signups_period' => 'Нет регистраций за этот период',
     'funnel_group_traffic' => 'Трафик сайта (анонимно)',
     'funnel_group_cohort' => 'Регистрации за этот период',
+    'funnel_group_tickets' => 'Продажа билетов',
+    'funnel_group_plan' => 'Переход на платный план',
     'funnel_stage_visited' => 'Посетил сайт',
     'funnel_stage_signup_view' => 'Просмотрел страницу регистрации',
     'funnel_stage_account' => 'Создал аккаунт',

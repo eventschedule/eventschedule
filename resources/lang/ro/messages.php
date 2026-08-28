@@ -3858,6 +3858,8 @@ return [
     'funnel_no_signups_period' => 'Nicio înregistrare în această perioadă',
     'funnel_group_traffic' => 'Trafic site (anonim)',
     'funnel_group_cohort' => 'Înregistrări în această perioadă',
+    'funnel_group_tickets' => 'Vânzare bilete',
+    'funnel_group_plan' => 'Upgrade de plan',
     'funnel_stage_visited' => 'A vizitat site-ul',
     'funnel_stage_signup_view' => 'A văzut pagina de înregistrare',
     'funnel_stage_account' => 'A creat un cont',

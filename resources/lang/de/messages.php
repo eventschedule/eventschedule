@@ -3823,6 +3823,8 @@ return [
     'funnel_no_signups_period' => 'Keine Anmeldungen in diesem Zeitraum',
     'funnel_group_traffic' => 'Website-Traffic (anonym)',
     'funnel_group_cohort' => 'Anmeldungen in diesem Zeitraum',
+    'funnel_group_tickets' => 'Ticketverkauf',
+    'funnel_group_plan' => 'Plan-Upgrade',
     'funnel_stage_visited' => 'Website besucht',
     'funnel_stage_signup_view' => 'Anmeldeseite angesehen',
     'funnel_stage_account' => 'Konto erstellt',

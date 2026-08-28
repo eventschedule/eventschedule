@@ -3819,6 +3819,8 @@ return [
     'funnel_no_signups_period' => 'Geen aanmeldingen in deze periode',
     'funnel_group_traffic' => 'Siteverkeer (anoniem)',
     'funnel_group_cohort' => 'Aanmeldingen in deze periode',
+    'funnel_group_tickets' => 'Ticketverkoop',
+    'funnel_group_plan' => 'Abonnement upgraden',
     'funnel_stage_visited' => 'Site bezocht',
     'funnel_stage_signup_view' => 'Aanmeldpagina bekeken',
     'funnel_stage_account' => 'Account aangemaakt',

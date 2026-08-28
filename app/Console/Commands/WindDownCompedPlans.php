@@ -98,14 +98,30 @@ class WindDownCompedPlans extends Command
             // in a single run, and every dormant plan lapses in the same hour. Keyed off the
             // role id, not a counter or a random draw, so the offset is stable across runs and
             // independent of row order - which is what keeps this command idempotent.
-            $offset = $role->id % $spreadDays;
-            $target = ($addressable ? $trialEnds : $lapseEnds)->copy()->addDays($offset);
+            $floor = $addressable ? $trialEnds : $lapseEnds;
 
             // Never extend. A plan already ending sooner than the target keeps its own date.
-            if ($role->plan_expires !== null && $role->plan_expires < $target->format('Y-m-d')) {
+            //
+            // Compared against the unoffset FLOOR, not $target. Testing the offset date would
+            // make the spread decide who is wound down at all: two identical roles expiring in
+            // the same window would get opposite outcomes on `id % spread`, and the skipped one
+            // gets no trial_ends_at, so it never enters SendSubscriptionReminders and lapses
+            // with no email whatsoever. The spread may move a date; it must not change the set.
+            if ($role->plan_expires !== null && $role->plan_expires < $floor->format('Y-m-d')) {
                 $counts['skipped_expires_sooner']++;
 
                 continue;
+            }
+
+            $target = $floor->copy()->addDays($role->id % $spreadDays);
+
+            // The offset may not push a date PAST what the role already has. Without this clamp
+            // the command stops being idempotent and starts extending: on a later run the floor
+            // has moved forward, so a role already sitting on floor+offset no longer trips the
+            // guard above, and gets rewritten a day further out on every single run - which is
+            // the one thing this command promises never to do.
+            if ($role->plan_expires !== null && $target->format('Y-m-d') > $role->plan_expires) {
+                $target = Carbon::parse($role->plan_expires);
             }
 
             $counts[$addressable ? 'addressable' : 'dormant']++;
@@ -242,8 +258,8 @@ class WindDownCompedPlans extends Command
         }
 
         $this->table(['segment', 'schedules', 'outcome'], [
-            ['addressable', $counts['addressable'], 'trial + plan ends '.$trialEnds->format('Y-m-d')],
-            ['dormant', $counts['dormant'], 'plan ends '.$lapseEnds->format('Y-m-d')],
+            ['addressable', $counts['addressable'], 'trial + plan ends '.$trialEnds->format('Y-m-d').' onwards'],
+            ['dormant', $counts['dormant'], 'plan ends '.$lapseEnds->format('Y-m-d').' onwards'],
             ['skipped (expires sooner)', $counts['skipped_expires_sooner'], 'left alone - never extend'],
             ['skipped (already wound down)', $counts['skipped_already_done'], 'has a trial_ends_at'],
             ['TOTAL comped', $total, ''],
