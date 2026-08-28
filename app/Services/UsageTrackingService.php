@@ -74,6 +74,11 @@ class UsageTrackingService
 
     const STRIPE_SUBSCRIPTION = 'stripe_subscription';
 
+    // A checkout that was attempted and threw. Counted rather than only logged, because
+    // Log::error is not queryable and so a run of failed card attempts was indistinguishable
+    // from nobody trying to buy - the two call for opposite responses.
+    const STRIPE_SUBSCRIPTION_FAILED = 'stripe_subscription_failed';
+
     // Invoice Ninja operations
     const INVOICENINJA_CLIENT = 'invoiceninja_client';
 

@@ -10,6 +10,7 @@ use App\Services\AuditService;
 use App\Services\UsageTrackingService;
 use App\Utils\PlanPriceUtils;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Laravel\Cashier\Exceptions\IncompletePayment;
 
 class SubscriptionController extends Controller
@@ -47,6 +48,16 @@ class SubscriptionController extends Controller
         if ($requestedTier === 'enterprise' && ! $enterpriseConfigured) {
             $requestedTier = 'pro';
         }
+
+        // Onboarding funnel: "reached checkout". First-touch stamp, deliberately placed AFTER
+        // every redirect above so it only counts a checkout page that actually rendered - a user
+        // bounced back because they are already subscribed never saw the form.
+        // Base query builder + whereNull writes at most once and does not bump users.updated_at
+        // (which the admin active-users metric keys off).
+        DB::table('users')
+            ->where('id', auth()->id())
+            ->whereNull('subscribe_form_viewed_at')
+            ->update(['subscribe_form_viewed_at' => now()]);
 
         $intent = $role->createSetupIntent();
 
@@ -108,6 +119,7 @@ class SubscriptionController extends Controller
                     [$exception->payment->id, 'redirect' => route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'plan'])]
                 );
             } catch (\Exception $e) {
+                UsageTrackingService::track(UsageTrackingService::STRIPE_SUBSCRIPTION_FAILED, $role->id);
                 \Log::error('Subscription upgrade failed', ['error' => $e->getMessage(), 'role' => $role->id]);
 
                 return redirect()->back()->with('error', __('messages.subscription_error'));
@@ -187,6 +199,7 @@ class SubscriptionController extends Controller
                 [$exception->payment->id, 'redirect' => route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'plan'])]
             );
         } catch (\Exception $e) {
+            UsageTrackingService::track(UsageTrackingService::STRIPE_SUBSCRIPTION_FAILED, $role->id);
             \Log::error('Subscription creation failed', ['error' => $e->getMessage(), 'role' => $role->id]);
 
             return redirect()->back()->with('error', __('messages.subscription_error'));

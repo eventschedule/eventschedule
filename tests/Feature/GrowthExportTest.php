@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Services\DemoService;
 use App\Services\GrowthExportService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -104,6 +105,79 @@ class GrowthExportTest extends TestCase
         );
         $this->assertSame($pageFunnel['cohort_size'], $exportFunnel['cohort_size']);
         $this->assertSame($pageFunnel['first_event_conv'], $exportFunnel['first_event_conv']);
+    }
+
+    /**
+     * The funnel used to stop at saved_event, which hid the largest drop in the business:
+     * across the install only ~21% of schedules ever get a ticket type and ~4% ever take money.
+     * These four stages are what make that visible, and each must be a true subset of the one
+     * above it or the funnel draws conversions above 100%.
+     */
+    public function test_the_funnel_carries_the_money_stages(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->freeRole($owner);
+        $event = $this->createEvent($role);
+
+        $stages = fn () => array_column($this->build()['funnel']['stages'], 'count', 'key');
+
+        // An event with no ticket type at all: reaches saved_event and stops.
+        $before = $stages();
+        $this->assertSame(1, $before['saved_event']);
+        $this->assertSame(0, $before['saved_ticket']);
+        $this->assertSame(0, $before['saved_paid_ticket']);
+        $this->assertSame(0, $before['reached_checkout']);
+        $this->assertSame(0, $before['subscribed']);
+
+        // A FREE ticket type advances saved_ticket only - it is not a monetization signal, and
+        // counting it as one is how ticket_types came to overstate anything commercial.
+        $this->createTicket($event, ['price' => 0]);
+        $free = $stages();
+        $this->assertSame(1, $free['saved_ticket']);
+        $this->assertSame(0, $free['saved_paid_ticket']);
+
+        // A priced ticket advances both.
+        $this->createTicket($event, ['type' => 'Paid', 'price' => 20]);
+        $paid = $stages();
+        $this->assertSame(1, $paid['saved_ticket'], 'one user, not one ticket');
+        $this->assertSame(1, $paid['saved_paid_ticket']);
+
+        // Reaching checkout without buying is the whole point of the stamp: previously only
+        // completed subscriptions were recorded, so this stage had no denominator.
+        $owner->forceFill(['subscribe_form_viewed_at' => now()])->save();
+        $reached = $stages();
+        $this->assertSame(1, $reached['reached_checkout']);
+        $this->assertSame(0, $reached['subscribed'], 'saw the form, did not buy');
+
+        // Every money stage is a subset of saved_event.
+        foreach (['saved_ticket', 'saved_paid_ticket', 'reached_checkout', 'subscribed'] as $key) {
+            $this->assertLessThanOrEqual($reached['saved_event'], $reached[$key], $key);
+        }
+    }
+
+    /**
+     * reached_checkout is OR-defined against the subscription, like stages 4/6, so a subscriber
+     * from before the column existed cannot make the stage below it exceed it.
+     */
+    public function test_reached_checkout_never_undercuts_subscribed(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->freeRole($owner);
+
+        $role->subscriptions()->create([
+            'type' => 'default',
+            'stripe_id' => 'sub_'.Str::random(14),
+            'stripe_status' => 'active',
+            'stripe_price' => 'price_test_monthly',
+            'quantity' => 1,
+        ]);
+
+        // Deliberately NOT stamped - this is the pre-column subscriber.
+        $this->assertNull($owner->fresh()->subscribe_form_viewed_at);
+
+        $stages = array_column($this->build()['funnel']['stages'], 'count', 'key');
+        $this->assertSame(1, $stages['subscribed']);
+        $this->assertSame(1, $stages['reached_checkout'], 'must not fall below the stage under it');
     }
 
     public function test_the_payload_carries_no_personal_data(): void

@@ -47,6 +47,16 @@ class TrackMarketingVisit
             MarketingDailyStat::record('docs_page_views');
         }
 
+        // /pricing on its own, because it is the one marketing page whose visit is an explicit
+        // buying signal - and it was previously indistinguishable from any other page view, so
+        // "did a price change move interest?" had no numerator. Also a SUBSET of page_views, and
+        // overlapping the docs buckets rather than excluding them.
+        $isPricing = $request->routeIs('marketing.pricing');
+
+        if ($isPricing) {
+            MarketingDailyStat::record('pricing_views');
+        }
+
         // Unique visitors: dedup by a daily-salted IP+UA hash rather than a session cookie,
         // so cookieless bots (which get a fresh session per request) cannot each be counted
         // as a new visitor. Prefer Cloudflare's real client IP, matching PageView::recordView().
@@ -60,6 +70,12 @@ class TrackMarketingVisit
         // buckets do overlap - subtracting gives a lower bound on buyer-intent traffic.
         if ($isDocs && PageView::isFirstDailyVisit('mkt_docs_visit', $ip, $request->userAgent())) {
             MarketingDailyStat::record('docs_visitors');
+        }
+
+        // Its own dedup key, for the same reason docs has one: someone who reads the docs and
+        // then /pricing must count once in each bucket.
+        if ($isPricing && PageView::isFirstDailyVisit('mkt_pricing_visit', $ip, $request->userAgent())) {
+            MarketingDailyStat::record('pricing_visitors');
         }
 
         return $response;

@@ -37,6 +37,9 @@ class MarketingDailyStat extends Model
      *
      * docs_page_views / docs_visitors are a SUBSET of page_views / visitors, not a
      * sibling bucket: buyer-intent traffic is (visitors - docs_visitors).
+     *
+     * pricing_views / pricing_visitors are a SUBSET in the same way, and overlap the docs
+     * buckets rather than excluding them - never add the three together.
      */
     public const COLUMNS = [
         'visitors',
@@ -44,6 +47,8 @@ class MarketingDailyStat extends Model
         'signup_views',
         'docs_page_views',
         'docs_visitors',
+        'pricing_views',
+        'pricing_visitors',
         'signup_code_requests',
         'signup_code_verified',
     ];

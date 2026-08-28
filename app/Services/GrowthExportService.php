@@ -122,6 +122,34 @@ class GrowthExportService
                     ->orWhereHas('createdEvents', $eventFilter);
             })->count();
 
+        // Stages 8-10: the monetization half, which the funnel previously did not model at all -
+        // it stopped at saved_event, so the largest drop in the business was invisible here.
+        // Across the whole install only 21% of schedules ever get a ticket type and 4% ever take
+        // money, and that cliff is what caps everything downstream.
+        //
+        // Ticket stages reuse the demo-excluding $eventFilter and Event::tickets(), which already
+        // scopes out is_deleted and add-on rows, so "has a ticket type" means a live, sellable one.
+        $savedTicket = $this->cohort($startDate, $endDate)
+            ->whereHas('createdEvents', function ($query) use ($eventFilter) {
+                $eventFilter($query);
+                $query->whereHas('tickets');
+            })->count();
+        $savedPaidTicket = $this->cohort($startDate, $endDate)
+            ->whereHas('createdEvents', function ($query) use ($eventFilter) {
+                $eventFilter($query);
+                $query->whereHas('tickets', fn ($t) => $t->where('price', '>', 0));
+            })->count();
+
+        // OR-defined like stages 4/6, so it can never undercut the stage below it: a user who
+        // subscribed before this column existed still counts as having reached checkout.
+        $reachedCheckout = $this->cohort($startDate, $endDate)
+            ->where(function ($query) {
+                $query->whereNotNull('subscribe_form_viewed_at')
+                    ->orWhereHas('createdRoles.subscriptions');
+            })->count();
+        $subscribed = $this->cohort($startDate, $endDate)
+            ->whereHas('createdRoles.subscriptions')->count();
+
         // Traffic stages (1-2): anonymous, only meaningful for a window inside the tracked period.
         $trackingStart = MarketingDailyStat::min('date');
         $rangeTracked = $trackingStart !== null
@@ -145,6 +173,10 @@ class GrowthExportService
             ['key' => 'saved_schedule', 'group' => 'cohort', 'count' => $savedSchedule],
             ['key' => 'reached_event', 'group' => 'cohort', 'count' => $reachedEvent],
             ['key' => 'saved_event', 'group' => 'cohort', 'count' => $savedEvent],
+            ['key' => 'saved_ticket', 'group' => 'money', 'count' => $savedTicket],
+            ['key' => 'saved_paid_ticket', 'group' => 'money', 'count' => $savedPaidTicket],
+            ['key' => 'reached_checkout', 'group' => 'money', 'count' => $reachedCheckout],
+            ['key' => 'subscribed', 'group' => 'money', 'count' => $subscribed],
         ];
 
         // Bar width denominator: stage-1 visitors when present, else the largest stage.
