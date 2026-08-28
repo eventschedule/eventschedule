@@ -80,12 +80,12 @@ return [
         'price_yearly' => env('STRIPE_PRICE_YEARLY'),
         // ?: not a second arg: .env.example ships these present-but-empty, and env() returns
         // '' for that, so a default argument never fires and (int) '' prices the plan at $0.
-        'price_monthly_amount' => env('STRIPE_PRICE_MONTHLY_AMOUNT') ?: '9',
-        'price_yearly_amount' => env('STRIPE_PRICE_YEARLY_AMOUNT') ?: '90',
+        'price_monthly_amount' => env('STRIPE_PRICE_MONTHLY_AMOUNT') ?: '5',
+        'price_yearly_amount' => env('STRIPE_PRICE_YEARLY_AMOUNT') ?: '50',
         'enterprise_price_monthly' => env('STRIPE_ENTERPRISE_PRICE_MONTHLY'),
         'enterprise_price_yearly' => env('STRIPE_ENTERPRISE_PRICE_YEARLY'),
-        'enterprise_price_monthly_amount' => env('STRIPE_ENTERPRISE_PRICE_MONTHLY_AMOUNT') ?: '29',
-        'enterprise_price_yearly_amount' => env('STRIPE_ENTERPRISE_PRICE_YEARLY_AMOUNT') ?: '290',
+        'enterprise_price_monthly_amount' => env('STRIPE_ENTERPRISE_PRICE_MONTHLY_AMOUNT') ?: '15',
+        'enterprise_price_yearly_amount' => env('STRIPE_ENTERPRISE_PRICE_YEARLY_AMOUNT') ?: '150',
         // Retired price IDs that are still billing grandfathered subscribers. Comma-separated,
         // so more than one generation of price change can accumulate. Recognition ONLY: new
         // checkouts and swaps always use the current IDs above. Stripe Prices are immutable, so

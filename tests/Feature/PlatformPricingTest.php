@@ -105,8 +105,8 @@ class PlatformPricingTest extends TestCase
         ]);
         PlatformPricing::flush();
 
-        $this->assertSame(9.0, PlatformPricing::proMonthly());
-        $this->assertSame(290.0, PlatformPricing::enterpriseYearly());
+        $this->assertSame(5.0, PlatformPricing::proMonthly());
+        $this->assertSame(150.0, PlatformPricing::enterpriseYearly());
     }
 
     public function test_the_setting_overrides_config(): void
@@ -418,7 +418,7 @@ class PlatformPricingTest extends TestCase
         // Belt and braces alongside the grep guard in MarketingPriceTest: this asserts the value
         // in force, not just the absence of a symbol.
         $this->assertStringContainsString(
-            "config('services.stripe_platform.price_monthly_amount', 9)",
+            "config('services.stripe_platform.price_monthly_amount', 5)",
             $source,
             'MRR must keep reading config, not the admin-settable amounts.'
         );

@@ -1769,6 +1769,9 @@ Beyond the API endpoints documented above, Event Schedule includes these platfor
 
 ## Pricing
 
+Amounts below are eventschedule.com's defaults. A selfhosted or white-label platform sets
+its own prices and currency.
+
 ### Free Plan
 
 All core features are available for free:
@@ -1777,21 +1780,39 @@ All core features are available for free:
 - Calendar sync
 - Event graphics
 - Analytics
-- API access (with Pro schedules)
+- API access (read)
 - iCal feed
 - Embedding
+- Up to 25 paid tickets per month
+- Up to 10 newsletter recipients per month
 
 ### Pro Plan
 
-$5/month or $50/year. New accounts receive the first year free.
+$5/month or $50/year.
 
 Pro adds:
+- Unlimited paid ticket sales
+- Up to 100 newsletter recipients per month
 - API write operations (POST/PUT/DELETE)
-- Custom domain support
 - Remove Event Schedule branding
-- Newsletters
 - Custom fields
 - Priority support
+
+### Enterprise Plan
+
+$15/month or $150/year.
+
+Enterprise adds everything in Pro, plus:
+- Custom domains
+- Allocated (reserved) seating with a guest seat picker and box office console
+- Multiple team members, with admin and viewer roles
+- Internal and unlisted event visibility
+- AI features: flyer generation, schedule and event detail generation, agenda scanning
+- WhatsApp event creation
+- Availability management
+- Up to 1,000 newsletter recipients per month
+
+Selfhosted deployments get all Enterprise features.
 
 ### Zero Platform Fees
 

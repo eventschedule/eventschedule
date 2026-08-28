@@ -6,9 +6,9 @@
         "keywords": "Google Forms alternative for events, Google Forms replacement, event registration form, event signup form",
         "audience_hint": "For event organizers using Google Forms for RSVPs and registration",
         "about": "Google Forms is a free form builder used by many event organizers to collect RSVPs and registrations. While it works for basic data collection, it was never designed for event management - leaving organizers to manually handle payments, confirmations, and attendee tracking outside the form.",
-        "pricing_note": "Google Forms is free, but when you add Stripe for payments and Mailchimp for emails, costs add up quickly. Event Schedule combines registration, payments, emails, and check-in from $9/month total.",
+        "pricing_note": "Google Forms is free, but when you add Stripe for payments and Mailchimp for emails, costs add up quickly. Event Schedule combines registration, payments, emails, and check-in from $5/month total.",
         "competitor_price": "Free (but $50+/mo with add-ons)",
-        "es_price": "From $0/mo (Pro $9/mo)",
+        "es_price": "From $0/mo (Pro $5/mo)",
         "comparison_rows": [
             {
                 "feature": "Event registration",
@@ -148,7 +148,7 @@
             },
             {
                 "question": "Is Event Schedule really free?",
-                "answer": "Yes. The free plan includes unlimited events, Google Calendar sync, newsletters, and fan engagement features. Ticketing with zero platform fees is available on the Pro plan for $9/month. No credit card required to start."
+                "answer": "Yes. The free plan includes unlimited events, Google Calendar sync, newsletters, and fan engagement features. Ticketing with zero platform fees is available on the Pro plan for $5/month. No credit card required to start."
             },
             {
                 "question": "Can Event Schedule handle custom registration fields like Google Forms?",
@@ -206,9 +206,9 @@
         "keywords": "Mailchimp alternative for events, Mailchimp replacement, event email marketing, event newsletter",
         "audience_hint": "For organizers managing event emails in a separate platform",
         "about": "Mailchimp is a popular email marketing platform that many event organizers use to promote events and communicate with attendees. However, using Mailchimp means managing a separate tool alongside your event platform, manually syncing attendee lists, and paying for email marketing on top of your event tools.",
-        "pricing_note": "Mailchimp starts at $13/month for 500 contacts and goes up from there. Event Schedule newsletters are free for unlimited subscribers, and Pro at $9/month adds ticketing with zero platform fees.",
+        "pricing_note": "Mailchimp starts at $13/month for 500 contacts and goes up from there. Event Schedule newsletters are free for unlimited subscribers, and Pro at $5/month adds ticketing with zero platform fees.",
         "competitor_price": "From $13/mo",
-        "es_price": "From $0/mo (Pro $9/mo)",
+        "es_price": "From $0/mo (Pro $5/mo)",
         "comparison_rows": [
             {
                 "feature": "Email newsletters",
@@ -348,7 +348,7 @@
             },
             {
                 "question": "How much does Event Schedule cost compared to Mailchimp?",
-                "answer": "Event Schedule is free for newsletters, subscriber management, and unlimited events. The Pro plan at $9/month adds ticketing with zero platform fees. Mailchimp charges based on subscriber count and can cost $20 or more per month for similar email features alone."
+                "answer": "Event Schedule is free for newsletters, subscriber management, and unlimited events. The Pro plan at $5/month adds ticketing with zero platform fees. Mailchimp charges based on subscriber count and can cost $20 or more per month for similar email features alone."
             },
             {
                 "question": "Does Event Schedule support email automation like Mailchimp?",
@@ -406,9 +406,9 @@
         "keywords": "Canva alternative for events, Canva replacement, event flyer maker, event graphic generator",
         "audience_hint": "For organizers spending hours designing event flyers manually",
         "about": "Canva is a popular graphic design platform that event organizers use to create flyers, social media posts, and promotional graphics. While Canva offers great design flexibility, creating event graphics manually takes time and requires updating multiple designs whenever event details change.",
-        "pricing_note": "Canva Pro costs $15/month for premium design features. Event Schedule generates event graphics automatically on the Pro plan at $9/month, which also includes ticketing and newsletters.",
+        "pricing_note": "Canva Pro costs $15/month for premium design features. Event Schedule generates event graphics automatically on the Pro plan at $5/month, which also includes ticketing and newsletters.",
         "competitor_price": "From $15/mo (Pro)",
-        "es_price": "From $0/mo (Pro $9/mo)",
+        "es_price": "From $0/mo (Pro $5/mo)",
         "comparison_rows": [
             {
                 "feature": "Event graphics",
@@ -548,7 +548,7 @@
             },
             {
                 "question": "Is Event Schedule free for event graphics?",
-                "answer": "Event graphics generation is included in the Pro plan at $9/month, which also includes ticketing, QR check-in, and more. The free plan includes unlimited events, public event pages, and Google Calendar sync."
+                "answer": "Event graphics generation is included in the Pro plan at $5/month, which also includes ticketing, QR check-in, and more. The free plan includes unlimited events, public event pages, and Google Calendar sync."
             },
             {
                 "question": "How do Event Schedule graphics compare to Canva designs?",
@@ -606,9 +606,9 @@
         "keywords": "Linktree alternative for events, Linktree replacement, event link in bio, event landing page",
         "audience_hint": "For creators and organizers using a link-in-bio for event promotion",
         "about": "Linktree is a link-in-bio tool that event organizers use to share multiple event links from a single URL. While it solves the \"one link\" problem on social media, it is just a list of links with no event context, ticketing, or scheduling functionality.",
-        "pricing_note": "Linktree Pro costs $9/month for analytics and customization on what is still a list of links. Event Schedule starts free, and Pro at $9/month buys a full event schedule page with ticketing, newsletters, and subscriber signups.",
+        "pricing_note": "Linktree Pro costs $9/month for analytics and customization on what is still a list of links. Event Schedule starts free, and Pro at $5/month buys a full event schedule page with ticketing, newsletters, and subscriber signups.",
         "competitor_price": "From $9/mo (Pro)",
-        "es_price": "From $0/mo (Pro $9/mo)",
+        "es_price": "From $0/mo (Pro $5/mo)",
         "comparison_rows": [
             {
                 "feature": "Event details on page",
@@ -748,7 +748,7 @@
             },
             {
                 "question": "Does Event Schedule have a free plan?",
-                "answer": "Yes. The free plan includes unlimited events, a public schedule page, Google Calendar sync, newsletters, and embeddable widgets. Ticketing with zero platform fees is available on the Pro plan for $9/month."
+                "answer": "Yes. The free plan includes unlimited events, a public schedule page, Google Calendar sync, newsletters, and embeddable widgets. Ticketing with zero platform fees is available on the Pro plan for $5/month."
             },
             {
                 "question": "Can I use Event Schedule as my link in bio?",
@@ -806,9 +806,9 @@
         "keywords": "Google Sheets alternative for events, Google Sheets replacement, event tracking spreadsheet, Excel alternative for events",
         "audience_hint": "For organizers tracking event data and attendees in spreadsheets",
         "about": "Google Sheets is a go-to tool for event organizers who need to track attendees, manage guest lists, and organize event details. But spreadsheets were not built for event management - they require manual data entry, have no attendee-facing features, and become unwieldy as events grow.",
-        "pricing_note": "Google Sheets is free, but tracking events manually costs time. Event Schedule automates attendee tracking, and the Pro plan at $9/month adds ticketing with automatic sales data.",
+        "pricing_note": "Google Sheets is free, but tracking events manually costs time. Event Schedule automates attendee tracking, and the Pro plan at $5/month adds ticketing with automatic sales data.",
         "competitor_price": "Free (manual effort)",
-        "es_price": "From $0/mo (Pro $9/mo)",
+        "es_price": "From $0/mo (Pro $5/mo)",
         "comparison_rows": [
             {
                 "feature": "Attendee tracking",
@@ -948,7 +948,7 @@
             },
             {
                 "question": "Is there a free plan for Event Schedule?",
-                "answer": "Yes. The free plan includes unlimited events, Google Calendar sync, newsletters, and fan engagement features. Ticketing with automatic tracking and zero platform fees is available on the Pro plan for $9/month."
+                "answer": "Yes. The free plan includes unlimited events, Google Calendar sync, newsletters, and fan engagement features. Ticketing with automatic tracking and zero platform fees is available on the Pro plan for $5/month."
             },
             {
                 "question": "Can I still export data to a spreadsheet?",
@@ -1006,9 +1006,9 @@
         "keywords": "Calendly alternative for events, Calendly replacement, event scheduling tool, public event scheduling",
         "audience_hint": "For organizers using appointment scheduling for public events",
         "about": "Calendly is a scheduling tool designed for booking one-on-one meetings and appointments. Some event organizers use it to schedule events, but it lacks public event pages, ticketing, and the ability to share a calendar of events with an audience.",
-        "pricing_note": "Calendly charges $10/month per user for its Standard plan. Event Schedule is free for unlimited events and public pages, with ticketing at $9/month and no per-user fees.",
+        "pricing_note": "Calendly charges $10/month per user for its Standard plan. Event Schedule is free for unlimited events and public pages, with ticketing at $5/month and no per-user fees.",
         "competitor_price": "From $10/mo per user",
-        "es_price": "From $0/mo (Pro $9/mo)",
+        "es_price": "From $0/mo (Pro $5/mo)",
         "comparison_rows": [
             {
                 "feature": "Public event pages",
@@ -1153,7 +1153,7 @@
             },
             {
                 "question": "Does Event Schedule have a free plan?",
-                "answer": "Yes. The free plan includes unlimited events, public event pages, Google Calendar sync, newsletters, and fan engagement features. Ticketing with zero platform fees is available on the Pro plan for $9/month."
+                "answer": "Yes. The free plan includes unlimited events, public event pages, Google Calendar sync, newsletters, and fan engagement features. Ticketing with zero platform fees is available on the Pro plan for $5/month."
             },
             {
                 "question": "Does Event Schedule sync with Google Calendar like Calendly?",
@@ -1211,9 +1211,9 @@
         "keywords": "SurveyMonkey alternative for events, SurveyMonkey replacement, event registration, event signup",
         "audience_hint": "For organizers using survey tools for event registration",
         "about": "SurveyMonkey is a survey platform that some event organizers repurpose for event registration and feedback collection. While it offers form building capabilities, it was designed for surveys and research - not for managing events, selling tickets, or handling attendee logistics.",
-        "pricing_note": "SurveyMonkey charges $25+/month for features like payment collection and custom branding. Event Schedule Pro is $9/month with zero platform fees on ticket sales.",
+        "pricing_note": "SurveyMonkey charges $25+/month for features like payment collection and custom branding. Event Schedule Pro is $5/month with zero platform fees on ticket sales.",
         "competitor_price": "From $25+/mo",
-        "es_price": "From $0/mo (Pro $9/mo)",
+        "es_price": "From $0/mo (Pro $5/mo)",
         "comparison_rows": [
             {
                 "feature": "Event registration",
@@ -1327,7 +1327,7 @@
             "intro": "SurveyMonkey was built for surveys, not events. Event Schedule gives you purpose-built registration with ticketing, payments, and check-in tools.",
             "points": [
                 "Event registration with ticket types, limits, and waitlists",
-                "Zero platform fees at $9/month vs SurveyMonkey at $25+/month",
+                "Zero platform fees at $5/month vs SurveyMonkey at $25+/month",
                 "Attendee records with check-in tools, not survey responses",
                 "Public event pages that look professional, not like questionnaires"
             ]
@@ -1353,7 +1353,7 @@
             },
             {
                 "question": "How much does Event Schedule cost compared to SurveyMonkey?",
-                "answer": "Event Schedule is free for unlimited events, newsletters, and Google Calendar sync. The Pro plan at $9/month adds ticketing with zero platform fees. SurveyMonkey charges $25 or more per month for features like payment collection and custom branding."
+                "answer": "Event Schedule is free for unlimited events, newsletters, and Google Calendar sync. The Pro plan at $5/month adds ticketing with zero platform fees. SurveyMonkey charges $25 or more per month for features like payment collection and custom branding."
             },
             {
                 "question": "Does Event Schedule support post-event surveys?",
@@ -1411,9 +1411,9 @@
         "keywords": "Doodle alternative for events, Doodle replacement, event scheduling poll, event date scheduling",
         "audience_hint": "For organizers using date polling to coordinate events",
         "about": "Doodle is a scheduling poll tool that helps groups find a common time to meet. Event organizers sometimes use it to pick event dates, but Doodle stops at the poll - it does not help you create, promote, or manage the actual event once a date is chosen.",
-        "pricing_note": "Doodle charges $7+/month per user for its Pro plan. Event Schedule is free for unlimited events with a public schedule, and $9/month for ticketing with no per-user fees.",
+        "pricing_note": "Doodle charges $7+/month per user for its Pro plan. Event Schedule is free for unlimited events with a public schedule, and $5/month for ticketing with no per-user fees.",
         "competitor_price": "From $7+/mo per user",
-        "es_price": "From $0/mo (Pro $9/mo)",
+        "es_price": "From $0/mo (Pro $5/mo)",
         "comparison_rows": [
             {
                 "feature": "Event creation",
@@ -1553,7 +1553,7 @@
             },
             {
                 "question": "Is Event Schedule free to use?",
-                "answer": "Yes. The free plan includes unlimited events, public event pages, Google Calendar sync, newsletters, and fan engagement features. Ticketing with zero platform fees is available on the Pro plan for $9/month."
+                "answer": "Yes. The free plan includes unlimited events, public event pages, Google Calendar sync, newsletters, and fan engagement features. Ticketing with zero platform fees is available on the Pro plan for $5/month."
             },
             {
                 "question": "Does Event Schedule have scheduling or polling features like Doodle?",
@@ -1612,9 +1612,9 @@
         "keywords": "QR code alternative for events, QR code generator replacement, event QR code, QR code check-in",
         "audience_hint": "For organizers using standalone QR tools for event check-in",
         "about": "QR code generators are standalone tools that event organizers use to create scannable codes for event check-in, links to event pages, or ticket verification. Using a separate QR tool means manually creating codes, linking them to attendee data, and building your own check-in process.",
-        "pricing_note": "Many QR generators charge $5 to $15/month for dynamic QR codes. Event Schedule includes QR codes on every ticket automatically with the Pro plan at $9/month, which also covers ticketing, check-in, and a live dashboard.",
+        "pricing_note": "Many QR generators charge $5 to $15/month for dynamic QR codes. Event Schedule includes QR codes on every ticket automatically with the Pro plan at $5/month, which also covers ticketing, check-in, and a live dashboard.",
         "competitor_price": "$5 to $15/mo",
-        "es_price": "From $0/mo (Pro $9/mo)",
+        "es_price": "From $0/mo (Pro $5/mo)",
         "comparison_rows": [
             {
                 "feature": "QR codes on tickets",
@@ -1754,7 +1754,7 @@
             },
             {
                 "question": "How much does QR code ticketing cost?",
-                "answer": "QR code tickets are included in the Pro plan at $9/month with zero platform fees. You only pay standard Stripe processing fees (typically 2.9% + $0.30 per transaction). The free plan includes unlimited events without ticketing."
+                "answer": "QR code tickets are included in the Pro plan at $5/month with zero platform fees. You only pay standard Stripe processing fees (typically 2.9% + $0.30 per transaction). The free plan includes unlimited events without ticketing."
             },
             {
                 "question": "How does the QR check-in system work?",
@@ -1812,9 +1812,9 @@
         "keywords": "Squarespace alternative for events, Squarespace replacement, event website builder, event landing page",
         "audience_hint": "For organizers building event pages on a general website builder",
         "about": "Squarespace is a general website builder that some event organizers use to create event pages and sell tickets through third-party integrations. While it produces beautiful websites, building event functionality on top of a website builder means extra complexity, plugins, and ongoing maintenance for features that should be built in.",
-        "pricing_note": "Squarespace costs $16+/month for a basic site, plus extra for third-party ticketing. Event Schedule is free for event pages, and $9/month for ticketing with zero platform fees.",
+        "pricing_note": "Squarespace costs $16+/month for a basic site, plus extra for third-party ticketing. Event Schedule is free for event pages, and $5/month for ticketing with zero platform fees.",
         "competitor_price": "From $16+/mo",
-        "es_price": "From $0/mo (Pro $9/mo)",
+        "es_price": "From $0/mo (Pro $5/mo)",
         "comparison_rows": [
             {
                 "feature": "Event pages",
@@ -1954,7 +1954,7 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to Squarespace?",
-                "answer": "Event Schedule is free for unlimited events and a public schedule page. The Pro plan at $9/month adds ticketing with zero platform fees. Squarespace costs $16 or more per month for a basic website, plus additional fees for third-party ticketing integrations."
+                "answer": "Event Schedule is free for unlimited events and a public schedule page. The Pro plan at $5/month adds ticketing with zero platform fees. Squarespace costs $16 or more per month for a basic website, plus additional fees for third-party ticketing integrations."
             },
             {
                 "question": "Do I still need a website if I use Event Schedule?",
@@ -2012,9 +2012,9 @@
         "keywords": "Notion alternative for events, Notion replacement, Notion event planning, event management workspace",
         "audience_hint": "For organizers planning events in workspace tools like Notion",
         "about": "Notion is a workspace and productivity tool that some event organizers use to plan events with databases, calendars, and shared pages. While Notion is excellent for internal project management, it has no public-facing event pages, no ticketing or RSVP functionality, and a steep learning curve for setting up event workflows.",
-        "pricing_note": "Notion Plus costs $10/month per user. Event Schedule is free for unlimited events, public pages, and team features. Pro at $9/month adds ticketing with zero platform fees and no per-user charges.",
+        "pricing_note": "Notion Plus costs $10/month per user. Event Schedule is free for unlimited events, public pages, and team features. Pro at $5/month adds ticketing with zero platform fees and no per-user charges.",
         "competitor_price": "From $10/mo per user",
-        "es_price": "From $0/mo (Pro $9/mo)",
+        "es_price": "From $0/mo (Pro $5/mo)",
         "comparison_rows": [
             {
                 "feature": "Public event pages",
@@ -2154,7 +2154,7 @@
             },
             {
                 "question": "Is Event Schedule free like Notion?",
-                "answer": "Yes. The free plan includes unlimited events, public event pages, Google Calendar sync, newsletters, and team collaboration. The Pro plan at $9/month adds ticketing with zero platform fees, event graphics, and more."
+                "answer": "Yes. The free plan includes unlimited events, public event pages, Google Calendar sync, newsletters, and team collaboration. The Pro plan at $5/month adds ticketing with zero platform fees, event graphics, and more."
             },
             {
                 "question": "Does Event Schedule support team collaboration like Notion?",
@@ -2212,9 +2212,9 @@
         "keywords": "Trello alternative for events, Trello replacement, Trello event planning, event management board",
         "audience_hint": "For organizers managing events with task boards and project tools",
         "about": "Trello is a kanban-style project management tool that some event organizers use to track event planning tasks. While Trello is great for organizing workflows with boards and cards, it has no attendee-facing features, no registration or ticketing, and task boards do not map well to the event lifecycle of creating, promoting, and managing events.",
-        "pricing_note": "Trello Standard costs $6/month per user. Event Schedule is free for unlimited events and public pages with team collaboration, and $9/month for ticketing with no per-user fees.",
+        "pricing_note": "Trello Standard costs $6/month per user. Event Schedule is free for unlimited events and public pages with team collaboration, and $5/month for ticketing with no per-user fees.",
         "competitor_price": "From $6/mo per user",
-        "es_price": "From $0/mo (Pro $9/mo)",
+        "es_price": "From $0/mo (Pro $5/mo)",
         "comparison_rows": [
             {
                 "feature": "Public event pages",
@@ -2354,7 +2354,7 @@
             },
             {
                 "question": "Is Event Schedule free like Trello?",
-                "answer": "Yes. The free plan includes unlimited events, public event pages, Google Calendar sync, newsletters, and fan engagement features. The Pro plan at $9/month adds ticketing with zero platform fees, event graphics, and more."
+                "answer": "Yes. The free plan includes unlimited events, public event pages, Google Calendar sync, newsletters, and fan engagement features. The Pro plan at $5/month adds ticketing with zero platform fees, event graphics, and more."
             },
             {
                 "question": "Does Event Schedule have task management like Trello?",

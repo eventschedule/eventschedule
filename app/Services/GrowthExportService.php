@@ -891,10 +891,10 @@ class GrowthExportService
         // actually charges. Sourcing the fallback from the admin-settable amounts would build
         // one MRR figure from two sources and let a marketing change restate revenue that was
         // already booked. MarketingPriceTest pins this in both directions.
-        $monthly = (float) config('services.stripe_platform.price_monthly_amount', 9);
-        $yearly = (float) config('services.stripe_platform.price_yearly_amount', 90);
-        $entMonthly = (float) config('services.stripe_platform.enterprise_price_monthly_amount', 29);
-        $entYearly = (float) config('services.stripe_platform.enterprise_price_yearly_amount', 290);
+        $monthly = (float) config('services.stripe_platform.price_monthly_amount', 5);
+        $yearly = (float) config('services.stripe_platform.price_yearly_amount', 50);
+        $entMonthly = (float) config('services.stripe_platform.enterprise_price_monthly_amount', 15);
+        $entYearly = (float) config('services.stripe_platform.enterprise_price_yearly_amount', 150);
         $mrr = 0.0;
 
         // lazy(), not get(): this is every schedule on the install, and actualPlanTier()

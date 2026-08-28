@@ -32,10 +32,10 @@ class PlatformPricing
      * setting key => config key, for the four amounts we quote.
      */
     private const KEYS = [
-        'pro.monthly' => ['plan_price_pro_monthly', 'price_monthly_amount', '9'],
-        'pro.yearly' => ['plan_price_pro_yearly', 'price_yearly_amount', '90'],
-        'enterprise.monthly' => ['plan_price_enterprise_monthly', 'enterprise_price_monthly_amount', '29'],
-        'enterprise.yearly' => ['plan_price_enterprise_yearly', 'enterprise_price_yearly_amount', '290'],
+        'pro.monthly' => ['plan_price_pro_monthly', 'price_monthly_amount', '5'],
+        'pro.yearly' => ['plan_price_pro_yearly', 'price_yearly_amount', '50'],
+        'enterprise.monthly' => ['plan_price_enterprise_monthly', 'enterprise_price_monthly_amount', '15'],
+        'enterprise.yearly' => ['plan_price_enterprise_yearly', 'enterprise_price_yearly_amount', '150'],
     ];
 
     /**
@@ -131,7 +131,7 @@ class PlatformPricing
      * The raw stored override, or null when there is none.
      *
      * For the admin form ONLY, so it can render an empty field with the effective value as a
-     * placeholder - otherwise an operator cannot tell "unset, defaulting to 9" from "set to 9",
+     * placeholder - otherwise an operator cannot tell "unset, defaulting to 5" from "set to 5",
      * and so cannot tell whether clearing the field will change anything. Everything else must
      * call amount(), which is the number actually in force.
      */

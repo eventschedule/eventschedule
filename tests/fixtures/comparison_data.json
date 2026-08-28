@@ -22,7 +22,7 @@
                 ],
                 [
                     "Paid plan price",
-                    "$9/mo (7-day free trial)",
+                    "$5/mo (7-day free trial)",
                     "Free (fees on tickets)",
                     true
                 ],
@@ -406,7 +406,7 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to Eventbrite?",
-                "answer": "Eventbrite charges 3.7% + $1.79 per ticket on paid events. Event Schedule charges zero platform fees at every plan level. The Pro plan is a flat $9/mo regardless of how many tickets you sell."
+                "answer": "Eventbrite charges 3.7% + $1.79 per ticket on paid events. Event Schedule charges zero platform fees at every plan level. The Pro plan is a flat $5/mo regardless of how many tickets you sell."
             },
             {
                 "question": "Does Event Schedule have an event marketplace like Eventbrite?",
@@ -419,7 +419,7 @@
         "key": "luma",
         "slug": "luma-alternative",
         "tagline": "A powerful open source alternative to Luma at a fraction of the price.",
-        "description": "Compare Event Schedule with Luma. Get custom domains, zero platform fees, and open source flexibility for $9/mo instead of $59/mo.",
+        "description": "Compare Event Schedule with Luma. Get custom domains, zero platform fees, and open source flexibility for $5/mo instead of $59/mo.",
         "keywords": "luma alternative, luma alternative open source, lu.ma alternative, event platform comparison, luma competitor",
         "about": "Luma (lu.ma) is a modern event platform popular with tech communities and creators. It offers sleek event pages, built-in video streaming, and community features.",
         "competitor_strengths": [
@@ -437,7 +437,7 @@
                 ],
                 [
                     "Paid plan price",
-                    "$9/mo (7-day free trial)",
+                    "$5/mo (7-day free trial)",
                     "$59/mo",
                     true
                 ],
@@ -690,7 +690,7 @@
         "key_advantages": [
             {
                 "title": "12x More Affordable",
-                "description": "Event Schedule Pro costs $9/mo with a 7-day free trial. Luma Plus costs $59/mo for comparable features.",
+                "description": "Event Schedule Pro costs $5/mo with a 7-day free trial. Luma Plus costs $59/mo for comparable features.",
                 "icon": "dollar",
                 "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
                 "border": "border-emerald-200 dark:border-emerald-500/20",
@@ -760,7 +760,7 @@
         "why_choose": {
             "summary": "Event Schedule delivers comparable features to Luma at a fraction of the cost, with open source transparency and zero platform fees.",
             "points": [
-                "$9/month vs Luma's $59/month for premium features",
+                "$5/month vs Luma's $59/month for premium features",
                 "Zero platform fees vs Luma's 5% on the free plan",
                 "Fully open source with selfhosting option for complete data ownership",
                 "Two-way Google Calendar and CalDAV sync included free on every plan"
@@ -773,7 +773,7 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to Luma?",
-                "answer": "Luma charges $59/mo for its premium plan. Event Schedule Pro is $9/mo with zero platform fees. Even the free plan includes unlimited events, Google Calendar sync, and newsletters."
+                "answer": "Luma charges $59/mo for its premium plan. Event Schedule Pro is $5/mo with zero platform fees. Even the free plan includes unlimited events, Google Calendar sync, and newsletters."
             },
             {
                 "question": "Does Event Schedule support virtual events like Luma?",
@@ -786,7 +786,7 @@
         "key": "ticket-tailor",
         "slug": "ticket-tailor-alternative",
         "tagline": "A flat-rate alternative to Ticket Tailor with zero per-ticket fees.",
-        "description": "Compare Event Schedule with Ticket Tailor. Get zero platform fees, open source flexibility, and AI features for a flat $9/mo.",
+        "description": "Compare Event Schedule with Ticket Tailor. Get zero platform fees, open source flexibility, and AI features for a flat $5/mo.",
         "keywords": "ticket tailor alternative, ticket tailor alternative free, ticketing platform comparison, no per-ticket fees, ticket tailor competitor",
         "about": "Ticket Tailor is an independent ticketing platform focused on affordable event ticketing. It offers a straightforward per-ticket pricing model and supports various payment processors.",
         "competitor_strengths": [
@@ -804,7 +804,7 @@
                 ],
                 [
                     "Paid plan price",
-                    "$9/mo (7-day free trial)",
+                    "$5/mo (7-day free trial)",
                     "From $0.28/ticket",
                     true
                 ],
@@ -1057,7 +1057,7 @@
         "key_advantages": [
             {
                 "title": "Flat-Rate Pricing",
-                "description": "Pay $9/mo flat instead of $0.28 to $0.60 per ticket. The more tickets you sell, the more you save.",
+                "description": "Pay $5/mo flat instead of $0.28 to $0.60 per ticket. The more tickets you sell, the more you save.",
                 "icon": "dollar",
                 "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
                 "border": "border-emerald-200 dark:border-emerald-500/20",
@@ -1127,7 +1127,7 @@
         "why_choose": {
             "summary": "Event Schedule offers flat-rate pricing instead of per-ticket fees, plus a full suite of features that go beyond pure ticketing.",
             "points": [
-                "Flat $9/month vs Ticket Tailor's per-ticket fees that scale with volume",
+                "Flat $5/month vs Ticket Tailor's per-ticket fees that scale with volume",
                 "Built-in newsletters, Google Calendar sync, and CalDAV sync included free",
                 "AI event parsing and flyer generation that pure ticketing platforms lack",
                 "Fully open source with selfhosting option for complete data control"
@@ -1140,7 +1140,7 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to Ticket Tailor?",
-                "answer": "Ticket Tailor charges per ticket sold. Event Schedule Pro is a flat $9/mo with zero platform fees, no matter how many tickets you sell. This makes costs predictable and lower for most organizers."
+                "answer": "Ticket Tailor charges per ticket sold. Event Schedule Pro is a flat $5/mo with zero platform fees, no matter how many tickets you sell. This makes costs predictable and lower for most organizers."
             },
             {
                 "question": "What does Event Schedule offer that Ticket Tailor does not?",
@@ -1507,7 +1507,7 @@
             },
             {
                 "question": "Is Event Schedule free like Google Calendar?",
-                "answer": "Event Schedule has a generous free plan that includes unlimited events, Google Calendar sync, newsletters, and team collaboration. The Pro plan at $9/mo adds ticketing, QR check-ins, and custom branding."
+                "answer": "Event Schedule has a generous free plan that includes unlimited events, Google Calendar sync, newsletters, and team collaboration. The Pro plan at $5/mo adds ticketing, QR check-ins, and custom branding."
             },
             {
                 "question": "Can Event Schedule handle ticketing that Google Calendar cannot?",
@@ -1538,7 +1538,7 @@
                 ],
                 [
                     "Paid plan price",
-                    "$9/mo (7-day free trial)",
+                    "$5/mo (7-day free trial)",
                     "From $16.79/mo (organizer)",
                     true
                 ],
@@ -1779,7 +1779,7 @@
         "key_advantages": [
             {
                 "title": "No Organizer Fee",
-                "description": "Meetup charges organizers $16.79 to $24.50/mo just to host a group. Event Schedule is free forever with optional $9/mo Pro upgrade - saving you up to $200/year.",
+                "description": "Meetup charges organizers $16.79 to $24.50/mo just to host a group. Event Schedule is free forever with optional $5/mo Pro upgrade - saving you up to $200/year.",
                 "icon": "dollar",
                 "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
                 "border": "border-emerald-200 dark:border-emerald-500/20",
@@ -1853,7 +1853,7 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to Meetup?",
-                "answer": "Meetup charges organizers a subscription starting at $16.79/mo for basic groups, with higher tiers for larger communities. Event Schedule has a free plan with unlimited events. The Pro plan is $9/mo with zero platform fees on ticket sales."
+                "answer": "Meetup charges organizers a subscription starting at $16.79/mo for basic groups, with higher tiers for larger communities. Event Schedule has a free plan with unlimited events. The Pro plan is $5/mo with zero platform fees on ticket sales."
             },
             {
                 "question": "Can Event Schedule handle community events and recurring meetups?",
@@ -1884,7 +1884,7 @@
                 ],
                 [
                     "Paid plan price",
-                    "$9/mo (7-day free trial)",
+                    "$5/mo (7-day free trial)",
                     "Free (fees on buyers)",
                     true
                 ],
@@ -2236,7 +2236,7 @@
                 ],
                 [
                     "Paid plan price",
-                    "$9/mo (7-day free trial)",
+                    "$5/mo (7-day free trial)",
                     "Free (fees on tickets)",
                     true
                 ],
@@ -2557,7 +2557,7 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to Brown Paper Tickets?",
-                "answer": "Brown Paper Tickets charges $0.99 + 5% per ticket as a buyer-paid service fee. Event Schedule charges zero platform fees at any plan level. The Pro plan is a flat $9/mo for unlimited ticketing with direct Stripe payouts."
+                "answer": "Brown Paper Tickets charges $0.99 + 5% per ticket as a buyer-paid service fee. Event Schedule charges zero platform fees at any plan level. The Pro plan is a flat $5/mo for unlimited ticketing with direct Stripe payouts."
             },
             {
                 "question": "Is Event Schedule actively maintained?",
@@ -2588,7 +2588,7 @@
                 ],
                 [
                     "Paid plan price",
-                    "$9/mo (7-day free trial)",
+                    "$5/mo (7-day free trial)",
                     "Enterprise pricing",
                     true
                 ],
@@ -2852,8 +2852,8 @@
                 "icon_color": "text-sky-600 dark:text-sky-400"
             },
             {
-                "title": "Transparent $9/mo",
-                "description": "Splash hides pricing behind \"contact us\" forms. Event Schedule is free forever, with Pro at a transparent $9/mo - no surprise invoices or annual commitments.",
+                "title": "Transparent $5/mo",
+                "description": "Splash hides pricing behind \"contact us\" forms. Event Schedule is free forever, with Pro at a transparent $5/mo - no surprise invoices or annual commitments.",
                 "icon": "dollar",
                 "gradient": "from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30",
                 "border": "border-teal-200 dark:border-teal-500/20",
@@ -2909,7 +2909,7 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to Splash?",
-                "answer": "Splash uses custom enterprise pricing that requires contacting sales, with contracts typically running thousands of dollars per year. Event Schedule Pro is a transparent $9/mo with zero platform fees and no annual commitment."
+                "answer": "Splash uses custom enterprise pricing that requires contacting sales, with contracts typically running thousands of dollars per year. Event Schedule Pro is a transparent $5/mo with zero platform fees and no annual commitment."
             },
             {
                 "question": "Can Event Schedule handle corporate events like Splash?",
@@ -2922,7 +2922,7 @@
         "key": "sched",
         "slug": "sched-alternative",
         "tagline": "A more affordable, full-featured alternative to Sched with zero platform fees.",
-        "description": "Compare Event Schedule with Sched. Get zero platform fees, calendar sync, and open source flexibility for $9/mo instead of $50+/mo.",
+        "description": "Compare Event Schedule with Sched. Get zero platform fees, calendar sync, and open source flexibility for $5/mo instead of $50+/mo.",
         "keywords": "sched alternative, sched.com alternative, conference schedule platform, event agenda alternative, sched competitor",
         "about": "Sched is a conference and event scheduling platform popular for managing multi-track agendas, speaker profiles, and personalized attendee schedules. It targets conferences, trade shows, and multi-day events.",
         "competitor_strengths": [
@@ -2940,7 +2940,7 @@
                 ],
                 [
                     "Paid plan price",
-                    "$9/mo (7-day free trial)",
+                    "$5/mo (7-day free trial)",
                     "From $50/mo",
                     true
                 ],
@@ -3181,7 +3181,7 @@
         "key_advantages": [
             {
                 "title": "10x More Affordable",
-                "description": "$9/mo vs $50+/mo starting price. Get more features for a fraction of the cost.",
+                "description": "$5/mo vs $50+/mo starting price. Get more features for a fraction of the cost.",
                 "icon": "dollar",
                 "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
                 "border": "border-emerald-200 dark:border-emerald-500/20",
@@ -3255,7 +3255,7 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to Sched?",
-                "answer": "Sched charges per-event or annual pricing that scales with attendee count. Event Schedule Pro is a flat $9/mo with unlimited events and zero platform fees on ticket sales."
+                "answer": "Sched charges per-event or annual pricing that scales with attendee count. Event Schedule Pro is a flat $5/mo with unlimited events and zero platform fees on ticket sales."
             },
             {
                 "question": "Can Event Schedule handle conference agendas like Sched?",
@@ -3286,7 +3286,7 @@
                 ],
                 [
                     "Paid plan price",
-                    "$9/mo (7-day free trial)",
+                    "$5/mo (7-day free trial)",
                     "Custom quotes",
                     true
                 ],
@@ -3533,7 +3533,7 @@
         "key_advantages": [
             {
                 "title": "Transparent Pricing",
-                "description": "$9/mo flat vs opaque custom quotes requiring sales calls. No surprises, no negotiations.",
+                "description": "$5/mo flat vs opaque custom quotes requiring sales calls. No surprises, no negotiations.",
                 "icon": "dollar",
                 "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
                 "border": "border-emerald-200 dark:border-emerald-500/20",
@@ -3607,7 +3607,7 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to Whova?",
-                "answer": "Whova uses quote-based enterprise pricing that requires a sales call, with costs typically running thousands of dollars per event. Event Schedule Pro is a flat $9/mo with unlimited events and zero platform fees on ticket sales."
+                "answer": "Whova uses quote-based enterprise pricing that requires a sales call, with costs typically running thousands of dollars per event. Event Schedule Pro is a flat $5/mo with unlimited events and zero platform fees on ticket sales."
             },
             {
                 "question": "Does Event Schedule offer attendee engagement features like Whova?",
@@ -3620,7 +3620,7 @@
         "key": "accelevents",
         "slug": "accelevents-alternative",
         "tagline": "A simpler, more affordable alternative to Accelevents without enterprise pricing.",
-        "description": "Compare Event Schedule with Accelevents. Get zero platform fees, instant setup, and open source flexibility for $9/mo instead of $7,500+/year.",
+        "description": "Compare Event Schedule with Accelevents. Get zero platform fees, instant setup, and open source flexibility for $5/mo instead of $7,500+/year.",
         "keywords": "accelevents alternative, accelevents alternative free, event management platform, accelevents competitor, affordable event platform",
         "about": "Accelevents is an enterprise event management platform offering in-person, virtual, and hybrid event solutions. It targets mid-to-large organizations with badge printing, CRM integrations, and white-label capabilities.",
         "competitor_strengths": [
@@ -3638,7 +3638,7 @@
                 ],
                 [
                     "Paid plan price",
-                    "$9/mo (7-day free trial)",
+                    "$5/mo (7-day free trial)",
                     "From $7,000/year",
                     true
                 ],
@@ -3890,7 +3890,7 @@
         },
         "key_advantages": [
             {
-                "title": "$9/mo vs $7,000+/year",
+                "title": "$5/mo vs $7,000+/year",
                 "description": "125x more affordable for core event management features. No enterprise contracts required.",
                 "icon": "dollar",
                 "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
@@ -3965,7 +3965,7 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to Accelevents?",
-                "answer": "Accelevents starts at $7,000/year with additional per-ticket fees ($1 + 1%) on paid plans. Event Schedule Pro is a flat $9/mo with unlimited events and zero platform fees."
+                "answer": "Accelevents starts at $7,000/year with additional per-ticket fees ($1 + 1%) on paid plans. Event Schedule Pro is a flat $5/mo with unlimited events and zero platform fees."
             },
             {
                 "question": "Can Event Schedule handle virtual and hybrid events like Accelevents?",
@@ -3978,7 +3978,7 @@
         "key": "tito",
         "slug": "tito-alternative",
         "tagline": "A flat-rate alternative to Tito with calendar sync, newsletters, and zero per-ticket fees.",
-        "description": "Compare Event Schedule with Tito. Get flat $9/mo pricing instead of 3% per ticket, plus calendar sync, newsletters, and selfhosting.",
+        "description": "Compare Event Schedule with Tito. Get flat $5/mo pricing instead of 3% per ticket, plus calendar sync, newsletters, and selfhosting.",
         "keywords": "tito alternative, ti.to alternative, tito ticketing alternative, event ticketing platform, tito competitor",
         "about": "Tito is a simple, developer-friendly ticketing platform popular with tech conferences and community events. It charges 3% per paid ticket with no monthly subscription, and is known for its clean interface and well-documented API.",
         "competitor_strengths": [
@@ -3996,7 +3996,7 @@
                 ],
                 [
                     "Paid plan price",
-                    "$9/mo (7-day free trial)",
+                    "$5/mo (7-day free trial)",
                     "3% per ticket (cap 25 EUR)",
                     true
                 ],
@@ -4249,7 +4249,7 @@
         "key_advantages": [
             {
                 "title": "Flat-Rate Pricing",
-                "description": "$9/mo flat vs 3% per ticket. Sell 200 x $25 tickets and save $145/mo.",
+                "description": "$5/mo flat vs 3% per ticket. Sell 200 x $25 tickets and save $145/mo.",
                 "icon": "dollar",
                 "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
                 "border": "border-emerald-200 dark:border-emerald-500/20",
@@ -4323,7 +4323,7 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to Tito?",
-                "answer": "Tito charges per-ticket fees on each sale. Event Schedule charges zero platform fees at every plan level. The Pro plan is a flat $9/mo for unlimited ticketing and events."
+                "answer": "Tito charges per-ticket fees on each sale. Event Schedule charges zero platform fees at every plan level. The Pro plan is a flat $5/mo for unlimited ticketing and events."
             },
             {
                 "question": "Does Event Schedule support developer-friendly features like Tito?",
@@ -4336,7 +4336,7 @@
         "key": "addevent",
         "slug": "addevent-alternative",
         "tagline": "A complete event platform that goes beyond \"Add to Calendar\" buttons.",
-        "description": "Compare Event Schedule with AddEvent. Get ticketing, public event pages, and a full event platform for $9/mo instead of just calendar buttons at $29/mo.",
+        "description": "Compare Event Schedule with AddEvent. Get ticketing, public event pages, and a full event platform for $5/mo instead of just calendar buttons at $29/mo.",
         "keywords": "addevent alternative, add to calendar alternative, addevent competitor, event calendar platform, calendar button alternative",
         "about": "AddEvent is a calendar marketing tool focused on \"Add to Calendar\" buttons, subscription calendars, and RSVP collection. It helps drive event attendance through calendar engagement but does not offer ticketing or event management features.",
         "competitor_strengths": [
@@ -4354,7 +4354,7 @@
                 ],
                 [
                     "Paid plan price",
-                    "$9/mo (7-day free trial)",
+                    "$5/mo (7-day free trial)",
                     "From $36/mo",
                     true
                 ],
@@ -4595,7 +4595,7 @@
             },
             {
                 "title": "7x More Affordable",
-                "description": "$9/mo vs $36/mo, with far more features included.",
+                "description": "$5/mo vs $36/mo, with far more features included.",
                 "icon": "percent",
                 "gradient": "from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30",
                 "border": "border-teal-200 dark:border-teal-500/20",
@@ -4651,7 +4651,7 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to AddEvent?",
-                "answer": "AddEvent charges $36/mo for its premium plan. Event Schedule Pro is $9/mo with zero platform fees. Even the free plan includes unlimited events, Google Calendar sync, and newsletters."
+                "answer": "AddEvent charges $36/mo for its premium plan. Event Schedule Pro is $5/mo with zero platform fees. Even the free plan includes unlimited events, Google Calendar sync, and newsletters."
             },
             {
                 "question": "How is Event Schedule different from AddEvent?",
@@ -4664,7 +4664,7 @@
         "key": "pretix",
         "slug": "pretix-alternative",
         "tagline": "A broader open source event platform with flat pricing and more built-in features.",
-        "description": "Compare Event Schedule with Pretix. Get flat $9/mo pricing instead of per-ticket fees, plus calendar sync, newsletters, AI features, and fan engagement.",
+        "description": "Compare Event Schedule with Pretix. Get flat $5/mo pricing instead of per-ticket fees, plus calendar sync, newsletters, AI features, and fan engagement.",
         "keywords": "pretix alternative, pretix alternative free, open source ticketing alternative, pretix competitor, event platform open source",
         "about": "Pretix is an open source ticketing platform (AGPLv3) based in Germany, focused on ticket sales for conferences, festivals, and exhibitions. It offers a selfhosted Community Edition and a paid hosted service with per-ticket pricing.",
         "competitor_strengths": [
@@ -4682,7 +4682,7 @@
                 ],
                 [
                     "Hosted pricing",
-                    "$9/mo (7-day free trial)",
+                    "$5/mo (7-day free trial)",
                     "2.5%/ticket (cap 15 EUR)",
                     true
                 ],
@@ -4934,7 +4934,7 @@
         },
         "key_advantages": [
             {
-                "title": "Flat $9/mo Pricing",
+                "title": "Flat $5/mo Pricing",
                 "description": "No per-ticket fees ever. Pretix charges 2.5% per ticket on their hosted plan.",
                 "icon": "dollar",
                 "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
@@ -5009,7 +5009,7 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to Pretix?",
-                "answer": "Pretix Hosted charges per-ticket fees on each sale. Event Schedule Pro is a flat $9/mo with zero platform fees. Both platforms are open source, but Event Schedule is simpler to selfhost."
+                "answer": "Pretix Hosted charges per-ticket fees on each sale. Event Schedule Pro is a flat $5/mo with zero platform fees. Both platforms are open source, but Event Schedule is simpler to selfhost."
             },
             {
                 "question": "Is Event Schedule easier to selfhost than Pretix?",
@@ -5021,8 +5021,8 @@
         "name": "Humanitix",
         "key": "humanitix",
         "slug": "humanitix-alternative",
-        "tagline": "Keep 100% of your ticket revenue with flat $9/mo pricing and zero platform fees.",
-        "description": "Compare Event Schedule with Humanitix. Get flat $9/mo pricing instead of per-ticket fees, plus calendar sync, newsletters, AI features, and selfhosting.",
+        "tagline": "Keep 100% of your ticket revenue with flat $5/mo pricing and zero platform fees.",
+        "description": "Compare Event Schedule with Humanitix. Get flat $5/mo pricing instead of per-ticket fees, plus calendar sync, newsletters, AI features, and selfhosting.",
         "keywords": "humanitix alternative, humanitix alternative free, event ticketing platform, humanitix competitor, affordable event platform",
         "about": "Humanitix is a ticketing platform that donates profits to charity, primarily children's education. It charges a per-ticket booking fee (under $3 for most tickets) with no subscription plans. It offers ticketing, QR check-in, promo codes, and embeddable widgets.",
         "competitor_strengths": [
@@ -5040,7 +5040,7 @@
                 ],
                 [
                     "Paid plan price",
-                    "$9/mo (7-day free trial)",
+                    "$5/mo (7-day free trial)",
                     "No subscription (per-ticket only)",
                     true
                 ],
@@ -5292,7 +5292,7 @@
         },
         "key_advantages": [
             {
-                "title": "Flat $9/mo Pricing",
+                "title": "Flat $5/mo Pricing",
                 "description": "No per-ticket fees ever. Humanitix charges a booking fee on every paid ticket (under $3 for most tickets).",
                 "icon": "dollar",
                 "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
@@ -5367,7 +5367,7 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to Humanitix?",
-                "answer": "Humanitix charges a per-ticket booking fee on every paid event (under $3 for most tickets). Event Schedule charges zero platform fees at every plan level. The Pro plan is a flat $9/mo regardless of ticket volume."
+                "answer": "Humanitix charges a per-ticket booking fee on every paid event (under $3 for most tickets). Event Schedule charges zero platform fees at every plan level. The Pro plan is a flat $5/mo regardless of ticket volume."
             },
             {
                 "question": "Does Humanitix donate to charity while Event Schedule does not?",
@@ -5380,7 +5380,7 @@
         "key": "eventzilla",
         "slug": "eventzilla-alternative",
         "tagline": "A flat-rate open source alternative to Eventzilla with zero per-ticket fees.",
-        "description": "Compare Event Schedule with Eventzilla. Get flat $9/mo pricing instead of per-ticket fees, plus calendar sync, newsletters, AI features, and open source.",
+        "description": "Compare Event Schedule with Eventzilla. Get flat $5/mo pricing instead of per-ticket fees, plus calendar sync, newsletters, AI features, and open source.",
         "keywords": "eventzilla alternative, eventzilla alternative free, event registration platform, eventzilla competitor, affordable event platform",
         "about": "Eventzilla is an event registration and ticketing platform offering per-ticket pricing across multiple tiers. Plans range from $1.50/registration (Basic) to $5,999/year (Unlimited). It includes features like badge printing, speaker management, live streaming, and CRM integrations.",
         "competitor_strengths": [
@@ -5398,7 +5398,7 @@
                 ],
                 [
                     "Paid plan price",
-                    "$9/mo (7-day free trial)",
+                    "$5/mo (7-day free trial)",
                     "$1.50/ticket + up to 2.9%",
                     true
                 ],
@@ -5650,7 +5650,7 @@
         },
         "key_advantages": [
             {
-                "title": "Flat $9/mo Pricing",
+                "title": "Flat $5/mo Pricing",
                 "description": "No per-ticket fees ever. Eventzilla charges $1.50/ticket plus up to 2.9% in platform fees.",
                 "icon": "dollar",
                 "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
@@ -5725,7 +5725,7 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to Eventzilla?",
-                "answer": "Eventzilla charges $1.50/ticket plus up to 2.9% in platform fees depending on the plan. Event Schedule Pro is a flat $9/mo with zero platform fees, making costs predictable regardless of ticket volume."
+                "answer": "Eventzilla charges $1.50/ticket plus up to 2.9% in platform fees depending on the plan. Event Schedule Pro is a flat $5/mo with zero platform fees, making costs predictable regardless of ticket volume."
             },
             {
                 "question": "Can Event Schedule handle registration features like Eventzilla?",

@@ -15,8 +15,8 @@ This file is the single source of truth for which features belong to each plan t
 | Tier | Price (monthly) | Price (yearly) | Code method |
 |------|----------------|----------------|-------------|
 | Free | $0 | $0 | default (neither `isPro()` nor `isEnterprise()`) |
-| Pro | $9 | $90 | `$role->isPro()` (returns true for Pro AND Enterprise) |
-| Enterprise | $29 | $290 | `$role->isEnterprise()` |
+| Pro | $5 | $50 | `$role->isPro()` (returns true for Pro AND Enterprise) |
+| Enterprise | $15 | $150 | `$role->isEnterprise()` |
 
 Prices are set by `STRIPE_PRICE_MONTHLY_AMOUNT` / `STRIPE_PRICE_YEARLY_AMOUNT` /
 `STRIPE_ENTERPRISE_PRICE_MONTHLY_AMOUNT` / `STRIPE_ENTERPRISE_PRICE_YEARLY_AMOUNT`, with the
