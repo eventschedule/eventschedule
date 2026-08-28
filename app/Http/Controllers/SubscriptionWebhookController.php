@@ -67,8 +67,8 @@ class SubscriptionWebhookController extends WebhookController
         if ($role) {
             if ($role->hasActiveSubscription()) {
                 // Place the invoiced price before writing anything. A price we cannot resolve
-                // means config is incomplete - most likely one was retired without being listed
-                // in STRIPE_LEGACY_* - and hasActiveEnterpriseSubscription() answers false for
+                // means config is incomplete - most likely STRIPE_PRICE_* was repointed and left
+                // this generation behind - and hasActiveEnterpriseSubscription() answers false for
                 // exactly that price, so trusting it here would stamp plan_type = 'pro' onto a
                 // customer this very invoice just charged the Enterprise rate. Renewal invoices
                 // fire every billing cycle, so leave the row alone and let the warning stand.
@@ -169,8 +169,8 @@ class SubscriptionWebhookController extends WebhookController
             $planTerm = PlanPriceUtils::termFor($currentPrice);
 
             if ($currentPrice && (! $planType || ! $planTerm)) {
-                // A price we cannot place means config is incomplete - most likely a price was
-                // retired without being listed in STRIPE_LEGACY_*. Writing the old fallback here
+                // A price we cannot place means config is incomplete - most likely STRIPE_PRICE_*
+                // was repointed and left this generation behind. Writing the old fallback here
                 // (pro/month) would persist a downgrade onto a customer who is still being
                 // charged the Enterprise rate, so leave the row alone and let the alert stand.
                 Log::warning('Unrecognized Stripe price on subscription update; leaving plan unchanged', [

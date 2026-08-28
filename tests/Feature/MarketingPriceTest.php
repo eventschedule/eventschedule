@@ -649,7 +649,6 @@ class MarketingPriceTest extends TestCase
         $allowed = [
             'config/services.php' => 'defines the keys',
             'app/Utils/PlatformPricing.php' => 'is the reader every other caller goes through',
-            'app/Utils/PlanPriceUtils.php' => 'answers what Stripe charges, not what we advertise',
             'app/Services/GrowthExportService.php' => 'is revenue reporting, which must not follow a marketing change',
         ];
 

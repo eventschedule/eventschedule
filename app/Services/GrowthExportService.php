@@ -970,12 +970,12 @@ class GrowthExportService
             }
 
             if ($role->plan_source === null) {
-                // Prefer what this subscriber is actually billed. A schedule grandfathered
-                // through a price change still bills on the retired price, while the config
-                // amounts below describe what we sell TODAY - using those would overstate MRR
-                // after a price increase, and disagree with the dashboard's ARR, which reads
-                // the real price. Roles with no subscription row (legacy plan_type backfills)
-                // keep the by-tier estimate, which is all that was ever available for them.
+                // Prefer the amount tied to this subscriber's own price ID over the by-tier
+                // estimate below, so MRR agrees with the dashboard's ARR, which reads the same
+                // source. Only the four configured IDs resolve; a subscription on any other
+                // price falls through to the estimate, where ARR drops it entirely - the one
+                // place the two figures can legitimately disagree. Roles with no subscription
+                // row (legacy plan_type backfills) have only ever had the estimate.
                 $subscription = $role->subscriptions->first(
                     fn ($s) => in_array($s->stripe_status, ['active', 'trialing', 'past_due'], true)
                 );

@@ -166,8 +166,10 @@ trait RoleBillable
             return $this->plan_term === 'year' ? 'yearly' : 'monthly';
         }
 
-        // Includes retired price IDs: a subscriber grandfathered on an old yearly price is still
-        // billed yearly, and reporting them as monthly would misstate their renewal date.
+        // Only the configured yearly IDs resolve. An unrecognized price falls through to the
+        // 'monthly' return below - the one place in this file that guesses rather than returning
+        // null - which misstates the renewal date. Repoint STRIPE_PRICE_* at whatever your
+        // subscribers are actually billed on rather than leaving a generation behind.
         foreach (PlanPriceUtils::yearlyIds() as $priceId) {
             if ($subscription->hasPrice($priceId)) {
                 return 'yearly';
@@ -194,9 +196,10 @@ trait RoleBillable
             return false;
         }
 
-        // Includes retired price IDs. Stripe keeps billing an archived price, so a customer who
-        // subscribed before a price change is still paying for Enterprise; matching only the
-        // current IDs would strip their features while their card keeps being charged.
+        // Only the configured enterprise IDs grant Enterprise. Stripe keeps billing an archived
+        // price, so a customer left on a price ID config no longer names keeps paying the
+        // Enterprise rate while this returns false and their features are withdrawn. A price
+        // change means repointing STRIPE_PRICE_* at what subscribers are actually billed on.
         foreach (PlanPriceUtils::enterpriseIds() as $priceId) {
             if ($subscription->hasPrice($priceId)) {
                 return true;

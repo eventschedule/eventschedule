@@ -360,10 +360,10 @@ class AdminController extends Controller
             })
             ->pluck('stripe_price');
 
-        // ARR. PlanPriceUtils resolves retired price IDs too, so subscribers grandfathered
-        // through a price change are counted at what they actually pay rather than dropping to
-        // zero. A price it cannot place contributes nothing, which is the honest answer: falling
-        // back to the current amount would overstate revenue after a price increase.
+        // ARR. Only the four configured price IDs resolve to an amount, so a subscription left
+        // on any other price contributes nothing here. That is the honest answer rather than a
+        // good one - falling back to the current amount would overstate revenue after a price
+        // change - but note MRR estimates such a role by tier instead, so the two disagree.
         $arr = 0;
         foreach ($activeSubscriptions as $priceId) {
             $amount = PlanPriceUtils::amountFor($priceId);

@@ -5,23 +5,21 @@ namespace App\Utils;
 /**
  * The one place that maps a Stripe Price ID onto a plan tier and term.
  *
- * Stripe Prices are immutable: changing what a plan costs means creating a NEW Price object and
- * pointing config at it. Existing subscriptions keep billing on the old one forever (archiving a
- * Price in Stripe only blocks NEW use of it), so at any moment several generations of price ID
- * can be live at once.
+ * Nothing in this app asks Stripe what a subscription costs. Tier and term are decided by string
+ * matching the locally stored `subscriptions.stripe_price` against the four configured price IDs.
  *
- * Nothing in this app asks Stripe what a subscription costs - tier and term are decided by string
- * matching the locally stored `subscriptions.stripe_price` against config. So every one of those
- * comparisons has to know about the retired IDs too, or a grandfathered Enterprise customer stops
- * matching, drops to Pro, and keeps paying the Enterprise rate for it.
+ * Stripe Prices are immutable, so changing what a plan costs means creating a NEW Price object and
+ * pointing config at it, while existing subscriptions keep billing on the old one forever. This
+ * class recognizes ONLY the four current IDs, so a price change has to be made by repointing
+ * STRIPE_PRICE_* at the Price objects your subscribers are actually on - anything left behind
+ * stops resolving, and tierFor()/termFor() start returning null for it.
  *
- * The split that matters: current() is what a NEW subscription is created at, and is the only
- * thing checkout and swap may use. Everything that RECOGNIZES an existing subscription must go
- * through the plural accessors, which include the legacy IDs.
+ * What that null costs is set out on tierFor(). It is a real cost, and it is why the resolution
+ * here is deliberately strict rather than best-effort: a wrong tier is worse than no tier.
  */
 class PlanPriceUtils
 {
-    /** @var array<string, string> tier+term => the config key holding the current price ID */
+    /** @var array<string, string> tier+term => the config key holding the price ID */
     private const CURRENT_KEYS = [
         'pro.monthly' => 'price_monthly',
         'pro.yearly' => 'price_yearly',
@@ -29,23 +27,16 @@ class PlanPriceUtils
         'enterprise.yearly' => 'enterprise_price_yearly',
     ];
 
-    /** @var array<string, string> tier+term => the config key holding retired price IDs */
-    private const LEGACY_KEYS = [
-        'pro.monthly' => 'legacy_price_monthly',
-        'pro.yearly' => 'legacy_price_yearly',
-        'enterprise.monthly' => 'legacy_enterprise_price_monthly',
-        'enterprise.yearly' => 'legacy_enterprise_price_yearly',
-    ];
-
     /**
-     * The price ID a NEW subscription at this tier and term is created at.
+     * The price ID for this tier and term - what a new subscription is created at, and the only
+     * value that resolves back to a tier.
      *
      * @param  string  $tier  pro|enterprise
      * @param  string  $term  monthly|yearly
      */
     public static function current(string $tier, string $term): ?string
     {
-        $key = self::CURRENT_KEYS[self::slot($tier, $term)] ?? null;
+        $key = self::CURRENT_KEYS[strtolower($tier).'.'.strtolower($term)] ?? null;
 
         if (! $key) {
             return null;
@@ -55,48 +46,29 @@ class PlanPriceUtils
     }
 
     /**
-     * Every price ID that counts as this tier and term: the current one plus any retired ones.
-     * The current ID is first, so callers that want a canonical value can take the head.
-     *
-     * @return array<int, string>
-     */
-    public static function all(string $tier, string $term): array
-    {
-        $slot = self::slot($tier, $term);
-
-        $ids = [self::current($tier, $term)];
-
-        if ($key = self::LEGACY_KEYS[$slot] ?? null) {
-            $ids = array_merge($ids, self::split(config('services.stripe_platform.'.$key)));
-        }
-
-        return array_values(array_unique(array_filter($ids)));
-    }
-
-    /**
-     * Every price ID that grants Enterprise, across both terms and every generation.
+     * Every price ID that grants Enterprise, across both terms.
      *
      * @return array<int, string>
      */
     public static function enterpriseIds(): array
     {
-        return array_values(array_unique(array_merge(
-            self::all('enterprise', 'monthly'),
-            self::all('enterprise', 'yearly'),
-        )));
+        return array_values(array_filter([
+            self::current('enterprise', 'monthly'),
+            self::current('enterprise', 'yearly'),
+        ]));
     }
 
     /**
-     * Every price ID billed yearly, across both tiers and every generation.
+     * Every price ID billed yearly, across both tiers.
      *
      * @return array<int, string>
      */
     public static function yearlyIds(): array
     {
-        return array_values(array_unique(array_merge(
-            self::all('pro', 'yearly'),
-            self::all('enterprise', 'yearly'),
-        )));
+        return array_values(array_filter([
+            self::current('pro', 'yearly'),
+            self::current('enterprise', 'yearly'),
+        ]));
     }
 
     /**
@@ -105,6 +77,13 @@ class PlanPriceUtils
      * Null is load-bearing: callers must decline to write rather than assume Pro. A price ID we
      * do not recognize means config is incomplete, and guessing "pro" there is exactly how a
      * paying Enterprise customer gets a downgrade persisted to their role row.
+     *
+     * What an unrecognized ID actually costs, so the strictness is a known trade and not a
+     * surprise: hasActiveEnterpriseSubscription() goes false, so Enterprise features are withdrawn
+     * while the card keeps being charged the Enterprise rate; both webhook handlers decline to
+     * write, so the role row freezes out of sync with Stripe; ARR counts the subscriber at zero
+     * while MRR books them at the Pro estimate; and the renewal email is either skipped or
+     * labelled "Pro". Only a Log::warning announces any of it.
      *
      * @return string|null enterprise|pro|null
      */
@@ -118,11 +97,9 @@ class PlanPriceUtils
             return 'enterprise';
         }
 
-        if (in_array($priceId, array_merge(self::all('pro', 'monthly'), self::all('pro', 'yearly')), true)) {
-            return 'pro';
-        }
+        $proIds = array_filter([self::current('pro', 'monthly'), self::current('pro', 'yearly')]);
 
-        return null;
+        return in_array($priceId, $proIds, true) ? 'pro' : null;
     }
 
     /**
@@ -141,20 +118,19 @@ class PlanPriceUtils
             return 'year';
         }
 
-        if (in_array($priceId, array_merge(self::all('pro', 'monthly'), self::all('enterprise', 'monthly')), true)) {
-            return 'month';
-        }
+        $monthlyIds = array_filter([
+            self::current('pro', 'monthly'),
+            self::current('enterprise', 'monthly'),
+        ]);
 
-        return null;
+        return in_array($priceId, $monthlyIds, true) ? 'month' : null;
     }
 
     /**
-     * What a price ID charges per billing period, in dollars. Current prices come from the
-     * display amounts; retired ones from the legacy amount map, since their real figure is not
-     * recoverable from config any other way.
+     * What a price ID charges per billing period, in dollars, or null if it is not one we know.
      *
-     * Returns null rather than a guess: quoting a grandfathered subscriber the current price
-     * would state a number they are not being charged.
+     * Returns null rather than a guess: quoting a subscriber a price they are not being charged
+     * is worse than quoting nothing.
      *
      * Reads config, NOT PlatformPricing, and must keep doing so. This stands in for a Stripe API
      * call - SendSubscriptionReminders prefers the live unit_amount and only falls back here -
@@ -164,12 +140,11 @@ class PlanPriceUtils
      */
     public static function amountFor(?string $priceId): ?float
     {
-        // The amount map is deliberately subordinate to the ID lists. It is a free-form env var,
-        // so an ID could appear there and nowhere else - and a caller that got an amount but no
-        // term would have to assume one. Revenue reporting assumes monthly, which turns a
-        // half-configured YEARLY price into a silent 12x overcount. Refusing the amount makes
-        // that config mistake an undercount instead, which is visible.
-        if (! self::tierFor($priceId)) {
+        // Not redundant with the loop below, despite both only ever matching a current ID: this
+        // is also what rejects a NULL price. Without it, `null === (config(...) ?: null)` is true
+        // for any tier the install does not sell - a Pro-only install would answer a null price
+        // with the enterprise yearly amount.
+        if (! $priceId) {
             return null;
         }
 
@@ -179,33 +154,6 @@ class PlanPriceUtils
             }
         }
 
-        foreach (self::split(config('services.stripe_platform.legacy_price_amounts')) as $pair) {
-            $parts = explode(':', $pair, 2);
-
-            if (count($parts) === 2 && trim($parts[0]) === $priceId && is_numeric(trim($parts[1]))) {
-                return (float) trim($parts[1]);
-            }
-        }
-
         return null;
-    }
-
-    private static function slot(string $tier, string $term): string
-    {
-        return strtolower($tier).'.'.strtolower($term);
-    }
-
-    /**
-     * Split a comma-separated env value into trimmed, non-empty pieces.
-     *
-     * @return array<int, string>
-     */
-    private static function split(?string $value): array
-    {
-        if (! $value) {
-            return [];
-        }
-
-        return array_values(array_filter(array_map('trim', explode(',', $value)), fn ($v) => $v !== ''));
     }
 }

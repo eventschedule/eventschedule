@@ -86,20 +86,6 @@ return [
         'enterprise_price_yearly' => env('STRIPE_ENTERPRISE_PRICE_YEARLY'),
         'enterprise_price_monthly_amount' => env('STRIPE_ENTERPRISE_PRICE_MONTHLY_AMOUNT') ?: '15',
         'enterprise_price_yearly_amount' => env('STRIPE_ENTERPRISE_PRICE_YEARLY_AMOUNT') ?: '150',
-        // Retired price IDs that are still billing grandfathered subscribers. Comma-separated,
-        // so more than one generation of price change can accumulate. Recognition ONLY: new
-        // checkouts and swaps always use the current IDs above. Stripe Prices are immutable, so
-        // a price change means a NEW price id, and every tier/term decision in this app is a
-        // string match against config - without these, a grandfathered Enterprise customer stops
-        // matching and silently loses Enterprise access while still being charged for it.
-        'legacy_price_monthly' => env('STRIPE_LEGACY_PRICE_MONTHLY'),
-        'legacy_price_yearly' => env('STRIPE_LEGACY_PRICE_YEARLY'),
-        'legacy_enterprise_price_monthly' => env('STRIPE_LEGACY_ENTERPRISE_PRICE_MONTHLY'),
-        'legacy_enterprise_price_yearly' => env('STRIPE_LEGACY_ENTERPRISE_PRICE_YEARLY'),
-        // What those retired prices actually charge, as `price_id:amount` pairs, e.g.
-        // "price_abc:9,price_def:90". Used for ARR and renewal emails; without it a
-        // grandfathered subscriber counts as $0 revenue.
-        'legacy_price_amounts' => env('STRIPE_LEGACY_PRICE_AMOUNTS'),
     ],
 
     'invoiceninja' => [

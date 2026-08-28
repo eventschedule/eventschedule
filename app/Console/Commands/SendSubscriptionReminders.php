@@ -336,10 +336,9 @@ class SendSubscriptionReminders extends Command
      * What this subscriber will actually be charged at renewal.
      *
      * Read off the live Stripe subscription first, which the caller has already fetched. That is
-     * the only figure guaranteed to be right for a grandfathered subscriber: the config amounts
-     * describe what we sell TODAY, and quoting those to someone still billing on a retired price
-     * would state a number they are not being charged. Config is the fallback for when the
-     * Stripe object is unavailable.
+     * the only figure guaranteed to be right: the config amounts describe what we sell TODAY, and
+     * a subscriber whose price ID config no longer names would be quoted a number they are not
+     * being charged. Config is the fallback for when the Stripe object is unavailable.
      *
      * @param  \Stripe\Subscription|null  $stripeSubscription  the already-fetched Stripe object
      */
@@ -349,9 +348,9 @@ class SendSubscriptionReminders extends Command
 
         if ($unitAmount !== null) {
             // The currency comes off the same Stripe price as the amount, not from our own
-            // setting: this line states what the customer is actually charged, and a
-            // grandfathered subscriber may well be billed in a currency the platform has
-            // since stopped selling in.
+            // setting: this line states what the customer is actually charged, and a long-standing
+            // subscriber may well be billed in a currency the platform has since stopped
+            // selling in.
             //
             // The divisor is looked up rather than a literal 100. JPY and KRW have no minor
             // unit, so unit_amount is already whole yen - dividing by 100 there understated

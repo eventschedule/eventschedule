@@ -11,38 +11,31 @@ use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
 /**
- * Stripe Prices are immutable, so changing what a plan costs means creating a NEW Price and
- * pointing config at it. Existing subscriptions keep billing on the old one indefinitely
- * (archiving a Price only blocks new use of it), so both generations of ID are live at once.
+ * How a stored Stripe price ID resolves to a plan tier and term.
  *
  * Nothing in this app asks Stripe what a subscription costs - every tier and term decision is a
- * string match against config. Before PlanPriceUtils, pointing the four price ID vars at new
- * values stripped Enterprise from every grandfathered customer on their next page load, while
- * their card kept being charged the Enterprise rate, and the subscription.updated webhook then
- * persisted the downgrade to roles.plan_type.
+ * string match against the four configured price IDs. Only those four resolve; anything else
+ * returns null, and callers must decline to write rather than guess.
  *
- * These tests pin that a retired price ID still resolves to the tier and term it was sold as.
+ * That null is the whole point. Before PlanPriceUtils, an unrecognized price fell through to
+ * pro/month, so the subscription.updated webhook persisted a downgrade onto a customer whose card
+ * was still being charged the Enterprise rate. These tests pin that it no longer can.
+ *
+ * (This file was LegacyPlanPriceTest. The STRIPE_LEGACY_* mechanism it was written for is gone;
+ * the unknown-price behaviour it also covered outlives it and is what remains here.)
  */
-class LegacyPlanPriceTest extends TestCase
+class PlanPriceResolutionTest extends TestCase
 {
     use CreatesScheduleData;
     use RefreshDatabase;
 
-    /** What we sell today. */
-    private const CURRENT_ENT_MONTHLY = 'price_ent_monthly_v2';
+    private const ENT_MONTHLY = 'price_ent_monthly_v2';
 
-    private const CURRENT_ENT_YEARLY = 'price_ent_yearly_v2';
+    private const ENT_YEARLY = 'price_ent_yearly_v2';
 
-    private const CURRENT_PRO_MONTHLY = 'price_pro_monthly_v2';
+    private const PRO_MONTHLY = 'price_pro_monthly_v2';
 
-    private const CURRENT_PRO_YEARLY = 'price_pro_yearly_v2';
-
-    /** Retired at the price change, still billing grandfathered subscribers. */
-    private const LEGACY_ENT_MONTHLY = 'price_ent_monthly_v1';
-
-    private const LEGACY_ENT_YEARLY = 'price_ent_yearly_v1';
-
-    private const LEGACY_PRO_YEARLY = 'price_pro_yearly_v1';
+    private const PRO_YEARLY = 'price_pro_yearly_v2';
 
     protected function setUp(): void
     {
@@ -50,14 +43,10 @@ class LegacyPlanPriceTest extends TestCase
 
         config([
             'app.hosted' => true,
-            'services.stripe_platform.enterprise_price_monthly' => self::CURRENT_ENT_MONTHLY,
-            'services.stripe_platform.enterprise_price_yearly' => self::CURRENT_ENT_YEARLY,
-            'services.stripe_platform.price_monthly' => self::CURRENT_PRO_MONTHLY,
-            'services.stripe_platform.price_yearly' => self::CURRENT_PRO_YEARLY,
-            'services.stripe_platform.legacy_enterprise_price_monthly' => self::LEGACY_ENT_MONTHLY,
-            'services.stripe_platform.legacy_enterprise_price_yearly' => self::LEGACY_ENT_YEARLY,
-            'services.stripe_platform.legacy_price_yearly' => self::LEGACY_PRO_YEARLY,
-            'services.stripe_platform.legacy_price_amounts' => self::LEGACY_ENT_MONTHLY.':19,'.self::LEGACY_PRO_YEARLY.':50',
+            'services.stripe_platform.enterprise_price_monthly' => self::ENT_MONTHLY,
+            'services.stripe_platform.enterprise_price_yearly' => self::ENT_YEARLY,
+            'services.stripe_platform.price_monthly' => self::PRO_MONTHLY,
+            'services.stripe_platform.price_yearly' => self::PRO_YEARLY,
         ]);
     }
 
@@ -89,28 +78,12 @@ class LegacyPlanPriceTest extends TestCase
         return $role->fresh();
     }
 
-    public function test_legacy_enterprise_price_still_grants_enterprise(): void
+    public function test_a_configured_enterprise_price_grants_enterprise(): void
     {
-        $role = $this->subscriberOn(self::LEGACY_ENT_MONTHLY);
+        $role = $this->subscriberOn(self::ENT_MONTHLY);
 
         $this->assertTrue($role->hasActiveEnterpriseSubscription());
         $this->assertTrue($role->isEnterprise());
-    }
-
-    public function test_current_enterprise_price_still_grants_enterprise(): void
-    {
-        $role = $this->subscriberOn(self::CURRENT_ENT_MONTHLY);
-
-        $this->assertTrue($role->isEnterprise());
-    }
-
-    public function test_legacy_yearly_price_still_reports_a_yearly_term(): void
-    {
-        $entYearly = $this->subscriberOn(self::LEGACY_ENT_YEARLY);
-        $proYearly = $this->subscriberOn(self::LEGACY_PRO_YEARLY, 'pro');
-
-        $this->assertSame('yearly', $entYearly->currentPlanTerm());
-        $this->assertSame('yearly', $proYearly->currentPlanTerm());
     }
 
     /** The match must stay tight: an unlisted price is not a free pass to Enterprise. */
@@ -123,45 +96,52 @@ class LegacyPlanPriceTest extends TestCase
         $this->assertNull(PlanPriceUtils::termFor('price_never_configured'));
     }
 
-    public function test_tier_and_term_resolve_for_both_generations(): void
+    public function test_tier_and_term_resolve_for_every_configured_price(): void
     {
-        $this->assertSame('enterprise', PlanPriceUtils::tierFor(self::LEGACY_ENT_YEARLY));
-        $this->assertSame('enterprise', PlanPriceUtils::tierFor(self::CURRENT_ENT_YEARLY));
-        $this->assertSame('pro', PlanPriceUtils::tierFor(self::LEGACY_PRO_YEARLY));
+        $this->assertSame('enterprise', PlanPriceUtils::tierFor(self::ENT_YEARLY));
+        $this->assertSame('enterprise', PlanPriceUtils::tierFor(self::ENT_MONTHLY));
+        $this->assertSame('pro', PlanPriceUtils::tierFor(self::PRO_YEARLY));
+        $this->assertSame('pro', PlanPriceUtils::tierFor(self::PRO_MONTHLY));
 
-        $this->assertSame('year', PlanPriceUtils::termFor(self::LEGACY_ENT_YEARLY));
-        $this->assertSame('month', PlanPriceUtils::termFor(self::LEGACY_ENT_MONTHLY));
+        $this->assertSame('year', PlanPriceUtils::termFor(self::ENT_YEARLY));
+        $this->assertSame('year', PlanPriceUtils::termFor(self::PRO_YEARLY));
+        $this->assertSame('month', PlanPriceUtils::termFor(self::ENT_MONTHLY));
+        $this->assertSame('month', PlanPriceUtils::termFor(self::PRO_MONTHLY));
     }
 
-    /** Checkout and swap must never offer a retired price. */
-    public function test_current_returns_only_the_live_price(): void
+    public function test_current_returns_the_configured_price(): void
     {
-        $this->assertSame(self::CURRENT_ENT_MONTHLY, PlanPriceUtils::current('enterprise', 'monthly'));
-        $this->assertSame(self::CURRENT_PRO_YEARLY, PlanPriceUtils::current('pro', 'yearly'));
+        $this->assertSame(self::ENT_MONTHLY, PlanPriceUtils::current('enterprise', 'monthly'));
+        $this->assertSame(self::PRO_YEARLY, PlanPriceUtils::current('pro', 'yearly'));
     }
 
-    public function test_amounts_come_from_the_legacy_map_for_retired_prices(): void
+    public function test_amounts_come_from_the_configured_display_amounts(): void
     {
         config(['services.stripe_platform.enterprise_price_monthly_amount' => '29']);
 
-        $this->assertSame(29.0, PlanPriceUtils::amountFor(self::CURRENT_ENT_MONTHLY));
-        $this->assertSame(19.0, PlanPriceUtils::amountFor(self::LEGACY_ENT_MONTHLY));
-        $this->assertSame(50.0, PlanPriceUtils::amountFor(self::LEGACY_PRO_YEARLY));
+        $this->assertSame(29.0, PlanPriceUtils::amountFor(self::ENT_MONTHLY));
         $this->assertNull(PlanPriceUtils::amountFor('price_never_configured'));
     }
 
     /**
-     * The amount map is a free-form env var, so it can name an ID the tier/term lists do not.
-     * Honouring it there would hand callers an amount with no term, and the revenue rollup
-     * annualizes anything it cannot prove is yearly - turning a half-configured YEARLY price
-     * into a silent 12x overcount. Refusing the amount makes the mistake an undercount.
+     * A null price must not resolve to an amount.
+     *
+     * The guard at the top of amountFor() looks redundant now that the loop only ever matches a
+     * configured ID, but it is also the only thing rejecting null: `null === (config(...) ?: null)`
+     * is TRUE for any tier the install does not sell, so a Pro-only install would answer a null
+     * price with the enterprise yearly amount.
      */
-    public function test_an_amount_without_a_configured_id_is_refused(): void
+    public function test_a_null_price_has_no_amount(): void
     {
-        config(['services.stripe_platform.legacy_price_amounts' => 'price_orphan_yearly:200']);
+        config([
+            'services.stripe_platform.enterprise_price_monthly' => null,
+            'services.stripe_platform.enterprise_price_yearly' => null,
+            'services.stripe_platform.enterprise_price_yearly_amount' => '150',
+        ]);
 
-        $this->assertNull(PlanPriceUtils::termFor('price_orphan_yearly'));
-        $this->assertNull(PlanPriceUtils::amountFor('price_orphan_yearly'));
+        $this->assertNull(PlanPriceUtils::amountFor(null));
+        $this->assertNull(PlanPriceUtils::tierFor(null));
+        $this->assertNull(PlanPriceUtils::termFor(null));
     }
 
     private function fireSubscriptionUpdated(Role $role, string $priceId): void
@@ -186,11 +166,11 @@ class LegacyPlanPriceTest extends TestCase
         ]);
     }
 
-    public function test_webhook_keeps_enterprise_for_a_legacy_price(): void
+    public function test_webhook_writes_the_plan_for_a_configured_price(): void
     {
-        $role = $this->subscriberOn(self::LEGACY_ENT_YEARLY);
+        $role = $this->subscriberOn(self::ENT_YEARLY);
 
-        $this->fireSubscriptionUpdated($role, self::LEGACY_ENT_YEARLY);
+        $this->fireSubscriptionUpdated($role, self::ENT_YEARLY);
 
         $role->refresh();
         $this->assertSame('enterprise', $role->plan_type);
@@ -203,7 +183,7 @@ class LegacyPlanPriceTest extends TestCase
      */
     public function test_webhook_leaves_the_plan_alone_for_an_unknown_price(): void
     {
-        $role = $this->subscriberOn(self::LEGACY_ENT_MONTHLY);
+        $role = $this->subscriberOn(self::ENT_MONTHLY);
         $role->plan_term = 'year';
         $role->save();
 
@@ -231,11 +211,11 @@ class LegacyPlanPriceTest extends TestCase
         ]);
     }
 
-    public function test_paid_invoice_keeps_enterprise_for_a_legacy_price(): void
+    public function test_paid_invoice_writes_the_plan_for_a_configured_price(): void
     {
-        $role = $this->subscriberOn(self::LEGACY_ENT_YEARLY);
+        $role = $this->subscriberOn(self::ENT_YEARLY);
 
-        $this->fireInvoicePaid($role, self::LEGACY_ENT_YEARLY);
+        $this->fireInvoicePaid($role, self::ENT_YEARLY);
 
         $role->refresh();
         $this->assertSame('enterprise', $role->plan_type);
@@ -243,8 +223,9 @@ class LegacyPlanPriceTest extends TestCase
     }
 
     /**
-     * The handler that renews every billing cycle, so the likeliest one to hit an ID that was
-     * retired without being listed in STRIPE_LEGACY_*.
+     * The handler that renews every billing cycle, so the likeliest one to meet a price ID that
+     * config no longer names - which is now the ONLY outcome for any price left behind by a
+     * repointed STRIPE_PRICE_*, since there is no legacy list to catch it.
      *
      * The subscription itself must be on the unrecognized price, not just the invoice line: it is
      * the SUBSCRIPTION's stored price that hasActiveEnterpriseSubscription() reads, and that

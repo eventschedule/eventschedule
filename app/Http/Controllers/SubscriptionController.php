@@ -93,8 +93,7 @@ class SubscriptionController extends Controller
 
         // If upgrading from Pro to Enterprise with existing subscription, use swap
         if ($tier === 'enterprise' && $role->hasActiveSubscription() && ! $role->hasActiveEnterpriseSubscription()) {
-            // current(), never the legacy sets: a new or swapped subscription is always created
-            // at what we sell today. Retired price IDs exist only to be RECOGNIZED.
+            // A new or swapped subscription is always created at what we sell today.
             $priceId = PlanPriceUtils::current('enterprise', $request->plan);
 
             try {
