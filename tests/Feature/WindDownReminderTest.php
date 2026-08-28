@@ -65,6 +65,63 @@ class WindDownReminderTest extends TestCase
         parent::tearDown();
     }
 
+    /**
+     * Queued, and in the recipient's own language. It used to be Mail::to($address)->send(),
+     * which is two bugs: on hosted this command runs inside a web request
+     * (AppController::translateData) and the wind-down gives the whole addressable cohort dates
+     * in the same window, so one run tried to deliver all of them synchronously; and a bare
+     * address renders in the CLI locale, so the he and ro subscription_winddown_* strings that
+     * shipped with this feature could never be reached.
+     */
+    public function test_the_reminder_is_queued_in_the_recipients_language(): void
+    {
+        \Illuminate\Support\Facades\Queue::fake();
+
+        $role = $this->windingDown();
+        $role->user->forceFill(['language_code' => 'he'])->save();
+
+        $this->remind();
+
+        \Illuminate\Support\Facades\Queue::assertPushed(
+            \App\Jobs\SendQueuedEmail::class,
+            function ($job) use ($role) {
+                $read = function (string $property) use ($job) {
+                    $ref = new \ReflectionProperty($job, $property);
+                    $ref->setAccessible(true);
+
+                    return $ref->getValue($job);
+                };
+
+                return $read('recipient') === $role->user->email
+                    && $read('locale') === 'he'
+                    && $read('mailable') instanceof SubscriptionTrialEnding;
+            }
+        );
+    }
+
+    /**
+     * The stamp is claimed with a conditional UPDATE before the send, so a second runner cannot
+     * read the same row and mail the owner twice. The two schedulers hold different mutexes, so
+     * a read-then-write genuinely can overlap.
+     */
+    public function test_the_window_is_claimed_before_sending(): void
+    {
+        $role = $this->windingDown();
+        $this->assertNull($role->winddown_reminder_sent_at);
+
+        $this->remind();
+
+        $this->assertNotNull(
+            $role->fresh()->winddown_reminder_sent_at,
+            'the claim must be written, or a concurrent run re-sends'
+        );
+
+        // Re-running inside the window is refused by the claim, not by a re-read.
+        Mail::fake();
+        $this->remind();
+        Mail::assertNothingSent();
+    }
+
     public function test_the_amount_carries_its_currency_symbol(): void
     {
         config(['services.stripe_platform.price_monthly_amount' => '9']);

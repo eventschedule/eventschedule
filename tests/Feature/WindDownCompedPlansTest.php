@@ -51,6 +51,24 @@ class WindDownCompedPlansTest extends TestCase
         $this->assertNull($role->trial_ends_at);
     }
 
+    /**
+     * A dry run that reports only "347 addressable" gives you the size of the blast radius but
+     * not who is in it, so the segmentation cannot be sanity checked before real customers' plans
+     * are rewritten - and the audit rows that would tell you afterwards are pruned at 90 days,
+     * right around when these trials end.
+     */
+    public function test_the_dry_run_names_the_schedules_it_would_touch(): void
+    {
+        $role = $this->comped();
+
+        $this->artisan('app:wind-down-comped-plans')
+            ->expectsOutputToContain($role->subdomain)
+            ->expectsOutputToContain('dormant')
+            ->assertExitCode(0);
+
+        $this->assertNull($role->fresh()->trial_ends_at, 'still a dry run');
+    }
+
     public function test_a_schedule_with_an_audience_gets_a_dated_trial(): void
     {
         $role = $this->comped();
@@ -68,7 +86,9 @@ class WindDownCompedPlansTest extends TestCase
             ]);
         }
 
-        $this->windDown(['--apply' => true, '--trial-days' => 90]);
+        // --spread-days=1 pins the offset to zero: this test is about the segmentation and
+        // the plan_expires/trial_ends_at pairing, not about how dates are spread.
+        $this->windDown(['--apply' => true, '--trial-days' => 90, '--spread-days' => 1]);
 
         $role->refresh();
         $this->assertNotNull($role->trial_ends_at, 'an addressable schedule gets a runway');
@@ -81,7 +101,7 @@ class WindDownCompedPlansTest extends TestCase
     {
         $role = $this->comped();
 
-        $this->windDown(['--apply' => true, '--lapse-days' => 30]);
+        $this->windDown(['--apply' => true, '--lapse-days' => 30, '--spread-days' => 1]);
 
         $role->refresh();
         $this->assertNull($role->trial_ends_at, 'no runway and no emails for a dead schedule');
@@ -166,6 +186,55 @@ class WindDownCompedPlansTest extends TestCase
             $this->assertNull($role->trial_ends_at);
             $this->assertSame(now()->addYears(3)->format('Y-m-d'), $role->plan_expires);
         }
+    }
+
+    /**
+     * Every addressable role used to get the SAME trial_ends_at, so the whole cohort entered
+     * SendSubscriptionReminders' 14-day window on one day and was mailed in a single run -
+     * synchronously, inside a web request on hosted. Spreading the dates is what defuses that.
+     */
+    public function test_end_dates_are_spread_across_the_cohort(): void
+    {
+        $roles = collect(range(1, 6))->map(fn () => $this->comped());
+
+        $this->windDown(['--apply' => true, '--lapse-days' => 30, '--spread-days' => 14]);
+
+        // Deterministic and keyed off the role id, so the offset survives a re-run and does not
+        // depend on row order - that is what keeps the command idempotent.
+        foreach ($roles as $role) {
+            $this->assertSame(
+                now()->addDays(30 + ($role->id % 14))->format('Y-m-d'),
+                $role->fresh()->plan_expires
+            );
+        }
+
+        $dates = $roles->map(fn ($r) => $r->fresh()->plan_expires);
+
+        // The point of the exercise: not everyone lands on the same day.
+        $this->assertGreaterThan(1, $dates->unique()->count(), 'the cohort must not end on one date');
+
+        // And nothing lands before the floor the operator asked for.
+        foreach ($dates as $date) {
+            $this->assertGreaterThanOrEqual(now()->addDays(30)->format('Y-m-d'), $date);
+        }
+    }
+
+    /** A second run must not re-spread an already-wound-down role onto a new date. */
+    public function test_the_spread_is_stable_across_runs(): void
+    {
+        $role = $this->comped();
+        for ($i = 0; $i < 6; $i++) {
+            DB::table('role_user')->insert([
+                'role_id' => $role->id, 'user_id' => $this->createOwner()->id, 'level' => 'follower',
+            ]);
+        }
+
+        $this->windDown(['--apply' => true, '--trial-days' => 90]);
+        $first = $role->fresh()->trial_ends_at->format('Y-m-d');
+
+        $this->windDown(['--apply' => true, '--trial-days' => 90]);
+
+        $this->assertSame($first, $role->fresh()->trial_ends_at->format('Y-m-d'));
     }
 
     public function test_it_is_idempotent(): void

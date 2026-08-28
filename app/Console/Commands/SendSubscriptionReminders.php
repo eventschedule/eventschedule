@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\SendQueuedEmail;
 use App\Mail\SubscriptionRenewal;
 use App\Mail\SubscriptionTrialEnding;
 use App\Models\Role;
@@ -70,9 +71,29 @@ class SendSubscriptionReminders extends Command
                     continue;
                 }
 
-                // Already reminded inside this window.
-                if ($role->winddown_reminder_sent_at
-                    && $role->winddown_reminder_sent_at->greaterThan(now()->subDays($daysOut))) {
+                // Claim the window BEFORE sending, conditionally. The stamp is the only thing
+                // stopping a second send, and the two schedulers (routes/console.php and
+                // AppController::translateData) hold different mutexes, so a read-then-write can
+                // let a concurrent run see the same rows and email everyone twice. A conditional
+                // UPDATE is atomic, so exactly one runner claims each row. Same condition the
+                // read used: unsent, or last sent longer ago than this window.
+                //
+                // winddown_reminder_sent_at has its own column for a reason: the Stripe path in
+                // sendTrialReminders() reads trial_reminder_sent_at with NO time window, so any
+                // value there means "already sent, forever" - stamping that column here would
+                // permanently suppress the genuine "your trial ends tomorrow" email.
+                //
+                // The claim STANDS if the dispatch below throws. Clearing it would let the next
+                // tick re-send to someone who may already have the mail; "only ever moves
+                // forward" is what makes a double-fired scheduler safe.
+                $claimed = Role::where('id', $role->id)
+                    ->where(function ($query) use ($daysOut) {
+                        $query->whereNull('winddown_reminder_sent_at')
+                            ->orWhere('winddown_reminder_sent_at', '<=', now()->subDays($daysOut));
+                    })
+                    ->update(['winddown_reminder_sent_at' => now()]);
+
+                if ($claimed === 0) {
                     continue;
                 }
 
@@ -80,7 +101,14 @@ class SendSubscriptionReminders extends Command
                     $isEnterprise = $role->plan_type === 'enterprise';
                     $amount = \App\Utils\PlatformPricing::amount($isEnterprise ? 'enterprise' : 'pro', 'monthly');
 
-                    Mail::to($role->user->email)->send(new SubscriptionTrialEnding(
+                    // Queued, and in the recipient's own language. Inline Mail::to()->send()
+                    // was two separate problems: on hosted this command runs inside a web
+                    // request (AppController::translateData), and WindDownCompedPlans gives
+                    // every addressable role the SAME trial_ends_at, so one daily run would
+                    // try to deliver the whole cohort synchronously in one request. A bare
+                    // address also renders in the CLI locale, so the he and ro
+                    // subscription_winddown_* strings that shipped with this feature went unused.
+                    SendQueuedEmail::dispatch(new SubscriptionTrialEnding(
                         $role,
                         // Formatted, like getAmountForSubscription() does for every other caller.
                         // A bare int coerced to "9" and the copy renders it verbatim: "will be
@@ -94,16 +122,13 @@ class SendSubscriptionReminders extends Command
                         // start a subscription, and being told otherwise lets the plan lapse
                         // while they believe they have acted.
                         windDown: true,
-                    ));
+                    ),
+                        $role->user->email,
+                        $role->id,
+                        $role->user->language_code ?? app()->getLocale()
+                    );
 
-                    // Its own column. trial_reminder_sent_at is read by the Stripe path below with
-                    // NO time window - any value at all means "already sent, forever" - so
-                    // stamping it here permanently suppressed the genuine "your trial ends
-                    // tomorrow" email for every schedule this wound down.
-                    $role->winddown_reminder_sent_at = now();
-                    $role->save();
-
-                    $this->info("Sent {$daysOut}-day wind-down reminder to {$role->subdomain}.");
+                    $this->info("Queued {$daysOut}-day wind-down reminder for {$role->subdomain}.");
                     $sent++;
                 } catch (\Exception $e) {
                     $this->error("Failed wind-down reminder for {$role->subdomain}: {$e->getMessage()}");

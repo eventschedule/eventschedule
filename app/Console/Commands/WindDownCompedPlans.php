@@ -42,7 +42,8 @@ class WindDownCompedPlans extends Command
         {--trial-days=90 : Runway for schedules that are getting real value.}
         {--lapse-days=30 : Grace for dormant schedules before the plan simply ends.}
         {--min-views=100 : Views in the last 90 days that count as having an audience.}
-        {--min-followers=5 : Followers that count as having an audience.}';
+        {--min-followers=5 : Followers that count as having an audience.}
+        {--spread-days=14 : Spread the end dates over this many days, so the cohort does not all land at once.}';
 
     protected $description = 'Put admin-granted plans on a dated trial (or let dormant ones lapse)';
 
@@ -72,8 +73,10 @@ class WindDownCompedPlans extends Command
 
         $trialEnds = Carbon::now()->addDays($trialDays);
         $lapseEnds = Carbon::now()->addDays($lapseDays);
+        $spreadDays = max(1, (int) $this->option('spread-days'));
 
         $counts = ['addressable' => 0, 'dormant' => 0, 'skipped_expires_sooner' => 0, 'skipped_already_done' => 0];
+        $affected = [];
 
         foreach ($roles as $role) {
             $signal = $signals[$role->id] ?? null;
@@ -90,7 +93,13 @@ class WindDownCompedPlans extends Command
                 || $signal->followers >= $minFollowers
             );
 
-            $target = $addressable ? $trialEnds : $lapseEnds;
+            // Spread the cohort rather than ending every plan on one day. Without this
+            // SendSubscriptionReminders sees the whole addressable set enter the 14-day window
+            // in a single run, and every dormant plan lapses in the same hour. Keyed off the
+            // role id, not a counter or a random draw, so the offset is stable across runs and
+            // independent of row order - which is what keeps this command idempotent.
+            $offset = $role->id % $spreadDays;
+            $target = ($addressable ? $trialEnds : $lapseEnds)->copy()->addDays($offset);
 
             // Never extend. A plan already ending sooner than the target keeps its own date.
             if ($role->plan_expires !== null && $role->plan_expires < $target->format('Y-m-d')) {
@@ -100,6 +109,12 @@ class WindDownCompedPlans extends Command
             }
 
             $counts[$addressable ? 'addressable' : 'dormant']++;
+            $affected[] = [
+                $role->subdomain,
+                $addressable ? 'addressable' : 'dormant',
+                $role->plan_type,
+                $target->format('Y-m-d'),
+            ];
 
             if (! $apply) {
                 continue;
@@ -125,7 +140,7 @@ class WindDownCompedPlans extends Command
             );
         }
 
-        $this->report($roles->count(), $counts, $trialEnds, $lapseEnds, $apply);
+        $this->report($roles->count(), $counts, $trialEnds, $lapseEnds, $apply, $affected);
 
         return 0;
     }
@@ -211,11 +226,20 @@ class WindDownCompedPlans extends Command
         return $out;
     }
 
-    private function report(int $total, array $counts, Carbon $trialEnds, Carbon $lapseEnds, bool $apply): void
+    private function report(int $total, array $counts, Carbon $trialEnds, Carbon $lapseEnds, bool $apply, array $affected = []): void
     {
         $this->newLine();
         $this->info($apply ? 'Applied.' : 'DRY RUN - nothing was written. Re-run with --apply.');
         $this->newLine();
+
+        // Name every schedule, not just a count. A dry run that reports "347 addressable" tells
+        // you the size of the blast radius but not who is in it, so there is no way to sanity
+        // check the segmentation before touching real customers' plans - and the audit rows that
+        // would tell you afterwards are pruned at 90 days, right around when these trials end.
+        if ($affected) {
+            $this->table(['subdomain', 'segment', 'plan', 'ends'], $affected);
+            $this->newLine();
+        }
 
         $this->table(['segment', 'schedules', 'outcome'], [
             ['addressable', $counts['addressable'], 'trial + plan ends '.$trialEnds->format('Y-m-d')],

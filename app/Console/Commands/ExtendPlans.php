@@ -42,6 +42,16 @@ class ExtendPlans extends Command
             ->whereNotNull('plan_expires')
             ->where('plan_expires', '>=', $now->format('Y-m-d'))
             ->where('plan_expires', '<=', $oneYearFromNow->format('Y-m-d'))
+            // Never extend a plan that app:wind-down-comped-plans has put on a dated trial.
+            // This command has no plan_source filter, and nearly every yearly plan on the
+            // install is an admin grant, so without this a single run silently hands back the
+            // whole wind-down: the owner has been emailed that their plan ends, and then it
+            // does not.
+            ->where(function ($query) {
+                $query->where('plan_source', '!=', 'admin')
+                    ->orWhereNull('plan_source')
+                    ->orWhereNull('trial_ends_at');
+            })
             ->get();
 
         if ($roles->isEmpty()) {
@@ -51,6 +61,15 @@ class ExtendPlans extends Command
         }
 
         $this->info("Found {$roles->count()} role(s) to extend.");
+
+        // The guard above only catches the ADDRESSABLE half of a wind-down. A dormant role gets
+        // its plan_expires moved but no trial_ends_at, so it is indistinguishable from any other
+        // admin grant with a near expiry - and this command would push it out a year. Say so
+        // loudly rather than let it happen quietly.
+        $comped = $roles->where('plan_source', 'admin')->count();
+        if ($comped > 0) {
+            $this->warn("{$comped} of these are admin-granted comps. If app:wind-down-comped-plans has been run, extending them undoes it for the dormant segment.");
+        }
 
         $extended = 0;
         $errors = 0;
