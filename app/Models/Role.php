@@ -1197,6 +1197,50 @@ class Role extends Model implements MustVerifyEmail
             });
     }
 
+    /**
+     * The role-column half of what makes an event federatable: opted in, real, and
+     * verified.
+     *
+     * Extracted from FederationService::federatableQuery()'s whereHas so the settings
+     * preview can apply the SAME rule to a standalone Role query. Copying it would
+     * have been two definitions of "will be shared" drifting apart, which on this
+     * feature means telling an operator their schedule is published when it is not.
+     *
+     * Stricter than scopeClaimed(): this also requires the contact column matching the
+     * verification timestamp to be present, because a verified_at with no address is
+     * not a channel anyone can be reached on.
+     *
+     * The pivot condition (event_role.is_accepted) is NOT here: it is only in scope
+     * when the caller reached roles through the event relation, so each call site adds
+     * it. The demo exclusion is not here either - federatableQuery() drops any event
+     * carrying a demo role, so a demo role can never satisfy the query.
+     *
+     * $includeUndecided widens the tri-state to include null. Only an explicit yes
+     * qualifies a schedule to publish; the adoption prompt is the sole caller that
+     * counts "not asked yet" as willing.
+     */
+    public function scopeFederationEligible($query, bool $includeUndecided = false)
+    {
+        return $query
+            ->where(function ($f) use ($includeUndecided) {
+                $f->where('roles.federation_enabled', true);
+
+                if ($includeUndecided) {
+                    $f->orWhereNull('roles.federation_enabled');
+                }
+            })
+            ->where('roles.is_deleted', false)
+            ->where('roles.is_unlisted', false)
+            ->whereNotNull('roles.user_id')
+            ->where(function ($r) {
+                $r->where(function ($x) {
+                    $x->whereNotNull('roles.email')->whereNotNull('roles.email_verified_at');
+                })->orWhere(function ($x) {
+                    $x->whereNotNull('roles.phone')->whereNotNull('roles.phone_verified_at');
+                });
+            });
+    }
+
     public function hasConfiguredBackground(): bool
     {
         return match ($this->background) {

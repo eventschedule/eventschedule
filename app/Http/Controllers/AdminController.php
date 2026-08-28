@@ -2743,6 +2743,10 @@ class AdminController extends Controller
         $federationAvailable = ! config('app.is_nexus');
         $federation = app(\App\Services\FederationService::class);
 
+        // Resolved ahead of the view array so the "and N more" line below can decide
+        // whether the extra count query is worth running at all.
+        $federationPreviewSchedules = $federationAvailable ? $federation->previewSchedules(12) : collect();
+
         return view('admin.settings', [
             'custom_header_code' => Setting::get('custom_header_code'),
             'custom_footer_code' => Setting::get('custom_footer_code'),
@@ -2783,6 +2787,16 @@ class AdminController extends Controller
             // install, so show it rather than describing it.
             'federationPreview' => $federationAvailable ? $federation->previewEvents(12) : collect(),
             'federationPreviewTotal' => $federationAvailable ? $federation->federatableQuery()->count() : 0,
+            // A listing carries the schedule's name and the address of its public page,
+            // both of which the reviewing administrator sees, so name the schedules and
+            // not only the event titles.
+            'federationPreviewSchedules' => $federationPreviewSchedules,
+            // Counted only when the capped list came back full: the count repeats
+            // federatableQuery(), the expensive shape this page already runs twice, and
+            // an install with 12 or fewer listed schedules never needs it.
+            'federationPreviewSchedulesTotal' => $federationPreviewSchedules->count() >= 12
+                ? $federation->previewScheduleCount()
+                : $federationPreviewSchedules->count(),
             'federationUnverified' => $federationAvailable ? $federation->unverifiedScheduleCount() : 0,
             // The other reason the preview is shorter than the operator expects.
             'federationUndecided' => $federationAvailable ? $federation->undecidedScheduleCount() : 0,

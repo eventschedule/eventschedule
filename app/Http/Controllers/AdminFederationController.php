@@ -18,8 +18,11 @@ use Illuminate\Http\Request;
  */
 class AdminFederationController extends Controller
 {
-    /** Sample listings shown inline on a pending row, so approval is informed. */
+    /** Sample listings shown inline on a row, so a review decision is informed. */
     public const SAMPLE_SIZE = 6;
+
+    /** Origin schedules listed inline per instance. */
+    public const MAX_SCHEDULES = 6;
 
     /** Matches the translation review queue's bulk cap. */
     public const MAX_BULK = 100;
@@ -33,7 +36,12 @@ class AdminFederationController extends Controller
         $instances = FederatedInstance::query()
             // withCount rather than a GROUP BY: grouping on a select alias binds to a
             // same-named table column and errors with 1055.
-            ->withCount('events')
+            //
+            // live_events_count deliberately omits listable()'s instance-approval
+            // check - the parent IS the instance - so it is non-zero for a pending or
+            // suspended instance that publishes nothing. The view gates on
+            // isApproved() before offering the link that uses it.
+            ->withCount(['events', 'events as live_events_count' => fn ($q) => $q->live()])
             ->when(in_array($status, ['pending', 'approved', 'suspended'], true), fn ($q) => $q->where('status', $status))
             // Flagged instances first (a site_url that stopped matching), then the ones
             // carrying the most content, so attention lands where it matters.
@@ -43,20 +51,30 @@ class AdminFederationController extends Controller
             ->paginate(30)
             ->withQueryString();
 
-        // A sample of what each pending instance has actually sent.
+        // A sample of what each instance has actually sent, on every tab and not only
+        // the pending one. An approved instance is the one you may need to reconsider,
+        // and showing nothing there left the row with no evidence at all.
+        //
+        // Deliberately NOT folded into one grouped query the way the schedule list
+        // below is: this returns rows per LISTING, so a single query with a global
+        // limit would let one instance holding thousands of them consume the whole
+        // budget and starve every other row on the page. Thirty small bounded queries
+        // against the FK index is the cheaper shape here.
         $samples = [];
         foreach ($instances as $instance) {
-            if ($instance->status === FederatedInstance::STATUS_PENDING) {
-                $samples[$instance->id] = FederatedEvent::where('federated_instance_id', $instance->id)
-                    ->orderByDesc('created_at')
-                    ->limit(self::SAMPLE_SIZE)
-                    ->get();
-            }
+            $samples[$instance->id] = FederatedEvent::where('federated_instance_id', $instance->id)
+                ->orderByDesc('created_at')
+                ->limit(self::SAMPLE_SIZE)
+                ->get();
         }
 
         return view('admin.federation', [
             'instances' => $instances,
             'samples' => $samples,
+            // The origin's own public pages. The instance's site_url lands on its login
+            // screen (a selfhost install publishes no index of its schedules), so these
+            // are the only links on the row a reviewer can actually learn anything from.
+            'scheduleLinks' => FederatedEvent::schedulesForInstances($instances->pluck('id')->all()),
             'status' => $status,
             'pendingCount' => FederatedInstance::pending()->count(),
         ]);

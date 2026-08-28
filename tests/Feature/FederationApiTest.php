@@ -182,6 +182,97 @@ class FederationApiTest extends TestCase
         ])->assertOk()->assertJson(['accepted' => 1]);
     }
 
+    /**
+     * schedule_url reaches an admin's browser as a clickable link on the review
+     * screen, so it is held to the same host rule as the backlink.
+     *
+     * Nulled and not refused: a refusal is permanent, so one bad schedule_url would
+     * keep an otherwise perfectly publishable event off the network for good.
+     */
+    public function test_a_schedule_url_off_the_instances_host_is_dropped_not_refused(): void
+    {
+        $instance = $this->makeInstance();
+
+        $this->signed(self::EVENTS, [
+            'instance_id' => $instance->instance_id,
+            'items' => [$this->item(['schedule_url' => 'https://somewhere-else.test/phish'])],
+        ])->assertOk()->assertJson(['accepted' => 1, 'skipped' => 0]);
+
+        $this->assertDatabaseHas('federated_events', [
+            'external_id' => 'abc123',
+            'schedule_url' => null,
+        ]);
+    }
+
+    public function test_a_schedule_url_on_a_subdomain_of_the_registered_host_survives(): void
+    {
+        $instance = $this->makeInstance();
+
+        $this->signed(self::EVENTS, [
+            'instance_id' => $instance->instance_id,
+            'items' => [$this->item(['schedule_url' => 'https://tenant.operator.test/agenda'])],
+        ])->assertOk()->assertJson(['accepted' => 1]);
+
+        $this->assertDatabaseHas('federated_events', [
+            'external_id' => 'abc123',
+            'schedule_url' => 'https://tenant.operator.test/agenda',
+        ]);
+    }
+
+    /**
+     * The online joining link is no longer stored, only whether there is one. An
+     * install on an older release still sends event_url, and must keep working.
+     */
+    public function test_an_older_senders_event_url_sets_the_flag_and_is_not_stored(): void
+    {
+        $instance = $this->makeInstance();
+
+        $this->signed(self::EVENTS, [
+            'instance_id' => $instance->instance_id,
+            'items' => [$this->item(['event_url' => 'https://zoom.us/j/8412?pwd=secrettoken'])],
+        ])->assertOk()->assertJson(['accepted' => 1]);
+
+        $this->assertDatabaseHas('federated_events', [
+            'external_id' => 'abc123',
+            'is_online' => true,
+        ]);
+
+        // The link itself is gone, not merely unread.
+        $this->assertFalse(
+            \Illuminate\Support\Facades\Schema::hasColumn('federated_events', 'event_url')
+        );
+    }
+
+    public function test_a_current_sender_sets_the_flag_directly(): void
+    {
+        $instance = $this->makeInstance();
+
+        $this->signed(self::EVENTS, [
+            'instance_id' => $instance->instance_id,
+            'items' => [$this->item(['is_online' => true])],
+        ])->assertOk()->assertJson(['accepted' => 1]);
+
+        $this->assertDatabaseHas('federated_events', [
+            'external_id' => 'abc123',
+            'is_online' => true,
+        ]);
+    }
+
+    public function test_an_in_person_event_is_not_marked_online(): void
+    {
+        $instance = $this->makeInstance();
+
+        $this->signed(self::EVENTS, [
+            'instance_id' => $instance->instance_id,
+            'items' => [$this->item()],
+        ])->assertOk()->assertJson(['accepted' => 1]);
+
+        $this->assertDatabaseHas('federated_events', [
+            'external_id' => 'abc123',
+            'is_online' => false,
+        ]);
+    }
+
     public function test_junk_names_are_skipped_like_local_events_are(): void
     {
         $instance = $this->makeInstance();

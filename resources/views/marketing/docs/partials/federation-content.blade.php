@@ -44,7 +44,8 @@
     <ol>
         <li>Sign in as an administrator and open <strong>Admin &rarr; Settings</strong>.</li>
         <li>Switch on <strong>Share events with the network</strong>.</li>
-        <li>Add a contact email. It is used only to tell you when your install has been reviewed.</li>
+        <li>Add a contact email. It is shown to the administrator who reviews your install, and used
+        to email you their decision. It is never published.</li>
         <li>Save.</li>
     </ol>
     <p>
@@ -158,10 +159,88 @@
         What is shared, and what is not
     </h2>
     <p>
-        Only information that is already public on your event pages is sent: the event name, short
-        description, dates, the venue's name, address and coordinates, the schedule's name, a
-        picture, and the link back to your site. No attendee data, ticket data, contact details or
-        private fields ever leave your install.
+        Only information that is already public on your event pages is sent. Rather than describe it,
+        here is the complete list, field by field, and where each one ends up.
+    </p>
+
+    <div class="doc-table-wrap">
+        <table class="doc-table">
+            <thead>
+                <tr>
+                    <th scope="col">What is sent</th>
+                    <th scope="col">When</th>
+                    <th scope="col">Where it is visible</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Event name</td>
+                    <td>Every listing</td>
+                    <td>On the listing card</td>
+                </tr>
+                <tr>
+                    <td>Next date, time and timezone</td>
+                    <td>Every listing</td>
+                    <td>On the listing card, in the event's own timezone</td>
+                </tr>
+                <tr>
+                    <td>Link back to the event on your site</td>
+                    <td>Every listing</td>
+                    <td>The card's link. This is the whole point of federation</td>
+                </tr>
+                <tr>
+                    <td>Picture</td>
+                    <td>Every listing (an event without one is not listed)</td>
+                    <td>Copied and stored by eventschedule.com, shown on the card</td>
+                </tr>
+                <tr>
+                    <td>Venue name and city</td>
+                    <td>When the event has a venue</td>
+                    <td>The card's location line</td>
+                </tr>
+                <tr>
+                    <td>Short description, end time, further dates</td>
+                    <td>Every listing</td>
+                    <td>Sent, but not currently shown anywhere</td>
+                </tr>
+                <tr>
+                    <td>Street address, postal code, coordinates, country</td>
+                    <td>When the event has a venue</td>
+                    <td>Not shown. The country drives the country filter</td>
+                </tr>
+                <tr>
+                    <td>Language</td>
+                    <td>Every listing</td>
+                    <td>Not shown. Drives the language filter</td>
+                </tr>
+                <tr>
+                    <td>Whether the event is online</td>
+                    <td>Every listing</td>
+                    <td>Decides the online label. The joining link itself is never sent</td>
+                </tr>
+                <tr>
+                    <td>Schedule name, and the address of its public page</td>
+                    <td>Every listing</td>
+                    <td>Shown to the administrator who reviews your install, so they can see what they are approving</td>
+                </tr>
+                <tr>
+                    <td>Your site address</td>
+                    <td>Every request</td>
+                    <td>The source badge on every card</td>
+                </tr>
+                <tr>
+                    <td>Install name, contact email, version number</td>
+                    <td>Once, when you join</td>
+                    <td>Shown to the reviewing administrator only. Never published</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p>
+        No attendee data, ticket data, sales, contact details or private fields ever leave your
+        install. Neither does the joining link for an online event: the network is told only that
+        there is one, because a label is all it has ever done with it.
     </p>
     <p>
         Pictures are copied and stored by eventschedule.com rather than loaded from your server, so

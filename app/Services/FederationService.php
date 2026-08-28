@@ -417,27 +417,13 @@ class FederationService
             ->where('is_draft', false)
             ->where('is_cancelled', false)
             ->whereNull('event_password')
+            // Three states, and the difference matters twice: see the veto below. Only
+            // an explicit yes qualifies a schedule to publish. The role-column half
+            // lives on the Role model so previewSchedules() can apply the identical
+            // rule to a standalone query instead of a second copy of it.
             ->whereHas('roles', function ($q) use ($includeUndecided) {
                 $q->where('event_role.is_accepted', true)
-                    // Three states, and the difference matters twice: see the veto
-                    // below. Only an explicit yes qualifies a schedule to publish.
-                    ->where(function ($f) use ($includeUndecided) {
-                        $f->where('roles.federation_enabled', true);
-
-                        if ($includeUndecided) {
-                            $f->orWhereNull('roles.federation_enabled');
-                        }
-                    })
-                    ->where('roles.is_deleted', false)
-                    ->where('roles.is_unlisted', false)
-                    ->whereNotNull('roles.user_id')
-                    ->where(function ($r) {
-                        $r->where(function ($x) {
-                            $x->whereNotNull('roles.email')->whereNotNull('roles.email_verified_at');
-                        })->orWhere(function ($x) {
-                            $x->whereNotNull('roles.phone')->whereNotNull('roles.phone_verified_at');
-                        });
-                    });
+                    ->federationEligible($includeUndecided);
             })
             // The whereHas above is an ANY-match, so on a co-listed event one willing
             // schedule would drag every other participant onto the network with it -
@@ -586,7 +572,11 @@ class FederationService
             'schedule_name' => optional($schedule)->name,
             'schedule_url' => optional($schedule)->getGuestUrl(),
             'image_url' => $image,
-            'event_url' => $event->event_url ?: null,
+            // Whether there is an online component, never the joining link itself.
+            // event_url routinely holds a tokenised Zoom or Teams URL (see the
+            // migration that widened events.event_url to 500), and the network has no
+            // use for it: it decides a label and nothing more.
+            'is_online' => (bool) $event->event_url,
             'venue_name' => $venue ? $venue->name : null,
             'address' => $venue ? $venue->bestAddress() : null,
             'city' => $venue ? $venue->city : null,
@@ -820,6 +810,53 @@ class FederationService
     public function previewEvents(int $limit = 25)
     {
         return $this->federatableQuery()->orderBy('starts_at')->limit($limit)->get();
+    }
+
+    /**
+     * The schedules that would appear on at least one shared listing, for the "what
+     * will be shared" preview beside the operator's toggle.
+     *
+     * A listing carries the schedule's name AND the address of its public page, and
+     * both are shown to whoever reviews the install, so an operator deciding whether
+     * to join should see the schedules and not only the event titles.
+     *
+     * Derived from federatableQuery(), NOT from roles.federation_enabled. A standalone
+     * Role query cannot reproduce the veto: a schedule can be opted in and still
+     * publish nothing, because any co-listed participant opting out drops the whole
+     * event. Listing it as "will be shared" would be a straight lie in exactly the
+     * place an operator is trusting this screen.
+     *
+     * The role-side federationEligible() is load-bearing, not belt-and-braces. The
+     * whereHas only proves this role is attached to a federatable event, and
+     * federatableQuery()'s own role filter is an ANY-match, so without it an
+     * unverified or unlisted co-participant on that same event would be listed as
+     * being published when it is not.
+     */
+    public function previewSchedules(int $limit = 25)
+    {
+        return $this->federatableSchedulesQuery()->orderBy('roles.name')->limit($limit)->get();
+    }
+
+    /**
+     * How many there are in total, for the "and N more" line.
+     *
+     * Separate from previewSchedules() rather than folded into it because it repeats
+     * federatableQuery() - two EXISTS subqueries plus three REGEXP predicates over the
+     * whole events table - and the settings page already runs that shape twice. Call
+     * it only when the capped list came back full.
+     */
+    public function previewScheduleCount(): int
+    {
+        return $this->federatableSchedulesQuery()->count();
+    }
+
+    protected function federatableSchedulesQuery()
+    {
+        return Role::federationEligible()
+            ->whereHas('events', function ($q) {
+                $q->whereIn('events.id', $this->federatableQuery()->select('events.id'))
+                    ->where('event_role.is_accepted', true);
+            });
     }
 
     /**

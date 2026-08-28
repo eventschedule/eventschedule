@@ -68,6 +68,130 @@ class FederationReviewTest extends TestCase
             ->assertSee('A Sampled Listing');
     }
 
+    /**
+     * The reported bug: on the Approved tab the only link was site_url, which on a
+     * selfhost install redirects to its login page.
+     */
+    public function test_an_approved_instance_links_to_its_public_schedules(): void
+    {
+        $this->adminActing();
+        $instance = $this->makeInstance(['status' => FederatedInstance::STATUS_APPROVED]);
+        $this->makeEvent($instance, [
+            'schedule_name' => 'Dieppe Agenda',
+            'schedule_url' => 'https://operator.test/dieppe-agenda',
+        ]);
+
+        $this->get(route('admin.federation', ['status' => 'approved']))
+            ->assertOk()
+            ->assertSee('Dieppe Agenda')
+            ->assertSee('https://operator.test/dieppe-agenda');
+    }
+
+    /** One row per schedule, not per listing, with the listing count beside it. */
+    public function test_listings_from_one_schedule_are_listed_once(): void
+    {
+        $this->adminActing();
+        $instance = $this->makeInstance(['status' => FederatedInstance::STATUS_APPROVED]);
+
+        foreach (['One', 'Two', 'Three'] as $name) {
+            $this->makeEvent($instance, [
+                'name' => $name,
+                'schedule_name' => 'Dieppe Agenda',
+                'schedule_url' => 'https://operator.test/dieppe-agenda',
+            ]);
+        }
+
+        $response = $this->get(route('admin.federation', ['status' => 'approved']))->assertOk();
+
+        $this->assertSame(1, substr_count($response->getContent(), 'https://operator.test/dieppe-agenda'));
+        $response->assertSee('3 listings');
+    }
+
+    /**
+     * schedule_url is host-checked at intake now, but rows stored before that check
+     * kept whatever the sender sent, and a re-push never rewrites them. Writing
+     * straight through the model is exactly how those rows exist.
+     */
+    public function test_a_schedule_link_off_the_instances_host_is_not_clickable(): void
+    {
+        $this->adminActing();
+        $instance = $this->makeInstance(['status' => FederatedInstance::STATUS_APPROVED]);
+        $this->makeEvent($instance, [
+            'schedule_name' => 'Dieppe Agenda',
+            'schedule_url' => 'https://evil.test/phish',
+        ]);
+
+        $this->get(route('admin.federation', ['status' => 'approved']))
+            ->assertOk()
+            ->assertSee('Dieppe Agenda')
+            ->assertDontSee('evil.test');
+    }
+
+    public function test_an_instance_with_no_listings_says_so(): void
+    {
+        $this->adminActing();
+        $this->makeInstance(['status' => FederatedInstance::STATUS_APPROVED]);
+
+        $this->get(route('admin.federation', ['status' => 'approved']))
+            ->assertOk()
+            ->assertSee(__('messages.federation_no_listings_yet'));
+    }
+
+    /** Samples used to load only for pending rows, leaving the Approved tab blank. */
+    public function test_sample_listings_render_on_the_approved_tab(): void
+    {
+        $this->adminActing();
+        $instance = $this->makeInstance(['status' => FederatedInstance::STATUS_APPROVED]);
+        $this->makeEvent($instance, ['name' => 'A Sampled Listing']);
+
+        $this->get(route('admin.federation', ['status' => 'approved']))
+            ->assertOk()
+            ->assertSee('A Sampled Listing');
+    }
+
+    /**
+     * image_path is deliberately absent from $fillable, so it has to be assigned
+     * after creation - mass assignment drops it silently and scopeLive() then matches
+     * nothing, which would let this test pass with the link absent, proving nothing.
+     */
+    public function test_the_live_listings_link_needs_an_approved_instance_with_live_rows(): void
+    {
+        $this->adminActing();
+
+        $pending = $this->makeInstance(['name' => 'Still Pending']);
+        $pendingEvent = $this->makeEvent($pending, [
+            'schedule_name' => 'Pending Schedule',
+            'schedule_url' => 'https://operator.test/pending',
+        ]);
+        $pendingEvent->image_path = 'federated/f.jpg';
+        $pendingEvent->save();
+
+        // Approval is what makes a listing live, so a pending instance gets no link
+        // to a page that would be empty.
+        $this->get(route('admin.federation', ['status' => 'pending']))
+            ->assertOk()
+            ->assertSee('Pending Schedule')
+            ->assertDontSee('instance='.UrlUtils::encodeId($pending->id), false);
+
+        $approved = $this->makeInstance([
+            'instance_id' => (string) Str::uuid(),
+            'site_url' => 'https://live.test',
+            'name' => 'Live Operator',
+            'status' => FederatedInstance::STATUS_APPROVED,
+        ]);
+        $approvedEvent = $this->makeEvent($approved, [
+            'url' => 'https://live.test/show',
+            'schedule_name' => 'Live Schedule',
+            'schedule_url' => 'https://live.test/live-schedule',
+        ]);
+        $approvedEvent->image_path = 'federated/g.jpg';
+        $approvedEvent->save();
+
+        $this->get(route('admin.federation', ['status' => 'approved']))
+            ->assertOk()
+            ->assertSee('instance='.UrlUtils::encodeId($approved->id), false);
+    }
+
     public function test_approving_lights_up_everything_already_received(): void
     {
         Mail::fake();

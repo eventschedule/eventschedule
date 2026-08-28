@@ -168,6 +168,49 @@ class FederationBrowseTest extends TestCase
             ->assertDontSee('English Gig');
     }
 
+    /** Linked from the federation review screen, to show one instance's blast radius. */
+    public function test_the_instance_filter_narrows_the_section(): void
+    {
+        $mine = $this->makeInstance();
+        $this->makeListing($mine, ['name' => 'Mine Gig']);
+
+        $theirs = $this->makeInstance([
+            'instance_id' => (string) Str::uuid(),
+            'site_url' => 'https://other.test',
+            'name' => 'Other',
+        ]);
+        $this->makeListing($theirs, ['name' => 'Theirs Gig', 'url' => 'https://other.test/show']);
+
+        $this->get('/browse?instance='.UrlUtils::encodeId($mine->id))
+            ->assertOk()
+            ->assertSee('Mine Gig')
+            ->assertDontSee('Theirs Gig');
+    }
+
+    /**
+     * The trap this filter is built around. decodeId() returns null for an unreadable
+     * hash, so keying the filter off the decoded id would fall straight through and
+     * serve the entire corpus as though no filter had been asked for.
+     */
+    public function test_an_unreadable_instance_hash_shows_nothing_not_everything(): void
+    {
+        $instance = $this->makeInstance();
+        $this->makeListing($instance, ['name' => 'Should Stay Hidden']);
+
+        $this->get('/browse?instance=not-a-real-hash')
+            ->assertOk()
+            ->assertDontSee('Should Stay Hidden');
+    }
+
+    /** An array reaches strtoupper()/decode as an array and used to 500 this page. */
+    public function test_an_array_instance_parameter_does_not_error(): void
+    {
+        $instance = $this->makeInstance();
+        $this->makeListing($instance, ['name' => 'Still Fine']);
+
+        $this->get('/browse?instance[]=x')->assertOk();
+    }
+
     /**
      * Consistent with keeping federated rows out of the sitemap: this site should not
      * claim off-site URLs as its own list.

@@ -401,4 +401,79 @@ class FederationShareTest extends TestCase
         $this->assertCount(1, $preview);
         $this->assertSame('Will Share', $preview->first()->name);
     }
+
+    /**
+     * A listing carries the schedule's name and the address of its public page, and
+     * whoever reviews the install sees both, so the operator is shown the schedules
+     * and not only the event titles.
+     */
+    public function test_the_preview_names_the_schedules_that_would_be_listed(): void
+    {
+        $event = $this->shareableEvent();
+
+        $schedules = $this->service()->previewSchedules();
+
+        $this->assertCount(1, $schedules);
+        $this->assertSame($event->creatorRole->id, $schedules->first()->id);
+    }
+
+    /**
+     * The whole reason the preview cannot be a plain
+     * Role::where('federation_enabled', true): a schedule can be opted in and still
+     * publish nothing, because any co-listed participant opting out vetoes the whole
+     * event. Listing it as "will be shared" would be a lie in the one place an
+     * operator is trusting this screen.
+     */
+    public function test_a_schedule_vetoed_on_every_event_is_not_listed_as_shared(): void
+    {
+        $event = $this->shareableEvent();
+        $optedIn = $event->creatorRole;
+
+        $objector = $this->createRole($this->createOwner(), 'talent', ['federation_enabled' => false]);
+        $event->roles()->attach($objector->id, ['is_accepted' => true]);
+
+        $this->assertCount(0, $this->service()->previewEvents());
+        $this->assertCount(0, $this->service()->previewSchedules());
+        $this->assertTrue($optedIn->fresh()->federation_enabled);
+    }
+
+    /**
+     * The role-side gate is load-bearing: the whereHas onto events is an ANY-match,
+     * so without it an unverified co-participant on a qualifying event would be
+     * reported as being published when it is not.
+     */
+    public function test_an_unverified_co_participant_is_not_listed_as_shared(): void
+    {
+        $event = $this->shareableEvent();
+
+        $unverified = $this->createRole($this->createOwner(), 'talent', ['federation_enabled' => true]);
+        $unverified->forceFill(['email_verified_at' => null, 'phone_verified_at' => null])->save();
+        $event->roles()->attach($unverified->id, ['is_accepted' => true]);
+
+        $names = $this->service()->previewSchedules()->pluck('id')->all();
+
+        $this->assertContains($event->creatorRole->id, $names);
+        $this->assertNotContains($unverified->id, $names);
+    }
+
+    /** The joining link is not sent at all now, only whether there is one. */
+    public function test_the_payload_carries_an_online_flag_and_not_the_joining_link(): void
+    {
+        $this->fakeNexus();
+        $this->shareableEvent(['event_url' => 'https://zoom.us/j/8412?pwd=secrettoken']);
+
+        $this->service()->push();
+
+        Http::assertSent(function ($request) {
+            if ($request->url() !== self::EVENTS_ENDPOINT) {
+                return true;
+            }
+
+            $item = $request->data()['items'][0];
+
+            return ($item['is_online'] ?? null) === true
+                && ! array_key_exists('event_url', $item)
+                && ! str_contains(json_encode($item), 'secrettoken');
+        });
+    }
 }

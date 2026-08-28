@@ -5047,9 +5047,23 @@ class MarketingController extends Controller
             ? trim((string) $request->input('lang'))
             : '';
 
+        // Everything one instance publishes here, linked from the federation review
+        // screen so an admin can see the blast radius of an approval.
+        $federatedInstance = is_scalar($request->input('instance'))
+            ? trim((string) $request->input('instance'))
+            : '';
+        $federatedInstanceId = (int) ($federatedInstance !== '' ? UrlUtils::decodeId($federatedInstance) : 0);
+
         $federatedQuery = \App\Models\FederatedEvent::listable()
             ->when($federatedCountry !== '', fn ($q) => $q->where('country_code', $federatedCountry))
             ->when($federatedLanguage !== '', fn ($q) => $q->where('language', $federatedLanguage))
+            // Keyed on the raw string, NEVER on the decoded id. decodeId() returns null
+            // for an unreadable hash, so when($federatedInstanceId) would fall through
+            // and quietly serve the whole corpus as though no filter had been asked
+            // for. A null would not save it either: where($column, null) is rewritten
+            // by the builder into IS NULL, which matches nothing by accident rather
+            // than on purpose. Casting to 0 makes the never-match deliberate.
+            ->when($federatedInstance !== '', fn ($q) => $q->where('federated_instance_id', $federatedInstanceId))
             ->orderBy('next_occurrence_at');
 
         $federatedLimit = min(max((int) $request->input('federated_limit', 12), 12), 96);
@@ -5066,6 +5080,7 @@ class MarketingController extends Controller
             'federatedLanguages' => $this->federatedFilterValues('language'),
             'federatedCountry' => $federatedCountry,
             'federatedLanguage' => $federatedLanguage,
+            'federatedInstance' => $federatedInstance,
         ]);
     }
 
@@ -5713,13 +5728,13 @@ class MarketingController extends Controller
             ['page' => 'Federation', 'section' => 'Per-schedule control', 'description' => 'Each schedule opts in or out for itself; new schedules start out unlisted.', 'url' => $r['saas_federation'].'#per-schedule', 'category' => 'SaaS', 'keywords' => 'opt in opt out per schedule toggle undecided co-listed veto'],
             ['page' => 'Federation', 'section' => 'What a listing looks like', 'description' => 'Listings link straight back to the event on your site.', 'url' => $r['saas_federation'].'#listings', 'category' => 'SaaS', 'keywords' => 'listing card link backlink filter country language'],
             ['page' => 'Federation', 'section' => 'Keeping it in sync', 'description' => 'Sharing runs hourly and removes events that stop qualifying.', 'url' => $r['saas_federation'].'#sync', 'category' => 'SaaS', 'keywords' => 'sync hourly cron federation:push verified'],
-            ['page' => 'Federation', 'section' => 'What is shared', 'description' => 'Only public event information leaves your install.', 'url' => $r['saas_federation'].'#privacy', 'category' => 'SaaS', 'keywords' => 'privacy data shared attendees tickets'],
+            ['page' => 'Federation', 'section' => 'What is shared', 'description' => 'Every field that leaves your install, and where each one ends up.', 'url' => $r['saas_federation'].'#privacy', 'category' => 'SaaS', 'keywords' => 'privacy data shared attendees tickets what is sent fields schedule link contact email version online joining link'],
             ['page' => 'Federation', 'section' => 'Overview', 'description' => 'Share your public events with the eventschedule.com listings.', 'url' => $r['selfhost_federation'].'#overview', 'category' => 'Selfhost', 'keywords' => 'federation network listings discovery traffic backlink'],
             ['page' => 'Federation', 'section' => 'Turning it on', 'description' => 'Enable the network and register your install for review.', 'url' => $r['selfhost_federation'].'#enable', 'category' => 'Selfhost', 'keywords' => 'enable turn on register approve settings'],
             ['page' => 'Federation', 'section' => 'Per-schedule control', 'description' => 'Each schedule opts in or out for itself; new schedules start out unlisted.', 'url' => $r['selfhost_federation'].'#per-schedule', 'category' => 'Selfhost', 'keywords' => 'opt in opt out per schedule toggle undecided co-listed veto'],
             ['page' => 'Federation', 'section' => 'What a listing looks like', 'description' => 'Listings link straight back to the event on your site.', 'url' => $r['selfhost_federation'].'#listings', 'category' => 'Selfhost', 'keywords' => 'listing card link backlink filter country language'],
             ['page' => 'Federation', 'section' => 'Keeping it in sync', 'description' => 'Sharing runs hourly and removes events that stop qualifying.', 'url' => $r['selfhost_federation'].'#sync', 'category' => 'Selfhost', 'keywords' => 'sync hourly cron federation:push verified'],
-            ['page' => 'Federation', 'section' => 'What is shared', 'description' => 'Only public event information leaves your install.', 'url' => $r['selfhost_federation'].'#privacy', 'category' => 'Selfhost', 'keywords' => 'privacy data shared attendees tickets'],
+            ['page' => 'Federation', 'section' => 'What is shared', 'description' => 'Every field that leaves your install, and where each one ends up.', 'url' => $r['selfhost_federation'].'#privacy', 'category' => 'Selfhost', 'keywords' => 'privacy data shared attendees tickets what is sent fields schedule link contact email version online joining link'],
 
             // ===== DEVELOPER =====
 

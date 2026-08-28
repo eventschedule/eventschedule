@@ -184,6 +184,11 @@ class Event extends Model
      * Columns whose change makes a federated listing stale, either because the listing
      * displays them, because they change its URL, or because they change whether it
      * qualifies at all. Keep this in sync with FederationService::buildPayload().
+     *
+     * `event_url` belongs here even though buildPayload() no longer sends it: the
+     * payload carries `is_online`, which is derived from this column, so an event
+     * switching between in-person and online has to re-push. Removing it because the
+     * name no longer appears in buildPayload() would strand exactly that change.
      */
     public const FEDERATION_FIELDS = [
         'name',

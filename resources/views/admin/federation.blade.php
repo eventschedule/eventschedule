@@ -42,12 +42,22 @@
                                 <input type="checkbox" name="hashes[]" value="{{ $hash }}"
                                        class="mt-1 rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                                 <div class="min-w-0">
-                                    {{-- Instance-supplied text: escape and keep it out of any Vue template. --}}
+                                    {{-- Instance-supplied text: escape and keep it out of any Vue template.
+                                         Applies to the schedule names and URLs below too. --}}
                                     <p class="font-semibold text-gray-900 dark:text-white truncate">{{ $instance->name ?: $instance->site_url }}</p>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 break-all">
-                                        <a href="{{ $instance->site_url }}" target="_blank" rel="noopener nofollow" class="hover:underline">{{ $instance->site_url }}</a>
-                                    </p>
                                     <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                                        {{-- Demoted from the row's headline link to one identifier among
+                                             several. On a selfhost install / redirects to the login page,
+                                             so this never showed a reviewer anything - the schedule links
+                                             below are what it should have been all along. Still a link:
+                                             it is the host every backlink is checked against and the
+                                             subject of the flagged_at warning. --}}
+                                        @if ($instance->name)
+                                            <span class="break-all">
+                                                <a href="{{ $instance->site_url }}" target="_blank" rel="noopener nofollow" class="hover:underline">{{ $instance->site_url }}</a>
+                                            </span>
+                                            &middot;
+                                        @endif
                                         {{ $instance->contact_email ?: __('messages.none') }}
                                         &middot; {{ $instance->app_version ?: '-' }}
                                         &middot; {{ trans_choice('messages.federation_listing_count', $instance->events_count, ['count' => number_format($instance->events_count)]) }}
@@ -92,6 +102,64 @@
                                     <p class="text-sm text-amber-800 dark:text-amber-200">@lang('messages.federation_flagged_warning')</p>
                                 </div>
                             </div>
+                        @endif
+
+                        {{-- The origin's own public schedule pages: what a reviewer would
+                             otherwise have no way to look at. site_url above lands on the
+                             install's login screen, and a selfhost install publishes no
+                             index of its schedules anywhere. --}}
+                        @php
+                            $schedules = $scheduleLinks[$instance->id] ?? collect();
+                            $shownSchedules = $schedules->take(\App\Http\Controllers\AdminFederationController::MAX_SCHEDULES);
+                        @endphp
+
+                        @if ($schedules->isNotEmpty())
+                            <div class="mt-4 rounded-lg bg-gray-50 dark:bg-gray-800 p-4">
+                                <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">@lang('messages.federation_public_schedules')</p>
+                                <ul class="space-y-2">
+                                    @foreach ($shownSchedules as $schedule)
+                                        <li class="flex flex-wrap items-baseline gap-x-2 text-sm">
+                                            {{-- Only linked when it lives on the host the instance
+                                                 registered. Rows stored before that check existed at
+                                                 intake still hold whatever the sender sent, and a
+                                                 re-push will not rewrite them, so this is the guard
+                                                 that actually matters. --}}
+                                            @if ($instance->ownsUrl($schedule->schedule_url))
+                                                <x-link href="{{ $schedule->schedule_url }}" target="_blank" :nofollow="true" class="font-medium">
+                                                    {{ $schedule->schedule_label ?: $schedule->schedule_url }}
+                                                </x-link>
+                                            @else
+                                                <span class="font-medium text-gray-900 dark:text-white">{{ $schedule->schedule_label ?: __('messages.none') }}</span>
+                                            @endif
+                                            <span class="text-gray-500 dark:text-gray-400">
+                                                {{ trans_choice('messages.federation_listing_count', $schedule->listing_count, ['count' => number_format($schedule->listing_count)]) }}
+                                            </span>
+                                        </li>
+                                    @endforeach
+                                </ul>
+
+                                @if ($schedules->count() > $shownSchedules->count())
+                                    <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                        {{ __('messages.federation_preview_more', ['count' => number_format($schedules->count() - $shownSchedules->count())]) }}
+                                    </p>
+                                @endif
+
+                                {{-- Gated on approval because listable() requires it: for a
+                                     pending or suspended instance this page would be empty. --}}
+                                @if ($instance->isApproved() && $instance->live_events_count > 0)
+                                    <p class="mt-3 text-sm">
+                                        <x-link href="{{ marketing_url('/browse?instance='.$hash).'#network' }}" target="_blank" :nofollow="true">
+                                            {{ trans_choice('messages.federation_view_live_listings', $instance->live_events_count, ['count' => number_format($instance->live_events_count)]) }}
+                                        </x-link>
+                                    </p>
+                                @endif
+                            </div>
+                        @elseif ($instance->events_count === 0)
+                            {{-- Says so rather than rendering an empty card. Nothing has been
+                                 received, so there is genuinely nothing to preview, and an
+                                 instance that pushes nothing for a week is dropped by
+                                 FederationMaintenance::pruneStaleInstances() anyway. --}}
+                            <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">@lang('messages.federation_no_listings_yet')</p>
                         @endif
 
                         {{-- What is actually being approved. Approving on a name alone is

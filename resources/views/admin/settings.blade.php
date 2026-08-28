@@ -136,6 +136,31 @@
                     </div>
                 </div>
 
+                {{-- Schedules before events: a listing carries the schedule's name and
+                     the address of its public page, and the reviewing administrator at
+                     the other end sees both, so the operator should see the same list
+                     first. Its own block rather than part of the event preview below,
+                     whose unverified/undecided footnotes are caveats on the EVENT list. --}}
+                @if ($federationPreviewSchedules->isNotEmpty())
+                    <div class="mb-6">
+                        <p class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.federation_preview_schedules_title')</p>
+                        <ul class="space-y-1.5">
+                            @foreach ($federationPreviewSchedules as $previewSchedule)
+                                <li class="flex flex-wrap items-baseline gap-x-2 text-sm">
+                                    <span class="font-medium text-gray-900 dark:text-gray-100">{{ $previewSchedule->name }}</span>
+                                    <span class="text-gray-500 dark:text-gray-400 break-all">{{ $previewSchedule->getGuestUrl() }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+
+                        @if ($federationPreviewSchedulesTotal > $federationPreviewSchedules->count())
+                            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                @lang('messages.federation_preview_more', ['count' => $federationPreviewSchedulesTotal - $federationPreviewSchedules->count()])
+                            </p>
+                        @endif
+                    </div>
+                @endif
+
                 {{-- Publishing customers' events to a third-party site sight-unseen is
                      the real anxiety here, so show exactly what would go out. --}}
                 <div class="mb-6">

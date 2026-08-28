@@ -226,7 +226,7 @@ class ApiFederationController extends Controller
 
             // A blocked listing stays blocked: fill() only touches UPSERT_FIELDS,
             // which deliberately excludes blocked_at.
-            $row->fill($this->mapPayload($item));
+            $row->fill($this->mapPayload($item, $instance));
             $row->save();
 
             if (! $existing) {
@@ -420,7 +420,11 @@ class ApiFederationController extends Controller
             'schedule_name' => ['nullable', 'string', 'max:255'],
             'schedule_url' => ['nullable', 'url:http,https', 'max:1024'],
             'image_url' => ['nullable', 'url:http,https', 'max:1024'],
+            // The joining link is no longer stored, only whether there is one. The
+            // event_url rule stays so an install on an older release is not rejected:
+            // mapPayload() reads its presence and discards the value.
             'event_url' => ['nullable', 'url:http,https', 'max:1024'],
+            'is_online' => ['nullable', 'boolean'],
             'venue_name' => ['nullable', 'string', 'max:255'],
             'address' => ['nullable', 'string', 'max:255'],
             'city' => ['nullable', 'string', 'max:255'],
@@ -442,9 +446,7 @@ class ApiFederationController extends Controller
     {
         // The backlink must live on the instance's own host, or an approved instance
         // becomes an open backlink farm.
-        $host = strtolower((string) parse_url($item['url'], PHP_URL_HOST));
-        $expected = $instance->host();
-        if (! $host || ! $expected || ! $this->hostMatches($host, $expected)) {
+        if (! $instance->ownsUrl($item['url'])) {
             return false;
         }
 
@@ -469,12 +471,6 @@ class ApiFederationController extends Controller
         return ! empty($item['starts_at']) || ! empty($item['occurrences']);
     }
 
-    /** Exact host, or a subdomain of the registered host. */
-    protected function hostMatches(string $host, string $expected): bool
-    {
-        return $host === $expected || str_ends_with($host, '.'.$expected);
-    }
-
     /** Mirror of Event::scopeExcludeLikelyTest() applied to a single incoming name. */
     protected function looksLikeTest(string $name): bool
     {
@@ -497,7 +493,7 @@ class ApiFederationController extends Controller
      * Payload to column mapping, including the derived next_occurrence_at that
      * browse orders and paginates by (a JSON array cannot be indexed or sorted on).
      */
-    protected function mapPayload(array $item): array
+    protected function mapPayload(array $item, FederatedInstance $instance): array
     {
         $occurrences = array_values(array_filter($item['occurrences'] ?? []));
         sort($occurrences);
@@ -527,12 +523,25 @@ class ApiFederationController extends Controller
             'schedule_name' => isset($item['schedule_name'])
                 ? $this->stripControlCharacters($item['schedule_name'])
                 : null,
-            'schedule_url' => $item['schedule_url'] ?? null,
+            // Held to the same host rule as `url`. This one is rendered as a clickable
+            // link on the review screen, so without the check an instance could aim an
+            // admin anywhere it liked, which is the backlink-farm hole isAcceptable()
+            // exists to close.
+            //
+            // Nulled rather than refused: a refusal is permanent (skipped_ids means "do
+            // not retry"), so one bad schedule_url would keep an otherwise perfectly
+            // good event off the network forever.
+            'schedule_url' => $instance->ownsUrl($item['schedule_url'] ?? null)
+                ? $item['schedule_url']
+                : null,
             // Only the advertised URL is stored here. The local copy is fetched out of
             // band through UrlUtils::safeHttpGet(), so an intake request never makes
             // this server fetch an attacker-supplied URL on the request path.
             'image_url' => $item['image_url'] ?? null,
-            'event_url' => $item['event_url'] ?? null,
+            // A flag, never the joining link itself. Senders on an older release still
+            // send event_url; its presence means the same thing and is all this app
+            // has ever used it for.
+            'is_online' => ! empty($item['is_online']) || ! empty($item['event_url']),
             'venue_name' => isset($item['venue_name']) ? $this->stripControlCharacters($item['venue_name']) : null,
             'address' => isset($item['address']) ? $this->stripControlCharacters($item['address']) : null,
             'city' => isset($item['city']) ? $this->stripControlCharacters($item['city']) : null,

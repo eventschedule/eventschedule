@@ -71,4 +71,31 @@ class FederatedInstance extends Model
 
         return $host ? strtolower($host) : null;
     }
+
+    /**
+     * Does this URL live on the host the instance registered? Exact host, or a
+     * subdomain of it.
+     *
+     * The rule the event backlink has always had to pass, lifted out of the intake
+     * controller so a second surface cannot drift from it. It guards every
+     * instance-supplied URL this app is willing to render as a link, which is now
+     * more than one: schedule_url reaches the review screen.
+     *
+     * parse_url returns no host for a scheme-relative or javascript: string, so
+     * those fail here too.
+     */
+    public function ownsUrl(?string $url): bool
+    {
+        $parts = parse_url((string) $url) ?: [];
+
+        if (! in_array(strtolower($parts['scheme'] ?? ''), ['http', 'https'], true)) {
+            return false;
+        }
+
+        $host = strtolower($parts['host'] ?? '');
+        $expected = $this->host();
+
+        return $host !== '' && $expected !== null
+            && ($host === $expected || str_ends_with($host, '.'.$expected));
+    }
 }

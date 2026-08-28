@@ -546,7 +546,7 @@
     @php
         $eventCount = $events->count();
         $networkCount = $federatedEvents->count();
-        $hasNetworkSection = $networkCount > 0 || $federatedCountry || $federatedLanguage;
+        $hasNetworkSection = $networkCount > 0 || $federatedCountry || $federatedLanguage || $federatedInstance;
 
         // Section plates number themselves, so the run stays 01, 02, 03 whether or
         // not the federated section renders. Hardcoding them left a gap.
@@ -737,6 +737,11 @@
                          essential, and keeping this server-side means the page stays
                          crawlable, shareable, and free of a JS mount. --}}
                     <form method="GET" action="{{ marketing_url('/browse') }}" class="flex flex-wrap items-center gap-2">
+                        {{-- Carried through, or picking a country would silently drop the
+                             instance scope this page was opened with. --}}
+                        @if($federatedInstance)
+                            <input type="hidden" name="instance" value="{{ $federatedInstance }}">
+                        @endif
                         <span class="es-news-folio" aria-hidden="true">Filter by</span>
                         <label for="federated-country" class="sr-only">{{ __('messages.federation_filter_all_countries') }}</label>
                         <select id="federated-country" name="country" data-auto-submit class="es-news-select">
@@ -788,7 +793,7 @@
                                  is only ever reached with a filter set. --}}
                             <p class="es-news-folio mb-3">Filtered</p>
                             <p class="es-news-muted">{{ __('messages.federation_browse_no_results') }}</p>
-                            @if($federatedCountry || $federatedLanguage)
+                            @if($federatedCountry || $federatedLanguage || $federatedInstance)
                                 <p class="es-news-folio mt-4">
                                     <a href="{{ marketing_url('/browse') }}#network" class="es-news-link underline">Show every country and language</a>
                                 </p>

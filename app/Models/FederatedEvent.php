@@ -31,7 +31,7 @@ class FederatedEvent extends Model
         'schedule_name',
         'schedule_url',
         'image_url',
-        'event_url',
+        'is_online',
         'venue_name',
         'address',
         'city',
@@ -49,6 +49,7 @@ class FederatedEvent extends Model
     ];
 
     protected $casts = [
+        'is_online' => 'boolean',
         'starts_at' => 'datetime',
         'ends_at' => 'datetime',
         'next_occurrence_at' => 'datetime',
@@ -114,6 +115,54 @@ class FederatedEvent extends Model
     }
 
     /**
+     * The distinct schedules each instance has federated, for the review screen.
+     *
+     * One grouped query for the whole page rather than one per instance: the screen
+     * paginates 30 at a time and this runs on every status tab.
+     *
+     * GROUP BY names real columns, never a select alias - MySQL binds a bare alias
+     * back to the same-named table column and fails with 1055. For the same reason
+     * MAX(schedule_name) is aliased to `schedule_label` and not to `schedule_name`,
+     * which IS a real column here: the alias is legal in SELECT, but shadowing a
+     * column leaves the next ORDER BY or GROUP BY on that name one edit from 1055.
+     * MAX() also satisfies ONLY_FULL_GROUP_BY and picks deterministically when a
+     * schedule was renamed part-way through its history.
+     *
+     * Deliberately NOT listable(): that requires an approved instance, so it would
+     * return nothing on the pending tab, which is the tab where seeing what an
+     * instance publishes matters most.
+     *
+     * schedule_url is a varchar(1024) with no index, so the grouping is a filesort
+     * on a wide key. Fine for 30 instances behind admin auth; do not move it onto a
+     * public or hot path without an index to match.
+     *
+     * The cap is a memory backstop, not a rule: one row per (instance, schedule)
+     * means a real page returns a few dozen.
+     */
+    public static function schedulesForInstances($instanceIds, int $cap = 2000)
+    {
+        if (empty($instanceIds)) {
+            return collect();
+        }
+
+        return static::query()
+            ->whereIn('federated_instance_id', $instanceIds)
+            ->whereNotNull('schedule_url')
+            ->where('schedule_url', '!=', '')
+            ->groupBy('federated_instance_id', 'schedule_url')
+            ->select('federated_instance_id', 'schedule_url')
+            ->selectRaw('MAX(schedule_name) as schedule_label, COUNT(*) as listing_count')
+            ->orderBy('federated_instance_id')
+            ->orderByDesc('listing_count')
+            ->limit($cap)
+            // Plain rows, not models: none of this is a FederatedEvent, and hydrating
+            // 1024-character URLs into models costs far more than it is worth.
+            ->toBase()
+            ->get()
+            ->groupBy('federated_instance_id');
+    }
+
+    /**
      * Block or unblock a listing.
      *
      * These exist because blocked_at is deliberately absent from $fillable, so
@@ -176,25 +225,41 @@ class FederatedEvent extends Model
      */
     public function scopeListable($query)
     {
-        return $query->whereNull('blocked_at')
-            ->whereNotNull('image_path')
-            ->whereNotNull('next_occurrence_at')
-            ->where('next_occurrence_at', '>=', now()->subDay())
-            ->whereHas('instance', fn ($q) => $q->approved());
+        return $query->live()->whereHas('instance', fn ($q) => $q->approved());
     }
 
     /**
-     * Mirrors Event::getSchemaAttendanceMode(): an online link plus a venue is hybrid,
-     * the link alone is online, neither is in-person.
+     * The row-level half of listable(), without the instance-approval check.
+     *
+     * Split out so a query already scoped to one instance can ask "how much of this
+     * would be live?" without a redundant whereHas back to the parent it started
+     * from. Counting with this alone is NOT the same as listable(): it returns a
+     * non-zero number for a pending or suspended instance, which publishes nothing.
+     */
+    public function scopeLive($query)
+    {
+        return $query->whereNull('blocked_at')
+            ->whereNotNull('image_path')
+            ->whereNotNull('next_occurrence_at')
+            ->where('next_occurrence_at', '>=', now()->subDay());
+    }
+
+    /**
+     * Mirrors Event::getSchemaAttendanceMode(): online plus a venue is hybrid, the
+     * flag alone is online, neither is in-person.
+     *
+     * The flag is the only signal, deliberately. Inferring "online" from the absence
+     * of a venue calls an in-person event whose sender simply sent no venue data
+     * online, and can never recognise a hybrid one at all.
      */
     public function isOnline(): bool
     {
-        return ! empty($this->event_url) && empty($this->venue_name);
+        return $this->is_online && empty($this->venue_name);
     }
 
     public function isHybrid(): bool
     {
-        return ! empty($this->event_url) && ! empty($this->venue_name);
+        return $this->is_online && ! empty($this->venue_name);
     }
 
     /**
