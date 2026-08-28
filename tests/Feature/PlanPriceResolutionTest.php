@@ -128,15 +128,18 @@ class PlanPriceResolutionTest extends TestCase
      *
      * The guard at the top of amountFor() looks redundant now that the loop only ever matches a
      * configured ID, but it is also the only thing rejecting null: `null === (config(...) ?: null)`
-     * is TRUE for any tier the install does not sell, so a Pro-only install would answer a null
-     * price with the enterprise yearly amount.
+     * is TRUE for any tier the install does not sell, and the FIRST unconfigured key in
+     * CURRENT_KEYS wins the comparison. So a Pro-only install answers a null price with
+     * enterprise_price_MONTHLY_amount - remove the guard and this test fails with 15.0, not null.
      */
     public function test_a_null_price_has_no_amount(): void
     {
         config([
             'services.stripe_platform.enterprise_price_monthly' => null,
             'services.stripe_platform.enterprise_price_yearly' => null,
-            'services.stripe_platform.enterprise_price_yearly_amount' => '150',
+            // Monthly, not yearly: enterprise.monthly is the first unconfigured key, so it is
+            // the one a null price would wrongly resolve to.
+            'services.stripe_platform.enterprise_price_monthly_amount' => '15',
         ]);
 
         $this->assertNull(PlanPriceUtils::amountFor(null));

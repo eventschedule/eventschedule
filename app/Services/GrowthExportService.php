@@ -226,10 +226,21 @@ class GrowthExportService
         }
         unset($stage);
 
-        // Biggest onboarding leak: the worst adjacent drop among the cohort stages (3-7) by
-        // absolute users lost. Traffic stages are excluded (anonymous, different population).
+        // Biggest leak: the worst adjacent drop by absolute users lost.
+        //
+        // Traffic stages are excluded (anonymous, a different population). The TICKETS stages are
+        // included, because each is a genuine subset of the one above it - a ticket needs an
+        // event - and because saved_event -> saved_ticket is the largest drop in the business
+        // (install-wide, 438 schedules publish an event and 144 ever create a ticket type). It is
+        // the whole reason those stages exist, and scoping this to 'cohort' made it the one
+        // transition the loop structurally could not name.
+        //
+        // The PLAN stages stay out: reached_checkout is not a subset of saved_paid_ticket, so an
+        // adjacent "drop" there can be negative and would let this pick a meaningless pair. That
+        // is the same boundary $noStepConv suppresses above.
         $biggestDrop = null;
-        $cohortStages = array_values(array_filter($stages, fn ($s) => $s['group'] === 'cohort'));
+        $leakGroups = ['cohort', 'tickets'];
+        $cohortStages = array_values(array_filter($stages, fn ($s) => in_array($s['group'], $leakGroups, true)));
         for ($i = 1; $i < count($cohortStages); $i++) {
             $from = $cohortStages[$i - 1];
             $to = $cohortStages[$i];

@@ -224,6 +224,35 @@ class GrowthExportTest extends TestCase
         $this->assertSame(0, $counts['reached_checkout'], 'nor does it imply the form was seen');
     }
 
+    /**
+     * biggest_drop must be able to name the ticket cliff. saved_event -> saved_ticket is the
+     * largest drop in the business (438 schedules publish an event, 144 ever create a ticket
+     * type), and scoping the loop to the cohort group made it the one transition that could
+     * never be reported - while the stages were added precisely to surface it.
+     *
+     * The plan group stays excluded: reached_checkout is not a subset of saved_paid_ticket, so a
+     * "drop" there can be negative and would let this pick a meaningless pair.
+     */
+    public function test_the_biggest_drop_can_name_the_ticket_cliff(): void
+    {
+        // Three users publish an event; only one of them adds a ticket type. The largest single
+        // drop in this fixture is therefore saved_event -> saved_ticket.
+        foreach (range(1, 3) as $n) {
+            $owner = $this->createOwner();
+            $event = $this->createEvent($this->freeRole($owner));
+
+            if ($n === 1) {
+                $this->createTicket($event, ['price' => 10]);
+            }
+        }
+
+        $funnel = $this->build()['funnel'];
+
+        $this->assertSame('saved_event', $funnel['biggest_drop']['from_key']);
+        $this->assertSame('saved_ticket', $funnel['biggest_drop']['to_key']);
+        $this->assertSame(2, $funnel['biggest_drop']['lost']);
+    }
+
     /** A cancelled subscriber still converted once, which is what a conversion funnel counts. */
     public function test_a_cancelled_subscription_still_counts_as_a_conversion(): void
     {

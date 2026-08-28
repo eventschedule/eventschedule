@@ -142,8 +142,10 @@ class PlanPriceUtils
     {
         // Not redundant with the loop below, despite both only ever matching a current ID: this
         // is also what rejects a NULL price. Without it, `null === (config(...) ?: null)` is true
-        // for any tier the install does not sell - a Pro-only install would answer a null price
-        // with the enterprise yearly amount.
+        // for any tier the install does not sell, and the FIRST unconfigured key in CURRENT_KEYS
+        // wins - so a Pro-only install answers a null price with enterprise_price_monthly_amount,
+        // which is 15 by default. Do not delete this on the grounds that the loop below already
+        // filters to configured IDs; it does not filter null.
         if (! $priceId) {
             return null;
         }

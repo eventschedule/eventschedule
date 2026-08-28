@@ -105,18 +105,6 @@
                             $barWidth = ($count !== null && $count > 0) ? max(2, $stage['width']) : 0;
                         @endphp
 
-                        {{-- Group labels, driven off the group CHANGE rather than hardcoded
-                             indices: the funnel gained ticket and plan stages, and index-based
-                             headers silently filed them under "Signups this period" with the
-                             cohort tooltip attached to a different population. --}}
-                        @if($stage['group'] !== $prevGroup)
-                            <div class="flex items-center gap-2 pb-1 {{ $prevGroup === null ? '' : 'pt-3' }}">
-                                <span class="text-[11px] uppercase tracking-wide text-gray-400 dark:text-gray-500">@lang('messages.funnel_group_' . $stage['group'])</span>
-                                <span class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></span>
-                            </div>
-                        @endif
-                        @php $prevGroup = $stage['group']; @endphp
-
                         {{-- Drop connector (users lost from the previous stage) --}}
                         @if($stage['drop_count'] !== null && $stage['drop_count'] > 0)
                             @php $isBiggest = $biggestDropToKey === $stage['key']; @endphp
@@ -126,6 +114,20 @@
                                 @if($isBiggest) &middot; @lang('messages.funnel_biggest_leak') @endif
                             </div>
                         @endif
+
+                        {{-- Group labels, driven off the group CHANGE rather than hardcoded
+                             indices: the funnel gained ticket and plan stages, and index-based
+                             headers silently filed them under "Signups this period" with the
+                             cohort tooltip attached to a different population. Emitted AFTER the
+                             connector above: a "N lost" line measures the transition INTO this
+                             group, so it belongs above the heading, not under it. --}}
+                        @if($stage['group'] !== $prevGroup)
+                            <div class="flex items-center gap-2 pb-1 {{ $prevGroup === null ? '' : 'pt-3' }}">
+                                <span class="text-[11px] uppercase tracking-wide text-gray-400 dark:text-gray-500">@lang('messages.funnel_group_' . $stage['group'])</span>
+                                <span class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></span>
+                            </div>
+                        @endif
+                        @php $prevGroup = $stage['group']; @endphp
 
                         {{-- Stage: label + count above, bar (track + fill) below --}}
                         <div>
