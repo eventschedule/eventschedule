@@ -1580,6 +1580,16 @@ example.eventschedule.com/summer-concert</code></pre>
                         <td>What the coupon is worth, as a percentage or an amount in the event's currency. Empty when no discount is set</td>
                         <td>15%</td>
                     </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">{discounted_price}</code></td>
+                        <td>The price with the coupon taken off, as a bare figure with no currency symbol. Empty when the event has no discount or no price, and on any event that sells tickets or takes RSVPs through the platform</td>
+                        <td>119</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">{original_price}</code></td>
+                        <td>The price before the discount. The same price as <code class="doc-inline-code">{price}</code>, written to the currency's own decimal places and with a thousands separator, but empty unless a discount applies, so a before-and-after pair appears together or not at all</td>
+                        <td>149</td>
+                    </tr>
                 </tbody>
             </table>
         </div>

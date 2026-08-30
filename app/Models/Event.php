@@ -2808,6 +2808,94 @@ class Event extends Model
     }
 
     /**
+     * The price the coupon comes off, or null when there is nothing to discount. Shared by
+     * {discounted_price} and {original_price} so the pair can never name different bases.
+     */
+    private function couponDiscountBasePrice(): ?float
+    {
+        // The coupon points at an OUTSIDE ticket platform and nothing here redeems it -
+        // internal discounts are the separate promo_codes table. The field is hidden but
+        // never cleared when an owner switches to internal tickets or RSVP (the form uses
+        // v-show, which still submits, and neither the watcher nor EventRepo scrubs it), so
+        // a stale value survives the switch. Quoting a discounted PRICE off that would put a
+        // number on a flyer that our own checkout will not charge. Same condition the guest
+        // page gates its coupon block on (event/show-guest.blade.php), so a graphic and the
+        // event page can never disagree about the price.
+        //
+        // Deliberately narrower than {coupon_discount}, which is not mode-gated: changing
+        // that would rewrite output for templates already in use, and "15% off" is a vague
+        // claim where "119" is a specific one.
+        if ($this->tickets_enabled || $this->rsvp_enabled) {
+            return null;
+        }
+
+        // Nothing to take off, so there is no before-and-after to show.
+        if ($this->formatted_coupon_discount === '') {
+            return null;
+        }
+
+        // getPrice() is the source {price} renders from, so a was/now line can never
+        // contradict it. It returns '' for the free cases it catches, but still returns 0.0
+        // when a free ticket sits beside a paid one and min() picks the zero - so test the
+        // number, not the empty string, or a free event with a stale discount renders '0'.
+        $base = (float) EventTextGenerator::getPrice($this);
+
+        return $base > 0 ? $base : null;
+    }
+
+    /**
+     * The price after the coupon, rounded to the currency's decimals. Null when there is no
+     * discount, or no price for it to come off.
+     */
+    private function couponDiscountedPrice(): ?float
+    {
+        $base = $this->couponDiscountBasePrice();
+
+        if ($base === null) {
+            return null;
+        }
+
+        $value = (float) $this->coupon_discount;
+
+        // Must resolve the missing TYPE exactly as getFormattedCouponDiscountAttribute()
+        // does. If the two ever drift, one token says '30 off' while the other subtracts
+        // 30 percent, on the same line of the same post. They agree on the type only: the
+        // clamp below has no counterpart there, so a legacy row storing 150 percent still
+        // renders '150% off' beside a floored '0'. Validation blocks new rows like that.
+        $isPercentage = ($this->coupon_discount_type ?: self::DEFAULT_COUPON_DISCOUNT_TYPE) === 'percentage';
+
+        // The validator already bounds a percentage at 100, but it keys off the request and
+        // an older row may predate it; clamping here costs nothing and keeps the floor at 0.
+        $off = $isPercentage ? $base * min(100, max(0, $value)) / 100 : $value;
+
+        return round(max(0, $base - $off), MoneyUtils::decimalsFor($this->ticket_currency_code));
+    }
+
+    /**
+     * The discounted price as a bare figure - '119', '126.65', '4,250' - with no currency
+     * symbol, so a template can put its own wording around it. Empty when no discount
+     * applies. This is what {discounted_price} substitutes.
+     */
+    public function getDiscountedPriceAttribute(): string
+    {
+        $price = $this->couponDiscountedPrice();
+
+        return $price === null ? '' : MoneyUtils::formatNumber($price, $this->ticket_currency_code);
+    }
+
+    /**
+     * The list price the discount comes off, formatted to match {discounted_price}. Empty
+     * unless a discount actually applies, so a 'was/now' pair renders in full or collapses;
+     * {price} is the unconditional one. Unrelated to Eloquent's getOriginal().
+     */
+    public function getOriginalPriceAttribute(): string
+    {
+        $base = $this->couponDiscountBasePrice();
+
+        return $base === null ? '' : MoneyUtils::formatNumber($base, $this->ticket_currency_code);
+    }
+
+    /**
      * Canonical conversion of a duration in hours (float) to whole minutes.
      * Durations are stored as hours with limited precision (e.g. 50 min -> 0.83),
      * so rounding to the nearest minute recovers the exact minute the user entered

@@ -36,6 +36,33 @@ class MoneyUtils
         return in_array(strtoupper($currencyCode), self::$zeroDecimalCurrencies) ? 0 : 2;
     }
 
+    /**
+     * Just the number half of format(): the currency's decimal places, a ',' thousands
+     * separator, and a trailing '.00' dropped so a whole amount reads '119' not '119.00'.
+     *
+     * Split out so callers that render a bare figure next to their own currency wording
+     * (the {discounted_price} / {original_price} template tokens) produce digits identical
+     * to format()'s, instead of a raw float cast that would print '119.2' for 119.20.
+     *
+     * Not a byte-for-byte extraction. The (float) cast makes this fail quietly where
+     * format() used to raise: null was deprecated and is now '0'; '' and 'abc' threw a
+     * TypeError and are now '0'; and, the one worth watching, '12abc' becomes '12' while an
+     * array or a Money-like object becomes '1'. Deliberate, since this is called from more
+     * places now, but pass it a number - do not read it as a pure refactor.
+     */
+    public static function formatNumber($amount, $currencyCode): string
+    {
+        $decimals = self::decimalsFor($currencyCode);
+
+        $formatted = number_format((float) $amount, $decimals, '.', ',');
+
+        if ($decimals === 2 && str_ends_with($formatted, '.00')) {
+            $formatted = substr($formatted, 0, -3);
+        }
+
+        return $formatted;
+    }
+
     public static function format($amount, $currencyCode)
     {
         // Null-safe, because plenty of callers read the code off a nullable relation
@@ -48,13 +75,7 @@ class MoneyUtils
             $upper = 'USD';
             $currencyCode = 'USD';
         }
-        $decimals = self::decimalsFor($upper);
-
-        $formatted = number_format($amount, $decimals, '.', ',');
-
-        if ($decimals === 2 && str_ends_with($formatted, '.00')) {
-            $formatted = substr($formatted, 0, -3);
-        }
+        $formatted = self::formatNumber($amount, $upper);
 
         if (isset(self::$displaySymbols[$upper])) {
             return self::$displaySymbols[$upper].$formatted;

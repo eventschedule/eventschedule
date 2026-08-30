@@ -282,6 +282,46 @@ https://example.com/event/summer-concert</code></pre>
             <p>Use <code class="doc-inline-code">*text*</code> for bold formatting on WhatsApp and Telegram, or <code class="doc-inline-code">_text_</code> for italics.</p>
         </div>
 
+        <h3 class="doc-subheading">Showing a price before and after a coupon</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            When an event carries a coupon, <code class="doc-inline-code">{discounted_price}</code> is the price with the discount already taken off and <code class="doc-inline-code">{original_price}</code> is what it was before. Both are bare figures with no currency symbol, so you write the currency and the wording yourself. They are written the way prices are, with the currency's decimal places and a thousands separator (<code class="doc-inline-code">1,224.50</code>), which is a little different from plain <code class="doc-inline-code">{price}</code> (<code class="doc-inline-code">1234.5</code>) - worth knowing if you put the two on one line.
+        </p>
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>Template</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code>*{event_name}*
+{discounted_price} &#8362; ({original_price} &#8362;) with {coupon_code}</code></pre>
+        </div>
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>Generated Text</span>
+            </div>
+            <pre><code>*Summer Concert*
+119 &#8362; (149 &#8362;) with SAVE30</code></pre>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            The pair is blank together, so an event with no coupon prints neither figure. The wording and symbols you typed around them still print, though, so on such an event that line comes out as <code class="doc-inline-code">&#8362; (&#8362;) with</code> and nothing else. Use this shape on a schedule where every event carries a coupon.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Both figures are also blank on any event that sells tickets or takes RSVPs through the platform. The coupon is a pointer at an outside ticket link, and nothing here redeems it, so quoting a discounted price on an event we take the money for would advertise a total the checkout will not charge.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            If only some of your events run coupons, give the price and the coupon their own lines. A line is dropped only once nothing but spaces and punctuation is left on it, which is exactly what happens to the coupon line when both of its variables come back empty:
+        </p>
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>Template</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code>{price} &#8362;
+{coupon_code} {coupon_discount}</code></pre>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            One catch: a currency symbol, or any word you type yourself, is not punctuation, so it survives on its own. On a free event, where <code class="doc-inline-code">{price}</code> is blank, that first line still prints a lone <code class="doc-inline-code">&#8362;</code>. If your schedule mixes free and paid events, put the symbol on a line that always has something else on it. Overlay Text is stricter still: it never drops a line, so anything you type there prints even when every variable on it came back empty.
+        </p>
+
         <h3 class="doc-subheading">Blank values clean themselves up</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             You do not need a separate template for events that have no venue or no price. If a variable comes back empty, a stranded <code class="doc-inline-code">|</code> separator around it is removed, and a line left with nothing but punctuation is dropped from that event's entry.
@@ -368,6 +408,8 @@ https://example.com/event/summer-concert</code></pre>
                     <div class="flex justify-between gap-3"><code class="doc-inline-code">{currency}</code> <span class="text-gray-600 dark:text-gray-400">USD</span></div>
                     <div class="flex justify-between gap-3"><code class="doc-inline-code">{coupon_code}</code> <span class="text-gray-600 dark:text-gray-400">SAVE20</span></div>
                     <div class="flex justify-between gap-3"><code class="doc-inline-code">{coupon_discount}</code> <span class="text-gray-600 dark:text-gray-400">15%</span></div>
+                    <div class="flex justify-between gap-3"><code class="doc-inline-code">{discounted_price}</code> <span class="text-gray-600 dark:text-gray-400">119</span></div>
+                    <div class="flex justify-between gap-3"><code class="doc-inline-code">{original_price}</code> <span class="text-gray-600 dark:text-gray-400">149</span></div>
                 </div>
             </div>
         </div>
@@ -598,6 +640,16 @@ https://example.com/event/summer-concert</code></pre>
                         <td><code class="doc-inline-code">{coupon_discount}</code></td>
                         <td>What the coupon is worth. A percentage renders as <code class="doc-inline-code">15%</code>; a fixed discount renders as an amount in the event's currency. Blank when no discount is set, so the line drops rather than printing a zero.</td>
                         <td>15%</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">{discounted_price}</code></td>
+                        <td>The price with the coupon already taken off, as a bare figure with no currency symbol so you can word the line yourself. Blank when the event has no discount or no price, and on any event that sells tickets or takes RSVPs through the platform.</td>
+                        <td>119</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">{original_price}</code></td>
+                        <td>The price before the discount, for showing what the coupon saves. The same price as <code class="doc-inline-code">{price}</code>, written to the currency's own decimal places and with a thousands separator, but blank unless a discount actually applies, so a before-and-after pair appears together or not at all.</td>
+                        <td>149</td>
                     </tr>
                 </tbody>
             </table>

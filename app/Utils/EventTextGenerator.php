@@ -228,6 +228,8 @@ class EventTextGenerator
             '{price}' => self::getPrice($event),
             '{coupon_code}' => $event->coupon_code ?? '',
             '{coupon_discount}' => $event->formatted_coupon_discount,
+            '{discounted_price}' => $event->discounted_price,
+            '{original_price}' => $event->original_price,
         ];
 
         // Add custom field replacements using stable indices
