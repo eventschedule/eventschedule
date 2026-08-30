@@ -251,15 +251,111 @@ class EventCouponDiscountTest extends TestCase
         $this->assertStringNotContainsString('coupon_discount: "15.000"', $html);
     }
 
-    /** A brand new event must not open with a blank type select. */
-    public function test_the_edit_form_defaults_an_unset_type_to_percentage(): void
+    /**
+     * A brand new event must not open with a blank type select, and a row that predates the
+     * column must open on the amount rather than on the percentage it never chose.
+     */
+    public function test_the_edit_form_defaults_an_unset_type_to_a_fixed_amount(): void
     {
         $html = $this->actingAs($this->owner)->get(route('event.edit', [
             'subdomain' => $this->role->subdomain,
             'hash' => \App\Utils\UrlUtils::encodeId($this->externalEvent()->id),
         ]))->assertOk()->getContent();
 
-        $this->assertStringContainsString('coupon_discount_type: "percentage"', $html);
+        $this->assertStringContainsString('coupon_discount_type: "fixed"', $html);
+    }
+
+    /**
+     * The guest-submit form seeds its type entirely client-side, so nothing on the AP side
+     * pins it. The page is a plain GET that renders the seed server-side, which is also the
+     * only way to catch a broken @json here: the directive does not error, it silently kills
+     * the Vue mount and leaves an unusable page.
+     */
+    public function test_the_guest_submit_form_seeds_the_type_to_a_fixed_amount(): void
+    {
+        // showGuestSubmit() 404s without accept_requests and redirects without require_account.
+        $curator = $this->createCurator($this->createOwner(), [
+            'accept_requests' => true,
+            'require_account' => true,
+        ]);
+
+        $html = $this->get(route('event.guest_submit', ['subdomain' => $curator->subdomain]))
+            ->assertOk()->getContent();
+
+        // The blank-form default and the post-submit reset are separate seeds in that file.
+        $this->assertStringContainsString('coupon_discount_type: "fixed"', $html);
+        $this->assertStringContainsString('this.event.coupon_discount_type = "fixed"', $html);
+    }
+
+    /** The AI import preview seeds the type onto every parsed row that arrives without one. */
+    public function test_the_ai_import_form_seeds_the_type_to_a_fixed_amount(): void
+    {
+        // Without a key the page collapses to the setup guide and the seed never renders at
+        // all - so this assertion would pass locally and fail in CI.
+        config(['services.google.gemini_key' => 'test-key']);
+
+        $html = $this->actingAs($this->owner)
+            ->get(route('event.show_import_ai', ['subdomain' => $this->role->subdomain]))
+            ->assertOk()->getContent();
+
+        // e(), not json_encode(), matching the currency default seeded beside it - so the
+        // rendered value carries single quotes rather than the double quotes above.
+        $this->assertStringContainsString("event.coupon_discount_type = 'fixed'", $html);
+    }
+
+    /**
+     * The row a type-less client write still produces: an amount with no type. It has to read
+     * as money, which is what the accessor's fallback decides - the old `?? 'percentage'`
+     * made "150% off" of exactly this shape.
+     */
+    public function test_a_stored_amount_with_no_type_renders_as_money(): void
+    {
+        $event = $this->externalEvent(['coupon_discount' => 15]);
+
+        $this->assertNull($event->coupon_discount_type);
+        $this->assertSame(
+            \App\Utils\MoneyUtils::format($event->coupon_discount, 'USD'),
+            $event->formatted_coupon_discount
+        );
+        $this->assertStringNotContainsString('%', $event->formatted_coupon_discount);
+    }
+
+    /**
+     * The gap the ceiling used to have. saveEvent()'s fill() leaves an omitted
+     * coupon_discount_type alone, so a partial update that sends only the amount is rendered
+     * under the type ALREADY on the row - and 150 under a stored 'percentage' is "150% off"
+     * as fact. The rule has to read the stored type, not just the submitted one.
+     */
+    public function test_a_partial_update_cannot_put_an_over_hundred_value_on_a_percentage_event(): void
+    {
+        $event = $this->externalEvent([
+            'coupon_discount' => 10,
+            'coupon_discount_type' => 'percentage',
+        ]);
+
+        $this->putUpdateEvent($this->owner, $this->role, $event, [
+            'coupon_discount' => '150',
+        ])->assertSessionHasErrors('coupon_discount');
+
+        $this->assertEquals(10, (float) $event->fresh()->coupon_discount);
+    }
+
+    /** The tightened rule must not start rejecting a legitimate large fixed amount. */
+    public function test_a_partial_update_of_a_fixed_amount_event_still_accepts_a_large_value(): void
+    {
+        $event = $this->externalEvent([
+            'coupon_discount' => 10,
+            'coupon_discount_type' => 'fixed',
+        ]);
+
+        $this->putUpdateEvent($this->owner, $this->role, $event, [
+            'coupon_discount' => '150',
+        ])->assertSessionHasNoErrors();
+
+        // Also pins the fill() behaviour the rule above has to compensate for: the omitted
+        // type key leaves the stored 'fixed' in place rather than resetting it.
+        $this->assertEquals(150, (float) $event->fresh()->coupon_discount);
+        $this->assertSame('fixed', $event->fresh()->coupon_discount_type);
     }
 
     /**

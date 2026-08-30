@@ -339,8 +339,8 @@
                       class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                     <select v-model="event.coupon_discount_type"
                       class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                      <option value="percentage">%</option>
                       <option value="fixed">@{{ event.ticket_currency_code }}</option>
+                      <option value="percentage">%</option>
                     </select>
                   </div>
                 </div>
@@ -685,7 +685,7 @@
                     short_description_en: '',
                     coupon_code: '',
                     coupon_discount: '',
-                    coupon_discount_type: 'percentage',
+                    coupon_discount_type: @json(\App\Models\Event::DEFAULT_COUPON_DISCOUNT_TYPE),
                     category_id: '',
                     group_id: '',
                 },
@@ -1640,7 +1640,7 @@
                 this.event.short_description_en = '';
                 this.event.coupon_code = '';
                 this.event.coupon_discount = '';
-                this.event.coupon_discount_type = 'percentage';
+                this.event.coupon_discount_type = @json(\App\Models\Event::DEFAULT_COUPON_DISCOUNT_TYPE);
                 this.event.category_id = '';
                 this.event.group_id = '';
                 if (this.datePicker) this.datePicker.clear();

@@ -5,6 +5,8 @@ namespace App\Http\Requests;
 use App\Http\Requests\Concerns\ValidatesCouponDiscount;
 use App\Http\Requests\Concerns\ValidatesEventCustomFields;
 use App\Http\Requests\Concerns\ValidatesVenueFields;
+use App\Models\Event;
+use App\Utils\UrlUtils;
 use Illuminate\Foundation\Http\FormRequest;
 
 class EventUpdateRequest extends FormRequest
@@ -67,8 +69,20 @@ class EventUpdateRequest extends FormRequest
             'event_sponsor_tiers.*' => ['nullable', 'string', 'in:gold,silver,bronze'],
 
             'existing_event_sponsors' => ['nullable', 'string', 'json'],
-        ], $this->couponDiscountRules($this->input('coupon_discount_type')),
+        ], $this->couponDiscountRules($this->input('coupon_discount_type'), $this->storedCouponDiscountType()),
             $this->venueFieldRules(), $this->eventCustomFieldRules());
+    }
+
+    /**
+     * The type already stored on the row, which is what an omitted coupon_discount_type
+     * leaves in place - see couponDiscountRules(). A value() rather than a model: this runs
+     * on every event update and only the one column is wanted.
+     */
+    private function storedCouponDiscountType(): ?string
+    {
+        $id = UrlUtils::decodeId($this->route('hash'));
+
+        return $id ? Event::whereKey($id)->value('coupon_discount_type') : null;
     }
 
     public function attributes(): array

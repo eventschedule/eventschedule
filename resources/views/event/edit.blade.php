@@ -1992,8 +1992,8 @@
                                 <div class="mt-1 flex flex-col sm:flex-row gap-3">
                                     <select name="coupon_discount_type" v-model="event.coupon_discount_type"
                                         class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                        <option value="percentage">%</option>
                                         <option value="fixed">@{{ event.ticket_currency_code }}</option>
+                                        <option value="percentage">%</option>
                                     </select>
                                     <x-text-input id="coupon_discount" type="number" name="coupon_discount" step="0.01" min="0"
                                         class="flex-1" v-model="event.coupon_discount" />
@@ -5366,7 +5366,9 @@
           total_tickets_mode: @json($event->total_tickets_mode ?? 'individual'),
           // A select bound to null renders blank, and decimal(13,3) serializes as the
           // string "15.000" which is not what a number input should start life holding.
-          coupon_discount_type: @json($event->coupon_discount_type ?: 'percentage'),
+          // A row that predates the column has no type, so it opens on the model's default
+          // rather than on whichever option happens to be listed first.
+          coupon_discount_type: @json($event->coupon_discount_type ?: \App\Models\Event::DEFAULT_COUPON_DISCOUNT_TYPE),
           coupon_discount: @json($event->coupon_discount !== null ? (float) $event->coupon_discount : null),
           recurring_end_type: @json($event->recurring_end_type ?? 'never'),
           recurring_end_value: @json($event->recurring_end_value ?? null),

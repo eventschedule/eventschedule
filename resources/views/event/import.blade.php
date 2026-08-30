@@ -623,8 +623,8 @@
                                 <select v-model="preview.parsed[idx].coupon_discount_type"
                                     v-bind:disabled="savedEvents[idx]"
                                     class="w-28 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                    <option value="percentage">%</option>
                                     <option value="fixed">@{{ preview.parsed[idx].ticket_currency_code }}</option>
+                                    <option value="percentage">%</option>
                                 </select>
                                 <x-text-input type="number" step="0.01" min="0"
                                     class="flex-1"
@@ -1800,7 +1800,7 @@
                             event.ticket_currency_code = '{{ $defaultCurrency }}';
                         }
                         if (!event.coupon_discount_type) {
-                            event.coupon_discount_type = 'percentage';
+                            event.coupon_discount_type = '{{ \App\Models\Event::DEFAULT_COUPON_DISCOUNT_TYPE }}';
                         }
                         if (!event.group_id) {
                             event.group_id = '';

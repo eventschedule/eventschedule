@@ -229,6 +229,14 @@ class Event extends Model
         'event_password' => 255,
     ];
 
+    /**
+     * What a missing coupon_discount_type means. The column is nullable with no DB default
+     * and no backfill (see the 2026_08_21 migration), so every read site has to resolve it
+     * independently - the validator's ceiling and this model's rendering have to agree, or a
+     * value accepted under one reading renders under the other.
+     */
+    public const DEFAULT_COUPON_DISCOUNT_TYPE = 'fixed';
+
     protected static function boot()
     {
         parent::boot();
@@ -2777,13 +2785,15 @@ class Event extends Model
             return '';
         }
 
-        // A null type means the row predates the column; percentage is the form's default.
-        if (($this->coupon_discount_type ?? 'percentage') === 'fixed') {
-            return MoneyUtils::format($this->coupon_discount, $this->ticket_currency_code);
+        // A null type means the row predates the column, or a client wrote the amount without
+        // one; both read as a fixed amount, matching what the forms open on. ?: not ??, so an
+        // empty string resolves the same way the blade seed already resolves it.
+        if (($this->coupon_discount_type ?: self::DEFAULT_COUPON_DISCOUNT_TYPE) === 'percentage') {
+            // Cast first so the stored decimal(13,3) reads as '15' rather than '15.000'.
+            return ((float) $this->coupon_discount).'%';
         }
 
-        // Cast first so the stored decimal(13,3) reads as '15' rather than '15.000'.
-        return ((float) $this->coupon_discount).'%';
+        return MoneyUtils::format($this->coupon_discount, $this->ticket_currency_code);
     }
 
     /**
