@@ -780,6 +780,42 @@ return [
     'onboarding_nudge_body_3' => 'Dit is de laatste e-mail die we sturen over het instellen. Wil je nog steeds een openbare pagina voor je evenementen, dan kost dat ongeveer een minuut. Zo niet, dan hoef je niets te doen - je account blijft precies zoals het is.',
     'onboarding_nudge_cta' => 'Maak je schema aan',
     'onboarding_nudge_free_note' => 'Het gratis plan heeft geen tijdslimiet en vraagt niet om een kaart.',
+
+    'activation_nudge_subject_no_event' => 'Zet je eerste evenement op :schedule',
+    'activation_nudge_heading_no_event' => 'Je pagina wacht op een datum',
+    'activation_nudge_body_no_event' => ':schedule is ingesteld en de openbare pagina staat live, maar er staat nog niets op. Voeg één evenement toe en de pagina gaat werken: een link om te delen, een QR-code en een agenda waarop je publiek zich kan abonneren. Een evenement dat wekelijks of maandelijks terugkomt hoef je maar één keer in te voeren.',
+    'activation_nudge_cta_no_event' => 'Evenement toevoegen',
+
+    'activation_nudge_subject_no_ticket_type' => 'Tickets verkopen voor :schedule?',
+    'activation_nudge_heading_no_ticket_type' => 'Vanaf deze pagina kun je verkopen',
+    'activation_nudge_body_no_ticket_type' => ':schedule heeft gepubliceerde evenementen maar geen tickettypes, dus de pagina is te lezen maar er valt niets te kopen. Een tickettype toevoegen vraagt om een naam, een prijs en een aantal. Het gratis plan verkoopt tot 25 betaalde tickets per maand, je scant de QR-code van elk daarvan bij de deur, en Event Schedule rekent op geen enkel plan platformkosten.',
+    'activation_nudge_cta_no_ticket_type' => 'Tickets instellen',
+
+    'activation_nudge_subject_no_gateway' => 'Nog één stap voordat :schedule betalingen kan aannemen',
+    'activation_nudge_heading_no_gateway' => 'Koppel een manier om betaald te worden',
+    'activation_nudge_body_no_gateway' => ':schedule heeft betaalde tickets ingesteld, maar er is nog geen betaalmethode gekoppeld, dus kopers kunnen niet online betalen. Stripe koppelen kost een paar minuten en het geld gaat rechtstreeks naar je eigen rekening. Je kunt ook contant afrekenen bij de deur en de tickets precies laten zoals ze zijn.',
+    'activation_nudge_cta_no_gateway' => 'Betalingen koppelen',
+
+    'activation_nudge_subject_first_sale' => 'Je hebt je eerste ticket verkocht',
+    'activation_nudge_heading_first_sale' => 'De eerste is verkocht',
+    'activation_nudge_body_first_sale' => 'Het eerste ticket voor :schedule is betaald. De koper heeft zijn QR-code, en je kunt die bij de deur scannen vanaf de verkooppagina. Die pagina laat ook zien wie er komt, wat er gekocht is en hoeveel je tot nu toe hebt binnengehaald.',
+    'activation_nudge_cta_first_sale' => 'Bekijk je verkopen',
+
+    'activation_nudge_subject_idle_30' => 'Niets op komst op :schedule',
+    'activation_nudge_heading_idle_30' => 'Je pagina heeft geen komende data',
+    'activation_nudge_body_idle_30' => ':schedule heeft geen komende evenementen, dus wie de pagina nu bezoekt ziet een lege agenda. De volgende datum toevoegen brengt hem terug, en een terugkerend evenement dekt in één keer een heel seizoen.',
+    'activation_nudge_cta_idle_30' => 'Volgende datum toevoegen',
+
+    'activation_nudge_subject_idle_60' => 'Laatste bericht over :schedule',
+    'activation_nudge_heading_idle_60' => 'Laatste bericht van ons',
+    'activation_nudge_body_idle_60' => 'Dit is de laatste e-mail die we over :schedule sturen. Er staan al een paar maanden geen komende evenementen op. Wil je de pagina weer laten werken, dan is één datum genoeg. Zo niet, dan hoef je niets te doen en blijft alles precies zoals het is.',
+    'activation_nudge_cta_idle_60' => 'Evenement toevoegen',
+
+    'next_steps' => 'Volgende stappen',
+    'next_step_add_ticket_type' => 'Voeg een tickettype toe zodat mensen kunnen kopen',
+    'next_step_connect_payments' => 'Koppel een betaalmethode om geld aan te nemen',
+    'next_step_add_first_event' => 'Voeg je eerste evenement toe',
+    'next_step_add_next_event' => 'Voeg je volgende datum toe',
     'square_profile_image' => 'Vierkante profielfoto',
     'subdomain_taken' => 'Subdomein is al in gebruik',
     'resend_invite' => 'Uitnodiging opnieuw verzenden',

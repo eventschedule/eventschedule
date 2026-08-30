@@ -408,6 +408,42 @@ return [
     'onboarding_nudge_body_3' => 'Acesta este ultimul e-mail pe care îl trimitem despre configurare. Dacă doriți în continuare o pagină publică pentru evenimentele dumneavoastră, durează aproximativ un minut. Altfel, nu trebuie să faceți nimic - contul rămâne exact așa cum este.',
     'onboarding_nudge_cta' => 'Creați programul',
     'onboarding_nudge_free_note' => 'Planul gratuit nu are limită de timp și nu solicită card.',
+
+    'activation_nudge_subject_no_event' => 'Adăugați primul eveniment pe :schedule',
+    'activation_nudge_heading_no_event' => 'Pagina dumneavoastră așteaptă o dată',
+    'activation_nudge_body_no_event' => ':schedule este configurat și pagina publică este online, dar încă nu are nimic pe ea. Adăugați un eveniment și pagina începe să funcționeze: un link de partajat, un cod QR și un calendar la care publicul se poate abona. Un eveniment care se repetă săptămânal sau lunar se introduce o singură dată.',
+    'activation_nudge_cta_no_event' => 'Adăugați un eveniment',
+
+    'activation_nudge_subject_no_ticket_type' => 'Vindeți bilete pentru :schedule?',
+    'activation_nudge_heading_no_ticket_type' => 'Puteți vinde din această pagină',
+    'activation_nudge_body_no_ticket_type' => ':schedule are evenimente publicate, dar niciun tip de bilet, așa că pagina poate fi citită, dar nu se poate cumpăra nimic de pe ea. Un tip de bilet cere un nume, un preț și o cantitate. Planul gratuit vinde până la 25 de bilete plătite pe lună, scanați codul QR al fiecăruia la intrare, iar Event Schedule nu percepe niciun comision de platformă, pe niciun plan.',
+    'activation_nudge_cta_no_ticket_type' => 'Configurați biletele',
+
+    'activation_nudge_subject_no_gateway' => 'Mai e un pas până când :schedule poate încasa',
+    'activation_nudge_heading_no_gateway' => 'Conectați o modalitate de a fi plătit',
+    'activation_nudge_body_no_gateway' => ':schedule are bilete plătite configurate, dar nu este conectată încă nicio metodă de plată, așa că cumpărătorii nu pot plăti online. Conectarea Stripe durează câteva minute, iar banii ajung direct în contul dumneavoastră. Puteți încasa și numerar la intrare, lăsând biletele exact așa cum sunt.',
+    'activation_nudge_cta_no_gateway' => 'Conectați plățile',
+
+    'activation_nudge_subject_first_sale' => 'Ați vândut primul bilet',
+    'activation_nudge_heading_first_sale' => 'Primul este vândut',
+    'activation_nudge_body_first_sale' => 'Primul bilet pentru :schedule a fost plătit. Cumpărătorul are codul QR, iar dumneavoastră îl puteți scana la intrare din pagina de vânzări. Aceeași pagină arată și cine vine, ce s-a cumpărat și cât ați încasat până acum.',
+    'activation_nudge_cta_first_sale' => 'Vedeți vânzările',
+
+    'activation_nudge_subject_idle_30' => 'Nimic în program pe :schedule',
+    'activation_nudge_heading_idle_30' => 'Pagina nu are date viitoare',
+    'activation_nudge_body_idle_30' => ':schedule nu are evenimente viitoare, așa că oricine vizitează pagina acum vede un calendar gol. Adăugarea următoarei date o readuce la viață, iar un eveniment recurent acoperă un sezon întreg dintr-o dată.',
+    'activation_nudge_cta_idle_30' => 'Adăugați următoarea dată',
+
+    'activation_nudge_subject_idle_60' => 'Ultima notă despre :schedule',
+    'activation_nudge_heading_idle_60' => 'Ultimul mesaj de la noi',
+    'activation_nudge_body_idle_60' => 'Acesta este ultimul e-mail pe care îl trimitem despre :schedule. De câteva luni nu are evenimente viitoare. Dacă doriți ca pagina să funcționeze din nou, este suficientă o singură dată. Altfel, nu trebuie să faceți nimic și totul rămâne exact așa cum este.',
+    'activation_nudge_cta_idle_60' => 'Adăugați un eveniment',
+
+    'next_steps' => 'Pașii următori',
+    'next_step_add_ticket_type' => 'Adăugați un tip de bilet pentru a se putea cumpăra',
+    'next_step_connect_payments' => 'Conectați o metodă de plată pentru a încasa',
+    'next_step_add_first_event' => 'Adăugați primul eveniment',
+    'next_step_add_next_event' => 'Adăugați următoarea dată',
     'square_profile_image' => 'Imagine de Profil Pătrată',
     'subdomain_taken' => 'Subdomeniul este deja ocupat',
     'resend_invite' => 'Retrimite Invitația',

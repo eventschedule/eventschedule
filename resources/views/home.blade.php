@@ -133,6 +133,12 @@
             <x-needs-attention :items="$pendingActionItems" />
         @endif
 
+        {{-- Next steps: suggestions, deliberately a separate list from the one above so the
+             to-do queue stays a queue. Same component, its own heading. --}}
+        @if(!empty($nextStepItems) && $nextStepItems->isNotEmpty())
+            <x-needs-attention :items="$nextStepItems" :title="__('messages.next_steps')" />
+        @endif
+
         {{-- Configurable Dashboard Panels --}}
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-4">
             @foreach($dashboardConfig['panels'] as $panel)

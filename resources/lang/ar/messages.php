@@ -352,6 +352,42 @@ return [
     'onboarding_nudge_body_3' => 'هذه آخر رسالة نرسلها بشأن الإعداد. إذا كنت ما زلت ترغب في صفحة عامة لفعالياتك، فالأمر يستغرق نحو دقيقة. وإلا فلا حاجة لفعل شيء - يبقى حسابك كما هو.',
     'onboarding_nudge_cta' => 'أنشئ جدولك',
     'onboarding_nudge_free_note' => 'الخطة المجانية بلا حد زمني ولا تتطلب بطاقة.',
+
+    'activation_nudge_subject_no_event' => 'أضف أول فعالية إلى :schedule',
+    'activation_nudge_heading_no_event' => 'صفحتك تنتظر موعدًا',
+    'activation_nudge_body_no_event' => 'تم إعداد :schedule وصفحته العامة متاحة، لكن لا يوجد عليها شيء بعد. أضف فعالية واحدة وتبدأ الصفحة بالعمل: رابط للمشاركة، ورمز QR، وتقويم يمكن لجمهورك الاشتراك فيه. الفعالية التي تتكرر أسبوعيًا أو شهريًا تُدخَل مرة واحدة فقط.',
+    'activation_nudge_cta_no_event' => 'أضف فعالية',
+
+    'activation_nudge_subject_no_ticket_type' => 'هل تبيع تذاكر لـ :schedule؟',
+    'activation_nudge_heading_no_ticket_type' => 'يمكنك البيع من هذه الصفحة',
+    'activation_nudge_body_no_ticket_type' => 'لدى :schedule فعاليات منشورة لكن بلا أنواع تذاكر، فالصفحة تُقرأ ولا يمكن الشراء منها. إضافة نوع تذكرة تحتاج اسمًا وسعرًا وكمية. تبيع الخطة المجانية حتى 25 تذكرة مدفوعة شهريًا، وتمسح رمز QR لكل واحدة منها عند الباب، ولا تتقاضى Event Schedule أي رسوم منصة على أي خطة.',
+    'activation_nudge_cta_no_ticket_type' => 'إعداد التذاكر',
+
+    'activation_nudge_subject_no_gateway' => 'خطوة واحدة قبل أن يتمكن :schedule من قبول الدفع',
+    'activation_nudge_heading_no_gateway' => 'اربط وسيلة لتحصيل المدفوعات',
+    'activation_nudge_body_no_gateway' => 'لدى :schedule تذاكر مدفوعة معدّة، لكن لم تُربط بعد أي وسيلة دفع، فلا يستطيع المشترون الدفع عبر الإنترنت. ربط Stripe يستغرق دقائق قليلة والمال يذهب مباشرة إلى حسابك الخاص. ويمكنك بدلًا من ذلك قبول النقد عند الباب وترك التذاكر كما هي تمامًا.',
+    'activation_nudge_cta_no_gateway' => 'اربط المدفوعات',
+
+    'activation_nudge_subject_first_sale' => 'لقد بعت أول تذكرة',
+    'activation_nudge_heading_first_sale' => 'بيعت الأولى',
+    'activation_nudge_body_first_sale' => 'تم دفع أول تذكرة لـ :schedule. لدى المشتري رمز QR الخاص به، ويمكنك مسحه عند الباب من صفحة المبيعات. تعرض الصفحة نفسها أيضًا من سيحضر وما الذي اشتراه وكم حصّلت حتى الآن.',
+    'activation_nudge_cta_first_sale' => 'اعرض مبيعاتك',
+
+    'activation_nudge_subject_idle_30' => 'لا شيء قادم على :schedule',
+    'activation_nudge_heading_idle_30' => 'صفحتك بلا مواعيد قادمة',
+    'activation_nudge_body_idle_30' => 'ليس لدى :schedule فعاليات قادمة، فمن يزور الصفحة الآن يرى تقويمًا فارغًا. إضافة الموعد التالي تعيدها للعمل، والفعالية المتكررة تغطي موسمًا كاملًا دفعة واحدة.',
+    'activation_nudge_cta_idle_30' => 'أضف موعدك التالي',
+
+    'activation_nudge_subject_idle_60' => 'آخر رسالة بشأن :schedule',
+    'activation_nudge_heading_idle_60' => 'آخر رسالة منا',
+    'activation_nudge_body_idle_60' => 'هذه آخر رسالة نرسلها بشأن :schedule. لم تكن عليه فعاليات قادمة منذ شهرين. إذا أردت أن تعمل الصفحة من جديد، يكفي إضافة موعد واحد. وإلا فلا حاجة لفعل شيء ويبقى كل شيء كما هو تمامًا.',
+    'activation_nudge_cta_idle_60' => 'أضف فعالية',
+
+    'next_steps' => 'الخطوات التالية',
+    'next_step_add_ticket_type' => 'أضف نوع تذكرة ليتمكن الناس من الشراء',
+    'next_step_connect_payments' => 'اربط وسيلة دفع لتحصيل الأموال',
+    'next_step_add_first_event' => 'أضف أول فعالية لك',
+    'next_step_add_next_event' => 'أضف موعدك التالي',
     'square_profile_image' => 'صورة الملف الشخصي المربعة',
     'subdomain_taken' => 'النطاق الفرعي مستخدم بالفعل',
     'resend_invite' => 'إعادة إرسال الدعوة',

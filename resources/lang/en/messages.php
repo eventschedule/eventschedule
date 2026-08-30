@@ -408,6 +408,45 @@ return [
     'onboarding_nudge_body_3' => 'This is the last email we will send about getting set up. If you still want a public page for your events, it takes about a minute. Otherwise there is nothing to do - your account stays exactly as it is.',
     'onboarding_nudge_cta' => 'Create your schedule',
     'onboarding_nudge_free_note' => 'The free plan has no time limit and asks for no card.',
+
+    // Activation nudges: a schedule EXISTS and has stalled. Each key is an independent
+    // trigger, not a stage, so the copy never refers to an earlier or later email.
+    'activation_nudge_subject_no_event' => 'Put your first event on :schedule',
+    'activation_nudge_heading_no_event' => 'Your page is waiting for a date',
+    'activation_nudge_body_no_event' => ':schedule is set up and its public page is live, but there is nothing on it yet. Add one event and the page starts working: a shareable link, a QR code, and a calendar your audience can subscribe to. An event that repeats weekly or monthly only has to be entered once.',
+    'activation_nudge_cta_no_event' => 'Add an event',
+
+    'activation_nudge_subject_no_ticket_type' => 'Selling tickets for :schedule?',
+    'activation_nudge_heading_no_ticket_type' => 'You can sell from this page',
+    'activation_nudge_body_no_ticket_type' => ':schedule has events published but no ticket types, so the page can be read but not bought from. Adding one takes a name, a price and a quantity. The free plan sells up to 25 paid tickets a month, you scan the QR code on every one of them at the door, and Event Schedule takes no platform fee on any plan.',
+    'activation_nudge_cta_no_ticket_type' => 'Set up tickets',
+
+    'activation_nudge_subject_no_gateway' => 'One step left before :schedule can take payment',
+    'activation_nudge_heading_no_gateway' => 'Connect a way to get paid',
+    'activation_nudge_body_no_gateway' => ':schedule has paid tickets set up, but no payment method is connected yet, so buyers cannot pay online. Connecting Stripe takes a couple of minutes and the money goes straight to your own account. You can also take cash at the door instead and keep the tickets exactly as they are.',
+    'activation_nudge_cta_no_gateway' => 'Connect payments',
+
+    'activation_nudge_subject_first_sale' => 'You sold your first ticket',
+    'activation_nudge_heading_first_sale' => 'First one sold',
+    'activation_nudge_body_first_sale' => 'The first ticket for :schedule has been paid for. The buyer has their QR code, and you can scan it at the door from the Sales page. That page also shows who is coming, what they bought and what you have taken so far.',
+    'activation_nudge_cta_first_sale' => 'See your sales',
+
+    'activation_nudge_subject_idle_30' => 'Nothing coming up on :schedule',
+    'activation_nudge_heading_idle_30' => 'Your page has no upcoming dates',
+    'activation_nudge_body_idle_30' => ':schedule has no upcoming events, so anyone visiting the page right now sees an empty calendar. Adding the next date brings it back, and a recurring event covers a whole season in one go.',
+    'activation_nudge_cta_idle_30' => 'Add your next date',
+
+    'activation_nudge_subject_idle_60' => 'Last note about :schedule',
+    'activation_nudge_heading_idle_60' => 'Last note from us',
+    'activation_nudge_body_idle_60' => 'This is the last email we will send about :schedule. It has had no upcoming events for a couple of months. If you want the page working again, adding one date is all it takes. Otherwise there is nothing to do and everything stays exactly where it is.',
+    'activation_nudge_cta_idle_60' => 'Add an event',
+
+    // In-app next steps, the dashboard half of the activation nudges above.
+    'next_steps' => 'Next steps',
+    'next_step_add_ticket_type' => 'Add a ticket type so people can buy',
+    'next_step_connect_payments' => 'Connect a payment method to take money',
+    'next_step_add_first_event' => 'Add your first event',
+    'next_step_add_next_event' => 'Add your next date',
     'square_profile_image' => 'Square Profile Image',
     'subdomain_taken' => 'Subdomain is already taken',
     'resend_invite' => 'Resend Invite',

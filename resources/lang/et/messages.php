@@ -407,6 +407,42 @@ return [
     'onboarding_nudge_body_3' => 'See on viimane e-kiri, mille seadistamise kohta saadame. Kui soovite endiselt oma sündmustele avalikku lehte, võtab see umbes minuti. Vastasel juhul pole vaja midagi teha - teie konto jääb täpselt selliseks, nagu on.',
     'onboarding_nudge_cta' => 'Looge oma ajakava',
     'onboarding_nudge_free_note' => 'Tasuta plaanil pole ajapiirangut ega küsita kaarti.',
+
+    'activation_nudge_subject_no_event' => 'Lisage :schedule lehele esimene sündmus',
+    'activation_nudge_heading_no_event' => 'Teie leht ootab kuupäeva',
+    'activation_nudge_body_no_event' => ':schedule on seadistatud ja selle avalik leht on üleval, kuid seal pole veel midagi. Lisage üks sündmus ja leht hakkab tööle: jagatav link, QR-kood ja kalender, mida teie publik saab tellida. Iga nädal või kuu korduvat sündmust tuleb sisestada ainult üks kord.',
+    'activation_nudge_cta_no_event' => 'Lisa sündmus',
+
+    'activation_nudge_subject_no_ticket_type' => 'Kas müüte :schedule piletid?',
+    'activation_nudge_heading_no_ticket_type' => 'Sellelt lehelt saab müüa',
+    'activation_nudge_body_no_ticket_type' => ':schedule lehel on sündmused avaldatud, kuid piletitüüpe pole, nii et lehte saab lugeda, aga sealt ei saa osta. Piletitüübi lisamiseks kulub nimi, hind ja kogus. Tasuta plaan müüb kuni 25 tasulist piletit kuus, te skannite ukse juures neist igaühe QR-koodi ja Event Schedule ei võta üheski plaanis platvormitasu.',
+    'activation_nudge_cta_no_ticket_type' => 'Seadista piletid',
+
+    'activation_nudge_subject_no_gateway' => 'Üks samm on jäänud, enne kui :schedule saab makseid vastu võtta',
+    'activation_nudge_heading_no_gateway' => 'Ühendage makseviis',
+    'activation_nudge_body_no_gateway' => ':schedule lehel on tasulised piletid seadistatud, kuid ühtegi makseviisi pole veel ühendatud, nii et ostjad ei saa veebis maksta. Stripe\'i ühendamine võtab paar minutit ja raha läheb otse teie enda kontole. Võite ka ukse juures sularaha võtta ja jätta piletid täpselt selliseks, nagu need on.',
+    'activation_nudge_cta_no_gateway' => 'Ühenda maksed',
+
+    'activation_nudge_subject_first_sale' => 'Müüsite oma esimese pileti',
+    'activation_nudge_heading_first_sale' => 'Esimene müüdud',
+    'activation_nudge_body_first_sale' => ':schedule esimene pilet on makstud. Ostjal on oma QR-kood ja te saate selle ukse juures müügilehelt skannida. Sama leht näitab ka, kes tuleb, mida osteti ja kui palju olete seni teeninud.',
+    'activation_nudge_cta_first_sale' => 'Vaata müüke',
+
+    'activation_nudge_subject_idle_30' => ':schedule lehel pole midagi tulemas',
+    'activation_nudge_heading_idle_30' => 'Teie lehel pole eelseisvaid kuupäevi',
+    'activation_nudge_body_idle_30' => ':schedule lehel pole eelseisvaid sündmusi, nii et praegu külastaja näeb tühja kalendrit. Järgmise kuupäeva lisamine toob selle tagasi ja korduv sündmus katab kogu hooaja korraga.',
+    'activation_nudge_cta_idle_30' => 'Lisa järgmine kuupäev',
+
+    'activation_nudge_subject_idle_60' => 'Viimane kiri :schedule kohta',
+    'activation_nudge_heading_idle_60' => 'Viimane kiri meilt',
+    'activation_nudge_body_idle_60' => 'See on viimane kiri, mille :schedule kohta saadame. Sellel pole paar kuud olnud eelseisvaid sündmusi. Kui soovite lehe uuesti tööle panna, piisab ühest kuupäevast. Vastasel juhul pole vaja midagi teha ja kõik jääb täpselt sinna, kus on.',
+    'activation_nudge_cta_idle_60' => 'Lisa sündmus',
+
+    'next_steps' => 'Järgmised sammud',
+    'next_step_add_ticket_type' => 'Lisa piletitüüp, et saaks osta',
+    'next_step_connect_payments' => 'Ühenda makseviis, et raha vastu võtta',
+    'next_step_add_first_event' => 'Lisa oma esimene sündmus',
+    'next_step_add_next_event' => 'Lisa järgmine kuupäev',
     'square_profile_image' => 'Ruudukujuline profiilipilt',
     'subdomain_taken' => 'Alamdomeen on juba hõivatud',
     'resend_invite' => 'Saada kutse uuesti',

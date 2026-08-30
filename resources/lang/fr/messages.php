@@ -386,6 +386,42 @@ return [
     'onboarding_nudge_body_3' => 'Ceci est le dernier e-mail que nous enverrons à propos de la configuration. Si vous voulez toujours une page publique pour vos événements, cela prend environ une minute. Sinon, il n\'y a rien à faire : votre compte reste tel quel.',
     'onboarding_nudge_cta' => 'Créer votre agenda',
     'onboarding_nudge_free_note' => 'Le plan gratuit est sans limite de durée et ne demande aucune carte.',
+
+    'activation_nudge_subject_no_event' => 'Ajoutez votre premier événement sur :schedule',
+    'activation_nudge_heading_no_event' => 'Votre page attend une date',
+    'activation_nudge_body_no_event' => ':schedule est configuré et sa page publique est en ligne, mais il n\'y a encore rien dessus. Ajoutez un événement et la page se met à fonctionner : un lien à partager, un QR code et un calendrier auquel votre public peut s\'abonner. Un événement qui revient chaque semaine ou chaque mois ne se saisit qu\'une seule fois.',
+    'activation_nudge_cta_no_event' => 'Ajouter un événement',
+
+    'activation_nudge_subject_no_ticket_type' => 'Vendre des billets pour :schedule ?',
+    'activation_nudge_heading_no_ticket_type' => 'Vous pouvez vendre depuis cette page',
+    'activation_nudge_body_no_ticket_type' => ':schedule a des événements publiés mais aucun type de billet : la page se lit, mais on ne peut rien y acheter. En ajouter un demande un nom, un prix et une quantité. Le plan gratuit vend jusqu\'à 25 billets payants par mois, vous scannez le QR code de chacun d\'eux à l\'entrée, et Event Schedule ne prend aucune commission de plateforme, sur aucun plan.',
+    'activation_nudge_cta_no_ticket_type' => 'Configurer les billets',
+
+    'activation_nudge_subject_no_gateway' => 'Une étape avant que :schedule puisse encaisser',
+    'activation_nudge_heading_no_gateway' => 'Connectez un moyen d\'être payé',
+    'activation_nudge_body_no_gateway' => ':schedule a des billets payants configurés, mais aucun moyen de paiement n\'est encore connecté : les acheteurs ne peuvent donc pas payer en ligne. Connecter Stripe prend quelques minutes et l\'argent arrive directement sur votre propre compte. Vous pouvez aussi encaisser en espèces à l\'entrée et laisser les billets exactement tels qu\'ils sont.',
+    'activation_nudge_cta_no_gateway' => 'Connecter les paiements',
+
+    'activation_nudge_subject_first_sale' => 'Vous avez vendu votre premier billet',
+    'activation_nudge_heading_first_sale' => 'Le premier est vendu',
+    'activation_nudge_body_first_sale' => 'Le premier billet pour :schedule a été payé. L\'acheteur a son QR code, et vous pouvez le scanner à l\'entrée depuis la page des ventes. Cette page montre aussi qui vient, ce qui a été acheté et ce que vous avez encaissé jusqu\'ici.',
+    'activation_nudge_cta_first_sale' => 'Voir vos ventes',
+
+    'activation_nudge_subject_idle_30' => 'Rien à venir sur :schedule',
+    'activation_nudge_heading_idle_30' => 'Votre page n\'a aucune date à venir',
+    'activation_nudge_body_idle_30' => ':schedule n\'a aucun événement à venir : qui visite la page en ce moment voit un calendrier vide. Ajouter la prochaine date la remet en marche, et un événement récurrent couvre toute une saison d\'un coup.',
+    'activation_nudge_cta_idle_30' => 'Ajouter votre prochaine date',
+
+    'activation_nudge_subject_idle_60' => 'Dernier mot au sujet de :schedule',
+    'activation_nudge_heading_idle_60' => 'Dernier message de notre part',
+    'activation_nudge_body_idle_60' => 'Ceci est le dernier e-mail que nous enverrons au sujet de :schedule. Il n\'a aucun événement à venir depuis deux mois. Si vous voulez que la page refonctionne, une seule date suffit. Sinon, il n\'y a rien à faire et tout reste exactement en place.',
+    'activation_nudge_cta_idle_60' => 'Ajouter un événement',
+
+    'next_steps' => 'Prochaines étapes',
+    'next_step_add_ticket_type' => 'Ajoutez un type de billet pour pouvoir vendre',
+    'next_step_connect_payments' => 'Connectez un moyen de paiement pour encaisser',
+    'next_step_add_first_event' => 'Ajoutez votre premier événement',
+    'next_step_add_next_event' => 'Ajoutez votre prochaine date',
     'square_profile_image' => 'Image de profil carrée',
     'subdomain_taken' => 'Le sous-domaine est déjà pris',
     'resend_invite' => 'Renvoyer l\'invitation',

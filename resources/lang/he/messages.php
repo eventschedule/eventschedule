@@ -533,6 +533,42 @@ return [
     'onboarding_nudge_body_3' => 'זהו המייל האחרון שנשלח בנוגע להגדרה. אם עדיין תרצו עמוד ציבורי לאירועים שלכם, זה לוקח כדקה. אחרת אין מה לעשות - החשבון שלכם נשאר בדיוק כפי שהוא.',
     'onboarding_nudge_cta' => 'צרו את לוח הזמנים',
     'onboarding_nudge_free_note' => 'לתוכנית החינמית אין מגבלת זמן ואין צורך בכרטיס אשראי.',
+
+    'activation_nudge_subject_no_event' => 'הוסיפו את האירוע הראשון ל:schedule',
+    'activation_nudge_heading_no_event' => 'העמוד שלכם מחכה לתאריך',
+    'activation_nudge_body_no_event' => ':schedule מוגדר והעמוד הציבורי שלו באוויר, אבל עדיין אין עליו כלום. הוסיפו אירוע אחד והעמוד מתחיל לעבוד: קישור לשיתוף, קוד QR ולוח שנה שהקהל שלכם יכול להירשם אליו. אירוע שחוזר כל שבוע או כל חודש צריך להזין רק פעם אחת.',
+    'activation_nudge_cta_no_event' => 'הוספת אירוע',
+
+    'activation_nudge_subject_no_ticket_type' => 'מוכרים כרטיסים ל:schedule?',
+    'activation_nudge_heading_no_ticket_type' => 'אפשר למכור מהעמוד הזה',
+    'activation_nudge_body_no_ticket_type' => 'ל:schedule יש אירועים מפורסמים אבל אין סוגי כרטיסים, כך שאפשר לקרוא את העמוד אבל לא לקנות בו. הוספת סוג כרטיס דורשת שם, מחיר וכמות. התוכנית החינמית מוכרת עד 25 כרטיסים בתשלום בחודש, אתם סורקים את קוד ה-QR של כל אחד מהם בכניסה, ו-Event Schedule לא גובה עמלת פלטפורמה באף תוכנית.',
+    'activation_nudge_cta_no_ticket_type' => 'הגדרת כרטיסים',
+
+    'activation_nudge_subject_no_gateway' => 'נשאר צעד אחד לפני ש:schedule יוכל לגבות תשלום',
+    'activation_nudge_heading_no_gateway' => 'חברו דרך לקבל תשלום',
+    'activation_nudge_body_no_gateway' => 'ל:schedule מוגדרים כרטיסים בתשלום, אבל עדיין לא חובר אמצעי תשלום, כך שקונים לא יכולים לשלם אונליין. חיבור Stripe לוקח כמה דקות והכסף מגיע ישירות לחשבון שלכם. אפשר גם לגבות מזומן בכניסה ולהשאיר את הכרטיסים בדיוק כפי שהם.',
+    'activation_nudge_cta_no_gateway' => 'חיבור תשלומים',
+
+    'activation_nudge_subject_first_sale' => 'מכרתם את הכרטיס הראשון',
+    'activation_nudge_heading_first_sale' => 'הראשון נמכר',
+    'activation_nudge_body_first_sale' => 'הכרטיס הראשון ל:schedule שולם. לקונה יש קוד QR, ואתם יכולים לסרוק אותו בכניסה מעמוד המכירות. אותו עמוד מראה גם מי מגיע, מה נקנה וכמה גביתם עד עכשיו.',
+    'activation_nudge_cta_first_sale' => 'צפייה במכירות',
+
+    'activation_nudge_subject_idle_30' => 'אין שום דבר קרוב ב:schedule',
+    'activation_nudge_heading_idle_30' => 'לעמוד שלכם אין תאריכים קרובים',
+    'activation_nudge_body_idle_30' => 'ל:schedule אין אירועים קרובים, כך שמי שנכנס לעמוד עכשיו רואה לוח שנה ריק. הוספת התאריך הבא מחזירה אותו לפעולה, ואירוע חוזר מכסה עונה שלמה בבת אחת.',
+    'activation_nudge_cta_idle_30' => 'הוספת התאריך הבא',
+
+    'activation_nudge_subject_idle_60' => 'הודעה אחרונה בנוגע ל:schedule',
+    'activation_nudge_heading_idle_60' => 'הודעה אחרונה מאיתנו',
+    'activation_nudge_body_idle_60' => 'זהו המייל האחרון שנשלח בנוגע ל:schedule. כבר חודשיים אין בו אירועים קרובים. אם תרצו שהעמוד יעבוד שוב, מספיק להוסיף תאריך אחד. אחרת אין מה לעשות והכול נשאר בדיוק כפי שהוא.',
+    'activation_nudge_cta_idle_60' => 'הוספת אירוע',
+
+    'next_steps' => 'הצעדים הבאים',
+    'next_step_add_ticket_type' => 'הוסיפו סוג כרטיס כדי שאפשר יהיה לקנות',
+    'next_step_connect_payments' => 'חברו אמצעי תשלום כדי לגבות כסף',
+    'next_step_add_first_event' => 'הוסיפו את האירוע הראשון',
+    'next_step_add_next_event' => 'הוסיפו את התאריך הבא',
     'square_profile_image' => 'תמונת פרופיל מרובעת',
     'subdomain_taken' => 'תת-הדומיין כבר תפוס',
     'resend_invite' => 'שלח הזמנה שוב',

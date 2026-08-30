@@ -359,6 +359,42 @@ return [
     'onboarding_nudge_body_3' => 'Dies ist die letzte E-Mail, die wir zur Einrichtung senden. Wenn Sie weiterhin eine öffentliche Seite für Ihre Veranstaltungen möchten, dauert es etwa eine Minute. Andernfalls ist nichts zu tun - Ihr Konto bleibt genau so, wie es ist.',
     'onboarding_nudge_cta' => 'Zeitplan erstellen',
     'onboarding_nudge_free_note' => 'Der kostenlose Plan hat keine Zeitbegrenzung und erfordert keine Kreditkarte.',
+
+    'activation_nudge_subject_no_event' => 'Bringen Sie Ihre erste Veranstaltung auf :schedule',
+    'activation_nudge_heading_no_event' => 'Ihre Seite wartet auf einen Termin',
+    'activation_nudge_body_no_event' => ':schedule ist eingerichtet und die öffentliche Seite ist online, aber es steht noch nichts darauf. Fügen Sie eine Veranstaltung hinzu und die Seite fängt an zu arbeiten: ein Link zum Teilen, ein QR-Code und ein Kalender, den Ihr Publikum abonnieren kann. Eine wöchentlich oder monatlich wiederkehrende Veranstaltung muss nur einmal eingetragen werden.',
+    'activation_nudge_cta_no_event' => 'Veranstaltung hinzufügen',
+
+    'activation_nudge_subject_no_ticket_type' => 'Tickets für :schedule verkaufen?',
+    'activation_nudge_heading_no_ticket_type' => 'Von dieser Seite aus können Sie verkaufen',
+    'activation_nudge_body_no_ticket_type' => 'Auf :schedule sind Veranstaltungen veröffentlicht, aber es gibt keine Ticketarten, also lässt sich die Seite lesen, aber nichts darauf kaufen. Für eine Ticketart brauchen Sie einen Namen, einen Preis und eine Menge. Der kostenlose Plan verkauft bis zu 25 bezahlte Tickets im Monat, Sie scannen den QR-Code auf jedem davon am Einlass, und Event Schedule erhebt auf keinem Plan eine Plattformgebühr.',
+    'activation_nudge_cta_no_ticket_type' => 'Tickets einrichten',
+
+    'activation_nudge_subject_no_gateway' => 'Ein Schritt fehlt, bis :schedule Zahlungen annehmen kann',
+    'activation_nudge_heading_no_gateway' => 'Verbinden Sie eine Zahlungsmethode',
+    'activation_nudge_body_no_gateway' => 'Auf :schedule sind bezahlte Tickets eingerichtet, aber es ist noch keine Zahlungsmethode verbunden, also können Käufer online nicht bezahlen. Stripe zu verbinden dauert ein paar Minuten und das Geld geht direkt auf Ihr eigenes Konto. Sie können stattdessen auch Barzahlung am Einlass annehmen und die Tickets genau so lassen, wie sie sind.',
+    'activation_nudge_cta_no_gateway' => 'Zahlungen verbinden',
+
+    'activation_nudge_subject_first_sale' => 'Sie haben Ihr erstes Ticket verkauft',
+    'activation_nudge_heading_first_sale' => 'Das erste ist verkauft',
+    'activation_nudge_body_first_sale' => 'Das erste Ticket für :schedule wurde bezahlt. Der Käufer hat seinen QR-Code, und Sie können ihn am Einlass über die Verkaufsseite scannen. Dort sehen Sie auch, wer kommt, was gekauft wurde und wie viel bisher eingenommen wurde.',
+    'activation_nudge_cta_first_sale' => 'Verkäufe ansehen',
+
+    'activation_nudge_subject_idle_30' => 'Nichts Kommendes auf :schedule',
+    'activation_nudge_heading_idle_30' => 'Ihre Seite hat keine kommenden Termine',
+    'activation_nudge_body_idle_30' => 'Auf :schedule stehen keine kommenden Veranstaltungen, wer die Seite gerade besucht, sieht also einen leeren Kalender. Der nächste Termin bringt sie zurück, und eine wiederkehrende Veranstaltung deckt eine ganze Saison auf einmal ab.',
+    'activation_nudge_cta_idle_30' => 'Nächsten Termin hinzufügen',
+
+    'activation_nudge_subject_idle_60' => 'Letzte Nachricht zu :schedule',
+    'activation_nudge_heading_idle_60' => 'Letzte Nachricht von uns',
+    'activation_nudge_body_idle_60' => 'Dies ist die letzte E-Mail, die wir zu :schedule senden. Seit ein paar Monaten stehen dort keine kommenden Veranstaltungen. Wenn die Seite wieder arbeiten soll, genügt ein einziger Termin. Andernfalls ist nichts zu tun und alles bleibt genau so, wie es ist.',
+    'activation_nudge_cta_idle_60' => 'Veranstaltung hinzufügen',
+
+    'next_steps' => 'Nächste Schritte',
+    'next_step_add_ticket_type' => 'Ticketart hinzufügen, damit gekauft werden kann',
+    'next_step_connect_payments' => 'Zahlungsmethode verbinden, um Geld anzunehmen',
+    'next_step_add_first_event' => 'Erste Veranstaltung hinzufügen',
+    'next_step_add_next_event' => 'Nächsten Termin hinzufügen',
     'square_profile_image' => 'Quadratisches Profilbild',
     'subdomain_taken' => 'Subdomain ist bereits vergeben',
     'resend_invite' => 'Einladung erneut senden',

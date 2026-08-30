@@ -381,6 +381,42 @@ return [
     'onboarding_nudge_body_3' => 'Este es el último correo que enviaremos sobre la configuración. Si todavía quieres una página pública para tus eventos, solo lleva un minuto. Si no, no hay nada que hacer: tu cuenta se queda tal como está.',
     'onboarding_nudge_cta' => 'Crear tu agenda',
     'onboarding_nudge_free_note' => 'El plan gratuito no tiene límite de tiempo y no pide tarjeta.',
+
+    'activation_nudge_subject_no_event' => 'Publica tu primer evento en :schedule',
+    'activation_nudge_heading_no_event' => 'Tu página está esperando una fecha',
+    'activation_nudge_body_no_event' => ':schedule está configurada y su página pública está publicada, pero todavía no hay nada en ella. Añade un evento y la página empieza a funcionar: un enlace para compartir, un código QR y un calendario al que tu público puede suscribirse. Un evento que se repite cada semana o cada mes solo hay que introducirlo una vez.',
+    'activation_nudge_cta_no_event' => 'Añadir un evento',
+
+    'activation_nudge_subject_no_ticket_type' => '¿Vas a vender entradas para :schedule?',
+    'activation_nudge_heading_no_ticket_type' => 'Puedes vender desde esta página',
+    'activation_nudge_body_no_ticket_type' => ':schedule tiene eventos publicados pero ningún tipo de entrada, así que la página se puede leer pero no comprar en ella. Añadir uno solo necesita un nombre, un precio y una cantidad. El plan gratuito vende hasta 25 entradas de pago al mes, escaneas el código QR de todas ellas en la puerta, y Event Schedule no cobra comisión de plataforma en ningún plan.',
+    'activation_nudge_cta_no_ticket_type' => 'Configurar entradas',
+
+    'activation_nudge_subject_no_gateway' => 'Falta un paso para que :schedule pueda cobrar',
+    'activation_nudge_heading_no_gateway' => 'Conecta una forma de cobrar',
+    'activation_nudge_body_no_gateway' => ':schedule tiene entradas de pago configuradas, pero todavía no hay ningún método de pago conectado, así que los compradores no pueden pagar en línea. Conectar Stripe lleva un par de minutos y el dinero va directamente a tu propia cuenta. También puedes cobrar en efectivo en la puerta y dejar las entradas exactamente como están.',
+    'activation_nudge_cta_no_gateway' => 'Conectar pagos',
+
+    'activation_nudge_subject_first_sale' => 'Has vendido tu primera entrada',
+    'activation_nudge_heading_first_sale' => 'Primera entrada vendida',
+    'activation_nudge_body_first_sale' => 'Ya se ha pagado la primera entrada de :schedule. El comprador tiene su código QR y puedes escanearlo en la puerta desde la página de ventas. Esa página también muestra quién viene, qué ha comprado y cuánto has recaudado hasta ahora.',
+    'activation_nudge_cta_first_sale' => 'Ver tus ventas',
+
+    'activation_nudge_subject_idle_30' => 'No hay nada próximo en :schedule',
+    'activation_nudge_heading_idle_30' => 'Tu página no tiene fechas próximas',
+    'activation_nudge_body_idle_30' => ':schedule no tiene eventos próximos, así que quien visite la página ahora mismo ve un calendario vacío. Añadir la siguiente fecha la recupera, y un evento recurrente cubre toda una temporada de una vez.',
+    'activation_nudge_cta_idle_30' => 'Añadir tu próxima fecha',
+
+    'activation_nudge_subject_idle_60' => 'Último aviso sobre :schedule',
+    'activation_nudge_heading_idle_60' => 'Último mensaje nuestro',
+    'activation_nudge_body_idle_60' => 'Este es el último correo que enviaremos sobre :schedule. Lleva un par de meses sin eventos próximos. Si quieres que la página vuelva a funcionar, basta con añadir una fecha. Si no, no hay nada que hacer y todo se queda exactamente donde está.',
+    'activation_nudge_cta_idle_60' => 'Añadir un evento',
+
+    'next_steps' => 'Próximos pasos',
+    'next_step_add_ticket_type' => 'Añade un tipo de entrada para que puedan comprar',
+    'next_step_connect_payments' => 'Conecta un método de pago para cobrar',
+    'next_step_add_first_event' => 'Añade tu primer evento',
+    'next_step_add_next_event' => 'Añade tu próxima fecha',
     'square_profile_image' => 'Imagen de perfil cuadrada',
     'subdomain_taken' => 'El subdominio ya está ocupado',
     'resend_invite' => 'Reenviar invitación',

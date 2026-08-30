@@ -390,6 +390,14 @@ class AppController extends Controller
                     \Log::error('Scheduled command app:check-version failed: '.$e->getMessage());
                     report($e);
                 }
+                // In the daily block, not the hourly one: every trigger is on a day scale, so
+                // an hourly pass would add load without reaching anyone sooner.
+                try {
+                    \Artisan::call('app:send-activation-nudges', ['--apply' => true]);
+                } catch (\Throwable $e) {
+                    \Log::error('Scheduled command app:send-activation-nudges failed: '.$e->getMessage());
+                    report($e);
+                }
                 try {
                     \Artisan::call('google:refresh-webhooks');
                 } catch (\Exception $e) {

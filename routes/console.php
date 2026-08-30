@@ -220,6 +220,15 @@ Schedule::call(function () {
     }
 })->hourly()->name('send-onboarding-nudges')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
 
+// Daily, unlike the onboarding nudge above. Every trigger here is on a day scale - a schedule
+// with no event after 24 hours, a first sale, a page that has gone quiet for a month - so an
+// hourly pass would only add load without reaching anyone sooner.
+Schedule::call(function () {
+    if (config('app.hosted')) {
+        Artisan::call('app:send-activation-nudges', ['--apply' => true]);
+    }
+})->dailyAt('13:00')->name('send-activation-nudges')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+
 Schedule::call(function () {
     Artisan::call('app:notify-request-changes');
     Artisan::call('app:notify-fan-content-changes');

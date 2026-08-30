@@ -301,6 +301,12 @@ class HomeController extends Controller
         // dashboard, and only shown when something is pending.
         $pendingActionItems = $this->getPendingActionItems($roleIds);
 
+        // Suggestions, kept OUT of the list above. getPendingActionItems() is deliberately
+        // reactive - "a to-do list is for things that need doing" - and mixing growth
+        // suggestions into it would make a real queue impossible to trust. Same component,
+        // different heading, the way AdminAlertService reuses it.
+        $nextStepItems = $this->getNextStepItems($roleIds);
+
         // Nudge admins to turn federation on once there is something worth sharing.
         $showFederationPrompt = app(\App\Services\FederationService::class)
             ->shouldPromptAdoption($user);
@@ -331,7 +337,7 @@ class HomeController extends Controller
             'venues',
             'curators',
             'defaultCurrency',
-            'pendingActionItems', 'showFederationPrompt',
+            'pendingActionItems', 'nextStepItems', 'showFederationPrompt',
         ));
     }
 
@@ -594,6 +600,123 @@ class HomeController extends Controller
         }
 
         return $this->sortPendingActionItems($items);
+    }
+
+    /**
+     * What a schedule owner could do next, as the same row shape the to-do list uses.
+     *
+     * Kept apart from getPendingActionItems() on purpose. That list is reactive and its own
+     * comment says a to-do list is for things that need doing; a suggestion sitting in it
+     * would make a real queue impossible to trust. These render under their own heading.
+     *
+     * This is the in-app half of the activation nudges. The email half is bounded at both
+     * ends so a first run cannot mailshot the whole base, which leaves every schedule that
+     * stalled BEFORE those windows reachable only here - and that is most of them: 12 of the
+     * 401 schedules created up to 2026-02 have had any event in the last 90 days.
+     *
+     * Ordered by what it is worth if acted on: a page with a date and no way to buy comes
+     * before an empty page, because selling is what the 2026-08-30 export shows separates a
+     * paying customer from a dormant one.
+     */
+    private function getNextStepItems($roleIds)
+    {
+        $items = collect();
+
+        if ($roleIds->isEmpty()) {
+            return $items;
+        }
+
+        // $roleIds is already $user->editor(), i.e. owner and admin only, the same input
+        // getPendingActionItems() trusts. A viewer cannot act on any of these steps and never
+        // reaches here.
+        $roles = Role::whereIn('id', $roleIds)->where('is_deleted', false)->get();
+
+        if ($roles->isEmpty()) {
+            return $items;
+        }
+
+        $ids = $roles->pluck('id');
+
+        // One query each rather than per schedule: the dashboard renders on every page load.
+        $publicUpcoming = DB::table('event_role')
+            ->join('events', 'events.id', '=', 'event_role.event_id')
+            ->whereIn('event_role.role_id', $ids)
+            ->where('events.is_draft', false)
+            ->where('events.is_private', false)
+            ->where('events.is_internal', false)
+            ->where('events.starts_at', '>=', now())
+            ->distinct()->pluck('event_role.role_id')->flip();
+
+        $anyEvent = DB::table('event_role')
+            ->whereIn('role_id', $ids)
+            ->distinct()->pluck('role_id')->flip();
+
+        $withTicketType = DB::table('tickets')
+            ->join('event_role', 'event_role.event_id', '=', 'tickets.event_id')
+            ->whereIn('event_role.role_id', $ids)
+            ->where('tickets.is_deleted', false)
+            ->distinct()->pluck('event_role.role_id')->flip();
+
+        $withPaidTicketType = DB::table('tickets')
+            ->join('event_role', 'event_role.event_id', '=', 'tickets.event_id')
+            ->whereIn('event_role.role_id', $ids)
+            ->where('tickets.is_deleted', false)
+            ->where('tickets.price', '>', 0)
+            ->distinct()->pluck('event_role.role_id')->flip();
+
+        $user = auth()->user();
+        $hasGateway = $user->stripe_account_id || $user->payfast_merchant_id || $user->invoiceninja_api_key;
+
+        foreach ($roles as $role) {
+            // 1) Something upcoming and no way to buy: the step that matters most.
+            if (isset($publicUpcoming[$role->id]) && ! isset($withTicketType[$role->id])) {
+                $items->push([
+                    'type' => 'next_step_tickets',
+                    'count' => 1,
+                    'title' => __('messages.next_step_add_ticket_type'),
+                    'subtitle' => $role->name,
+                    'url' => route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']),
+                    'color' => 'blue',
+                ]);
+
+                continue;
+            }
+
+            // 2) Paid tickets set up with nothing to take the money with.
+            if (isset($withPaidTicketType[$role->id]) && ! $hasGateway) {
+                $items->push([
+                    'type' => 'next_step_payments',
+                    'count' => 1,
+                    'title' => __('messages.next_step_connect_payments'),
+                    'subtitle' => $role->name,
+                    'url' => route('profile.edit').'#section-payment-methods',
+                    'color' => 'blue',
+                ]);
+
+                continue;
+            }
+
+            // 3) An empty page, or one whose dates have all passed. Same ask either way:
+            // put a date on it.
+            if (! isset($publicUpcoming[$role->id])) {
+                $items->push([
+                    'type' => 'next_step_event',
+                    'count' => 1,
+                    'title' => isset($anyEvent[$role->id])
+                        ? __('messages.next_step_add_next_event')
+                        : __('messages.next_step_add_first_event'),
+                    'subtitle' => $role->name,
+                    'url' => route('event.create', ['subdomain' => $role->subdomain]),
+                    'color' => 'blue',
+                ]);
+            }
+        }
+
+        // At most one step per schedule already (each branch continues), and a short list is
+        // a suggestion while a long one is a chore.
+        $priority = ['next_step_tickets' => 0, 'next_step_payments' => 1, 'next_step_event' => 2];
+
+        return $items->sortBy(fn ($item) => $priority[$item['type']] ?? 9)->values();
     }
 
     /**

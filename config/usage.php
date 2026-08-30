@@ -53,6 +53,11 @@ return [
     // same run and those accounts received the entire sequence within hours.
     'onboarding_nudge_batch' => (int) env('ONBOARDING_NUDGE_BATCH', 500),
 
+    // Activation nudges are per SCHEDULE and every trigger is bounded at both ends, so a run
+    // is small by construction. The lower ceiling is deliberate anyway: these reach people who
+    // are already using the app, where a burst of mail costs more than a slow drain.
+    'activation_nudge_batch' => (int) env('ACTIVATION_NUDGE_BATCH', 200),
+
     // How many talent/venue schedules one curator may pull events from, and how many
     // event links a single reconcile pass may write. Hitting the batch ceiling is logged
     // and the remainder is picked up by the next run rather than dropped.
