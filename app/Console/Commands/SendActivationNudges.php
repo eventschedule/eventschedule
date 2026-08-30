@@ -76,6 +76,18 @@ class SendActivationNudges extends Command
         $budget = $this->batch();
         $sent = 0;
 
+        // At most ONE nudge per OWNER per run, whatever the batch allows.
+        //
+        // Every trigger is per-schedule and the only other ceiling is the global batch, so a
+        // single owner could be handed a run's worth of mail at once: one account on this
+        // install owns 37 schedules, 34 of them dormant with history. The nudges() order below
+        // is what decides which one they get - tickets and payments before idle reminders.
+        //
+        // A skipped role is NOT claimed, so it is still due on the next run and simply drains
+        // one at a time. For an owner with dozens of stalled schedules that is the intended
+        // outcome, not a limitation to engineer around.
+        $seenUsers = [];
+
         foreach ($this->nudges() as $key => $resolver) {
             if ($budget <= 0) {
                 break;
@@ -90,7 +102,12 @@ class SendActivationNudges extends Command
                     break;
                 }
 
+                if (isset($seenUsers[$role->user_id])) {
+                    continue;
+                }
+
                 if (! $apply) {
+                    $seenUsers[$role->user_id] = true;
                     $this->line("  would send {$key} for {$role->name} to {$role->user->email}");
                     $sent++;
                     $budget--;
@@ -112,16 +129,25 @@ class SendActivationNudges extends Command
                     continue;
                 }
 
+                $seenUsers[$role->user_id] = true;
                 $budget--;
 
                 try {
                     // Queued, and in the recipient's own language. Sending inline blocks the
                     // scheduled chain (this also runs inside a web request), and Mail::to()
                     // with a bare address renders in the CLI locale.
+                    // roleId NULL, deliberately, so this goes out on the PLATFORM mailer.
+                    // Passing the schedule id routes SendQueuedEmail through
+                    // RoleMailerService::sendForRole(), which sends via the schedule's own SMTP
+                    // when it has one - our message, from their domain - meters it as
+                    // EMAIL_TICKET against their allowance, and worst, DROPS it silently while
+                    // their SMTP is inside its 24h failure window. The claim above is already
+                    // written by then, so that nudge would never be sent or retried.
+                    // Same rule as SendOnboardingNudges and WindDownReminder.
                     SendQueuedEmail::dispatch(
                         new ActivationNudge($role, $key),
                         $role->user->email,
-                        $role->id,
+                        null,
                         $role->user->language_code ?? app()->getLocale()
                     );
 
@@ -199,6 +225,35 @@ class SendActivationNudges extends Command
             ->where('events.is_internal', false);
     }
 
+    /**
+     * Events this schedule is actually responsible for, mirroring Event::scopeManagedThrough().
+     *
+     * The `events` relation is a plain pivot, so without this a schedule is nudged about events
+     * it does not own. Two cases, both real:
+     *
+     * 1. A DECLINE does not detach. EventController::decline() and ::uncurate() leave the row at
+     *    is_accepted = false, so a venue that turned an event down would be told to put tickets
+     *    on it.
+     * 2. A CURATOR that merely lists someone else's event would be told to price it - and since
+     *    the editor's Tickets panel follows canViewEventData(), which has a curator exception,
+     *    the email would link to a page where they cannot act.
+     *
+     * The accepted branch is NOT narrowed to events the schedule created. A venue that accepted
+     * a talent's event can manage its tickets and is exactly who this is for; scoping on
+     * creator_role_id alone would silently stop nudging the main persona.
+     */
+    private function ownedEvents($query)
+    {
+        return $query->where(function ($q) {
+            // My own schedule's event: mine whatever the pivot says.
+            $q->whereColumn('event_role.role_id', 'events.creator_role_id')
+                // Somebody else's: only once this schedule accepted it, and never for a curator,
+                // which owns only what it created.
+                ->orWhere(fn ($w) => $w->where('event_role.is_accepted', true)
+                    ->where('roles.type', '!=', 'curator'));
+        });
+    }
+
     /** A schedule created recently that still has nothing on its page. */
     private function dueForNoEvent(int $limit)
     {
@@ -221,33 +276,69 @@ class SendActivationNudges extends Command
     private function dueForNoTicketType(int $limit)
     {
         return $this->base('no_ticket_type')
-            ->whereHas('events', fn ($q) => $this->publicEvents($q)->where('events.starts_at', '>=', now()))
-            ->whereDoesntHave('events.tickets', fn ($q) => $q->where('tickets.is_deleted', false))
+            ->whereHas('events', fn ($q) => $this->ownedEvents($this->publicEvents($q))
+                ->where('events.starts_at', '>=', now()))
+            // Any ticket type on any event this schedule owns counts as "they know how".
+            ->whereDoesntHave('events', fn ($q) => $this->ownedEvents($q)
+                ->whereHas('tickets', fn ($t) => $t->where('tickets.is_deleted', false)))
             ->limit($limit)->get();
     }
 
-    /** Paid tickets set up, but nothing connected to take the money with. */
+    /**
+     * Paid tickets set up, but nothing connected to take the money with.
+     *
+     * The "connected" test is payment_gateways()->connectedFor(), whose docblock says it is what
+     * the event form keys this same nudge off. It is a PHP-side check, so the SQL only
+     * pre-filters to schedules with a paid ticket type and the collection is filtered after -
+     * that candidate set is under a hundred schedules on this install.
+     *
+     * Testing the credential columns by hand got it wrong in BOTH directions. It missed
+     * users.payment_url, so an organizer taking money through a payment link was told to connect
+     * something; and it read stripe_account_id, which is written when Connect onboarding STARTS,
+     * where canAcceptStripePayments() reads stripe_completed_at, written only once Stripe
+     * confirms charges_enabled - so someone who abandoned onboarding halfway could not take money
+     * and was skipped by the very nudge meant for them.
+     */
     private function dueForNoGateway(int $limit)
     {
         return $this->base('no_gateway')
-            ->whereHas('events.tickets', fn ($q) => $q->where('tickets.is_deleted', false)
-                ->where('tickets.price', '>', 0))
-            ->whereHas('user', fn ($q) => $q->whereNull('stripe_account_id')
-                ->whereNull('payfast_merchant_id')
-                ->whereNull('invoiceninja_api_key'))
-            ->limit($limit)->get();
+            ->whereHas('events', fn ($q) => $this->ownedEvents($q)
+                ->whereHas('tickets', fn ($t) => $t->where('tickets.is_deleted', false)
+                    ->where('tickets.price', '>', 0)))
+            ->limit($limit)->get()
+            ->filter(fn (Role $role) => empty(payment_gateways()->connectedFor($role->user)))
+            ->values();
     }
 
-    /** First money in, recently enough that saying so still makes sense. */
+    /**
+     * The FIRST money in, recently enough that saying so still makes sense.
+     *
+     * Both halves are load-bearing. "A paid sale in the last 7 days" alone is not "first": the
+     * once-per-(role, key) claim only makes it read that way for a schedule that had never sold
+     * when this shipped. On the first run every established seller qualifies, and the four
+     * schedules carrying 89% of all ticket volume - 328, 127, 85 and 36 lifetime sales - would
+     * each be congratulated on their first.
+     *
+     * So the second clause requires that no qualifying sale exists OUTSIDE the window. It repeats
+     * every filter from the first, or an old RSVP row would disqualify a genuine first sale, and
+     * it counts a null paid_at as old: Sale::saving() stamps it so nulls are legacy only, but
+     * `paid_at < $cut` is false for null and an undated old sale would otherwise slip through.
+     */
     private function dueForFirstSale(int $limit)
     {
-        $w = self::WINDOWS['first_sale'];
+        $cutoff = now()->subDays(self::WINDOWS['first_sale']['max_days']);
+
+        $paidSale = fn ($q) => $q->where('sales.status', 'paid')
+            ->where('sales.is_deleted', false)
+            ->whereNotIn('sales.payment_method', ['rsvp', 'import']);
 
         return $this->base('first_sale')
-            ->whereHas('events.sales', fn ($q) => $q->where('sales.status', 'paid')
-                ->where('sales.is_deleted', false)
-                ->whereNotIn('sales.payment_method', ['rsvp', 'import'])
-                ->where('sales.paid_at', '>=', now()->subDays($w['max_days'])))
+            ->whereHas('events', fn ($q) => $this->ownedEvents($q)
+                ->whereHas('sales', fn ($s) => $paidSale($s)->where('sales.paid_at', '>=', $cutoff)))
+            ->whereDoesntHave('events', fn ($q) => $this->ownedEvents($q)
+                ->whereHas('sales', fn ($s) => $paidSale($s)
+                    ->where(fn ($w) => $w->whereNull('sales.paid_at')
+                        ->orWhere('sales.paid_at', '<', $cutoff))))
             ->limit($limit)->get();
     }
 
@@ -261,9 +352,12 @@ class SendActivationNudges extends Command
         $w = self::WINDOWS[$key];
 
         return $this->base($key)
-            ->whereHas('events', fn ($q) => $this->publicEvents($q)
+            ->whereHas('events', fn ($q) => $this->ownedEvents($this->publicEvents($q))
                 ->whereBetween('events.starts_at', [now()->subDays($w['max_days']), now()->subDays($w['min_days'])]))
-            ->whereDoesntHave('events', fn ($q) => $q->where('events.starts_at', '>=', now()))
+            // Anything upcoming at all means the page is working, draft included - someone
+            // mid-edit is not idle.
+            ->whereDoesntHave('events', fn ($q) => $this->ownedEvents($q)
+                ->where('events.starts_at', '>=', now()))
             ->limit($limit)->get();
     }
 }

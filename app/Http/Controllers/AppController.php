@@ -390,14 +390,10 @@ class AppController extends Controller
                     \Log::error('Scheduled command app:check-version failed: '.$e->getMessage());
                     report($e);
                 }
-                // In the daily block, not the hourly one: every trigger is on a day scale, so
-                // an hourly pass would add load without reaching anyone sooner.
-                try {
-                    \Artisan::call('app:send-activation-nudges', ['--apply' => true]);
-                } catch (\Throwable $e) {
-                    \Log::error('Scheduled command app:send-activation-nudges failed: '.$e->getMessage());
-                    report($e);
-                }
+                // app:send-activation-nudges is deliberately NOT called here, and not in
+                // routes/console.php either - the two rails stay in sync, and here that means
+                // absent from both. It is hand-run until a real pass has been read; see the
+                // note in routes/console.php.
                 try {
                     \Artisan::call('google:refresh-webhooks');
                 } catch (\Exception $e) {

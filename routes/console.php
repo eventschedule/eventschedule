@@ -220,14 +220,11 @@ Schedule::call(function () {
     }
 })->hourly()->name('send-onboarding-nudges')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
 
-// Daily, unlike the onboarding nudge above. Every trigger here is on a day scale - a schedule
-// with no event after 24 hours, a first sale, a page that has gone quiet for a month - so an
-// hourly pass would only add load without reaching anyone sooner.
-Schedule::call(function () {
-    if (config('app.hosted')) {
-        Artisan::call('app:send-activation-nudges', ['--apply' => true]);
-    }
-})->dailyAt('13:00')->name('send-activation-nudges')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+// app:send-activation-nudges is deliberately NOT scheduled, here or in
+// AppController::translateData(). It emails people who are already using the app, and its
+// windows are wide enough that the first pass over an install that has never run it reaches a
+// large backlog at once. Run it by hand - no flag prints a dry run, --apply sends - and put it
+// back on a schedule once a real pass has been read and looks right.
 
 Schedule::call(function () {
     Artisan::call('app:notify-request-changes');

@@ -86,15 +86,86 @@ class DashboardNextStepsTest extends TestCase
         $this->assertSame(['next_step_payments'], $this->types($user->fresh()));
     }
 
+    /** stripe_completed_at, not stripe_account_id - see canAcceptStripePayments(). */
     public function test_a_connected_gateway_clears_the_payment_step(): void
     {
         $user = $this->createOwner();
-        $user->forceFill(['stripe_account_id' => 'acct_123'])->save();
+        $user->forceFill(['stripe_account_id' => 'acct_123', 'stripe_completed_at' => now()])->save();
         $role = $this->createRole($user->fresh());
         $event = $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
         $this->createTicket($event, ['price' => 25]);
 
         $this->assertSame([], $this->types($user->fresh()));
+    }
+
+    /** A half-finished Stripe onboarding cannot take money, so the step must stand. */
+    public function test_an_unfinished_stripe_onboarding_still_asks_for_payments(): void
+    {
+        $user = $this->createOwner();
+        $user->forceFill(['stripe_account_id' => 'acct_123', 'stripe_completed_at' => null])->save();
+        $role = $this->createRole($user->fresh());
+        $event = $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+        $this->createTicket($event, ['price' => 25]);
+
+        $this->assertSame(['next_step_payments'], $this->types($user->fresh()));
+    }
+
+    /** A payment link is a gateway. */
+    public function test_a_payment_link_clears_the_payment_step(): void
+    {
+        $user = $this->createOwner();
+        $user->forceFill(['payment_url' => 'https://paypal.me/someone'])->save();
+        $role = $this->createRole($user->fresh());
+        $event = $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+        $this->createTicket($event, ['price' => 25]);
+
+        $this->assertSame([], $this->types($user->fresh()));
+    }
+
+    /** A paid ADD-ON is not a ticket type, and the email half never counted it as one. */
+    public function test_a_paid_addon_is_not_a_ticket_type(): void
+    {
+        $user = $this->createOwner();
+        $role = $this->createRole($user);
+        $event = $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+        $this->createTicket($event, ['price' => 25, 'is_addon' => true]);
+
+        $this->assertSame(['next_step_tickets'], $this->types($user));
+    }
+
+    /** A curator that only lists someone else's event is offered nothing for it. */
+    public function test_a_curator_listing_someone_elses_event_is_offered_nothing(): void
+    {
+        $venueOwner = $this->createOwner();
+        $venue = $this->createRole($venueOwner, 'venue');
+        $event = $this->createEvent($venue, [
+            'starts_at' => now()->addDays(10)->format('Y-m-d H:i:s'),
+            'creator_role_id' => $venue->id,
+        ]);
+
+        $curatorUser = $this->createOwner();
+        $curator = $this->createRole($curatorUser, 'curator');
+        $event->roles()->attach($curator->id, ['is_accepted' => true]);
+
+        // Not "nothing at all": the curator's own page has no upcoming event of its own, so the
+        // step it gets must be about publishing one, never about pricing someone else's.
+        $this->assertSame(['next_step_event'], $this->types($curatorUser));
+    }
+
+    /** But a venue that accepted a talent's event can price it, so it is asked to. */
+    public function test_a_venue_that_accepted_someone_elses_event_is_asked_for_tickets(): void
+    {
+        $talent = $this->createRole($this->createOwner(), 'talent');
+        $event = $this->createEvent($talent, [
+            'starts_at' => now()->addDays(10)->format('Y-m-d H:i:s'),
+            'creator_role_id' => $talent->id,
+        ]);
+
+        $venueOwner = $this->createOwner();
+        $venue = $this->createRole($venueOwner, 'venue');
+        $event->roles()->attach($venue->id, ['is_accepted' => true]);
+
+        $this->assertSame(['next_step_tickets'], $this->types($venueOwner));
     }
 
     public function test_an_empty_schedule_is_asked_for_its_first_event(): void

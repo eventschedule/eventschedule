@@ -637,35 +637,52 @@ class HomeController extends Controller
 
         $ids = $roles->pluck('id');
 
+        // Events a schedule is actually RESPONSIBLE for, mirroring Event::scopeManagedThrough()
+        // and SendActivationNudges::ownedEvents(). Without it a schedule is offered steps for
+        // events it does not own: a decline leaves the pivot in place at is_accepted = false, and
+        // a curator that merely lists an event cannot even open the editor's Tickets panel, which
+        // follows canViewEventData(). The accepted branch is deliberately not narrowed to
+        // creator_role_id - a venue that accepted a talent's event CAN price it.
+        $owned = fn ($query) => $query
+            ->join('roles', 'roles.id', '=', 'event_role.role_id')
+            ->where(fn ($q) => $q->whereColumn('event_role.role_id', 'events.creator_role_id')
+                ->orWhere(fn ($w) => $w->where('event_role.is_accepted', true)
+                    ->where('roles.type', '!=', 'curator')));
+
         // One query each rather than per schedule: the dashboard renders on every page load.
-        $publicUpcoming = DB::table('event_role')
+        $publicUpcoming = $owned(DB::table('event_role')
             ->join('events', 'events.id', '=', 'event_role.event_id')
             ->whereIn('event_role.role_id', $ids)
             ->where('events.is_draft', false)
             ->where('events.is_private', false)
             ->where('events.is_internal', false)
-            ->where('events.starts_at', '>=', now())
+            ->where('events.starts_at', '>=', now()))
             ->distinct()->pluck('event_role.role_id')->flip();
 
-        $anyEvent = DB::table('event_role')
-            ->whereIn('role_id', $ids)
-            ->distinct()->pluck('role_id')->flip();
+        $anyEvent = $owned(DB::table('event_role')
+            ->join('events', 'events.id', '=', 'event_role.event_id')
+            ->whereIn('event_role.role_id', $ids))
+            ->distinct()->pluck('event_role.role_id')->flip();
 
-        $withTicketType = DB::table('tickets')
+        // is_addon excluded to match Event::tickets(), which the email half goes through: an
+        // add-on is not a thing anyone buys on its own, so it is not a ticket type.
+        $ticketTypes = fn (bool $paidOnly) => $owned(DB::table('tickets')
             ->join('event_role', 'event_role.event_id', '=', 'tickets.event_id')
+            ->join('events', 'events.id', '=', 'tickets.event_id')
             ->whereIn('event_role.role_id', $ids)
             ->where('tickets.is_deleted', false)
+            ->where('tickets.is_addon', false)
+            ->when($paidOnly, fn ($q) => $q->where('tickets.price', '>', 0)))
             ->distinct()->pluck('event_role.role_id')->flip();
 
-        $withPaidTicketType = DB::table('tickets')
-            ->join('event_role', 'event_role.event_id', '=', 'tickets.event_id')
-            ->whereIn('event_role.role_id', $ids)
-            ->where('tickets.is_deleted', false)
-            ->where('tickets.price', '>', 0)
-            ->distinct()->pluck('event_role.role_id')->flip();
+        $withTicketType = $ticketTypes(false);
+        $withPaidTicketType = $ticketTypes(true);
 
         $user = auth()->user();
-        $hasGateway = $user->stripe_account_id || $user->payfast_merchant_id || $user->invoiceninja_api_key;
+        // The canonical check, and what the event form keys the same nudge off. Testing the
+        // credential columns by hand missed users.payment_url and read stripe_account_id, which
+        // is written when Connect onboarding STARTS rather than when it completes.
+        $hasGateway = ! empty(payment_gateways()->connectedFor($user));
 
         foreach ($roles as $role) {
             // 1) Something upcoming and no way to buy: the step that matters most.
