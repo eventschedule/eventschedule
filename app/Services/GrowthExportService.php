@@ -397,6 +397,14 @@ class GrowthExportService
             'marketing_daily_stats.visitors is nexus-only and is null elsewhere.',
             'The newest cohort is always immature - see funnel_trend.last_index.',
             'Row tables are columnar: read columns[] then rows[][].',
+            'traffic[] columns are null for months before that counter existed, not 0. A real zero '
+                .'and an untracked month are different answers - see MarketingDailyStat::COLUMN_TRACKED_FROM.',
+            'activation, cohorts and acquisition count EVERY verified account. funnel counts only the '
+                .'organizer cohort (signup_intent null or organizer), so its denominator is smaller and '
+                .'the two sets of rates are not comparable.',
+            'signup_code_requests and signup_code_verified are NOT a funnel pair. Both are deduped per '
+                .'IP+user-agent per day rather than counted per event, and the request counter is also '
+                .'raised by the guest-add flow, which never reaches the verified counter.',
         ];
         // Every derived section is computed from the row tables, so if those were capped
         // the sections describe the most recent N rows and not the whole population.
@@ -414,7 +422,7 @@ class GrowthExportService
                 'is_hosted' => (bool) config('app.hosted'),
                 'is_nexus' => (bool) config('app.is_nexus'),
                 'app_version' => config('self-update.version_installed'),
-                'schema_version' => 1,
+                'schema_version' => 2,
                 'free_ticket_cap' => config('usage.ticket_sale_monthly_limit_free'),
                 'row_cap' => $this->rowCap(),
                 'truncated' => [
@@ -519,7 +527,14 @@ class GrowthExportService
                 $this->hostOf($u->referrer_url),
                 $this->pathOf($u->landing_page),
                 $u->google_oauth_id ? 'google' : ($u->password ? 'email' : 'other'),
-                $u->schedule_form_viewed_at !== null,
+                // OR-defined, exactly as funnelData()'s reached_schedule stage is, so the step
+                // can never come out BELOW the saved_schedule it contains. The timestamp alone
+                // is only stamped by RoleController::create() and only since 2026-07-07, so a
+                // user who arrived by any other path - or who signed up before that column
+                // existed - read as "never reached the form" while also reading as "saved a
+                // schedule". That made activation.reached_schedule_form 88 against 491 saves.
+                // admin/users.blade.php already does it this way.
+                $u->schedule_form_viewed_at !== null || (int) ($roleAgg->c ?? 0) > 0,
                 (int) ($roleAgg->c ?? 0) > 0,
                 (int) ($eventsByUser[$u->id]->c ?? 0) > 0,
                 (int) ($roleAgg->c ?? 0),
@@ -599,6 +614,7 @@ class GrowthExportService
             ->get()->keyBy('role_id');
 
         $paidByMonth = $this->paidTicketsByRoleMonth();
+        $gmvByMonth = $this->gmvByRoleMonth();
 
         $views = AnalyticsDaily::query()
             ->where('date', '>=', now()->copy()->subDays(90)->toDateString())
@@ -636,6 +652,25 @@ class GrowthExportService
             foreach ($months as $m) {
                 $perMonth[] = (int) ($paidByMonth[$r->id][$m] ?? 0);
             }
+
+            // The month a schedule first took money. The single best predictor in this export
+            // of whether it will ever pay for a plan, and nothing recorded it before.
+            $paidMonths = array_keys($paidByMonth[$r->id] ?? []);
+            $firstPaidMonth = $paidMonths ? min($paidMonths) : null;
+
+            // One currency or none. Summing across currencies would produce a number that is
+            // not an amount of anything, so a mixed-currency schedule reports null and is
+            // counted through paid_tickets_recent instead.
+            $currencies = array_keys($gmvByMonth[$r->id] ?? []);
+            $gmvCurrency = count($currencies) === 1 ? $currencies[0] : null;
+            $gmvPerMonth = null;
+            if ($gmvCurrency !== null) {
+                $gmvPerMonth = [];
+                foreach ($months as $m) {
+                    $gmvPerMonth[] = (float) ($gmvByMonth[$r->id][$gmvCurrency][$m] ?? 0);
+                }
+            }
+
             $subAt = $firstSub[$r->id]->first_at ?? null;
 
             $rows[] = [
@@ -652,6 +687,9 @@ class GrowthExportService
                 (int) ($ticketTypes[$r->id]->paid_c ?? 0),
                 array_sum($paidByMonth[$r->id] ?? []),
                 $perMonth,
+                $firstPaidMonth,
+                $gmvCurrency,
+                $gmvPerMonth,
                 (int) ($views[$r->id]->v ?? 0),
                 (int) ($followers[$r->id]->c ?? 0),
                 (int) ($apptTypes[$r->id]->c ?? 0),
@@ -666,7 +704,8 @@ class GrowthExportService
             'columns' => ['sid', 'uid', 'created_month', 'type', 'plan', 'plan_source',
                 'events_total', 'events_public', 'events_recent_90d', 'ticket_types',
                 'paid_ticket_types', 'paid_tickets_total',
-                'paid_tickets_recent', 'views_90d', 'followers', 'appointment_types',
+                'paid_tickets_recent', 'first_paid_sale_month', 'gmv_currency', 'gmv_recent',
+                'views_90d', 'followers', 'appointment_types',
                 'photos', 'newsletter_emails_this_month', 'features', 'days_to_upgrade'],
             'rows' => $rows,
             'total' => $total,
@@ -703,6 +742,41 @@ class GrowthExportService
         $map = [];
         foreach ($rows as $row) {
             $map[$row->role_id][$row->ym] = (int) $row->qty;
+        }
+
+        return $map;
+    }
+
+    /**
+     * Money taken per schedule per month, in the schedule's own currency.
+     *
+     * The export already reports gmv_by_currency, but only as a platform total, so nothing
+     * connected the money to the schedule that earned it - and the whole ticketing business
+     * turns out to be four accounts. Sizing that, or noticing one of them stop, needs the join.
+     *
+     * Per currency because sales has no currency column of its own: the amount means whatever
+     * events.ticket_currency_code says. A schedule that has taken money in more than one
+     * currency therefore gets null rather than a sum of unlike things - see the row builder.
+     */
+    private function gmvByRoleMonth(): array
+    {
+        $rows = DB::table('sales')
+            ->join('events', 'events.id', '=', 'sales.event_id')
+            ->join('event_role', 'event_role.event_id', '=', 'events.id')
+            ->where('sales.status', 'paid')
+            ->where('sales.is_deleted', false)
+            ->whereNotIn('sales.payment_method', ['rsvp', 'import'])
+            ->whereNotNull('sales.paid_at')
+            // Group by the expression, never the select alias - an alias binds to a
+            // same-named real column and raises 1055 under ONLY_FULL_GROUP_BY.
+            ->groupBy('event_role.role_id', 'events.ticket_currency_code', DB::raw("DATE_FORMAT(sales.paid_at, '%Y-%m')"))
+            ->selectRaw('event_role.role_id as role_id, events.ticket_currency_code as currency, '
+                ."DATE_FORMAT(sales.paid_at, '%Y-%m') as ym, SUM(sales.payment_amount) as amount")
+            ->get();
+
+        $map = [];
+        foreach ($rows as $row) {
+            $map[$row->role_id][$row->currency][$row->ym] = round((float) $row->amount, 2);
         }
 
         return $map;
@@ -1101,20 +1175,39 @@ class GrowthExportService
         $months = $stats->keys()->merge($signups->keys())->unique()->sort()->values();
 
         return $months->map(function ($m) use ($stats, $signups, $isNexus) {
-            $visitors = (int) ($stats[$m]->visitors ?? 0);
-            $docsVisitors = (int) ($stats[$m]->docs_visitors ?? 0);
+            // null, not 0, for a month before the column existed. Every counter after the
+            // first three was added by a later migration with default(0), which MySQL
+            // backfills onto the rows already there, so an untracked month is indistinguishable
+            // from a real zero in the stored data - see MarketingDailyStat::COLUMN_TRACKED_FROM.
+            // Reading those defaults as measurements is how "pricing_views: 0" was mistaken for
+            // a broken counter when the column was two days old.
+            $count = function (string $column) use ($stats, $m): ?int {
+                if (! MarketingDailyStat::trackedInMonth($column, $m)) {
+                    return null;
+                }
+
+                return (int) ($stats[$m]->{$column} ?? 0);
+            };
+
+            $visitors = $count('visitors');
+            $docsVisitors = $count('docs_visitors');
 
             return [
                 'month' => $m,
                 'visitors' => $isNexus ? $visitors : null,
-                'page_views' => $isNexus ? (int) ($stats[$m]->page_views ?? 0) : null,
+                'page_views' => $isNexus ? $count('page_views') : null,
                 // Docs/selfhost readers are a subset of the totals above, not prospects for the
                 // hosted plans. Subtracting gives a lower bound on buyer-intent traffic - a
                 // lower bound rather than an exact figure because someone who reads both the
                 // docs and a product page is deduped into each bucket separately.
                 'docs_visitors' => $isNexus ? $docsVisitors : null,
-                'docs_page_views' => $isNexus ? (int) ($stats[$m]->docs_page_views ?? 0) : null,
-                'commercial_visitors' => $isNexus ? max(0, $visitors - $docsVisitors) : null,
+                'docs_page_views' => $isNexus ? $count('docs_page_views') : null,
+                // Untracked docs months must NOT fall back to zero here: subtracting a
+                // not-yet-counted subset from a real total silently republishes the total as
+                // buyer intent, which overstated every month before 2026-08.
+                'commercial_visitors' => ($isNexus && $visitors !== null && $docsVisitors !== null)
+                    ? max(0, $visitors - $docsVisitors)
+                    : null,
                 // Also a subset of the totals, and overlapping the docs buckets rather than
                 // excluding them - never add the three together. This is the one page whose
                 // visit is an explicit buying signal, and the only acquisition-side number that
@@ -1122,12 +1215,15 @@ class GrowthExportService
                 // run at about one a month, where nothing is distinguishable from noise.
                 // It cannot see SIGNED-IN owners weighing an upgrade - TrackMarketingVisit
                 // skips auth()->check() - which is what users.subscribe_form_viewed_at covers.
-                'pricing_visitors' => $isNexus ? (int) ($stats[$m]->pricing_visitors ?? 0) : null,
-                'pricing_views' => $isNexus ? (int) ($stats[$m]->pricing_views ?? 0) : null,
-                'signup_views' => (int) ($stats[$m]->signup_views ?? 0),
-                // The 6-digit-code wall, which sits between signup_views and an account.
-                'signup_code_requests' => (int) ($stats[$m]->signup_code_requests ?? 0),
-                'signup_code_verified' => (int) ($stats[$m]->signup_code_verified ?? 0),
+                'pricing_visitors' => $isNexus ? $count('pricing_visitors') : null,
+                'pricing_views' => $isNexus ? $count('pricing_views') : null,
+                'signup_views' => $count('signup_views'),
+                // The 6-digit-code wall, which sits between signup_views and an account. NOT a
+                // pair and NOT a conversion rate: see the notes emitted with this export.
+                'signup_code_requests' => $count('signup_code_requests'),
+                'signup_code_verified' => $count('signup_code_verified'),
+                // Queried from users, not a counter column, so this one is tracked all the way
+                // back and is the only column here that never goes null.
                 'verified_signups' => (int) ($signups[$m]->c ?? 0),
             ];
         })->all();

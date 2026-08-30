@@ -56,6 +56,49 @@ class MarketingDailyStat extends Model
     ];
 
     /**
+     * The first date each counter was actually being written.
+     *
+     * Every column after the first three was added by a later migration with `default(0)`,
+     * which MySQL also backfills onto every existing row. So a zero in a month before the
+     * column existed is a schema default, not a measurement - and nothing in the data
+     * distinguishes the two. GrowthExportService::traffic() reads this to emit null instead,
+     * because "we were not counting" and "nobody visited" are different answers and only one
+     * of them is a growth problem.
+     *
+     * These are the migration filenames, which is the best declarative answer available: a
+     * deploy that lagged its migration by a few days will still report those days as real
+     * zeros. That is the same failure the export had everywhere before, now confined to a
+     * handful of days rather than two years.
+     */
+    public const COLUMN_TRACKED_FROM = [
+        // 2026_07_07_000000_create_marketing_daily_stats_table
+        'visitors' => '2026-07-07',
+        'page_views' => '2026-07-07',
+        'signup_views' => '2026-07-07',
+        // 2026_08_03_000000_add_funnel_columns_to_marketing_daily_stats
+        'docs_page_views' => '2026-08-03',
+        'docs_visitors' => '2026-08-03',
+        'signup_code_requests' => '2026-08-03',
+        'signup_code_verified' => '2026-08-03',
+        // 2026_08_28_000001_add_upgrade_funnel_tracking
+        'pricing_views' => '2026-08-28',
+        'pricing_visitors' => '2026-08-28',
+    ];
+
+    /**
+     * Whether a column was being written for any part of the given `YYYY-MM` month.
+     *
+     * Month-granular because traffic() reports by month: a column that started mid-month is
+     * reported for that whole month, undercounting its first few days rather than hiding it.
+     */
+    public static function trackedInMonth(string $column, string $month): bool
+    {
+        $from = self::COLUMN_TRACKED_FROM[$column] ?? null;
+
+        return $from !== null && substr($from, 0, 7) <= $month;
+    }
+
+    /**
      * Atomically increment one of the daily counters for today (UTC).
      *
      * Mirrors AnalyticsDaily::incrementView(): a single INSERT ... ON DUPLICATE KEY

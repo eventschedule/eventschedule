@@ -181,11 +181,19 @@ class RegisteredUserController extends Controller
         // people leave the tab for a 6-digit code, and nothing measured how many never came
         // back. Deduped per day the same way signup_views is, so the ratio between them is
         // apples-to-apples rather than inflated by resends.
-        $ip = request()->header('CF-Connecting-IP') ?? request()->ip();
-        if (! PageView::isBot(request()->userAgent())
-            && ! PageView::isSuspiciousRequest(request())
-            && PageView::isFirstDailyVisit('signup_code_request', $ip, request()->userAgent())) {
-            MarketingDailyStat::record('signup_code_requests');
+        //
+        // SIGNUP ONLY. This same method is also mounted on event.guest_send_code for the
+        // guest-add flow, which is not a signup and never reaches signup_code_verified. Counting
+        // it did more than inflate the numerator: isFirstDailyVisit CLAIMS the day's slot for
+        // that IP + user agent, so a guest submission suppressed a real signup request from the
+        // same browser and the pair read as a conversion loss that never happened.
+        if (request()->routeIs('sign_up.send_code')) {
+            $ip = request()->header('CF-Connecting-IP') ?? request()->ip();
+            if (! PageView::isBot(request()->userAgent())
+                && ! PageView::isSuspiciousRequest(request())
+                && PageView::isFirstDailyVisit('signup_code_request', $ip, request()->userAgent())) {
+                MarketingDailyStat::record('signup_code_requests');
+            }
         }
 
         $response = [
@@ -359,9 +367,14 @@ class RegisteredUserController extends Controller
             // counting every success made the ratio a comparison between different denominators:
             // two people behind one NAT on the same browser version contribute one request and
             // two verifications, and the code-wall conversion rate reads over 100%.
+            // The bot and suspicious-request filters have to match too, for the same reason:
+            // the requests side drops those and this side did not, so anything that got past
+            // the wall without a plausible user agent counted here and nowhere else.
             $ip = request()->header('CF-Connecting-IP') ?? request()->ip();
 
-            if (PageView::isFirstDailyVisit('signup_code_verified', $ip, request()->userAgent())) {
+            if (! PageView::isBot(request()->userAgent())
+                && ! PageView::isSuspiciousRequest(request())
+                && PageView::isFirstDailyVisit('signup_code_verified', $ip, request()->userAgent())) {
                 MarketingDailyStat::record('signup_code_verified');
             }
         }

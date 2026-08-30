@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\MarketingDailyStat;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\DemoService;
@@ -79,7 +80,7 @@ class GrowthExportTest extends TestCase
         $this->assertArrayHasKey('meta', $decoded);
         $this->assertArrayHasKey('signups', $decoded);
         $this->assertArrayHasKey('schedules', $decoded);
-        $this->assertSame(1, $decoded['meta']['schema_version']);
+        $this->assertSame(2, $decoded['meta']['schema_version']);
     }
 
     public function test_the_export_funnel_matches_the_admin_users_page(): void
@@ -606,5 +607,138 @@ class GrowthExportTest extends TestCase
         // monetization section would be empty or actively misleading.
         $this->adminActing($admin)->get('/admin/growth')->assertNotFound();
         $this->adminActing($admin)->get('/admin/growth/export')->assertNotFound();
+    }
+
+    /**
+     * A counter that did not exist yet must read null, never 0.
+     *
+     * Every column after the first three was added by a later migration with default(0), which
+     * MySQL backfills onto the rows already there. Reporting those defaults as measurements is
+     * how "pricing_views: 0" in the 2026-08-30 export looked like a broken counter when the
+     * column was two days old, and how commercial_visitors silently equalled visitors for
+     * thirteen months.
+     */
+    public function test_traffic_reports_untracked_months_as_null_not_zero(): void
+    {
+        config(['app.is_nexus' => true]);
+
+        // One row in a month before docs_* and pricing_* existed, with real visitors.
+        MarketingDailyStat::create([
+            'date' => '2026-07-10',
+            'visitors' => 40,
+            'page_views' => 55,
+            'signup_views' => 6,
+        ]);
+
+        $data = app(GrowthExportService::class)->build(
+            now()->copy()->subDays(30), now(), now()->copy()->subDays(60), now()->copy()->subDays(30)
+        );
+
+        $july = collect($data['traffic'])->firstWhere('month', '2026-07');
+        $this->assertNotNull($july);
+
+        // Tracked from the create migration: real numbers.
+        $this->assertSame(40, $july['visitors']);
+        $this->assertSame(6, $july['signup_views']);
+
+        // Not yet tracked in July: null, not 0.
+        $this->assertNull($july['docs_visitors'], 'docs_visitors did not exist in 2026-07');
+        $this->assertNull($july['pricing_views'], 'pricing_views did not exist until 2026-08-28');
+        $this->assertNull($july['signup_code_requests']);
+
+        // And the derived column must not republish the total as buyer intent by subtracting
+        // a subset that was never counted.
+        $this->assertNull($july['commercial_visitors']);
+    }
+
+    /**
+     * reached_schedule_form is OR-defined, so it can never come out below the stage it contains.
+     *
+     * The timestamp alone is stamped only by RoleController::create() and only since
+     * 2026-07-07, so a user who arrived by any other path read as "never reached the form"
+     * while also reading as "saved a schedule" - 88 against 491 in the 2026-08-30 export.
+     */
+    public function test_reached_schedule_form_counts_anyone_who_saved_a_schedule(): void
+    {
+        $owner = $this->createOwner();
+        $owner->forceFill(['schedule_form_viewed_at' => null])->saveQuietly();
+        $this->createRole($owner);
+
+        $data = app(GrowthExportService::class)->build(
+            now()->copy()->subDays(30), now(), now()->copy()->subDays(60), now()->copy()->subDays(30)
+        );
+
+        $this->assertSame(1, $data['activation']['saved_schedule']);
+        $this->assertSame(
+            1,
+            $data['activation']['reached_schedule_form'],
+            'saving a schedule implies reaching the form, whatever the timestamp says'
+        );
+        $this->assertGreaterThanOrEqual(
+            $data['activation']['saved_schedule'],
+            $data['activation']['reached_schedule_form']
+        );
+    }
+
+    /**
+     * Money has to be attributable to the schedule that earned it.
+     *
+     * gmv_by_currency is a platform total, so nothing connected revenue to a schedule - and
+     * the whole ticketing business turns out to be a handful of accounts.
+     */
+    public function test_schedule_rows_carry_first_paid_sale_and_gmv(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner);
+        $event = $this->createEvent($role, ['ticket_currency_code' => 'GBP']);
+        $ticket = $this->createTicket($event, ['price' => 25]);
+
+        $this->createSale($event, $role, [
+            'payment_amount' => 50,
+            'paid_at' => now()->copy()->startOfMonth()->addDay(),
+        ], $ticket, 2);
+
+        $data = app(GrowthExportService::class)->build(
+            now()->copy()->subDays(30), now(), now()->copy()->subDays(60), now()->copy()->subDays(30)
+        );
+
+        $i = array_flip($data['schedules']['columns']);
+        $row = collect($data['schedules']['rows'])
+            ->first(fn ($r) => $r[$i['paid_tickets_total']] > 0);
+
+        $this->assertNotNull($row, 'the selling schedule is in the export');
+        $this->assertSame(now()->format('Y-m'), $row[$i['first_paid_sale_month']]);
+        $this->assertSame('GBP', $row[$i['gmv_currency']]);
+        $this->assertSame(50.0, (float) end($row[$i['gmv_recent']]));
+    }
+
+    /** A schedule paid in two currencies reports null rather than adding unlike things. */
+    public function test_mixed_currency_schedules_report_no_gmv_sum(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner);
+
+        foreach (['GBP' => 50, 'EUR' => 40] as $currency => $amount) {
+            $event = $this->createEvent($role, ['ticket_currency_code' => $currency]);
+            $ticket = $this->createTicket($event, ['price' => 20]);
+            $this->createSale($event, $role, [
+                'payment_amount' => $amount,
+                'paid_at' => now()->copy()->startOfMonth()->addDay(),
+            ], $ticket, 1);
+        }
+
+        $data = app(GrowthExportService::class)->build(
+            now()->copy()->subDays(30), now(), now()->copy()->subDays(60), now()->copy()->subDays(30)
+        );
+
+        $i = array_flip($data['schedules']['columns']);
+        $row = collect($data['schedules']['rows'])
+            ->first(fn ($r) => $r[$i['paid_tickets_total']] > 0);
+
+        $this->assertNotNull($row);
+        $this->assertNull($row[$i['gmv_currency']], 'GBP + EUR is not an amount of anything');
+        $this->assertNull($row[$i['gmv_recent']]);
+        // The ticket COUNT is still currency-free, so it keeps working.
+        $this->assertSame(2, $row[$i['paid_tickets_total']]);
     }
 }
