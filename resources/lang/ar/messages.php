@@ -388,6 +388,10 @@ return [
     'next_step_connect_payments' => 'اربط وسيلة دفع لتحصيل الأموال',
     'next_step_add_first_event' => 'أضف أول فعالية لك',
     'next_step_add_next_event' => 'أضف موعدك التالي',
+
+    'your_first_ticket_type' => 'أول نوع تذكرة لديك',
+    'your_first_ticket_type_help' => 'حدّد السعر وعدد التذاكر المتاحة. اترك السعر فارغًا للتذكرة المجانية، والكمية فارغة لعدد غير محدود.',
+    'ticket_type_placeholder' => 'دخول عام',
     'square_profile_image' => 'صورة الملف الشخصي المربعة',
     'subdomain_taken' => 'النطاق الفرعي مستخدم بالفعل',
     'resend_invite' => 'إعادة إرسال الدعوة',

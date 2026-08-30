@@ -422,6 +422,10 @@ return [
     'next_step_connect_payments' => 'Connectez un moyen de paiement pour encaisser',
     'next_step_add_first_event' => 'Ajoutez votre premier événement',
     'next_step_add_next_event' => 'Ajoutez votre prochaine date',
+
+    'your_first_ticket_type' => 'Votre premier type de billet',
+    'your_first_ticket_type_help' => 'Donnez-lui un prix et le nombre disponible. Laissez le prix vide pour un billet gratuit et la quantité vide pour un nombre illimité.',
+    'ticket_type_placeholder' => 'Entrée générale',
     'square_profile_image' => 'Image de profil carrée',
     'subdomain_taken' => 'Le sous-domaine est déjà pris',
     'resend_invite' => 'Renvoyer l\'invitation',

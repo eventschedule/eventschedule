@@ -444,6 +444,10 @@ return [
     'next_step_connect_payments' => 'Подключите способ оплаты, чтобы принимать деньги',
     'next_step_add_first_event' => 'Добавьте первое событие',
     'next_step_add_next_event' => 'Добавьте следующую дату',
+
+    'your_first_ticket_type' => 'Ваш первый тип билета',
+    'your_first_ticket_type_help' => 'Укажите цену и сколько билетов доступно. Оставьте цену пустой для бесплатного билета, а количество пустым для неограниченного.',
+    'ticket_type_placeholder' => 'Общий вход',
     'square_profile_image' => 'Квадратное изображение профиля',
     'subdomain_taken' => 'Поддомен уже занят',
     'resend_invite' => 'Отправить приглашение повторно',

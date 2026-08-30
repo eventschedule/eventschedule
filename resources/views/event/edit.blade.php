@@ -1381,6 +1381,23 @@
                                 {{ __('messages.details') }}
                             </a>
                             @endif
+                            {{-- canViewEventData(), not canEditEvent(): this panel carries prices,
+                                 payment setup and the link to the sales it produces, and
+                                 canEditEvent() has no curator exception - it would hand a
+                                 curator's staff the ticket setup for an event another
+                                 schedule created. Same predicate TicketController::sales() and
+                                 BoxOfficeController use. It used to be
+                                 `$event->user_id == $user->id`, which is creator identity
+                                 rather than permission, so an Enterprise team admin saw no
+                                 Tickets tab at all on their own schedule's events. --}}
+                            @if ($user->canViewEventData($event))
+                            <a href="#section-tickets" class="section-nav-link" data-section="section-tickets">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
+                                </svg>
+                                {{ __('messages.tickets') }}
+                            </a>
+                            @endif
                             <a href="#section-venue" class="section-nav-link" data-section="section-venue">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-1.5-1.5v18m7.5-18v18" />
@@ -1433,14 +1450,6 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                                 </svg>
                                 {{ __('messages.microsoft_calendar_sync') }}
-                            </a>
-                            @endif
-                            @if ($event->user_id == $user->id)
-                            <a href="#section-tickets" class="section-nav-link" data-section="section-tickets">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
-                                </svg>
-                                {{ __('messages.tickets') }}
                             </a>
                             @endif
                             @if ($user->isEditor($subdomain) && $role->isPro())
@@ -1873,6 +1882,1494 @@
 
                     </div>
                 </div>
+                @endif
+                    {{-- Same predicate as the sidebar link above; the two must not diverge. --}}
+                    @if ($user->canViewEventData($event))
+                    <button type="button" class="mobile-section-header" data-section="section-tickets">
+                        <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
+                            </svg>
+                            {{ __('messages.tickets') }}
+                        </span>
+                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div id="section-tickets" class="section-content lg:mt-0">
+                        <div class="max-w-xl">                                                
+                            <div class="mb-6 flex items-center justify-between">
+                                <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
+                                    </svg>
+                                    {{ __('messages.tickets') }}
+                                </h2>
+                                @if ($event->exists && $role->isPro() && !$event->is_private)
+                                <a href="#" id="embed-ticket-link" v-show="event.tickets_enabled || event.rsvp_enabled"
+                                    class="js-open-embed-ticket-modal inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                        <path d="M12.89,3L14.85,3.4L11.11,21L9.15,20.6L12.89,3M19.59,12L16,8.41V5.58L22.42,12L16,18.41V15.58L19.59,12M1.58,12L8,5.58V8.41L4.41,12L8,15.58V18.41L1.58,12Z" />
+                                    </svg>
+                                    {{ $event->rsvp_enabled && !$event->tickets_enabled ? __('messages.embed_registration') : __('messages.embed_tickets') }}
+                                </a>
+                                @endif
+                            </div>
+
+                            <input type="hidden" name="rsvp_enabled" :value="event.rsvp_enabled ? 1 : 0">
+                            <input type="hidden" name="tickets_enabled" :value="event.tickets_enabled ? 1 : 0">
+                            <fieldset class="mb-6">
+                                <div class="space-y-4 sm:flex sm:items-center sm:space-x-10 sm:space-y-0 rtl:sm:space-x-reverse">
+                                    <div class="flex items-center">
+                                        <input id="ticket_mode_external" type="radio" value="external" v-model="ticketMode"
+                                            class="ticket-mode-radio h-4 w-4 border-gray-300 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                                        <label for="ticket_mode_external"
+                                            class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.external') }}</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input id="ticket_mode_rsvp" type="radio" value="rsvp" v-model="ticketMode"
+                                            class="ticket-mode-radio h-4 w-4 border-gray-300 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                                        <label for="ticket_mode_rsvp"
+                                            class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.registration') }}</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input id="ticket_mode_tickets" type="radio" value="tickets" v-model="ticketMode"
+                                            class="ticket-mode-radio h-4 w-4 border-gray-300 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                                        <label for="ticket_mode_tickets"
+                                            class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">
+                                            {{ __('messages.tickets') }}
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {{-- The single most useful sentence on this page for a free organizer, and
+                                     the only evergreen place they learn selling is included at all. The
+                                     one-time announcement banner expires; this does not. --}}
+                                @if ($role->ticketSaleLimit() !== null)
+                                <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
+                                    {{ __('messages.ticket_allowance_radio_hint', ['limit' => $role->ticketSaleLimit()]) }}
+                                </p>
+                                @endif
+                            </fieldset>
+
+                            <!-- Registration URL (only visible when tickets and RSVP are disabled) -->
+                            <div class="mb-6" v-show="!event.tickets_enabled && !event.rsvp_enabled">
+                                <x-input-label for="registration_url" :value="__('messages.registration_url')" />
+                                <x-text-input id="registration_url" name="registration_url" type="url" class="mt-1 block w-full"
+                                    v-model="event.registration_url" />
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.registration_url_help') }}</p>
+                            </div>
+
+                            <!-- External Event Price (only visible when tickets and RSVP are disabled) -->
+                            <div class="mb-6" v-show="!event.tickets_enabled && !event.rsvp_enabled">
+                                <x-input-label :value="__('messages.price')" />
+                                <div class="mt-1 flex flex-col sm:flex-row gap-3">
+                                    <select name="ticket_currency_code" v-model="event.ticket_currency_code" data-searchable
+                                        class="w-full sm:w-28 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                        @foreach ($currencies as $currency)
+                                        @if ($loop->index == 2)
+                                        <option disabled>──────</option>
+                                        @endif
+                                        <option value="{{ $currency->value }}">{{ $currency->value }}</option>
+                                        @endforeach
+                                    </select>
+                                    <x-text-input type="number" name="ticket_price" step="0.01" min="0"
+                                        class="flex-1" v-model="event.ticket_price" />
+                                </div>
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.external_price_help') }}</p>
+                            </div>
+
+                            <div class="mb-6" v-show="!event.tickets_enabled && !event.rsvp_enabled">
+                                <x-input-label for="coupon_code" :value="__('messages.coupon_code')" />
+                                <x-text-input id="coupon_code" name="coupon_code" type="text" class="mt-1 block w-full"
+                                    v-model="event.coupon_code" maxlength="255" />
+                                <x-input-error class="mt-2" :messages="$errors->get('coupon_code')" />
+                            </div>
+
+                            <!-- What the coupon is worth (only visible when tickets and RSVP are disabled) -->
+                            <div class="mb-6" v-show="!event.tickets_enabled && !event.rsvp_enabled">
+                                <x-input-label for="coupon_discount" :value="__('messages.discount')" />
+                                <div class="mt-1 flex flex-col sm:flex-row gap-3">
+                                    <select name="coupon_discount_type" v-model="event.coupon_discount_type"
+                                        class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                        <option value="percentage">%</option>
+                                        <option value="fixed">@{{ event.ticket_currency_code }}</option>
+                                    </select>
+                                    <x-text-input id="coupon_discount" type="number" name="coupon_discount" step="0.01" min="0"
+                                        class="flex-1" v-model="event.coupon_discount" />
+                                </div>
+                                <x-input-error class="mt-2" :messages="$errors->get('coupon_discount')" />
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.coupon_discount_help') }}</p>
+                            </div>
+
+                            <div v-show="event.tickets_enabled || event.rsvp_enabled">
+
+                                {{-- The free plan's ticket allowance. Selling is no longer Pro-only, so this
+                                     is an entitlement notice under the cap and a warning only once it is
+                                     spent. The numbers are server-rendered (they cannot change without a
+                                     reload); only visibility is reactive. --}}
+                                @php
+                                    $ticketLimit = $role->ticketSaleLimit();
+                                    $ticketUsed = $ticketLimit === null ? 0 : $role->ticketsSoldThisMonth();
+                                    $ticketAtCap = $ticketLimit !== null && $ticketUsed >= $ticketLimit;
+                                    $ticketResetDate = $role->ticketAllowanceResetsAt()->translatedFormat('F j');
+                                @endphp
+                                @if ($ticketLimit !== null && ! $ticketAtCap)
+                                <div class="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-700 dark:bg-blue-900/20" v-show="event.tickets_enabled">
+                                    <div class="flex items-start gap-2">
+                                        <svg class="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z" />
+                                        </svg>
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-sm font-semibold text-blue-900 dark:text-blue-100">{{ __('messages.ticket_allowance_included_title') }}</p>
+                                            <p class="mt-0.5 text-sm text-blue-800 dark:text-blue-200">{{ __('messages.ticket_allowance_included_body', ['limit' => $ticketLimit]) }}</p>
+                                            <x-usage-meter
+                                                variant="inline"
+                                                class="mt-3"
+                                                :label="__('messages.ticket_allowance_usage')"
+                                                :used="$ticketUsed"
+                                                :limit="$ticketLimit"
+                                                :usedText="__('messages.tickets_sold_of', ['used' => $ticketUsed, 'limit' => $ticketLimit])"
+                                                :noteText="__('messages.ticket_allowance_note', ['date' => $ticketResetDate])" />
+                                            <p class="mt-2 text-sm">
+                                                <button type="button" data-modal-open="upgrade-tickets" class="font-medium text-[var(--brand-blue)] hover:underline">{{ __('messages.ticket_allowance_see_pro') }}</button>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                @elseif ($ticketLimit !== null)
+                                <x-plan-gate
+                                    variant="banner"
+                                    tier="pro"
+                                    class="mb-4"
+                                    :role="$role"
+                                    :subdomain="$subdomain"
+                                    :learnMoreUrl="marketing_url('/features/ticketing')"
+                                    :title="__('messages.ticket_allowance_reached_title', ['limit' => $ticketLimit, 'month' => now()->translatedFormat('F')])"
+                                    v-show="event.tickets_enabled">
+                                    {{ __('messages.ticket_allowance_reached_body', ['date' => $ticketResetDate]) }}
+                                </x-plan-gate>
+                                @endif
+
+                                <!-- Ticket Section Tabs -->
+                                <div class="mt-6 mb-6 border-b border-gray-200 dark:border-gray-700" v-show="event.tickets_enabled">
+                                    <nav class="-mb-px flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide">
+                                        <button type="button" @click="activeTicketTab = 'tickets'"
+                                            :class="activeTicketTab === 'tickets' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
+                                            class="ticket-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="tickets">
+                                            {{ __('messages.general') }}
+                                        </button>
+                                        <button type="button" @click="activeTicketTab = 'payment'"
+                                            :class="activeTicketTab === 'payment' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
+                                            class="ticket-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="payment">
+                                            {{ __('messages.payment') }}
+                                        </button>
+                                        <button type="button" @click="activeTicketTab = 'options'"
+                                            :class="activeTicketTab === 'options' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
+                                            class="ticket-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="options">
+                                            {{ __('messages.options') }}
+                                        </button>
+                                        <button type="button" @click="activeTicketTab = 'promo_codes'"
+                                            :class="activeTicketTab === 'promo_codes' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
+                                            class="ticket-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="promo_codes">
+                                            {{ __('messages.promo_codes') }}
+                                        </button>
+                                        <button type="button" @click="activeTicketTab = 'add_ons'"
+                                            :class="activeTicketTab === 'add_ons' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
+                                            class="ticket-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="add_ons">
+                                            {{ __('messages.add_ons') }}
+                                        </button>
+                                    </nav>
+                                </div>
+
+                                {{-- This used to be a blanket "disabled state wrapper" that greyed out and
+                                     froze the entire ticket area for a non-Pro schedule. The free plan can
+                                     sell now, so the whole panel has to be usable; the individual Pro-only
+                                     options carry their own locks instead. Kept as a plain div so the
+                                     surrounding structure and indentation are unchanged. --}}
+                                <div>
+
+                                <!-- Payment Tab -->
+                                <div v-show="activeTicketTab === 'payment'">
+
+                                {{-- No payment method configured at all. The selector below is skipped
+                                     entirely in that case, so the whole tab used to be a currency
+                                     dropdown and a text-xs link, and the event would save, publish and
+                                     take no money. That was survivable while selling was Pro-only; the
+                                     free plan sends a much larger cohort down this exact path, so the
+                                     setup step has to be first-class.
+
+                                     Opens in a new tab deliberately: this form is unsaved. --}}
+                                @if (! $connectedGateways)
+                                <div class="mb-6 ap-card rounded-xl p-6" v-show="event.tickets_enabled">
+                                    <div class="flex items-start gap-3">
+                                        <div class="dashboard-icon p-2 rounded-xl bg-blue-50 dark:bg-blue-500/10">
+                                            <svg class="w-5 h-5 text-[var(--brand-blue)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
+                                            </svg>
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.connect_stripe_to_get_paid') }}</h3>
+                                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ __('messages.connect_stripe_to_get_paid_body') }}</p>
+                                            <div class="mt-4 flex flex-wrap items-center gap-3">
+                                                <x-brand-link href="{{ route('profile.edit') }}#section-payment-methods" target="_blank" rel="noopener">
+                                                    {{ __('messages.connect_stripe') }}
+                                                </x-brand-link>
+                                                <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.connect_stripe_reload_hint') }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @elseif ($user->stripe_account_id && ! $user->stripe_completed_at)
+                                {{-- Stripe onboarding is asynchronous, so this window is real and had no UI
+                                     anywhere in the panel. --}}
+                                <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2" v-show="event.tickets_enabled">
+                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+                                    <div class="text-sm text-amber-800 dark:text-amber-200">{{ __('messages.stripe_verifying') }}</div>
+                                </div>
+                                @elseif (! $onlineGateways)
+                                {{-- Connected, but not to anything that can take money in this currency. The
+                                     nudge above is Stripe-specific and would be actively wrong advice here:
+                                     on the selfhost installs this case is commonest on, Stripe is precisely
+                                     what is unavailable. Naming the currency instead points at the fix. --}}
+                                <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2" v-show="event.tickets_enabled">
+                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>
+                                    <div class="text-sm text-amber-800 dark:text-amber-200">
+                                        <div class="font-semibold">{{ __('messages.no_payment_method_for_currency', ['currency' => $event->ticket_currency_code]) }}</div>
+                                        <p class="mt-1">{{ __('messages.no_payment_method_for_currency_body', ['currency' => $event->ticket_currency_code]) }}</p>
+                                    </div>
+                                </div>
+                                @endif
+
+                                @if ($connectedGateways || $storedGateway)
+                                <div class="mb-6">
+                                    <x-input-label for="payment_method" :value="__('messages.payment_method')"/>
+                                    <select id="payment_method" name="payment_method" v-model="event.payment_method" :required="event.tickets_enabled"
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                        {{-- Ordered by config('payments.gateways'), and filtered to what this owner has
+                                             connected and what can settle this event's currency. A gateway that cannot
+                                             take the currency is omitted rather than shown and then rejected.
+
+                                             v-pre on every option: the label can carry owner-typed text (a Payfast
+                                             merchant id, an API-sourced company name), and this select sits inside the
+                                             Vue mount, where a server-rendered text node is compiled as a template.
+                                             Same guard as the sub-schedule options further up this file. --}}
+                                        @foreach ($selectableGateways as $gatewayKey => $gateway)
+                                        <option v-pre value="{{ $gatewayKey }}">{{ $gateway->label($user) }}</option>
+                                        @endforeach
+                                        {{-- The SAVED method stays visible even when no longer offerable (currency
+                                             changed after saving, gateway disconnected). Without this the select
+                                             rendered blank, a blank select posts nothing, and the stale value silently
+                                             survived every save - the state that let a USD event keep charging through
+                                             Payfast. Showing it lets the owner see and fix it; checkout guards remain
+                                             the authority either way. --}}
+                                        @if ($storedGateway)
+                                        <option v-pre value="{{ $event->payment_method }}">{{ $storedGateway->label($user) }} - {{ __('messages.payment_method_unavailable') }}</option>
+                                        @endif
+                                    </select>
+                                    <div class="text-xs pt-1">
+                                        <x-link href="{{ route('profile.edit') }}#section-payment-methods" target="_blank">
+                                            {{ __('messages.manage_payment_methods') }}
+                                        </x-link>
+                                    </div>
+                                </div>
+                                @endif
+
+                                <div class="mb-6">
+                                    <x-input-label for="ticket_currency_code" :value="__('messages.currency')"/>
+                                    <select id="ticket_currency_code" name="ticket_currency_code" v-model="event.ticket_currency_code" :required="event.tickets_enabled" data-searchable
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                        @foreach ($currencies as $currency)
+                                        @if ($loop->index == 2)
+                                        <option disabled>──────────</option>
+                                        @endif
+                                        <option value="{{ $currency->value }}" {{ $event->ticket_currency_code == $currency->value ? 'selected' : '' }}>
+                                            {{ $currency->value }} - {{ $currency->label }}
+                                        </option>
+                                        @endforeach
+                                    </select>
+                                    @if (! $connectedGateways)
+                                    <div class="text-xs pt-1">
+                                        <x-link href="{{ route('profile.edit') }}#section-payment-methods" target="_blank">
+                                            {{ __('messages.manage_payment_methods') }}
+                                        </x-link>
+                                    </div>
+                                    @endif
+                                </div>
+
+                                <div class="mb-6" v-show="gatewayCapabilities[event.payment_method]?.payment_instructions">
+                                    <x-input-label for="payment_instructions" :value="__('messages.payment_instructions')" />
+                                    <textarea id="payment_instructions" name="payment_instructions" v-model="event.payment_instructions" rows="4" data-content-dir="{{ content_dir($role) }}"
+                                        class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"></textarea>
+                                </div>
+
+                                {{-- Installments. Event-level and here rather than per ticket row: the
+                                     split is computed on the post-discount ORDER total, so a per-ticket
+                                     flag would have states that silently do nothing (on for one ticket
+                                     and off for another, buyer picks both, option vanishes). This is
+                                     also where an organizer already is when thinking about how they get
+                                     paid. Stripe only - nothing else can charge a saved card. --}}
+                                <div class="mb-6" v-show="gatewayCapabilities[event.payment_method]?.installments">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="min-w-0">
+                                            <label for="installments_enabled" class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                                {{ __('messages.installments_label') }}
+                                                @if (! $role->isPro())
+                                                    <x-lock-badge tier="pro" />
+                                                @endif
+                                            </label>
+                                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.installments_help') }}</p>
+                                        </div>
+                                        <button type="button" role="switch" id="installments_enabled"
+                                            :aria-checked="event.installments_enabled ? 'true' : 'false'"
+                                            :disabled="!isPro && !event.installments_enabled"
+                                            @click="(isPro || event.installments_enabled) && (event.installments_enabled = !event.installments_enabled)"
+                                            :class="[event.installments_enabled ? 'bg-[var(--brand-button-bg)]' : 'bg-gray-200 dark:bg-gray-700', (!isPro && !event.installments_enabled) ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer']"
+                                            class="relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                                            <span aria-hidden="true" :class="event.installments_enabled ? 'translate-x-5' : 'translate-x-0'"
+                                                class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200"></span>
+                                        </button>
+                                    </div>
+
+                                    {{-- The v-else is load-bearing: with only the v-if inputs, switching
+                                         the toggle OFF posts nothing at all and the stored values
+                                         survive the save. Same idiom as the pass block. --}}
+                                    <template v-if="event.installments_enabled">
+                                        <input type="hidden" name="installments_enabled" value="1">
+                                    </template>
+                                    <input v-else type="hidden" name="installments_enabled" value="0">
+
+                                    <div v-if="event.installments_enabled" class="mt-4 pl-1 border-l-2 border-gray-100 dark:border-gray-700">
+                                        <div class="pl-4 grid grid-cols-1 min-[900px]:grid-cols-3 gap-4">
+                                            <div>
+                                                <x-input-label for="installment_count" :value="__('messages.installment_count')" />
+                                                <select id="installment_count" name="installment_count" v-model.number="event.installment_count"
+                                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                                    <option v-for="n in [2,3,4,5,6,8,10,12]" :key="n" :value="n">@{{ n }}</option>
+                                                </select>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.installment_count_help') }}</p>
+                                            </div>
+                                            <div>
+                                                <x-input-label for="installment_final_days_before" :value="__('messages.installment_final_days_before')" />
+                                                <input id="installment_final_days_before" name="installment_final_days_before" type="number" min="7" max="365"
+                                                    v-model.number="event.installment_final_days_before"
+                                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm" />
+                                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.installment_final_days_before_help') }}</p>
+                                            </div>
+                                            <div>
+                                                <x-input-label for="installment_min_order_amount" :value="__('messages.installment_min_order_amount')" />
+                                                <input id="installment_min_order_amount" name="installment_min_order_amount" type="number" min="0" step="0.01"
+                                                    v-model="event.installment_min_order_amount"
+                                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm" />
+                                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.installment_min_order_amount_help') }}</p>
+                                            </div>
+                                        </div>
+
+                                        {{-- Live preview rather than a save-time validation error. By the
+                                             time a validation message fires the organizer has already
+                                             made their choices; this tells them, while they are choosing,
+                                             that four monthly payments on a November event sold in August
+                                             would land the last one after the doors open. --}}
+                                        <div class="pl-4 mt-4">
+                                            <div v-if="installmentPreviewFits === false" class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2">
+                                                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>
+                                                <div class="text-sm text-amber-800 dark:text-amber-200">@{{ installmentPreviewText }}</div>
+                                            </div>
+                                            <p v-else-if="installmentPreviewText" class="text-sm text-gray-600 dark:text-gray-400">@{{ installmentPreviewText }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                </div>
+
+                                <!-- Options Tab -->
+                                <div v-show="activeTicketTab === 'options' || event.rsvp_enabled">
+
+                                <!-- Phone Number -->
+                                <div class="mb-6">
+                                    <div class="flex items-center gap-3">
+                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                            <input id="ask_phone_checkbox" type="checkbox"
+                                                v-model="event.ask_phone"
+                                                class="sr-only peer"
+                                                @change="event.ask_phone || (event.require_phone = false, event.country_code_phone = false)">
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                        </label>
+                                        <label for="ask_phone_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                            {{ __('messages.ask_for_phone_number') }}
+                                        </label>
+                                    </div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.ask_for_phone_number_help') }}</p>
+                                    <div class="flex items-center gap-4 mt-2 ms-14" v-if="event.ask_phone">
+                                        <div class="flex items-center">
+                                            <input type="checkbox" v-model="event.require_phone" id="require_phone_checkbox" class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
+                                            <label for="require_phone_checkbox" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <input type="checkbox" v-model="event.country_code_phone" id="country_code_phone_checkbox" class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
+                                            <label for="country_code_phone_checkbox" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.country_code') }}</label>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" name="ask_phone" :value="event.ask_phone ? 1 : 0">
+                                    <input type="hidden" name="require_phone" :value="event.require_phone ? 1 : 0">
+                                    <input type="hidden" name="country_code_phone" :value="event.country_code_phone ? 1 : 0">
+                                </div>
+
+                                <!-- Individual Tickets -->
+                                {{-- Pro. The blanket non-Pro wrapper that used to freeze this whole
+                                     panel is gone (the free plan sells now), so the control carries
+                                     its own lock: disabled rather than hidden, so a free organizer
+                                     can see the feature exists instead of turning it on and watching
+                                     EventRepo::saveEvent() silently scrub it back off. --}}
+                                <div class="mb-6">
+                                    <div class="flex items-center gap-3" :class="isPro ? '' : 'opacity-60'">
+                                        <label class="relative w-11 h-6 flex-shrink-0" :class="isPro ? 'cursor-pointer' : 'cursor-not-allowed'">
+                                            <input id="individual_tickets_checkbox" type="checkbox"
+                                                v-model="event.individual_tickets"
+                                                :disabled="!isPro"
+                                                class="sr-only peer">
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                        </label>
+                                        <label for="individual_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300" :class="isPro ? 'cursor-pointer' : 'cursor-not-allowed'">
+                                            {{ __('messages.individual_tickets') }}
+                                        </label>
+                                        <template v-if="!isPro"><x-lock-badge tier="pro" /></template>
+                                    </div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.individual_tickets_description') }}</p>
+                                    <p class="text-xs mt-1 ms-14" v-if="!isPro">
+                                        <button type="button" data-modal-open="upgrade-tickets" class="font-medium text-[var(--brand-blue)] hover:underline">{{ __('messages.ticket_allowance_see_pro') }}</button>
+                                    </p>
+                                    <input type="hidden" name="individual_tickets" :value="event.individual_tickets ? 1 : 0">
+
+                                    <!-- Individual Ticket Fields sub-toggle -->
+                                    <div v-show="event.individual_tickets" class="mt-3 ms-14">
+                                        <div class="flex items-center gap-3">
+                                            <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                                <input id="individual_ticket_fields_checkbox" type="checkbox"
+                                                    v-model="event.individual_ticket_fields"
+                                                    class="sr-only peer">
+                                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                                <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                            </label>
+                                            <label for="individual_ticket_fields_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                                {{ __('messages.individual_ticket_fields') }}
+                                            </label>
+                                        </div>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.individual_ticket_fields_description') }}</p>
+                                        <input type="hidden" name="individual_ticket_fields" :value="event.individual_ticket_fields ? 1 : 0">
+                                    </div>
+                                </div>
+
+                                <!-- Ticket-only toggles -->
+                                <div v-show="event.tickets_enabled" class="mb-6">
+                                    <div class="flex items-center gap-3">
+                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                            <input id="sell_after_start_checkbox" type="checkbox"
+                                                v-model="event.sell_after_start"
+                                                class="sr-only peer">
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                        </label>
+                                        <label for="sell_after_start_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                            {{ __('messages.sell_after_start') }}
+                                        </label>
+                                    </div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.sell_after_start_help') }}</p>
+                                    <input type="hidden" name="sell_after_start" :value="event.sell_after_start ? 1 : 0">
+                                </div>
+
+                                <div v-show="event.tickets_enabled" class="mb-6">
+                                    <div class="flex items-center gap-3">
+                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                            <input id="show_sales_dates_checkbox" type="checkbox"
+                                                v-model="showSalesDates"
+                                                class="sr-only peer"
+                                                @change="onToggleSalesDates">
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                        </label>
+                                        <label for="show_sales_dates_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                            {{ __('messages.configure_sales_dates') }}
+                                        </label>
+                                    </div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.configure_sales_dates_help') }}</p>
+                                </div>
+
+                                <div v-show="event.tickets_enabled" class="mb-6">
+                                    <div class="flex items-center gap-3">
+                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                            <input id="show_unavailable_tickets_checkbox" type="checkbox"
+                                                v-model="event.show_unavailable_tickets"
+                                                class="sr-only peer">
+                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                        </label>
+                                        <label for="show_unavailable_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                            {{ __('messages.show_unavailable_tickets') }}
+                                        </label>
+                                    </div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.show_unavailable_tickets_help') }}</p>
+                                    <input type="hidden" name="show_unavailable_tickets" :value="event.show_unavailable_tickets ? 1 : 0">
+                                </div>
+
+                                <div v-if="hasLimitedPaidTickets" v-show="event.tickets_enabled">
+                                    <div class="mb-6">
+                                        <div class="flex items-center gap-3">
+                                            <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                                <input id="expire_unpaid_tickets_checkbox" name="expire_unpaid_tickets_checkbox" type="checkbox"
+                                                    v-model="showExpireUnpaid"
+                                                    class="sr-only peer"
+                                                    @change="toggleExpireUnpaid">
+                                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                                <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                            </label>
+                                            <label for="expire_unpaid_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                                {{ __('messages.expire_unpaid_tickets') }}
+                                            </label>
+                                        </div>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.expire_unpaid_tickets_help') }}</p>
+                                    </div>
+
+                                    <div class="mb-6" v-if="showExpireUnpaid">
+                                        <x-input-label for="expire_unpaid_tickets" :value="__('messages.after_number_of_hours')" />
+                                        <x-text-input id="expire_unpaid_tickets" name="expire_unpaid_tickets" type="number" class="mt-1 block w-full"
+                                            :value="old('expire_unpaid_tickets', $event->expire_unpaid_tickets)"
+                                            v-model="event.expire_unpaid_tickets"
+                                            autocomplete="off" />
+                                        <x-input-error class="mt-2" :messages="$errors->get('expire_unpaid_tickets')" />
+                                    </div>
+                                    <div v-else>
+                                        <input type="hidden" name="expire_unpaid_tickets" value="0"/>
+                                    </div>
+                                </div>
+
+                                <!-- Event-level Custom Fields -->
+                                <template v-if="isPro">
+                                <div class="mb-6">
+                                    <x-input-label :value="__('messages.custom_fields') . ' (' . __('messages.per_order') . ')'" class="mb-3" />
+
+                                    <div v-if="eventCustomFields && Object.keys(eventCustomFields).length > 0" id="event-custom-fields-sortable">
+                                        <div v-for="(field, fieldKey) in eventCustomFields" :key="fieldKey" :data-event-field-key="fieldKey" class="mt-2 p-3 border border-gray-200 dark:border-gray-600 rounded-lg flex items-start gap-2">
+                                            <div v-show="Object.keys(eventCustomFields).length > 1" class="custom-field-drag-handle cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0 mt-1">
+                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
+                                                </svg>
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                <div>
+                                                    <x-input-label :value="__('messages.field_name') . ' *'" class="text-xs" />
+                                                    <x-text-input type="text" v-model="field.name" class="mt-1 block w-full text-sm" v-bind:required="event.tickets_enabled || event.rsvp_enabled" v-bind:class="{ 'border-red-500': formSubmitAttempted && !field.name }" />
+                                                    <p v-if="formSubmitAttempted && !field.name" class="mt-1 text-xs text-red-600">{{ __('messages.field_name_required') }}</p>
+                                                </div>
+                                                <div>
+                                                    <x-input-label :value="__('messages.field_type')" class="text-xs" />
+                                                    <select v-model="field.type" class="mt-1 block w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                                        <option value="string">{{ __('messages.type_string') }}</option>
+                                                        <option value="multiline_string">{{ __('messages.type_multiline_string') }}</option>
+                                                        <option value="switch">{{ __('messages.type_switch') }}</option>
+                                                        <option value="date">{{ __('messages.type_date') }}</option>
+                                                        <option value="dropdown">{{ __('messages.type_dropdown') }}</option>
+                                                        <option value="multiselect">{{ __('messages.type_multiselect') }}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            @if($role->language_code !== 'en')
+                                            <div class="mt-2">
+                                                <x-input-label :value="__('messages.english_name')" class="text-xs" />
+                                                <x-text-input type="text" v-model="field.name_en" class="mt-1 block w-full text-sm" placeholder="{{ __('messages.auto_translated_placeholder') }}" />
+                                            </div>
+                                            @endif
+                                            <div class="mt-2" v-if="field.type === 'dropdown' || field.type === 'multiselect'">
+                                                <x-input-label :value="__('messages.field_options')" class="text-xs" />
+                                                <x-text-input type="text" v-model="field.options" class="mt-1 block w-full text-sm" placeholder="{{ __('messages.options_placeholder') }}" />
+                                            </div>
+                                            <div class="mt-2 flex items-center justify-between">
+                                                <div class="flex items-center">
+                                                    <input type="checkbox" v-model="field.required" :id="`event_field_required_${fieldKey}`" class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
+                                                    <label :for="`event_field_required_${fieldKey}`" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
+                                                </div>
+                                                <button type="button" @click="removeEventCustomField(fieldKey)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                                    {{ __('messages.remove') }}
+                                                </button>
+                                            </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" name="custom_fields" :value="JSON.stringify(eventCustomFields || {})">
+                                    <button type="button" @click="addEventCustomField" class="mt-2 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="getEventCustomFieldCount() < 10">
+                                        + {{ __('messages.add_field') }}
+                                    </button>
+                                </div>
+                                </template>
+                                <template v-else>
+                                <x-upgrade-prompt tier="pro" :learnMoreUrl="marketing_url('/features/ticketing')" :subdomain="$subdomain" v-show="event.rsvp_enabled" class="mb-6">
+                                    <x-slot:icon>
+                                        <svg class="h-7 w-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z" />
+                                        </svg>
+                                    </x-slot:icon>
+                                    {{ __('messages.custom_fields_pro_only') }}
+                                </x-upgrade-prompt>
+                                </template>
+                                </div>
+
+                                <div class="mb-6" v-show="event.rsvp_enabled">
+                                    <x-input-label for="rsvp_limit" :value="__('messages.rsvp_limit')" />
+                                    <x-text-input id="rsvp_limit" name="rsvp_limit" type="number" min="1" class="mt-1 block w-full"
+                                        v-model="event.rsvp_limit" />
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.rsvp_limit_help') }}</p>
+                                </div>
+
+                                <!-- Tickets Tab -->
+                                <div v-show="activeTicketTab === 'tickets'">
+                                @php
+                                    // Deliberately distinctive names: these blocks share the VIEW
+                                    // scope, so a plain $plans here would be visible to every
+                                    // block below it.
+                                    // isVenue() as well as the plan gate: only a venue owns a
+                                    // plan, so on any other schedule type this is a query that
+                                    // can only ever come back empty.
+                                    $seatingPlanList = $role->isVenue() && $role->seatingEnabled()
+                                        ? \App\Models\SeatingPlan::with('sections')
+                                            ->where('role_id', $role->id)->where('is_deleted', false)
+                                            ->orderBy('name')->get()
+                                        : collect();
+                                    // bandCounts: how many seats each band actually holds. The band
+                                    // select was names alone, so the organizer priced blind - and a
+                                    // band no ticket claims is invisible until the box office
+                                    // refuses a sale from it. thumb: which room this is, since four
+                                    // plans in a dropdown are four indistinguishable strings.
+                                    // One grouped count per plan rather than a query PAIR per band.
+                                    // sections is already eager-loaded and the relation excludes
+                                    // deleted ones, so the section ids and the standing capacities
+                                    // both come from memory.
+                                    $seatingPlanOptions = $seatingPlanList->map(function ($p) {
+                                        $byBand = $p->sections->filter(fn ($s) => filled($s->band))->groupBy('band');
+
+                                        $seatsPerSection = $p->seats()
+                                            ->whereIn('seating_section_id', $p->sections->pluck('id'))
+                                            ->toBase()
+                                            ->selectRaw('seating_section_id, count(*) as aggregate')
+                                            ->groupBy('seating_section_id')
+                                            ->pluck('aggregate', 'seating_section_id');
+
+                                        $countFor = function ($sections) use ($seatsPerSection) {
+                                            $seats = $sections->sum(fn ($s) => (int) ($seatsPerSection[$s->id] ?? 0));
+
+                                            // Standing sections hold a capacity, not seats, and the
+                                            // band select shows whichever the room actually uses.
+                                            return $seats ?: (int) $sections->where('kind', 'standing')->sum('capacity');
+                                        };
+
+                                        return [
+                                            'id' => $p->id,
+                                            'name' => $p->name,
+                                            'bands' => $byBand->keys()->values()->all(),
+                                            'bandCounts' => $byBand->map($countFor)->all(),
+                                            'seats' => (int) $seatsPerSection->sum(),
+                                            'thumb' => $p->thumbnail(200),
+                                        ];
+                                    })->values();
+                                @endphp
+
+                                {{-- A schedule with no plan yet used to see nothing at all here, so
+                                     allocated seating was invisible unless you already knew to go
+                                     looking for the tab. Say it exists, and link to where it is
+                                     built. --}}
+                                @if ($role->isVenue() && $role->seatingEnabled() && $seatingPlanOptions->isEmpty())
+                                <div class="mb-6 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+                                    <x-input-label :value="__('messages.seating_plan')" />
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.seating_no_plans_yet') }}</p>
+                                    <a href="{{ route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'seating']) }}"
+                                       class="mt-2 inline-block text-sm font-medium text-[var(--brand-blue)] hover:underline">
+                                        {{ __('messages.seating_new_plan') }}
+                                    </a>
+                                </div>
+                                @endif
+
+                                @if ($seatingPlanOptions->isNotEmpty())
+                                <div class="mb-6">
+                                    <x-input-label for="seating_plan_id" :value="__('messages.seating_plan')" />
+                                    <select id="seating_plan_id" name="seating_plan_id" v-model="event.seating_plan_id"
+                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm">
+                                        <option value="">{{ __('messages.seating_no_plan') }}</option>
+                                        @foreach ($seatingPlanOptions as $option)
+                                            <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
+                                        @endforeach
+                                    </select>
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.seating_plan_help') }}</p>
+
+                                    {{-- The room, once one is chosen. Decorative - the seat count
+                                         beside it says the same thing in words. --}}
+                                    <div v-if="selectedSeatingPlan && selectedSeatingPlan.thumb" class="mt-3 flex items-center gap-4">
+                                        <svg :viewBox="selectedSeatingPlan.thumb.viewBox" class="h-20 w-40 shrink-0"
+                                             aria-hidden="true" focusable="false" preserveAspectRatio="xMidYMid meet">
+                                            <circle v-for="(dot, i) in selectedSeatingPlan.thumb.dots" :key="i"
+                                                :cx="dot.x" :cy="dot.y" r="6" :fill="dot.c" opacity="0.75" />
+                                        </svg>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                                            @{{ selectedSeatingPlan.seats }} {{ __('messages.seating_seats') }}
+                                        </p>
+                                    </div>
+
+                                    {{-- A section whose band no ticket prices is unsellable, and the
+                                         only place that ever surfaced was a box-office refusal at
+                                         the counter. Say it while the prices are being set. --}}
+                                    <div v-if="unmappedSeatingBands.length"
+                                         class="mt-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2">
+                                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24"
+                                             stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                        </svg>
+                                        <p class="text-sm text-amber-800 dark:text-amber-200">
+                                            @{{ unmappedBandWarning }}
+                                        </p>
+                                    </div>
+                                    @if ($event->exists && $event->hasAllocatedSeating())
+                                        <div v-if="event.seating_plan_id" class="mt-3 flex flex-wrap gap-3">
+                                            <x-secondary-link :href="route('box_office.show', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)])">
+                                                {{ __('messages.seating_box_office') }}
+                                            </x-secondary-link>
+                                            <x-secondary-link :href="route('seating.occurrence_design', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)])">
+                                                {{ __('messages.seating_modify_this_date') }}
+                                            </x-secondary-link>
+                                        </div>
+                                    @endif
+                                </div>
+                                @endif
+
+                                <div class="mb-6">
+                                    {{-- First run used to be two unlabelled number boxes and nothing else:
+                                         the controller always seeds one blank Ticket row
+                                         (EventController::create/edit), so there is no zero-ticket state to
+                                         write an empty state for. This says what the row is instead. --}}
+                                    <div v-if="tickets.length === 1 && !tickets[0].id" class="mt-4">
+                                        <h4 class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('messages.your_first_ticket_type') }}</h4>
+                                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.your_first_ticket_type_help') }}</p>
+                                    </div>
+                                    <div v-for="(ticket, index) in tickets" :key="ticket.uid"
+                                        :class="{'mt-4 p-4 border border-gray-300 dark:border-gray-700 rounded-lg': tickets.length > 1, 'mt-4': tickets.length === 1}">
+                                        <input type="hidden" v-bind:name="`tickets[${index}][id]`" v-model="ticket.id">
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div>
+                                                <x-input-label :value="__('messages.price')" />
+                                                <x-text-input type="number" step="0.01" v-bind:name="`tickets[${index}][price]`" 
+                                                    v-model="ticket.price" class="mt-1 block w-full" placeholder="{{ __('messages.free') }}" />
+                                            </div>
+                                            <div>
+                                                <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.quantity') }} @{{ (! isRecurring && ticket.sold && Object.values(JSON.parse(ticket.sold))[0] > 0) ? (' - ' + Object.values(JSON.parse(ticket.sold))[0] + ' ' +soldLabel) : '' }}</label>
+                                                <x-text-input type="number" v-bind:name="`tickets[${index}][quantity]`"
+                                                    v-model="ticket.quantity" class="mt-1 block w-full" placeholder="{{ __('messages.unlimited') }}"
+                                                    v-bind:readonly="!!ticket.seating_band" v-bind:class="{ 'opacity-60': !!ticket.seating_band }" />
+                                                <p v-if="ticket.seating_band" class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.seating_quantity_from_plan') }}</p>
+                                            </div>
+                                            <div v-if="seatingBands.length && !ticket.is_pass">
+                                                <x-input-label :value="__('messages.seating_band')" />
+                                                <select v-bind:name="`tickets[${index}][seating_band]`" v-model="ticket.seating_band"
+                                                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm">
+                                                    <option value="">{{ __('messages.seating_band_none') }}</option>
+                                                    <option v-for="band in seatingBands" :key="band" :value="band">@{{ bandOptionLabel(band) }}</option>
+                                                </select>
+                                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.seating_band_ticket_help') }}</p>
+                                            </div>
+                                            {{-- Always shown. It used to appear only once a SECOND row
+                                                 existed, so the field that names the thing a buyer is
+                                                 choosing was invisible on the first ticket anyone made.
+                                                 Still only REQUIRED with more than one row, where an
+                                                 unnamed ticket is genuinely ambiguous. --}}
+                                            <div>
+                                                {{-- Plain label, not <x-input-label :value>: that binding is a
+                                                     BLADE expression, so a Vue one in it is parsed as PHP and
+                                                     `tickets` raises "Undefined constant". Same shape the
+                                                     Quantity label above already uses. --}}
+                                                <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.type') }}@{{ tickets.length > 1 ? ' *' : '' }}</label>
+                                                <x-text-input v-bind:name="`tickets[${index}][type]`" v-model="ticket.type"
+                                                    class="mt-1 block w-full" placeholder="{{ __('messages.ticket_type_placeholder') }}"
+                                                    v-bind:required="event.tickets_enabled && tickets.length > 1" v-bind:class="{ 'border-red-500': formSubmitAttempted && tickets.length > 1 && !ticket.type }" />
+                                                <p v-if="formSubmitAttempted && tickets.length > 1 && !ticket.type" class="mt-1 text-xs text-red-600">{{ __('messages.ticket_type_required') }}</p>
+                                            </div>
+                                            <div v-if="tickets.length > 1" class="flex items-end gap-3 flex-wrap">
+                                                <button type="button" @click="addTicketCustomField(index)" class="mt-1 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="getTicketCustomFieldCount(index) < 10">
+                                                    + {{ __('messages.add_field') }}
+                                                </button>
+                                                <button type="button" @click="addTicketVolumeDiscount(index)" class="mt-1 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="!ticket.volume_discount">
+                                                    + {{ __('messages.add_volume_discount') }}
+                                                </button>
+                                                <button type="button" @click="addTicketMaxPerOrder(index)" class="mt-1 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="ticket.max_per_order === null || ticket.max_per_order === undefined">
+                                                    + {{ __('messages.add_limit') }}
+                                                </button>
+                                                <button type="button" @click="removeTicket(index)" class="mt-1 text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                                    {{ __('messages.remove') }}
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div v-if="tickets.length === 1" class="mt-2 flex flex-wrap items-center gap-3">
+                                            <button type="button" @click="addTicketCustomField(index)" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="getTicketCustomFieldCount(index) < 10">
+                                                + {{ __('messages.add_field') }}
+                                            </button>
+                                            <button type="button" @click="addTicketVolumeDiscount(index)" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="!ticket.volume_discount">
+                                                + {{ __('messages.add_volume_discount') }}
+                                            </button>
+                                            <button type="button" @click="addTicketMaxPerOrder(index)" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="ticket.max_per_order === null || ticket.max_per_order === undefined">
+                                                + {{ __('messages.add_limit') }}
+                                            </button>
+                                        </div>
+                                        <div v-if="ticket.volume_discount" class="mt-4">
+                                            <x-input-label :value="__('messages.volume_discount')" />
+                                            <div class="mt-2 p-3 border border-gray-200 dark:border-gray-600 rounded-lg">
+                                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                <div>
+                                                    <x-input-label :value="__('messages.volume_discount_min_quantity')" class="text-xs" />
+                                                    <x-text-input type="number" min="2" step="1" v-model.number="ticket.volume_discount.min_quantity" class="mt-1 block w-full text-sm" />
+                                                </div>
+                                                <div>
+                                                    <x-input-label :value="__('messages.type')" class="text-xs" />
+                                                    <select v-model="ticket.volume_discount.type" class="mt-1 block w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                                        <option value="percentage">{{ __('messages.percentage') }}</option>
+                                                        <option value="fixed">{{ __('messages.fixed_amount') }}</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <x-input-label :value="__('messages.volume_discount_value')" class="text-xs" />
+                                                    <x-text-input type="number" step="0.01" min="0.01" v-bind:max="ticket.volume_discount.type === 'percentage' ? 100 : undefined" v-model.number="ticket.volume_discount.value" class="mt-1 block w-full text-sm" />
+                                                </div>
+                                                </div>
+                                                <div class="mt-2 flex justify-end">
+                                                    <button type="button" @click="removeTicketVolumeDiscount(index)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                                        {{ __('messages.remove') }}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div v-if="ticket.max_per_order !== null && ticket.max_per_order !== undefined" class="mt-4">
+                                            <x-input-label :value="__('messages.max_per_order')" />
+                                            <div class="mt-2 p-3 border border-gray-200 dark:border-gray-600 rounded-lg">
+                                                <x-text-input type="number" min="1" step="1" v-model.number="ticket.max_per_order" class="block w-full sm:w-48" />
+                                                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.max_per_order_help') }}</p>
+                                                <div class="mt-2 flex justify-end">
+                                                    <button type="button" @click="removeTicketMaxPerOrder(index)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                                        {{ __('messages.remove') }}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Pass / subscription configuration -->
+                                        {{-- Pro, and locked rather than hidden for the same reason as
+                                             the individual-tickets toggle above: turning it on below
+                                             Pro only to have EventRepo::saveEvent() reset it to the
+                                             stored value reads as the form losing the setting. An
+                                             already-sold pass keeps its switch usable so a lapsed Pro
+                                             schedule can still turn one OFF. --}}
+                                        <div class="mt-4" :class="(isPro || ticket.is_pass) ? '' : 'opacity-60'">
+                                            <label class="flex items-start gap-3" :class="(isPro || ticket.is_pass) ? 'cursor-pointer' : 'cursor-not-allowed'">
+                                                <button type="button" role="switch" :aria-checked="ticket.is_pass ? 'true' : 'false'" @click="toggleTicketPass(index)"
+                                                    :disabled="!isPro && !ticket.is_pass"
+                                                    :class="['relative inline-flex h-6 w-11 flex-shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800', ticket.is_pass ? 'bg-[var(--brand-button-bg)]' : 'bg-gray-200 dark:bg-gray-700']">
+                                                    <span :class="['inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform mt-0.5', ticket.is_pass ? 'translate-x-5' : 'translate-x-0.5']"></span>
+                                                </button>
+                                                <span>
+                                                    <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.subscription_toggle_label') }}</span>
+                                                    <template v-if="!isPro"> <x-lock-badge tier="pro" /></template>
+                                                    <span class="block text-xs text-gray-500 dark:text-gray-400">{{ __('messages.subscription_toggle_help') }}</span>
+                                                </span>
+                                            </label>
+                                            <p class="text-xs mt-1 ms-14" v-if="!isPro && !ticket.is_pass">
+                                                <button type="button" data-modal-open="upgrade-tickets" class="font-medium text-[var(--brand-blue)] hover:underline">{{ __('messages.ticket_allowance_see_pro') }}</button>
+                                            </p>
+
+                                            <div v-if="ticket.is_pass" class="mt-3 ms-14 space-y-4">
+                                                <!-- Subscription type -->
+                                                <div>
+                                                    <x-input-label :value="__('messages.subscription_type')" />
+                                                    <select v-model="ticket.pass_usage_type" @change="normalizePassScope(ticket)" class="mt-1 block w-full sm:w-72 text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                                        <option value="total">{{ __('messages.pass_type_visit_pass') }}</option>
+                                                        <option value="unlimited">{{ __('messages.pass_type_membership') }}</option>
+                                                        <option value="per_event">{{ __('messages.pass_type_festival') }}</option>
+                                                        <option v-if="isRecurring" value="per_occurrence">{{ __('messages.pass_type_season') }}</option>
+                                                    </select>
+                                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@{{ passTypeHelp(ticket.pass_usage_type) }}</p>
+                                                </div>
+
+                                                <!-- Admissions per event (holder + guests) -->
+                                                <div>
+                                                    <x-input-label :value="__('messages.pass_admits_per_event')" />
+                                                    <x-text-input type="number" min="1" step="1" placeholder="1" v-model.number="ticket.pass_admits_per_event" class="mt-1 block w-full sm:w-48" />
+                                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pass_admits_per_event_help') }}</p>
+                                                    <p v-if="ticket.pass_admits_per_event > 1" class="mt-1 text-xs text-[var(--brand-blue)]">@{{ ticket.pass_admits_per_event }} {{ __('messages.pass_admits_people_including_holder') }}</p>
+                                                </div>
+
+                                                <!-- Visit cap (total) -->
+                                                <div v-if="ticket.pass_usage_type === 'total'">
+                                                    <x-input-label :value="__('messages.pass_max_uses')" />
+                                                    <x-text-input type="number" min="1" step="1" v-model.number="ticket.pass_max_uses" class="mt-1 block w-full sm:w-48" />
+                                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pass_max_uses_help') }}</p>
+                                                </div>
+
+                                                <!-- Validity window (not for season pass, which is bound by recurrence) -->
+                                                <div v-if="ticket.pass_usage_type !== 'per_occurrence'">
+                                                    <x-input-label :value="__('messages.pass_valid_days')" />
+                                                    <x-text-input type="number" min="1" step="1" v-model.number="ticket.pass_valid_days" class="mt-1 block w-full sm:w-48" />
+                                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pass_valid_days_help') }}</p>
+                                                </div>
+
+                                                <!-- Coverage (cross-event subscriptions) -->
+                                                <div v-if="ticket.pass_usage_type !== 'per_occurrence'">
+                                                    <x-input-label :value="__('messages.pass_coverage')" />
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.pass_coverage_help') }}</p>
+                                                    <select v-model="ticket.pass_scope" class="block w-full sm:w-72 text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                                        <option value="all_events">{{ __('messages.pass_scope_all_events') }}</option>
+                                                        <option value="sub_schedule">{{ __('messages.pass_scope_sub_schedule') }}</option>
+                                                        <option value="specific_events">{{ __('messages.pass_scope_specific_events') }}</option>
+                                                    </select>
+                                                    <p v-if="ticket.pass_scope === 'all_events'" class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pass_scope_all_events_help') }}</p>
+
+                                                    <div v-if="ticket.pass_scope === 'sub_schedule'" class="mt-2">
+                                                        <select v-model="ticket.pass_scope_group_id" class="block w-full sm:w-72 text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                                            <option value="">{{ __('messages.select_sub_schedule') }}</option>
+                                                            <option v-for="g in passGroups" :key="g.id" :value="g.id">@{{ g.name }}</option>
+                                                        </select>
+                                                        <p v-if="passGroups.length === 0" class="mt-1 text-xs text-amber-600 dark:text-amber-400">{{ __('messages.pass_no_sub_schedules') }}</p>
+                                                    </div>
+
+                                                    <div v-if="ticket.pass_scope === 'specific_events'" class="mt-2">
+                                                        <input type="text" v-model="passEventSearch[index]" placeholder="{{ __('messages.search_events') }}" class="block w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                                        <div class="mt-2 max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg p-2 space-y-1">
+                                                            <label v-for="e in getFilteredPassEvents(index)" :key="e.id" class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                                                                <input type="checkbox" :value="e.id" v-model="ticket.pass_event_ids" class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
+                                                                <span>@{{ e.name }}</span>
+                                                            </label>
+                                                            <p v-if="getFilteredPassEvents(index).length === 0" class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.no_events_found') }}</p>
+                                                        </div>
+                                                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@{{ ticket.pass_event_ids.length }} {{ __('messages.events_covered') }}</p>
+                                                        <p v-if="ticket.pass_event_ids.length === 0" class="mt-1 text-xs text-amber-600 dark:text-amber-400">{{ __('messages.pass_no_events_warning') }}</p>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Advance booking -->
+                                                <div>
+                                                    <label class="flex items-center gap-3 cursor-pointer">
+                                                        <button type="button" role="switch" :aria-checked="ticket.pass_allow_booking ? 'true' : 'false'" @click="ticket.pass_allow_booking = !ticket.pass_allow_booking"
+                                                            :class="['relative inline-flex h-6 w-11 flex-shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800', ticket.pass_allow_booking ? 'bg-[var(--brand-button-bg)]' : 'bg-gray-200 dark:bg-gray-700']">
+                                                            <span :class="['inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform mt-0.5', ticket.pass_allow_booking ? 'translate-x-5' : 'translate-x-0.5']"></span>
+                                                        </button>
+                                                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.pass_allow_booking_label') }}</span>
+                                                    </label>
+                                                    <p class="mt-1 ms-14 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pass_allow_booking_help') }}</p>
+
+                                                    <div v-if="ticket.pass_allow_booking" class="mt-3 ms-14 space-y-3">
+                                                        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                                            <div class="flex items-start gap-2">
+                                                                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                                                                </svg>
+                                                                <p class="text-xs text-amber-800 dark:text-amber-200">{{ __('messages.pass_shared_capacity_warning') }}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <x-input-label :value="__('messages.pass_seats_per_occurrence')" />
+                                                            <x-text-input type="number" min="1" step="1" v-model.number="ticket.pass_seats_per_occurrence" class="mt-1 block w-full sm:w-48" />
+                                                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pass_seats_per_occurrence_help') }}</p>
+                                                        </div>
+                                                        <div>
+                                                            <x-input-label :value="__('messages.pass_cancel_cutoff_label')" />
+                                                            <select v-model="ticket.pass_cancel_cutoff_hours" class="mt-1 block w-full sm:w-72 text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                                                <option value="">{{ __('messages.pass_cancel_anytime') }}</option>
+                                                                <option :value="0">{{ __('messages.pass_cancel_until_start') }}</option>
+                                                                @foreach ([12, 24, 48, 72, 168] as $cutoffHours)
+                                                                <option :value="{{ $cutoffHours }}">{{ __('messages.pass_cancel_hours_before', ['hours' => $cutoffHours]) }}</option>
+                                                                @endforeach
+                                                                <!-- A stored value outside the presets (e.g. restored from a backup)
+                                                                     must stay visible and selected, not render a blank select. -->
+                                                                <option v-if="![0, 12, 24, 48, 72, 168].includes(ticket.pass_cancel_cutoff_hours) && ticket.pass_cancel_cutoff_hours !== '' && ticket.pass_cancel_cutoff_hours !== null"
+                                                                    :value="ticket.pass_cancel_cutoff_hours">@{{ passCancelHoursLabel(ticket.pass_cancel_cutoff_hours) }}</option>
+                                                            </select>
+                                                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pass_cancel_cutoff_help') }}</p>
+                                                        </div>
+                                                        <div v-if="ticket.pass_cancel_cutoff_hours !== '' && ticket.pass_cancel_cutoff_hours !== null">
+                                                            <x-input-label :value="__('messages.pass_late_cancel_policy_label')" />
+                                                            <select v-model="ticket.pass_late_cancel_policy" class="mt-1 block w-full sm:w-72 text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                                                <option value="forfeit">{{ __('messages.pass_late_cancel_forfeit') }}</option>
+                                                                <option value="block">{{ __('messages.pass_late_cancel_block') }}</option>
+                                                            </select>
+                                                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pass_late_cancel_policy_help') }}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <template v-if="ticket.is_pass">
+                                                <input type="hidden" v-bind:name="`tickets[${index}][is_pass]`" :value="1">
+                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_usage_type]`" :value="ticket.pass_usage_type">
+                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_max_uses]`" :value="ticket.pass_max_uses || ''">
+                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_valid_days]`" :value="ticket.pass_valid_days || ''">
+                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_scope]`" :value="ticket.pass_scope">
+                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_scope_group_id]`" :value="ticket.pass_scope_group_id || ''">
+                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_event_ids]`" :value="JSON.stringify(ticket.pass_event_ids || [])">
+                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_allow_booking]`" :value="ticket.pass_allow_booking ? 1 : 0">
+                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_seats_per_occurrence]`" :value="ticket.pass_seats_per_occurrence || ''">
+                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_cancel_cutoff_hours]`" :value="ticket.pass_cancel_cutoff_hours === '' || ticket.pass_cancel_cutoff_hours === null ? '' : ticket.pass_cancel_cutoff_hours">
+                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_late_cancel_policy]`" :value="ticket.pass_late_cancel_policy || 'forfeit'">
+                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_admits_per_event]`" :value="ticket.pass_admits_per_event || ''">
+                                            </template>
+                                            <input v-else type="hidden" v-bind:name="`tickets[${index}][is_pass]`" :value="0">
+                                        </div>
+                                        <!-- Ticket-level Custom Fields -->
+                                        <div class="mt-4" v-if="ticket.custom_fields && Object.keys(ticket.custom_fields).length > 0">
+                                            <x-input-label :value="__('messages.custom_fields') . ' (' . __('messages.per_ticket') . ')'" />
+                                            <div :id="`ticket-${index}-custom-fields`">
+                                            <div v-for="(field, fieldKey) in ticket.custom_fields" :key="fieldKey" :data-ticket-field-key="fieldKey" class="mt-2 p-3 border border-gray-200 dark:border-gray-600 rounded-lg flex items-start gap-2">
+                                                <div v-show="Object.keys(ticket.custom_fields).length > 1" class="custom-field-drag-handle cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0 mt-1">
+                                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
+                                                    </svg>
+                                                </div>
+                                                <div class="flex-1 min-w-0">
+                                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                    <div>
+                                                        <x-input-label :value="__('messages.field_name') . ' *'" class="text-xs" />
+                                                        <x-text-input type="text" v-model="field.name" class="mt-1 block w-full text-sm" v-bind:required="event.tickets_enabled || event.rsvp_enabled" v-bind:class="{ 'border-red-500': formSubmitAttempted && !field.name }" />
+                                                        <p v-if="formSubmitAttempted && !field.name" class="mt-1 text-xs text-red-600">{{ __('messages.field_name_required') }}</p>
+                                                    </div>
+                                                    <div>
+                                                        <x-input-label :value="__('messages.field_type')" class="text-xs" />
+                                                        <select v-model="field.type" class="mt-1 block w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                                            <option value="string">{{ __('messages.type_string') }}</option>
+                                                            <option value="multiline_string">{{ __('messages.type_multiline_string') }}</option>
+                                                            <option value="switch">{{ __('messages.type_switch') }}</option>
+                                                            <option value="date">{{ __('messages.type_date') }}</option>
+                                                            <option value="dropdown">{{ __('messages.type_dropdown') }}</option>
+                                                            <option value="multiselect">{{ __('messages.type_multiselect') }}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                @if($role->language_code !== 'en')
+                                                <div class="mt-2">
+                                                    <x-input-label :value="__('messages.english_name')" class="text-xs" />
+                                                    <x-text-input type="text" v-model="field.name_en" class="mt-1 block w-full text-sm" placeholder="{{ __('messages.auto_translated_placeholder') }}" />
+                                                </div>
+                                                @endif
+                                                <div class="mt-2" v-if="field.type === 'dropdown' || field.type === 'multiselect'">
+                                                    <x-input-label :value="__('messages.field_options')" class="text-xs" />
+                                                    <x-text-input type="text" v-model="field.options" class="mt-1 block w-full text-sm" placeholder="{{ __('messages.options_placeholder') }}" />
+                                                </div>
+                                                <div class="mt-2 flex items-center justify-between">
+                                                    <div class="flex items-center">
+                                                        <input type="checkbox" v-model="field.required" :id="`ticket_${index}_field_required_${fieldKey}`" class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
+                                                        <label :for="`ticket_${index}_field_required_${fieldKey}`" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
+                                                    </div>
+                                                    <button type="button" @click="removeTicketCustomField(index, fieldKey)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                                        {{ __('messages.remove') }}
+                                                    </button>
+                                                </div>
+                                                </div>
+                                            </div>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" v-bind:name="`tickets[${index}][custom_fields]`" :value="JSON.stringify(ticket.custom_fields || {})">
+                                        <input type="hidden" v-bind:name="`tickets[${index}][volume_discount]`" :value="ticket.volume_discount ? JSON.stringify(ticket.volume_discount) : ''">
+                                        <input type="hidden" v-bind:name="`tickets[${index}][max_per_order]`" :value="(ticket.max_per_order === null || ticket.max_per_order === undefined || ticket.max_per_order === '') ? '' : ticket.max_per_order">
+
+                                        <div class="mt-4">
+                                            <x-input-label :value="__('messages.description')" />
+                                            <textarea v-bind:name="`tickets[${index}][description]`" v-model="ticket.description" rows="4" data-content-dir="{{ content_dir($role) }}"
+                                                class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"></textarea>
+                                        </div>
+
+                                        <template v-if="showSalesDates">
+                                            <div class="mt-4">
+                                                <x-input-label :value="__('messages.ticket_sales_start_at')" />
+                                                <div class="flex items-center gap-2 mt-1">
+                                                    <input type="text"
+                                                        class="datepicker-ticket-sales-start flex-1 min-w-[110px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm"
+                                                        :data-ticket-index="index"
+                                                        :value="ticket.sales_start_at_date"
+                                                        autocomplete="off" />
+                                                    <div class="relative w-28">
+                                                        <input type="text"
+                                                            class="ticket-sales-start-time-input w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm"
+                                                            :value="formatPartTime(ticket.sales_start_at_time)"
+                                                            @focus="initTicketSalesStartTimePickerOnFocus($event, index)"
+                                                            @change="onTicketSalesStartTimeChange(index, $event)"
+                                                            autocomplete="off" placeholder="{{ __('messages.time') }}" />
+                                                        <div class="time-dropdown" :ref="'ticket_sales_start_time_dropdown_' + index"></div>
+                                                    </div>
+                                                </div>
+                                                <input type="hidden" v-bind:name="`tickets[${index}][sales_start_at]`" :value="ticket.sales_start_at_date && ticket.sales_start_at_time ? ticket.sales_start_at_date + ' ' + ticket.sales_start_at_time + ':00' : (ticket.sales_start_at_date ? ticket.sales_start_at_date + ' 00:00:00' : '')" />
+                                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                                    {{ __('messages.ticket_sales_start_at_help') }}
+                                                </p>
+                                            </div>
+
+                                            <div class="mt-4">
+                                                <x-input-label :value="__('messages.ticket_sales_end_at')" />
+                                                <div class="flex items-center gap-2 mt-1">
+                                                    <input type="text"
+                                                        class="datepicker-ticket-sales-end flex-1 min-w-[110px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm"
+                                                        :data-ticket-index="index"
+                                                        :value="ticket.sales_end_at_date"
+                                                        autocomplete="off" />
+                                                    <div class="relative w-28">
+                                                        <input type="text"
+                                                            class="ticket-sales-end-time-input w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm"
+                                                            :value="formatPartTime(ticket.sales_end_at_time)"
+                                                            @focus="initTicketSalesEndTimePickerOnFocus($event, index)"
+                                                            @change="onTicketSalesEndTimeChange(index, $event)"
+                                                            autocomplete="off" placeholder="{{ __('messages.time') }}" />
+                                                        <div class="time-dropdown" :ref="'ticket_sales_end_time_dropdown_' + index"></div>
+                                                    </div>
+                                                </div>
+                                                <input type="hidden" v-bind:name="`tickets[${index}][sales_end_at]`" :value="ticket.sales_end_at_date && ticket.sales_end_at_time ? ticket.sales_end_at_date + ' ' + ticket.sales_end_at_time + ':00' : (ticket.sales_end_at_date ? ticket.sales_end_at_date + ' 23:59:00' : '')" />
+                                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                                    {{ __('messages.ticket_sales_end_at_help') }}
+                                                </p>
+                                            </div>
+                                        </template>
+                                        <template v-else>
+                                            <input type="hidden" :name="`tickets[${index}][sales_start_at]`" value="" />
+                                            <input type="hidden" :name="`tickets[${index}][sales_end_at]`" value="" />
+                                        </template>
+                                    </div>
+
+                                    <!-- Total Tickets Mode Selection -->
+                                    <!-- Hidden for an allocated event: quantities come from the plan, so two
+                                         equal sections would offer "combined" by accident and the server
+                                         refuses it anyway (Event::hasSameTicketQuantities). -->
+                                    <div v-if="hasSameTicketQuantities && tickets.length > 1 && !event.seating_plan_id" class="mt-6 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
+                                        <div class="space-y-3">
+                                            <div class="flex items-center">
+                                                <input id="total_tickets_individual" name="total_tickets_mode" type="radio"
+                                                    value="individual" v-model="event.total_tickets_mode"
+                                                    class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300">
+                                                <label for="total_tickets_individual" class="ms-3 block text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                    {{ __('messages.individual_quantities') }} (@{{ getTotalTicketQuantity }} total)
+                                                    <p class="text-xs text-gray-600 dark:text-gray-400">
+                                                        {{ __('messages.individual_quantities_help') }}
+                                                    </p>
+                                                </label>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input id="total_tickets_combined" name="total_tickets_mode" type="radio"
+                                                    value="combined" v-model="event.total_tickets_mode"
+                                                    class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300">
+                                                <label for="total_tickets_combined" class="ms-3 block text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                    {{ __('messages.combined_total') }} (@{{ getCombinedTotalQuantity }} total)
+                                                    <p class="text-xs text-gray-600 dark:text-gray-400">
+                                                        {{ __('messages.combined_total_help') }}
+                                                    </p>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex gap-2 mt-4">
+                                        <button type="button" @click="addTicket" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
+                                            + {{ __('messages.add_type') }}
+                                        </button>
+                                    </div>
+                                </div>
+                                </div>
+
+                                <!-- Options Tab (continued) - shared by ticketed and registration (RSVP) events -->
+                                <div v-show="activeTicketTab === 'options' || event.rsvp_enabled">
+                                <div class="mb-6">
+                                    <x-input-label for="ticket_notes" v-show="event.tickets_enabled" :value="__('messages.ticket_notes')" />
+                                    <x-input-label for="ticket_notes" v-show="!event.tickets_enabled" :value="__('messages.registration_notes')" />
+                                    <textarea id="ticket_notes" name="ticket_notes" v-model="event.ticket_notes" rows="4" data-content-dir="{{ content_dir($role) }}"
+                                        class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"></textarea>
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.ticket_notes_help') }}</p>
+                                    <x-link href="{{ marketing_url('/docs/creating-schedules#available-variables') }}" target="_blank" class="text-sm mt-1 inline-block">{{ __('messages.show_available_variables') }}</x-link>
+                                </div>
+
+                                <div class="mb-6" v-show="event.tickets_enabled">
+                                    <x-input-label for="terms_url" :value="__('messages.terms_url')" />
+                                    <x-text-input id="terms_url" name="terms_url" type="url" class="mt-1 block w-full"
+                                        :value="old('terms_url', $event->terms_url)"
+                                        v-model="event.terms_url" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('terms_url')" />
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                        {{ __('messages.terms_url_help') }}
+                                    </p>
+                                </div>
+
+                                </div>
+
+                                <!-- Promo Codes Tab -->
+                                <div v-show="activeTicketTab === 'promo_codes'">
+                                @if (! $role->isPro())
+                                {{-- The tab still opens and shows what promo codes do. A user who can see
+                                     the feature is far likelier to want it than one who hits a dead tab. --}}
+                                <x-plan-gate
+                                    tier="pro"
+                                    :role="$role"
+                                    :subdomain="$subdomain"
+                                    :learnMoreUrl="marketing_url('/features/ticketing')"
+                                    :title="__('messages.promo_codes')"
+                                    :bullets="[
+                                        __('messages.plan_gate_promo_bullet_types'),
+                                        __('messages.plan_gate_promo_bullet_limits'),
+                                        __('messages.plan_gate_promo_bullet_expiry'),
+                                        __('messages.plan_gate_promo_bullet_reporting'),
+                                    ]">
+                                    {{ __('messages.plan_gate_promo_body') }}
+                                </x-plan-gate>
+                                @else
+                                <div class="mb-6">
+                                    <div v-for="(promoCode, pcIndex) in promoCodes" :key="pcIndex" class="mt-4 p-4 border border-gray-300 dark:border-gray-700 rounded-lg">
+                                        <input type="hidden" v-bind:name="`promo_codes[${pcIndex}][id]`" :value="promoCode.id">
+
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div>
+                                                <x-input-label :value="__('messages.promo_code') . ' *'" class="text-xs" />
+                                                <x-text-input type="text" v-bind:name="`promo_codes[${pcIndex}][code]`" v-model="promoCode.code" class="mt-1 block w-full text-sm" required maxlength="50" style="text-transform: uppercase" />
+                                            </div>
+                                            <div>
+                                                <x-input-label :value="__('messages.discount_type')" class="text-xs" />
+                                                <select v-bind:name="`promo_codes[${pcIndex}][type]`" v-model="promoCode.type" class="mt-1 block w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                                    <option value="percentage">{{ __('messages.percentage') }}</option>
+                                                    <option value="fixed">{{ __('messages.fixed_amount') }}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
+                                            <div>
+                                                <x-input-label :value="__('messages.discount_value') . ' *'" class="text-xs" />
+                                                <div class="relative mt-1">
+                                                    <x-text-input type="number" step="0.01" min="0.01" v-bind:max="promoCode.type === 'percentage' ? 100 : undefined" v-bind:name="`promo_codes[${pcIndex}][value]`" v-model="promoCode.value" class="block w-full text-sm pe-14 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" required />
+                                                    <span class="absolute inset-y-0 end-0 flex items-center pe-3 text-gray-400 text-sm">@{{ promoCode.type === 'percentage' ? '%' : event.ticket_currency_code }}</span>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <x-input-label :value="__('messages.max_uses')" class="text-xs" />
+                                                <x-text-input type="number" min="1" v-bind:name="`promo_codes[${pcIndex}][max_uses]`" v-model="promoCode.max_uses" class="mt-1 block w-full text-sm" :placeholder="__('messages.unlimited')" />
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
+                                            <div>
+                                                <x-input-label :value="__('messages.expires_at')" class="text-xs" />
+                                                <div class="flex items-center gap-2 mt-1">
+                                                    <input type="text"
+                                                        :class="'datepicker-promo-date flex-1 min-w-[110px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm'"
+                                                        :data-pc-index="pcIndex"
+                                                        :value="promoCode.expires_at_date"
+                                                        autocomplete="off" />
+                                                    <div class="relative w-28">
+                                                        <input type="text"
+                                                            class="promo-time-input w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm"
+                                                            :data-pc-index="pcIndex"
+                                                            :value="formatPartTime(promoCode.expires_at_time)"
+                                                            @focus="initPromoTimePickerOnFocus($event, pcIndex)"
+                                                            @change="onPromoTimeChange(pcIndex, $event)"
+                                                            autocomplete="off" placeholder="{{ __('messages.time') }}" />
+                                                        <div class="time-dropdown" :ref="'promo_time_dropdown_' + pcIndex"></div>
+                                                    </div>
+                                                </div>
+                                                <input type="hidden" v-bind:name="`promo_codes[${pcIndex}][expires_at]`" :value="promoCode.expires_at_date && promoCode.expires_at_time ? promoCode.expires_at_date + ' ' + promoCode.expires_at_time + ':00' : (promoCode.expires_at_date ? promoCode.expires_at_date + ' 23:59:00' : '')" />
+                                            </div>
+                                            <div class="flex items-end pb-1 gap-4">
+                                                <div class="flex items-center gap-3">
+                                                    <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                                        <input type="checkbox" :checked="promoCode.is_active"
+                                                            @change="promoCode.is_active = $event.target.checked"
+                                                            class="sr-only peer">
+                                                        <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                                        <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                                    </label>
+                                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.active') }}</span>
+                                                </div>
+                                                <input type="hidden" v-bind:name="`promo_codes[${pcIndex}][is_active]`" :value="promoCode.is_active ? 1 : 0">
+                                                <span v-if="promoCode.times_used > 0" class="text-xs text-gray-500 dark:text-gray-400">
+                                                    {{ __('messages.times_used') }}: @{{ promoCode.times_used }}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-3" v-if="tickets.length > 1 && !(isInvoiceNinjaPaymentLink && event.payment_method === 'invoiceninja')">
+                                            <x-input-label :value="__('messages.applies_to')" class="text-xs" />
+                                            <div class="mt-1 flex items-center gap-3">
+                                                <label class="flex items-center gap-1 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                                                    <input type="radio" :name="`promo_ticket_mode_${pcIndex}`" value="all" :checked="!promoCode.ticket_ids || promoCode.ticket_ids.length === 0" @change="promoCode.ticket_ids = []" class="text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                                                    {{ __('messages.all_tickets') }}
+                                                </label>
+                                                <label class="flex items-center gap-1 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                                                    <input type="radio" :name="`promo_ticket_mode_${pcIndex}`" value="specific" :checked="promoCode.ticket_ids && promoCode.ticket_ids.length > 0" @change="promoCode.ticket_ids = promoCode.ticket_ids && promoCode.ticket_ids.length > 0 ? promoCode.ticket_ids : [tickets[0]?.id]" class="text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                                                    {{ __('messages.specific_tickets') }}
+                                                </label>
+                                            </div>
+                                            <div v-if="promoCode.ticket_ids && promoCode.ticket_ids.length > 0" class="mt-2 ms-6 space-y-1">
+                                                <label v-for="ticket in tickets" :key="ticket.uid" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
+                                                    <input type="checkbox" :value="ticket.id" v-model="promoCode.ticket_ids" class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
+                                                    <span v-text="ticket.type || '{{ __('messages.ticket') }}'"></span>
+                                                </label>
+                                            </div>
+                                            <input type="hidden" v-bind:name="`promo_codes[${pcIndex}][ticket_ids]`" :value="JSON.stringify(promoCode.ticket_ids || [])">
+                                        </div>
+
+                                        <div class="mt-3 flex items-center gap-1.5">
+                                            <template v-if="promoCode.code && promoLinkBaseUrl">
+                                                <div class="flex items-center gap-1 min-w-0 w-fit">
+                                                    <a :href="promoLinkBaseUrl + '?promo=' + promoCode.code.trim().toUpperCase()"
+                                                       target="_blank"
+                                                       class="text-xs text-gray-500 dark:text-gray-400 hover:text-[var(--brand-blue)] truncate flex-shrink"
+                                                       :title="promoLinkBaseUrl + '?promo=' + promoCode.code.trim().toUpperCase()">@{{ (promoLinkBaseUrl + '?promo=' + promoCode.code.trim().toUpperCase()).replace(/^https?:\/\//, '') }}</a>
+                                                    <button type="button" @click="copyPromoLink(promoCode)" class="inline-flex items-center justify-center flex-shrink-0 text-gray-400 hover:text-[var(--brand-blue)] transition-colors" :title="promoCode._copied ? '{{ __('messages.copied') }}' : '{{ __('messages.copy_link') }}'">
+                                                        <svg v-if="!promoCode._copied" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9.75a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184" />
+                                                        </svg>
+                                                        <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-green-500">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </template>
+                                            <button type="button" @click="removePromoCode(pcIndex)" class="ms-auto text-red-600 hover:text-red-800 dark:text-red-400 text-sm flex-shrink-0">
+                                                {{ __('messages.remove') }}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <button type="button" @click="addPromoCode"
+                                        v-show="!(isInvoiceNinjaPaymentLink && event.payment_method === 'invoiceninja' && promoCodes.length >= 1)"
+                                        class="mt-2 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
+                                        + {{ __('messages.add_promo_code') }}
+                                    </button>
+                                </div>
+                                @endif
+                                </div>
+
+                                <!-- Add-ons Tab -->
+                                <div v-show="activeTicketTab === 'add_ons'">
+                                    @if (! $role->isPro())
+                                    <x-plan-gate
+                                        tier="pro"
+                                        :role="$role"
+                                        :subdomain="$subdomain"
+                                        :learnMoreUrl="marketing_url('/features/ticketing')"
+                                        :title="__('messages.add_ons')"
+                                        :bullets="[
+                                            __('messages.plan_gate_addons_bullet_extras'),
+                                            __('messages.plan_gate_addons_bullet_stock'),
+                                            __('messages.plan_gate_addons_bullet_limits'),
+                                            __('messages.plan_gate_addons_bullet_reporting'),
+                                        ]">
+                                        {{ __('messages.add_ons_help') }}
+                                    </x-plan-gate>
+                                    @else
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.add_ons_help') }}</p>
+
+                                    <div v-for="(addon, aIndex) in addons" :key="addon._key" class="mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.name') }} *</label>
+                                                <input type="text" v-model="addon.type" :name="`addons[${aIndex}][type]`" required
+                                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.price') }}</label>
+                                                <input type="number" v-model="addon.price" :name="`addons[${aIndex}][price]`" step="0.01" min="0"
+                                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.quantity') }}</label>
+                                                <input type="number" v-model="addon.quantity" :name="`addons[${aIndex}][quantity]`" min="0" :placeholder="'{{ __('messages.unlimited') }}'"
+                                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm">
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.description') }}</label>
+                                            <textarea v-model="addon.description" :name="`addons[${aIndex}][description]`" rows="2"
+                                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm"></textarea>
+                                        </div>
+                                        <div class="mt-3">
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.url') }}</label>
+                                            <input type="url" v-model="addon.url" :name="`addons[${aIndex}][url]`" placeholder="https://..."
+                                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm" />
+                                        </div>
+                                        <div class="mt-3">
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.image') }}</label>
+                                            <div v-if="addon.image_url" class="mb-2 relative inline-block">
+                                                <img :src="addon.image_url" :alt="addon.type" style="max-height: 80px" class="rounded-lg border border-gray-200 dark:border-gray-600" />
+                                                <button type="button" @click="removeAddonImage(aIndex)" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                </button>
+                                            </div>
+                                            <div v-if="!addon.image_url">
+                                                <button type="button" @click="(Array.isArray($refs['addon_image_' + aIndex]) ? $refs['addon_image_' + aIndex][0] : $refs['addon_image_' + aIndex]).click()"
+                                                    class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors border border-gray-300 dark:border-gray-600">
+                                                    <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                    </svg>
+                                                    {{ __('messages.choose_file') }}
+                                                </button>
+                                            </div>
+                                            <input type="file" :ref="'addon_image_' + aIndex"
+                                                accept="image/png, image/jpeg, image/gif, image/webp" class="hidden"
+                                                @change="onAddonFileChange(aIndex, $event)" />
+                                            <input type="hidden" v-if="addon.image_url && addon.image_url.startsWith('data:')" :name="`addon_image_data[${aIndex}]`" :value="addon.image_url">
+                                            <input type="hidden" :name="`addons[${aIndex}][remove_image]`" :value="addon.remove_image ? 1 : 0" />
+                                        </div>
+                                        <div v-if="addon.max_per_order !== null && addon.max_per_order !== undefined" class="mt-3">
+                                            <x-input-label :value="__('messages.max_per_order')" />
+                                            <div class="mt-2 p-3 border border-gray-200 dark:border-gray-600 rounded-lg">
+                                                <x-text-input type="number" min="1" step="1" v-model.number="addon.max_per_order" class="block w-full sm:w-48" />
+                                                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.max_per_order_help') }}</p>
+                                                <div class="mt-2 flex justify-end">
+                                                    <button type="button" @click="removeAddonMaxPerOrder(aIndex)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                                        {{ __('messages.remove') }}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" :name="`addons[${aIndex}][max_per_order]`" :value="(addon.max_per_order === null || addon.max_per_order === undefined || addon.max_per_order === '') ? '' : addon.max_per_order">
+                                        <div class="mt-2 flex justify-between items-center">
+                                            <input type="hidden" :name="`addons[${aIndex}][id]`" :value="addon.id">
+                                            <button type="button" @click="addAddonMaxPerOrder(aIndex)" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="addon.max_per_order === null || addon.max_per_order === undefined">
+                                                + {{ __('messages.add_limit') }}
+                                            </button>
+                                            <div v-else></div>
+                                            <button type="button" @click="removeAddon(aIndex)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                                {{ __('messages.remove') }}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <button type="button" @click="addAddon"
+                                        class="mt-2 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
+                                        + {{ __('messages.add_add_on') }}
+                                    </button>
+                                    @endif
+                                </div>
+
+                                </div><!-- /was the blanket non-Pro wrapper; now a plain div -->
+
+
+                            </div>
+
+                            <hr class="my-4 border-gray-200 dark:border-gray-700">
+
+                            @if ($user->isMember($subdomain))
+                            {{-- Saving the ticket set as this schedule's default is not a Pro feature at
+                                 all; it only carried the blanket non-Pro wrapper because it sat next to
+                                 the ticket area. --}}
+                            <div class="flex items-center gap-3 mt-3">
+                                <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
+                                    <input id="save_default_tickets" name="save_default_tickets" type="checkbox"
+                                        class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                                    <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
+                                </label>
+                                <label for="save_default_tickets" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                    {{ __('messages.save_as_default') }}
+                                </label>
+                            </div>
+                            @endif
+
+                        </div>
+                    </div>
                 @endif
                 <button type="button" class="mobile-section-header" data-section="section-venue">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -3019,1475 +4516,6 @@
             </div>
             @endif
 
-                    @if ($event->user_id == $user->id)
-                    <button type="button" class="mobile-section-header" data-section="section-tickets">
-                        <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
-                            </svg>
-                            {{ __('messages.tickets') }}
-                        </span>
-                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                        </svg>
-                    </button>
-                    <div id="section-tickets" class="section-content lg:mt-0">
-                        <div class="max-w-xl">                                                
-                            <div class="mb-6 flex items-center justify-between">
-                                <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
-                                    </svg>
-                                    {{ __('messages.tickets') }}
-                                </h2>
-                                @if ($event->exists && $role->isPro() && !$event->is_private)
-                                <a href="#" id="embed-ticket-link" v-show="event.tickets_enabled || event.rsvp_enabled"
-                                    class="js-open-embed-ticket-modal inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
-                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                        <path d="M12.89,3L14.85,3.4L11.11,21L9.15,20.6L12.89,3M19.59,12L16,8.41V5.58L22.42,12L16,18.41V15.58L19.59,12M1.58,12L8,5.58V8.41L4.41,12L8,15.58V18.41L1.58,12Z" />
-                                    </svg>
-                                    {{ $event->rsvp_enabled && !$event->tickets_enabled ? __('messages.embed_registration') : __('messages.embed_tickets') }}
-                                </a>
-                                @endif
-                            </div>
-
-                            <input type="hidden" name="rsvp_enabled" :value="event.rsvp_enabled ? 1 : 0">
-                            <input type="hidden" name="tickets_enabled" :value="event.tickets_enabled ? 1 : 0">
-                            <fieldset class="mb-6">
-                                <div class="space-y-4 sm:flex sm:items-center sm:space-x-10 sm:space-y-0 rtl:sm:space-x-reverse">
-                                    <div class="flex items-center">
-                                        <input id="ticket_mode_external" type="radio" value="external" v-model="ticketMode"
-                                            class="ticket-mode-radio h-4 w-4 border-gray-300 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                                        <label for="ticket_mode_external"
-                                            class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.external') }}</label>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <input id="ticket_mode_rsvp" type="radio" value="rsvp" v-model="ticketMode"
-                                            class="ticket-mode-radio h-4 w-4 border-gray-300 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                                        <label for="ticket_mode_rsvp"
-                                            class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">{{ __('messages.registration') }}</label>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <input id="ticket_mode_tickets" type="radio" value="tickets" v-model="ticketMode"
-                                            class="ticket-mode-radio h-4 w-4 border-gray-300 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                                        <label for="ticket_mode_tickets"
-                                            class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100 cursor-pointer">
-                                            {{ __('messages.tickets') }}
-                                        </label>
-                                    </div>
-                                </div>
-
-                                {{-- The single most useful sentence on this page for a free organizer, and
-                                     the only evergreen place they learn selling is included at all. The
-                                     one-time announcement banner expires; this does not. --}}
-                                @if ($role->ticketSaleLimit() !== null)
-                                <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
-                                    {{ __('messages.ticket_allowance_radio_hint', ['limit' => $role->ticketSaleLimit()]) }}
-                                </p>
-                                @endif
-                            </fieldset>
-
-                            <!-- Registration URL (only visible when tickets and RSVP are disabled) -->
-                            <div class="mb-6" v-show="!event.tickets_enabled && !event.rsvp_enabled">
-                                <x-input-label for="registration_url" :value="__('messages.registration_url')" />
-                                <x-text-input id="registration_url" name="registration_url" type="url" class="mt-1 block w-full"
-                                    v-model="event.registration_url" />
-                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.registration_url_help') }}</p>
-                            </div>
-
-                            <!-- External Event Price (only visible when tickets and RSVP are disabled) -->
-                            <div class="mb-6" v-show="!event.tickets_enabled && !event.rsvp_enabled">
-                                <x-input-label :value="__('messages.price')" />
-                                <div class="mt-1 flex flex-col sm:flex-row gap-3">
-                                    <select name="ticket_currency_code" v-model="event.ticket_currency_code" data-searchable
-                                        class="w-full sm:w-28 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                        @foreach ($currencies as $currency)
-                                        @if ($loop->index == 2)
-                                        <option disabled>──────</option>
-                                        @endif
-                                        <option value="{{ $currency->value }}">{{ $currency->value }}</option>
-                                        @endforeach
-                                    </select>
-                                    <x-text-input type="number" name="ticket_price" step="0.01" min="0"
-                                        class="flex-1" v-model="event.ticket_price" />
-                                </div>
-                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.external_price_help') }}</p>
-                            </div>
-
-                            <div class="mb-6" v-show="!event.tickets_enabled && !event.rsvp_enabled">
-                                <x-input-label for="coupon_code" :value="__('messages.coupon_code')" />
-                                <x-text-input id="coupon_code" name="coupon_code" type="text" class="mt-1 block w-full"
-                                    v-model="event.coupon_code" maxlength="255" />
-                                <x-input-error class="mt-2" :messages="$errors->get('coupon_code')" />
-                            </div>
-
-                            <!-- What the coupon is worth (only visible when tickets and RSVP are disabled) -->
-                            <div class="mb-6" v-show="!event.tickets_enabled && !event.rsvp_enabled">
-                                <x-input-label for="coupon_discount" :value="__('messages.discount')" />
-                                <div class="mt-1 flex flex-col sm:flex-row gap-3">
-                                    <select name="coupon_discount_type" v-model="event.coupon_discount_type"
-                                        class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                        <option value="percentage">%</option>
-                                        <option value="fixed">@{{ event.ticket_currency_code }}</option>
-                                    </select>
-                                    <x-text-input id="coupon_discount" type="number" name="coupon_discount" step="0.01" min="0"
-                                        class="flex-1" v-model="event.coupon_discount" />
-                                </div>
-                                <x-input-error class="mt-2" :messages="$errors->get('coupon_discount')" />
-                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.coupon_discount_help') }}</p>
-                            </div>
-
-                            <div v-show="event.tickets_enabled || event.rsvp_enabled">
-
-                                {{-- The free plan's ticket allowance. Selling is no longer Pro-only, so this
-                                     is an entitlement notice under the cap and a warning only once it is
-                                     spent. The numbers are server-rendered (they cannot change without a
-                                     reload); only visibility is reactive. --}}
-                                @php
-                                    $ticketLimit = $role->ticketSaleLimit();
-                                    $ticketUsed = $ticketLimit === null ? 0 : $role->ticketsSoldThisMonth();
-                                    $ticketAtCap = $ticketLimit !== null && $ticketUsed >= $ticketLimit;
-                                    $ticketResetDate = $role->ticketAllowanceResetsAt()->translatedFormat('F j');
-                                @endphp
-                                @if ($ticketLimit !== null && ! $ticketAtCap)
-                                <div class="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-700 dark:bg-blue-900/20" v-show="event.tickets_enabled">
-                                    <div class="flex items-start gap-2">
-                                        <svg class="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z" />
-                                        </svg>
-                                        <div class="min-w-0 flex-1">
-                                            <p class="text-sm font-semibold text-blue-900 dark:text-blue-100">{{ __('messages.ticket_allowance_included_title') }}</p>
-                                            <p class="mt-0.5 text-sm text-blue-800 dark:text-blue-200">{{ __('messages.ticket_allowance_included_body', ['limit' => $ticketLimit]) }}</p>
-                                            <x-usage-meter
-                                                variant="inline"
-                                                class="mt-3"
-                                                :label="__('messages.ticket_allowance_usage')"
-                                                :used="$ticketUsed"
-                                                :limit="$ticketLimit"
-                                                :usedText="__('messages.tickets_sold_of', ['used' => $ticketUsed, 'limit' => $ticketLimit])"
-                                                :noteText="__('messages.ticket_allowance_note', ['date' => $ticketResetDate])" />
-                                            <p class="mt-2 text-sm">
-                                                <button type="button" data-modal-open="upgrade-tickets" class="font-medium text-[var(--brand-blue)] hover:underline">{{ __('messages.ticket_allowance_see_pro') }}</button>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                                @elseif ($ticketLimit !== null)
-                                <x-plan-gate
-                                    variant="banner"
-                                    tier="pro"
-                                    class="mb-4"
-                                    :role="$role"
-                                    :subdomain="$subdomain"
-                                    :learnMoreUrl="marketing_url('/features/ticketing')"
-                                    :title="__('messages.ticket_allowance_reached_title', ['limit' => $ticketLimit, 'month' => now()->translatedFormat('F')])"
-                                    v-show="event.tickets_enabled">
-                                    {{ __('messages.ticket_allowance_reached_body', ['date' => $ticketResetDate]) }}
-                                </x-plan-gate>
-                                @endif
-
-                                <!-- Ticket Section Tabs -->
-                                <div class="mt-6 mb-6 border-b border-gray-200 dark:border-gray-700" v-show="event.tickets_enabled">
-                                    <nav class="-mb-px flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide">
-                                        <button type="button" @click="activeTicketTab = 'tickets'"
-                                            :class="activeTicketTab === 'tickets' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
-                                            class="ticket-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="tickets">
-                                            {{ __('messages.general') }}
-                                        </button>
-                                        <button type="button" @click="activeTicketTab = 'payment'"
-                                            :class="activeTicketTab === 'payment' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
-                                            class="ticket-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="payment">
-                                            {{ __('messages.payment') }}
-                                        </button>
-                                        <button type="button" @click="activeTicketTab = 'options'"
-                                            :class="activeTicketTab === 'options' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
-                                            class="ticket-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="options">
-                                            {{ __('messages.options') }}
-                                        </button>
-                                        <button type="button" @click="activeTicketTab = 'promo_codes'"
-                                            :class="activeTicketTab === 'promo_codes' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
-                                            class="ticket-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="promo_codes">
-                                            {{ __('messages.promo_codes') }}
-                                        </button>
-                                        <button type="button" @click="activeTicketTab = 'add_ons'"
-                                            :class="activeTicketTab === 'add_ons' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
-                                            class="ticket-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="add_ons">
-                                            {{ __('messages.add_ons') }}
-                                        </button>
-                                    </nav>
-                                </div>
-
-                                {{-- This used to be a blanket "disabled state wrapper" that greyed out and
-                                     froze the entire ticket area for a non-Pro schedule. The free plan can
-                                     sell now, so the whole panel has to be usable; the individual Pro-only
-                                     options carry their own locks instead. Kept as a plain div so the
-                                     surrounding structure and indentation are unchanged. --}}
-                                <div>
-
-                                <!-- Payment Tab -->
-                                <div v-show="activeTicketTab === 'payment'">
-
-                                {{-- No payment method configured at all. The selector below is skipped
-                                     entirely in that case, so the whole tab used to be a currency
-                                     dropdown and a text-xs link, and the event would save, publish and
-                                     take no money. That was survivable while selling was Pro-only; the
-                                     free plan sends a much larger cohort down this exact path, so the
-                                     setup step has to be first-class.
-
-                                     Opens in a new tab deliberately: this form is unsaved. --}}
-                                @if (! $connectedGateways)
-                                <div class="mb-6 ap-card rounded-xl p-6" v-show="event.tickets_enabled">
-                                    <div class="flex items-start gap-3">
-                                        <div class="dashboard-icon p-2 rounded-xl bg-blue-50 dark:bg-blue-500/10">
-                                            <svg class="w-5 h-5 text-[var(--brand-blue)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
-                                            </svg>
-                                        </div>
-                                        <div class="min-w-0 flex-1">
-                                            <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.connect_stripe_to_get_paid') }}</h3>
-                                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ __('messages.connect_stripe_to_get_paid_body') }}</p>
-                                            <div class="mt-4 flex flex-wrap items-center gap-3">
-                                                <x-brand-link href="{{ route('profile.edit') }}#section-payment-methods" target="_blank" rel="noopener">
-                                                    {{ __('messages.connect_stripe') }}
-                                                </x-brand-link>
-                                                <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.connect_stripe_reload_hint') }}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                @elseif ($user->stripe_account_id && ! $user->stripe_completed_at)
-                                {{-- Stripe onboarding is asynchronous, so this window is real and had no UI
-                                     anywhere in the panel. --}}
-                                <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2" v-show="event.tickets_enabled">
-                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
-                                    <div class="text-sm text-amber-800 dark:text-amber-200">{{ __('messages.stripe_verifying') }}</div>
-                                </div>
-                                @elseif (! $onlineGateways)
-                                {{-- Connected, but not to anything that can take money in this currency. The
-                                     nudge above is Stripe-specific and would be actively wrong advice here:
-                                     on the selfhost installs this case is commonest on, Stripe is precisely
-                                     what is unavailable. Naming the currency instead points at the fix. --}}
-                                <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2" v-show="event.tickets_enabled">
-                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>
-                                    <div class="text-sm text-amber-800 dark:text-amber-200">
-                                        <div class="font-semibold">{{ __('messages.no_payment_method_for_currency', ['currency' => $event->ticket_currency_code]) }}</div>
-                                        <p class="mt-1">{{ __('messages.no_payment_method_for_currency_body', ['currency' => $event->ticket_currency_code]) }}</p>
-                                    </div>
-                                </div>
-                                @endif
-
-                                @if ($connectedGateways || $storedGateway)
-                                <div class="mb-6">
-                                    <x-input-label for="payment_method" :value="__('messages.payment_method')"/>
-                                    <select id="payment_method" name="payment_method" v-model="event.payment_method" :required="event.tickets_enabled"
-                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                        {{-- Ordered by config('payments.gateways'), and filtered to what this owner has
-                                             connected and what can settle this event's currency. A gateway that cannot
-                                             take the currency is omitted rather than shown and then rejected.
-
-                                             v-pre on every option: the label can carry owner-typed text (a Payfast
-                                             merchant id, an API-sourced company name), and this select sits inside the
-                                             Vue mount, where a server-rendered text node is compiled as a template.
-                                             Same guard as the sub-schedule options further up this file. --}}
-                                        @foreach ($selectableGateways as $gatewayKey => $gateway)
-                                        <option v-pre value="{{ $gatewayKey }}">{{ $gateway->label($user) }}</option>
-                                        @endforeach
-                                        {{-- The SAVED method stays visible even when no longer offerable (currency
-                                             changed after saving, gateway disconnected). Without this the select
-                                             rendered blank, a blank select posts nothing, and the stale value silently
-                                             survived every save - the state that let a USD event keep charging through
-                                             Payfast. Showing it lets the owner see and fix it; checkout guards remain
-                                             the authority either way. --}}
-                                        @if ($storedGateway)
-                                        <option v-pre value="{{ $event->payment_method }}">{{ $storedGateway->label($user) }} - {{ __('messages.payment_method_unavailable') }}</option>
-                                        @endif
-                                    </select>
-                                    <div class="text-xs pt-1">
-                                        <x-link href="{{ route('profile.edit') }}#section-payment-methods" target="_blank">
-                                            {{ __('messages.manage_payment_methods') }}
-                                        </x-link>
-                                    </div>
-                                </div>
-                                @endif
-
-                                <div class="mb-6">
-                                    <x-input-label for="ticket_currency_code" :value="__('messages.currency')"/>
-                                    <select id="ticket_currency_code" name="ticket_currency_code" v-model="event.ticket_currency_code" :required="event.tickets_enabled" data-searchable
-                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                        @foreach ($currencies as $currency)
-                                        @if ($loop->index == 2)
-                                        <option disabled>──────────</option>
-                                        @endif
-                                        <option value="{{ $currency->value }}" {{ $event->ticket_currency_code == $currency->value ? 'selected' : '' }}>
-                                            {{ $currency->value }} - {{ $currency->label }}
-                                        </option>
-                                        @endforeach
-                                    </select>
-                                    @if (! $connectedGateways)
-                                    <div class="text-xs pt-1">
-                                        <x-link href="{{ route('profile.edit') }}#section-payment-methods" target="_blank">
-                                            {{ __('messages.manage_payment_methods') }}
-                                        </x-link>
-                                    </div>
-                                    @endif
-                                </div>
-
-                                <div class="mb-6" v-show="gatewayCapabilities[event.payment_method]?.payment_instructions">
-                                    <x-input-label for="payment_instructions" :value="__('messages.payment_instructions')" />
-                                    <textarea id="payment_instructions" name="payment_instructions" v-model="event.payment_instructions" rows="4" data-content-dir="{{ content_dir($role) }}"
-                                        class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"></textarea>
-                                </div>
-
-                                {{-- Installments. Event-level and here rather than per ticket row: the
-                                     split is computed on the post-discount ORDER total, so a per-ticket
-                                     flag would have states that silently do nothing (on for one ticket
-                                     and off for another, buyer picks both, option vanishes). This is
-                                     also where an organizer already is when thinking about how they get
-                                     paid. Stripe only - nothing else can charge a saved card. --}}
-                                <div class="mb-6" v-show="gatewayCapabilities[event.payment_method]?.installments">
-                                    <div class="flex items-start justify-between gap-3">
-                                        <div class="min-w-0">
-                                            <label for="installments_enabled" class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                                                {{ __('messages.installments_label') }}
-                                                @if (! $role->isPro())
-                                                    <x-lock-badge tier="pro" />
-                                                @endif
-                                            </label>
-                                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.installments_help') }}</p>
-                                        </div>
-                                        <button type="button" role="switch" id="installments_enabled"
-                                            :aria-checked="event.installments_enabled ? 'true' : 'false'"
-                                            :disabled="!isPro && !event.installments_enabled"
-                                            @click="(isPro || event.installments_enabled) && (event.installments_enabled = !event.installments_enabled)"
-                                            :class="[event.installments_enabled ? 'bg-[var(--brand-button-bg)]' : 'bg-gray-200 dark:bg-gray-700', (!isPro && !event.installments_enabled) ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer']"
-                                            class="relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
-                                            <span aria-hidden="true" :class="event.installments_enabled ? 'translate-x-5' : 'translate-x-0'"
-                                                class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200"></span>
-                                        </button>
-                                    </div>
-
-                                    {{-- The v-else is load-bearing: with only the v-if inputs, switching
-                                         the toggle OFF posts nothing at all and the stored values
-                                         survive the save. Same idiom as the pass block. --}}
-                                    <template v-if="event.installments_enabled">
-                                        <input type="hidden" name="installments_enabled" value="1">
-                                    </template>
-                                    <input v-else type="hidden" name="installments_enabled" value="0">
-
-                                    <div v-if="event.installments_enabled" class="mt-4 pl-1 border-l-2 border-gray-100 dark:border-gray-700">
-                                        <div class="pl-4 grid grid-cols-1 min-[900px]:grid-cols-3 gap-4">
-                                            <div>
-                                                <x-input-label for="installment_count" :value="__('messages.installment_count')" />
-                                                <select id="installment_count" name="installment_count" v-model.number="event.installment_count"
-                                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                                    <option v-for="n in [2,3,4,5,6,8,10,12]" :key="n" :value="n">@{{ n }}</option>
-                                                </select>
-                                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.installment_count_help') }}</p>
-                                            </div>
-                                            <div>
-                                                <x-input-label for="installment_final_days_before" :value="__('messages.installment_final_days_before')" />
-                                                <input id="installment_final_days_before" name="installment_final_days_before" type="number" min="7" max="365"
-                                                    v-model.number="event.installment_final_days_before"
-                                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm" />
-                                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.installment_final_days_before_help') }}</p>
-                                            </div>
-                                            <div>
-                                                <x-input-label for="installment_min_order_amount" :value="__('messages.installment_min_order_amount')" />
-                                                <input id="installment_min_order_amount" name="installment_min_order_amount" type="number" min="0" step="0.01"
-                                                    v-model="event.installment_min_order_amount"
-                                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm" />
-                                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.installment_min_order_amount_help') }}</p>
-                                            </div>
-                                        </div>
-
-                                        {{-- Live preview rather than a save-time validation error. By the
-                                             time a validation message fires the organizer has already
-                                             made their choices; this tells them, while they are choosing,
-                                             that four monthly payments on a November event sold in August
-                                             would land the last one after the doors open. --}}
-                                        <div class="pl-4 mt-4">
-                                            <div v-if="installmentPreviewFits === false" class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2">
-                                                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>
-                                                <div class="text-sm text-amber-800 dark:text-amber-200">@{{ installmentPreviewText }}</div>
-                                            </div>
-                                            <p v-else-if="installmentPreviewText" class="text-sm text-gray-600 dark:text-gray-400">@{{ installmentPreviewText }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                </div>
-
-                                <!-- Options Tab -->
-                                <div v-show="activeTicketTab === 'options' || event.rsvp_enabled">
-
-                                <!-- Phone Number -->
-                                <div class="mb-6">
-                                    <div class="flex items-center gap-3">
-                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                            <input id="ask_phone_checkbox" type="checkbox"
-                                                v-model="event.ask_phone"
-                                                class="sr-only peer"
-                                                @change="event.ask_phone || (event.require_phone = false, event.country_code_phone = false)">
-                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
-                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                        </label>
-                                        <label for="ask_phone_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                                            {{ __('messages.ask_for_phone_number') }}
-                                        </label>
-                                    </div>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.ask_for_phone_number_help') }}</p>
-                                    <div class="flex items-center gap-4 mt-2 ms-14" v-if="event.ask_phone">
-                                        <div class="flex items-center">
-                                            <input type="checkbox" v-model="event.require_phone" id="require_phone_checkbox" class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
-                                            <label for="require_phone_checkbox" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
-                                        </div>
-                                        <div class="flex items-center">
-                                            <input type="checkbox" v-model="event.country_code_phone" id="country_code_phone_checkbox" class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
-                                            <label for="country_code_phone_checkbox" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.country_code') }}</label>
-                                        </div>
-                                    </div>
-                                    <input type="hidden" name="ask_phone" :value="event.ask_phone ? 1 : 0">
-                                    <input type="hidden" name="require_phone" :value="event.require_phone ? 1 : 0">
-                                    <input type="hidden" name="country_code_phone" :value="event.country_code_phone ? 1 : 0">
-                                </div>
-
-                                <!-- Individual Tickets -->
-                                {{-- Pro. The blanket non-Pro wrapper that used to freeze this whole
-                                     panel is gone (the free plan sells now), so the control carries
-                                     its own lock: disabled rather than hidden, so a free organizer
-                                     can see the feature exists instead of turning it on and watching
-                                     EventRepo::saveEvent() silently scrub it back off. --}}
-                                <div class="mb-6">
-                                    <div class="flex items-center gap-3" :class="isPro ? '' : 'opacity-60'">
-                                        <label class="relative w-11 h-6 flex-shrink-0" :class="isPro ? 'cursor-pointer' : 'cursor-not-allowed'">
-                                            <input id="individual_tickets_checkbox" type="checkbox"
-                                                v-model="event.individual_tickets"
-                                                :disabled="!isPro"
-                                                class="sr-only peer">
-                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
-                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                        </label>
-                                        <label for="individual_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300" :class="isPro ? 'cursor-pointer' : 'cursor-not-allowed'">
-                                            {{ __('messages.individual_tickets') }}
-                                        </label>
-                                        <template v-if="!isPro"><x-lock-badge tier="pro" /></template>
-                                    </div>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.individual_tickets_description') }}</p>
-                                    <p class="text-xs mt-1 ms-14" v-if="!isPro">
-                                        <button type="button" data-modal-open="upgrade-tickets" class="font-medium text-[var(--brand-blue)] hover:underline">{{ __('messages.ticket_allowance_see_pro') }}</button>
-                                    </p>
-                                    <input type="hidden" name="individual_tickets" :value="event.individual_tickets ? 1 : 0">
-
-                                    <!-- Individual Ticket Fields sub-toggle -->
-                                    <div v-show="event.individual_tickets" class="mt-3 ms-14">
-                                        <div class="flex items-center gap-3">
-                                            <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                                <input id="individual_ticket_fields_checkbox" type="checkbox"
-                                                    v-model="event.individual_ticket_fields"
-                                                    class="sr-only peer">
-                                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
-                                                <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                            </label>
-                                            <label for="individual_ticket_fields_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                                                {{ __('messages.individual_ticket_fields') }}
-                                            </label>
-                                        </div>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.individual_ticket_fields_description') }}</p>
-                                        <input type="hidden" name="individual_ticket_fields" :value="event.individual_ticket_fields ? 1 : 0">
-                                    </div>
-                                </div>
-
-                                <!-- Ticket-only toggles -->
-                                <div v-show="event.tickets_enabled" class="mb-6">
-                                    <div class="flex items-center gap-3">
-                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                            <input id="sell_after_start_checkbox" type="checkbox"
-                                                v-model="event.sell_after_start"
-                                                class="sr-only peer">
-                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
-                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                        </label>
-                                        <label for="sell_after_start_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                                            {{ __('messages.sell_after_start') }}
-                                        </label>
-                                    </div>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.sell_after_start_help') }}</p>
-                                    <input type="hidden" name="sell_after_start" :value="event.sell_after_start ? 1 : 0">
-                                </div>
-
-                                <div v-show="event.tickets_enabled" class="mb-6">
-                                    <div class="flex items-center gap-3">
-                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                            <input id="show_sales_dates_checkbox" type="checkbox"
-                                                v-model="showSalesDates"
-                                                class="sr-only peer"
-                                                @change="onToggleSalesDates">
-                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
-                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                        </label>
-                                        <label for="show_sales_dates_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                                            {{ __('messages.configure_sales_dates') }}
-                                        </label>
-                                    </div>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.configure_sales_dates_help') }}</p>
-                                </div>
-
-                                <div v-show="event.tickets_enabled" class="mb-6">
-                                    <div class="flex items-center gap-3">
-                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                            <input id="show_unavailable_tickets_checkbox" type="checkbox"
-                                                v-model="event.show_unavailable_tickets"
-                                                class="sr-only peer">
-                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
-                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                        </label>
-                                        <label for="show_unavailable_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                                            {{ __('messages.show_unavailable_tickets') }}
-                                        </label>
-                                    </div>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.show_unavailable_tickets_help') }}</p>
-                                    <input type="hidden" name="show_unavailable_tickets" :value="event.show_unavailable_tickets ? 1 : 0">
-                                </div>
-
-                                <div v-if="hasLimitedPaidTickets" v-show="event.tickets_enabled">
-                                    <div class="mb-6">
-                                        <div class="flex items-center gap-3">
-                                            <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                                <input id="expire_unpaid_tickets_checkbox" name="expire_unpaid_tickets_checkbox" type="checkbox"
-                                                    v-model="showExpireUnpaid"
-                                                    class="sr-only peer"
-                                                    @change="toggleExpireUnpaid">
-                                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
-                                                <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                            </label>
-                                            <label for="expire_unpaid_tickets_checkbox" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                                                {{ __('messages.expire_unpaid_tickets') }}
-                                            </label>
-                                        </div>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">{{ __('messages.expire_unpaid_tickets_help') }}</p>
-                                    </div>
-
-                                    <div class="mb-6" v-if="showExpireUnpaid">
-                                        <x-input-label for="expire_unpaid_tickets" :value="__('messages.after_number_of_hours')" />
-                                        <x-text-input id="expire_unpaid_tickets" name="expire_unpaid_tickets" type="number" class="mt-1 block w-full"
-                                            :value="old('expire_unpaid_tickets', $event->expire_unpaid_tickets)"
-                                            v-model="event.expire_unpaid_tickets"
-                                            autocomplete="off" />
-                                        <x-input-error class="mt-2" :messages="$errors->get('expire_unpaid_tickets')" />
-                                    </div>
-                                    <div v-else>
-                                        <input type="hidden" name="expire_unpaid_tickets" value="0"/>
-                                    </div>
-                                </div>
-
-                                <!-- Event-level Custom Fields -->
-                                <template v-if="isPro">
-                                <div class="mb-6">
-                                    <x-input-label :value="__('messages.custom_fields') . ' (' . __('messages.per_order') . ')'" class="mb-3" />
-
-                                    <div v-if="eventCustomFields && Object.keys(eventCustomFields).length > 0" id="event-custom-fields-sortable">
-                                        <div v-for="(field, fieldKey) in eventCustomFields" :key="fieldKey" :data-event-field-key="fieldKey" class="mt-2 p-3 border border-gray-200 dark:border-gray-600 rounded-lg flex items-start gap-2">
-                                            <div v-show="Object.keys(eventCustomFields).length > 1" class="custom-field-drag-handle cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0 mt-1">
-                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
-                                                </svg>
-                                            </div>
-                                            <div class="flex-1 min-w-0">
-                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                <div>
-                                                    <x-input-label :value="__('messages.field_name') . ' *'" class="text-xs" />
-                                                    <x-text-input type="text" v-model="field.name" class="mt-1 block w-full text-sm" v-bind:required="event.tickets_enabled || event.rsvp_enabled" v-bind:class="{ 'border-red-500': formSubmitAttempted && !field.name }" />
-                                                    <p v-if="formSubmitAttempted && !field.name" class="mt-1 text-xs text-red-600">{{ __('messages.field_name_required') }}</p>
-                                                </div>
-                                                <div>
-                                                    <x-input-label :value="__('messages.field_type')" class="text-xs" />
-                                                    <select v-model="field.type" class="mt-1 block w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                                        <option value="string">{{ __('messages.type_string') }}</option>
-                                                        <option value="multiline_string">{{ __('messages.type_multiline_string') }}</option>
-                                                        <option value="switch">{{ __('messages.type_switch') }}</option>
-                                                        <option value="date">{{ __('messages.type_date') }}</option>
-                                                        <option value="dropdown">{{ __('messages.type_dropdown') }}</option>
-                                                        <option value="multiselect">{{ __('messages.type_multiselect') }}</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            @if($role->language_code !== 'en')
-                                            <div class="mt-2">
-                                                <x-input-label :value="__('messages.english_name')" class="text-xs" />
-                                                <x-text-input type="text" v-model="field.name_en" class="mt-1 block w-full text-sm" placeholder="{{ __('messages.auto_translated_placeholder') }}" />
-                                            </div>
-                                            @endif
-                                            <div class="mt-2" v-if="field.type === 'dropdown' || field.type === 'multiselect'">
-                                                <x-input-label :value="__('messages.field_options')" class="text-xs" />
-                                                <x-text-input type="text" v-model="field.options" class="mt-1 block w-full text-sm" placeholder="{{ __('messages.options_placeholder') }}" />
-                                            </div>
-                                            <div class="mt-2 flex items-center justify-between">
-                                                <div class="flex items-center">
-                                                    <input type="checkbox" v-model="field.required" :id="`event_field_required_${fieldKey}`" class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
-                                                    <label :for="`event_field_required_${fieldKey}`" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
-                                                </div>
-                                                <button type="button" @click="removeEventCustomField(fieldKey)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
-                                                    {{ __('messages.remove') }}
-                                                </button>
-                                            </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <input type="hidden" name="custom_fields" :value="JSON.stringify(eventCustomFields || {})">
-                                    <button type="button" @click="addEventCustomField" class="mt-2 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="getEventCustomFieldCount() < 10">
-                                        + {{ __('messages.add_field') }}
-                                    </button>
-                                </div>
-                                </template>
-                                <template v-else>
-                                <x-upgrade-prompt tier="pro" :learnMoreUrl="marketing_url('/features/ticketing')" :subdomain="$subdomain" v-show="event.rsvp_enabled" class="mb-6">
-                                    <x-slot:icon>
-                                        <svg class="h-7 w-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z" />
-                                        </svg>
-                                    </x-slot:icon>
-                                    {{ __('messages.custom_fields_pro_only') }}
-                                </x-upgrade-prompt>
-                                </template>
-                                </div>
-
-                                <div class="mb-6" v-show="event.rsvp_enabled">
-                                    <x-input-label for="rsvp_limit" :value="__('messages.rsvp_limit')" />
-                                    <x-text-input id="rsvp_limit" name="rsvp_limit" type="number" min="1" class="mt-1 block w-full"
-                                        v-model="event.rsvp_limit" />
-                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.rsvp_limit_help') }}</p>
-                                </div>
-
-                                <!-- Tickets Tab -->
-                                <div v-show="activeTicketTab === 'tickets'">
-                                @php
-                                    // Deliberately distinctive names: these blocks share the VIEW
-                                    // scope, so a plain $plans here would be visible to every
-                                    // block below it.
-                                    // isVenue() as well as the plan gate: only a venue owns a
-                                    // plan, so on any other schedule type this is a query that
-                                    // can only ever come back empty.
-                                    $seatingPlanList = $role->isVenue() && $role->seatingEnabled()
-                                        ? \App\Models\SeatingPlan::with('sections')
-                                            ->where('role_id', $role->id)->where('is_deleted', false)
-                                            ->orderBy('name')->get()
-                                        : collect();
-                                    // bandCounts: how many seats each band actually holds. The band
-                                    // select was names alone, so the organizer priced blind - and a
-                                    // band no ticket claims is invisible until the box office
-                                    // refuses a sale from it. thumb: which room this is, since four
-                                    // plans in a dropdown are four indistinguishable strings.
-                                    // One grouped count per plan rather than a query PAIR per band.
-                                    // sections is already eager-loaded and the relation excludes
-                                    // deleted ones, so the section ids and the standing capacities
-                                    // both come from memory.
-                                    $seatingPlanOptions = $seatingPlanList->map(function ($p) {
-                                        $byBand = $p->sections->filter(fn ($s) => filled($s->band))->groupBy('band');
-
-                                        $seatsPerSection = $p->seats()
-                                            ->whereIn('seating_section_id', $p->sections->pluck('id'))
-                                            ->toBase()
-                                            ->selectRaw('seating_section_id, count(*) as aggregate')
-                                            ->groupBy('seating_section_id')
-                                            ->pluck('aggregate', 'seating_section_id');
-
-                                        $countFor = function ($sections) use ($seatsPerSection) {
-                                            $seats = $sections->sum(fn ($s) => (int) ($seatsPerSection[$s->id] ?? 0));
-
-                                            // Standing sections hold a capacity, not seats, and the
-                                            // band select shows whichever the room actually uses.
-                                            return $seats ?: (int) $sections->where('kind', 'standing')->sum('capacity');
-                                        };
-
-                                        return [
-                                            'id' => $p->id,
-                                            'name' => $p->name,
-                                            'bands' => $byBand->keys()->values()->all(),
-                                            'bandCounts' => $byBand->map($countFor)->all(),
-                                            'seats' => (int) $seatsPerSection->sum(),
-                                            'thumb' => $p->thumbnail(200),
-                                        ];
-                                    })->values();
-                                @endphp
-
-                                {{-- A schedule with no plan yet used to see nothing at all here, so
-                                     allocated seating was invisible unless you already knew to go
-                                     looking for the tab. Say it exists, and link to where it is
-                                     built. --}}
-                                @if ($role->isVenue() && $role->seatingEnabled() && $seatingPlanOptions->isEmpty())
-                                <div class="mb-6 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-                                    <x-input-label :value="__('messages.seating_plan')" />
-                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.seating_no_plans_yet') }}</p>
-                                    <a href="{{ route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'seating']) }}"
-                                       class="mt-2 inline-block text-sm font-medium text-[var(--brand-blue)] hover:underline">
-                                        {{ __('messages.seating_new_plan') }}
-                                    </a>
-                                </div>
-                                @endif
-
-                                @if ($seatingPlanOptions->isNotEmpty())
-                                <div class="mb-6">
-                                    <x-input-label for="seating_plan_id" :value="__('messages.seating_plan')" />
-                                    <select id="seating_plan_id" name="seating_plan_id" v-model="event.seating_plan_id"
-                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm">
-                                        <option value="">{{ __('messages.seating_no_plan') }}</option>
-                                        @foreach ($seatingPlanOptions as $option)
-                                            <option value="{{ $option['id'] }}">{{ $option['name'] }}</option>
-                                        @endforeach
-                                    </select>
-                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.seating_plan_help') }}</p>
-
-                                    {{-- The room, once one is chosen. Decorative - the seat count
-                                         beside it says the same thing in words. --}}
-                                    <div v-if="selectedSeatingPlan && selectedSeatingPlan.thumb" class="mt-3 flex items-center gap-4">
-                                        <svg :viewBox="selectedSeatingPlan.thumb.viewBox" class="h-20 w-40 shrink-0"
-                                             aria-hidden="true" focusable="false" preserveAspectRatio="xMidYMid meet">
-                                            <circle v-for="(dot, i) in selectedSeatingPlan.thumb.dots" :key="i"
-                                                :cx="dot.x" :cy="dot.y" r="6" :fill="dot.c" opacity="0.75" />
-                                        </svg>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400">
-                                            @{{ selectedSeatingPlan.seats }} {{ __('messages.seating_seats') }}
-                                        </p>
-                                    </div>
-
-                                    {{-- A section whose band no ticket prices is unsellable, and the
-                                         only place that ever surfaced was a box-office refusal at
-                                         the counter. Say it while the prices are being set. --}}
-                                    <div v-if="unmappedSeatingBands.length"
-                                         class="mt-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2">
-                                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24"
-                                             stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                  d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-                                        </svg>
-                                        <p class="text-sm text-amber-800 dark:text-amber-200">
-                                            @{{ unmappedBandWarning }}
-                                        </p>
-                                    </div>
-                                    @if ($event->exists && $event->hasAllocatedSeating())
-                                        <div v-if="event.seating_plan_id" class="mt-3 flex flex-wrap gap-3">
-                                            <x-secondary-link :href="route('box_office.show', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)])">
-                                                {{ __('messages.seating_box_office') }}
-                                            </x-secondary-link>
-                                            <x-secondary-link :href="route('seating.occurrence_design', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)])">
-                                                {{ __('messages.seating_modify_this_date') }}
-                                            </x-secondary-link>
-                                        </div>
-                                    @endif
-                                </div>
-                                @endif
-
-                                <div class="mb-6">
-                                    <div v-for="(ticket, index) in tickets" :key="ticket.uid"
-                                        :class="{'mt-4 p-4 border border-gray-300 dark:border-gray-700 rounded-lg': tickets.length > 1, 'mt-4': tickets.length === 1}">
-                                        <input type="hidden" v-bind:name="`tickets[${index}][id]`" v-model="ticket.id">
-                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            <div>
-                                                <x-input-label :value="__('messages.price')" />
-                                                <x-text-input type="number" step="0.01" v-bind:name="`tickets[${index}][price]`" 
-                                                    v-model="ticket.price" class="mt-1 block w-full" placeholder="{{ __('messages.free') }}" />
-                                            </div>
-                                            <div>
-                                                <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.quantity') }} @{{ (! isRecurring && ticket.sold && Object.values(JSON.parse(ticket.sold))[0] > 0) ? (' - ' + Object.values(JSON.parse(ticket.sold))[0] + ' ' +soldLabel) : '' }}</label>
-                                                <x-text-input type="number" v-bind:name="`tickets[${index}][quantity]`"
-                                                    v-model="ticket.quantity" class="mt-1 block w-full" placeholder="{{ __('messages.unlimited') }}"
-                                                    v-bind:readonly="!!ticket.seating_band" v-bind:class="{ 'opacity-60': !!ticket.seating_band }" />
-                                                <p v-if="ticket.seating_band" class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.seating_quantity_from_plan') }}</p>
-                                            </div>
-                                            <div v-if="seatingBands.length && !ticket.is_pass">
-                                                <x-input-label :value="__('messages.seating_band')" />
-                                                <select v-bind:name="`tickets[${index}][seating_band]`" v-model="ticket.seating_band"
-                                                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm">
-                                                    <option value="">{{ __('messages.seating_band_none') }}</option>
-                                                    <option v-for="band in seatingBands" :key="band" :value="band">@{{ bandOptionLabel(band) }}</option>
-                                                </select>
-                                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.seating_band_ticket_help') }}</p>
-                                            </div>
-                                            <div v-if="tickets.length > 1">
-                                                <x-input-label :value="__('messages.type') . ' *'" />
-                                                <x-text-input v-bind:name="`tickets[${index}][type]`" v-model="ticket.type"
-                                                    class="mt-1 block w-full" v-bind:required="event.tickets_enabled" v-bind:class="{ 'border-red-500': formSubmitAttempted && tickets.length > 1 && !ticket.type }" />
-                                                <p v-if="formSubmitAttempted && tickets.length > 1 && !ticket.type" class="mt-1 text-xs text-red-600">{{ __('messages.ticket_type_required') }}</p>
-                                            </div>
-                                            <div v-if="tickets.length > 1" class="flex items-end gap-3 flex-wrap">
-                                                <button type="button" @click="addTicketCustomField(index)" class="mt-1 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="getTicketCustomFieldCount(index) < 10">
-                                                    + {{ __('messages.add_field') }}
-                                                </button>
-                                                <button type="button" @click="addTicketVolumeDiscount(index)" class="mt-1 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="!ticket.volume_discount">
-                                                    + {{ __('messages.add_volume_discount') }}
-                                                </button>
-                                                <button type="button" @click="addTicketMaxPerOrder(index)" class="mt-1 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="ticket.max_per_order === null || ticket.max_per_order === undefined">
-                                                    + {{ __('messages.add_limit') }}
-                                                </button>
-                                                <button type="button" @click="removeTicket(index)" class="mt-1 text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
-                                                    {{ __('messages.remove') }}
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div v-if="tickets.length === 1" class="mt-2 flex flex-wrap items-center gap-3">
-                                            <button type="button" @click="addTicketCustomField(index)" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="getTicketCustomFieldCount(index) < 10">
-                                                + {{ __('messages.add_field') }}
-                                            </button>
-                                            <button type="button" @click="addTicketVolumeDiscount(index)" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="!ticket.volume_discount">
-                                                + {{ __('messages.add_volume_discount') }}
-                                            </button>
-                                            <button type="button" @click="addTicketMaxPerOrder(index)" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="ticket.max_per_order === null || ticket.max_per_order === undefined">
-                                                + {{ __('messages.add_limit') }}
-                                            </button>
-                                        </div>
-                                        <div v-if="ticket.volume_discount" class="mt-4">
-                                            <x-input-label :value="__('messages.volume_discount')" />
-                                            <div class="mt-2 p-3 border border-gray-200 dark:border-gray-600 rounded-lg">
-                                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                                <div>
-                                                    <x-input-label :value="__('messages.volume_discount_min_quantity')" class="text-xs" />
-                                                    <x-text-input type="number" min="2" step="1" v-model.number="ticket.volume_discount.min_quantity" class="mt-1 block w-full text-sm" />
-                                                </div>
-                                                <div>
-                                                    <x-input-label :value="__('messages.type')" class="text-xs" />
-                                                    <select v-model="ticket.volume_discount.type" class="mt-1 block w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                                        <option value="percentage">{{ __('messages.percentage') }}</option>
-                                                        <option value="fixed">{{ __('messages.fixed_amount') }}</option>
-                                                    </select>
-                                                </div>
-                                                <div>
-                                                    <x-input-label :value="__('messages.volume_discount_value')" class="text-xs" />
-                                                    <x-text-input type="number" step="0.01" min="0.01" v-bind:max="ticket.volume_discount.type === 'percentage' ? 100 : undefined" v-model.number="ticket.volume_discount.value" class="mt-1 block w-full text-sm" />
-                                                </div>
-                                                </div>
-                                                <div class="mt-2 flex justify-end">
-                                                    <button type="button" @click="removeTicketVolumeDiscount(index)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
-                                                        {{ __('messages.remove') }}
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div v-if="ticket.max_per_order !== null && ticket.max_per_order !== undefined" class="mt-4">
-                                            <x-input-label :value="__('messages.max_per_order')" />
-                                            <div class="mt-2 p-3 border border-gray-200 dark:border-gray-600 rounded-lg">
-                                                <x-text-input type="number" min="1" step="1" v-model.number="ticket.max_per_order" class="block w-full sm:w-48" />
-                                                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.max_per_order_help') }}</p>
-                                                <div class="mt-2 flex justify-end">
-                                                    <button type="button" @click="removeTicketMaxPerOrder(index)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
-                                                        {{ __('messages.remove') }}
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <!-- Pass / subscription configuration -->
-                                        {{-- Pro, and locked rather than hidden for the same reason as
-                                             the individual-tickets toggle above: turning it on below
-                                             Pro only to have EventRepo::saveEvent() reset it to the
-                                             stored value reads as the form losing the setting. An
-                                             already-sold pass keeps its switch usable so a lapsed Pro
-                                             schedule can still turn one OFF. --}}
-                                        <div class="mt-4" :class="(isPro || ticket.is_pass) ? '' : 'opacity-60'">
-                                            <label class="flex items-start gap-3" :class="(isPro || ticket.is_pass) ? 'cursor-pointer' : 'cursor-not-allowed'">
-                                                <button type="button" role="switch" :aria-checked="ticket.is_pass ? 'true' : 'false'" @click="toggleTicketPass(index)"
-                                                    :disabled="!isPro && !ticket.is_pass"
-                                                    :class="['relative inline-flex h-6 w-11 flex-shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800', ticket.is_pass ? 'bg-[var(--brand-button-bg)]' : 'bg-gray-200 dark:bg-gray-700']">
-                                                    <span :class="['inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform mt-0.5', ticket.is_pass ? 'translate-x-5' : 'translate-x-0.5']"></span>
-                                                </button>
-                                                <span>
-                                                    <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.subscription_toggle_label') }}</span>
-                                                    <template v-if="!isPro"> <x-lock-badge tier="pro" /></template>
-                                                    <span class="block text-xs text-gray-500 dark:text-gray-400">{{ __('messages.subscription_toggle_help') }}</span>
-                                                </span>
-                                            </label>
-                                            <p class="text-xs mt-1 ms-14" v-if="!isPro && !ticket.is_pass">
-                                                <button type="button" data-modal-open="upgrade-tickets" class="font-medium text-[var(--brand-blue)] hover:underline">{{ __('messages.ticket_allowance_see_pro') }}</button>
-                                            </p>
-
-                                            <div v-if="ticket.is_pass" class="mt-3 ms-14 space-y-4">
-                                                <!-- Subscription type -->
-                                                <div>
-                                                    <x-input-label :value="__('messages.subscription_type')" />
-                                                    <select v-model="ticket.pass_usage_type" @change="normalizePassScope(ticket)" class="mt-1 block w-full sm:w-72 text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                                        <option value="total">{{ __('messages.pass_type_visit_pass') }}</option>
-                                                        <option value="unlimited">{{ __('messages.pass_type_membership') }}</option>
-                                                        <option value="per_event">{{ __('messages.pass_type_festival') }}</option>
-                                                        <option v-if="isRecurring" value="per_occurrence">{{ __('messages.pass_type_season') }}</option>
-                                                    </select>
-                                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@{{ passTypeHelp(ticket.pass_usage_type) }}</p>
-                                                </div>
-
-                                                <!-- Admissions per event (holder + guests) -->
-                                                <div>
-                                                    <x-input-label :value="__('messages.pass_admits_per_event')" />
-                                                    <x-text-input type="number" min="1" step="1" placeholder="1" v-model.number="ticket.pass_admits_per_event" class="mt-1 block w-full sm:w-48" />
-                                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pass_admits_per_event_help') }}</p>
-                                                    <p v-if="ticket.pass_admits_per_event > 1" class="mt-1 text-xs text-[var(--brand-blue)]">@{{ ticket.pass_admits_per_event }} {{ __('messages.pass_admits_people_including_holder') }}</p>
-                                                </div>
-
-                                                <!-- Visit cap (total) -->
-                                                <div v-if="ticket.pass_usage_type === 'total'">
-                                                    <x-input-label :value="__('messages.pass_max_uses')" />
-                                                    <x-text-input type="number" min="1" step="1" v-model.number="ticket.pass_max_uses" class="mt-1 block w-full sm:w-48" />
-                                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pass_max_uses_help') }}</p>
-                                                </div>
-
-                                                <!-- Validity window (not for season pass, which is bound by recurrence) -->
-                                                <div v-if="ticket.pass_usage_type !== 'per_occurrence'">
-                                                    <x-input-label :value="__('messages.pass_valid_days')" />
-                                                    <x-text-input type="number" min="1" step="1" v-model.number="ticket.pass_valid_days" class="mt-1 block w-full sm:w-48" />
-                                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pass_valid_days_help') }}</p>
-                                                </div>
-
-                                                <!-- Coverage (cross-event subscriptions) -->
-                                                <div v-if="ticket.pass_usage_type !== 'per_occurrence'">
-                                                    <x-input-label :value="__('messages.pass_coverage')" />
-                                                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.pass_coverage_help') }}</p>
-                                                    <select v-model="ticket.pass_scope" class="block w-full sm:w-72 text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                                        <option value="all_events">{{ __('messages.pass_scope_all_events') }}</option>
-                                                        <option value="sub_schedule">{{ __('messages.pass_scope_sub_schedule') }}</option>
-                                                        <option value="specific_events">{{ __('messages.pass_scope_specific_events') }}</option>
-                                                    </select>
-                                                    <p v-if="ticket.pass_scope === 'all_events'" class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pass_scope_all_events_help') }}</p>
-
-                                                    <div v-if="ticket.pass_scope === 'sub_schedule'" class="mt-2">
-                                                        <select v-model="ticket.pass_scope_group_id" class="block w-full sm:w-72 text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                                            <option value="">{{ __('messages.select_sub_schedule') }}</option>
-                                                            <option v-for="g in passGroups" :key="g.id" :value="g.id">@{{ g.name }}</option>
-                                                        </select>
-                                                        <p v-if="passGroups.length === 0" class="mt-1 text-xs text-amber-600 dark:text-amber-400">{{ __('messages.pass_no_sub_schedules') }}</p>
-                                                    </div>
-
-                                                    <div v-if="ticket.pass_scope === 'specific_events'" class="mt-2">
-                                                        <input type="text" v-model="passEventSearch[index]" placeholder="{{ __('messages.search_events') }}" class="block w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                                        <div class="mt-2 max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg p-2 space-y-1">
-                                                            <label v-for="e in getFilteredPassEvents(index)" :key="e.id" class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-                                                                <input type="checkbox" :value="e.id" v-model="ticket.pass_event_ids" class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
-                                                                <span>@{{ e.name }}</span>
-                                                            </label>
-                                                            <p v-if="getFilteredPassEvents(index).length === 0" class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.no_events_found') }}</p>
-                                                        </div>
-                                                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@{{ ticket.pass_event_ids.length }} {{ __('messages.events_covered') }}</p>
-                                                        <p v-if="ticket.pass_event_ids.length === 0" class="mt-1 text-xs text-amber-600 dark:text-amber-400">{{ __('messages.pass_no_events_warning') }}</p>
-                                                    </div>
-                                                </div>
-
-                                                <!-- Advance booking -->
-                                                <div>
-                                                    <label class="flex items-center gap-3 cursor-pointer">
-                                                        <button type="button" role="switch" :aria-checked="ticket.pass_allow_booking ? 'true' : 'false'" @click="ticket.pass_allow_booking = !ticket.pass_allow_booking"
-                                                            :class="['relative inline-flex h-6 w-11 flex-shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800', ticket.pass_allow_booking ? 'bg-[var(--brand-button-bg)]' : 'bg-gray-200 dark:bg-gray-700']">
-                                                            <span :class="['inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform mt-0.5', ticket.pass_allow_booking ? 'translate-x-5' : 'translate-x-0.5']"></span>
-                                                        </button>
-                                                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.pass_allow_booking_label') }}</span>
-                                                    </label>
-                                                    <p class="mt-1 ms-14 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pass_allow_booking_help') }}</p>
-
-                                                    <div v-if="ticket.pass_allow_booking" class="mt-3 ms-14 space-y-3">
-                                                        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
-                                                            <div class="flex items-start gap-2">
-                                                                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                                                                </svg>
-                                                                <p class="text-xs text-amber-800 dark:text-amber-200">{{ __('messages.pass_shared_capacity_warning') }}</p>
-                                                            </div>
-                                                        </div>
-                                                        <div>
-                                                            <x-input-label :value="__('messages.pass_seats_per_occurrence')" />
-                                                            <x-text-input type="number" min="1" step="1" v-model.number="ticket.pass_seats_per_occurrence" class="mt-1 block w-full sm:w-48" />
-                                                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pass_seats_per_occurrence_help') }}</p>
-                                                        </div>
-                                                        <div>
-                                                            <x-input-label :value="__('messages.pass_cancel_cutoff_label')" />
-                                                            <select v-model="ticket.pass_cancel_cutoff_hours" class="mt-1 block w-full sm:w-72 text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                                                <option value="">{{ __('messages.pass_cancel_anytime') }}</option>
-                                                                <option :value="0">{{ __('messages.pass_cancel_until_start') }}</option>
-                                                                @foreach ([12, 24, 48, 72, 168] as $cutoffHours)
-                                                                <option :value="{{ $cutoffHours }}">{{ __('messages.pass_cancel_hours_before', ['hours' => $cutoffHours]) }}</option>
-                                                                @endforeach
-                                                                <!-- A stored value outside the presets (e.g. restored from a backup)
-                                                                     must stay visible and selected, not render a blank select. -->
-                                                                <option v-if="![0, 12, 24, 48, 72, 168].includes(ticket.pass_cancel_cutoff_hours) && ticket.pass_cancel_cutoff_hours !== '' && ticket.pass_cancel_cutoff_hours !== null"
-                                                                    :value="ticket.pass_cancel_cutoff_hours">@{{ passCancelHoursLabel(ticket.pass_cancel_cutoff_hours) }}</option>
-                                                            </select>
-                                                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pass_cancel_cutoff_help') }}</p>
-                                                        </div>
-                                                        <div v-if="ticket.pass_cancel_cutoff_hours !== '' && ticket.pass_cancel_cutoff_hours !== null">
-                                                            <x-input-label :value="__('messages.pass_late_cancel_policy_label')" />
-                                                            <select v-model="ticket.pass_late_cancel_policy" class="mt-1 block w-full sm:w-72 text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                                                <option value="forfeit">{{ __('messages.pass_late_cancel_forfeit') }}</option>
-                                                                <option value="block">{{ __('messages.pass_late_cancel_block') }}</option>
-                                                            </select>
-                                                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pass_late_cancel_policy_help') }}</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <template v-if="ticket.is_pass">
-                                                <input type="hidden" v-bind:name="`tickets[${index}][is_pass]`" :value="1">
-                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_usage_type]`" :value="ticket.pass_usage_type">
-                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_max_uses]`" :value="ticket.pass_max_uses || ''">
-                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_valid_days]`" :value="ticket.pass_valid_days || ''">
-                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_scope]`" :value="ticket.pass_scope">
-                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_scope_group_id]`" :value="ticket.pass_scope_group_id || ''">
-                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_event_ids]`" :value="JSON.stringify(ticket.pass_event_ids || [])">
-                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_allow_booking]`" :value="ticket.pass_allow_booking ? 1 : 0">
-                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_seats_per_occurrence]`" :value="ticket.pass_seats_per_occurrence || ''">
-                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_cancel_cutoff_hours]`" :value="ticket.pass_cancel_cutoff_hours === '' || ticket.pass_cancel_cutoff_hours === null ? '' : ticket.pass_cancel_cutoff_hours">
-                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_late_cancel_policy]`" :value="ticket.pass_late_cancel_policy || 'forfeit'">
-                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_admits_per_event]`" :value="ticket.pass_admits_per_event || ''">
-                                            </template>
-                                            <input v-else type="hidden" v-bind:name="`tickets[${index}][is_pass]`" :value="0">
-                                        </div>
-                                        <!-- Ticket-level Custom Fields -->
-                                        <div class="mt-4" v-if="ticket.custom_fields && Object.keys(ticket.custom_fields).length > 0">
-                                            <x-input-label :value="__('messages.custom_fields') . ' (' . __('messages.per_ticket') . ')'" />
-                                            <div :id="`ticket-${index}-custom-fields`">
-                                            <div v-for="(field, fieldKey) in ticket.custom_fields" :key="fieldKey" :data-ticket-field-key="fieldKey" class="mt-2 p-3 border border-gray-200 dark:border-gray-600 rounded-lg flex items-start gap-2">
-                                                <div v-show="Object.keys(ticket.custom_fields).length > 1" class="custom-field-drag-handle cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0 mt-1">
-                                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
-                                                    </svg>
-                                                </div>
-                                                <div class="flex-1 min-w-0">
-                                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                    <div>
-                                                        <x-input-label :value="__('messages.field_name') . ' *'" class="text-xs" />
-                                                        <x-text-input type="text" v-model="field.name" class="mt-1 block w-full text-sm" v-bind:required="event.tickets_enabled || event.rsvp_enabled" v-bind:class="{ 'border-red-500': formSubmitAttempted && !field.name }" />
-                                                        <p v-if="formSubmitAttempted && !field.name" class="mt-1 text-xs text-red-600">{{ __('messages.field_name_required') }}</p>
-                                                    </div>
-                                                    <div>
-                                                        <x-input-label :value="__('messages.field_type')" class="text-xs" />
-                                                        <select v-model="field.type" class="mt-1 block w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                                            <option value="string">{{ __('messages.type_string') }}</option>
-                                                            <option value="multiline_string">{{ __('messages.type_multiline_string') }}</option>
-                                                            <option value="switch">{{ __('messages.type_switch') }}</option>
-                                                            <option value="date">{{ __('messages.type_date') }}</option>
-                                                            <option value="dropdown">{{ __('messages.type_dropdown') }}</option>
-                                                            <option value="multiselect">{{ __('messages.type_multiselect') }}</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                @if($role->language_code !== 'en')
-                                                <div class="mt-2">
-                                                    <x-input-label :value="__('messages.english_name')" class="text-xs" />
-                                                    <x-text-input type="text" v-model="field.name_en" class="mt-1 block w-full text-sm" placeholder="{{ __('messages.auto_translated_placeholder') }}" />
-                                                </div>
-                                                @endif
-                                                <div class="mt-2" v-if="field.type === 'dropdown' || field.type === 'multiselect'">
-                                                    <x-input-label :value="__('messages.field_options')" class="text-xs" />
-                                                    <x-text-input type="text" v-model="field.options" class="mt-1 block w-full text-sm" placeholder="{{ __('messages.options_placeholder') }}" />
-                                                </div>
-                                                <div class="mt-2 flex items-center justify-between">
-                                                    <div class="flex items-center">
-                                                        <input type="checkbox" v-model="field.required" :id="`ticket_${index}_field_required_${fieldKey}`" class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
-                                                        <label :for="`ticket_${index}_field_required_${fieldKey}`" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
-                                                    </div>
-                                                    <button type="button" @click="removeTicketCustomField(index, fieldKey)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
-                                                        {{ __('messages.remove') }}
-                                                    </button>
-                                                </div>
-                                                </div>
-                                            </div>
-                                            </div>
-                                        </div>
-                                        <input type="hidden" v-bind:name="`tickets[${index}][custom_fields]`" :value="JSON.stringify(ticket.custom_fields || {})">
-                                        <input type="hidden" v-bind:name="`tickets[${index}][volume_discount]`" :value="ticket.volume_discount ? JSON.stringify(ticket.volume_discount) : ''">
-                                        <input type="hidden" v-bind:name="`tickets[${index}][max_per_order]`" :value="(ticket.max_per_order === null || ticket.max_per_order === undefined || ticket.max_per_order === '') ? '' : ticket.max_per_order">
-
-                                        <div class="mt-4">
-                                            <x-input-label :value="__('messages.description')" />
-                                            <textarea v-bind:name="`tickets[${index}][description]`" v-model="ticket.description" rows="4" data-content-dir="{{ content_dir($role) }}"
-                                                class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"></textarea>
-                                        </div>
-
-                                        <template v-if="showSalesDates">
-                                            <div class="mt-4">
-                                                <x-input-label :value="__('messages.ticket_sales_start_at')" />
-                                                <div class="flex items-center gap-2 mt-1">
-                                                    <input type="text"
-                                                        class="datepicker-ticket-sales-start flex-1 min-w-[110px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm"
-                                                        :data-ticket-index="index"
-                                                        :value="ticket.sales_start_at_date"
-                                                        autocomplete="off" />
-                                                    <div class="relative w-28">
-                                                        <input type="text"
-                                                            class="ticket-sales-start-time-input w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm"
-                                                            :value="formatPartTime(ticket.sales_start_at_time)"
-                                                            @focus="initTicketSalesStartTimePickerOnFocus($event, index)"
-                                                            @change="onTicketSalesStartTimeChange(index, $event)"
-                                                            autocomplete="off" placeholder="{{ __('messages.time') }}" />
-                                                        <div class="time-dropdown" :ref="'ticket_sales_start_time_dropdown_' + index"></div>
-                                                    </div>
-                                                </div>
-                                                <input type="hidden" v-bind:name="`tickets[${index}][sales_start_at]`" :value="ticket.sales_start_at_date && ticket.sales_start_at_time ? ticket.sales_start_at_date + ' ' + ticket.sales_start_at_time + ':00' : (ticket.sales_start_at_date ? ticket.sales_start_at_date + ' 00:00:00' : '')" />
-                                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                                    {{ __('messages.ticket_sales_start_at_help') }}
-                                                </p>
-                                            </div>
-
-                                            <div class="mt-4">
-                                                <x-input-label :value="__('messages.ticket_sales_end_at')" />
-                                                <div class="flex items-center gap-2 mt-1">
-                                                    <input type="text"
-                                                        class="datepicker-ticket-sales-end flex-1 min-w-[110px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm"
-                                                        :data-ticket-index="index"
-                                                        :value="ticket.sales_end_at_date"
-                                                        autocomplete="off" />
-                                                    <div class="relative w-28">
-                                                        <input type="text"
-                                                            class="ticket-sales-end-time-input w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm"
-                                                            :value="formatPartTime(ticket.sales_end_at_time)"
-                                                            @focus="initTicketSalesEndTimePickerOnFocus($event, index)"
-                                                            @change="onTicketSalesEndTimeChange(index, $event)"
-                                                            autocomplete="off" placeholder="{{ __('messages.time') }}" />
-                                                        <div class="time-dropdown" :ref="'ticket_sales_end_time_dropdown_' + index"></div>
-                                                    </div>
-                                                </div>
-                                                <input type="hidden" v-bind:name="`tickets[${index}][sales_end_at]`" :value="ticket.sales_end_at_date && ticket.sales_end_at_time ? ticket.sales_end_at_date + ' ' + ticket.sales_end_at_time + ':00' : (ticket.sales_end_at_date ? ticket.sales_end_at_date + ' 23:59:00' : '')" />
-                                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                                    {{ __('messages.ticket_sales_end_at_help') }}
-                                                </p>
-                                            </div>
-                                        </template>
-                                        <template v-else>
-                                            <input type="hidden" :name="`tickets[${index}][sales_start_at]`" value="" />
-                                            <input type="hidden" :name="`tickets[${index}][sales_end_at]`" value="" />
-                                        </template>
-                                    </div>
-
-                                    <!-- Total Tickets Mode Selection -->
-                                    <!-- Hidden for an allocated event: quantities come from the plan, so two
-                                         equal sections would offer "combined" by accident and the server
-                                         refuses it anyway (Event::hasSameTicketQuantities). -->
-                                    <div v-if="hasSameTicketQuantities && tickets.length > 1 && !event.seating_plan_id" class="mt-6 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
-                                        <div class="space-y-3">
-                                            <div class="flex items-center">
-                                                <input id="total_tickets_individual" name="total_tickets_mode" type="radio"
-                                                    value="individual" v-model="event.total_tickets_mode"
-                                                    class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300">
-                                                <label for="total_tickets_individual" class="ms-3 block text-sm font-medium text-gray-900 dark:text-gray-100">
-                                                    {{ __('messages.individual_quantities') }} (@{{ getTotalTicketQuantity }} total)
-                                                    <p class="text-xs text-gray-600 dark:text-gray-400">
-                                                        {{ __('messages.individual_quantities_help') }}
-                                                    </p>
-                                                </label>
-                                            </div>
-                                            <div class="flex items-center">
-                                                <input id="total_tickets_combined" name="total_tickets_mode" type="radio"
-                                                    value="combined" v-model="event.total_tickets_mode"
-                                                    class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300">
-                                                <label for="total_tickets_combined" class="ms-3 block text-sm font-medium text-gray-900 dark:text-gray-100">
-                                                    {{ __('messages.combined_total') }} (@{{ getCombinedTotalQuantity }} total)
-                                                    <p class="text-xs text-gray-600 dark:text-gray-400">
-                                                        {{ __('messages.combined_total_help') }}
-                                                    </p>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex gap-2 mt-4">
-                                        <button type="button" @click="addTicket" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
-                                            + {{ __('messages.add_type') }}
-                                        </button>
-                                    </div>
-                                </div>
-                                </div>
-
-                                <!-- Options Tab (continued) - shared by ticketed and registration (RSVP) events -->
-                                <div v-show="activeTicketTab === 'options' || event.rsvp_enabled">
-                                <div class="mb-6">
-                                    <x-input-label for="ticket_notes" v-show="event.tickets_enabled" :value="__('messages.ticket_notes')" />
-                                    <x-input-label for="ticket_notes" v-show="!event.tickets_enabled" :value="__('messages.registration_notes')" />
-                                    <textarea id="ticket_notes" name="ticket_notes" v-model="event.ticket_notes" rows="4" data-content-dir="{{ content_dir($role) }}"
-                                        class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"></textarea>
-                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.ticket_notes_help') }}</p>
-                                    <x-link href="{{ marketing_url('/docs/creating-schedules#available-variables') }}" target="_blank" class="text-sm mt-1 inline-block">{{ __('messages.show_available_variables') }}</x-link>
-                                </div>
-
-                                <div class="mb-6" v-show="event.tickets_enabled">
-                                    <x-input-label for="terms_url" :value="__('messages.terms_url')" />
-                                    <x-text-input id="terms_url" name="terms_url" type="url" class="mt-1 block w-full"
-                                        :value="old('terms_url', $event->terms_url)"
-                                        v-model="event.terms_url" />
-                                    <x-input-error class="mt-2" :messages="$errors->get('terms_url')" />
-                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                        {{ __('messages.terms_url_help') }}
-                                    </p>
-                                </div>
-
-                                </div>
-
-                                <!-- Promo Codes Tab -->
-                                <div v-show="activeTicketTab === 'promo_codes'">
-                                @if (! $role->isPro())
-                                {{-- The tab still opens and shows what promo codes do. A user who can see
-                                     the feature is far likelier to want it than one who hits a dead tab. --}}
-                                <x-plan-gate
-                                    tier="pro"
-                                    :role="$role"
-                                    :subdomain="$subdomain"
-                                    :learnMoreUrl="marketing_url('/features/ticketing')"
-                                    :title="__('messages.promo_codes')"
-                                    :bullets="[
-                                        __('messages.plan_gate_promo_bullet_types'),
-                                        __('messages.plan_gate_promo_bullet_limits'),
-                                        __('messages.plan_gate_promo_bullet_expiry'),
-                                        __('messages.plan_gate_promo_bullet_reporting'),
-                                    ]">
-                                    {{ __('messages.plan_gate_promo_body') }}
-                                </x-plan-gate>
-                                @else
-                                <div class="mb-6">
-                                    <div v-for="(promoCode, pcIndex) in promoCodes" :key="pcIndex" class="mt-4 p-4 border border-gray-300 dark:border-gray-700 rounded-lg">
-                                        <input type="hidden" v-bind:name="`promo_codes[${pcIndex}][id]`" :value="promoCode.id">
-
-                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            <div>
-                                                <x-input-label :value="__('messages.promo_code') . ' *'" class="text-xs" />
-                                                <x-text-input type="text" v-bind:name="`promo_codes[${pcIndex}][code]`" v-model="promoCode.code" class="mt-1 block w-full text-sm" required maxlength="50" style="text-transform: uppercase" />
-                                            </div>
-                                            <div>
-                                                <x-input-label :value="__('messages.discount_type')" class="text-xs" />
-                                                <select v-bind:name="`promo_codes[${pcIndex}][type]`" v-model="promoCode.type" class="mt-1 block w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                                    <option value="percentage">{{ __('messages.percentage') }}</option>
-                                                    <option value="fixed">{{ __('messages.fixed_amount') }}</option>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
-                                            <div>
-                                                <x-input-label :value="__('messages.discount_value') . ' *'" class="text-xs" />
-                                                <div class="relative mt-1">
-                                                    <x-text-input type="number" step="0.01" min="0.01" v-bind:max="promoCode.type === 'percentage' ? 100 : undefined" v-bind:name="`promo_codes[${pcIndex}][value]`" v-model="promoCode.value" class="block w-full text-sm pe-14 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" required />
-                                                    <span class="absolute inset-y-0 end-0 flex items-center pe-3 text-gray-400 text-sm">@{{ promoCode.type === 'percentage' ? '%' : event.ticket_currency_code }}</span>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <x-input-label :value="__('messages.max_uses')" class="text-xs" />
-                                                <x-text-input type="number" min="1" v-bind:name="`promo_codes[${pcIndex}][max_uses]`" v-model="promoCode.max_uses" class="mt-1 block w-full text-sm" :placeholder="__('messages.unlimited')" />
-                                            </div>
-                                        </div>
-
-                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
-                                            <div>
-                                                <x-input-label :value="__('messages.expires_at')" class="text-xs" />
-                                                <div class="flex items-center gap-2 mt-1">
-                                                    <input type="text"
-                                                        :class="'datepicker-promo-date flex-1 min-w-[110px] border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm'"
-                                                        :data-pc-index="pcIndex"
-                                                        :value="promoCode.expires_at_date"
-                                                        autocomplete="off" />
-                                                    <div class="relative w-28">
-                                                        <input type="text"
-                                                            class="promo-time-input w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm"
-                                                            :data-pc-index="pcIndex"
-                                                            :value="formatPartTime(promoCode.expires_at_time)"
-                                                            @focus="initPromoTimePickerOnFocus($event, pcIndex)"
-                                                            @change="onPromoTimeChange(pcIndex, $event)"
-                                                            autocomplete="off" placeholder="{{ __('messages.time') }}" />
-                                                        <div class="time-dropdown" :ref="'promo_time_dropdown_' + pcIndex"></div>
-                                                    </div>
-                                                </div>
-                                                <input type="hidden" v-bind:name="`promo_codes[${pcIndex}][expires_at]`" :value="promoCode.expires_at_date && promoCode.expires_at_time ? promoCode.expires_at_date + ' ' + promoCode.expires_at_time + ':00' : (promoCode.expires_at_date ? promoCode.expires_at_date + ' 23:59:00' : '')" />
-                                            </div>
-                                            <div class="flex items-end pb-1 gap-4">
-                                                <div class="flex items-center gap-3">
-                                                    <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                                        <input type="checkbox" :checked="promoCode.is_active"
-                                                            @change="promoCode.is_active = $event.target.checked"
-                                                            class="sr-only peer">
-                                                        <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
-                                                        <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                                    </label>
-                                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.active') }}</span>
-                                                </div>
-                                                <input type="hidden" v-bind:name="`promo_codes[${pcIndex}][is_active]`" :value="promoCode.is_active ? 1 : 0">
-                                                <span v-if="promoCode.times_used > 0" class="text-xs text-gray-500 dark:text-gray-400">
-                                                    {{ __('messages.times_used') }}: @{{ promoCode.times_used }}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <div class="mt-3" v-if="tickets.length > 1 && !(isInvoiceNinjaPaymentLink && event.payment_method === 'invoiceninja')">
-                                            <x-input-label :value="__('messages.applies_to')" class="text-xs" />
-                                            <div class="mt-1 flex items-center gap-3">
-                                                <label class="flex items-center gap-1 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-                                                    <input type="radio" :name="`promo_ticket_mode_${pcIndex}`" value="all" :checked="!promoCode.ticket_ids || promoCode.ticket_ids.length === 0" @change="promoCode.ticket_ids = []" class="text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                                                    {{ __('messages.all_tickets') }}
-                                                </label>
-                                                <label class="flex items-center gap-1 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-                                                    <input type="radio" :name="`promo_ticket_mode_${pcIndex}`" value="specific" :checked="promoCode.ticket_ids && promoCode.ticket_ids.length > 0" @change="promoCode.ticket_ids = promoCode.ticket_ids && promoCode.ticket_ids.length > 0 ? promoCode.ticket_ids : [tickets[0]?.id]" class="text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                                                    {{ __('messages.specific_tickets') }}
-                                                </label>
-                                            </div>
-                                            <div v-if="promoCode.ticket_ids && promoCode.ticket_ids.length > 0" class="mt-2 ms-6 space-y-1">
-                                                <label v-for="ticket in tickets" :key="ticket.uid" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
-                                                    <input type="checkbox" :value="ticket.id" v-model="promoCode.ticket_ids" class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
-                                                    <span v-text="ticket.type || '{{ __('messages.ticket') }}'"></span>
-                                                </label>
-                                            </div>
-                                            <input type="hidden" v-bind:name="`promo_codes[${pcIndex}][ticket_ids]`" :value="JSON.stringify(promoCode.ticket_ids || [])">
-                                        </div>
-
-                                        <div class="mt-3 flex items-center gap-1.5">
-                                            <template v-if="promoCode.code && promoLinkBaseUrl">
-                                                <div class="flex items-center gap-1 min-w-0 w-fit">
-                                                    <a :href="promoLinkBaseUrl + '?promo=' + promoCode.code.trim().toUpperCase()"
-                                                       target="_blank"
-                                                       class="text-xs text-gray-500 dark:text-gray-400 hover:text-[var(--brand-blue)] truncate flex-shrink"
-                                                       :title="promoLinkBaseUrl + '?promo=' + promoCode.code.trim().toUpperCase()">@{{ (promoLinkBaseUrl + '?promo=' + promoCode.code.trim().toUpperCase()).replace(/^https?:\/\//, '') }}</a>
-                                                    <button type="button" @click="copyPromoLink(promoCode)" class="inline-flex items-center justify-center flex-shrink-0 text-gray-400 hover:text-[var(--brand-blue)] transition-colors" :title="promoCode._copied ? '{{ __('messages.copied') }}' : '{{ __('messages.copy_link') }}'">
-                                                        <svg v-if="!promoCode._copied" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9.75a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184" />
-                                                        </svg>
-                                                        <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-green-500">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </template>
-                                            <button type="button" @click="removePromoCode(pcIndex)" class="ms-auto text-red-600 hover:text-red-800 dark:text-red-400 text-sm flex-shrink-0">
-                                                {{ __('messages.remove') }}
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <button type="button" @click="addPromoCode"
-                                        v-show="!(isInvoiceNinjaPaymentLink && event.payment_method === 'invoiceninja' && promoCodes.length >= 1)"
-                                        class="mt-2 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
-                                        + {{ __('messages.add_promo_code') }}
-                                    </button>
-                                </div>
-                                @endif
-                                </div>
-
-                                <!-- Add-ons Tab -->
-                                <div v-show="activeTicketTab === 'add_ons'">
-                                    @if (! $role->isPro())
-                                    <x-plan-gate
-                                        tier="pro"
-                                        :role="$role"
-                                        :subdomain="$subdomain"
-                                        :learnMoreUrl="marketing_url('/features/ticketing')"
-                                        :title="__('messages.add_ons')"
-                                        :bullets="[
-                                            __('messages.plan_gate_addons_bullet_extras'),
-                                            __('messages.plan_gate_addons_bullet_stock'),
-                                            __('messages.plan_gate_addons_bullet_limits'),
-                                            __('messages.plan_gate_addons_bullet_reporting'),
-                                        ]">
-                                        {{ __('messages.add_ons_help') }}
-                                    </x-plan-gate>
-                                    @else
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.add_ons_help') }}</p>
-
-                                    <div v-for="(addon, aIndex) in addons" :key="addon._key" class="mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.name') }} *</label>
-                                                <input type="text" v-model="addon.type" :name="`addons[${aIndex}][type]`" required
-                                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm">
-                                            </div>
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.price') }}</label>
-                                                <input type="number" v-model="addon.price" :name="`addons[${aIndex}][price]`" step="0.01" min="0"
-                                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm">
-                                            </div>
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.quantity') }}</label>
-                                                <input type="number" v-model="addon.quantity" :name="`addons[${aIndex}][quantity]`" min="0" :placeholder="'{{ __('messages.unlimited') }}'"
-                                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm">
-                                            </div>
-                                        </div>
-                                        <div class="mt-3">
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.description') }}</label>
-                                            <textarea v-model="addon.description" :name="`addons[${aIndex}][description]`" rows="2"
-                                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm"></textarea>
-                                        </div>
-                                        <div class="mt-3">
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.url') }}</label>
-                                            <input type="url" v-model="addon.url" :name="`addons[${aIndex}][url]`" placeholder="https://..."
-                                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm" />
-                                        </div>
-                                        <div class="mt-3">
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.image') }}</label>
-                                            <div v-if="addon.image_url" class="mb-2 relative inline-block">
-                                                <img :src="addon.image_url" :alt="addon.type" style="max-height: 80px" class="rounded-lg border border-gray-200 dark:border-gray-600" />
-                                                <button type="button" @click="removeAddonImage(aIndex)" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                                </button>
-                                            </div>
-                                            <div v-if="!addon.image_url">
-                                                <button type="button" @click="(Array.isArray($refs['addon_image_' + aIndex]) ? $refs['addon_image_' + aIndex][0] : $refs['addon_image_' + aIndex]).click()"
-                                                    class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors border border-gray-300 dark:border-gray-600">
-                                                    <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                                    </svg>
-                                                    {{ __('messages.choose_file') }}
-                                                </button>
-                                            </div>
-                                            <input type="file" :ref="'addon_image_' + aIndex"
-                                                accept="image/png, image/jpeg, image/gif, image/webp" class="hidden"
-                                                @change="onAddonFileChange(aIndex, $event)" />
-                                            <input type="hidden" v-if="addon.image_url && addon.image_url.startsWith('data:')" :name="`addon_image_data[${aIndex}]`" :value="addon.image_url">
-                                            <input type="hidden" :name="`addons[${aIndex}][remove_image]`" :value="addon.remove_image ? 1 : 0" />
-                                        </div>
-                                        <div v-if="addon.max_per_order !== null && addon.max_per_order !== undefined" class="mt-3">
-                                            <x-input-label :value="__('messages.max_per_order')" />
-                                            <div class="mt-2 p-3 border border-gray-200 dark:border-gray-600 rounded-lg">
-                                                <x-text-input type="number" min="1" step="1" v-model.number="addon.max_per_order" class="block w-full sm:w-48" />
-                                                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.max_per_order_help') }}</p>
-                                                <div class="mt-2 flex justify-end">
-                                                    <button type="button" @click="removeAddonMaxPerOrder(aIndex)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
-                                                        {{ __('messages.remove') }}
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <input type="hidden" :name="`addons[${aIndex}][max_per_order]`" :value="(addon.max_per_order === null || addon.max_per_order === undefined || addon.max_per_order === '') ? '' : addon.max_per_order">
-                                        <div class="mt-2 flex justify-between items-center">
-                                            <input type="hidden" :name="`addons[${aIndex}][id]`" :value="addon.id">
-                                            <button type="button" @click="addAddonMaxPerOrder(aIndex)" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="addon.max_per_order === null || addon.max_per_order === undefined">
-                                                + {{ __('messages.add_limit') }}
-                                            </button>
-                                            <div v-else></div>
-                                            <button type="button" @click="removeAddon(aIndex)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
-                                                {{ __('messages.remove') }}
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <button type="button" @click="addAddon"
-                                        class="mt-2 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
-                                        + {{ __('messages.add_add_on') }}
-                                    </button>
-                                    @endif
-                                </div>
-
-                                </div><!-- /was the blanket non-Pro wrapper; now a plain div -->
-
-
-                            </div>
-
-                            <hr class="my-4 border-gray-200 dark:border-gray-700">
-
-                            @if ($user->isMember($subdomain))
-                            {{-- Saving the ticket set as this schedule's default is not a Pro feature at
-                                 all; it only carried the blanket non-Pro wrapper because it sat next to
-                                 the ticket area. --}}
-                            <div class="flex items-center gap-3 mt-3">
-                                <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                    <input id="save_default_tickets" name="save_default_tickets" type="checkbox"
-                                        class="sr-only peer">
-                                    <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
-                                    <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                </label>
-                                <label for="save_default_tickets" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                                    {{ __('messages.save_as_default') }}
-                                </label>
-                            </div>
-                            @endif
-
-                        </div>
-                    </div>
-                @endif
 
                 @if ($user->isEditor($subdomain) && $role->isPro())
                     <button type="button" class="mobile-section-header" data-section="section-event-settings">

@@ -823,6 +823,10 @@ return [
     'next_step_connect_payments' => 'Collega un metodo di pagamento per incassare',
     'next_step_add_first_event' => 'Aggiungi il tuo primo evento',
     'next_step_add_next_event' => 'Aggiungi la prossima data',
+
+    'your_first_ticket_type' => 'Il tuo primo tipo di biglietto',
+    'your_first_ticket_type_help' => 'Dagli un prezzo e quanti ne sono disponibili. Lascia il prezzo vuoto per un biglietto gratuito e la quantità vuota per illimitati.',
+    'ticket_type_placeholder' => 'Ingresso generale',
     'square_profile_image' => 'Immagine profilo quadrata',
     'subdomain_taken' => 'Il sottodominio è già occupato',
     'resend_invite' => 'Invia di nuovo invito',

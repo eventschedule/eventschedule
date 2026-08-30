@@ -816,6 +816,10 @@ return [
     'next_step_connect_payments' => 'Koppel een betaalmethode om geld aan te nemen',
     'next_step_add_first_event' => 'Voeg je eerste evenement toe',
     'next_step_add_next_event' => 'Voeg je volgende datum toe',
+
+    'your_first_ticket_type' => 'Je eerste tickettype',
+    'your_first_ticket_type_help' => 'Geef het een prijs en hoeveel er beschikbaar zijn. Laat de prijs leeg voor een gratis ticket en het aantal leeg voor onbeperkt.',
+    'ticket_type_placeholder' => 'Algemene toegang',
     'square_profile_image' => 'Vierkante profielfoto',
     'subdomain_taken' => 'Subdomein is al in gebruik',
     'resend_invite' => 'Uitnodiging opnieuw verzenden',

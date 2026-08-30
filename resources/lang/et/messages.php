@@ -443,6 +443,10 @@ return [
     'next_step_connect_payments' => 'Ühenda makseviis, et raha vastu võtta',
     'next_step_add_first_event' => 'Lisa oma esimene sündmus',
     'next_step_add_next_event' => 'Lisa järgmine kuupäev',
+
+    'your_first_ticket_type' => 'Teie esimene piletitüüp',
+    'your_first_ticket_type_help' => 'Määrake hind ja mitu on saadaval. Jätke hind tühjaks tasuta pileti jaoks ja kogus tühjaks piiramatu jaoks.',
+    'ticket_type_placeholder' => 'Tavapilet',
     'square_profile_image' => 'Ruudukujuline profiilipilt',
     'subdomain_taken' => 'Alamdomeen on juba hõivatud',
     'resend_invite' => 'Saada kutse uuesti',

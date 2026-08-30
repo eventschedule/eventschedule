@@ -447,6 +447,12 @@ return [
     'next_step_connect_payments' => 'Connect a payment method to take money',
     'next_step_add_first_event' => 'Add your first event',
     'next_step_add_next_event' => 'Add your next date',
+
+    // The Tickets panel's first run: the controller always seeds one blank row, so this is the
+    // nearest thing to an empty state it can have.
+    'your_first_ticket_type' => 'Your first ticket type',
+    'your_first_ticket_type_help' => 'Give it a price and how many are available. Leave the price blank for a free ticket and the quantity blank for unlimited.',
+    'ticket_type_placeholder' => 'General admission',
     'square_profile_image' => 'Square Profile Image',
     'subdomain_taken' => 'Subdomain is already taken',
     'resend_invite' => 'Resend Invite',

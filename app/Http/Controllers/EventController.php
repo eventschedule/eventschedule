@@ -725,6 +725,26 @@ class EventController extends Controller
                 }
             }
 
+            // Start a new event in whatever mode this SCHEDULE last used.
+            //
+            // The mode radio defaults to "external" (a registration URL somewhere else), so a
+            // venue that sells tickets every week had to flip it on every single event, and
+            // nothing on a first visit suggested selling here was possible at all. Only 144 of
+            // the 438 schedules that publish an event have ever created a ticket type.
+            //
+            // Read off the schedule's own last event rather than flipped on by type, so it can
+            // only ever turn on for someone who has already done it once. A schedule that has
+            // never sold is untouched, which is what keeps this from creating a stray ticket
+            // type on every new event in the app.
+            $lastMode = Event::whereHas('roles', fn ($q) => $q->where('roles.id', $role->id))
+                ->orderBy('id', 'desc')
+                ->first(['id', 'tickets_enabled', 'rsvp_enabled']);
+
+            if ($lastMode) {
+                $event->tickets_enabled = (bool) $lastMode->tickets_enabled;
+                $event->rsvp_enabled = (bool) $lastMode->rsvp_enabled;
+            }
+
             if ($schedule) {
                 $selectedMembers = [$schedule->toData()];
             }

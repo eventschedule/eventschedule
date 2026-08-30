@@ -569,6 +569,10 @@ return [
     'next_step_connect_payments' => 'חברו אמצעי תשלום כדי לגבות כסף',
     'next_step_add_first_event' => 'הוסיפו את האירוע הראשון',
     'next_step_add_next_event' => 'הוסיפו את התאריך הבא',
+
+    'your_first_ticket_type' => 'סוג הכרטיס הראשון שלכם',
+    'your_first_ticket_type_help' => 'קבעו מחיר וכמה כרטיסים זמינים. השאירו את המחיר ריק לכרטיס חינם ואת הכמות ריקה לכמות בלתי מוגבלת.',
+    'ticket_type_placeholder' => 'כניסה כללית',
     'square_profile_image' => 'תמונת פרופיל מרובעת',
     'subdomain_taken' => 'תת-הדומיין כבר תפוס',
     'resend_invite' => 'שלח הזמנה שוב',

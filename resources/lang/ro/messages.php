@@ -444,6 +444,10 @@ return [
     'next_step_connect_payments' => 'Conectați o metodă de plată pentru a încasa',
     'next_step_add_first_event' => 'Adăugați primul eveniment',
     'next_step_add_next_event' => 'Adăugați următoarea dată',
+
+    'your_first_ticket_type' => 'Primul dumneavoastră tip de bilet',
+    'your_first_ticket_type_help' => 'Stabiliți un preț și câte sunt disponibile. Lăsați prețul gol pentru un bilet gratuit și cantitatea goală pentru nelimitat.',
+    'ticket_type_placeholder' => 'Acces general',
     'square_profile_image' => 'Imagine de Profil Pătrată',
     'subdomain_taken' => 'Subdomeniul este deja ocupat',
     'resend_invite' => 'Retrimite Invitația',

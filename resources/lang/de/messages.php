@@ -395,6 +395,10 @@ return [
     'next_step_connect_payments' => 'Zahlungsmethode verbinden, um Geld anzunehmen',
     'next_step_add_first_event' => 'Erste Veranstaltung hinzufügen',
     'next_step_add_next_event' => 'Nächsten Termin hinzufügen',
+
+    'your_first_ticket_type' => 'Ihre erste Ticketart',
+    'your_first_ticket_type_help' => 'Geben Sie einen Preis an und wie viele verfügbar sind. Preis leer lassen für ein kostenloses Ticket, Menge leer lassen für unbegrenzt.',
+    'ticket_type_placeholder' => 'Normaler Eintritt',
     'square_profile_image' => 'Quadratisches Profilbild',
     'subdomain_taken' => 'Subdomain ist bereits vergeben',
     'resend_invite' => 'Einladung erneut senden',
