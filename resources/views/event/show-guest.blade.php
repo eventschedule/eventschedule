@@ -314,6 +314,7 @@
                         <button type="button"
                           data-follow-trigger
                           data-follow-url="{{ route('role.follow', ['subdomain' => $each->subdomain]) }}"
+                          data-subscribe-url="{{ route('role.audience.join', ['subdomain' => $each->subdomain]) }}"
                           data-schedule-name="{{ $each->name }}"
                           data-schedule-image="{{ $each->profile_image_url }}"
                           data-accent-color="{{ $accentColor }}"
@@ -2090,6 +2091,14 @@
               :title="$role->translatedSponsorSectionTitle()"
               :background="$role->sponsorBackground()" />
         @endif
+
+        {{-- Audience capture for the schedule that published this event.
+
+             The header's Follow button is not this: it loops the event's claimed PERFORMERS, and
+             is gated on isClaimed(), on config('app.hosted'), and (via $hasSubmitButton) on the
+             visitor being signed in. A venue event with no claimed talent, or any event on a
+             selfhost install, has no capture affordance at all without this panel. --}}
+        @include('partials.subscribe-panel')
 
         {{-- End of content section --}}
 

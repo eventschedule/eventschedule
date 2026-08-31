@@ -754,6 +754,29 @@ class RoleController extends Controller
             $target->save();
         }
 
+        // Re-point role_subscribers and its suppression list onto the survivor.
+        //
+        // Both are unique on (role_id, email), so a bare update() throws 1062 the moment one
+        // address exists on both schedules - and this runs inside performMerge's transaction.
+        //
+        // Delete-the-collisions-then-update, via a self-join, rather than plucking the target's
+        // emails into a whereNotIn: a venue with tens of thousands of subscribers would build a
+        // query with that many bind parameters and hit MySQL's placeholder limit mid-merge. The
+        // join keeps it to one bounded statement, and it sidesteps 1093 (which forbids a subquery
+        // on the table being written) because a multi-table DELETE is allowed to read its own
+        // target.
+        foreach (['role_subscribers', 'newsletter_unsubscribes'] as $table) {
+            DB::table($table.' as src')
+                ->join($table.' as dst', function ($join) use ($target) {
+                    $join->on('dst.email', '=', 'src.email')
+                        ->where('dst.role_id', '=', $target->id);
+                })
+                ->where('src.role_id', $source->id)
+                ->delete();
+
+            DB::table($table)->where('role_id', $source->id)->update(['role_id' => $target->id]);
+        }
+
         // Re-point carpool_offers.role_id so offers attached to the source venue
         // continue to surface against the merged-into venue. Source is only
         // soft-deleted, so the FK's nullOnDelete wouldn't fire on its own.
@@ -2820,6 +2843,8 @@ class RoleController extends Controller
         $members = $membersQuery->get();
         $followers = $role->followers()->get();
         $followersWithRoles = [];
+        // Populated only on the followers tab; compact() below runs for every tab.
+        $subscribers = null;
 
         // The pending-handover panel replaces the Transfer button on the Team tab. Owner
         // only: an admin can manage members but cannot give the schedule away.
@@ -2964,6 +2989,27 @@ class RoleController extends Controller
                 ->orderBy($followerSortBy, $followerSortDir)
                 ->paginate(10)
                 ->withQueryString();
+
+            // Account-less subscribers. A SECOND paginator with its own page name rather than a
+            // UNION: the two sources have different columns and different sort keys, and the
+            // existing $followersWithRoles paginator keeps 'page'.
+            //
+            // The status column is left-joined from newsletter_unsubscribes, which is the single
+            // suppression list - role_subscribers deliberately has no unsubscribed_at of its own,
+            // because a mirrored flag is a second source of truth that will drift.
+            $subscribers = \App\Models\RoleSubscriber::query()
+                ->where('role_subscribers.role_id', $role->id)
+                ->leftJoin('newsletter_unsubscribes', function ($join) use ($role) {
+                    $join->on('newsletter_unsubscribes.email', '=', 'role_subscribers.email')
+                        ->where('newsletter_unsubscribes.role_id', '=', $role->id);
+                })
+                ->orderByDesc('role_subscribers.created_at')
+                ->select([
+                    'role_subscribers.*',
+                    \Illuminate\Support\Facades\DB::raw('newsletter_unsubscribes.id is not null as has_unsubscribed'),
+                ])
+                ->paginate(10, ['*'], 'subscribers_page')
+                ->withQueryString();
         } elseif ($tab == 'templates') {
             $eventTemplates = $role->eventTemplates;
         } elseif ($tab == 'seating') {
@@ -3015,6 +3061,7 @@ class RoleController extends Controller
             'members',
             'followers',
             'followersWithRoles',
+            'subscribers',
             'requests',
             'month',
             'year',
@@ -5908,6 +5955,11 @@ class RoleController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
         $url = $role->getGuestUrl(true) ?: $role->getGuestUrl();
+
+        // ?subscribe=1 scrolls the guest page to the subscribe panel. Without it a scanned poster
+        // lands a phone at the top of a forty-event calendar with the form somewhere below, which
+        // is the whole reason this QR code has never produced an audience.
+        $url .= (str_contains($url, '?') ? '&' : '?').'subscribe=1';
 
         return response(QrCodeUtils::png($url, 300))
             ->header('Content-Type', 'image/png')

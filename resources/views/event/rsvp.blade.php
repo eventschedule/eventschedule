@@ -429,6 +429,29 @@
                     </div>
                 </div>
             @endif
+
+            {{-- Audience opt-in. Guest buyers are the platform's largest uncaptured audience: the
+                 follower row on checkout only fires when a signed-out visitor also opens an
+                 account, so everyone else is captured at zero.
+
+                 UNCHECKED by default. GDPR Art. 4(11) wants an affirmative act, and a pre-ticked
+                 box on a shared platform mailer damages deliverability for every other schedule.
+
+                 No v-model: this form submits natively, and a plain named checkbox is submitted
+                 by the browser without Vue needing to know about it. --}}
+            @if (! auth()->check() && ! request()->embed && $event->creatorRole)
+                <div class="mt-6 flex items-start">
+                    <input id="audience_opt_in" name="audience_opt_in" type="checkbox" value="1"
+                        class="mt-1 h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 dark:border-gray-600 rounded">
+                    {{-- v-pre: the schedule name is user-controlled and this label sits inside a
+                         Vue mount (#rsvp-form / #ticket-selector), so without it a name like
+                         "{{constructor.constructor('...')()}}" is compiled as a template and runs.
+                         Same guard as the custom-content block further down this file. --}}
+                    <label for="audience_opt_in" v-pre class="ms-3 block text-sm text-gray-900 dark:text-gray-100">
+                        {{ __('messages.audience_opt_in_label', ['schedule' => $event->creatorRole->name]) }}
+                    </label>
+                </div>
+            @endif
         </div>
 
         <div class="mb-6" v-if="askPhone">

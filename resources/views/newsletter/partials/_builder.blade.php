@@ -25,17 +25,7 @@ foreach (($segments ?? collect()) as $segment) {
             $segmentTypeLabels[$segment->id] = $segment->type;
         }
     } else {
-        if ($segment->type === 'all_followers') {
-            $segmentTypeLabels[$segment->id] = __('messages.all_followers');
-        } elseif ($segment->type === 'ticket_buyers') {
-            $segmentTypeLabels[$segment->id] = __('messages.ticket_buyers');
-        } elseif ($segment->type === 'manual') {
-            $segmentTypeLabels[$segment->id] = __('messages.manual');
-        } elseif ($segment->type === 'waitlist') {
-            $segmentTypeLabels[$segment->id] = __('messages.waitlist');
-        } else {
-            $segmentTypeLabels[$segment->id] = __('messages.subschedule');
-        }
+        $segmentTypeLabels[$segment->id] = \App\Models\NewsletterSegment::typeLabel($segment->type);
     }
 }
 

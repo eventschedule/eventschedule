@@ -163,6 +163,25 @@
                      while the ticket form's own fields were empty. Hiding them unconditionally
                      would post a blank name, and the refusal would come back with nothing on
                      screen to fix. --}}
+                {{-- Audience opt-in. The cart can span several schedules, so the copy says
+                     "these schedules" and TicketController::captureAudienceOptIn() captures every
+                     distinct one in the basket rather than arbitrarily picking the first leg.
+
+                     Signed-out only, like the honeypot above: a signed-in buyer already has an
+                     account to follow with. Unchecked by default, per GDPR Art. 4(11).
+
+                     No schedule name is interpolated here, so no v-pre is needed - unlike the
+                     single-event forms, which name the schedule inside a Vue mount. --}}
+                @guest
+                    <div class="mt-4 flex items-start">
+                        <input id="es-cart-audience-opt-in" name="audience_opt_in" type="checkbox" value="1"
+                            class="mt-1 h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 dark:border-gray-600 rounded">
+                        <label for="es-cart-audience-opt-in" class="ms-3 block text-sm text-gray-700 dark:text-gray-300">
+                            {{ __('messages.audience_opt_in_label_cart') }}
+                        </label>
+                    </div>
+                @endguest
+
                 <template v-if="knowsBuyer">
                     <input type="hidden" name="name" :value="name">
                     <input type="hidden" name="email" :value="email">

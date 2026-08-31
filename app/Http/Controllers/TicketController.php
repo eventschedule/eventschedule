@@ -1308,6 +1308,11 @@ class TicketController extends Controller
                     $sales[0]->order_id = $primaryId;
                 }
 
+                // Every distinct schedule in the basket, which is what the cart's own label
+                // promises ("these schedules"). Deduped inside; a single-event checkout is
+                // unchanged.
+                $this->captureAudienceOptIn($request, array_column($legs, 'event'), $sales[0]->email, $sales[0]->name, $subdomain);
+
                 return $sales[0];
             });
         } catch (\Illuminate\Database\QueryException $e) {
@@ -2145,6 +2150,82 @@ class TicketController extends Controller
         }
     }
 
+    /**
+     * "Email me about future events", ticked on a checkout or RSVP form.
+     *
+     * Guest buyers are the platform's single largest uncaptured audience: the follower row at
+     * :1251 only ever fires inside `! $user && $request->create_account && config('app.hosted')`,
+     * so a guest who does not open an account, and every signed-in buyer, is captured at zero.
+     *
+     * Marked confirmed on the spot rather than sending a confirmation mail. Everywhere else an
+     * unconfirmed row is the rule, because the public subscribe form takes an address from someone
+     * who may not own it. Here the same address is simultaneously being used for a transactional
+     * receipt the person is expecting, so it is already proven by use, and a second "please
+     * confirm" email arriving next to an RSVP confirmation reads as a bug.
+     *
+     * No network I/O: this runs inside the checkout transaction.
+     */
+    private function captureAudienceOptIn(Request $request, $events, ?string $email, ?string $name, ?string $subdomain = null): void
+    {
+        if (! $request->boolean('audience_opt_in') || empty($email)) {
+            return;
+        }
+
+        // A cart can span several schedules, and the label on that form says "these schedules"
+        // plural - so capture every distinct one rather than arbitrarily picking the first leg's.
+        // A single-event checkout passes one event and behaves exactly as before.
+        $roles = collect(is_iterable($events) ? $events : [$events])
+            ->map(function ($event) use ($subdomain) {
+                // Prefer the schedule that OWNS the event over sales.subdomain, which is a
+                // booking-time snapshot of the storefront and is never rewritten on rename. Fall
+                // back to the storefront rather than silently capturing nobody: creator_role_id is
+                // nullable, and an opt-in that quietly does nothing is worse than one attributed
+                // to the page the visitor was actually looking at.
+                return $event->creatorRole
+                    ?: ($subdomain ? \App\Models\Role::subdomain($subdomain)->first() : null);
+            })
+            ->filter(fn ($role) => $role && ! $role->is_deleted && ! is_demo_role($role))
+            ->unique('id');
+
+        foreach ($roles as $role) {
+            $this->captureAudienceOptInFor($role, $email, $name);
+        }
+    }
+
+    private function captureAudienceOptInFor(\App\Models\Role $role, string $email, ?string $name): void
+    {
+        try {
+            $subscriber = \App\Models\RoleSubscriber::firstOrCreate(
+                ['role_id' => $role->id, 'email' => strtolower(trim($email))],
+                [
+                    'name' => $name ? strip_tags($name) : null,
+                    'locale' => app()->getLocale(),
+                    'source' => 'checkout',
+                    'confirmed_at' => now(),
+                    'token' => \App\Models\RoleSubscriber::newToken(),
+                ]
+            );
+
+            // firstOrCreate writes nothing when the row already exists, so somebody who used the
+            // public panel and never clicked the confirmation link would stay unmailable forever
+            // even after ticking this box - despite the address now being proven by the very
+            // receipt this checkout is about to send.
+            if (! $subscriber->isConfirmed()) {
+                $subscriber->forceFill(['confirmed_at' => now(), 'confirm_token' => null])->save();
+            }
+        } catch (\Illuminate\Database\QueryException $e) {
+            // ONLY a duplicate-key race is safe to swallow here. This runs inside the checkout
+            // transaction, and a deadlock (1213) or lock-wait timeout aborts it in MySQL - so
+            // swallowing those would let the closure return normally, the sale rows vanish on the
+            // implicit rollback, and the buyer still be forwarded to payment with no error.
+            if (($e->errorInfo[1] ?? null) != 1062) {
+                throw $e;
+            }
+
+            report($e);
+        }
+    }
+
     public function rsvp(Request $request, $subdomain)
     {
         // Honeypot. See checkout() for why this returns the input.
@@ -2349,6 +2430,8 @@ class TicketController extends Controller
                 }
 
                 $sale->save();
+
+                $this->captureAudienceOptIn($request, $event, $sale->email, $sale->name, $subdomain);
 
                 // Individual RSVP: create guest sales
                 if ($event->individual_tickets && $rsvpQuantity > 1 && count($guests) > 1) {

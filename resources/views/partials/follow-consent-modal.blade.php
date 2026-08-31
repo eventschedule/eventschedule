@@ -39,6 +39,20 @@ document.addEventListener('DOMContentLoaded', function() {
             const dontAskAgain = ref(false);
             const submitting = ref(false);
             const followUrl = ref('');
+            const subscribeUrl = ref('');
+            const email = ref('');
+            const subscriberName = ref('');
+            // Honeypot. It has to live in the Vue template below rather than as a Blade honeypot
+            // component beside the mount: Vue's template option REPLACES the mount element's
+            // contents, so a server-rendered field there is destroyed before anything reads it.
+            //
+            // And do NOT write the component's tag name literally in a comment here - Blade
+            // compiles component tags anywhere in the file, JS comments included, which silently
+            // emits a second real honeypot into the page.
+            const website = ref('');
+            const resultMessage = ref('');
+            const resultSuccess = ref(false);
+            const done = ref(false);
             const scheduleName = ref('');
             const scheduleImage = ref('');
             const accentColor = ref('#4E81FA');
@@ -47,6 +61,10 @@ document.addEventListener('DOMContentLoaded', function() {
             let triggerEl = null;
 
             const shouldSkip = () => {
+                // Only ever skips for a signed-in user. For a guest the modal is no longer a
+                // consent gate in front of a signup redirect - it is the subscribe form itself,
+                // so skipping it would skip the whole feature.
+                if (isGuest) return false;
                 if (initiallyDismissed) return true;
                 try {
                     return localStorage.getItem('follow_consent_dismissed') === '1';
@@ -63,6 +81,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 triggerEl = btn;
                 followUrl.value = btn.dataset.followUrl || '';
+                subscribeUrl.value = btn.dataset.subscribeUrl || '';
+                email.value = '';
+                subscriberName.value = '';
+                website.value = '';
+                resultMessage.value = '';
+                resultSuccess.value = false;
+                done.value = false;
                 scheduleName.value = btn.dataset.scheduleName || '';
                 scheduleImage.value = btn.dataset.scheduleImage || '';
                 accentColor.value = btn.dataset.accentColor || '#4E81FA';
@@ -111,6 +136,59 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.location.href = url;
             };
 
+            const subscribeBody = computed(() =>
+                @json(__('messages.subscribe_panel_body', ['schedule' => '__SCHEDULE__']), JSON_UNESCAPED_UNICODE)
+                    // Function replacement, not a string: String.replace interprets $&, $`, $'
+                    // and $1 inside a string replacement, so a schedule called "Rock $' Roll"
+                    // would render mangled prose.
+                    .replace('__SCHEDULE__', () => scheduleName.value)
+            );
+
+            const submitSubscribe = async () => {
+                if (submitting.value) return;
+                // A page cached from before this shipped has no data-subscribe-url. Fall back to
+                // the account route rather than leaving a button that does nothing.
+                if (!subscribeUrl.value) return confirm();
+                submitting.value = true;
+                resultMessage.value = '';
+
+                try {
+                    const response = await fetch(subscribeUrl.value, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        },
+                        body: JSON.stringify({
+                            email: email.value,
+                            name: subscriberName.value,
+                            // Sent explicitly: a hidden input alone is not part of a hand-built
+                            // JSON payload.
+                            website: website.value,
+                            source: 'modal',
+                        }),
+                    });
+
+                    if (!response.ok) {
+                        resultSuccess.value = false;
+                        resultMessage.value = @json(__('messages.invalid_request'), JSON_UNESCAPED_UNICODE);
+                        return;
+                    }
+
+                    const data = await response.json();
+                    resultSuccess.value = !!data.success;
+                    resultMessage.value = data.message || '';
+                    if (data.success) done.value = true;
+                } catch (e) {
+                    resultSuccess.value = false;
+                    resultMessage.value = @json(__('messages.invalid_request'), JSON_UNESCAPED_UNICODE);
+                } finally {
+                    submitting.value = false;
+                }
+            };
+
             const handleKeydown = (e) => {
                 if (!open.value) return;
                 if (e.key === 'Escape') {
@@ -150,7 +228,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 open, dontAskAgain, submitting,
                 scheduleName, scheduleImage, accentColor, contrastColor,
                 isGuest, confirmButtonRef,
-                close, confirm,
+                subscribeUrl, email, subscriberName, website, subscribeBody,
+                resultMessage, resultSuccess, done,
+                close, confirm, submitSubscribe,
             };
         },
         template: `
@@ -181,18 +261,51 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
 
         <div id="follow-consent-desc" class="px-6 pb-4 space-y-3">
-            <p class="text-sm text-gray-700 dark:text-gray-300">
-                <span v-text="scheduleName"></span> {{ __('messages.follow_consent_body') }}
-            </p>
-            <p class="text-xs text-gray-500 dark:text-gray-400">
-                {{ __('messages.follow_consent_body_privacy') }}
-            </p>
-            <p v-if="isGuest" class="text-xs text-gray-500 dark:text-gray-400">
-                {{ __('messages.follow_consent_body_guest') }}
-            </p>
+            {{-- Signed in: unchanged. Following still means a real account and a role_user row. --}}
+            <template v-if="!isGuest">
+                <p class="text-sm text-gray-700 dark:text-gray-300">
+                    <span v-text="scheduleName"></span> {{ __('messages.follow_consent_body') }}
+                </p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ __('messages.follow_consent_body_privacy') }}
+                </p>
+            </template>
+
+            {{-- Signed out: the modal IS the subscribe form. It used to be a consent gate in front
+                 of a redirect to sign_up, which is why 139k guest page views produced 764
+                 followers. --}}
+            <template v-else>
+                <div v-if="done" class="text-sm text-gray-700 dark:text-gray-300">
+                    <p v-text="resultMessage"></p>
+                </div>
+                <template v-else>
+                    {{-- v-text, not a Blade-rendered string: the schedule name lives in Vue
+                         state, and v-text sets textContent so a name containing markup or a
+                         mustache is inert. --}}
+                    <p class="text-sm text-gray-700 dark:text-gray-300" v-text="subscribeBody"></p>
+                    <div>
+                        <label for="follow-consent-email" class="sr-only">{{ __('messages.subscribe_your_email') }}</label>
+                        <input id="follow-consent-email" type="email" v-model="email" required autocomplete="email"
+                            @keyup.enter="submitSubscribe"
+                            placeholder="{{ __('messages.subscribe_your_email') }}"
+                            class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                    </div>
+                    <div>
+                        <label for="follow-consent-name" class="sr-only">{{ __('messages.subscribe_your_name_optional') }}</label>
+                        <input id="follow-consent-name" type="text" v-model="subscriberName" autocomplete="name"
+                            @keyup.enter="submitSubscribe"
+                            placeholder="{{ __('messages.subscribe_your_name_optional') }}"
+                            class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                    </div>
+                    <div class="hidden" aria-hidden="true">
+                        <input type="text" v-model="website" tabindex="-1" autocomplete="off">
+                    </div>
+                    <p v-if="resultMessage && !resultSuccess" class="text-xs text-red-600 dark:text-red-400" v-text="resultMessage"></p>
+                </template>
+            </template>
         </div>
 
-        <div class="px-6 pb-4">
+        <div v-if="!isGuest" class="px-6 pb-4">
             <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
                 <input type="checkbox" v-model="dontAskAgain"
                     class="rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:bg-gray-700">
@@ -201,19 +314,30 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
 
         <div class="px-6 pb-6 pt-2 flex justify-end gap-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-            <button type="button" @click="close" :disabled="submitting"
+            <button v-if="!done" type="button" @click="close" :disabled="submitting"
                 class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors disabled:opacity-50">
                 {{ __('messages.cancel') }}
             </button>
-            <button type="button" ref="confirmButtonRef" @click="confirm" :disabled="submitting"
+            {{-- The account route is still offered, just no longer the only way through. --}}
+            <button v-if="isGuest && !done" type="button" @click="confirm" :disabled="submitting"
+                class="px-4 py-2 text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] rounded-lg transition-colors disabled:opacity-50">
+                {{ __('messages.follow_consent_signup_button') }}
+            </button>
+            <button v-if="!done" type="button" ref="confirmButtonRef"
+                @click="isGuest ? submitSubscribe() : confirm()" :disabled="submitting"
                 :style="{ backgroundColor: accentColor, color: contrastColor, borderColor: accentColor }"
                 class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90">
                 <svg v-if="submitting" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
                 </svg>
-                <span v-if="isGuest">{{ __('messages.follow_consent_signup_button') }}</span>
+                <span v-if="isGuest">{{ __('messages.email_me_new_events') }}</span>
                 <span v-else>{{ __('messages.follow') }}</span>
+            </button>
+            <button v-if="done" type="button" @click="close"
+                :style="{ backgroundColor: accentColor, color: contrastColor, borderColor: accentColor }"
+                class="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-all hover:opacity-90">
+                {{ __('messages.done') }}
             </button>
         </div>
     </div>

@@ -41,6 +41,15 @@ class ProcessScheduledNewsletters
                         'newsletter_id' => $newsletter->id,
                         'role_id' => $newsletter->role_id,
                     ]);
+                } elseif (is_array($result) && $result[0] === 'requires_verification') {
+                    // send() resets the row to 'scheduled' with a scheduled_at now in the past, so
+                    // without this arm every tick would silently re-resolve the whole recipient set
+                    // and re-refuse, forever, looking to the operator like a successful send.
+                    Log::warning('Scheduled newsletter blocked: schedule cannot send audience mail', [
+                        'newsletter_id' => $newsletter->id,
+                        'role_id' => $newsletter->role_id,
+                        'recipients' => $result[1] ?? null,
+                    ]);
                 }
             } catch (\Exception $e) {
                 Log::error('Failed to process scheduled newsletter: '.$e->getMessage(), [

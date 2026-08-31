@@ -45,6 +45,7 @@ use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\PushController;
 use App\Http\Controllers\ReferralController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\RoleSubscriberController;
 use App\Http\Controllers\SeatingPickerController;
 use App\Http\Controllers\SeatingPlanController;
 use App\Http\Controllers\SitemapController;
@@ -89,6 +90,15 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::get('/api/calendar-events', [RoleController::class, 'calendarEvents'])->name('role.calendar_events');
         Route::get('/request', [RoleController::class, 'request'])->name('role.request');
         Route::get('/follow', [RoleController::class, 'follow'])->name('role.follow');
+        // Account-less audience capture. The path segment is NOT "subscribe": that URI is
+        // already taken by the authenticated plan checkout (SubscriptionController@store, below),
+        // whose group is registered first and would shadow this on selfhost.
+        //
+        // The throttle carries a prefix because an unprefixed one shares its bucket with every
+        // other throttled route in this group - a visitor who just used the cart would arrive
+        // pre-blocked. The real limit is the per-email one in the controller.
+        Route::post('/audience/join', [RoleSubscriberController::class, 'store'])
+            ->name('role.audience.join')->middleware('throttle:5,1,audience_join');
         // Promotion click-through. Counted and billed here, then redirected, so the
         // advertiser only pays for clicks that actually left this page.
         //
@@ -293,6 +303,16 @@ Route::get('/nl/o/{token}', [NewsletterTrackingController::class, 'trackOpen'])-
 Route::get('/nl/c/{token}/{encodedUrl}', [NewsletterTrackingController::class, 'trackClick'])->name('newsletter.track_click')->where('encodedUrl', '.*')->middleware('throttle:60,1');
 Route::get('/nl/u/{token}', [NewsletterTrackingController::class, 'showUnsubscribe'])->name('newsletter.show_unsubscribe');
 Route::post('/nl/u/{token}', [NewsletterTrackingController::class, 'unsubscribe'])->name('newsletter.unsubscribe')->middleware('throttle:2,2');
+
+// Audience subscription confirm / unsubscribe (public, no auth). Top level for the same reason as
+// the /nl/* block above. 'sub' is reserved in Role::cleanSubdomain() so no schedule can shadow it.
+// Prefixed throttles. An unprefixed one shares its per-IP bucket with every other unprefixed
+// throttled route at this level, including /nl/u/* - so unsubscribing from a newsletter and then
+// from an audience subscription inside two minutes would return 429, and a 429 on an unsubscribe
+// link is exactly what produces a spam complaint.
+Route::get('/sub/c/{token}', [RoleSubscriberController::class, 'confirm'])->name('subscriber.confirm')->middleware('throttle:10,1,audience_confirm');
+Route::get('/sub/u/{token}', [RoleSubscriberController::class, 'showUnsubscribe'])->name('subscriber.show_unsubscribe');
+Route::post('/sub/u/{token}', [RoleSubscriberController::class, 'unsubscribe'])->name('subscriber.unsubscribe')->middleware('throttle:6,2,audience_unsubscribe');
 
 // Schedule ownership handover, recipient side (discussion #119).
 //
@@ -692,6 +712,8 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::post('/{subdomain}/publish-event/{hash}', [EventController::class, 'publish'])->name('event.publish');
     Route::post('/{subdomain}/preview-link', [RoleController::class, 'previewLink'])->name('role.preview_link');
     Route::get('/{subdomain}/followers/qr-code', [RoleController::class, 'qrCode'])->name('role.qr_code');
+    Route::delete('/{subdomain}/subscribers/{hash}', [RoleSubscriberController::class, 'remove'])
+        ->name('role.subscribers.remove')->where('hash', '[A-Za-z0-9+=]+');
     Route::get('/{subdomain}/team/add-member', [RoleController::class, 'createMember'])->name('role.create_member');
     Route::post('/{subdomain}/team/add-member', [RoleController::class, 'storeMember'])->name('role.store_member');
     Route::delete('/{subdomain}/team/remove-member/{hash}', [RoleController::class, 'removeMember'])->name('role.remove_member');
@@ -1785,6 +1807,9 @@ if (! config('app.hosted') || config('app.is_testing')) {
     Route::get('/{subdomain}/api/calendar-events', [RoleController::class, 'calendarEvents'])->name('role.calendar_events');
     Route::get('/{subdomain}/request', [RoleController::class, 'request'])->name('role.request');
     Route::get('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');
+    // Selfhost twin. See the hosted route for why this is not /{subdomain}/subscribe.
+    Route::post('/{subdomain}/audience/join', [RoleSubscriberController::class, 'store'])
+        ->name('role.audience.join')->middleware('throttle:5,1,audience_join');
     // Nested under the tenant path so it cannot collide with a schedule whose subdomain
     // happens to be "promo" - selfhost serves every tenant from this same path space.
     // {hash} constrained for the same reason as the hosted twin above.

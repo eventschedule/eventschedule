@@ -734,6 +734,15 @@ class Role extends Model implements MustVerifyEmail
     }
 
     /**
+     * Account-less members of this schedule's audience: people who gave an email address on the
+     * guest portal without creating an account. AudienceResolver unions this with followers().
+     */
+    public function subscribers()
+    {
+        return $this->hasMany(\App\Models\RoleSubscriber::class);
+    }
+
+    /**
      * Get non-owner members who have Google Calendar sync enabled
      */
     public function getMembersWithCalendarSync()
@@ -1467,6 +1476,9 @@ class Role extends Model implements MustVerifyEmail
             // Owned by the public ownership-handover route, which is registered ahead of
             // the selfhost /{subdomain} catch-all and would shadow this schedule's pages.
             'schedule-transfer',
+            // Owned by the public audience confirm/unsubscribe routes (/sub/c, /sub/u), registered
+            // ahead of the selfhost /{subdomain} catch-all for the same reason as the above.
+            'sub',
         ];
 
         // Unconditional, NOT hosted-only. The list's own entries explain why: several are there
@@ -2272,6 +2284,7 @@ class Role extends Model implements MustVerifyEmail
             'category' => 'Category',
             'clear_filters' => 'Clear Filters',
             'done' => 'Done',
+            'email_me_new_events' => 'Email me new events',
             'events' => 'Events',
             'filters' => 'Filter Events',
             'follow' => 'Follow',
@@ -2486,6 +2499,51 @@ class Role extends Model implements MustVerifyEmail
         }
 
         return 'free';
+    }
+
+    /**
+     * May this schedule send audience mail (a newsletter, or an automatic event announcement)?
+     *
+     * The single answer for what used to be duplicated in NewsletterService::send() and
+     * NewsletterController::requiresNewsletterVerification(). Both now call this so the three
+     * cannot drift.
+     *
+     * $recipients scales the gate to the size of the send. Requiring SMTP or an SMS-verified phone
+     * before ANY bulk mail is very likely why only 4 of 671 schedules sent a newsletter last month
+     * and no free schedule ever has; the long tail this is meant to serve has single-digit
+     * audiences, where the abuse ceiling is not what the control is protecting.
+     *
+     * $actor is the person who pressed send. It is NOT always the owner: the newsletter composer
+     * gates on the composing user, so an admin-level member with a verified phone can send today
+     * and must keep being able to. A scheduled command has no actor and falls back to the owner.
+     */
+    public function canSendAudienceMail(int $recipients = 0, ?User $actor = null): bool
+    {
+        // Selfhost runs the operator's own mail server, and the test env has no reputation to
+        // protect. Matches the existing gates, which both short-circuit on the same two.
+        if (! config('app.hosted') || config('app.is_testing')) {
+            return true;
+        }
+
+        // Its own SMTP: the consequences land on the schedule's domain, not the platform's.
+        if ($this->hasEmailSettings()) {
+            return true;
+        }
+
+        // Ownerless schedules (roles.user_id is nullable - AI-imported claimable venues, which can
+        // still accumulate followers) fail CLOSED.
+        $actor = $actor ?: $this->user;
+        if (! $actor) {
+            return false;
+        }
+
+        if ($actor->isAdmin() || $actor->hasVerifiedPhone()) {
+            return true;
+        }
+
+        $limit = (int) config('usage.audience_mail_unverified_max_recipients', 50);
+
+        return $recipients > 0 && $recipients <= $limit;
     }
 
     public function newsletterLimit(): ?int

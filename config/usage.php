@@ -58,6 +58,15 @@ return [
     // are already using the app, where a burst of mail costs more than a slow drain.
     'activation_nudge_batch' => (int) env('ACTIVATION_NUDGE_BATCH', 200),
 
+    // Audience mail (newsletters, and automatic event announcements) from a schedule that has
+    // neither its own SMTP nor an SMS-verified owner still goes out on the PLATFORM mailer, so the
+    // platform carries the reputation. Rather than refusing outright - which is what the newsletter
+    // does today, and very likely why 4 of 671 schedules have ever used it - allow a small audience
+    // and ask for verification above it. See Role::canSendAudienceMail().
+    // `?:` not a default argument: an EMPTY value in .env yields '' and (int) '' is 0, which would
+    // silently block every unverified send rather than falling back.
+    'audience_mail_unverified_max_recipients' => (int) (env('AUDIENCE_MAIL_UNVERIFIED_MAX_RECIPIENTS') ?: 50),
+
     // How many talent/venue schedules one curator may pull events from, and how many
     // event links a single reconcile pass may write. Hitting the batch ceiling is logged
     // and the remainder is picked up by the next run rather than dropped.

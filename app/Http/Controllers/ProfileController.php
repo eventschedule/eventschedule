@@ -305,6 +305,13 @@ class ProfileController extends Controller
             }
         }
 
+        // Account-less audience rows are keyed on the EMAIL, not on a user id, so no foreign key
+        // takes them with the account. The privacy policy's erasure section promises deletion of
+        // "your account and all associated data" and calls it final, total and irreversible, and
+        // there is no separate erasure flow in the app - so leaving the address behind in a table
+        // the user never knew existed would break that promise, and they would keep being mailed.
+        \App\Models\RoleSubscriber::where('email', strtolower($user->email))->delete();
+
         // Send notification to the deleted user
         Notification::route('mail', $user->email)->notify(new DeletedUserNotification($user));
 

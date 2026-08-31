@@ -391,6 +391,12 @@ html[data-es-view="list"] #calendar-panel-wrapper {
       </div>
       </section>
 
+      {{-- Outside the section and outside #calendar-panel-wrapper on purpose: that wrapper carries
+           data-view-width and a max-width that swings to 200rem in calendar view. --}}
+      <div class="mb-6">
+        @include('partials.subscribe-panel', ['panelClass' => 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl'])
+      </div>
+
       @if ($role->youtube_links && $role->youtube_links != '[]')
         @php
           // Filtered BEFORE counting: the column count and the "is there anything to show" test

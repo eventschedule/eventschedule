@@ -283,8 +283,13 @@ class HoneypotTest extends TestCase
         // unnoticed - the exact regression this test exists to catch.
         $cartHoneypots = 1;
 
+        // Same for the audience subscribe panel (partials/subscribe-panel.blade.php): a public
+        // form, so it carries a honeypot, but it has no guest_name field. Counted explicitly for
+        // the reason above - relaxing this to >= would let a fan form lose its honeypot unnoticed.
+        $subscribePanelHoneypots = 1;
+
         $this->assertSame(
-            substr_count($html, 'name="guest_name"') + $cartHoneypots,
+            substr_count($html, 'name="guest_name"') + $cartHoneypots + $subscribePanelHoneypots,
             substr_count($html, 'name="website"'),
             'every signed-out fan form must carry a honeypot'
         );

@@ -1263,6 +1263,23 @@
                     </div>
                 </div>
             @endif
+
+            {{-- Audience opt-in. See event/rsvp.blade.php for the reasoning; the two forms mirror
+                 each other. Unchecked by default, and no v-model: this form posts natively
+                 (v-on:submit only validates), so the browser submits a plain named checkbox. --}}
+            @if (! auth()->check() && ! request()->embed && $event->creatorRole)
+                <div class="mt-6 flex items-start">
+                    <input id="audience_opt_in" name="audience_opt_in" type="checkbox" value="1"
+                        class="mt-1 h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 dark:border-gray-600 rounded">
+                    {{-- v-pre: the schedule name is user-controlled and this label sits inside a
+                         Vue mount (#rsvp-form / #ticket-selector), so without it a name like
+                         "{{constructor.constructor('...')()}}" is compiled as a template and runs.
+                         Same guard as the custom-content block further down this file. --}}
+                    <label for="audience_opt_in" v-pre class="ms-3 block text-sm text-gray-900 dark:text-gray-100">
+                        {{ __('messages.audience_opt_in_label', ['schedule' => $event->creatorRole->name]) }}
+                    </label>
+                </div>
+            @endif
         </div>
 
         <div class="mb-6" v-if="askPhone">

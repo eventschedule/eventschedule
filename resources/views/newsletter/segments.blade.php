@@ -37,7 +37,7 @@
                     </div>
                 </div>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    {{ __('messages.type') }}: {{ $segment->type === 'all_followers' ? __('messages.all_followers') : ($segment->type === 'ticket_buyers' ? __('messages.ticket_buyers') : ($segment->type === 'manual' ? __('messages.manual') : ($segment->type === 'waitlist' ? __('messages.waitlist') : __('messages.subschedule')))) }}
+                    {{ __('messages.type') }}: {{ \App\Models\NewsletterSegment::typeLabel($segment->type) }}
                 </p>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ __('messages.recipients') }}: {{ number_format($segment->recipient_count) }}
@@ -69,6 +69,7 @@
                             <x-input-label :value="__('messages.type')" />
                             <select name="type" v-model="segmentType" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                 <option value="all_followers">{{ __('messages.all_followers') }}</option>
+                                <option value="all_subscribers">{{ __('messages.all_subscribers') }}</option>
                                 <option value="ticket_buyers">{{ __('messages.ticket_buyers') }}</option>
                                 <option value="manual">{{ __('messages.manual') }}</option>
                                 <option value="waitlist">{{ __('messages.waitlist') }}</option>

@@ -31,20 +31,6 @@ class NewsletterService
             return false;
         }
 
-        if (! $newsletter->isAdmin() && $role && config('app.hosted') && ! config('app.is_testing')) {
-            if (! $role->hasEmailSettings()) {
-                $newsletterUser = $newsletter->user;
-                if (! $newsletterUser || (! $newsletterUser->isAdmin() && ! $newsletterUser->hasVerifiedPhone())) {
-                    Log::warning('Newsletter send blocked: requires SMTP or phone verification', [
-                        'newsletter_id' => $newsletter->id,
-                        'role_id' => $newsletter->role_id,
-                    ]);
-
-                    return false;
-                }
-            }
-        }
-
         $sendToken = Str::random(64);
         $updated = Newsletter::where('id', $newsletter->id)
             ->whereIn('status', ['draft', 'scheduled'])
@@ -72,6 +58,26 @@ class NewsletterService
             ]);
 
             return ['no_recipients', 0];
+        }
+
+        // Trust gate. Moved below recipient resolution so it can scale to the size of the send:
+        // Role::canSendAudienceMail() lets a small audience through without SMTP or an SMS-verified
+        // phone, and asks for verification above it. Resetting the status matters as much as the
+        // refusal - send() has already claimed the row as 'sending' by this point.
+        if (! $newsletter->isAdmin() && $role
+            && ! $role->canSendAudienceMail($recipients->count(), $newsletter->user)) {
+            Log::warning('Newsletter send blocked: requires SMTP or phone verification', [
+                'newsletter_id' => $newsletter->id,
+                'role_id' => $newsletter->role_id,
+                'recipients' => $recipients->count(),
+            ]);
+
+            $newsletter->update([
+                'status' => $newsletter->scheduled_at ? 'scheduled' : 'draft',
+                'send_token' => null,
+            ]);
+
+            return ['requires_verification', $recipients->count()];
         }
 
         // Check if sending to these recipients would exceed the email limit
@@ -193,11 +199,34 @@ class NewsletterService
         }
     }
 
+    /**
+     * Per-instance memo. NewsletterController::send() now resolves recipients to size the trust
+     * gate, and send() resolves them again to build the recipient rows - and each pass plucks
+     * every unsubscribed address on the platform. Recipients cannot change mid-request, so one
+     * resolution per (role, segments) is enough.
+     */
+    private array $resolvedRecipients = [];
+
     public function resolveRecipients(Role $role, array $segmentIds): Collection
     {
+        $ids = $segmentIds;
+        sort($ids);
+        $memoKey = $role->id.':'.implode(',', $ids);
+
+        if (isset($this->resolvedRecipients[$memoKey])) {
+            return $this->resolvedRecipients[$memoKey];
+        }
+
+        return $this->resolvedRecipients[$memoKey] = $this->resolveRecipientsUncached($role, $segmentIds);
+    }
+
+    private function resolveRecipientsUncached(Role $role, array $segmentIds): Collection
+    {
         if (empty($segmentIds)) {
+            // Both audience types, not just account followers. This is the "everyone" default, and
+            // an account-less subscriber is as much a follower of this schedule as a user row is.
             $segments = NewsletterSegment::where('role_id', $role->id)
-                ->where('type', 'all_followers')
+                ->whereIn('type', ['all_followers', 'all_subscribers'])
                 ->get();
         } else {
             $segments = NewsletterSegment::where('role_id', $role->id)
@@ -208,6 +237,44 @@ class NewsletterService
         $allRecipients = collect();
         foreach ($segments as $segment) {
             $allRecipients = $allRecipients->merge($segment->resolveRecipients());
+        }
+
+        // Default audience: no segment was asked for and none is saved, so this send means
+        // "everyone", which is what messages.default_all_followers promises in the composer.
+        //
+        // ADDITIVE, and unconditional whenever no segment was asked for. Two earlier shapes were
+        // both wrong:
+        //   - checking $allRecipients->isEmpty() AFTER the member merge below. members() always
+        //     includes the owner, so the check could never be true and the branch was dead code -
+        //     a schedule with no saved segment mailed only itself.
+        //   - checking $segments->isEmpty(). An owner who had ever saved an all_followers segment
+        //     (an ordinary thing to do) then reached account followers only, and the account-less
+        //     audience silently got nothing while the composer promised "all followers".
+        // unique('email') below collapses anyone a segment already contributed.
+        if (empty($segmentIds)) {
+            $allRecipients = $allRecipients->merge($role->followers()
+                ->select('users.id', 'users.email', 'users.name', 'users.is_subscribed')
+                ->where('users.is_subscribed', true)
+                ->get()
+                ->map(fn ($user) => (object) [
+                    'user_id' => $user->id,
+                    'email' => strtolower($user->email),
+                    'name' => $user->name,
+                ])
+                // toBase(): merge() on an Eloquent collection keys by getKey(), which these plain
+                // objects do not have.
+                ->toBase()
+            )->merge(
+                \App\Models\RoleSubscriber::where('role_id', $role->id)
+                    ->confirmed()
+                    ->get(['email', 'name'])
+                    ->map(fn ($subscriber) => (object) [
+                        'user_id' => null,
+                        'email' => strtolower($subscriber->email),
+                        'name' => $subscriber->name,
+                    ])
+                    ->toBase()
+            );
         }
 
         // Always include schedule members (owner, admin, viewer)
@@ -222,19 +289,6 @@ class NewsletterService
                 'name' => $user->name,
             ]);
         $allRecipients = $allRecipients->merge($members);
-
-        // If no segments found and no segmentIds, fall back to followers
-        if ($allRecipients->isEmpty() && empty($segmentIds)) {
-            $allRecipients = $role->followers()
-                ->select('users.id', 'users.email', 'users.name', 'users.is_subscribed')
-                ->where('users.is_subscribed', true)
-                ->get()
-                ->map(fn ($user) => (object) [
-                    'user_id' => $user->id,
-                    'email' => strtolower($user->email),
-                    'name' => $user->name,
-                ]);
-        }
 
         // Deduplicate by lowercase email
         $allRecipients = $allRecipients->unique('email');

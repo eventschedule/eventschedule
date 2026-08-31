@@ -244,6 +244,27 @@ class BackupService
             })->toArray();
         }
 
+        // Account-less audience. Schedule data, not user data - and without it a restore silently
+        // loses the schedule's whole subscriber list. Honours the same PII gate as the
+        // unsubscribes above, and carries confirmed_at so a restore cannot promote somebody who
+        // never confirmed into a mailable recipient.
+        if ($stripNewsletterPii) {
+            $subscribersData = [];
+        } else {
+            $subscribersData = \App\Models\RoleSubscriber::where('role_id', $role->id)
+                ->get()
+                ->map(function ($subscriber) {
+                    return [
+                        'email' => $subscriber->email,
+                        'name' => $subscriber->name,
+                        'locale' => $subscriber->locale,
+                        'source' => $subscriber->source,
+                        'confirmed_at' => $subscriber->confirmed_at,
+                        'created_at' => $subscriber->created_at,
+                    ];
+                })->toArray();
+        }
+
         return [
             'role' => $roleData,
             'groups' => $groupsData,
@@ -252,6 +273,7 @@ class BackupService
             'newsletter_segments' => $segmentsData,
             'newsletter_ab_tests' => $abTestsData,
             'newsletter_unsubscribes' => $unsubscribesData,
+            'role_subscribers' => $subscribersData,
             'gift_cards' => $this->exportGiftCards($role),
             'appointment_types' => $this->exportAppointmentTypes($role),
             // Templates, exported with the schedule that owns them. The per-occurrence snapshots
@@ -1488,6 +1510,26 @@ class BackupService
                             'role_id' => $role->id,
                             'email' => $unsubData['email'],
                             'unsubscribed_at' => $unsubData['unsubscribed_at'] ?? now(),
+                        ]);
+                    });
+                } catch (\Exception $e) {
+                    report($e);
+                }
+            }
+
+            // Import account-less subscribers. A fresh token per row: the exported one may still
+            // be live in somebody's inbox pointing at the original schedule.
+            foreach ($scheduleData['role_subscribers'] ?? [] as $subData) {
+                try {
+                    \App\Models\RoleSubscriber::withoutEvents(function () use ($role, $subData) {
+                        \App\Models\RoleSubscriber::create([
+                            'role_id' => $role->id,
+                            'email' => $subData['email'],
+                            'name' => $subData['name'] ?? null,
+                            'locale' => $subData['locale'] ?? null,
+                            'source' => $subData['source'] ?? 'import',
+                            'confirmed_at' => $subData['confirmed_at'] ?? null,
+                            'token' => \App\Models\RoleSubscriber::newToken(),
                         ]);
                     });
                 } catch (\Exception $e) {

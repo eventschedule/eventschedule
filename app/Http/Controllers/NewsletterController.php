@@ -69,17 +69,16 @@ class NewsletterController extends Controller
         return ['role_id' => UrlUtils::encodeId($role->id)];
     }
 
-    protected function requiresNewsletterVerification($role): bool
+    /**
+     * Delegates to the one shared gate so this and NewsletterService::send() cannot drift.
+     *
+     * $recipients scales it: a small audience goes out without SMTP or an SMS-verified phone.
+     * Callers that have not resolved recipients yet pass 0, which is the strict answer and
+     * preserves the pre-existing behaviour of the compose-time warning.
+     */
+    protected function requiresNewsletterVerification($role, int $recipients = 0): bool
     {
-        if (! config('app.hosted') || config('app.is_testing')) {
-            return false;
-        }
-
-        if (auth()->user()->isAdmin()) {
-            return false;
-        }
-
-        return ! $role->hasEmailSettings() && ! auth()->user()->hasVerifiedPhone();
+        return ! $role->canSendAudienceMail($recipients, auth()->user());
     }
 
     public function index(Request $request)
@@ -306,10 +305,6 @@ class NewsletterController extends Controller
         $this->authorizeAccess();
         $role = $this->getRole($request);
 
-        if ($this->requiresNewsletterVerification($role)) {
-            return back()->with('error', __('messages.newsletter_requires_verification'));
-        }
-
         $newsletter = Newsletter::where('role_id', $role->id)
             ->where('id', UrlUtils::decodeId($hash))
             ->firstOrFail();
@@ -325,13 +320,18 @@ class NewsletterController extends Controller
             return back()->with('error', __('messages.newsletter_limit_reached', ['used' => $used, 'limit' => $limit]));
         }
 
-        // On sync queue, large sends would timeout the HTTP request - advise scheduling instead
-        if (config('queue.default') === 'sync') {
-            $estimatedCount = $service->resolveRecipients($role, $newsletter->segment_ids ?? [])->count();
+        // Resolved once, and used by both checks below.
+        $estimatedCount = $service->resolveRecipients($role, $newsletter->segment_ids ?? [])->count();
 
-            if ($estimatedCount > 50) {
-                return back()->with('error', __('messages.newsletter_sync_queue_limit'));
-            }
+        // Trust gate, scaled to the size of the send. Checked here rather than before the
+        // newsletter is loaded, because the recipient count is what decides it.
+        if ($this->requiresNewsletterVerification($role, $estimatedCount)) {
+            return back()->with('error', __('messages.newsletter_requires_verification'));
+        }
+
+        // On sync queue, large sends would timeout the HTTP request - advise scheduling instead
+        if (config('queue.default') === 'sync' && $estimatedCount > 50) {
+            return back()->with('error', __('messages.newsletter_sync_queue_limit'));
         }
 
         $result = $service->send($newsletter);
@@ -342,6 +342,10 @@ class NewsletterController extends Controller
 
         if (is_array($result) && $result[0] === 'no_recipients') {
             return back()->with('error', __('messages.newsletter_no_recipients'));
+        }
+
+        if (is_array($result) && $result[0] === 'requires_verification') {
+            return back()->with('error', __('messages.newsletter_requires_verification'));
         }
 
         if (is_array($result) && $result[0] === 'limit_exceeded') {
@@ -365,13 +369,18 @@ class NewsletterController extends Controller
         $this->authorizeAccess();
         $role = $this->getRole($request);
 
-        if ($this->requiresNewsletterVerification($role)) {
-            return back()->with('error', __('messages.newsletter_requires_verification'));
-        }
-
         $newsletter = Newsletter::where('role_id', $role->id)
             ->where('id', UrlUtils::decodeId($hash))
             ->firstOrFail();
+
+        // Scaled the same way as send(): the deferred send runs through NewsletterService::send(),
+        // which applies this same gate, so refusing a small send here would be inconsistent.
+        $estimatedCount = app(NewsletterService::class)
+            ->resolveRecipients($role, $newsletter->segment_ids ?? [])->count();
+
+        if ($this->requiresNewsletterVerification($role, $estimatedCount)) {
+            return back()->with('error', __('messages.newsletter_requires_verification'));
+        }
 
         if (! in_array($newsletter->status, ['draft', 'scheduled'])) {
             return back()->with('error', __('messages.newsletter_already_sent'));
@@ -499,7 +508,7 @@ class NewsletterController extends Controller
         $this->authorizeAccess();
         $role = $this->getRole($request);
 
-        if ($this->requiresNewsletterVerification($role)) {
+        if ($this->requiresNewsletterVerification($role, 1)) {
             return back()->with('error', __('messages.newsletter_requires_verification'));
         }
 
@@ -673,7 +682,7 @@ class NewsletterController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|in:all_followers,ticket_buyers,manual,group,waitlist',
+            'type' => 'required|in:all_followers,all_subscribers,ticket_buyers,manual,group,waitlist',
             'filter_criteria' => 'nullable|array',
             'emails' => 'nullable|string',
         ]);
@@ -965,10 +974,6 @@ class NewsletterController extends Controller
         $this->authorizeAccess();
         $role = $this->getRole($request);
 
-        if ($this->requiresNewsletterVerification($role)) {
-            return back()->with('error', __('messages.newsletter_requires_verification'));
-        }
-
         if (! $role->canSendNewsletter()) {
             $limit = $role->newsletterLimit();
             $used = $role->newslettersSentThisMonth();
@@ -1014,6 +1019,16 @@ class NewsletterController extends Controller
 
         if ($allRecipients->isEmpty()) {
             return back()->with('error', __('messages.no_recipients'));
+        }
+
+        // Scaled to the audience, exactly like send() and schedule(). Checked here rather than up
+        // front because the recipient count is what decides it - leaving this one on the strict
+        // gate meant an unverified schedule with eight subscribers could send a normal newsletter
+        // but was hard-refused on an A/B test, with no explanation and no path forward.
+        if ($this->requiresNewsletterVerification($role, $allRecipients->count())) {
+            $abTest->update(['status' => 'pending']);
+
+            return back()->with('error', __('messages.newsletter_requires_verification'));
         }
 
         // Check if total recipients would exceed the email limit

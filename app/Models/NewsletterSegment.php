@@ -28,10 +28,31 @@ class NewsletterSegment extends Model
         return $this->hasMany(NewsletterSegmentUser::class);
     }
 
+    /**
+     * The one place a segment type becomes a human label.
+     *
+     * Previously a nested ternary duplicated in four views, every copy of which fell through to
+     * "Sub-schedule" for anything it did not recognise - so adding a type rendered a subscriber
+     * segment labelled "Sub-schedule" while every test still passed.
+     */
+    public static function typeLabel(?string $type): string
+    {
+        return match ($type) {
+            'all_followers' => __('messages.all_followers'),
+            'all_subscribers' => __('messages.all_subscribers'),
+            'ticket_buyers' => __('messages.ticket_buyers'),
+            'manual' => __('messages.manual'),
+            'waitlist' => __('messages.waitlist'),
+            'group' => __('messages.subschedule'),
+            default => __('messages.subschedule'),
+        };
+    }
+
     public function resolveRecipients(): Collection
     {
         return match ($this->type) {
             'all_followers' => $this->resolveFollowers(),
+            'all_subscribers' => $this->resolveSubscribers(),
             'ticket_buyers' => $this->resolveTicketBuyers(),
             'manual' => $this->resolveManual(),
             'group' => $this->resolveGroup(),
@@ -58,6 +79,35 @@ class NewsletterSegment extends Model
                 'user_id' => $user->id,
                 'email' => strtolower($user->email),
                 'name' => $user->name,
+            ]);
+    }
+
+    /**
+     * People who gave this schedule an email address without creating an account.
+     *
+     * A SEPARATE type from all_followers rather than widening it. Widening would silently change
+     * the recipient set of every saved segment and every already-scheduled newsletter, and would
+     * remove the owner's ability to mail only account holders.
+     *
+     * Only CONFIRMED rows. The subscribe endpoint is public and unauthenticated, and the repo has
+     * no bounce or complaint handling anywhere, so an address nobody confirmed must never be mailed
+     * more than the one confirmation itself.
+     */
+    protected function resolveSubscribers(): Collection
+    {
+        if (! $this->role) {
+            return collect();
+        }
+
+        return \App\Models\RoleSubscriber::where('role_id', $this->role->id)
+            ->confirmed()
+            ->get(['email', 'name'])
+            ->map(fn ($subscriber) => (object) [
+                // Nullable on newsletter_recipients, and resolveWaitlist() already emits the same
+                // shape, so nothing downstream needs to know these have no account.
+                'user_id' => null,
+                'email' => strtolower($subscriber->email),
+                'name' => $subscriber->name,
             ]);
     }
 
