@@ -1586,7 +1586,11 @@
                             @endif
                         </div>
 
-                        {{-- Visibility selector (unifies Public / Draft / Internal / Unlisted) --}}
+                        {{-- Visibility selector (unifies Public / Draft / Internal / Unlisted).
+                             One row of pills rather than four stacked cards: the choice costs a
+                             line instead of half the first screen, and the description below
+                             follows whichever option is hovered or focused so every state stays
+                             readable without selecting it. --}}
                         @php
                             $visibilityOptions = [
                                 ['value' => 'public',   'label' => __('messages.public'),   'desc' => __('messages.visibility_public_desc'),   'enterprise' => false],
@@ -1594,51 +1598,71 @@
                                 ['value' => 'internal', 'label' => __('messages.internal'), 'desc' => __('messages.visibility_internal_desc'), 'enterprise' => true],
                                 ['value' => 'unlisted', 'label' => __('messages.unlisted'), 'desc' => __('messages.visibility_unlisted_desc'), 'enterprise' => true],
                             ];
+
+                            // The house segmented control, same strings as role/partials/appointment-editor.blade.php.
+                            // $segRadio keeps a real radio (keyboard, arrow keys, screen reader) and paints only
+                            // the sibling span, so no :class binding is needed to show the selection.
+                            $segShell = 'inline-flex flex-wrap items-center gap-1 rounded-xl bg-gray-100 dark:bg-gray-800 p-1';
+                            $segIdle = 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300';
+                            $segItem = 'rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200';
+                            $segRadio = $segItem.' block cursor-pointer '.$segIdle
+                                .' peer-checked:bg-white dark:peer-checked:bg-gray-900 peer-checked:text-gray-900 dark:peer-checked:text-white'
+                                .' peer-checked:shadow-[inset_0_2px_4px_rgba(0,0,0,0.08)]'
+                                .' peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--brand-blue)]';
+                            // No opacity: gray-500 on the group's gray-100 is already only ~4.4:1, and
+                            // dimming it further drops it to ~2.6:1. The padlock carries the locked signal.
+                            // focus-visible (not focus) so a mouse click does not leave a ring behind, matching
+                            // the radios' peer-focus-visible.
+                            $segLocked = $segItem.' '.$segIdle.' inline-flex items-center gap-1.5'
+                                .' focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]';
+                            // Server mirror of the Vue getter, so the right pill is already pressed
+                            // on first paint instead of only once Vue mounts.
+                            $currentVisibility = $event->visibilityState();
                         @endphp
-                        <div class="mb-6">
-                            <x-input-label :value="__('messages.visibility')" />
+                        <fieldset class="mb-6">
+                            <legend class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.visibility') }}</legend>
                             <input type="hidden" name="is_draft" :value="event.is_draft ? 1 : 0">
                             <input type="hidden" name="is_private" :value="event.is_private ? 1 : 0">
                             <input type="hidden" name="is_internal" :value="event.is_internal ? 1 : 0">
-                            <div class="space-y-2 mt-1">
+
+                            {{-- The reset lives on the container, not on each pill: leaving one pill for the
+                                 next must not depend on mouseleave/mouseenter firing in a particular order. --}}
+                            <div class="{{ $segShell }} mt-1" @mouseleave="hoveredVisibility = null">
                                 @foreach ($visibilityOptions as $opt)
                                     @if (! $opt['enterprise'] || $role->isEnterprise())
-                                        <label class="flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors"
-                                            :class="visibility === '{{ $opt['value'] }}' ? 'border-[var(--brand-blue)] bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'"
-                                            @click="visibility = '{{ $opt['value'] }}'">
-                                            <div class="w-4 h-4 mt-0.5 rounded-full border-2 flex items-center justify-center flex-shrink-0"
-                                                :class="visibility === '{{ $opt['value'] }}' ? 'border-[var(--brand-blue)]' : 'border-gray-400'">
-                                                <div v-show="visibility === '{{ $opt['value'] }}'" class="w-2 h-2 rounded-full bg-[var(--brand-blue)]"></div>
-                                            </div>
-                                            <div>
-                                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $opt['label'] }}</span>
-                                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $opt['desc'] }}</p>
-                                            </div>
+                                        <label @mouseenter="hoveredVisibility = '{{ $opt['value'] }}'">
+                                            <input type="radio" name="visibility_ui" value="{{ $opt['value'] }}" class="sr-only peer"
+                                                v-model="visibility" {{ $currentVisibility === $opt['value'] ? 'checked' : '' }}
+                                                @focus="hoveredVisibility = '{{ $opt['value'] }}'" @blur="hoveredVisibility = null">
+                                            <span class="{{ $segRadio }}">{{ $opt['label'] }}</span>
                                         </label>
                                     @else
-                                        <div class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 opacity-60 cursor-not-allowed">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mt-0.5 text-gray-400 flex-shrink-0">
+                                        {{-- Locked: a button rather than a disabled radio, so the click still
+                                             reaches the upgrade modal, and it stays out of the radio group. --}}
+                                        <button type="button" class="{{ $segLocked }}"
+                                            title="{{ $opt['label'] }} ({{ __('messages.enterprise') }})"
+                                            aria-label="{{ $opt['label'] }} ({{ __('messages.enterprise') }})"
+                                            @click="openUpgrade('upgrade-privacy')"
+                                            @mouseenter="hoveredVisibility = '{{ $opt['value'] }}'"
+                                            @focus="hoveredVisibility = '{{ $opt['value'] }}'" @blur="hoveredVisibility = null">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 flex-shrink-0">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
                                             </svg>
-                                            <div>
-                                                <span class="text-sm font-medium text-gray-500 dark:text-gray-400 inline-flex items-center gap-1.5">
-                                                    {{ $opt['label'] }}
-                                                    <span class="text-[10px] uppercase tracking-wide font-semibold px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">{{ __('messages.enterprise') }}</span>
-                                                </span>
-                                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $opt['desc'] }}</p>
-                                            </div>
-                                        </div>
+                                            {{ $opt['label'] }}
+                                        </button>
                                     @endif
                                 @endforeach
                             </div>
 
-                            @if (! $role->isEnterprise())
-                                <div class="mt-3">
-                                    <x-upgrade-prompt tier="enterprise" :learnMoreUrl="marketing_url('/features/private-events')" :subdomain="$subdomain">
-                                        {{ __('messages.upgrade_enterprise_privacy') }}
-                                    </x-upgrade-prompt>
-                                </div>
-                            @endif
+                            {{-- Deliberately not an aria-live region: this text follows hover as well as
+                                 selection, and announcing on unintended pointer movement is worse than
+                                 silence. The radio announces the selection itself. --}}
+                            <div class="mt-2 min-h-[1.25rem]">
+                                @foreach ($visibilityOptions as $opt)
+                                    <p class="text-xs text-gray-500 dark:text-gray-400"
+                                        v-show="(hoveredVisibility || visibility) === '{{ $opt['value'] }}'">{{ $opt['desc'] }}</p>
+                                @endforeach
+                            </div>
 
                             @if ($role->isEnterprise())
                             {{-- Password applies only to Unlisted events --}}
@@ -1659,7 +1683,7 @@
                                 </svg>
                                 <span class="text-sm text-amber-800 dark:text-amber-300">{{ __('messages.visibility_publish_warning') }}</span>
                             </div>
-                        </div>
+                        </fieldset>
 
                         @if($effectiveRole->groups && count($effectiveRole->groups))
                         <div class="mb-6">
@@ -5392,6 +5416,9 @@
         // rather than echoed into a v-show attribute, which would not survive the mount.
         gatewayCapabilities: @json($gatewayCapabilities),
         initiallyHidden: @json($event->exists && ($event->is_draft || $event->is_private)),
+        // Lets the visibility description line follow the hovered/focused pill and fall
+        // back to the selected one, so a locked Enterprise option still explains itself.
+        hoveredVisibility: null,
         isPro: @json($role->isPro()),
         ticketMode: @json($event->tickets_enabled ? 'tickets' : ($event->rsvp_enabled ? 'rsvp' : 'external')),
         venues: @json($venues),
@@ -6457,6 +6484,11 @@
           window._skipUnsavedWarning = true;
           document.getElementById('edit-form').requestSubmit();
         });
+      },
+      // The modal component is Alpine; this is the same window event its
+      // x-on:open-modal.window listener expects (see role/show-admin.blade.php).
+      openUpgrade(name) {
+        window.dispatchEvent(new CustomEvent('open-modal', { detail: name }));
       },
       validateForm(event) {
         this.formSubmitAttempted = true;

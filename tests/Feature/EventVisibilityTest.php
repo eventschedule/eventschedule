@@ -105,6 +105,45 @@ class EventVisibilityTest extends TestCase
         $this->assertNull($event->fresh()->event_password);
     }
 
+    public function test_visibility_ui_radio_name_is_inert_on_save(): void
+    {
+        // The segmented control's radios post name="visibility_ui" purely so the browser
+        // groups them for arrow-key navigation; the three booleans below are the real
+        // contract. Event::$fillable has no such column, so fill() must drop it rather
+        // than attempt an unknown-column write. Pinned because the name is invisible in
+        // the payloads every other test hand-builds.
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent');
+
+        $this->postCreateEvent($owner, $role, [
+            'visibility_ui' => 'draft',
+            'is_draft' => '1',
+        ])->assertRedirect();
+
+        $event = $this->latestEvent();
+        $this->assertDatabaseHas('events', [
+            'id' => $event->id,
+            'is_draft' => 1,
+            'is_private' => 0,
+            'is_internal' => 0,
+        ]);
+
+        // The stray key must not have been written anywhere on the model.
+        $this->assertFalse(array_key_exists('visibility_ui', $event->fresh()->getAttributes()));
+
+        // And a visibility_ui that disagrees with the booleans must not steer the save.
+        $this->putUpdateEvent($owner, $role, $event, [
+            'visibility_ui' => 'unlisted',
+            'is_draft' => '1',
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('events', [
+            'id' => $event->id,
+            'is_draft' => 1,
+            'is_private' => 0,
+        ]);
+    }
+
     public function test_saving_unlisted_event_keeps_private_without_draft(): void
     {
         $owner = $this->createOwner();
