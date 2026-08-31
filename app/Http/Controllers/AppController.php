@@ -281,16 +281,11 @@ class AppController extends Controller
                     \Log::error('Scheduled command app:send-feedback-requests failed: '.$e->getMessage());
                     report($e);
                 }
-                try {
-                    // Hourly polling; the real cadence is usage.audience_announcement_min_hours,
-                    // enforced per schedule. Registered here AND in routes/console.php - hosted
-                    // runs this cron, selfhost runs the scheduler, and a command in only one of
-                    // them silently does nothing on the other deployment.
-                    \Artisan::call('app:send-event-announcements', ['--apply' => true]);
-                } catch (\Throwable $e) {
-                    \Log::error('Scheduled command app:send-event-announcements failed: '.$e->getMessage());
-                    report($e);
-                }
+                // app:send-event-announcements is deliberately NOT called here, and not in
+                // routes/console.php either - the two rails stay in sync, and here that means
+                // absent from both. It mails a schedule's whole confirmed audience and is not yet
+                // safe unattended; it is hand-run until that is fixed. See the note in
+                // routes/console.php and the class docblock.
                 try {
                     \Artisan::call('app:send-carpool-reminders');
                 } catch (\Throwable $e) {

@@ -255,6 +255,28 @@ class EventAnnouncementTest extends TestCase
         $this->assertStringContainsString('2', $many->envelope()->subject);
     }
 
+    /**
+     * The command is hand-run for now, and must stay absent from BOTH scheduler rails.
+     *
+     * Asserted rather than commented, for the same reason ActivationNudgeTest asserts it: the repo
+     * rule is that the two rails stay in sync, so the obvious "fix" for a missing registration is
+     * to add one back - and adding one back here re-arms every defect listed in the class
+     * docblock, including a watermark stamped after the dispatch loop and two rails holding
+     * different mutexes with no claim between them. Neither can be undone once mail has left.
+     */
+    public function test_the_command_is_not_scheduled_on_either_rail(): void
+    {
+        foreach (['routes/console.php', 'app/Http/Controllers/AppController.php'] as $file) {
+            $body = file_get_contents(base_path($file));
+
+            $this->assertStringNotContainsString(
+                "Artisan::call('app:send-event-announcements'", $body,
+                "{$file} schedules the announcements; they are meant to be hand-run until the "
+                .'blockers in the SendEventAnnouncements docblock are closed'
+            );
+        }
+    }
+
     public function test_a_dry_run_sends_nothing_and_stamps_nothing(): void
     {
         // The command is dry by default so a first deployment can be read before it mails anyone.

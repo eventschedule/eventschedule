@@ -97,13 +97,16 @@ Schedule::call(function () {
     Artisan::call('app:send-appointment-reminders');
 })->hourly()->name('send-appointment-reminders')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
 
-// New-event announcements to each schedule's confirmed audience. Hourly is the POLLING rate, not
-// the sending rate: the real cadence is usage.audience_announcement_min_hours, enforced per
-// schedule against roles.last_announced_at, so a schedule cannot be mailed more often than the
-// confirmation email promised however often this runs.
-Schedule::call(function () {
-    Artisan::call('app:send-event-announcements', ['--apply' => true]);
-})->hourly()->name('send-event-announcements')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+// app:send-event-announcements is deliberately NOT scheduled, here or in
+// AppController::translateData(). It mails a schedule's whole confirmed audience, and it is not
+// yet safe to run unattended: the batch ceiling counts schedules rather than recipients, the
+// last_announced_at watermark is stamped AFTER the dispatch loop with no try/catch around it, and
+// the two rails hold different mutexes with no atomic claim between them - the same hazard
+// SendActivationNudges documents at its own claim. Any one of those can put duplicated or
+// unbounded mail on the shared sending reputation, and none of it can be recalled.
+//
+// Run it by hand - no flag prints a dry run, --apply sends - and put it back on a schedule once
+// those are closed and a real pass has been read. See the class docblock for the full list.
 
 // withoutOverlapping() is not decoration here: this command initiates card charges, so two
 // concurrent runs would attempt the same installment. The Stripe idempotency key is the second

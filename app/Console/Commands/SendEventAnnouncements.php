@@ -32,7 +32,44 @@ use Illuminate\Support\Facades\Log;
  *      event in the historical base from every schedule at once, on the platform's shared
  *      sending reputation - the same lesson SendActivationNudges::WINDOWS records.
  *
- * Dry by default, like SendActivationNudges. Read a run before scheduling it.
+ * Dry by default, like SendActivationNudges, and HAND-RUN ONLY: deliberately absent from both
+ * routes/console.php and AppController::translateData().
+ *
+ * Do not put it back on a schedule until all of the following are closed. Each one can put
+ * duplicated or unbounded mail on the platform's shared sending reputation, and none of it can be
+ * recalled once sent. The repo already has the shape for every fix; the references are the
+ * existing code to copy, not new designs.
+ *
+ *   a. The batch ceiling counts SCHEDULES, not recipients - $budget-- sits outside the recipient
+ *      loop - and canSendAudienceMail() returns true regardless of count for selfhost, own SMTP,
+ *      admin and verified-phone schedules. newsletterLimit() is cited at the top of this docblock
+ *      and never called. Cap recipients, and chunk + delay the dispatch the way
+ *      NewsletterService::send() already does.
+ *   b. last_announced_at is stamped AFTER the dispatch loop, and there is no try/catch anywhere in
+ *      this file, so a throw mid-loop re-sends to everyone already mailed on the next tick,
+ *      deterministically. Claim BEFORE sending and roll back in a catch, as
+ *      SendFeedbackRequests does.
+ *   c. The two rails hold different mutexes and there is no atomic claim, so a concurrent run can
+ *      mail the same audience twice - exactly what SendActivationNudges warns about at its
+ *      insertOrIgnore claim. Needs a shared Cache::lock, or a conditional
+ *      UPDATE ... WHERE last_announced_at = <value read>.
+ *   d. newEventsFor() keys on created_at, so a draft written before the watermark and published
+ *      after it is never announced. That is the ordinary "draft ahead, publish on the day"
+ *      workflow. events.published_at exists in the schema but nothing outside blog posts writes
+ *      or reads it; populating it on the draft-to-public transition (plus a backfill) is the fix.
+ *   e. A canSendAudienceMail() refusal continues without stamping, so it re-resolves and re-refuses
+ *      every hour forever - the same defect this feature FIXED for scheduled newsletters in
+ *      NewsletterService::send().
+ *   f. The watermark writes use save(), which fires Role::boot()'s saving hook and with it a
+ *      synchronous Google Geocoding call on any role whose geo_address is stale. Use
+ *      saveQuietly() or a raw update().
+ *   g. AudienceResolver::suppressedEmails() runs a platform-wide scan of an unindexed
+ *      users.is_subscribed once PER ROLE, inside the loop. Hoist it, or index the column.
+ *
+ * Smaller, worth doing at the same time: dueRoles() has no orderBy, so which schedules get served
+ * when the budget runs out is arbitrary; the limit(25) truncates silently while the watermark
+ * advances past everything; and getGuestUrl() returns '' for an unclaimed role, which renders the
+ * email's primary button with an empty href.
  */
 class SendEventAnnouncements extends Command
 {
