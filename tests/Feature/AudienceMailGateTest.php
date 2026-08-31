@@ -2,8 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Models\Newsletter;
 use App\Models\Role;
+use App\Models\RoleSubscriber;
 use App\Models\User;
+use App\Services\NewsletterService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
@@ -120,5 +123,54 @@ class AudienceMailGateTest extends TestCase
         $role = $this->createRole($this->unverifiedOwner());
 
         $this->assertFalse($role->canSendAudienceMail(0));
+    }
+
+    public function test_a_refused_scheduled_newsletter_leaves_the_cron_queue(): void
+    {
+        // The defect: send() put a refused row back to 'scheduled' with its scheduled_at still in
+        // the past, so ProcessScheduledNewsletters re-picked it every single minute, re-resolved
+        // the whole recipient set and re-refused, forever - while the composer went on showing it
+        // as scheduled and the owner was told nothing.
+        //
+        // 'draft' with a null scheduled_at is terminal: the cron only reads 'scheduled' rows.
+        $owner = $this->unverifiedOwner();
+        $role = $this->createRole($owner);
+
+        // Over the unverified ceiling, so the gate refuses.
+        $over = (int) config('usage.audience_mail_unverified_max_recipients', 50) + 5;
+        for ($i = 0; $i < $over; $i++) {
+            RoleSubscriber::create([
+                'role_id' => $role->id,
+                'email' => "fan{$i}@fans.test",
+                'token' => RoleSubscriber::newToken(),
+                'confirmed_at' => now(),
+            ]);
+        }
+
+        $newsletter = Newsletter::create([
+            'role_id' => $role->id,
+            'user_id' => $owner->id,
+            'subject' => 'Test Newsletter',
+            'status' => 'scheduled',
+            'scheduled_at' => now()->subMinutes(5),
+            'template' => 'modern',
+            'blocks' => [],
+            'type' => 'schedule',
+        ]);
+
+        $result = app(NewsletterService::class)->send($newsletter);
+
+        $this->assertSame('requires_verification', $result[0]);
+
+        $newsletter->refresh();
+        $this->assertSame('draft', $newsletter->status);
+        $this->assertNull($newsletter->scheduled_at, 'a refused row must not stay due for the cron');
+        $this->assertNull($newsletter->send_token);
+
+        // The thing that actually mattered: a second pass finds nothing to do.
+        $this->assertSame(
+            0,
+            Newsletter::where('status', 'scheduled')->where('scheduled_at', '<=', now())->count(),
+        );
     }
 }

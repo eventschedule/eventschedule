@@ -48,7 +48,7 @@
                 "name": "How do fans know when I have a show near them?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Fans follow your schedule and get notified when you add new shows. You can also send newsletters directly to your followers with upcoming dates. Share your schedule link in your social bios, on podcasts, or anywhere fans find you."
+                    "text": "Fans sign up with their email and hear automatically when you add new shows. You can also send newsletters directly to your audience with upcoming dates. Share your schedule link in your social bios, on podcasts, or anywhere fans find you."
                 }
             },
             {
@@ -138,7 +138,7 @@
                 "@type": "HowToStep",
                 "position": 3,
                 "name": "Fill the room",
-                "text": "Fans follow you and get notified. No more posting into the algorithm void."
+                "text": "Fans sign up for email and hear from you directly. No more posting into the algorithm void."
             }
         ]
     }
@@ -1044,7 +1044,7 @@
                 <div class="text-center" data-reveal>
                     <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-600 to-rose-700 text-xl font-bold text-white shadow-lg shadow-rose-600/25">3</div>
                     <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Fill the room</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Fans follow you and get notified. No more posting into the algorithm void.</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Fans sign up for email and hear from you directly. No more posting into the algorithm void.</p>
                 </div>
             </div>
         </div>
@@ -1139,7 +1139,7 @@
                 @foreach ([
                     ['Is Event Schedule free for comedians?', 'Yes. Event Schedule is free forever for sharing your show dates and building a fan following. Ticketing and newsletters are available on the Pro and Enterprise plans, with zero platform fees on any ticket sales.'],
                     ['Can I sell tickets to my comedy shows?', 'Yes. Connect your Stripe account and sell tickets directly from your schedule. Create multiple ticket types like general admission, VIP, and early bird. Every ticket includes a QR code for check-in at the door. Zero platform fees - you only pay Stripe\'s standard processing.'],
-                    ['How do fans know when I have a show near them?', 'Fans follow your schedule and get notified when you add new shows. You can also send newsletters directly to your followers with upcoming dates. Share your schedule link in your social bios, on podcasts, or anywhere fans find you.'],
+                    ['How do fans know when I have a show near them?', 'Fans sign up with their email and hear automatically when you add new shows. You can also send newsletters directly to your audience with upcoming dates. Share your schedule link in your social bios, on podcasts, or anywhere fans find you.'],
                     ['Can comedy clubs add me to their lineup?', 'Yes. When a comedy club adds you to their event on Event Schedule, the show automatically appears on your schedule too. No need to add the same gig in two places. Both calendars stay in sync so your fans always see your latest bookings.'],
                     ['Can I track open mics and bringer shows without announcing them?', 'Yes. Save any set as a draft and it stays off your public schedule until you publish it. Drafts are free and unlimited, so you can plan a whole week of mics privately. On the Enterprise plan you can also make events internal or unlisted with an optional password for corporate and private gigs.'],
                     ['Can I run stand-up, improv, and a podcast on one schedule?', 'Yes. Sub-schedules let you split your calendar into separate lineups like stand-up sets, improv nights, and podcast tapings. Fans can see everything in one place, or you can share each lineup with its own link. Sub-schedules are included on the free plan.'],

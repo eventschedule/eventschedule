@@ -28,7 +28,10 @@
      this panel currently sits 244 characters after #calendar-app closes - one careless move inside
      and an unguarded name like "{{constructor.constructor('...')()}}" would execute. v-pre is inert
      where there is no mount and correct where there is, so it costs nothing to keep. --}}
-<div v-pre id="subscribe-panel" class="{{ $panelClass ?? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl' }} p-6 sm:p-8">
+{{-- Padding lives INSIDE $panelClass, not beside it: the event page includes this within a
+     container that already pads, and a hardcoded p-6 sm:p-8 there could only be fought with
+     conflicting utilities whose winner is decided by stylesheet order. --}}
+<div v-pre id="subscribe-panel" class="{{ $panelClass ?? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8' }}">
     <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
         {{ __('messages.subscribe_panel_heading') }}
     </h2>
@@ -44,8 +47,11 @@
         <input type="hidden" name="source" value="panel">
 
         <label for="subscribe_email_{{ $subscribePanelRole->id }}" class="sr-only">{{ __('messages.subscribe_your_email') }}</label>
+        {{-- session(), not old(): this page's ticket and RSVP forms also post a field called
+             `email`, so old('email') would cross-fill between them. --}}
         <input type="email" name="email" id="subscribe_email_{{ $subscribePanelRole->id }}" required
             autocomplete="email"
+            value="{{ session('subscribe_email') }}"
             placeholder="{{ __('messages.subscribe_your_email') }}"
             class="flex-1 min-w-0 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
 
@@ -63,6 +69,13 @@
             {{ $subscribePanelRole->customLabel('email_me_new_events') }}
         </button>
     </form>
+
+    {{-- What the schedule gets. The follow-consent modal has always told signed-in users this;
+         a panel that takes an address from somebody with no account needs to say it too. --}}
+    <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
+        {{ __('messages.subscribe_privacy_note') }}
+        <x-link href="{{ policy_url('privacy') }}" target="_blank">{{ __('messages.privacy_policy') }}</x-link>
+    </p>
 </div>
 
 @if (request()->boolean('subscribe'))

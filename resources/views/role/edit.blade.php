@@ -3240,6 +3240,19 @@
                                 help="{{ __('messages.notify_new_fan_content_help') }}" />
                         </div>
 
+                        {{-- Outbound, not inbound: every other toggle in this section decides
+                             what reaches the OWNER. This one decides whether the schedule's
+                             confirmed audience gets the email the subscribe panel promised them.
+                             Default on, because the guest opted in, not the owner. --}}
+                        <hr class="my-6 border-gray-200 dark:border-gray-700">
+
+                        <div class="mb-6">
+                            <x-toggle name="announce_new_events"
+                                label="{{ __('messages.announce_new_events') }}"
+                                checked="{{ old('announce_new_events', $role->announce_new_events) }}"
+                                help="{{ __('messages.announce_new_events_help') }}" />
+                        </div>
+
                         @php $emailDisabled = config('app.hosted') && ! $role->hasEmailSettings(); @endphp
 
                         @if ($emailDisabled)

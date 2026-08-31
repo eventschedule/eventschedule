@@ -54,6 +54,8 @@ All users get these features with no subscription required.
 | Online events | Virtual event support |
 | Recurring events | Day-of-week recurring patterns with date exceptions (include/exclude specific dates) |
 | Newsletter management | Full newsletter creation and management UI (sending limits vary by tier) |
+| Email subscribers (audience capture) | `role_subscribers` + `App\Services\AudienceResolver`. A signed-out visitor gives the schedule an email address from the sign-up panel, the follow modal or a checkout tick box, and becomes a recipient without an account. Double opt-in from the panel, single opt-in at checkout (the receipt already proves the address). Unlimited on every tier, and listed on the Followers tab. Works on selfhost, where the panel is the only capture surface: the Follow modal is hosted-only |
+| Automatic new-event announcements | `app:send-event-announcements`. When a schedule publishes public events, its CONFIRMED subscribers get one digest covering the batch, floored at `usage.audience_announcement_min_hours` (default 72) per schedule. This is what the sign-up copy promises, so it is ungated and does NOT count against the newsletter allowance below - the cadence floor is what bounds it. Still subject to `Role::canSendAudienceMail()`, so an unverified schedule on the shared platform mailer reaches at most `usage.audience_mail_unverified_max_recipients` (default 50). Owner opt-out per schedule at Settings > Notifications, default on. Account followers are NOT included; they are reached only by a newsletter |
 | Embed calendar on website | iframe embed with X-Frame-Options |
 | Free event registration / RSVP | Native sign-up for free events with optional capacity limits. Unlimited on every tier, and never counted against the paid-ticket allowance below. The RSVP variants of the waitlist, per-guest individual registration and the `?rsvp=true` embed widget are free too - they always have been |
 | Sell tickets (25 paid tickets per month) | `Role::ticketSaleLimit()`. Create ticket types and take payment, including online via Stripe Connect with **no platform fee**, the same as Pro. Capped at 25 paid tickets per calendar month per schedule, with a per-owner backstop across a user's schedules. Free RSVPs, zero-price tickets, add-ons and appointment bookings never count. Cash sales are counted but never blocked, and the cap never applies to an event starting within 48 hours. The first paid sale on each event always notifies the organizer |
@@ -65,7 +67,7 @@ All users get these features with no subscription required.
 | Event cloning | Duplicate an existing event as a starting point for a new one |
 | Venue logo wall header | Banner header option showing logos of venues (talents for venue schedules) from approved public events; drag-reorderable on the edit page |
 | Backup & restore | Export and import schedule data with optional images |
-| 10 newsletter emails per month | Basic newsletter email sending limit (counts each recipient as one email) |
+| 10 newsletter emails per month | Basic newsletter email sending limit (counts each recipient as one email). Automatic new-event announcements are separate and do not draw on it |
 | AI event parsing | `EventController::parse`, daily limit | Parse event details from text/images via Gemini (10/day free, 50/day pro, 100/day enterprise) |
 
 ## Pro Features
@@ -225,6 +227,8 @@ oldest **bookable** type, and the rest return on upgrade.
 ## Newsletter Email Limits
 
 Managed by `Role::newsletterLimit()` (`app/Models/Role.php`). Limits count individual email recipients, not newsletters. A newsletter sent to 100 followers uses 100 of the monthly allowance.
+
+Automatic new-event announcements (`app:send-event-announcements`) are deliberately OUTSIDE this allowance. The promise is made to the guest at sign-up, not to the owner, so a free schedule that could not deliver it would be worse than not offering it at all. What bounds announcements instead is the cadence floor (`usage.audience_announcement_min_hours`, default 72) and `Role::canSendAudienceMail()`.
 
 | Tier | Monthly email limit |
 |------|---------------------|

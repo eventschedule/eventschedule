@@ -859,6 +859,7 @@
         <!-- Notifications Tab -->
         <h3 id="settings-notifications" class="doc-subheading">Notifications</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Choose which email notifications you want for this schedule. They go to the address on the <a href="#contact-info" class="doc-link">Contact Info</a> tab, whether or not you publish it. All five are off until you turn them on.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">One setting here points the other way. <strong class="text-gray-900 dark:text-white">Email subscribers about new events</strong> decides whether your <a href="{{ route('marketing.docs.newsletters') }}#email-subscribers" class="doc-link">email subscribers</a> get an automatic digest when you publish, at most one every few days. Unlike the notifications above it is on by default, because the people receiving it asked for it when they signed up.</p>
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Notify New Request</h4>

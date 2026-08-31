@@ -392,9 +392,14 @@ html[data-es-view="list"] #calendar-panel-wrapper {
       </section>
 
       {{-- Outside the section and outside #calendar-panel-wrapper on purpose: that wrapper carries
-           data-view-width and a max-width that swings to 200rem in calendar view. --}}
-      <div class="mb-6">
-        @include('partials.subscribe-panel', ['panelClass' => 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl'])
+           data-view-width and a max-width that swings to 200rem in calendar view.
+
+           mx-auto + max-w-4xl because of what that opt-out cost: in list view the calendar above
+           is 56rem centred while this inherited the full container, so the widest element on the
+           page was the email form. 56rem matches the list view and is a sane cap in calendar
+           view, where a form stretched to 200rem would look broken. --}}
+      <div class="mb-6 mx-auto w-full max-w-4xl">
+        @include('partials.subscribe-panel', ['panelClass' => 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl p-6 sm:p-8'])
       </div>
 
       @if ($role->youtube_links && $role->youtube_links != '[]')

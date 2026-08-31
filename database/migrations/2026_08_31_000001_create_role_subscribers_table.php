@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\Schema;
  * People who asked a schedule to email them about new events, WITHOUT creating an account.
  *
  * The account-less half of a schedule's audience. The other half is role_user at level 'follower',
- * and AudienceResolver unions the two, deduping on lowercased email. Following used to cost a full
+ * and App\Services\AudienceResolver decides which may be mailed, deduping on lowercased email.
+ * Following used to cost a full
  * user account (RoleController::follow() redirects a signed-out visitor to sign_up), which is why
  * 139k guest page views produced 764 followers.
  *

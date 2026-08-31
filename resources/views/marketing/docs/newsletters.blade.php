@@ -9,6 +9,7 @@
         <x-doc-nav-link href="#block-types">Block Types</x-doc-nav-link>
         <x-doc-nav-link href="#templates">Templates</x-doc-nav-link>
         <x-doc-nav-link href="#style-customization">Style Customization</x-doc-nav-link>
+        <x-doc-nav-link href="#email-subscribers">Email Subscribers</x-doc-nav-link>
         <x-doc-nav-link href="#recipients">Recipients & Segments</x-doc-nav-link>
         <x-doc-nav-link href="#managing-segments" sub>Managing Segments</x-doc-nav-link>
         <x-doc-nav-link href="#importing-emails" sub>Importing Emails</x-doc-nav-link>
@@ -397,6 +398,56 @@
     </section>
 
     <!-- Recipients & Segments -->
+    <!-- Email Subscribers -->
+    <section id="email-subscribers" class="doc-section">
+        <h2 class="doc-heading">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+            </svg>
+            Email Subscribers
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Not everyone who wants to hear from you wants an account. A signed-out visitor can give your schedule an email address directly, and those people become your <strong class="text-gray-900 dark:text-white">email subscribers</strong>. They appear in their own list on the <a href="{{ route('marketing.docs.managing_schedules') }}#followers" class="doc-link">Followers tab</a>, separately from account followers.
+        </p>
+
+        <h3 class="doc-subheading">Where People Sign Up</h3>
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">The sign-up panel</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A short form on your schedule page and on each event page. Signing up here sends a confirmation email, and the address joins your audience only once that link is clicked.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">At checkout</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A tick box on the ticket and RSVP forms, off by default. Because the same address is already receiving a ticket, no confirmation email is needed and the person joins straight away.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Your sign-up link</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The Followers tab gives you a shareable link and a QR code that open your schedule with the form ready. Useful on a poster, a flyer or a merch table.</p>
+            </div>
+        </div>
+
+        <h3 class="doc-subheading">Automatic New-Event Emails</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            This is the promise made to people when they sign up, and it is kept for you. When you publish new events, your confirmed subscribers are sent a single short digest listing them.
+        </p>
+        <ul class="doc-list mb-6">
+            <li>One digest covering every event in the batch, never one email per event</li>
+            <li>At most one every few days, however often you publish</li>
+            <li>Only public events. Drafts, internal and unlisted events are never announced</li>
+            <li>Only events still to come. Back-filling past dates sends nothing</li>
+            <li>Every digest carries a one-click unsubscribe link</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+            You can turn this off per schedule under <strong class="text-gray-900 dark:text-white">Settings &rarr; Notifications</strong>. Account followers are not included: they are reached by a newsletter you compose and send.
+        </p>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Confirmed subscribers only</div>
+            <p>Someone who signed up through the panel but never clicked the confirmation link is shown as <strong>Awaiting confirmation</strong> and is never emailed. That is deliberate: it stops anyone signing up an address they do not own. It also means the number of subscribers on the Followers tab can be higher than the recipient count on a newsletter.</p>
+        </div>
+    </section>
+
+    <!-- Recipients -->
     <section id="recipients" class="doc-section">
         <h2 class="doc-heading">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
@@ -405,7 +456,7 @@
             Recipients &amp; Segments
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The <strong class="text-gray-900 dark:text-white">Recipients</strong> panel on the Settings tab lists your saved segments with a live recipient count beside each one. Tick as many as you need and the lists are merged. If you tick nothing, the newsletter goes to all your followers.
+            The <strong class="text-gray-900 dark:text-white">Recipients</strong> panel on the Settings tab lists your saved segments with a live recipient count beside each one. Tick as many as you need and the lists are merged. If you tick nothing, the newsletter goes to everyone: your followers and your <a href="#email-subscribers" class="doc-link">email subscribers</a> together.
         </p>
 
         <h3 class="doc-subheading">Segment Types</h3>
@@ -413,6 +464,10 @@
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">All Followers</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Everyone who follows your schedule and has not opted out of emails. Best for general announcements and event digests. Learn how to <a href="{{ route('marketing.docs.sharing') }}#followers" class="doc-link">build your follower base</a>.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Email Subscribers</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">People who gave you their email address on your schedule page or at checkout, without creating an account, and then confirmed it. See <a href="#email-subscribers" class="doc-link">Email Subscribers</a>.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Ticket Buyers</h4>

@@ -2098,7 +2098,12 @@
              is gated on isClaimed(), on config('app.hosted'), and (via $hasSubmitButton) on the
              visitor being signed in. A venue event with no claimed talent, or any event on a
              selfhost install, has no capture affordance at all without this panel. --}}
-        @include('partials.subscribe-panel')
+        {{-- No card of its own: this include sits INSIDE the right column's container, which
+             already carries bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl
+             p-6 sm:p-8. Falling through to the partial's default rendered that a second time -
+             a card nested in an identical card, blur stacked on blur, and the panel's contents
+             inset a further 24-32px from every other block in the column. --}}
+        @include('partials.subscribe-panel', ['panelClass' => 'border-t border-gray-200 dark:border-gray-700 pt-6 -mx-6 sm:-mx-8 px-6 sm:px-8'])
 
         {{-- End of content section --}}
 

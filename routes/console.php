@@ -97,6 +97,14 @@ Schedule::call(function () {
     Artisan::call('app:send-appointment-reminders');
 })->hourly()->name('send-appointment-reminders')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
 
+// New-event announcements to each schedule's confirmed audience. Hourly is the POLLING rate, not
+// the sending rate: the real cadence is usage.audience_announcement_min_hours, enforced per
+// schedule against roles.last_announced_at, so a schedule cannot be mailed more often than the
+// confirmation email promised however often this runs.
+Schedule::call(function () {
+    Artisan::call('app:send-event-announcements', ['--apply' => true]);
+})->hourly()->name('send-event-announcements')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+
 // withoutOverlapping() is not decoration here: this command initiates card charges, so two
 // concurrent runs would attempt the same installment. The Stripe idempotency key is the second
 // line of defence; this is the first.

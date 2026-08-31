@@ -136,7 +136,7 @@ class RoleSubscriberController extends Controller
     }
 
     /**
-     * Confirm. Until this runs the row exists but AudienceResolver will not mail it.
+     * Confirm. Until this runs the row exists but App\Services\AudienceResolver will not mail it.
      */
     /**
      * Confirm, from the single-use confirm_token.
@@ -147,16 +147,24 @@ class RoleSubscriberController extends Controller
      */
     public function confirm(Request $request, string $token)
     {
-        $subscriber = RoleSubscriber::where('confirm_token', $token)->with('role')->firstOrFail();
+        $subscriber = RoleSubscriber::where('confirm_token', $token)->with('role')->first();
+
+        // Not firstOrFail(). The token is single-use and is nulled by the confirm below, so the
+        // ROW CANNOT BE FOUND on a replay - which means a bare 404 was the reward for clicking
+        // your own confirmation link twice, or for clicking it at all after a corporate mail
+        // gateway (Safe Links, Proofpoint) prefetched and burned it. An expired-link page cannot
+        // distinguish "already used" from "garbage", and does not need to: the copy covers both.
+        if (! $subscriber) {
+            return $this->linkExpired();
+        }
+
         $role = $subscriber->role;
 
         if (! $role || $role->is_deleted) {
             abort(404);
         }
 
-        if (is_valid_language_code($role->language_code)) {
-            app()->setLocale($role->language_code);
-        }
+        $this->applyLocale($subscriber, $role);
 
         // Burn the token in the same write that confirms. Everything below is now unreachable by
         // a replay of this URL.
@@ -181,9 +189,7 @@ class RoleSubscriberController extends Controller
     {
         $subscriber = RoleSubscriber::where('token', $token)->with('role')->firstOrFail();
 
-        if ($subscriber->role && is_valid_language_code($subscriber->role->language_code)) {
-            app()->setLocale($subscriber->role->language_code);
-        }
+        $this->applyLocale($subscriber, $subscriber->role);
 
         return view('subscriber.unsubscribe', [
             'role' => $subscriber->role,
@@ -202,9 +208,7 @@ class RoleSubscriberController extends Controller
         $subscriber = RoleSubscriber::where('token', $token)->with('role')->firstOrFail();
         $role = $subscriber->role;
 
-        if ($role && is_valid_language_code($role->language_code)) {
-            app()->setLocale($role->language_code);
-        }
+        $this->applyLocale($subscriber, $role);
 
         // Any confirmation link still sitting in an inbox dies here, so it cannot be replayed -
         // by the person or by their mail scanner - to undo what they just asked for.
@@ -246,6 +250,31 @@ class RoleSubscriberController extends Controller
         RoleSubscriber::where('role_id', $role->id)->where('id', $id)->delete();
 
         return back()->with('message', __('messages.deleted_subscriber'));
+    }
+
+    /**
+     * One locale rule for every page in this flow.
+     *
+     * sendConfirmation() dispatches the mail in $subscriber->locale, so resolving these pages off
+     * the ROLE meant a visitor browsing in French got a French email and an English landing page.
+     * The address was captured with a language attached; use it, and keep the schedule's own
+     * language as the fallback it always was.
+     */
+    private function applyLocale(?RoleSubscriber $subscriber, ?Role $role): void
+    {
+        foreach ([$subscriber?->locale, $role?->language_code] as $candidate) {
+            if ($candidate && is_valid_language_code($candidate)) {
+                app()->setLocale($candidate);
+
+                return;
+            }
+        }
+    }
+
+    /** A confirm link that has already been spent. Deliberately reveals nothing about the row. */
+    private function linkExpired()
+    {
+        return response()->view('subscriber.link-expired', [], 410);
     }
 
     private function sendConfirmation(Role $role, RoleSubscriber $subscriber): void
@@ -314,7 +343,21 @@ class RoleSubscriberController extends Controller
         }
 
         if (! $success) {
-            return back()->withInput()->with('error', $message);
+            // NOT session('error'), and not withInput().
+            //
+            // event/show-guest.blade.php force-opens the RSVP / ticket-purchase form when
+            // `session('error') || $errors->any()` - which is why this controller validates by
+            // hand instead of throwing ValidationException. But the error FLASH lands in the same
+            // condition, so a mistyped address in the subscribe panel reopened the ticket form,
+            // and hidePanelsBelow() then hid the panel the visitor was actually using. A key of
+            // its own keeps the toast and leaves the page alone.
+            //
+            // The address comes back under its own key too: old('email') is shared with the
+            // ticket and RSVP forms on that same page, so repopulating through withInput() would
+            // cross-fill them.
+            return back()
+                ->with('subscribe_error', $message)
+                ->with('subscribe_email', (string) $request->input('email'));
         }
 
         return back()->with('message', $message);

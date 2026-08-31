@@ -117,7 +117,7 @@ class RoleSubscriberTest extends TestCase
         $this->post($this->joinUrl(), [
             'email' => 'fan@fans.test',
             'website' => 'http://spam.example',
-        ])->assertSessionHas('error');
+        ])->assertSessionHas('subscribe_error');
 
         $this->assertSame(0, RoleSubscriber::count());
     }
@@ -265,6 +265,43 @@ class RoleSubscriberTest extends TestCase
         $this->get($this->guestEventUrl($this->role, $event))
             ->assertOk()
             ->assertSee(route('role.audience.join', ['subdomain' => $this->role->subdomain]), false);
+    }
+
+    public function test_the_event_page_panel_does_not_nest_a_second_card(): void
+    {
+        // The event page includes the panel INSIDE the right column's container, which already
+        // carries bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8.
+        // With no $panelClass the partial fell through to its default and rendered every one of
+        // those again: a white card nested inside an identical white card, backdrop-blur stacked
+        // on backdrop-blur, and the contents inset a further 24-32px from the rest of the column.
+        //
+        // Local dev cannot show this - every schedule here belongs to the demo user, so the panel
+        // is (correctly) suppressed - which is exactly why it is pinned here instead.
+        $event = $this->createEvent($this->role);
+
+        $html = $this->get($this->guestEventUrl($this->role, $event))->assertOk()->getContent();
+
+        preg_match('/id="subscribe-panel" class="([^"]*)"/', $html, $m);
+        $this->assertNotEmpty($m, 'the panel did not render on the event page');
+
+        $this->assertStringNotContainsString('backdrop-blur-sm', $m[1],
+            'the panel must not repeat the card treatment its container already applies');
+        $this->assertStringContainsString('border-t', $m[1],
+            'the panel should separate itself with a rule, not a nested card');
+    }
+
+    public function test_the_schedule_page_panel_keeps_its_own_card_and_padding(): void
+    {
+        // The other side of the same change: padding moved INSIDE $panelClass, so a caller that
+        // passes one now owns it. If the schedule page's class string ever loses the padding
+        // again, the form renders flush against the card edge.
+        $html = $this->get($this->role->getGuestUrl())->assertOk()->getContent();
+
+        preg_match('/id="subscribe-panel" class="([^"]*)"/', $html, $m);
+        $this->assertNotEmpty($m, 'the panel did not render on the schedule page');
+
+        $this->assertStringContainsString('rounded-2xl', $m[1]);
+        $this->assertStringContainsString('p-6', $m[1]);
     }
 
     public function test_the_panel_is_hidden_from_a_signed_in_visitor(): void
@@ -423,8 +460,16 @@ class RoleSubscriberTest extends TestCase
         $this->get($liveConfirmUrl)->assertOk();
         $this->post('/sub/u/'.$sub->token)->assertOk();
 
-        // Replay the link that is still sitting in their inbox.
-        $this->get($liveConfirmUrl)->assertNotFound();
+        // Replay the link that is still sitting in their inbox. 410, not 404: the link WAS
+        // valid, and the dead end it used to produce was indistinguishable from a broken site.
+        // What must not change is that the replay changes nothing.
+        $replay = $this->get($liveConfirmUrl);
+        $replay->assertStatus(410);
+        $replay->assertSee(__('messages.subscription_link_expired_heading'));
+
+        // The page is reached with no row in hand, so it can say nothing about who or what.
+        $replay->assertDontSee('fan@fans.test');
+        $replay->assertDontSee($this->role->name, false);
 
         $this->assertSame(1, NewsletterUnsubscribe::where('email', 'fan@fans.test')->count(),
             'a replayed confirmation link must not lift a suppression');
@@ -439,7 +484,7 @@ class RoleSubscriberTest extends TestCase
         $liveConfirmUrl = route('subscriber.confirm', ['token' => $sub->confirm_token]);
 
         $this->post('/sub/u/'.$sub->token)->assertOk();
-        $this->get($liveConfirmUrl)->assertNotFound();
+        $this->get($liveConfirmUrl)->assertStatus(410);
 
         $this->assertNull($sub->fresh()->confirmed_at);
         $this->assertSame(1, NewsletterUnsubscribe::where('email', 'fan@fans.test')->count());
@@ -492,8 +537,19 @@ class RoleSubscriberTest extends TestCase
         $response = $this->from($this->role->getGuestUrl())
             ->post($this->joinUrl(), ['email' => 'not-an-email']);
 
-        $response->assertSessionHas('error');
+        // The rejection has to be VISIBLE: guest layouts toast this key.
+        $response->assertSessionHas('subscribe_error');
+
+        // ...and it must not be the key that opens the modal. This is what the test name has
+        // always claimed and what it did not previously check: session('error') sits in the same
+        // @if as $errors->any() in event/show-guest.blade.php, so flashing it reopened the ticket
+        // form and hidePanelsBelow() then hid the subscribe panel itself.
+        $response->assertSessionMissing('error');
         $response->assertSessionHasNoErrors();
+
+        // The typed address survives, under a key that cannot cross-fill the ticket/RSVP forms.
+        $response->assertSessionHas('subscribe_email', 'not-an-email');
+
         $this->assertSame(0, RoleSubscriber::count());
     }
 

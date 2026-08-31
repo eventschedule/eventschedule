@@ -15,7 +15,7 @@ use Illuminate\Queue\SerializesModels;
  * Sent once, when somebody gives a schedule their email address on the guest portal.
  *
  * This is the confirm step of a single-opt-in flow: the visitor's experience is one form and one
- * click, but AudienceResolver only ever mails rows with confirmed_at set. The repo has no bounce,
+ * click, but App\Services\AudienceResolver only ever mails rows with confirmed_at set. The repo has no bounce,
  * complaint or suppression handling anywhere, so an address typed in by somebody else has to cost
  * one stray message rather than a permanent subscription.
  *

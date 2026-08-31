@@ -138,7 +138,7 @@
                 "@type": "HowToStep",
                 "position": 3,
                 "name": "Pack the dancefloor",
-                "text": "Fans follow you, get notified when you're spinning, and show up ready to dance."
+                "text": "Fans sign up for email, hear automatically when you're spinning, and show up ready to dance."
             }
         ]
     }
@@ -914,7 +914,7 @@
                                 <span class="es-dj-display text-lg text-white sm:text-xl">Headline</span>
                                 <span class="es-dj-decal es-dj-decal-on !py-1 !px-2.5 text-[10px]">On air</span>
                             </div>
-                            <p class="text-sm text-gray-400">Fans follow you and get notified when you play near them. One newsletter fills the floor before you are on.</p>
+                            <p class="text-sm text-gray-400">Fans sign up for email and hear automatically when you add a date. One newsletter fills the floor before you are on.</p>
                         </div>
                     </div>
                     <div class="es-dj-slot grid grid-cols-[5.5rem_1fr] gap-x-4 py-5 sm:grid-cols-[6.5rem_1fr] sm:gap-x-6" data-reveal>
@@ -1093,7 +1093,7 @@
                     <div class="es-dj-sign-night rounded-2xl p-7 text-center" data-reveal="panel">
                         <div class="es-dj-display es-dj-tube-lit-amber mx-auto mb-5 text-4xl">3</div>
                         <h3 class="mb-2 text-lg font-semibold text-white">Pack the dancefloor</h3>
-                        <p class="text-sm text-gray-400">Fans follow you, get notified when you're spinning, and show up ready to dance.</p>
+                        <p class="text-sm text-gray-400">Fans sign up for email, hear automatically when you're spinning, and show up ready to dance.</p>
                     </div>
                 </div>
             </div>

@@ -22,6 +22,8 @@ class Role extends Model implements MustVerifyEmail
     protected $fillable = [
         'type',
         'is_unlisted',
+        'announce_new_events',
+        'last_announced_at',
         'design',
         'header_style',
         'background',
@@ -139,6 +141,8 @@ class Role extends Model implements MustVerifyEmail
      * @var array<string, string>
      */
     protected $casts = [
+        'announce_new_events' => 'boolean',
+        'last_announced_at' => 'datetime',
         'google_webhook_expires_at' => 'datetime',
         'trial_ends_at' => 'datetime',
         'caldav_last_sync_at' => 'datetime',
@@ -735,7 +739,8 @@ class Role extends Model implements MustVerifyEmail
 
     /**
      * Account-less members of this schedule's audience: people who gave an email address on the
-     * guest portal without creating an account. AudienceResolver unions this with followers().
+     * guest portal without creating an account. App\Services\AudienceResolver decides which of these
+     * rows may actually be mailed; NewsletterService unions them with followers() for a campaign.
      */
     public function subscribers()
     {

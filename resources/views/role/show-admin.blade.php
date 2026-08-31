@@ -408,9 +408,9 @@
                 <option value="requests" {{ $tab == 'requests' ? 'selected' : '' }}>
                     {{ __('messages.requests') }}{{ count($requests) ? ' (' . count($requests) . ')' : '' }}</option>
                 @endif
-                @if (config('app.hosted') || config('app.is_testing'))
+                @if (config('app.hosted') || config('app.is_testing') || $subscribersCount)
                 <option value="followers" {{ $tab == 'followers' ? 'selected' : '' }}>
-                    {{ __('messages.followers') }}{{ count($followers) ? ' (' . count($followers) . ')' : '' }}</option>
+                    {{ __('messages.followers') }}{{ (count($followers) + $subscribersCount) ? ' (' . (count($followers) + $subscribersCount) . ')' : '' }}</option>
                 @endif
                 <option value="team" {{ $tab == 'team' ? 'selected' : '' }}>
                     {{ __('messages.team') }}{{ count($members) ? ' (' . count($members) . ')' : '' }}</option>
@@ -448,9 +448,9 @@
                 <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'requests']) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'requests' ? 'border-[var(--brand-blue)] px-3 pb-5 text-base font-medium text-[var(--brand-blue)]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.requests') }}{{ count($requests) ? ' (' . count($requests) . ')' : '' }}</a>
                 @endif
-                @if (config('app.hosted') || config('app.is_testing'))
+                @if (config('app.hosted') || config('app.is_testing') || $subscribersCount)
                 <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'followers']) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'followers' ? 'border-[var(--brand-blue)] px-3 pb-5 text-base font-medium text-[var(--brand-blue)]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.followers') }}{{ count($followers) ? ' (' . count($followers) . ')' : '' }}</a>
+                    class="whitespace-nowrap border-b-2 {{ $tab == 'followers' ? 'border-[var(--brand-blue)] px-3 pb-5 text-base font-medium text-[var(--brand-blue)]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.followers') }}{{ (count($followers) + $subscribersCount) ? ' (' . (count($followers) + $subscribersCount) . ')' : '' }}</a>
                 @endif
                 <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'team' ? 'border-[var(--brand-blue)] px-3 pb-5 text-base font-medium text-[var(--brand-blue)]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.team') }}{{ count($members) ? ' (' . count($members) . ')' : '' }}</a>

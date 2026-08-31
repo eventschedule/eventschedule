@@ -2845,6 +2845,14 @@ class RoleController extends Controller
         $followersWithRoles = [];
         // Populated only on the followers tab; compact() below runs for every tab.
         $subscribers = null;
+        $subscriberStats = null;
+
+        // Counted on EVERY tab, not just the followers one, because the tab strip needs it twice:
+        // once to label the tab and once to decide whether to render the link at all. The link is
+        // otherwise hosted-only, which stranded selfhost - the subscribe panel has no hosted gate,
+        // so a selfhoster could collect an audience into a tab they could only reach by hand-typing
+        // ?tab=followers. The tab CONTENT was never gated; only the way in was.
+        $subscribersCount = \App\Models\RoleSubscriber::where('role_id', $role->id)->count();
 
         // The pending-handover panel replaces the Transfer button on the Team tab. Owner
         // only: an admin can manage members but cannot give the schedule away.
@@ -3010,6 +3018,29 @@ class RoleController extends Controller
                 ])
                 ->paginate(10, ['*'], 'subscribers_page')
                 ->withQueryString();
+
+            // Breakdown for the panel above the table. Owners cannot otherwise answer "how many
+            // people can I actually email?" - the table paginates at 10 and the three states are
+            // only legible as badges. Pending rows are never resolved as recipients, so this
+            // count and the newsletter's recipient count legitimately differ; the panel says so.
+            $suppressed = \App\Models\NewsletterUnsubscribe::where('role_id', $role->id)
+                ->pluck('email')
+                ->map(fn ($email) => strtolower($email))
+                ->all();
+            $subscriberStats = [
+                'confirmed' => \App\Models\RoleSubscriber::where('role_id', $role->id)
+                    ->whereNotNull('confirmed_at')
+                    ->when($suppressed, fn ($q) => $q->whereNotIn('email', $suppressed))
+                    ->count(),
+                'pending' => \App\Models\RoleSubscriber::where('role_id', $role->id)
+                    ->whereNull('confirmed_at')
+                    ->count(),
+                'unsubscribed' => $suppressed
+                    ? \App\Models\RoleSubscriber::where('role_id', $role->id)
+                        ->whereIn('email', $suppressed)
+                        ->count()
+                    : 0,
+            ];
         } elseif ($tab == 'templates') {
             $eventTemplates = $role->eventTemplates;
         } elseif ($tab == 'seating') {
@@ -3062,6 +3093,8 @@ class RoleController extends Controller
             'followers',
             'followersWithRoles',
             'subscribers',
+            'subscribersCount',
+            'subscriberStats',
             'requests',
             'month',
             'year',

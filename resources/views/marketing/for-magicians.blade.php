@@ -72,7 +72,7 @@
                 "name": "How do planners and fans find my shows?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Share one schedule link in your bio, EPK, and booking website, or embed the calendar on any page. Fans who follow your schedule get notified when you add a show, and newsletters reach their inboxes directly. Two-way Google, Outlook, and CalDAV sync keeps every calendar current."
+                    "text": "Share one schedule link in your bio, EPK, and booking website, or embed the calendar on any page. Fans who sign up for email get a digest automatically when you add a show, and newsletters reach their inboxes directly. Two-way Google, Outlook, and CalDAV sync keeps every calendar current."
                 }
             }
         ]
@@ -140,7 +140,7 @@
                 "@type": "HowToStep",
                 "position": 3,
                 "name": "Fill the room",
-                "text": "Fans follow your schedule and get notified when you add a show. Newsletters and new-show alerts reach their inboxes directly."
+                "text": "Fans sign up with their email and hear from you automatically when you add a show. Newsletters and new-show digests reach their inboxes directly."
             }
         ]
     }
@@ -826,7 +826,7 @@
                     <div class="es-pick-index es-pick-pip-red" aria-hidden="true"><span>3</span>{!! $suitDiamond !!}</div>
                     <div class="es-pick-index-flip es-pick-pip-red" aria-hidden="true"><span>3</span>{!! $suitDiamond !!}</div>
                     <h3 class="mb-3 text-center text-xl font-bold">Fill the room</h3>
-                    <p class="text-center text-sm text-gray-600">Fans follow your schedule and get notified when you add a show. Newsletters and new-show alerts reach their inboxes directly.</p>
+                    <p class="text-center text-sm text-gray-600">Fans sign up with their email and hear from you automatically when you add a show. Newsletters and new-show digests reach their inboxes directly.</p>
                 </div>
             </div>
         </div>
@@ -1080,7 +1080,7 @@
                     ['Can I sell gift cards or season passes for my shows?', 'Yes. On the Pro plan you can sell balance-tracked gift cards that buyers send to a recipient by email, redeemable toward tickets for any show on your schedule. You can also sell multi-use passes like a parlor-show season pass, with usage tracked automatically. Zero platform fees apply to both.'],
                     ['Can I sell tickets to my magic shows?', 'Yes. Connect your Stripe account and sell tickets directly from your schedule. Create ticket types for general admission, VIP, and meet-and-greet packages, each with a QR code for check-in at the door. When a show sells out, a waitlist notifies fans if seats open up. Zero platform fees, you only pay Stripe\'s processing.'],
                     ['Can I run a weekly residency without re-entering the same show?', 'Yes. Set up your show once as a recurring event with a day-of-week pattern, and add date exceptions for the weeks you are away. On the Pro plan you can also save any event as a template, so repeat corporate formats take two clicks instead of a blank form.'],
-                    ['How do planners and fans find my shows?', 'Share one schedule link in your bio, EPK, and booking website, or embed the calendar on any page. Fans who follow your schedule get notified when you add a show, and newsletters reach their inboxes directly. Two-way Google, Outlook, and CalDAV sync keeps every calendar current.'],
+                    ['How do planners and fans find my shows?', 'Share one schedule link in your bio, EPK, and booking website, or embed the calendar on any page. Fans who sign up for email get a digest automatically when you add a show, and newsletters reach their inboxes directly. Two-way Google, Outlook, and CalDAV sync keeps every calendar current.'],
                 ] as [$q, $a])
                     <details name="faq" data-reveal class="group/faq es-pick-hover overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
                         <summary class="flex cursor-pointer items-center justify-between p-6">

@@ -66,6 +66,11 @@ class BackupService
         // Same reasoning: a schedule that declined to host paid promotions must not
         // silently start hosting them again after a restore.
         'promotions_opt_out',
+        // Same again. last_announced_at is deliberately NOT exported: it is operational state,
+        // and restoring an old one would make the first run after a restore announce everything
+        // published since. Absent, it restores as NULL, which the command treats as a first
+        // sighting and stamps without sending.
+        'announce_new_events',
         // And the sharpest version of it: without these, a restore silently drops the
         // owner's Stay22 affiliate ID, so the accommodation map keeps rendering but the
         // commission falls back to the instance operator. That is precisely the outcome the

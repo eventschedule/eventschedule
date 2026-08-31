@@ -282,6 +282,16 @@ class AppController extends Controller
                     report($e);
                 }
                 try {
+                    // Hourly polling; the real cadence is usage.audience_announcement_min_hours,
+                    // enforced per schedule. Registered here AND in routes/console.php - hosted
+                    // runs this cron, selfhost runs the scheduler, and a command in only one of
+                    // them silently does nothing on the other deployment.
+                    \Artisan::call('app:send-event-announcements', ['--apply' => true]);
+                } catch (\Throwable $e) {
+                    \Log::error('Scheduled command app:send-event-announcements failed: '.$e->getMessage());
+                    report($e);
+                }
+                try {
                     \Artisan::call('app:send-carpool-reminders');
                 } catch (\Throwable $e) {
                     \Log::error('Scheduled command app:send-carpool-reminders failed: '.$e->getMessage());

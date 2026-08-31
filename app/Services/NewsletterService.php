@@ -72,8 +72,18 @@ class NewsletterService
                 'recipients' => $recipients->count(),
             ]);
 
+            // Back to DRAFT, and the schedule cleared, even when this was a scheduled send.
+            //
+            // Returning it to 'scheduled' with a scheduled_at already in the past put it straight
+            // back in ProcessScheduledNewsletters' queue, so it was re-picked every minute: the
+            // whole recipient set re-resolved and the same refusal logged, forever, while the
+            // composer went on showing it as scheduled and the owner was told nothing. Draft is
+            // terminal here - the cron only reads 'scheduled' rows - and it puts the newsletter
+            // somewhere the owner will actually look, where opening it hits the same
+            // canSendAudienceMail() gate and shows messages.newsletter_requires_verification.
             $newsletter->update([
-                'status' => $newsletter->scheduled_at ? 'scheduled' : 'draft',
+                'status' => 'draft',
+                'scheduled_at' => null,
                 'send_token' => null,
             ]);
 

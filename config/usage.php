@@ -67,6 +67,18 @@ return [
     // silently block every unverified send rather than falling back.
     'audience_mail_unverified_max_recipients' => (int) (env('AUDIENCE_MAIL_UNVERIFIED_MAX_RECIPIENTS') ?: 50),
 
+    // Automatic new-event announcements (App\Console\Commands\SendEventAnnouncements).
+    //
+    // The cadence floor is what makes subscription_confirm_cadence true - the confirmation email
+    // promises "at most one email every few days", so a schedule cannot announce again inside
+    // this window however much it publishes. The batch ceiling drains a backlog over several
+    // runs rather than in one burst, exactly as activation_nudge_batch does.
+    //
+    // `?:` not a default argument: an EMPTY value in .env yields '' and (int) '' is 0, which
+    // max(1, ...) would then floor to an hourly mailshot rather than the intended default.
+    'audience_announcement_min_hours' => (int) (env('AUDIENCE_ANNOUNCEMENT_MIN_HOURS') ?: 72),
+    'audience_announcement_batch' => (int) (env('AUDIENCE_ANNOUNCEMENT_BATCH') ?: 100),
+
     // How many talent/venue schedules one curator may pull events from, and how many
     // event links a single reconcile pass may write. Hitting the batch ceiling is logged
     // and the remainder is picked up by the next run rather than dropped.

@@ -300,6 +300,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="hidden" aria-hidden="true">
                         <input type="text" v-model="website" tabindex="-1" autocomplete="off">
                     </div>
+                    {{-- The signed-in branch above discloses that the schedule sees the name and
+                         email (follow_consent_body_privacy). The guest branch is the one that
+                         COLLECTS an address from somebody with no account, and it disclosed
+                         nothing - while the owner sees every subscriber's name and email on the
+                         followers tab. Static translated text, so no CSTI surface. --}}
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                        {{ __('messages.subscribe_privacy_note') }}
+                        <a href="{{ policy_url('privacy') }}" target="_blank" rel="noopener"
+                            class="text-[var(--brand-blue)] hover:underline">{{ __('messages.privacy_policy') }}</a>
+                    </p>
                     <p v-if="resultMessage && !resultSuccess" class="text-xs text-red-600 dark:text-red-400" v-text="resultMessage"></p>
                 </template>
             </template>

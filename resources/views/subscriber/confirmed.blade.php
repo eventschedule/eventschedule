@@ -6,9 +6,10 @@
         <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
             {{ __('messages.subscription_confirmed_body', ['schedule' => $role->name]) }}
         </p>
-        <a href="{{ $role->getGuestUrl() }}"
-            class="mt-6 inline-block text-sm text-[var(--brand-blue)] hover:underline">
-            {{ $role->name }}
-        </a>
+        <div class="mt-6 text-sm">
+            <x-link href="{{ $role->getGuestUrl() }}">
+                {{ __('messages.back_to_schedule') }}
+            </x-link>
+        </div>
     </div>
 </x-auth-layout>

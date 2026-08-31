@@ -722,7 +722,7 @@
                         Followers, ticket buyers and anyone you have shared the link with. You reach them with a newsletter you write and send: 10 emails a month on Free, 100 on Pro and 1,000 on Enterprise, counted per recipient.
                     </p>
                     <p class="es-launch-muted mb-4 text-sm">
-                        Worth being blunt about, because plenty of tools imply otherwise: nothing goes out on its own here. Adding a show does not email your followers. A newsletter is a thing you compose and hit send on.
+                        Worth being precise about: people who gave you their email on your schedule page are sent a short digest automatically when you publish new events, at most one every few days. Everything beyond that is a newsletter you compose and hit send on, and account followers are only ever reached that way.
                     </p>
                     <a href="{{ marketing_url('/features/newsletters') }}" class="es-launch-link mt-auto inline-flex items-center gap-1 text-sm font-semibold">
                         How newsletters work

@@ -1058,10 +1058,10 @@
                     </div>
                     <div class="es-stage-card p-6" data-reveal="panel">
                         <div class="mb-3 flex flex-wrap items-center gap-2">
-                            <h3 class="es-stage-onink text-lg font-bold">Nothing sends itself</h3>
+                            <h3 class="es-stage-onink text-lg font-bold">What sends itself, and what does not</h3>
                             <span class="es-stage-plan">Free</span>
                         </div>
-                        <p class="es-stage-onmuted text-sm">Worth knowing before you plan around it: followers are not auto-notified when you add a date. You write the email and you press send. Ticket buyers are the exception, and they are told when a date they bought into changes or is cancelled.</p>
+                        <p class="es-stage-onmuted text-sm">Worth knowing before you plan around it: fans who gave you their email on your schedule page get an automatic digest when you add dates, at most one every few days. Account followers are not auto-notified, so reaching them means writing the email and pressing send. Ticket buyers are told separately when a date they bought into changes or is cancelled.</p>
                     </div>
                 </div>
 

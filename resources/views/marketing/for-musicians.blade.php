@@ -825,7 +825,7 @@
                             <div class="flex-1">
                                 <div class="mb-4 text-[10px] font-bold uppercase tracking-[0.3em] text-[#0e7490] dark:text-[#22d3ee]">Followers</div>
                                 <h3 class="es-poster-display mb-4 text-3xl text-[color:var(--esp-ink)]">The street team</h3>
-                                <p class="text-lg text-[color:var(--esp-ink-soft)]">Fans follow your schedule and get notified when you play near them. After the show they post clips, photos, and comments, and nothing goes live until you approve it.</p>
+                                <p class="text-lg text-[color:var(--esp-ink-soft)]">Fans sign up with their email and hear automatically when you add a date. After the show they post clips, photos, and comments, and nothing goes live until you approve it.</p>
                             </div>
                             <div class="w-full shrink-0 lg:w-64" aria-hidden="true">
                                 <div class="rounded-xl border-2 border-[color:var(--esp-line)] bg-[#fdfcf8] p-4 text-center dark:bg-[#171c26]">

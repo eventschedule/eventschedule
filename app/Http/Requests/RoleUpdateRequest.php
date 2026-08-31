@@ -177,6 +177,7 @@ class RoleUpdateRequest extends FormRequest
             'event_categories.*.name_en' => ['nullable', 'string', 'max:80', 'regex:/^[^<>\n\r]+$/'],
             'event_categories.*.color' => ['nullable', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'first_day_of_week' => ['nullable', 'integer', 'min:0', 'max:6'],
+            'announce_new_events' => ['nullable', 'boolean'],
             'feedback_enabled' => ['nullable', 'boolean'],
             'feedback_public' => ['nullable', 'boolean'],
             'fan_comments_enabled' => ['nullable', 'boolean'],

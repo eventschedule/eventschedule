@@ -392,7 +392,10 @@
         </h2>
         @if(config('app.hosted'))
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The <strong class="text-gray-900 dark:text-white">Followers</strong> tab lists the people who have followed your schedule from its public page. Followers are the default recipients when you send a <a href="{{ route('marketing.docs.newsletters') }}#recipients" class="doc-link">newsletter</a>, which is the only thing that emails them: adding an event does not notify anyone by itself.
+            The <strong class="text-gray-900 dark:text-white">Followers</strong> tab lists your audience, in two separate tables: people who followed your schedule with an account, and <a href="{{ route('marketing.docs.newsletters') }}#email-subscribers" class="doc-link">email subscribers</a> who gave you an address without creating one. Both are default recipients when you send a <a href="{{ route('marketing.docs.newsletters') }}#recipients" class="doc-link">newsletter</a>.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Adding an event does not email your account followers. Confirmed email subscribers are different: they asked to hear about new events, so publishing sends them <a href="{{ route('marketing.docs.newsletters') }}#email-subscribers" class="doc-link">an automatic digest</a>, at most one every few days. You can turn that off under Settings &rarr; Notifications.
         </p>
 
         <ul class="doc-list mb-6">
@@ -400,6 +403,7 @@
             <li>Sort by name, email or date by clicking the column heading, and page through longer lists at the bottom</li>
             <li><strong>QR Code</strong> at the top right downloads a PNG that points at your public schedule page, or at your custom domain if you have one, ready to print on a poster or a flyer</li>
             <li>Before you have any followers, the tab shows your public link instead so you can copy and share it</li>
+            <li>The subscriber table adds a <strong>status</strong> for each address: Confirmed, Awaiting confirmation, or Unsubscribed. Only confirmed addresses are ever emailed</li>
         </ul>
 
         <div class="doc-callout doc-callout-info mb-6">
@@ -412,7 +416,7 @@
         </p>
         @else
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The <strong class="text-gray-900 dark:text-white">Followers</strong> tab is part of the hosted version of Event Schedule (eventschedule.com). It lists the people who follow your schedule with their name, email address and the date they followed, and offers a QR code pointing at your public page.
+            Following a schedule with an account is part of the hosted version of Event Schedule (eventschedule.com). <a href="{{ route('marketing.docs.newsletters') }}#email-subscribers" class="doc-link">Email subscribers</a> work on every installation, though: the sign-up panel on your schedule and event pages is the capture surface here, and the <strong class="text-gray-900 dark:text-white">Followers</strong> tab appears as soon as you have your first subscriber, listing each address with its status and sign-up date.
         </p>
         @endif
     </section>

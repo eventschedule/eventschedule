@@ -42,9 +42,9 @@ class ProcessScheduledNewsletters
                         'role_id' => $newsletter->role_id,
                     ]);
                 } elseif (is_array($result) && $result[0] === 'requires_verification') {
-                    // send() resets the row to 'scheduled' with a scheduled_at now in the past, so
-                    // without this arm every tick would silently re-resolve the whole recipient set
-                    // and re-refuse, forever, looking to the operator like a successful send.
+                    // send() now drops the row to 'draft' and clears scheduled_at, so it leaves
+                    // this queue for good rather than being re-picked and re-refused every tick.
+                    // This arm is the operator's record of why it moved.
                     Log::warning('Scheduled newsletter blocked: schedule cannot send audience mail', [
                         'newsletter_id' => $newsletter->id,
                         'role_id' => $newsletter->role_id,
