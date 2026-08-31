@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BlogPost;
 use App\Models\BoostCampaign;
+use App\Models\DismissedNextStep;
 use App\Models\Event;
 use App\Models\EventComment;
 use App\Models\EventPhoto;
@@ -21,6 +22,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class HomeController extends Controller
 {
@@ -617,6 +619,11 @@ class HomeController extends Controller
      * Ordered by what it is worth if acted on: a page with a date and no way to buy comes
      * before an empty page, because selling is what the 2026-08-30 export shows separates a
      * paying customer from a dormant one.
+     *
+     * Each row can be turned down, and a dismissal is permanent for that (user, schedule, step).
+     * Deliberately not a flag on the user: this is the surface that reaches everyone the email
+     * windows exclude, so someone who does not want to sell tickets on one venue must still be
+     * told when a schedule they create next month has no dates on it.
      */
     private function getNextStepItems($roleIds)
     {
@@ -684,40 +691,76 @@ class HomeController extends Controller
         // is written when Connect onboarding STARTS rather than when it completes.
         $hasGateway = ! empty(payment_gateways()->connectedFor($user));
 
+        // One query, like the four above: the dashboard renders on every page load. Keyed per
+        // (schedule, step) rather than per user, so a schedule created after a dismissal still
+        // gets its own suggestion, and a flat set so the branch checks below are plain isset().
+        //
+        // The or-clause is the exception: a payments dismissal is account-wide (see
+        // DismissedNextStep::ACCOUNT_WIDE_STEP_TYPES), so it has to be found even when it was
+        // taken on a schedule outside $ids - one since deleted, or simply a different one.
+        $dismissedRows = DB::table('dismissed_next_steps')
+            ->where('user_id', $user->id)
+            ->where(fn ($q) => $q->whereIn('role_id', $ids)
+                ->orWhereIn('step_type', DismissedNextStep::ACCOUNT_WIDE_STEP_TYPES))
+            ->get(['role_id', 'step_type']);
+
+        $dismissed = $dismissedRows->map(fn ($row) => $row->role_id.':'.$row->step_type)->flip();
+        $paymentsDismissed = $dismissedRows->contains(fn ($row) => $row->step_type === 'next_step_payments');
+
         foreach ($roles as $role) {
             // 1) Something upcoming and no way to buy: the step that matters most.
             if (isset($publicUpcoming[$role->id]) && ! isset($withTicketType[$role->id])) {
-                $items->push([
-                    'type' => 'next_step_tickets',
-                    'count' => 1,
-                    'title' => __('messages.next_step_add_ticket_type'),
-                    'subtitle' => $role->name,
-                    'url' => route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']),
-                    'color' => 'blue',
-                ]);
+                // A dismissal suppresses the row and the schedule keeps its slot: the continue
+                // below still runs. Falling through would replace a dismissed suggestion with
+                // the next-best one on the same schedule, which reads as the button not working.
+                if (! isset($dismissed[$role->id.':next_step_tickets'])) {
+                    $items->push([
+                        'type' => 'next_step_tickets',
+                        'count' => 1,
+                        'title' => __('messages.next_step_add_ticket_type'),
+                        'subtitle' => $role->name,
+                        'url' => route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']),
+                        'color' => 'blue',
+                        // Both the dismiss form's payload and the opt-in signal for the row
+                        // partial. getPendingActionItems() and AdminAlertService never set it,
+                        // so their rows render no control.
+                        'dismiss_schedule' => UrlUtils::encodeId($role->id),
+                    ]);
+                }
 
                 continue;
             }
 
             // 2) Paid tickets set up with nothing to take the money with.
             if (isset($withPaidTicketType[$role->id]) && ! $hasGateway) {
-                $items->push([
-                    'type' => 'next_step_payments',
-                    'count' => 1,
-                    'title' => __('messages.next_step_connect_payments'),
-                    'subtitle' => $role->name,
-                    'url' => route('profile.edit').'#section-payment-methods',
-                    'color' => 'blue',
-                ]);
+                // Account-wide, not per schedule: $hasGateway is one gateway for the whole
+                // account, so turning this down on any schedule answers it for all of them.
+                // Otherwise an owner with five schedules selling tickets says no five times.
+                if (! $paymentsDismissed) {
+                    $items->push([
+                        'type' => 'next_step_payments',
+                        'count' => 1,
+                        'title' => __('messages.next_step_connect_payments'),
+                        'subtitle' => $role->name,
+                        'url' => route('profile.edit').'#section-payment-methods',
+                        'color' => 'blue',
+                        'dismiss_schedule' => UrlUtils::encodeId($role->id),
+                    ]);
+                }
 
                 continue;
             }
 
-            // 3) An empty page, or one whose dates have all passed. Same ask either way:
-            // put a date on it.
-            if (! isset($publicUpcoming[$role->id])) {
+            // 3) An empty page, or one whose dates have all passed. Two step types rather than
+            // one, keyed off the same condition that picks the copy: "never published" and "went
+            // quiet" are different situations at opposite ends of a schedule's life, and a
+            // dismissal is permanent, so folding them together lets a day-one "not ready yet"
+            // silence the dormancy nudge on a schedule that later ran and stopped.
+            $eventStep = isset($anyEvent[$role->id]) ? 'next_step_next_event' : 'next_step_first_event';
+
+            if (! isset($publicUpcoming[$role->id]) && ! isset($dismissed[$role->id.':'.$eventStep])) {
                 $items->push([
-                    'type' => 'next_step_event',
+                    'type' => $eventStep,
                     'count' => 1,
                     'title' => isset($anyEvent[$role->id])
                         ? __('messages.next_step_add_next_event')
@@ -725,13 +768,19 @@ class HomeController extends Controller
                     'subtitle' => $role->name,
                     'url' => route('event.create', ['subdomain' => $role->subdomain]),
                     'color' => 'blue',
+                    'dismiss_schedule' => UrlUtils::encodeId($role->id),
                 ]);
             }
         }
 
         // At most one step per schedule already (each branch continues), and a short list is
         // a suggestion while a long one is a chore.
-        $priority = ['next_step_tickets' => 0, 'next_step_payments' => 1, 'next_step_event' => 2];
+        $priority = [
+            'next_step_tickets' => 0,
+            'next_step_payments' => 1,
+            'next_step_first_event' => 2,
+            'next_step_next_event' => 2,
+        ];
 
         return $items->sortBy(fn ($item) => $priority[$item['type']] ?? 9)->values();
     }
@@ -1186,6 +1235,90 @@ class HomeController extends Controller
         $user->federation_prompt_dismissed = true;
         // saveQuietly: dismissing a banner should not bump users.updated_at.
         $user->saveQuietly();
+
+        return redirect()->back();
+    }
+
+    /**
+     * Turn down one suggestion on the Next steps panel, permanently.
+     *
+     * No saveQuietly() question here, unlike the federation prompt above: this writes a row in
+     * its own table rather than mutating users, so nothing touches users.updated_at or the
+     * updating hook in User::boot().
+     */
+    public function dismissNextStep(Request $request): RedirectResponse
+    {
+        if (is_demo_mode()) {
+            return redirect()->back();
+        }
+
+        $validated = $request->validate([
+            'schedule' => ['required', 'string'],
+            // Not decoration: without it the discriminator column accepts any string, and a
+            // value that later collided with a real step type would silently suppress both a
+            // panel row and an email.
+            'type' => ['required', Rule::in(DismissedNextStep::STEP_TYPES)],
+        ]);
+
+        $user = $request->user();
+        $roleId = UrlUtils::decodeId($validated['schedule']);
+
+        // The same set the panel is built from: editor() is owner and admin only, and roles()
+        // already filters is_deleted. A viewer can act on none of these steps and never sees a
+        // row. decodeId() returns null on a malformed hash, which would otherwise fall through
+        // to an unkeyed write.
+        if (! $roleId || ! $user->editor()->where('roles.id', $roleId)->exists()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        DismissedNextStep::firstOrCreate([
+            'user_id' => $user->id,
+            'role_id' => $roleId,
+            'step_type' => $validated['type'],
+        ]);
+
+        return redirect()->back();
+    }
+
+    /**
+     * Turn down every suggestion currently on the panel.
+     *
+     * Still one row per suggestion rather than a flag on the user, so this clears what is on the
+     * panel today without silencing a schedule created tomorrow.
+     */
+    public function dismissAllNextSteps(Request $request): RedirectResponse
+    {
+        if (is_demo_mode()) {
+            return redirect()->back();
+        }
+
+        $user = $request->user();
+
+        // Recomputed rather than read from hidden inputs. The panel only renders the first
+        // $limit rows and folds the rest into a "show more" details, so a form built from what
+        // is on screen would leave everything past the eighth schedule behind. It also means
+        // there is no per-item authorization to do: getNextStepItems() is only ever fed
+        // $user->editor(), so the list cannot name a schedule this user does not edit.
+        $rows = $this->getNextStepItems($user->editor()->pluck('roles.id'))
+            // Every branch sets dismiss_schedule today. This is so that one added later without
+            // it skips the row, rather than writing a null into a NOT NULL role_id - which is an
+            // unhandled 500 on this action, not a missing dismissal.
+            ->filter(fn ($item) => ! empty($item['dismiss_schedule']))
+            ->map(fn ($item) => [
+                'user_id' => $user->id,
+                'role_id' => UrlUtils::decodeId($item['dismiss_schedule']),
+                'step_type' => $item['type'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ])->all();
+
+        if ($rows) {
+            // One statement, not one per schedule: an owner on this install has 37 of them.
+            // insertOrIgnore against dns_user_role_step_unique makes a double submit a no-op,
+            // the same way SendActivationNudges claims a nudge. It bypasses the model, hence
+            // the explicit timestamps above.
+            DB::table('dismissed_next_steps')->insertOrIgnore($rows);
+        }
 
         return redirect()->back();
     }

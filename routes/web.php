@@ -416,6 +416,8 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::get('/dashboard/api/calendar-events', [HomeController::class, 'calendarEvents'])->name('home.calendar_events');
     Route::post('/dashboard/config', [HomeController::class, 'saveDashboardConfig'])->name('home.save_config');
     Route::post('/dashboard/federation-prompt/dismiss', [HomeController::class, 'dismissFederationPrompt'])->name('home.federation_prompt_dismiss');
+    Route::post('/dashboard/next-steps/dismiss', [HomeController::class, 'dismissNextStep'])->name('home.next_steps_dismiss');
+    Route::post('/dashboard/next-steps/dismiss-all', [HomeController::class, 'dismissAllNextSteps'])->name('home.next_steps_dismiss_all');
     Route::get('/getting-started', [HomeController::class, 'gettingStarted'])->name('getting-started');
     Route::get('/new/{type}', [RoleController::class, 'create'])->name('new');
     Route::post('/validate_address', [RoleController::class, 'validateAddress'])->name('validate_address')->middleware('throttle:25,1440');

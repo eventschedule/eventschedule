@@ -443,6 +443,8 @@ return [
     'next_step_connect_payments' => 'Ühenda makseviis, et raha vastu võtta',
     'next_step_add_first_event' => 'Lisa oma esimene sündmus',
     'next_step_add_next_event' => 'Lisa järgmine kuupäev',
+    'next_step_dismiss' => 'Peida see soovitus ajakava :schedule jaoks',
+    'next_steps_dismiss_all' => 'Peida kõik',
 
     'your_first_ticket_type' => 'Teie esimene piletitüüp',
     'your_first_ticket_type_help' => 'Määrake hind ja mitu on saadaval. Jätke hind tühjaks tasuta pileti jaoks ja kogus tühjaks piiramatu jaoks.',

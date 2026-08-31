@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Jobs\SendQueuedEmail;
 use App\Mail\ActivationNudge;
+use App\Models\DismissedNextStep;
 use App\Models\Role;
 use App\Services\DemoService;
 use Illuminate\Console\Command;
@@ -191,12 +192,12 @@ class SendActivationNudges extends Command
     }
 
     /**
-     * Every nudge shares this: a live schedule, a real owner who still wants email, and no
-     * delivery of this key already recorded.
+     * Every nudge shares this: a live schedule, a real owner who still wants email, no delivery
+     * of this key already recorded, and no in-app dismissal of the step that asks the same thing.
      */
     private function base(string $key)
     {
-        return Role::query()
+        $query = Role::query()
             ->with('user')
             ->where('is_deleted', false)
             ->whereNotNull('user_id')
@@ -213,8 +214,50 @@ class SendActivationNudges extends Command
                     ->from('schedule_nudges')
                     ->whereColumn('schedule_nudges.role_id', 'roles.id')
                     ->where('schedule_nudges.nudge_key', $key);
-            })
-            ->orderBy('id');
+            });
+
+        // An in-app dismissal is an answer. The dashboard panel offers the same steps, and if
+        // the person this would go to has already turned one down, do not then email it to them.
+        //
+        // The two halves are keyed differently and the correlation below is the rule that
+        // resolves it: a dismissal is per USER, because several editors share a schedule and
+        // one of them saying no does not decide for the others, while a nudge is per schedule
+        // and is addressed to roles.user_id ($role->user->email in handle()). So only the
+        // RECIPIENT'S own dismissal silences it - a co-admin clearing their own dashboard must
+        // not silence mail to an owner who never saw the panel.
+        //
+        // One-way by design: an already-claimed schedule_nudges row is unaffected by a later
+        // dismissal, because that mail is long gone, and a sent email writes no dismissal,
+        // because an unread email is not an answer.
+        $steps = DismissedNextStep::stepTypesForNudge($key);
+
+        // Split by how far the answer reaches. Most steps are about ONE schedule's own page, so
+        // the dismissal has to name that schedule. The gateway is one per account, so turning
+        // that ask down on any schedule answers it for all of them - keeping the role_id
+        // correlation there would mail an owner about schedule B a step they just declined on
+        // schedule A, which is the "not listening" failure this exclusion exists to prevent.
+        $perSchedule = array_values(array_diff($steps, DismissedNextStep::ACCOUNT_WIDE_STEP_TYPES));
+        $accountWide = array_values(array_intersect($steps, DismissedNextStep::ACCOUNT_WIDE_STEP_TYPES));
+
+        if ($steps) {
+            $query->whereNotExists(function ($q) use ($perSchedule, $accountWide) {
+                $q->select(DB::raw(1))
+                    ->from('dismissed_next_steps')
+                    ->whereColumn('dismissed_next_steps.user_id', 'roles.user_id')
+                    ->where(function ($w) use ($perSchedule, $accountWide) {
+                        if ($perSchedule) {
+                            $w->orWhere(fn ($s) => $s->whereIn('dismissed_next_steps.step_type', $perSchedule)
+                                ->whereColumn('dismissed_next_steps.role_id', 'roles.id'));
+                        }
+
+                        if ($accountWide) {
+                            $w->orWhereIn('dismissed_next_steps.step_type', $accountWide);
+                        }
+                    });
+            });
+        }
+
+        return $query->orderBy('id');
     }
 
     /** Events on this schedule that the public can actually see. */

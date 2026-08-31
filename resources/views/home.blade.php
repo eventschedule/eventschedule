@@ -136,7 +136,9 @@
         {{-- Next steps: suggestions, deliberately a separate list from the one above so the
              to-do queue stays a queue. Same component, its own heading. --}}
         @if(!empty($nextStepItems) && $nextStepItems->isNotEmpty())
-            <x-needs-attention :items="$nextStepItems" :title="__('messages.next_steps')" />
+            <x-needs-attention :items="$nextStepItems" :title="__('messages.next_steps')"
+                :dismiss-route="route('home.next_steps_dismiss')"
+                :dismiss-all-route="route('home.next_steps_dismiss_all')" />
         @endif
 
         {{-- Configurable Dashboard Panels --}}

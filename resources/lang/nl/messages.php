@@ -816,6 +816,8 @@ return [
     'next_step_connect_payments' => 'Koppel een betaalmethode om geld aan te nemen',
     'next_step_add_first_event' => 'Voeg je eerste evenement toe',
     'next_step_add_next_event' => 'Voeg je volgende datum toe',
+    'next_step_dismiss' => 'Verberg deze suggestie voor :schedule',
+    'next_steps_dismiss_all' => 'Alles verbergen',
 
     'your_first_ticket_type' => 'Je eerste tickettype',
     'your_first_ticket_type_help' => 'Geef het een prijs en hoeveel er beschikbaar zijn. Laat de prijs leeg voor een gratis ticket en het aantal leeg voor onbeperkt.',

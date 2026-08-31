@@ -444,6 +444,8 @@ return [
     'next_step_connect_payments' => 'Подключите способ оплаты, чтобы принимать деньги',
     'next_step_add_first_event' => 'Добавьте первое событие',
     'next_step_add_next_event' => 'Добавьте следующую дату',
+    'next_step_dismiss' => 'Скрыть эту рекомендацию для :schedule',
+    'next_steps_dismiss_all' => 'Скрыть все',
 
     'your_first_ticket_type' => 'Ваш первый тип билета',
     'your_first_ticket_type_help' => 'Укажите цену и сколько билетов доступно. Оставьте цену пустой для бесплатного билета, а количество пустым для неограниченного.',

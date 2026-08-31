@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Jobs\SendQueuedEmail;
 use App\Mail\ActivationNudge;
+use App\Models\DismissedNextStep;
+use App\Models\Role;
 use App\Models\User;
 use App\Services\DemoService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -729,5 +731,196 @@ class ActivationNudgeTest extends TestCase
             );
             $this->assertStringContainsString('The Blue Room', $rendered, "{$lang} lost the name");
         }
+    }
+
+    //
+    // In-app dismissals. The dashboard panel asks the same things, so a step the recipient has
+    // already turned down there must not then arrive by email.
+    //
+
+    private function dismissInApp(User $user, Role $role, string $stepType): void
+    {
+        DismissedNextStep::create([
+            'user_id' => $user->id,
+            'role_id' => $role->id,
+            'step_type' => $stepType,
+        ]);
+    }
+
+    public function test_a_dismissed_tickets_step_silences_the_no_ticket_type_nudge(): void
+    {
+        $owner = $this->owner();
+        $role = $this->createRole($owner);
+        $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+
+        $this->dismissInApp($owner, $role, 'next_step_tickets');
+
+        $this->nudge('no_ticket_type');
+
+        $this->assertNothingSent();
+    }
+
+    public function test_a_dismissed_payments_step_silences_the_no_gateway_nudge(): void
+    {
+        $owner = $this->owner(['stripe_account_id' => null]);
+        $role = $this->createRole($owner);
+        $event = $this->createEvent($role);
+        $this->createTicket($event, ['price' => 25]);
+
+        $this->dismissInApp($owner, $role, 'next_step_payments');
+
+        $this->nudge('no_gateway');
+
+        $this->assertNothingSent();
+    }
+
+    /**
+     * The event step fans out to three keys, because the panel uses one type for both "Add your
+     * first event" and "Add your next date" - it picks the copy, not the type - and those are
+     * no_event and the two idle windows. A one-to-one map would leave the idle mail firing at
+     * someone who has already said the schedule is finished.
+     */
+    public function test_a_dismissed_event_step_silences_no_event_and_both_idle_windows(): void
+    {
+        foreach ([
+            'no_event' => ['next_step_first_event', null],
+            'idle_30' => ['next_step_next_event', 40],
+            'idle_60' => ['next_step_next_event', 70],
+        ] as $key => [$stepType, $daysAgo]) {
+            $owner = $this->owner();
+            $role = $this->createRole($owner);
+            $role->forceFill(['created_at' => now()->subDays(2)])->save();
+
+            if ($daysAgo) {
+                $this->createEvent($role, ['starts_at' => now()->subDays($daysAgo)->format('Y-m-d H:i:s')]);
+            }
+
+            $this->dismissInApp($owner, $role, $stepType);
+
+            $this->nudge($key);
+
+            // Not assertNothingSent(): inside a loop it cannot say which key regressed.
+            Queue::assertNothingPushed();
+            $this->assertSame(0, DB::table('schedule_nudges')->count(), "{$key} was not silenced by the dismissal");
+        }
+    }
+
+    /** Turning down one suggestion is not blanket consent to hear nothing. */
+    public function test_a_dismissal_of_a_different_step_does_not_silence_this_nudge(): void
+    {
+        $owner = $this->owner();
+        $role = $this->createRole($owner);
+        $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+
+        $this->dismissInApp($owner, $role, 'next_step_first_event');
+
+        $this->nudge('no_ticket_type');
+
+        $this->assertSent('no_ticket_type');
+    }
+
+    /**
+     * The two halves are keyed differently and this is the rule that resolves it.
+     *
+     * A dismissal is per USER, because several editors share a schedule; a nudge is per schedule
+     * and is addressed to roles.user_id. A co-admin clearing their own dashboard must not
+     * silence mail to an owner who never saw the panel.
+     */
+    public function test_a_non_owner_admins_dismissal_does_not_silence_the_owners_email(): void
+    {
+        $owner = $this->owner();
+        $role = $this->createRole($owner);
+        $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+
+        $admin = $this->createOwner();
+        $role->users()->attach($admin->id, ['level' => 'admin']);
+        $this->dismissInApp($admin, $role, 'next_step_tickets');
+
+        $this->nudge('no_ticket_type');
+
+        $this->assertSent('no_ticket_type');
+        $this->assertQueuedTo($owner->email);
+    }
+
+    /**
+     * Asserted on the claimed row rather than the send count: $seenUsers caps one send per owner
+     * per run, so a bare "one email went out" passes whether the filter is keyed on the schedule
+     * or ignores it entirely.
+     */
+    public function test_a_dismissal_on_one_schedule_does_not_silence_another(): void
+    {
+        $owner = $this->owner();
+        $quiet = $this->createRole($owner);
+        $other = $this->createRole($owner);
+        $this->createEvent($quiet, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+        $this->createEvent($other, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+
+        $this->dismissInApp($owner, $quiet, 'next_step_tickets');
+
+        $this->nudge('no_ticket_type');
+
+        $this->assertSame(0, DB::table('schedule_nudges')->where('role_id', $quiet->id)->count());
+        $this->assertSame(1, DB::table('schedule_nudges')->where('role_id', $other->id)->count());
+    }
+
+    /** One gateway per account, so one answer: schedule B must not be mailed what A declined. */
+    public function test_a_payments_dismissal_silences_the_gateway_nudge_on_every_schedule(): void
+    {
+        $owner = $this->owner(['stripe_account_id' => null]);
+        $a = $this->createRole($owner);
+        $this->createTicket($this->createEvent($a), ['price' => 25]);
+        $b = $this->createRole($owner);
+        $this->createTicket($this->createEvent($b), ['price' => 25]);
+
+        // Answered once, on one schedule.
+        $this->dismissInApp($owner, $a, 'next_step_payments');
+
+        $this->nudge('no_gateway');
+
+        $this->assertNothingSent();
+    }
+
+    /**
+     * The split in the other direction: turning down the day-one ask must NOT silence the
+     * dormancy mail, which is a different situation on a schedule that has since published.
+     */
+    public function test_a_dismissed_first_event_ask_does_not_silence_the_idle_nudges(): void
+    {
+        foreach (['idle_30' => 40, 'idle_60' => 70] as $key => $daysAgo) {
+            $owner = $this->owner();
+            $role = $this->createRole($owner);
+            $this->createEvent($role, ['starts_at' => now()->subDays($daysAgo)->format('Y-m-d H:i:s')]);
+
+            $this->dismissInApp($owner, $role, 'next_step_first_event');
+
+            $this->nudge($key);
+
+            $this->assertSame(
+                1,
+                DB::table('schedule_nudges')->where('nudge_key', $key)->count(),
+                "{$key} was silenced by a dismissal of a different ask"
+            );
+        }
+    }
+
+    /**
+     * first_sale congratulates rather than asks. It has no dismiss control on the panel, so
+     * nothing can silence it, and mapping it to a step type would silence a thank-you.
+     */
+    public function test_a_first_sale_congratulation_is_never_silenced(): void
+    {
+        $owner = $this->owner();
+        $role = $this->createRole($owner);
+        $event = $this->createEvent($role);
+        $ticket = $this->createTicket($event, ['price' => 20]);
+        $this->createSale($event, $role, ['payment_amount' => 20, 'paid_at' => now()->subDay()], $ticket);
+
+        foreach (DismissedNextStep::STEP_TYPES as $stepType) {
+            $this->dismissInApp($owner, $role, $stepType);
+        }
+
+        $this->nudge('first_sale');
+
+        $this->assertSent('first_sale');
     }
 }

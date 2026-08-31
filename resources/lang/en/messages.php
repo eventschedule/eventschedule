@@ -447,6 +447,8 @@ return [
     'next_step_connect_payments' => 'Connect a payment method to take money',
     'next_step_add_first_event' => 'Add your first event',
     'next_step_add_next_event' => 'Add your next date',
+    'next_step_dismiss' => 'Dismiss this suggestion for :schedule',
+    'next_steps_dismiss_all' => 'Dismiss all',
 
     // The Tickets panel's first run: the controller always seeds one blank row, so this is the
     // nearest thing to an empty state it can have.

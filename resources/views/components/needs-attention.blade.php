@@ -2,6 +2,11 @@
     'items',
     'title' => null,
     'limit' => 8,
+    // Opt-in, per caller. The to-do queue and the admin dashboard pass neither, so their rows
+    // render exactly as before: no form, no extra tab stop. The component POSTs to a route it
+    // was handed and knows nothing about what it is dismissing.
+    'dismissRoute' => null,
+    'dismissAllRoute' => null,
 ])
 
 @php
@@ -34,7 +39,8 @@
         // Next-step suggestion types (HomeController::getNextStepItems).
         'next_step_tickets' => '<path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />',
         'next_step_payments' => '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />',
-        'next_step_event' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />',
+        'next_step_first_event' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />',
+        'next_step_next_event' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />',
 
         // Admin dashboard types (AdminAlertService).
         'jobs_failed' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />',
@@ -56,13 +62,27 @@
 @endphp
 
 <div class="ap-card rounded-xl overflow-hidden mb-4">
-    <div class="dashboard-panel-header px-5 py-4 flex items-center justify-between">
+    <div class="dashboard-panel-header px-5 py-4 flex items-center justify-between gap-3">
         <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ $title ?? __('messages.needs_attention') }}</h3>
-        <span class="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-2 text-xs font-semibold rounded-full bg-[var(--brand-blue)] text-white">{{ number_format($total) }}</span>
+        <div class="flex items-center gap-3">
+            {{-- Only worth its own control past a single row: next to one suggestion the row's
+                 own X is already right there. Small underlined text, like the federation
+                 prompt's dismiss - this is a "no thanks", not an action. --}}
+            @if ($dismissAllRoute && $items->count() > 1)
+                <form method="POST" action="{{ $dismissAllRoute }}">
+                    @csrf
+                    <button type="submit"
+                        class="rounded text-xs font-medium text-gray-500 dark:text-gray-400 underline hover:text-gray-700 dark:hover:text-gray-200 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]">
+                        {{ __('messages.next_steps_dismiss_all') }}
+                    </button>
+                </form>
+            @endif
+            <span class="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-2 text-xs font-semibold rounded-full bg-[var(--brand-blue)] text-white">{{ number_format($total) }}</span>
+        </div>
     </div>
     <div class="divide-y divide-gray-100 dark:divide-white/[0.06]">
         @foreach ($visibleItems as $item)
-            @include('partials.needs-attention-row', ['item' => $item])
+            @include('partials.needs-attention-row', ['item' => $item, 'dismissRoute' => $dismissRoute])
         @endforeach
 
         @if ($hiddenItems->isNotEmpty())
@@ -74,7 +94,7 @@
                     </svg>
                 </summary>
                 @foreach ($hiddenItems as $item)
-                    @include('partials.needs-attention-row', ['item' => $item])
+                    @include('partials.needs-attention-row', ['item' => $item, 'dismissRoute' => $dismissRoute])
                 @endforeach
             </details>
         @endif

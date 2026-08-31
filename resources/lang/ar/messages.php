@@ -388,6 +388,8 @@ return [
     'next_step_connect_payments' => 'اربط وسيلة دفع لتحصيل الأموال',
     'next_step_add_first_event' => 'أضف أول فعالية لك',
     'next_step_add_next_event' => 'أضف موعدك التالي',
+    'next_step_dismiss' => 'تجاهل هذا الاقتراح لـ :schedule',
+    'next_steps_dismiss_all' => 'تجاهل الكل',
 
     'your_first_ticket_type' => 'أول نوع تذكرة لديك',
     'your_first_ticket_type_help' => 'حدّد السعر وعدد التذاكر المتاحة. اترك السعر فارغًا للتذكرة المجانية، والكمية فارغة لعدد غير محدود.',

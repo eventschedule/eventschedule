@@ -823,6 +823,8 @@ return [
     'next_step_connect_payments' => 'Collega un metodo di pagamento per incassare',
     'next_step_add_first_event' => 'Aggiungi il tuo primo evento',
     'next_step_add_next_event' => 'Aggiungi la prossima data',
+    'next_step_dismiss' => 'Ignora questo suggerimento per :schedule',
+    'next_steps_dismiss_all' => 'Ignora tutti',
 
     'your_first_ticket_type' => 'Il tuo primo tipo di biglietto',
     'your_first_ticket_type_help' => 'Dagli un prezzo e quanti ne sono disponibili. Lascia il prezzo vuoto per un biglietto gratuito e la quantità vuota per illimitati.',

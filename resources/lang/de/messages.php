@@ -395,6 +395,8 @@ return [
     'next_step_connect_payments' => 'Zahlungsmethode verbinden, um Geld anzunehmen',
     'next_step_add_first_event' => 'Erste Veranstaltung hinzufügen',
     'next_step_add_next_event' => 'Nächsten Termin hinzufügen',
+    'next_step_dismiss' => 'Diesen Vorschlag für :schedule ausblenden',
+    'next_steps_dismiss_all' => 'Alle ausblenden',
 
     'your_first_ticket_type' => 'Ihre erste Ticketart',
     'your_first_ticket_type_help' => 'Geben Sie einen Preis an und wie viele verfügbar sind. Preis leer lassen für ein kostenloses Ticket, Menge leer lassen für unbegrenzt.',

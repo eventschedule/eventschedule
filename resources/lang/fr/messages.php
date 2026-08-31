@@ -422,6 +422,8 @@ return [
     'next_step_connect_payments' => 'Connectez un moyen de paiement pour encaisser',
     'next_step_add_first_event' => 'Ajoutez votre premier événement',
     'next_step_add_next_event' => 'Ajoutez votre prochaine date',
+    'next_step_dismiss' => 'Ignorer cette suggestion pour :schedule',
+    'next_steps_dismiss_all' => 'Tout ignorer',
 
     'your_first_ticket_type' => 'Votre premier type de billet',
     'your_first_ticket_type_help' => 'Donnez-lui un prix et le nombre disponible. Laissez le prix vide pour un billet gratuit et la quantité vide pour un nombre illimité.',

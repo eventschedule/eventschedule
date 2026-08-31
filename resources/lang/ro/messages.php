@@ -444,6 +444,8 @@ return [
     'next_step_connect_payments' => 'Conectați o metodă de plată pentru a încasa',
     'next_step_add_first_event' => 'Adăugați primul eveniment',
     'next_step_add_next_event' => 'Adăugați următoarea dată',
+    'next_step_dismiss' => 'Ascundeți această sugestie pentru :schedule',
+    'next_steps_dismiss_all' => 'Ascundeți toate',
 
     'your_first_ticket_type' => 'Primul dumneavoastră tip de bilet',
     'your_first_ticket_type_help' => 'Stabiliți un preț și câte sunt disponibile. Lăsați prețul gol pentru un bilet gratuit și cantitatea goală pentru nelimitat.',

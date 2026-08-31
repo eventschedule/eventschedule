@@ -821,6 +821,8 @@ return [
     'next_step_connect_payments' => 'Ligue um método de pagamento para receber',
     'next_step_add_first_event' => 'Adicione o seu primeiro evento',
     'next_step_add_next_event' => 'Adicione a sua próxima data',
+    'next_step_dismiss' => 'Dispensar esta sugestão para :schedule',
+    'next_steps_dismiss_all' => 'Dispensar tudo',
 
     'your_first_ticket_type' => 'O seu primeiro tipo de bilhete',
     'your_first_ticket_type_help' => 'Dê-lhe um preço e quantos estão disponíveis. Deixe o preço em branco para um bilhete gratuito e a quantidade em branco para ilimitados.',

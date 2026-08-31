@@ -417,6 +417,8 @@ return [
     'next_step_connect_payments' => 'Conecta un método de pago para cobrar',
     'next_step_add_first_event' => 'Añade tu primer evento',
     'next_step_add_next_event' => 'Añade tu próxima fecha',
+    'next_step_dismiss' => 'Descartar esta sugerencia para :schedule',
+    'next_steps_dismiss_all' => 'Descartar todo',
 
     'your_first_ticket_type' => 'Tu primer tipo de entrada',
     'your_first_ticket_type_help' => 'Ponle un precio y cuántas hay disponibles. Deja el precio en blanco para una entrada gratuita y la cantidad en blanco para ilimitadas.',
