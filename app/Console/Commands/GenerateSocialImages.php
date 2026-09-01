@@ -10,9 +10,24 @@ use Illuminate\Console\Command;
 use Laravel\Dusk\Browser;
 use Laravel\Dusk\Chrome\ChromeProcess;
 
+/**
+ * Writes public/images/social/<slug>.jpg (and a .webp twin) by screenshotting each marketing hero.
+ *
+ * The output is JPEG, not PNG. These frames are photographic dark-mode heroes with gradients and
+ * noise, which PNG stores at around 460 KB each - and WhatsApp does not render a link preview at
+ * all for an image over roughly 300 KB, while other scrapers time out fetching one. The same
+ * frames land at around 67 KB as JPEG at quality 82, none of them over 300 KB, and at this size
+ * the difference is not visible.
+ *
+ * The .png files generated before that change are deliberately left on disk: links already shared
+ * point at them. Nothing regenerates them, and the marketing layout prefers the .jpg.
+ */
 class GenerateSocialImages extends Command
 {
-    protected $signature = 'app:generate-social-images {--page= : Generate a single page image} {--force : Overwrite existing files}';
+    protected $signature = 'app:generate-social-images
+        {--page= : Generate a single page image}
+        {--force : Overwrite existing files}
+        {--convert-existing : Re-encode the PNGs already on disk as JPEG instead of capturing anything}';
 
     protected $description = 'Generate social/OG images by screenshotting marketing page heroes with ChromeDriver';
 
@@ -25,6 +40,9 @@ class GenerateSocialImages extends Command
     private const WIDTH = 1200;
 
     private const HEIGHT = 630;
+
+    /** Measured: 82 keeps every 1200x630 hero under 300 KB, averaging around 67 KB. */
+    private const JPEG_QUALITY = 82;
 
     private const PAGES = [
         // Core pages
@@ -176,6 +194,10 @@ class GenerateSocialImages extends Command
             mkdir($outputDir, 0755, true);
         }
 
+        if ($this->option('convert-existing')) {
+            return $this->convertExisting($outputDir, $force);
+        }
+
         // Temporarily remove Vite hot file so @vite uses built assets
         $hotFile = public_path('hot');
         $hotFileBackup = null;
@@ -248,8 +270,17 @@ class GenerateSocialImages extends Command
             DesiredCapabilities::chrome()->setCapability(ChromeOptions::CAPABILITY, $options)
         );
 
+        // Dusk can only write PNG, and the deliverable is a JPEG, so captures land in a scratch
+        // directory and never in public/images/social - which is also what keeps the pre-JPEG
+        // .png files there intact for links that were already shared.
+        $captureDir = sys_get_temp_dir().'/eventschedule-social-'.getmypid();
+
+        if (! is_dir($captureDir)) {
+            mkdir($captureDir, 0755, true);
+        }
+
         Browser::$baseUrl = $baseUrl;
-        Browser::$storeScreenshotsAt = $outputDir;
+        Browser::$storeScreenshotsAt = $captureDir;
 
         $browser = new Browser($driver);
 
@@ -274,10 +305,7 @@ class GenerateSocialImages extends Command
             $skipped = 0;
 
             foreach ($pages as $slug => $urlPath) {
-                $pngPath = "{$outputDir}/{$slug}.png";
-                $webpPath = "{$outputDir}/{$slug}.webp";
-
-                if (! $force && file_exists($pngPath) && file_exists($webpPath)) {
+                if (! $force && file_exists("{$outputDir}/{$slug}.jpg") && file_exists("{$outputDir}/{$slug}.webp")) {
                     $this->line("  Skipping {$slug} (already exists, use --force to overwrite)");
                     $skipped++;
 
@@ -319,12 +347,17 @@ class GenerateSocialImages extends Command
 
                 $browser->screenshot($slug);
 
-                if (file_exists($pngPath)) {
-                    ImageUtils::generateWebP($pngPath, $webpPath);
+                $capturePath = "{$captureDir}/{$slug}.png";
+
+                if (file_exists($capturePath) && $this->writeDerivatives($capturePath, $outputDir, $slug)) {
                     $generated++;
                     $this->line("    Generated {$slug}");
                 } else {
                     $this->warn("    Failed to generate {$slug}");
+                }
+
+                if (file_exists($capturePath)) {
+                    unlink($capturePath);
                 }
             }
 
@@ -336,7 +369,99 @@ class GenerateSocialImages extends Command
             $browser->quit();
             $chromeProcess->stop();
             $this->stopServer($serverProcess);
+
+            if (is_dir($captureDir)) {
+                array_map('unlink', glob($captureDir.'/*') ?: []);
+                @rmdir($captureDir);
+            }
         }
+    }
+
+    /**
+     * Turn one PNG capture into the pair that ships: <slug>.jpg and <slug>.webp.
+     *
+     * Shared by the capture loop and --convert-existing so a converted image is byte-for-byte what
+     * a fresh capture would have produced.
+     */
+    private function writeDerivatives(string $capturePath, string $outputDir, string $slug): bool
+    {
+        $image = @imagecreatefrompng($capturePath);
+
+        if ($image === false) {
+            return false;
+        }
+
+        try {
+            // JPEG carries no alpha channel. Chrome's screenshots are opaque, so this fill only
+            // ever shows through if a future capture does carry transparency, and black is what
+            // the dark-mode hero sits on.
+            $flat = imagecreatetruecolor(imagesx($image), imagesy($image));
+            imagefill($flat, 0, 0, imagecolorallocate($flat, 0, 0, 0));
+            imagecopy($flat, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
+
+            // Progressive: a scraper on a slow link gets a whole low-detail frame first rather
+            // than the top third of a sharp one.
+            imageinterlace($flat, true);
+
+            $wroteJpeg = imagejpeg($flat, "{$outputDir}/{$slug}.jpg", self::JPEG_QUALITY);
+
+            imagedestroy($flat);
+        } finally {
+            imagedestroy($image);
+        }
+
+        // The WebP twin is not referenced by the layout today; it is kept so anything that
+        // negotiates WebP has one, and it costs a single extra encode.
+        $wroteWebp = ImageUtils::generateWebP($capturePath, "{$outputDir}/{$slug}.webp");
+
+        return $wroteJpeg && $wroteWebp;
+    }
+
+    /**
+     * Re-encode every PNG already in the output directory as JPEG.
+     *
+     * A one-off for the 113 images captured before the format changed, kept in the command rather
+     * than run as a throwaway script so the result is produced by exactly the code a fresh capture
+     * uses. The PNGs are left where they are.
+     */
+    private function convertExisting(string $outputDir, bool $force): int
+    {
+        $converted = 0;
+        $skipped = 0;
+        $failed = 0;
+
+        foreach (glob($outputDir.'/*.png') ?: [] as $png) {
+            $slug = pathinfo($png, PATHINFO_FILENAME);
+
+            if (! $force && file_exists("{$outputDir}/{$slug}.jpg")) {
+                $skipped++;
+
+                continue;
+            }
+
+            // Orphans from retired pages are still on disk at the pre-Phase-D 1200x491 crop.
+            // Converting one would put a file on disk that contradicts the og:image:width /
+            // og:image:height the layout declares, so leave it as the PNG it already is.
+            $size = @getimagesize($png);
+
+            if (! $size || $size[0] !== self::WIDTH || $size[1] !== self::HEIGHT) {
+                $this->warn("  Skipping {$slug} (".($size ? "{$size[0]}x{$size[1]}" : 'unreadable').', not '.self::WIDTH.'x'.self::HEIGHT.')');
+                $skipped++;
+
+                continue;
+            }
+
+            if ($this->writeDerivatives($png, $outputDir, $slug)) {
+                $converted++;
+            } else {
+                $failed++;
+                $this->warn("  Failed to convert {$slug}");
+            }
+        }
+
+        $this->info("Converted: {$converted}, skipped: {$skipped}, failed: {$failed}.");
+
+        return $failed === 0 ? 0 : 1;
     }
 
     private function findAvailablePort(): int

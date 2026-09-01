@@ -65,17 +65,27 @@
             $pathSlug = str_replace('/', '-', $pathSlug);
             // Fall back from an exact page image to a section image (e.g. docs-getting-started -> docs), then home.
             $section = explode('-', $pathSlug)[0];
-            if (file_exists(public_path("images/social/{$pathSlug}.png"))) {
-                $ogImage = config('app.url') . "/images/social/{$pathSlug}.png";
-            } elseif ($section !== $pathSlug && file_exists(public_path("images/social/{$section}.png"))) {
-                $ogImage = config('app.url') . "/images/social/{$section}.png";
-            } else {
-                $ogImage = config('app.url') . '/images/social/home.png';
-            }
+            // JPEG first: that is what app:generate-social-images writes now, because WhatsApp
+            // silently renders no preview at all for an image over roughly 300 KB and the PNG
+            // captures were 460 KB. The .png files are the pre-JPEG generation, still on disk for
+            // links already shared, and still the answer for any slug that has no .jpg yet.
+            $ogImagePath = function (string $slug): ?string {
+                foreach (['jpg', 'png'] as $extension) {
+                    if (file_exists(public_path("images/social/{$slug}.{$extension}"))) {
+                        return config('app.url') . "/images/social/{$slug}.{$extension}";
+                    }
+                }
+
+                return null;
+            };
+            $ogImage = $ogImagePath($pathSlug)
+                ?? ($section !== $pathSlug ? $ogImagePath($section) : null)
+                ?? $ogImagePath('home')
+                ?? config('app.url') . '/images/social/home.jpg';
         }
 
-        // Every generated social image is a PNG, but $socialImage can be a page's own file
-        // (a blog post's featured image), so read the type off the URL rather than assuming.
+        // $socialImage can be a page's own file (a blog post's featured image), so read the type
+        // off the URL rather than assuming whatever the generator currently writes.
         $ogImageType = match (strtolower(pathinfo((string) parse_url($ogImage, PHP_URL_PATH), PATHINFO_EXTENSION))) {
             'jpg', 'jpeg' => 'image/jpeg',
             'webp' => 'image/webp',

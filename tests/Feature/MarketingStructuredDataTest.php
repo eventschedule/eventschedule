@@ -151,21 +151,58 @@ class MarketingStructuredDataTest extends TestCase
         }
     }
 
+    /**
+     * The tags have to describe the actual bytes: a declared size the file does not have gets the
+     * image re-cropped by every scraper, and the wrong type gets it rejected outright.
+     *
+     * The 300 KB ceiling is WhatsApp's - over it, it renders no link preview at all - and it is
+     * why these are JPEG rather than the 460 KB PNG captures they started as.
+     */
     public function test_the_og_image_tags_describe_the_file_that_is_served(): void
     {
-        $body = $this->get('/pricing')->assertOk()->getContent();
+        foreach (['/', '/pricing'] as $path) {
+            $body = $this->get($path)->assertOk()->getContent();
 
-        $this->assertStringContainsString('<meta property="og:image:type" content="image/png">', $body);
+            preg_match('~<meta property="og:image" content="([^"]+)">~', $body, $m);
+            $this->assertNotEmpty($m, $path.' declares no og:image');
+            $this->assertStringEndsWith('.jpg', $m[1], $path.' should share a JPEG');
 
-        preg_match('~<meta property="og:image" content="([^"]+)">~', $body, $m);
-        $this->assertNotEmpty($m, '/pricing declares no og:image');
+            $file = public_path('images/social/'.basename($m[1]));
+            $this->assertFileExists($file);
 
-        $file = public_path('images/social/'.basename($m[1]));
-        $this->assertFileExists($file);
+            [$width, $height, $type] = getimagesize($file);
+            $this->assertSame(IMAGETYPE_JPEG, $type, $file.' is not a JPEG');
+            $this->assertSame([1200, 630], [$width, $height], $file.' is not 1200x630');
+            $this->assertStringContainsString('<meta property="og:image:type" content="image/jpeg">', $body);
+            $this->assertStringContainsString('<meta property="og:image:width" content="'.$width.'">', $body);
+            $this->assertStringContainsString('<meta property="og:image:height" content="'.$height.'">', $body);
 
-        [$width, $height] = getimagesize($file);
-        $this->assertStringContainsString('<meta property="og:image:width" content="'.$width.'">', $body);
-        $this->assertStringContainsString('<meta property="og:image:height" content="'.$height.'">', $body);
+            $this->assertLessThan(
+                300 * 1024,
+                filesize($file),
+                basename($file).' is over 300 KB, so WhatsApp will not render a preview for it'
+            );
+        }
+    }
+
+    /** Nothing shipped in the social directory may exceed the ceiling or contradict the tags. */
+    public function test_every_social_image_is_a_shareable_size(): void
+    {
+        $offenders = [];
+
+        foreach (glob(public_path('images/social/*.jpg')) ?: [] as $file) {
+            [$width, $height] = getimagesize($file);
+
+            if ($width !== 1200 || $height !== 630) {
+                $offenders[] = basename($file)." is {$width}x{$height}";
+            }
+
+            if (filesize($file) > 300 * 1024) {
+                $offenders[] = basename($file).' is '.round(filesize($file) / 1024).' KB';
+            }
+        }
+
+        $this->assertSame([], $offenders, 'regenerate these with `php artisan app:generate-social-images`');
     }
 
     /**
