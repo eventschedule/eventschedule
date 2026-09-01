@@ -42,6 +42,7 @@
             "Public event calendar",
             "Booking request inbox",
             "QR code ticketing and check-in dashboard",
+            "Reserved seating",
             "Promo codes and gift cards",
             "Private hire booking",
             "Sub-schedules for rooms and stages",
@@ -255,6 +256,10 @@
                 'q' => 'What does it cost to sell tickets?',
                 'a' => 'Selling is included on every plan, with the Free plan capped at 25 paid tickets a month and Pro removing the cap. Event Schedule charges no platform fee on ticket sales at any tier, so the only deduction is Stripe\'s standard processing fee, and payouts go straight to your own Stripe account.',
             ],
+            [
+                'q' => 'Can buyers pick their own seat?',
+                'a' => 'Yes, on the Enterprise plan. Draw your room once as a reusable seating plan - levels, sections, rows, tables, standing areas and wheelchair spaces - attach it to an event, and buyers choose their seats off the map. One plan covers every date of a run, and a single date can be changed on its own without touching the rest. Your box office gets the same map to hold seats back, take a booking over the phone, move somebody or release one seat.',
+            ],
         ];
 
         $dotSections = [
@@ -447,7 +452,7 @@
         badge="Box office"
         heading="Sell tickets without giving away the door"
         lede="Set your ticket types, connect your own Stripe account and keep every cent of the face value. Event Schedule takes no platform fee, so the only deduction is Stripe's processing charge."
-        :chips="['Zero platform fees', 'Stripe payouts', 'Promo codes', 'Gift cards', 'Waitlists', 'Free RSVPs']"
+        :chips="['Zero platform fees', 'Stripe payouts', 'Reserved seating', 'Promo codes', 'Gift cards', 'Waitlists', 'Free RSVPs']"
         :flip="true"
         frame="phone"
         ground="gray">
