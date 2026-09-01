@@ -22,62 +22,6 @@
         }
     }
     </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "Is Event Schedule free for comedians?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Event Schedule is free forever for sharing your show dates and building a fan following. Ticketing and newsletters are available on the Pro and Enterprise plans, with zero platform fees on any ticket sales."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I sell tickets to my comedy shows?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Connect your Stripe account and sell tickets directly from your schedule. Create multiple ticket types like general admission, VIP, and early bird. Every ticket includes a QR code for check-in at the door. Zero platform fees - you only pay Stripe's standard processing."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "How do fans know when I have a show near them?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Fans sign up with their email and hear automatically when you add new shows. You can also send newsletters directly to your audience with upcoming dates. Share your schedule link in your social bios, on podcasts, or anywhere fans find you."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can comedy clubs add me to their lineup?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. When a comedy club adds you to their event on Event Schedule, the show automatically appears on your schedule too. No need to add the same gig in two places. Both calendars stay in sync so your fans always see your latest bookings."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I track open mics and bringer shows without announcing them?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Save any set as a draft and it stays off your public schedule until you publish it. Drafts are free and unlimited, so you can plan a whole week of mics privately. On the Enterprise plan you can also make events internal or unlisted with an optional password for corporate and private gigs."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I run stand-up, improv, and a podcast on one schedule?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Sub-schedules let you split your calendar into separate lineups like stand-up sets, improv nights, and podcast tapings. Fans can see everything in one place, or you can share each lineup with its own link. Sub-schedules are included on the free plan."
-                }
-            }
-        ]
-    }
-    </script>
     <!-- Product Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
@@ -1136,14 +1080,17 @@
             </div>
 
             <div class="space-y-4" data-reveal-group="80">
-                @foreach ([
-                    ['Is Event Schedule free for comedians?', 'Yes. Event Schedule is free forever for sharing your show dates and building a fan following. Ticketing and newsletters are available on the Pro and Enterprise plans, with zero platform fees on any ticket sales.'],
-                    ['Can I sell tickets to my comedy shows?', 'Yes. Connect your Stripe account and sell tickets directly from your schedule. Create multiple ticket types like general admission, VIP, and early bird. Every ticket includes a QR code for check-in at the door. Zero platform fees - you only pay Stripe\'s standard processing.'],
-                    ['How do fans know when I have a show near them?', 'Fans sign up with their email and hear automatically when you add new shows. You can also send newsletters directly to your audience with upcoming dates. Share your schedule link in your social bios, on podcasts, or anywhere fans find you.'],
-                    ['Can comedy clubs add me to their lineup?', 'Yes. When a comedy club adds you to their event on Event Schedule, the show automatically appears on your schedule too. No need to add the same gig in two places. Both calendars stay in sync so your fans always see your latest bookings.'],
-                    ['Can I track open mics and bringer shows without announcing them?', 'Yes. Save any set as a draft and it stays off your public schedule until you publish it. Drafts are free and unlimited, so you can plan a whole week of mics privately. On the Enterprise plan you can also make events internal or unlisted with an optional password for corporate and private gigs.'],
-                    ['Can I run stand-up, improv, and a podcast on one schedule?', 'Yes. Sub-schedules let you split your calendar into separate lineups like stand-up sets, improv nights, and podcast tapings. Fans can see everything in one place, or you can share each lineup with its own link. Sub-schedules are included on the free plan.'],
-                ] as [$q, $a])
+                @php
+                    $faqs = [
+                        ['q' => 'Is Event Schedule free for comedians?', 'a' => 'Yes. Event Schedule is free forever for sharing your show dates and building a fan following. Ticketing and newsletters are available on the Pro and Enterprise plans, with zero platform fees on any ticket sales.'],
+                        ['q' => 'Can I sell tickets to my comedy shows?', 'a' => 'Yes. Connect your Stripe account and sell tickets directly from your schedule. Create multiple ticket types like general admission, VIP, and early bird. Every ticket includes a QR code for check-in at the door. Zero platform fees - you only pay Stripe\'s standard processing.'],
+                        ['q' => 'How do fans know when I have a show near them?', 'a' => 'Fans sign up with their email and hear automatically when you add new shows. You can also send newsletters directly to your audience with upcoming dates. Share your schedule link in your social bios, on podcasts, or anywhere fans find you.'],
+                        ['q' => 'Can comedy clubs add me to their lineup?', 'a' => 'Yes. When a comedy club adds you to their event on Event Schedule, the show automatically appears on your schedule too. No need to add the same gig in two places. Both calendars stay in sync so your fans always see your latest bookings.'],
+                        ['q' => 'Can I track open mics and bringer shows without announcing them?', 'a' => 'Yes. Save any set as a draft and it stays off your public schedule until you publish it. Drafts are free and unlimited, so you can plan a whole week of mics privately. On the Enterprise plan you can also make events internal or unlisted with an optional password for corporate and private gigs.'],
+                        ['q' => 'Can I run stand-up, improv, and a podcast on one schedule?', 'a' => 'Yes. Sub-schedules let you split your calendar into separate lineups like stand-up sets, improv nights, and podcast tapings. Fans can see everything in one place, or you can share each lineup with its own link. Sub-schedules are included on the free plan.'],
+                    ];
+                @endphp
+                @foreach ($faqs as ['q' => $q, 'a' => $a])
                     <details name="faq" data-reveal class="group/faq es-comic-hover overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
                         <summary class="flex cursor-pointer items-center justify-between p-6">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
@@ -1157,6 +1104,8 @@
             </div>
         </div>
     </section>
+
+    <x-seo.faq-schema :items="$faqs" />
 
     <!-- ============================================================ -->
     <!-- 12. Encore finale                                            -->

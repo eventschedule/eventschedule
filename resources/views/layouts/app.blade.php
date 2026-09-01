@@ -7,7 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
-    <link rel="icon" href="{{ asset('images/favicon.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}" sizes="32x32">
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon-96.png') }}" sizes="96x96">
     {{-- <link rel="manifest"> and <meta name="theme-color"> are deliberately NOT here. They name
          and colour the site as an app, and this layout is the shell for the guest portal as well
          as the admin portal, so a single value here brands every schedule's site as ours: it made

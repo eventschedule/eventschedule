@@ -16,7 +16,8 @@
     <meta name="twitter:image:alt" content="Event Schedule">
     <meta name="twitter:card" content="summary_large_image">
 
-    <link rel="icon" href="{{ asset('images/favicon.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}" sizes="32x32">
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon-96.png') }}" sizes="96x96">
 
     @include('partials.google-analytics')
 

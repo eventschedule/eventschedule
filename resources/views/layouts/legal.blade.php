@@ -23,7 +23,8 @@
     <title>{{ $title }} - {{ config('app.name') }}</title>
     <meta name="description" content="{{ $title }} - {{ config('app.name') }}">
     <link rel="canonical" href="{{ url()->current() }}">
-    <link rel="icon" href="{{ asset('images/favicon.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}" sizes="32x32">
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon-96.png') }}" sizes="96x96">
 
     {{-- A policy link gets pasted into email and chat often enough to be worth a
          preview card. No image: the social images are generated per marketing page

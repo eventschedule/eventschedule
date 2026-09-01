@@ -18,6 +18,14 @@ class GenerateSocialImages extends Command
 
     private array $serverPipes = [];
 
+    /**
+     * The OG image size the marketing layout declares in og:image:width / og:image:height.
+     * Keep the two in step: a capture that is not this size gets re-cropped by every scraper.
+     */
+    private const WIDTH = 1200;
+
+    private const HEIGHT = 630;
+
     private const PAGES = [
         // Core pages
         'home' => '/',
@@ -227,7 +235,7 @@ class GenerateSocialImages extends Command
 
         // Create WebDriver with OG image dimensions
         $options = (new ChromeOptions)->addArguments([
-            '--window-size=1200,630',
+            '--window-size='.self::WIDTH.','.self::HEIGHT,
             '--disable-gpu',
             '--headless=new',
             '--disable-search-engine-choice-screen',
@@ -244,6 +252,22 @@ class GenerateSocialImages extends Command
         Browser::$storeScreenshotsAt = $outputDir;
 
         $browser = new Browser($driver);
+
+        // --window-size sets the OUTER window. Headless Chrome still reserves its browser chrome
+        // inside that box (143 px tall as of Chrome 152), so a 1200x630 window renders a 1200x487
+        // VIEWPORT - and the W3C "Take Screenshot" command that Dusk uses returns the viewport.
+        // That is why every generated image was 1200x491 while the meta tags said 1200x630.
+        // Measure the chrome once and grow the window by it so the viewport is exactly the OG size.
+        $chrome = $browser->script('return [window.outerWidth - window.innerWidth, window.outerHeight - window.innerHeight];')[0];
+        $browser->resize(self::WIDTH + (int) $chrome[0], self::HEIGHT + (int) $chrome[1]);
+
+        $viewport = $browser->script('return [window.innerWidth, window.innerHeight];')[0];
+        if ((int) $viewport[0] !== self::WIDTH || (int) $viewport[1] !== self::HEIGHT) {
+            $this->warn(sprintf(
+                '  Viewport is %dx%d, expected %dx%d. Images will not match the og:image tags.',
+                $viewport[0], $viewport[1], self::WIDTH, self::HEIGHT
+            ));
+        }
 
         try {
             $generated = 0;
@@ -273,13 +297,25 @@ class GenerateSocialImages extends Command
                 $browser->script("document.documentElement.classList.remove('es-anim')");
 
                 // Inject all screenshot overrides: disable animations, hide header/footer, center hero content
+                $heroHeight = self::HEIGHT;
                 $browser->script("
                     var style = document.createElement('style');
-                    style.textContent = '*, *::before, *::after { animation: none !important; transition: none !important; } .animate-reveal { opacity: 1 !important; } .es-mask .es-mask-line { transform: none !important; } .es-fade-up { opacity: 1 !important; transform: none !important; } header { display: none !important; } footer { display: none !important; } .es-dotnav { display: none !important; } main > section:first-of-type { height: 630px !important; min-height: unset !important; padding: 0 !important; overflow: hidden !important; } main > section:first-of-type .flex.justify-center.gap-4 { display: none !important; } main > section:first-of-type .relative.z-10 > .mb-6:first-child { display: none !important; } main > section:first-of-type nav[aria-label=\"Breadcrumb\"] { display: none !important; } main > section:first-of-type > .relative.z-10 { position: absolute !important; top: 40% !important; left: 0 !important; right: 0 !important; transform: translateY(-50%) !important; padding: 0 !important; margin: 0 auto !important; } main > section:first-of-type .relative.z-10.text-center { display: flex !important; flex-direction: column !important; align-items: center !important; gap: 2rem !important; } main > section:first-of-type .relative.z-10.text-center > * { margin-top: 0 !important; margin-bottom: 0 !important; } .fixed.bottom-4.right-4.z-50 { display: none !important; }';
+                    style.textContent = '*, *::before, *::after { animation: none !important; transition: none !important; } .animate-reveal { opacity: 1 !important; } .es-mask .es-mask-line { transform: none !important; } .es-fade-up { opacity: 1 !important; transform: none !important; } header { display: none !important; } footer { display: none !important; } .es-dotnav { display: none !important; } main > section:first-of-type { height: {$heroHeight}px !important; min-height: unset !important; padding: 0 !important; overflow: hidden !important; } main > section:first-of-type .flex.justify-center.gap-4 { display: none !important; } main > section:first-of-type .relative.z-10 > .mb-6:first-child { display: none !important; } main > section:first-of-type nav[aria-label=\"Breadcrumb\"] { display: none !important; } main > section:first-of-type > .relative.z-10 { position: absolute !important; top: 50% !important; left: 0 !important; right: 0 !important; transform: translateY(-50%) !important; padding: 0 !important; margin: 0 auto !important; } main > section:first-of-type .relative.z-10.text-center { display: flex !important; flex-direction: column !important; align-items: center !important; gap: 2rem !important; } main > section:first-of-type .relative.z-10.text-center > * { margin-top: 0 !important; margin-bottom: 0 !important; } .fixed.bottom-4.right-4.z-50 { display: none !important; } main > .doc-accent-guide > section:first-of-type { height: {$heroHeight}px !important; min-height: unset !important; overflow: hidden !important; }';
                     document.head.appendChild(style);
                 ");
 
                 $browser->pause(1500);
+
+                // A hero taller than the frame clips at BOTH ends once it is centred, and the top
+                // is where the eyebrow and the headline live. Anchor an oversized one to the top
+                // so only its tail is lost. Pages that fit are untouched.
+                $browser->script("
+                    var hero = document.querySelector('main > section:first-of-type > .relative.z-10');
+                    if (hero && hero.getBoundingClientRect().height > {$heroHeight}) {
+                        hero.style.setProperty('top', '0', 'important');
+                        hero.style.setProperty('transform', 'none', 'important');
+                    }
+                ");
 
                 $browser->screenshot($slug);
 
@@ -320,7 +356,10 @@ class GenerateSocialImages extends Command
     {
         $artisan = base_path('artisan');
         $cmd = sprintf(
-            'IS_NEXUS=true IS_HOSTED=false APP_TESTING=true DEBUGBAR_ENABLED=false PHP_CLI_SERVER_WORKERS=4 php %s serve --port=%d --host=127.0.0.1 --no-reload 2>/dev/null',
+            // exec is load-bearing: proc_open runs this through /bin/sh, so without it the pid
+            // proc_get_status() reports is the SHELL's. Killing that left `artisan serve` running
+            // on its random port for ever and hung proc_close() at the end of every run.
+            'IS_NEXUS=true IS_HOSTED=false APP_TESTING=true DEBUGBAR_ENABLED=false PHP_CLI_SERVER_WORKERS=4 exec php %s serve --port=%d --host=127.0.0.1 --no-reload 2>/dev/null',
             escapeshellarg($artisan),
             $port
         );

@@ -22,62 +22,6 @@
         }
     }
     </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "Is Event Schedule free for musicians?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Event Schedule is free forever for sharing your gig schedule, building a fan following, and syncing with Google Calendar. The free plan also sells up to 25 paid tickets a month and sends 10 newsletter emails a month. Scanning tickets at the door is free too. Pro lifts the ticket ceiling and adds the rest of the door kit: live check-in dashboard, promo codes, waitlists. Platform fees are zero on every plan."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "How do fans find out about my upcoming shows?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Fans can follow your schedule and receive email notifications when you add new shows. You can also send newsletters directly to followers with your upcoming dates, and share your schedule link on Spotify, Bandcamp, your EPK, or any social profile."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I sell tickets to my own shows?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Connect your Stripe account and sell tickets directly from your schedule. Every ticket includes a QR code for check-in at the door. Event Schedule charges zero platform fees - you only pay Stripe's standard processing fees."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What happens when a venue books me for a show?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "When a venue adds you to their event on Event Schedule, it automatically appears on your schedule too. No need to manually add the same gig in two places. Both calendars stay in sync."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I list a weekly residency or recurring gigs?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Recurring events are free. Set the day-of-week pattern once, like every Thursday at the same club, and Event Schedule fills in the dates. You can exclude the weeks you skip, and fans always see the next upcoming show."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I use Event Schedule as my band website?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Many musicians do. Your schedule lives at your own link, like your-band.eventschedule.com, with your bio, photos, and streaming links. You can also embed the calendar on an existing website, and the Enterprise plan supports a fully custom domain."
-                }
-            }
-        ]
-    }
-    </script>
     <!-- Product Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
@@ -1235,92 +1179,36 @@
             </div>
 
             <div class="space-y-4" data-reveal-group="80">
-                <details name="faq" data-reveal class="group/faq es-poster-faq overflow-hidden rounded-xl border-2 border-[color:var(--esp-line)] bg-[color:var(--esp-paper)] transition-shadow">
-                    <summary class="flex cursor-pointer items-center justify-between p-6">
-                        <h3 class="text-lg font-semibold text-[color:var(--esp-ink)]">
-                            Is Event Schedule free for musicians?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-[color:var(--esp-ink-soft)] transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </summary>
-                    <p class="faq-answer px-6 pb-6 text-[color:var(--esp-ink-soft)]">
-                        Yes. Event Schedule is free forever for sharing your gig schedule, building a fan following, and syncing with Google Calendar. The free plan also sells up to 25 paid tickets a month and sends 10 newsletter emails a month. Scanning tickets at the door is free too. Pro lifts the ticket ceiling and adds the rest of the door kit: live check-in dashboard, promo codes, waitlists. Platform fees are zero on every plan.
-                    </p>
-                </details>
-
-                <details name="faq" data-reveal class="group/faq es-poster-faq overflow-hidden rounded-xl border-2 border-[color:var(--esp-line)] bg-[color:var(--esp-paper)] transition-shadow">
-                    <summary class="flex cursor-pointer items-center justify-between p-6">
-                        <h3 class="text-lg font-semibold text-[color:var(--esp-ink)]">
-                            How do fans find out about my upcoming shows?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-[color:var(--esp-ink-soft)] transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </summary>
-                    <p class="faq-answer px-6 pb-6 text-[color:var(--esp-ink-soft)]">
-                        Fans can follow your schedule and receive email notifications when you add new shows. You can also send newsletters directly to followers with your upcoming dates, and share your schedule link on Spotify, Bandcamp, your EPK, or any social profile.
-                    </p>
-                </details>
-
-                <details name="faq" data-reveal class="group/faq es-poster-faq overflow-hidden rounded-xl border-2 border-[color:var(--esp-line)] bg-[color:var(--esp-paper)] transition-shadow">
-                    <summary class="flex cursor-pointer items-center justify-between p-6">
-                        <h3 class="text-lg font-semibold text-[color:var(--esp-ink)]">
-                            Can I sell tickets to my own shows?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-[color:var(--esp-ink-soft)] transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </summary>
-                    <p class="faq-answer px-6 pb-6 text-[color:var(--esp-ink-soft)]">
-                        Yes. Connect your Stripe account and sell tickets directly from your schedule. Every ticket includes a QR code for check-in at the door. Event Schedule charges zero platform fees - you only pay Stripe's standard processing fees.
-                    </p>
-                </details>
-
-                <details name="faq" data-reveal class="group/faq es-poster-faq overflow-hidden rounded-xl border-2 border-[color:var(--esp-line)] bg-[color:var(--esp-paper)] transition-shadow">
-                    <summary class="flex cursor-pointer items-center justify-between p-6">
-                        <h3 class="text-lg font-semibold text-[color:var(--esp-ink)]">
-                            What happens when a venue books me for a show?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-[color:var(--esp-ink-soft)] transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </summary>
-                    <p class="faq-answer px-6 pb-6 text-[color:var(--esp-ink-soft)]">
-                        When a venue adds you to their event on Event Schedule, it automatically appears on your schedule too. No need to manually add the same gig in two places. Both calendars stay in sync.
-                    </p>
-                </details>
-
-                <details name="faq" data-reveal class="group/faq es-poster-faq overflow-hidden rounded-xl border-2 border-[color:var(--esp-line)] bg-[color:var(--esp-paper)] transition-shadow">
-                    <summary class="flex cursor-pointer items-center justify-between p-6">
-                        <h3 class="text-lg font-semibold text-[color:var(--esp-ink)]">
-                            Can I list a weekly residency or recurring gigs?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-[color:var(--esp-ink-soft)] transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </summary>
-                    <p class="faq-answer px-6 pb-6 text-[color:var(--esp-ink-soft)]">
-                        Yes. Recurring events are free. Set the day-of-week pattern once, like every Thursday at the same club, and Event Schedule fills in the dates. You can exclude the weeks you skip, and fans always see the next upcoming show.
-                    </p>
-                </details>
-
-                <details name="faq" data-reveal class="group/faq es-poster-faq overflow-hidden rounded-xl border-2 border-[color:var(--esp-line)] bg-[color:var(--esp-paper)] transition-shadow">
-                    <summary class="flex cursor-pointer items-center justify-between p-6">
-                        <h3 class="text-lg font-semibold text-[color:var(--esp-ink)]">
-                            Can I use Event Schedule as my band website?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-[color:var(--esp-ink-soft)] transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </summary>
-                    <p class="faq-answer px-6 pb-6 text-[color:var(--esp-ink-soft)]">
-                        Many musicians do. Your schedule lives at your own link, like your-band.eventschedule.com, with your bio, photos, and streaming links. You can also embed the calendar on an existing website, and the Enterprise plan supports a fully custom domain.
-                    </p>
-                </details>
+                @php
+                    $faqs = [
+                        ['q' => 'Is Event Schedule free for musicians?', 'a' => 'Yes. Event Schedule is free forever for sharing your gig schedule, building a fan following, and syncing with Google Calendar. The free plan also sells up to 25 paid tickets a month and sends 10 newsletter emails a month. Scanning tickets at the door is free too. Pro lifts the ticket ceiling and adds the rest of the door kit: live check-in dashboard, promo codes, waitlists. Platform fees are zero on every plan.'],
+                        ['q' => 'How do fans find out about my upcoming shows?', 'a' => 'Fans can follow your schedule and receive email notifications when you add new shows. You can also send newsletters directly to followers with your upcoming dates, and share your schedule link on Spotify, Bandcamp, your EPK, or any social profile.'],
+                        ['q' => 'Can I sell tickets to my own shows?', 'a' => 'Yes. Connect your Stripe account and sell tickets directly from your schedule. Every ticket includes a QR code for check-in at the door. Event Schedule charges zero platform fees - you only pay Stripe\'s standard processing fees.'],
+                        ['q' => 'What happens when a venue books me for a show?', 'a' => 'When a venue adds you to their event on Event Schedule, it automatically appears on your schedule too. No need to manually add the same gig in two places. Both calendars stay in sync.'],
+                        ['q' => 'Can I list a weekly residency or recurring gigs?', 'a' => 'Yes. Recurring events are free. Set the day-of-week pattern once, like every Thursday at the same club, and Event Schedule fills in the dates. You can exclude the weeks you skip, and fans always see the next upcoming show.'],
+                        ['q' => 'Can I use Event Schedule as my band website?', 'a' => 'Many musicians do. Your schedule lives at your own link, like your-band.eventschedule.com, with your bio, photos, and streaming links. You can also embed the calendar on an existing website, and the Enterprise plan supports a fully custom domain.'],
+                    ];
+                @endphp
+                @foreach ($faqs as ['q' => $q, 'a' => $a])
+                    <details name="faq" data-reveal class="group/faq es-poster-faq overflow-hidden rounded-xl border-2 border-[color:var(--esp-line)] bg-[color:var(--esp-paper)] transition-shadow">
+                        <summary class="flex cursor-pointer items-center justify-between p-6">
+                            <h3 class="text-lg font-semibold text-[color:var(--esp-ink)]">
+                                {{ $q }}
+                            </h3>
+                            <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-[color:var(--esp-ink-soft)] transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </summary>
+                        <p class="faq-answer px-6 pb-6 text-[color:var(--esp-ink-soft)]">
+                            {{ $a }}
+                        </p>
+                    </details>
+                @endforeach
             </div>
         </div>
     </section>
+
+    <x-seo.faq-schema :items="$faqs" />
 
     <!-- ============================================================ -->
     <!-- 10. Encore finale: the backstage laminate                    -->

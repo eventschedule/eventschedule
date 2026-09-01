@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ in_array(request()->get('lang'), ['he', 'ar']) ? 'rtl' : 'ltr' }}">
-<head class="h-full">
-    <title>{{ $title ?? 'Event Schedule - The simple way to share your event schedule' }}</title>
+<head>
     <meta charset="utf-8">
+    <title>{{ $title ?? 'Event Schedule - The simple way to share your event schedule' }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}" sizes="32x32">
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon-96.png') }}" sizes="96x96">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/apple-touch-icon.png') }}">
 
     <!-- Preconnect to external resources -->
@@ -72,8 +73,18 @@
                 $ogImage = config('app.url') . '/images/social/home.png';
             }
         }
+
+        // Every generated social image is a PNG, but $socialImage can be a page's own file
+        // (a blog post's featured image), so read the type off the URL rather than assuming.
+        $ogImageType = match (strtolower(pathinfo((string) parse_url($ogImage, PHP_URL_PATH), PATHINFO_EXTENSION))) {
+            'jpg', 'jpeg' => 'image/jpeg',
+            'webp' => 'image/webp',
+            'gif' => 'image/gif',
+            default => 'image/png',
+        };
     @endphp
     <meta property="og:image" content="{{ $ogImage }}">
+    <meta property="og:image:type" content="{{ $ogImageType }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="{{ $title ?? 'Event Schedule' }}">
@@ -149,29 +160,29 @@
         }
     }
     </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SiteNavigationElement",
-        "name": ["Features", "Pricing", "Selfhost", "Docs"],
-        "url": [
-            "{{ config('app.url') }}/features",
-            "{{ config('app.url') }}/pricing",
-            "{{ config('app.url') }}/selfhost",
-            "{{ config('app.url') }}/docs"
-        ]
-    }
-    </script>
     {{ $structuredData ?? '' }}
 
     @if (!request()->is('/') && !request()->is(''))
     <!-- BreadcrumbList Schema for subpages -->
     @php
+        // A title reaches this as a RENDERED slot, so it is already HTML-escaped and may hold a
+        // quote or an entity. Decode it back to plain text and let json_encode do the escaping.
+        // A Blade echo tag HTML-escapes but does NOT JSON-escape, so interpolating the title that
+        // way put a raw double quote inside a JSON string and invalidated the whole block.
+        $crumbName = fn ($value) => trim(html_entity_decode(strip_tags((string) $value), ENT_QUOTES, 'UTF-8'));
+
+        // The deepest crumb IS this page, so it has to be the URL the canonical claims rather
+        // than whatever host happened to serve the request. $basePath is the config('app.url')
+        // form built for the canonical above; blog pages pass their own $canonical because they
+        // live on the blog host.
+        $selfUrl = trim((string) ($canonical ?? $basePath));
+        $pageName = $crumbName($breadcrumbTitle ?? $title ?? 'Page');
+
         $breadcrumbs = [['name' => 'Home', 'url' => config('app.url')]];
         $path = request()->path();
         $skipBreadcrumb = false;
         if ($path === 'docs') {
-            $breadcrumbs[] = ['name' => 'Documentation', 'url' => url()->current()];
+            $breadcrumbs[] = ['name' => 'Documentation', 'url' => $selfUrl];
         } elseif (str_starts_with($path, 'docs/')) {
             // Every page under /docs/ is an <x-docs-page> and renders its own
             // visible BreadcrumbList via <x-docs-breadcrumb>; skip the layout's
@@ -180,53 +191,50 @@
             $skipBreadcrumb = true;
         } elseif (str_starts_with($path, 'features/')) {
             $breadcrumbs[] = ['name' => 'Features', 'url' => url('/features')];
-            $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
+            $breadcrumbs[] = ['name' => $pageName, 'url' => $selfUrl];
         } elseif (str_starts_with($path, 'for-')) {
             $breadcrumbs[] = ['name' => 'Use Cases', 'url' => url('/use-cases')];
-            $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
+            $breadcrumbs[] = ['name' => $pageName, 'url' => $selfUrl];
         } elseif (str_ends_with($path, '-alternative')) {
             $breadcrumbs[] = ['name' => 'Compare', 'url' => url('/compare')];
-            $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
+            $breadcrumbs[] = ['name' => $pageName, 'url' => $selfUrl];
         } elseif (str_ends_with($path, '-replacement')) {
             $breadcrumbs[] = ['name' => 'Replace', 'url' => url('/replace')];
-            $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
+            $breadcrumbs[] = ['name' => $pageName, 'url' => $selfUrl];
         } elseif (str_starts_with($path, 'blog/')) {
             $breadcrumbs[] = ['name' => 'Blog', 'url' => blog_url()];
-            $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
+            $breadcrumbs[] = ['name' => $pageName, 'url' => $selfUrl];
         } elseif ($path === 'blog') {
-            $breadcrumbs[] = ['name' => 'Blog', 'url' => url()->current()];
+            $breadcrumbs[] = ['name' => 'Blog', 'url' => $selfUrl];
         } elseif (in_array($path, ['stripe', 'google-calendar', 'caldav', 'invoiceninja'])) {
             $breadcrumbs[] = ['name' => 'Integrations', 'url' => url('/features/integrations')];
-            $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
+            $breadcrumbs[] = ['name' => $pageName, 'url' => $selfUrl];
         } elseif ($path === 'use-cases') {
-            $breadcrumbs[] = ['name' => 'Use Cases', 'url' => url()->current()];
+            $breadcrumbs[] = ['name' => 'Use Cases', 'url' => $selfUrl];
         } elseif ($path === 'features') {
-            $breadcrumbs[] = ['name' => 'Features', 'url' => url()->current()];
+            $breadcrumbs[] = ['name' => 'Features', 'url' => $selfUrl];
         } elseif ($path === 'compare') {
-            $breadcrumbs[] = ['name' => 'Compare', 'url' => url()->current()];
+            $breadcrumbs[] = ['name' => 'Compare', 'url' => $selfUrl];
         } elseif ($path === 'replace') {
-            $breadcrumbs[] = ['name' => 'Replace', 'url' => url()->current()];
+            $breadcrumbs[] = ['name' => 'Replace', 'url' => $selfUrl];
         } else {
-            $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
+            $breadcrumbs[] = ['name' => $pageName, 'url' => $selfUrl];
         }
+
+        $breadcrumbPayload = [
+            '@context' => 'https://schema.org',
+            '@type' => 'BreadcrumbList',
+            'itemListElement' => array_map(fn ($i, $crumb) => [
+                '@type' => 'ListItem',
+                'position' => $i + 1,
+                'name' => $crumb['name'],
+                'item' => $crumb['url'],
+            ], array_keys($breadcrumbs), $breadcrumbs),
+        ];
     @endphp
     @if (! $skipBreadcrumb)
     <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-            @foreach ($breadcrumbs as $i => $crumb)
-            @if ($i > 0),@endif
-            {
-                "@type": "ListItem",
-                "position": {{ $i + 1 }},
-                "name": "{{ $crumb['name'] }}",
-                "item": "{{ $crumb['url'] }}"
-            }
-            @endforeach
-        ]
-    }
+    {!! json_encode($breadcrumbPayload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
     </script>
     @endif
     @endif

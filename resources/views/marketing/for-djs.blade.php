@@ -22,62 +22,6 @@
         }
     }
     </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "Can I track both residencies and one-off bookings?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Set up recurring events for your weekly or monthly residencies and they auto-repeat on your schedule. Add guest spots and festival bookings as one-off events. Everything shows up in one clean calendar that fans can follow."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Does it handle late-night sets that cross midnight?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Event Schedule handles overnight events correctly. A set that starts at 11 PM Saturday and ends at 4 AM Sunday displays properly on the Saturday listing, so fans know when to show up."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What happens when a club adds me to their lineup?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "When a club or promoter adds you to their event on Event Schedule, it automatically appears on your schedule. No double-entry needed. Both calendars stay in sync so your fans always see your latest bookings."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I sell advance tickets to my sets?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Connect Stripe and sell tickets directly from your schedule with zero platform fees. Each ticket includes a unique QR code for check-in at the door. You keep 100% of the sale minus Stripe's standard processing fees."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I keep private gigs and secret parties off my public schedule?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Draft events are free and stay hidden until you publish them. On the Enterprise plan you can also mark events internal for your team only, or unlisted with an optional password, so a wedding, corporate booking, or secret location party is reachable only by direct link."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I run separate club nights or brands on one schedule?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Sub-schedules are free and let you group events by club night or brand, so your weekly techno night and your open format bookings stay organized under one account. Your link still shows everything in one place, and you can embed the calendar on any website."
-                }
-            }
-        ]
-    }
-    </script>
     <!-- Product Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
@@ -1222,14 +1166,17 @@
             </div>
 
             <div class="space-y-4" data-reveal-group="80">
-                @foreach ([
-                    ['Can I track both residencies and one-off bookings?', 'Yes. Set up recurring events for your weekly or monthly residencies and they auto-repeat on your schedule. Add guest spots and festival bookings as one-off events. Everything shows up in one clean calendar that fans can follow.'],
-                    ['Does it handle late-night sets that cross midnight?', 'Yes. Event Schedule handles overnight events correctly. A set that starts at 11 PM Saturday and ends at 4 AM Sunday displays properly on the Saturday listing, so fans know when to show up.'],
-                    ['What happens when a club adds me to their lineup?', 'When a club or promoter adds you to their event on Event Schedule, it automatically appears on your schedule. No double-entry needed. Both calendars stay in sync so your fans always see your latest bookings.'],
-                    ['Can I sell advance tickets to my sets?', 'Yes. Connect Stripe and sell tickets directly from your schedule with zero platform fees. Each ticket includes a unique QR code for check-in at the door. You keep 100% of the sale minus Stripe\'s standard processing fees.'],
-                    ['Can I keep private gigs and secret parties off my public schedule?', 'Yes. Draft events are free and stay hidden until you publish them. On the Enterprise plan you can also mark events internal for your team only, or unlisted with an optional password, so a wedding, corporate booking, or secret location party is reachable only by direct link.'],
-                    ['Can I run separate club nights or brands on one schedule?', 'Yes. Sub-schedules are free and let you group events by club night or brand, so your weekly techno night and your open format bookings stay organized under one account. Your link still shows everything in one place, and you can embed the calendar on any website.'],
-                ] as [$q, $a])
+                @php
+                    $faqs = [
+                        ['q' => 'Can I track both residencies and one-off bookings?', 'a' => 'Yes. Set up recurring events for your weekly or monthly residencies and they auto-repeat on your schedule. Add guest spots and festival bookings as one-off events. Everything shows up in one clean calendar that fans can follow.'],
+                        ['q' => 'Does it handle late-night sets that cross midnight?', 'a' => 'Yes. Event Schedule handles overnight events correctly. A set that starts at 11 PM Saturday and ends at 4 AM Sunday displays properly on the Saturday listing, so fans know when to show up.'],
+                        ['q' => 'What happens when a club adds me to their lineup?', 'a' => 'When a club or promoter adds you to their event on Event Schedule, it automatically appears on your schedule. No double-entry needed. Both calendars stay in sync so your fans always see your latest bookings.'],
+                        ['q' => 'Can I sell advance tickets to my sets?', 'a' => 'Yes. Connect Stripe and sell tickets directly from your schedule with zero platform fees. Each ticket includes a unique QR code for check-in at the door. You keep 100% of the sale minus Stripe\'s standard processing fees.'],
+                        ['q' => 'Can I keep private gigs and secret parties off my public schedule?', 'a' => 'Yes. Draft events are free and stay hidden until you publish them. On the Enterprise plan you can also mark events internal for your team only, or unlisted with an optional password, so a wedding, corporate booking, or secret location party is reachable only by direct link.'],
+                        ['q' => 'Can I run separate club nights or brands on one schedule?', 'a' => 'Yes. Sub-schedules are free and let you group events by club night or brand, so your weekly techno night and your open format bookings stay organized under one account. Your link still shows everything in one place, and you can embed the calendar on any website.'],
+                    ];
+                @endphp
+                @foreach ($faqs as ['q' => $q, 'a' => $a])
                     <details name="faq" data-reveal class="group/faq es-dj-hover overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
                         <summary class="flex cursor-pointer items-center justify-between p-6">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
@@ -1243,6 +1190,8 @@
             </div>
         </div>
     </section>
+
+    <x-seo.faq-schema :items="$faqs" />
 
     <!-- ============================================================ -->
     <!-- 10. Finale: your name in lights                              -->

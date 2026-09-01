@@ -22,62 +22,6 @@
         }
     }
     </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "Is Event Schedule free for magicians?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Event Schedule is free forever for sharing your show schedule, building a following, and syncing with Google Calendar. Ticketing is available on the Pro plan with zero platform fees on ticket sales, and newsletters are free with a monthly send limit."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I keep private and corporate bookings off my public schedule?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Save any booking as a draft and it stays off your public schedule until you publish it. Drafts are free and unlimited, so you can hold close-up gigs and corporate dates privately. On the Enterprise plan you can also make events internal or unlisted with an optional password for private and corporate clients."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I sell gift cards or season passes for my shows?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. On the Pro plan you can sell balance-tracked gift cards that buyers send to a recipient by email, redeemable toward tickets for any show on your schedule. You can also sell multi-use passes like a parlor-show season pass, with usage tracked automatically. Zero platform fees apply to both."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I sell tickets to my magic shows?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Connect your Stripe account and sell tickets directly from your schedule. Create ticket types for general admission, VIP, and meet-and-greet packages, each with a QR code for check-in at the door. When a show sells out, a waitlist notifies fans if seats open up. Zero platform fees, you only pay Stripe's processing."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I run a weekly residency without re-entering the same show?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Set up your show once as a recurring event with a day-of-week pattern, and add date exceptions for the weeks you are away. On the Pro plan you can also save any event as a template, so repeat corporate formats take two clicks instead of a blank form."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "How do planners and fans find my shows?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Share one schedule link in your bio, EPK, and booking website, or embed the calendar on any page. Fans who sign up for email get a digest automatically when you add a show, and newsletters reach their inboxes directly. Two-way Google, Outlook, and CalDAV sync keeps every calendar current."
-                }
-            }
-        ]
-    }
-    </script>
     <!-- Product Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
@@ -1074,14 +1018,17 @@
             </div>
 
             <div class="space-y-4" data-reveal-group="80">
-                @foreach ([
-                    ['Is Event Schedule free for magicians?', 'Yes. Event Schedule is free forever for sharing your show schedule, building a following, and syncing with Google Calendar. Ticketing is available on the Pro plan with zero platform fees on ticket sales, and newsletters are free with a monthly send limit.'],
-                    ['Can I keep private and corporate bookings off my public schedule?', 'Yes. Save any booking as a draft and it stays off your public schedule until you publish it. Drafts are free and unlimited, so you can hold close-up gigs and corporate dates privately. On the Enterprise plan you can also make events internal or unlisted with an optional password for private and corporate clients.'],
-                    ['Can I sell gift cards or season passes for my shows?', 'Yes. On the Pro plan you can sell balance-tracked gift cards that buyers send to a recipient by email, redeemable toward tickets for any show on your schedule. You can also sell multi-use passes like a parlor-show season pass, with usage tracked automatically. Zero platform fees apply to both.'],
-                    ['Can I sell tickets to my magic shows?', 'Yes. Connect your Stripe account and sell tickets directly from your schedule. Create ticket types for general admission, VIP, and meet-and-greet packages, each with a QR code for check-in at the door. When a show sells out, a waitlist notifies fans if seats open up. Zero platform fees, you only pay Stripe\'s processing.'],
-                    ['Can I run a weekly residency without re-entering the same show?', 'Yes. Set up your show once as a recurring event with a day-of-week pattern, and add date exceptions for the weeks you are away. On the Pro plan you can also save any event as a template, so repeat corporate formats take two clicks instead of a blank form.'],
-                    ['How do planners and fans find my shows?', 'Share one schedule link in your bio, EPK, and booking website, or embed the calendar on any page. Fans who sign up for email get a digest automatically when you add a show, and newsletters reach their inboxes directly. Two-way Google, Outlook, and CalDAV sync keeps every calendar current.'],
-                ] as [$q, $a])
+                @php
+                    $faqs = [
+                        ['q' => 'Is Event Schedule free for magicians?', 'a' => 'Yes. Event Schedule is free forever for sharing your show schedule, building a following, and syncing with Google Calendar. Ticketing is available on the Pro plan with zero platform fees on ticket sales, and newsletters are free with a monthly send limit.'],
+                        ['q' => 'Can I keep private and corporate bookings off my public schedule?', 'a' => 'Yes. Save any booking as a draft and it stays off your public schedule until you publish it. Drafts are free and unlimited, so you can hold close-up gigs and corporate dates privately. On the Enterprise plan you can also make events internal or unlisted with an optional password for private and corporate clients.'],
+                        ['q' => 'Can I sell gift cards or season passes for my shows?', 'a' => 'Yes. On the Pro plan you can sell balance-tracked gift cards that buyers send to a recipient by email, redeemable toward tickets for any show on your schedule. You can also sell multi-use passes like a parlor-show season pass, with usage tracked automatically. Zero platform fees apply to both.'],
+                        ['q' => 'Can I sell tickets to my magic shows?', 'a' => 'Yes. Connect your Stripe account and sell tickets directly from your schedule. Create ticket types for general admission, VIP, and meet-and-greet packages, each with a QR code for check-in at the door. When a show sells out, a waitlist notifies fans if seats open up. Zero platform fees, you only pay Stripe\'s processing.'],
+                        ['q' => 'Can I run a weekly residency without re-entering the same show?', 'a' => 'Yes. Set up your show once as a recurring event with a day-of-week pattern, and add date exceptions for the weeks you are away. On the Pro plan you can also save any event as a template, so repeat corporate formats take two clicks instead of a blank form.'],
+                        ['q' => 'How do planners and fans find my shows?', 'a' => 'Share one schedule link in your bio, EPK, and booking website, or embed the calendar on any page. Fans who sign up for email get a digest automatically when you add a show, and newsletters reach their inboxes directly. Two-way Google, Outlook, and CalDAV sync keeps every calendar current.'],
+                    ];
+                @endphp
+                @foreach ($faqs as ['q' => $q, 'a' => $a])
                     <details name="faq" data-reveal class="group/faq es-pick-hover overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
                         <summary class="flex cursor-pointer items-center justify-between p-6">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
@@ -1095,6 +1042,8 @@
             </div>
         </div>
     </section>
+
+    <x-seo.faq-schema :items="$faqs" />
 
     <!-- ============================================================ -->
     <!-- 11. Finale: is this your card? (A of hearts)                 -->

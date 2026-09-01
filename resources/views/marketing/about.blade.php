@@ -4,30 +4,21 @@
     <x-slot name="breadcrumbTitle">About</x-slot>
 
     <x-slot name="structuredData">
+    {{-- The layout already emits the full Organization node at {app.url}/#organization: name,
+         url, logo, description, foundingDate, sameAs and contactPoint. Repeating it here without
+         that @id produced a SECOND, unrelated organization on this one page. Carrying the same
+         @id makes this an extension of that node instead, so it only has to say what the layout
+         does not - which on the About page is what the organization knows about. --}}
+    @php
+        $aboutOrganization = [
+            '@context' => 'https://schema.org',
+            '@type' => 'Organization',
+            '@id' => config('app.url').'/#organization',
+            'knowsAbout' => ['Event Management', 'Ticketing', 'Calendar Synchronization', 'Open Source Software'],
+        ];
+    @endphp
     <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "Event Schedule",
-        "url": "{{ config('app.url') }}",
-        "logo": {
-            "@type": "ImageObject",
-            "url": "{{ config('app.url') }}/images/dark_logo.png",
-            "width": 712,
-            "height": 140
-        },
-        "foundingDate": "2024",
-        "description": "Event Schedule helps talent, venues, and organizers share events and sell tickets. Open source, privacy-focused, and community-driven.",
-        "knowsAbout": ["Event Management", "Ticketing", "Calendar Synchronization", "Open Source Software"],
-        "sameAs": [
-            "https://github.com/eventschedule/eventschedule",
-            "https://www.facebook.com/appeventschedule",
-            "https://www.instagram.com/eventschedule/",
-            "https://youtube.com/@EventSchedule",
-            "https://x.com/ScheduleEvent",
-            "https://www.linkedin.com/company/eventschedule/"
-        ]
-    }
+    {!! json_encode($aboutOrganization, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
     </script>
     </x-slot>
 
