@@ -333,14 +333,21 @@ class BackupController extends Controller
         ];
 
         if ($backupJob->isCompleted() && $backupJob->isExport() && $backupJob->hasDownload()) {
+            // try/finally for the same reason as ProcessBackupExport: a throw in between would
+            // leave the root forced for the rest of the request.
             $previousRootUrl = config('app.url');
             URL::forceRootUrl(rtrim(app_url('/'), '/'));
-            $response['download_url'] = URL::temporarySignedRoute(
-                'backup.download',
-                $backupJob->file_expires_at,
-                ['backupJob' => $backupJob->id]
-            );
-            URL::forceRootUrl($previousRootUrl);
+
+            try {
+                $response['download_url'] = URL::temporarySignedRoute(
+                    'backup.download',
+                    $backupJob->file_expires_at,
+                    ['backupJob' => $backupJob->id]
+                );
+            } finally {
+                URL::forceRootUrl($previousRootUrl);
+            }
+
             $response['expires_at'] = $backupJob->file_expires_at->toIso8601String();
         }
 

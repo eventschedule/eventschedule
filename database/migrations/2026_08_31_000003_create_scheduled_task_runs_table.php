@@ -36,10 +36,12 @@ return new class extends Migration
             // "started but never finished" check and show two red states for one event.
             $table->timestamp('last_finished_at')->nullable();
 
-            // Overlap skips get their own column and never touch last_status. withoutOverlapping()
-            // blocking a task is normal under load - process-queue runs a 120s queue:work every
-            // minute - so a skip is evidence the scheduler is ALIVE, not that the task failed. It
-            // counts toward liveness when deciding whether a task is overdue.
+            // Overlap skips get their own column, and also set last_status - except over a
+            // recorded failure, which they leave alone (ScheduledTaskRecorder::recordSkip()).
+            // withoutOverlapping() blocking a task is normal under load - process-queue runs a
+            // 120s queue:work every minute - so a skip is evidence the scheduler is ALIVE, not
+            // that the task failed. It counts toward liveness when deciding whether a task is
+            // overdue.
             $table->timestamp('last_skipped_at')->nullable();
 
             // 'succeeded' | 'failed' | 'skipped'. Never an enum: adding a state should be a code

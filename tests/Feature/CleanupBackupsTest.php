@@ -93,6 +93,44 @@ class CleanupBackupsTest extends TestCase
     }
 
     /**
+     * The stuck-IMPORT sweep is the one that unwedges a user, and it touches the disk.
+     *
+     * FilesystemAdapter::exists() has no try/catch of its own, so it propagates whatever the disk
+     * throws regardless of the `throw` flag. One unreadable path used to abort the command before
+     * the remaining stuck rows were freed - leaving those users locked out of importing, every run.
+     */
+    public function test_an_unreadable_import_path_still_frees_every_stuck_row(): void
+    {
+        $first = BackupJob::create([
+            'user_id' => $this->user()->id,
+            'type' => 'import',
+            'status' => 'processing',
+            'file_path' => 'backups/1/import-unreadable.zip',
+            'started_at' => now()->subDay(),
+        ]);
+
+        $second = BackupJob::create([
+            'user_id' => $this->user()->id,
+            'type' => 'import',
+            'status' => 'processing',
+            'file_path' => null,
+            'started_at' => now()->subDay(),
+        ]);
+
+        $broken = \Mockery::mock(\Illuminate\Contracts\Filesystem\Filesystem::class);
+        $broken->shouldReceive('exists')->andThrow(new \RuntimeException('the mount went read-only'));
+        $broken->shouldReceive('allFiles')->andReturn([]);
+        Storage::set('local', $broken);
+
+        $this->artisan('app:cleanup-backups')->assertExitCode(0);
+
+        $this->assertSame('failed', $first->fresh()->status,
+            'the row whose file could not be read must still be freed');
+        $this->assertSame('failed', $second->fresh()->status,
+            'and so must every row behind it');
+    }
+
+    /**
      * The 'backups' disk is configured 'throw' => true, so one S3 hiccup used to abort the whole
      * command - including the stuck-job sweep below it, which is the ONLY thing that unwedges a
      * user stuck in 'processing' and therefore unable to start another export.

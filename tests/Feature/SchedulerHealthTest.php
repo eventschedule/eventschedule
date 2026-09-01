@@ -141,10 +141,20 @@ class SchedulerHealthTest extends TestCase
             'translate_data_lock has moved or changed shape; this guard needs updating'
         );
 
+        $lockMinutes = (int) $lock[1] / 60;
+
         $this->assertGreaterThan(
-            (int) $lock[1] / 60,
+            $lockMinutes,
             config('app.scheduler_stale_minutes'),
             'the stale threshold must outlast translate_data_lock, or one killed cron request cries wolf'
+        );
+
+        // The default is not enough on its own: an operator can set this. Assert the FLOOR, which
+        // is what stops them configuring their way back into the false alarm.
+        $this->assertGreaterThan(
+            $lockMinutes,
+            $this->configWith(['SCHEDULER_STALE_MINUTES' => '1'])['scheduler_stale_minutes'],
+            'the floor must clear the lock too - a configured value below it must be raised'
         );
     }
 

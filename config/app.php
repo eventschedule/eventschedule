@@ -47,12 +47,14 @@ return [
      * uncommented-but-blank SCHEDULER_STALE_MINUTES= would yield (int) '' === 0 and mark every
      * heartbeat stale forever. Zero is not a valid threshold, so mapping it here is intended.
      *
-     * The max(5) is the floor for everything `?:` cannot catch: Env::get turns the literal `true`
-     * into boolean true, which `?:` keeps and (int) makes 1 - a one-minute threshold and the same
-     * permanent false alarm by a different route. No install wants to be told the scheduler is
-     * dead because one tick was slow.
+     * The floor is 16 because translate_data_lock is held for 900 seconds - exactly 15 minutes -
+     * and a request killed by a timeout leaves it held for that whole window with no heartbeat
+     * stamped behind it. ANY value at or below 15 reintroduces the false alarm this default exists
+     * to avoid, so an operator cannot configure their way back into it. It also catches what `?:`
+     * cannot: Env::get turns the literal `true` into boolean true, which `?:` keeps and (int) makes
+     * 1. This is the ONE place the floor lives; SchedulerHealth::staleMinutes() just reads it.
      */
-    'scheduler_stale_minutes' => max(5, (int) (env('SCHEDULER_STALE_MINUTES') ?: 20)),
+    'scheduler_stale_minutes' => max(16, (int) (env('SCHEDULER_STALE_MINUTES') ?: 20)),
 
     /*
      * Which cron rail this process is. schedule:run cannot tell whether it was started by a

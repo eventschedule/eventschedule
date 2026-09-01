@@ -117,15 +117,23 @@ class ProcessBackupExport implements ShouldQueue
                 'completed_at' => now(),
             ]);
 
-            // Send email
+            // Send email.
+            //
+            // try/finally: a throw between forcing the root and restoring it would leave it forced
+            // for the REST OF THE PROCESS, and queue:work drains several jobs per process - so one
+            // bad export would rewrite every later job's links. Cheap to make impossible.
             $previousRootUrl = config('app.url');
             URL::forceRootUrl(rtrim(app_url('/'), '/'));
-            $downloadUrl = URL::temporarySignedRoute(
-                'backup.download',
-                $expiresAt,
-                ['backupJob' => $job->id]
-            );
-            URL::forceRootUrl($previousRootUrl);
+
+            try {
+                $downloadUrl = URL::temporarySignedRoute(
+                    'backup.download',
+                    $expiresAt,
+                    ['backupJob' => $job->id]
+                );
+            } finally {
+                URL::forceRootUrl($previousRootUrl);
+            }
 
             $scheduleNames = $roles->pluck('name')->toArray();
 

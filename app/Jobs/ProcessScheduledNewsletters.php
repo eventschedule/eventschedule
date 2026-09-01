@@ -59,6 +59,10 @@ class ProcessScheduledNewsletters
                     'newsletter_id' => $newsletter->id,
                     'error' => $e->getMessage(),
                 ]);
+
+                // report() as well as Log: this runs on both cron rails every minute, and at
+                // Log::error alone a newsletter failing in a loop never reached the issue tracker.
+                report($e);
             }
         }
     }

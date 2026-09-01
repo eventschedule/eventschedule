@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\ScheduledTaskRun;
 use App\Services\ScheduledTaskRecorder;
 use App\Services\SchedulerHealth;
+use Illuminate\Console\Events\ScheduledTaskFailed;
 use Illuminate\Console\Events\ScheduledTaskFinished;
 use Illuminate\Console\Events\ScheduledTaskSkipped;
 use Illuminate\Console\Events\ScheduledTaskStarting;
@@ -224,6 +225,34 @@ class SchedulerHealthStateTest extends TestCase
     }
 
     /**
+     * The other half of the hung test: a run that legitimately outlasts its own interval.
+     *
+     * This is the false positive the interval slack exists for. app-translate is due every fifteen
+     * minutes with a twenty-minute budget, so a run that takes eighteen is healthy - but by the time
+     * it is sixteen minutes in, the PREVIOUS completion is thirty-one minutes old. Measuring the
+     * anchor against the budget alone would call that never_finished while the run is well inside
+     * the window its author declared for it.
+     */
+    public function test_a_run_that_outlasts_its_own_interval_is_not_flagged(): void
+    {
+        $this->tick();
+
+        // T+0 completes. T+15 the next one starts and is still going at T+31, so the T+30 tick was
+        // skipped. Sixteen minutes into a run budgeted for twenty.
+        $this->record('app-translate', exitCode: 0);
+        ScheduledTaskRun::where('name', 'app-translate')->update([
+            'last_finished_at' => now()->subMinutes(31),
+            'last_started_at' => now()->subMinutes(16),
+        ]);
+        $this->skip('app-translate');
+
+        $this->assertSame('running', $this->state('app-translate'),
+            'a run inside its own withoutOverlapping budget must not be called never_finished '.
+            'just because the previous completion is older than that budget'
+        );
+    }
+
+    /**
      * A task wedged behind a mutex nothing in this table created.
      *
      * Reachable on a mixed deploy: the pre-4d23fdfcb code took its mutexes with the framework
@@ -262,8 +291,80 @@ class SchedulerHealthStateTest extends TestCase
         $task = SchedulerHealth::tasks()->firstWhere('name', 'process-queue');
         $html = view('admin.partials._scheduled-task-row', ['task' => $task])->render();
 
-        $this->assertStringNotContainsString('?', $html, 'the label must not render a placeholder age');
         $this->assertStringContainsString(__('messages.scheduler_never_ran'), $html);
+        $this->assertStringNotContainsString('never finished', $html,
+            'a task with no recorded start must not be described as having started');
+    }
+
+    /**
+     * The rendered age must come from the last COMPLETION, not the latest respawn.
+     *
+     * state() was moved off last_started_at because a run that overruns its expiry lets the mutex
+     * lapse and a fresh copy launch, restamping it. The label kept reading it, so a task that had
+     * produced nothing for an hour rendered "started 20m ago and never finished" - contradicting
+     * the verdict printed beside it.
+     */
+    public function test_the_never_finished_label_reports_time_since_the_last_completion(): void
+    {
+        $this->tick();
+
+        $this->record('process-queue', exitCode: 0);
+        ScheduledTaskRun::where('name', 'process-queue')->update([
+            'last_finished_at' => now()->subMinutes(90),
+            'last_started_at' => now()->subMinutes(5),
+            'last_status' => ScheduledTaskRun::STATUS_SKIPPED,
+            'last_skipped_at' => now(),
+        ]);
+
+        $task = SchedulerHealth::tasks()->firstWhere('name', 'process-queue');
+        $this->assertSame('never_finished', $task->state);
+
+        $html = view('admin.partials._scheduled-task-row', ['task' => $task])->render();
+        $label = strip_tags(explode('<details', $html)[0]);
+
+        $this->assertStringContainsString('1h', $label,
+            'the age must be measured from the last completion (90m), not the latest respawn (5m)');
+        $this->assertStringNotContainsString('5m', $label);
+    }
+
+    /**
+     * A failure must not go on masking a hang that started after it.
+     *
+     * recordSkip() deliberately refuses to move last_status off 'failed', and only a completed run
+     * with exit 0 clears it - so without this a task that failed once and then wedged rendered its
+     * old one-off error forever and never_finished was unreachable.
+     */
+    public function test_a_hang_after_a_failure_is_reported_as_the_hang(): void
+    {
+        $this->tick();
+
+        ScheduledTaskRecorder::failed(
+            new ScheduledTaskFailed($this->event('process-queue'), new \RuntimeException('boom'))
+        );
+        ScheduledTaskRun::where('name', 'process-queue')->update(['last_finished_at' => now()->subHour()]);
+
+        // A later copy starts and hangs; every tick since has bounced off its mutex.
+        ScheduledTaskRecorder::starting(new ScheduledTaskStarting($this->event('process-queue')));
+        $this->skip('process-queue');
+
+        $row = ScheduledTaskRun::where('name', 'process-queue')->first();
+        $this->assertSame(ScheduledTaskRun::STATUS_FAILED, $row->last_status,
+            'the failure is still on the row - it is the VERDICT that must move on');
+
+        $this->assertSame('never_finished', $this->state('process-queue'));
+    }
+
+    /** With no later run, the failure is still the latest thing that happened and still governs. */
+    public function test_a_failure_with_no_later_run_still_reports_failed(): void
+    {
+        $this->tick();
+
+        ScheduledTaskRecorder::failed(
+            new ScheduledTaskFailed($this->event('process-queue'), new \RuntimeException('boom'))
+        );
+        $this->skip('process-queue');
+
+        $this->assertSame('failed', $this->state('process-queue'));
     }
 
     /**

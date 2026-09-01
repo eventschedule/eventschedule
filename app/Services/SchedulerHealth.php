@@ -41,10 +41,11 @@ class SchedulerHealth
 
     public static function staleMinutes(): int
     {
-        // No second default: config/app.php owns this number, and a spare copy here is one that
-        // can go stale. It already had - it still said 15, which is exactly translate_data_lock's
-        // 900-second TTL and the value SchedulerHealthTest proves raises a false alarm.
-        return max(1, (int) config('app.scheduler_stale_minutes'));
+        // No default and no floor here: config/app.php owns both, and a spare copy is one that can
+        // go stale. It already had - this line used to carry its own default of 15, which is
+        // exactly translate_data_lock's 900-second TTL and the value SchedulerHealthTest proves
+        // raises a false alarm.
+        return (int) config('app.scheduler_stale_minutes');
     }
 
     /** The aggregate heartbeat: has ANY rail ticked recently. */
@@ -236,8 +237,14 @@ class SchedulerHealth
     private static function state($event, ?ScheduledTaskRun $row, int $interval, bool $stalled): string
     {
         // A failure is real data whatever the heartbeat says, so it is checked before the stall
-        // suppression below.
-        if ($row?->last_status === ScheduledTaskRun::STATUS_FAILED) {
+        // suppression below - but only while it is still the LATEST thing that happened.
+        //
+        // isRunning() means a run has begun since that failure was recorded, which makes the stored
+        // error history. Without this a task that failed once and then hung would render its old
+        // one-off error forever: recordSkip() deliberately refuses to move last_status off 'failed',
+        // and only a completed run with exit 0 clears it - so 'never_finished' became unreachable
+        // and the operator was shown a stale cause for a live outage.
+        if ($row?->last_status === ScheduledTaskRun::STATUS_FAILED && ! $row->isRunning()) {
             return 'failed';
         }
 

@@ -26,11 +26,17 @@
     $since = $task->lastSeenAt?->diffForHumans(null, true, true);
     $label = match ($task->state) {
         'failed' => __('messages.failed'),
-        // The state can now be reached by a row created by a SKIP, which has no last_started_at at
-        // all - "started ? ago and never finished" is what the old `?? '?'` rendered at the
-        // operator. Say the true thing instead; the dot stays red either way.
+        // The age comes from the same anchor state() judged on - the last COMPLETION - not from
+        // last_started_at. A run that overruns its expiry lets the mutex lapse and a fresh copy
+        // launch, restamping the start, so this row used to read "started 4m ago and never
+        // finished" for a task that had produced nothing in three hours: the label contradicted
+        // the verdict beside it.
+        //
+        // A row with no start at all is one a SKIP created, and saying it started is simply false.
         'never_finished' => $row?->last_started_at
-            ? __('messages.task_never_finished', ['age' => $row->last_started_at->diffForHumans(null, true, true)])
+            ? __('messages.task_never_finished', [
+                'age' => ($row->last_finished_at ?? $row->created_at)->diffForHumans(null, true, true),
+            ])
             : __('messages.scheduler_never_ran'),
         // $since cannot be null here: state() only returns 'overdue' when lastSeenAt() is set,
         // and a task that has never run gets 'not_yet_run' instead.

@@ -339,6 +339,8 @@ class AppController extends Controller
                             // and a synchronous run of Stripe charges is the one thing here that
                             // can consume it all and starve the commands queued behind. It
                             // resumes next hour.
+                            // Budget comes from the signature's own {--max-seconds=120}, on both
+                            // rails. Passing it here too was the one argument that differed.
                             \Artisan::call('app:charge-installments');
                         } finally {
                             $chargeLock->release();

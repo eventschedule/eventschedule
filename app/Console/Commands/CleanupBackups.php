@@ -111,9 +111,20 @@ class CleanupBackups extends Command
             ->get();
 
         foreach ($stuckImports as $job) {
-            if ($job->file_path && Storage::disk('local')->exists($job->file_path)) {
-                Storage::disk('local')->delete($job->file_path);
+            // Guarded like the sweeps above, and for the sharpest version of the same reason: this
+            // loop is the one that unwedges users, and it touches the disk. One unreadable path
+            // here used to abort the command before the remaining stuck rows were freed - so the
+            // users behind them stayed locked out of exporting, every run, forever.
+            try {
+                if ($job->file_path && Storage::disk('local')->exists($job->file_path)) {
+                    Storage::disk('local')->delete($job->file_path);
+                }
+            } catch (\Throwable $e) {
+                report($e);
             }
+
+            // Outside the try: freeing the row is the point of this sweep, and it must happen even
+            // when the file could not be removed.
             $job->update([
                 'status' => 'failed',
                 'error_message' => 'Processing timed out.',

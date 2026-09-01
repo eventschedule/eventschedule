@@ -26,7 +26,8 @@ use Illuminate\Support\Facades\Schedule;
  *    dangerous direction. In practice that lands around twice the gap to the next run for the
  *    frequent entries, which is the cost of one or two skipped runs after a hard kill rather than
  *    a day of them. /admin/queue flags a skip streak that outlasts this number, so a stranded
- *    mutex is visible either way - which is what makes rounding up safe.
+ *    mutex is visible either way - /admin/queue calls a task never_finished once it has gone
+ *    this long plus one interval without COMPLETING - which is what makes rounding up safe.
  */
 
 // --sleep=0 because Worker::daemon() sleeps BEFORE stopIfNecessary() evaluates stopWhenEmpty, so

@@ -47,7 +47,9 @@ class ScheduledTaskRecorder
      * Event::run()'s own shouldSkipDueToOverlapping() is still reachable in the race between the
      * filter passing and mutex->create() succeeding, and it returns before finish() assigns
      * exitCode - so a null exit code does arrive here occasionally, and must not be read as
-     * success. It is recorded as a skip, exactly as the filtered path would have been.
+     * success. It is recorded as a skip - though not an identical row to the filtered path's, which
+     * never runs starting() and so never stamps last_started_at. This one leaves isRunning() true
+     * for a copy that did not run, which state() reads as 'running' until the next tick corrects it.
      */
     public static function finished(ScheduledTaskFinished $event): void
     {
@@ -115,8 +117,15 @@ class ScheduledTaskRecorder
      * and consecutive_failures sat unread underneath - which contradicts state()'s own "a failure
      * is real data whatever the heartbeat says".
      *
-     * Two statements rather than a read-then-write, so a real run finishing in between wins
-     * outright instead of being half-overwritten - the same argument the failure counter makes.
+     * Two statements rather than a read-then-write, because the value being preserved has to be
+     * read and compared inside the database rather than in PHP.
+     *
+     * Not the same guarantee the failure counter below makes, despite the shape: that one scopes on
+     * the value it just wrote, so an interleaved success genuinely wins. This predicate excludes
+     * only failures, so a run that COMPLETES between the two statements has its 'succeeded' pushed
+     * back to 'skipped'. Harmless - state() reads the skipped arm, finds a fresh last_finished_at
+     * and falls through to 'ok' - but it is not a race-free write and should not be described as
+     * one.
      */
     private static function recordSkip(object $event): void
     {
@@ -194,7 +203,7 @@ class ScheduledTaskRecorder
         self::$tableExists = null;
     }
 
-    /** @param  callable():void  $work */
+    /** @param  callable():mixed  $work  Return value is ignored; some entry points hand back the row. */
     private static function guard(callable $work): void
     {
         try {

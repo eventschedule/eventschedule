@@ -22,9 +22,9 @@ streams its output to the container log. It does not wait for the previous minut
 long task never blocks the next tick.
 
 The queue is drained by the `process-queue` entry inside that schedule, which runs
-`queue:work --stop-when-empty --max-time=120 --tries=3`. That is the same invocation the HTTP cron
-used, so queue behaviour after the cutover is identical to before it: dispatch latency is up to
-about 60 seconds by design. See "Known limits" if that ever needs to change.
+`queue:work --stop-when-empty --sleep=0 --max-time=120 --tries=3`. That is the same invocation the
+HTTP cron used, so queue behaviour after the cutover is identical to before it: dispatch latency is
+up to about 60 seconds by design. See "Known limits" if that ever needs to change.
 
 `GET /translate_data?secret=...` (`AppController::translateData()`) is the legacy rail. It is a
 complete second copy of the schedule, still used by selfhost installs that cannot run a cron
@@ -193,10 +193,13 @@ One thing the log stream will *not* tell you: a task skipped because its `withou
 mutex was held prints **nothing at all**. `withoutOverlapping()` registers a `->skip()` reject
 filter, and `ScheduleRunCommand` evaluates `filtersPass()` before it ever reaches the `Running
 [...]` line - so the task simply does not appear that minute, which is indistinguishable from it
-not being due. A task wedged behind a stranded mutex therefore leaves no trace in the logs at all;
-the admin Scheduler card is what catches it (it records the skip and flags a streak longer than the
-task's own `withoutOverlapping` expiry), so check there, and check that expiry in
-`routes/console.php`, if a task's effects stop appearing.
+not being due. A task wedged behind a mutex it cannot take therefore leaves no trace in the logs at
+all; the admin Scheduler card is what catches it. The card asks how long it has been since the task
+last **completed**, not since it last started - a run that overruns its expiry lets the mutex lapse
+and a fresh copy launch, so the start time resets and only the last completion keeps ageing. The
+threshold is the task's own `withoutOverlapping` expiry plus one interval of slack for the idle gap
+between runs, which works out to flagging a hang roughly `expiresAt` minutes after it begins. Check
+there, and check that expiry in `routes/console.php`, if a task's effects stop appearing.
 
 **"Scheduled tasks are not running".** This alert appears on the admin dashboard, the admin nav and
 the Scheduler card on `/admin/queue`. Both rails stamp `scheduler.last_run_at` in the cache on
