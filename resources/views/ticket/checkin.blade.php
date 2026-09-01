@@ -6,6 +6,8 @@
 
     <div id="app" class="max-w-3xl mx-auto px-4">
 
+        @include('partials.team-access-notice', ['roles' => $planBlockedRoles])
+
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ __('messages.checkin_dashboard') }}</h2>
             <div class="flex gap-2">

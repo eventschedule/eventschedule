@@ -1474,6 +1474,8 @@ return [
     'enterprise_feature_email_scheduling' => 'Atualize para Enterprise para enviar automaticamente gráficos de eventos em uma programação.',
     'enterprise_feature_agenda_scanning' => 'Atualize para Enterprise para usar IA para digitalizar agendas e criar eventos automaticamente.',
     'enterprise_required_for_team_access' => 'O proprietário do calendário precisa atualizar para Enterprise para adicionar membros da equipe.',
+    'team_access_blocked' => 'Você não tem acesso às vendas de ingressos nem aos check-ins de :schedules. O acesso de membros da equipe requer o plano Enterprise, que o proprietário do calendário pode restaurar atualizando.',
+    'team_access_blocked_owner' => 'Os membros da equipe não podem ver as vendas de ingressos nem os check-ins deste calendário. O acesso de membros da equipe requer o plano Enterprise.',
     'feature_ai_text' => 'Transformação de texto com IA',
     'feature_email_scheduling' => 'Agendamento de e-mail',
     'feature_agenda_scanning' => 'Digitalização de agenda',

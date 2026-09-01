@@ -1,5 +1,7 @@
 <x-app-admin-layout>
 
+    @include('partials.team-access-notice', ['roles' => $planBlockedRoles])
+
     @if ($waitlistCount > 0 || $hasPro || ($subscriptionsCount ?? 0) > 0 || ($giftCardsCount ?? 0) > 0 || ($installmentsCount ?? 0) > 0)
     <div class="ap-tab-container mb-6 border-b border-gray-200 dark:border-gray-700">
         <nav class="-mb-px flex gap-6">

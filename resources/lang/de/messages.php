@@ -1477,6 +1477,8 @@ return [
     'enterprise_feature_email_scheduling' => 'Upgrade auf Enterprise, um Veranstaltungsgrafiken automatisch nach Zeitplan zu senden.',
     'enterprise_feature_agenda_scanning' => 'Upgrade auf Enterprise, um KI zum Scannen von Agenden und automatischen Erstellen von Veranstaltungen zu nutzen.',
     'enterprise_required_for_team_access' => 'Der Kalender-Inhaber muss auf Enterprise upgraden, um Teammitglieder hinzuzufügen.',
+    'team_access_blocked' => 'Sie haben keinen Zugriff auf die Ticketverkäufe oder Check-ins von :schedules. Der Zugriff für Teammitglieder erfordert den Enterprise-Tarif, den der Kalender-Inhaber durch ein Upgrade freischalten kann.',
+    'team_access_blocked_owner' => 'Teammitglieder können die Ticketverkäufe und Check-ins dieses Kalenders nicht sehen. Der Zugriff für Teammitglieder erfordert den Enterprise-Tarif.',
     'feature_ai_text' => 'KI-Texttransformation',
     'feature_email_scheduling' => 'E-Mail-Planung',
     'feature_agenda_scanning' => 'Agenda-Scannen',

@@ -1528,6 +1528,8 @@ return [
     'enterprise_feature_email_scheduling' => 'שדרגו ל-Enterprise כדי לשלוח גרפיקות אירועים אוטומטית לפי לוח זמנים.',
     'enterprise_feature_agenda_scanning' => 'שדרגו ל-Enterprise כדי להשתמש ב-AI לסריקת סדרי יום ויצירת אירועים אוטומטית.',
     'enterprise_required_for_team_access' => 'בעל לוח השנה צריך לשדרג ל-Enterprise כדי להוסיף חברי צוות.',
+    'team_access_blocked' => 'אין לך גישה למכירות הכרטיסים או לרישומי הכניסה של :schedules. גישת חברי צוות מחייבת מנוי Enterprise, ובעל לוח השנה יכול להחזיר אותה על ידי שדרוג.',
+    'team_access_blocked_owner' => 'חברי הצוות אינם יכולים לראות את מכירות הכרטיסים או רישומי הכניסה של לוח שנה זה. גישת חברי צוות מחייבת מנוי Enterprise.',
     'feature_ai_text' => 'המרת טקסט באמצעות AI',
     'feature_email_scheduling' => 'תזמון דוא"ל',
     'feature_agenda_scanning' => 'סריקת סדר יום',

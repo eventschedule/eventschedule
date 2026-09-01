@@ -1476,6 +1476,8 @@ return [
     'enterprise_feature_email_scheduling' => 'Passa a Enterprise per inviare automaticamente grafiche degli eventi secondo una pianificazione.',
     'enterprise_feature_agenda_scanning' => 'Passa a Enterprise per usare l\'IA per scansionare le agende e creare eventi automaticamente.',
     'enterprise_required_for_team_access' => 'Il proprietario del calendario deve passare a Enterprise per aggiungere membri del team.',
+    'team_access_blocked' => 'Non hai accesso alle vendite di biglietti né ai check-in di :schedules. L\'accesso per i membri del team richiede il piano Enterprise, che il proprietario del calendario può attivare con un upgrade.',
+    'team_access_blocked_owner' => 'I membri del team non possono vedere le vendite di biglietti né i check-in di questo calendario. L\'accesso per i membri del team richiede il piano Enterprise.',
     'feature_ai_text' => 'Trasformazione del testo con IA',
     'feature_email_scheduling' => 'Pianificazione e-mail',
     'feature_agenda_scanning' => 'Scansione dell\'agenda',

@@ -296,6 +296,41 @@ class User extends Authenticatable implements MustVerifyEmail
         return once(fn () => $this->filterTeamRoles($this->member()));
     }
 
+    /**
+     * Schedules this user helps run that the plan filter is currently closing them out of.
+     *
+     * The complement of filterTeamRoles() over the same set, resolved through the SAME predicate
+     * so the two cannot drift. That matters more than it looks: this is what the Sales, /scan and
+     * /checkin pages say instead of "No sales found. Create events to start selling tickets.",
+     * and a notice that disagreed with the list it is explaining would be worse than none.
+     *
+     * Keyed on member() rather than editor() because a viewer loses the /scan picker to the same
+     * gate and deserves the same sentence.
+     */
+    public function planBlockedRoles(): EloquentCollection
+    {
+        return once(function () {
+            if (! config('app.hosted')) {
+                return new EloquentCollection;
+            }
+
+            return $this->member()->with('subscriptions')->get()
+                ->reject(fn (Role $role) => $this->planAllowsTeamAccess($role))
+                ->values();
+        });
+    }
+
+    /**
+     * Whether this schedule's plan lets the user read its ticketing data as a team member.
+     *
+     * Mirrors RoleController::viewAdmin(): your own schedule always, somebody else's only while
+     * it is Enterprise. Keys on roles.user_id exactly like viewAdmin() does.
+     */
+    private function planAllowsTeamAccess(Role $role): bool
+    {
+        return (int) $this->id === (int) $role->user_id || $role->isEnterprise();
+    }
+
     private function filterTeamRoles(BelongsToMany $relation): EloquentCollection
     {
         // Selfhost has no plan to check (isEnterprise() is unconditionally true there), so it must
@@ -306,9 +341,9 @@ class User extends Authenticatable implements MustVerifyEmail
 
         // Load-bearing eager load, not decoration: isEnterprise() reads subscription('default'),
         // so without it every role fires its own query.
-        return $relation->with('subscriptions')->get()->filter(
-            fn (Role $role) => (int) $this->id === (int) $role->user_id || $role->isEnterprise()
-        )->values();
+        return $relation->with('subscriptions')->get()
+            ->filter(fn (Role $role) => $this->planAllowsTeamAccess($role))
+            ->values();
     }
 
     public function carpoolOffers()

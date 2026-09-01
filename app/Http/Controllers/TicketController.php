@@ -169,9 +169,9 @@ class TicketController extends Controller
             ->filter(fn ($count) => $count > 0);
 
         if (request()->ajax()) {
+            $user = auth()->user();
             $tab = request()->query('tab');
             if ($tab === 'feedback') {
-                $user = auth()->user();
                 $hasPro = $user->manageableRoles()->contains(fn ($role) => $role->isPro());
                 if (! $hasPro) {
                     abort(403);
@@ -180,7 +180,8 @@ class TicketController extends Controller
                 return view('ticket.feedback_table', $this->getFeedbackData());
             }
 
-            return view('ticket.sales_table', compact('sales', 'groupCounts', 'sortBy', 'sortDir'));
+            return view('ticket.sales_table', compact('sales', 'groupCounts', 'sortBy', 'sortDir'))
+                ->with('planBlockedRoles', $user->planBlockedRoles());
         } else {
             $user = auth()->user();
             $waitlistCount = TicketWaitlist::whereHas('event', fn ($q) => $q->managedBy($user))
@@ -189,6 +190,12 @@ class TicketController extends Controller
             $waitlistEntries = collect();
 
             $hasPro = $user->manageableRoles()->contains(fn ($role) => $role->isPro());
+
+            // Every list on this page is scoped by managedBy(), so a schedule the plan filter
+            // dropped contributes nothing and the table falls through to "No sales found. Create
+            // events to start selling tickets." Name the schedules instead of implying there is
+            // nothing to see.
+            $planBlockedRoles = $user->planBlockedRoles();
 
             $subscriptions = $this->getSubscriptionsData();
             $subscriptionsCount = $subscriptions->count();
@@ -204,7 +211,7 @@ class TicketController extends Controller
             $installmentTotals = $installmentData['installmentTotals'];
             $installmentForecast = $installmentData['installmentForecast'];
 
-            return view('ticket.sales', compact('sales', 'count', 'waitlistCount', 'waitlistEntries', 'hasPro', 'groupCounts', 'sortBy', 'sortDir', 'subscriptions', 'subscriptionsCount', 'giftCards', 'giftCardsCount', 'ticketQuotas', 'installments', 'installmentsCount', 'installmentTotals', 'installmentForecast'));
+            return view('ticket.sales', compact('sales', 'count', 'waitlistCount', 'waitlistEntries', 'hasPro', 'planBlockedRoles', 'groupCounts', 'sortBy', 'sortDir', 'subscriptions', 'subscriptionsCount', 'giftCards', 'giftCardsCount', 'ticketQuotas', 'installments', 'installmentsCount', 'installmentTotals', 'installmentForecast'));
         }
     }
 
@@ -2774,6 +2781,10 @@ class TicketController extends Controller
         return view('ticket.scan', [
             'events' => $eventsData,
             'selectedEventId' => $selectedEventId ? UrlUtils::encodeId($selectedEventId) : null,
+            // scannableBy() above drops any schedule the plan filter closed. Scanning itself is
+            // available on every plan, so an empty picker here reads as "you have no events"
+            // rather than "this schedule's plan no longer covers you".
+            'planBlockedRoles' => $user->planBlockedRoles(),
             // The scanner rebuilds its POST target from this rather than from the scanned
             // QR's origin, so a base-path install (/public/...) and the hosted app subdomain
             // both resolve correctly, and a foreign QR can't redirect the POST off-site.

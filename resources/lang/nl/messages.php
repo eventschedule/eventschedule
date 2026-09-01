@@ -1473,6 +1473,8 @@ return [
     'enterprise_feature_email_scheduling' => 'Upgrade naar Enterprise om automatisch evenementafbeeldingen volgens een schema te verzenden.',
     'enterprise_feature_agenda_scanning' => 'Upgrade naar Enterprise om AI te gebruiken voor het scannen van agenda\'s en automatisch aanmaken van evenementen.',
     'enterprise_required_for_team_access' => 'De agenda-eigenaar moet upgraden naar Enterprise om teamleden toe te voegen.',
+    'team_access_blocked' => 'U hebt geen toegang tot de ticketverkopen of check-ins van :schedules. Toegang voor teamleden vereist het Enterprise-abonnement; de agenda-eigenaar kan dit herstellen door te upgraden.',
+    'team_access_blocked_owner' => 'Teamleden kunnen de ticketverkopen en check-ins van deze agenda niet zien. Toegang voor teamleden vereist het Enterprise-abonnement.',
     'feature_ai_text' => 'AI-teksttransformatie',
     'feature_email_scheduling' => 'E-mail planning',
     'feature_agenda_scanning' => 'Agenda scannen',

@@ -1454,6 +1454,8 @@ return [
     'enterprise_feature_email_scheduling' => 'Faceți upgrade la Enterprise pentru a trimite automat grafice de evenimente pe un program.',
     'enterprise_feature_agenda_scanning' => 'Faceți upgrade la Enterprise pentru a utiliza AI pentru a scana agendele și a crea evenimente automat.',
     'enterprise_required_for_team_access' => 'Proprietarul calendarului trebuie să facă upgrade la Enterprise pentru a adăuga membri ai echipei.',
+    'team_access_blocked' => 'Nu ai acces la vânzările de bilete sau la check-in-urile pentru :schedules. Accesul membrilor echipei necesită planul Enterprise, pe care proprietarul calendarului îl poate activa printr-un upgrade.',
+    'team_access_blocked_owner' => 'Membrii echipei nu pot vedea vânzările de bilete sau check-in-urile acestui calendar. Accesul membrilor echipei necesită planul Enterprise.',
     'feature_ai_text' => 'Transformare text cu AI',
     'feature_email_scheduling' => 'Programare emailuri',
     'feature_agenda_scanning' => 'Scanare agendă',

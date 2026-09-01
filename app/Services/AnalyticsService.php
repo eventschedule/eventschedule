@@ -1190,6 +1190,14 @@ class AnalyticsService
      */
     public function getCheckinStats(User $user, Carbon $start, Carbon $end, ?int $roleId = null, ?int $eventId = null): array
     {
+        // Assigned only in the else branch below, but read again by the timezone lookup, which
+        // runs on BOTH paths. An ?event_id= URL carrying no role_id lands here with it unset -
+        // reachable because encodeId(null) is null and the tab links array_filter() it away, and
+        // because the controller auto-fills role_id only for a user with exactly one schedule.
+        // Left undefined it fatals on ->isNotEmpty(), but only once there are sale tickets to
+        // show, since the empty case returns before the lookup.
+        $roleIds = collect();
+
         if ($eventId) {
             $eventIds = collect([$eventId]);
         } else {
@@ -1214,7 +1222,7 @@ class AnalyticsService
                 ->where('status', 'paid')
                 ->whereBetween('event_date', [$start->toDateString(), $end->toDateString()]);
         })
-            ->with(['sale:id,event_id,event_date', 'sale.event:id,name,name_en', 'ticket:id,type'])
+            ->with(['sale:id,event_id,event_date', 'sale.event:id,name,name_en,creator_role_id', 'ticket:id,type'])
             ->get();
 
         if ($saleTickets->isEmpty()) {
@@ -1227,6 +1235,12 @@ class AnalyticsService
             $timezone = Role::where('id', $roleId)->value('timezone');
         } elseif ($roleIds->isNotEmpty()) {
             $timezone = Role::where('id', $roleIds->first())->value('timezone');
+        } elseif ($eventId) {
+            // Single-event view with no schedule filter - the path that used to fatal here. An
+            // arrival hour belongs to where the event happens, not to whoever is reading the
+            // page, so resolve the event's own schedule rather than dropping through to the
+            // app timezone that the null branch below uses.
+            $timezone = $saleTickets->first()?->sale?->event?->scheduleTimezone();
         }
 
         $totalSold = 0;

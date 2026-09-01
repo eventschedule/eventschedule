@@ -180,6 +180,101 @@ class TeamMemberSalesVisibilityTest extends TestCase
         $this->actingAs($owner)->get(route('sales'))->assertOk()->assertSee('Zaphod Beeblebrox');
     }
 
+    /**
+     * The gate above is right; what it never did was say anything. A blocked member got the page's
+     * ordinary empty state - "No sales found. Create events to start selling tickets." - which is
+     * false twice over: the sales exist, and creating events is not what unblocks them. That is
+     * what turned a plan limit into three rounds of support email.
+     */
+    public function test_a_plan_blocked_member_is_told_why_rather_than_shown_no_sales(): void
+    {
+        config(['app.hosted' => true]);
+
+        [, $role] = $this->scheduleWithASale();
+        $role->name = 'Ed Presents';
+        $role->save();
+
+        $admin = $this->createOwner();
+        $this->followRole($admin, $role, 'admin');
+
+        // Positive control: while the schedule is Enterprise there is no notice, so the
+        // assertions below cannot pass on a page that renders one unconditionally.
+        $this->actingAs($admin)->get(route('sales'))
+            ->assertOk()
+            ->assertSee('Zaphod Beeblebrox')
+            ->assertDontSee('Team member access requires the Enterprise plan');
+
+        $role->plan_type = 'free';
+        $role->plan_expires = now()->subYear()->format('Y-m-d');
+        $role->save();
+
+        // Re-resolve: manageableRoles() and planBlockedRoles() both memoize on the model instance.
+        $this->actingAs($admin->fresh())->get(route('sales'))
+            ->assertOk()
+            ->assertDontSee('Zaphod Beeblebrox')
+            ->assertSee('Team member access requires the Enterprise plan')
+            // Names the schedule, so a member who helps run several knows which one went dark.
+            ->assertSee('Ed Presents')
+            ->assertDontSee('Create events to start selling tickets');
+    }
+
+    public function test_the_scan_and_checkin_pickers_explain_the_plan_block(): void
+    {
+        config(['app.hosted' => true]);
+
+        [, $role] = $this->scheduleWithASale();
+
+        $admin = $this->createOwner();
+        $this->followRole($admin, $role, 'admin');
+
+        $this->actingAs($admin)->get(route('ticket.scan'))
+            ->assertOk()
+            ->assertDontSee('Team member access requires the Enterprise plan');
+
+        $role->plan_type = 'free';
+        $role->plan_expires = now()->subYear()->format('Y-m-d');
+        $role->save();
+
+        // Scanning is available on every plan, so an empty picker here reads as "you have no
+        // events" rather than "this schedule stopped covering you".
+        $this->actingAs($admin->fresh())->get(route('ticket.scan'))
+            ->assertOk()
+            ->assertSee('Team member access requires the Enterprise plan');
+
+        $this->actingAs($admin->fresh())->get(route('checkin.index'))
+            ->assertOk()
+            ->assertSee('Team member access requires the Enterprise plan');
+    }
+
+    /**
+     * The other side of the same silence: members added while the schedule was Enterprise stay
+     * listed after a downgrade, with nothing telling the owner their staff have gone blind.
+     */
+    public function test_the_owner_is_warned_when_the_plan_no_longer_covers_their_members(): void
+    {
+        config(['app.hosted' => true]);
+
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner);
+
+        $admin = $this->createOwner();
+        $this->followRole($admin, $role, 'admin');
+
+        $team = route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']);
+
+        $this->actingAs($owner)->get($team)
+            ->assertOk()
+            ->assertDontSee('Team members cannot see this schedule');
+
+        $role->plan_type = 'free';
+        $role->plan_expires = now()->subYear()->format('Y-m-d');
+        $role->save();
+
+        $this->actingAs($owner->fresh())->get($team)
+            ->assertOk()
+            ->assertSee('Team members cannot see this schedule');
+    }
+
     public function test_only_the_owner_may_change_levels_or_remove_other_members(): void
     {
         $owner = $this->createOwner();

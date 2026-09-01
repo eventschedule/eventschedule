@@ -1478,6 +1478,8 @@ return [
     'enterprise_feature_email_scheduling' => 'Passez à "Entreprise" pour envoyer automatiquement des graphiques d\'événements selon un calendrier.',
     'enterprise_feature_agenda_scanning' => 'Passez à "Entreprise" pour utiliser l\'IA pour numériser les agendas et créer des événements automatiquement.',
     'enterprise_required_for_team_access' => 'Le propriétaire du calendrier doit passer à "Entreprise" pour ajouter des membres d\'équipe.',
+    'team_access_blocked' => 'Vous n\'avez pas accès aux ventes de billets ni aux enregistrements de :schedules. L\'accès des membres d\'équipe nécessite l\'offre "Entreprise" ; le propriétaire du calendrier peut le rétablir en changeant d\'offre.',
+    'team_access_blocked_owner' => 'Les membres de l\'équipe ne peuvent pas voir les ventes de billets ni les enregistrements de ce calendrier. L\'accès des membres d\'équipe nécessite l\'offre "Entreprise".',
     'feature_ai_text' => 'Transformation de texte par IA',
     'feature_email_scheduling' => 'Planification des e-mails',
     'feature_agenda_scanning' => 'Numérisation d\'agenda',

@@ -714,6 +714,10 @@
     <div class="mt-6 px-4">
         {{ $sales->links() }}
     </div>
+    @elseif (($planBlockedRoles ?? collect())->isNotEmpty())
+    {{-- The notice above already explains the empty table. Falling through to the ordinary empty
+         state here would contradict it: "No sales found. Create events to start selling tickets."
+         is the wrong advice for someone whose schedule has plenty of both. --}}
     @else
     <div class="text-center py-12">
         <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">

@@ -1536,6 +1536,8 @@ return [
     'enterprise_feature_email_scheduling' => 'قم بالترقية إلى Enterprise لإرسال رسومات الأحداث تلقائيًا وفق جدول زمني.',
     'enterprise_feature_agenda_scanning' => 'قم بالترقية إلى Enterprise لاستخدام الذكاء الاصطناعي لمسح جداول الأعمال وإنشاء الأحداث تلقائيًا.',
     'enterprise_required_for_team_access' => 'يحتاج مالك الجدول إلى الترقية إلى Enterprise لإضافة أعضاء الفريق.',
+    'team_access_blocked' => 'ليس لديك حق الوصول إلى مبيعات التذاكر أو تسجيلات الدخول الخاصة بـ :schedules. يتطلب وصول أعضاء الفريق خطة Enterprise، ويمكن لمالك الجدول استعادته بالترقية.',
+    'team_access_blocked_owner' => 'لا يمكن لأعضاء الفريق رؤية مبيعات التذاكر أو تسجيلات الدخول لهذا الجدول. يتطلب وصول أعضاء الفريق خطة Enterprise.',
     'feature_ai_text' => 'تحويل النص بالذكاء الاصطناعي',
     'feature_email_scheduling' => 'جدولة البريد الإلكتروني',
     'feature_agenda_scanning' => 'مسح جدول الأعمال',

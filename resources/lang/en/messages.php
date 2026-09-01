@@ -1791,6 +1791,8 @@ return [
     'enterprise_feature_email_scheduling' => 'Upgrade to Enterprise to automatically send event graphics on a schedule.',
     'enterprise_feature_agenda_scanning' => 'Upgrade to Enterprise to use AI to scan agendas and create events automatically.',
     'enterprise_required_for_team_access' => 'The schedule owner needs to upgrade to Enterprise to add team members.',
+    'team_access_blocked' => 'You do not have access to the ticket sales or check-ins for :schedules. Team member access requires the Enterprise plan, so the schedule owner can restore it by upgrading.',
+    'team_access_blocked_owner' => 'Team members cannot see this schedule\'s ticket sales or check-ins. Team member access requires the Enterprise plan.',
     'feature_ai_text' => 'AI text transformation',
     'feature_email_scheduling' => 'Email scheduling',
     'feature_agenda_scanning' => 'Agenda scanning',

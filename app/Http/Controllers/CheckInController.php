@@ -55,6 +55,9 @@ class CheckInController extends Controller
         return view('ticket.checkin', [
             'events' => $eventsData,
             'selectedEventId' => $selectedEventId ? UrlUtils::encodeId($selectedEventId) : null,
+            // managedBy() above drops any schedule the plan filter closed, so a team member on a
+            // non-Enterprise schedule gets an empty picker with no reason given.
+            'planBlockedRoles' => $user->planBlockedRoles(),
         ]);
     }
 

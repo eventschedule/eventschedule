@@ -1445,6 +1445,8 @@ return [
     'enterprise_feature_email_scheduling' => 'Uuendage Enterprise-le, et saata sündmuste graafika automaatselt ajakava alusel.',
     'enterprise_feature_agenda_scanning' => 'Uuendage Enterprise-le, et kasutada AI-d päevakordade skaneerimiseks ja sündmuste automaatseks loomiseks.',
     'enterprise_required_for_team_access' => 'Kalendri omanik peab meeskonnaliikmete lisamiseks uuendama Enterprise-le.',
+    'team_access_blocked' => 'Teil puudub juurdepääs :schedules piletimüügile ja sisseregistreerimistele. Meeskonnaliikmete juurdepääs eeldab Enterprise-paketti, mille kalendri omanik saab uuendamisega taastada.',
+    'team_access_blocked_owner' => 'Meeskonnaliikmed ei näe selle kalendri piletimüüki ega sisseregistreerimisi. Meeskonnaliikmete juurdepääs eeldab Enterprise-paketti.',
     'feature_ai_text' => 'AI teksti teisendamine',
     'feature_email_scheduling' => 'Meili ajastamine',
     'feature_agenda_scanning' => 'Päevakorra skaneerimine',

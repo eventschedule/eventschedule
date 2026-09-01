@@ -1473,6 +1473,8 @@ return [
     'enterprise_feature_email_scheduling' => 'Actualiza a Enterprise para enviar automáticamente gráficos de eventos según un horario.',
     'enterprise_feature_agenda_scanning' => 'Actualiza a Enterprise para usar IA para escanear agendas y crear eventos automáticamente.',
     'enterprise_required_for_team_access' => 'El propietario del calendario necesita actualizar a Enterprise para agregar miembros del equipo.',
+    'team_access_blocked' => 'No tienes acceso a las ventas de entradas ni a los registros de entrada de :schedules. El acceso para miembros del equipo requiere el plan Enterprise, por lo que el propietario del calendario puede restaurarlo actualizando.',
+    'team_access_blocked_owner' => 'Los miembros del equipo no pueden ver las ventas de entradas ni los registros de entrada de este calendario. El acceso para miembros del equipo requiere el plan Enterprise.',
     'feature_ai_text' => 'Transformación de texto con IA',
     'feature_email_scheduling' => 'Programación de correos',
     'feature_agenda_scanning' => 'Escaneo de agenda',
