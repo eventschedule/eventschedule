@@ -1,7 +1,8 @@
 @php
     $eventUrl = $event->getGuestUrl();
     $cardRole = $event->getViewableRole();
-    $imageUrl = $event->getImageUrl();
+    // 480px WebP derivative when one exists: the card's image header is ~400px wide.
+    $imageUrl = $event->getImageUrl(480);
     $isHidden = $event->is_hidden_from_discovery;
     $isAdmin = auth()->check() && auth()->user()->isAdmin();
     // Same timezone resolution as getShortDateRangeDisplay(), so every check

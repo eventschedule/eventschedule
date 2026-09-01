@@ -1,9 +1,95 @@
 <x-marketing-layout>
+    {{-- Live poster wall data: real upcoming events (same /browse visibility
+         rules as the rail), padded with decorative demo flyers. Decorative
+         cards never carry names or links.
+
+         Computed up here, before the slots, because <x-slot name="headMeta"> below needs the
+         first image's origin to decide whether a preconnect is worth issuing. --}}
+    @php
+        // 5 columns x 5 rows: aim for up to 25 unique posters so the wall fills
+        // without obvious repeats (demo flyers only backfill any remaining slots).
+        $wallTarget = 25;
+        // How many posters may load eagerly. Both breakpoints draw their eager set from the
+        // SAME first cards, and the desktop set (one per column = cards 0-4) is a subset of
+        // the mobile set (the first 6 of the strip) - so whichever of the two is displayed,
+        // the browser is never asked for more than this many images before first paint.
+        // Everything else, in both marquee copies, is lazy and low priority.
+        $wallEagerCount = 6;
+        $wallEventCards = [];
+        foreach ($discoverEvents as $wallEvent) {
+            if (count($wallEventCards) >= $wallTarget) {
+                break;
+            }
+            $wallUrl = $wallEvent->getGuestUrl();
+            // 480px WebP derivative when one exists: the slots here are 96 and 208 CSS px,
+            // and the originals are up to 4MB PNGs.
+            $wallImg = $wallEvent->getImageUrl(480);
+            if (! $wallUrl || ! $wallImg) {
+                continue;
+            }
+            $wallEventCards[] = [
+                'url' => $wallUrl,
+                'img' => $wallImg,
+                'name' => $wallEvent->name,
+                'date' => $wallEvent->starts_at
+                    ? $wallEvent->getShortDateRangeDisplay('M j')
+                    : __('messages.recurring'),
+            ];
+        }
+        $wallCards = $wallEventCards;
+        $wallDemoFlyers = ['jazz', 'party', 'rock', 'dj', 'comedy', 'openmic', 'special'];
+        $wallDemoIndex = 0;
+        while (count($wallCards) < $wallTarget) {
+            $wallCards[] = [
+                'url' => null,
+                'img' => asset('images/demo/demo_flyer_' . $wallDemoFlyers[$wallDemoIndex % count($wallDemoFlyers)] . '.webp'),
+                'name' => null,
+                'date' => null,
+            ];
+            $wallDemoIndex++;
+        }
+        foreach ($wallCards as $wallIndex => $wallCard) {
+            $wallCards[$wallIndex]['eager'] = $wallIndex < $wallEagerCount;
+        }
+        // Warm the connection to whichever host is actually serving the posters, derived from
+        // the first card rather than hardcoded: a selfhost install serves them from its own
+        // origin and must not be made to open a socket to our CDN.
+        $wallPreconnect = null;
+        foreach ($wallCards as $wallCard) {
+            if (! str_starts_with($wallCard['img'], 'http')) {
+                continue;
+            }
+            $wallImgHost = parse_url($wallCard['img'], PHP_URL_HOST);
+            if ($wallImgHost && $wallImgHost !== request()->getHost()) {
+                $wallPreconnect = (parse_url($wallCard['img'], PHP_URL_SCHEME) ?: 'https') . '://' . $wallImgHost;
+            }
+            break;
+        }
+        $wallColumns = [[], [], [], [], []];
+        foreach ($wallCards as $wallIndex => $wallCard) {
+            $wallColumns[$wallIndex % 5][] = $wallCard;
+        }
+        // Each looping half needs enough posters to outrun the viewport.
+        $wallColumns = array_map(function ($column) {
+            $half = [];
+            $i = 0;
+            while (count($half) < 5) {
+                $half[] = $column[$i % count($column)];
+                $i++;
+            }
+            return $half;
+        }, $wallColumns);
+        $wallDurations = [58, 72, 50, 66, 62];
+    @endphp
+
     <x-slot name="title">{{ __('marketing.home_title') }}</x-slot>
     <x-slot name="description">{{ __('marketing.home_description') }}</x-slot>
     <x-slot name="breadcrumbTitle">Home</x-slot>
     <x-slot name="headMeta">
         <link rel="preconnect" href="https://img.youtube.com">
+        @if ($wallPreconnect)
+            <link rel="preconnect" href="{{ $wallPreconnect }}">
+        @endif
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,
@@ -366,61 +452,6 @@
             <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
         </div>
 
-        {{-- Live poster wall data: real upcoming events (same /browse visibility
-             rules as the rail), padded with decorative demo flyers. Decorative
-             cards never carry names or links. --}}
-        @php
-            // 5 columns x 5 rows: aim for up to 25 unique posters so the wall fills
-            // without obvious repeats (demo flyers only backfill any remaining slots).
-            $wallTarget = 25;
-            $wallEventCards = [];
-            foreach ($discoverEvents as $wallEvent) {
-                if (count($wallEventCards) >= $wallTarget) {
-                    break;
-                }
-                $wallUrl = $wallEvent->getGuestUrl();
-                $wallImg = $wallEvent->getImageUrl();
-                if (! $wallUrl || ! $wallImg) {
-                    continue;
-                }
-                $wallEventCards[] = [
-                    'url' => $wallUrl,
-                    'img' => $wallImg,
-                    'name' => $wallEvent->name,
-                    'date' => $wallEvent->starts_at
-                        ? $wallEvent->getShortDateRangeDisplay('M j')
-                        : __('messages.recurring'),
-                ];
-            }
-            $wallCards = $wallEventCards;
-            $wallDemoFlyers = ['jazz', 'party', 'rock', 'dj', 'comedy', 'openmic', 'special'];
-            $wallDemoIndex = 0;
-            while (count($wallCards) < $wallTarget) {
-                $wallCards[] = [
-                    'url' => null,
-                    'img' => asset('images/demo/demo_flyer_' . $wallDemoFlyers[$wallDemoIndex % count($wallDemoFlyers)] . '.webp'),
-                    'name' => null,
-                    'date' => null,
-                ];
-                $wallDemoIndex++;
-            }
-            $wallColumns = [[], [], [], [], []];
-            foreach ($wallCards as $wallIndex => $wallCard) {
-                $wallColumns[$wallIndex % 5][] = $wallCard;
-            }
-            // Each looping half needs enough posters to outrun the viewport.
-            $wallColumns = array_map(function ($column) {
-                $half = [];
-                $i = 0;
-                while (count($half) < 5) {
-                    $half[] = $column[$i % count($column)];
-                    $i++;
-                }
-                return $half;
-            }, $wallColumns);
-            $wallDurations = [58, 72, 50, 66, 62];
-        @endphp
-
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 py-12 text-center sm:px-6 sm:py-16 lg:px-8 lg:py-28">
             <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-2 rounded-full glass px-4 py-2">
                 <span class="relative flex h-2 w-2">
@@ -464,13 +495,14 @@
                         <div class="es-marquee-track">
                             @for ($stripCopy = 0; $stripCopy < 2; $stripCopy++)
                                 @foreach ($wallCards as $stripCard)
+                                    @php $stripEager = $stripCopy === 0 && $stripCard['eager']; @endphp
                                     @if ($stripCard['url'])
                                         <a href="{{ $stripCard['url'] }}" target="_blank" rel="noopener" @if ($stripCopy === 1) aria-hidden="true" tabindex="-1" @endif class="block w-24 shrink-0 overflow-hidden rounded-lg shadow-md ring-1 ring-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA] dark:ring-white/10" aria-label="{{ $stripCard['name'] }}">
-                                            <img src="{{ $stripCard['img'] }}" alt="" class="aspect-[3/4] w-full object-cover" width="96" height="128" loading="{{ $stripCopy === 0 ? 'eager' : 'lazy' }}" decoding="async" fetchpriority="{{ $stripCopy === 0 ? 'auto' : 'low' }}">
+                                            <img src="{{ $stripCard['img'] }}" alt="" class="aspect-[3/4] w-full object-cover" width="96" height="128" loading="{{ $stripEager ? 'eager' : 'lazy' }}" decoding="async" fetchpriority="{{ $stripEager ? 'auto' : 'low' }}">
                                         </a>
                                     @else
                                         <div class="w-24 shrink-0 overflow-hidden rounded-lg shadow-md ring-1 ring-black/5 dark:ring-white/10" aria-hidden="true">
-                                            <img src="{{ $stripCard['img'] }}" alt="" class="aspect-[3/4] w-full object-cover" width="96" height="128" loading="{{ $stripCopy === 0 ? 'eager' : 'lazy' }}" decoding="async" fetchpriority="{{ $stripCopy === 0 ? 'auto' : 'low' }}">
+                                            <img src="{{ $stripCard['img'] }}" alt="" class="aspect-[3/4] w-full object-cover" width="96" height="128" loading="{{ $stripEager ? 'eager' : 'lazy' }}" decoding="async" fetchpriority="{{ $stripEager ? 'auto' : 'low' }}">
                                         </div>
                                     @endif
                                 @endforeach
@@ -490,10 +522,13 @@
                     <div class="es-wall-col" style="--dur: {{ $wallDurations[$wallColumnIndex] }}s;">
                         <div class="es-wall-track">
                             @for ($wallCopy = 0; $wallCopy < 2; $wallCopy++)
-                                @foreach ($wallColumnCards as $wallCard)
+                                @foreach ($wallColumnCards as $wallRowIndex => $wallCard)
+                                    {{-- Row 0 of column N is card N, so the wall's eager set is
+                                         cards 0-4: the first five of the strip's first six. --}}
+                                    @php $wallEager = $wallCopy === 0 && $wallRowIndex === 0 && $wallCard['eager']; @endphp
                                     @if ($wallCard['url'])
                                         <a href="{{ $wallCard['url'] }}" target="_blank" rel="noopener" @if ($wallCopy === 1) aria-hidden="true" tabindex="-1" @endif class="es-wall-card group relative block bg-gray-200 focus-visible:outline-none dark:bg-white/10" aria-label="{{ $wallCard['name'] }}">
-                                            <img src="{{ $wallCard['img'] }}" alt="" class="aspect-[3/4] w-full object-cover" width="208" height="277" loading="{{ $wallCopy === 0 ? 'eager' : 'lazy' }}" decoding="async" fetchpriority="{{ $wallCopy === 0 ? 'auto' : 'low' }}">
+                                            <img src="{{ $wallCard['img'] }}" alt="" class="aspect-[3/4] w-full object-cover" width="208" height="277" loading="{{ $wallEager ? 'eager' : 'lazy' }}" decoding="async" fetchpriority="{{ $wallEager ? 'auto' : 'low' }}">
                                             <span class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-3 pb-2.5 pt-8">
                                                 <span class="block truncate text-xs font-bold text-white">{{ $wallCard['name'] }}</span>
                                                 <span class="block text-[10px] text-white/75">{{ $wallCard['date'] }}</span>
@@ -501,7 +536,7 @@
                                         </a>
                                     @else
                                         <div class="es-wall-card relative bg-gray-200 dark:bg-white/10" aria-hidden="true">
-                                            <img src="{{ $wallCard['img'] }}" alt="" class="aspect-[3/4] w-full object-cover" width="208" height="277" loading="{{ $wallCopy === 0 ? 'eager' : 'lazy' }}" decoding="async" fetchpriority="{{ $wallCopy === 0 ? 'auto' : 'low' }}">
+                                            <img src="{{ $wallCard['img'] }}" alt="" class="aspect-[3/4] w-full object-cover" width="208" height="277" loading="{{ $wallEager ? 'eager' : 'lazy' }}" decoding="async" fetchpriority="{{ $wallEager ? 'auto' : 'low' }}">
                                         </div>
                                     @endif
                                 @endforeach

@@ -40,26 +40,48 @@ class MarketingController extends Controller
         return view('marketing.index', [
             'personas' => $this->getPersonas(),
             'steps' => $this->getSteps(),
-            // Same visibility rules as /browse: only events whose card shows a real
-            // image (own flyer, or a talent/venue schedule's profile photo), so the
-            // homepage rail is guaranteed visually rich posters.
-            'discoverEvents' => $this->publicUpcomingEventsQuery()
-                ->where('is_hidden_from_discovery', false)
-                ->where(function ($sub) {
-                    $sub->where(function ($f) {
-                        $f->whereNotNull('flyer_image_url')
-                            ->where('flyer_image_url', '!=', '');
-                    })
-                        ->orWhereHas('roles', function ($r) {
-                            $r->whereIn('roles.type', ['talent', 'venue'])
-                                ->whereNotNull('roles.profile_image_url')
-                                ->where('roles.profile_image_url', '!=', '');
-                        });
-                })
-                ->orderByRaw('CASE WHEN starts_at >= ? THEN 0 ELSE 1 END, starts_at IS NULL, starts_at ASC', [Carbon::today()])
-                ->limit(25)
-                ->get(),
+            'discoverEvents' => $this->discoverWallEvents(),
         ]);
+    }
+
+    /**
+     * The events behind the homepage poster wall, the mobile strip and the discover rail.
+     *
+     * Same visibility rules as /browse: only events whose card shows a real image (own flyer, or
+     * a talent/venue schedule's profile photo), so the wall is guaranteed visually rich posters.
+     *
+     * Cached for 10 minutes: this is five correlated subqueries plus an excludeLikelyTest() regex
+     * pass, run on the single most-hit page on the site, and its answer only moves when somebody
+     * publishes an event. No invalidation is wired up, because a ten-minute-old wall is
+     * indistinguishable from a fresh one. Keyed on the app URL so a white-label nexus install
+     * cannot be served another install's wall.
+     */
+    private function discoverWallEvents()
+    {
+        $build = fn () => $this->publicUpcomingEventsQuery()
+            ->where('is_hidden_from_discovery', false)
+            ->where(function ($sub) {
+                $sub->where(function ($f) {
+                    $f->whereNotNull('flyer_image_url')
+                        ->where('flyer_image_url', '!=', '');
+                })
+                    ->orWhereHas('roles', function ($r) {
+                        $r->whereIn('roles.type', ['talent', 'venue'])
+                            ->whereNotNull('roles.profile_image_url')
+                            ->where('roles.profile_image_url', '!=', '');
+                    });
+            })
+            ->orderByRaw('CASE WHEN starts_at >= ? THEN 0 ELSE 1 END, starts_at IS NULL, starts_at ASC', [Carbon::today()])
+            ->limit(25)
+            ->get();
+
+        // The test cache store is `array` and survives RefreshDatabase within a process, so a
+        // wall cached by one test would render, against a wiped database, in the next one.
+        if (app()->runningUnitTests()) {
+            return $build();
+        }
+
+        return Cache::remember('marketing.wall.'.md5((string) config('app.url')), now()->addMinutes(10), $build);
     }
 
     /**

@@ -2,6 +2,8 @@
 
 namespace App\Utils;
 
+use Illuminate\Support\Facades\Storage;
+
 class ImageUtils
 {
     /**
@@ -137,6 +139,223 @@ class ImageUtils
 
         // Already an absolute URL from some other source.
         return $value;
+    }
+
+    /**
+     * The one derivative width the app generates today.
+     *
+     * The homepage poster wall declares 96x128 (mobile strip), 208x277 (desktop wall) and
+     * 320x427 (rail) slots, so 480px covers every one of them at up to 2x DPR while staying
+     * one file. Widths are part of the derivative FILENAME, so adding a second one later is
+     * additive - nothing already generated has to be rewritten.
+     */
+    public const VARIANT_WIDTH = 480;
+
+    public const VARIANT_QUALITY = 80;
+
+    /**
+     * Refuse to decode anything bigger than this.
+     *
+     * GD allocates 4 bytes per pixel for a truecolor canvas, so 12MP is ~48MB for the source
+     * alone before the destination canvas, and the hosted PHP workers are capped at 128MB.
+     * Only the web upload path resizes originals (EventRepo caps them at 2000px); the API,
+     * guest submit, WhatsApp and import paths all store whatever arrived, so this guard is
+     * the only thing standing between a 10MB camera JPEG and an OOM in the queue worker.
+     * getimagesize() reads the header only, so the check costs nothing.
+     */
+    public const VARIANT_MAX_PIXELS = 12_000_000;
+
+    /**
+     * Deterministic name for a derivative of a stored image.
+     *
+     * `flyer_abc123.png` at 480px becomes `flyer_abc123_w480.webp`. Deterministic on purpose:
+     * regenerating overwrites rather than orphaning, and a caller holding only the original's
+     * name can still address the derivative.
+     */
+    public static function variantFilename(string $storedName, int $width = self::VARIANT_WIDTH): string
+    {
+        $dir = pathinfo($storedName, PATHINFO_DIRNAME);
+        $name = pathinfo($storedName, PATHINFO_FILENAME).'_w'.$width.'.webp';
+
+        return ($dir && $dir !== '.' && $dir !== DIRECTORY_SEPARATOR) ? $dir.'/'.$name : $name;
+    }
+
+    /**
+     * The disk path a stored image filename lives at.
+     *
+     * Mirrors the storeAs() rule every write path uses
+     * (`config('filesystems.default') == 'local' ? '/public' : '/'`), so a derivative written
+     * here is served by exactly the same `/storage/...` or CDN URL as its original.
+     */
+    public static function storagePathFor(string $filename): string
+    {
+        return config('filesystems.default') == 'local' ? 'public/'.$filename : $filename;
+    }
+
+    /**
+     * Public URL for a derivative filename recorded in an `image_variants` column.
+     *
+     * Delegates to storedUrl() deliberately: the derivative sits on the same disk in the same
+     * directory as its original, so it has to resolve through the identical branch or a
+     * selfhost install would serve `/storage/...` for the flyer and a CDN host for its thumbnail.
+     */
+    public static function variantUrl(?string $variantFilename): string
+    {
+        return self::storedUrl($variantFilename);
+    }
+
+    /**
+     * Write a WebP derivative of a stored image next to the original, on the same disk.
+     *
+     * Model-agnostic on purpose: it takes the raw stored filename (what
+     * `events.flyer_image_url` holds), not a model, so `roles.profile_image_url` can reuse it
+     * unchanged. GD cannot read from S3, so the original is streamed to a temp file first and
+     * both temp files are removed in a `finally`.
+     *
+     * Never upscales: a source narrower than the target is re-encoded at its own width, which
+     * is still a large win (the wall's originals are multi-megabyte PNGs). The returned
+     * filename always names the REQUESTED width so the recorded key stays predictable.
+     *
+     * @return array{ok: bool, filename: ?string, reason: ?string} reason is one of
+     *                                                             demo|external|missing|unreadable|too_large|failed
+     */
+    public static function generateStoredVariant(string $storedName, int $width = self::VARIANT_WIDTH): array
+    {
+        $skip = fn (string $reason) => ['ok' => false, 'filename' => null, 'reason' => $reason];
+
+        if (! $storedName) {
+            return $skip('missing');
+        }
+
+        // Demo seed flyers ship in the repo as small WebPs already; there is nothing to gain
+        // and no storage disk to write to.
+        if (str_starts_with($storedName, 'demo_')) {
+            return $skip('demo');
+        }
+
+        // A few legacy rows hold a full URL rather than a stored filename.
+        if (str_starts_with($storedName, 'http')) {
+            return $skip('external');
+        }
+
+        $sourcePath = self::storagePathFor($storedName);
+
+        if (! Storage::exists($sourcePath)) {
+            return $skip('missing');
+        }
+
+        $tempIn = tempnam(sys_get_temp_dir(), 'variant_src_');
+        $tempOut = tempnam(sys_get_temp_dir(), 'variant_out_');
+
+        $sourceImage = null;
+        $destImage = null;
+
+        try {
+            $read = Storage::readStream($sourcePath);
+            if (! $read) {
+                return $skip('missing');
+            }
+
+            $write = fopen($tempIn, 'w');
+            if (! $write) {
+                fclose($read);
+
+                return $skip('failed');
+            }
+
+            stream_copy_to_stream($read, $write);
+            fclose($write);
+            fclose($read);
+
+            // Header-only read, BEFORE any GD allocation. Everything below this line depends
+            // on it having passed.
+            $info = @getimagesize($tempIn);
+            if ($info === false) {
+                return $skip('unreadable');
+            }
+
+            [$srcWidth, $srcHeight] = $info;
+            $mimeType = $info['mime'] ?? null;
+
+            if ($srcWidth < 1 || $srcHeight < 1) {
+                return $skip('unreadable');
+            }
+
+            if (($srcWidth * $srcHeight) > self::VARIANT_MAX_PIXELS) {
+                return $skip('too_large');
+            }
+
+            $sourceImage = match ($mimeType) {
+                'image/jpeg' => @imagecreatefromjpeg($tempIn),
+                'image/png' => @imagecreatefrompng($tempIn),
+                'image/gif' => @imagecreatefromgif($tempIn),
+                'image/webp' => @imagecreatefromwebp($tempIn),
+                default => null,
+            };
+
+            if (! $sourceImage) {
+                return $skip('unreadable');
+            }
+
+            $destWidth = min($width, $srcWidth);
+            $destHeight = max(1, (int) round($srcHeight * ($destWidth / $srcWidth)));
+
+            $destImage = imagecreatetruecolor($destWidth, $destHeight);
+            if (! $destImage) {
+                return $skip('failed');
+            }
+
+            // WebP carries alpha, and a flyer with a transparent background would otherwise
+            // resample onto black.
+            imagealphablending($destImage, false);
+            imagesavealpha($destImage, true);
+            $transparent = imagecolorallocatealpha($destImage, 0, 0, 0, 127);
+            imagefill($destImage, 0, 0, $transparent);
+
+            imagecopyresampled(
+                $destImage, $sourceImage,
+                0, 0, 0, 0,
+                $destWidth, $destHeight,
+                $srcWidth, $srcHeight
+            );
+
+            if (! imagewebp($destImage, $tempOut, self::VARIANT_QUALITY)) {
+                return $skip('failed');
+            }
+
+            $destName = self::variantFilename($storedName, $width);
+            $stream = fopen($tempOut, 'r');
+            if (! $stream) {
+                return $skip('failed');
+            }
+
+            // Explicitly public: the do_spaces disk defaults to public visibility, but the
+            // local/public disks and any future S3 bucket must not be left to a default.
+            $stored = Storage::put(self::storagePathFor($destName), $stream, 'public');
+
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+
+            if (! $stored) {
+                return $skip('failed');
+            }
+
+            return ['ok' => true, 'filename' => $destName, 'reason' => null];
+        } finally {
+            if ($sourceImage) {
+                imagedestroy($sourceImage);
+            }
+            if ($destImage) {
+                imagedestroy($destImage);
+            }
+            if (file_exists($tempIn)) {
+                @unlink($tempIn);
+            }
+            if (file_exists($tempOut)) {
+                @unlink($tempOut);
+            }
+        }
     }
 
     /**

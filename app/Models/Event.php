@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Jobs\GenerateEventImageVariants;
 use App\Jobs\SyncEventToCalDAV;
 use App\Jobs\SyncEventToGoogleCalendar;
 use App\Jobs\SyncEventToMicrosoftCalendar;
 use App\Services\TicketVolumeDiscount;
 use App\Utils\EventTextGenerator;
+use App\Utils\ImageUtils;
 use App\Utils\MarkdownUtils;
 use App\Utils\MoneyUtils;
 use App\Utils\TextUtils;
@@ -162,6 +164,10 @@ class Event extends Model
         'individual_ticket_fields' => 'boolean',
         'sell_after_start' => 'boolean',
         'show_unavailable_tickets' => 'boolean',
+        // {"w480": "flyer_abc123_w480.webp"} or {"w480": null, "skipped": "too_large"}.
+        // Written only by GenerateEventImageVariants / the backfill command through
+        // recordImageVariants(), so deliberately NOT in $fillable.
+        'image_variants' => 'array',
     ];
 
     /** Per-request memo of pass advance-booking seats reserved, keyed by occurrence date. */
@@ -387,6 +393,14 @@ class Event extends Model
                 }
             }
 
+            // A new flyer invalidates every derivative of the old one. Cleared here rather
+            // than in the job so the wall falls straight back to the (correct) original in the
+            // up-to-a-minute window before the queue rebuilds the thumbnail, instead of showing
+            // the previous flyer's WebP under the new event image.
+            if ($model->exists && $model->isDirty('flyer_image_url')) {
+                $model->image_variants = null;
+            }
+
             if ($model->isDirty('short_description') && $model->exists) {
                 if (! $model->isDirty('short_description_en')) {
                     $model->short_description_en = null;
@@ -399,6 +413,24 @@ class Event extends Model
                     $eventRole->translation_attempts = 0;
                     $eventRole->save();
                 }
+            }
+        });
+
+        // Every flyer write path in the app ends in an Eloquent save(), so hooking the model
+        // covers the web upload, the API, guest submit, guest import, the AI flyer, Eventbrite,
+        // WhatsApp, the curator import and clone in one place. The exception is
+        // BackupService::importEventImages(), which uses saveQuietly() by design - restored rows
+        // are picked up by `php artisan images:backfill-variants`.
+        static::created(function ($model) {
+            self::queueImageVariants($model);
+        });
+
+        static::updated(function ($model) {
+            // performInsert() never calls syncChanges(), so wasChanged() is meaningless on a
+            // fresh insert - which is why the create case above is a separate hook rather than
+            // one shared `saved` listener.
+            if ($model->wasChanged('flyer_image_url')) {
+                self::queueImageVariants($model);
             }
         });
 
@@ -479,6 +511,27 @@ class Event extends Model
                 $event->dispatchCalendarSync('delete');
             }
         });
+    }
+
+    /**
+     * Queue the resized WebP derivative of this event's flyer, if it has one worth resizing.
+     *
+     * afterCommit() because inbound calendar sync and the seat-map rekey both save events inside
+     * a transaction, and on the `sync` queue (the selfhost default) the job would otherwise run
+     * S3 reads and writes inside that open transaction - the exact shape that has produced a live
+     * deadlock in this codebase before.
+     */
+    protected static function queueImageVariants(self $model): void
+    {
+        $raw = $model->getAttributes()['flyer_image_url'] ?? null;
+
+        // demo_ flyers ship in the repo as small WebPs already; a legacy http value is not ours
+        // to resize.
+        if (! $raw || str_starts_with($raw, 'demo_') || str_starts_with($raw, 'http')) {
+            return;
+        }
+
+        GenerateEventImageVariants::dispatch($model->id, $raw)->afterCommit();
     }
 
     /**
@@ -2251,9 +2304,23 @@ class Event extends Model
         });
     }
 
-    public function getImageUrl()
+    /**
+     * The image a card should render for this event: its own flyer, else the talent schedule's
+     * profile photo, else the venue's.
+     *
+     * Pass $width to ask for a resized derivative (see ImageUtils::VARIANT_WIDTH). It only ever
+     * applies to the FLYER: the schedule and venue fallbacks have no derivatives yet, and an
+     * event with no flyer must keep resolving exactly as before. An event whose derivative has
+     * not been generated (or was skipped) also falls through to the original, so a caller never
+     * has to check first - the URL is always renderable.
+     */
+    public function getImageUrl(?int $width = null)
     {
         if ($this->flyer_image_url) {
+            if ($width && ($variant = $this->imageVariantFilename($width))) {
+                return ImageUtils::variantUrl($variant);
+            }
+
             return $this->flyer_image_url;
         } elseif ($this->role() && $this->role()->profile_image_url) {
             return $this->role()->profile_image_url;
@@ -2262,6 +2329,61 @@ class Event extends Model
         }
 
         return null;
+    }
+
+    /**
+     * The stored filename of this event's flyer derivative at the given width, or null.
+     *
+     * Null covers all three "no derivative" cases at once: never generated, deliberately skipped
+     * (the value is null beside a `skipped` reason), and a narrowed get() that did not select the
+     * column at all.
+     */
+    public function imageVariantFilename(int $width = ImageUtils::VARIANT_WIDTH): ?string
+    {
+        $variants = $this->image_variants;
+
+        if (! is_array($variants)) {
+            return null;
+        }
+
+        $name = $variants['w'.$width] ?? null;
+
+        return (is_string($name) && $name !== '') ? $name : null;
+    }
+
+    /**
+     * Record the result of a derivative build.
+     *
+     * Written with the query builder, guarded on the flyer filename it was built from: resizing
+     * a multi-megabyte original takes seconds, and if the owner replaced the flyer in that window
+     * the saving hook already cleared this column and queued a fresh job. An unguarded write here
+     * would file the OLD flyer's thumbnail under the NEW one, and every card would show the wrong
+     * poster until someone edited the event again. Going around Eloquent also keeps updated_at
+     * (and the federation re-publish check that reads it) out of a purely derived write.
+     *
+     * Returns whether the row still matched.
+     */
+    public function recordImageVariants(array $variants): bool
+    {
+        $raw = $this->getAttributes()['flyer_image_url'] ?? null;
+
+        if (! $raw) {
+            return false;
+        }
+
+        $encoded = json_encode($variants);
+
+        $affected = DB::table('events')
+            ->where('id', $this->id)
+            ->where('flyer_image_url', $raw)
+            ->update(['image_variants' => $encoded]);
+
+        if ($affected) {
+            $this->attributes['image_variants'] = $encoded;
+            $this->syncOriginalAttribute('image_variants');
+        }
+
+        return $affected > 0;
     }
 
     /**

@@ -6,7 +6,8 @@
 @php
     $eventUrl = $event->getGuestUrl();
     $cardRole = $event->getViewableRole();
-    $imageUrl = $event->getImageUrl();
+    // 480px WebP derivative when one exists: the card renders at 320x427.
+    $imageUrl = $event->getImageUrl(480);
     $isHidden = $event->is_hidden_from_discovery;
     $isAdmin = auth()->check() && auth()->user()->isAdmin();
 @endphp
