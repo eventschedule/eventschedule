@@ -1752,7 +1752,15 @@ class EventController extends Controller
             ->wherePivot('is_auto_sourced', true)
             ->exists();
 
-        if ($isAutoSourced) {
+        // Same reasoning for the schedule that CREATED the event. events.creator_role_id is
+        // write-once, so detaching here strands it, and a missing event_role row is the one state
+        // no arm of Event::scopeManagedThrough() can rescue: the schedule's own team silently
+        // loses the event's sales and check-ins while the owner keeps them through
+        // events.user_id. Decline it instead - the guest-side reads honour is_accepted = false,
+        // so the listing still clears.
+        $isCreator = $event->creator_role_id && (int) $event->creator_role_id === (int) $role->id;
+
+        if ($isAutoSourced || $isCreator) {
             $role->events()->updateExistingPivot($event->id, ['is_accepted' => false]);
         } else {
             $role->events()->detach($event->id);
@@ -3318,6 +3326,14 @@ class EventController extends Controller
 
         // Create the event
         $event = new Event;
+        // Every other persisted creation site sets this (EventRepo::saveEvent, AppointmentService,
+        // the calendar syncs, BackupService); this one did not, so every booking-request event
+        // carried a NULL creator_role_id. That kills arm 1 of Event::scopeManagedThrough(), and
+        // with require_approval on the pivot below is attached at is_accepted = null, which kills
+        // arm 2 - leaving the event visible to the owner and invisible to the schedule's own
+        // admins in the check-in and scan pickers. CheckData cannot see it either: its creator
+        // check opens whereNotNull('creator_role_id').
+        $event->creator_role_id = $role->id;
         $event->name = $request->event_name ?: __('messages.booking_request');
         $event->description = $request->description;
         $event->starts_at = $startsAt;

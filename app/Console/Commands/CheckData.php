@@ -129,33 +129,71 @@ class CheckData extends Command
         });
     }
 
+    /**
+     * Events whose creating schedule has no event_role row.
+     *
+     * This is the one state no arm of Event::scopeManagedThrough() can rescue: the owner still
+     * reads the event through events.user_id, so nobody notices, while every team member on that
+     * schedule silently loses its sales, check-in stats and scan picker. creator_role_id is
+     * write-once (EventRepo::saveEvent, $isNewEvent block) but event_role is fully replaced by
+     * sync() on every save, so the two drift and nothing else reconciles them.
+     */
     private function checkEventCreatorRoles(array &$errors, bool $shouldFix): void
     {
-        Event::with('roles')->whereNotNull('creator_role_id')->chunkById(500, function ($events) use (&$errors, $shouldFix) {
+        // Reported in aggregate and NEVER repaired. Choosing a creator for an event that never
+        // recorded one is a guess, and the 2025_01_15 backfill already guessed once - it read the
+        // user's OLDEST role_user row, with no join to event_role and no level filter, which is
+        // where a large share of today's wrong values came from. Do not add a heuristic here.
+        $nullCreator = [];
+
+        // No whereNotNull() filter: a NULL creator_role_id kills the same arm of the scope, and
+        // excluding it here is what made that population invisible to this check.
+        Event::with('roles')->chunkById(500, function ($events) use (&$errors, &$nullCreator, $shouldFix) {
             foreach ($events as $event) {
-                $roleIds = $event->roles->pluck('id')->toArray();
+                if (! $event->creator_role_id) {
+                    $nullCreator[] = $event->id;
 
-                if (! in_array($event->creator_role_id, $roleIds)) {
-                    $error = 'Creator role not in event roles for event '.$event->id.': '.$event->name;
+                    continue;
+                }
 
-                    if ($shouldFix) {
-                        $claimedRole = $event->roles->first(function ($role) {
-                            return $role->isClaimed();
-                        });
+                if ($event->roles->contains('id', $event->creator_role_id)) {
+                    continue;
+                }
 
-                        if ($claimedRole) {
-                            $event->creator_role_id = $claimedRole->id;
-                            $event->save();
-                            $this->info("Fixed creator_role_id for event {$event->id} to role {$claimedRole->id}");
-                        } else {
-                            $errors[] = $error;
-                        }
-                    } else {
-                        $errors[] = $error;
-                    }
+                $error = 'Creator role not in event roles for event '.$event->id.': '.$event->name;
+
+                if (! $shouldFix) {
+                    $errors[] = $error;
+
+                    continue;
+                }
+
+                // Re-attach the pivot. Do NOT rewrite creator_role_id: the discrepancy is a
+                // missing MEMBERSHIP row, while creator_role_id is provenance. The previous
+                // repair stamped whichever claimed role happened to come first out of an
+                // unordered relation, which left the schedule's team just as blind, destroyed the
+                // record of who created the event, and made this check report clean for ever
+                // after. RoleController::performMerge() already carries a comment warning about
+                // precisely that behaviour.
+                $creatorRole = Role::find($event->creator_role_id);
+
+                if ($creatorRole && ! $creatorRole->is_deleted) {
+                    // true, not null: for a schedule's own event autoAcceptsEventFrom() returns
+                    // true on its first rule, so this restores the row the save should have kept
+                    // rather than inventing a pending one the guest page would hide.
+                    $event->roles()->attach($creatorRole->id, ['is_accepted' => true]);
+                    $this->info("Re-attached creator role {$creatorRole->id} to event {$event->id}");
+                } else {
+                    $errors[] = $error;
                 }
             }
         });
+
+        if ($nullCreator) {
+            $shown = implode(', ', array_slice($nullCreator, 0, 20));
+            $errors[] = 'Null creator_role_id on '.count($nullCreator).' event(s) (not auto-fixable): '
+                .$shown.(count($nullCreator) > 20 ? ', ...' : '');
+        }
     }
 
     private function checkEncryption(array &$errors): void

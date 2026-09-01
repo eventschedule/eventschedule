@@ -1382,6 +1382,31 @@ class EventRepo
             $roleIds = array_values(array_unique($roleIds));
         }
 
+        // The creator schedule's own pivot row is not optional. $roleIds is assembled from the
+        // form - talent members[], the venue field, curators[] - and none of those sections
+        // necessarily names the schedule that CREATED the event, so sync() below would delete its
+        // event_role row while events.creator_role_id, written once at insert (see the $isNewEvent
+        // block above), keeps pointing at it.
+        //
+        // That divergence is invisible to the owner, who reads sales through events.user_id, and
+        // total for a team member, whose only route is the event_role EXISTS in
+        // Event::scopeManagedThrough() - no is_accepted value and no plan can rescue a row that is
+        // not there. Api\ApiEventController::update() reaches it on every call: it picks
+        // $currentRole from an unordered $event->roles loop and its request whitelist never
+        // carries the creator.
+        //
+        // The loop above already protects $currentRole unconditionally for the same reason; the
+        // creator simply was never considered. Restored to $roleIds only, deliberately not to
+        // $roles: that would re-run autoAcceptsEventFrom() and could flip a deliberate decline
+        // back to accepted, and arm 1 of the scope ignores is_accepted for the creator anyway.
+        if ($event->creator_role_id && ! in_array($event->creator_role_id, $roleIds)) {
+            $creatorRole = Role::find($event->creator_role_id);
+
+            if ($creatorRole && ! $creatorRole->is_deleted) {
+                $roleIds[] = $creatorRole->id;
+            }
+        }
+
         // sync() below detaches any curator that is visible to the saving user but absent from
         // curators[], which for a co-owned curator happens on every programmatic save. The rows
         // it drops are rebuilt by CuratorSourceService further down, so snapshot their
