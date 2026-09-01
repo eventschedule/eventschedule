@@ -54,24 +54,14 @@ class ScheduledTaskRun extends Model
      * Skips count. process-queue is blocked by its own mutex on any minute where the previous
      * queue:work is still draining, and treating that as "did not run" would mark the busiest
      * install's most important task permanently overdue.
+     *
+     * That makes this the wrong thing to ask "has this task completed lately", because a skip keeps
+     * it fresh forever - SchedulerHealth::state() anchors that question on last_finished_at
+     * instead, and only falls through to this for the overdue comparison.
      */
     public function lastSeenAt(): ?\Illuminate\Support\Carbon
     {
         return collect([$this->last_started_at, $this->last_skipped_at])
-            ->filter()
-            ->max();
-    }
-
-    /**
-     * The last time this task really ran - a start or a completion, whichever is later.
-     *
-     * Distinct from lastSeenAt(), which also counts a skip. A skip is evidence the SCHEDULER is
-     * alive; this is evidence the TASK is. SchedulerHealth needs both, and conflating them is what
-     * let a task wedged behind a stranded mutex read as healthy.
-     */
-    public function lastRanAt(): ?\Illuminate\Support\Carbon
-    {
-        return collect([$this->last_started_at, $this->last_finished_at])
             ->filter()
             ->max();
     }

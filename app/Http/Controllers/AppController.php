@@ -155,10 +155,13 @@ class AppController extends Controller
                 report($e);
             }
 
-            // Process queued jobs (emails, etc.)
+            // Process queued jobs (emails, etc.). --sleep=0: Worker::daemon() sleeps BEFORE
+            // stopIfNecessary() evaluates stopWhenEmpty, so the default of 3 burns three seconds of
+            // every cron request on an empty queue. Keep in sync with routes/console.php.
             try {
                 \Artisan::call('queue:work', [
                     '--stop-when-empty' => true,
+                    '--sleep' => 0,
                     '--max-time' => 120,
                     '--tries' => 3,
                 ]);
@@ -336,7 +339,7 @@ class AppController extends Controller
                             // and a synchronous run of Stripe charges is the one thing here that
                             // can consume it all and starve the commands queued behind. It
                             // resumes next hour.
-                            \Artisan::call('app:charge-installments', ['--max-seconds' => 120]);
+                            \Artisan::call('app:charge-installments');
                         } finally {
                             $chargeLock->release();
                         }

@@ -21,9 +21,67 @@ use Tests\TestCase;
  * These are source-text assertions rather than behavioural ones, following the idiom already used
  * by TranslateCommandTest and QueueFailureHandlingTest. The rails are two hand-maintained lists;
  * comparing the lists is the point.
+ *
+ * WHAT THESE GUARDS CANNOT SEE - read this before trusting a green run:
+ *
+ * - Cadence on the HTTP rail is read from the TIER'S KEY NAME, never its TTL. Changing
+ *   Cache::put('td_hourly', true, now()->addHour()) to addMinutes(5) keeps the label 'hourly' and
+ *   keeps this file green while the whole hourly block starts running twelve times as often.
+ *   self::TIERS is a hand-maintained map with nothing tying it to the source it describes.
+ * - The condition walk understands `if` and nothing else. `elseif`, `else`, a brace-less body,
+ *   alternative syntax, and the scheduler's own ->when() / ->skip() / ->environments() all read as
+ *   'ungated'. Moving an existing `if (config('app.hosted'))` into ->when() - a tidy-up a reviewer
+ *   would wave through - deletes the gate from this file's view entirely.
+ * - hostedGate() reads negation from the text immediately before config('app.hosted'). It is right
+ *   for `!`, `!config(...)` and `$x && ! config(...)`, and WRONG for `! (config('app.hosted'))`,
+ *   `config('app.hosted') === false` and `$x !== config('app.hosted')`, all of which report
+ *   'hosted'. Hoisting a negation over a compound condition on one rail only passes green.
+ * - consoleCadences() splits on Schedule::call(, so each chunk carries the FOLLOWING entry's
+ *   comment block. preg_match takes the first hit, which is safe only while every entry uses a
+ *   frequency method from self::CADENCES. ->cron(), ->twiceDaily(), ->weekly(),
+ *   ->everyThirtyMinutes() and ->everyTenMinutes() are all absent from it, and ->at('03:00') vs
+ *   ->at('12:00') compare equal to a bare ->daily().
+ * - Schedule::call(new SomeJob) has no Artisan::call, so the newsletter entry is invisible on both
+ *   rails, as are the MetaAdsService::isBoostConfigured() and AdsService::isEnabled() gates.
+ *
+ * Every one of those is a real way for the rails to diverge with this file green. Widen the guard
+ * rather than assuming it already covers a shape you are about to introduce.
  */
 class CronRailSyncTest extends TestCase
 {
+    /**
+     * A raw DB::beginTransaction() must be recovered on \Throwable, not \Exception.
+     *
+     * Both cron rails continue to the next task after a failure - ScheduleRunCommand catches
+     * Throwable per event, and translateData catches it per command - so an \Error that escapes a
+     * raw transaction's recovery leaves that transaction OPEN, and every write the rest of the tick
+     * makes is rolled back at teardown while the cache-backed tier keys survive to mark the work
+     * done. Silent, and repeats every tick.
+     *
+     * DB::transaction(closure) is safe (it catches Throwable itself), so only hand-rolled
+     * transactions need this. There is exactly one such file reachable from either rail today.
+     */
+    public function test_raw_transactions_recover_on_throwable(): void
+    {
+        foreach (['app/Services/NewsletterService.php'] as $path) {
+            $source = file_get_contents(base_path($path));
+
+            foreach (['DB::beginTransaction()', '->beginTransaction()'] as $needle) {
+                $offset = 0;
+
+                while (($at = strpos($source, $needle, $offset)) !== false) {
+                    $offset = $at + 1;
+                    $recovery = substr($source, $at, 4000);
+
+                    $this->assertStringContainsString('catch (\Throwable', $recovery,
+                        "{$path}: the recovery for a raw {$needle} must catch \Throwable - an ".
+                        '\Error would otherwise leave the transaction open for the rest of the cron tick'
+                    );
+                }
+            }
+        }
+    }
+
     /**
      * Commands deliberately absent from BOTH rails. Each is hand-run until the hazards in its own
      * docblock are closed; see the notes in routes/console.php. Listing them here means adding one
@@ -128,6 +186,60 @@ class CronRailSyncTest extends TestCase
     }
 
     /**
+     * Same command, same ARGUMENTS.
+     *
+     * Name, cadence and gate can all agree while the two rails still behave differently, and they
+     * did: app:charge-installments was called with ['--max-seconds' => 120] on the HTTP rail and
+     * bare on the scheduler rail. Benign only because the signature defaults to the same 120 - but
+     * it is exactly the shape that stops being benign the moment either number moves, and
+     * routes/console.php sizes its mutex TTL by reasoning about "the command's own 120s budget".
+     */
+    public function test_the_arguments_match_on_both_rails(): void
+    {
+        $console = $this->argumentsIn($this->console());
+        $http = $this->argumentsIn($this->translateData());
+        $drift = [];
+
+        foreach (array_keys($console) as $command) {
+            if (($http[$command] ?? null) !== $console[$command]) {
+                $drift[$command] = 'console='.json_encode($console[$command]).
+                    ' http='.json_encode($http[$command] ?? null);
+            }
+        }
+
+        $this->assertSame([], $drift,
+            'these commands are invoked with different arguments on the two cron rails, so installs '.
+            'on the two rails get different behaviour even though the name, cadence and gate agree.'
+        );
+    }
+
+    /**
+     * Artisan arguments per command, whitespace-normalised.
+     *
+     * @return array<string, string>
+     */
+    private function argumentsIn(string $source): array
+    {
+        preg_match_all(
+            "/Artisan::call\\(\\s*'([^']+)'\\s*(,\\s*\\[[^\\]]*\\])?/",
+            $source,
+            $matches,
+            PREG_SET_ORDER
+        );
+
+        $arguments = [];
+
+        foreach ($matches as $match) {
+            // queue:* IS compared here, unlike in commandsIn(): its presence is shared plumbing,
+            // but its arguments are exactly what drifts silently - --sleep, --max-time and --tries
+            // all change how much work one tick does.
+            $arguments[$match[1]] = preg_replace('/\\s+/', ' ', trim($match[2] ?? ''));
+        }
+
+        return $arguments;
+    }
+
+    /**
      * CLAUDE.md requires matching FREQUENCY too, and until this existed nothing checked it: moving
      * a command from the hourly tier to the daily one on a single rail passed cleanly, even though
      * the failure message told you it would not.
@@ -149,8 +261,9 @@ class CronRailSyncTest extends TestCase
                 $this->assertSame(
                     self::CADENCE_EXCEPTIONS[$command],
                     [$console[$command], $http[$command]],
-                    "{$command} is an allowed cadence exception, but neither rail matches the pair ".
-                    'recorded here any more. Re-read the reasoning before editing this.'
+                    "{$command} is listed as an allowed cadence exception, but the rails no longer ".
+                    'match the pair recorded there. Note this also fires when the rails are brought '.
+                    'into AGREEMENT - which is the good outcome: delete the CADENCE_EXCEPTIONS entry.'
                 );
 
                 continue;
@@ -172,10 +285,11 @@ class CronRailSyncTest extends TestCase
      * Commands whose cadence deliberately differs, as [scheduler rail, HTTP rail].
      *
      * app:retry-failed-jobs: the per-job cap, the cooldown and the per-job error handling all live
-     * INSIDE the command, so the two cadences produce identical retry behaviour rather than two
-     * different retry budgets - which is why both rails' comments say to keep the callers in sync
-     * without saying to keep the frequency in sync. Listing it here means changing it is a
-     * deliberate edit to this test rather than an accident.
+     * INSIDE the command, so the two cadences cannot produce two different retry BUDGETS - which is
+     * why both rails' comments say to keep the callers in sync without saying to keep the frequency
+     * in sync. Not identical behaviour, though: RetryFailedJobs exempts the first retry from the
+     * cooldown, so the one-minute rail reaches a newly-failed job sooner and rescans its batch five
+     * times as often. Listing it here means changing it is a deliberate edit, not an accident.
      */
     private const CADENCE_EXCEPTIONS = [
         'app:retry-failed-jobs' => ['5min', 'minute'],

@@ -127,7 +127,13 @@ class NewsletterService
                 NewsletterRecipient::insert($chunk);
             }
             DB::commit();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            // \Throwable, not \Exception. This is a RAW beginTransaction, so an \Error escaping
+            // here leaves the transaction open - and both cron rails carry on afterwards
+            // (ScheduleRunCommand catches Throwable per event; translateData does too), so every
+            // later write that minute lands in a doomed transaction and is lost at teardown, with
+            // the cache-backed tier keys surviving to mark the work done. Rolling back is correct
+            // for an \Error as well; the connection is usable again either way.
             DB::rollBack();
             $newsletter->update([
                 'status' => $newsletter->scheduled_at ? 'scheduled' : 'draft',
@@ -686,7 +692,9 @@ class NewsletterService
                 NewsletterRecipient::insert($chunk);
             }
             DB::commit();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            // \Throwable for the same reason as the sibling block above: a raw transaction left
+            // open by an \Error poisons every write the rest of the cron tick makes.
             DB::rollBack();
             $remainderNewsletter->update(['status' => 'draft', 'send_token' => null]);
             report($e);

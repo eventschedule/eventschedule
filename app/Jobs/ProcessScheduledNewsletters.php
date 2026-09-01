@@ -51,7 +51,10 @@ class ProcessScheduledNewsletters
                         'recipients' => $result[1] ?? null,
                     ]);
                 }
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
+                // \Throwable so one newsletter cannot abort the loop - and, more importantly, so an
+                // \Error from NewsletterService reaches a handler at all rather than unwinding
+                // past both cron rails with a transaction still open.
                 Log::error('Failed to process scheduled newsletter: '.$e->getMessage(), [
                     'newsletter_id' => $newsletter->id,
                     'error' => $e->getMessage(),

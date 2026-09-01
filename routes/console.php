@@ -29,9 +29,13 @@ use Illuminate\Support\Facades\Schedule;
  *    mutex is visible either way - which is what makes rounding up safe.
  */
 
+// --sleep=0 because Worker::daemon() sleeps BEFORE stopIfNecessary() evaluates stopWhenEmpty, so
+// the default of 3 burns three seconds of every tick on an empty queue - which is the normal state.
+// Idle pacing is irrelevant here: the worker stops on its first empty poll either way.
 Schedule::call(function () {
     Artisan::call('queue:work', [
         '--stop-when-empty' => true,
+        '--sleep' => 0,
         '--max-time' => 120,
         '--tries' => 3,
     ]);

@@ -40,16 +40,18 @@ class CleanupBackups extends Command
                         Storage::disk($disk)->delete($job->file_path);
                     }
                 }
+                $job->update(['file_path' => null]);
             } catch (\Throwable $e) {
                 report($e);
                 $failedDeletes++;
 
                 // file_path is deliberately left set, so the next run tries this row again rather
-                // than orphaning the object with nothing pointing at it.
+                // than orphaning the object with nothing pointing at it. That does mean a
+                // permanently undeletable object is retried daily forever; bounded by the number of
+                // expired rows, and the row is not downloadable meanwhile because
+                // BackupJob::hasDownload() already gates on file_expires_at being in the future.
                 continue;
             }
-
-            $job->update(['file_path' => null]);
         }
 
         if ($failedDeletes > 0) {
@@ -70,10 +72,19 @@ class CleanupBackups extends Command
             ->get();
 
         foreach ($stale as $job) {
-            if ($job->file_path && Storage::disk('local')->exists($job->file_path)) {
-                Storage::disk('local')->delete($job->file_path);
+            // Guarded for the same reason as the export sweep above: FilesystemAdapter::exists()
+            // has no try/catch of its own, so it propagates whatever the disk throws regardless of
+            // the `throw` flag - and everything below this loop, including the stuck-job sweep that
+            // is the only way to unwedge a user, would be skipped.
+            try {
+                if ($job->file_path && Storage::disk('local')->exists($job->file_path)) {
+                    Storage::disk('local')->delete($job->file_path);
+                }
+
+                $job->update(['file_path' => null]);
+            } catch (\Throwable $e) {
+                report($e);
             }
-            $job->update(['file_path' => null]);
         }
 
         if ($stale->count() > 0) {
@@ -122,11 +133,18 @@ class CleanupBackups extends Command
         // row, so this sweep is the only thing that ever collects an abandoned upload.
         $orphaned = 0;
         foreach (Storage::disk('local')->allFiles('backups') as $file) {
-            if (str_contains($file, '/import-') &&
-                Storage::disk('local')->lastModified($file) < now()->subHour()->timestamp &&
-                ! BackupJob::where('file_path', $file)->exists()) {
-                Storage::disk('local')->delete($file);
-                $orphaned++;
+            // Per-file, because lastModified() does not honour the disk's `throw` flag either: a
+            // file that vanishes between allFiles() and this stat - which a concurrent upload or
+            // cleanup does - would otherwise abort the sweep partway through.
+            try {
+                if (str_contains($file, '/import-') &&
+                    Storage::disk('local')->lastModified($file) < now()->subHour()->timestamp &&
+                    ! BackupJob::where('file_path', $file)->exists()) {
+                    Storage::disk('local')->delete($file);
+                    $orphaned++;
+                }
+            } catch (\Throwable $e) {
+                report($e);
             }
         }
 

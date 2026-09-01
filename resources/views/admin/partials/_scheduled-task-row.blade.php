@@ -26,7 +26,12 @@
     $since = $task->lastSeenAt?->diffForHumans(null, true, true);
     $label = match ($task->state) {
         'failed' => __('messages.failed'),
-        'never_finished' => __('messages.task_never_finished', ['age' => $row?->last_started_at?->diffForHumans(null, true, true) ?? '?']),
+        // The state can now be reached by a row created by a SKIP, which has no last_started_at at
+        // all - "started ? ago and never finished" is what the old `?? '?'` rendered at the
+        // operator. Say the true thing instead; the dot stays red either way.
+        'never_finished' => $row?->last_started_at
+            ? __('messages.task_never_finished', ['age' => $row->last_started_at->diffForHumans(null, true, true)])
+            : __('messages.scheduler_never_ran'),
         // $since cannot be null here: state() only returns 'overdue' when lastSeenAt() is set,
         // and a task that has never run gets 'not_yet_run' instead.
         'overdue' => __('messages.task_overdue_by', ['age' => $since]),

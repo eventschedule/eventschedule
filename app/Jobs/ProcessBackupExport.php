@@ -151,7 +151,10 @@ class ProcessBackupExport implements ShouldQueue
                 report($notificationFailure);
             }
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            // \Throwable, matching the two catches below it. An \Error in exportSchedules() used
+            // to skip the partial-upload cleanup entirely and leak the object: failed() marks the
+            // row failed but has no $zipFilename in scope, so nothing else would ever collect it.
             report($e);
 
             // Mark the job failed FIRST. The backups disk is deliberately 'throw' => true, and the

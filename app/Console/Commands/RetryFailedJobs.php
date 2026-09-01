@@ -137,8 +137,12 @@ class RetryFailedJobs extends Command
             }
 
             if ($retried > 0 && ! $this->option('skip-work')) {
+                // --sleep=0 for the same reason as both cron rails: Worker::daemon() sleeps
+                // BEFORE stopIfNecessary() evaluates stopWhenEmpty, so the default of 3 is three
+                // seconds burned after the last retried job drains.
                 Artisan::call('queue:work', [
                     '--stop-when-empty' => true,
+                    '--sleep' => 0,
                     '--max-time' => 60,
                     '--tries' => 3,
                 ]);

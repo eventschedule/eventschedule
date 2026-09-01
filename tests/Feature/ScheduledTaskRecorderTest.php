@@ -7,6 +7,7 @@ use App\Services\ScheduledTaskRecorder;
 use App\Services\SchedulerHealth;
 use Illuminate\Console\Events\ScheduledTaskFailed;
 use Illuminate\Console\Events\ScheduledTaskFinished;
+use Illuminate\Console\Events\ScheduledTaskSkipped;
 use Illuminate\Console\Events\ScheduledTaskStarting;
 use Illuminate\Console\Scheduling\CacheEventMutex;
 use Illuminate\Console\Scheduling\CallbackEvent;
@@ -168,6 +169,43 @@ class ScheduledTaskRecorderTest extends TestCase
 
         $this->assertNotNull($row, 'the run must still be recorded');
         $this->assertLessThanOrEqual(20, mb_strlen($row->last_via));
+    }
+
+    /**
+     * A skip must not erase a recorded failure.
+     *
+     * Both cron rails can be live at once during a cutover, so a task that just failed on one rail
+     * is routinely skipped on the other a moment later. Letting that skip advance last_status
+     * turned the row green while last_error and consecutive_failures sat unread - and
+     * SchedulerHealth::state() only renders the error when the state is 'failed', so the failure
+     * vanished from the page and from the needs-attention list entirely.
+     */
+    public function test_a_skip_does_not_erase_a_recorded_failure(): void
+    {
+        ScheduledTaskRecorder::failed(new ScheduledTaskFailed($this->event(), new \RuntimeException('boom')));
+
+        ScheduledTaskRecorder::skipped(new ScheduledTaskSkipped($this->event()));
+
+        $row = ScheduledTaskRun::firstWhere('name', 'demo-task');
+
+        $this->assertSame(ScheduledTaskRun::STATUS_FAILED, $row->last_status,
+            'a skip is not evidence the failure is over');
+        $this->assertNotNull($row->last_skipped_at, 'but the skip is still recorded');
+        $this->assertSame(1, $row->consecutive_failures);
+    }
+
+    /** A real run finishing IS evidence, so it clears the failure as before. */
+    public function test_a_successful_run_does_clear_a_recorded_failure(): void
+    {
+        ScheduledTaskRecorder::failed(new ScheduledTaskFailed($this->event(), new \RuntimeException('boom')));
+
+        ScheduledTaskRecorder::starting(new ScheduledTaskStarting($this->event()));
+        ScheduledTaskRecorder::finished(new ScheduledTaskFinished($this->event(exitCode: 0), 0.5));
+
+        $row = ScheduledTaskRun::firstWhere('name', 'demo-task');
+
+        $this->assertSame(ScheduledTaskRun::STATUS_SUCCEEDED, $row->last_status);
+        $this->assertSame(0, $row->consecutive_failures);
     }
 
     /**

@@ -13,6 +13,7 @@ use Illuminate\Console\Scheduling\CallbackEvent;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schedule as ScheduleFacade;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
@@ -146,76 +147,91 @@ class SchedulerHealthStateTest extends TestCase
      * An overlap skip is evidence the scheduler considered the task, so it counts toward liveness.
      * process-queue runs a 120s queue:work under a mutex and is legitimately skipped on busy
      * minutes; without this it would sit permanently overdue on the busiest installs.
-     *
-     * Written through the recorder rather than hand-built. An earlier version of this test invented
-     * a row with last_finished_at AFTER last_started_at, which the recorder cannot produce, and so
-     * it passed on data that never occurs.
      */
     public function test_a_skip_counts_as_liveness(): void
     {
         $this->tick();
 
-        // The real process-queue cycle: a run completes, the next one starts and is still draining
-        // a minute later, so this minute's tick bounces off the held mutex.
+        // A completed run, then two minutes in which the mutex was held by the NEXT run - which is
+        // over by now, so nothing is in flight and only the skips keep the row fresh. Built this
+        // way on purpose: with isRunning() false, state() has to fall through to lastSeenAt(),
+        // which is the property under test. A row that is still running short-circuits above it.
         $this->record('process-queue', exitCode: 0);
         ScheduledTaskRun::where('name', 'process-queue')->update([
-            'last_started_at' => now()->subMinutes(3),
-            'last_finished_at' => now()->subMinutes(2),
+            'last_started_at' => now()->subMinutes(4),
+            'last_finished_at' => now()->subMinutes(3),
         ]);
-        ScheduledTaskRecorder::starting(new ScheduledTaskStarting($this->event('process-queue')));
         $this->skip('process-queue');
 
-        // "running", not "overdue": the mutex being held is evidence a run is in flight, which is
-        // the normal state of a task whose work outlasts its own interval. What matters is that a
-        // routine skip is never counted as trouble.
-        $this->assertSame('running', $this->state('process-queue'));
-        $this->assertNotContains($this->state('process-queue'), ['overdue', 'never_finished', 'failed']);
+        $run = ScheduledTaskRun::where('name', 'process-queue')->first();
+        $this->assertFalse($run->isRunning(), 'the fixture must reach the lastSeenAt() comparison');
+
+        // 'ok', not 'overdue': process-queue is due every minute and its last START was 4 minutes
+        // ago, which is past the overdue threshold. Only the skip keeps it healthy.
+        $this->assertSame('ok', $this->state('process-queue'));
+    }
+
+    /** The property the row above rests on, asserted directly rather than inferred from a state. */
+    public function test_last_seen_at_counts_a_skip(): void
+    {
+        $run = new ScheduledTaskRun([
+            'last_started_at' => now()->subHour(),
+            'last_skipped_at' => now()->subMinute(),
+        ]);
+
+        $this->assertTrue($run->lastSeenAt()->equalTo($run->last_skipped_at),
+            'a skip is evidence the scheduler considered the task and must count toward liveness');
     }
 
     /**
-     * The stranded-mutex case: the single failure this whole table exists to catch.
+     * The failure this table exists to catch, driven through a timeline production can actually
+     * produce.
      *
-     * A skipped tick touches ONLY last_skipped_at, so the row keeps a fresh lastSeenAt() while
-     * last_started_at stays behind last_finished_at. isRunning() is therefore false and the
-     * freshness test passes, which read as a green "ran 30s ago" for a task that had not run in
-     * hours. The skip-streak check in SchedulerHealth::state() is what catches it, measured
-     * against the task's own withoutOverlapping() budget.
+     * A run hangs. Its mutex TTL is the task's own withoutOverlapping() budget, so every tick
+     * inside that window is skipped - and when the TTL lapses a FRESH COPY launches, restamping
+     * last_started_at. That respawn is why the verdict cannot be measured from the start: doing so
+     * resets the clock every budget minutes and the task reads "running" forever. Anchoring on
+     * last_finished_at is what makes it stick.
      */
-    public function test_a_task_stranded_behind_its_mutex_is_flagged(): void
+    public function test_a_hung_task_that_keeps_respawning_is_flagged(): void
     {
         $this->tick();
 
-        // startOfSecond because the column stores whole seconds; comparing against a fresh now()
-        // below would otherwise fail on microseconds rather than on the property under test.
-        $stranded = now()->subHours(3)->startOfSecond();
-
+        // 10:00 - a clean run completes.
         $this->record('process-queue', exitCode: 0);
         ScheduledTaskRun::where('name', 'process-queue')->update([
-            'last_started_at' => $stranded,
-            'last_finished_at' => $stranded,
+            'last_started_at' => now()->subMinutes(62),
+            'last_finished_at' => now()->subMinutes(61),
         ]);
 
-        // Three minutes of ticks that each bounce off the held mutex.
-        foreach (range(1, 3) as $ignored) {
+        // 10:01 onward - a copy starts and hangs; ticks bounce off the mutex until the 20-minute
+        // TTL lapses, at which point another copy starts. Sixty minutes of that.
+        foreach ([60, 40, 20] as $minutesAgo) {
+            ScheduledTaskRecorder::starting(new ScheduledTaskStarting($this->event('process-queue')));
+            ScheduledTaskRun::where('name', 'process-queue')
+                ->update(['last_started_at' => now()->subMinutes($minutesAgo)]);
+
             $this->skip('process-queue');
         }
 
         $run = ScheduledTaskRun::where('name', 'process-queue')->first();
-        $this->assertTrue($run->last_started_at->equalTo($stranded),
-            'a skip must not restamp last_started_at - the whole detection depends on it');
-        $this->assertFalse($run->isRunning());
+        $this->assertTrue($run->isRunning(), 'a copy is in flight, so the row looks live');
+        $this->assertTrue($run->lastSeenAt()->gt(now()->subMinute()),
+            'and the skips keep lastSeenAt() fresh, which is why freshness cannot be the test');
 
         $this->assertSame('never_finished', $this->state('process-queue'),
-            'a task skipped every minute since its last completion must not read as healthy');
+            'nothing has COMPLETED for an hour; a respawn must not reset the verdict');
     }
 
     /**
-     * A task that has NEVER run, wedged behind a mutex stranded before this table existed.
+     * A task wedged behind a mutex nothing in this table created.
      *
-     * The row is created by the skip itself, so there is no start or finish to measure from and
-     * created_at is the only window. Without that fallback the row reads 'ok' forever.
+     * Reachable on a mixed deploy: the pre-4d23fdfcb code took its mutexes with the framework
+     * default of 1440 minutes, so one stranded by a SIGKILL before this table existed outlives
+     * every current expiry. The row is then created by the skips themselves - no start, no finish -
+     * and created_at is the only window there is.
      */
-    public function test_a_never_run_task_wedged_behind_a_mutex_is_flagged(): void
+    public function test_a_task_wedged_with_no_recorded_run_is_flagged(): void
     {
         $this->tick();
 
@@ -223,30 +239,81 @@ class SchedulerHealthStateTest extends TestCase
         ScheduledTaskRun::where('name', 'process-queue')->update(['created_at' => now()->subHours(3)]);
         $this->skip('process-queue');
 
+        $run = ScheduledTaskRun::where('name', 'process-queue')->first();
+        $this->assertNull($run->last_started_at, 'nothing ever recorded a start for this task');
+
         $this->assertSame('never_finished', $this->state('process-queue'));
     }
 
     /**
-     * The framework contract the recorder is built on, asserted rather than assumed.
+     * That row has no last_started_at, so the label must not claim a start time it does not have.
      *
-     * withoutOverlapping() ends with $this->skip(fn () => $this->mutex->exists($this)), i.e. a
-     * REJECT FILTER, and ScheduleRunCommand evaluates filtersPass() before runEvent(). An earlier
-     * version of this file reasoned from Event::run()'s internal shouldSkipDueToOverlapping()
-     * instead, concluded that an overlap arrives as Starting + Finished(exitCode: null), and built
-     * the whole per-task health model on a sequence that never occurs. If a Laravel upgrade ever
-     * moves the check back inside run(), this fails and the model gets revisited.
+     * Rendered rather than asserted on the state string: the state was correct and the ROW read
+     * "started ? ago and never finished" at the operator, which no state assertion could see.
      */
-    public function test_without_overlapping_is_a_reject_filter_not_an_in_run_check(): void
+    public function test_a_wedged_task_with_no_recorded_run_renders_an_honest_label(): void
     {
-        $event = $this->event('process-queue')->everyMinute();
+        $this->tick();
+
+        $this->skip('process-queue');
+        ScheduledTaskRun::where('name', 'process-queue')->update(['created_at' => now()->subHours(3)]);
+        $this->skip('process-queue');
+
+        $task = SchedulerHealth::tasks()->firstWhere('name', 'process-queue');
+        $html = view('admin.partials._scheduled-task-row', ['task' => $task])->render();
+
+        $this->assertStringNotContainsString('?', $html, 'the label must not render a placeholder age');
+        $this->assertStringContainsString(__('messages.scheduler_never_ran'), $html);
+    }
+
+    /**
+     * The framework contract the whole model rests on, driven through ScheduleRunCommand itself.
+     *
+     * withoutOverlapping() ends with $this->skip(fn () => $this->mutex->exists($this)) - a REJECT
+     * FILTER - and ScheduleRunCommand evaluates filtersPass() BEFORE runEvent(). So an overlap
+     * dispatches ScheduledTaskSkipped and neither Starting nor Finished. An earlier version of this
+     * file reasoned from Event::run()'s internal shouldSkipDueToOverlapping() instead, concluded
+     * that an overlap arrives as Starting + Finished(exitCode: null), and built the per-task health
+     * model on a sequence that never occurs.
+     *
+     * Asserting on filtersPass() alone was not enough: moving the check back inside run() would
+     * leave that green. This runs the real command and asserts on the events it actually emits.
+     */
+    public function test_an_overlap_dispatches_only_the_skipped_event(): void
+    {
+        $schedule = new Schedule;
+        $this->app->instance(Schedule::class, $schedule);
+
+        $ran = false;
+        $event = $schedule->call(function () use (&$ran) {
+            $ran = true;
+        })->everyMinute()->name('overlap-probe');
         $event->withoutOverlapping(20);
 
         $this->assertTrue($event->filtersPass($this->app), 'an unheld mutex must not reject the event');
 
         $event->mutex->create($event);
 
-        $this->assertFalse($event->filtersPass($this->app),
-            'a held overlap mutex must reject the event BEFORE it runs, so ScheduledTaskSkipped is what fires');
+        try {
+            $seen = [];
+            Event::listen(ScheduledTaskStarting::class, function () use (&$seen) {
+                $seen[] = 'starting';
+            });
+            Event::listen(ScheduledTaskFinished::class, function () use (&$seen) {
+                $seen[] = 'finished';
+            });
+            Event::listen(ScheduledTaskSkipped::class, function () use (&$seen) {
+                $seen[] = 'skipped';
+            });
+
+            $this->artisan('schedule:run');
+
+            $this->assertSame(['skipped'], $seen,
+                'a held overlap mutex must dispatch ScheduledTaskSkipped ALONE, before runEvent()');
+            $this->assertFalse($ran, 'and the task itself must not have run');
+        } finally {
+            $event->mutex->forget($event);
+        }
     }
 
     /** One dead scheduler must not paint every row red for a single root cause. */
@@ -298,6 +365,11 @@ class SchedulerHealthStateTest extends TestCase
             'last_finished_at' => null,
             'last_status' => ScheduledTaskRun::STATUS_SUCCEEDED,
         ]);
+
+        // created_at is written when the row is first inserted, i.e. when that run started - it
+        // cannot be newer than last_started_at in production, and the verdict anchors on it while
+        // there is no completion to measure from. Left at now() this fixture would be unreachable.
+        ScheduledTaskRun::where('name', 'app-translate')->update(['created_at' => now()->subHours(4)]);
 
         $this->assertSame('never_finished', $this->state('app-translate'));
     }

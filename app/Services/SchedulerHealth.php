@@ -41,7 +41,10 @@ class SchedulerHealth
 
     public static function staleMinutes(): int
     {
-        return (int) config('app.scheduler_stale_minutes', 15);
+        // No second default: config/app.php owns this number, and a spare copy here is one that
+        // can go stale. It already had - it still said 15, which is exactly translate_data_lock's
+        // 900-second TTL and the value SchedulerHealthTest proves raises a false alarm.
+        return max(1, (int) config('app.scheduler_stale_minutes'));
     }
 
     /** The aggregate heartbeat: has ANY rail ticked recently. */
@@ -105,7 +108,9 @@ class SchedulerHealth
             // permanent red "scheduler stalled" alert while the worker is perfectly healthy.
             ->merge([config('app.scheduler_rail', 'cron'), self::expectedRail()])
             // Before the map, not after: expectedRail() is nullable and the closure is typed.
-            ->filter()
+            // Explicit predicate rather than bare filter(), which would drop a rail named "0" -
+            // reachable through SCHEDULER_EXPECTED_RAIL, which has no `?:` to map it away.
+            ->filter(fn ($rail) => is_string($rail) && $rail !== '')
             ->unique()
             ->map(function (string $rail) {
                 $value = Cache::get('scheduler.last_run_at.'.$rail);
@@ -243,41 +248,41 @@ class SchedulerHealth
             return 'unknown';
         }
 
-        // withoutOverlapping's own expiry is the author's declared budget for this task, so it is
-        // the right threshold for both checks below - no invented constant.
-        $budget = max(1, (int) $event->expiresAt);
+        // How long may this task go without COMPLETING before something is wrong?
+        //
+        // Two parts. withoutOverlapping's own expiry is the author's declared budget for one run -
+        // and it is also the mutex TTL, since CacheEventMutex::create() stores the mutex for
+        // expiresAt * 60 seconds. The task's interval is added on top because a task that finished
+        // and is simply waiting for its next due minute has legitimately completed nothing for
+        // that long: the worst healthy gap is one idle interval plus one full-length run.
+        $budget = max(1, (int) $event->expiresAt) + intdiv($interval, 60);
 
-        // A SKIP STREAK, checked before anything else that infers from elapsed time.
+        // The anchor is last_finished_at, and nothing else.
         //
-        // withoutOverlapping() is a ->skip() REJECT FILTER: ManagesAttributes::withoutOverlapping()
-        // ends with $this->skip(fn () => $this->mutex->exists($this)), and ScheduleRunCommand
-        // evaluates filtersPass() BEFORE runEvent(). So an overlap dispatches ScheduledTaskSkipped
-        // and NOT ScheduledTaskStarting/Finished - Event::run()'s own shouldSkipDueToOverlapping()
-        // is only reachable in the race between the filter and mutex->create().
+        // NOT last_started_at. A run that overruns its own expiry lets the mutex lapse and a fresh
+        // copy launch - routes/console.php's header says so - and every launch restamps
+        // last_started_at. Measuring from the start therefore resets the clock every expiresAt
+        // minutes, so a permanently hung task that keeps respawning reads "running" forever. A
+        // start is evidence the task was LAUNCHED; only a finish is evidence it ran.
         //
-        // A skipped tick therefore touches last_skipped_at and nothing else. Without this check a
-        // task wedged behind a stranded mutex keeps a fresh lastSeenAt() while last_started_at
-        // stays at or behind last_finished_at, so isRunning() is false, the freshness test below
-        // passes, and the row reads 'ok' forever - which is precisely the failure this table
-        // exists to catch.
+        // created_at is the fallback because it is written once and never moves: for a task that
+        // has started but never once completed it still yields a growing age.
         //
-        // Measured from the last time the task really ran, so a routine skip while a run is
-        // legitimately in flight stays quiet: only a streak outlasting the task's own overlap
-        // budget is trouble. created_at covers a task that has never once run.
-        if ($row?->last_status === ScheduledTaskRun::STATUS_SKIPPED && $row->last_skipped_at) {
-            $lastReal = $row->lastRanAt() ?? $row->created_at;
+        // Checked for a SKIPPED row as well as a running one. withoutOverlapping() is a ->skip()
+        // reject filter and ScheduleRunCommand evaluates filtersPass() before runEvent(), so an
+        // overlap dispatches ScheduledTaskSkipped ALONE - leaving isRunning() false while
+        // last_skipped_at keeps lastSeenAt() looking fresh. Without this arm a task wedged behind a
+        // mutex it cannot take reads 'ok' indefinitely.
+        if ($row?->last_status === ScheduledTaskRun::STATUS_SKIPPED || $row?->isRunning()) {
+            $anchor = $row->last_finished_at ?? $row->created_at;
 
-            if ($lastReal && $lastReal->diffInMinutes($row->last_skipped_at) > $budget) {
+            if ($anchor && $anchor->diffInMinutes(now()) > $budget) {
                 return 'never_finished';
             }
-        }
 
-        if ($row?->isRunning()) {
-            // Measured from the start, full stop. A skip does not restamp last_started_at (see
-            // above), so a skipped row needs no special origin - and the one it used to get,
-            // measured from the PREVIOUS completion, over-reports by the idle gap between runs and
-            // so flags a perfectly healthy long run as never_finished early.
-            return $row->last_started_at->diffInMinutes(now()) > $budget ? 'never_finished' : 'running';
+            if ($row->isRunning()) {
+                return 'running';
+            }
         }
 
         $lastSeen = $row?->lastSeenAt();

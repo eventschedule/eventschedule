@@ -53,10 +53,7 @@ class ScheduledTaskRecorder
     {
         self::guard(function () use ($event) {
             if ($event->task->exitCode === null) {
-                self::write($event, [
-                    'last_skipped_at' => now(),
-                    'last_status' => ScheduledTaskRun::STATUS_SKIPPED,
-                ]);
+                self::recordSkip($event);
 
                 return;
             }
@@ -102,16 +99,38 @@ class ScheduledTaskRecorder
      * The normal overlap path: withoutOverlapping()'s reject filter fired.
      *
      * Deliberately does not touch last_started_at or last_finished_at - no run began. That is what
-     * lets SchedulerHealth tell a task that is merely queued behind a live run from one wedged
-     * behind a stranded mutex: only last_skipped_at moves, so a streak stands out against
-     * lastRanAt().
+     * lets SchedulerHealth tell a task queued behind a live run from one wedged behind a mutex it
+     * cannot take: only last_skipped_at moves, so last_finished_at keeps ageing underneath it.
      */
     public static function skipped(ScheduledTaskSkipped $event): void
     {
-        self::guard(fn () => self::write($event, [
-            'last_skipped_at' => now(),
-            'last_status' => ScheduledTaskRun::STATUS_SKIPPED,
-        ]));
+        self::guard(fn () => self::recordSkip($event));
+    }
+
+    /**
+     * Stamp a skip WITHOUT letting it erase a recorded failure.
+     *
+     * A skip means no run happened, so it is not evidence that the previous failure is over. Writing
+     * last_status unconditionally turned a red row green on the next blocked tick while last_error
+     * and consecutive_failures sat unread underneath - which contradicts state()'s own "a failure
+     * is real data whatever the heartbeat says".
+     *
+     * Two statements rather than a read-then-write, so a real run finishing in between wins
+     * outright instead of being half-overwritten - the same argument the failure counter makes.
+     */
+    private static function recordSkip(object $event): void
+    {
+        $run = self::write($event, ['last_skipped_at' => now()]);
+
+        if ($run === null) {
+            return;
+        }
+
+        ScheduledTaskRun::whereKey($run->getKey())
+            ->where(fn ($query) => $query
+                ->whereNull('last_status')
+                ->orWhere('last_status', '!=', ScheduledTaskRun::STATUS_FAILED))
+            ->update(['last_status' => ScheduledTaskRun::STATUS_SKIPPED]);
     }
 
     /**
@@ -123,14 +142,14 @@ class ScheduledTaskRecorder
      * consecutive_failures counter is moved with an atomic expression rather than a read-then-write
      * so two racing writers cannot both read 3 and both store 4.
      */
-    private static function write(object $event, array $values, bool $incrementFailures = false, bool $resetFailures = false): void
+    private static function write(object $event, array $values, bool $incrementFailures = false, bool $resetFailures = false): ?ScheduledTaskRun
     {
         $name = $event->task->description ?? null;
 
         // Every entry carries ->name() (SchedulerHealthTest enforces it), but an unnamed task
         // would collapse every other unnamed task onto one row, so skip rather than corrupt.
         if (! is_string($name) || $name === '') {
-            return;
+            return null;
         }
 
         // An un-migrated container must not report once per task per minute. Memoized because this
@@ -138,7 +157,7 @@ class ScheduledTaskRecorder
         self::$tableExists ??= Schema::hasTable('scheduled_task_runs');
 
         if (! self::$tableExists) {
-            return;
+            return null;
         }
 
         // Clamped like last_host below: SCHEDULER_RAIL is operator-settable and the column is
@@ -162,6 +181,8 @@ class ScheduledTaskRecorder
                 ->where('last_status', ScheduledTaskRun::STATUS_FAILED)
                 ->update(['consecutive_failures' => DB::raw('consecutive_failures + 1')]);
         }
+
+        return $run;
     }
 
     /**

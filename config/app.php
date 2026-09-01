@@ -46,8 +46,13 @@ return [
      * `?:` not env()'s second argument: that default only applies to a MISSING key, so an
      * uncommented-but-blank SCHEDULER_STALE_MINUTES= would yield (int) '' === 0 and mark every
      * heartbeat stale forever. Zero is not a valid threshold, so mapping it here is intended.
+     *
+     * The max(5) is the floor for everything `?:` cannot catch: Env::get turns the literal `true`
+     * into boolean true, which `?:` keeps and (int) makes 1 - a one-minute threshold and the same
+     * permanent false alarm by a different route. No install wants to be told the scheduler is
+     * dead because one tick was slow.
      */
-    'scheduler_stale_minutes' => (int) (env('SCHEDULER_STALE_MINUTES') ?: 20),
+    'scheduler_stale_minutes' => max(5, (int) (env('SCHEDULER_STALE_MINUTES') ?: 20)),
 
     /*
      * Which cron rail this process is. schedule:run cannot tell whether it was started by a

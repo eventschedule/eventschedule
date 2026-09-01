@@ -85,6 +85,15 @@ class CronEndpointSecurityTest extends TestCase
      *
      * Every tier key is pre-claimed so only the "EVERY CALL" block runs - the tiers are covered by
      * CronRailSyncTest, and running all of them here would execute the entire schedule.
+     *
+     * That list is a hand-maintained FOURTH copy of translateData()'s tiers (after the source and
+     * CronRailSyncTest::TIERS), with nothing asserting they agree: add a tier and this test quietly
+     * starts executing it for real. Check it when you add one.
+     *
+     * The block it does run really executes queue:work, which installs pcntl signal handlers in the
+     * PHPUnit process - QueueFailureHandlingTest already does the same, so this adds no new class
+     * of side effect. It is cheap only because both rails pass --sleep=0; without it Worker::daemon
+     * sleeps three seconds before noticing the queue is empty.
      */
     public function test_a_completed_run_stamps_both_heartbeat_keys(): void
     {
