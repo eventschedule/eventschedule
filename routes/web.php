@@ -112,6 +112,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
             ->name('promo.click')->middleware('throttle:60,1');
         Route::get('/guest-add', [EventController::class, 'showGuestImport'])->name('event.guest_import');
         Route::get('/guest-submit', [EventController::class, 'showGuestSubmit'])->name('event.guest_submit');
+        Route::get('/guest-submit/google', [EventController::class, 'guestSubmitGoogle'])->name('event.guest_submit.google');
         Route::post('/guest-add', [EventController::class, 'guestImport'])->name('event.guest_import.store')->middleware('throttle:10,1');
         Route::post('/guest-add/check-email', [EventController::class, 'checkEmail'])->name('event.check_email')->middleware('throttle:10,1');
         Route::post('/guest-add/send-code', [RegisteredUserController::class, 'sendVerificationCode'])->name('event.guest_send_code')->middleware('throttle:5,1');
@@ -1824,6 +1825,7 @@ if (! config('app.hosted') || config('app.is_testing')) {
         ->name('promo.click')->middleware('throttle:60,1');
     Route::get('/{subdomain}/guest-add', [EventController::class, 'showGuestImport'])->name('event.guest_import');
     Route::get('/{subdomain}/guest-submit', [EventController::class, 'showGuestSubmit'])->name('event.guest_submit');
+    Route::get('/{subdomain}/guest-submit/google', [EventController::class, 'guestSubmitGoogle'])->name('event.guest_submit.google');
     Route::post('/{subdomain}/guest-add', [EventController::class, 'guestImport'])->name('event.guest_import.store')->middleware('throttle:10,1');
     Route::post('/{subdomain}/guest-add/check-email', [EventController::class, 'checkEmail'])->name('event.check_email')->middleware('throttle:10,1');
     Route::post('/{subdomain}/guest-add/send-code', [RegisteredUserController::class, 'sendVerificationCode'])->name('event.guest_send_code')->middleware('throttle:5,1');

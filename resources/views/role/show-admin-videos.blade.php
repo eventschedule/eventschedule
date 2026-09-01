@@ -28,6 +28,26 @@
                     <div class="mb-4">
                         <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">@{{ role.name }}</h3>
                         <p v-if="role.description" class="text-sm text-gray-500 dark:text-gray-400 mt-1">@{{ role.description }}</p>
+                        {{-- The booking is what decides whether a YouTube hit is the right act: two
+                             bands share a name, and one of them is playing this room. `role` here is
+                             the Vue loop variable (the act), not Blade's $role (this schedule).
+                             Laid out with flex + gap rather than spaces between the elements, which
+                             Vue's condense pass would eat. --}}
+                        <p v-if="role.event_name" class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-500 dark:text-gray-400">
+                            <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            {{-- getGuestUrl() returns '' rather than throwing when it cannot resolve
+                                 a subdomain, so the plain-text fallback is not theoretical. --}}
+                            <a v-if="role.event_url" :href="role.event_url" target="_blank" rel="noopener noreferrer"
+                               :title="viewEventLabel" dir="auto"
+                               class="font-medium text-[var(--brand-blue)] hover:underline">@{{ role.event_name }}</a>
+                            <span v-else dir="auto" class="font-medium text-gray-700 dark:text-gray-300">@{{ role.event_name }}</span>
+                            {{-- No separator glyph: the date already renders as "Friday, 5 September
+                                 - 8:00 PM" with a bullet of its own, so a second one is noise. The
+                                 gap plus the blue link against the muted date does the separating. --}}
+                            <span v-if="role.event_date">@{{ role.event_date }}</span>
+                        </p>
                     </div>
                     
                     <div class="mt-4">
@@ -180,6 +200,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // this comment - Blade compiles directives inside JavaScript comments too, and an
                 // empty argument list compiles to invalid PHP.)
                 previewLabel: @json(__('messages.preview_video')),
+                viewEventLabel: @json(__('messages.view_event')),
                 isViewer: document.getElementById('videos-app').dataset.isViewer === 'true'
             }
         },

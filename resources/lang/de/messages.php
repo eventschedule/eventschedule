@@ -2175,7 +2175,7 @@ return [
     'why_create_account_ready_title' => 'Bereit, das volle Erlebnis freizuschalten?',
     'why_create_account_ready_subtitle' => 'Schließen Sie sich Tausenden von Veranstaltern an. Es ist kostenlos und wird es immer bleiben.',
     'why_create_account_no_cc' => 'Keine Kreditkarte erforderlich',
-    'why_create_account_learn_more' => 'Erfahren Sie warum',
+    'why_create_account_learn_more' => 'Erfahre, warum',
 
     // Admin detailed views
     'recent_sales' => 'Letzte Verkäufe',
@@ -3710,6 +3710,7 @@ return [
     'account_creation_disabled' => 'Die Kontoerstellung ist auf diesem Server deaktiviert. Bitte melde dich an, um fortzufahren.',
     'forgot_your_password' => 'Passwort vergessen?',
     'use_another_email' => 'Eine andere E-Mail-Adresse verwenden',
+    'guest_submit_password_help' => 'Mindestens 8 Zeichen. Dieser Zeitplan erfordert ein Konto - mit diesem Passwort meldest du dich später an, um deine Veranstaltung zu bearbeiten.',
     'email_me_a_code' => 'Code per E-Mail senden',
     'code_sent_to_prefix' => 'Wir haben einen 6-stelligen Code gesendet an',
     'code_sent_to_suffix' => 'Gib ihn unten ein, um abzuschließen.',

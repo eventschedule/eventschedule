@@ -116,11 +116,19 @@ if (! function_exists('get_translated_categories')) {
 
 if (! function_exists('is_valid_language_code')) {
     /**
-     * Check if a language code is supported by the application
+     * Check if a language code is supported by the application.
+     *
+     * Deliberately typed mixed, not ?string. A query param arrives as an array for
+     * ?lang[]=en, and against a ?string signature that is an uncaught TypeError - a 500
+     * on any page that forwards the visitor's language. Callers are spread across
+     * controllers, middleware and Blade views, several of which read straight from the
+     * request or the session, so the guard belongs here rather than at ~57 call sites.
+     * The explicit is_string() checks already at some of those call sites are now
+     * redundant but harmless, and they document the hazard where it was hit.
      */
-    function is_valid_language_code(?string $languageCode): bool
+    function is_valid_language_code(mixed $languageCode): bool
     {
-        if (empty($languageCode)) {
+        if (! is_string($languageCode) || $languageCode === '') {
             return false;
         }
 

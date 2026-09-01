@@ -3706,6 +3706,7 @@ return [
     'account_creation_disabled' => 'La creazione di account è disabilitata su questo server. Accedi per continuare.',
     'forgot_your_password' => 'Hai dimenticato la password?',
     'use_another_email' => 'Usa un\'email diversa',
+    'guest_submit_password_help' => 'Almeno 8 caratteri. Questo programma richiede un account: con questa password accederai in seguito per modificare il tuo evento.',
     'email_me_a_code' => 'Inviami un codice via email',
     'code_sent_to_prefix' => 'Abbiamo inviato un codice di 6 cifre a',
     'code_sent_to_suffix' => 'Inseriscilo qui sotto per completare.',

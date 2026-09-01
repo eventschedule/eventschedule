@@ -3725,6 +3725,7 @@ return [
     'account_creation_disabled' => 'Kontode loomine on selles serveris keelatud. Jätkamiseks logi sisse.',
     'forgot_your_password' => 'Unustasid parooli?',
     'use_another_email' => 'Kasuta teist meiliaadressi',
+    'guest_submit_password_help' => 'Vähemalt 8 tähemärki. See ajakava nõuab kontot - selle parooliga logid hiljem sisse, et oma sündmust muuta.',
     'email_me_a_code' => 'Saada mulle kood meiliga',
     'code_sent_to_prefix' => 'Saatsime 6-kohalise koodi aadressile',
     'code_sent_to_suffix' => 'Sisesta see allpool, et lõpetada.',

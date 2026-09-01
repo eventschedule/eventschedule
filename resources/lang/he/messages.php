@@ -3763,6 +3763,7 @@ return [
     'account_creation_disabled' => 'יצירת חשבון מושבתת בשרת זה. יש להתחבר כדי להמשיך.',
     'forgot_your_password' => 'שכחת את הסיסמה?',
     'use_another_email' => 'השתמש בכתובת אימייל אחרת',
+    'guest_submit_password_help' => 'לפחות 8 תווים. לוח זמנים זה דורש חשבון - עם הסיסמה הזו תתחבר בהמשך כדי לערוך את האירוע שלך.',
     'email_me_a_code' => 'שלחו לי קוד באימייל',
     'code_sent_to_prefix' => 'שלחנו קוד בן 6 ספרות אל',
     'code_sent_to_suffix' => 'הזן אותו למטה כדי לסיים.',

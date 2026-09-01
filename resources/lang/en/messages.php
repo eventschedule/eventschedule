@@ -4195,6 +4195,7 @@ return [
     'account_creation_disabled' => 'Account creation is disabled on this server. Please log in to continue.',
     'forgot_your_password' => 'Forgot your password?',
     'use_another_email' => 'Use a different email',
+    'guest_submit_password_help' => 'At least 8 characters. This schedule requires an account - you\'ll log in with this password to edit your event later.',
     'email_me_a_code' => 'Email me a code',
     'code_sent_to_prefix' => 'We emailed a 6-digit code to',
     'code_sent_to_suffix' => 'Enter it below to finish.',

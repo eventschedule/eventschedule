@@ -6847,8 +6847,10 @@ class RoleController extends Controller
             return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
         }
 
-        // Get upcoming events for this curator
-        $upcomingEvents = Event::with('roles')
+        // Get upcoming events for this curator. creatorRole is eager loaded because
+        // getGuestUrl() below reads it through getGuestUrlData(); venue and role() both reuse the
+        // already loaded roles collection, so they cost nothing extra.
+        $upcomingEvents = Event::with(['roles', 'creatorRole'])
             ->upcomingOrOngoing()
             ->whereIn('id', function ($query) use ($role) {
                 $query->select('event_id')
@@ -6881,7 +6883,13 @@ class RoleController extends Controller
                             'description' => $eventRole->description,
                             'profile_image_url' => $eventRole->profile_image_url,
                             'event_name' => $event->name,
-                            'event_date' => $event->localStartsAt(),
+                            // Pretty, not the raw Y-m-d H:i:s: the matcher renders this now.
+                            'event_date' => $event->localStartsAt(true),
+                            // The booking is what tells a curator which of two identically named
+                            // acts this is, so the matcher links out to it. The subdomain is passed
+                            // explicitly because this is a schedule-scoped screen: without it the
+                            // helper resolves the event's own home schedule, a different tenant.
+                            'event_url' => $event->getGuestUrl($role->subdomain),
                         ]);
                     }
                 }

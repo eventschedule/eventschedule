@@ -236,6 +236,7 @@
         <x-doc-screenshot id="managing-schedules--videos-tab" alt="Videos tab showing YouTube search results" />
 
         <ul class="doc-list mb-6">
+            <li>Each act shows the <strong>event it is booked on</strong> and its date, and the event name opens that event's page in a new tab, so you can check you have the right act before picking a video</li>
             <li>Each act gets up to six suggestions, showing the <strong>thumbnail</strong>, <strong>title</strong>, <strong>channel</strong>, <strong>view count</strong> and <strong>like count</strong>, with a <strong>Watch</strong> link that opens the video on YouTube</li>
             <li>Only videos their owner allows to be played on other websites are suggested, so a saved video will not turn into YouTube's "Video unavailable" panel on your public pages</li>
             <li>Click the <strong>play button</strong> on a suggestion to watch it right there, in the same player your visitors get</li>

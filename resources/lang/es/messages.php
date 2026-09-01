@@ -3706,6 +3706,7 @@ return [
     'account_creation_disabled' => 'La creación de cuentas está deshabilitada en este servidor. Inicia sesión para continuar.',
     'forgot_your_password' => '¿Olvidaste tu contraseña?',
     'use_another_email' => 'Usar un correo electrónico diferente',
+    'guest_submit_password_help' => 'Al menos 8 caracteres. Este horario requiere una cuenta: con esta contraseña iniciarás sesión más tarde para editar tu evento.',
     'email_me_a_code' => 'Envíame un código por correo',
     'code_sent_to_prefix' => 'Enviamos un código de 6 dígitos a',
     'code_sent_to_suffix' => 'Introdúcelo a continuación para finalizar.',

@@ -3706,6 +3706,7 @@ return [
     'account_creation_disabled' => 'Account aanmaken is uitgeschakeld op deze server. Log in om door te gaan.',
     'forgot_your_password' => 'Wachtwoord vergeten?',
     'use_another_email' => 'Een ander e-mailadres gebruiken',
+    'guest_submit_password_help' => 'Minimaal 8 tekens. Dit schema vereist een account - met dit wachtwoord log je later in om je evenement te bewerken.',
     'email_me_a_code' => 'Mail me een code',
     'code_sent_to_prefix' => 'We hebben een 6-cijferige code gemaild naar',
     'code_sent_to_suffix' => 'Voer hem hieronder in om af te ronden.',

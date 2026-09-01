@@ -1863,8 +1863,9 @@ class EventController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        // Query params can arrive as arrays (?lang[]=en); is_valid_language_code() is typed
-        // ?string, so only honor a string value.
+        // Query params can arrive as arrays (?lang[]=en). is_valid_language_code() answers false
+        // for a non-string now, but $lang is also forwarded as a route parameter below, so keep
+        // it narrowed to a string or null.
         $lang = is_string($request->lang) ? $request->lang : null;
 
         // Require-account curators use the structured single-page submission (event.guest_submit),
@@ -1962,8 +1963,8 @@ class EventController extends Controller
             session()->put('pending_request', $subdomain);
         }
 
-        // Query params can arrive as arrays (?lang[]=en); is_valid_language_code() is typed
-        // ?string, so only honor a string value.
+        // Query params can arrive as arrays (?lang[]=en); is_valid_language_code() answers false
+        // for a non-string, so this only narrows what gets stored as the guest language.
         $lang = is_string($request->lang) ? $request->lang : null;
 
         // Store guest language for auth flow
@@ -2001,6 +2002,70 @@ class EventController extends Controller
         $currencies = json_decode(file_get_contents(base_path('storage/currencies.json')));
 
         return view('event.guest-submit', ['role' => $role, 'isGuest' => true, 'requireAccount' => true, 'venues' => [], 'currencies' => $currencies, 'defaultCurrency' => MoneyUtils::getCurrencyForCountry($role->country_code)]);
+    }
+
+    /**
+     * Hand off to Google sign-up from the guest-submit page, remembering to come back.
+     *
+     * SocialAuthController ends every account path with redirect()->intended(). Without a stored
+     * URL the pending_request chain wins and lands the visitor in the admin event editor
+     * (HomeController -> role.follow -> RoleController -> event.create), with the curator's form
+     * abandoned and the localStorage draft - keyed es_guest_submit_draft_<subdomain> to the page
+     * they just left - orphaned.
+     *
+     * This is a separate route rather than a line in showGuestSubmit() so that only clicking the
+     * Google button has the effect. url.intended is not flash data and is consumed by nine call
+     * sites across seven controllers, so writing it on every page view hijacked the next login -
+     * which would have silently skipped the pending_transfer handover offer and the
+     * pending_fan_content submission, both of which reach /login through a plain link and need
+     * HomeController to run.
+     */
+    public function guestSubmitGoogle(Request $request, $subdomain)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! $role->acceptEventRequests()) {
+            abort(404);
+        }
+
+        // Already signed in - reachable from a stale tab, where the button is still rendered from
+        // the guest-state HTML. Nothing to hand off to, and a key written here would NOT be
+        // consumed: auth.google's guest middleware (RedirectIfAuthenticated) never reads
+        // url.intended, so it would survive to misdirect the email-verification redirect, which is
+        // the one consumer that fires without an intervening logout and does not set its own.
+        if (auth()->check()) {
+            return redirect(route('event.guest_submit', ['subdomain' => $subdomain]));
+        }
+
+        // Mirror the button's own gate (guest-submit.blade.php). Without credentials or with
+        // registration closed, /auth/google cannot complete - GOOGLE_CLIENT_ID is null by default -
+        // so there is no destination worth remembering, and an ungated write here lets any
+        // unauthenticated GET plant url.intended for any schedule.
+        if (! config('services.google.client_id') || ! public_registration_enabled()) {
+            abort(404);
+        }
+
+        // A custom-domain session is scoped to that origin (ResolveCustomDomain nulls
+        // session.domain), so a key written here would be invisible to the callback on app. -
+        // the same reason showGuestSubmit() bounces these to the canonical host.
+        if ($request->attributes->get('custom_domain_host')) {
+            return redirect(route('role.request', ['subdomain' => $subdomain]));
+        }
+
+        // Not array_filter(): subdomain is a REQUIRED route parameter, and a no-callback filter
+        // would drop it on any falsy value rather than only dropping an absent lang.
+        $lang = is_string($request->lang) ? $request->lang : null;
+        $params = ['subdomain' => $subdomain];
+
+        if (is_valid_language_code($lang)) {
+            $params['lang'] = $lang;
+        }
+
+        session()->put('url.intended', route('event.guest_submit', $params));
+
+        // auth.google sits behind the app_subdomain middleware, so a bare route() from a tenant
+        // host only works via RedirectToAppSubdomain's extra bounce.
+        return redirect(app_url(route('auth.google', [], false)));
     }
 
     public function parse(EventParseRequest $request, $subdomain)

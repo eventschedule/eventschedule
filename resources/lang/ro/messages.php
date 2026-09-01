@@ -3745,6 +3745,7 @@ return [
     'account_creation_disabled' => 'Crearea conturilor este dezactivată pe acest server. Conectează-te pentru a continua.',
     'forgot_your_password' => 'Ai uitat parola?',
     'use_another_email' => 'Folosește o altă adresă de email',
+    'guest_submit_password_help' => 'Cel puțin 8 caractere. Acest program necesită un cont - cu această parolă te vei autentifica mai târziu pentru a-ți edita evenimentul.',
     'email_me_a_code' => 'Trimite-mi un cod pe email',
     'code_sent_to_prefix' => 'Am trimis un cod din 6 cifre la',
     'code_sent_to_suffix' => 'Introdu-l mai jos pentru a finaliza.',

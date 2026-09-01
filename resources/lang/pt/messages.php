@@ -3706,6 +3706,7 @@ return [
     'account_creation_disabled' => 'A criação de contas está desativada neste servidor. Faça login para continuar.',
     'forgot_your_password' => 'Esqueceu a sua senha?',
     'use_another_email' => 'Usar um e-mail diferente',
+    'guest_submit_password_help' => 'Pelo menos 8 caracteres. Esta agenda exige uma conta - com esta senha você entrará mais tarde para editar o seu evento.',
     'email_me_a_code' => 'Enviar um código por e-mail',
     'code_sent_to_prefix' => 'Enviamos um código de 6 dígitos para',
     'code_sent_to_suffix' => 'Digite-o abaixo para concluir.',

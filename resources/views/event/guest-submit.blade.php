@@ -30,6 +30,13 @@
               : (($field['type'] ?? 'string') === 'switch' ? '0' : '');
       }
   }
+
+  // ?lang can arrive as an array (?lang[]=en). is_valid_language_code() answers false for a
+  // non-string now, so this narrowing is belt-and-braces rather than the thing standing between
+  // the page and a TypeError - but $lang is concatenated below, so keep it a string or null.
+  $lang = is_string(request()->query('lang')) ? request()->query('lang') : null;
+  $whyAccountUrl = marketing_url('/why-create-account')
+      .(is_valid_language_code($lang) ? '?lang='.$lang : '');
 @endphp
 
 <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
@@ -85,6 +92,15 @@
                 </a>
               </div>
             </div>
+            @guest
+            {{-- Restored from guest-import.blade.php, where it was dropped when this page
+                 was split out of it (0820e2550). Frames the account before the visitor
+                 spends effort on the form, rather than at the password field at the bottom. --}}
+            <p class="text-sm text-gray-600 dark:text-gray-400 -mt-2">
+                {!! __('messages.guest_submit_value_strip') !!}
+                <x-link href="{{ $whyAccountUrl }}" target="_blank" class="text-sm mt-1 inline-block">{{ __('messages.why_create_account_learn_more') }}</x-link>
+            </p>
+            @endguest
           </div>
         </div>
 
@@ -451,7 +467,10 @@
             <div class="ap-card p-4 sm:p-8 shadow-md sm:rounded-xl mt-4">
               <div class="max-w-2xl mx-auto">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">{{ __('messages.your_details') }}</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">{{ __('messages.your_details_help') }}</p>
+                {{-- Only true for someone who is about to create an account: it contradicts the
+                     "creation is disabled" notice below on a closed selfhost, and it told a
+                     signed-in visitor to create an account they already have. --}}
+                <p v-if="!isAuthed && registrationEnabled" class="text-sm text-gray-500 dark:text-gray-400 mb-5">{{ __('messages.your_details_help') }}</p>
 
                 <x-honeypot vmodel="honeypot" />
 
@@ -490,7 +509,13 @@
                   {{-- Returning user: inline login --}}
                   <template v-if="accountMode === 'login'">
                     <div class="mb-3 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg text-sm text-blue-800 dark:text-blue-200" aria-live="polite">
-                      {{ __('messages.email_already_registered_login') }}
+                      {{-- Keyed on the visitor, not the install. With registration closed every
+                           email lands in login mode, so gating on registrationEnabled alone told a
+                           returning user their account could not be created. When registration is
+                           open, accountMode === 'login' already implies emailExists && !emailStub,
+                           so this leaves that path unchanged. --}}
+                      <span v-if="emailExists && !emailStub">{{ __('messages.email_already_registered_login') }}</span>
+                      <span v-else-if="!registrationEnabled">{{ __('messages.account_creation_disabled') }}</span>
                     </div>
                     <div class="mb-2">
                       <label for="login_password" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.password') }} <span class="text-red-500">*</span></label>
@@ -512,6 +537,33 @@
 
                   {{-- New user: register + 6-digit code --}}
                   <template v-else>
+                    @if (config('services.google.client_id') && public_registration_enabled())
+                    {{-- Same gate as auth/register.blade.php, so this also disappears wherever
+                         closed registration does. Offered first: the honest answer to "why do I
+                         need a password" is that with Google you do not. The link goes through
+                         event.guest_submit.google, which stores this page as the post-login
+                         destination before handing off to Google, so the round trip comes back
+                         here where the localStorage draft is. --}}
+                    <div class="mb-4">
+                      <a href="{{ route('event.guest_submit.google', ['subdomain' => $role->subdomain]) }}" class="w-full inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800 transition-all duration-200">
+                        <svg class="w-5 h-5 me-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
+                        {{ __('messages.sign_up_with_google') }}
+                      </a>
+                      {{-- Flex rule + label, not an absolutely-positioned line behind an opaque
+                           label: .ap-card is a gradient, so no flat mask colour can match it. Same
+                           shape as role/partials/calendar.blade.php's past-events divider. --}}
+                      <div class="my-4 flex items-center gap-4">
+                        <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
+                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.or') }}</span>
+                        <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
+                      </div>
+                    </div>
+                    @endif
                     <div class="mb-4">
                       <label for="account_name" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.name') }} <span class="text-red-500">*</span></label>
                       <input id="account_name" type="text" v-model="userName" autocomplete="name" :class="errClass('account_name')"
@@ -520,7 +572,7 @@
                     <div class="mb-4">
                       <label for="account_password" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.password') }} <span class="text-red-500">*</span></label>
                       <div class="relative">
-                        <input id="account_password" :type="showPassword ? 'text' : 'password'" v-model="userPassword" autocomplete="new-password" :class="errClass('account_password')"
+                        <input id="account_password" :type="showPassword ? 'text' : 'password'" v-model="userPassword" autocomplete="new-password" aria-describedby="account_password_help" :class="errClass('account_password')"
                           class="mt-1 block w-full pe-10 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg shadow-sm">
                         <button type="button" @click="showPassword = !showPassword" :aria-label="showPassword ? hidePasswordLabel : showPasswordLabel"
                           class="absolute end-2 top-1/2 -translate-y-1/2 mt-0.5 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
@@ -528,7 +580,7 @@
                           <svg v-else class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
                         </button>
                       </div>
-                      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.password_min_chars') }}</p>
+                      <p id="account_password_help" class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.guest_submit_password_help') }}</p>
                     </div>
 
                     @if (\App\Utils\TurnstileUtils::isEnabled())
@@ -707,12 +759,20 @@
                 requireAccount: true,
                 isAuthed: {{ auth()->check() ? 'true' : 'false' }},
                 requiresCode: {{ (config('app.hosted') && ! config('app.is_testing')) ? 'true' : 'false' }},
+                // A selfhost without ALLOW_REGISTRATION rejects account creation in
+                // createAccountWithCode(), but only at submit time - so the register branch is
+                // suppressed and the panel opens in login mode instead of letting someone fill
+                // the whole form for nothing.
+                registrationEnabled: {{ public_registration_enabled() ? 'true' : 'false' }},
                 turnstileEnabled: {{ \App\Utils\TurnstileUtils::isEnabled() ? 'true' : 'false' }},
                 turnstileSiteKey: @json(\App\Utils\TurnstileUtils::getSiteKey()),
                 turnstileToken: '',
                 turnstileWidgetId: null,
                 talents: @json(auth()->check() ? auth()->user()->talents()->get()->map(fn($t) => ['id' => \App\Utils\UrlUtils::encodeId($t->id), 'name' => $t->name])->values() : []),
-                accountMode: 'register',
+                // Encoded, not echoed: Blade escapes a quote to &#039; and this sits inside a
+                // <script>, where that is a syntax error that kills the whole Vue app silently.
+                // (Do not name a Blade directive in this comment - Blade compiles it here too.)
+                accountMode: @json(public_registration_enabled() ? 'register' : 'login'),
                 scheduleName: '',
                 userName: @json(auth()->check() ? auth()->user()->name : ''),
                 userEmail: '',
@@ -1132,7 +1192,7 @@
                             this.accountMode = 'login';
                             this.codeSent = false;
                         } else {
-                            this.accountMode = 'register';
+                            this.accountMode = this.registrationEnabled ? 'register' : 'login';
                         }
                     }
                 } catch (e) {
@@ -1150,7 +1210,7 @@
             },
 
             useAnotherEmail() {
-                this.accountMode = 'register';
+                this.accountMode = this.registrationEnabled ? 'register' : 'login';
                 this.emailExists = null;
                 this.codeSent = false;
                 this.verificationCode = '';

@@ -3713,6 +3713,7 @@ return [
     'account_creation_disabled' => 'La création de compte est désactivée sur ce serveur. Veuillez vous connecter pour continuer.',
     'forgot_your_password' => 'Mot de passe oublié ?',
     'use_another_email' => 'Utiliser une autre adresse e-mail',
+    'guest_submit_password_help' => 'Au moins 8 caractères. Ce planning nécessite un compte - vous vous connecterez avec ce mot de passe pour modifier votre événement plus tard.',
     'email_me_a_code' => 'Envoyez-moi un code par e-mail',
     'code_sent_to_prefix' => 'Nous avons envoyé un code à 6 chiffres à',
     'code_sent_to_suffix' => 'Saisissez-le ci-dessous pour terminer.',

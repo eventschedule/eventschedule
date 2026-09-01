@@ -537,6 +537,57 @@ class ScheduleFeaturesTest extends TestCase
         $this->assertNotContains('Claimed Act', $names);
     }
 
+    public function test_the_video_matcher_links_each_act_to_its_soonest_event(): void
+    {
+        // The card header is the only place a curator can see WHICH booking an act is being
+        // matched for, and two identically named bands are exactly the case it has to settle.
+        // event_name and event_date were already in the payload and rendered nowhere; event_url
+        // is what makes the name reachable.
+        $owner = $this->createOwner();
+        $curator = $this->createRole($owner, 'curator');
+        $act = $this->createRole($this->createOwner(), 'talent', [
+            'name' => 'Unclaimed Act',
+            'email_verified_at' => null,
+        ]);
+
+        // Two bookings. The matcher de-duplicates by act, so the earlier one has to win - that is
+        // what orderBy('starts_at') buys, and it is the event the link must point at.
+        $later = $this->createEvent($curator, [
+            'name' => 'Later Show',
+            'starts_at' => now()->addDays(20)->setTime(12, 0)->format('Y-m-d H:i:s'),
+        ]);
+        $soonest = $this->createEvent($curator, [
+            'name' => 'Soonest Show',
+            'starts_at' => now()->addDays(3)->setTime(12, 0)->format('Y-m-d H:i:s'),
+        ]);
+        $later->roles()->attach($act->id, ['is_accepted' => true]);
+        $soonest->roles()->attach($act->id, ['is_accepted' => true]);
+
+        $row = collect(
+            $this->actingAs($owner)
+                ->get(route('role.talent_roles_without_videos', ['subdomain' => $curator->subdomain]))
+                ->assertOk()
+                ->json()
+        )->firstWhere('name', 'Unclaimed Act');
+
+        $this->assertNotNull($row);
+        $this->assertSame('Soonest Show', $row['event_name']);
+
+        // Built independently of the controller, so this cannot pass by both sides calling the
+        // same helper with the same wrong argument.
+        $this->assertSame($this->guestEventUrl($curator, $soonest), $row['event_url']);
+
+        // And it actually resolves. EventRepo::getEvent matches on the id plus an accepted pivot,
+        // which is the same condition the matcher selected on, so the two cannot drift apart.
+        $this->actingAs($owner)->get($row['event_url'])->assertOk();
+
+        // Rendered for a person, not the raw Y-m-d H:i:s this used to emit, and never markup:
+        // localStartsAt() grows a <br/> once an end time is asked for, and this is interpolated
+        // as text.
+        $this->assertDoesNotMatchRegularExpression('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $row['event_date']);
+        $this->assertStringNotContainsString('<', $row['event_date']);
+    }
+
     /**
      * Two videos on an unclaimed talent, one of which is broken.
      */
