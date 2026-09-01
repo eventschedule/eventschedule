@@ -15,7 +15,8 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 - **Never delete migration files** - They may have already been run on production
 - **Use today's date for new migrations** - Migration filenames must use today's date (e.g. `2026_04_15_000000_`), never a future or past date
 - **Use "selfhost" not "self-host"** - Always write "selfhost" and "selfhosted" (no hyphen) except for "self-hosting"
-- **Keep the sitemap up-to-date** - When adding new pages, add them to `resources/views/sitemap.blade.php`
+- **Keep the sitemap up-to-date** - When adding new pages, add them to `resources/views/sitemap.blade.php`. Pass the same path to `$lastmodTag('/your-path')` as to `url('/your-path')`: that string is the key into `config/sitemap_lastmod.php`, so a mismatch silently costs the page its `<lastmod>`. `tests/Feature/SitemapCoverageTest.php` fails the build if a `marketing.*` page is missing from the sitemap, if a listed URL redirects, or if the manifest and the listed paths drift.
+- **Run `php artisan sitemap:lastmod` before a release** - It rebuilds `config/sitemap_lastmod.php` (URL path to git commit date) so `/sitemap-pages.xml` carries a real per-page `<lastmod>`; commit the result. The deployed container has neither usable file mtimes nor a git history, so an unrefreshed manifest just means slightly stale dates - which is still far better than the shared boot timestamp every page used to report.
 - **Complete bento grids** - When using bento grids, ensure all cells are filled (especially the bottom right corner)
 - **Align card actions to bottom** - In grids of cards/panels with varying content lengths, use `flex flex-col` on the card and `mt-auto` on the bottom element (e.g. links, buttons) so they align across cards
 - **Support light and dark mode** - Always consider both light mode and dark mode when working on UI

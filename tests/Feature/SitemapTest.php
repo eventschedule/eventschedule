@@ -221,9 +221,9 @@ class SitemapTest extends TestCase
     }
 
     /**
-     * The static <lastmod> comes from view mtimes, and reproducible-build images rewrite those to a
-     * fixed epoch - the hosted buildpack stamps 1980-01-01, which told crawlers the marketing pages
-     * had not changed in 46 years. Any pre-2000 timestamp is a build artifact, never a real edit.
+     * A <lastmod> that is a build artifact is worse than none: reproducible-build images rewrite
+     * every mtime to a fixed epoch - the hosted buildpack stamps 1980-01-01 - which told crawlers
+     * the marketing pages had not changed in 46 years. Any pre-2000 timestamp is a build artifact.
      */
     public function test_static_lastmods_are_not_build_artifacts(): void
     {
@@ -242,6 +242,118 @@ class SitemapTest extends TestCase
                 );
             }
         }
+    }
+
+    /** The <lastmod> of one <url> node in a document, or null when it has none. */
+    private function lastmodFor(string $xml, string $loc): ?string
+    {
+        foreach ($this->parse($xml)->url as $entry) {
+            if ((string) $entry->loc === $loc) {
+                return isset($entry->lastmod) ? (string) $entry->lastmod : null;
+            }
+        }
+
+        $this->fail($loc.' is not listed in the document');
+    }
+
+    /**
+     * Every static page used to report the same <lastmod> - on the hosted deploy, the container's
+     * boot time - so every release told Google that all ~150 pages had changed at once, which is
+     * how a site teaches Google to ignore the signal. The dates now come per page from the
+     * committed config/sitemap_lastmod.php manifest.
+     */
+    public function test_pages_are_dated_from_the_manifest(): void
+    {
+        config(['sitemap_lastmod' => [
+            '/pricing' => '2026-01-02T03:04:05+00:00',
+            '/features' => '2026-05-06T07:08:09+00:00',
+        ]]);
+
+        $xml = $this->xml('/sitemap-pages.xml');
+
+        $this->assertSame('2026-01-02T03:04:05+00:00', $this->lastmodFor($xml, url('/pricing')));
+        $this->assertSame('2026-05-06T07:08:09+00:00', $this->lastmodFor($xml, url('/features')));
+    }
+
+    /**
+     * Google would rather have no lastmod than one it can prove wrong, and an undated URL simply
+     * keeps whatever date Google already discovered for it.
+     */
+    public function test_a_page_missing_from_the_manifest_gets_no_lastmod(): void
+    {
+        config(['sitemap_lastmod' => ['/pricing' => '2026-01-02T03:04:05+00:00']]);
+
+        $xml = $this->xml('/sitemap-pages.xml');
+
+        $this->assertNull($this->lastmodFor($xml, url('/about')));
+        $this->assertNull($this->lastmodFor($xml, url('/docs/getting-started')));
+        $this->assertStringNotContainsString('<lastmod></lastmod>', $xml);
+    }
+
+    /** A hand-edited or malformed date would make the whole document invalid, so it is dropped. */
+    public function test_an_unparseable_manifest_date_is_dropped_rather_than_emitted(): void
+    {
+        config(['sitemap_lastmod' => ['/pricing' => 'last Tuesday']]);
+
+        $xml = $this->xml('/sitemap-pages.xml');
+
+        $this->assertNull($this->lastmodFor($xml, url('/pricing')));
+        $this->assertStringNotContainsString('last Tuesday', $xml);
+    }
+
+    /** The index's roll-up for the pages child is the newest thing that child contains. */
+    public function test_the_index_dates_the_pages_child_from_the_manifest(): void
+    {
+        config(['sitemap_lastmod' => [
+            '/pricing' => '2026-01-02T03:04:05+00:00',
+            '/features' => '2026-05-06T07:08:09+00:00',
+        ]]);
+
+        $this->assertSame(
+            '2026-05-06T07:08:09+00:00',
+            $this->lastmodForSitemap($this->xml('/sitemap.xml'), url('/sitemap-pages.xml'))
+        );
+    }
+
+    /** The <lastmod> of one <sitemap> node in the index. */
+    private function lastmodForSitemap(string $xml, string $loc): ?string
+    {
+        foreach ($this->parse($xml)->sitemap as $entry) {
+            if ((string) $entry->loc === $loc) {
+                return isset($entry->lastmod) ? (string) $entry->lastmod : null;
+            }
+        }
+
+        $this->fail($loc.' is not advertised by the index');
+    }
+
+    /**
+     * Google ignores <changefreq> and <priority> outright, and marketing is English-only so there
+     * are no hreflang alternates to declare. All three were pure bytes on ~150 URLs.
+     */
+    public function test_the_pages_child_carries_no_ignored_hints(): void
+    {
+        $xml = $this->xml('/sitemap-pages.xml');
+
+        $this->assertStringNotContainsString('<changefreq>', $xml);
+        $this->assertStringNotContainsString('<priority>', $xml);
+        $this->assertStringNotContainsString('xhtml', $xml);
+    }
+
+    /**
+     * url('/blog') 301s to the blog host on the hosted deploy, and a <loc> that redirects is a soft
+     * error to a crawler. The blog host's robots.txt points back at this sitemap, which is what
+     * authorises the cross-host entry.
+     */
+    public function test_the_blog_entry_is_the_url_the_blog_actually_serves(): void
+    {
+        $this->assertContains(blog_url(), $this->locs($this->xml('/sitemap-pages.xml')));
+
+        // blog_url() collapses to url('/blog') under test, so prove the hosted shape too.
+        config(['app.is_testing' => false, 'app.hosted' => true]);
+
+        $this->assertContains(blog_url(), $this->locs($this->xml('/sitemap-pages.xml')));
+        $this->assertStringStartsWith('https://blog.', blog_url());
     }
 
     /**
@@ -671,6 +783,65 @@ class SitemapTest extends TestCase
         foreach ($hidden as $event) {
             $this->assertStringNotContainsString($event->slug, $xml, $event->name.' should not be listed');
         }
+    }
+
+    /**
+     * is_unlisted is the owner keeping the schedule out of directories. The page stays indexable,
+     * but submitting to Google a URL the product will not list itself is a mixed signal.
+     */
+    public function test_unlisted_schedules_are_excluded_from_the_global_sitemap(): void
+    {
+        $owner = $this->createOwner();
+        $listed = $this->createRole($owner, 'venue');
+        $unlisted = $this->createRole($owner, 'venue', ['is_unlisted' => true]);
+
+        $xml = $this->xml('/sitemap-schedules-1.xml');
+
+        $this->assertStringContainsString($listed->subdomain, $xml);
+        $this->assertStringNotContainsString($unlisted->subdomain, $xml);
+    }
+
+    /**
+     * The event page stays public; the flag only says "stop surfacing this from /browse", and
+     * submitting it to Google would be us surfacing it.
+     */
+    public function test_events_hidden_from_discovery_are_excluded_from_the_global_sitemap(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent');
+
+        $visible = $this->createEvent($role, ['name' => 'Visible', 'creator_role_id' => $role->id]);
+        $hidden = $this->createEvent($role, [
+            'name' => 'Hidden',
+            'creator_role_id' => $role->id,
+            'is_hidden_from_discovery' => true,
+        ]);
+
+        $xml = $this->xml('/sitemap-events-1.xml');
+
+        $this->assertStringContainsString($visible->slug, $xml);
+        $this->assertStringNotContainsString($hidden->slug, $xml);
+    }
+
+    /**
+     * The carve-out: a schedule's own sitemap, served on its own host, is the OWNER's listing
+     * rather than ours, so neither discovery flag applies to it. Breaking this would 404 the
+     * sitemap of every unlisted schedule on a custom domain.
+     */
+    public function test_the_per_schedule_sitemap_still_lists_undiscoverable_content(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue', ['is_unlisted' => true]);
+        $event = $this->createEvent($role, [
+            'name' => 'Hidden',
+            'creator_role_id' => $role->id,
+            'is_hidden_from_discovery' => true,
+        ]);
+
+        $xml = $this->xml('/'.$role->subdomain.'/sitemap.xml');
+
+        $this->assertStringContainsString($role->subdomain, $xml);
+        $this->assertStringContainsString($event->slug, $xml);
     }
 
     /**

@@ -167,7 +167,12 @@ class SitemapController extends Controller
         return $this->urlset(fn (callable $write) => $this->writeSchedule($role, $url, $write));
     }
 
-    /** One schedule, its sub-schedules and its events, in that order. */
+    /**
+     * One schedule, its sub-schedules and its events, in that order.
+     *
+     * Deliberately the unfiltered eventQuery(): the discovery flags say "do not surface this from
+     * OUR listings", and a schedule's own sitemap on its own host is the owner's listing, not ours.
+     */
     private function writeSchedule(Role $role, string $url, callable $write): void
     {
         $cap = $this->urlsPerFile();
@@ -284,7 +289,7 @@ class SitemapController extends Controller
         }
 
         $sections = array_merge($sections, $this->namedRanges('schedules', $this->pageRanges(
-            $this->scheduleQuery()
+            $this->discoverableScheduleQuery()
                 ->select(['id', 'updated_at'])
                 ->withCount(['groups' => fn ($q) => $q->whereNotNull('slug')]),
             'asc',
@@ -296,7 +301,7 @@ class SitemapController extends Controller
 
         // Descending, so sitemap-events-1.xml holds the events crawlers care about most.
         $sections = array_merge($sections, $this->namedRanges('events', $this->pageRanges(
-            $this->eventQuery()->select(['id', 'updated_at']),
+            $this->discoverableEventQuery()->select(['id', 'updated_at']),
             'desc',
             null,
             fn ($event) => $event->updated_at
@@ -389,12 +394,39 @@ class SitemapController extends Controller
      * The view gates the marketing block on is_nexus itself and still emits the site root, so this
      * section is always present, and it needs no database - which is what makes it a usable
      * fallback when the section list is degraded.
+     *
+     * Each page dates itself from the committed config/sitemap_lastmod.php manifest (rebuilt by
+     * `php artisan sitemap:lastmod`). Every page used to report the same date - on the hosted
+     * deploy, the container's boot time - so every release told Google the whole marketing site
+     * had changed, which is how a site teaches Google to ignore lastmod entirely.
      */
     private function pagesSection(): StreamedResponse
     {
-        $content = view('sitemap', ['lastmod' => $this->staticLastmod()])->render();
+        $content = view('sitemap', ['lastmodTag' => $this->lastmodTag(...)])->render();
 
         return $this->streamed(fn (callable $write) => $write($content));
+    }
+
+    /**
+     * The <lastmod> element for one static page, or an empty string when the manifest has no date
+     * for it. Absent beats wrong: Google discounts the signal site-wide once it can prove it is
+     * unreliable, and an undated page simply keeps its previously discovered date.
+     *
+     * The format check is not paranoia about the generated file so much as about a hand-edit of
+     * it: an unparseable <lastmod> makes the whole document invalid, and Google rejects the file
+     * rather than the row.
+     */
+    private function lastmodTag(string $path): string
+    {
+        // The whole array, not config('sitemap_lastmod.'.$path): the keys are URL paths and
+        // Arr::get would read a dot in one of them as a level of nesting.
+        $date = (config('sitemap_lastmod') ?: [])[$path] ?? null;
+
+        if (! is_string($date) || ! preg_match('/^\d{4}-\d{2}-\d{2}(T[\d:.]+(Z|[+-]\d{2}:\d{2}))?$/', $date)) {
+            return '';
+        }
+
+        return '<lastmod>'.$date.'</lastmod>';
     }
 
     private function writeBlog(array $range, callable $write): void
@@ -417,7 +449,7 @@ class SitemapController extends Controller
         // Every column read by Role::getCanonicalUrl() -> getGuestUrl() / isClaimed() /
         // servesOnCustomDomain() must be listed here. A column that is read but not selected reads
         // as null instead of raising, so omissions fail silently.
-        $this->applyRange($this->scheduleQuery(), $range)
+        $this->applyRange($this->discoverableScheduleQuery(), $range)
             ->select([
                 'id', 'subdomain', 'user_id', 'email_verified_at', 'phone_verified_at',
                 'custom_domain', 'custom_domain_mode', 'custom_domain_status', 'updated_at',
@@ -454,7 +486,7 @@ class SitemapController extends Controller
         // creatorRole.timezone (saleEventDateFromStartsAt) and the roles' custom_domain_* columns
         // (servesOnCustomDomain). is_private / is_draft / is_cancelled / event_password are query
         // predicates only and are deliberately never selected.
-        $this->applyRange($this->eventQuery(), $range)
+        $this->applyRange($this->discoverableEventQuery(), $range)
             ->select(['id', 'slug', 'starts_at', 'days_of_week', 'creator_role_id', 'updated_at'])
             ->with([
                 'roles:id,subdomain,type,user_id,email_verified_at,phone_verified_at,custom_domain,custom_domain_mode,custom_domain_status',
@@ -487,6 +519,13 @@ class SitemapController extends Controller
     |--------------------------------------------------------------------------
     */
 
+    /**
+     * Every schedule with a public URL, whether or not it is discoverable.
+     *
+     * This is the lookup the per-tenant sitemap uses, so it deliberately does NOT apply the
+     * discovery rules below: a schedule serving its own host is entitled to a sitemap of that host
+     * even when it has opted out of being listed anywhere else.
+     */
     private function scheduleQuery()
     {
         return Role::query()
@@ -494,6 +533,18 @@ class SitemapController extends Controller
             ->where('is_deleted', false)
             ->whereNotNull('subdomain')
             ->whereNot(fn ($q) => $this->scopeToDemoSchedules($q));
+    }
+
+    /**
+     * The schedules the GLOBAL sitemap advertises.
+     *
+     * is_unlisted is the owner saying "do not put this in a directory". The page itself stays
+     * indexable - unlisted means shared by link, not hidden - but submitting to Google a URL the
+     * product keeps out of its own listings is a mixed signal, so discovery is left to the link.
+     */
+    private function discoverableScheduleQuery()
+    {
+        return $this->scheduleQuery()->where('is_unlisted', false);
     }
 
     /**
@@ -519,6 +570,10 @@ class SitemapController extends Controller
                 ->where('users.email', DemoService::DEMO_EMAIL));
     }
 
+    /**
+     * Every event with a public URL, whether or not it is discoverable. See scheduleQuery() for
+     * why the per-tenant sitemap uses this one rather than the discoverable variant below.
+     */
     private function eventQuery()
     {
         return Event::query()
@@ -549,6 +604,18 @@ class SitemapController extends Controller
                 ->where('roles.is_deleted', false)
                 ->whereNotNull('roles.user_id')
                 ->whereNot(fn ($d) => $this->scopeToDemoSchedules($d)));
+    }
+
+    /**
+     * The events the GLOBAL sitemap advertises.
+     *
+     * is_hidden_from_discovery is set on an event that its schedule has pulled out of /browse. The
+     * event page stays public and indexable; it just stops being surfaced by us. Submitting it to
+     * Google anyway would be us surfacing it, which is the thing the flag turns off.
+     */
+    private function discoverableEventQuery()
+    {
+        return $this->eventQuery()->where('is_hidden_from_discovery', false);
     }
 
     private function blogQuery()
@@ -751,15 +818,27 @@ class SitemapController extends Controller
     }
 
     /**
-     * Static marketing/docs pages change on deploy, not per crawl. Derive <lastmod> from the newest
-     * marketing view mtime so it reflects real content changes instead of "now" (which trains
-     * crawlers to ignore it). Memoized per request rather than cached in the cache store: it is
-     * ~90 stat calls, and it must keep working when the cache store is the thing that is broken.
+     * The index's roll-up <lastmod> for the pages child: the newest date any page in it reports.
+     *
+     * The per-page dates come from config/sitemap_lastmod.php (see lastmodTag()), so the newest of
+     * those is by definition the newest thing in that child. Only when the manifest is missing or
+     * empty - a fresh checkout that has never run `php artisan sitemap:lastmod`, or a selfhost
+     * install running ahead of one - does this fall back to the old view-mtime reading, and then to
+     * the release stamp for filesystems whose mtimes are build artifacts.
+     *
+     * Memoized per request rather than cached in the cache store: the fallback is ~90 stat calls,
+     * and this must keep working when the cache store is the thing that is broken.
      */
     private function staticLastmod(): string
     {
         if ($this->staticLastmod !== null) {
             return $this->staticLastmod;
+        }
+
+        $newest = collect(config('sitemap_lastmod') ?: [])->max();
+
+        if (is_string($newest) && $newest !== '') {
+            return $this->staticLastmod = $newest;
         }
 
         $mtime = collect(glob(resource_path('views/marketing/*.blade.php')) ?: [])
