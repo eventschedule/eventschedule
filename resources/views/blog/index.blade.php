@@ -1,4 +1,21 @@
 <x-marketing-layout>
+    @php
+        // Page 1 keeps the clean URL. Page 2+ self-canonicalizes, and the URL has to be byte-identical
+        // to the hrefs the paginator emits for rel=prev/next and its own links, so it is built by the
+        // paginator rather than hand-concatenated (today that form is "<base>?page=N", no slash).
+        // A canonical that pointed at page 1 while the page said noindex was a contradictory pair, and
+        // it hid 177 of 187 posts from indexable HTML.
+        //
+        // Filtered views (?tag=, month archives) stay noindex, and keep the query-stripped canonical:
+        // the paginator does not carry the filter into its links, so its URL would be the wrong page.
+        $isFiltered = $monthLabel || request('tag');
+        $blogCanonical = (! $isFiltered && $posts->currentPage() > 1)
+            ? $posts->url($posts->currentPage())
+            : url()->current();
+
+        // A page past the last one renders nothing; there is no point inviting a crawl of it.
+        $blogNoindex = $isFiltered || ($posts->currentPage() > 1 && $posts->isEmpty());
+    @endphp
     @if(request('tag'))
         <x-slot name="title">{{ request('tag') }} - Blog | Event Schedule</x-slot>
         <x-slot name="description">Articles about {{ request('tag') }} on the Event Schedule blog.</x-slot>
@@ -10,9 +27,9 @@
         <x-slot name="description">Read the latest news, tips, and insights about event scheduling and ticketing from the Event Schedule team.</x-slot>
     @endif
     <x-slot name="breadcrumbTitle">Blog</x-slot>
-    <x-slot name="canonical">{{ url()->current() }}</x-slot>
+    <x-slot name="canonical">{{ $blogCanonical }}</x-slot>
 
-    @if($posts->currentPage() > 1 || $monthLabel || request('tag'))
+    @if($blogNoindex)
         <x-slot name="robots">noindex, follow</x-slot>
     @endif
 
@@ -43,41 +60,59 @@
 
     <x-slot name="structuredData">
     <!-- Blog ItemList Structured Data -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Blog",
-        "name": "Event Schedule Blog",
-        "description": "Read the latest news, tips, and insights about event scheduling and ticketing from the Event Schedule team.",
-        "url": "{{ route('blog.index') }}",
-        "publisher": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "logo": {
-                "@type": "ImageObject",
-                "url": "{{ config('app.url') }}/images/light_logo.png",
-                "width": 712,
-                "height": 140
-            }
+    @php
+        // Built as an array and emitted with json_encode: a Blade echo tag HTML-escapes but does
+        // NOT JSON-escape, so a double quote in a post title used to invalidate the whole block.
+        $blogPayload = [
+            '@context' => 'https://schema.org',
+            '@type' => 'Blog',
+            '@id' => route('blog.index').'#blog',
+            'name' => 'Event Schedule Blog',
+            'description' => 'Read the latest news, tips, and insights about event scheduling and ticketing from the Event Schedule team.',
+            // The blog entity always lives at page 1; mainEntityOfPage is what ties it to the
+            // page actually being served, so it has to follow the canonical.
+            'url' => route('blog.index'),
+            'mainEntityOfPage' => [
+                '@type' => 'CollectionPage',
+                '@id' => $blogCanonical,
+            ],
+            'publisher' => [
+                '@type' => 'Organization',
+                '@id' => config('app.url').'/#organization',
+                'name' => 'Event Schedule',
+                'logo' => [
+                    '@type' => 'ImageObject',
+                    'url' => config('app.url').'/images/light_logo.png',
+                    'width' => 712,
+                    'height' => 140,
+                ],
+            ],
+        ];
+
+        // Not $post: @php shares the view scope, and $post is the card loop's variable below.
+        foreach ($posts as $listed) {
+            $blogPayload['blogPost'][] = [
+                '@type' => 'BlogPosting',
+                'headline' => $listed->title,
+                'description' => $listed->excerpt,
+                'url' => route('blog.show', $listed->slug),
+                'mainEntityOfPage' => [
+                    '@type' => 'WebPage',
+                    '@id' => route('blog.show', $listed->slug),
+                ],
+                'image' => $listed->featured_image_url ?: config('app.url').'/images/social/home.png',
+                'datePublished' => $listed->published_at?->toISOString() ?: '',
+                'dateModified' => ($listed->updated_at ?: $listed->published_at)?->toISOString() ?: '',
+                'author' => [
+                    '@type' => 'Organization',
+                    '@id' => config('app.url').'/#organization',
+                    'name' => 'Event Schedule',
+                ],
+            ];
         }
-        @if($posts->count() > 0)
-        ,"blogPost": [
-            @foreach($posts as $index => $post)
-            {
-                "@type": "BlogPosting",
-                "headline": "{{ $post->title }}",
-                "description": "{{ $post->excerpt }}",
-                "url": "{{ route('blog.show', $post->slug) }}",
-                "datePublished": "{{ $post->published_at ? $post->published_at->toISOString() : '' }}",
-                "author": {
-                    "@type": "Person",
-                    "name": "{{ $post->author_name }}"
-                }
-            }@if(!$loop->last),@endif
-            @endforeach
-        ]
-        @endif
-    }
+    @endphp
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {!! json_encode($blogPayload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
     </script>
     </x-slot>
 

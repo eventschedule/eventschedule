@@ -144,7 +144,7 @@ return [
         Return ONLY a raw JSON object. Do not use markdown blocks (no ```json). Your entire response must start exactly with { and end exactly with }.
         {
             \"title\": \"Highly clickable, search-intent driven title (50-60 characters)\",
-            \"content\": \"HTML formatted content. Use semantic tags (<h1>, <h2>, <h3>), <p>, and <ul>/<ol>. Bold key terms naturally. Ensure high readability.\",
+            \"content\": \"HTML formatted content. Use semantic tags (<h2>, <h3>), <p>, and <ul>/<ol>. Never emit an H1: the page template already renders the post title as the only H1. Bold key terms naturally. Ensure high readability.\",
             \"excerpt\": \"Compelling summary targeting the primary keyword (150-160 characters)\",
             \"tags\": [\"tag1\", \"tag2\", \"tag3\", \"tag4\", \"tag5\"],
             \"meta_title\": \"SEO meta title including primary keyword (50-60 characters)\",

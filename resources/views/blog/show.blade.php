@@ -14,7 +14,9 @@
     @if($post->published_at)
         <meta property="article:published_time" content="{{ $post->published_at->toISOString() }}">
     @endif
-    <meta property="article:modified_time" content="{{ $post->updated_at->toISOString() }}">
+    @if($post->updated_at ?: $post->published_at)
+        <meta property="article:modified_time" content="{{ ($post->updated_at ?: $post->published_at)->toISOString() }}">
+    @endif
     <meta property="article:author" content="{{ $post->author_name }}">
     @if($post->tags)
         @foreach($post->tags as $tag)
@@ -26,43 +28,54 @@
 
     <x-slot name="structuredData">
     <!-- BlogPosting Structured Data -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "BlogPosting",
-        "headline": "{{ $post->title }}",
-        "description": "{{ $post->meta_description }}",
-        "image": "{{ $post->featured_image_url ?: config('app.url') . '/images/social/home.png' }}",
-        "author": {
-            "@type": "Person",
-            "name": "{{ $post->author_name }}",
-            "url": "{{ config('app.url') }}/about"
-        },
-        "publisher": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "logo": {
-                "@type": "ImageObject",
-                "url": "{{ config('app.url') }}/images/light_logo.png",
-                "width": 712,
-                "height": 140
-            }
-        },
-        "datePublished": "{{ $post->published_at ? $post->published_at->toISOString() : '' }}",
-        "dateModified": "{{ $post->updated_at->toISOString() }}",
-        "mainEntityOfPage": {
-            "@type": "WebPage",
-            "@id": "{{ url()->current() }}"
-        },
-        "speakable": {
-            "@type": "SpeakableSpecification",
-            "cssSelector": ["[itemprop='headline']", "[itemprop='description']"]
+    @php
+        // Built as an array and emitted with json_encode: a Blade echo tag HTML-escapes but does
+        // NOT JSON-escape, so a double quote in a post title used to invalidate the whole block.
+        //
+        // author is the Organization, not a Person: "Event Schedule Team" was never a real byline,
+        // and sharing the layout's Organization @id lets the two nodes merge.
+        $postingPayload = [
+            '@context' => 'https://schema.org',
+            '@type' => 'BlogPosting',
+            'headline' => $post->title,
+            'description' => $post->meta_description,
+            'image' => $post->featured_image_url ?: config('app.url').'/images/social/home.png',
+            'author' => [
+                '@type' => 'Organization',
+                '@id' => config('app.url').'/#organization',
+                'name' => 'Event Schedule',
+                'url' => config('app.url'),
+            ],
+            'publisher' => [
+                '@type' => 'Organization',
+                '@id' => config('app.url').'/#organization',
+                'name' => 'Event Schedule',
+                'logo' => [
+                    '@type' => 'ImageObject',
+                    'url' => config('app.url').'/images/light_logo.png',
+                    'width' => 712,
+                    'height' => 140,
+                ],
+            ],
+            'datePublished' => $post->published_at?->toISOString() ?: '',
+            'dateModified' => ($post->updated_at ?: $post->published_at)?->toISOString() ?: '',
+            'mainEntityOfPage' => [
+                '@type' => 'WebPage',
+                '@id' => url()->current(),
+            ],
+            'speakable' => [
+                '@type' => 'SpeakableSpecification',
+                'cssSelector' => ["[itemprop='headline']", "[itemprop='description']"],
+            ],
+            'wordCount' => str_word_count(strip_tags($post->content)),
+        ];
+
+        if ($post->tags) {
+            $postingPayload['keywords'] = implode(', ', $post->tags);
         }
-        ,"wordCount": {{ str_word_count(strip_tags($post->content)) }}
-        @if($post->tags)
-        ,"keywords": "{{ implode(', ', $post->tags) }}"
-        @endif
-    }
+    @endphp
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {!! json_encode($postingPayload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
     </script>
     </x-slot>
 
@@ -270,7 +283,6 @@
                 <div class="prose prose-lg dark:prose-invert max-w-none" style="font-size: 1.125rem;">
                     <style {!! nonce_attr() !!}>
                         .prose-lg p { margin-bottom: 2rem !important; }
-                        .prose-lg h1 { font-size: 2.5rem !important; font-weight: 800 !important; margin-top: 3rem !important; margin-bottom: 2rem !important; line-height: 1.1 !important; }
                         .prose-lg h2 { font-size: 2rem !important; font-weight: 700 !important; margin-top: 2.5rem !important; margin-bottom: 1.5rem !important; line-height: 1.15 !important; }
                         .prose-lg h3 { font-size: 1.5rem !important; font-weight: 600 !important; margin-top: 2rem !important; margin-bottom: 1rem !important; }
                         .prose-lg h4 { font-size: 1.25rem !important; font-weight: 600 !important; margin-top: 1.5rem !important; margin-bottom: 0.75rem !important; }
@@ -279,11 +291,11 @@
                         .prose-lg ul { list-style-type: disc !important; padding-left: 2rem !important; }
                         .prose-lg ul li { display: list-item !important; }
                         .dark .prose-lg { color: rgb(var(--ap-ink-2)); }
-                        .dark .prose-lg h1, .dark .prose-lg h2, .dark .prose-lg h3, .dark .prose-lg h4 { color: #fff; }
+                        .dark .prose-lg h2, .dark .prose-lg h3, .dark .prose-lg h4 { color: #fff; }
                         .dark .prose-lg a { color: #a78bfa; }
                         .dark .prose-lg strong { color: #fff; }
                     </style>
-                    {!! \App\Utils\MarkdownUtils::sanitizeHtml($post->content) !!}
+                    {!! $post->renderedContent() !!}
                 </div>
                 <!-- Related Posts -->
                 @if($relatedPosts->count() > 0)

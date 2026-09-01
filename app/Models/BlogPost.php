@@ -154,9 +154,37 @@ class BlogPost extends Model
         return $value ?: $this->excerpt;
     }
 
+    /**
+     * Count a public read of this post WITHOUT restamping updated_at.
+     *
+     * Eloquent's Builder::increment() runs its values through addUpdatedAtColumn(), so a bare
+     * $this->increment('view_count') writes updated_at = now() alongside the counter. Every
+     * anonymous page view - Googlebot's included - therefore marked the post modified, and
+     * updated_at is what feeds the sitemap's <lastmod>, the BlogPosting dateModified and
+     * article:modified_time. The whole corpus reported "changed at the moment you crawled it".
+     *
+     * withoutTimestamps() flips usesTimestamps() off for the duration, which is what
+     * addUpdatedAtColumn() consults, so the UPDATE carries view_count only. The in-memory model
+     * still gets the new count (Model::incrementOrDecrement sets the column before it queries)
+     * and keeps the stored updated_at, which is what the view renders.
+     */
     public function incrementViewCount()
     {
-        $this->increment('view_count');
+        static::withoutTimestamps(fn () => $this->increment('view_count'));
+    }
+
+    /**
+     * The post body as it should be rendered on a page.
+     *
+     * The template already renders the title as the page's one <h1>. sanitizeHtml() allows h1
+     * through and the AI generator used to be told to emit it, so most stored bodies open with a
+     * second (and sometimes third) <h1>. Demote them rather than editing stored content.
+     */
+    public function renderedContent(): string
+    {
+        $html = \App\Utils\MarkdownUtils::sanitizeHtml($this->content);
+
+        return preg_replace('~<(/?)h1(?=[\s>])~i', '<$1h2', $html) ?? $html;
     }
 
     public function getFeaturedImageUrlAttribute()
