@@ -629,18 +629,58 @@ class User extends Authenticatable implements MustVerifyEmail
         return false;
     }
 
+    /**
+     * Events whose PRIVATE data (revenue, sales, buyers, check-ins) this user may read.
+     *
+     * Owner/admin on any schedule attached to the event grants access, EXCEPT a curator schedule
+     * that did not create the event: curators that only list/promote an event don't own the
+     * creator's private data. Read by BoxOfficeController, CheckInController, Api\ApiSaleController,
+     * TicketController and the analytics revenue/check-ins tabs, so do not widen it.
+     */
     public function canViewEventData(Event $event): bool
+    {
+        return $this->hasEventRoleAccess($event, skipUnownedCurators: true);
+    }
+
+    /**
+     * Events whose PAGE TRAFFIC this user may read: the same rule minus the curator exception.
+     *
+     * A curator that lists an event serves the page view itself, and PageView::recordView() writes
+     * analytics_events_daily keyed on event_id alone with no schedule dimension, so a schedule that
+     * shows an event has a real claim on the view count. AnalyticsService::getTopEvents() already
+     * puts that count on the curator's own analytics page.
+     *
+     * Strictly WIDER than canViewEventData(), never narrower, which is why the two share a body:
+     * the analytics web tab may authorize on this, and nothing that reads money may.
+     */
+    public function canViewEventTraffic(Event $event): bool
+    {
+        return $this->hasEventRoleAccess($event, skipUnownedCurators: false);
+    }
+
+    private function hasEventRoleAccess(Event $event, bool $skipUnownedCurators): bool
     {
         if ($this->id == $event->user_id) {
             return true;
         }
 
-        // Owner/admin on any role attached to the event grants access, EXCEPT
-        // a curator role that did not create the event — curators that only
-        // list/promote an event don't own the creator's private data.
         foreach ($event->roles as $role) {
             if ($role->isCurator() && $event->creator_role_id != $role->id) {
-                continue;
+                // Private data: a curator that only lists an event never owns the creator's money.
+                if ($skipUnownedCurators) {
+                    continue;
+                }
+
+                // Traffic: only once the curator ACCEPTED it. Acceptance is what put the event on
+                // the curator's page and made the view its own; syncCuratorSources() attaches a
+                // source venue's events at is_accepted = null without anyone agreeing, and a
+                // decline leaves the row at false rather than detaching, and neither ever rendered
+                // anything. Loose truthiness on purpose - EventRole casts is_auto_sourced but NOT
+                // is_accepted, so the pivot hands back 1/0/null, and `!== true` would reject
+                // every accepted row.
+                if (! $role->pivot->is_accepted) {
+                    continue;
+                }
             }
 
             $pivot = $this->roles()

@@ -29,47 +29,84 @@ class AnalyticsController extends Controller
             abort(403, 'Unauthorized access to analytics');
         }
 
+        // Tab first: the revenue and check-ins tabs read the creator's private data rather than
+        // page traffic, so they authorize the selected event more strictly and get a narrower
+        // picker list. Whitelisted rather than passed through, so the strictness flag and the
+        // dispatch branches below can never be reading different values.
+        $tab = in_array($request->tab, ['web', 'revenue', 'checkins'], true) ? $request->tab : 'web';
+        $ownedDataOnly = $tab !== 'web';
+
         // Get selected event for filtering (decode from URL-safe format)
         $selectedEventId = $request->event_id ? UrlUtils::decodeId($request->event_id) : null;
+        $selectedEvent = null;
+        // What the tab links carry. The private tabs drop an event whose data belongs to its
+        // creator, and the tab strip rebuilds every href from the selection, so without this a
+        // Web -> Revenue -> Web round trip would lose the filter for good.
+        $tabEventId = null;
 
-        // Security: Validate that the authenticated user owns the event's data.
-        // Owner/admin on any non-curator role attached to the event grants access;
-        // a curator role only grants access for events the curator itself created.
         if ($selectedEventId) {
             $selectedEvent = Event::with('roles')->find($selectedEventId);
 
-            if (! $selectedEvent || ! $user->canViewEventData($selectedEvent)) {
+            // Security: page traffic is the floor - owner/admin on any schedule the event is
+            // attached to, curators included. A curator that lists an event served the view that
+            // incremented the row, and the Top events table on this tab already counts it.
+            if (! $selectedEvent || ! $user->canViewEventTraffic($selectedEvent)) {
                 abort(403, 'Unauthorized access to analytics');
             }
 
-            // If a schedule is selected, ensure the event belongs to it.
-            // For curators, "belongs to" means the curator created the event
-            // (curated-but-not-created events are excluded from analytics).
-            // For other roles, the event must be attached via the event_role pivot.
-            if ($selectedRoleId) {
-                $selectedRole = $roles->firstWhere('id', $selectedRoleId);
-                $belongsToRole = $selectedRole && $selectedRole->isCurator()
-                    ? $selectedEvent->creator_role_id == $selectedRoleId
-                    : DB::table('event_role')
-                        ->where('event_id', $selectedEventId)
-                        ->where('role_id', $selectedRoleId)
-                        ->exists();
+            // Authorized for traffic, so it is safe to keep offering across the tab strip.
+            $tabEventId = $selectedEventId;
 
-                if (! $belongsToRole) {
-                    $selectedEventId = null;
-                }
+            // The money still belongs to whoever created it. Drop the filter rather than aborting:
+            // the tab links carry event_id forward, so a curator holding a curated event selected
+            // would hit a 403 page just by clicking Revenue.
+            if ($ownedDataOnly && ! $user->canViewEventData($selectedEvent)) {
+                $selectedEventId = null;
+                $selectedEvent = null;
+            }
+        }
+
+        // If a schedule is selected, ensure the event belongs to it. On the private tabs a curator
+        // "belongs to" only what it created; on the web tab an attached event is on the curator's
+        // own page, which is whose traffic this is. Deliberately looser than the picker list (no
+        // is_accepted, no date window) so no listed row can be rejected and a saved deep link to an
+        // older event keeps filtering. The creator_role_id arm matches the picker's: an event whose
+        // creator lost its event_role row must not lose its filter either.
+        if ($selectedEventId && $selectedRoleId) {
+            $selectedRole = $roles->firstWhere('id', $selectedRoleId);
+
+            $attachedToRole = $selectedEvent->creator_role_id == $selectedRoleId
+                || DB::table('event_role')
+                    ->where('event_id', $selectedEventId)
+                    ->where('role_id', $selectedRoleId)
+                    ->exists();
+
+            $belongsToRole = $selectedRole && $selectedRole->isCurator() && $ownedDataOnly
+                ? $selectedEvent->creator_role_id == $selectedRoleId
+                : $attachedToRole;
+
+            // Two different failures. Not attached at all means no tab can show it, so the tab
+            // strip must stop offering it. Attached but not owned is the private-data rule again,
+            // and the web tab can still show its traffic, so the link keeps the id.
+            if (! $attachedToRole) {
+                $tabEventId = null;
+            }
+
+            if (! $belongsToRole) {
+                $selectedEventId = null;
+                $selectedEvent = null;
             }
         }
 
         // Get events list for the dropdown (only when a schedule is selected)
-        $events = $selectedRoleId ? $analytics->getEventsForSchedule($selectedRoleId) : collect();
+        $events = $selectedRoleId ? $analytics->getEventsForSchedule($selectedRoleId, $ownedDataOnly) : collect();
 
-        // Resolve the selected event's display name for the initial (pre-Vue-mount) render of the picker
-        $selectedEventEntry = $selectedEventId ? $events->firstWhere('raw_id', $selectedEventId) : null;
-        $selectedEventName = $selectedEventEntry ? $selectedEventEntry['name'] : __('messages.all_events');
-
-        // Tab selection
-        $tab = $request->tab ?? 'web';
+        // Resolve the selected event's display name for the initial (pre-Vue-mount) render of the
+        // picker. From the event itself, never from the list: the id below filters every panel
+        // whether or not the picker lists it (a deep link outside the 30-day window, or the
+        // narrower list the private tabs get), and labelling an applied filter "All events" is
+        // exactly what reads as missing data.
+        $selectedEventName = $selectedEvent ? $selectedEvent->translatedName() : __('messages.all_events');
 
         // Date range filter
         $range = $request->range ?? 'last_30_days';
@@ -92,6 +129,7 @@ class AnalyticsController extends Controller
                 'selectedRoleId',
                 'selectedEventId',
                 'selectedEventName',
+                'tabEventId',
                 'events',
                 'range',
                 'tab',
@@ -109,7 +147,7 @@ class AnalyticsController extends Controller
                 : collect();
 
             // Get top events by revenue
-            $topEventsByRevenue = $analytics->getTopEventsByRevenue($user, 10, $start, $end, $selectedEventId);
+            $topEventsByRevenue = $analytics->getTopEventsByRevenue($user, 10, $start, $end, $selectedEventId, $selectedRoleId);
 
             // Get boost stats
             $boostStats = $analytics->getBoostStats($user, $start, $end, $selectedRoleId);
@@ -122,6 +160,7 @@ class AnalyticsController extends Controller
                 'selectedRoleId',
                 'selectedEventId',
                 'selectedEventName',
+                'tabEventId',
                 'events',
                 'range',
                 'tab',
@@ -152,7 +191,7 @@ class AnalyticsController extends Controller
             );
 
         // Get top events
-        $topEvents = $analytics->getTopEvents($user, 10, $start, $end, $selectedEventId);
+        $topEvents = $analytics->getTopEvents($user, 10, $start, $end, $selectedEventId, $selectedRoleId);
 
         // Get views by period for chart
         $viewsByPeriod = $analytics->getViewsByPeriod($user, $period, $start, $end, $selectedRoleId, $selectedEventId);
@@ -217,6 +256,7 @@ class AnalyticsController extends Controller
             'selectedRoleId',
             'selectedEventId',
             'selectedEventName',
+            'tabEventId',
             'events',
             'totalViews',
             'momComparison',

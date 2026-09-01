@@ -72,9 +72,12 @@ class AnalyticsService
     /**
      * Get top events by view count
      */
-    public function getTopEvents(User $user, int $limit, Carbon $start, Carbon $end, ?int $eventId = null): Collection
+    public function getTopEvents(User $user, int $limit, Carbon $start, Carbon $end, ?int $eventId = null, ?int $roleId = null): Collection
     {
-        $roleIds = $this->getUserRoleIds($user);
+        // $roleId last so HomeController's dashboard call keeps working unchanged. Scoped the way
+        // getTrafficSources() is: without it this panel aggregated every schedule the user owns
+        // while the picker beside it was filtered to one.
+        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
 
         if ($roleIds->isEmpty()) {
             return collect();
@@ -376,9 +379,20 @@ class AnalyticsService
     }
 
     /**
-     * Get events for the analytics filter dropdown (future + past 30 days)
+     * Get events for the analytics filter dropdown (future, live recurrences, and the past 30 days).
+     *
+     * Two lists, not one. $ownedDataOnly is the revenue and check-ins tabs, which read the
+     * creator's private data: a curator that only lists an event does not own it, so those tabs
+     * offer just what the curator created, matching the totals ownedEventIdsForRoles() computes
+     * beside the picker. It defaults to the strict list so a new caller cannot widen by accident.
+     *
+     * The web tab is page traffic. A curator's own site served the view that incremented the row,
+     * and getTopEvents() already counts curated events in the Top events table on that same tab -
+     * excluding them from the picker only made the curator's schedule look like it was missing
+     * events. (analytics_events_daily carries no schedule dimension, so the count is the event's
+     * traffic everywhere it appears; that is what the Top events table has always shown.)
      */
-    public function getEventsForSchedule(int $roleId): Collection
+    public function getEventsForSchedule(int $roleId, bool $ownedDataOnly = true): Collection
     {
         $cutoff = now()->subDays(30)->startOfDay();
 
@@ -390,15 +404,66 @@ class AnalyticsService
             ->where('is_draft', false)
             ->where(function ($q) use ($cutoff) {
                 $q->where('starts_at', '>=', $cutoff)
-                    ->orWhereNull('starts_at');
+                    ->orWhereNull('starts_at')
+                    // starts_at holds only the FIRST occurrence of a recurring event; the rest are
+                    // computed by matchesDate(). Without this the clause above drops a live weekly
+                    // residency the day it turns 30 days old, which is how a venue's regular nights
+                    // went missing from this picker while still collecting views.
+                    //
+                    // Bounded, unlike Event::scopeInMonth()'s bare orWhereNotNull('days_of_week'):
+                    // that scope's callers re-filter every row through matchesDate() per grid day,
+                    // so a finished series is loaded and then discarded. Nothing re-filters this
+                    // list, so unbounded would mean a series that ended in 2019 sits in the
+                    // dropdown forever. 'on_date' is the only end SQL can evaluate - 'never' has no
+                    // end and 'after_events' counts occurrences in PHP (countOccurrences()) - so
+                    // both of those stay in.
+                    ->orWhere(function ($q2) use ($cutoff) {
+                        $q2->whereNotNull('days_of_week')
+                            ->where(function ($q3) use ($cutoff) {
+                                $q3->where('recurring_end_type', '!=', 'on_date')
+                                    ->orWhereNull('recurring_end_type')
+                                    ->orWhereNull('recurring_end_value')
+                                    ->orWhere('recurring_end_value', '>=', $cutoff->toDateString());
+                            });
+                    })
+                    // Multi-day event that started before the window and is still running.
+                    ->orWhere(function ($q2) use ($cutoff) {
+                        $q2->where('duration', '>=', 24)
+                            ->whereRaw('DATE_ADD(starts_at, INTERVAL duration HOUR) >= ?', [$cutoff]);
+                    });
             });
 
-        // Curators only see events they created here; curated-but-not-created
-        // events are excluded so they don't leak into the analytics event picker.
-        if ($isCurator) {
+        if ($isCurator && $ownedDataOnly) {
             $query->where('creator_role_id', $roleId);
+        } elseif ($isCurator) {
+            // Strictly the old list PLUS what this curator accepted, so nothing can vanish.
+            //
+            // The creator_role_id arm carries NO pivot requirement, on purpose. An event whose
+            // creator_role_id names a schedule with no matching event_role row is a real state
+            // (CheckData::checkEventCreatorRoles() finds it and deliberately never repairs it) and
+            // it still works here, because canViewEventTraffic() short-circuits on events.user_id
+            // exactly as Event::scopeManagedThrough()'s first arm does. That scope can afford its
+            // "a pivot row is REQUIRED" rule because it carries that user_id arm; this list does
+            // not, so requiring a pivot would hide the curator's own event instead.
+            //
+            // Somebody else's event counts once this curator ACCEPTED it: acceptance is what put
+            // it on the page whose views these are, and every listing query in RoleController
+            // filters the same way. A decline leaves is_accepted = false rather than detaching, so
+            // it stays out, and syncCuratorSources()'s pending auto-attachments cannot flood the
+            // picker.
+            $query->where(function ($q) use ($roleId) {
+                $q->where('creator_role_id', $roleId)
+                    ->orWhereHas('roles', fn ($r) => $r->where('roles.id', $roleId)
+                        ->where('event_role.is_accepted', true));
+            });
         } else {
-            $query->whereHas('roles', fn ($q) => $q->where('roles.id', $roleId));
+            // Same creator arm as the curator branch above, for the same reason: an event whose
+            // creator lost its event_role row still resolves through events.user_id, and CheckData
+            // reports that state more often for venues than for curators.
+            $query->where(function ($q) use ($roleId) {
+                $q->where('creator_role_id', $roleId)
+                    ->orWhereHas('roles', fn ($r) => $r->where('roles.id', $roleId));
+            });
         }
 
         return $query->orderBy('starts_at')
@@ -407,7 +472,15 @@ class AnalyticsService
                 'id' => UrlUtils::encodeId($event->id),
                 'raw_id' => $event->id,
                 'name' => $event->translatedName(),
-                'starts_at' => $event->getShortDateRangeDisplay('D, M j, Y'),
+                // A recurring row's starts_at is its first occurrence, so on its own it reads as
+                // a stale date sitting next to tonight's shows. Label it rather than replace it:
+                // the date is still the only hint a reader gets that a series is long finished,
+                // and the 'after_events' end type cannot be evaluated here to drop those (its
+                // countOccurrences() walks day by day from starts_at, thousands of iterations per
+                // row), so the SQL above keeps them.
+                'starts_at' => $event->days_of_week
+                    ? __('messages.recurring').' · '.$event->getShortDateRangeDisplay('M j, Y')
+                    : $event->getShortDateRangeDisplay('D, M j, Y'),
                 'image_url' => $event->getImageUrl(),
             ]);
     }
@@ -677,12 +750,12 @@ class AnalyticsService
     /**
      * Get top events by revenue
      */
-    public function getTopEventsByRevenue(User $user, int $limit, Carbon $start, Carbon $end, ?int $eventId = null): Collection
+    public function getTopEventsByRevenue(User $user, int $limit, Carbon $start, Carbon $end, ?int $eventId = null, ?int $roleId = null): Collection
     {
         if ($eventId) {
             $eventIds = collect([$eventId]);
         } else {
-            $roleIds = $this->getUserRoleIds($user);
+            $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
 
             if ($roleIds->isEmpty()) {
                 return collect();

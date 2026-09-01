@@ -126,15 +126,15 @@
 
         {{-- Tab Navigation --}}
         <div class="flex gap-6 border-b border-gray-200 dark:border-gray-700">
-            <a href="{{ route('analytics', array_filter(['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'event_id' => \App\Utils\UrlUtils::encodeId($selectedEventId), 'range' => $range])) }}"
+            <a href="{{ route('analytics', array_filter(['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'event_id' => \App\Utils\UrlUtils::encodeId($tabEventId), 'range' => $range])) }}"
                 class="pb-3 text-base font-medium border-b-2 transition-colors {{ $tab === 'web' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
                 {{ __('messages.web_analytics') }}
             </a>
-            <a href="{{ route('analytics', array_filter(['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'event_id' => \App\Utils\UrlUtils::encodeId($selectedEventId), 'range' => $range, 'tab' => 'revenue'])) }}"
+            <a href="{{ route('analytics', array_filter(['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'event_id' => \App\Utils\UrlUtils::encodeId($tabEventId), 'range' => $range, 'tab' => 'revenue'])) }}"
                 class="pb-3 text-base font-medium border-b-2 transition-colors {{ $tab === 'revenue' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
                 {{ __('messages.revenue') }}
             </a>
-            <a href="{{ route('analytics', array_filter(['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'event_id' => \App\Utils\UrlUtils::encodeId($selectedEventId), 'range' => $range, 'tab' => 'checkins'])) }}"
+            <a href="{{ route('analytics', array_filter(['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'event_id' => \App\Utils\UrlUtils::encodeId($tabEventId), 'range' => $range, 'tab' => 'checkins'])) }}"
                 class="pb-3 text-base font-medium border-b-2 transition-colors {{ $tab === 'checkins' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
                 {{ __('messages.check_ins') }}
             </a>
