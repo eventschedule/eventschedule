@@ -14,6 +14,8 @@
         <x-doc-nav-link href="#verification">Verification Steps</x-doc-nav-link>
         <x-doc-nav-link href="#demo">Demo Mode</x-doc-nav-link>
         <x-doc-nav-link href="#troubleshooting">Troubleshooting</x-doc-nav-link>
+        <x-doc-nav-link href="#scheduler">Scheduler and queue</x-doc-nav-link>
+        <x-doc-nav-link href="#backup-storage">Backup storage</x-doc-nav-link>
         <x-doc-nav-link href="#support-chat">Support Chat</x-doc-nav-link>
         <x-doc-nav-link href="#translations">Custom translations</x-doc-nav-link>
         <x-doc-nav-link href="#custom-links">Custom dashboard links</x-doc-nav-link>
@@ -755,6 +757,71 @@ yourdomain.com.    CNAME    your-server.hosting.com.
             </div>
             <pre><code>tail -f storage/logs/laravel.log</code></pre>
         </div>
+    </section>
+
+    <!-- Scheduler and queue -->
+    <section id="scheduler" class="doc-section">
+        <h2 class="doc-heading">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Scheduler and queue
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Timed work - reminder emails, calendar sync, installment charges, ticket release, AI translation - is driven by the Laravel scheduler, and the queue is drained from inside it. There are two interchangeable ways to run it. Pick one.</p>
+
+        <h3 class="doc-subheading">A cron entry, or a worker process</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">On a server with cron, add the single entry from the <a href="{{ route('marketing.docs.selfhost.installation') }}#cron" class="doc-link">installation guide</a>:</p>
+        <pre class="rounded-xl bg-gray-100 dark:bg-[#1A1A1A] p-4 text-sm overflow-x-auto"><code>* * * * * php /path/to/eventschedule/artisan schedule:run</code></pre>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">On a platform with no cron but long-running processes - a container host, for example - run the scheduler as the process instead. This is what eventschedule.com does, as a DigitalOcean App Platform worker:</p>
+        <pre class="rounded-xl bg-gray-100 dark:bg-[#1A1A1A] p-4 text-sm overflow-x-auto"><code>php artisan schedule:work</code></pre>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Either way, do not run more than one. Two schedulers means two of every timed job.</p>
+
+        <h3 id="http-cron" class="doc-subheading">Or an HTTP cron endpoint</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Shared hosting that offers neither a crontab nor a long-running process can drive the same schedule over HTTP. Set <code class="doc-inline-code">APP_CRON_SECRET</code> to a long random string and have any external cron service request this once a minute:</p>
+        <pre class="rounded-xl bg-gray-100 dark:bg-[#1A1A1A] p-4 text-sm overflow-x-auto"><code>GET https://your-domain.com/translate_data?secret=YOUR_SECRET</code></pre>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The same secret also gates <code class="doc-inline-code">/release_tickets</code>. Leaving <code class="doc-inline-code">APP_CRON_SECRET</code> empty disables both endpoints, which is the right setting on an install that uses cron or a worker.</p>
+
+        <div class="doc-callout doc-callout-warning">
+            <div class="doc-callout-title">Do not run two of these at once</div>
+            <p>The HTTP endpoint and the scheduler are two copies of the same schedule. An install running both will do some work twice. A handful of commands hold a shared lock and are safe either way, but most rely on there being a single runner.</p>
+        </div>
+
+        <h3 class="doc-subheading">Queue</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The scheduler runs <code class="doc-inline-code">queue:work --stop-when-empty</code> every minute, so queued mail and background jobs go out within about a minute with no separate worker to manage. With the default <code class="doc-inline-code">QUEUE_CONNECTION=sync</code> nothing is queued at all and jobs run inline in the request that created them; set it to <code class="doc-inline-code">database</code> to get the queue.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">If you need lower latency than a minute, run a resident <code class="doc-inline-code">php artisan queue:work</code> as well.</p>
+
+        <h3 class="doc-subheading">Knowing that it stopped</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Every scheduler tick stamps a heartbeat, and the admin panel raises <span class="font-semibold text-gray-900 dark:text-white">"Scheduled tasks are not running"</span> on the dashboard, the nav and <span class="font-semibold text-gray-900 dark:text-white">System &rarr; Queue</span> when it goes stale. Tune the threshold with <code class="doc-inline-code">SCHEDULER_STALE_MINUTES</code> (default 15). Take it seriously: while the scheduler is down nothing sends email, syncs a calendar or charges an installment.</p>
+
+        <div class="doc-callout doc-callout-warning">
+            <div class="doc-callout-title">Running more than one app server</div>
+            <p>Set <code class="doc-inline-code">CACHE_STORE</code> to <code class="doc-inline-code">database</code> or <code class="doc-inline-code">redis</code>. Every lock that stops two scheduled runs colliding is held in the cache, so on the <code class="doc-inline-code">file</code> default each server serialises only against itself - and the heartbeat above will report a stall that is not real, because one server cannot see another's cache.</p>
+        </div>
+    </section>
+
+    <!-- Backup storage -->
+    <section id="backup-storage" class="doc-section">
+        <h2 class="doc-heading">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+            </svg>
+            Backup storage
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Schedule exports are written to <code class="doc-inline-code">storage/app</code> by default, which is correct for a single server. Point them at object storage if your app runs on more than one server or container, or on a host with an ephemeral filesystem: the process that builds an export is not the one that later serves the download, so a local file would be missing or already deleted by then.</p>
+        <pre class="rounded-xl bg-gray-100 dark:bg-[#1A1A1A] p-4 text-sm overflow-x-auto"><code>BACKUP_DISK_DRIVER=s3
+BACKUP_SPACES_KEY=your-key
+BACKUP_SPACES_SECRET=your-secret
+BACKUP_SPACES_REGION=nyc3
+BACKUP_SPACES_ENDPOINT=https://nyc3.digitaloceanspaces.com
+BACKUP_SPACES_BUCKET=your-private-backups-bucket</code></pre>
+
+        <div class="doc-callout doc-callout-warning">
+            <div class="doc-callout-title">Use a separate private bucket, never your images bucket</div>
+            <p>An export archive contains every sale, attendee email address and phone number for the schedules inside it, and its path is a user id plus a timestamp. Image buckets are public and usually CDN-fronted, so anything landing in one is effectively published at a guessable URL - and a CDN keeps serving it after you make the object private again. Use a bucket with no public policy and no CDN in front of it. <code class="doc-inline-code">BACKUP_SPACES_BUCKET</code> has no default for this reason: a missing value fails rather than quietly writing backups somewhere public.</p>
+            <p>Archive filenames also carry 32 random characters, so the bucket is not the only thing standing between an export and the public.</p>
+        </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Imports are unaffected and always stay on the server that received the upload.</p>
     </section>
 
     <!-- Support Chat -->

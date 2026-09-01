@@ -112,7 +112,11 @@ class AppController extends Controller
         $requestSecret = request()->get('secret');
         $serverSecret = config('app.cron_secret');
 
-        if (! $serverSecret || ! $requestSecret || ! hash_equals($serverSecret, $requestSecret)) {
+        // is_string matters: request()->get() hands back whatever the query string parsed to, so
+        // ?secret[]=x yields an ARRAY. An array is truthy, so it sails past the emptiness check and
+        // hash_equals() then throws a TypeError - an uncaught 500, from anyone, no secret needed.
+        if (! $serverSecret || ! is_string($requestSecret) || $requestSecret === ''
+            || ! hash_equals($serverSecret, $requestSecret)) {
             return response()->json(['error' => __('messages.unauthorized')], 403);
         }
 
@@ -269,8 +273,14 @@ class AppController extends Controller
                 }
                 // In the hourly block, not the daily one: the first nudge is due an hour
                 // after signup and the window it targets closes fast.
+                //
+                // Hosted-gated to match routes/console.php. Without the gate a plain selfhost
+                // driving cron through this endpoint mails onboarding nudges that the crontab rail
+                // deliberately suppresses - and mail cannot be recalled.
                 try {
-                    \Artisan::call('app:send-onboarding-nudges', ['--apply' => true]);
+                    if (config('app.hosted')) {
+                        \Artisan::call('app:send-onboarding-nudges', ['--apply' => true]);
+                    }
                 } catch (\Throwable $e) {
                     \Log::error('Scheduled command app:send-onboarding-nudges failed: '.$e->getMessage());
                     report($e);
@@ -395,6 +405,22 @@ class AppController extends Controller
                     \Log::error('Scheduled command app:check-version failed: '.$e->getMessage());
                     report($e);
                 }
+
+                // Republish the admin translation manager's overrides from the database onto this
+                // container's disk. config('app.lang_overrides_path') defaults to storage/app/lang, which is
+                // per-container and does not survive a deploy - so on any host with more than one container,
+                // or any host that redeploys, a process that never republishes serves the base English strings
+                // instead of the operator's edits. Cheap and idempotent: it rewrites files from rows.
+                // Keep in sync with routes/console.php.
+                // Passes --no-prune: publishAll()'s prune deletes any managed file not backed by a DB row, and
+                // adoptFileOverrides() swallows a parse error and creates none - so a hand-made override file
+                // with one typo would be deleted by cron within a day. Unattended runs write, never delete.
+                try {
+                    \Artisan::call('translations:publish', ['--no-prune' => true]);
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command translations:publish failed: '.$e->getMessage());
+                    report($e);
+                }
                 // app:send-activation-nudges is deliberately NOT called here, and not in
                 // routes/console.php either - the two rails stay in sync, and here that means
                 // absent from both. It is hand-run until a real pass has been read; see the
@@ -509,6 +535,19 @@ class AppController extends Controller
                 }
             }
 
+            // Scheduler heartbeat, the same key AppServiceProvider writes on every schedule:run
+            // tick, so AdminAlertService's scheduler_stalled row reads one signal whichever rail
+            // an install is on - or both, mid-cutover.
+            //
+            // Deliberately the last statement of the try, NOT the finally. The try opens right
+            // after the lock is taken, so a finally would stamp "the scheduler is alive" for a
+            // request that died on its very first statement - which is precisely the outage a
+            // dead-man's switch exists to report. Reaching this line means the whole chain ran.
+            Cache::put('scheduler.last_run_at', now()->timestamp, now()->addDay());
+
+            // Per-rail sibling key, so /admin can tell a live worker from a live HTTP cron. This
+            // rail is always 'http'; the scheduler rail names itself via config('app.scheduler_rail').
+            Cache::put('scheduler.last_run_at.http', now()->timestamp, now()->addDays(7));
         } finally {
             $lock->release();
         }

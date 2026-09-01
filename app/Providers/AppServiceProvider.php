@@ -6,9 +6,17 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Policies\EventPolicy;
 use App\Policies\RolePolicy;
+use App\Services\ScheduledTaskRecorder;
 use App\Support\SafeTranslationLoader;
+use Illuminate\Console\Events\CommandFinished;
+use Illuminate\Console\Events\ScheduledTaskFailed;
+use Illuminate\Console\Events\ScheduledTaskFinished;
+use Illuminate\Console\Events\ScheduledTaskSkipped;
+use Illuminate\Console\Events\ScheduledTaskStarting;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event as EventFacade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\View;
@@ -164,6 +172,50 @@ class AppServiceProvider extends ServiceProvider
             \App\Utils\PlatformPricing::flush();
             \App\Models\LegalDocument::flush();
         });
+
+        // Scheduler heartbeat, read by AdminAlertService's scheduler_stalled row.
+        //
+        // CommandFinished rather than ScheduledTaskFinished: this has to tick even on the minutes
+        // when nothing was due, or a quiet stretch would look identical to a dead scheduler. That
+        // is the whole point of a dead-man's switch.
+        //
+        // A cache key rather than a Setting row because Setting::set() calls
+        // Cache::forget('site_settings'), and busting the settings map once a minute to record a
+        // liveness ping would cost far more than the ping is worth. It does mean the alert needs a
+        // cache store shared between the worker and the web containers - CACHE_STORE=database on
+        // hosted. On the file default the worker writes a key the web container cannot see, so the
+        // alert would fire constantly; that is why the env var is a prerequisite, not a nicety.
+        //
+        // AppController::translateData() writes the same key, so an install on either rail - or
+        // mid-cutover on both - feeds one signal.
+        EventFacade::listen(CommandFinished::class, function (CommandFinished $event) {
+            if ($event->command !== 'schedule:run') {
+                return;
+            }
+
+            Cache::put('scheduler.last_run_at', now()->timestamp, now()->addDay());
+
+            // A SECOND key, per rail, rather than adding a "via" to the one above.
+            //
+            // The aggregate answers "is anything running" and three readers already treat it as a
+            // bare int, so its shape stays put. But during the cutover both rails tick every
+            // minute, so a single "which rail was last" field would just flap - and if the worker
+            // died while the HTTP cron kept going, the aggregate would stay green and the stall
+            // alert would never fire. That is the exact blindness this is meant to remove, so each
+            // rail has to age independently.
+            //
+            // A week, not a day: a rail retired last month should disappear from the card, but one
+            // that died yesterday must still be visible AS stale rather than silently absent.
+            Cache::put('scheduler.last_run_at.'.config('app.scheduler_rail', 'cron'), now()->timestamp, now()->addDays(7));
+        });
+
+        // Per-task health for /admin/queue. Every handler is internally guarded - see the
+        // ScheduledTaskRecorder docblock: the starting event is dispatched outside
+        // ScheduleRunCommand's try/catch, so a throw here would kill the whole minute's run.
+        EventFacade::listen(ScheduledTaskStarting::class, [ScheduledTaskRecorder::class, 'starting']);
+        EventFacade::listen(ScheduledTaskFinished::class, [ScheduledTaskRecorder::class, 'finished']);
+        EventFacade::listen(ScheduledTaskFailed::class, [ScheduledTaskRecorder::class, 'failed']);
+        EventFacade::listen(ScheduledTaskSkipped::class, [ScheduledTaskRecorder::class, 'skipped']);
 
         View::composer('marketing.partials.header', function ($view) {
             $view->with('githubStars', \App\Utils\GitHubUtils::getStars());

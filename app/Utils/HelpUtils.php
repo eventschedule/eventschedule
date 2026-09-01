@@ -199,6 +199,7 @@ class HelpUtils
         'checkin' => '/docs/tickets#check-in',
         'waitlist' => '/docs/tickets#waitlist',
         'referrals' => '/docs/referral-program',
+        'admin/queue*' => '/docs/selfhost/admin#system-queue',
         'admin/support' => '/docs/saas#support-chat',
         // Growth continues the onboarding funnel documented under Users (Insights), so it
         // points there rather than at a section of its own.

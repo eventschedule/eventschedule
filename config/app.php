@@ -28,6 +28,34 @@ return [
 
     'env' => env('APP_ENV', 'production'),
     'cron_secret' => env('APP_CRON_SECRET', ''),
+
+    /*
+     * How stale the scheduler heartbeat may get before /admin raises "scheduler stalled".
+     * Both rails write scheduler.last_run_at every tick, so 15 minutes is many missed ticks
+     * rather than one slow one - long enough that a deploy or a long-running command does not
+     * cry wolf, short enough that a dead worker is noticed within the quarter hour.
+     */
+    'scheduler_stale_minutes' => (int) env('SCHEDULER_STALE_MINUTES', 15),
+
+    /*
+     * Which cron rail this process is. schedule:run cannot tell whether it was started by a
+     * crontab or by schedule:work on a worker, so the deployment has to say: set SCHEDULER_RAIL=worker
+     * on the DigitalOcean worker component. AppController::translateData() hardcodes 'http' for the
+     * endpoint rail. Only used for display and per-rail staleness on /admin/queue.
+     */
+    'scheduler_rail' => env('SCHEDULER_RAIL', 'cron'),
+
+    /*
+     * Which rail MUST be alive for scheduled work to count as happening. Empty means "any rail",
+     * which is right for a selfhost running one crontab.
+     *
+     * Set it to 'worker' once a dedicated scheduler container exists. Without it, the HTTP cron
+     * keeping the aggregate heartbeat fresh masks a dead worker completely: no banner, no alert.
+     * Naming the expectation is what separates "this rail died" from "we switched this rail off on
+     * purpose" - the latter happens at the end of every cutover, and inferring it from whether a
+     * key looks stale would raise a false alarm for the full week its TTL lasts.
+     */
+    'scheduler_expected_rail' => env('SCHEDULER_EXPECTED_RAIL'),
     'sentry_js_dsn' => env('SENTRY_JS_DSN', 'https://js.sentry-cdn.com/e40010dda2802390fc7a031a3db09b63.min.js'),
 
     'hosted' => (bool) env('IS_HOSTED', false),

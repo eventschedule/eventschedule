@@ -5,40 +5,58 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schedule;
 
+/*
+ * Two conventions hold for every entry in this file, and both are enforced by
+ * tests/Feature/SchedulerHealthTest.php.
+ *
+ * 1. Every entry has a ->name(). CallbackEvent::withoutOverlapping() throws a LogicException
+ *    without one, and CallbackEvent::shouldSkipDueToOverlapping() short-circuits on the same
+ *    property - so an unnamed entry cannot have overlap protection at all. That was survivable
+ *    while hosted drove cron through AppController::translateData(), which serialises its whole
+ *    chain under one lock. It is not survivable under schedule:work, which starts a fresh
+ *    schedule:run every minute WITHOUT waiting for the previous one to finish.
+ *
+ * 2. Every withoutOverlapping() is given an explicit expiry in minutes. The default is 1440 - a
+ *    full day - and the mutex is released in a finally block, which a SIGKILL or an OOM does not
+ *    run. App Platform SIGTERMs the worker on every deploy, so one bad kill would otherwise stop
+ *    that entry for 24 hours, silently. Size the expiry just above the entry's own budget and
+ *    comfortably inside the gap to its next run: a stranded mutex should cost one skipped run,
+ *    not a day of them.
+ */
+
 Schedule::call(function () {
     Artisan::call('queue:work', [
         '--stop-when-empty' => true,
         '--max-time' => 120,
         '--tries' => 3,
     ]);
-})->everyMinute()->name('process-queue')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->everyMinute()->name('process-queue')->withoutOverlapping(20)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 // Keep in sync with AppController::translateData(). The per-job cap, the cooldown and the
 // per-job error handling live inside the command, so this rail's five-minute cadence and
 // translateData's one-minute cadence produce identical retry behaviour.
 Schedule::call(function () {
     Artisan::call('app:retry-failed-jobs');
-})->everyFiveMinutes()->name('retry-failed-jobs')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->everyFiveMinutes()->name('retry-failed-jobs')->withoutOverlapping(10)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     Artisan::call('app:release-tickets');
-})->hourly()->name('app-release-tickets')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->hourly()->name('app-release-tickets')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     Artisan::call('app:expire-waitlist');
-})->hourly()->name('app-expire-waitlist')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->hourly()->name('app-expire-waitlist')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 // Every five minutes: this is what makes curator sources correct, rather than the single
 // hook in EventRepo::saveEvent() which only makes them immediate. Two set queries over
 // schedules that actually have sources, so a quiet install does almost no work.
 Schedule::call(function () {
     Artisan::call('app:sync-curator-sources');
-})->everyFiveMinutes()->name('app-sync-curator-sources')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->everyFiveMinutes()->name('app-sync-curator-sources')->withoutOverlapping(10)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 // Every 15 minutes rather than hourly: the command stops cleanly at its budget and resumes with
 // the longest-waiting rows, so more frequent short runs drain the queue faster than one long run
-// that may be killed. withoutOverlapping() is given an explicit expiry because its default is
-// 1440 minutes - a hard-killed run would otherwise leave the mutex in place for a full day.
+// that may be killed.
 Schedule::call(function () {
     // A lock scoped to app:translate ALONE, shared with AppController::translateData(), because
     // withoutOverlapping() only serialises the scheduler against itself: an install running BOTH
@@ -69,33 +87,46 @@ Schedule::call(function () {
 // AppController::translateData(). No-ops on nexus.
 Schedule::call(function () {
     Artisan::call('app:check-version');
-})->daily()->name('app-check-version')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->daily()->name('app-check-version')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
+
+// Republish the admin translation manager's overrides from the database onto this
+// container's disk. config('app.lang_overrides_path') defaults to storage/app/lang, which is
+// per-container and does not survive a deploy - so on any host with more than one container,
+// or any host that redeploys, a process that never republishes serves the base English strings
+// instead of the operator's edits. Cheap and idempotent: it rewrites files from rows.
+// Keep in sync with AppController::translateData().
+// Passes --no-prune: publishAll()'s prune deletes any managed file not backed by a DB row, and
+// adoptFileOverrides() swallows a parse error and creates none - so a hand-made override file
+// with one typo would be deleted by cron within a day. Unattended runs write, never delete.
+Schedule::call(function () {
+    Artisan::call('translations:publish', ['--no-prune' => true]);
+})->daily()->name('translations-publish')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     Artisan::call('google:refresh-webhooks');
-})->daily()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->daily()->name('google-refresh-webhooks')->withoutOverlapping(60)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     Artisan::call('microsoft:refresh-webhooks');
-})->daily()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->daily()->name('microsoft-refresh-webhooks')->withoutOverlapping(60)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     if (! config('app.hosted')) {
         Artisan::call('app:import-curator-events');
     }
-})->daily()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->daily()->name('app-import-curator-events')->withoutOverlapping(360)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     Artisan::call('app:send-graphic-emails');
-})->hourly()->name('app-send-graphic-emails')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->hourly()->name('app-send-graphic-emails')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     Artisan::call('app:send-feedback-requests');
-})->hourly()->name('send-feedback-requests')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->hourly()->name('send-feedback-requests')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     Artisan::call('app:send-appointment-reminders');
-})->hourly()->name('send-appointment-reminders')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->hourly()->name('send-appointment-reminders')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 // app:send-event-announcements is deliberately NOT scheduled, here or in
 // AppController::translateData(). It mails a schedule's whole confirmed audience, and it is not
@@ -132,69 +163,69 @@ Schedule::call(function () {
     } finally {
         $lock->release();
     }
-})->hourly()->name('charge-installments')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->hourly()->name('charge-installments')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     Artisan::call('federation:push');
-})->hourly()->name('federation-push')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->hourly()->name('federation-push')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     Artisan::call('federation:maintain');
-})->hourly()->name('federation-maintain')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->hourly()->name('federation-maintain')->withoutOverlapping(45)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     Artisan::call('caldav:sync');
-})->everyFifteenMinutes()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->everyFifteenMinutes()->name('caldav-sync')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     Artisan::call('microsoft:sync');
-})->everyFifteenMinutes()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->everyFifteenMinutes()->name('microsoft-sync')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     Artisan::call('google:sync');
-})->everyFifteenMinutes()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->everyFifteenMinutes()->name('google-sync')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     if (config('app.hosted')) {
         Artisan::call('app:setup-demo');
     }
-})->hourly()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->hourly()->name('app-setup-demo')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     if (config('app.hosted')) {
         Artisan::call('app:generate-sub-audience-blog');
     }
-})->daily()->at('03:00')->appendOutputTo(storage_path('logs/sub-audience-blog.log'));
+})->daily()->at('03:00')->name('app-generate-sub-audience-blog')->withoutOverlapping(60)->appendOutputTo(storage_path('logs/sub-audience-blog.log'));
 
-Schedule::call(new ProcessScheduledNewsletters)->everyMinute()->name('process-scheduled-newsletters')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+Schedule::call(new ProcessScheduledNewsletters)->everyMinute()->name('process-scheduled-newsletters')->withoutOverlapping(10)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     Artisan::call('audit:prune');
-})->daily()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->daily()->name('audit-prune')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     Artisan::call('app:cleanup-webhook-deliveries');
-})->daily()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->daily()->name('app-cleanup-webhook-deliveries')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     Artisan::call('app:cleanup-backups');
-})->daily()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->daily()->name('app-cleanup-backups')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 // Keep in sync with AppController::translateData(). Daily is plenty: a video having embedding
 // switched off is not urgent, and the command no-ops without a YouTube key.
 Schedule::call(function () {
     Artisan::call('app:recheck-video-embeds');
-})->daily()->name('recheck-video-embeds')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->daily()->name('recheck-video-embeds')->withoutOverlapping(120)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     if (\App\Services\MetaAdsService::isBoostConfigured()) {
         Artisan::call('boost:sync');
     }
-})->everyFifteenMinutes()->name('boost-sync')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->everyFifteenMinutes()->name('boost-sync')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     Artisan::call('boost:expire-pending');
-})->everyFifteenMinutes()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->everyFifteenMinutes()->name('boost-expire-pending')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 // Separate from boost-sync above: that one is gated on Meta being configured, so an
 // operator running only the on-network promotions engine would never see it fire.
@@ -208,19 +239,19 @@ Schedule::call(function () {
     if (\App\Services\AdsService::isEnabled()) {
         Artisan::call('promo:sync');
     }
-})->everyFifteenMinutes()->name('promo-sync')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->everyFifteenMinutes()->name('promo-sync')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     if (config('app.hosted')) {
         Artisan::call('app:sync-domain-statuses');
     }
-})->everyFiveMinutes()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->everyFiveMinutes()->name('app-sync-domain-statuses')->withoutOverlapping(10)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     if (config('app.hosted')) {
         Artisan::call('app:send-subscription-reminders');
     }
-})->daily()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->daily()->name('app-send-subscription-reminders')->withoutOverlapping(60)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 // Hourly rather than daily: the first nudge is due one hour after signup, and 91% of the
 // people who activate do so inside that first hour - a daily pass would reach the rest a day
@@ -229,7 +260,7 @@ Schedule::call(function () {
     if (config('app.hosted')) {
         Artisan::call('app:send-onboarding-nudges', ['--apply' => true]);
     }
-})->hourly()->name('send-onboarding-nudges')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->hourly()->name('send-onboarding-nudges')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 // app:send-activation-nudges is deliberately NOT scheduled, here or in
 // AppController::translateData(). It emails people who are already using the app, and its
@@ -241,24 +272,24 @@ Schedule::call(function () {
     Artisan::call('app:notify-request-changes');
     Artisan::call('app:notify-fan-content-changes');
     Artisan::call('app:notify-poll-option-changes');
-})->daily()->at('12:00')->appendOutputTo(storage_path('logs/scheduler.log'));
+})->daily()->at('12:00')->name('app-notify-pending-changes')->withoutOverlapping(60)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     Artisan::call('app:send-carpool-reminders');
-})->hourly()->name('app-send-carpool-reminders')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->hourly()->name('app-send-carpool-reminders')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     if (config('app.hosted')) {
         Artisan::call('app:generate-daily-blog-post');
     }
-})->daily()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->daily()->name('app-generate-daily-blog-post')->withoutOverlapping(60)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     if (config('app.hosted')) {
         Artisan::call('app:process-referral-credits');
     }
-})->daily()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->daily()->name('app-process-referral-credits')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     Artisan::call('app:update-geoip');
-})->monthly()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->monthly()->name('app-update-geoip')->withoutOverlapping(60)->appendOutputTo(storage_path('logs/scheduler.log'));

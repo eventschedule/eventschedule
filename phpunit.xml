@@ -23,6 +23,9 @@
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="CACHE_STORE" value="array"/>
+        <!-- The backups disk must resolve to its local default under test; a developer .env
+             that points it at object storage would otherwise fail BackupStorageTest. -->
+        <env name="BACKUP_DISK_DRIVER" value="local" force="true"/>
         <env name="DB_CONNECTION" value="mysql"/>
         <env name="DB_DATABASE" value="eventschedule_test" force="true"/>
         <env name="MAIL_MAILER" value="array"/>

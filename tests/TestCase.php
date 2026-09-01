@@ -31,5 +31,8 @@ abstract class TestCase extends BaseTestCase
         // the failure lands in an innocent file and only shows up in some orderings.
         \App\Utils\PlatformCurrency::flush();
         \App\Utils\PlatformPricing::flush();
+
+        // Memoizes whether scheduled_task_runs exists; RefreshDatabase rebuilds the schema under it.
+        \App\Services\ScheduledTaskRecorder::flush();
     }
 }

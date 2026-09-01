@@ -3152,7 +3152,10 @@ class TicketController extends Controller
         $requestSecret = request()->get('secret');
         $serverSecret = config('app.cron_secret');
 
-        if (! $serverSecret || ! $requestSecret || ! hash_equals($serverSecret, $requestSecret)) {
+        // is_string matters: ?secret[]=x yields an ARRAY, which is truthy and would reach
+        // hash_equals() and throw an uncaught TypeError. Same guard as AppController::translateData().
+        if (! $serverSecret || ! is_string($requestSecret) || $requestSecret === ''
+            || ! hash_equals($serverSecret, $requestSecret)) {
             return response()->json(['error' => __('messages.unauthorized')], 403);
         }
 

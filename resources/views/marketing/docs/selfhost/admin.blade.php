@@ -585,7 +585,18 @@
             </svg>
             Queue (System)
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The Queue page reports on background jobs: calendar syncs, newsletter batches, graphics generation and anything else the application defers.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The Queue page reports on the scheduler and on background jobs: calendar syncs, newsletter batches, graphics generation and anything else the application defers.</p>
+
+        <h3 class="doc-subheading">Scheduler</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The card at the top of the page answers one question: is timed work happening at all? Nothing else on this page can drain while the scheduler is stopped, so read it first.</p>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Last tick</strong> - every scheduler run stamps a heartbeat, even on minutes when nothing was due, so a stale value means the scheduler itself stopped rather than that the queue is quiet. The threshold is <code class="doc-inline-code">SCHEDULER_STALE_MINUTES</code> (default 15).</li>
+            <li><strong class="text-gray-900 dark:text-white">Rails</strong> - each way of running the schedule ages separately: a crontab or worker running <code class="doc-inline-code">schedule:run</code>, and the <code class="doc-inline-code">/translate_data</code> cron endpoint. They are listed apart on purpose, so a worker that has died is visible even while another rail keeps the overall heartbeat fresh. Label a dedicated scheduler container with <code class="doc-inline-code">SCHEDULER_RAIL=worker</code>.</li>
+            <li><strong class="text-gray-900 dark:text-white">Scheduled tasks</strong> - every task with its cadence and when it last ran. A task is only called overdue relative to its own schedule, so "20 hours ago" is fine for a daily task and a problem for an hourly one. Failures show the error; tasks skipped because the previous run was still going are not failures. While the scheduler is stopped these are hidden, because none of them would mean anything.</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Installs driven only by the <code class="doc-inline-code">/translate_data</code> endpoint see a note instead of the task list: that route reports a single heartbeat rather than per-task results.</p>
+
+        <h3 class="doc-subheading">Jobs</h3>
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Health cards</strong> - pending jobs (with a per-queue breakdown underneath the number), failed jobs, job batches, and the age of the oldest pending job</li>
             <li><strong class="text-gray-900 dark:text-white">Warning banner</strong> - shown when anything has failed, or when the oldest pending job has waited more than an hour, which normally means no worker is running</li>

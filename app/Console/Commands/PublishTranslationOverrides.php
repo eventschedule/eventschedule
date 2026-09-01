@@ -22,13 +22,16 @@ use Illuminate\Console\Command;
  */
 class PublishTranslationOverrides extends Command
 {
-    protected $signature = 'translations:publish';
+    protected $signature = 'translations:publish {--no-prune : Write files from the database without deleting any that are not backed by a row}';
 
     protected $description = 'Rebuild translation override files in storage from the database';
 
     public function handle(TranslationOverrideService $service): int
     {
-        $counts = $service->publishAll();
+        // The scheduled rails pass --no-prune. Pruning is a deploy/hand-run concern: on a worker
+        // container storage/ is rebuilt every deploy, so there is nothing stale to collect, and an
+        // unattended prune would delete a hand-made file that merely failed to parse.
+        $counts = $service->publishAll(! $this->option('no-prune'));
 
         $this->info("Published {$counts['written']} translation override files, removed {$counts['deleted']} stale files.");
 

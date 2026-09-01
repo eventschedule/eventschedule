@@ -372,8 +372,14 @@ Route::post('/webhooks/meta', [MetaAdsWebhookController::class, 'handle'])->name
 // WhatsApp webhook route (no auth required)
 Route::post('/api/whatsapp/webhook', [WhatsAppWebhookController::class, 'handle'])->name('whatsapp.webhook')->middleware('throttle:60,1');
 
-Route::get('/release_tickets', [TicketController::class, 'release'])->name('release_tickets')->middleware('throttle:5,1');
-Route::get('/translate_data', [AppController::class, 'translateData'])->name('translate_data')->middleware('throttle:5,1');
+// The third throttle argument is load-bearing, for the same reason it is on the appointment block
+// below: for a guest the limiter key is $prefix.sha1(domain|ip) with no route name in it, so every
+// unprefixed guest route shares ONE counter and the tightest limit governs all of them. At 5/min
+// these two were the tightest in the file, so ordinary traffic on /ticket/view or a webhook could
+// burn the bucket and 429 the cron - and this endpoint is the documented emergency fallback for
+// the scheduler, so it must not be the first thing to break under load.
+Route::get('/release_tickets', [TicketController::class, 'release'])->name('release_tickets')->middleware('throttle:5,1,cron_release');
+Route::get('/translate_data', [AppController::class, 'translateData'])->name('translate_data')->middleware('throttle:5,1,cron_translate');
 
 Route::get('/ticket/qr_code/{event_id}/{secret}', [TicketController::class, 'qrCode'])->name('ticket.qr_code')->middleware('throttle:100,1');
 Route::get('/ticket/view/{event_id}/{secret}', [TicketController::class, 'view'])->name('ticket.view')->middleware('throttle:100,1');

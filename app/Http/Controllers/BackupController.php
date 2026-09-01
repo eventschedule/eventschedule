@@ -165,9 +165,16 @@ class BackupController extends Controller
             return response()->json(['error' => $errors[0]], 422);
         }
 
-        // Store uploaded file
-        $storagePath = 'backups/'.$user->id.'/import-'.now()->format('YmdHis').'.zip';
-        Storage::disk('local')->put($storagePath, file_get_contents($zipPath));
+        // Store uploaded file. Stays on 'local' - the import job runs synchronously on this same
+        // container (see confirm() below), and BackupService opens the ZIP through
+        // Storage::path(), which only resolves on a local driver.
+        // putFileAs rather than put(file_get_contents(...)): the archive can be a hundred megabytes
+        // and there is no reason to pull all of it through PHP's memory limit.
+        $storagePath = Storage::disk('local')->putFileAs(
+            'backups/'.$user->id,
+            $file,
+            'import-'.now()->format('YmdHis').'.zip'
+        );
 
         $preview = $service->getImportPreview($data);
 
@@ -221,12 +228,12 @@ class BackupController extends Controller
             'file_path' => $filePath,
         ]);
 
-        if (config('queue.default') !== 'sync') {
-            ProcessBackupImport::dispatch($job->id, $selectedIndices);
-        } else {
-            set_time_limit(0);
-            ProcessBackupImport::dispatchSync($job->id, $selectedIndices);
-        }
+        // Always inline, whatever the queue driver is. The uploaded ZIP is on this container's
+        // local disk and BackupService opens it with Storage::path(), which returns a bucket key
+        // rather than a filesystem path on any remote driver - so a queued import picked up by a
+        // worker on another container would fail to open the archive, or silently import no images.
+        set_time_limit(0);
+        ProcessBackupImport::dispatchSync($job->id, $selectedIndices);
 
         return response()->json([
             'job_id' => $job->id,
@@ -295,11 +302,19 @@ class BackupController extends Controller
         }
 
         $filePath = $backupJob->file_path;
-        if (! Storage::disk('local')->exists($filePath)) {
+
+        // Exports live on the 'backups' disk. The 'local' fallback is for rows written before that
+        // disk existed - file_expires_at is 7 days out, so the last of them ages out a week after
+        // this ships and the fallback can be deleted then. Streamed through this route rather than
+        // handed out as a temporaryUrl(), so the ownership check above stays the only way in.
+        $disk = Storage::disk('backups')->exists($filePath) ? 'backups'
+            : (Storage::disk('local')->exists($filePath) ? 'local' : null);
+
+        if ($disk === null) {
             abort(404);
         }
 
-        return Storage::disk('local')->download($filePath, 'backup-'.now()->format('Y-m-d').'.zip', [
+        return Storage::disk($disk)->download($filePath, 'backup-'.now()->format('Y-m-d').'.zip', [
             'Content-Type' => 'application/octet-stream',
         ]);
     }

@@ -12,6 +12,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 
 class ProcessBackupExport implements ShouldQueue
 {
@@ -62,7 +63,15 @@ class ProcessBackupExport implements ShouldQueue
             // Create ZIP
             $jsonContent = json_encode($result['json'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
             $timestamp = now()->format('Y-m-d-His');
-            $zipFilename = "backups/{$job->user_id}/backup-{$timestamp}.zip";
+
+            // The random component is the backstop, not decoration. Without it the key is a small
+            // integer plus a second-resolution timestamp bounded by a created_at the owner can
+            // already see - enumerable by anyone who ever gets read access to the bucket. The
+            // bucket is private and downloads are served through a signed route, so this only
+            // matters the day one of those is misconfigured; that is exactly when it matters.
+            // strtolower(Str::random(32)) matches how the rest of the app names unguessable
+            // uploads (ImageUtils::saveImageData, the sponsor/flyer/addon paths in EventRepo).
+            $zipFilename = "backups/{$job->user_id}/backup-{$timestamp}-".strtolower(Str::random(32)).'.zip';
 
             $tempZip = tempnam(sys_get_temp_dir(), 'backup');
             $zip = new \ZipArchive;
@@ -78,8 +87,27 @@ class ProcessBackupExport implements ShouldQueue
 
             $zip->close();
 
-            // Store on local disk (not public)
-            Storage::disk('local')->put($zipFilename, file_get_contents($tempZip));
+            // The 'backups' disk, not 'local'. On hosted this is shared object storage, because
+            // the container that builds the export is not the one that later serves the download:
+            // storage_path('app') is per-container and wiped on every deploy, so a file written
+            // here would be gone long before file_expires_at. Streamed rather than
+            // file_get_contents()'d because nothing caps the size of an export.
+            $handle = fopen($tempZip, 'r');
+
+            // Guarded rather than passed straight in: put() treats a non-resource as string
+            // contents, so a failed fopen would silently store an EMPTY archive and the code
+            // below would still mark the job completed and mail the user a link to it.
+            if ($handle === false) {
+                throw new \RuntimeException('Could not open the generated backup archive for upload.');
+            }
+
+            try {
+                Storage::disk('backups')->put($zipFilename, $handle, 'private');
+            } finally {
+                if (is_resource($handle)) {
+                    fclose($handle);
+                }
+            }
 
             $expiresAt = now()->addDays(7);
             $job->update([
@@ -113,14 +141,27 @@ class ProcessBackupExport implements ShouldQueue
 
         } catch (\Exception $e) {
             report($e);
-            if (isset($zipFilename) && Storage::disk('local')->exists($zipFilename)) {
-                Storage::disk('local')->delete($zipFilename);
-            }
+
+            // Mark the job failed FIRST. The backups disk is deliberately 'throw' => true, and the
+            // likeliest reason to be in this catch is that the disk write failed - so a cleanup
+            // attempt here can throw straight back out and skip the status update, leaving the row
+            // stuck in 'processing'. BackupController refuses a new export while one is pending or
+            // processing, so that would lock the user out of exporting entirely, with nothing in
+            // the UI to clear it.
             $job->update([
                 'status' => 'failed',
                 'error_message' => 'Export failed. Please try again.',
                 'completed_at' => now(),
             ]);
+
+            // Best-effort cleanup of a partial upload; never allowed to mask the failure above.
+            try {
+                if (isset($zipFilename) && Storage::disk('backups')->exists($zipFilename)) {
+                    Storage::disk('backups')->delete($zipFilename);
+                }
+            } catch (\Throwable $cleanupFailure) {
+                report($cleanupFailure);
+            }
         } finally {
             if ($tempZip && file_exists($tempZip)) {
                 unlink($tempZip);

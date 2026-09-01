@@ -100,6 +100,35 @@ class SentryScrubberTest extends TestCase
         $this->assertStringNotContainsString(self::SECRET, $returned->getRequest()['url']);
     }
 
+    /**
+     * APP_CRON_SECRET travels in the query string of /translate_data and /release_tickets, and
+     * Sentry's request integration always stamps url and query_string regardless of
+     * send_default_pii. So any exception escaping the cron chain after its auth check would ship a
+     * live credential - and for a selfhoster with REPORT_ERRORS=true, ship it to the UPSTREAM
+     * eventschedule.com project rather than their own.
+     *
+     * The bare form is the one that matters: Sentry writes query_string WITHOUT a leading question
+     * mark, so a pattern anchored only on [?&] scrubs the url and leaves query_string intact.
+     */
+    public function test_it_scrubs_a_cron_secret_from_a_query_string(): void
+    {
+        $this->assertSame('secret=[secret]&x=1', SentryScrubber::scrub('secret=s3cr3t-live&x=1'));
+        $this->assertSame('?secret=[secret]&x=1', SentryScrubber::scrub('?secret=s3cr3t-live&x=1'));
+        $this->assertSame('x=1&secret=[secret]', SentryScrubber::scrub('x=1&secret=s3cr3t-live'));
+        $this->assertSame('token=[secret]', SentryScrubber::scrub('token=s3cr3t-live'));
+        $this->assertSame(
+            'https://e.com/translate_data?secret=[secret]',
+            SentryScrubber::scrub('https://e.com/translate_data?secret=s3cr3t-live')
+        );
+    }
+
+    /** The anchor must not turn any parameter ending in "secret" into a false positive. */
+    public function test_it_leaves_unrelated_parameters_readable(): void
+    {
+        $this->assertSame('notasecret=keepme', SentryScrubber::scrub('notasecret=keepme'));
+        $this->assertSame('x=1&page=2', SentryScrubber::scrub('x=1&page=2'));
+    }
+
     /** The wiring is what makes the scrub run; a correct helper nobody calls protects nothing. */
     public function test_it_is_registered_for_both_event_types(): void
     {

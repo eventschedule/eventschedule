@@ -40,6 +40,15 @@ class AdminAlertService
      * protect. Those belong on their own admin page as a stat, not in here.
      */
     private const DEFINITIONS = [
+        // First, because nothing else in this list is more broken. Every other row is a queue
+        // someone has to work through; this one means the thing that drains those queues - and
+        // sends every reminder, charges every installment and syncs every calendar - is not
+        // running at all.
+        'scheduler_stalled',
+        // Above jobs_failed: a queue that has stopped draining is a worse condition than one job
+        // that broke, and it is the failure the /admin/queue banner already warns about without
+        // ever reaching the dashboard panel or the nav badge.
+        'jobs_stalled',
         'jobs_failed',
         'domains_failed',
         'boosts_stuck',
@@ -68,6 +77,12 @@ class AdminAlertService
     public const BOOST_ALERT_DAYS = 30;
 
     /**
+     * How long a DUE job may sit before the queue counts as stalled. Matches the threshold the
+     * /admin/queue banner renders, so the badge and the page it links to cannot disagree.
+     */
+    public const JOBS_STALLED_MINUTES = 60;
+
+    /**
      * Nav badge colour precedence. A group's badge takes the highest severity it
      * contains, so a red badge keeps meaning "something is broken" even when
      * informational rows are counted alongside it.
@@ -87,6 +102,8 @@ class AdminAlertService
      */
     private static ?object $roleCounts = null;
 
+    private static ?bool $schedulerStalled = null;
+
     /**
      * Every pending admin action, highest priority first. Rows with a zero count are
      * omitted, so an empty collection means there is nothing to do.
@@ -101,6 +118,48 @@ class AdminAlertService
         $isHosted = config('app.hosted');
 
         $counts = [
+            // Both cron rails write scheduler.last_run_at once a tick, even on the minutes when
+            // nothing was due, so a missing or stale key means the scheduler itself stopped.
+            //
+            // Suppressed under APP_TESTING because the key is never written in a test run and an
+            // always-on row would break every assertion that the panel is empty. The alert's own
+            // coverage lives in tests/Feature/SchedulerHealthTest.php, which overrides the flag.
+            //
+            // Reads the shared cache store. On a multi-container install with CACHE_STORE=file
+            // this would fire permanently - which is the correct signal that the deployment is
+            // misconfigured, since every scheduler mutex is equally per-container there.
+            'scheduler_stalled' => function () {
+                if (config('app.is_testing')) {
+                    return 0;
+                }
+
+                return self::schedulerIsStalled() ? 1 : 0;
+            },
+
+            // Jobs that are DUE and still waiting. available_at, not created_at: a delayed
+            // dispatch (ReconcileBoostCampaign is +24h) is written with created_at = now, so
+            // keying on created_at would pin a permanent badge on a perfectly healthy queue -
+            // exactly the "never drains" shape this class's docblock forbids.
+            //
+            // Suppressed while the scheduler is stalled: nothing drains the queue then, so a
+            // backlog is a symptom of the row above, and two red rows for one cause drains the
+            // signal.
+            'jobs_stalled' => function () {
+                if (config('app.is_testing') || self::schedulerIsStalled()) {
+                    return 0;
+                }
+
+                // exists(), not count(). Two reasons, and both matter. jobs is indexed on queue
+                // only, so a COUNT over available_at is a full table scan - on every admin page
+                // render, and worst exactly when there IS a backlog. And this class's own docblock
+                // forbids a row whose count inflates the panel's header total: a backlog of 8,000
+                // jobs would add 8,000 to a to-do list whose other rows are single digits. It is
+                // one condition, so it counts as one.
+                return DB::table('jobs')
+                    ->where('available_at', '<=', now()->subMinutes(self::JOBS_STALLED_MINUTES)->timestamp)
+                    ->exists() ? 1 : 0;
+            },
+
             'jobs_failed' => fn () => DB::table('failed_jobs')->count(),
 
             'domains_failed' => fn () => $isHosted ? (int) self::roleCounts()->domains_failed : 0,
@@ -215,6 +274,7 @@ class AdminAlertService
     {
         self::$cache = null;
         self::$roleCounts = null;
+        self::$schedulerStalled = null;
     }
 
     /**
@@ -240,6 +300,16 @@ class AdminAlertService
     }
 
     /**
+     * Shared by scheduler_stalled and jobs_stalled, memoized so the two rows read the same clock:
+     * called twice, now() advances between them and the cascade could otherwise disagree with
+     * itself within a single render.
+     */
+    private static function schedulerIsStalled(): bool
+    {
+        return self::$schedulerStalled ??= SchedulerHealth::isStalled();
+    }
+
+    /**
      * Build one to-do row, or null when the destination route is not registered on
      * this install. Titles are pluralized; subtitles name the destination section so
      * a row reads "3 instances awaiting approval / Federation".
@@ -247,6 +317,8 @@ class AdminAlertService
     private static function row(string $type, int $count): ?array
     {
         [$nav, $tab, $name, $params, $fragment, $color, $subtitle] = match ($type) {
+            'scheduler_stalled' => ['system', 'queue', 'admin.queue', [], '', 'red', __('messages.queue')],
+            'jobs_stalled' => ['system', 'queue', 'admin.queue', [], '', 'red', __('messages.queue')],
             'jobs_failed' => ['system', 'queue', 'admin.queue', [], '', 'red', __('messages.queue')],
             'domains_failed' => ['manage', 'domains', 'admin.domains', ['status' => 'failed'], '', 'red', __('messages.domains')],
             'boosts_stuck' => ['manage', 'boost', 'admin.boost', [], '#boost-alerts', 'red', 'Boost'],

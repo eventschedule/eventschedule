@@ -35,7 +35,8 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 - **Use `config('app.supported_languages')` for language lists** - Never hardcode language code arrays. Always reference the centralized list in `config/app.php`.
 - **Keep Help button mappings up-to-date** - When adding, removing, or moving doc pages, update the anchor map in `app/Utils/HelpUtils.php` so the admin panel Help button links to the correct docs for each section/tab
 - **Match docs structure to app layout** - Documentation sections and sub-sections should mirror the app's UI structure (sections, tabs, sidebar items) where it makes sense. This keeps the Help button deep links aligned and makes docs intuitive for users navigating between the app and docs.
-- **Keep `translateData` and `console.php` in sync** - Scheduled commands must be registered in both `AppController::translateData()` (hosted cron) and `routes/console.php` (selfhosted scheduler). When adding a new scheduled command, add it to both places with matching frequency.
+- **Keep `translateData` and `console.php` in sync** - Scheduled commands must be registered in both `AppController::translateData()` (the HTTP cron rail) and `routes/console.php` (the scheduler rail). Add it to both places with matching frequency, and with the SAME `config('app.hosted')` gate: a gate on one rail only means an install using the other rail runs a command it should not (that is how selfhost installs on `/translate_data` ended up mailing onboarding nudges). `tests/Feature/CronRailSyncTest.php` fails the build on either kind of drift.
+- **Every scheduler entry needs `->name()` and a bounded `->withoutOverlapping(N)`** - `CallbackEvent::withoutOverlapping()` throws without a prior `->name()`, so an unnamed entry has no overlap protection at all and logs as `Running [Callback]`; and its default expiry is 1440 MINUTES, released in a `finally` that a SIGKILL skips - so a container killed mid-run strands the mutex for a full day. `schedule:work` starts a new `schedule:run` every minute without waiting for the last one, so overlap is normal. Size N just above the entry's own budget. `tests/Feature/SchedulerHealthTest.php` fails the build otherwise.
 - **Use toggle switches for boolean settings** - In the admin portal, use `<x-toggle>` (or toggle switch markup for Vue pages) for standalone boolean on/off settings. Reserve plain checkboxes for multi-select lists and "required" indicators.
 - **Consistent primary action button sizing** - Primary action buttons in the AP should use `px-4 py-3 text-base` sizing to match `<x-brand-link>` / `<x-secondary-link>` components. Do not use smaller `py-2 text-sm` for standalone call-to-action buttons.
 - **Keep doc search index up-to-date** - When adding, removing, or renaming doc sections, update `getDocSearchIndex()` in `MarketingController` so the docs search stays accurate
@@ -267,9 +268,27 @@ Routes are defined conditionally in `routes/web.php` based on `config('app.hoste
 - **Always encode IDs visible to users** - Use `UrlUtils::encodeId()` for IDs in URLs, and `UrlUtils::decodeId()` in controllers to decode them
 
 ### Scheduled Tasks
-Cron job required: `* * * * * php artisan schedule:run`
 
-Commands in `app/Console/Commands/`: CheckData, ExtendPlans, ReleaseTickets, Translate, UpdateApp
+There are two interchangeable rails, and `CLAUDE.md`'s sync rule above exists because both must
+list every command (`php artisan schedule:list` prints the scheduler rail):
+
+- **`routes/console.php`** - the Laravel scheduler. Selfhost drives it with the documented crontab
+  entry `* * * * * php artisan schedule:run`; hosted drives it with `php artisan schedule:work` on
+  a DigitalOcean App Platform worker. See `docs/DIGITALOCEAN_WORKER.md`.
+- **`AppController::translateData()`** - `GET /translate_data?secret=$APP_CRON_SECRET`, a complete
+  second copy of the schedule as cache-key-gated tiers. For installs that cannot run a cron
+  process, and as the hosted emergency fallback. Unsetting `APP_CRON_SECRET` disables it (and
+  `/release_tickets`).
+
+The queue is drained by the `process-queue` entry inside the schedule, not by a resident worker, so
+dispatch latency is up to about a minute. Both rails stamp `scheduler.last_run_at` every tick;
+`AdminAlertService`'s `scheduler_stalled` row alerts when that goes stale.
+
+**Hosted (eventschedule.com) runs `QUEUE_CONNECTION=database`, and `CACHE_STORE` must be set to
+`database` before a second container exists** - it is currently unset there, which resolves to the
+`file` driver, and that is safe only while one container serves everything. Every scheduler mutex
+and every cross-rail lock lives in the cache, so on `file` two containers serialise against
+nothing. Setting it is a step in `docs/DIGITALOCEAN_WORKER.md`; restate it as fact once done.
 
 ## Environment Variables
 

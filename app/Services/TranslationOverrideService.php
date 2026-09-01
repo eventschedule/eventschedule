@@ -273,11 +273,20 @@ class TranslationOverrideService
     }
 
     /**
-     * Rebuild every published override file from the database and delete stale
-     * files whose overrides no longer exist. Used after a database restore or
-     * when cloning the app to a new server.
+     * Rebuild every published override file from the database, and (by default) delete stale
+     * files whose overrides no longer exist. Used after a database restore or when cloning the
+     * app to a new server.
+     *
+     * Pass $prune = false for unattended runs. The adopt pass above the prune is what is supposed
+     * to make deletion safe - "adopt first so pruning can never delete overrides that only exist
+     * on disk" - but adoptFileOverrides() swallows a Throwable and returns 0, so a hand-made file
+     * with a single syntax error creates no rows, is therefore absent from $active, and gets
+     * DELETED. That is survivable when a human ran the command and can read the output; it is not
+     * survivable on a schedule, where it would quietly destroy an operator's customizations within
+     * a day and undo the whole point of SafeTranslationLoader (issue #117), which exists so a
+     * broken override degrades to English and stays fixable.
      */
-    public function publishAll(): array
+    public function publishAll(bool $prune = true): array
     {
         $written = 0;
         $deleted = 0;
@@ -304,7 +313,7 @@ class TranslationOverrideService
             ->map(fn ($row) => $row->locale.'/'.$row->group)
             ->all();
 
-        if (File::isDirectory($basePath)) {
+        if ($prune && File::isDirectory($basePath)) {
             foreach (File::directories($basePath) as $localeDir) {
                 foreach (File::files($localeDir) as $file) {
                     $group = $file->getFilenameWithoutExtension();

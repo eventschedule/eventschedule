@@ -14,15 +14,23 @@ class CleanupBackups extends Command
 
     public function handle(): void
     {
-        // Delete expired export files
+        // Delete expired export files.
+        //
+        // Exports live on the 'backups' disk (shared object storage on hosted, because the
+        // container that writes an export is not the one that serves the download); imports stay
+        // on 'local', because the import job runs inline on the container that received the
+        // upload. Every disk choice below follows from that split. The 'local' arm here is for
+        // export rows written before the 'backups' disk existed and can go once they have aged out.
         $expired = BackupJob::where('type', 'export')
             ->whereNotNull('file_path')
             ->where('file_expires_at', '<', now())
             ->get();
 
         foreach ($expired as $job) {
-            if ($job->file_path && Storage::disk('local')->exists($job->file_path)) {
-                Storage::disk('local')->delete($job->file_path);
+            foreach (['backups', 'local'] as $disk) {
+                if ($job->file_path && Storage::disk($disk)->exists($job->file_path)) {
+                    Storage::disk($disk)->delete($job->file_path);
+                }
             }
             $job->update(['file_path' => null]);
         }
@@ -86,17 +94,16 @@ class CleanupBackups extends Command
         }
 
         // Clean orphaned import uploads (uploaded but never confirmed, no BackupJob record)
+        // One recursive listing rather than directories() + a files() call per user: upload() stores
+        // the file and hands file_path straight back to the browser WITHOUT creating a BackupJob
+        // row, so this sweep is the only thing that ever collects an abandoned upload.
         $orphaned = 0;
-        $directories = Storage::disk('local')->directories('backups');
-        foreach ($directories as $dir) {
-            $files = Storage::disk('local')->files($dir);
-            foreach ($files as $file) {
-                if (str_contains($file, '/import-') &&
-                    Storage::disk('local')->lastModified($file) < now()->subHour()->timestamp &&
-                    ! BackupJob::where('file_path', $file)->exists()) {
-                    Storage::disk('local')->delete($file);
-                    $orphaned++;
-                }
+        foreach (Storage::disk('local')->allFiles('backups') as $file) {
+            if (str_contains($file, '/import-') &&
+                Storage::disk('local')->lastModified($file) < now()->subHour()->timestamp &&
+                ! BackupJob::where('file_path', $file)->exists()) {
+                Storage::disk('local')->delete($file);
+                $orphaned++;
             }
         }
 

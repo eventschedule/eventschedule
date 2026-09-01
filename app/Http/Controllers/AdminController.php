@@ -29,6 +29,7 @@ use App\Services\DemoService;
 use App\Services\DigitalOceanService;
 use App\Services\GrowthExportService;
 use App\Services\OneSignalService;
+use App\Services\SchedulerHealth;
 use App\Services\TranslationQueue;
 use App\Services\WebhookService;
 use App\Utils\MoneyUtils;
@@ -1900,9 +1901,46 @@ class AdminController extends Controller
         $failedJobsCount = DB::table('failed_jobs')->count();
         $jobBatchesCount = DB::table('job_batches')->count();
 
-        // Oldest pending job age
-        $oldestPendingJob = DB::table('jobs')->orderBy('created_at')->first();
-        $oldestJobAge = $oldestPendingJob ? Carbon::createFromTimestamp($oldestPendingJob->created_at) : null;
+        // Oldest job that is actually DUE.
+        //
+        // available_at, not created_at, on BOTH the filter and the ordering. A delayed dispatch
+        // (ReconcileBoostCampaign is +24h, the newsletter A/B winner is +winner_wait_hours) is
+        // written with created_at = now, so filtering on created_at would report an hour-old
+        // "stuck" job on a perfectly healthy queue. And ordering by id is not ordering by age once
+        // any delay exists: a job queued an hour ago with delay(59m) becomes due AFTER one queued
+        // fifty minutes ago with none, so id order would return the younger row and the banner
+        // would under-report exactly the backlog it exists to detect.
+        //
+        // This runs once, on this page. AdminAlertService's jobs_stalled row asks the same question
+        // with exists() rather than reusing this query, because it runs on every admin page render
+        // and only needs a yes/no.
+        $oldestPendingJob = DB::table('jobs')
+            ->where('available_at', '<=', now()->timestamp)
+            ->orderBy('available_at')
+            ->first(['available_at']);
+        $oldestJobAge = $oldestPendingJob ? Carbon::createFromTimestamp($oldestPendingJob->available_at) : null;
+
+        // Scheduler liveness. Both cron rails stamp this key every tick, even on the minutes when
+        // nothing was due, so a stale value means the scheduler stopped rather than that the queue
+        // is quiet - a distinction the job counts above cannot make. Same key and threshold as
+        // AdminAlertService's scheduler_stalled row, so the card and the alert cannot disagree.
+        $schedulerLastRunAt = SchedulerHealth::lastRunAt();
+        $schedulerStaleMinutes = SchedulerHealth::staleMinutes();
+        $schedulerStalled = SchedulerHealth::isStalled();
+        $schedulerRails = SchedulerHealth::rails();
+        $schedulerHttpRailOnly = SchedulerHealth::isHttpRailOnly();
+
+        // Per-task health. Ordered worst-first so the exceptions block reads top-down, then by
+        // staleness, so the task that has been silent longest leads.
+        $severity = ['failed' => 0, 'never_finished' => 1, 'overdue' => 2, 'running' => 3, 'ok' => 4, 'not_yet_run' => 5, 'unknown' => 6];
+        $scheduledTasks = SchedulerHealth::tasks()
+            ->sortBy([
+                fn ($a, $b) => ($severity[$a->state] ?? 9) <=> ($severity[$b->state] ?? 9),
+                fn ($a, $b) => ($a->lastSeenAt?->timestamp ?? 0) <=> ($b->lastSeenAt?->timestamp ?? 0),
+            ])
+            ->values();
+        $taskExceptions = $scheduledTasks->whereIn('state', ['failed', 'never_finished', 'overdue'])->values();
+        $tasksReporting = $scheduledTasks->filter(fn ($t) => $t->row !== null)->count();
 
         // Group pending jobs by queue
         $pendingByQueue = DB::table('jobs')
@@ -1969,7 +2007,15 @@ class AdminController extends Controller
             'pendingByClass',
             'pendingJobsTable',
             'failedJobs',
-            'jobBatches'
+            'jobBatches',
+            'schedulerLastRunAt',
+            'schedulerStalled',
+            'schedulerStaleMinutes',
+            'schedulerRails',
+            'schedulerHttpRailOnly',
+            'scheduledTasks',
+            'taskExceptions',
+            'tasksReporting'
         ));
     }
 

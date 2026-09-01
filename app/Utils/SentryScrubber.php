@@ -29,6 +29,24 @@ class SentryScrubber
      */
     private const SECRET_PATH = '#(\bappointment/[^/?\s]+/[^/?\s]+/)[a-z0-9]{32}#i';
 
+    /**
+     * `?secret=...` / `&secret=...` on the cron endpoints (/translate_data, /release_tickets).
+     *
+     * APP_CRON_SECRET travels in the query string, and Sentry's request integration always stamps
+     * `url` and `query_string` - send_default_pii does not gate those. So without this, ANY
+     * exception escaping the chain after the auth check ships a live credential to the issue
+     * tracker. Worse for selfhosters: config/sentry.php points REPORT_ERRORS=true installs at an
+     * upstream eventschedule.com DSN, so their secret would land in someone else's project.
+     *
+     * Anchored on ^ as well as [?&]: Sentry stamps `query_string` with the BARE string, no leading
+     * question mark, so a pattern requiring a separator silently misses the FIRST parameter - which
+     * is where ?secret= normally sits. It would then scrub `url` and leave `query_string` intact,
+     * i.e. still ship the credential.
+     *
+     * Matches the value up to the next separator so a following parameter stays readable.
+     */
+    private const SECRET_QUERY = '#((?:^|[?&])(?:secret|token|api_key)=)[^&\s"\']+#i';
+
     public static function beforeSend(Event $event): ?Event
     {
         $request = $event->getRequest();
@@ -88,6 +106,8 @@ class SentryScrubber
 
     public static function scrub(string $value): string
     {
-        return preg_replace(self::SECRET_PATH, '$1[secret]', $value) ?? $value;
+        $value = preg_replace(self::SECRET_PATH, '$1[secret]', $value) ?? $value;
+
+        return preg_replace(self::SECRET_QUERY, '$1[secret]', $value) ?? $value;
     }
 }
