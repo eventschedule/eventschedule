@@ -129,15 +129,27 @@ class ProcessBackupExport implements ShouldQueue
 
             $scheduleNames = $roles->pluck('name')->toArray();
 
-            Mail::to($job->user->email)->send(
-                new BackupExportComplete($downloadUrl, $scheduleNames, $expiresAt)
-            );
+            // Notifying is NOT part of building the export, so it gets its own catch.
+            //
+            // The job is already marked completed with its file_path above. Letting a transient
+            // SMTP failure fall through to the catch below would flip a genuinely finished export
+            // back to 'failed' AND delete the archive - losing the user's export because the email
+            // about it did not send, and leaving a row whose file_path points at nothing. The
+            // download route is signed but reachable from the backups list either way, so a missing
+            // notification is a nuisance; a deleted archive is data loss.
+            try {
+                Mail::to($job->user->email)->send(
+                    new BackupExportComplete($downloadUrl, $scheduleNames, $expiresAt)
+                );
 
-            OneSignalService::pushToUser($job->user, [
-                'title_key' => 'messages.push_backup_export_title',
-                'body_key' => 'messages.push_backup_export_body',
-                'url' => $downloadUrl,
-            ], null);
+                OneSignalService::pushToUser($job->user, [
+                    'title_key' => 'messages.push_backup_export_title',
+                    'body_key' => 'messages.push_backup_export_body',
+                    'url' => $downloadUrl,
+                ], null);
+            } catch (\Throwable $notificationFailure) {
+                report($notificationFailure);
+            }
 
         } catch (\Exception $e) {
             report($e);

@@ -135,13 +135,22 @@ class AppController extends Controller
         }
 
         try {
+            // Every catch below is \Throwable, not \Exception.
+            //
+            // Each tier claims its cache key BEFORE running its commands, so an escaping error does
+            // not just fail one command - it skips every command below it in that tier until the
+            // key expires. A fatal \Error (a TypeError from a malformed API response, say) is
+            // deterministic, so on the daily tier that means the same block silently skipped every
+            // day, forever. It would also escape past the heartbeat at the end of this method,
+            // which is stamped last precisely so it means "the whole chain ran".
+            //
             // === EVERY CALL (every minute) ===
 
             // Process scheduled newsletters BEFORE queue:work so newly dispatched
             // SendNewsletterBatch jobs get processed by the queue:work below
             try {
                 (new \App\Jobs\ProcessScheduledNewsletters)();
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 \Log::error('Scheduled command ProcessScheduledNewsletters failed: '.$e->getMessage());
                 report($e);
             }
@@ -161,8 +170,13 @@ class AppController extends Controller
                 // two callers in sync. The command runs its own queue:work when it actually
                 // pushed something.
                 \Artisan::call('app:retry-failed-jobs');
-            } catch (\Exception $e) {
-                \Log::warning('Queue processing failed: '.$e->getMessage());
+            } catch (\Throwable $e) {
+                // error + report, like every other catch on this rail. This one covers the two
+                // commands that run every single minute, so a persistent failure here is the most
+                // consequential of the lot - and at warning level with no report() it never
+                // reached Sentry at all.
+                \Log::error('Queue processing failed: '.$e->getMessage());
+                report($e);
             }
 
             // === EVERY 5 MINUTES ===
@@ -172,7 +186,7 @@ class AppController extends Controller
                 if (config('app.hosted')) {
                     try {
                         \Artisan::call('app:sync-domain-statuses');
-                    } catch (\Exception $e) {
+                    } catch (\Throwable $e) {
                         \Log::error('Scheduled command app:sync-domain-statuses failed: '.$e->getMessage());
                         report($e);
                     }
@@ -180,7 +194,7 @@ class AppController extends Controller
 
                 try {
                     \Artisan::call('app:sync-curator-sources');
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     \Log::error('Scheduled command app:sync-curator-sources failed: '.$e->getMessage());
                     report($e);
                 }
@@ -192,21 +206,21 @@ class AppController extends Controller
 
                 try {
                     \Artisan::call('caldav:sync');
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     \Log::error('Scheduled command caldav:sync failed: '.$e->getMessage());
                     report($e);
                 }
 
                 try {
                     \Artisan::call('microsoft:sync');
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     \Log::error('Scheduled command microsoft:sync failed: '.$e->getMessage());
                     report($e);
                 }
 
                 try {
                     \Artisan::call('google:sync');
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     \Log::error('Scheduled command google:sync failed: '.$e->getMessage());
                     report($e);
                 }
@@ -214,14 +228,14 @@ class AppController extends Controller
                 if (\App\Services\MetaAdsService::isBoostConfigured()) {
                     try {
                         \Artisan::call('boost:sync');
-                    } catch (\Exception $e) {
+                    } catch (\Throwable $e) {
                         \Log::error('Scheduled command boost:sync failed: '.$e->getMessage());
                         report($e);
                     }
                 }
                 try {
                     \Artisan::call('boost:expire-pending');
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     \Log::error('Scheduled command boost:expire-pending failed: '.$e->getMessage());
                     report($e);
                 }
@@ -237,7 +251,7 @@ class AppController extends Controller
                 if (\App\Services\AdsService::isEnabled()) {
                     try {
                         \Artisan::call('promo:sync');
-                    } catch (\Exception $e) {
+                    } catch (\Throwable $e) {
                         \Log::error('Scheduled command promo:sync failed: '.$e->getMessage());
                         report($e);
                     }
@@ -401,7 +415,7 @@ class AppController extends Controller
                 // cron through this endpoint rather than through schedule:run.
                 try {
                     \Artisan::call('app:check-version');
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     \Log::error('Scheduled command app:check-version failed: '.$e->getMessage());
                     report($e);
                 }
@@ -417,7 +431,7 @@ class AppController extends Controller
                 // with one typo would be deleted by cron within a day. Unattended runs write, never delete.
                 try {
                     \Artisan::call('translations:publish', ['--no-prune' => true]);
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     \Log::error('Scheduled command translations:publish failed: '.$e->getMessage());
                     report($e);
                 }
@@ -427,38 +441,38 @@ class AppController extends Controller
                 // note in routes/console.php.
                 try {
                     \Artisan::call('google:refresh-webhooks');
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     \Log::error('Scheduled command google:refresh-webhooks failed: '.$e->getMessage());
                     report($e);
                 }
                 try {
                     \Artisan::call('microsoft:refresh-webhooks');
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     \Log::error('Scheduled command microsoft:refresh-webhooks failed: '.$e->getMessage());
                     report($e);
                 }
                 try {
                     \Artisan::call('audit:prune');
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     \Log::error('Scheduled command audit:prune failed: '.$e->getMessage());
                     report($e);
                 }
                 try {
                     \Artisan::call('app:cleanup-webhook-deliveries');
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     \Log::error('Scheduled command app:cleanup-webhook-deliveries failed: '.$e->getMessage());
                     report($e);
                 }
                 try {
                     \Artisan::call('app:cleanup-backups');
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     \Log::error('Scheduled command app:cleanup-backups failed: '.$e->getMessage());
                     report($e);
                 }
                 // Not hosted-gated: a selfhost install with a YouTube key gets the same rot.
                 try {
                     \Artisan::call('app:recheck-video-embeds');
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     \Log::error('Scheduled command app:recheck-video-embeds failed: '.$e->getMessage());
                     report($e);
                 }
@@ -466,25 +480,25 @@ class AppController extends Controller
                 if (config('app.hosted')) {
                     try {
                         \Artisan::call('app:generate-sub-audience-blog');
-                    } catch (\Exception $e) {
+                    } catch (\Throwable $e) {
                         \Log::error('Scheduled command app:generate-sub-audience-blog failed: '.$e->getMessage());
                         report($e);
                     }
                     try {
                         \Artisan::call('app:generate-daily-blog-post');
-                    } catch (\Exception $e) {
+                    } catch (\Throwable $e) {
                         \Log::error('Scheduled command app:generate-daily-blog-post failed: '.$e->getMessage());
                         report($e);
                     }
                     try {
                         \Artisan::call('app:send-subscription-reminders');
-                    } catch (\Exception $e) {
+                    } catch (\Throwable $e) {
                         \Log::error('Scheduled command app:send-subscription-reminders failed: '.$e->getMessage());
                         report($e);
                     }
                     try {
                         \Artisan::call('app:process-referral-credits');
-                    } catch (\Exception $e) {
+                    } catch (\Throwable $e) {
                         \Log::error('Scheduled command app:process-referral-credits failed: '.$e->getMessage());
                         report($e);
                     }
@@ -493,7 +507,7 @@ class AppController extends Controller
                 if (! config('app.hosted')) {
                     try {
                         \Artisan::call('app:import-curator-events');
-                    } catch (\Exception $e) {
+                    } catch (\Throwable $e) {
                         \Log::error('Scheduled command app:import-curator-events failed: '.$e->getMessage());
                         report($e);
                     }
@@ -504,19 +518,19 @@ class AppController extends Controller
             if (now()->hour >= 12 && ! Cache::has('notified_pending_today')) {
                 try {
                     \Artisan::call('app:notify-request-changes');
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     \Log::error('Scheduled command app:notify-request-changes failed: '.$e->getMessage());
                     report($e);
                 }
                 try {
                     \Artisan::call('app:notify-fan-content-changes');
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     \Log::error('Scheduled command app:notify-fan-content-changes failed: '.$e->getMessage());
                     report($e);
                 }
                 try {
                     \Artisan::call('app:notify-poll-option-changes');
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     \Log::error('Scheduled command app:notify-poll-option-changes failed: '.$e->getMessage());
                     report($e);
                 }
@@ -529,7 +543,7 @@ class AppController extends Controller
 
                 try {
                     \Artisan::call('app:update-geoip');
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     \Log::error('Scheduled command app:update-geoip failed: '.$e->getMessage());
                     report($e);
                 }

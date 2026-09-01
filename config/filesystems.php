@@ -74,8 +74,15 @@ return [
          * a small integer plus a second-resolution timestamp the owner can already see - and CDN
          * edges cache, so making the object private again does not revoke access until a purge.
          *
-         * BACKUP_SPACES_BUCKET therefore has NO fallback to DO_SPACES_BUCKET. A missing value must
-         * fail loudly rather than quietly write tenant data into the images bucket.
+         * BACKUP_SPACES_BUCKET therefore has NO fallback to DO_SPACES_BUCKET, and must keep none:
+         * a missing value must fail loudly rather than quietly write tenant data into the images
+         * bucket. It is also the one key below that must NOT get the `?:` treatment - an empty
+         * bucket has to stay empty and blow up, not reach for something else.
+         *
+         * Everything else uses `?:` rather than env()'s second argument, which only fires on a
+         * MISSING key. .env.example and the SaaS setup doc both ship this block with empty values
+         * for the operator to fill in, so an uncommented-but-unfilled BACKUP_SPACES_KEY= would
+         * otherwise resolve to '' and silently skip the DO_SPACES_* fallback advertised here.
          *
          * 'throw' is on because put() otherwise returns false on a failed write, and
          * ProcessBackupExport discards that return and marks the job completed - mailing the user a
@@ -86,22 +93,31 @@ return [
          * with no migration.
          */
         'backups' => [
-            'driver' => env('BACKUP_DISK_DRIVER', 'local'),
+            'driver' => env('BACKUP_DISK_DRIVER') ?: 'local',
 
+            // Kept in step with 'driver' above, including the `?:`: if the two ever disagree about
+            // what the driver is, an s3 disk gets a filesystem path as its object key prefix.
             // Only the local driver wants a filesystem root. createS3Driver() uses this same key as
             // the OBJECT KEY PREFIX, so leaving storage_path() in on s3 silently turns every key
             // into /var/www/.../storage/app/backups/... The app would not notice - every read and
             // write goes through the same prefixer - but a bucket lifecycle rule or an IAM policy
             // scoped to "backups/*" would then match nothing, which is exactly the sort of control
             // an operator sets up as the backstop for the 7-day retention.
-            'root' => env('BACKUP_DISK_DRIVER', 'local') === 'local' ? storage_path('app') : '',
-            'key' => env('BACKUP_SPACES_KEY', env('DO_SPACES_KEY')),
-            'secret' => env('BACKUP_SPACES_SECRET', env('DO_SPACES_SECRET')),
-            'region' => env('BACKUP_SPACES_REGION', env('DO_SPACES_REGION')),
-            'endpoint' => env('BACKUP_SPACES_ENDPOINT', env('DO_SPACES_ENDPOINT')),
+            'root' => (env('BACKUP_DISK_DRIVER') ?: 'local') === 'local' ? storage_path('app') : '',
+            'key' => env('BACKUP_SPACES_KEY') ?: env('DO_SPACES_KEY'),
+            'secret' => env('BACKUP_SPACES_SECRET') ?: env('DO_SPACES_SECRET'),
+            'region' => env('BACKUP_SPACES_REGION') ?: env('DO_SPACES_REGION'),
+            'endpoint' => env('BACKUP_SPACES_ENDPOINT') ?: env('DO_SPACES_ENDPOINT'),
             'bucket' => env('BACKUP_SPACES_BUCKET'),
             'visibility' => 'private',
             'throw' => true,
+
+            // Without this, AwsS3V3Adapter::readObject() leaves the SDK's default sink in place and
+            // Guzzle buffers the ENTIRE object into php://temp before the first byte reaches the
+            // client - so BackupController::download()'s StreamedResponse streams from a copy that
+            // already materialised on the container's ephemeral disk, and TTFB is the full S3
+            // fetch. Nothing caps the size of an export, so that copy is unbounded.
+            'stream_reads' => true,
         ],
     ],
 

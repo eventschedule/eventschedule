@@ -62,6 +62,20 @@ class ScheduledTaskRun extends Model
             ->max();
     }
 
+    /**
+     * The last time this task really ran - a start or a completion, whichever is later.
+     *
+     * Distinct from lastSeenAt(), which also counts a skip. A skip is evidence the SCHEDULER is
+     * alive; this is evidence the TASK is. SchedulerHealth needs both, and conflating them is what
+     * let a task wedged behind a stranded mutex read as healthy.
+     */
+    public function lastRanAt(): ?\Illuminate\Support\Carbon
+    {
+        return collect([$this->last_started_at, $this->last_finished_at])
+            ->filter()
+            ->max();
+    }
+
     public function isRunning(): bool
     {
         return $this->last_started_at !== null

@@ -25,8 +25,9 @@ class SchedulerHealth
      * and the scheduler rail names itself from config('app.scheduler_rail'), which defaults to
      * 'cron' and is set to 'worker' on a dedicated container.
      *
-     * rails() reads the stored keys rather than iterating this list, so an operator who sets
-     * SCHEDULER_RAIL to something else still sees their rail instead of it silently vanishing.
+     * rails() also merges this container's own rail and the EXPECTED rail, so an operator who sets
+     * SCHEDULER_RAIL to something outside this list still sees their rail instead of it silently
+     * vanishing - which would leave isStalled() unable to find the rail it is judging.
      */
     public const RAILS = ['worker', 'cron', 'http'];
 
@@ -48,7 +49,13 @@ class SchedulerHealth
     {
         $value = Cache::get('scheduler.last_run_at');
 
-        return is_numeric($value) ? Carbon::createFromTimestamp((int) $value) : null;
+        // ->setTimezone: Carbon 3's createFromTimestamp() returns UTC regardless of the default
+        // timezone, so on an install where APP_TIMEZONE is not UTC the card's tooltip would print a
+        // different clock from last_finished_at right beside it, which is an Eloquent cast and lands
+        // in the app timezone. diffForHumans is unaffected either way; the printed time is not.
+        return is_numeric($value)
+            ? Carbon::createFromTimestamp((int) $value)->setTimezone(config('app.timezone'))
+            : null;
     }
 
     /**
@@ -92,7 +99,13 @@ class SchedulerHealth
     public static function rails(): Collection
     {
         return collect(self::RAILS)
-            ->merge([config('app.scheduler_rail', 'cron')])
+            // This container's rail AND the expected one. Without the latter, naming a rail
+            // outside RAILS in SCHEDULER_EXPECTED_RAIL means the web container never reads that
+            // rail's key, firstWhere() in isStalled() returns null, and the install sits on a
+            // permanent red "scheduler stalled" alert while the worker is perfectly healthy.
+            ->merge([config('app.scheduler_rail', 'cron'), self::expectedRail()])
+            // Before the map, not after: expectedRail() is nullable and the closure is typed.
+            ->filter()
             ->unique()
             ->map(function (string $rail) {
                 $value = Cache::get('scheduler.last_run_at.'.$rail);
@@ -101,7 +114,8 @@ class SchedulerHealth
                     return null;
                 }
 
-                $at = Carbon::createFromTimestamp((int) $value);
+                // App timezone, for the same reason as lastRunAt() above: the card prints this.
+                $at = Carbon::createFromTimestamp((int) $value)->setTimezone(config('app.timezone'));
 
                 return (object) [
                     'name' => $rail,
@@ -126,13 +140,15 @@ class SchedulerHealth
         // it must never be shown copy claiming the cron endpoint is its liveness signal. Suppressing
         // that panel for a week after genuinely retiring a worker is a far smaller harm than telling
         // an operator a dead worker is healthy. An install that never had one has no such key.
-        if (self::rails()->contains(fn ($rail) => $rail->name !== 'http')) {
+        $rails = self::rails();
+
+        if ($rails->contains(fn ($rail) => $rail->name !== 'http')) {
             return false;
         }
 
-        $fresh = self::rails()->reject->stale;
-
-        return $fresh->isNotEmpty() && $fresh->every(fn ($rail) => $rail->name === 'http');
+        // Past the guard above every remaining rail is named 'http', so this only has to ask
+        // whether one of them is still fresh.
+        return $rails->reject->stale->isNotEmpty();
     }
 
     /**
@@ -227,31 +243,41 @@ class SchedulerHealth
             return 'unknown';
         }
 
+        // withoutOverlapping's own expiry is the author's declared budget for this task, so it is
+        // the right threshold for both checks below - no invented constant.
+        $budget = max(1, (int) $event->expiresAt);
+
+        // A SKIP STREAK, checked before anything else that infers from elapsed time.
+        //
+        // withoutOverlapping() is a ->skip() REJECT FILTER: ManagesAttributes::withoutOverlapping()
+        // ends with $this->skip(fn () => $this->mutex->exists($this)), and ScheduleRunCommand
+        // evaluates filtersPass() BEFORE runEvent(). So an overlap dispatches ScheduledTaskSkipped
+        // and NOT ScheduledTaskStarting/Finished - Event::run()'s own shouldSkipDueToOverlapping()
+        // is only reachable in the race between the filter and mutex->create().
+        //
+        // A skipped tick therefore touches last_skipped_at and nothing else. Without this check a
+        // task wedged behind a stranded mutex keeps a fresh lastSeenAt() while last_started_at
+        // stays at or behind last_finished_at, so isRunning() is false, the freshness test below
+        // passes, and the row reads 'ok' forever - which is precisely the failure this table
+        // exists to catch.
+        //
+        // Measured from the last time the task really ran, so a routine skip while a run is
+        // legitimately in flight stays quiet: only a streak outlasting the task's own overlap
+        // budget is trouble. created_at covers a task that has never once run.
+        if ($row?->last_status === ScheduledTaskRun::STATUS_SKIPPED && $row->last_skipped_at) {
+            $lastReal = $row->lastRanAt() ?? $row->created_at;
+
+            if ($lastReal && $lastReal->diffInMinutes($row->last_skipped_at) > $budget) {
+                return 'never_finished';
+            }
+        }
+
         if ($row?->isRunning()) {
-            // withoutOverlapping's own expiry is the author's declared budget for this task, so it
-            // is the right threshold for "started and never came back" - no invented constant.
-            $budget = max(1, (int) $event->expiresAt);
-
-            // Which timestamp to measure from is the whole difficulty here.
-            //
-            // ScheduleRunCommand dispatches ScheduledTaskStarting BEFORE calling Event::run(), and
-            // the overlap check lives inside run() - so a tick that bounces straight off a held
-            // mutex still stamps last_started_at. For a task skipped every minute (process-queue
-            // and friends) that stamp is always ~now, isRunning() is permanently true, and
-            // measuring from it would report "running for 0 seconds" forever. The stranded-mutex
-            // case - the single failure this whole table exists to catch - would be unreachable.
-            //
-            // A skip means no run began, so the last start stamp is an attempt, not a run. Measure
-            // from the last real completion instead: "how long has this task been unable to
-            // finish" is exactly the number the budget should be compared against.
-            // Falling back to last_started_at would defeat the whole point, because that is the
-            // stamp the skips keep refreshing. created_at is when this row was first seen, so for
-            // a task that has never once completed it still yields a growing age.
-            $since = $row->last_status === ScheduledTaskRun::STATUS_SKIPPED
-                ? ($row->last_finished_at ?? $row->created_at)
-                : $row->last_started_at;
-
-            return $since->diffInMinutes(now()) > $budget ? 'never_finished' : 'running';
+            // Measured from the start, full stop. A skip does not restamp last_started_at (see
+            // above), so a skipped row needs no special origin - and the one it used to get,
+            // measured from the PREVIOUS completion, over-reports by the idle gap between runs and
+            // so flags a perfectly healthy long run as never_finished early.
+            return $row->last_started_at->diffInMinutes(now()) > $budget ? 'never_finished' : 'running';
         }
 
         $lastSeen = $row?->lastSeenAt();

@@ -13,15 +13,23 @@
         ? 'text-red-600 dark:text-red-400'
         : 'text-gray-500 dark:text-gray-400';
     $cadence = \Carbon\CarbonInterval::seconds($task->interval)->cascade()->forHumans(['short' => true, 'parts' => 1]);
+    // Hover detail: which rail and which container actually ran this, and how long it took.
+    // That is the question the per-rail work exists to answer ("is the worker the thing running my
+    // schedule"), and last_via / last_host / last_runtime_seconds were recorded for it but not
+    // rendered anywhere. Data, not prose, so it needs no translation key.
+    $detail = collect([
+        $row?->last_finished_at?->format('Y-m-d H:i:s'),
+        $row?->last_via,
+        $row?->last_host,
+        $row?->last_runtime_seconds === null ? null : rtrim(rtrim((string) $row->last_runtime_seconds, '0'), '.').'s',
+    ])->filter()->implode(' · ');
     $since = $task->lastSeenAt?->diffForHumans(null, true, true);
     $label = match ($task->state) {
         'failed' => __('messages.failed'),
         'never_finished' => __('messages.task_never_finished', ['age' => $row?->last_started_at?->diffForHumans(null, true, true) ?? '?']),
-        // A task can be overdue having NEVER run, in which case there is no age to report and
-        // the placeholder would render the literal "overdue by ?" at the operator.
-        'overdue' => $since === null
-            ? __('messages.scheduler_never_ran')
-            : __('messages.task_overdue_by', ['age' => $since]),
+        // $since cannot be null here: state() only returns 'overdue' when lastSeenAt() is set,
+        // and a task that has never run gets 'not_yet_run' instead.
+        'overdue' => __('messages.task_overdue_by', ['age' => $since]),
         'running' => __('messages.task_running_for', ['age' => $row?->last_started_at?->diffForHumans(null, true, true) ?? '?']),
         'ok' => __('messages.task_ran_ago', ['age' => $since ?? '?']),
         'not_yet_run' => __('messages.task_not_yet_run'),
@@ -38,12 +46,14 @@
         </span>
         @if ($label !== '')
         <span class="text-sm {{ $ageClass }} whitespace-nowrap ms-auto"
-              @if ($row?->last_finished_at) title="{{ $row->last_finished_at->format('Y-m-d H:i:s') }}" @endif>{{ $label }}</span>
+              @if ($detail !== '') title="{{ $detail }}" @endif>{{ $label }}</span>
         @endif
     </div>
     @if ($row?->last_error && $task->state === 'failed')
     <details class="mt-1">
-        <summary class="cursor-pointer text-xs text-red-600 dark:text-red-400 truncate">{{ Str::limit($row->last_error, 120) }}</summary>
+        {{-- The consecutive count is what separates a one-off blip from something genuinely broken,
+             and it is the only reason the column is maintained. Bare digits, so no new lang key. --}}
+        <summary class="cursor-pointer text-xs text-red-600 dark:text-red-400 truncate">{{ Str::limit($row->last_error, 120) }}@if ($row->consecutive_failures > 1) <span class="font-semibold">(&times;{{ $row->consecutive_failures }})</span>@endif</summary>
         <pre class="mt-2 text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap break-words max-h-64 overflow-y-auto bg-gray-50 dark:bg-gray-900 p-3 rounded">{{ $row->last_error }}</pre>
     </details>
     @endif

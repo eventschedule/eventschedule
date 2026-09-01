@@ -149,12 +149,17 @@ class AdminAlertService
                     return 0;
                 }
 
-                // exists(), not count(). Two reasons, and both matter. jobs is indexed on queue
-                // only, so a COUNT over available_at is a full table scan - on every admin page
-                // render, and worst exactly when there IS a backlog. And this class's own docblock
-                // forbids a row whose count inflates the panel's header total: a backlog of 8,000
-                // jobs would add 8,000 to a to-do list whose other rows are single digits. It is
-                // one condition, so it counts as one.
+                // exists(), not count(). Two reasons, and both matter.
+                //
+                // jobs is indexed on queue only, so a COUNT over available_at has to read every
+                // row. exists() adds a LIMIT 1 and stops at the first match - which is the case
+                // that matters, because it is the one where the table is big. With no match it
+                // still scans, so this stays cheap only while a healthy queue stays near-empty,
+                // which is the design: the schedule drains it every minute.
+                //
+                // And this class's own docblock forbids a row whose count inflates the panel's
+                // header total: a backlog of 8,000 jobs would add 8,000 to a to-do list whose
+                // other rows are single digits. It is one condition, so it counts as one.
                 return DB::table('jobs')
                     ->where('available_at', '<=', now()->subMinutes(self::JOBS_STALLED_MINUTES)->timestamp)
                     ->exists() ? 1 : 0;

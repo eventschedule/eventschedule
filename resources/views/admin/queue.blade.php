@@ -10,7 +10,7 @@
         @endif
 
         {{-- Alert Banner --}}
-        @if ($schedulerStalled || $failedJobsCount > 0 || ($oldestJobAge && $oldestJobAge->diffInMinutes(now()) > 60))
+        @if ($schedulerStalled || $failedJobsCount > 0 || ($oldestJobAge && $oldestJobAge->diffInMinutes(now()) > \App\Services\AdminAlertService::JOBS_STALLED_MINUTES))
         <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-4">
             <div class="flex">
                 <svg class="w-5 h-5 text-red-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
@@ -27,7 +27,7 @@
                             @if ($failedJobsCount > 0)
                             <li>@lang('messages.n_failed_jobs', ['count' => number_format($failedJobsCount)])</li>
                             @endif
-                            @if ($oldestJobAge && $oldestJobAge->diffInMinutes(now()) > 60)
+                            @if ($oldestJobAge && $oldestJobAge->diffInMinutes(now()) > \App\Services\AdminAlertService::JOBS_STALLED_MINUTES)
                             <li>@lang('messages.oldest_job_stuck', ['age' => $oldestJobAge->diffForHumans(null, true, true)])</li>
                             @endif
                         </ul>
@@ -187,7 +187,7 @@
                     <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.oldest_pending_job')</h4>
                 </div>
                 @if ($oldestJobAge)
-                <p class="text-2xl font-bold {{ $oldestJobAge->diffInMinutes(now()) > 60 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }}">{{ $oldestJobAge->diffForHumans(null, false, true) }}</p>
+                <p class="text-2xl font-bold {{ $oldestJobAge->diffInMinutes(now()) > \App\Services\AdminAlertService::JOBS_STALLED_MINUTES ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }}">{{ $oldestJobAge->diffForHumans(null, false, true) }}</p>
                 @else
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">@lang('messages.none')</p>
                 @endif

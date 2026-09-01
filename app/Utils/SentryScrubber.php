@@ -2,6 +2,7 @@
 
 namespace App\Utils;
 
+use Sentry\Breadcrumb;
 use Sentry\Event;
 
 /**
@@ -12,6 +13,11 @@ use Sentry\Event;
  * into the issue tracker. Four separate fields carry it: the request url, the Referer header, the
  * transaction name, and the exception message (Symfony's MethodNotAllowedHttpException quotes the raw
  * path back verbatim).
+ *
+ * Every field that can carry the secret is walked, not just the obvious ones: the request url,
+ * query string, headers, cookies and body; the transaction name; the message; exception values;
+ * breadcrumbs (message AND metadata); extra; and tags. A field left out is a field that ships the
+ * credential, which is how breadcrumbs defeated this class for as long as they were skipped.
  *
  * Wired as `before_send` in config/sentry.php as a static-method STRING rather than a closure: a closure
  * in a config file breaks `php artisan config:cache`, which docs/SECURITY_CONFIG.md tells selfhosters
@@ -80,6 +86,39 @@ class SentryScrubber
         foreach ($event->getExceptions() as $exception) {
             $exception->setValue(self::scrub($exception->getValue()));
         }
+
+        // Breadcrumbs, which are attached to the event BEFORE before_send runs and were the widest
+        // remaining hole. config/sentry.php enables `logs` and `http_client_requests` by default,
+        // so every \Log:: line and every outbound request URL rides along with the event - and
+        // AppController::translateData() logs 'Scheduled command X failed: ...' for every command
+        // on the rail whose secret this class exists to protect. Scrubbing url, message and
+        // exception value while leaving these untouched shipped the credential anyway.
+        //
+        // Rebuilt rather than mutated: Breadcrumb is immutable, and withMessage() is typed string
+        // while getMessage() is nullable, so the null case has to be skipped rather than coerced.
+        $event->setBreadcrumb(array_map(static function (Breadcrumb $crumb): Breadcrumb {
+            $message = $crumb->getMessage();
+
+            if ($message !== null) {
+                $crumb = $crumb->withMessage(self::scrub($message));
+            }
+
+            // Metadata, not just the message: an http_client_requests breadcrumb carries the URL
+            // there, which is where an appointment secret actually travels.
+            foreach ($crumb->getMetadata() as $key => $value) {
+                $scrubbed = self::scrubDeep($value);
+
+                if ($scrubbed !== $value) {
+                    $crumb = $crumb->withMetadata($key, $scrubbed);
+                }
+            }
+
+            return $crumb;
+        }, $event->getBreadcrumbs()));
+
+        // extra and tags are free text the app sets itself, and cost nothing to walk.
+        $event->setExtra(self::scrubDeep($event->getExtra()));
+        $event->setTags(self::scrubDeep($event->getTags()));
 
         return $event;
     }

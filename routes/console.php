@@ -19,9 +19,14 @@ use Illuminate\Support\Facades\Schedule;
  * 2. Every withoutOverlapping() is given an explicit expiry in minutes. The default is 1440 - a
  *    full day - and the mutex is released in a finally block, which a SIGKILL or an OOM does not
  *    run. App Platform SIGTERMs the worker on every deploy, so one bad kill would otherwise stop
- *    that entry for 24 hours, silently. Size the expiry just above the entry's own budget and
- *    comfortably inside the gap to its next run: a stranded mutex should cost one skipped run,
- *    not a day of them.
+ *    that entry for 24 hours, silently.
+ *
+ *    Size it just above the entry's own worst-case runtime, then round up: a run that overruns its
+ *    expiry lets a second copy start, which is the thing this prevents, so erring short is the
+ *    dangerous direction. In practice that lands around twice the gap to the next run for the
+ *    frequent entries, which is the cost of one or two skipped runs after a hard kill rather than
+ *    a day of them. /admin/queue flags a skip streak that outlasts this number, so a stranded
+ *    mutex is visible either way - which is what makes rounding up safe.
  */
 
 Schedule::call(function () {

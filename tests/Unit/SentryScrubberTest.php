@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Utils\SentryScrubber;
+use Sentry\Breadcrumb;
 use Sentry\Event as SentryEvent;
 use Sentry\ExceptionDataBag;
 use Tests\TestCase;
@@ -137,5 +138,71 @@ class SentryScrubberTest extends TestCase
             $this->assertSame([SentryScrubber::class, 'beforeSend'], $callback, $key.' must be wired');
             $this->assertIsCallable($callback, 'Sentry validates these with is_callable()');
         }
+    }
+
+    /**
+     * Breadcrumbs are attached to the event before before_send runs, and config/sentry.php enables
+     * log breadcrumbs by default - so AppController::translateData()'s
+     * "Scheduled command X failed: ..." lines ride along with every exception on the very rail
+     * whose secret this class protects. Scrubbing url and query_string while leaving these alone
+     * shipped the credential anyway.
+     */
+    public function test_it_scrubs_a_secret_from_a_log_breadcrumb(): void
+    {
+        $event = SentryEvent::createEvent();
+        $event->setBreadcrumb([
+            new Breadcrumb(
+                Breadcrumb::LEVEL_ERROR,
+                Breadcrumb::TYPE_DEFAULT,
+                'log',
+                'Scheduled command failed for /translate_data?secret=s3cr3t-live&x=1'
+            ),
+        ]);
+
+        $message = SentryScrubber::beforeSend($event)->getBreadcrumbs()[0]->getMessage();
+
+        $this->assertStringNotContainsString('s3cr3t-live', $message);
+        $this->assertStringContainsString('secret=[secret]', $message);
+        $this->assertStringContainsString('x=1', $message, 'the rest of the line stays readable');
+    }
+
+    /** An http_client_requests breadcrumb carries the URL in metadata, not in the message. */
+    public function test_it_scrubs_a_booking_secret_from_breadcrumb_metadata(): void
+    {
+        $url = 'https://example.com/appointment/view/abc123/'.str_repeat('a', 32);
+
+        $event = SentryEvent::createEvent();
+        $event->setBreadcrumb([
+            (new Breadcrumb(Breadcrumb::LEVEL_INFO, Breadcrumb::TYPE_HTTP, 'http'))
+                ->withMetadata('url', $url),
+        ]);
+
+        $scrubbed = SentryScrubber::beforeSend($event)->getBreadcrumbs()[0]->getMetadata()['url'];
+
+        $this->assertStringNotContainsString(str_repeat('a', 32), $scrubbed);
+        $this->assertStringContainsString('/appointment/view/abc123/[secret]', $scrubbed);
+    }
+
+    /** A breadcrumb with no message at all must not blow up: withMessage() is typed string. */
+    public function test_a_breadcrumb_without_a_message_survives(): void
+    {
+        $event = SentryEvent::createEvent();
+        $event->setBreadcrumb([
+            new Breadcrumb(Breadcrumb::LEVEL_INFO, Breadcrumb::TYPE_DEFAULT, 'cache'),
+        ]);
+
+        $this->assertNull(SentryScrubber::beforeSend($event)->getBreadcrumbs()[0]->getMessage());
+    }
+
+    public function test_it_scrubs_extra_and_tags(): void
+    {
+        $event = SentryEvent::createEvent();
+        $event->setExtra(['url' => '/translate_data?secret=s3cr3t-live']);
+        $event->setTags(['endpoint' => 'release_tickets?secret=s3cr3t-live']);
+
+        $scrubbed = SentryScrubber::beforeSend($event);
+
+        $this->assertStringNotContainsString('s3cr3t-live', $scrubbed->getExtra()['url']);
+        $this->assertStringNotContainsString('s3cr3t-live', $scrubbed->getTags()['endpoint']);
     }
 }

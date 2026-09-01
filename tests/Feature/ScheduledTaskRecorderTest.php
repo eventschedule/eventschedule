@@ -151,6 +151,26 @@ class ScheduledTaskRecorderTest extends TestCase
     }
 
     /**
+     * last_via is varchar(20) and SCHEDULER_RAIL is operator-settable.
+     *
+     * Unclamped, an over-long name is a 1406 on a strict connection - which guard() swallows, so
+     * per-task recording would go silently dead for every task on every tick while the heartbeat
+     * stayed green, and report() would fire ~38 times a minute. The monitor failing invisibly is
+     * the one outcome this class exists to prevent.
+     */
+    public function test_an_over_long_rail_name_does_not_kill_recording(): void
+    {
+        config(['app.scheduler_rail' => str_repeat('scheduler-container-', 5)]);
+
+        ScheduledTaskRecorder::starting(new ScheduledTaskStarting($this->event()));
+
+        $row = ScheduledTaskRun::firstWhere('name', 'demo-task');
+
+        $this->assertNotNull($row, 'the run must still be recorded');
+        $this->assertLessThanOrEqual(20, mb_strlen($row->last_via));
+    }
+
+    /**
      * The aggregate heartbeat cannot distinguish rails, so a worker that died while the HTTP cron
      * kept ticking would look healthy. Per-rail keys are what make that visible.
      */

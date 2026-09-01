@@ -100,6 +100,58 @@ class BackupStorageTest extends TestCase
             'the backups disk must not prefix S3 object keys with a filesystem path');
     }
 
+    /**
+     * .env.example and the SaaS setup doc both ship the BACKUP_SPACES_* block with empty values for
+     * the operator to fill in. env()'s second argument only fires on a MISSING key, so an operator
+     * who uncomments the block and fills in only some of it gets '' for the rest and silently loses
+     * the DO_SPACES_* fallback the config comment advertises. `?:` is what makes the fallback real.
+     *
+     * BACKUP_SPACES_BUCKET is deliberately exempt and must stay exempt - see the test above.
+     */
+    public function test_blank_backup_credentials_still_fall_back_to_the_spaces_defaults(): void
+    {
+        $overrides = [
+            'BACKUP_DISK_DRIVER' => 's3',
+            'BACKUP_SPACES_KEY' => '',
+            'BACKUP_SPACES_SECRET' => '',
+            'BACKUP_SPACES_REGION' => '',
+            'BACKUP_SPACES_ENDPOINT' => '',
+            'BACKUP_SPACES_BUCKET' => '',
+            'DO_SPACES_KEY' => 'images-key',
+            'DO_SPACES_SECRET' => 'images-secret',
+            'DO_SPACES_REGION' => 'nyc3',
+            'DO_SPACES_ENDPOINT' => 'https://nyc3.digitaloceanspaces.com',
+        ];
+
+        $previous = [];
+
+        foreach ($overrides as $key => $value) {
+            $previous[$key] = $_SERVER[$key] ?? null;
+            $_SERVER[$key] = $value;
+        }
+
+        try {
+            $backups = (require config_path('filesystems.php'))['disks']['backups'];
+        } finally {
+            foreach ($previous as $key => $value) {
+                if ($value === null) {
+                    unset($_SERVER[$key]);
+                } else {
+                    $_SERVER[$key] = $value;
+                }
+            }
+        }
+
+        $this->assertSame('images-key', $backups['key']);
+        $this->assertSame('images-secret', $backups['secret']);
+        $this->assertSame('nyc3', $backups['region']);
+        $this->assertSame('https://nyc3.digitaloceanspaces.com', $backups['endpoint']);
+
+        // The bucket must NOT fall back. A blank value has to stay blank and fail, rather than
+        // reaching for the CDN-fronted images bucket and publishing every tenant export in it.
+        $this->assertEmpty($backups['bucket'], 'the backups bucket must never inherit another bucket');
+    }
+
     /** The local default still roots at storage/app, so selfhost paths keep resolving. */
     public function test_the_backups_disk_still_roots_at_storage_app_on_the_local_driver(): void
     {

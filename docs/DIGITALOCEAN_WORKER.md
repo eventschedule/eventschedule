@@ -190,15 +190,18 @@ never write it: that option is only honoured for process-backed scheduled events
 closures. The file has never existed. The container log stream is the real one.
 
 One thing the log stream will *not* tell you: a task skipped because its `withoutOverlapping()`
-mutex was held still prints `DONE`. `Event::run()` returns before the exit code is ever set, so the
-scheduler reports success for a task that did nothing. A task wedged behind a stranded mutex
-therefore looks healthy in the logs - check the `withoutOverlapping` expiry in
-`routes/console.php` and the admin Scheduler card if a task's effects stop appearing.
+mutex was held prints **nothing at all**. `withoutOverlapping()` registers a `->skip()` reject
+filter, and `ScheduleRunCommand` evaluates `filtersPass()` before it ever reaches the `Running
+[...]` line - so the task simply does not appear that minute, which is indistinguishable from it
+not being due. A task wedged behind a stranded mutex therefore leaves no trace in the logs at all;
+the admin Scheduler card is what catches it (it records the skip and flags a streak longer than the
+task's own `withoutOverlapping` expiry), so check there, and check that expiry in
+`routes/console.php`, if a task's effects stop appearing.
 
 **"Scheduled tasks are not running".** This alert appears on the admin dashboard, the admin nav and
 the Scheduler card on `/admin/queue`. Both rails stamp `scheduler.last_run_at` in the cache on
 every tick - even on minutes when nothing was due - and the alert fires when that key is missing or
-older than `SCHEDULER_STALE_MINUTES` (default 15). It means the scheduler stopped, which also means
+older than `SCHEDULER_STALE_MINUTES` (default 20). It means the scheduler stopped, which also means
 nothing is draining the queue: no email, no calendar sync, no installment charges.
 
 What to check, in order:

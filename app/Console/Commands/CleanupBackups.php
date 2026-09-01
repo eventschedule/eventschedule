@@ -26,17 +26,40 @@ class CleanupBackups extends Command
             ->where('file_expires_at', '<', now())
             ->get();
 
+        $failedDeletes = 0;
+
         foreach ($expired as $job) {
-            foreach (['backups', 'local'] as $disk) {
-                if ($job->file_path && Storage::disk($disk)->exists($job->file_path)) {
-                    Storage::disk($disk)->delete($job->file_path);
+            // Per-row try/catch, because the 'backups' disk is configured 'throw' => true. One S3
+            // hiccup here would otherwise abort the whole command - including the stuck-job sweep
+            // at the bottom, which is the ONLY thing that unwedges a user whose export is stuck in
+            // 'processing' and who therefore cannot start another one. A file we failed to delete
+            // is retried tomorrow; a user locked out of exporting is not self-healing.
+            try {
+                foreach (['backups', 'local'] as $disk) {
+                    if ($job->file_path && Storage::disk($disk)->exists($job->file_path)) {
+                        Storage::disk($disk)->delete($job->file_path);
+                    }
                 }
+            } catch (\Throwable $e) {
+                report($e);
+                $failedDeletes++;
+
+                // file_path is deliberately left set, so the next run tries this row again rather
+                // than orphaning the object with nothing pointing at it.
+                continue;
             }
+
             $job->update(['file_path' => null]);
         }
 
-        if ($expired->count() > 0) {
-            $this->info("Cleaned up {$expired->count()} expired export(s).");
+        if ($failedDeletes > 0) {
+            $this->warn("Could not delete {$failedDeletes} expired export file(s); will retry next run.");
+        }
+
+        $cleaned = $expired->count() - $failedDeletes;
+
+        if ($cleaned > 0) {
+            $this->info("Cleaned up {$cleaned} expired export(s).");
         }
 
         // Delete stale import uploads (pending/failed older than 1 hour)

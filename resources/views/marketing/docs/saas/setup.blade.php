@@ -791,7 +791,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
         <p class="text-gray-600 dark:text-gray-300 mb-4">If you need lower latency than a minute, run a resident <code class="doc-inline-code">php artisan queue:work</code> as well.</p>
 
         <h3 class="doc-subheading">Knowing that it stopped</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Every scheduler tick stamps a heartbeat, and the admin panel raises <span class="font-semibold text-gray-900 dark:text-white">"Scheduled tasks are not running"</span> on the dashboard, the nav and <span class="font-semibold text-gray-900 dark:text-white">System &rarr; Queue</span> when it goes stale. Tune the threshold with <code class="doc-inline-code">SCHEDULER_STALE_MINUTES</code> (default 15). Take it seriously: while the scheduler is down nothing sends email, syncs a calendar or charges an installment.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Every scheduler tick stamps a heartbeat, and the admin panel raises <span class="font-semibold text-gray-900 dark:text-white">"Scheduled tasks are not running"</span> on the dashboard, the nav and <span class="font-semibold text-gray-900 dark:text-white">System &rarr; Queue</span> when it goes stale. Tune the threshold with <code class="doc-inline-code">SCHEDULER_STALE_MINUTES</code> (default 20). Take it seriously: while the scheduler is down nothing sends email, syncs a calendar or charges an installment.</p>
 
         <div class="doc-callout doc-callout-warning">
             <div class="doc-callout-title">Running more than one app server</div>

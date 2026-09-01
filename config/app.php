@@ -31,19 +31,34 @@ return [
 
     /*
      * How stale the scheduler heartbeat may get before /admin raises "scheduler stalled".
-     * Both rails write scheduler.last_run_at every tick, so 15 minutes is many missed ticks
-     * rather than one slow one - long enough that a deploy or a long-running command does not
-     * cry wolf, short enough that a dead worker is noticed within the quarter hour.
+     * Both rails write scheduler.last_run_at every tick, so this is many missed ticks rather than
+     * one slow one - long enough that a deploy or a long-running command does not cry wolf, short
+     * enough that a dead worker is noticed within about the quarter hour.
+     *
+     * 20 rather than 15 to clear translate_data_lock, which is held for 900 SECONDS - exactly 15
+     * minutes. A /translate_data request killed by PHP-FPM or a proxy timeout never runs its
+     * finally, so the lock survives its full TTL and every tick in that window takes the "Already
+     * running" branch, which deliberately stamps no heartbeat. At 15 the aggregate key ages to
+     * exactly the threshold and one killed request raises a false alert. The lock cannot be
+     * shortened instead: it has to outlive the whole daily chain, and two requests running that
+     * concurrently is far worse than a late warning.
+     *
+     * `?:` not env()'s second argument: that default only applies to a MISSING key, so an
+     * uncommented-but-blank SCHEDULER_STALE_MINUTES= would yield (int) '' === 0 and mark every
+     * heartbeat stale forever. Zero is not a valid threshold, so mapping it here is intended.
      */
-    'scheduler_stale_minutes' => (int) env('SCHEDULER_STALE_MINUTES', 15),
+    'scheduler_stale_minutes' => (int) (env('SCHEDULER_STALE_MINUTES') ?: 20),
 
     /*
      * Which cron rail this process is. schedule:run cannot tell whether it was started by a
      * crontab or by schedule:work on a worker, so the deployment has to say: set SCHEDULER_RAIL=worker
      * on the DigitalOcean worker component. AppController::translateData() hardcodes 'http' for the
      * endpoint rail. Only used for display and per-rail staleness on /admin/queue.
+     *
+     * `?:` so a blank SCHEDULER_RAIL= does not become the cache key "scheduler.last_run_at." and a
+     * nameless row on the Scheduler card.
      */
-    'scheduler_rail' => env('SCHEDULER_RAIL', 'cron'),
+    'scheduler_rail' => env('SCHEDULER_RAIL') ?: 'cron',
 
     /*
      * Which rail MUST be alive for scheduled work to count as happening. Empty means "any rail",

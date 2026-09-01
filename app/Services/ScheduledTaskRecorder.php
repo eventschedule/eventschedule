@@ -37,14 +37,17 @@ class ScheduledTaskRecorder
     }
 
     /**
-     * Finished fires for a genuine completion AND for a task skipped by withoutOverlapping().
+     * A genuine completion, and - rarely - an overlap that slipped past the filter.
      *
-     * Event::run() returns early on an overlap, before finish() ever assigns exitCode, so the skip
-     * arrives here with exitCode still null - ScheduledTaskSkipped is NOT dispatched for it (that
-     * event is only for ->when()/->skip() filters, which this app does not use). Reading a null
-     * exit code as success would mean a task wedged behind a stranded mutex reports "succeeded"
-     * every minute forever, which is precisely the failure the bounded withoutOverlapping()
-     * expiries exist to catch.
+     * An ordinary overlap does NOT arrive here. withoutOverlapping() is a ->skip() reject filter
+     * (ManagesAttributes::withoutOverlapping() ends with $this->skip(...)), and ScheduleRunCommand
+     * evaluates filtersPass() BEFORE runEvent(), so it dispatches ScheduledTaskSkipped and neither
+     * Starting nor Finished. skipped() below is the handler that fires.
+     *
+     * Event::run()'s own shouldSkipDueToOverlapping() is still reachable in the race between the
+     * filter passing and mutex->create() succeeding, and it returns before finish() assigns
+     * exitCode - so a null exit code does arrive here occasionally, and must not be read as
+     * success. It is recorded as a skip, exactly as the filtered path would have been.
      */
     public static function finished(ScheduledTaskFinished $event): void
     {
@@ -58,6 +61,14 @@ class ScheduledTaskRecorder
                 return;
             }
 
+            // What 'failed' can and cannot see: every entry in routes/console.php is a closure
+            // wrapping Artisan::call(), and CallbackEvent::execute() maps only a literal `false`
+            // return to exit code 1. A closure that returns nothing is therefore always exit 0, so
+            // a command returning Command::FAILURE WITHOUT throwing lands here as a success.
+            // In practice the commands that matter throw, and returning `Artisan::call(...) === 0`
+            // from all 38 closures would also paint a task red for benign non-zero exits -
+            // app:check-version returns FAILURE when GitHub is merely unreachable. So this state
+            // means "threw", not "exited non-zero", and the page should be read that way.
             $failed = $event->task->exitCode !== 0;
 
             self::write($event, [
@@ -87,6 +98,14 @@ class ScheduledTaskRecorder
         ], incrementFailures: true));
     }
 
+    /**
+     * The normal overlap path: withoutOverlapping()'s reject filter fired.
+     *
+     * Deliberately does not touch last_started_at or last_finished_at - no run began. That is what
+     * lets SchedulerHealth tell a task that is merely queued behind a live run from one wedged
+     * behind a stranded mutex: only last_skipped_at moves, so a streak stands out against
+     * lastRanAt().
+     */
     public static function skipped(ScheduledTaskSkipped $event): void
     {
         self::guard(fn () => self::write($event, [
@@ -122,7 +141,11 @@ class ScheduledTaskRecorder
             return;
         }
 
-        $values['last_via'] = config('app.scheduler_rail', 'cron');
+        // Clamped like last_host below: SCHEDULER_RAIL is operator-settable and the column is
+        // varchar(20), so an over-long value is a 1406 on a strict connection - swallowed by
+        // guard(), reported ~38 times a minute, and per-task recording silently dead while the
+        // heartbeat stays green. Exactly the invisible failure this class is written against.
+        $values['last_via'] = TextUtils::clamp(config('app.scheduler_rail', 'cron'), 20);
         $values['last_host'] = TextUtils::clamp(gethostname() ?: null, 64);
 
         if ($resetFailures) {
