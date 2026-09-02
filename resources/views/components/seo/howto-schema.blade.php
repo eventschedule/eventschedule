@@ -22,6 +22,6 @@
 @endphp
 @if (!empty($howToSteps))
 <script type="application/ld+json" {!! nonce_attr() !!}>
-{!! json_encode($howToPayload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+{!! \App\Utils\SeoUtils::jsonLd($howToPayload) !!}
 </script>
 @endif

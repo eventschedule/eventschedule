@@ -59,7 +59,7 @@
         "@id": "{{ config('app.url') }}/compare#page",
         "name": "Compare Event Schedule with 16 event platforms",
         "url": "{{ config('app.url') }}/compare",
-        "description": {!! json_encode('Feature-by-feature comparisons of Event Schedule against 16 event and ticketing platforms, with a fee calculator using published rates.', JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!},
+        "description": {!! \App\Utils\SeoUtils::jsonLd('Feature-by-feature comparisons of Event Schedule against 16 event and ticketing platforms, with a fee calculator using published rates.') !!},
         "mainEntity": {
             "@type": "ItemList",
             "name": "Event platform comparisons",
@@ -69,7 +69,7 @@
                 {
                     "@type": "ListItem",
                     "position": {{ $loop->iteration }},
-                    "name": {!! json_encode('Event Schedule vs '.$c['name'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!},
+                    "name": {!! \App\Utils\SeoUtils::jsonLd('Event Schedule vs '.$c['name']) !!},
                     "url": "{{ route($c['route']) }}"
                 }@if (! $loop->last),@endif
                 @endforeach

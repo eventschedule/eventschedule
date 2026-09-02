@@ -101,8 +101,8 @@
             {
                 "@type": "ListItem",
                 "position": {{ $i + 1 }},
-                "name": {!! json_encode($p['name'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!},
-                "url": {!! json_encode(marketing_url($p['url']), JSON_UNESCAPED_SLASHES) !!}
+                "name": {!! \App\Utils\SeoUtils::jsonLd($p['name']) !!},
+                "url": {!! \App\Utils\SeoUtils::jsonLd(marketing_url($p['url'])) !!}
             }@if (! $loop->last),@endif
             @endforeach
         ]

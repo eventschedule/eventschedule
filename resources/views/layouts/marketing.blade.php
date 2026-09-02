@@ -92,11 +92,17 @@
             'gif' => 'image/gif',
             default => 'image/png',
         };
+
+        // And read the size off the file for the same reason. Every generated social card is
+        // 1200x630, but a blog post ships its own 1200x600 twin (BlogPost::socialImageUrl()), and
+        // a declared size the bytes do not have gets the image re-cropped by every scraper that
+        // trusts the tags. Anything this install does not serve itself keeps the card default.
+        [$ogImageWidth, $ogImageHeight] = \App\Utils\SeoUtils::imageDimensions($ogImage) ?: [1200, 630];
     @endphp
     <meta property="og:image" content="{{ $ogImage }}">
     <meta property="og:image:type" content="{{ $ogImageType }}">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
+    <meta property="og:image:width" content="{{ $ogImageWidth }}">
+    <meta property="og:image:height" content="{{ $ogImageHeight }}">
     <meta property="og:image:alt" content="{{ $title ?? 'Event Schedule' }}">
     <meta property="og:site_name" content="Event Schedule">
     @php
@@ -176,7 +182,7 @@
     <!-- BreadcrumbList Schema for subpages -->
     @php
         // A title reaches this as a RENDERED slot, so it is already HTML-escaped and may hold a
-        // quote or an entity. Decode it back to plain text and let json_encode do the escaping.
+        // quote or an entity. Decode it back to plain text and let SeoUtils::jsonLd escape it.
         // A Blade echo tag HTML-escapes but does NOT JSON-escape, so interpolating the title that
         // way put a raw double quote inside a JSON string and invalidated the whole block.
         $crumbName = fn ($value) => trim(html_entity_decode(strip_tags((string) $value), ENT_QUOTES, 'UTF-8'));
@@ -244,7 +250,7 @@
     @endphp
     @if (! $skipBreadcrumb)
     <script type="application/ld+json" {!! nonce_attr() !!}>
-    {!! json_encode($breadcrumbPayload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+    {!! \App\Utils\SeoUtils::jsonLd($breadcrumbPayload) !!}
     </script>
     @endif
     @endif

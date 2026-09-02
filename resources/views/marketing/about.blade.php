@@ -18,7 +18,7 @@
         ];
     @endphp
     <script type="application/ld+json" {!! nonce_attr() !!}>
-    {!! json_encode($aboutOrganization, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+    {!! \App\Utils\SeoUtils::jsonLd($aboutOrganization) !!}
     </script>
     </x-slot>
 

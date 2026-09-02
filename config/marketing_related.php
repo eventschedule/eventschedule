@@ -554,7 +554,7 @@ return [
 
     'for-virtual-conferences' => [
         ['title' => 'For Webinars', 'path' => '/for-webinars', 'blurb' => 'Registration, ticketing, and a join link on any platform.'],
-        ['title' => 'For Live Q&amp;A Sessions', 'path' => '/for-live-qa-sessions', 'blurb' => 'Registration, ticketing and email for a live Q&amp;A on any platform.'],
+        ['title' => 'For Live Q&A Sessions', 'path' => '/for-live-qa-sessions', 'blurb' => 'Registration, ticketing and email for a live Q&A on any platform.'],
         ['title' => 'Use Cases', 'path' => '/use-cases', 'blurb' => 'Event scheduling for musicians, venues, restaurants and theaters.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
@@ -567,7 +567,7 @@ return [
     ],
 
     'for-watch-parties' => [
-        ['title' => 'For Live Q&amp;A Sessions', 'path' => '/for-live-qa-sessions', 'blurb' => 'Registration, ticketing and email for a live Q&amp;A on any platform.'],
+        ['title' => 'For Live Q&A Sessions', 'path' => '/for-live-qa-sessions', 'blurb' => 'Registration, ticketing and email for a live Q&A on any platform.'],
         ['title' => 'For Online Classes', 'path' => '/for-online-classes', 'blurb' => 'Sell online classes with registration and recurring sessions.'],
         ['title' => 'Use Cases', 'path' => '/use-cases', 'blurb' => 'Event scheduling for musicians, venues, restaurants and theaters.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],

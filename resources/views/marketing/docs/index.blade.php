@@ -87,7 +87,7 @@
              derived from the manifest rather than hardcoded - the version this
              replaced shipped a dateModified of 2026-02-01 that had gone stale. --}}
         <script type="application/ld+json" {!! nonce_attr() !!}>
-            {!! json_encode([
+            {!! \App\Utils\SeoUtils::jsonLd([
                 '@context' => 'https://schema.org',
                 '@type' => 'TechArticle',
                 'headline' => 'Event Schedule Documentation',
@@ -106,11 +106,11 @@
                 'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => url()->current()],
                 'datePublished' => '2024-01-01',
                 'dateModified' => collect(DocsUtils::pages())->max('modified') ?: '2024-01-01',
-            ], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
+            ], true) !!}
         </script>
 
         <script type="application/ld+json" {!! nonce_attr() !!}>
-            {!! json_encode([
+            {!! \App\Utils\SeoUtils::jsonLd([
                 '@context' => 'https://schema.org',
                 '@type' => 'DefinedTermSet',
                 'name' => 'Event Schedule Glossary',
@@ -120,7 +120,7 @@
                     'name' => $g['term'],
                     'description' => $g['def'],
                 ], $glossary),
-            ], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
+            ], true) !!}
         </script>
     </x-slot>
 

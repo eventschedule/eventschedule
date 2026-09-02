@@ -21,6 +21,6 @@
 @endphp
 @if (!empty($faqEntities))
 <script type="application/ld+json" {!! nonce_attr() !!}>
-{!! json_encode($faqPayload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+{!! \App\Utils\SeoUtils::jsonLd($faqPayload) !!}
 </script>
 @endif

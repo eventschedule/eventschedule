@@ -14,7 +14,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Event Management Software",
         "operatingSystem": "Linux",
-        "description": {!! json_encode(__('marketing.selfhost_description'), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!},
+        "description": {!! \App\Utils\SeoUtils::jsonLd(__('marketing.selfhost_description')) !!},
         "offers": {
             "@type": "Offer",
             "price": "0",

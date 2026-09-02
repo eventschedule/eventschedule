@@ -429,13 +429,13 @@
     @endphp
     @if (count($eventListItems))
     <script type="application/ld+json" {!! nonce_attr() !!}>
-    {!! json_encode([
+    {!! \App\Utils\SeoUtils::jsonLd([
         '@context' => 'https://schema.org',
         '@type' => 'ItemList',
         'name' => 'Upcoming events on Event Schedule',
         'url' => url('/'),
         'itemListElement' => $eventListItems,
-    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+    ]) !!}
     </script>
     @endif
     </x-slot>

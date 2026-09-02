@@ -275,6 +275,74 @@ class BlogSeoTest extends TestCase
     }
 
     /**
+     * json_encode HTML-escapes nothing, so the rewrite from {{ }} to an encoder traded one
+     * injection for another: {{ }} could not produce a literal "</script>", and json_encode with
+     * only the UNESCAPED flags can. A <script type="application/ld+json"> element is raw text, so
+     * that string closes it and everything after it is markup the browser runs.
+     *
+     * The writers here are admins, so this is robustness rather than privilege escalation - but a
+     * post title is quoted into three separate blocks (BlogPosting, the layout's BreadcrumbList,
+     * and the index's Blog), and one of them is enough.
+     */
+    public function test_a_closing_script_tag_in_a_post_title_cannot_break_out_of_the_json_ld(): void
+    {
+        $payload = 'Tickets </script><script>alert(1)</script> Explained';
+
+        $control = $this->makePost(['title' => 'Tickets Explained']);
+        $hostile = $this->makePost(['title' => $payload]);
+
+        $controlBody = $this->get('/blog/'.$control->slug)->assertOk()->getContent();
+        $body = $this->get('/blog/'.$hostile->slug)->assertOk()->getContent();
+
+        // The count is the whole point: an escaped payload adds no element, an unescaped one adds
+        // the <script> it smuggled in.
+        $this->assertSame(
+            substr_count($controlBody, '<script'),
+            substr_count($body, '<script'),
+            'the title opened a script element of its own'
+        );
+        $this->assertStringNotContainsString('<script>alert(1)</script>', $body);
+
+        // And the block still says what it is supposed to say, escaped rather than mangled.
+        $posting = $this->jsonLdOfType($body, 'BlogPosting');
+        $this->assertNotNull($posting, 'the BlogPosting block did not decode');
+        $this->assertSame($payload, $posting['headline']);
+
+        $breadcrumb = $this->jsonLdOfType($body, 'BreadcrumbList');
+        $this->assertNotNull($breadcrumb, 'the BreadcrumbList did not decode');
+        $this->assertSame($payload, end($breadcrumb['itemListElement'])['name']);
+
+        // The listing quotes every title too, and it is a different payload builder.
+        $indexBody = $this->get('/blog')->assertOk()->getContent();
+        $blog = $this->jsonLdOfType($indexBody, 'Blog');
+        $this->assertNotNull($blog, 'the Blog block did not decode');
+        $this->assertContains($payload, array_column($blog['blogPost'], 'headline'));
+    }
+
+    /**
+     * og:image:width and og:image:height used to be hardcoded 1200x630 for every page, but a blog
+     * post shares its own 1200x600 twin. A declared size the bytes do not have gets the image
+     * re-cropped by every scraper that trusts the tags.
+     */
+    public function test_the_og_image_tags_report_the_blog_twins_real_size(): void
+    {
+        $post = $this->makePost(['featured_image' => 'Literature.png']);
+
+        $body = $this->get('/blog/'.$post->slug)->assertOk()->getContent();
+
+        $this->assertStringContainsString(
+            '<meta property="og:image" content="'.url('/images/headers/social/Literature.jpg').'">',
+            $body
+        );
+
+        [$width, $height] = getimagesize(public_path('images/headers/social/Literature.jpg'));
+        $this->assertSame([1200, 600], [$width, $height], 'the blog social twins are no longer 1200x600');
+
+        $this->assertStringContainsString('<meta property="og:image:width" content="1200">', $body);
+        $this->assertStringContainsString('<meta property="og:image:height" content="600">', $body);
+    }
+
+    /**
      * @return array<string, mixed>|null
      */
     private function jsonLdOfType(string $html, string $type): ?array

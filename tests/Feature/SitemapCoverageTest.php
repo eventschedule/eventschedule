@@ -149,6 +149,15 @@ class SitemapCoverageTest extends TestCase
 
         // /blog is listed at its own host and dated by the blog child sitemap; /cookie-policy has
         // no bundled page to read a history off, so neither can be dated here.
-        $this->assertSame(['/cookie-policy', '/blog'], $undated, 'unexpected pages have no date in the manifest');
+        //
+        // Compared as a set: the order is the order the sitemap view happens to list them in, and
+        // moving a <url> block is not a regression. A page added in this commit is not on this
+        // list either way, because sitemap:lastmod now dates an uncommitted view rather than
+        // skipping it (GenerateSitemapLastmod::uncommittedDate()).
+        $this->assertEqualsCanonicalizing(
+            ['/cookie-policy', '/blog'],
+            $undated,
+            'unexpected pages have no date in the manifest'
+        );
     }
 }

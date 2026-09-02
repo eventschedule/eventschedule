@@ -4,7 +4,7 @@
     <x-slot name="description">Explore {{ $scheduleCount }} live demo schedules showcasing Event Schedule. See real examples for fitness studios, music venues, yoga retreats, community groups, and more.</x-slot>
     <x-slot name="breadcrumbTitle">Examples</x-slot>
 
-    {{-- Structured Data for Rich Results. Built with json_encode so the payload
+    {{-- Structured Data for Rich Results. Built with SeoUtils::jsonLd so the payload
          cannot drift from the visible floor and so names with an apostrophe
          (Nate's Woodworking Shop) encode correctly. --}}
     <x-slot name="structuredData">
@@ -39,10 +39,10 @@
         ];
     @endphp
     <script type="application/ld+json" {!! nonce_attr() !!}>
-    {!! json_encode($collectionPayload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+    {!! \App\Utils\SeoUtils::jsonLd($collectionPayload) !!}
     </script>
     <script type="application/ld+json" {!! nonce_attr() !!}>
-    {!! json_encode($itemListPayload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+    {!! \App\Utils\SeoUtils::jsonLd($itemListPayload) !!}
     </script>
     </x-slot>
 

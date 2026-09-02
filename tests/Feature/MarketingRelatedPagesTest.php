@@ -183,6 +183,29 @@ class MarketingRelatedPagesTest extends TestCase
     }
 
     /**
+     * The strip prints the title and the blurb through {{ }}, which escapes what it is given. A
+     * row that already carries an entity therefore renders it doubly encoded, and the card reads
+     * "For Live Q&amp;A Sessions" on the page - which is how two rows shipped.
+     */
+    public function test_no_entry_carries_an_html_entity(): void
+    {
+        $offenders = [];
+
+        foreach (config('marketing_related') as $key => $rows) {
+            foreach ($rows as $index => $row) {
+                foreach (['title', 'blurb'] as $field) {
+                    if (preg_match('/&[a-z]+;|&#/i', (string) ($row[$field] ?? ''))) {
+                        $offenders[] = "{$key}[{$index}].{$field}: ".$row[$field];
+                    }
+                }
+            }
+        }
+
+        $this->assertSame([], $offenders,
+            'write the character itself - the component escapes on output, so an entity here is printed literally');
+    }
+
+    /**
      * The strip renders url($item['path']) with no validation, so a stale path ships a 404 or a
      * redirect to every visitor of the page that lists it.
      */

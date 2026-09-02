@@ -24,6 +24,11 @@ class MarketingStructuredDataTest extends TestCase
     /** See test_a_double_quote_in_the_page_title_does_not_break_the_breadcrumb for the depth. */
     private const QUOTE_FIXTURE_PATH = '/seo/breadcrumb/quote-fixture';
 
+    /** The same fixture twice, once with a hostile breadcrumb title and once without. */
+    private const PLAIN_FIXTURE_PATH = '/seo/breadcrumb/plain-fixture';
+
+    private const SCRIPT_FIXTURE_PATH = '/seo/breadcrumb/script-fixture';
+
     /** Every page whose structured data this test walks. */
     private const PAGES = [
         '/',
@@ -80,6 +85,61 @@ class MarketingStructuredDataTest extends TestCase
         $this->assertSame('https://eventschedule.test'.self::QUOTE_FIXTURE_PATH, $last['item']);
         $this->assertSame(1, $breadcrumb['itemListElement'][0]['position']);
         $this->assertSame('Home', $breadcrumb['itemListElement'][0]['name']);
+    }
+
+    /**
+     * The other half of that rewrite. {{ }} HTML-escapes, so it could never emit a literal
+     * "</script>"; an encoder carrying only the UNESCAPED flags can, and a
+     * <script type="application/ld+json"> element is raw text, so that string closes it and
+     * everything after it is markup the browser runs.
+     *
+     * The layout hands the breadcrumb title to every subpage on the site, which is why this is
+     * asserted here rather than only where a title happens to come from the database.
+     */
+    public function test_a_closing_script_tag_in_the_page_title_cannot_break_out_of_the_breadcrumb(): void
+    {
+        config(['app.url' => 'https://eventschedule.test']);
+
+        // Written as entities so the slot renders the payload as TEXT, which is what a title read
+        // out of the database looks like by the time the layout sees it. $crumbName strips tags
+        // before it decodes entities, so this survives to the encoder intact - as it should.
+        Route::get(self::PLAIN_FIXTURE_PATH, fn () => Blade::render(<<<'BLADE'
+            <x-marketing-layout>
+                <x-slot name="title">A Fixture - Event Schedule</x-slot>
+                <x-slot name="description">A page used to count the script elements on it.</x-slot>
+                <x-slot name="breadcrumbTitle">Seating Charts</x-slot>
+                <p>Body.</p>
+            </x-marketing-layout>
+            BLADE));
+
+        Route::get(self::SCRIPT_FIXTURE_PATH, fn () => Blade::render(<<<'BLADE'
+            <x-marketing-layout>
+                <x-slot name="title">A Fixture - Event Schedule</x-slot>
+                <x-slot name="description">A page used to count the script elements on it.</x-slot>
+                <x-slot name="breadcrumbTitle">Seating &lt;/script&gt;&lt;script&gt;alert(1)&lt;/script&gt; Charts</x-slot>
+                <p>Body.</p>
+            </x-marketing-layout>
+            BLADE));
+
+        $plain = $this->get(self::PLAIN_FIXTURE_PATH)->assertOk()->getContent();
+        $body = $this->get(self::SCRIPT_FIXTURE_PATH)->assertOk()->getContent();
+
+        // The count is the whole assertion: an escaped payload adds no element, an unescaped one
+        // adds the <script> it smuggled in.
+        $this->assertSame(
+            substr_count($plain, '<script'),
+            substr_count($body, '<script'),
+            'the breadcrumb title opened a script element of its own'
+        );
+        $this->assertStringNotContainsString('<script>alert(1)</script>', $body);
+
+        // And the block still parses and still says what it is supposed to say.
+        $breadcrumb = $this->nodeOfType($this->jsonLdBlocks($body), 'BreadcrumbList');
+        $this->assertNotNull($breadcrumb, 'the layout emitted no BreadcrumbList');
+        $this->assertSame(
+            'Seating </script><script>alert(1)</script> Charts',
+            end($breadcrumb['itemListElement'])['name']
+        );
     }
 
     public function test_about_does_not_emit_a_second_unrelated_organization(): void

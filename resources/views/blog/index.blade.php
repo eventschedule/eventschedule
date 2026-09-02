@@ -67,7 +67,7 @@
     <x-slot name="structuredData">
     <!-- Blog ItemList Structured Data -->
     @php
-        // Built as an array and emitted with json_encode: a Blade echo tag HTML-escapes but does
+        // Built as an array and emitted with SeoUtils::jsonLd: a Blade echo tag HTML-escapes but does
         // NOT JSON-escape, so a double quote in a post title used to invalidate the whole block.
         $blogPayload = [
             '@context' => 'https://schema.org',
@@ -118,7 +118,7 @@
         }
     @endphp
     <script type="application/ld+json" {!! nonce_attr() !!}>
-    {!! json_encode($blogPayload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+    {!! \App\Utils\SeoUtils::jsonLd($blogPayload) !!}
     </script>
     </x-slot>
 

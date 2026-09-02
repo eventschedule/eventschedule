@@ -38,7 +38,7 @@
 
     <x-slot name="structuredData">
         <script type="application/ld+json" {!! nonce_attr() !!}>
-            {!! json_encode($structuredData(), JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
+            {!! \App\Utils\SeoUtils::jsonLd($structuredData(), true) !!}
         </script>
         {{ $schema ?? '' }}
     </x-slot>

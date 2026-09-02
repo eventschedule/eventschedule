@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Integrations | Calendars, Stripe, Webhooks and the API</x-slot>
-    <x-slot name="description">Twelve real integrations, each with its direction, its trigger and its plan written on the label: Google Calendar, Outlook, CalDAV, Stripe, webhooks.</x-slot>
+    <x-slot name="description">Twelve real integrations, each with its direction, its trigger and its plan written on the label: Google Calendar, Outlook, CalDAV, Stripe, webhooks and more.</x-slot>
     <x-slot name="breadcrumbTitle">Integrations</x-slot>
 
     <x-slot name="structuredData">

@@ -31,7 +31,7 @@
     <x-slot name="structuredData">
     <!-- BlogPosting Structured Data -->
     @php
-        // Built as an array and emitted with json_encode: a Blade echo tag HTML-escapes but does
+        // Built as an array and emitted with SeoUtils::jsonLd: a Blade echo tag HTML-escapes but does
         // NOT JSON-escape, so a double quote in a post title used to invalidate the whole block.
         //
         // author is the Organization, not a Person: "Event Schedule Team" was never a real byline,
@@ -77,7 +77,7 @@
         }
     @endphp
     <script type="application/ld+json" {!! nonce_attr() !!}>
-    {!! json_encode($postingPayload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+    {!! \App\Utils\SeoUtils::jsonLd($postingPayload) !!}
     </script>
     </x-slot>
 

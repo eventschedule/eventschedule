@@ -29,7 +29,9 @@ use Illuminate\Support\Facades\Route;
  *   3. A view shared by several routes (compare-single, replace-single) also tracks the data block
  *      that distinguishes this page from its siblings - `'<key>' => [` inside the controller helper
  *      the method calls - via `git log -L`, falling back to the whole controller.
- *   4. The date is the newest `git log -1 --format=%cI` across that file set, in UTC.
+ *   4. The date is the newest `git log -1 --format=%cI` across that file set, in UTC. A view that
+ *      exists but has no history yet - a page being added in the commit being written - is dated
+ *      now and warned about, because an undated page fails SitemapCoverageTest.
  */
 class GenerateSitemapLastmod extends Command
 {
@@ -85,6 +87,7 @@ class GenerateSitemapLastmod extends Command
 
         $manifest = [];
         $skipped = [];
+        $uncommitted = [];
 
         foreach ($routes as $name => $route) {
             $sources = $this->sourcesFor($name, $route['action'], $routes);
@@ -98,9 +101,12 @@ class GenerateSitemapLastmod extends Command
             $date = $this->newestDate($sources);
 
             if (! $date) {
-                $skipped[$name] = $route['path'].' (no git history)';
-
-                continue;
+                // The view is on disk but git has never seen it, which is exactly what a page
+                // being added in the commit currently being written looks like. Skipping it left
+                // that page undated, and SitemapCoverageTest asserts the undated list, so a new
+                // page could not be green in its own commit. Date it now instead.
+                $date = $this->uncommittedDate();
+                $uncommitted[$name] = $sources[0]['file'];
             }
 
             $manifest[$route['path']] = $date;
@@ -112,6 +118,10 @@ class GenerateSitemapLastmod extends Command
             $this->line('  skipped '.$name.' - '.$where);
         }
 
+        foreach ($uncommitted as $name => $file) {
+            $this->warn('  '.$name.' - '.$file.': uncommitted view, dated now; re-run sitemap:lastmod after committing');
+        }
+
         $contents = $this->render($manifest);
 
         if ($this->option('dry-run')) {
@@ -121,7 +131,8 @@ class GenerateSitemapLastmod extends Command
             $this->info('Wrote '.self::MANIFEST.'.');
         }
 
-        $this->info(count($manifest).' pages dated, '.count($skipped).' skipped.');
+        $this->info(count($manifest).' pages dated ('.count($uncommitted).' from an uncommitted view), '.
+            count($skipped).' skipped.');
 
         return self::SUCCESS;
     }
@@ -362,6 +373,19 @@ class GenerateSitemapLastmod extends Command
         }
 
         return $newest?->toIso8601String();
+    }
+
+    /**
+     * The date a page whose view has no git history gets: now, in the same UTC ISO 8601 shape the
+     * git-derived dates use, so the manifest's format check cannot tell the two apart.
+     *
+     * It is a guess, and the warning says so. The alternative - no date at all - is worse: the
+     * page is real and its content is genuinely new, and an absent entry reads as a stale manifest
+     * rather than as a page that has not been committed yet.
+     */
+    private function uncommittedDate(): string
+    {
+        return Carbon::now()->utc()->toIso8601String();
     }
 
     private function git(array $arguments): ?string

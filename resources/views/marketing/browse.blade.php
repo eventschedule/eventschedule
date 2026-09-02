@@ -24,17 +24,17 @@
     @endphp
     @if(count($itemListElements))
     <script type="application/ld+json" {!! nonce_attr() !!}>
-    {{-- JSON_HEX_TAG is load-bearing: this block is echoed raw, and JSON_UNESCAPED_SLASHES
-         means a closing script tag inside an event name would otherwise terminate the
-         element and let the rest of the name run as markup. Escaping < and > costs
-         nothing - JSON-LD consumers decode them back to the same string. --}}
-    {!! json_encode([
+    {{-- SeoUtils::jsonLd escapes < and >, which is load-bearing here: this block is echoed
+         raw, so a closing script tag inside an event name would otherwise terminate the
+         element and let the rest of the name run as markup. The escaping costs nothing -
+         JSON-LD consumers decode them back to the same string. --}}
+    {!! \App\Utils\SeoUtils::jsonLd([
         '@context' => 'https://schema.org',
         '@type' => 'ItemList',
         'name' => 'Upcoming events on Event Schedule',
         'url' => url('/browse'),
         'itemListElement' => $itemListElements,
-    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}
+    ]) !!}
     </script>
     @endif
     </x-slot>
