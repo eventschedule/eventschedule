@@ -277,6 +277,23 @@ class EventAnnouncementTest extends TestCase
         }
     }
 
+    /**
+     * The watermark is operational state, not a setting, and must not be reachable from a form.
+     *
+     * RoleController::update() fills from $request->all() rather than validated(), and
+     * RoleUpdateRequest has no rule for this key - so while it was in $fillable any editor could
+     * POST a future timestamp and permanently silence their own announcements: dueRoles() reads
+     * a negative diffInHours() as "sent recently" and skips forever, with nothing on screen to
+     * explain it. Asserted through fill(), which is exactly the call the controller makes.
+     */
+    public function test_the_announcement_watermark_cannot_be_set_from_a_request(): void
+    {
+        $this->role->fill(['last_announced_at' => now()->addYears(5), 'announce_new_events' => false]);
+
+        $this->assertNull($this->role->last_announced_at, 'the watermark must not be mass-assignable');
+        $this->assertFalse($this->role->announce_new_events, 'the owner-facing toggle beside it must still fill');
+    }
+
     public function test_a_dry_run_sends_nothing_and_stamps_nothing(): void
     {
         // The command is dry by default so a first deployment can be read before it mails anyone.

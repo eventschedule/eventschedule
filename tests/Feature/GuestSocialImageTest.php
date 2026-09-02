@@ -26,8 +26,17 @@ class GuestSocialImageTest extends TestCase
     use CreatesScheduleData;
     use RefreshDatabase;
 
-    /** The advert. Its presence on any guest surface is the bug. */
-    private const PLATFORM_AD = 'social/home.png';
+    /**
+     * The advert. Its presence on any guest surface is the bug.
+     *
+     * The DIRECTORY, not one filename. This used to be 'social/home.png', and the release that
+     * re-encoded the social cards as JPEG changed layouts/app.blade.php's fallback to
+     * social/home.jpg without changing this - so the guard silently stopped matching the thing it
+     * guards against, and all ten assertions below would have passed with the advert back on
+     * every guest page. Nothing under public/images/social is ever a schedule's own picture, so
+     * the whole path is the right thing to forbid and it cannot be defanged by a re-encode again.
+     */
+    private const PLATFORM_AD = 'images/social/';
 
     private function role(array $attrs = []): Role
     {

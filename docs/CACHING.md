@@ -1,10 +1,16 @@
 # Edge caching of marketing HTML
 
 How anonymous marketing (WP) pages are made cacheable by a shared cache, what the origin
-promises, and the Cloudflare rules the operator has to add for it to take effect.
+promises, and the rules the operator has to add for it to take effect.
 
-Selfhosted installs are unaffected unless they put a CDN in front of the app: the origin
-headers change either way, but nothing else does.
+Selfhosted installs need no action **while nothing caches in front of the app** - the origin
+headers change either way, but with no shared cache there is nothing to store the response.
+
+Put any shared cache in front - a CDN, Varnish, nginx `proxy_cache` - and it becomes your
+job to keep a signed-in visitor off the stored anonymous copy. **The origin cannot do this
+for you.** See [Any shared cache](#any-shared-cache-not-just-cloudflare) below for the two
+rules you have to add. Without the first, a signed-in visitor can be served the guest page
+for up to ten minutes; without the second, the cache stops working at all.
 
 ## Why
 
@@ -105,6 +111,30 @@ is in `EXCLUDED_ROUTES` precisely so the 10-minute page header cannot overwrite 
 `CaptureUtmParameters` also stands down on both, so a `/docs/search-index.json` fetch can
 never be recorded as a landing page, and `TrackMarketingVisit::NON_PAGE_ROUTES` (the same two
 routes) keeps it out of the page-view counters.
+
+## Any shared cache, not just Cloudflare
+
+Whatever sits in front of the app must do two things. They are not optional, and no header
+this app sends can substitute for them:
+
+1. **Bypass the cache for any request carrying `config('session.cookie')` (`laravel_session`
+   by default) or a `remember_*` cookie.** These are the signed-in visitors. The origin
+   refuses to *mark* their response public, but nothing in the response stops a cache
+   *serving* them one it stored earlier for somebody else.
+2. **Key the cache on the URL, not on the cookie header.** Do not add `Vary: Cookie` in
+   front of this app, and note that the app deliberately does not send it either. An
+   eligible request legitimately carries cookies that differ per visitor - the three 30-day
+   `utm_*` cookies are encrypted, so the same value yields different ciphertext for every
+   visitor - so varying on them gives each visitor a private entry and the cache stops
+   working from their second page onward. `CacheableMarketingResponse` and
+   `MarketingEdgeCacheTest::test_a_consented_visitor_is_cacheable_from_the_second_page` both
+   record this.
+
+RFC 9111 special-cases only `Authorization` for shared caches; `Cookie` is not special, so
+rule 1 really is something you have to configure rather than something you inherit.
+
+The Cloudflare form of rule 1 follows. Rule 2 is about not *introducing* cookie-based cache
+keying, so there is nothing to configure for it - just do not add it.
 
 ## Cloudflare Cache Rule (operator action, outside the repo)
 

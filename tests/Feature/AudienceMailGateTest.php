@@ -173,4 +173,74 @@ class AudienceMailGateTest extends TestCase
             Newsletter::where('status', 'scheduled')->where('scheduled_at', '<=', now())->count(),
         );
     }
+
+    /**
+     * The same release, for the other two refusals.
+     *
+     * send() has three arms that hand a claimed row back, and only the verification one was
+     * fixed. 'limit_exceeded' and 'no_recipients' still returned it to 'scheduled' with a
+     * scheduled_at in the past, so they re-armed on every cron tick exactly as the arm above used
+     * to - re-resolving the whole recipient set (which plucks every opted-out address on the
+     * platform) every minute, on both rails, for up to a month.
+     *
+     * @dataProvider refusalProvider
+     */
+    public function test_every_refusal_releases_the_row_from_the_cron_queue(string $expected, int $subscribers): void
+    {
+        // A verified phone, so canSendAudienceMail() passes and the run reaches the arm under test.
+        $owner = $this->createOwner();
+        $owner->forceFill(['phone_verified_at' => now()])->save();
+        // Explicitly free: createRole() defaults to enterprise, whose newsletterLimit() is 1000,
+        // so the limit arm would never be reached and the test would send 13 real mails instead.
+        $role = $this->createRole($owner, 'venue', ['plan_type' => 'free', 'plan_expires' => null]);
+
+        // Free tier caps at 10 recipients a month, so 12 confirmed subscribers overshoots it.
+        for ($i = 0; $i < $subscribers; $i++) {
+            RoleSubscriber::create([
+                'role_id' => $role->id,
+                'email' => "fan{$i}@fans.test",
+                'token' => RoleSubscriber::newToken(),
+                'confirmed_at' => now(),
+            ]);
+        }
+
+        if ($expected === 'no_recipients') {
+            // members() requires is_subscribed AND a verified email, so opting the only member
+            // out is what empties the set - nothing else can, because the owner is always in it.
+            $owner->forceFill(['is_subscribed' => false])->save();
+        }
+
+        $newsletter = Newsletter::create([
+            'role_id' => $role->id,
+            'user_id' => $owner->id,
+            'subject' => 'Test Newsletter',
+            'status' => 'scheduled',
+            'scheduled_at' => now()->subMinutes(5),
+            'template' => 'modern',
+            'blocks' => [],
+            'type' => 'schedule',
+        ]);
+
+        $result = app(NewsletterService::class)->send($newsletter);
+
+        $this->assertSame($expected, $result[0]);
+
+        $newsletter->refresh();
+        $this->assertSame('draft', $newsletter->status);
+        $this->assertNull($newsletter->scheduled_at, 'a refused row must not stay due for the cron');
+        $this->assertNull($newsletter->send_token);
+
+        $this->assertSame(
+            0,
+            Newsletter::where('status', 'scheduled')->where('scheduled_at', '<=', now())->count(),
+        );
+    }
+
+    public static function refusalProvider(): array
+    {
+        return [
+            'over the monthly limit' => ['limit_exceeded', 12],
+            'nobody to send to' => ['no_recipients', 0],
+        ];
+    }
 }

@@ -168,6 +168,12 @@ class AudienceAdminTabTest extends TestCase
         $this->subscribe($role, 'yes@fans.test');
         $this->subscribe($role, 'pending@fans.test', confirmed: false);
 
+        // Backdated, so the created_at assertion below cannot pass merely because both rows were
+        // written in the same second.
+        $subscribedOn = '2026-03-14 09:15:00';
+        RoleSubscriber::where('role_id', $role->id)->where('email', 'yes@fans.test')
+            ->update(['created_at' => $subscribedOn]);
+
         $svc = app(\App\Services\BackupService::class);
 
         $exportJob = \App\Models\BackupJob::create(['user_id' => $owner->id, 'type' => 'export', 'status' => 'processing']);
@@ -191,6 +197,15 @@ class AudienceAdminTabTest extends TestCase
         $this->assertNotSame(
             RoleSubscriber::where('role_id', $role->id)->where('email', 'yes@fans.test')->value('token'),
             $rows['yes@fans.test']->token
+        );
+
+        // The signup DATE survives too. The export has always carried created_at, but it is not
+        // fillable, so the importer's create() dropped it and every restored subscriber came back
+        // dated the restore - which is the column the followers tab renders as "Date".
+        $this->assertSame(
+            $subscribedOn,
+            $rows['yes@fans.test']->created_at->toDateTimeString(),
+            'a restore must keep the date the person actually subscribed',
         );
     }
 

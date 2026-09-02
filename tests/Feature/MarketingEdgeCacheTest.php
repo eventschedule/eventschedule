@@ -75,6 +75,15 @@ class MarketingEdgeCacheTest extends TestCase
         // navigation, so with it a visitor who signs in keeps being painted the stored
         // anonymous page. Serving stale belongs to Cloudflare's own setting, not the header.
         $this->assertStringNotContainsString('stale-while-revalidate', $cacheControl);
+
+        // And no Vary. It looks like the missing guard against a shared cache handing this copy
+        // to a signed-in visitor, but a cache keys Vary: Cookie on the whole header value and an
+        // eligible request carries per-visitor cookies (the utm_* trio is encrypted, so identical
+        // plaintext differs per visitor) - so it would give each of them a private entry and
+        // break test_a_consented_visitor_is_cacheable_from_the_second_page below. Keeping a
+        // signed-in visitor off the stored copy belongs to the cache's own bypass rule; see
+        // docs/CACHING.md.
+        $this->assertNull($response->headers->get('Vary'));
     }
 
     /**

@@ -143,7 +143,23 @@ class WindDownCompedPlans extends Command
             if ($addressable) {
                 $role->trial_ends_at = $target;
             }
-            $role->save();
+
+            // saveQuietly(), and it is load-bearing. compedRoles() hydrates five columns, and
+            // Role::saving() recomputes description_html, description_html_en,
+            // banner_message_html and banner_message_html_en UNCONDITIONALLY - unlike the
+            // isDirty()-guarded blocks above them. On a partial hydrate the source columns read
+            // null, MarkdownUtils::convertToHtml(null) returns null, and assigning null ADDS the
+            // key to $attributes while it is absent from $original - which Eloquent's
+            // originalIsEquivalent() reports as dirty for exactly that reason. All four nulls
+            // then land in the UPDATE and every comped schedule's guest page loses its
+            // description and banner.
+            //
+            // Nothing in the hooks is wanted here: Role::updating() and ::updated() key on
+            // email, phone, name, description, federation_enabled and translation_language_code,
+            // none of which this command touches. Quiet is also what keeps the loop off the
+            // network - a full hydrate would instead run Role::saving()'s 10-second Google
+            // geocoding call once per role.
+            $role->saveQuietly();
 
             AuditService::log(
                 AuditService::ADMIN_PLAN_UPDATE,

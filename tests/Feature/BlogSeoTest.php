@@ -84,11 +84,18 @@ class BlogSeoTest extends TestCase
         $published = $this->makePost(['published_at' => Carbon::parse('2026-02-03 10:00:00')]);
         $backdated = $this->makePost(['published_at' => Carbon::parse('2019-01-01 00:00:00')]);
         $draft = $this->makePost(['is_published' => false, 'published_at' => null]);
+        // Never publicly viewed, so the bug never restamped it and its updated_at is a real edit
+        // date. The repair must leave it alone - it is the same statement that counts a view.
+        $neverViewed = $this->makePost(['published_at' => Carbon::parse('2026-01-05 10:00:00')]);
 
         // What years of view counting left behind.
-        DB::table('blog_posts')->update(['updated_at' => Carbon::parse('2026-09-01 23:59:00')]);
+        DB::table('blog_posts')->update(['updated_at' => Carbon::parse('2026-09-01 23:59:00'), 'view_count' => 812]);
         DB::table('blog_posts')->where('id', $published->id)->update(['created_at' => Carbon::parse('2026-02-03 09:55:00')]);
         DB::table('blog_posts')->where('id', $backdated->id)->update(['created_at' => Carbon::parse('2024-06-01 00:00:00')]);
+        DB::table('blog_posts')->where('id', $neverViewed->id)->update([
+            'view_count' => 0,
+            'updated_at' => Carbon::parse('2026-08-20 12:00:00'),
+        ]);
 
         $migration = require database_path('migrations/2026_09_02_000000_reset_blog_post_updated_at.php');
         $migration->up();
@@ -109,6 +116,13 @@ class BlogSeoTest extends TestCase
         $this->assertSame(
             '2026-09-01 23:59:00',
             BlogPost::find($draft->id)->updated_at->toDateTimeString()
+        );
+
+        // And a post the bug never reached keeps its genuine edit date. Without this guard the
+        // repair destroyed the very signal it exists to protect, on the rows that were correct.
+        $this->assertSame(
+            '2026-08-20 12:00:00',
+            BlogPost::find($neverViewed->id)->updated_at->toDateTimeString()
         );
     }
 

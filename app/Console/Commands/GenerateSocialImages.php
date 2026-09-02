@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Utils\ImageUtils;
 use Facebook\WebDriver\Chrome\ChromeOptions;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
@@ -11,7 +10,7 @@ use Laravel\Dusk\Browser;
 use Laravel\Dusk\Chrome\ChromeProcess;
 
 /**
- * Writes public/images/social/<slug>.jpg (and a .webp twin) by screenshotting each marketing hero.
+ * Writes public/images/social/<slug>.jpg by screenshotting each marketing hero.
  *
  * The output is JPEG, not PNG. These frames are photographic dark-mode heroes with gradients and
  * noise, which PNG stores at around 460 KB each - and WhatsApp does not render a link preview at
@@ -21,6 +20,13 @@ use Laravel\Dusk\Chrome\ChromeProcess;
  *
  * The .png files generated before that change are deliberately left on disk: links already shared
  * point at them. Nothing regenerates them, and the marketing layout prefers the .jpg.
+ *
+ * No .webp twin is written, and the ones that existed were deleted. These files are never
+ * rendered as an <img> on any page - they exist solely as og:image, twitter:image and JSON-LD
+ * screenshot targets, fetched once by a scraper and never by a visitor - so a smaller encode
+ * saves no page weight, while Facebook, WhatsApp and LinkedIn do not reliably render a WebP
+ * og:image. Nothing in the repo ever referenced them, so unlike the PNGs above there was no
+ * shared link to keep working.
  */
 class GenerateSocialImages extends Command
 {
@@ -305,7 +311,7 @@ class GenerateSocialImages extends Command
             $skipped = 0;
 
             foreach ($pages as $slug => $urlPath) {
-                if (! $force && file_exists("{$outputDir}/{$slug}.jpg") && file_exists("{$outputDir}/{$slug}.webp")) {
+                if (! $force && file_exists("{$outputDir}/{$slug}.jpg")) {
                     $this->line("  Skipping {$slug} (already exists, use --force to overwrite)");
                     $skipped++;
 
@@ -378,7 +384,7 @@ class GenerateSocialImages extends Command
     }
 
     /**
-     * Turn one PNG capture into the pair that ships: <slug>.jpg and <slug>.webp.
+     * Turn one PNG capture into the file that ships: <slug>.jpg.
      *
      * Shared by the capture loop and --convert-existing so a converted image is byte-for-byte what
      * a fresh capture would have produced.
@@ -410,11 +416,10 @@ class GenerateSocialImages extends Command
             imagedestroy($image);
         }
 
-        // The WebP twin is not referenced by the layout today; it is kept so anything that
-        // negotiates WebP has one, and it costs a single extra encode.
-        $wroteWebp = ImageUtils::generateWebP($capturePath, "{$outputDir}/{$slug}.webp");
-
-        return $wroteJpeg && $wroteWebp;
+        // No WebP twin. Nothing negotiates a format for these: they are only ever fetched by a
+        // link-preview scraper following an og:image URL, and the ones that matter most here
+        // (Facebook, WhatsApp, LinkedIn) do not reliably render WebP. See the class docblock.
+        return $wroteJpeg;
     }
 
     /**

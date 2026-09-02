@@ -676,7 +676,7 @@ class ImageVariantsTest extends TestCase
         );
     }
 
-    public function test_the_job_throws_on_a_transient_failure_and_records_nothing(): void
+    public function test_the_job_throws_on_a_transient_failure_where_a_retry_will_happen(): void
     {
         $owner = $this->createOwner();
         $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room']);
@@ -684,6 +684,10 @@ class ImageVariantsTest extends TestCase
         $this->storeFlyer('flyer_abc123.png', 400, 500);
 
         $this->swapDisk($this->diskThatCannotRead());
+
+        // A real queue, so $tries means something. phpunit.xml pins QUEUE_CONNECTION=sync, and
+        // the job reads the connection rather than assuming a worker - see willBeRetried().
+        config(['queue.default' => 'database']);
 
         $threw = false;
 
@@ -699,6 +703,59 @@ class ImageVariantsTest extends TestCase
             $event->fresh()->image_variants,
             'Recording a transient failure is what made $tries inert and hid the row from the backfill'
         );
+    }
+
+    /**
+     * The same failure on the connection selfhost actually runs.
+     *
+     * SyncQueue::executeJob() has no retry loop - it catches once and handleException() rethrows
+     * without consulting $tries - so throwing there is not a retry, it is a 500 propagating out
+     * of the Event::save() that dispatched the job, on a row that has already been committed.
+     */
+    public function test_the_job_records_a_transient_failure_instead_of_throwing_on_the_sync_queue(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room']);
+        $event = $this->createEvent($role, ['name' => 'Autumn Session', 'flyer_image_url' => 'flyer_abc123.png']);
+        $this->storeFlyer('flyer_abc123.png', 400, 500);
+
+        $this->swapDisk($this->diskThatCannotRead());
+
+        $this->assertSame('sync', config('queue.default'), 'phpunit.xml pins the selfhost default');
+
+        (new GenerateEventImageVariants($event->id, 'flyer_abc123.png'))->handle();
+
+        // The transient reason wins the `skipped` slot, because that is the value
+        // BackfillImageVariants::baseQuery() re-selects on WITHOUT --retry-skipped.
+        $this->assertSame(
+            ['w480' => null, 'w960' => null, 'skipped' => 'read_failed'],
+            $event->fresh()->image_variants,
+        );
+    }
+
+    /**
+     * The whole point of the branch above: the user's flyer upload must still succeed.
+     *
+     * Distinct from test_a_throwing_helper_never_breaks_the_flyer_save_on_the_sync_queue, which
+     * covers the helper THROWING (caught by the job's own try/catch). This covers the helper
+     * RETURNING a transient reason, which is the path that used to throw on purpose.
+     */
+    public function test_a_transient_disk_failure_never_breaks_the_flyer_save_on_the_sync_queue(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room']);
+        $event = $this->createEvent($role, ['name' => 'Autumn Session']);
+        $this->storeFlyer('flyer_boom.png', 400, 500);
+
+        $this->swapDisk($this->diskThatCannotWrite());
+        $this->useSyncQueue();
+
+        $event->flyer_image_url = 'flyer_boom.png';
+        $event->save();
+
+        $fresh = $event->fresh();
+        $this->assertSame('flyer_boom.png', $fresh->getAttributes()['flyer_image_url'], 'The flyer save must stand');
+        $this->assertSame(['w480' => null, 'w960' => null, 'skipped' => 'write_failed'], $fresh->image_variants);
     }
 
     public function test_a_throwing_helper_never_breaks_the_flyer_save_on_the_sync_queue(): void

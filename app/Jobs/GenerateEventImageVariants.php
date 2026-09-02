@@ -30,7 +30,14 @@ use Illuminate\Support\Facades\Log;
  *    bytes with the same extensions and reach the same answer.
  *  - Transient (the disk would not hand the file over, or would not take the derivative): the job
  *    THROWS and records nothing, so $tries brings it back and the column stays null for the
- *    backfill to find.
+ *    backfill to find - but ONLY on a connection where $tries means something. On `sync` there is
+ *    no retry loop (SyncQueue::executeJob catches once and rethrows), so the throw would be the
+ *    500 this list exists to prevent; there the reason is recorded like a deterministic one and
+ *    `images:backfill-variants` re-selects it, which its baseQuery() does for a transient
+ *    `skipped` without needing --retry-skipped. That command is OPERATOR-RUN - it is on neither
+ *    cron rail - so on `sync` the recovery is a thumbnail that stays unbuilt until someone runs
+ *    it. The card renders the original meanwhile, so the page is correct and only heavier.
+ *    See willBeRetried().
  */
 class GenerateEventImageVariants implements ShouldQueue
 {
@@ -112,7 +119,11 @@ class GenerateEventImageVariants implements ShouldQueue
             }
         }
 
-        if ($transient !== null) {
+        // A transient reason means the disk answered badly rather than the image being
+        // unusable, so trying again can genuinely produce a different answer - but only where
+        // trying again actually happens. See willBeRetried(): on the `sync` connection nothing
+        // retries, and a throw here escapes the Event::save() that dispatched this job.
+        if ($transient !== null && $this->willBeRetried()) {
             // Deliberately before any recording: the column stays null, so the retry (and the
             // backfill after it) still sees a row that needs doing.
             throw new \RuntimeException(
@@ -120,11 +131,41 @@ class GenerateEventImageVariants implements ShouldQueue
             );
         }
 
+        if ($transient !== null) {
+            // Recorded rather than thrown: BackfillImageVariants::baseQuery() re-selects any
+            // row whose `skipped` is one of ImageUtils::VARIANT_TRANSIENT_REASONS without
+            // needing --retry-skipped, so the row is not lost. It is not picked up on its own
+            // either - that command is operator-run (see the class docblock) - which is why
+            // this logs at WARNING: the save succeeded, but somebody has work to do.
+            Log::warning('GenerateEventImageVariants could not reach storage for event '
+                .$this->eventId.': '.$transient.' (left for images:backfill-variants)');
+        }
+
         if ($deterministic !== null) {
             Log::info('GenerateEventImageVariants skipped event '.$this->eventId.': '.$deterministic);
         }
 
-        $event->recordImageVariants($this->payload($variants, $deterministic));
+        // Transient wins the `skipped` slot when both happened, because it is the one the
+        // backfill's un-flagged query keys on; a deterministic reason recorded over it would
+        // strand the row until someone ran --retry-skipped by hand.
+        $event->recordImageVariants($this->payload($variants, $transient ?? $deterministic));
+    }
+
+    /**
+     * Will a failure here actually be retried?
+     *
+     * Only on a real queue. `sync` - the selfhost default (.env.example) - runs the job INLINE
+     * inside the save() that dispatched it, and SyncQueue::executeJob() has no retry loop at all:
+     * it catches once and handleException() rethrows without ever consulting $tries. So a throw
+     * on that connection is not a retry, it is an HTTP 500 on a flyer upload whose event row has
+     * already been committed - the exact failure this class's docblock is written against.
+     *
+     * $this->job is null when handle() is invoked directly (a test, tinker), which is inline for
+     * the same reason, so fall back to the configured connection rather than assuming a worker.
+     */
+    private function willBeRetried(): bool
+    {
+        return ($this->job?->getConnectionName() ?? config('queue.default')) !== 'sync';
     }
 
     /**

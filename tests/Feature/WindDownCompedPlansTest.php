@@ -306,6 +306,42 @@ class WindDownCompedPlansTest extends TestCase
         $this->assertSame($firstPass, $role->refresh()->plan_expires);
     }
 
+    /**
+     * The command hydrates five columns and then calls save(), and Role::saving() recomputes
+     * description_html / banner_message_html UNCONDITIONALLY - so on a partial hydrate it wrote
+     * four nulls into the UPDATE and blanked the guest page of every schedule it touched.
+     *
+     * Asserted through the rendered columns rather than through save() vs saveQuietly(), so the
+     * test still holds if the fix is later changed to a full hydrate instead.
+     */
+    public function test_it_leaves_the_rendered_description_and_banner_intact(): void
+    {
+        $role = $this->comped();
+        $role->forceFill([
+            'description' => '# Springfield Hall',
+            'banner_message' => 'Doors at 7pm',
+        ])->save();
+
+        $role->refresh();
+        $descriptionHtml = $role->description_html;
+        $bannerHtml = $role->banner_message_html;
+
+        $this->assertNotEmpty($descriptionHtml, 'fixture must actually have rendered HTML to lose');
+        $this->assertNotEmpty($bannerHtml);
+
+        $this->windDown(['--apply' => true]);
+
+        $role->refresh();
+
+        $this->assertNotSame(
+            $this->comped()->plan_expires,
+            $role->plan_expires,
+            'the command must actually have touched this row, or the assertions below prove nothing',
+        );
+        $this->assertSame($descriptionHtml, $role->description_html);
+        $this->assertSame($bannerHtml, $role->banner_message_html);
+    }
+
     public function test_it_does_nothing_on_a_selfhosted_install(): void
     {
         config(['app.hosted' => false]);

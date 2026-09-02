@@ -52,10 +52,7 @@ class NewsletterService
             : $this->resolveRecipients($newsletter->role, $segmentIds);
 
         if ($recipients->isEmpty()) {
-            $newsletter->update([
-                'status' => $newsletter->scheduled_at ? 'scheduled' : 'draft',
-                'send_token' => null,
-            ]);
+            $this->releaseToDraft($newsletter);
 
             return ['no_recipients', 0];
         }
@@ -72,20 +69,7 @@ class NewsletterService
                 'recipients' => $recipients->count(),
             ]);
 
-            // Back to DRAFT, and the schedule cleared, even when this was a scheduled send.
-            //
-            // Returning it to 'scheduled' with a scheduled_at already in the past put it straight
-            // back in ProcessScheduledNewsletters' queue, so it was re-picked every minute: the
-            // whole recipient set re-resolved and the same refusal logged, forever, while the
-            // composer went on showing it as scheduled and the owner was told nothing. Draft is
-            // terminal here - the cron only reads 'scheduled' rows - and it puts the newsletter
-            // somewhere the owner will actually look, where opening it hits the same
-            // canSendAudienceMail() gate and shows messages.newsletter_requires_verification.
-            $newsletter->update([
-                'status' => 'draft',
-                'scheduled_at' => null,
-                'send_token' => null,
-            ]);
+            $this->releaseToDraft($newsletter);
 
             return ['requires_verification', $recipients->count()];
         }
@@ -96,10 +80,7 @@ class NewsletterService
             if ($limit !== null) {
                 $used = $role->newslettersSentThisMonth();
                 if ($used + $recipients->count() > $limit) {
-                    $newsletter->update([
-                        'status' => $newsletter->scheduled_at ? 'scheduled' : 'draft',
-                        'send_token' => null,
-                    ]);
+                    $this->releaseToDraft($newsletter);
 
                     return ['limit_exceeded', $recipients->count()];
                 }
@@ -154,6 +135,30 @@ class NewsletterService
             });
 
         return true;
+    }
+
+    /**
+     * Hand a claimed newsletter back, terminally.
+     *
+     * Every refusal inside send() runs after the row has already been claimed as 'sending', so
+     * each one has to release it - and all three must release it the SAME way. Returning it to
+     * 'scheduled' with a scheduled_at already in the past puts it straight back in
+     * ProcessScheduledNewsletters' queue (which selects status = 'scheduled' AND
+     * scheduled_at <= now()), so it is re-picked every minute on both cron rails: the whole
+     * recipient set re-resolved and the same refusal logged, forever, while the composer goes on
+     * showing it as scheduled and the owner is told nothing.
+     *
+     * Draft is terminal here, because the cron only reads 'scheduled' rows, and it puts the
+     * newsletter somewhere the owner will actually look - where opening it hits the same gate
+     * that refused it and shows them why.
+     */
+    private function releaseToDraft(Newsletter $newsletter): void
+    {
+        $newsletter->update([
+            'status' => 'draft',
+            'scheduled_at' => null,
+            'send_token' => null,
+        ]);
     }
 
     public function sendToRecipient(Newsletter $newsletter, NewsletterRecipient $recipient, bool $isTest = false, ?array $processedBlocks = null): bool

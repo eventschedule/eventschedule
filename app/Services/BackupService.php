@@ -1527,7 +1527,14 @@ class BackupService
             foreach ($scheduleData['role_subscribers'] ?? [] as $subData) {
                 try {
                     \App\Models\RoleSubscriber::withoutEvents(function () use ($role, $subData) {
-                        \App\Models\RoleSubscriber::create([
+                        // forceFill, not create(): created_at is not in $fillable, so create()
+                        // dropped it silently and every restored subscriber came back dated the
+                        // restore - while exportRole() has always written it, and the followers
+                        // tab renders it as that subscriber's "Date". An explicitly set
+                        // created_at survives updateTimestamps(), which only stamps when the
+                        // column is not already dirty. The mutator on email still runs, because
+                        // forceFill() goes through fill() and so through setAttribute().
+                        (new \App\Models\RoleSubscriber)->forceFill([
                             'role_id' => $role->id,
                             'email' => $subData['email'],
                             'name' => $subData['name'] ?? null,
@@ -1535,7 +1542,11 @@ class BackupService
                             'source' => $subData['source'] ?? 'import',
                             'confirmed_at' => $subData['confirmed_at'] ?? null,
                             'token' => \App\Models\RoleSubscriber::newToken(),
-                        ]);
+                            // ?? then ?:, not either alone: ?? misses an empty string (which a
+                            // hand-edited backup can carry, and which Carbon would choke on),
+                            // and a bare ?: warns on the absent key.
+                            'created_at' => ($subData['created_at'] ?? null) ?: now(),
+                        ])->save();
                     });
                 } catch (\Exception $e) {
                     report($e);

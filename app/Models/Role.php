@@ -23,7 +23,12 @@ class Role extends Model implements MustVerifyEmail
         'type',
         'is_unlisted',
         'announce_new_events',
-        'last_announced_at',
+        // last_announced_at is deliberately NOT fillable. It is operational state, written only
+        // by SendEventAnnouncements and always through forceFill(), and RoleController::update()
+        // fills from $request->all() rather than validated() - so with it here any editor could
+        // POST a future timestamp and permanently silence their own schedule's announcements
+        // (the command compares diffInHours() against it and skips on a negative). Same rule the
+        // Event model's $casts block documents for is_cancelled and friends.
         'design',
         'header_style',
         'background',

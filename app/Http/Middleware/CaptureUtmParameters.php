@@ -91,8 +91,20 @@ class CaptureUtmParameters
                 $request->query('utm_campaign')
             );
 
-        // Only capture if UTM params are present and session doesn't already have them (first-touch)
-        if (($isPaidPlacement || ! $request->session()->has('utm_params')) && $this->hasUtmParams($request)) {
+        // Only capture if UTM params are present and neither carrier already holds them
+        // (first-touch). The cookie counts as evidence for the same two reasons the referrer and
+        // landing-page blocks below spell out, and it is not optional here:
+        // seedSessionFromClientAttribution() deliberately does NOT seed the session while this
+        // cookie exists (so the cookie can win at the read sites), which means
+        // session()->has('utm_params') is GUARANTEED false in exactly the case the cookie is the
+        // sole carrier. Without the cookie check, a consented visitor whose 2-hour session had
+        // lapsed had their 30-day utm_source overwritten by whatever link they clicked next -
+        // while landing_page and referrer_url kept their day-one values, so the row that
+        // eventually reached users was internally inconsistent. It also let any plain
+        // ?utm_source= do what the $isPaidPlacement signed token exists to prevent.
+        $holdsUtmParams = $request->session()->has('utm_params') || $request->cookie('utm_params');
+
+        if (($isPaidPlacement || ! $holdsUtmParams) && $this->hasUtmParams($request)) {
             $utmParams = [
                 'utm_source' => self::sanitize($request->query('utm_source')),
                 'utm_medium' => self::sanitize($request->query('utm_medium')),

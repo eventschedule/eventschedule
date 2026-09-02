@@ -17,6 +17,17 @@ use Illuminate\Support\Facades\DB;
  * The expression reads nothing from updated_at, so re-running is a no-op, and an empty table
  * updates zero rows. created_at is required because GREATEST() returns NULL if any argument is
  * NULL, which would blank the column on a legacy row.
+ *
+ * view_count > 0 is what keeps this off the rows that were never damaged. The restamp came from
+ * exactly one statement - BlogPost::incrementViewCount(), whose only caller is BlogController's
+ * public-view branch - and that is the SAME statement that increments the counter. So a post at
+ * zero views was never touched by the bug and its updated_at is a real edit date; overwriting it
+ * with published_at would destroy the very signal this migration exists to protect, on the subset
+ * of rows that were already correct.
+ *
+ * It is not a perfect discriminator: a post that was viewed and then genuinely edited is still
+ * dragged back, because nothing recorded when the edit happened. That residual is unavoidable
+ * without an audit trail; the filter removes the part that is avoidable.
  */
 return new class extends Migration
 {
@@ -25,6 +36,7 @@ return new class extends Migration
         DB::table('blog_posts')
             ->where('is_published', true)
             ->whereNotNull('created_at')
+            ->where('view_count', '>', 0)
             ->update([
                 'updated_at' => DB::raw('GREATEST(COALESCE(published_at, created_at), created_at)'),
             ]);

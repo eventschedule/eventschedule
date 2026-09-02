@@ -237,6 +237,53 @@ class UtmConsentCookieTest extends TestCase
         $this->assertNull($this->cookie($response, 'utm_referrer_url'), 'first-touch referrer must survive');
     }
 
+    /**
+     * The same rule for utm_params, which is the one the other two exist to keep honest.
+     *
+     * seedSessionFromClientAttribution() deliberately does not seed the session while this cookie
+     * exists, so consulting only the session made the guard unreachable in exactly the case that
+     * matters: a lapsed session plus a live 30-day cookie. The campaign would then be rewritten by
+     * the next link the visitor clicked while landing_page and referrer_url kept their day-one
+     * values, producing an attribution row that disagreed with itself.
+     */
+    public function test_the_campaign_cookie_is_not_rewritten_on_a_later_page(): void
+    {
+        $this->flushSession();
+
+        $response = $this->withUnencryptedCookie('cookie_consent', 'granted')
+            ->withCookie('utm_params', json_encode(['utm_source' => 'newsletter', 'utm_medium' => 'email']))
+            ->get('/pricing?utm_source=facebook&utm_medium=cpc')
+            ->assertOk();
+
+        $this->assertNull($this->cookie($response, 'utm_params'), 'first-touch campaign must survive');
+    }
+
+    /**
+     * ...but a signed paid placement still overrides it. That override is the whole reason the
+     * condition is not a bare first-touch check, so pin it alongside.
+     */
+    public function test_a_signed_paid_placement_still_overrides_the_campaign_cookie(): void
+    {
+        $this->flushSession();
+
+        // utm_campaign carries the encoded id; the token is the HMAC over the raw one.
+        $campaignHash = \App\Utils\UrlUtils::encodeId(42);
+        $token = \App\Services\PromotionService::clickToken(42);
+
+        $response = $this->withUnencryptedCookie('cookie_consent', 'granted')
+            ->withCookie('utm_params', json_encode(['utm_source' => 'newsletter', 'utm_medium' => 'email']))
+            ->get('/pricing?utm_source=boost&utm_medium=network&utm_campaign='.$campaignHash.'&utm_token='.$token)
+            ->assertOk();
+
+        // Asserted through the session, as the sibling tests do: the cookie is encrypted on the
+        // way out, so its raw value is not readable from the response header.
+        $this->assertSame('boost', session('utm_params.utm_source'));
+        $this->assertNotNull(
+            $this->cookie($response, 'utm_params'),
+            'a signed placement must be able to claim the visitor',
+        );
+    }
+
     // -----------------------------------------------------------------
     // es_attribution: the browser-written fallback for edge-cached pages.
     // -----------------------------------------------------------------

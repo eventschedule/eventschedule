@@ -134,6 +134,17 @@ class CacheableMarketingResponse
 
         $response->headers->set('Cache-Control', self::CACHE_CONTROL);
 
+        // Deliberately NO `Vary`. A shared cache keys Vary: Cookie on the whole header value,
+        // and an eligible request may carry cookies that differ per visitor - the three 30-day
+        // utm_* cookies are encrypted, so identical plaintext yields different ciphertext for
+        // every visitor. Varying on that would give each of them a private cache entry and undo
+        // test_a_consented_visitor_is_cacheable_from_the_second_page, which exists precisely so
+        // accepting cookies does not opt a visitor out of the edge.
+        //
+        // HTTP cannot express "vary on WHETHER a session cookie is present", so keeping a
+        // signed-in visitor off the stored copy is the shared cache's job, not this response's.
+        // docs/CACHING.md states that requirement for any cache put in front of the app.
+
         return $response;
     }
 
