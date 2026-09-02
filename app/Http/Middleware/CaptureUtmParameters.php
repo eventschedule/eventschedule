@@ -45,6 +45,25 @@ class CaptureUtmParameters
             return $next($request);
         }
 
+        // The beacon POST and the docs search-index JSON are fetched BY a marketing page, so
+        // neither is a landing page or a referrer. Recording one as either would be wrong in
+        // the session and worse in a 30-day cookie, and a Set-Cookie on the JSON route's
+        // `public, max-age=3600` response would be handed to every visitor after it.
+        if (in_array($request->route()?->getName(), TrackMarketingVisit::NON_PAGE_ROUTES, true)) {
+            return $next($request);
+        }
+
+        // Whatever the browser recorded on the visitor's first marketing page comes first,
+        // because it happened first. Anonymous marketing HTML is served from the edge, so
+        // there is no server session on the pages that matter and the FIRST request with a
+        // real session is typically /sign_up itself - which used to record `sign_up` as the
+        // landing page and the same-domain hop as no referrer at all, then win every read
+        // site's `session ?? cookie ?? es_attribution` chain. Seeding here puts the cookie
+        // exactly where that session write used to go, so every consumer is covered without
+        // a fallback of its own: SocialAuthController (Google sign-up) and TicketController's
+        // two stub-account paths read the session and the consented cookies only.
+        $this->seedSessionFromClientAttribution($request);
+
         // Capture referral code (first-touch)
         if (! $request->session()->has('referral_code') && $request->has('ref')) {
             $refCode = preg_replace('/[^a-zA-Z0-9]/', '', $request->query('ref'));
@@ -140,6 +159,51 @@ class CaptureUtmParameters
         }
 
         return $this->forgetAttributionCookies($request, $response, $consented);
+    }
+
+    /**
+     * Copy the browser-written first-touch cookie into the session, before anything below
+     * can record a first touch of its own.
+     *
+     * Priority is unchanged and deliberate: the session wins if it already holds a key, and
+     * the consented 30-day cookies win over this one, because those carry an EARLIER first
+     * touch (up to 30 days back) while `es_attribution` is scoped to the browser session.
+     * That is the same order every read site applies; all this does is apply it soon enough
+     * that the first-touch capture below cannot overwrite the answer first.
+     */
+    private function seedSessionFromClientAttribution(Request $request): void
+    {
+        if (! $request->hasSession()) {
+            return;
+        }
+
+        // On a cacheable request the session is an in-memory store that is thrown away, so
+        // seeding it would achieve nothing except suppressing the consented 30-day cookie
+        // the visitor's first marketing page is meant to write.
+        if ($request->attributes->get(CacheableMarketingResponse::STATELESS_ATTRIBUTE, false)) {
+            return;
+        }
+
+        $client = self::clientAttribution($request);
+        $session = $request->session();
+
+        if (! empty($client['utm_params'])
+            && ! $session->has('utm_params')
+            && ! $request->cookie('utm_params')) {
+            $session->put('utm_params', $client['utm_params']);
+        }
+
+        foreach (['utm_referrer_url', 'utm_landing_page'] as $key) {
+            if ($client[$key] !== null && ! $session->has($key) && ! $request->cookie($key)) {
+                $session->put($key, $client[$key]);
+            }
+        }
+
+        // No 30-day twin for this one: referral codes were session-only, which is why a
+        // referred visitor who landed on a cached page credited nobody.
+        if ($client['referral_code'] !== null && ! $session->has('referral_code')) {
+            $session->put('referral_code', $client['referral_code']);
+        }
     }
 
     /**

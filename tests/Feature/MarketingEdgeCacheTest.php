@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Http\Middleware\CacheableMarketingResponse;
+use App\Http\Middleware\TrackMarketingVisit;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
@@ -14,8 +15,12 @@ use Tests\TestCase;
  * An anonymous marketing GET must come back with NO Set-Cookie at all and a public,
  * s-maxage'd Cache-Control, and everything that could differ per visitor must keep today's
  * `no-cache, private` plus its session. Cloudflare's Cache Rule bypasses on the presence of
- * a `laravel_session` cookie, so these two halves together are what stops a cached anonymous
- * page ever reaching a signed-in visitor.
+ * a `laravel_session` or a `remember_*` cookie, so these two halves together are what stops
+ * a cached anonymous page ever reaching a signed-in visitor.
+ *
+ * The two support routes a cached page calls (the visit beacon and the docs search index)
+ * are covered here too: they are never public, but they must never start a session either,
+ * or the first one a visitor triggers takes them off the edge for the rest of their visit.
  */
 class MarketingEdgeCacheTest extends TestCase
 {
@@ -43,8 +48,12 @@ class MarketingEdgeCacheTest extends TestCase
         $this->assertStringContainsString('public', $cacheControl);
         $this->assertStringContainsString('s-maxage=600', $cacheControl);
         $this->assertStringContainsString('max-age=0', $cacheControl);
-        $this->assertStringContainsString('stale-while-revalidate=3600', $cacheControl);
         $this->assertStringNotContainsString('private', $cacheControl);
+
+        // Firefox and Safari apply stale-while-revalidate in the BROWSER cache on an ordinary
+        // navigation, so with it a visitor who signs in keeps being painted the stored
+        // anonymous page. Serving stale belongs to Cloudflare's own setting, not the header.
+        $this->assertStringNotContainsString('stale-while-revalidate', $cacheControl);
     }
 
     /**
@@ -248,8 +257,85 @@ class MarketingEdgeCacheTest extends TestCase
     public function test_the_cache_control_header_is_the_documented_one(): void
     {
         $this->assertSame(
-            'public, max-age=0, s-maxage=600, stale-while-revalidate=3600',
+            'public, max-age=0, s-maxage=600',
             CacheableMarketingResponse::CACHE_CONTROL
+        );
+    }
+
+    /**
+     * The beacon defeated the whole scheme after exactly one page.
+     *
+     * It is a POST, so it was never eligible, so its 204 carried `Set-Cookie: laravel_session`
+     * and wrote a sessions row per anonymous visitor. The next navigation carried that cookie,
+     * Cloudflare's rule bypassed on it and the origin refused to mark the page public, in
+     * exchange for a session nothing ever reads.
+     */
+    public function test_the_beacon_response_is_stateless(): void
+    {
+        $response = $this->postJson('/marketing/visit', ['route' => 'marketing.pricing']);
+
+        $response->assertNoContent();
+        $this->assertSame([], $response->headers->all('set-cookie'), 'The beacon must not start a session.');
+
+        // The rejection path too: a 422 that hands out a session cookie costs just as much.
+        $rejected = $this->postJson('/marketing/visit', ['route' => 'marketing.no-such-page']);
+
+        $rejected->assertStatus(422);
+        $this->assertSame([], $rejected->headers->all('set-cookie'));
+
+        // ...and it is still private. Nothing about being stateless makes a beacon shareable.
+        $this->assertStringContainsString('private', $response->headers->get('Cache-Control'));
+    }
+
+    /**
+     * The other half: the docs search index is JSON fetched BY a cached page, and it used to
+     * answer with both framework cookies.
+     */
+    public function test_the_docs_search_index_is_stateless_and_keeps_its_own_cache_header(): void
+    {
+        $response = $this->get('/docs/search-index.json');
+
+        $response->assertOk();
+        $this->assertSame([], $response->headers->all('set-cookie'), 'The search index must not start a session.');
+
+        // Its controller sets an hour of shared caching; the 10-minute page header must not
+        // overwrite it, which is what keeping it in EXCLUDED_ROUTES buys. (Symfony reorders
+        // the directives, so this is asserted piecewise rather than as one string.)
+        $cacheControl = $response->headers->get('Cache-Control');
+        $this->assertStringContainsString('public', $cacheControl);
+        $this->assertStringContainsString('max-age=3600', $cacheControl);
+        $this->assertStringNotContainsString('s-maxage', $cacheControl);
+    }
+
+    /**
+     * Statelessness is for anonymous visitors only. A signed-in one already carries a session
+     * cookie (so there is nothing left to protect at the edge) and must keep their session:
+     * dropping it here would log them out on their own page-view beacon.
+     */
+    public function test_a_stateless_route_keeps_the_session_of_a_visitor_who_has_one(): void
+    {
+        // withCredentials(), or postJson() sends no cookies at all: the harness drops them
+        // from a JSON request unless credentials are asked for, which would make this pass
+        // for the wrong reason.
+        $response = $this->withCredentials()
+            ->withCookie(config('session.cookie'), 'whatever')
+            ->postJson('/marketing/visit', ['route' => 'marketing.pricing']);
+
+        $response->assertNoContent();
+        $this->assertCookieWasSet($response, config('session.cookie'));
+    }
+
+    /**
+     * Two lists, one meaning: a marketing.* route that is not a page. They are declared
+     * separately because they answer different questions (may it hold a session / is it a
+     * page view), and drift between them is exactly how the search-index JSON ended up
+     * counted as a docs page view while being excluded from the cache.
+     */
+    public function test_the_stateless_and_non_page_route_lists_agree(): void
+    {
+        $this->assertSame(
+            TrackMarketingVisit::NON_PAGE_ROUTES,
+            CacheableMarketingResponse::STATELESS_ROUTES
         );
     }
 

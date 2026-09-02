@@ -366,7 +366,11 @@
                         a.href = document.referrer;
                         var base = function (h) { return h.toLowerCase().split('.').slice(-2).join('.'); };
                         if (a.hostname && base(a.hostname) !== base(location.hostname)) {
-                            data.referrer = document.referrer.slice(0, 2048);
+                            // 512, not 2048: encodeURIComponent roughly triples the URL
+                            // characters in a referrer, so an untrimmed one on its own could
+                            // push the whole cookie past the limit below and lose the landing
+                            // page and the utm_* values with it.
+                            data.referrer = document.referrer.slice(0, 512);
                         }
                     }
 
@@ -379,6 +383,12 @@
                     });
 
                     var value = encodeURIComponent(JSON.stringify(data));
+                    if (value.length > 2048 && data.referrer) {
+                        // The referrer is the only unbounded field left, and the least
+                        // valuable: drop it rather than the landing page and the campaign.
+                        delete data.referrer;
+                        value = encodeURIComponent(JSON.stringify(data));
+                    }
                     if (value.length > 2048) {
                         return;
                     }

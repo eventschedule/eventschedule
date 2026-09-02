@@ -387,6 +387,191 @@ class UtmConsentCookieTest extends TestCase
         ), 'The server must never write this cookie itself.');
     }
 
+    // -----------------------------------------------------------------
+    // Seeding the session from es_attribution, before anything can record
+    // a first touch of its own (CaptureUtmParameters::handle).
+    // -----------------------------------------------------------------
+
+    /**
+     * The whole point of the cookie, from the read sites' side.
+     *
+     * Anonymous marketing pages are served from the edge, so the FIRST request with a real
+     * session is /sign_up itself. Its session had no landing page, so the first-touch capture
+     * stored `sign_up` - and `sign_up` then beat the cookie at every `session ?? cookie ??
+     * es_attribution` read site, recording the sign-up form as the page that won the visitor.
+     */
+    public function test_the_client_cookie_beats_the_sign_up_page_as_the_landing_page(): void
+    {
+        config(['app.hosted' => true]);
+
+        $this->withUnencryptedCookie('es_attribution', $this->clientAttribution([
+            'landing' => 'for-musicians',
+            'referrer' => 'https://news.example.org/post',
+            'utm_source' => 'newsletter',
+            'ref' => 'REF12345',
+        ]));
+
+        // The visitor arrives at the form the way a real one does, from a cached page.
+        $this->get('/sign_up')->assertOk();
+
+        $this->post('/sign_up', [
+            'name' => 'Cached Visitor',
+            'email' => 'landed@gmail.com',
+            'password' => 'password',
+        ]);
+
+        $user = \App\Models\User::where('email', 'landed@gmail.com')->firstOrFail();
+
+        $this->assertSame('for-musicians', $user->landing_page);
+        $this->assertSame('https://news.example.org/post', $user->referrer_url);
+        $this->assertSame('newsletter', $user->utm_source);
+    }
+
+    /**
+     * Seeding covers the read sites that have NO cookie fallback of their own:
+     * SocialAuthController::handleGoogleCallback() and TicketController's two stub-account
+     * paths all read `session(...) ?? request()->cookie(...)` and stop there. Asserting the
+     * session directly is what pins that, rather than each of their own flows.
+     */
+    public function test_the_session_is_seeded_for_the_read_sites_that_only_look_at_it(): void
+    {
+        $this->withUnencryptedCookie('es_attribution', $this->clientAttribution([
+            'landing' => 'for-venues',
+            'referrer' => 'https://blog.example.org/why',
+            'utm_source' => 'newsletter',
+            'utm_medium' => 'email',
+            'ref' => 'REF12345',
+        ]))->get('/sign_up')->assertOk();
+
+        $this->assertSame('for-venues', session('utm_landing_page'));
+        $this->assertSame('https://blog.example.org/why', session('utm_referrer_url'));
+        $this->assertSame('newsletter', session('utm_params.utm_source'));
+        $this->assertSame('email', session('utm_params.utm_medium'));
+        $this->assertSame('REF12345', session('referral_code'));
+    }
+
+    /**
+     * ...and the Google sign-up path end to end, because it is the one account-creation flow
+     * with no clientAttribution() fallback at all. Before the seeding it recorded
+     * `auth/google/callback` as the landing page of every visitor who arrived from the edge.
+     */
+    public function test_google_sign_up_is_attributed_from_the_client_cookie(): void
+    {
+        config(['app.hosted' => true]);
+
+        $googleUser = (new \Laravel\Socialite\Two\User)->map([
+            'id' => 'google-oauth-id-1',
+            'name' => 'Google Visitor',
+            'email' => 'google-visitor@gmail.com',
+            'avatar' => null,
+        ]);
+        $googleUser->user = [];
+
+        $provider = \Mockery::mock(\Laravel\Socialite\Two\GoogleProvider::class);
+        $provider->shouldReceive('redirectUrl')->andReturnSelf();
+        $provider->shouldReceive('user')->andReturn($googleUser);
+        \Laravel\Socialite\Facades\Socialite::shouldReceive('driver')->with('google')->andReturn($provider);
+
+        $referrer = \App\Models\User::factory()->create(['referral_code' => 'REF12345']);
+
+        $this->withUnencryptedCookie('es_attribution', $this->clientAttribution([
+            'landing' => 'for-musicians',
+            'referrer' => 'https://news.example.org/post',
+            'utm_source' => 'newsletter',
+            'ref' => 'REF12345',
+        ]))->get('/auth/google/callback');
+
+        $user = \App\Models\User::where('email', 'google-visitor@gmail.com')->firstOrFail();
+
+        $this->assertSame('for-musicians', $user->landing_page);
+        $this->assertSame('https://news.example.org/post', $user->referrer_url);
+        $this->assertSame('newsletter', $user->utm_source);
+        $this->assertSame($referrer->id, $user->referred_by_user_id);
+    }
+
+    /**
+     * Priority is unchanged: the session still wins, because a visitor who was served a
+     * dynamic page recorded their first touch there.
+     */
+    public function test_seeding_never_overwrites_a_session_the_visitor_already_has(): void
+    {
+        $this->withUnencryptedCookie('es_attribution', $this->clientAttribution([
+            'landing' => 'stale-page',
+            'referrer' => 'https://stale.example.org/',
+        ]))->withSession([
+            'utm_landing_page' => 'live-page',
+        ])->get('/sign_up')->assertOk();
+
+        $this->assertSame('live-page', session('utm_landing_page'));
+
+        // Only the key that was already there is protected; the rest is still seeded.
+        $this->assertSame('https://stale.example.org/', session('utm_referrer_url'));
+    }
+
+    /**
+     * And the consented 30-day cookies still win over it, because they carry an EARLIER first
+     * touch (up to 30 days back) while es_attribution is scoped to the browser session. Same
+     * order every read site applies; seeding just applies it sooner.
+     */
+    public function test_seeding_defers_to_the_consented_thirty_day_cookies(): void
+    {
+        $this->withUnencryptedCookie('cookie_consent', 'granted')
+            ->withUnencryptedCookie('es_attribution', $this->clientAttribution([
+                'landing' => 'this-visit',
+                'referrer' => 'https://this-visit.example.org/',
+            ]))
+            ->withCookie('utm_landing_page', 'three-weeks-ago')
+            ->withCookie('utm_referrer_url', 'https://three-weeks-ago.example.org/')
+            ->get('/sign_up')
+            ->assertOk();
+
+        $this->assertNull(session('utm_landing_page'), 'the 30-day cookie is the answer, so nothing is seeded over it');
+        $this->assertNull(session('utm_referrer_url'));
+    }
+
+    /**
+     * Not on an edge-cacheable page: that session is an in-memory store that is thrown away,
+     * and seeding it would suppress the consented 30-day cookie the visitor's first marketing
+     * page is meant to write. The guard is the request attribute
+     * CacheableMarketingResponse sets, not the driver name - phpunit.xml runs the whole suite
+     * on the `array` driver, so a driver check would be true everywhere.
+     */
+    public function test_a_cacheable_marketing_page_is_not_seeded(): void
+    {
+        config(['app.url' => 'https://eventschedule.test']);
+
+        $response = $this->withUnencryptedCookie('cookie_consent', 'granted')
+            ->withUnencryptedCookie('es_attribution', $this->clientAttribution(['landing' => 'for-musicians']))
+            ->get('/faq')
+            ->assertOk();
+
+        $this->assertNotNull($this->cookie($response, 'utm_landing_page'), 'the consented cookie must still be written');
+    }
+
+    /**
+     * The beacon and the docs search index are fetched BY a marketing page, so neither is a
+     * landing page. Recording one would be wrong in the session and worse in a 30-day cookie:
+     * the JSON route answers `public, max-age=3600`, so a Set-Cookie on it would be handed to
+     * every visitor after the first.
+     */
+    public function test_the_non_page_routes_never_record_a_landing_page(): void
+    {
+        config(['app.url' => 'https://eventschedule.test']);
+
+        $index = $this->withUnencryptedCookie('cookie_consent', 'granted')->get('/docs/search-index.json');
+
+        $index->assertOk();
+        $this->assertNull($this->cookie($index, 'utm_landing_page'));
+        $this->assertNull(session('utm_landing_page'));
+
+        $beacon = $this->withUnencryptedCookie('cookie_consent', 'granted')
+            ->postJson('/marketing/visit', ['route' => 'marketing.pricing']);
+
+        $beacon->assertNoContent();
+        $this->assertNull($this->cookie($beacon, 'utm_landing_page'));
+        $this->assertNull(session('utm_landing_page'));
+    }
+
     private function clientAttribution(array $data): string
     {
         return json_encode($data);

@@ -22,8 +22,9 @@ use Symfony\Component\HttpFoundation\Response;
  * layouts/marketing.blade.php therefore ships a sendBeacon() to marketing.visit, which calls
  * record() below with the same filters and buckets. The layout flags the request when it
  * renders that beacon and this middleware then stands down, so the two can never both count
- * the same view. Marketing responses that carry no beacon (the docs search-index JSON, or
- * any future marketing.* route that does not use the layout) are still counted here.
+ * the same view. A marketing response that carries no beacon (a future marketing.* route
+ * that does not use the layout, or a dynamically served page whose beacon was blocked) is
+ * still counted here. NON_PAGE_ROUTES is counted by neither.
  *
  * Known limit, inherited from moving to a beacon: a visitor with JavaScript disabled is not
  * counted. Every such visitor was already inside the bot/suspicious-request filters' margin
@@ -35,6 +36,26 @@ class TrackMarketingVisit
      * Set on the request by layouts/marketing.blade.php when it renders the visit beacon.
      */
     public const BEACON_ATTRIBUTE = 'marketing_visit_beacon';
+
+    /**
+     * The marketing.* routes that are not pages, and so are not page views.
+     *
+     * Both are fetched BY a marketing page rather than being one: the beacon this class
+     * feeds, and the docs search widget's index, which a reader pulls on first focus while
+     * already counted for the docs page they are reading. Counting the index made one docs
+     * reader who used the search look like two.
+     *
+     * Shared by record() and isCountableRouteName(), which is also what the layout asks
+     * before it ships a beacon at all - so no beacon is ever rendered for either, and a
+     * hand-built one naming either is refused.
+     *
+     * The same two routes are CacheableMarketingResponse::STATELESS_ROUTES, for the same
+     * underlying reason; MarketingEdgeCacheTest pins the two lists together.
+     */
+    public const NON_PAGE_ROUTES = [
+        'marketing.visit',
+        'marketing.docs.search_index',
+    ];
 
     public function handle(Request $request, Closure $next): Response
     {
@@ -76,6 +97,7 @@ class TrackMarketingVisit
             || auth()->check()
             || $routeName === null
             || ! Str::startsWith($routeName, 'marketing.')
+            || in_array($routeName, self::NON_PAGE_ROUTES, true)
             || PageView::isBot($request->userAgent())
             || PageView::isSuspiciousRequest($request, $expectDocumentAccept)) {
             return;
@@ -139,6 +161,10 @@ class TrackMarketingVisit
     public static function isCountableRouteName(?string $routeName): bool
     {
         if ($routeName === null || $routeName === '' || ! Str::startsWith($routeName, 'marketing.')) {
+            return false;
+        }
+
+        if (in_array($routeName, self::NON_PAGE_ROUTES, true)) {
             return false;
         }
 

@@ -65,13 +65,18 @@ cached.
 When all of it holds, the response is marked with:
 
 ```
-Cache-Control: public, max-age=0, s-maxage=600, stale-while-revalidate=3600
+Cache-Control: public, max-age=0, s-maxage=600
 ```
 
 `max-age=0` means browsers revalidate on every navigation, so a visitor never sees a stale
-page from their own cache. `s-maxage=600` is the shared-cache (edge) TTL, and
-`stale-while-revalidate=3600` lets the edge serve the stored copy while it refreshes in the
-background.
+page from their own cache. `s-maxage=600` is the shared-cache (edge) TTL.
+
+There is deliberately no `stale-while-revalidate`. Firefox and Safari honour it in the
+**browser** cache on an ordinary navigation, which would let a visitor who has just signed in
+keep being painted the stored anonymous copy - guest header, guest-only scripts - for as long
+as the directive lasted. Serving stale while revalidating is a shared-cache behaviour, so get
+it from Cloudflare's own **Caching -> Configuration -> Serve stale content** setting, where no
+browser can act on it.
 
 Why the cookies have to be removed at all: in this Laravel version
 `StartSession::sessionIsPersistent()` only checks that the driver is non-null, so the `array`
@@ -79,6 +84,27 @@ driver still queues `laravel_session`, and `ValidateCsrfToken` queues `XSRF-TOKE
 response regardless.
 
 `tests/Feature/MarketingEdgeCacheTest.php` pins the whole rule.
+
+## The two stateless support routes
+
+`CacheableMarketingResponse::STATELESS_ROUTES` - `marketing.visit` (the page-view beacon) and
+`marketing.docs.search_index` (the docs search index) - get that same `array` driver and the
+same cookie strip, on any method, whenever the request is anonymous (no session cookie, no
+`remember_*` cookie, no `Authorization` header) and arrived on `_base_domain()`. Neither is a
+page and neither holds anything per visitor.
+
+Without this, edge caching stopped working after ONE page. The beacon is a POST, so it was
+ineligible, so its 204 carried `Set-Cookie: laravel_session` and wrote a `sessions` row per
+anonymous visitor. The next navigation carried that cookie, the Cloudflare rule bypassed on
+it and the origin refused to mark the response public - in exchange for a session nothing
+ever read. `GET /docs/search-index.json` did the same with `XSRF-TOKEN` as well.
+
+Neither response is ever marked public by this middleware: the beacon stays `no-cache,
+private`, and the search index keeps the `public, max-age=3600` its own controller sets (it
+is in `EXCLUDED_ROUTES` precisely so the 10-minute page header cannot overwrite the hour).
+`CaptureUtmParameters` also stands down on both, so a `/docs/search-index.json` fetch can
+never be recorded as a landing page, and `TrackMarketingVisit::NON_PAGE_ROUTES` (the same two
+routes) keeps it out of the page-view counters.
 
 ## Cloudflare Cache Rule (operator action, outside the repo)
 
@@ -95,7 +121,8 @@ Rules -> Cache Rules -> Create rule.
   and not starts_with(http.request.uri.path, "/sitemap")
   and not starts_with(http.request.uri.path, "/login")
   and not starts_with(http.request.uri.path, "/sign_up")
-  and not (http.cookie contains "laravel_session"))
+  and not (http.cookie contains "laravel_session")
+  and not (http.cookie contains "remember_"))
 ```
 
 **Then:**
@@ -105,9 +132,20 @@ Rules -> Cache Rules -> Create rule.
   makes `s-maxage=600` the edge TTL rather than a fixed number in the dashboard)
 - Browser TTL: **Respect origin TTL**
 
-The `laravel_session` clause is the important one: it is what keeps a signed-in visitor on
-dynamic pages. Combined with the origin rule (a request that carries a session cookie is
-never marked public), a cached anonymous copy can never be handed to a signed-in user.
+The two cookie clauses are the important ones: they are what keeps a signed-in visitor on
+dynamic pages. Combined with the origin rule (a request carrying either cookie is never
+marked public), a cached anonymous copy can never be handed to a signed-in user.
+
+Both clauses are needed. A remembered visitor whose 2-hour session has lapsed sends a
+`remember_*` cookie and no `laravel_session`, and the login form ships with **Remember me
+checked by default**, so this is the common case rather than the exotic one. On the
+`laravel_session` clause alone the origin would (correctly) refuse to mark their page public
+while the edge would (incorrectly) hand them a stored anonymous copy of it.
+
+`laravel_session` is `config('session.cookie')`, which is `SESSION_COOKIE` if it is set and
+otherwise the `APP_NAME` slug plus `_session`. With the shipped `APP_NAME=Laravel` that is
+`laravel_session`; change either and this expression has to change with it, or the bypass
+silently stops matching and every signed-in visitor is served the anonymous copy.
 
 The path exclusions are belt and braces. The origin already refuses to mark anything but a
 `marketing.*` page public, and `/sitemap*` and the manifest already opt out of the `web`
@@ -137,8 +175,8 @@ the HTTP (port 80) scheme included, which is what removes the extra hop.
 
 ## Deploys
 
-A cached copy survives up to 10 minutes past a deploy, and up to an hour more if the edge
-chooses to serve stale while revalidating. That is fine for content changes and wrong for
+A cached copy survives up to 10 minutes past a deploy, plus however long Cloudflare's
+serve-stale setting allows. That is fine for content changes and wrong for
 anything urgent, so for an urgent marketing fix purge the zone (Caching -> Configuration ->
 Purge Everything, or purge the affected URLs) after the deploy finishes. Automating a zone
 purge from the release flow is the obvious follow-up and is not wired up.
@@ -164,8 +202,9 @@ the `/admin/users` onboarding funnel reads.
 - Counting itself is one implementation, `TrackMarketingVisit::record()`, shared by the
   beacon and the middleware. The layout flags the request when it renders the beacon and
   `TrackMarketingVisit` then stands down, so exactly one of the two counts any given view.
-  A marketing response with no beacon (the docs search-index JSON) is still counted by the
-  middleware.
+  A marketing response with no beacon is still counted by the middleware; the two routes in
+  `TrackMarketingVisit::NON_PAGE_ROUTES` are counted by neither, so a reader who opens the
+  docs search no longer counts as a second docs view.
 - One filter is relaxed for the beacon: `PageView::isSuspiciousRequest()` treats a wildcard
   `Accept` header as a bot signal, which is correct for a document navigation and impossible
   for a beacon (`sendBeacon` takes no headers and both it and `fetch` default to `*/*`). The
@@ -188,8 +227,20 @@ and are unchanged.
 
 `CaptureUtmParameters::clientAttribution()` reads it back defensively (malformed JSON
 ignored, unknown keys dropped, every value through the same sanitiser and length caps), and
-it is the **last** fallback at every read site, after the session and after the consented
-cookies:
+it is the **last** fallback: after the session and after the consented cookies.
+
+`CaptureUtmParameters::handle()` applies that order once, for everyone, by seeding the
+session from the cookie on the first request that has a real session - normally `/sign_up`
+itself - before its own first-touch capture runs. Without that, the session had no landing
+page (the marketing pages that had one were served from the edge), so the capture stored
+`sign_up`, and `sign_up` then beat the cookie at every read site. Seeding puts the cookie
+exactly where that session write used to go, which covers the sites that read the session
+and the consented cookies only:
+
+- `SocialAuthController::handleGoogleCallback()` (Google sign-up)
+- `TicketController`'s two stub-account paths
+
+Two sites additionally consult `clientAttribution()` themselves, as belt and braces:
 
 - `RegisteredUserController::store()` (utm, referrer, landing page and `referral_code`)
 - `EventController`'s two guest-submit account-creation paths
@@ -209,10 +260,13 @@ reused against a page an attacker can write into. The reasoning is repeated in
 ## What to watch after deploy
 
 - `curl -sI https://eventschedule.com/pricing` - expect `cache-control: public, max-age=0,
-  s-maxage=600, stale-while-revalidate=3600`, no `set-cookie`, and `cf-cache-status: MISS`
-  then `HIT` on the second call.
+  s-maxage=600`, no `set-cookie`, and `cf-cache-status: MISS` then `HIT` on the second call.
 - `curl -sI 'https://eventschedule.com/pricing?lang=fr'` - expect `no-cache, private` and a
   `set-cookie`.
+- `curl -sI -X POST https://eventschedule.com/marketing/visit` and
+  `curl -sI https://eventschedule.com/docs/search-index.json` - expect no `set-cookie` on
+  either. A `laravel_session` on either one takes the visitor off the edge for the rest of
+  their session.
 - `/admin/users` funnel: "Visited site", page views, docs and pricing buckets should stay in
   the same range as the week before. A sharp drop means the beacon is not firing (check the
   browser console for a CSP violation and the `marketing.visit` route for 419s or 429s); a

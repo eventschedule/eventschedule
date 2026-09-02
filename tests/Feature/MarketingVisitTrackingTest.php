@@ -219,11 +219,55 @@ class MarketingVisitTrackingTest extends TestCase
 
         $this->assertNull($this->stat());
 
-        // ...and still counts a marketing response that carries no beacon (the docs
-        // search-index JSON, or any future marketing.* route that skips the layout).
+        // ...and still counts a marketing response that carries no beacon (any future
+        // marketing.* route that skips the layout, or a page whose beacon was blocked).
         $this->track();
 
         $this->assertSame(1, $this->pageViews());
+    }
+
+    /**
+     * The docs search index is JSON the search widget pulls on first focus, from a docs page
+     * that has already been counted. Counting it too made one reader who used the search look
+     * like two, and pushed docs_visitors towards the visitors total it is measured against.
+     *
+     * One list drives both ends: isCountableRouteName() is what the layout asks before it
+     * ships a beacon at all, so neither route can be beaconed, and record() refuses them even
+     * when it is the origin doing the counting.
+     */
+    public function test_the_non_page_marketing_routes_are_not_page_views(): void
+    {
+        config(['app.is_nexus' => true]);
+
+        foreach (TrackMarketingVisit::NON_PAGE_ROUTES as $routeName) {
+            $this->assertFalse(
+                TrackMarketingVisit::isCountableRouteName($routeName),
+                $routeName.' is not a page, so no beacon may report it.'
+            );
+
+            $this->track(routeName: $routeName);
+        }
+
+        $this->assertNull($this->stat(), 'A non-page marketing route must not move any counter.');
+
+        // Not vacuous: a real docs page on the same IP+UA still counts, in both buckets.
+        $this->track(routeName: 'marketing.docs.installation');
+
+        $this->assertSame(1, $this->pageViews());
+        $this->assertSame(1, $this->docsPageViews());
+    }
+
+    /**
+     * The same thing through a real request, since the middleware is what runs on it: the
+     * search index answers without touching the funnel counters.
+     */
+    public function test_fetching_the_docs_search_index_counts_nothing(): void
+    {
+        config(['app.url' => 'https://eventschedule.test']);
+
+        $this->withHeaders($this->browserHeaders())->get('/docs/search-index.json')->assertOk();
+
+        $this->assertNull($this->stat());
     }
 
     public function test_the_beacon_counts_a_visit(): void
@@ -274,7 +318,7 @@ class MarketingVisitTrackingTest extends TestCase
 
     public function test_the_beacon_rejects_route_names_it_does_not_recognise(): void
     {
-        foreach (['', 'marketing.no-such-page', 'viewGuest', 'marketing.visit', 'admin.users'] as $routeName) {
+        foreach (['', 'marketing.no-such-page', 'viewGuest', 'marketing.visit', 'marketing.docs.search_index', 'admin.users'] as $routeName) {
             $this->beacon($routeName)->assertStatus(422);
         }
 
