@@ -79,6 +79,13 @@ return [
     'audience_announcement_min_hours' => (int) (env('AUDIENCE_ANNOUNCEMENT_MIN_HOURS') ?: 72),
     'audience_announcement_batch' => (int) (env('AUDIENCE_ANNOUNCEMENT_BATCH') ?: 100),
 
+    // The ceiling that actually bounds outbound mail. audience_announcement_batch counts
+    // SCHEDULES, so one schedule with a large confirmed audience is a single tick against it and
+    // its whole list against the platform's sending reputation. A run stops once it has queued
+    // this many messages; the rest of the schedules keep their watermark and go out next run.
+    // `?:` for the same reason as its neighbours: an empty value in .env is (int) '' === 0.
+    'audience_announcement_recipient_batch' => (int) (env('AUDIENCE_ANNOUNCEMENT_RECIPIENT_BATCH') ?: 2000),
+
     // How many talent/venue schedules one curator may pull events from, and how many
     // event links a single reconcile pass may write. Hitting the batch ceiling is logged
     // and the remainder is picked up by the next run rather than dropped.

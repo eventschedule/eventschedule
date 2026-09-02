@@ -308,11 +308,17 @@ class AppController extends Controller
                     \Log::error('Scheduled command app:send-feedback-requests failed: '.$e->getMessage());
                     report($e);
                 }
-                // app:send-event-announcements is deliberately NOT called here, and not in
-                // routes/console.php either - the two rails stay in sync, and here that means
-                // absent from both. It mails a schedule's whole confirmed audience and is not yet
-                // safe unattended; it is hand-run until that is fixed. See the note in
-                // routes/console.php and the class docblock.
+                // Keep in sync with routes/console.php. Not gated on config('app.hosted'): this
+                // keeps a promise made to a guest, and on selfhost the subscribe panel is the only
+                // capture surface a signed-out visitor sees. The per-schedule cadence floor
+                // (usage.audience_announcement_min_hours) is what bounds how often anyone is
+                // mailed; this tier only decides how soon a same-day publish is noticed.
+                try {
+                    \Artisan::call('app:send-event-announcements', ['--apply' => true]);
+                } catch (\Throwable $e) {
+                    \Log::error('Scheduled command app:send-event-announcements failed: '.$e->getMessage());
+                    report($e);
+                }
                 try {
                     \Artisan::call('app:send-carpool-reminders');
                 } catch (\Throwable $e) {

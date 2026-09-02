@@ -88,7 +88,9 @@ class CronRailSyncTest extends TestCase
      * back to a schedule is a deliberate edit to this test, not an accident.
      */
     private const UNSCHEDULED = [
-        'app:send-event-announcements',
+        // app:send-event-announcements came OFF this list once the seven hazards in its docblock
+        // were closed; it is now on both rails, hourly, and the parity check above covers it like
+        // any other entry.
         'app:send-activation-nudges',
     ];
 

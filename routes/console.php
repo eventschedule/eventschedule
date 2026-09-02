@@ -138,16 +138,21 @@ Schedule::call(function () {
     Artisan::call('app:send-appointment-reminders');
 })->hourly()->name('send-appointment-reminders')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
-// app:send-event-announcements is deliberately NOT scheduled, here or in
-// AppController::translateData(). It mails a schedule's whole confirmed audience, and it is not
-// yet safe to run unattended: the batch ceiling counts schedules rather than recipients, the
-// last_announced_at watermark is stamped AFTER the dispatch loop with no try/catch around it, and
-// the two rails hold different mutexes with no atomic claim between them - the same hazard
-// SendActivationNudges documents at its own claim. Any one of those can put duplicated or
-// unbounded mail on the shared sending reputation, and none of it can be recalled.
+// Keep in sync with AppController::translateData(). Deliberately NOT gated on config('app.hosted'):
+// this keeps a promise made to a GUEST, and on selfhost the subscribe panel is the only capture
+// surface a signed-out visitor ever sees, so selfhost is where an unkept promise is most visible.
 //
-// Run it by hand - no flag prints a dry run, --apply sends - and put it back on a schedule once
-// those are closed and a real pass has been read. See the class docblock for the full list.
+// Hourly, but a schedule cannot be announced to more often than
+// usage.audience_announcement_min_hours (72 by default) - the cadence floor is what makes
+// subscription_confirm_cadence ("at most one email every few days") true, not this frequency.
+// Hourly is what makes a same-day publish reach its audience the same day.
+//
+// Was hand-run only until the seven hazards in the command's docblock were closed; it claims each
+// schedule's window with a conditional UPDATE before sending, so running on both rails at once
+// cannot double-send.
+Schedule::call(function () {
+    Artisan::call('app:send-event-announcements', ['--apply' => true]);
+})->hourly()->name('send-event-announcements')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 // withoutOverlapping() is not decoration here: this command initiates card charges, so two
 // concurrent runs would attempt the same installment. The Stripe idempotency key is the second

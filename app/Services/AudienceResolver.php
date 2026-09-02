@@ -25,6 +25,9 @@ use Illuminate\Support\Collection;
  */
 class AudienceResolver
 {
+    /** @var Collection<int, string>|null */
+    private ?Collection $platformSuppressed = null;
+
     /**
      * Addresses this schedule must not mail, lowercased.
      *
@@ -37,11 +40,29 @@ class AudienceResolver
             ->pluck('email')
             ->map(fn ($email) => strtolower($email));
 
-        $platformWide = User::where('is_subscribed', false)
+        return array_flip($perSchedule->merge($this->platformSuppressedEmails())->all());
+    }
+
+    /**
+     * The platform-wide users.is_subscribed = false opt-out, memoized for the life of this
+     * resolver.
+     *
+     * users.is_subscribed carries no index, so this is a full scan of the users table. It is
+     * per-PLATFORM rather than per-schedule, but it used to sit inside suppressedEmails() and so
+     * ran once per role inside SendEventAnnouncements' loop - a whole-table scan per schedule, for
+     * an answer that cannot change between them.
+     *
+     * An instance property, not a static: a static would survive RefreshDatabase between tests and
+     * hand the second test the first one's opt-out list. Callers that want a fresh read take a
+     * fresh resolver, which is what the container hands every command and request anyway.
+     *
+     * @return Collection<int, string>
+     */
+    private function platformSuppressedEmails(): Collection
+    {
+        return $this->platformSuppressed ??= User::where('is_subscribed', false)
             ->pluck('email')
             ->map(fn ($email) => strtolower($email));
-
-        return array_flip($perSchedule->merge($platformWide)->all());
     }
 
     /**

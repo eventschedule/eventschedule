@@ -8,6 +8,16 @@ class NoFakeEmail implements Rule
 {
     public function passes($attribute, $value)
     {
+        // A query parameter or form field arrives as an array for `email[]=x`, and strpos() below
+        // is a TypeError against that - an unauthenticated 500 on every endpoint carrying this
+        // rule, which is 13 of them including registration, the API register, checkout and guest
+        // submit. Rejecting rather than abstaining: a non-string is definitionally not a permanent
+        // address, and this must not depend on a sibling `email` rule being present to catch it.
+        // Same class as the is_valid_language_code() signature, which takes mixed for this reason.
+        if (! is_string($value)) {
+            return false;
+        }
+
         if (strpos($value, '@example.com') !== false) {
             return false;
         }

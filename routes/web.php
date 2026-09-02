@@ -303,7 +303,7 @@ Route::post('/clear-pending-request', [EventController::class, 'clearPendingRequ
 Route::get('/nl/o/{token}', [NewsletterTrackingController::class, 'trackOpen'])->name('newsletter.track_open')->middleware('throttle:60,1');
 Route::get('/nl/c/{token}/{encodedUrl}', [NewsletterTrackingController::class, 'trackClick'])->name('newsletter.track_click')->where('encodedUrl', '.*')->middleware('throttle:60,1');
 Route::get('/nl/u/{token}', [NewsletterTrackingController::class, 'showUnsubscribe'])->name('newsletter.show_unsubscribe');
-Route::post('/nl/u/{token}', [NewsletterTrackingController::class, 'unsubscribe'])->name('newsletter.unsubscribe')->middleware('throttle:2,2');
+Route::post('/nl/u/{token}', [NewsletterTrackingController::class, 'unsubscribe'])->name('newsletter.unsubscribe')->middleware('throttle:newsletter_unsubscribe');
 
 // Audience subscription confirm / unsubscribe (public, no auth). Top level for the same reason as
 // the /nl/* block above. 'sub' is reserved in Role::cleanSubdomain() so no schedule can shadow it.
@@ -311,9 +311,14 @@ Route::post('/nl/u/{token}', [NewsletterTrackingController::class, 'unsubscribe'
 // throttled route at this level, including /nl/u/* - so unsubscribing from a newsletter and then
 // from an audience subscription inside two minutes would return 429, and a 429 on an unsubscribe
 // link is exactly what produces a spam complaint.
-Route::get('/sub/c/{token}', [RoleSubscriberController::class, 'confirm'])->name('subscriber.confirm')->middleware('throttle:10,1,audience_confirm');
+// Confirm is a GET page plus a POST that mutates, mirroring the /sub/u/* pair below. A GET that
+// confirmed was fetched by corporate mail gateways (Safe Links, Proofpoint) before the recipient
+// saw it, which both completed the subscription and deleted their shared newsletter suppression
+// row. See RoleSubscriberController::showConfirm().
+Route::get('/sub/c/{token}', [RoleSubscriberController::class, 'showConfirm'])->name('subscriber.show_confirm')->middleware('throttle:10,1,audience_confirm');
+Route::post('/sub/c/{token}', [RoleSubscriberController::class, 'confirm'])->name('subscriber.confirm')->middleware('throttle:10,1,audience_confirm');
 Route::get('/sub/u/{token}', [RoleSubscriberController::class, 'showUnsubscribe'])->name('subscriber.show_unsubscribe');
-Route::post('/sub/u/{token}', [RoleSubscriberController::class, 'unsubscribe'])->name('subscriber.unsubscribe')->middleware('throttle:6,2,audience_unsubscribe');
+Route::post('/sub/u/{token}', [RoleSubscriberController::class, 'unsubscribe'])->name('subscriber.unsubscribe')->middleware('throttle:audience_unsubscribe');
 
 // Schedule ownership handover, recipient side (discussion #119).
 //

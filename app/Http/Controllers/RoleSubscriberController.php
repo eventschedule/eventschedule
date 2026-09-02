@@ -34,6 +34,22 @@ class RoleSubscriberController extends Controller
      */
     private const PER_EMAIL_HOURLY_LIMIT = 5;
 
+    /**
+     * How many confirmation emails one schedule may generate per day, from all addresses.
+     *
+     * The per-email limit above keys on the literal address, so subaddressing walks straight past
+     * it: victim+1@, victim+2@ ... each get their own bucket AND their own row (the unique index is
+     * (role_id, email)), while every message lands in one inbox. Canonicalising addresses is not
+     * the fix - plus-tags are meaningful at some providers and dots are only special at Gmail, so
+     * folding them would silently merge distinct people.
+     *
+     * A ceiling on the SCHEDULE is the lever that actually bounds it: an attacker can still flood,
+     * but only until the schedule's daily budget is spent, and the budget is per schedule so one
+     * target cannot exhaust another's. Sized well above real use - a schedule taking 500 genuine
+     * new subscribers in a day is doing extremely well - so this is a backstop, not a quota.
+     */
+    private const PER_ROLE_DAILY_LIMIT = 500;
+
     public function store(Request $request, $subdomain)
     {
         // Honeypot first, before validation, so a bot learns nothing from field-level errors.
@@ -76,7 +92,10 @@ class RoleSubscriberController extends Controller
         // that the address exists, and the point of the limit is to bound outbound mail, not to
         // tell the caller anything.
         $rateKey = 'audience-join:'.sha1($email);
-        if (RateLimiter::tooManyAttempts($rateKey, self::PER_EMAIL_HOURLY_LIMIT)) {
+        $roleKey = 'audience-join-role:'.$role->id;
+
+        if (RateLimiter::tooManyAttempts($rateKey, self::PER_EMAIL_HOURLY_LIMIT)
+            || RateLimiter::tooManyAttempts($roleKey, self::PER_ROLE_DAILY_LIMIT)) {
             return $this->respond($request, __('messages.subscription_check_your_email'), true);
         }
 
@@ -101,6 +120,7 @@ class RoleSubscriberController extends Controller
             }
 
             RateLimiter::hit($rateKey, 3600);
+            RateLimiter::hit($roleKey, 86400);
             $this->sendConfirmation($role, $existing);
 
             return $this->respond($request, __('messages.subscription_check_your_email'), true);
@@ -130,32 +150,95 @@ class RoleSubscriberController extends Controller
         }
 
         RateLimiter::hit($rateKey, 3600);
+        RateLimiter::hit($roleKey, 86400);
         $this->sendConfirmation($role, $subscriber);
 
         return $this->respond($request, __('messages.subscription_check_your_email'), true);
     }
 
     /**
-     * Confirm. Until this runs the row exists but App\Services\AudienceResolver will not mail it.
-     */
-    /**
-     * Confirm, from the single-use confirm_token.
+     * The confirm page: a GET that renders a button. The POST below is what mutates.
      *
-     * Deliberately NOT keyed on the permanent unsubscribe token. This is a GET that mutates, and
-     * mail gateways prefetch links, so a permanent confirm URL would let merely receiving an old
-     * confirmation email resurrect a subscription somebody had since cancelled.
+     * Deliberately NOT a GET that confirms. A single-use token stops an OLD link being replayed,
+     * which is what the previous design guarded and what
+     * RoleSubscriberTest::test_a_replayed_confirm_link_is_expired pins - but it cannot stop a
+     * corporate mail gateway (Defender Safe Links, Proofpoint, Barracuda) fetching the CURRENT
+     * link the moment it lands. That fetch used to confirm the subscription AND delete the
+     * recipient's newsletter_unsubscribes row with no human ever seeing the page.
+     *
+     * Anyone can put any address into the public form, and newsletter_unsubscribes is the SHARED
+     * suppression list (NewsletterTrackingController writes it, NewsletterService reads it), so
+     * that made an unauthenticated caller able to erase a stranger's newsletter opt-out by proxy -
+     * against an address that had never used this feature at all. /sub/u/* is already a two-step
+     * for the mirror-image reason; this now matches it.
+     */
+    public function showConfirm(Request $request, string $token)
+    {
+        [$subscriber, $role] = $this->resolveConfirmToken($token);
+
+        if (! $subscriber) {
+            return $this->linkExpired();
+        }
+
+        return view('subscriber.confirmed', [
+            'role' => $role,
+            'subscriber' => $subscriber,
+            'done' => false,
+        ]);
+    }
+
+    /**
+     * Confirm, from the single-use confirm_token. POST only - see showConfirm() for why.
+     *
+     * Deliberately NOT keyed on the permanent unsubscribe token: a permanent confirm URL would let
+     * merely receiving an old confirmation email resurrect a subscription somebody had cancelled.
      */
     public function confirm(Request $request, string $token)
     {
-        $subscriber = RoleSubscriber::where('confirm_token', $token)->with('role')->first();
+        [$subscriber, $role] = $this->resolveConfirmToken($token);
 
-        // Not firstOrFail(). The token is single-use and is nulled by the confirm below, so the
-        // ROW CANNOT BE FOUND on a replay - which means a bare 404 was the reward for clicking
-        // your own confirmation link twice, or for clicking it at all after a corporate mail
-        // gateway (Safe Links, Proofpoint) prefetched and burned it. An expired-link page cannot
-        // distinguish "already used" from "garbage", and does not need to: the copy covers both.
         if (! $subscriber) {
             return $this->linkExpired();
+        }
+
+        // Burn the token in the same write that confirms. Everything below is now unreachable by
+        // a replay of this URL.
+        $subscriber->forceFill([
+            'confirmed_at' => $subscriber->confirmed_at ?: now(),
+            'confirm_token' => null,
+        ])->save();
+
+        // Confirming is an unambiguous affirmative act with proof of mailbox possession, so it
+        // lifts a previous opt-out for THIS schedule. The public form never does. Reachable only
+        // from the POST above, so "possession" now means a person pressed a button rather than
+        // anything that merely dereferenced a URL.
+        NewsletterUnsubscribe::where('role_id', $role->id)
+            ->where('email', $subscriber->email)
+            ->delete();
+
+        return view('subscriber.confirmed', [
+            'role' => $role,
+            'subscriber' => $subscriber,
+            'done' => true,
+        ]);
+    }
+
+    /**
+     * Resolve a confirm token to its subscriber and schedule, or [null, null] when it is spent.
+     *
+     * Not firstOrFail(). The token is single-use and is nulled by confirm(), so the ROW CANNOT BE
+     * FOUND on a replay - which means a bare 404 was the reward for pressing the button twice, or
+     * for following a link a mail scanner had already spent. An expired-link page cannot
+     * distinguish "already used" from "garbage", and does not need to: the copy covers both.
+     *
+     * @return array{0: ?RoleSubscriber, 1: ?Role}
+     */
+    private function resolveConfirmToken(string $token): array
+    {
+        $subscriber = RoleSubscriber::where('confirm_token', $token)->with('role')->first();
+
+        if (! $subscriber) {
+            return [null, null];
         }
 
         $role = $subscriber->role;
@@ -166,23 +249,7 @@ class RoleSubscriberController extends Controller
 
         $this->applyLocale($subscriber, $role);
 
-        // Burn the token in the same write that confirms. Everything below is now unreachable by
-        // a replay of this URL.
-        $subscriber->forceFill([
-            'confirmed_at' => $subscriber->confirmed_at ?: now(),
-            'confirm_token' => null,
-        ])->save();
-
-        // Confirming is an unambiguous affirmative act with proof of mailbox possession, so it
-        // lifts a previous opt-out for THIS schedule. The public form never does.
-        NewsletterUnsubscribe::where('role_id', $role->id)
-            ->where('email', $subscriber->email)
-            ->delete();
-
-        return view('subscriber.confirmed', [
-            'role' => $role,
-            'subscriber' => $subscriber,
-        ]);
+        return [$subscriber, $role];
     }
 
     public function showUnsubscribe(Request $request, string $token)
@@ -286,21 +353,42 @@ class RoleSubscriberController extends Controller
         $mailable = new SubscriptionConfirmation(
             $role,
             $subscriber,
-            route('subscriber.confirm', ['token' => $subscriber->confirm_token]),
+            route('subscriber.show_confirm', ['token' => $subscriber->confirm_token]),
             route('subscriber.show_unsubscribe', ['token' => $subscriber->token]),
         );
 
-        // Queued, never Mail::send(). Selfhost ships QUEUE_CONNECTION=sync, and a synchronous send
-        // here would turn the endpoint's response time into an oracle for whether the address was
-        // already known, on top of blocking the request on SMTP.
-        //
         // roleId is passed so it goes out from the schedule's own SMTP where one is configured.
-        SendQueuedEmail::dispatch(
-            $mailable,
-            $subscriber->email,
-            $role->id,
-            $subscriber->locale ?: ($role->language_code ?: app()->getLocale()),
-        );
+        //
+        // The try/catch is not defensive padding. This used to read "Queued, never Mail::send(),
+        // so a synchronous send cannot block the request on SMTP" - which is exactly backwards on
+        // the install it named. Under QUEUE_CONNECTION=sync (the .env.example default, so most
+        // selfhost installs) dispatch() IS the send: SyncQueue runs handle() inline and rethrows,
+        // SendQueuedEmail has no catch of its own, and on selfhost RoleMailerService::sendForRole()
+        // takes its non-role-mailer branch whose Mail::send() sits outside that method's try. So a
+        // dead or misconfigured SMTP host rendered a 500 to an anonymous visitor on a public form -
+        // with the transport exception on the page wherever APP_DEBUG is on - for a subscriber row
+        // that had already been committed a few lines above.
+        //
+        // Swallowed to the same neutral response every other outcome returns, so a send failure
+        // reveals nothing either. It is reported, so it is not silent.
+        //
+        // Residual, deliberately not chased here: under sync the SMTP round trip is still inside
+        // the request, and store()'s already-confirmed branch is the one path that skips this call,
+        // so response LATENCY still distinguishes "already a confirmed subscriber" from every other
+        // state. Closing that means deferring the send past the response, which on sync would take
+        // it out of the queue the tests fake and off the retry path queue-backed installs rely on.
+        // The response body is identical in every case, which is the enumeration vector that
+        // matters for an endpoint reachable on every schedule page.
+        try {
+            SendQueuedEmail::dispatch(
+                $mailable,
+                $subscriber->email,
+                $role->id,
+                $subscriber->locale ?: ($role->language_code ?: app()->getLocale()),
+            );
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 
     /** The one suppression list, shared with the newsletter composer. */
@@ -357,7 +445,9 @@ class RoleSubscriberController extends Controller
             // cross-fill them.
             return back()
                 ->with('subscribe_error', $message)
-                ->with('subscribe_email', (string) $request->input('email'));
+                ->with('subscribe_email', is_string($request->input('email'))
+                    ? $request->input('email')
+                    : '');
         }
 
         return back()->with('message', $message);

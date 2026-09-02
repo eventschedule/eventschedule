@@ -255,24 +255,178 @@ class EventAnnouncementTest extends TestCase
         $this->assertStringContainsString('2', $many->envelope()->subject);
     }
 
+    public function test_a_draft_published_after_the_watermark_is_announced(): void
+    {
+        // Hazard (d). newEventsFor() keyed on created_at, so the ordinary "write it up now,
+        // publish on the day" workflow was invisible: the row was created before the watermark, so
+        // it never qualified, however long after it went public. Event::boot() now stamps
+        // published_at on the draft-to-public transition and the query reads
+        // COALESCE(published_at, created_at).
+        $this->subscribe();
+
+        // Written as a draft a long time ago...
+        $event = $this->publish(['is_draft' => true]);
+        $event->forceFill(['created_at' => now()->subDays(60)])->saveQuietly();
+
+        // ...the schedule was baselined after that...
+        $this->baseline(now()->subDays(30)->toDateTimeString());
+
+        // ...and it goes public today.
+        $event->refresh();
+        $event->is_draft = false;
+        $event->save();
+
+        $this->assertNotNull($event->fresh()->published_at, 'publishing must stamp published_at');
+
+        $this->runCommand();
+
+        $this->assertNotEmpty($this->announcements(), 'a draft published after the watermark must be announced');
+    }
+
+    public function test_publishing_twice_does_not_restamp_published_at(): void
+    {
+        // Unpublishing and republishing must not make an event new again, or it is announced twice.
+        $event = $this->publish();
+        $first = $event->fresh()->published_at;
+        $this->assertNotNull($first);
+
+        $event->is_draft = true;
+        $event->save();
+        $event->is_draft = false;
+        $event->save();
+
+        $this->assertEquals($first->toDateTimeString(), $event->fresh()->published_at->toDateTimeString());
+    }
+
+    public function test_a_failed_dispatch_hands_the_window_back(): void
+    {
+        // Hazard (b). The watermark used to be stamped AFTER the dispatch loop with no try/catch,
+        // so a throw part-way through left it untouched and the next run re-sent to everyone
+        // already mailed - deterministically, not as a race. It is now claimed BEFORE sending and
+        // handed back in the catch, so a failed run retries rather than double-sending.
+        $this->subscribe();
+        $this->publish();
+        $this->baseline();
+        $before = $this->role->fresh()->last_announced_at;
+
+        // Time advances between the claim and the throw, deliberately, and it is hooked on the
+        // claim's own UPDATE rather than on the queue: last_announced_at has second precision, so
+        // a rollback naming now() instead of the timestamp actually claimed matches only while the
+        // dispatch finishes inside the same second - which a test does and a real send does not.
+        // Hooking the queue does not work here, because the failing call is not the one a mock
+        // closure would run.
+        \DB::listen(function ($query) {
+            if (str_contains($query->sql, 'update `roles`') && str_contains($query->sql, 'last_announced_at')) {
+                $this->travel(5)->seconds();
+            }
+        });
+
+        Queue::shouldReceive('push')->andThrow(new \RuntimeException('mailer exploded'));
+        Queue::shouldReceive('connection')->andReturnSelf();
+
+        $this->runCommand();
+
+        $this->assertEquals(
+            $before->toDateTimeString(),
+            $this->role->fresh()->last_announced_at->toDateTimeString(),
+            'a failed dispatch must not advance the watermark'
+        );
+    }
+
+    public function test_a_concurrent_run_cannot_claim_the_same_window(): void
+    {
+        // Hazard (c). routes/console.php and AppController::translateData() hold DIFFERENT mutexes,
+        // so both rails can reach one schedule at once. claimWindow() is a conditional UPDATE
+        // naming the value it read, so the second runner changes no row and skips. Simulated by
+        // moving the watermark out from under the run, which is what the other rail doing its work
+        // first looks like from here.
+        $this->subscribe();
+        $this->publish();
+        $this->baseline();
+
+        $role = $this->role;
+        $moved = now()->subDay();
+
+        // The other rail claims it between this run's read and its own claim.
+        \Illuminate\Support\Facades\Event::listen('eloquent.retrieved: '.Role::class, function () use ($role, $moved) {
+            \DB::table('roles')->where('id', $role->id)->update(['last_announced_at' => $moved]);
+        });
+
+        $this->runCommand();
+
+        $this->assertSame([], $this->announcements(), 'the loser of a claim race must send nothing');
+    }
+
+    public function test_a_schedule_that_cannot_send_still_stamps(): void
+    {
+        // Hazard (e). A canSendAudienceMail() refusal used to `continue` without stamping, so the
+        // same events were re-resolved, the same audience re-counted and the same refusal logged
+        // on every run for ever - the defect this feature already fixed for scheduled newsletters.
+        // app.is_testing OFF is load-bearing: canSendAudienceMail() short-circuits to true on it
+        // before any of its real rules run, so without this the schedule sends and the test passes
+        // for the wrong reason. AudienceMailGateTest's docblock says the same thing about itself.
+        config(['app.hosted' => true, 'app.is_testing' => false]);
+
+        // Unverified owner, audience over the unverified ceiling: the gate refuses.
+        config(['usage.audience_mail_unverified_max_recipients' => 1]);
+        $this->subscribe('a@fans.test');
+        $this->subscribe('b@fans.test');
+        $this->publish();
+        $this->baseline();
+        $before = $this->role->fresh()->last_announced_at;
+
+        $this->runCommand();
+
+        $this->assertSame([], $this->announcements(), 'a refused schedule must not send');
+        $this->assertTrue(
+            $this->role->fresh()->last_announced_at->gt($before),
+            'a refusal must still advance the watermark, or it re-refuses for ever'
+        );
+    }
+
+    public function test_an_unclaimed_schedule_is_not_announced_for(): void
+    {
+        // getGuestUrl() returns '' for an unclaimed schedule, which would render the email's
+        // primary button with an empty href. It also has no owner who could have opted in.
+        $this->subscribe();
+        $this->publish();
+        $this->baseline();
+
+        \DB::table('roles')->where('id', $this->role->id)->update(['user_id' => null]);
+
+        $this->runCommand();
+
+        $this->assertSame([], $this->announcements());
+    }
+
     /**
-     * The command is hand-run for now, and must stay absent from BOTH scheduler rails.
+     * The command is on BOTH rails, and must stay on both.
      *
-     * Asserted rather than commented, for the same reason ActivationNudgeTest asserts it: the repo
-     * rule is that the two rails stay in sync, so the obvious "fix" for a missing registration is
-     * to add one back - and adding one back here re-arms every defect listed in the class
-     * docblock, including a watermark stamped after the dispatch loop and two rails holding
-     * different mutexes with no claim between them. Neither can be undone once mail has left.
+     * This assertion used to say the opposite: the command was hand-run while the seven hazards in
+     * its class docblock were open. They are closed, so the risk has inverted - the repo rule is
+     * that the two rails stay in sync, and a command registered on only one means an install using
+     * the other rail silently never announces. CronRailSyncTest checks gate and cadence parity;
+     * this checks the pair exists at all, so removing one is a deliberate edit rather than a
+     * merge accident.
+     *
+     * Deliberately NOT gated on config('app.hosted') on either rail: the promise is made to a
+     * guest, and on selfhost the subscribe panel is the only capture surface they ever see.
      */
-    public function test_the_command_is_not_scheduled_on_either_rail(): void
+    public function test_the_command_is_scheduled_on_both_rails(): void
     {
         foreach (['routes/console.php', 'app/Http/Controllers/AppController.php'] as $file) {
             $body = file_get_contents(base_path($file));
 
-            $this->assertStringNotContainsString(
+            $this->assertStringContainsString(
                 "Artisan::call('app:send-event-announcements'", $body,
-                "{$file} schedules the announcements; they are meant to be hand-run until the "
-                .'blockers in the SendEventAnnouncements docblock are closed'
+                "{$file} does not schedule the announcements; an install driven by that rail would "
+                .'take subscriptions and never send anything'
+            );
+
+            $this->assertStringNotContainsString(
+                "if (config('app.hosted')) {\n                    \\Artisan::call('app:send-event-announcements'", $body,
+                "{$file} gates the announcements on hosted; selfhost is where the subscribe panel "
+                .'is the only capture surface, so it must run there too'
             );
         }
     }

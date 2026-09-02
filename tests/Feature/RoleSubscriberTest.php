@@ -80,7 +80,7 @@ class RoleSubscriberTest extends TestCase
         $this->post($this->joinUrl(), ['email' => 'fan@fans.test']);
         $sub = RoleSubscriber::first();
 
-        $this->get(route('subscriber.confirm', ['token' => $sub->confirm_token]))->assertOk();
+        $this->post(route('subscriber.confirm', ['token' => $sub->confirm_token]))->assertOk();
 
         $this->assertNotNull($sub->fresh()->confirmed_at);
         $this->assertSame(1, RoleSubscriber::confirmed()->count());
@@ -167,9 +167,71 @@ class RoleSubscriberTest extends TestCase
             'unsubscribed_at' => now(),
         ]);
 
-        $this->get(route('subscriber.confirm', ['token' => RoleSubscriber::first()->confirm_token]));
+        $this->post(route('subscriber.confirm', ['token' => RoleSubscriber::first()->confirm_token]));
 
         $this->assertSame(0, NewsletterUnsubscribe::where('email', 'fan@fans.test')->count());
+    }
+
+    public function test_fetching_the_confirm_link_does_not_confirm(): void
+    {
+        // The regression this guards: confirm() used to be a GET that mutated. Corporate inbound
+        // mail security (Defender Safe Links, Proofpoint, Barracuda) fetches every link in an
+        // inbound message before the recipient sees it, so that fetch completed the subscription
+        // AND deleted the recipient's newsletter_unsubscribes row on their behalf. Anyone can put
+        // any address into the public form, so it made an unauthenticated caller able to erase a
+        // stranger's newsletter opt-out by proxy.
+        $this->post($this->joinUrl(), ['email' => 'fan@fans.test']);
+        $sub = RoleSubscriber::first();
+
+        NewsletterUnsubscribe::create([
+            'role_id' => $this->role->id,
+            'email' => 'fan@fans.test',
+            'unsubscribed_at' => now(),
+        ]);
+
+        // The page renders, and offers the button.
+        $page = $this->get(route('subscriber.show_confirm', ['token' => $sub->confirm_token]));
+        $page->assertOk();
+        $page->assertSee(__('messages.subscription_confirm_button'));
+
+        // Nothing moved.
+        $this->assertNull($sub->fresh()->confirmed_at, 'a GET must not confirm');
+        $this->assertNotNull($sub->fresh()->confirm_token, 'a GET must not burn the token');
+        $this->assertSame(1, NewsletterUnsubscribe::where('email', 'fan@fans.test')->count(),
+            'a GET must not lift a suppression');
+
+        // And the token is still live for the person who actually presses the button.
+        $this->post(route('subscriber.confirm', ['token' => $sub->confirm_token]))->assertOk();
+        $this->assertNotNull($sub->fresh()->confirmed_at);
+        $this->assertSame(0, NewsletterUnsubscribe::where('email', 'fan@fans.test')->count());
+    }
+
+    public function test_an_array_email_is_rejected_rather_than_fatal(): void
+    {
+        // respond() cast the submitted address to string for the repopulate flash, so `email[]=a`
+        // raised "Array to string conversion" - which HandleExceptions promotes to an
+        // ErrorException, i.e. a 500 on a public endpoint. Same class as ArrayLanguageParamTest,
+        // and as the is_valid_language_code() signature change in this release.
+        $this->post($this->joinUrl(), ['email' => ['a']])->assertRedirect();
+        $this->post($this->joinUrl(), ['email' => 'fan@fans.test', 'website' => ['x']])->assertRedirect();
+
+        $this->assertSame(0, RoleSubscriber::count());
+    }
+
+    public function test_a_failing_mailer_does_not_500_the_public_form(): void
+    {
+        // Selfhost ships QUEUE_CONNECTION=sync, where dispatch() IS the send: SyncQueue runs the
+        // job inline and rethrows, SendQueuedEmail has no catch, and RoleMailerService's
+        // non-role-mailer branch sends outside its own try. A dead SMTP host therefore rendered a
+        // 500 - with the transport exception on the page wherever APP_DEBUG is on - to an
+        // anonymous visitor, for a row that had already been committed.
+        Queue::shouldReceive('push')->andThrow(new \RuntimeException('smtp is down'));
+        Queue::shouldReceive('connection')->andReturnSelf();
+
+        $this->post($this->joinUrl(), ['email' => 'fan@fans.test'])->assertRedirect();
+
+        // The row is still written, and the visitor is told the same thing as always.
+        $this->assertSame(1, RoleSubscriber::count());
     }
 
     public function test_one_click_unsubscribe_writes_the_shared_list(): void
@@ -451,13 +513,13 @@ class RoleSubscriberTest extends TestCase
     {
         // The defect this replaced: confirm() lifted the suppression unconditionally and the link
         // never expired, so subscribe -> confirm -> unsubscribe -> reopening the ORIGINAL
-        // confirmation email silently re-subscribed. Because it is a GET, "reopening" includes a
-        // corporate mail gateway prefetching links.
+        // confirmation email silently re-subscribed. "Reopening" included a corporate mail gateway
+        // prefetching links, which is why confirming is now a POST - see the GET test below.
         $this->post($this->joinUrl(), ['email' => 'fan@fans.test']);
         $sub = RoleSubscriber::first();
         $liveConfirmUrl = route('subscriber.confirm', ['token' => $sub->confirm_token]);
 
-        $this->get($liveConfirmUrl)->assertOk();
+        $this->post($liveConfirmUrl)->assertOk();
         $this->post('/sub/u/'.$sub->token)->assertOk();
 
         // Replay the link that is still sitting in their inbox. 410, not 404: the link WAS
@@ -465,6 +527,7 @@ class RoleSubscriberTest extends TestCase
         // What must not change is that the replay changes nothing.
         $replay = $this->get($liveConfirmUrl);
         $replay->assertStatus(410);
+        $this->post($liveConfirmUrl)->assertStatus(410);
         $replay->assertSee(__('messages.subscription_link_expired_heading'));
 
         // The page is reached with no row in hand, so it can say nothing about who or what.
@@ -496,7 +559,7 @@ class RoleSubscriberTest extends TestCase
         // or an unsubscribe is permanent even for the person who changes their mind.
         $this->post($this->joinUrl(), ['email' => 'fan@fans.test']);
         $sub = RoleSubscriber::first();
-        $this->get(route('subscriber.confirm', ['token' => $sub->confirm_token]));
+        $this->post(route('subscriber.confirm', ['token' => $sub->confirm_token]));
         $this->post('/sub/u/'.$sub->token);
 
         // Fill the form in again: a fresh confirmation goes out.
@@ -504,7 +567,7 @@ class RoleSubscriberTest extends TestCase
         $fresh = $sub->fresh();
         $this->assertNotNull($fresh->confirm_token, 'a suppressed address must get a new confirmation');
 
-        $this->get(route('subscriber.confirm', ['token' => $fresh->confirm_token]))->assertOk();
+        $this->post(route('subscriber.confirm', ['token' => $fresh->confirm_token]))->assertOk();
         $this->assertSame(0, NewsletterUnsubscribe::where('email', 'fan@fans.test')->count());
     }
 

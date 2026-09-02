@@ -23,22 +23,37 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('federated_events', function (Blueprint $table) {
-            $table->boolean('is_online')->default(false)->after('image_path');
-        });
+        // Each step guarded, because these are three statements and MySQL cannot roll them back as
+        // one: Schema\Grammars\Grammar::$transactions is false and MySqlGrammar does not override
+        // it, so DDL implicitly commits, and Migrator::runUp() writes the migrations row only after
+        // up() RETURNS. An interruption between the add and the drop - a lock wait, a killed
+        // connection, or the PHP timeout that AppUpdateService's in-request `migrate --force` can
+        // hit - would otherwise leave is_online created, nothing logged, and every retry dying on
+        // "1060 Duplicate column name", blocking the other ten migrations with no rollback path.
+        if (! Schema::hasColumn('federated_events', 'is_online')) {
+            Schema::table('federated_events', function (Blueprint $table) {
+                $table->boolean('is_online')->default(false)->after('image_path');
+            });
+        }
 
         // Backfill before the drop. Already-synced listings are not re-pushed just
         // because the payload changed shape - push() only re-sends unsynced rows and
         // recurring events - so without this every existing online listing would
         // silently become in-person.
-        DB::table('federated_events')
-            ->whereNotNull('event_url')
-            ->where('event_url', '!=', '')
-            ->update(['is_online' => true]);
+        //
+        // Guarded on event_url, not is_online: a retry that skipped this because is_online now
+        // exists would leave already-online listings marked in-person, which is the exact data
+        // loss the backfill exists to prevent.
+        if (Schema::hasColumn('federated_events', 'event_url')) {
+            DB::table('federated_events')
+                ->whereNotNull('event_url')
+                ->where('event_url', '!=', '')
+                ->update(['is_online' => true]);
 
-        Schema::table('federated_events', function (Blueprint $table) {
-            $table->dropColumn('event_url');
-        });
+            Schema::table('federated_events', function (Blueprint $table) {
+                $table->dropColumn('event_url');
+            });
+        }
     }
 
     /**

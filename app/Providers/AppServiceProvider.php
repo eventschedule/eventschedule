@@ -8,6 +8,7 @@ use App\Policies\EventPolicy;
 use App\Policies\RolePolicy;
 use App\Services\ScheduledTaskRecorder;
 use App\Support\SafeTranslationLoader;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Events\CommandFinished;
 use Illuminate\Console\Events\ScheduledTaskFailed;
 use Illuminate\Console\Events\ScheduledTaskFinished;
@@ -19,6 +20,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event as EventFacade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Cashier\Cashier;
@@ -172,6 +174,25 @@ class AppServiceProvider extends ServiceProvider
             \App\Utils\PlatformPricing::flush();
             \App\Models\LegalDocument::flush();
         });
+
+        // Unsubscribe limiters keyed on the TOKEN, not the IP.
+        //
+        // ThrottleRequests::resolveRequestSignature() falls back to sha1(domain|ip) for a guest, so
+        // an unprefixed per-IP limit on an unsubscribe route counts the mail PROVIDER, not the
+        // reader: RFC 8058 one-click unsubscribes are POSTed by Gmail's and Outlook's egress hosts,
+        // so the nth reader to press Unsubscribe within the window got a 429. A 429 on an
+        // unsubscribe is what produces a spam complaint, which is the exact outcome both routes'
+        // own comments say to avoid.
+        //
+        // The token is single-purpose and already unguessable, so keying on it is both tighter
+        // (one person cannot burn anyone else's budget) and looser where it matters (a shared
+        // egress IP is no longer a shared budget). Kept generous: repeating your own unsubscribe
+        // is not abuse, and the write is idempotent.
+        foreach (['audience_unsubscribe', 'newsletter_unsubscribe'] as $limiter) {
+            RateLimiter::for($limiter, function ($request) {
+                return Limit::perMinutes(2, 10)->by((string) $request->route('token'));
+            });
+        }
 
         // Scheduler heartbeat, read by AdminAlertService's scheduler_stalled row.
         //

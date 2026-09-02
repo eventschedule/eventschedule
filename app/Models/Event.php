@@ -131,6 +131,10 @@ class Event extends Model
         'duration' => 'float',
         'is_private' => 'boolean',
         'is_draft' => 'boolean',
+        // Written by the saving hook in boot(), read by SendEventAnnouncements. Cast but
+        // deliberately NOT fillable: it records what the app observed, not what a caller asked
+        // for, and BackupService walks getFillable() in both directions.
+        'published_at' => 'datetime',
         'is_internal' => 'boolean',
         // Cancellation state is set only via EventController::cancel()/restore() (intentionally NOT in
         // $fillable, so the edit form's fill() can never toggle it via mass-assignment).
@@ -270,6 +274,31 @@ class Event extends Model
         parent::boot();
 
         static::saving(function ($model) {
+            // When this event first became publicly visible.
+            //
+            // The column has existed since 2024_07_13_184927_setup_database and nothing outside
+            // blog posts ever wrote it. SendEventAnnouncements needs it: keying "new since the
+            // last announcement" on created_at alone silently skipped every event written as a
+            // draft before the watermark and published after it, which is the ordinary
+            // write-it-up-now-publish-on-the-day workflow.
+            //
+            // Stamped on the transition out of draft, once, and never revised - unpublishing and
+            // republishing does not make an event new again, and re-stamping would re-announce it.
+            // is_draft covers both draft and internal (Event::setVisibilityState sets it for each);
+            // is_private is deliberately NOT considered, because an unlisted event IS published,
+            // just not listed, and the announcement query filters it out on its own terms.
+            //
+            // No backfill migration accompanies this. newEventsFor() reads
+            // COALESCE(published_at, created_at), so a row that predates this stamp keeps exactly
+            // the behaviour it has today, and writing created_at into the column for every
+            // historical event would be inventing a publication date we do not know.
+            // saveQuietly() fires no events, so a BackupService restore leaves it null and falls
+            // into that same COALESCE - which is right, since the restore date is not a
+            // publication date either.
+            if (! $model->is_draft && ! $model->published_at) {
+                $model->published_at = now();
+            }
+
             // MUST come before the federation check below, which reads isDirty(FEDERATION_FIELDS)
             // and event_url and event_password are both in that list. Clamping can cancel a change
             // out - an over-long event_url that cuts back to the value already stored - and a
