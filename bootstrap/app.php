@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CacheableMarketingResponse;
 use App\Http\Middleware\CaptureUtmParameters;
 use App\Http\Middleware\DemoAutoLogin;
 use App\Http\Middleware\DetectTrailingSlash;
@@ -37,6 +38,13 @@ return Application::configure(basePath: dirname(__DIR__))
         // public 'granted'/'denied' enum, so leaving it in the clear costs nothing.
         $middleware->encryptCookies(except: [
             'cookie_consent',
+            // Written by the browser too (layouts/marketing.blade.php), for the same reason:
+            // marketing HTML is edge-cached, so the server response that used to carry the
+            // attribution session cannot exist. Laravel would drop an undecryptable cookie
+            // silently, so the exemption is what makes it readable at sign-up. The value is
+            // a JSON blob of the visitor's own landing page, referrer and ?utm_*/?ref=
+            // values - all of which the visitor already controls through the URL.
+            'es_attribution',
         ]);
 
         $middleware->validateCsrfTokens(except: [
@@ -81,6 +89,10 @@ return Application::configure(basePath: dirname(__DIR__))
             // Runs before route-model binding so a selfhost install with no migrated DB
             // is redirected to the setup wizard before anything touches the database.
             EnsureSelfhostSetup::class,
+            // Must wrap StartSession (hence prepend, not append): it swaps the session
+            // driver to `array` for an anonymous marketing GET so the response can be
+            // cookie-free and cacheable at the edge. See docs/CACHING.md.
+            CacheableMarketingResponse::class,
         ], append: [
             CaptureUtmParameters::class,
             TrackMarketingVisit::class,

@@ -266,3 +266,10 @@ double the cost for a latency improvement nothing currently needs.
 spread them across whatever minute its rolling cache key happened to expire on. If that block gets
 slow, stagger them with `->dailyAt()`; `app:recheck-video-embeds` is the first candidate to move,
 since it makes YouTube API calls with no time budget.
+
+## Related
+
+**Edge caching of marketing HTML.** Anonymous marketing pages are served with
+`s-maxage=600` and no cookies, so Cloudflare can hold them. The eligibility rule, the two
+Cloudflare rules the operator has to add, and the deploy caveat (a cached copy survives up
+to 10 minutes past a deploy) are in [docs/CACHING.md](CACHING.md).

@@ -15,7 +15,17 @@ class SecurityHeaders
      */
     public function handle(Request $request, Closure $next)
     {
-        // Generate nonce BEFORE response so Blade templates can use it
+        // Generate nonce BEFORE response so Blade templates can use it.
+        //
+        // Anonymous marketing (WP) pages are cached at the edge for up to 10 minutes
+        // (CacheableMarketingResponse, docs/CACHING.md), so everyone served the same stored
+        // copy shares one nonce for that window. Accepted deliberately: a nonce only has to
+        // be unguessable to an attacker who can inject markup into the page, and a marketing
+        // page has no user-controlled content at all - every inline script on it is authored
+        // in the repo. Nothing that renders anything a visitor supplied is cacheable (the
+        // eligibility rule excludes /search, /browse and /contact, every query string, and
+        // any authenticated or session-carrying request), so a cached nonce can never be
+        // reused against a page an attacker can write into.
         $nonce = base64_encode(Str::random(16));
         $request->attributes->set('csp_nonce', $nonce);
         \Illuminate\Support\Facades\Vite::useCspNonce($nonce);

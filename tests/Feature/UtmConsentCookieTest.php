@@ -15,6 +15,14 @@ use Tests\TestCase;
  * nothing is written before the visitor accepts, and declining costs cross-session
  * attribution ONLY - the session copy that every consumer falls back to must survive, or a
  * decline would quietly stop crediting sales made in the same visit.
+ *
+ * The second half of this file covers `es_attribution`, which is a different cookie with a
+ * different justification: the browser writes it, it holds exactly what the server session
+ * used to hold for the marketing-to-signup hop, and it exists because anonymous marketing
+ * HTML is now served from the CDN and so has no server session at all (docs/CACHING.md).
+ * That makes it strictly necessary in the same sense the session cookie it replaces was, so
+ * it is deliberately not consent-gated - and the tests below pin that it is the LAST
+ * fallback, never an override of the session or the consented cookies.
  */
 class UtmConsentCookieTest extends TestCase
 {
@@ -205,6 +213,183 @@ class UtmConsentCookieTest extends TestCase
     {
         $this->assertNotNull($cookie, 'The response must carry a delete for the stale '.$name.' cookie');
         $this->assertLessThan(now()->timestamp, $cookie->getExpiresTime(), $name.' must be expired, not refreshed');
+    }
+
+    /**
+     * The cookie counts as first-touch evidence in its own right, not just the session.
+     *
+     * Sessions last 2 hours and an edge-cacheable page has no persistent session at all, so a
+     * guard that only consults the session rewrites the 30-day cookie with whatever page the
+     * visitor happens to be on - turning first-touch attribution into last-touch.
+     */
+    public function test_the_attribution_cookie_is_not_rewritten_on_a_later_page(): void
+    {
+        $this->flushSession();
+
+        $response = $this->withUnencryptedCookie('cookie_consent', 'granted')
+            ->withCookie('utm_landing_page', 'for-musicians')
+            ->withCookie('utm_referrer_url', 'https://first.example.org/')
+            ->withHeader('Referer', 'https://later.example.org/')
+            ->get('/pricing')
+            ->assertOk();
+
+        $this->assertNull($this->cookie($response, 'utm_landing_page'), 'first-touch landing page must survive');
+        $this->assertNull($this->cookie($response, 'utm_referrer_url'), 'first-touch referrer must survive');
+    }
+
+    // -----------------------------------------------------------------
+    // es_attribution: the browser-written fallback for edge-cached pages.
+    // -----------------------------------------------------------------
+
+    public function test_the_marketing_layout_ships_the_attribution_writer(): void
+    {
+        $this->get('/pricing')
+            ->assertOk()
+            ->assertSee('es_attribution=', false);
+    }
+
+    public function test_the_client_attribution_cookie_is_read_at_signup(): void
+    {
+        config(['app.hosted' => true]);
+
+        $this->withUnencryptedCookie('es_attribution', $this->clientAttribution([
+            'landing' => 'for-musicians',
+            'referrer' => 'https://news.example.org/post',
+            'utm_source' => 'newsletter',
+            'utm_medium' => 'email',
+            'utm_campaign' => 'spring',
+        ]))->post('/sign_up', [
+            'name' => 'Cached Visitor',
+            'email' => 'cached@gmail.com',
+            'password' => 'password',
+        ]);
+
+        $user = \App\Models\User::where('email', 'cached@gmail.com')->firstOrFail();
+
+        $this->assertSame('newsletter', $user->utm_source);
+        $this->assertSame('email', $user->utm_medium);
+        $this->assertSame('spring', $user->utm_campaign);
+        $this->assertSame('for-musicians', $user->landing_page);
+        $this->assertSame('https://news.example.org/post', $user->referrer_url);
+    }
+
+    /**
+     * referral_code was session-only before this, so a referred visitor who landed on a
+     * cached page would have credited nobody.
+     */
+    public function test_a_referral_code_in_the_client_cookie_is_credited(): void
+    {
+        config(['app.hosted' => true]);
+
+        $referrer = \App\Models\User::factory()->create(['referral_code' => 'REF12345']);
+
+        $this->withUnencryptedCookie('es_attribution', $this->clientAttribution([
+            'landing' => '/',
+            'ref' => 'REF12345',
+        ]))->post('/sign_up', [
+            'name' => 'Referred Visitor',
+            'email' => 'referred@gmail.com',
+            'password' => 'password',
+        ]);
+
+        $user = \App\Models\User::where('email', 'referred@gmail.com')->firstOrFail();
+
+        $this->assertSame($referrer->id, $user->referred_by_user_id);
+        $this->assertDatabaseHas('referrals', [
+            'referrer_user_id' => $referrer->id,
+            'referred_user_id' => $user->id,
+        ]);
+    }
+
+    /**
+     * It is the LAST fallback. A visitor who was served a dynamic page has a session, and the
+     * session must win - otherwise a stale first-touch cookie from an earlier visit would
+     * overwrite the attribution of the visit that actually converted.
+     */
+    public function test_the_session_wins_over_the_client_attribution_cookie(): void
+    {
+        config(['app.hosted' => true]);
+
+        $this->withUnencryptedCookie('es_attribution', $this->clientAttribution([
+            'landing' => 'stale-page',
+            'utm_source' => 'stale',
+        ]))->withSession([
+            'utm_params' => ['utm_source' => 'live', 'utm_medium' => null, 'utm_campaign' => null, 'utm_content' => null, 'utm_term' => null],
+            'utm_landing_page' => 'live-page',
+        ])->post('/sign_up', [
+            'name' => 'Session Visitor',
+            'email' => 'session@gmail.com',
+            'password' => 'password',
+        ]);
+
+        $user = \App\Models\User::where('email', 'session@gmail.com')->firstOrFail();
+
+        $this->assertSame('live', $user->utm_source);
+        $this->assertSame('live-page', $user->landing_page);
+    }
+
+    /**
+     * The value is client-controlled, so every shape of garbage has to fall through to null
+     * rather than throw on the sign-up path.
+     */
+    public function test_a_malformed_client_attribution_cookie_is_ignored(): void
+    {
+        config(['app.hosted' => true]);
+
+        $index = 0;
+
+        foreach (['not json at all', '[]', '"a string"', '{"landing":{"nested":true},"utm_source":["array"]}', ''] as $raw) {
+            // Registering signs the visitor in, and /sign_up is guest-only, so each round has
+            // to start from a clean slate or every case after the first silently redirects.
+            auth()->logout();
+            $this->flushSession();
+
+            $email = 'garbage'.($index++).'@gmail.com';
+
+            $this->withUnencryptedCookie('es_attribution', $raw)->post('/sign_up', [
+                'name' => 'Garbage Visitor',
+                'email' => $email,
+                'password' => 'password',
+            ]);
+
+            $user = \App\Models\User::where('email', $email)->firstOrFail();
+
+            $this->assertNull($user->utm_source, 'Malformed cookie: '.$raw);
+            $this->assertNull($user->landing_page, 'Malformed cookie: '.$raw);
+            $this->assertNull($user->referrer_url, 'Malformed cookie: '.$raw);
+        }
+    }
+
+    /**
+     * Written by the browser, so Laravel has nothing to decrypt. Dropping the bootstrap
+     * exemption would make every read null and the whole fallback silently dead.
+     */
+    public function test_the_client_attribution_cookie_is_readable_unencrypted(): void
+    {
+        $payload = $this->clientAttribution(['landing' => 'pricing', 'utm_source' => 'plain']);
+
+        $request = \Illuminate\Http\Request::create('/sign_up', 'POST');
+        $request->cookies->set('es_attribution', $payload);
+
+        $attribution = \App\Http\Middleware\CaptureUtmParameters::clientAttribution($request);
+
+        $this->assertSame('plain', $attribution['utm_params']['utm_source']);
+        $this->assertSame('pricing', $attribution['utm_landing_page']);
+
+        // ...and the exemption really is in place, so a real request reads the same value.
+        $this->withUnencryptedCookie('es_attribution', $payload)
+            ->get('/pricing')
+            ->assertOk();
+
+        $this->assertNotContains('es_attribution', array_map(
+            fn ($cookie) => $cookie->getName(),
+            $this->app['cookie']->getQueuedCookies()
+        ), 'The server must never write this cookie itself.');
+    }
+
+    private function clientAttribution(array $data): string
+    {
+        return json_encode($data);
     }
 
     private function cookie(TestResponse $response, string $name): ?Cookie

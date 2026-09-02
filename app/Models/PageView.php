@@ -200,7 +200,7 @@ class PageView
     /**
      * Check if request has suspicious headers (missing Accept-Language, generic Accept)
      */
-    public static function isSuspiciousRequest(Request $request): bool
+    public static function isSuspiciousRequest(Request $request, bool $expectDocumentAccept = true): bool
     {
         // Real browsers ALWAYS send Accept-Language
         $acceptLanguage = $request->header('Accept-Language');
@@ -208,10 +208,15 @@ class PageView
             return true;
         }
 
-        // Real browsers send specific Accept headers, not just "*/*"
-        $accept = $request->header('Accept');
-        if (empty($accept) || $accept === '*/*') {
-            return true;
+        // Real browsers send specific Accept headers, not just "*/*" - when they are asking
+        // for a DOCUMENT. A background request cannot satisfy this: navigator.sendBeacon()
+        // takes no headers at all and both it and fetch() default to `Accept: */*`, so the
+        // marketing visit beacon opts out of this one check and keeps the rest.
+        if ($expectDocumentAccept) {
+            $accept = $request->header('Accept');
+            if (empty($accept) || $accept === '*/*') {
+                return true;
+            }
         }
 
         return false;

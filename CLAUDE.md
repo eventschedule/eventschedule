@@ -285,6 +285,12 @@ The queue is drained by the `process-queue` entry inside the schedule, not by a 
 dispatch latency is up to about a minute. Both rails stamp `scheduler.last_run_at` every tick;
 `AdminAlertService`'s `scheduler_stalled` row alerts when that goes stale.
 
+**Anonymous marketing HTML is edge-cached** - `CacheableMarketingResponse` strips the session and
+CSRF cookies and sets `s-maxage=600` on cookie-free anonymous `marketing.*` GETs, so page views are
+counted by a `sendBeacon` and first-touch attribution by a browser-written `es_attribution` cookie
+rather than by the session. Read `docs/CACHING.md` before touching either, or before adding a
+marketing page that renders anything visitor-specific.
+
 **Hosted (eventschedule.com) runs `QUEUE_CONNECTION=database`, and `CACHE_STORE` must be set to
 `database` before a second container exists** - it is currently unset there, which resolves to the
 `file` driver, and that is safe only while one container serves everything. Every scheduler mutex

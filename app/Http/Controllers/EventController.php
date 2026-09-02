@@ -2966,6 +2966,14 @@ class EventController extends Controller
             $utmParams = json_decode($request->cookie('utm_params'), true) ?? [];
         }
 
+        // Last fallback: the browser-written es_attribution cookie, for a guest who arrived
+        // through an edge-cached marketing page and so never got a server session.
+        $clientAttribution = \App\Http\Middleware\CaptureUtmParameters::clientAttribution($request);
+
+        if (empty($utmParams)) {
+            $utmParams = $clientAttribution['utm_params'];
+        }
+
         $languageCode = (session()->has('guest_language') && is_valid_language_code(session('guest_language')))
             ? session('guest_language')
             : 'en';
@@ -2980,8 +2988,8 @@ class EventController extends Controller
             'utm_campaign' => $utmParams['utm_campaign'] ?? null,
             'utm_content' => $utmParams['utm_content'] ?? null,
             'utm_term' => $utmParams['utm_term'] ?? null,
-            'referrer_url' => session('utm_referrer_url') ?? $request->cookie('utm_referrer_url'),
-            'landing_page' => session('utm_landing_page') ?? $request->cookie('utm_landing_page'),
+            'referrer_url' => session('utm_referrer_url') ?? $request->cookie('utm_referrer_url') ?? $clientAttribution['utm_referrer_url'],
+            'landing_page' => session('utm_landing_page') ?? $request->cookie('utm_landing_page') ?? $clientAttribution['utm_landing_page'],
         ];
 
         // The guest-submit flow is an event request on someone else's schedule;
@@ -3121,6 +3129,14 @@ class EventController extends Controller
             $utmParams = json_decode($request->cookie('utm_params'), true) ?? [];
         }
 
+        // Last fallback: the browser-written es_attribution cookie, for a guest who arrived
+        // through an edge-cached marketing page and so never got a server session.
+        $clientAttribution = \App\Http\Middleware\CaptureUtmParameters::clientAttribution($request);
+
+        if (empty($utmParams)) {
+            $utmParams = $clientAttribution['utm_params'];
+        }
+
         $user = User::create([
             'name' => $name,
             'email' => $email,
@@ -3134,8 +3150,8 @@ class EventController extends Controller
             'utm_campaign' => $utmParams['utm_campaign'] ?? null,
             'utm_content' => $utmParams['utm_content'] ?? null,
             'utm_term' => $utmParams['utm_term'] ?? null,
-            'referrer_url' => session('utm_referrer_url') ?? $request->cookie('utm_referrer_url'),
-            'landing_page' => session('utm_landing_page') ?? $request->cookie('utm_landing_page'),
+            'referrer_url' => session('utm_referrer_url') ?? $request->cookie('utm_referrer_url') ?? $clientAttribution['utm_referrer_url'],
+            'landing_page' => session('utm_landing_page') ?? $request->cookie('utm_landing_page') ?? $clientAttribution['utm_landing_page'],
             'signup_intent' => 'request',
         ]);
 

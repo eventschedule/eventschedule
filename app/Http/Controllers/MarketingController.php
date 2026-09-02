@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Middleware\TrackMarketingVisit;
 use App\Models\Event;
 use App\Models\Role;
 use App\Services\AuditService;
@@ -5142,6 +5143,36 @@ class MarketingController extends Controller
         if ($event) {
             \App\Models\FederationClicksDaily::incrementClick($event->federated_instance_id);
         }
+
+        return response()->noContent();
+    }
+
+    /**
+     * Beacon target for the onboarding funnel's marketing page-view counters.
+     *
+     * Anonymous marketing HTML is cached at the edge (CacheableMarketingResponse), so a
+     * cached page never reaches TrackMarketingVisit and the /admin/users funnel would
+     * collapse to whatever the CDN happened to miss. layouts/marketing.blade.php therefore
+     * sends the route name here once per page view, and the middleware stands down on any
+     * response that shipped the beacon, so there is still exactly one writer per view.
+     *
+     * CSRF is excluded on the route: navigator.sendBeacon() cannot carry a token, and this
+     * changes no state a token would protect - it moves a counter, behind the same
+     * bot/suspicious-request filters and the same per-IP+UA daily dedup as before, plus a
+     * rate limit. The route name is validated against the router rather than trusted.
+     */
+    public function recordVisit(Request $request)
+    {
+        abort_unless(config('app.is_nexus'), 404);
+
+        $routeName = $request->input('route');
+        $routeName = is_string($routeName) ? $routeName : null;
+
+        if (! TrackMarketingVisit::isCountableRouteName($routeName)) {
+            return response()->noContent(422);
+        }
+
+        TrackMarketingVisit::record($request, $routeName, expectDocumentAccept: false);
 
         return response()->noContent();
     }

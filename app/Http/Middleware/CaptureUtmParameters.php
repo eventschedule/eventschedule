@@ -15,6 +15,26 @@ class CaptureUtmParameters
 
     private const COOKIE_MINUTES = 60 * 24 * 30;
 
+    /**
+     * First-touch attribution written by the BROWSER, in layouts/marketing.blade.php.
+     *
+     * Anonymous marketing HTML is cached at the edge (CacheableMarketingResponse), so on most
+     * marketing page views this middleware never runs and there is no server session to hold
+     * the marketing-to-signup hop. This cookie carries exactly what that session used to -
+     * landing page, off-site referrer, the utm_* values and ?ref= - and nothing else, which is
+     * why it is strictly necessary in the same sense the session cookie it stands in for was
+     * and is deliberately NOT gated on consent. The consented 30-day ATTRIBUTION_COOKIES above
+     * are a different thing (cross-session marketing attribution) and are unchanged.
+     *
+     * Exempt from cookie encryption in bootstrap/app.php, since the browser writes it.
+     */
+    public const CLIENT_COOKIE = 'es_attribution';
+
+    /**
+     * The keys the client cookie may carry. Anything else in it is discarded.
+     */
+    private const CLIENT_UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
+
     public function handle(Request $request, Closure $next): Response
     {
         // The guest appointment surfaces authenticate on a 32-char secret in the PATH, and this
@@ -55,11 +75,11 @@ class CaptureUtmParameters
         // Only capture if UTM params are present and session doesn't already have them (first-touch)
         if (($isPaidPlacement || ! $request->session()->has('utm_params')) && $this->hasUtmParams($request)) {
             $utmParams = [
-                'utm_source' => $this->sanitize($request->query('utm_source')),
-                'utm_medium' => $this->sanitize($request->query('utm_medium')),
-                'utm_campaign' => $this->sanitize($request->query('utm_campaign')),
-                'utm_content' => $this->sanitize($request->query('utm_content')),
-                'utm_term' => $this->sanitize($request->query('utm_term')),
+                'utm_source' => self::sanitize($request->query('utm_source')),
+                'utm_medium' => self::sanitize($request->query('utm_medium')),
+                'utm_campaign' => self::sanitize($request->query('utm_campaign')),
+                'utm_content' => self::sanitize($request->query('utm_content')),
+                'utm_term' => self::sanitize($request->query('utm_term')),
             ];
 
             $request->session()->put('utm_params', $utmParams);
@@ -87,8 +107,21 @@ class CaptureUtmParameters
 
         $response = $next($request);
 
+        // These two run on EVERY plain GET, so the cookie has to count as first-touch evidence
+        // alongside the session, for two reasons that arrived together with edge caching:
+        //
+        //  - Correctness. A consented visitor whose session has expired (2 hours) would
+        //    otherwise have the cookie rewritten with whatever page they are on now, quietly
+        //    turning 30-day first-touch attribution into last-touch.
+        //  - Cacheability. An anonymous marketing GET runs against an in-memory session
+        //    (CacheableMarketingResponse), so the session can never remember anything - and a
+        //    response that writes a cookie is not edge-cacheable. Without this, a consented
+        //    visitor would rewrite the cookie on every page and never be served a cached one.
+        //
+        // Whichever copy exists first wins, and it is never overwritten while it lives.
+
         // Capture referrer independently of UTM params (first-touch), filtering same-domain
-        if (! $request->session()->has('utm_referrer_url')) {
+        if (! $request->session()->has('utm_referrer_url') && ! $request->cookie('utm_referrer_url')) {
             $referer = $request->header('Referer');
             if ($referer && ! $this->isSameDomain($referer, $request)) {
                 $referrerUrl = mb_substr(trim($referer), 0, 2048);
@@ -98,7 +131,9 @@ class CaptureUtmParameters
         }
 
         // Capture landing page on first visit (GET only, even without UTM params)
-        if ($request->isMethod('GET') && ! $request->session()->has('utm_landing_page')) {
+        if ($request->isMethod('GET')
+            && ! $request->session()->has('utm_landing_page')
+            && ! $request->cookie('utm_landing_page')) {
             $landingPage = mb_substr($request->path(), 0, 2048);
             $request->session()->put('utm_landing_page', $landingPage);
             $this->rememberAttribution($response, $consented, 'utm_landing_page', $landingPage);
@@ -212,7 +247,7 @@ class CaptureUtmParameters
         return $host;
     }
 
-    private function sanitize(?string $value): ?string
+    private static function sanitize(?string $value): ?string
     {
         if ($value === null) {
             return null;
@@ -222,5 +257,78 @@ class CaptureUtmParameters
         $value = preg_replace('/[\x00-\x1F\x7F]/u', '', trim($value));
 
         return mb_substr($value, 0, 255) ?: null;
+    }
+
+    /**
+     * Read the browser-written first-touch attribution cookie.
+     *
+     * The LAST fallback at every read site, after the session and after the consented 30-day
+     * cookies, so a visitor whose page was served dynamically keeps exactly today's behaviour
+     * and one served from the edge still gets attributed. Defensive by construction: the value
+     * is client-controlled, so malformed JSON is ignored, unknown keys are dropped, and every
+     * value goes through the same sanitiser and the same length caps the session path uses.
+     *
+     * @return array{utm_params: array<string, string|null>, utm_referrer_url: string|null, utm_landing_page: string|null, referral_code: string|null}
+     */
+    public static function clientAttribution(Request $request): array
+    {
+        $empty = [
+            'utm_params' => [],
+            'utm_referrer_url' => null,
+            'utm_landing_page' => null,
+            'referral_code' => null,
+        ];
+
+        $raw = $request->cookie(self::CLIENT_COOKIE);
+
+        // 4 KB is the practical per-cookie ceiling; the writer caps itself at ~2 KB.
+        if (! is_string($raw) || $raw === '' || strlen($raw) > 4096) {
+            return $empty;
+        }
+
+        $data = json_decode($raw, true);
+
+        if (! is_array($data)) {
+            return $empty;
+        }
+
+        $utmParams = [];
+        foreach (self::CLIENT_UTM_KEYS as $key) {
+            $value = isset($data[$key]) && is_string($data[$key]) ? self::sanitize($data[$key]) : null;
+            $utmParams[$key] = $value;
+        }
+
+        // All null means the visitor simply arrived without campaign parameters; hand back an
+        // empty array so the read sites' `empty($utmParams)` fallback chain keeps working.
+        if (! array_filter($utmParams, fn ($value) => $value !== null)) {
+            $utmParams = [];
+        }
+
+        $referralCode = null;
+        if (isset($data['ref']) && is_string($data['ref'])) {
+            $referralCode = substr(preg_replace('/[^a-zA-Z0-9]/', '', $data['ref']), 0, 8) ?: null;
+        }
+
+        return [
+            'utm_params' => $utmParams,
+            'utm_referrer_url' => self::sanitizeUrlish($data['referrer'] ?? null),
+            'utm_landing_page' => self::sanitizeUrlish($data['landing'] ?? null),
+            'referral_code' => $referralCode,
+        ];
+    }
+
+    /**
+     * Same shape the session path stores: control characters stripped, trimmed, capped at the
+     * 2048 characters users.referrer_url / users.landing_page are sized for.
+     */
+    private static function sanitizeUrlish(mixed $value): ?string
+    {
+        if (! is_string($value)) {
+            return null;
+        }
+
+        $value = preg_replace('/[\x00-\x1F\x7F]/u', '', trim($value));
+
+        return mb_substr((string) $value, 0, 2048) ?: null;
     }
 }

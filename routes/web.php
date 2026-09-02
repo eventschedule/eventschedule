@@ -1018,6 +1018,14 @@ if (config('app.is_nexus')) {
         // itself stays a direct followable link to the origin, so this cannot be a
         // tracking redirect without destroying the backlink federation exists to give.
         Route::post('/browse/federated/{hash}/click', [MarketingController::class, 'federatedClick'])->name('marketing.federation.click')->middleware('throttle:120,1');
+        // Page-view beacon for the onboarding funnel. Anonymous marketing HTML is edge-cached,
+        // so a cached page never reaches TrackMarketingVisit; layouts/marketing.blade.php
+        // sendBeacon()s the route name here instead. CSRF only is excluded - sendBeacon cannot
+        // carry a token, and this moves a counter rather than changing state. See docs/CACHING.md.
+        Route::post('/marketing/visit', [MarketingController::class, 'recordVisit'])
+            ->name('marketing.visit')
+            ->middleware('throttle:120,1')
+            ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
         Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
         Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');
         Route::get('/features/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
@@ -1238,6 +1246,14 @@ if (config('app.is_nexus')) {
             // itself stays a direct followable link to the origin, so this cannot be a
             // tracking redirect without destroying the backlink federation exists to give.
             Route::post('/browse/federated/{hash}/click', [MarketingController::class, 'federatedClick'])->name('marketing.federation.click')->middleware('throttle:120,1');
+            // Page-view beacon for the onboarding funnel. Anonymous marketing HTML is edge-cached,
+            // so a cached page never reaches TrackMarketingVisit; layouts/marketing.blade.php
+            // sendBeacon()s the route name here instead. CSRF only is excluded - sendBeacon cannot
+            // carry a token, and this moves a counter rather than changing state. See docs/CACHING.md.
+            Route::post('/marketing/visit', [MarketingController::class, 'recordVisit'])
+                ->name('marketing.visit')
+                ->middleware('throttle:120,1')
+                ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
             Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
             Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');
             Route::get('/features/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\CaptureUtmParameters;
 use App\Models\MarketingDailyStat;
 use App\Models\PageView;
 use App\Models\Referral;
@@ -392,6 +393,23 @@ class RegisteredUserController extends Controller
             $utmParams = json_decode($request->cookie('utm_params'), true) ?? [];
         }
 
+        // Last fallback: the browser-written es_attribution cookie. Marketing HTML is served
+        // from the CDN for anonymous visitors, so on that path there is no server session and
+        // no consented cookie to read - see CaptureUtmParameters::CLIENT_COOKIE.
+        $clientAttribution = CaptureUtmParameters::clientAttribution($request);
+
+        if (empty($utmParams)) {
+            $utmParams = $clientAttribution['utm_params'];
+        }
+
+        $referrerUrl = session('utm_referrer_url')
+            ?? $request->cookie('utm_referrer_url')
+            ?? $clientAttribution['utm_referrer_url'];
+
+        $landingPage = session('utm_landing_page')
+            ?? $request->cookie('utm_landing_page')
+            ?? $clientAttribution['utm_landing_page'];
+
         // Classify the signup before any session keys are consumed below; the
         // hidden sms_token input is a fallback for when the session copy is gone
         $signupIntent = signup_intent_from_session();
@@ -422,8 +440,8 @@ class RegisteredUserController extends Controller
                 'utm_campaign' => $utmParams['utm_campaign'] ?? null,
                 'utm_content' => $utmParams['utm_content'] ?? null,
                 'utm_term' => $utmParams['utm_term'] ?? null,
-                'referrer_url' => session('utm_referrer_url') ?? $request->cookie('utm_referrer_url'),
-                'landing_page' => session('utm_landing_page') ?? $request->cookie('utm_landing_page'),
+                'referrer_url' => $referrerUrl,
+                'landing_page' => $landingPage,
                 // Keep the stub's original acquisition context (team invite,
                 // newsletter subscriber) rather than re-labeling it organizer
                 'signup_intent' => $existingUser->signup_intent ?? $signupIntent,
@@ -442,15 +460,15 @@ class RegisteredUserController extends Controller
                 'utm_campaign' => $utmParams['utm_campaign'] ?? null,
                 'utm_content' => $utmParams['utm_content'] ?? null,
                 'utm_term' => $utmParams['utm_term'] ?? null,
-                'referrer_url' => session('utm_referrer_url') ?? $request->cookie('utm_referrer_url'),
-                'landing_page' => session('utm_landing_page') ?? $request->cookie('utm_landing_page'),
+                'referrer_url' => $referrerUrl,
+                'landing_page' => $landingPage,
                 'signup_intent' => $signupIntent,
             ]);
         }
 
         // Link referral if referral code exists in session
         if (config('app.hosted')) {
-            $referralCode = session('referral_code');
+            $referralCode = session('referral_code') ?? $clientAttribution['referral_code'];
             if ($referralCode) {
                 $referrer = User::where('referral_code', $referralCode)->first();
                 if ($referrer && $referrer->id !== $user->id) {

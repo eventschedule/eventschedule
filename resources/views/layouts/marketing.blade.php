@@ -306,6 +306,94 @@
 
     @include('partials.cookie-banner')
 
+    @guest
+        {{-- Anonymous marketing HTML is cached at the edge (see docs/CACHING.md and
+             App\Http\Middleware\CacheableMarketingResponse), so the origin never sees most
+             page views and the two things the server used to do per visit have to happen in
+             the browser instead: count the view, and remember where the visitor came from.
+
+             Both are gated on @guest: a signed-in visitor is not a funnel prospect and needs
+             no signup attribution. --}}
+
+        @php($esVisitRoute = \App\Http\Middleware\TrackMarketingVisit::isCountableRouteName(\Illuminate\Support\Facades\Route::currentRouteName()) ? \Illuminate\Support\Facades\Route::currentRouteName() : null)
+
+        @if ($esVisitRoute)
+            {{-- Page-view beacon. Flagging the request here is what makes TrackMarketingVisit
+                 stand down, so exactly one of the two counts any given view. --}}
+            @php(request()->attributes->set(\App\Http\Middleware\TrackMarketingVisit::BEACON_ATTRIBUTE, true))
+            <script {!! nonce_attr() !!}>
+                (function () {
+                    var url = @json(url('/marketing/visit'));
+                    var body = JSON.stringify({ route: @json($esVisitRoute) });
+                    try {
+                        if (navigator.sendBeacon && navigator.sendBeacon(url, new Blob([body], { type: 'application/json' }))) {
+                            return;
+                        }
+                    } catch (e) {}
+                    try {
+                        fetch(url, {
+                            method: 'POST',
+                            keepalive: true,
+                            credentials: 'same-origin',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: body
+                        }).catch(function () {});
+                    } catch (e) {}
+                })();
+            </script>
+        @endif
+
+        {{-- First-touch attribution. This replaces exactly what the server session used to
+             hold for the marketing-to-signup hop (landing page, off-site referrer, ?utm_* and
+             ?ref=), so it is strictly necessary in the same sense the session cookie it stands
+             in for was, and is deliberately NOT gated on cookie consent. The consented 30-day
+             marketing cookies CaptureUtmParameters writes are unchanged and still gated.
+
+             Written by the browser, so it never appears in a server response and cannot make
+             a page uncacheable. Session-scoped (no expiry) and first-touch (never overwritten
+             while it exists). Read back at sign-up by CaptureUtmParameters::clientAttribution(). --}}
+        <script {!! nonce_attr() !!}>
+            (function () {
+                try {
+                    if (/(?:^|;\s*)es_attribution=/.test(document.cookie)) {
+                        return;
+                    }
+
+                    var data = { landing: location.pathname.replace(/^\/+/, '') || '/' };
+
+                    if (document.referrer) {
+                        var a = document.createElement('a');
+                        a.href = document.referrer;
+                        var base = function (h) { return h.toLowerCase().split('.').slice(-2).join('.'); };
+                        if (a.hostname && base(a.hostname) !== base(location.hostname)) {
+                            data.referrer = document.referrer.slice(0, 2048);
+                        }
+                    }
+
+                    var params = new URLSearchParams(location.search);
+                    ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'ref'].forEach(function (key) {
+                        var value = params.get(key);
+                        if (value) {
+                            data[key] = value.slice(0, 255);
+                        }
+                    });
+
+                    var value = encodeURIComponent(JSON.stringify(data));
+                    if (value.length > 2048) {
+                        return;
+                    }
+
+                    var domain = @json(config('session.domain'));
+                    document.cookie = 'es_attribution=' + value
+                        + '; path=/'
+                        + (domain ? '; domain=' + domain : '')
+                        + '; samesite=lax'
+                        + (location.protocol === 'https:' ? '; secure' : '');
+                } catch (e) {}
+            })();
+        </script>
+    @endguest
+
     {{-- @if (config('app.is_testing'))
         <style {!! nonce_attr() !!}>
             @keyframes es-ping { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(3); opacity: 0; } }
