@@ -6,8 +6,10 @@
     @endif
     <x-slot name="breadcrumbTitle">{{ $post->title }}</x-slot>
     <x-slot name="ogType">article</x-slot>
-    @if($post->featured_image_url)
-    <x-slot name="socialImage">{{ $post->featured_image_url }}</x-slot>
+    {{-- The 1200x600 JPEG twin, not the 1.9 MB PNG the page itself renders: see
+         BlogPost::socialImageUrl(). --}}
+    @if($post->socialImageUrl())
+    <x-slot name="socialImage">{{ $post->socialImageUrl() }}</x-slot>
     @endif
 
     <x-slot name="headMeta">
@@ -39,7 +41,7 @@
             '@type' => 'BlogPosting',
             'headline' => $post->title,
             'description' => $post->meta_description,
-            'image' => $post->featured_image_url ?: config('app.url').'/images/social/home.png',
+            'image' => $post->socialImageUrl() ?: config('app.url').'/images/social/home.jpg',
             'author' => [
                 '@type' => 'Organization',
                 '@id' => config('app.url').'/#organization',

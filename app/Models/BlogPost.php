@@ -197,6 +197,30 @@ class BlogPost extends Model
         return url('/images/headers/'.$this->featured_image);
     }
 
+    /**
+     * The image a link preview should use, which is not the one the page renders.
+     *
+     * public/images/headers/*.png are 1536x768 and about 1.9 MB each. WhatsApp renders no link
+     * preview at all for an image over roughly 300 KB, so the PNG is unusable as an og:image and
+     * the 384px thumbnail is far too small for one. `php artisan app:generate-thumbnails` writes
+     * 1200x600 JPEG twins under public/images/headers/social/ for exactly this. Falls back to the
+     * PNG when a twin has not been generated yet.
+     */
+    public function socialImageUrl(): ?string
+    {
+        if (! $this->featured_image) {
+            return null;
+        }
+
+        $name = pathinfo(basename($this->featured_image), PATHINFO_FILENAME);
+
+        if ($name !== '' && is_file(public_path('images/headers/social/'.$name.'.jpg'))) {
+            return url('/images/headers/social/'.$name.'.jpg');
+        }
+
+        return $this->featured_image_url;
+    }
+
     public function getUrlAttribute()
     {
         return url('/blog/'.$this->slug);

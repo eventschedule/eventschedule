@@ -144,6 +144,29 @@ class BlogSeoTest extends TestCase
         $this->assertSame($base.'?page=2', $node['mainEntityOfPage']['@id']);
     }
 
+    /**
+     * Now that page 2+ is indexable, all 19 pages would otherwise ship the byte-identical title
+     * and description of page 1, which is a set of duplicates Google picks one of.
+     */
+    public function test_a_paginated_page_names_itself_in_the_title_and_description(): void
+    {
+        for ($i = 0; $i < 15; $i++) {
+            $this->makePost(['title' => 'Post '.$i, 'published_at' => now()->subDays($i + 1)]);
+        }
+
+        $pageOne = $this->get('/blog')->assertOk()->getContent();
+        $pageTwo = $this->get('/blog?page=2')->assertOk()->getContent();
+
+        $this->assertStringContainsString('<title>Blog | Event Schedule</title>', $pageOne);
+        $this->assertStringContainsString('<title>Blog - Page 2 | Event Schedule</title>', $pageTwo);
+
+        preg_match('~<meta name="description" content="(.*?)">~s', $pageOne, $one);
+        preg_match('~<meta name="description" content="(.*?)">~s', $pageTwo, $two);
+
+        $this->assertNotSame($one[1], $two[1], 'page 2 repeats page 1 description');
+        $this->assertStringEndsWith('Page 2.', $two[1]);
+    }
+
     public function test_page_one_keeps_the_clean_canonical(): void
     {
         for ($i = 0; $i < 15; $i++) {
@@ -243,8 +266,12 @@ class BlogSeoTest extends TestCase
         $this->assertSame('Quote " in a listing', $item['headline']);
         $this->assertSame(route('blog.show', $post->slug), $item['url']);
         $this->assertSame($post->updated_at->toISOString(), $item['dateModified']);
-        $this->assertSame($post->featured_image_url, $item['image']);
         $this->assertSame('Organization', $item['author']['@type']);
+
+        // The 1200x600 JPEG twin, not the 1.9 MB PNG the card renders: WhatsApp shows no preview
+        // at all above roughly 300 KB. See BlogPost::socialImageUrl().
+        $this->assertSame($post->socialImageUrl(), $item['image']);
+        $this->assertSame(url('/images/headers/social/Literature.jpg'), $item['image']);
     }
 
     /**

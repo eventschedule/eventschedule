@@ -3,7 +3,7 @@
 
     layouts/app.blade.php's default meta block - the @else on its `meta` slot - exists for OUR
     surfaces: it names "Event Schedule" in og:title and og:site_name and offers
-    /images/social/home.png as og:image. A ticket, an order, an installment plan and a payment
+    /images/social/home.jpg as og:image. A ticket, an order, an installment plan and a payment
     interstitial all belong to the schedule that sold them, and ticket links do get forwarded, so
     inheriting that default put our advert and our name in the link preview of somebody else's
     purchase. Those four views set no `meta` slot, which is how they landed on it.

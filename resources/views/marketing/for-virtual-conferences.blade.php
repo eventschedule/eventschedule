@@ -54,7 +54,7 @@
         ],
         "url": "{{ url()->current() }}",
         "keywords": "virtual conference platform, online conference scheduling, conference agenda, virtual summit, conference ticketing",
-        "screenshot": "{{ asset('images/social/for-virtual-conferences.png') }}",
+        "screenshot": "{{ asset('images/social/for-virtual-conferences.jpg') }}",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule"

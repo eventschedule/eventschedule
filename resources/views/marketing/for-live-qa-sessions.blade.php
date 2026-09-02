@@ -54,7 +54,7 @@
         ],
         "url": "{{ url()->current() }}",
         "keywords": "live Q&A platform, Q&A session scheduling, interactive Q&A events, paid Q&A sessions, office hours scheduling, AMA scheduling",
-        "screenshot": "{{ asset('images/social/for-live-qa-sessions.png') }}",
+        "screenshot": "{{ asset('images/social/for-live-qa-sessions.jpg') }}",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule"

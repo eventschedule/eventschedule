@@ -54,7 +54,7 @@
         ],
         "url": "{{ url()->current() }}",
         "keywords": "watch party platform, schedule watch parties, virtual watch party, online watch party hosting, group streaming events, watch party ticketing, movie night scheduling, free watch party app",
-        "screenshot": "{{ asset('images/social/for-watch-parties.png') }}",
+        "screenshot": "{{ asset('images/social/for-watch-parties.jpg') }}",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule"

@@ -53,7 +53,7 @@
         ],
         "url": "{{ url()->current() }}",
         "keywords": "webinar hosting, webinar scheduling, webinar registration, paid webinars, recurring webinar series",
-        "screenshot": "{{ asset('images/social/for-webinars.png') }}",
+        "screenshot": "{{ asset('images/social/for-webinars.jpg') }}",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule"

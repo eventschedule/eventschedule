@@ -15,16 +15,22 @@
 
         // A page past the last one renders nothing; there is no point inviting a crawl of it.
         $blogNoindex = $isFiltered || ($posts->currentPage() > 1 && $posts->isEmpty());
+
+        // Now that page 2+ is indexable, all 19 pages would otherwise ship the same title and the
+        // same description. Name the page in both so they are not 19 duplicates of each other.
+        $blogPage = $posts->currentPage();
+        $blogTitleSuffix = $blogPage > 1 ? ' - Page '.$blogPage : '';
+        $blogDescSuffix = $blogPage > 1 ? ' Page '.$blogPage.'.' : '';
     @endphp
     @if(request('tag'))
-        <x-slot name="title">{{ request('tag') }} - Blog | Event Schedule</x-slot>
-        <x-slot name="description">Articles about {{ request('tag') }} on the Event Schedule blog.</x-slot>
+        <x-slot name="title">{{ request('tag') }} - Blog{{ $blogTitleSuffix }} | Event Schedule</x-slot>
+        <x-slot name="description">Articles about {{ request('tag') }} on the Event Schedule blog.{{ $blogDescSuffix }}</x-slot>
     @elseif($monthLabel)
-        <x-slot name="title">{{ $monthLabel }} - Blog | Event Schedule</x-slot>
-        <x-slot name="description">Event Schedule blog posts from {{ $monthLabel }}.</x-slot>
+        <x-slot name="title">{{ $monthLabel }} - Blog{{ $blogTitleSuffix }} | Event Schedule</x-slot>
+        <x-slot name="description">Event Schedule blog posts from {{ $monthLabel }}.{{ $blogDescSuffix }}</x-slot>
     @else
-        <x-slot name="title">Blog | Event Schedule</x-slot>
-        <x-slot name="description">Read the latest news, tips, and insights about event scheduling and ticketing from the Event Schedule team.</x-slot>
+        <x-slot name="title">Blog{{ $blogTitleSuffix }} | Event Schedule</x-slot>
+        <x-slot name="description">Read the latest news, tips, and insights about event scheduling and ticketing from the Event Schedule team.{{ $blogDescSuffix }}</x-slot>
     @endif
     <x-slot name="breadcrumbTitle">Blog</x-slot>
     <x-slot name="canonical">{{ $blogCanonical }}</x-slot>
@@ -100,7 +106,7 @@
                     '@type' => 'WebPage',
                     '@id' => route('blog.show', $listed->slug),
                 ],
-                'image' => $listed->featured_image_url ?: config('app.url').'/images/social/home.png',
+                'image' => $listed->socialImageUrl() ?: config('app.url').'/images/social/home.jpg',
                 'datePublished' => $listed->published_at?->toISOString() ?: '',
                 'dateModified' => ($listed->updated_at ?: $listed->published_at)?->toISOString() ?: '',
                 'author' => [

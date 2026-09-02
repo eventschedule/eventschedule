@@ -389,7 +389,7 @@
         "description": "The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": ["Web", "Android", "iOS"],
-        "screenshot": "{{ config('app.url') }}/images/social/home.png",
+        "screenshot": "{{ config('app.url') }}/images/social/home.jpg",
         "publisher": { "@id": "{{ config('app.url') }}/#organization" },
         "offers": {
             "@type": "Offer",

@@ -52,7 +52,7 @@
         ],
         "url": "{{ url()->current() }}",
         "keywords": "online class scheduling, virtual class platform, sell online classes, online teaching, class registration software",
-        "screenshot": "{{ asset('images/social/for-online-classes.png') }}",
+        "screenshot": "{{ asset('images/social/for-online-classes.jpg') }}",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule"

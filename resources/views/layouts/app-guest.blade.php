@@ -79,7 +79,7 @@
             @php
                 // The schedule's own logo, never the event's flyer: this page is password gated,
                 // so its imagery is precisely what the owner chose not to make public. And never
-                // /images/social/home.png, which put an Event Schedule advert in the WhatsApp
+                // /images/social/home.jpg, which put an Event Schedule advert in the WhatsApp
                 // preview of somebody else's private event.
                 $gateOgImage = $role->profile_image_url ?: null;
             @endphp
@@ -110,7 +110,7 @@
                             if ($firstPhoto) break;
                         }
                     }
-                    // Never /images/social/home.png: an event with no photo, no flyer and no
+                    // Never /images/social/home.jpg: an event with no photo, no flyer and no
                     // schedule or venue logo advertises no image, and the scraper falls back to
                     // the page's own contents rather than to an advert of ours.
                     $galleryOgImage = $firstPhoto ? $firstPhoto->photo_url : $event->getImageUrl();

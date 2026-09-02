@@ -54,7 +54,7 @@
         ],
         "url": "{{ url()->current() }}",
         "keywords": "live concert streaming, virtual concert tickets, livestream concerts, tour routing, concert promoter calendar, gig schedule",
-        "screenshot": "{{ asset('images/social/for-live-concerts.png') }}",
+        "screenshot": "{{ asset('images/social/for-live-concerts.jpg') }}",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule"
