@@ -20,6 +20,20 @@
     <php>
         <ini name="memory_limit" value="1G"/>
         <env name="APP_ENV" value="testing"/>
+        <!--
+            .env.example ships APP_URL empty and CI copies it verbatim, so config('app.url') was ''
+            there while a developer's .env carries a real one. That one difference decides the host
+            every $this->get('/path') reaches: SetRequestForConsole synthesizes the request from
+            APP_URL at bootstrap, and MakesHttpRequests::prepareUrlForRequest() is trim(url($uri), '/').
+            A test that then pins config(['app.url' => ...]) moves _base_domain() WITHOUT moving that
+            host, and with IS_HOSTED=true ResolveCustomDomain reads the mismatch as an unknown custom
+            domain and aborts 404 before the session middleware runs - which is how 18 tests passed
+            locally and failed on CI. Pinning it here makes the two agree on every machine.
+            Forced, and mirrored into $_SERVER by tests/bootstrap.php, so neither .env nor an exported
+            shell variable can reintroduce the split. tests/TestCase.php::pinAppUrl() is how a test
+            moves it deliberately.
+        -->
+        <env name="APP_URL" value="https://eventschedule.test" force="true"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="CACHE_STORE" value="array"/>

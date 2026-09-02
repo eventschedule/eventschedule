@@ -32,8 +32,29 @@ class MarketingEdgeCacheTest extends TestCase
 
         // The eligibility rule compares the request host against _base_domain(), which is
         // derived from app.url - so a machine with a different APP_URL must not change the
-        // answer. Pinning it also fixes the host $this->get() builds its URLs against.
-        config(['app.url' => 'https://eventschedule.test']);
+        // answer. pinAppUrl() rather than config(): config() alone moves _base_domain() and
+        // leaves the host $this->get() reaches where APP_URL put it at bootstrap. phpunit.xml
+        // pins the same value, so this is belt and braces rather than the only guard.
+        $this->pinAppUrl('https://eventschedule.test');
+    }
+
+    /**
+     * The invariant every other test in this file rests on.
+     *
+     * The host $this->get('/pricing') actually reaches and the base domain the eligibility rule
+     * compares it against come from two different places - APP_URL, read once at bootstrap, and
+     * config('app.url') at request time. When they drift, every request here 404s inside
+     * ResolveCustomDomain before a single cache header is written, so the whole file fails looking
+     * like a caching bug. Asserted on its own so the real cause is named instead of inferred.
+     *
+     * Exact equality, not the "or a subdomain of it" rule ResolveCustomDomain applies: this file's
+     * subject is requestIsAnonymous(), which compares the host to _base_domain() with strcasecmp,
+     * so a host one label below the apex would leave every page here ineligible rather than 404.
+     * TestEnvironmentTest asserts the looser, install-wide rule.
+     */
+    public function test_the_test_client_reaches_the_base_domain(): void
+    {
+        $this->assertSame(_base_domain(), parse_url(url('/'), PHP_URL_HOST));
     }
 
     public function test_anonymous_marketing_page_is_cookie_free_and_publicly_cacheable(): void

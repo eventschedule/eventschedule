@@ -661,7 +661,8 @@ class SitemapTest extends TestCase
      */
     public function test_a_custom_domain_advertises_its_own_sitemap(): void
     {
-        // Pinned: _base_domain() and the robots line both derive from app.url, which is empty in CI.
+        // Pinned: _base_domain() and the robots line both derive from app.url. phpunit.xml now
+        // forces the same value, so this restates the dependency rather than supplying it.
         config(['app.url' => 'https://eventschedule.test', 'app.hosted' => true]);
 
         $owner = $this->createOwner();

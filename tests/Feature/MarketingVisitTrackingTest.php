@@ -263,7 +263,7 @@ class MarketingVisitTrackingTest extends TestCase
      */
     public function test_fetching_the_docs_search_index_counts_nothing(): void
     {
-        config(['app.url' => 'https://eventschedule.test']);
+        $this->pinAppUrl('https://eventschedule.test');
 
         $this->withHeaders($this->browserHeaders())->get('/docs/search-index.json')->assertOk();
 

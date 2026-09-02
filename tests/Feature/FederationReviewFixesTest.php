@@ -12,7 +12,6 @@ use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
@@ -449,8 +448,7 @@ class FederationReviewFixesTest extends TestCase
         // APP_URL empty. So pin the root instead of reading the expected host back off
         // config, which would be null there. app.url is pinned to match so the payload's
         // site_url agrees with the links.
-        URL::forceRootUrl(self::INSTALL_ROOT);
-        config(['app.url' => self::INSTALL_ROOT]);
+        $this->pinAppUrl(self::INSTALL_ROOT);
 
         $this->enableSending();
         $this->shareable([], [

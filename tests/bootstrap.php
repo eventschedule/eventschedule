@@ -12,6 +12,7 @@ require_once __DIR__.'/../vendor/autoload.php';
 // phpunit.xml is applied, before the app boots. DB_DATABASE is deliberately absent: TestDatabase
 // below owns it and must have the last word.
 foreach ([
+    'APP_URL',
     'STRIPE_KEY',
     'STRIPE_PLATFORM_SECRET',
     'PAYFAST_MERCHANT_ID',
