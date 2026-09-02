@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Actor Schedules | A Credits List That Updates Itself</x-slot>
-    <x-slot name="description">Set your schedule to List and it becomes your credits: every production dated, past work kept, and new bookings arriving from the companies that cast you. Free forever, zero platform fees.</x-slot>
+    <x-slot name="description">Set your schedule to List and it becomes your credits: every production dated, past work kept, and new bookings arriving from the companies that cast you.</x-slot>
     <x-slot name="breadcrumbTitle">For Theater Performers</x-slot>
 
     <x-slot name="structuredData">

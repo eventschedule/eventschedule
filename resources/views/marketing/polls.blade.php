@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Polls & Voting - Event Schedule</x-slot>
-    <x-slot name="description">Add a poll to any event: a question, two to ten choices, one vote per signed-in guest. Guests read no count until they have voted, and closing the poll publishes it. A Pro feature, no credit card.</x-slot>
+    <x-slot name="description">Add a poll to any event: a question, two to ten choices, one vote per signed-in guest. Guests read no count until they have voted. A Pro feature.</x-slot>
     <x-slot name="breadcrumbTitle">Event Polls</x-slot>
 
     <x-slot name="structuredData">

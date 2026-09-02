@@ -1129,7 +1129,8 @@
                 </div>
 
                 <p class="mt-10 text-center text-gray-300" data-reveal>
-                    Nothing on this page is behind a sign-up, and neither is the free plan.
+                    Nothing on this page is behind a sign-up, and neither is the free plan. Here is
+                    <x-link href="{{ marketing_url('/why-create-account') }}" class="font-semibold text-white underline">what a free account unlocks</x-link>.
                 </p>
             </div>
         </div>

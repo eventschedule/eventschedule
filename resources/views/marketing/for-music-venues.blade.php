@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Music Venue Calendars | Set Times, Tickets, and the Door</x-slot>
-    <x-slot name="description">Put the whole show day on one link: set times for every band on the bill, tickets with zero platform fees and QR check-in, and one page bands and fans both read.</x-slot>
+    <x-slot name="description">Put the whole show day on one link: set times for every band on the bill, and tickets with zero platform fees and QR check-in.</x-slot>
     <x-slot name="breadcrumbTitle">For Music Venues</x-slot>
 
     <x-slot name="structuredData">

@@ -1,6 +1,6 @@
 <x-docs-page
     key="selfhost/stripe"
-    description="Configure Stripe for ticket sales on a selfhosted Event Schedule install, or Stripe Connect plus Cashier subscription billing if you run Event Schedule as your own SaaS."
+    description="Configure Stripe for ticket sales on a selfhosted Event Schedule install, or Stripe Connect plus Cashier billing if you run it as your own SaaS."
     lede="A selfhosted install takes card payments with one set of platform keys. A SaaS operator needs two integrations: Connect for ticket sales and Cashier for plan subscriptions."
 >
     <x-slot:toc>

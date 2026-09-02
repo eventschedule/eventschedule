@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Open Source Event Calendar - Licence, Selfhosting and the REST API</x-slot>
-    <x-slot name="description">Event Schedule is open source under the Attribution Assurance License. Selfhost the whole thing on your own server, or drive the hosted version through the REST API. Every claim on this page has a file path.</x-slot>
+    <x-slot name="title">Open Source Event Calendar - Licence and Selfhosting</x-slot>
+    <x-slot name="description">Event Schedule is open source under the Attribution Assurance License. Selfhost the whole thing on your own server, or drive it through the REST API.</x-slot>
     <x-slot name="breadcrumbTitle">Open Source</x-slot>
 
     <x-slot name="structuredData">

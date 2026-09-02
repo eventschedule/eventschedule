@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Gallery Calendars | The Show Runs, the Evenings Do Not</x-slot>
-    <x-slot name="description">A six-week hang is one recurring event that stops itself on the closing date, not thirty entries. The private view, the artist talk and the closing are the four evenings you add on top.</x-slot>
+    <x-slot name="description">A six-week hang is one recurring event that stops itself on the closing date, not thirty entries. The private view and the artist talk go on top.</x-slot>
     <x-slot name="breadcrumbTitle">For Art Galleries</x-slot>
 
     <x-slot name="structuredData">

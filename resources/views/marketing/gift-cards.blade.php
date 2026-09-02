@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Sell Gift Cards for Your Events - Event Schedule</x-slot>
-    <x-slot name="description">Sell balance-tracked gift cards your customers buy for someone else and redeem toward tickets for any event on your schedule. Set denominations, deliver by email, and track every card.</x-slot>
+    <x-slot name="description">Sell balance-tracked gift cards your customers buy for someone else and redeem toward tickets for any event on your schedule. Set your own denominations.</x-slot>
     <x-slot name="breadcrumbTitle">Gift Cards</x-slot>
 
     <x-slot name="structuredData">

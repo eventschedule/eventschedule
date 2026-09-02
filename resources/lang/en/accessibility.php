@@ -3,7 +3,7 @@
 return [
 
     'page_title' => 'Accessibility - Event Schedule',
-    'meta_description' => 'Accessibility statement and options for Event Schedule websites and apps.',
+    'meta_description' => 'Accessibility statement and options for Event Schedule websites and apps: conformance status, the measures we take, and how to send feedback.',
     'breadcrumb' => 'Accessibility',
 
     'h1' => 'Accessibility statement',

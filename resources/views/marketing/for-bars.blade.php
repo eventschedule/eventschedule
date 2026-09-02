@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Calendars for Bars and Pubs | Fill Every Night</x-slot>
-    <x-slot name="description">Put your whole week on one link - quiz nights, live music, karaoke, the match. Recurring dates that skip the holidays, free registration, and zero platform fees on tickets.</x-slot>
+    <x-slot name="description">Put your whole week on one link - quiz nights, live music, karaoke, the match. Recurring dates that skip the holidays, and free registration.</x-slot>
     <x-slot name="breadcrumbTitle">For Bars</x-slot>
 
     <x-slot name="structuredData">

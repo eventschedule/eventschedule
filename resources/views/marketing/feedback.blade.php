@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Feedback & Reviews - Event Schedule</x-slot>
-    <x-slot name="description">Post-event feedback for ticket holders: a day after the event ends, everyone who booked gets a card with a one-to-five rating and an optional comment. Yours alone by default, or published on the event page. A Pro feature.</x-slot>
+    <x-slot name="description">Post-event feedback for ticket holders: a day after the event ends, everyone who booked gets a card with a one-to-five rating and an optional comment.</x-slot>
     <x-slot name="breadcrumbTitle">Event Feedback</x-slot>
 
     <x-slot name="structuredData">

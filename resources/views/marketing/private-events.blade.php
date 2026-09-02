@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Private Events | Internal and Unlisted Events - Event Schedule</x-slot>
-    <x-slot name="description">Keep events members-only with Internal visibility, or hide them from your public schedule as Unlisted with an optional password. Control who sees what, per event.</x-slot>
+    <x-slot name="title">Private Events | Internal and Unlisted Events</x-slot>
+    <x-slot name="description">Keep events members-only with Internal visibility, or hide them from your public schedule as Unlisted with an optional password.</x-slot>
     <x-slot name="breadcrumbTitle">Private Events</x-slot>
 
     <x-slot name="structuredData">

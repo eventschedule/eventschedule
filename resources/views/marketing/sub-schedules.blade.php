@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Sub-Schedules | Sort One Schedule Into Sections</x-slot>
-    <x-slot name="description">A sub-schedule is a tabbed divider in one drawer: it gives a run of events a name, a colour and a URL. It sorts and it points. It never hides anything. Free on every plan.</x-slot>
+    <x-slot name="description">A sub-schedule is a tabbed divider in one drawer: it gives a run of events a name, a colour and a URL. It sorts and it points. It never hides anything.</x-slot>
     <x-slot name="breadcrumbTitle">Sub-Schedules</x-slot>
 
     <x-slot name="structuredData">

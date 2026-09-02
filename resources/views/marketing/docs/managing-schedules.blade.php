@@ -1,6 +1,6 @@
 <x-docs-page
     key="managing-schedules"
-    description="Learn how to run a schedule day to day in Event Schedule: the calendar, templates, videos, availability, appointments, event requests, followers, your team, your plan, and the audit log."
+    description="Learn how to run a schedule day to day in Event Schedule: the calendar, templates, videos, availability, appointments, event requests and followers."
     lede="Everything on the day-to-day side of a schedule: the calendar and its Actions menu, event requests, followers, team access, your plan, and the audit log."
 >
     <x-slot:toc>

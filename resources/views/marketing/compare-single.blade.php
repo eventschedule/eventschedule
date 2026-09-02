@@ -1466,6 +1466,8 @@
 
     </div>
 
+    <x-marketing.related-pages />
+
     <!-- Local confetti (no CDN) + motion engines -->
     <script {!! nonce_attr() !!} src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" defer></script>
     @vite('resources/js/marketing-home.js')

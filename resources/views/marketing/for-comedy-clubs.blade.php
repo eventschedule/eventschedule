@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Comedy Club Schedules | Sell the Night, Add the Lineup Later</x-slot>
-    <x-slot name="description">Friday at eight sells before anyone knows who is on. Set the night up once as a recurring show, put the tickets on sale, and add the participants when you book them - the date lands on every comic's own schedule.</x-slot>
+    <x-slot name="description">Friday at eight sells before anyone knows who is on. Set the night up once as a recurring show, put the tickets on sale, and add the participants later.</x-slot>
     <x-slot name="breadcrumbTitle">For Comedy Clubs</x-slot>
 
     <x-slot name="structuredData">

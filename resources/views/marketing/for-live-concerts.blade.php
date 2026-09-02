@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Free Event Schedule for Live Concerts | Promote Your Shows</x-slot>
-    <x-slot name="description">Put a whole tour routing online at once: a room, a door time and an on-sale in every city. Sell livestream tickets beside room tickets, write to your followers yourself. Zero platform fees.</x-slot>
+    <x-slot name="description">Put a whole tour routing online at once: a room, a door time and an on-sale in every city. Sell livestream tickets beside room tickets. Zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">For Live Concerts</x-slot>
 
     <x-slot name="structuredData">

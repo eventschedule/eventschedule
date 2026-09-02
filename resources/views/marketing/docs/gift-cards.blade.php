@@ -1,6 +1,6 @@
 <x-docs-page
     key="gift-cards"
-    description="Sell prepaid gift cards for your events: set the denominations and currency, let buyers email a card to someone else, and redeem the balance toward tickets at checkout."
+    description="Sell prepaid gift cards for your events: set the denominations and currency, let buyers email a card to someone else, and redeem it at checkout."
     lede="Let anyone buy a gift card for someone else. The recipient gets a code by email and redeems the balance toward tickets for your events."
     article-description="How to sell gift cards for your events: set denominations, let buyers send a card by email, and redeem the balance toward tickets at checkout."
     plan="pro"

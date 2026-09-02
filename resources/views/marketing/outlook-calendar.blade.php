@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Outlook Calendar Sync & Integration - Event Schedule</x-slot>
-    <x-slot name="description">Real-time two-way sync with Outlook and Microsoft 365. OAuth authentication, Microsoft Graph change notifications, and Teams meeting links for smooth event management.</x-slot>
+    <x-slot name="description">Real-time two-way sync with Outlook and Microsoft 365. OAuth authentication, Microsoft Graph change notifications, and Teams meeting links.</x-slot>
     <x-slot name="breadcrumbTitle">Outlook Calendar</x-slot>
 
     <x-slot name="structuredData">

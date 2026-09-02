@@ -228,6 +228,10 @@
             <p class="es-fade-up es-d-2 mx-auto max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
                 Start free and upgrade when you need more. No surprises, and never a cut of your ticket sales.
             </p>
+
+            <p class="es-fade-up es-d-3 mx-auto mt-5 max-w-3xl text-base text-gray-500 dark:text-gray-400">
+                Not signed up yet? See <x-link href="{{ marketing_url('/why-create-account') }}">what a free account unlocks</x-link>.
+            </p>
         </div>
     </section>
 

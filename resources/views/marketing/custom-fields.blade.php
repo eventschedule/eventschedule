@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Custom Fields | Ask Your Own Questions on Every Form - Event Schedule</x-slot>
-    <x-slot name="description">Add your own questions to your ticket form, your registration form and your public event request form. Six field types, ten fields each on your schedule, your event and your ticket types, and every answer in your sales export.</x-slot>
+    <x-slot name="title">Custom Fields | Ask Your Own Questions on Every Form</x-slot>
+    <x-slot name="description">Add your own questions to your ticket form, registration form and public event request form. Six field types, and every answer in your sales export.</x-slot>
     <x-slot name="breadcrumbTitle">Custom Fields</x-slot>
 
     <x-slot name="structuredData">

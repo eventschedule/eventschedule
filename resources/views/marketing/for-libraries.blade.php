@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Library Program Calendars | Recurring Sessions and Free Registration</x-slot>
+    <x-slot name="title">Library Program Calendars | Recurring Sessions</x-slot>
     <x-slot name="description">Set story time up once as a recurring program, take out the weeks the branch is closed, and give every single date its own place count. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For Libraries</x-slot>
 

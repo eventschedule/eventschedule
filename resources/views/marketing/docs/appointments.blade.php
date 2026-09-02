@@ -1,6 +1,6 @@
 <x-docs-page
     key="appointments"
-    description="Set up Calendly-style appointment booking: create appointment types with weekly hours and buffers, take free or paid bookings, require approval, and manage bookings."
+    description="Set up Calendly-style appointment booking: create appointment types with weekly hours and buffers, and take free or paid bookings."
     lede="Let guests book time with you on a public page, Calendly-style. You set the hours you are open, they pick an open slot, and everyone gets a confirmation."
     article-description="How to offer appointment booking: create appointment types with weekly hours, buffers, and optional payment, and let guests book a time on your public page."
 >

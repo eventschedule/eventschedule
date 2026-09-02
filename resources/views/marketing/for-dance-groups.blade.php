@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Dance Schedules | Classes, Rehearsals, Shows and Class Cards</x-slot>
-    <x-slot name="description">Run weekly classes as recurring events with per-class capacity, keep rehearsal calls off the public page, and sell 10-visit cards, unlimited memberships and show tickets with zero platform fees.</x-slot>
+    <x-slot name="description">Run weekly classes as recurring events with per-class capacity, and sell 10-visit cards, unlimited memberships and show tickets with zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">For Dance Groups</x-slot>
 
     <x-slot name="structuredData">

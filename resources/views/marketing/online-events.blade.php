@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Virtual & Online Event Hosting - Event Schedule</x-slot>
-    <x-slot name="description">Host virtual events from one link field: tick Online, paste the URL people join on, and the listing, the ticket and the search-engine markup all follow. Tick In person too and it is a hybrid.</x-slot>
+    <x-slot name="description">Host virtual events from one link field: tick Online, paste the URL people join on, and the listing, the ticket and the search-engine markup all follow.</x-slot>
     <x-slot name="breadcrumbTitle">Online Events</x-slot>
 
     <x-slot name="structuredData">

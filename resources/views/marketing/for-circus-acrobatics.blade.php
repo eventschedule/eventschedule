@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Circus & Acrobatics | Shows & Tickets</x-slot>
+    <x-slot name="title">Free Event Schedule for Circus & Acrobatics | Shows</x-slot>
     <x-slot name="description">One link for every circus show, aerial class, and festival stop. Sell tickets with zero fees, share rigging specs, and email fans directly. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For Circus & Acrobatics</x-slot>
 

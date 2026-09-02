@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Team Scheduling | Invite Members and Set Permissions</x-slot>
-    <x-slot name="description">Put other people on your schedule with a named position. Admins run the calendar, viewers read it and scan tickets at the door, and only the owner changes who is on the card.</x-slot>
+    <x-slot name="description">Put other people on your schedule with a named position. Admins run the calendar, and viewers read it and scan tickets at the door.</x-slot>
     <x-slot name="breadcrumbTitle">Team Scheduling</x-slot>
 
     <x-slot name="structuredData">

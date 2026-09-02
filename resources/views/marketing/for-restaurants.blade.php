@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Restaurant Event Ticketing | Know the Covers Before You Shop</x-slot>
-    <x-slot name="description">A wine dinner for twenty-four means the kitchen buys for twenty-four. Sell the covers, close the door before you shop, and collect the allergies at checkout instead of over email.</x-slot>
+    <x-slot name="description">A wine dinner for twenty-four means the kitchen buys for twenty-four. Sell the covers, close the door before you shop, and collect the allergies.</x-slot>
     <x-slot name="breadcrumbTitle">For Restaurants</x-slot>
 
     <x-slot name="structuredData">

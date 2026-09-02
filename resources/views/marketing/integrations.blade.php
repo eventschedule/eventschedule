@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Integrations | Calendars, Stripe, Webhooks and the API - Event Schedule</x-slot>
-    <x-slot name="description">Twelve real integrations, each with its direction, its trigger and its plan written on the label: Google Calendar, Outlook, CalDAV, Stripe, Invoice Ninja, webhooks, the REST API, web push, the accommodation map, Eventbrite import, Facebook and Instagram ads, and WhatsApp.</x-slot>
+    <x-slot name="title">Integrations | Calendars, Stripe, Webhooks and the API</x-slot>
+    <x-slot name="description">Twelve real integrations, each with its direction, its trigger and its plan written on the label: Google Calendar, Outlook, CalDAV, Stripe, webhooks.</x-slot>
     <x-slot name="breadcrumbTitle">Integrations</x-slot>
 
     <x-slot name="structuredData">

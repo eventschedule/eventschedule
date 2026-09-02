@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Allocated Seating | Reserved Seat Maps for Venues - Event Schedule</x-slot>
-    <x-slot name="description">Draw your venue once and sell the seats in it. A reusable seating plan, a buyer-facing seat picker, and a box office console to hold, move and release single seats.</x-slot>
+    <x-slot name="title">Allocated Seating | Reserved Seat Maps for Venues</x-slot>
+    <x-slot name="description">Draw your venue once and sell the seats in it. A reusable seating plan, a buyer-facing seat picker, and a box office console for single seats.</x-slot>
     <x-slot name="breadcrumbTitle">Allocated Seating</x-slot>
 
     <x-slot name="structuredData">

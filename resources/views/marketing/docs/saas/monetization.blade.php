@@ -1,6 +1,6 @@
 <x-docs-page
     key="saas/monetization"
-    description="Show Google AdSense on free schedules' public pages and let paid schedules buy promotional placement there. Off by default, and configured entirely by the instance operator."
+    description="Show Google AdSense on free schedules' public pages and let paid schedules buy promotional placement there. Off by default."
     lede="Cover your hosting costs by monetizing the free tier, and give your paying customers somewhere to advertise."
 >
     <x-slot:toc>

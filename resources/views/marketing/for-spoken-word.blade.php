@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Open Mic and Reading Schedules for Poets | Event Schedule</x-slot>
-    <x-slot name="description">Run open mic sign-ups, reading series, and workshops from one link. Free registration with a capacity limit, recurring dates that skip the holidays, and zero platform fees on tickets.</x-slot>
+    <x-slot name="description">Run open mic sign-ups, reading series, and workshops from one link. Free registration with a capacity limit, and recurring dates that skip the holidays.</x-slot>
     <x-slot name="breadcrumbTitle">For Spoken Word</x-slot>
 
     <x-slot name="structuredData">

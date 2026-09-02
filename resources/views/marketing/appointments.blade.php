@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Appointment Booking - Event Schedule</x-slot>
-    <x-slot name="description">Appointment booking built into your schedule. Write your hours down once, share one link, and guests pick an open time in their own timezone. Free or paid, approval optional, and the times you are already busy are never offered.</x-slot>
+    <x-slot name="description">Appointment booking built into your schedule. Write your hours down once, share one link, and guests pick an open time in their own timezone.</x-slot>
     <x-slot name="breadcrumbTitle">Appointments</x-slot>
 
     @php

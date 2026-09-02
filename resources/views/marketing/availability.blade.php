@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Availability | Cross Out the Dates You Cannot Work</x-slot>
-    <x-slot name="description">On a talent schedule, mark whole dates as unavailable and your team sees who is out on the shared calendar. Private to signed-in members, never published to guests. Enterprise plan.</x-slot>
+    <x-slot name="description">On a talent schedule, mark whole dates as unavailable and your team sees who is out on the shared calendar. Private to signed-in members, never published.</x-slot>
     <x-slot name="breadcrumbTitle">Availability</x-slot>
 
     <x-slot name="structuredData">

@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Taproom Calendars | Most of What You Run Is Free</x-slot>
-    <x-slot name="description">Nobody buys a ticket to trivia night. A taproom calendar exists to get people through the door, so almost all of it sits on the free plan - and ticketing is there for the tours that genuinely need it.</x-slot>
+    <x-slot name="description">Nobody buys a ticket to trivia night. A taproom calendar exists to get people through the door, so almost all of it sits on the free plan.</x-slot>
     <x-slot name="breadcrumbTitle">For Breweries and Wineries</x-slot>
 
     <x-slot name="structuredData">

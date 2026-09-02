@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Magicians | Gigs, Residencies, Tickets</x-slot>
+    <x-slot name="title">Free Event Schedule for Magicians | Gigs, Residencies</x-slot>
     <x-slot name="description">One link for every show, residency, and private booking. Sell tickets with zero platform fees and keep corporate gigs off your public schedule. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For Magicians</x-slot>
 

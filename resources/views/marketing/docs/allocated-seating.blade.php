@@ -1,6 +1,6 @@
 <x-docs-page
     key="allocated-seating"
-    description="Sell reserved seats from a plan of your venue: build a seating plan of levels, sections, rows and tables, let buyers choose their own seat, and run the door from a box office console."
+    description="Sell reserved seats from a plan of your venue: build a plan of levels, sections, rows and tables, and let buyers choose their own seat."
     lede="Draw your room once, attach it to an event, and sell the seats in it. Buyers pick where they sit; your box office holds seats back, books by phone and moves people around."
     article-description="How to sell allocated (reserved) seating: build a seating plan, price each band, let buyers choose their seats, and manage the room from the box office console."
     plan="enterprise"

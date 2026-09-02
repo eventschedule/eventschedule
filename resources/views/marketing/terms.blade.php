@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Terms of Service - Event Schedule</x-slot>
-    <x-slot name="description">Terms of Service for Event Schedule - the rules and guidelines for using our platform.</x-slot>
+    <x-slot name="description">Terms of Service for Event Schedule - the rules and guidelines for using our platform, including account eligibility, data ownership, and liability.</x-slot>
     <x-slot name="breadcrumbTitle">Terms of Service</x-slot>
 
     <x-slot name="structuredData">
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "WebPage",
         "name": "Terms of Service - Event Schedule",
-        "description": "Terms of Service for Event Schedule - the rules and guidelines for using our platform.",
+        "description": "Terms of Service for Event Schedule - the rules and guidelines for using our platform, including account eligibility, data ownership, and liability.",
         "url": "{{ url()->current() }}",
         "isPartOf": {
             "@type": "WebSite",

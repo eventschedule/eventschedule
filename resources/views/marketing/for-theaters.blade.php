@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Theater Calendars | Runs, Season Passes and Ticketing</x-slot>
-    <x-slot name="description">Set a production up once as a run - Tuesday to Sunday, dark Mondays, closing after fourteen performances - and sell every one from a single link with zero platform fees.</x-slot>
+    <x-slot name="description">Set a production up once as a run - Tuesday to Sunday, dark Mondays, closing after fourteen performances - and sell every one from a single link.</x-slot>
     <x-slot name="breadcrumbTitle">For Theaters</x-slot>
 
     <x-slot name="structuredData">

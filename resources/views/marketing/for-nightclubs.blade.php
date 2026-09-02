@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Nightclub Event Calendars | Entry, Capacity and Tickets</x-slot>
-    <x-slot name="description">Run the entry side of your club from one link: capacity, cover, timed ticket tiers and QR check-in at the door. Recurring themed nights, and zero platform fees when you sell.</x-slot>
+    <x-slot name="description">Run the entry side of your club from one link: capacity, cover, timed ticket tiers and QR check-in at the door. Plus recurring themed nights.</x-slot>
     <x-slot name="breadcrumbTitle">For Nightclubs</x-slot>
 
     <x-slot name="structuredData">

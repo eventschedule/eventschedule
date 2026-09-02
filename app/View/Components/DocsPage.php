@@ -35,6 +35,13 @@ class DocsPage extends Component
         public string $key,
         public ?string $title = null,
         public ?string $description = null,
+        /**
+         * Point this page's canonical at another URL. Only for a page whose body
+         * is a deliberate duplicate of another one (the two Federation pages ship
+         * the same partial), so search engines consolidate on one of them instead
+         * of picking for themselves. A path or an absolute URL.
+         */
+        public ?string $canonical = null,
         public ?string $heading = null,
         /** The word(s) in the heading to gradient-accent. Defaults to the last word. */
         public ?string $emphasis = null,
@@ -72,6 +79,21 @@ class DocsPage extends Component
     public function metaDescription(): string
     {
         return $this->description ?? $this->page['blurb'];
+    }
+
+    /**
+     * Null unless the page declares a canonical, in which case the layout's own
+     * self-canonical is overridden with this absolute URL.
+     */
+    public function canonicalUrl(): ?string
+    {
+        if ($this->canonical === null || $this->canonical === '') {
+            return null;
+        }
+
+        return str_starts_with($this->canonical, 'http')
+            ? $this->canonical
+            : rtrim(config('app.url'), '/').'/'.ltrim($this->canonical, '/');
     }
 
     public function headingText(): string

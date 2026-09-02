@@ -31,6 +31,11 @@
 <x-marketing-layout :docs="true" :title="$pageTitle()" :description="$metaDescription()">
     <x-slot name="breadcrumbTitle">{{ $page['title'] }}</x-slot>
 
+    {{-- Only a page that declares one; every other doc page keeps the layout's self-canonical. --}}
+    @if ($canonicalUrl())
+        <x-slot name="canonical">{{ $canonicalUrl() }}</x-slot>
+    @endif
+
     <x-slot name="structuredData">
         <script type="application/ld+json" {!! nonce_attr() !!}>
             {!! json_encode($structuredData(), JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}

@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Food Truck Schedules | One Link That Always Has Today's Stop</x-slot>
-    <x-slot name="description">Your address changes every week. Put the whole route on one link that never goes stale, set the regular pitches up once, and turn a customer at the window into someone you can email. Free forever.</x-slot>
+    <x-slot name="description">Your address changes every week. Put the whole route on one link that never goes stale, and set the regular pitches up once. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For Food Trucks and Vendors</x-slot>
 
     <x-slot name="structuredData">

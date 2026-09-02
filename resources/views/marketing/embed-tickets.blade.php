@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Embed Tickets on Any Website - Event Schedule</x-slot>
-    <x-slot name="description">Put the ticket checkout on your own website with one iframe tag. Ticket types, custom questions, promo codes and the total, all inside the frame. Pro plan, zero platform fees.</x-slot>
+    <x-slot name="description">Put the ticket checkout on your own website with one iframe tag. Ticket types, custom questions, promo codes and the total, all inside the frame.</x-slot>
     <x-slot name="breadcrumbTitle">Embed Tickets</x-slot>
 
     <x-slot name="structuredData">

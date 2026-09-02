@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Privacy Policy - Event Schedule</x-slot>
-    <x-slot name="description">Privacy Policy for Event Schedule - how we collect, use, and protect your data.</x-slot>
+    <x-slot name="description">Privacy Policy for Event Schedule - how we collect, use, and protect your data, who can access it, the cookies we set, and how to have your data erased.</x-slot>
     <x-slot name="breadcrumbTitle">Privacy Policy</x-slot>
 
     <x-slot name="structuredData">
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "WebPage",
         "name": "Privacy Policy - Event Schedule",
-        "description": "Privacy Policy for Event Schedule - how we collect, use, and protect your data.",
+        "description": "Privacy Policy for Event Schedule - how we collect, use, and protect your data, who can access it, the cookies we set, and how to have your data erased.",
         "url": "{{ url()->current() }}",
         "isPartOf": {
             "@type": "WebSite",

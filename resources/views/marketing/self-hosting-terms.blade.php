@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Self-Hosting Terms - Event Schedule</x-slot>
-    <x-slot name="description">Terms for self-hosting Event Schedule - the rules and guidelines for running your own instance.</x-slot>
+    <x-slot name="description">Terms for self-hosting Event Schedule - the rules and guidelines for running your own instance, including data ownership, your obligations, and liability.</x-slot>
     <x-slot name="breadcrumbTitle">Selfhosting Terms</x-slot>
 
     <x-slot name="structuredData">
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "WebPage",
         "name": "Self-Hosting Terms - Event Schedule",
-        "description": "Terms for self-hosting Event Schedule - the rules and guidelines for running your own instance.",
+        "description": "Terms for self-hosting Event Schedule - the rules and guidelines for running your own instance, including data ownership, your obligations, and liability.",
         "url": "{{ url()->current() }}",
         "isPartOf": {
             "@type": "WebSite",
