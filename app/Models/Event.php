@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Http\Controllers\MarketingController;
 use App\Jobs\GenerateEventImageVariants;
 use App\Jobs\SyncEventToCalDAV;
 use App\Jobs\SyncEventToGoogleCalendar;
@@ -243,6 +244,27 @@ class Event extends Model
      */
     public const DEFAULT_COUPON_DISCOUNT_TYPE = 'fixed';
 
+    /**
+     * Columns that decide whether - or how - an event shows on the homepage poster wall, which
+     * MarketingController caches for `marketing.wall_cache_seconds`.
+     *
+     * The first four are the wall's own visibility filters; the last three are what its cards
+     * print. Anything else (a description edit, a ticket price) leaves the wall identical, and
+     * busting the cache for those would cost the site's most-hit page five correlated subqueries
+     * on every publish. `image_variants` is deliberately absent: the job writes it around
+     * Eloquent, and a cached model without it simply renders the (correct, larger) original
+     * until the TTL turns over.
+     */
+    private const WALL_CACHE_FIELDS = [
+        'is_hidden_from_discovery',
+        'is_draft',
+        'is_private',
+        'is_cancelled',
+        'flyer_image_url',
+        'name',
+        'starts_at',
+    ];
+
     protected static function boot()
     {
         parent::boot();
@@ -398,6 +420,17 @@ class Event extends Model
             // up-to-a-minute window before the queue rebuilds the thumbnail, instead of showing
             // the previous flyer's WebP under the new event image.
             if ($model->exists && $model->isDirty('flyer_image_url')) {
+                // And delete the files, not just the record of them: a derivative's NAME is
+                // derived from the original's, so once this row stops holding that filename
+                // nothing can ever address them again. getRawOriginal(), because
+                // getOriginal() runs the flyer accessor and would hand back a URL.
+                // Safe for the clone path, which copies the bytes to a NEW filename and so has
+                // derivatives of its own.
+                $previousFlyer = $model->getRawOriginal('flyer_image_url');
+                if (is_string($previousFlyer) && $previousFlyer !== '') {
+                    ImageUtils::deleteStoredVariants($previousFlyer);
+                }
+
                 $model->image_variants = null;
             }
 
@@ -432,6 +465,26 @@ class Event extends Model
             if ($model->wasChanged('flyer_image_url')) {
                 self::queueImageVariants($model);
             }
+        });
+
+        static::saved(function ($model) {
+            // wasRecentlyCreated for the same reason as above: an insert never syncs changes, so
+            // wasChanged() is blind to it - and a brand new event is exactly the thing most
+            // likely to belong on the wall.
+            if ($model->wasRecentlyCreated || $model->wasChanged(self::WALL_CACHE_FIELDS)) {
+                MarketingController::forgetWallCache();
+            }
+        });
+
+        static::deleted(function ($model) {
+            // Nothing can address this row's derivatives once it is gone, so they would sit on
+            // object storage forever.
+            $raw = $model->getAttributes()['flyer_image_url'] ?? null;
+            if (is_string($raw) && $raw !== '') {
+                ImageUtils::deleteStoredVariants($raw);
+            }
+
+            MarketingController::forgetWallCache();
         });
 
         static::deleting(function ($event) {
@@ -2329,6 +2382,36 @@ class Event extends Model
         }
 
         return null;
+    }
+
+    /**
+     * A `srcset` of every generated width, or null when the set is incomplete.
+     *
+     * All-or-nothing on purpose: a srcset listing one width is just a slower way of writing
+     * `src`, and a card that offered only the 480 would tell a 2x screen that 480 is the best
+     * available and stop it falling back to the (sharper) original. Callers pair this with a
+     * `sizes` attribute matching their own CSS width and keep `src` pointed at the 480, so a row
+     * with no derivatives at all renders exactly as it did before.
+     */
+    public function imageSrcset(): ?string
+    {
+        if (! $this->flyer_image_url) {
+            return null;
+        }
+
+        $parts = [];
+
+        foreach (ImageUtils::VARIANT_WIDTHS as $width) {
+            $filename = $this->imageVariantFilename($width);
+
+            if (! $filename) {
+                return null;
+            }
+
+            $parts[] = ImageUtils::variantUrl($filename).' '.$width.'w';
+        }
+
+        return $parts ? implode(', ', $parts) : null;
     }
 
     /**

@@ -59,6 +59,11 @@
         <env name="PAYFAST_MERCHANT_KEY" value="" force="true"/>
         <env name="PAYFAST_PASSPHRASE" value="" force="true"/>
         <env name="DEFAULT_PAYMENT_METHOD" value="" force="true"/>
+        <!-- The homepage poster wall renders straight from the database under test. The `array`
+             cache store survives RefreshDatabase within a process, so a cached wall would
+             otherwise render against the next test's wiped database. ImageVariantsTest turns the
+             TTL back on for the two tests that exercise the cache itself. -->
+        <env name="MARKETING_WALL_CACHE_SECONDS" value="0" force="true"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="APP_TESTING" value="true"/>
         <env name="IS_NEXUS" value="true"/>

@@ -16,20 +16,25 @@ use Illuminate\Support\Facades\Log;
  * /browse actually render, so the first pass is what fixes the page. The second pass works
  * through the rest of the catalogue and can be left to run separately.
  *
+ * Generates EVERY width in ImageUtils::VARIANT_WIDTHS, and a row counts as done only when it has
+ * all of them - which is what picks up the rows built when 480 was the only width.
+ *
  * Resumable by construction: every row is left with either a derivative filename or a `skipped`
- * reason, and both are filtered out of the next run's query (use --retry-skipped to reconsider
- * the skips, e.g. after re-uploading an original that had gone missing).
+ * reason, and a DETERMINISTIC skip is filtered out of the next run's query (use --retry-skipped
+ * to reconsider those, e.g. after re-uploading an original that had gone missing). A TRANSIENT
+ * skip - the disk would not hand the original over, or would not take the derivative - is
+ * re-attempted by the next plain run, because the answer really can be different next time.
  */
 class BackfillImageVariants extends Command
 {
     protected $signature = 'images:backfill-variants
         {--upcoming-only : Stop after upcoming and recurring events, skipping past ones}
-        {--retry-skipped : Also reprocess rows previously recorded as skipped}
+        {--retry-skipped : Also reprocess rows whose recorded skip was deterministic (transient ones are always retried)}
         {--limit=0 : Stop after this many events (0 = no limit)}
         {--chunk=100 : Rows per database chunk}
         {--dry-run : List what would be generated without touching storage}';
 
-    protected $description = 'Generate the resized WebP derivative of every event flyer that does not have one yet.';
+    protected $description = 'Generate the resized WebP derivatives of every event flyer that is missing one.';
 
     private int $processed = 0;
 
@@ -52,7 +57,7 @@ class BackfillImageVariants extends Command
         $chunk = max(10, (int) $this->option('chunk'));
         $dryRun = (bool) $this->option('dry-run');
 
-        $this->info('Target width: '.ImageUtils::VARIANT_WIDTH.'px WebP'.($dryRun ? ' (dry run)' : ''));
+        $this->info('Target widths: '.implode('px, ', ImageUtils::VARIANT_WIDTHS).'px WebP'.($dryRun ? ' (dry run)' : ''));
 
         $this->runPass('upcoming', $chunk, $dryRun, function (Builder $query) {
             $query->where(function ($q) {
@@ -105,15 +110,21 @@ class BackfillImageVariants extends Command
     }
 
     /**
-     * Events with a resizable flyer and no derivative recorded for the target width.
+     * Events with a resizable flyer that is missing at least one of the target widths.
      *
      * The JSON filter has to go through JSON_TYPE: `JSON_EXTRACT(col, '$.w480') IS NULL` is FALSE
      * for a recorded skip, because a JSON null is a value, not SQL NULL. COALESCE supplies the
      * third state (the key is absent entirely).
+     *
+     * "Done" requires EVERY width, so the clause is ORed across the list. That is what makes
+     * adding a width to ImageUtils::VARIANT_WIDTHS enough on its own: rows holding only w480 have
+     * the w960 key MISSING and are picked up by the next plain run.
+     *
+     * A recorded skip is then filtered by its reason, not by its existence: a transient one gets
+     * another go unasked, a deterministic one waits for --retry-skipped.
      */
     private function baseQuery(): Builder
     {
-        $key = '$.w'.ImageUtils::VARIANT_WIDTH;
         $retrySkipped = (bool) $this->option('retry-skipped');
 
         return Event::query()
@@ -121,13 +132,27 @@ class BackfillImageVariants extends Command
             ->where('flyer_image_url', '!=', '')
             ->where('flyer_image_url', 'not like', 'demo\_%')
             ->where('flyer_image_url', 'not like', 'http%')
-            ->where(function ($q) use ($key, $retrySkipped) {
+            ->where(function ($q) use ($retrySkipped) {
                 $q->whereNull('image_variants');
 
-                if ($retrySkipped) {
-                    $q->orWhereRaw("COALESCE(JSON_TYPE(JSON_EXTRACT(image_variants, ?)), 'MISSING') <> 'STRING'", [$key]);
-                } else {
-                    $q->orWhereRaw("COALESCE(JSON_TYPE(JSON_EXTRACT(image_variants, ?)), 'MISSING') = 'MISSING'", [$key]);
+                foreach (ImageUtils::VARIANT_WIDTHS as $width) {
+                    $key = '$.w'.$width;
+
+                    if ($retrySkipped) {
+                        $q->orWhereRaw("COALESCE(JSON_TYPE(JSON_EXTRACT(image_variants, ?)), 'MISSING') <> 'STRING'", [$key]);
+                    } else {
+                        $q->orWhereRaw("COALESCE(JSON_TYPE(JSON_EXTRACT(image_variants, ?)), 'MISSING') = 'MISSING'", [$key]);
+                    }
+                }
+
+                // --retry-skipped's <> 'STRING' clause already covers these.
+                if (! $retrySkipped) {
+                    $placeholders = implode(',', array_fill(0, count(ImageUtils::VARIANT_TRANSIENT_REASONS), '?'));
+
+                    $q->orWhereRaw(
+                        'JSON_UNQUOTE(JSON_EXTRACT(image_variants, ?)) IN ('.$placeholders.')',
+                        array_merge(['$.skipped'], ImageUtils::VARIANT_TRANSIENT_REASONS)
+                    );
                 }
             });
     }
@@ -139,15 +164,18 @@ class BackfillImageVariants extends Command
         $raw = $event->getAttributes()['flyer_image_url'] ?? null;
 
         if ($dryRun) {
-            $this->line("  [{$event->id}] would generate ".ImageUtils::variantFilename($raw, ImageUtils::VARIANT_WIDTH));
+            $names = array_map(fn (int $width) => ImageUtils::variantFilename($raw, $width), ImageUtils::VARIANT_WIDTHS);
+            $this->line("  [{$event->id}] would generate ".implode(', ', $names));
             $this->generated++;
 
             return;
         }
 
-        // One bad image must never abort a run of thousands.
+        // One bad image must never abort a run of thousands. Unlike the queue job, which throws
+        // on a transient reason so it is retried, this records what happened and moves on - the
+        // next plain run comes back to it.
         try {
-            $result = ImageUtils::generateStoredVariant($raw, ImageUtils::VARIANT_WIDTH);
+            $results = ImageUtils::generateStoredVariants($raw);
         } catch (\Throwable $e) {
             report($e);
             $this->warn("  [{$event->id}] error: ".$e->getMessage());
@@ -156,20 +184,38 @@ class BackfillImageVariants extends Command
             return;
         }
 
-        $key = 'w'.ImageUtils::VARIANT_WIDTH;
+        $variants = [];
+        $written = [];
+        $reason = null;
 
-        if ($result['ok']) {
-            $event->recordImageVariants([$key => $result['filename']]);
-            $this->generated++;
-            $this->line("  [{$event->id}] {$result['filename']}");
+        foreach (ImageUtils::VARIANT_WIDTHS as $width) {
+            $result = $results[$width] ?? ['ok' => false, 'filename' => null, 'reason' => 'failed'];
+            $variants['w'.$width] = $result['ok'] ? $result['filename'] : null;
+
+            if ($result['ok']) {
+                $written[] = $result['filename'];
+            } else {
+                $reason ??= $result['reason'];
+            }
+        }
+
+        if ($reason !== null) {
+            $variants['skipped'] = $reason;
+        }
+
+        $event->recordImageVariants($variants);
+
+        // A partial run counts as skipped: the row still needs another pass.
+        if ($reason !== null) {
+            $this->skipped++;
+            $this->line("  [{$event->id}] skipped: {$reason}");
+            Log::info("images:backfill-variants skipped event {$event->id}: {$reason}");
 
             return;
         }
 
-        $event->recordImageVariants([$key => null, 'skipped' => $result['reason']]);
-        $this->skipped++;
-        $this->line("  [{$event->id}] skipped: {$result['reason']}");
-        Log::info("images:backfill-variants skipped event {$event->id}: {$result['reason']}");
+        $this->generated++;
+        $this->line("  [{$event->id}] ".implode(', ', $written));
     }
 
     private function limitReached(): bool

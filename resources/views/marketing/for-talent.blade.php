@@ -232,8 +232,11 @@
                     @foreach ($rail as $railEvent)
                         <a href="{{ $railEvent->getGuestUrl() }}" data-reveal data-tilt="2.5"
                            class="es-bento es-tilt-inner group relative flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-shadow duration-200 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA] dark:border-white/10 dark:bg-white/[0.04]">
+                            @php $railSrcset = $railEvent->imageSrcset(); @endphp
+                            {{-- Four across inside a max-w-7xl container is ~292 CSS px, two
+                                 across below lg is ~46vw: up to ~960 device pixels at 2x. --}}
                             <div class="aspect-[3/4] w-full overflow-hidden bg-gray-100 dark:bg-white/5">
-                                <img src="{{ $railEvent->getImageUrl(480) }}" alt="{{ $railEvent->name }}" loading="lazy" decoding="async"
+                                <img src="{{ $railEvent->getImageUrl(480) }}"@if($railSrcset) srcset="{{ $railSrcset }}" sizes="(min-width: 1024px) 292px, 46vw"@endif alt="{{ $railEvent->name }}" loading="lazy" decoding="async"
                                      class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105">
                             </div>
                             <div class="flex flex-1 flex-col p-3.5">

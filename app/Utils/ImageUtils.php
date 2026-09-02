@@ -142,16 +142,55 @@ class ImageUtils
     }
 
     /**
-     * The one derivative width the app generates today.
+     * The default derivative width: the homepage poster wall, the mobile strip, and the `src`
+     * attribute of every card that also offers a srcset.
      *
-     * The homepage poster wall declares 96x128 (mobile strip), 208x277 (desktop wall) and
-     * 320x427 (rail) slots, so 480px covers every one of them at up to 2x DPR while staying
-     * one file. Widths are part of the derivative FILENAME, so adding a second one later is
-     * additive - nothing already generated has to be rewritten.
+     * The wall declares 96x128 (mobile strip) and 208x277 (desktop wall) slots, so 480px covers
+     * both at up to 2x DPR while staying one file.
      */
     public const VARIANT_WIDTH = 480;
 
+    /**
+     * Every width the pipeline generates, smallest first.
+     *
+     * 480 covers the wall (above). 960 exists for the CARD surfaces, which are far larger than
+     * a wall slot: the homepage rail's poster card is 320 CSS px (72vw on a phone), /browse's
+     * grid cards run 287 to 669 CSS px and the for-talent rail's run 292 to ~480. At 2x DPR
+     * those want 580 to 1340 device pixels, so 480 would be an upscale of 1.2x to 2.8x -
+     * visibly softer than the original it replaced. Those three sites render a `srcset` of both
+     * widths and let the browser choose; everything else keeps asking for 480.
+     *
+     * Widths are part of the derivative FILENAME, so this list is additive: adding one leaves
+     * every file already generated valid, and `images:backfill-variants` fills in the new key.
+     */
+    public const VARIANT_WIDTHS = [480, 960];
+
     public const VARIANT_QUALITY = 80;
+
+    /**
+     * The complete `reason` vocabulary of generateStoredVariants(), split by whether trying
+     * again could ever produce a different answer.
+     *
+     * That split is the contract between the helper, the job and the backfill command:
+     *
+     *  - DETERMINISTIC: the same bytes (or the same absence of them) will decode the same way on
+     *    the tenth attempt. The outcome is RECORDED as a skip, and nothing revisits the row until
+     *    `--retry-skipped` asks it to.
+     *  - TRANSIENT: the disk answered badly. Flysystem swallows the exception on any disk that
+     *    does not set `throw` - do_spaces does not - so an S3 blip arrives here as a null stream
+     *    or a false write, indistinguishable from a real answer except for the return value.
+     *    Recording those as skips is how an afternoon of uploads ends up permanently
+     *    thumbnail-less, so the job throws instead (the queue retries, the column stays null) and
+     *    the backfill re-attempts them without being asked.
+     */
+    public const VARIANT_DETERMINISTIC_REASONS = ['demo', 'external', 'missing', 'unreadable', 'too_large', 'unsupported', 'failed'];
+
+    public const VARIANT_TRANSIENT_REASONS = ['read_failed', 'write_failed'];
+
+    public static function isTransientVariantReason(?string $reason): bool
+    {
+        return $reason !== null && in_array($reason, self::VARIANT_TRANSIENT_REASONS, true);
+    }
 
     /**
      * Refuse to decode anything bigger than this.
@@ -205,62 +244,142 @@ class ImageUtils
     }
 
     /**
-     * Write a WebP derivative of a stored image next to the original, on the same disk.
+     * Apply a JPEG's EXIF Orientation tag to an already-decoded GD image.
+     *
+     * GD ignores the tag: imagecreatefromjpeg() hands back the pixels exactly as stored, and
+     * every re-encode below drops the tag entirely (WebP carries no EXIF at all). So a phone
+     * photo that a browser renders upright - because a browser DOES honour the tag - comes out
+     * of the resizer permanently on its side. That is the whole bug: upright on the event page,
+     * rotated on the wall, the rail and /browse.
+     *
+     * The caller MUST take the return value: the rotate cases build a new resource and destroy
+     * the one passed in.
+     */
+    public static function applyExifOrientation(\GdImage $image, string $path): \GdImage
+    {
+        if (! function_exists('exif_read_data') || ! function_exists('imagerotate')) {
+            return $image;
+        }
+
+        // exif_read_data() warns and returns false for anything that is not a JPEG or TIFF, so
+        // ask the header first rather than suppressing our way through every PNG the app resizes.
+        $info = @getimagesize($path);
+        if (($info[2] ?? null) !== IMAGETYPE_JPEG) {
+            return $image;
+        }
+
+        $exif = @exif_read_data($path);
+        $orientation = is_array($exif) ? (int) ($exif['Orientation'] ?? 0) : 0;
+
+        // 1 is upright and anything outside 2-8 is not a value the tag can hold.
+        if ($orientation < 2 || $orientation > 8) {
+            return $image;
+        }
+
+        // Four of the eight orientations are mirrored as well as turned. imageflip() is in place.
+        if ($orientation === 2 || $orientation === 7) {
+            imageflip($image, IMG_FLIP_HORIZONTAL);
+        } elseif ($orientation === 4 || $orientation === 5) {
+            imageflip($image, IMG_FLIP_VERTICAL);
+        }
+
+        // imagerotate() turns COUNTER-clockwise, so the clockwise quarter turn an Orientation 6
+        // photo needs is -90 (i.e. 270).
+        $angle = match ($orientation) {
+            3 => 180,
+            5, 6, 7 => -90,
+            8 => 90,
+            default => 0,
+        };
+
+        if ($angle === 0) {
+            return $image;
+        }
+
+        $rotated = imagerotate($image, $angle, 0);
+
+        if (! $rotated) {
+            return $image;
+        }
+
+        imagedestroy($image);
+
+        return $rotated;
+    }
+
+    /**
+     * Write WebP derivatives of a stored image next to the original, on the same disk.
      *
      * Model-agnostic on purpose: it takes the raw stored filename (what
      * `events.flyer_image_url` holds), not a model, so `roles.profile_image_url` can reuse it
      * unchanged. GD cannot read from S3, so the original is streamed to a temp file first and
      * both temp files are removed in a `finally`.
      *
+     * Every requested width shares ONE decode: the expensive half of this is pulling a
+     * multi-megabyte original off object storage and handing it to GD, and doing that twice to
+     * produce two thumbnails of the same file would double the job's cost for nothing.
+     *
      * Never upscales: a source narrower than the target is re-encoded at its own width, which
      * is still a large win (the wall's originals are multi-megabyte PNGs). The returned
      * filename always names the REQUESTED width so the recorded key stays predictable.
      *
-     * @return array{ok: bool, filename: ?string, reason: ?string} reason is one of
-     *                                                             demo|external|missing|unreadable|too_large|failed
+     * @param  int[]  $widths
+     * @return array<int, array{ok: bool, filename: ?string, reason: ?string}> keyed by width;
+     *                                                                         see VARIANT_DETERMINISTIC_REASONS and VARIANT_TRANSIENT_REASONS
      */
-    public static function generateStoredVariant(string $storedName, int $width = self::VARIANT_WIDTH): array
+    public static function generateStoredVariants(string $storedName, array $widths = self::VARIANT_WIDTHS): array
     {
-        $skip = fn (string $reason) => ['ok' => false, 'filename' => null, 'reason' => $reason];
+        $widths = array_values(array_unique(array_map('intval', $widths)));
+
+        $skipAll = fn (string $reason) => array_fill_keys($widths, ['ok' => false, 'filename' => null, 'reason' => $reason]);
 
         if (! $storedName) {
-            return $skip('missing');
+            return $skipAll('missing');
         }
 
         // Demo seed flyers ship in the repo as small WebPs already; there is nothing to gain
         // and no storage disk to write to.
         if (str_starts_with($storedName, 'demo_')) {
-            return $skip('demo');
+            return $skipAll('demo');
         }
 
         // A few legacy rows hold a full URL rather than a stored filename.
         if (str_starts_with($storedName, 'http')) {
-            return $skip('external');
+            return $skipAll('external');
+        }
+
+        // Before any decoding, and before any I/O: a GD built without WebP support has no
+        // imagewebp(), and calling it is a fatal Error. On the `sync` queue (the selfhost
+        // default) that Error propagates out of the Event save that dispatched the job and turns
+        // a successful flyer upload into a 500.
+        if (! function_exists('imagewebp')) {
+            return $skipAll('unsupported');
         }
 
         $sourcePath = self::storagePathFor($storedName);
 
         if (! Storage::exists($sourcePath)) {
-            return $skip('missing');
+            return $skipAll('missing');
         }
 
         $tempIn = tempnam(sys_get_temp_dir(), 'variant_src_');
         $tempOut = tempnam(sys_get_temp_dir(), 'variant_out_');
 
         $sourceImage = null;
-        $destImage = null;
 
         try {
             $read = Storage::readStream($sourcePath);
             if (! $read) {
-                return $skip('missing');
+                // The file exists (checked above), so this is the disk failing to hand it over -
+                // worth retrying, unlike a genuinely missing original.
+                return $skipAll('read_failed');
             }
 
             $write = fopen($tempIn, 'w');
             if (! $write) {
                 fclose($read);
 
-                return $skip('failed');
+                return $skipAll('failed');
             }
 
             stream_copy_to_stream($read, $write);
@@ -271,18 +390,18 @@ class ImageUtils
             // on it having passed.
             $info = @getimagesize($tempIn);
             if ($info === false) {
-                return $skip('unreadable');
+                return $skipAll('unreadable');
             }
 
             [$srcWidth, $srcHeight] = $info;
             $mimeType = $info['mime'] ?? null;
 
             if ($srcWidth < 1 || $srcHeight < 1) {
-                return $skip('unreadable');
+                return $skipAll('unreadable');
             }
 
             if (($srcWidth * $srcHeight) > self::VARIANT_MAX_PIXELS) {
-                return $skip('too_large');
+                return $skipAll('too_large');
             }
 
             $sourceImage = match ($mimeType) {
@@ -294,17 +413,55 @@ class ImageUtils
             };
 
             if (! $sourceImage) {
-                return $skip('unreadable');
+                return $skipAll('unreadable');
             }
 
-            $destWidth = min($width, $srcWidth);
-            $destHeight = max(1, (int) round($srcHeight * ($destWidth / $srcWidth)));
+            $sourceImage = self::applyExifOrientation($sourceImage, $tempIn);
 
-            $destImage = imagecreatetruecolor($destWidth, $destHeight);
-            if (! $destImage) {
-                return $skip('failed');
+            // Re-read from the resource rather than reusing the header values: orientations 5-8
+            // turn the image a quarter circle, which SWAPS width and height, and scaling against
+            // the pre-rotation numbers would squash the derivative.
+            $srcWidth = imagesx($sourceImage);
+            $srcHeight = imagesy($sourceImage);
+
+            $results = [];
+
+            foreach ($widths as $width) {
+                $results[$width] = self::writeStoredVariant($sourceImage, $storedName, $width, $srcWidth, $srcHeight, $tempOut);
             }
 
+            return $results;
+        } finally {
+            if ($sourceImage) {
+                imagedestroy($sourceImage);
+            }
+            if (file_exists($tempIn)) {
+                @unlink($tempIn);
+            }
+            if (file_exists($tempOut)) {
+                @unlink($tempOut);
+            }
+        }
+    }
+
+    /**
+     * One width of generateStoredVariants(): resample the decoded source and put it on the disk.
+     *
+     * @return array{ok: bool, filename: ?string, reason: ?string}
+     */
+    private static function writeStoredVariant(\GdImage $sourceImage, string $storedName, int $width, int $srcWidth, int $srcHeight, string $tempOut): array
+    {
+        $skip = fn (string $reason) => ['ok' => false, 'filename' => null, 'reason' => $reason];
+
+        $destWidth = min($width, $srcWidth);
+        $destHeight = max(1, (int) round($srcHeight * ($destWidth / $srcWidth)));
+
+        $destImage = imagecreatetruecolor($destWidth, $destHeight);
+        if (! $destImage) {
+            return $skip('failed');
+        }
+
+        try {
             // WebP carries alpha, and a flyer with a transparent background would otherwise
             // resample onto black.
             imagealphablending($destImage, false);
@@ -338,22 +495,54 @@ class ImageUtils
             }
 
             if (! $stored) {
-                return $skip('failed');
+                // Flysystem returns false rather than throwing on a disk without `throw`, so an
+                // S3 outage looks exactly like this. Transient: worth another attempt.
+                return $skip('write_failed');
             }
 
             return ['ok' => true, 'filename' => $destName, 'reason' => null];
         } finally {
-            if ($sourceImage) {
-                imagedestroy($sourceImage);
-            }
-            if ($destImage) {
-                imagedestroy($destImage);
-            }
-            if (file_exists($tempIn)) {
-                @unlink($tempIn);
-            }
-            if (file_exists($tempOut)) {
-                @unlink($tempOut);
+            imagedestroy($destImage);
+        }
+    }
+
+    /**
+     * Write a single WebP derivative. Thin wrapper over generateStoredVariants().
+     *
+     * @return array{ok: bool, filename: ?string, reason: ?string}
+     */
+    public static function generateStoredVariant(string $storedName, int $width = self::VARIANT_WIDTH): array
+    {
+        return self::generateStoredVariants($storedName, [$width])[$width];
+    }
+
+    /**
+     * Remove every derivative of a stored image.
+     *
+     * Called when the original is replaced or its row is deleted. Derivative names are DERIVED
+     * from the original's, so once that filename is gone nothing can address them again and they
+     * would sit on Spaces forever - a replaced flyer stranded one file per width, every time.
+     *
+     * Walks VARIANT_WIDTHS rather than whatever the row recorded: the saving hook nulls
+     * `image_variants` before this could read it, and a run that failed halfway may have written
+     * a file it never got to record.
+     *
+     * Never throws. This is cleanup beside a save that has already been decided, and a disk that
+     * cannot delete a stale thumbnail must not fail the user's edit.
+     */
+    public static function deleteStoredVariants(string $storedName): void
+    {
+        // Demo flyers ship in the repo and legacy http values are not ours; neither has
+        // derivatives, and storagePathFor() would name something that is not theirs.
+        if (! $storedName || str_starts_with($storedName, 'demo_') || str_starts_with($storedName, 'http')) {
+            return;
+        }
+
+        foreach (self::VARIANT_WIDTHS as $width) {
+            try {
+                Storage::delete(self::storagePathFor(self::variantFilename($storedName, $width)));
+            } catch (\Throwable $e) {
+                report($e);
             }
         }
     }
@@ -623,6 +812,16 @@ class ImageUtils
         if (! $sourceImage) {
             return false;
         }
+
+        // This path re-encodes, and every encoder below drops the EXIF block, so a phone photo
+        // would lose the only record of which way up it is. Applied here rather than at the top
+        // because the early return above keeps the original bytes (and their tag) untouched.
+        $sourceImage = self::applyExifOrientation($sourceImage, $path);
+
+        // Orientations 5-8 swap width and height, so the destination has to be measured from the
+        // ROTATED image, not from the header read before the decode.
+        $srcWidth = imagesx($sourceImage);
+        $srcHeight = imagesy($sourceImage);
 
         $scale = $maxDim / max($srcWidth, $srcHeight);
         $dstWidth = (int) round($srcWidth * $scale);

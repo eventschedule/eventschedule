@@ -51,11 +51,14 @@ class MarketingController extends Controller
      * Same visibility rules as /browse: only events whose card shows a real image (own flyer, or
      * a talent/venue schedule's profile photo), so the wall is guaranteed visually rich posters.
      *
-     * Cached for 10 minutes: this is five correlated subqueries plus an excludeLikelyTest() regex
-     * pass, run on the single most-hit page on the site, and its answer only moves when somebody
-     * publishes an event. No invalidation is wired up, because a ten-minute-old wall is
-     * indistinguishable from a fresh one. Keyed on the app URL so a white-label nexus install
-     * cannot be served another install's wall.
+     * Cached for `marketing.wall_cache_seconds`: this is five correlated subqueries plus an
+     * excludeLikelyTest() regex pass, run on the single most-hit page on the site, and its answer
+     * only moves when somebody publishes an event. Keyed on the app URL so a white-label nexus
+     * install cannot be served another install's wall, and busted by forgetWallCache() from
+     * Event's saved/deleted hooks - the admin Hide/Unhide button is rendered ON this page, so a
+     * stale wall would contradict its own flash message and flip the event back on a re-click.
+     *
+     * A TTL of 0 (the test default) skips the cache entirely.
      */
     private function discoverWallEvents()
     {
@@ -76,13 +79,36 @@ class MarketingController extends Controller
             ->limit(25)
             ->get();
 
-        // The test cache store is `array` and survives RefreshDatabase within a process, so a
-        // wall cached by one test would render, against a wiped database, in the next one.
-        if (app()->runningUnitTests()) {
+        $ttl = (int) config('marketing.wall_cache_seconds');
+
+        if ($ttl <= 0) {
             return $build();
         }
 
-        return Cache::remember('marketing.wall.'.md5((string) config('app.url')), now()->addMinutes(10), $build);
+        return Cache::remember(self::wallCacheKey(), $ttl, $build);
+    }
+
+    /**
+     * The cache key discoverWallEvents() reads and writes.
+     *
+     * Per app URL: a white-label nexus install shares this process's cache store on the hosted
+     * deploy and must never be served another install's wall.
+     */
+    public static function wallCacheKey(): string
+    {
+        return 'marketing.wall.'.md5((string) config('app.url'));
+    }
+
+    /**
+     * Drop the cached homepage wall.
+     *
+     * Called from Event's saved/deleted hooks (see Event::WALL_CACHE_FIELDS) and from the admin
+     * discovery toggle. One Cache::forget, so it is cheap enough to run on every qualifying save;
+     * the next homepage hit pays for the rebuild.
+     */
+    public static function forgetWallCache(): void
+    {
+        Cache::forget(self::wallCacheKey());
     }
 
     /**
@@ -5218,6 +5244,12 @@ class MarketingController extends Controller
         $event = Event::findOrFail(UrlUtils::decodeIdOrFail($hash));
         $event->is_hidden_from_discovery = ! $event->is_hidden_from_discovery;
         $event->save();
+
+        // The save() above already busts it through Event's saved hook. Repeated here because
+        // this button is rendered ON the cached page: the redirect below re-renders the wall
+        // immediately, and a stale one would show the badge and the flash contradicting each
+        // other and flip the event back the next time it is clicked.
+        self::forgetWallCache();
 
         AuditService::log(
             'event.toggle_discovery',

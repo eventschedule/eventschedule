@@ -1,8 +1,12 @@
 @php
     $eventUrl = $event->getGuestUrl();
     $cardRole = $event->getViewableRole();
-    // 480px WebP derivative when one exists: the card's image header is ~400px wide.
+    // /browse lays these out one, two then three across, so the image header runs from the full
+    // viewport width down to a third of it - up to ~670 CSS px, which is 1340 device pixels at
+    // 2x. src stays on the 480 (or the original, when there are no derivatives at all) so
+    // nothing regresses for a row the pipeline has not reached.
     $imageUrl = $event->getImageUrl(480);
+    $imageSrcset = $event->imageSrcset();
     $isHidden = $event->is_hidden_from_discovery;
     $isAdmin = auth()->check() && auth()->user()->isAdmin();
     // Same timezone resolution as getShortDateRangeDisplay(), so every check
@@ -20,7 +24,7 @@
     {{-- Image header --}}
     <div class="relative aspect-[16/9] bg-gray-100 dark:bg-white/5 overflow-hidden">
         @if($imageUrl)
-            <img src="{{ $imageUrl }}" alt="{{ $event->name }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" width="640" height="360" loading="lazy" decoding="async">
+            <img src="{{ $imageUrl }}"@if($imageSrcset) srcset="{{ $imageSrcset }}" sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"@endif alt="{{ $event->name }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" width="640" height="360" loading="lazy" decoding="async">
         @else
             <div class="w-full h-full bg-gradient-to-br from-[#4E81FA] to-sky-500 flex items-center justify-center text-white font-bold text-4xl select-none">
                 {{ strtoupper(mb_substr($event->name, 0, 1)) }}

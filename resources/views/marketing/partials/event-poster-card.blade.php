@@ -6,8 +6,11 @@
 @php
     $eventUrl = $event->getGuestUrl();
     $cardRole = $event->getViewableRole();
-    // 480px WebP derivative when one exists: the card renders at 320x427.
+    // The card renders at 320x427 on desktop and 72vw on phones, so it wants up to ~640 device
+    // pixels at 2x - hence the srcset. src stays on the 480 (or the original, when there are no
+    // derivatives at all) so nothing regresses for a row the pipeline has not reached.
     $imageUrl = $event->getImageUrl(480);
+    $imageSrcset = $event->imageSrcset();
     $isHidden = $event->is_hidden_from_discovery;
     $isAdmin = auth()->check() && auth()->user()->isAdmin();
 @endphp
@@ -15,7 +18,7 @@
 <figure class="es-shot group relative w-[72vw] shrink-0 overflow-hidden rounded-2xl bg-gray-100 shadow-xl shadow-gray-900/10 ring-1 ring-gray-200 sm:w-[320px] {{ $isHidden ? 'opacity-60' : '' }}" data-tilt="3">
     <div class="relative aspect-[3/4]">
         @if($imageUrl)
-            <img src="{{ $imageUrl }}" alt="{{ $event->name }}" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" width="320" height="427" loading="lazy" decoding="async">
+            <img src="{{ $imageUrl }}"@if($imageSrcset) srcset="{{ $imageSrcset }}" sizes="(min-width: 640px) 320px, 72vw"@endif alt="{{ $event->name }}" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" width="320" height="427" loading="lazy" decoding="async">
         @else
             <div class="flex h-full w-full select-none items-center justify-center bg-gradient-to-br from-[#4E81FA] to-sky-500 text-7xl font-black text-white">
                 {{ strtoupper(mb_substr($event->name, 0, 1)) }}
