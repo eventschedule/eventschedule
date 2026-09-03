@@ -1022,14 +1022,24 @@ if (config('app.is_nexus')) {
         // Beacon target for outbound clicks on a federated listing. The card link
         // itself stays a direct followable link to the origin, so this cannot be a
         // tracking redirect without destroying the backlink federation exists to give.
-        Route::post('/browse/federated/{hash}/click', [MarketingController::class, 'federatedClick'])->name('marketing.federation.click')->middleware('throttle:120,1');
+        //
+        // NOT in CacheableMarketingResponse::STATELESS_ROUTES, and that is only safe while the
+        // federated card renders on /browse alone. This is a POST inside the web group on the
+        // marketing domain, so it starts a real session and sets laravel_session - the cookie
+        // the Cloudflare rule bypasses on, which takes that visitor off the edge for the rest
+        // of their session. marketing.browse is in EXCLUDED_ROUTES, so its visitors were never
+        // being served from the edge anyway and nothing is lost today. The day a federated card
+        // appears on any cacheable page - the homepage, a for-* page - this route has to join
+        // STATELESS_ROUTES in the SAME commit, or that page's visitors are dropped off the edge
+        // by their first click. It is the same failure the beacon below was moved there to fix.
+        Route::post('/browse/federated/{hash}/click', [MarketingController::class, 'federatedClick'])->name('marketing.federation.click')->middleware('throttle:120,1,federation_click');
         // Page-view beacon for the onboarding funnel. Anonymous marketing HTML is edge-cached,
         // so a cached page never reaches TrackMarketingVisit; layouts/marketing.blade.php
         // sendBeacon()s the route name here instead. CSRF only is excluded - sendBeacon cannot
         // carry a token, and this moves a counter rather than changing state. See docs/CACHING.md.
         Route::post('/marketing/visit', [MarketingController::class, 'recordVisit'])
             ->name('marketing.visit')
-            ->middleware('throttle:120,1')
+            ->middleware('throttle:120,1,marketing_visit')
             ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
         Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
         Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');
@@ -1250,14 +1260,24 @@ if (config('app.is_nexus')) {
             // Beacon target for outbound clicks on a federated listing. The card link
             // itself stays a direct followable link to the origin, so this cannot be a
             // tracking redirect without destroying the backlink federation exists to give.
-            Route::post('/browse/federated/{hash}/click', [MarketingController::class, 'federatedClick'])->name('marketing.federation.click')->middleware('throttle:120,1');
+            //
+            // NOT in CacheableMarketingResponse::STATELESS_ROUTES, and that is only safe while the
+            // federated card renders on /browse alone. This is a POST inside the web group on the
+            // marketing domain, so it starts a real session and sets laravel_session - the cookie
+            // the Cloudflare rule bypasses on, which takes that visitor off the edge for the rest
+            // of their session. marketing.browse is in EXCLUDED_ROUTES, so its visitors were never
+            // being served from the edge anyway and nothing is lost today. The day a federated card
+            // appears on any cacheable page - the homepage, a for-* page - this route has to join
+            // STATELESS_ROUTES in the SAME commit, or that page's visitors are dropped off the edge
+            // by their first click. It is the same failure the beacon below was moved there to fix.
+            Route::post('/browse/federated/{hash}/click', [MarketingController::class, 'federatedClick'])->name('marketing.federation.click')->middleware('throttle:120,1,federation_click');
             // Page-view beacon for the onboarding funnel. Anonymous marketing HTML is edge-cached,
             // so a cached page never reaches TrackMarketingVisit; layouts/marketing.blade.php
             // sendBeacon()s the route name here instead. CSRF only is excluded - sendBeacon cannot
             // carry a token, and this moves a counter rather than changing state. See docs/CACHING.md.
             Route::post('/marketing/visit', [MarketingController::class, 'recordVisit'])
                 ->name('marketing.visit')
-                ->middleware('throttle:120,1')
+                ->middleware('throttle:120,1,marketing_visit')
                 ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
             Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
             Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');

@@ -268,8 +268,47 @@ class MarketingEdgeCacheTest extends TestCase
 
         $this->assertNotContains(ValidateCsrfToken::class, $beacon, 'sendBeacon cannot carry a CSRF token.');
         $this->assertNotEmpty(
-            preg_grep('/ThrottleRequests:120,1$/', $beacon),
-            'The beacon must be rate limited: '.implode(', ', $beacon)
+            preg_grep('/ThrottleRequests:120,1,marketing_visit$/', $beacon),
+            'The beacon must be rate limited in its OWN bucket: '.implode(', ', $beacon)
+        );
+    }
+
+    /**
+     * Both marketing beacons need a NAMED throttle bucket, not just a limit.
+     *
+     * ThrottleRequests::resolveRequestSignature() falls back to sha1(domain|ip) for a guest, so
+     * every unprefixed `throttle:n,m` on the marketing domain counts into ONE shared bucket per
+     * IP. That was survivable while a visitor's origin traffic was mostly page fetches. It is
+     * not now: an edge-cached visitor generates no origin page hits at all, so the beacon is
+     * the only thing left, and a large office or CGNAT egress concentrates every one of its
+     * users onto a single counter. A 429 there is silent - recordVisit simply does not count -
+     * and /admin/users under-reports in a way indistinguishable from the beacon being broken,
+     * which is the one failure the post-deploy funnel check is watching for.
+     */
+    public function test_the_marketing_beacons_do_not_share_a_throttle_bucket(): void
+    {
+        $buckets = [];
+
+        foreach (['marketing.visit', 'marketing.federation.click'] as $name) {
+            $throttles = preg_grep('/ThrottleRequests:/', $this->middlewareFor($name));
+
+            $this->assertNotEmpty($throttles, $name.' must be rate limited.');
+
+            foreach ($throttles as $throttle) {
+                $this->assertMatchesRegularExpression(
+                    '/ThrottleRequests:\d+,\d+,\w+$/',
+                    $throttle,
+                    $name.' needs a named bucket, or it shares one with every other guest route.'
+                );
+
+                $buckets[$name] = $throttle;
+            }
+        }
+
+        $this->assertCount(
+            count($buckets),
+            array_unique($buckets),
+            'Each beacon needs its own bucket: '.json_encode($buckets)
         );
     }
 

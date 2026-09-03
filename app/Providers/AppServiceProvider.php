@@ -6,10 +6,12 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Policies\EventPolicy;
 use App\Policies\RolePolicy;
+use App\Listeners\VerifyApplicationHealth;
 use App\Services\ScheduledTaskRecorder;
 use App\Support\SafeTranslationLoader;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Events\CommandFinished;
+use Illuminate\Foundation\Events\DiagnosingHealth;
 use Illuminate\Console\Events\ScheduledTaskFailed;
 use Illuminate\Console\Events\ScheduledTaskFinished;
 use Illuminate\Console\Events\ScheduledTaskSkipped;
@@ -237,6 +239,11 @@ class AppServiceProvider extends ServiceProvider
         EventFacade::listen(ScheduledTaskFinished::class, [ScheduledTaskRecorder::class, 'finished']);
         EventFacade::listen(ScheduledTaskFailed::class, [ScheduledTaskRecorder::class, 'failed']);
         EventFacade::listen(ScheduledTaskSkipped::class, [ScheduledTaskRecorder::class, 'skipped']);
+
+        // Give GET /up something to actually verify. See VerifyApplicationHealth: it checks the
+        // database and a cache round trip, and deliberately NOT the scheduler, because a failing
+        // health check is grounds for App Platform to recycle the container.
+        EventFacade::listen(DiagnosingHealth::class, [VerifyApplicationHealth::class, 'handle']);
 
         View::composer('marketing.partials.header', function ($view) {
             $view->with('githubStars', \App\Utils\GitHubUtils::getStars());

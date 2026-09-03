@@ -51,12 +51,17 @@ return [
     // Accounts one onboarding-nudge run may reach. A cap on PEOPLE for the whole run, not on
     // each stage query: per stage, the overflow from stage 3 fell into the stage 2 query in the
     // same run and those accounts received the entire sequence within hours.
-    'onboarding_nudge_batch' => (int) env('ONBOARDING_NUDGE_BATCH', 500),
+    //
+    // `?:` not a default argument, for the reason spelled out below: an EMPTY value in .env
+    // yields '' and (int) '' is 0. Both nudge commands floor the result with max(1, ...), so a
+    // blank var would not disable the run - it would drain the queue one nudge at a time, which
+    // is far harder to notice than a stop.
+    'onboarding_nudge_batch' => (int) (env('ONBOARDING_NUDGE_BATCH') ?: 500),
 
     // Activation nudges are per SCHEDULE and every trigger is bounded at both ends, so a run
     // is small by construction. The lower ceiling is deliberate anyway: these reach people who
     // are already using the app, where a burst of mail costs more than a slow drain.
-    'activation_nudge_batch' => (int) env('ACTIVATION_NUDGE_BATCH', 200),
+    'activation_nudge_batch' => (int) (env('ACTIVATION_NUDGE_BATCH') ?: 200),
 
     // Audience mail (newsletters, and automatic event announcements) from a schedule that has
     // neither its own SMTP nor an SMS-verified owner still goes out on the PLATFORM mailer, so the

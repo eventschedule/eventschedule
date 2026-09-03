@@ -16,8 +16,20 @@ Reference material, both authoritative and more detailed than this file:
 
 ## What is shipping
 
-`main` is 44 commits and 11 migrations ahead of what is live. Deploys are manual
+`main` is 47 commits and 11 migrations ahead of what is live. Deploys are manual
 (`deploy_on_push` is unset on the app spec), so nothing in this release has reached production.
+
+Two commands do most of the checking in this file, and both are read-only:
+
+```bash
+php artisan deploy:preflight     # before you deploy: working tree, live app spec, baseline
+php artisan deploy:verify        # after each step: edge headers, scheduler, queue, cache
+```
+
+`deploy:preflight` runs from a checkout (it reads the live app spec over the DO API).
+`deploy:verify` runs from anywhere for the edge half and on the container for the rest; before
+the cutover it is SUPPOSED to fail its edge assertions, which is how you know they are real.
+
 The pre-deploy baseline, confirmed live:
 
 ```
@@ -48,13 +60,13 @@ Read-only. Do all of it before touching anything.
 | # | Check | Why it matters |
 |---|---|---|
 | P1 | **Snapshot the database.** | `2026_08_28_000000_replace_federated_event_url_with_is_online.php` **drops `federated_events.event_url`**. Its own `down()` recreates the column empty: the stored links are not recoverable, which is the point of the change. `2026_09_02_000000_reset_blog_post_updated_at.php` rewrites `updated_at` on ~161 blog rows with a no-op `down()`. Neither is reversible by a deployment rollback. |
-| P2 | `SELECT COUNT(*) FROM events;` | Two ALTERs land on `events` this release: `widen_events_event_url` (varchar 255 to 500, a table rebuild on MySQL 8) and `add_image_variants_to_events`. `migrate --force` runs in the service's start command, so a slow rebuild stalls the deploy and blocks writes. On a large table, run those two by hand from the console *before* triggering the deploy. |
-| P3 | Read the live app spec and record the current values | Production config is the app spec, not any `.env`. Confirm `CACHE_STORE` is still unset, `QUEUE_CONNECTION=database`, `APP_URL=https://eventschedule.com`, and note the current deployment ID for rollback. |
-| P4 | In that spec, check whether `STRIPE_LEGACY_PRICE_*` / `STRIPE_LEGACY_PRICE_AMOUNTS` are set | The legacy price recognition mechanism was removed this release. Stripe price IDs are what `PlanPriceUtils` recognises a subscriber's tier and term *from*, so a live subscriber still on a retired price ID silently loses Pro or Enterprise recognition after the deploy. |
-| P5 | In that spec, check `STRIPE_PRO_MONTHLY_AMOUNT` and siblings | The *defaults* changed from 9/90/29/290 to 5/50/15/150. If those vars are unset on the spec, displayed plan prices change the moment you deploy. |
+| P2 | `SELECT COUNT(*) FROM events;`, `SELECT COUNT(*) FROM federated_events;`, and `SELECT COUNT(*) FROM events WHERE coupon_discount IS NULL AND coupon_discount_type IS NOT NULL;` | **Three** migrations land on `events`, not two. Two are ALTERs: `widen_events_event_url` (varchar 255 to 500, a table rebuild on MySQL 8) and `add_image_variants_to_events` (a JSON column at the end, so INSTANT). The third, `reset_untouched_coupon_discount_types`, is the only one that WRITES rows, and neither column it filters on is indexed - so it scans `events` inside the start command's `migrate --force`. Its write set is small (the columns only exist since 2026-08-21) but the scan is not. `federated_events` is separately rebuilt **twice** in one migration: `replace_federated_event_url_with_is_online` adds `is_online` positionally with `->after()`, which forfeits `ALGORITHM=INSTANT`, then drops `event_url`. On large tables, run these by hand from the console *before* triggering the deploy. |
+| P3 | `php artisan deploy:preflight` | Production config is the app spec, not any `.env`. The command confirms `QUEUE_CONNECTION=database`, `APP_URL`, `IS_HOSTED`, `IS_NEXUS`, reports `CACHE_STORE`, checks the web service is **`instance_count: 1`** (more than one container on the `file` cache store means every lock in the app serialises against nothing), prints the deployment ID a rollback targets, and writes the full custom-domain list to `storage/deploy/`. |
+| P4 | On the console: `SELECT DISTINCT stripe_price FROM subscriptions WHERE stripe_status IN ('active','trialing','past_due');` | **The highest-value check in this table, and the one that was missing.** The legacy price recognition mechanism was removed this release, so `PlanPriceUtils` now matches a tier *only* against the four `STRIPE_PRICE_*` IDs on the spec. Every value this query returns must be one of those four. Anything else is a customer whose card is still being charged while `hasActiveEnterpriseSubscription()` returns false, both webhook handlers decline to write and ARR counts them at zero - the cost is spelled out in `PlanPriceUtils::tierFor()`'s docblock. Note the four configured IDs all share a `price_1T3s...` prefix, i.e. one creation batch, so anyone predating it is already stranded. `deploy:preflight` also confirms no `STRIPE_LEGACY_*` remains on the spec. |
+| P5 | On the console: `SELECT \`key\`, value FROM settings WHERE \`key\` LIKE 'plan_price_%';` | The *defaults* changed from 9/90/29/290 to 5/50/15/150. **The env vars are named `STRIPE_PRICE_MONTHLY_AMOUNT`, `STRIPE_PRICE_YEARLY_AMOUNT`, `STRIPE_ENTERPRISE_PRICE_MONTHLY_AMOUNT` and `STRIPE_ENTERPRISE_PRICE_YEARLY_AMOUNT`** - earlier revisions of this file named `STRIPE_PRO_MONTHLY_AMOUNT`, which exists nowhere in the codebase. But config is only the *second* layer: `PlatformPricing` reads the `settings` row first, so what the site advertises is decided by this query, not by the spec. As of writing production already advertises 5/50/15/150, so the config change is an alignment and the displayed price does not move. Note ARR, MRR and renewal emails deliberately read **config**, never `PlatformPricing` - so those figures *will* restate on deploy. That is a reporting artefact, not lost revenue. |
 | P6 | Capture a baseline from `/admin/users` | Record the "Visited site", page-view, docs and pricing funnel numbers. After the Cloudflare rule, origin-side counting stops and the beacon takes over; without a before-number a broken beacon is indistinguishable from normal variance. |
 | P7 | Confirm the external cron can be disabled in one click, and record the current `APP_CRON_SECRET` | Re-enabling the cron is the only emergency fallback that does not require fixing the worker. Step 8 says **disable, not delete**. |
-| P8 | `git status` clean, `HEAD == origin/main`, full suite green | `.github/workflows/test.yml` runs the whole Unit and Feature suite on push. There is **no release gate** on `build.yml`. |
+| P8 | `php artisan deploy:preflight`, then a green CI run | The deploy ships `origin/main`, not your disk. `deploy:preflight` fails on an unpushed commit or a dirty tree, and lists untracked paths separately because those are the ones `git commit -am` silently leaves behind - an asset referenced by committed code deploys as a 404 and nothing local ever notices. It also fails if `config/sitemap_lastmod.php` is older than the newest marketing view, which is the "run `php artisan sitemap:lastmod` before a release" rule made mechanical. `.github/workflows/test.yml` runs the whole Unit and Feature suite on push. There is **no release gate** on `build.yml`. |
 
 Reading the app spec (P3 to P5):
 
@@ -100,8 +112,8 @@ rebuild would surface); deployment `ACTIVE`; `/admin/queue` shows no failed-job 
 the homepage, a schedule page and checkout; `/admin` shows no new alerts. From the component
 console, `php artisan schedule:list` shows a name against every entry.
 
-Then verify the edge headers at origin. Cloudflare will still say `BYPASS`, because no rule
-exists yet:
+Then verify the edge headers at origin with `php artisan deploy:verify --edge`. Cloudflare will
+still say `BYPASS`, because no rule exists yet, but the origin half must already be right:
 
 ```
 curl -sI https://eventschedule.com/pricing
@@ -168,7 +180,12 @@ really is named `laravel_session` (`config('session.cookie')`), so the expressio
 written. It breaks *silently* if `APP_NAME` or `SESSION_COOKIE` ever changes, and every signed-in
 visitor would then be served the anonymous copy.
 
-**Verify:**
+**Verify:** `php artisan deploy:verify --edge` should now be fully green. It asserts the same
+contract the curls below do, plus two things that are easy to miss by eye: that no cacheable page
+sends a `Vary` on `Cookie` (which would give every visitor a private cache entry, since the
+`utm_*` cookies are encrypted and differ per visitor), and that no sampled apex 200 lacks a
+`Cache-Control` header at all - the rule's Edge TTL is "use cache-control if present, **use
+default otherwise**", so a header-less response becomes newly cacheable at the zone default.
 
 ```
 curl -sI https://eventschedule.com/pricing           # cf-cache-status MISS, then HIT on repeat
@@ -195,6 +212,12 @@ App-level environment variables, saved together so they cost one redeploy:
 - `BACKUP_SPACES_KEY` / `SECRET` / `REGION` / `ENDPOINT` / `BUCKET`, pointing at the step-1 bucket
 - `CACHE_STORE=database`, scope **RUN_AND_BUILD_TIME**
 
+**Type `database` carefully.** `config/cache.php` reads `env('CACHE_STORE', 'file')`, and a second
+argument never fires for a present-but-EMPTY value - so a blank entry is not a fallback to `file`,
+it is `''` reaching `CacheManager::resolve()` and throwing `Cache store [] is not defined` on the
+first cache read anywhere in the app. That is a site-wide 500, and `deploy:preflight` now fails
+loudly on it rather than reporting it as "unset".
+
 `CACHE_STORE` is the hard prerequisite for a second container. On the `file` default each
 container has its own `storage/framework/cache/data`, so nothing serialises across them: every
 scheduler `withoutOverlapping()` mutex, the seven named cross-rail locks (`translate_data_lock`,
@@ -215,9 +238,17 @@ post exists today, `SendSubscriptionReminders` gates on `*_reminder_sent_at`,
 `NotifyRequestChanges` on `last_notified_*_count`). Still, **do not do this between 00:00 and
 00:05 UTC**, where it would land on top of the day's genuine daily pass and read as a fault.
 
-**Verify:** `SELECT COUNT(*) FROM cache;` climbs within a minute. Then the backup round-trip: full
-export, emailed link, download, import into a throwaway schedule, and finally confirm the object
-is **not** readable at its Spaces origin URL.
+**Verify:** `php artisan deploy:verify --local` on the container reports the cache store as
+`database` and round-tripping, and `SELECT COUNT(*) FROM cache;` climbs within a minute. Then the
+backup round-trip: full export, emailed link, download, import into a throwaway schedule, and
+finally confirm the object is **not** readable at its Spaces origin URL.
+
+**Repeat that round-trip after step 7**, and treat this one as provisional until you have. The
+failure it is guarding against is invisible from here: with `BACKUP_DISK_DRIVER` unset the export
+writes to whichever container drained the queue, the job is marked complete, the user is emailed a
+working-looking link, and the download 404s from the web container with nothing logged
+(`BackupController::download()`). While one container does both, that cannot happen. Step 7 moves
+the queue to the worker, which is exactly when it can.
 
 *Undo:* delete the variables. Safe only while one container exists, which means through step 6,
 where the worker is parked on `sleep infinity` and runs nothing. From step 7 onward this is
@@ -236,20 +267,32 @@ Create, then Create Component, then **Worker**.
 | Run command | `sleep infinity` for now |
 | Instance | `apps-s-1vcpu-0.5gb`, count 1 (DigitalOcean refuses count above 1 on this slug, so "never two schedulers" is platform-enforced) |
 | Component env | `LOG_CHANNEL=stderr`, `SCHEDULER_RAIL=worker` |
-| **App-level** env | `SCHEDULER_EXPECTED_RAIL=worker` |
 | Alert | `RESTART_COUNT > 3` over 5 minutes |
+
+**Do NOT set `SCHEDULER_EXPECTED_RAIL` yet.** It belongs at the start of step 7, and setting it
+here is an ordering mistake earlier revisions of this file made. `SchedulerHealth::isStalled()`
+treats an expected rail that has never been seen as stalled - correctly, since a worker that has
+never ticked is not healthy - and a worker parked on `sleep infinity` writes no heartbeat key at
+all. So saving it here turns the `/admin` banner, the nav badge and the `/admin/queue` card red
+for the entire gap between step 6 and step 7, and while `scheduler_stalled` is red
+`AdminAlertService` **suppresses the queue-backlog row**, so a genuine backlog would be invisible
+at the same time.
 
 Do **not** copy other secrets to component scope, since they are inherited. Do **not** add
 `migrate --force`, because components deploy simultaneously and the service already migrates. Do
 **not** run `optimize`.
 
-`SCHEDULER_EXPECTED_RAIL` is the one that matters and has a different scope from the other two.
-Without it, `SchedulerHealth::isStalled()` falls back to the aggregate heartbeat key that the HTTP
-rail also writes, so a dead worker would be completely invisible. It must match the worker's
-`SCHEDULER_RAIL` **exactly**; a mismatch is a permanent false red.
+`SCHEDULER_EXPECTED_RAIL` is the one that matters, and it is the only one that is **app-level**
+rather than component scope - the *web* container is what reads it, so a component-scoped copy is
+the same as not setting it. Without it, `SchedulerHealth::isStalled()` falls back to the aggregate
+heartbeat key that the HTTP rail also writes, so a dead worker would be completely invisible. It
+must match the worker's `SCHEDULER_RAIL` **exactly**; a mismatch is a permanent false red, and
+`deploy:preflight` fails when no component announces the rail the app expects.
 
 **Verify:** builds, stays `ACTIVE`, no restart loop, cost reads $10/mo. `php -m | grep pcntl` on
-the worker.
+the worker (without it no queued job ever times out, and a hung one blocks its tick indefinitely).
+`/admin` should still be clear at this point - if it is red, `SCHEDULER_EXPECTED_RAIL` was set too
+early.
 
 *Undo:* delete the component. It runs nothing, so nothing else is affected.
 
@@ -262,7 +305,11 @@ the HTTP rail runs its whole daily block on the first tick after midnight UTC, t
 worker's twelve `daily()` tasks are scheduled for. Overlapping there means running the daily block
 twice, together.
 
-Set the run command to two lines:
+First set the **app-level** env var deferred from step 6:
+
+- `SCHEDULER_EXPECTED_RAIL=worker` (app level, not component scope)
+
+Then set the run command to two lines:
 
 ```
 php artisan translations:publish --no-prune || true
@@ -273,7 +320,10 @@ Line 1 exists because `storage/` comes from the image on every deploy and overri
 in git; without it the worker sends every notification in base strings until the daily task next
 runs at 00:00 UTC. `|| true` keeps a database blip at boot from stopping the scheduler starting.
 
-**Verify:** worker logs show a `Running [...] DONE` line per due task each minute.
+**Verify:** worker logs show a `Running [...] DONE` line per due task each minute, and
+`php artisan deploy:verify --local` on the web container reports the heartbeat fresh on rail
+`worker`, no task in a `failed` / `overdue` / `never_finished` state, and which instance id is
+actually completing tasks.
 
 *Undo:* set the run command back to `sleep infinity`.
 
@@ -288,8 +338,10 @@ commands and both AI blog generators would duplicate mail, spend and posts. Only
 carry an explicit cross-rail lock: `app:translate`, `app:charge-installments`,
 `app:retry-failed-jobs` and the three calendar syncs. Keep the overlap to minutes.
 
-**Verify:** `SELECT COUNT(*) FROM jobs;` stays near zero; the Scheduler card on `/admin/queue` is
-fresh and lists the `worker` rail; the "scheduled tasks are not running" alert stays clear.
+**Verify:** `php artisan deploy:verify --local` - it checks the queue depth using `available_at`
+rather than `created_at` (a delayed dispatch has `created_at = now` and would report a backlog
+that does not exist), the heartbeat, the per-task states and the admin alert list in one pass.
+The Scheduler card on `/admin/queue` should be fresh and list the `worker` rail.
 
 *Undo:* re-enable the cron and park the worker. A few duplicate emails beats a stopped scheduler.
 
@@ -304,15 +356,26 @@ Once verified, turn the two "still to do" claims into fact:
 
 ## Verification after the cutover
 
-- `curl -sI https://eventschedule.com/pricing` gives `public, max-age=0, s-maxage=600`, no
-  `set-cookie`, and `cf-cache-status: HIT` on the second call.
-- `?lang=fr`, `/contact` and `/browse` stay `no-cache, private`.
-- Signed in, in a real browser: marketing pages render the signed-in header every time.
-- Worker logs show `Running [...] DONE` lines each minute.
-- `/admin/queue`: Scheduler card fresh, `worker` rail present, no per-task `never_finished`.
-- `SELECT COUNT(*) FROM cache;` non-zero and moving; `SELECT COUNT(*) FROM jobs;` near zero.
+Most of this list is one command, run twice - once from anywhere, once on the container:
+
+```bash
+php artisan deploy:verify              # edge contract + in-app health
+php artisan deploy:verify --local      # on the container: scheduler, queue, cache, alerts
+```
+
+It covers the edge headers, the private pages, the two stateless support routes, the
+`Cache-Control` sweep, the scheduler rail and per-task states, the queue depth and the admin
+alert list. What it deliberately does NOT cover, because no automated check can:
+
+- **Signed in, in a real browser: marketing pages render the signed-in header every time.** This
+  is the one failure mode no response header can defend against - the origin refuses to *mark* a
+  signed-in visitor's page public, but nothing in a response stops a shared cache *serving* them
+  one it stored earlier for somebody else. Only the Cloudflare cookie-bypass rule does that.
+- `cf-cache-status: HIT` on the second call - `deploy:verify` reports the status but does not
+  assert it, since a cold edge legitimately MISSes.
+- Worker logs showing `Running [...] DONE` lines each minute.
 - Backup export, download and import round-trip works, and the object is not public at its origin
-  URL.
+  URL. Re-do this **after** step 7, not only after step 5.
 - `/admin/users` funnel numbers sit in the same range as the P6 baseline. A sharp drop means the
   beacon is not firing: check the browser console for a CSP violation, and `marketing.visit` for
   419s or 429s. A sharp rise means double counting.
@@ -335,6 +398,21 @@ from the release flow is a known un-wired follow-up.
   reject filter evaluated before the `Running [...]` line, so a wedged task is indistinguishable
   from "not due" in the logs. The per-task list on `/admin/queue` is the only place it shows.
 - Twelve `daily()` tasks fire together at 00:00 UTC, sequentially, in one container.
+- **A price or copy change made at `/admin/settings` is not visible on `/pricing`** for up to ten
+  minutes plus serve-stale, and there is no purge hook on a settings save the way there is a
+  manual one on a deploy. Purge the zone after changing an advertised price.
+- **Flyer variant generation now shares the worker's memory.** `GenerateEventImageVariants` is
+  drained by the `process-queue` entry inside `schedule:run`, and decodes up to 12 MP through GD
+  on the 0.5 GB box - the second consumer to watch alongside `app:send-graphic-emails`.
+- **Automatic new-event announcements are live.** `announce_new_events` defaults to true and
+  `role_subscribers` starts empty, so day one is quiet by construction; a real audience appears
+  as guests tick the checkout opt-in. Watch for `Log::warning('Event announcement blocked')`: a
+  schedule inside its own 24h SMTP failure window sends nothing, and `claimWindow()` has already
+  advanced `roles.last_announced_at`, so that digest is skipped rather than retried.
+- **Ticket-panel visibility widened on deploy.** `User::canViewEventData()` replaced an owner-only
+  check, so every team admin on an attached non-curator schedule can now see ticket prices,
+  payment configuration and sales for that schedule's events. Intended, but it is a data-visibility
+  change that takes effect the moment the code ships.
 
 ## Selfhost release
 

@@ -17,8 +17,18 @@ return [
     | store survives RefreshDatabase within a process, so a wall cached by one test would
     | otherwise render against the next test's wiped database.
     |
+    | is_numeric() rather than the `?:` form used elsewhere in config/, because 0 is a MEANINGFUL
+    | value here and `?:` would map it straight back to 600, breaking the pin phpunit.xml relies
+    | on. A second argument to env() is wrong for the opposite reason: it never fires for a
+    | present-but-empty var, and (int) '' is 0 - so a blank entry on a deployed app spec would
+    | silently disable the cache and put five correlated subqueries on every origin hit of `/`.
+    | is_numeric() is the only form that separates "unset or blank" from "deliberately zero":
+    | null and '' fail it, '0' passes.
+    |
     */
 
-    'wall_cache_seconds' => (int) env('MARKETING_WALL_CACHE_SECONDS', 600),
+    'wall_cache_seconds' => is_numeric(env('MARKETING_WALL_CACHE_SECONDS'))
+        ? (int) env('MARKETING_WALL_CACHE_SECONDS')
+        : 600,
 
 ];

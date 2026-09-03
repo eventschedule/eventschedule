@@ -349,6 +349,31 @@ class DigitalOceanService
     }
 
     /**
+     * The whole live app object, for read-only inspection.
+     *
+     * Production configuration for the hosted install IS the app spec - there is no .env on the
+     * container - so anything that wants to assert "is CACHE_STORE set", "how many web instances
+     * are there", "which deployment would a rollback go back to" has to read it from here.
+     * app:deploy-preflight is the caller.
+     *
+     * READ ONLY, and that is not a style preference. applyDomainChanges() PUTs a spec built from
+     * this same snapshot, and every PUT creates a deployment; two writers racing from one
+     * snapshot silently drop a customer's custom domain. Nothing reachable from here may write.
+     * Unlike getAppDomains(), this lets the RuntimeException out: a preflight that cannot read
+     * the spec must fail loudly rather than report an empty one as though everything were unset.
+     *
+     * @throws \RuntimeException when the app is unreadable
+     */
+    public function getAppSnapshot(): array
+    {
+        if (! $this->isConfigured()) {
+            throw new \RuntimeException('DigitalOcean is not configured: set DO_API_TOKEN and DO_APP_ID.');
+        }
+
+        return $this->getApp();
+    }
+
+    /**
      * Get the full app object from DO API.
      */
     protected function getApp(): array
