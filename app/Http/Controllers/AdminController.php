@@ -18,6 +18,7 @@ use App\Models\Newsletter;
 use App\Models\Referral;
 use App\Models\Role;
 use App\Models\Sale;
+use App\Models\ScheduledTaskRun;
 use App\Models\Setting;
 use App\Models\UsageDaily;
 use App\Models\User;
@@ -747,19 +748,19 @@ class AdminController extends Controller
         // These are the rows the ARR loop above skipped: PlanPriceUtils::amountFor() returns
         // null for an unrecognized price, so they contribute nothing to revenue while Stripe
         // keeps charging them.
-        $configuredPriceIds = array_values(array_filter([
-            PlanPriceUtils::current('pro', 'monthly'),
-            PlanPriceUtils::current('pro', 'yearly'),
-            PlanPriceUtils::current('enterprise', 'monthly'),
-            PlanPriceUtils::current('enterprise', 'yearly'),
-        ]));
+        $configuredPriceIds = AdminAlertService::configuredPriceIds();
 
+        // leftJoin, not join. subscriptions.role_id carries no foreign key and RoleController's
+        // delete path calls $role->delete() with no subscription cleanup and no Stripe
+        // cancellation, so a deleted schedule can leave an actively-billing row behind. An inner
+        // join hides exactly those, and the alert - which counts without joining - would then
+        // report a number this panel cannot show, linking a red row to an empty page. An
+        // ownerless subscription still being charged is the worst case, not one to drop.
         $unrecognizedSubscriptions = $configuredPriceIds === [] ? collect() : DB::table('subscriptions')
-            ->join('roles', 'roles.id', '=', 'subscriptions.role_id')
+            ->leftJoin('roles', 'roles.id', '=', 'subscriptions.role_id')
             ->where('subscriptions.type', 'default')
             ->whereIn('subscriptions.stripe_status', ['active', 'trialing', 'past_due'])
-            ->whereNotNull('subscriptions.stripe_price')
-            ->whereNotIn('subscriptions.stripe_price', $configuredPriceIds)
+            ->where(fn ($q) => AdminAlertService::unrecognizedPrice($q, $configuredPriceIds))
             ->orderBy('subscriptions.created_at')
             ->get([
                 'subscriptions.stripe_price',
@@ -1958,6 +1959,19 @@ class AdminController extends Controller
         $schedulerStaleMinutes = SchedulerHealth::staleMinutes();
         $schedulerStalled = SchedulerHealth::isStalled();
         $schedulerRails = SchedulerHealth::rails();
+        // What is actually running this scheduler, and whether this container can see it.
+        $cacheStore = SchedulerHealth::cacheStore();
+        $cacheStoreIsShared = SchedulerHealth::cacheStoreIsShared();
+        $cacheHidesScheduler = SchedulerHealth::cacheIsHidingAHealthyScheduler();
+        $lastTaskActivityAt = SchedulerHealth::lastTaskActivityAt();
+        // The container and rail actually completing work, from the database rather than the
+        // cache - the evidence behind the note above, and otherwise only visible as a tooltip.
+        $lastTaskHost = ScheduledTaskRun::whereNotNull('last_started_at')
+            ->orderByDesc('last_started_at')
+            ->value('last_host');
+        $lastTaskRail = ScheduledTaskRun::whereNotNull('last_started_at')
+            ->orderByDesc('last_started_at')
+            ->value('last_via');
         $schedulerHttpRailOnly = SchedulerHealth::isHttpRailOnly();
 
         // Per-task health. Ordered worst-first so the exceptions block reads top-down, then by
@@ -2042,6 +2056,12 @@ class AdminController extends Controller
             'schedulerStalled',
             'schedulerStaleMinutes',
             'schedulerRails',
+            'cacheStore',
+            'cacheStoreIsShared',
+            'cacheHidesScheduler',
+            'lastTaskActivityAt',
+            'lastTaskHost',
+            'lastTaskRail',
             'schedulerHttpRailOnly',
             'scheduledTasks',
             'taskExceptions',

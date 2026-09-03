@@ -560,6 +560,110 @@ class SchedulerHealthStateTest extends TestCase
             'the expected rail is ticking, so nothing is stalled');
     }
 
+    /**
+     * FAILS before the change: isHttpRailOnly() was true, so /admin/queue rendered "the cron
+     * endpoint is the liveness signal for this install" underneath a red stalled banner.
+     *
+     * A worker that has NEVER ticked writes no cache key at all, so rails() had nothing to find
+     * and the "does any non-http rail exist" guard never fired. That is the state after step 7 of
+     * the cutover if the worker fails to build, crash-loops, or has a SCHEDULER_RAIL typo - the
+     * one moment the page must not reassure anybody. A DECLARED rail settles it without consulting
+     * any key.
+     */
+    public function test_a_worker_that_never_ticked_is_not_called_an_http_only_install(): void
+    {
+        config(['app.scheduler_expected_rail' => 'worker']);
+
+        $this->tick('http');   // the cron keeps the aggregate and the http rail fresh
+
+        $this->assertTrue(SchedulerHealth::isStalled(),
+            'an expected rail that has never been seen is stalled');
+        $this->assertFalse(SchedulerHealth::isHttpRailOnly(),
+            'an install that declares a worker rail must never be told the cron endpoint is its liveness signal');
+    }
+
+    /**
+     * FAILS before the change: rails() dropped any rail with no cache key, so with a worker that
+     * had never ticked the word "worker" appeared nowhere on /admin/queue - the operator saw http
+     * ticking happily and no sign of the thing they were waiting for.
+     *
+     * Scoped to the EXPECTED rail: an unused entry in RAILS stays hidden rather than every install
+     * growing permanent "never seen" rows.
+     */
+    public function test_an_expected_rail_that_never_ticked_is_listed_as_never_seen(): void
+    {
+        config(['app.scheduler_expected_rail' => 'worker']);
+
+        $this->tick('http');
+
+        $worker = SchedulerHealth::rails()->firstWhere('name', 'worker');
+
+        $this->assertNotNull($worker, 'the rail being waited on must be listed');
+        $this->assertNull($worker->at, 'it has never ticked, so it has no timestamp');
+        $this->assertTrue($worker->stale);
+
+        $this->assertNull(SchedulerHealth::rails()->firstWhere('name', 'cron'),
+            'a rail that is neither expected nor ticking stays hidden');
+    }
+
+    /**
+     * The cutover failure nothing else on the page can distinguish: a cache store that is not
+     * shared between containers. The worker writes its heartbeat into its own container while its
+     * task rows land in the shared database, so the scheduler reads as stalled on a completely
+     * healthy install.
+     */
+    public function test_a_per_container_cache_with_live_tasks_is_reported_as_the_cause(): void
+    {
+        config(['app.scheduler_expected_rail' => 'worker', 'cache.default' => 'file']);
+
+        ScheduledTaskRun::create([
+            'name' => 'process-queue',
+            'last_started_at' => now(),
+            'last_finished_at' => now(),
+            'last_status' => ScheduledTaskRun::STATUS_SUCCEEDED,
+            'last_via' => 'worker',
+            'last_host' => 'scheduler-abc123',
+        ]);
+
+        $this->assertTrue(SchedulerHealth::isStalled());
+        $this->assertFalse(SchedulerHealth::cacheStoreIsShared());
+        $this->assertTrue(SchedulerHealth::cacheIsHidingAHealthyScheduler(),
+            'fresh task rows in the database with no readable heartbeat means the cache is the broken thing');
+    }
+
+    /**
+     * The mirror image: on a shared store the page must NOT blame the cache, because that
+     * explanation has not been established. The operator still sees the stall and the store name.
+     */
+    public function test_a_shared_cache_is_never_blamed(): void
+    {
+        config(['app.scheduler_expected_rail' => 'worker', 'cache.default' => 'database']);
+
+        ScheduledTaskRun::create([
+            'name' => 'process-queue',
+            'last_started_at' => now(),
+            'last_status' => ScheduledTaskRun::STATUS_SUCCEEDED,
+            'last_via' => 'worker',
+            'last_host' => 'scheduler-abc123',
+        ]);
+
+        $this->assertTrue(SchedulerHealth::cacheStoreIsShared());
+        $this->assertFalse(SchedulerHealth::cacheIsHidingAHealthyScheduler());
+    }
+
+    /**
+     * And with no task activity at all it really is a dead worker, so the cache must not be blamed
+     * for that either.
+     */
+    public function test_a_dead_worker_on_a_per_container_cache_is_not_blamed_on_the_cache(): void
+    {
+        config(['app.scheduler_expected_rail' => 'worker', 'cache.default' => 'file']);
+
+        $this->assertTrue(SchedulerHealth::isStalled());
+        $this->assertFalse(SchedulerHealth::cacheIsHidingAHealthyScheduler(),
+            'no task rows means nothing is running - that is a dead worker, not a cache problem');
+    }
+
     public function test_an_http_only_install_is_detected(): void
     {
         $this->tick('http');

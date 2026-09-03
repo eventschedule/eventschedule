@@ -61,15 +61,23 @@
                 </p>
             </div>
 
-            {{-- 3-up: complete, so the bento-completeness rule holds. Stacks on a phone. --}}
-            <div class="grid grid-cols-1 sm:grid-cols-3 border-t border-gray-200 dark:border-gray-700 divide-y sm:divide-y-0 sm:divide-x sm:rtl:divide-x-reverse divide-gray-200 dark:divide-gray-700">
+            {{-- 4-up, complete at both breakpoints (2x2, then 1x4), so the bento rule holds.
+                 Stacks on a phone. --}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-t border-gray-200 dark:border-gray-700 divide-y sm:divide-y-0 sm:divide-x sm:rtl:divide-x-reverse divide-gray-200 dark:divide-gray-700">
                 <div class="p-5">
                     <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">@lang('messages.scheduler_rails')</h4>
                     @forelse ($schedulerRails as $rail)
                     <div class="flex items-baseline justify-between gap-2 text-sm">
                         <span dir="ltr" class="font-mono text-gray-900 dark:text-white">{{ $rail->name }}</span>
+                        {{-- $rail->at is NULL for an expected rail that has never ticked. That row is
+                             the whole point of showing it - the operator is waiting on a worker that
+                             has not written a heartbeat yet - so it must render, not fatal. --}}
+                        @if ($rail->at)
                         <span class="{{ $rail->stale ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400' }} whitespace-nowrap"
                               title="{{ $rail->at->format('Y-m-d H:i:s') }}">{{ $rail->at->diffForHumans(null, false, true) }}</span>
+                        @else
+                        <span class="text-red-600 dark:text-red-400 whitespace-nowrap">@lang('messages.scheduler_rail_never_seen')</span>
+                        @endif
                     </div>
                     @empty
                     <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.none')</p>
@@ -89,7 +97,50 @@
                         {{ trans_choice('messages.scheduled_tasks_needs_attention', $taskExceptions->count(), ['count' => $taskExceptions->count()]) }}
                     </p>
                 </div>
+
+                {{-- Which cache store holds the heartbeat, and whether every container can read it.
+                     Without this the operator cannot tell a dead worker from an unshared cache -
+                     the two look identical everywhere else on this page. --}}
+                <div class="p-5">
+                    <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">@lang('messages.scheduler_runtime')</h4>
+                    <div class="flex items-baseline justify-between gap-2 text-sm">
+                        <span class="text-gray-500 dark:text-gray-400">@lang('messages.scheduler_cache_store')</span>
+                        <span dir="ltr" class="font-mono text-gray-900 dark:text-white">{{ $cacheStore }}</span>
+                    </div>
+                    <div class="flex items-baseline justify-between gap-2 text-sm mt-1">
+                        <span class="text-gray-500 dark:text-gray-400">@lang('messages.scheduler_cache_shared')</span>
+                        {{-- Amber only when an unshared store is actually causing something. A
+                             single-container selfhost on the `file` driver is perfectly healthy,
+                             and colouring "No" as a warning there would nag every such install
+                             forever about a condition that costs it nothing. --}}
+                        <span class="{{ $cacheHidesScheduler ? 'text-amber-600 dark:text-amber-400 font-semibold' : 'text-gray-900 dark:text-white' }}">
+                            {{ $cacheStoreIsShared ? __('messages.yes') : __('messages.no') }}
+                        </span>
+                    </div>
+                    @if ($lastTaskHost)
+                    <div class="flex items-baseline justify-between gap-2 text-sm mt-1">
+                        <span class="text-gray-500 dark:text-gray-400">@lang('messages.scheduler_running_on')</span>
+                        <span dir="ltr" class="font-mono text-gray-900 dark:text-white truncate" title="{{ $lastTaskHost }}{{ $lastTaskRail ? ' · '.$lastTaskRail : '' }}">{{ \Illuminate\Support\Str::limit($lastTaskHost, 14) }}</span>
+                    </div>
+                    @endif
+                </div>
             </div>
+
+            {{-- The diagnosis the runbook used to send you to another document for. Only rendered
+                 when the evidence is unambiguous: the store is per-container AND the database says
+                 tasks are still completing. --}}
+            @if ($cacheHidesScheduler)
+            <div class="border-t border-gray-200 dark:border-gray-700 p-5">
+                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                    <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                        <svg aria-hidden="true" class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.48 0l-7.1 12.25A2 2 0 004.99 19z"/>
+                        </svg>
+                        <span>@lang('messages.scheduler_cache_not_shared_detail', ['store' => $cacheStore])</span>
+                    </p>
+                </div>
+            </div>
+            @endif
 
             {{-- Failures render whatever the heartbeat says. SchedulerHealth::state() lets 'failed'
                  survive the stall suppression on purpose - a recorded failure is real data - so

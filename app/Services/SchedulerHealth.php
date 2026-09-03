@@ -117,7 +117,15 @@ class SchedulerHealth
                 $value = Cache::get('scheduler.last_run_at.'.$rail);
 
                 if (! is_numeric($value)) {
-                    return null;
+                    // The EXPECTED rail is still worth a row when it has never ticked: it is the
+                    // thing the operator is waiting on, and dropping it means the word "worker"
+                    // appears nowhere on /admin/queue at exactly the moment it is missing. Any
+                    // other rail with no key is simply not in use on this install, so it stays
+                    // hidden rather than growing a permanent "never seen" row per install.
+                    // `at` is null here - every reader must handle that.
+                    return $rail === self::expectedRail()
+                        ? (object) ['name' => $rail, 'at' => null, 'stale' => true]
+                        : null;
                 }
 
                 // App timezone, for the same reason as lastRunAt() above: the card prints this.
@@ -134,6 +142,69 @@ class SchedulerHealth
     }
 
     /**
+     * Cache drivers that every container of one deployment can read.
+     *
+     * The distinction is the whole reason the heartbeat can lie. `file`, `array` and `octane`
+     * keep their data inside one container, so a worker writing its heartbeat there is invisible
+     * to the web container reading it - while the database, which scheduled_task_runs uses, is
+     * shared by definition.
+     */
+    public const SHARED_CACHE_DRIVERS = ['database', 'redis', 'memcached', 'dynamodb'];
+
+    public static function cacheStore(): string
+    {
+        return (string) config('cache.default');
+    }
+
+    public static function cacheStoreIsShared(): bool
+    {
+        return in_array(self::cacheStore(), self::SHARED_CACHE_DRIVERS, true);
+    }
+
+    /**
+     * The most recent moment any scheduled task STARTED, from the database.
+     *
+     * Deliberately a different medium from the heartbeat: scheduled_task_runs is a table, the
+     * heartbeat is a cache key. Comparing the two is what separates "nothing is running" from
+     * "everything is running and I cannot see the heartbeat".
+     */
+    public static function lastTaskActivityAt(): ?Carbon
+    {
+        if (! Schema::hasTable('scheduled_task_runs')) {
+            return null;
+        }
+
+        $at = ScheduledTaskRun::max('last_started_at');
+
+        return $at ? Carbon::parse($at) : null;
+    }
+
+    /**
+     * The scheduler reports stalled, but the database says tasks are still completing.
+     *
+     * That combination has one common cause: a cache store that is not shared between
+     * containers. The worker writes its heartbeat into its own container's cache while its task
+     * rows land in the shared database, so isStalled() is permanently true on a completely
+     * healthy install - and nothing else on /admin/queue can tell that apart from a worker that
+     * genuinely died. docs/DIGITALOCEAN_WORKER.md makes "is CACHE_STORE still database" step 2
+     * of its triage list precisely because the UI could not answer it.
+     *
+     * Gated on the store actually being unshared so the page never asserts a cause it has not
+     * established. Fresh task rows on a SHARED store are a different anomaly, and the operator
+     * still sees the stall and the store name; they are just not told why.
+     */
+    public static function cacheIsHidingAHealthyScheduler(): bool
+    {
+        if (self::cacheStoreIsShared() || ! self::isStalled()) {
+            return false;
+        }
+
+        $last = self::lastTaskActivityAt();
+
+        return $last !== null && $last->diffInMinutes(now()) <= self::staleMinutes();
+    }
+
+    /**
      * True when the only rail ticking is the HTTP endpoint.
      *
      * That rail dispatches no ScheduledTask* events, so the per-task table can never fill on such
@@ -142,6 +213,18 @@ class SchedulerHealth
      */
     public static function isHttpRailOnly(): bool
     {
+        // A DECLARED rail settles it before any key is consulted. Keys only prove a rail has
+        // ticked at least once, and the worst moment for this panel is a worker that has never
+        // ticked at all - a failed build, a crash loop, a SCHEDULER_RAIL typo - where the key is
+        // simply absent. Without this the page renders "the cron endpoint is your liveness
+        // signal" underneath a red stalled banner, on cutover day, which is the one moment it
+        // must not. Naming an expected rail is that declaration.
+        $expected = self::expectedRail();
+
+        if ($expected !== null && $expected !== 'http') {
+            return false;
+        }
+
         // Any non-http rail key at all, stale or not, means this install HAS a scheduler rail - so
         // it must never be shown copy claiming the cron endpoint is its liveness signal. Suppressing
         // that panel for a week after genuinely retiring a worker is a far smaller harm than telling

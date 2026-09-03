@@ -73,7 +73,7 @@ queue is drained by the worker those happen on different containers, and `storag
 per-container and wiped on every deploy - so exports must go to shared object storage.
 
 > **The bucket must not be the images bucket.** Every object in `DO_SPACES_BUCKET` is reachable by
-> concatenating its raw storage key onto the public CDN hostname (`ImageUtils::getUrl()`). A backup
+> concatenating its raw storage key onto the public CDN hostname (`ImageUtils::storedUrl()`). A backup
 > archive contains every sale, attendee email and phone number for the schedules inside it. Use a
 > separate bucket with no CDN in
 > front of it and no public bucket policy. `BACKUP_SPACES_BUCKET` deliberately has no fallback, so
@@ -207,11 +207,18 @@ every tick - even on minutes when nothing was due - and the alert fires when tha
 older than `SCHEDULER_STALE_MINUTES` (default 20). It means the scheduler stopped, which also means
 nothing is draining the queue: no email, no calendar sync, no installment charges.
 
-What to check, in order:
+What to check, in order. The Scheduler card on `/admin/queue` answers the first two directly -
+its Runtime cell names the cache store, whether that store is shared between containers, and the
+container actually completing tasks:
 
-1. Is the worker component running? Restart it from the console if not.
+1. Is the worker component running? The Rails cell always lists the rail named in
+   `SCHEDULER_EXPECTED_RAIL`, and shows *never seen* when it has yet to write a heartbeat, which
+   is what a failed build or a crash loop looks like. Restart it from the console if not.
 2. Is `CACHE_STORE` still `database`? On the file driver the worker writes a key the web container
-   cannot read, and the alert fires permanently even though the scheduler is fine.
+   cannot read, and the alert fires permanently even though the scheduler is fine. The Runtime
+   cell says so outright when the store is unshared *and* the database shows tasks still
+   completing - the combination that means the worker is alive and only its heartbeat is
+   invisible.
 3. Was the external cron throttled out? Both cron endpoints carry their own rate-limit bucket, but a
    429 there stops the HTTP rail without any error reaching the app.
 4. Worker logs for a task throwing every minute, and the per-task list on `/admin/queue`, which

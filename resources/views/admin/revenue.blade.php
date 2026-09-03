@@ -188,7 +188,9 @@
                         @foreach ($unrecognizedSubscriptions as $subscription)
                         <tr>
                             <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                                {{ \Illuminate\Support\Str::limit($subscription->role_name ?: $subscription->role_subdomain, 30) }}
+                                {{-- Both are null for a subscription whose schedule was deleted; the
+                                     leftJoin keeps that row deliberately, so it needs a placeholder. --}}
+                                {{ \Illuminate\Support\Str::limit($subscription->role_name ?: $subscription->role_subdomain ?: '-', 30) }}
                             </td>
                             <td class="px-4 py-3 text-sm font-mono text-gray-900 dark:text-white">{{ $subscription->stripe_price }}</td>
                             <td class="px-4 py-3 text-sm text-red-600 dark:text-red-400">{{ $subscription->stripe_status }}</td>

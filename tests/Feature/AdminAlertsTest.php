@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\FederatedInstance;
+use App\Models\ScheduledTaskRun;
 use App\Models\TranslationSuggestion;
 use App\Models\User;
 use App\Services\AdminAlertService;
@@ -156,6 +157,149 @@ class AdminAlertsTest extends TestCase
         ]);
 
         $this->makeSubscription('price_whatever');
+
+        AdminAlertService::flush();
+
+        $this->assertNull(AdminAlertService::items()->firstWhere('type', 'subscriptions_unrecognized'));
+    }
+
+    /**
+     * /admin/queue must be able to tell a dead worker from a cache that cannot be shared.
+     *
+     * Before the Runtime cell these two produced identical output - red banner, no worker rail,
+     * every task "unknown" - and the only way to tell them apart was to open
+     * docs/DIGITALOCEAN_WORKER.md and work down its triage list. This renders the actual page.
+     */
+    public function test_the_queue_page_names_the_cache_store_and_explains_a_false_stall(): void
+    {
+        $admin = $this->createOwner(true);
+        config(['app.scheduler_expected_rail' => 'worker', 'cache.default' => 'file']);
+
+        ScheduledTaskRun::create([
+            'name' => 'process-queue',
+            'last_started_at' => now(),
+            'last_finished_at' => now(),
+            'last_status' => ScheduledTaskRun::STATUS_SUCCEEDED,
+            'last_via' => 'worker',
+            'last_host' => 'scheduler-abc123',
+        ]);
+
+        $html = $this->adminActing($admin)->get(route('admin.queue'))->assertOk()->getContent();
+
+        $this->assertStringContainsString('file', $html, 'the store name has to be on the page');
+        $this->assertStringContainsString('scheduler-abc123', $html,
+            'the container actually completing work is the evidence behind the verdict');
+        $this->assertStringContainsString('keeps its data inside a single container', $html,
+            'the page must say WHY the scheduler looks stalled when it is not');
+        $this->assertStringContainsString('worker', $html,
+            'the rail being waited on must be named even though it has never ticked');
+    }
+
+    /**
+     * FAILS before the change: the count joined nothing and the panel INNER joined roles, so an
+     * orphan was counted but invisible - a red row linking to a page whose panel does not render.
+     *
+     * subscriptions.role_id carries no foreign key, and RoleController::destroy calls
+     * $role->delete() with no subscription cleanup and no Stripe cancellation, so a deleted
+     * schedule really can leave an actively-billing row behind. That is the worst case, not one
+     * to hide: nobody owns it and nobody will notice.
+     */
+    public function test_a_subscription_whose_schedule_was_deleted_is_counted_and_shown(): void
+    {
+        $admin = $this->createOwner(true);
+        $this->configureCurrentPrices();
+
+        $role = $this->createRole($this->createOwner());
+        DB::table('subscriptions')->insert([
+            'role_id' => $role->id,
+            'type' => 'default',
+            'stripe_id' => 'sub_'.Str::random(14),
+            'stripe_status' => 'active',
+            'stripe_price' => 'price_retired_from_2024',
+            'quantity' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('roles')->where('id', $role->id)->delete();   // the orphan
+
+        AdminAlertService::flush();
+        $row = AdminAlertService::items()->firstWhere('type', 'subscriptions_unrecognized');
+
+        $this->assertNotNull($row, 'an orphaned subscription is still being charged');
+        $this->assertSame(1, $row['count']);
+
+        $html = $this->adminActing($admin)->get(route('admin.revenue'))->assertOk()->getContent();
+        $this->assertStringContainsString('price_retired_from_2024', $html,
+            'the alert count and the panel it links to must agree');
+    }
+
+    /**
+     * FAILS before the change: the count filtered whereNotNull('stripe_price'), which is not how
+     * the app resolves a plan.
+     *
+     * Cashier's Subscription::hasMultiplePrices() is literally is_null($this->stripe_price), so a
+     * null price sends hasPrice() to subscription_items. Such a subscription loses its tier
+     * exactly like a single-price one, and nothing else in the app reports it.
+     */
+    public function test_a_multi_price_subscription_on_a_retired_item_is_counted(): void
+    {
+        $this->createOwner(true);
+        $this->configureCurrentPrices();
+
+        $role = $this->createRole($this->createOwner());
+        $id = DB::table('subscriptions')->insertGetId([
+            'role_id' => $role->id,
+            'type' => 'default',
+            'stripe_id' => 'sub_'.Str::random(14),
+            'stripe_status' => 'active',
+            'stripe_price' => null,                       // Cashier reads the items instead
+            'quantity' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('subscription_items')->insert([
+            'subscription_id' => $id,
+            'stripe_id' => 'si_'.Str::random(14),
+            'stripe_product' => 'prod_x',
+            'stripe_price' => 'price_retired_from_2024',
+            'quantity' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        AdminAlertService::flush();
+
+        $this->assertSame(1, AdminAlertService::items()->firstWhere('type', 'subscriptions_unrecognized')['count']);
+    }
+
+    /**
+     * And the same shape on a CONFIGURED item is recognized, exactly as Cashier would.
+     */
+    public function test_a_multi_price_subscription_on_a_configured_item_is_ignored(): void
+    {
+        $this->createOwner(true);
+        $this->configureCurrentPrices();
+
+        $role = $this->createRole($this->createOwner());
+        $id = DB::table('subscriptions')->insertGetId([
+            'role_id' => $role->id,
+            'type' => 'default',
+            'stripe_id' => 'sub_'.Str::random(14),
+            'stripe_status' => 'active',
+            'stripe_price' => null,
+            'quantity' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('subscription_items')->insert([
+            'subscription_id' => $id,
+            'stripe_id' => 'si_'.Str::random(14),
+            'stripe_product' => 'prod_x',
+            'stripe_price' => 'price_current_pro_monthly',
+            'quantity' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
         AdminAlertService::flush();
 

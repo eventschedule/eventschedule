@@ -185,12 +185,7 @@ class AdminAlertService
             // through the dunning window, so a stranded past_due subscriber has exactly the
             // problem being looked for.
             'subscriptions_unrecognized' => function () {
-                $configured = array_values(array_filter([
-                    PlanPriceUtils::current('pro', 'monthly'),
-                    PlanPriceUtils::current('pro', 'yearly'),
-                    PlanPriceUtils::current('enterprise', 'monthly'),
-                    PlanPriceUtils::current('enterprise', 'yearly'),
-                ]));
+                $configured = self::configuredPriceIds();
 
                 // Nothing configured means no Stripe plans on this install, not that every
                 // subscription is stranded - counting them all would badge a selfhost install
@@ -202,8 +197,7 @@ class AdminAlertService
                 return DB::table('subscriptions')
                     ->where('type', 'default')
                     ->whereIn('stripe_status', ['active', 'trialing', 'past_due'])
-                    ->whereNotNull('stripe_price')
-                    ->whereNotIn('stripe_price', $configured)
+                    ->where(fn ($q) => self::unrecognizedPrice($q, $configured))
                     ->count();
             },
 
@@ -352,6 +346,48 @@ class AdminAlertService
     private static function schedulerIsStalled(): bool
     {
         return self::$schedulerStalled ??= SchedulerHealth::isStalled();
+    }
+
+    /**
+     * "This subscription is on a price the app cannot resolve", expressed the way Cashier
+     * resolves it - shared with AdminController::revenue() so the count and the panel it links to
+     * cannot disagree.
+     *
+     * Two branches because Cashier has two. Subscription::hasMultiplePrices() is literally
+     * `is_null($this->stripe_price)`, so a null price sends hasPrice() to subscription_items and a
+     * non-null one is compared directly. Checking only the column would silently miss a
+     * multi-price subscription whose items name nothing configured - which loses its tier exactly
+     * like a single-price one, and which nothing else in the app would report.
+     *
+     * @param  array<int, string>  $configured  the four current STRIPE_PRICE_* ids
+     */
+    public static function unrecognizedPrice($query, array $configured)
+    {
+        return $query
+            ->where(fn ($q) => $q->whereNotNull('stripe_price')->whereNotIn('stripe_price', $configured))
+            ->orWhere(fn ($q) => $q->whereNull('stripe_price')->whereNotExists(
+                fn ($sub) => $sub->select(DB::raw(1))
+                    ->from('subscription_items')
+                    ->whereColumn('subscription_items.subscription_id', 'subscriptions.id')
+                    ->whereIn('subscription_items.stripe_price', $configured)
+            ));
+    }
+
+    /**
+     * The four price ids this install currently sells, read through PlanPriceUtils rather than
+     * from config directly so the alert cannot drift from the recognition the rest of the app
+     * performs. Empty means the install sells no plans - not that every subscription is stranded.
+     *
+     * @return array<int, string>
+     */
+    public static function configuredPriceIds(): array
+    {
+        return array_values(array_filter([
+            PlanPriceUtils::current('pro', 'monthly'),
+            PlanPriceUtils::current('pro', 'yearly'),
+            PlanPriceUtils::current('enterprise', 'monthly'),
+            PlanPriceUtils::current('enterprise', 'yearly'),
+        ]));
     }
 
     /**

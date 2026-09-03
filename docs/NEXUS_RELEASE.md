@@ -21,7 +21,8 @@ the cutover.
 
 ## What is shipping
 
-`main` is 47 commits and 11 migrations ahead of what is live. Deploys are manual
+`main` is **11 migrations** ahead of what is live (`git log v1.0.128..HEAD` for the commits - a
+number written here goes stale the next time anyone commits, including commits to this file). Deploys are manual
 (`deploy_on_push` is unset on the app spec), so nothing in this release has reached production.
 
 The deploy itself is two actions:
@@ -32,9 +33,10 @@ The deploy itself is two actions:
 2. **Click Deploy in the DigitalOcean console.** `deploy_on_push` is unset on the app spec, so
    the deploy is deliberate rather than automatic.
 
-Everything else in this file is either a one-time infrastructure step or something you *look
-at* afterwards - the deploy log, `/admin`, `/admin/queue`. Nothing here asks you to run a
-maintenance command against production.
+Everything else is either a one-time infrastructure step or something you *look at* afterwards -
+the deploy log, `/admin`, `/admin/queue`. Two steps do need the App Platform console, so budget
+for it: **step 3** backfills the flyer thumbnails and must run before step 4, and **P2** may want
+the three `events` migrations run by hand first if the table is large.
 
 The pre-deploy baseline, confirmed live:
 
@@ -74,7 +76,7 @@ release - so read the table once now and revisit P4 as soon as step 2 is `ACTIVE
 | P3 | Read the app spec in the DO console | Production config is the app spec, not any `.env`. Confirm `QUEUE_CONNECTION=database`, `APP_URL=https://eventschedule.com`, `IS_HOSTED=true` and `IS_NEXUS=true`; note whether `CACHE_STORE` is set (step 5 sets it); and confirm the web service is **`instance_count: 1`** - more than one container on the `file` cache store means every lock in the app serialises against nothing. Note the active deployment ID while you are there: it is what a rollback targets. |
 | P4 | `/admin` tells you, permanently | **The highest-value check in this table, and the one that was missing.** The legacy price recognition mechanism was removed this release, so `PlanPriceUtils` now matches a tier *only* against the four `STRIPE_PRICE_*` IDs on the spec. `AdminAlertService` compares every live subscription's price ID against those four using `PlanPriceUtils` itself, so the alert cannot drift from what the app believes, and `/admin` &rarr; Revenue lists the affected schedules. Anything it flags is a customer whose card is still being charged while `hasActiveEnterpriseSubscription()` returns false, both webhook handlers decline to write and ARR counts them at zero - the cost is spelled out in `PlanPriceUtils::tierFor()`'s docblock. Note the four configured IDs all share a `price_1T3s...` prefix, i.e. one creation batch, so anyone predating it is already stranded. **This is a post-deploy check, unavoidably**: the alert ships in this release, so it cannot report before step 2. That is acceptable because the condition predates the deploy rather than being caused by it - but look at `/admin` as soon as step 2 is `ACTIVE`, because the release also removes the `STRIPE_LEGACY_*` mechanism that used to absorb it. |
 | P5 | `/admin` &rarr; Revenue after the deploy | The *defaults* changed from 9/90/29/290 to 5/50/15/150. **The env vars are named `STRIPE_PRICE_MONTHLY_AMOUNT`, `STRIPE_PRICE_YEARLY_AMOUNT`, `STRIPE_ENTERPRISE_PRICE_MONTHLY_AMOUNT` and `STRIPE_ENTERPRISE_PRICE_YEARLY_AMOUNT`** - earlier revisions of this file named `STRIPE_PRO_MONTHLY_AMOUNT`, which exists nowhere in the codebase. But config is only the *second* layer: `PlatformPricing` reads the `settings` row first, so what the site advertises is decided by that row, not by the spec. As of writing production already advertises 5/50/15/150, so the config change is an alignment and the displayed price does not move. Note ARR, MRR and renewal emails deliberately read **config**, never `PlatformPricing` - so those figures *will* restate on deploy. That is a reporting artefact, not lost revenue. |
-| P6 | Screenshot the funnel on `/admin/users` | Record the "Visited site", page-view, docs and pricing funnel numbers. After the Cloudflare rule, origin-side counting stops and the beacon takes over; without a before-number a broken beacon is indistinguishable from normal variance. |
+| P6 | Open `/admin/growth/export?range=last_30_days` and save the JSON | **Not `/admin/users`** - its funnel carries only "Visited site". The page-view, docs and pricing counters live in `GrowthExportService::traffic()`, which reaches neither the users funnel nor the growth dashboard, so the JSON export is the only place all four are readable. Record the "Visited site", page-view, docs and pricing funnel numbers. After the Cloudflare rule, origin-side counting stops and the beacon takes over; without a before-number a broken beacon is indistinguishable from normal variance. |
 | P7 | Confirm the external cron can be disabled in one click, and record the current `APP_CRON_SECRET` | Re-enabling the cron is the only emergency fallback that does not require fixing the worker. Step 8 says **disable, not delete**. |
 | P8 | A green CI run on the pushed commit | The deploy ships `origin/main`, so pushing is what makes your work real - and CI runs against exactly the commit that will deploy. `.github/workflows/test.yml` runs the whole Unit and Feature suite plus the sitemap-manifest check on every push. One thing CI cannot see: an **untracked** file. `git commit -am` silently leaves those behind, and an asset referenced by committed code then deploys as a 404 that nothing local ever notices, because locally the file is on disk. Check `git status` for `??` lines before pushing. There is **no release gate** on `build.yml`. |
 
@@ -118,7 +120,7 @@ verification.
 | # | Step | Where | Notes |
 |---|---|---|---|
 | 1 | Create the backups bucket | DO infra | one-time |
-| 2 | Deploy `main` | DO deploy | 11 migrations; two are irreversible |
+| 2 | Deploy `main` | DO deploy | 11 migrations; two irreversible, a third with a no-op `down()` |
 | 3 | Backfill the flyer thumbnails | console command | one-time; must precede step 4 |
 | 4 | Cloudflare cache rule | Cloudflare dashboard | one-time; the edge cache is inert until this exists |
 | 5 | Set `BACKUP_*` and `CACHE_STORE` | DO app spec | one-time; one save, one redeploy |
@@ -127,10 +129,12 @@ verification.
 | 8 | Disable the external cron | external | one-time; **timing**, same hour as 7 |
 | 9 | Restate the docs | code | one-time |
 
-Expect three App Platform deployments (code, env vars, worker component) plus the flyer backfill.
+Expect four App Platform deployments - step 2 (code), step 5 (env vars), step 6 (the worker
+component) and step 7 (`SCHEDULER_EXPECTED_RAIL` plus the run command) - and the flyer backfill.
 Everything up to step 6 can run whenever.
 
-**Steps 7 and 8 are the one hard timing constraint**, and it is two rules rather than one:
+**Steps 7 and 8 carry the main timing constraint**, and it is two rules rather than one (step 5
+has one of its own: never between 00:00 and 00:05 UTC):
 
 - **Start step 7 between :02 and :20 past the hour.** The hourly tier has just fired on both
   rails and the next one is forty minutes away.
@@ -144,7 +148,7 @@ A **new private Spaces bucket**, distinct from `DO_SPACES_BUCKET`, **no CDN in f
 bucket policy**. Generate a key pair for it.
 
 Everything in the images bucket is reachable by concatenating the raw storage key onto the public
-CDN hostname (`ImageUtils::getUrl()`), and a backup archive contains every sale, attendee email
+CDN hostname (`ImageUtils::storedUrl()`, which hardcodes the CDN host), and a backup archive contains every sale, attendee email
 and phone number. `BACKUP_SPACES_BUCKET` deliberately has no fallback, and
 `tests/Feature/BackupStorageTest.php` fails the build if one is re-added.
 
@@ -350,7 +354,8 @@ heartbeat key that the HTTP rail also writes, so a dead worker would be complete
 must match the worker's `SCHEDULER_RAIL` **exactly**; a mismatch is a permanent false red on
 `/admin`, indistinguishable from a genuinely dead worker.
 
-**Verify:** builds, stays `ACTIVE`, no restart loop, cost reads $10/mo. `php -m | grep pcntl` on
+**Verify:** builds, stays `ACTIVE`, no restart loop, and the app total goes from $5/mo to
+$10/mo (the worker's own slug is $5/mo). `php -m | grep pcntl` on
 the worker (without it no queued job ever times out, and a hung one blocks its tick indefinitely).
 `/admin` should still be clear at this point - if it is red, `SCHEDULER_EXPECTED_RAIL` was set too
 early.
@@ -384,9 +389,10 @@ runs at 00:00 UTC. `|| true` keeps a database blip at boot from stopping the sch
 
 **Verify:** worker logs show a `Running [...] DONE` line per due task each minute, and
 `/admin/queue` reports the heartbeat fresh on the `worker` rail with no task in a `failed`,
-`overdue` or `never_finished` state. Its per-task list also names the instance id actually
-completing each task, which is the direct evidence that the worker rather than the cron is
-doing the work.
+`overdue` or `never_finished` state. The Runtime cell on that card also names the container
+actually completing tasks - `gethostname()`, which on App Platform is the instance - which is
+the direct evidence that the worker rather than the cron is doing the work. (The per-task rows
+carry the same value, but only as a hover tooltip, so it is unreadable on a phone.)
 
 *Undo:* set the run command back to `sleep infinity`.
 
@@ -437,7 +443,8 @@ Then the things a page cannot tell you:
   URL. Re-do this **after** step 7, not only after step 5.
 - `/admin/users` funnel numbers sit in the same range as the P6 baseline. A sharp drop means the
   beacon is not firing: check the browser console for a CSP violation, and `marketing.visit` for
-  419s or 429s. A sharp rise means double counting.
+  429s - CSRF is excluded on that route (`routes/web.php:1043`), so a 419 cannot happen and
+  looking for one wastes the search. A sharp rise means double counting.
 - New sign-ups still carry non-null `utm_source`, `landing_page` and `referrer_url` at roughly the
   prior rate. That is the `es_attribution` cookie path.
 
@@ -461,12 +468,17 @@ draining the queue either - no email, no calendar sync, no installment charges. 
 `scheduler.last_run_at` on every tick, even on minutes when nothing was due, so the key going
 stale means the scheduler stopped rather than that nothing happened to be scheduled.
 
-Check in this order:
+Check in this order, and start on `/admin/queue` - the Scheduler card answers the first two
+without leaving the page:
 
-1. **Is the worker component running?** Restart it from the console if not.
-2. **Is `CACHE_STORE` still `database`?** On the file driver the worker writes a key the web
-   container cannot read, so the alert fires permanently while the scheduler is in fact fine.
-   This is the most likely false positive and the cheapest to rule out.
+1. **Read the Runtime cell.** It names the cache store, whether that store is shared between
+   containers, and the container actually completing tasks. If the store is not shared *and*
+   tasks are still completing, the card says so outright: the worker is alive and its heartbeat
+   is simply unreadable from the web container. That is the most likely false positive, and it
+   used to be indistinguishable from a dead worker.
+2. **Read the Rails cell.** The rail named in `SCHEDULER_EXPECTED_RAIL` is always listed, and
+   shows *never seen* if it has yet to write a heartbeat - which is what a worker that failed to
+   build or is crash-looping looks like. Restart the component from the console.
 3. **Was the external cron throttled out?** Both cron endpoints carry their own rate-limit
    bucket, and a 429 stops the HTTP rail without any error reaching the app.
 4. **Worker logs, then the per-task list on `/admin/queue`**, which names the individual task
@@ -499,9 +511,10 @@ The worker's **runtime log in the App Platform console** is the real log. `sched
 each `schedule:run` subprocess's output there, so a healthy worker shows a `Running [...] DONE`
 line per due task per minute, and `LOG_CHANNEL=stderr` puts every `Log::` call there too.
 
-**Ignore `storage/logs/scheduler.log`.** The `appendOutputTo()` calls throughout
-`routes/console.php` never write it - that option is only honoured for process-backed scheduled
-events, and every entry in that file is a closure. The file has never existed.
+**Ignore `storage/logs/scheduler.log`** - and `storage/logs/sub-audience-blog.log`, which the
+same reasoning covers. The `appendOutputTo()` calls throughout `routes/console.php` never write
+either: that option is only honoured for process-backed scheduled events, and every entry there
+is a `CallbackEvent` (mostly closures, one invokable object). Neither file has ever existed.
 
 One thing the log will not tell you: **a task skipped because its `withoutOverlapping()` mutex
 was held prints nothing at all.** The mutex registers a `->skip()` filter that is evaluated
@@ -526,9 +539,15 @@ The per-task list on `/admin/queue` is the only place it shows, and it ages from
   on the 0.5 GB box - the second consumer to watch alongside `app:send-graphic-emails`.
 - **Automatic new-event announcements are live.** `announce_new_events` defaults to true and
   `role_subscribers` starts empty, so day one is quiet by construction; a real audience appears
-  as guests tick the checkout opt-in. Watch for `Log::warning('Event announcement blocked')`: a
-  schedule inside its own 24h SMTP failure window sends nothing, and `claimWindow()` has already
-  advanced `roles.last_announced_at`, so that digest is skipped rather than retried.
+  as guests tick the checkout opt-in. Two separate silences to watch, often confused:
+  `Log::warning('Event announcement blocked')` fires only from the **trust** gate
+  (`Role::canSendAudienceMail()` - an unverified owner on the shared platform mailer with more
+  than 50 recipients), and it stamps the watermark deliberately. A schedule inside its own **24h
+  SMTP failure window** never reaches that warning - `canSendAudienceMail()` returns true as soon
+  as the schedule has its own SMTP - and instead fails silently inside
+  `RoleMailerService::sendForRole()`, which returns false and logs nothing. Both skip the digest
+  rather than retrying it, because `claimWindow()` has already advanced
+  `roles.last_announced_at`.
 - **`app:cleanup-backups` no longer collects abandoned import uploads.** Import archives live on
   the *web* container's local disk - they have to, because `ZipArchive` needs a real filesystem
   path - so the sweep now runs somewhere it cannot see them. That disk is ephemeral, so a deploy
@@ -566,9 +585,10 @@ in the web request**, and this release's 11 migrations include the irreversible
 - Adding `php artisan translations:publish --no-prune || true` to the *web* service's run command.
   Same gap, predates this change, and it edits the live service spec.
 - The resident `queue:work` supervisor. It would also require removing `process-queue` from
-  `routes/console.php` while keeping it on the HTTP rail, and
-  `CronRailSyncTest::test_the_arguments_match_on_both_rails()` has no exception mechanism for
-  that.
+  `routes/console.php` while keeping it on the HTTP rail, . Note the blocker is not the test suite:
+  `CronRailSyncTest::commandsIn()` strips every `queue:*` command, so removing `process-queue`
+  from one rail passes all four sync tests. The reason to be careful is the behaviour, not a
+  guard rail that would catch you.
 - Automated zone purge on deploy; moving backup *import* uploads to shared storage so
   `app:cleanup-backups` can see them again; staggering the 00:00 UTC daily block with
   `->dailyAt()`.
