@@ -20,8 +20,6 @@ abstract class TestCase extends BaseTestCase
 
         parent::setUp();
 
-        $this->withoutVite();
-
         // Its counts are memoized for the request; tests share a process, so a
         // previous test's totals would otherwise carry over.
         \App\Services\AdminAlertService::flush();
@@ -35,6 +33,27 @@ abstract class TestCase extends BaseTestCase
 
         // Memoizes whether scheduled_task_runs exists; RefreshDatabase rebuilds the schema under it.
         \App\Services\ScheduledTaskRecorder::flush();
+    }
+
+    /**
+     * Rebuild the application, keeping the Vite stub in place.
+     *
+     * withoutVite() swaps its stub into the CURRENT container, and refreshApplication() builds a
+     * brand new one, so a test that rebuilds the app mid-body silently gets the real Vite back.
+     * That is invisible locally, where public/build/manifest.json exists, and a bare 500 on CI,
+     * where public/build is gitignored and the workflow never builds assets - which is the whole
+     * reason withoutVite() is here at all. RouteLoadTest rebuilds the app to register the hosted
+     * subdomain routes, and the guest page it then requests renders @vite through
+     * layouts/app.blade.php.
+     *
+     * Applying it here rather than in setUp() covers both: Laravel's setUpTheTestEnvironment()
+     * calls this whenever $this->app is unset, which is every fresh test.
+     */
+    protected function refreshApplication(): void
+    {
+        parent::refreshApplication();
+
+        $this->withoutVite();
     }
 
     /**

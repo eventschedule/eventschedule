@@ -5,11 +5,15 @@ namespace Tests\Feature;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Tests\TestCase;
 
 class RouteLoadTest extends TestCase
 {
     use RefreshDatabase;
+
+    /** Env values as they stood before forceEnv() overrode them, keyed by variable name. */
+    private array $originalEnv = [];
 
     private function createUserWithSchedule(string $type = 'talent', string $subdomain = 'testtalent'): array
     {
@@ -61,9 +65,18 @@ class RouteLoadTest extends TestCase
             // getStatusCode(), not status(): TestResponse forwards unknown methods to the base
             // response, and a streamed response (the sitemap) is a plain Symfony StreamedResponse
             // without Laravel's status() helper.
+            $status = $response->getStatusCode();
+
+            // Name the exception, or a 500 that only happens on CI (where APP_DEBUG is false, so
+            // nothing else in the build output identifies it) costs a round trip to diagnose.
+            // Illuminate\Routing\Pipeline attaches it via withException(); read it only for a 500,
+            // because the streamed sitemap response has no such property at all.
+            $exception = $status >= 500 ? ($response->baseResponse->exception ?? null) : null;
+
             $this->assertTrue(
-                $response->getStatusCode() < 500,
-                "Route {$url} returned status {$response->getStatusCode()}"
+                $status < 500,
+                "Route {$url} returned status {$status}"
+                .($exception ? ' ('.get_class($exception).': '.$exception->getMessage().')' : '')
             );
         }
     }
@@ -352,9 +365,17 @@ class RouteLoadTest extends TestCase
         // Roll back RefreshDatabase transaction to release locks before app refresh
         $this->app['db']->connection()->rollBack();
 
-        // Switch to hosted mode and rebuild the app with subdomain routing
-        putenv('IS_HOSTED=true');
-        putenv('APP_TESTING=false');
+        // Switch to hosted mode and rebuild the app with subdomain routing.
+        //
+        // forceEnv(), not putenv(): Laravel's Env repository reads $_SERVER and $_ENV BEFORE
+        // getenv(), and phpunit.xml's <env name="APP_TESTING" value="true"/> lands in $_ENV, so
+        // putenv('APP_TESTING=false') is outranked and config('app.is_testing') stays true.
+        // routes/web.php gates the hosted subdomain group on `hosted && ! is_testing`, so the
+        // group was never registered: the domain-less '/' that routes/web.php:1013 registers for
+        // testing answered instead, and this test asserted against the marketing homepage while
+        // claiming to cover the guest portal.
+        $this->forceEnv('IS_HOSTED', 'true');
+        $this->forceEnv('APP_TESTING', 'false');
         $this->refreshApplication();
         $this->app['db']->connection()->beginTransaction();
 
@@ -373,14 +394,20 @@ class RouteLoadTest extends TestCase
                 $baseUrl.'/feed/rss',
             ];
 
-            foreach ($urls as $url) {
-                $response = $this->get($url);
+            // The whole point of the refresh: without it routes/web.php registers the OTHER half
+            // and every URL below lands on a domain-less route, which passes for the wrong reason.
+            $this->assertTrue(config('app.hosted'));
+            $this->assertFalse(
+                config('app.is_testing'),
+                'The hosted subdomain group is gated on ! is_testing, so the domain-less routes '
+                .'would answer instead and every assertion below would pass for the wrong reason.'
+            );
+            $this->assertSame(
+                'role.view_guest',
+                app('router')->getRoutes()->match(Request::create($baseUrl.'/'))->getName()
+            );
 
-                $this->assertTrue(
-                    $response->status() < 500,
-                    "Route {$url} returned status {$response->status()}"
-                );
-            }
+            $this->assertRoutesLoad($urls);
         } finally {
             // refreshApplication() swapped the database manager, so the transaction opened above is
             // invisible to RefreshDatabase's teardown callback, which still holds the manager
@@ -398,10 +425,52 @@ class RouteLoadTest extends TestCase
         }
     }
 
+    /**
+     * Pin an env value ahead of every layer Laravel's Env repository reads.
+     *
+     * The repository queries $_SERVER, then $_ENV, then getenv(), so a putenv() alone loses to
+     * anything phpunit.xml or the .env loader already wrote - which is why the whole $_SERVER
+     * mirror in tests/bootstrap.php exists. Original values are captured for tearDown(), because
+     * these decide which half of routes/web.php the NEXT test class registers.
+     */
+    private function forceEnv(string $key, string $value): void
+    {
+        if (! array_key_exists($key, $this->originalEnv)) {
+            $this->originalEnv[$key] = [
+                'server' => $_SERVER[$key] ?? null,
+                'env' => $_ENV[$key] ?? null,
+                'getenv' => getenv($key),
+            ];
+        }
+
+        $_SERVER[$key] = $value;
+        $_ENV[$key] = $value;
+        putenv($key.'='.$value);
+    }
+
     protected function tearDown(): void
     {
-        putenv('IS_HOSTED');
-        putenv('APP_TESTING');
+        foreach ($this->originalEnv as $key => $original) {
+            if ($original['server'] === null) {
+                unset($_SERVER[$key]);
+            } else {
+                $_SERVER[$key] = $original['server'];
+            }
+
+            if ($original['env'] === null) {
+                unset($_ENV[$key]);
+            } else {
+                $_ENV[$key] = $original['env'];
+            }
+
+            if ($original['getenv'] === false) {
+                putenv($key);
+            } else {
+                putenv($key.'='.$original['getenv']);
+            }
+        }
+
+        $this->originalEnv = [];
 
         parent::tearDown();
     }

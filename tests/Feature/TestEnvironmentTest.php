@@ -48,4 +48,27 @@ class TestEnvironmentTest extends TestCase
         // The end-to-end proof in one line: a marketing GET that nothing intercepts.
         $this->get('/pricing')->assertOk();
     }
+
+    /**
+     * The other half of the harness that only CI can disprove.
+     *
+     * public/build is gitignored and .github/workflows/test.yml never builds assets, so the real
+     * Vite throws ViteManifestNotFoundException on CI and every page rendering a layout 500s.
+     * TestCase stubs Vite out for that reason - but withoutVite() swaps into the CURRENT container,
+     * so an app rebuilt mid-test drops the stub. TestCase::refreshApplication() re-applies it; this
+     * fails if that override is ever removed.
+     *
+     * Asserting on the rendered output rather than the bound class makes it a real guard on both
+     * sides: with a manifest present the real Vite returns tags, and without one it throws.
+     */
+    public function test_the_vite_stub_survives_an_application_refresh(): void
+    {
+        $this->refreshApplication();
+
+        $this->assertSame(
+            '',
+            (string) app(\Illuminate\Foundation\Vite::class)(['resources/js/app.js']),
+            'refreshApplication() dropped the withoutVite() stub, so every @vite page 500s on CI.'
+        );
+    }
 }
