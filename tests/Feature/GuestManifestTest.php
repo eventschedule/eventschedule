@@ -134,8 +134,8 @@ class GuestManifestTest extends TestCase
      * than a default, for the same reason theme_color is omitted outright in that case. Our brand
      * blue is the one answer this whole manifest split exists to keep off someone else's audience.
      *
-     * Carries a logo so it isolates the cleared-accent branch. Without one it would land on the
-     * no-logo branch below and pass for the wrong reason.
+     * Carries a logo only so the fixture is unambiguous; since icons became unconditional there
+     * is no longer a separate no-logo branch for it to fall into.
      */
     public function test_a_schedule_without_an_accent_colour_keeps_a_white_splash(): void
     {
@@ -147,25 +147,30 @@ class GuestManifestTest extends TestCase
     }
 
     /**
-     * FAILS before the change: background_color followed the accent whatever the icons said.
+     * FAILS before the change: icons was omitted for a logo-less schedule, and background_color
+     * was pinned to white for exactly that case.
      *
-     * The pair to the two above, and the case that actually matters. A schedule with no logo
-     * advertises no icons at all, so a WebAPK minted while the static manifest was live has
-     * nothing to re-brand to and keeps OUR mark. Painting that onto their accent would be a
-     * stranger artifact than leaving it on white, and it lands on precisely the unfinished
-     * schedule least able to notice - the shape docs/BRANDING_MATRIX.md item 6 is written about.
+     * The case the whole splash bug lives in. Omitting icons reads like "no icon of ours", but an
+     * Android WebAPK re-brands itself by re-reading this document - so an absent key leaves an
+     * install minted while the static manifest was live holding OUR mark with nothing to replace
+     * it with. That is why a schedule owner's audience still saw our logo full screen months
+     * after the static file was deleted, and why the earlier attempt to fix this by colouring
+     * background_color could not: it was gated on having a logo, which is precisely the branch
+     * where our mark had already been replaced. Handing the install a different icon is the only
+     * lever that works.
      *
-     * theme_color is deliberately NOT gated the same way: it tints the address bar of the PAGE,
-     * which is theirs whether or not they have uploaded a logo.
+     * The neutral mark carries no wordmark and none of the brand blue, so the accent behind it is
+     * safe to use here - the reason background_color was ever gated was our mark standing on it.
      */
-    public function test_a_schedule_with_no_logo_keeps_white_behind_our_mark(): void
+    public function test_a_schedule_with_no_logo_advertises_a_neutral_mark_not_ours(): void
     {
         $role = $this->role(['accent_color' => '#123456', 'profile_image_url' => null]);
 
         $manifest = $this->get('/'.$role->subdomain.'/manifest.webmanifest')->assertOk()->json();
 
-        $this->assertArrayNotHasKey('icons', $manifest);
-        $this->assertSame('#ffffff', $manifest['background_color']);
+        $this->assertSame('/images/schedule-icon.png', $manifest['icons'][0]['src']);
+        $this->assertNotSame(self::PLATFORM_ICON, $manifest['icons'][0]['src']);
+        $this->assertSame('#123456', $manifest['background_color']);
         $this->assertSame('#123456', $manifest['theme_color']);
     }
 
@@ -230,17 +235,24 @@ class GuestManifestTest extends TestCase
     }
 
     /**
-     * No logo, no icons - rather than falling back to ours. A browser may then decline to treat
-     * the page as installable, which is the pre-manifest behaviour and the outcome that was asked
-     * for; what it must never do is offer an install badged with the platform's logo.
+     * Every schedule advertises an icon, and it is never the platform's.
+     *
+     * The pair to the test above: that one pins WHICH mark a logo-less schedule gets, this one
+     * pins that carrying one does not buy back installability. The icon key was once hoped to be
+     * the install gate - "no icons, so no install" - which was never true, since Chromium treats
+     * sizes "any" as satisfying every size requirement. display_override: ['browser'] is the only
+     * thing holding that line, so these two must stay independent: a future change that makes the
+     * icon richer must not quietly make the page installable again.
      */
-    public function test_a_schedule_without_a_logo_advertises_no_icons(): void
+    public function test_advertising_an_icon_does_not_make_the_page_installable(): void
     {
         $role = $this->role(['profile_image_url' => null]);
 
         $manifest = $this->get('/'.$role->subdomain.'/manifest.webmanifest')->assertOk()->json();
 
-        $this->assertArrayNotHasKey('icons', $manifest);
+        $this->assertArrayHasKey('icons', $manifest);
+        $this->assertStringNotContainsString('logo', $manifest['icons'][0]['src']);
+        $this->assertSame(['browser'], $manifest['display_override']);
     }
 
     /** Not plan-gated, unlike the custom favicon: a free schedule's audience is owed this too. */

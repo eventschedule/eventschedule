@@ -152,13 +152,22 @@ the head, and `servesOnCustomDomain()` removes that one too.
    field, and do not add a second `display_override` entry in front of `browser`. `sizes: "any"`
    is not a defence - Chromium treats it as satisfying every size requirement. The historic
    `/manifest.webmanifest` path stays served so WebAPKs installed before v1.0.124 re-brand
-   themselves off it. `background_color` is the ground those splashes paint the icon on, and it
-   carries the schedule's accent **only when the schedule has a logo**: with no logo the `icons`
-   key is omitted, so a pre-v1.0.124 WebAPK keeps our mark, and our mark on their accent is a
-   stranger artifact than our mark on white. It is the item 6 shape again - a fallback firing on
-   the schedule least able to notice - so the ground is coloured only when what stands on it is
-   already theirs. `theme_color` is not gated that way: it tints the page, which is theirs
-   regardless. Coverage: `tests/Feature/GuestManifestTest.php`.
+   themselves off it. **`icons` is always present, and that is load-bearing rather than tidy.**
+   Omitting it reads like "no icon of ours", but a WebAPK re-brands itself by re-reading this
+   document, so an absent key leaves an install minted while the static manifest was live holding
+   our mark with *nothing to replace it with* - which is why owners' audiences still saw our logo
+   full screen months after that file was deleted. You cannot uninstall an app from someone's home
+   screen remotely and an Android splash always paints something, so handing it a different icon
+   is the only lever there is: the schedule's own logo, or `/images/schedule-icon.png`, a neutral
+   calendar glyph carrying no wordmark and none of the brand blue. Note the deliberate asymmetry
+   with item 6: the right fallback for `og:image` is *nothing*, because it degrades to the owner's
+   own page, while the right fallback here is *something*, because the alternative degrades to us.
+   `background_color` follows the accent unconditionally now - it was briefly gated on the
+   schedule having a logo, to avoid standing our mark on their colour, but that gate only
+   described the bug and made the change a no-op on exactly the logo-less schedules still showing
+   our mark. Removing the possibility is what retires the gate. `theme_color` was never gated that
+   way: it tints the page, which is theirs regardless. Coverage:
+   `tests/Feature/GuestManifestTest.php`.
 8. **The WP documents this matrix publicly** and is written to not overclaim. Any change here needs
    `resources/views/marketing/white-label.blade.php` (the seven-row register, section 05, the
    selfhost and operator FAQs which also feed the FAQ JSON-LD, and the file's own design comment),

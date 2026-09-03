@@ -150,7 +150,7 @@
         </div>
 
         <h3 class="doc-subheading">It becomes your favicon too <x-doc-badge plan="pro" /></h3>
-        <p class="text-gray-600 dark:text-gray-300">On Pro, your profile image also becomes the icon in the browser tab on your public pages, including ticket pages, and the home-screen icon when a visitor saves your schedule to their phone. Nothing to configure: upload a profile image and the Event Schedule icon is replaced by yours. This is the same reason a square image matters, since a tab icon is cropped to a square either way.</p>
+        <p class="text-gray-600 dark:text-gray-300">On Pro, your profile image also becomes the icon in the browser tab on your public pages, including ticket pages. On every plan it becomes the home-screen icon when a visitor saves your schedule to their phone, and a schedule that has uploaded no image gets a plain calendar glyph there rather than the Event Schedule logo. Nothing to configure: upload a profile image and it is used automatically. This is the same reason a square image matters, since a tab icon is cropped to a square either way.</p>
     </section>
 
     <!-- Header Images -->

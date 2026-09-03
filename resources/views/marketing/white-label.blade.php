@@ -603,7 +603,7 @@
             ],
             [
                 'surface' => 'The browser tab icon on your pages',
-                'free'    => 'The Event Schedule mark.',
+                'free'    => 'The Event Schedule mark in the tab. A plain calendar glyph, never our logo, if a visitor saves the page to their home screen.',
                 'pill'    => 'Becomes yours',
                 'after'   => 'Your uploaded logo becomes the tab and home-screen icon.',
             ],

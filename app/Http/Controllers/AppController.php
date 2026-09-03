@@ -691,13 +691,15 @@ class AppController extends Controller
             // still allows. White is what made it read as a blank page that had failed to load,
             // which is how the owner who reported this described it.
             //
-            // Coloured only when the icon on it is the SCHEDULE's. A schedule with no logo
-            // advertises no icons at all (see below), so a WebAPK minted while the static
-            // manifest was live has nothing to re-brand to and keeps OUR mark - and our mark on
-            // their accent is a stranger artifact than our mark on white. accent_color is also
-            // NOT NULL with a '#007bff' default, so it is a colour they chose only when they
-            // chose one; this is not a claim that every schedule's splash is now theirs.
-            'background_color' => ($role->profile_image_url && $themeColor) ? $themeColor : '#ffffff',
+            // Unconditional, because the icon standing on it can no longer be ours: every
+            // schedule now advertises either its own logo or the neutral mark below. This was
+            // briefly gated on the schedule having a logo, since painting OUR mark onto THEIR
+            // accent is a stranger artifact than our mark on white - but that gate only ever
+            // described the bug rather than fixing it, and it made the change a no-op on exactly
+            // the logo-less schedules that were still showing our mark. Removing the possibility
+            // is what retires the gate. accent_color is NOT NULL with a '#007bff' default, so it
+            // is a colour they chose only when they chose one.
+            'background_color' => $themeColor ?: '#ffffff',
             'lang' => $role->language_code,
             'dir' => $role->isRtl() ? 'rtl' : 'ltr',
         ];
@@ -710,22 +712,42 @@ class AppController extends Controller
             $manifest['theme_color'] = $themeColor;
         }
 
-        // The schedule's own logo or nothing at all - never /images/logo.png, which is the whole
-        // bug. Uploads are stored as-is (RoleController::update does no resizing), so the real
-        // dimensions are unknown and "any" is the only honest value. A schedule with no logo
-        // advertises no icons for the same reason. Do not rely on "any" to prevent an install:
-        // Chromium treats it as satisfying every size requirement, so the earlier hope here that a
-        // browser would "decline to treat the page as installable" was never true - display_override
-        // is what does that now. These fields are still worth serving because a WebAPK minted while
-        // the static manifest was live re-brands itself off them on its next update check, which is
-        // the only reason the historic path is still served at all.
-        if ($role->profile_image_url) {
-            $manifest['icons'] = [[
-                'src' => $role->profile_image_url,
-                'sizes' => 'any',
-                'purpose' => 'any',
-            ]];
-        }
+        // The schedule's own logo, or a neutral mark - never /images/logo.png, which is the whole
+        // bug. ALWAYS present, and that is the fix rather than a detail: an Android WebAPK
+        // re-brands itself by re-reading this document on its next update check, so omitting the
+        // key is not "no icon". It leaves an install minted while the static manifest was live
+        // holding OUR mark with nothing to replace it with, which is how a schedule owner's
+        // audience kept seeing our logo full screen for months after that file was deleted. You
+        // cannot uninstall an app from someone's home screen remotely, and an Android launch
+        // splash always paints something, so the only lever that removes our logo is handing it a
+        // different one. A logo-less schedule therefore advertises schedule-icon.png - a plain
+        // calendar glyph carrying no wordmark and none of the brand blue.
+        //
+        // An upload is stored as-is (RoleController::update does no resizing), so its real
+        // dimensions are unknown and "any" is the only honest value; schedule-icon.png is ours to
+        // generate, so its size is declared exactly. Root-relative for the same reason start_url
+        // and scope are relative - resolved against this document's own URL it is same-origin on
+        // a subdomain, a custom domain and a path-routed selfhost alike, where asset() would emit
+        // the app host and point a tenant's icon off-origin.
+        //
+        // Do not rely on either entry to prevent an install: Chromium treats "any" as satisfying
+        // every size requirement, so the earlier hope here that a browser would "decline to treat
+        // the page as installable" was never true. display_override above is what does that, and
+        // nothing in this block affects it - GuestManifestTest pins that they stay independent.
+        $manifest['icons'] = [
+            $role->profile_image_url
+                ? [
+                    'src' => $role->profile_image_url,
+                    'sizes' => 'any',
+                    'purpose' => 'any',
+                ]
+                : [
+                    'src' => '/images/schedule-icon.png',
+                    'sizes' => '512x512',
+                    'type' => 'image/png',
+                    'purpose' => 'any',
+                ],
+        ];
 
         return $manifest;
     }
