@@ -11,8 +11,13 @@ at the end.
 Steps marked **[one-time]** are the v1.0.129 infrastructure cutover and will not recur. The rest
 is the standing shape of a hosted deploy.
 
-Reference material, both authoritative and more detailed than this file:
-[`CACHING.md`](CACHING.md) and [`DIGITALOCEAN_WORKER.md`](DIGITALOCEAN_WORKER.md).
+**This file is self-contained for the cutover.** Everything you need to do on the day, verify
+after it, and reach for when something goes wrong is here - you should not have to open another
+document mid-deploy. [`CACHING.md`](CACHING.md) and
+[`DIGITALOCEAN_WORKER.md`](DIGITALOCEAN_WORKER.md) go deeper on *why* each mechanism works the
+way it does: the origin cache contract the middleware implements, what moved into the browser,
+and the full worker reference. Read them before changing any of it; you do not need them to run
+the cutover.
 
 ## What is shipping
 
@@ -217,8 +222,9 @@ a variant deliberately does *not* bust that cache, so the switch is not instant.
 
 ### 4. Cloudflare Cache Rule - [one-time] [Cloudflare dashboard]
 
-Rules, then Cache Rules, then Create rule. Name `Marketing HTML edge cache`. The expression, and
-the reasoning behind every clause, is in [`CACHING.md`](CACHING.md):
+Rules, then Cache Rules, then Create rule. Name `Marketing HTML edge cache`. The expression is
+below; [`CACHING.md`](CACHING.md) explains the reasoning behind every clause if you need to
+change one:
 
 ```
 ((http.host eq "eventschedule.com")
@@ -268,8 +274,18 @@ never see the guest header. This is the one failure mode no code can defend agai
 
 *Undo:* disable the rule, then purge the zone (Caching, Configuration, Purge Everything).
 
-Optional and separate: the `www` to apex redirect rule in [`CACHING.md`](CACHING.md), which
-collapses two hops into one 301.
+**Optional and separate: the `www` to apex redirect.** `http://www.eventschedule.com/...`
+currently takes two hops - `http` to `https://www.`, then `www.` to the apex. One Cloudflare
+redirect rule collapses it to a single 301. Rules, then Redirect Rules, then Create rule.
+
+Match: `(http.host eq "www.eventschedule.com")`. Then, as a Dynamic redirect:
+
+- Expression: `concat("https://eventschedule.com", http.request.uri.path)`
+- Status: `301`
+- Preserve query string: on
+
+It has to sit ahead of whatever performs the `www` to apex redirect today, and it needs the HTTP
+(port 80) scheme included - that inclusion is what removes the extra hop.
 
 ### 5. Set `BACKUP_*` and `CACHE_STORE` - [one-time] [DO app spec, one save]
 
@@ -454,6 +470,70 @@ alert list. What it deliberately does NOT cover, because no automated check can:
 For an urgent marketing fix, purge the zone after the deploy finishes. Automating a zone purge
 from the release flow is a known un-wired follow-up.
 
+## If something goes wrong
+
+### "Scheduled tasks are not running"
+
+Expect this alert **between step 6 and step 7** - it is not a fault there. `SchedulerHealth::isStalled()`
+treats an expected rail that has never been seen as stalled, and a worker parked on
+`sleep infinity` writes no heartbeat, so the banner goes red the moment `SCHEDULER_EXPECTED_RAIL`
+is saved and stays red until `schedule:work` starts. That is the one window where it means
+nothing.
+
+Everywhere else it is real, and it matters more than it looks: the alert shows on the admin
+dashboard, the admin nav and the Scheduler card on `/admin/queue`, and it means nothing is
+draining the queue either - no email, no calendar sync, no installment charges. Both rails stamp
+`scheduler.last_run_at` on every tick, even on minutes when nothing was due, so the key going
+stale means the scheduler stopped rather than that nothing happened to be scheduled.
+
+Check in this order:
+
+1. **Is the worker component running?** Restart it from the console if not.
+2. **Is `CACHE_STORE` still `database`?** On the file driver the worker writes a key the web
+   container cannot read, so the alert fires permanently while the scheduler is in fact fine.
+   This is the most likely false positive and the cheapest to rule out.
+3. **Was the external cron throttled out?** Both cron endpoints carry their own rate-limit
+   bucket, and a 429 stops the HTTP rail without any error reaching the app.
+4. **Worker logs, then the per-task list on `/admin/queue`**, which names the individual task
+   rather than just reporting that something is wrong.
+
+### Emergency fallback to the HTTP cron
+
+The one recovery path that does not require fixing the worker. Restore `APP_CRON_SECRET` to a
+known value and re-enable the external cron against `GET /translate_data?secret=...` once a
+minute. `translateData()` is a complete second copy of the schedule, so nothing is lost while the
+worker is dealt with - which is exactly why step 8 says **disable** the cron rather than delete
+it, and why rotating that secret is deferred until after a week's soak.
+
+If both rails end up live for more than a few minutes, re-read step 8: most commands are
+idempotent through row-level watermarks, but the subscription reminders, the three `app:notify-*`
+commands and both blog generators will duplicate mail and spend.
+
+### Restarting the worker
+
+Console, the `scheduler` component, Actions, Restart. A deploy does the same thing.
+
+`schedule:work` installs no SIGTERM handler, so a restart can hard-kill an in-flight
+`schedule:run`. Every long-running command's lock is TTL-backstopped for exactly this, so the
+worst case is one skipped run - but it is a reason to avoid restarting at the top of an hour if
+you have the choice.
+
+### Where to look
+
+The worker's **runtime log in the App Platform console** is the real log. `schedule:work` streams
+each `schedule:run` subprocess's output there, so a healthy worker shows a `Running [...] DONE`
+line per due task per minute, and `LOG_CHANNEL=stderr` puts every `Log::` call there too.
+
+**Ignore `storage/logs/scheduler.log`.** The `appendOutputTo()` calls throughout
+`routes/console.php` never write it - that option is only honoured for process-backed scheduled
+events, and every entry in that file is a closure. The file has never existed.
+
+One thing the log will not tell you: **a task skipped because its `withoutOverlapping()` mutex
+was held prints nothing at all.** The mutex registers a `->skip()` filter that is evaluated
+before the `Running [...]` line, so a wedged task is indistinguishable from one that was not due.
+The per-task list on `/admin/queue` is the only place it shows, and it ages from the last
+*completion* rather than the last start.
+
 ## Watch for a week
 
 - **Worker memory.** `app:send-graphic-emails` can raise `memory_limit` toward 512 MB, the whole
@@ -462,9 +542,6 @@ from the release flow is a known un-wired follow-up.
   runs inside `schedule:run` and SIGKILLs itself on timeout, so the tick dies, nothing else due
   that minute runs, and no heartbeat is stamped. Not new, since the HTTP rail behaved identically,
   but it is the strongest argument for a resident `queue:work`.
-- **A task skipped by a held mutex prints nothing at all.** `withoutOverlapping()` is a `->skip()`
-  reject filter evaluated before the `Running [...]` line, so a wedged task is indistinguishable
-  from "not due" in the logs. The per-task list on `/admin/queue` is the only place it shows.
 - Twelve `daily()` tasks fire together at 00:00 UTC, sequentially, in one container.
 - **A price or copy change made at `/admin/settings` is not visible on `/pricing`** for up to ten
   minutes plus serve-stale, and there is no purge hook on a settings save the way there is a
@@ -477,6 +554,16 @@ from the release flow is a known un-wired follow-up.
   as guests tick the checkout opt-in. Watch for `Log::warning('Event announcement blocked')`: a
   schedule inside its own 24h SMTP failure window sends nothing, and `claimWindow()` has already
   advanced `roles.last_announced_at`, so that digest is skipped rather than retried.
+- **`app:cleanup-backups` no longer collects abandoned import uploads.** Import archives live on
+  the *web* container's local disk - they have to, because `ZipArchive` needs a real filesystem
+  path - so the sweep now runs somewhere it cannot see them. That disk is ephemeral, so a deploy
+  clears them; between deploys they accumulate. Moving import uploads to shared storage is the
+  real fix and is a follow-up.
+- **`app:update-geoip` now refreshes a file nothing reads.** It writes `database_path('geoip')` on
+  the worker; `GeoIpService` reads it during web requests on the service. Country analytics keep
+  working from the copy committed to git - they are just no longer refreshed. Note this was only
+  ever intermittently useful, since that path is inside the source tree and every deploy restores
+  the committed copy.
 - **Ticket-panel visibility widened on deploy.** `User::canViewEventData()` replaced an owner-only
   check, so every team admin on an attached non-curator schedule can now see ticket prices,
   payment configuration and sales for that schedule's events. Intended, but it is a data-visibility
@@ -497,9 +584,10 @@ in the web request**, and this release's 11 migrations include the irreversible
 
 ## Deferred
 
-- Rotating `APP_CRON_SECRET`, the final step of [`DIGITALOCEAN_WORKER.md`](DIGITALOCEAN_WORKER.md)
-  section 4. It belongs after a week's soak. Keep the old value until then, because the cron
-  fallback is the only recovery path that does not involve fixing the worker.
+- Rotating `APP_CRON_SECRET`. Set a new value on the app spec and confirm
+  `GET /translate_data?secret=<old>` returns 403; the undo is restoring the previous secret. It
+  belongs after a week's soak, so keep the old value until then - the cron fallback above is the
+  only recovery path that does not involve fixing the worker, and rotating the secret disarms it.
 - Adding `php artisan translations:publish --no-prune || true` to the *web* service's run command.
   Same gap, predates this change, and it edits the live service spec.
 - The resident `queue:work` supervisor. It would also require removing `process-queue` from
