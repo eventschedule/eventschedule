@@ -4,7 +4,10 @@ namespace App\Console\Commands;
 
 use App\Console\Concerns\ReportsChecks;
 use App\Services\DigitalOceanService;
+use App\Utils\PlanPriceUtils;
+use App\Utils\PlatformPricing;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 /**
@@ -58,7 +61,7 @@ class DeployPreflight extends Command
             $this->checkProductionBaseline();
         }
 
-        $this->printConsoleOnlyChecks();
+        $this->checkDatabase();
 
         return $this->summarise();
     }
@@ -66,6 +69,15 @@ class DeployPreflight extends Command
     private function checkWorkingTree(): void
     {
         $this->section('working tree');
+
+        // Skipped rather than failed on the App Platform container, which runs a built image
+        // with no .git at all. Without this every git call returns '' and the empty strings
+        // read as "clean tree, 0 commits ahead" - a false pass on the check that matters most.
+        if ($this->git('rev-parse --is-inside-work-tree') !== 'true') {
+            $this->warned('Not a git checkout', 'run the working-tree checks from your clone');
+
+            return;
+        }
 
         $head = $this->git('rev-parse --short HEAD');
         $branch = $this->git('rev-parse --abbrev-ref HEAD');
@@ -96,7 +108,9 @@ class DeployPreflight extends Command
         $ahead = $this->git('rev-list --count origin/main..HEAD');
         $behind = $this->git('rev-list --count HEAD..origin/main');
 
-        if ($ahead === '0' && $behind === '0') {
+        if ($ahead === '' || $behind === '') {
+            $this->warned('No origin/main to compare against', 'git fetch, then re-run');
+        } elseif ($ahead === '0' && $behind === '0') {
             $this->passed('HEAD matches origin/main');
         } elseif ($ahead !== '0') {
             $this->failed('HEAD is '.$ahead.' commit(s) ahead of origin/main', 'push before deploying');
@@ -337,31 +351,163 @@ class DeployPreflight extends Command
     }
 
     /**
-     * Two questions this command cannot answer from outside: they need the production database.
-     * Printed as copy-paste rather than silently skipped, because "not checked" and "checked and
-     * fine" are the two states a runbook must never confuse.
+     * The three questions that need a real database, run rather than printed.
+     *
+     * These used to be SQL pasted into a console. They are checks, not queries: the useful
+     * output is "no subscriber is stranded", not a list of price IDs to eyeball against a list
+     * of config values. Running them here also means the comparison uses the SAME
+     * PlanPriceUtils the app uses, so it cannot disagree with production by hand-transcription.
+     *
+     * WHICH database this reaches is the thing to be careful about. Run from a checkout it is
+     * your dev database and the answers mean nothing; run on the App Platform console it is
+     * production. So the section names the host and schema it actually queried, every time.
      */
-    private function printConsoleOnlyChecks(): void
+    private function checkDatabase(): void
     {
-        $this->section('run these on the container console');
+        $this->section('database');
 
-        $this->line(<<<'SQL'
-  -- 1. Is any live subscriber on a Stripe price ID config no longer names? Each of these must
-  --    appear in STRIPE_PRICE_MONTHLY / _YEARLY / STRIPE_ENTERPRISE_PRICE_MONTHLY / _YEARLY.
-  --    An unlisted ID means that customer loses their tier while still being charged, and this
-  --    release removes the STRIPE_LEGACY_* mechanism that used to absorb exactly that.
-  SELECT DISTINCT stripe_price FROM subscriptions
-  WHERE stripe_status IN ('active','trialing','past_due');
+        try {
+            DB::select('select 1');
+        } catch (\Throwable $e) {
+            $this->warned('No database reachable from here',
+                'run this again on the container console for the last three checks');
 
-  -- 2. What the marketing site advertises, which beats config. Blank result = config decides.
-  SELECT `key`, value FROM settings WHERE `key` LIKE 'plan_price_%';
+            return;
+        }
 
-  -- 3. Migration cost. Three migrations touch `events`; the third is the one that WRITES, and
-  --    neither column it filters on is indexed, so it scans.
-  SELECT COUNT(*) FROM events;
-  SELECT COUNT(*) FROM federated_events;
-  SELECT COUNT(*) FROM events WHERE coupon_discount IS NULL AND coupon_discount_type IS NOT NULL;
-SQL);
+        $this->note('connected to '.config('database.connections.'.config('database.default').'.database')
+            .' on '.config('database.connections.'.config('database.default').'.host'));
+
+        $this->checkStrandedSubscriptions();
+        $this->checkAdvertisedPrices();
+        $this->checkMigrationCost();
+    }
+
+    /**
+     * The highest-value check in the whole command.
+     *
+     * This release deleted STRIPE_LEGACY_*, so PlanPriceUtils resolves a tier ONLY by exact
+     * match against the four current price IDs. A live subscription on any other ID means that
+     * customer keeps being charged while hasActiveEnterpriseSubscription() returns false, both
+     * webhook handlers decline to write, and ARR counts them at zero - announced by nothing but
+     * a Log::warning. See PlanPriceUtils::tierFor()'s docblock.
+     */
+    private function checkStrandedSubscriptions(): void
+    {
+        $configured = array_values(array_filter([
+            PlanPriceUtils::current('pro', 'monthly'),
+            PlanPriceUtils::current('pro', 'yearly'),
+            PlanPriceUtils::current('enterprise', 'monthly'),
+            PlanPriceUtils::current('enterprise', 'yearly'),
+        ]));
+
+        if ($configured === []) {
+            $this->warned('No STRIPE_PRICE_* configured here', 'cannot judge stranded subscribers');
+
+            return;
+        }
+
+        $live = DB::table('subscriptions')
+            ->whereIn('stripe_status', ['active', 'trialing', 'past_due'])
+            ->whereNotNull('stripe_price')
+            ->distinct()
+            ->pluck('stripe_price')
+            ->all();
+
+        if ($live === []) {
+            $this->passed('No live subscriptions to check');
+
+            return;
+        }
+
+        $stranded = array_values(array_diff($live, $configured));
+
+        if ($stranded === []) {
+            $this->passed('All '.count($live).' live price ID(s) are recognised');
+
+            return;
+        }
+
+        $this->failed(count($stranded).' live price ID(s) NOT recognised by config',
+            'these customers are charged but lose their tier');
+
+        foreach ($stranded as $priceId) {
+            $affected = DB::table('subscriptions')
+                ->where('stripe_price', $priceId)
+                ->whereIn('stripe_status', ['active', 'trialing', 'past_due'])
+                ->count();
+
+            $this->note('  '.$priceId.'  on '.$affected.' live subscription(s)');
+        }
+    }
+
+    /**
+     * What the marketing site advertises comes from the settings table FIRST and config second
+     * (PlatformPricing), while ARR, MRR and renewal emails read config only - deliberately, so a
+     * super-admin cannot restate historical revenue from a form. This release changes the config
+     * defaults, so the two layers are worth seeing side by side before the deploy moves one.
+     */
+    private function checkAdvertisedPrices(): void
+    {
+        $overrides = DB::table('settings')
+            ->where('key', 'like', 'plan_price_%')
+            ->pluck('value', 'key')
+            ->all();
+
+        $advertised = PlatformPricing::all();
+
+        $configured = [
+            'proMonthly' => config('services.stripe_platform.price_monthly_amount'),
+            'proYearly' => config('services.stripe_platform.price_yearly_amount'),
+            'entMonthly' => config('services.stripe_platform.enterprise_price_monthly_amount'),
+            'entYearly' => config('services.stripe_platform.enterprise_price_yearly_amount'),
+        ];
+
+        foreach ($advertised as $slot => $amount) {
+            $this->note(sprintf('  %-11s advertised %-8s config %s', $slot, $amount, $configured[$slot] ?? '?'));
+        }
+
+        if ($overrides === []) {
+            $this->warned('No plan_price_* rows in settings',
+                'the advertised price follows config, so this deploy moves it');
+
+            return;
+        }
+
+        $this->passed(count($overrides).' plan_price_* setting(s) override config',
+            'the advertised price does not move on deploy');
+    }
+
+    /**
+     * migrate --force runs inside the service start command, so a slow migration stalls the
+     * deploy and holds locks on the busiest table in the app. Three migrations touch `events`
+     * this release; the coupon reset is the only one that WRITES, and neither column it filters
+     * on is indexed, so it scans however many rows there are.
+     */
+    private function checkMigrationCost(): void
+    {
+        $events = DB::table('events')->count();
+        $federated = DB::table('federated_events')->count();
+
+        $couponRows = DB::table('events')
+            ->whereNull('coupon_discount')
+            ->whereNotNull('coupon_discount_type')
+            ->count();
+
+        $this->note('  events '.number_format($events)
+            .'   federated_events '.number_format($federated)
+            .'   coupon rows to reset '.number_format($couponRows));
+
+        // Chosen as "large enough that an ALTER is worth doing by hand", not as a hard limit -
+        // an unindexed scan of a few hundred thousand rows is seconds, of tens of millions is
+        // not, and the deploy blocks on it either way.
+        if ($events > 500000 || $federated > 500000) {
+            $this->warned('Large tables', 'run the events and federated_events migrations by hand first');
+
+            return;
+        }
+
+        $this->passed('Migration tables are small enough to migrate in the start command');
     }
 
     /**
