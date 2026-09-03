@@ -112,6 +112,64 @@ class GuestManifestTest extends TestCase
     }
 
     /**
+     * FAILS before the change: background_color was a hardcoded '#ffffff'.
+     *
+     * This is the colour Android paints the launch splash of a home-screen app installed before
+     * v1.0.124, with the icon centred on it. White is what made the owner who reported this
+     * describe it as a blank page that had not loaded. It cannot stop those installs existing -
+     * only removing the icon does that - but it can stop them reading as a broken page, and the
+     * schedule's own accent is the only colour here that is honestly theirs.
+     */
+    public function test_the_splash_background_is_the_schedules_own_colour(): void
+    {
+        $role = $this->role(['accent_color' => '#123456', 'profile_image_url' => 'profile_bluenote.png']);
+
+        $manifest = $this->get('/'.$role->subdomain.'/manifest.webmanifest')->assertOk()->json();
+
+        $this->assertSame('#123456', $manifest['background_color']);
+    }
+
+    /**
+     * A guard, not a proof: passes before and after. A cleared accent reaches for nothing rather
+     * than a default, for the same reason theme_color is omitted outright in that case. Our brand
+     * blue is the one answer this whole manifest split exists to keep off someone else's audience.
+     *
+     * Carries a logo so it isolates the cleared-accent branch. Without one it would land on the
+     * no-logo branch below and pass for the wrong reason.
+     */
+    public function test_a_schedule_without_an_accent_colour_keeps_a_white_splash(): void
+    {
+        $role = $this->role(['accent_color' => '', 'profile_image_url' => 'profile_bluenote.png']);
+
+        $manifest = $this->get('/'.$role->subdomain.'/manifest.webmanifest')->assertOk()->json();
+
+        $this->assertSame('#ffffff', $manifest['background_color']);
+    }
+
+    /**
+     * FAILS before the change: background_color followed the accent whatever the icons said.
+     *
+     * The pair to the two above, and the case that actually matters. A schedule with no logo
+     * advertises no icons at all, so a WebAPK minted while the static manifest was live has
+     * nothing to re-brand to and keeps OUR mark. Painting that onto their accent would be a
+     * stranger artifact than leaving it on white, and it lands on precisely the unfinished
+     * schedule least able to notice - the shape docs/BRANDING_MATRIX.md item 6 is written about.
+     *
+     * theme_color is deliberately NOT gated the same way: it tints the address bar of the PAGE,
+     * which is theirs whether or not they have uploaded a logo.
+     */
+    public function test_a_schedule_with_no_logo_keeps_white_behind_our_mark(): void
+    {
+        $role = $this->role(['accent_color' => '#123456', 'profile_image_url' => null]);
+
+        $manifest = $this->get('/'.$role->subdomain.'/manifest.webmanifest')->assertOk()->json();
+
+        $this->assertArrayNotHasKey('icons', $manifest);
+        $this->assertSame('#ffffff', $manifest['background_color']);
+        $this->assertSame('#123456', $manifest['theme_color']);
+    }
+
+    /**
      * A guard, not a proof: passes before and after. This meta is the other route to a standalone
      * home-screen app, and it would sidestep the display_override above, so it must never appear.
      */

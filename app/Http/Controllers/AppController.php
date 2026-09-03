@@ -660,6 +660,8 @@ class AppController extends Controller
 
         $name = $role->translatedName() ?: $subdomain;
 
+        $themeColor = $role->manifestThemeColor();
+
         $manifest = [
             'name' => $name,
             'short_name' => Str::limit($name, 12, ''),
@@ -684,7 +686,18 @@ class AppController extends Controller
             // would re-open the hole with display untouched. GuestManifestTest pins both halves.
             'display' => 'standalone',
             'display_override' => ['browser'],
-            'background_color' => '#ffffff',
+            // The ground a launch splash paints its icon on. That reaches stale Android WebAPKs
+            // from before v1.0.124, and new iOS installs, which the display above deliberately
+            // still allows. White is what made it read as a blank page that had failed to load,
+            // which is how the owner who reported this described it.
+            //
+            // Coloured only when the icon on it is the SCHEDULE's. A schedule with no logo
+            // advertises no icons at all (see below), so a WebAPK minted while the static
+            // manifest was live has nothing to re-brand to and keeps OUR mark - and our mark on
+            // their accent is a stranger artifact than our mark on white. accent_color is also
+            // NOT NULL with a '#007bff' default, so it is a colour they chose only when they
+            // chose one; this is not a claim that every schedule's splash is now theirs.
+            'background_color' => ($role->profile_image_url && $themeColor) ? $themeColor : '#ffffff',
             'lang' => $role->language_code,
             'dir' => $role->isRtl() ? 'rtl' : 'ltr',
         ];
@@ -693,7 +706,7 @@ class AppController extends Controller
         // address bar on a page that is meant to carry no branding of ours. The matching
         // <meta name="theme-color"> in partials/web-app-manifest.blade.php reads the same
         // accessor, so the tag and this document cannot disagree - they used to.
-        if ($themeColor = $role->manifestThemeColor()) {
+        if ($themeColor) {
             $manifest['theme_color'] = $themeColor;
         }
 
