@@ -55,18 +55,45 @@ Two changes need operator action **outside the repo** before they do anything at
 
 ## Pre-flight
 
-Read-only. Do all of it before touching anything.
+Read-only. Do all of it before touching anything. It is worth the ten minutes because most of
+what it catches is invisible from the outside: an unpushed commit or an untracked asset (the
+deploy ships `origin/main`, not your disk), a variable that is set on the app spec but blank, and
+a subscriber on a Stripe price ID this release no longer recognises.
 
 | # | Check | Why it matters |
 |---|---|---|
 | P1 | **Snapshot the database.** | `2026_08_28_000000_replace_federated_event_url_with_is_online.php` **drops `federated_events.event_url`**. Its own `down()` recreates the column empty: the stored links are not recoverable, which is the point of the change. `2026_09_02_000000_reset_blog_post_updated_at.php` rewrites `updated_at` on ~161 blog rows with a no-op `down()`. Neither is reversible by a deployment rollback. |
-| P2 | `SELECT COUNT(*) FROM events;`, `SELECT COUNT(*) FROM federated_events;`, and `SELECT COUNT(*) FROM events WHERE coupon_discount IS NULL AND coupon_discount_type IS NOT NULL;` | **Three** migrations land on `events`, not two. Two are ALTERs: `widen_events_event_url` (varchar 255 to 500, a table rebuild on MySQL 8) and `add_image_variants_to_events` (a JSON column at the end, so INSTANT). The third, `reset_untouched_coupon_discount_types`, is the only one that WRITES rows, and neither column it filters on is indexed - so it scans `events` inside the start command's `migrate --force`. Its write set is small (the columns only exist since 2026-08-21) but the scan is not. `federated_events` is separately rebuilt **twice** in one migration: `replace_federated_event_url_with_is_online` adds `is_online` positionally with `->after()`, which forfeits `ALGORITHM=INSTANT`, then drops `event_url`. On large tables, run these by hand from the console *before* triggering the deploy. |
+| P2 | **Query 3** below, on the console | **Three** migrations land on `events`, not two. Two are ALTERs: `widen_events_event_url` (varchar 255 to 500, a table rebuild on MySQL 8) and `add_image_variants_to_events` (a JSON column at the end, so INSTANT). The third, `reset_untouched_coupon_discount_types`, is the only one that WRITES rows, and neither column it filters on is indexed - so it scans `events` inside the start command's `migrate --force`. Its write set is small (the columns only exist since 2026-08-21) but the scan is not. `federated_events` is separately rebuilt **twice** in one migration: `replace_federated_event_url_with_is_online` adds `is_online` positionally with `->after()`, which forfeits `ALGORITHM=INSTANT`, then drops `event_url`. On large tables, run those three migrations by hand from the console *before* triggering the deploy. |
 | P3 | `php artisan deploy:preflight` | Production config is the app spec, not any `.env`. The command confirms `QUEUE_CONNECTION=database`, `APP_URL`, `IS_HOSTED`, `IS_NEXUS`, reports `CACHE_STORE`, checks the web service is **`instance_count: 1`** (more than one container on the `file` cache store means every lock in the app serialises against nothing), prints the deployment ID a rollback targets, and writes the full custom-domain list to `storage/deploy/`. |
-| P4 | On the console: `SELECT DISTINCT stripe_price FROM subscriptions WHERE stripe_status IN ('active','trialing','past_due');` | **The highest-value check in this table, and the one that was missing.** The legacy price recognition mechanism was removed this release, so `PlanPriceUtils` now matches a tier *only* against the four `STRIPE_PRICE_*` IDs on the spec. Every value this query returns must be one of those four. Anything else is a customer whose card is still being charged while `hasActiveEnterpriseSubscription()` returns false, both webhook handlers decline to write and ARR counts them at zero - the cost is spelled out in `PlanPriceUtils::tierFor()`'s docblock. Note the four configured IDs all share a `price_1T3s...` prefix, i.e. one creation batch, so anyone predating it is already stranded. `deploy:preflight` also confirms no `STRIPE_LEGACY_*` remains on the spec. |
-| P5 | On the console: `SELECT \`key\`, value FROM settings WHERE \`key\` LIKE 'plan_price_%';` | The *defaults* changed from 9/90/29/290 to 5/50/15/150. **The env vars are named `STRIPE_PRICE_MONTHLY_AMOUNT`, `STRIPE_PRICE_YEARLY_AMOUNT`, `STRIPE_ENTERPRISE_PRICE_MONTHLY_AMOUNT` and `STRIPE_ENTERPRISE_PRICE_YEARLY_AMOUNT`** - earlier revisions of this file named `STRIPE_PRO_MONTHLY_AMOUNT`, which exists nowhere in the codebase. But config is only the *second* layer: `PlatformPricing` reads the `settings` row first, so what the site advertises is decided by this query, not by the spec. As of writing production already advertises 5/50/15/150, so the config change is an alignment and the displayed price does not move. Note ARR, MRR and renewal emails deliberately read **config**, never `PlatformPricing` - so those figures *will* restate on deploy. That is a reporting artefact, not lost revenue. |
+| P4 | **Query 1** below, on the console | **The highest-value check in this table, and the one that was missing.** The legacy price recognition mechanism was removed this release, so `PlanPriceUtils` now matches a tier *only* against the four `STRIPE_PRICE_*` IDs on the spec. Every value this query returns must be one of those four. Anything else is a customer whose card is still being charged while `hasActiveEnterpriseSubscription()` returns false, both webhook handlers decline to write and ARR counts them at zero - the cost is spelled out in `PlanPriceUtils::tierFor()`'s docblock. Note the four configured IDs all share a `price_1T3s...` prefix, i.e. one creation batch, so anyone predating it is already stranded. `deploy:preflight` also confirms no `STRIPE_LEGACY_*` remains on the spec. |
+| P5 | **Query 2** below, on the console | The *defaults* changed from 9/90/29/290 to 5/50/15/150. **The env vars are named `STRIPE_PRICE_MONTHLY_AMOUNT`, `STRIPE_PRICE_YEARLY_AMOUNT`, `STRIPE_ENTERPRISE_PRICE_MONTHLY_AMOUNT` and `STRIPE_ENTERPRISE_PRICE_YEARLY_AMOUNT`** - earlier revisions of this file named `STRIPE_PRO_MONTHLY_AMOUNT`, which exists nowhere in the codebase. But config is only the *second* layer: `PlatformPricing` reads the `settings` row first, so what the site advertises is decided by this query, not by the spec. As of writing production already advertises 5/50/15/150, so the config change is an alignment and the displayed price does not move. Note ARR, MRR and renewal emails deliberately read **config**, never `PlatformPricing` - so those figures *will* restate on deploy. That is a reporting artefact, not lost revenue. |
 | P6 | Capture a baseline from `/admin/users` | Record the "Visited site", page-view, docs and pricing funnel numbers. After the Cloudflare rule, origin-side counting stops and the beacon takes over; without a before-number a broken beacon is indistinguishable from normal variance. |
 | P7 | Confirm the external cron can be disabled in one click, and record the current `APP_CRON_SECRET` | Re-enabling the cron is the only emergency fallback that does not require fixing the worker. Step 8 says **disable, not delete**. |
 | P8 | `php artisan deploy:preflight`, then a green CI run | The deploy ships `origin/main`, not your disk. `deploy:preflight` fails on an unpushed commit or a dirty tree, and lists untracked paths separately because those are the ones `git commit -am` silently leaves behind - an asset referenced by committed code deploys as a 404 and nothing local ever notices. It also fails if `config/sitemap_lastmod.php` is older than the newest marketing view, which is the "run `php artisan sitemap:lastmod` before a release" rule made mechanical. `.github/workflows/test.yml` runs the whole Unit and Feature suite on push. There is **no release gate** on `build.yml`. |
+
+### The three console queries
+
+Queries 1, 2 and 3 answer P4, P5 and P2 respectively. The cells above carry the reasoning and
+the SQL lives only here, so the two cannot drift. `deploy:preflight` prints these same three at
+the end of its run, in this order and this wording; if you change one, change both.
+
+```sql
+-- 1. Is any live subscriber on a Stripe price ID config no longer names? Each of these must
+--    appear in STRIPE_PRICE_MONTHLY / _YEARLY / STRIPE_ENTERPRISE_PRICE_MONTHLY / _YEARLY.
+--    An unlisted ID means that customer loses their tier while still being charged, and this
+--    release removes the STRIPE_LEGACY_* mechanism that used to absorb exactly that.
+SELECT DISTINCT stripe_price FROM subscriptions
+WHERE stripe_status IN ('active','trialing','past_due');
+
+-- 2. What the marketing site advertises, which beats config. Blank result = config decides.
+SELECT `key`, value FROM settings WHERE `key` LIKE 'plan_price_%';
+
+-- 3. Migration cost. Three migrations touch `events`; the third is the one that WRITES, and
+--    neither column it filters on is indexed, so it scans.
+SELECT COUNT(*) FROM events;
+SELECT COUNT(*) FROM federated_events;
+SELECT COUNT(*) FROM events WHERE coupon_discount IS NULL AND coupon_discount_type IS NOT NULL;
+```
 
 Reading the app spec (P3 to P5):
 
@@ -87,9 +114,28 @@ curl -s -H "Authorization: Bearer $TOKEN" "https://api.digitalocean.com/v2/apps/
 Each step carries its own verification and its own undo. Do not advance past a failed
 verification.
 
+| # | Step | Where | Notes |
+|---|---|---|---|
+| 1 | Create the backups bucket | DO infra | one-time |
+| 2 | Deploy `main` | DO deploy | 11 migrations; two are irreversible |
+| 3 | Backfill the flyer thumbnails | console command | one-time; must precede step 4 |
+| 4 | Cloudflare cache rule | Cloudflare dashboard | one-time; the edge cache is inert until this exists |
+| 5 | Set `BACKUP_*` and `CACHE_STORE` | DO app spec | one-time; one save, one redeploy |
+| 6 | Create the `scheduler` worker, parked | DO console | one-time; runs nothing yet |
+| 7 | Go live: switch the run command | DO console | one-time; **timing** |
+| 8 | Disable the external cron | external | one-time; **timing**, same hour as 7 |
+| 9 | Restate the docs | code | one-time |
+
 Expect three App Platform deployments (code, env vars, worker component) plus the flyer backfill.
-**The one hard timing constraint is steps 7 and 8**: start them just after the top of an hour, and
-never near 00:00 UTC. Everything before that can run whenever.
+Everything up to step 6 can run whenever.
+
+**Steps 7 and 8 are the one hard timing constraint**, and it is two rules rather than one:
+
+- **Start step 7 between :02 and :20 past the hour.** The hourly tier has just fired on both
+  rails and the next one is forty minutes away.
+- **Never start during the 23:00 or 00:00 UTC hours.** This is wider than "avoid midnight", and
+  deliberately so: step 8 has to follow step 7 *within the same hour*, so a 23:02 start puts step
+  8 on top of the 00:00 daily block - the exact collision the rule exists to prevent.
 
 ### 1. Create the backups bucket - [one-time] [DO infra]
 
@@ -298,12 +344,13 @@ early.
 
 ### 7. Go live: switch the run command - [one-time] [DO console]
 
-**Timing: start just after the top of an hour, and never near 00:00 UTC.** Just after the hour
-means the hourly tier has just fired on both rails and the daily tasks are nowhere near due.
-Avoiding midnight is not merely prudent: `translateData()` claims `td_daily` with `endOfDay()`, so
-the HTTP rail runs its whole daily block on the first tick after midnight UTC, the same minute the
-worker's twelve `daily()` tasks are scheduled for. Overlapping there means running the daily block
-twice, together.
+**Timing: start between :02 and :20 past the hour, and not during the 23:00 or 00:00 UTC hours.**
+Just after the hour means the hourly tier has just fired on both rails and the daily tasks are
+nowhere near due. Avoiding midnight is not merely prudent: `translateData()` claims `td_daily`
+with `endOfDay()`, so the HTTP rail runs its whole daily block on the first tick after midnight
+UTC, the same minute the worker's twelve `daily()` tasks are scheduled for. Overlapping there
+means running the daily block twice, together. The 23:00 hour is excluded for the same reason:
+step 8 follows within the hour, so a 23:02 start lands it on that block.
 
 First set the **app-level** env var deferred from step 6:
 
