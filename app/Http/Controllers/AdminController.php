@@ -740,6 +740,35 @@ class AdminController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
+        // Live subscriptions on a Stripe price ID config no longer names. Same predicate as
+        // AdminAlertService's subscriptions_unrecognized row, which links here - the alert says
+        // how many, this says which, because the operator cannot query production themselves.
+        //
+        // These are the rows the ARR loop above skipped: PlanPriceUtils::amountFor() returns
+        // null for an unrecognized price, so they contribute nothing to revenue while Stripe
+        // keeps charging them.
+        $configuredPriceIds = array_values(array_filter([
+            PlanPriceUtils::current('pro', 'monthly'),
+            PlanPriceUtils::current('pro', 'yearly'),
+            PlanPriceUtils::current('enterprise', 'monthly'),
+            PlanPriceUtils::current('enterprise', 'yearly'),
+        ]));
+
+        $unrecognizedSubscriptions = $configuredPriceIds === [] ? collect() : DB::table('subscriptions')
+            ->join('roles', 'roles.id', '=', 'subscriptions.role_id')
+            ->where('subscriptions.type', 'default')
+            ->whereIn('subscriptions.stripe_status', ['active', 'trialing', 'past_due'])
+            ->whereNotNull('subscriptions.stripe_price')
+            ->whereNotIn('subscriptions.stripe_price', $configuredPriceIds)
+            ->orderBy('subscriptions.created_at')
+            ->get([
+                'subscriptions.stripe_price',
+                'subscriptions.stripe_status',
+                'subscriptions.created_at',
+                'roles.name as role_name',
+                'roles.subdomain as role_subdomain',
+            ]);
+
         // Recent sales for detailed table
         $recentSales = Sale::with('event:id,name')
             ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
@@ -770,7 +799,8 @@ class AdminController extends Controller
             'range',
             'recentSales',
             'mismatchSales',
-            'mismatchBoosts'
+            'mismatchBoosts',
+            'unrecognizedSubscriptions'
         ));
     }
 

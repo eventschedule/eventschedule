@@ -288,11 +288,13 @@ The queue is drained by the `process-queue` entry inside the schedule, not by a 
 dispatch latency is up to about a minute. Both rails stamp `scheduler.last_run_at` every tick;
 `AdminAlertService`'s `scheduler_stalled` row alerts when that goes stale.
 
-**Deploying the hosted install is documented in `docs/NEXUS_RELEASE.md`** - the ordered runbook,
-its pre-flight, and the two read-only commands that check it (`php artisan deploy:preflight`
-before, `php artisan deploy:verify` after each step). Production config for hosted is the
-DigitalOcean app spec, not any `.env`, so a check that reads `.env` is answering the wrong
-question; `deploy:preflight` reads the live spec over the DO API.
+**Deploying the hosted install is documented in `docs/NEXUS_RELEASE.md`.** The deploy is push to
+`main`, then click Deploy in the DigitalOcean console - there is deliberately no maintenance
+command to run, because the production database is not reachable from a dev machine and a
+command that ships in the release cannot check the release before it deploys. Anything needing
+production data is surfaced by the app instead: `AdminAlertService` on `/admin`, the Scheduler
+card on `/admin/queue`, and `/up`, whose `DiagnosingHealth` listener round-trips the database
+and the cache store. Production config for hosted is the DigitalOcean app spec, not any `.env`.
 
 **Anonymous marketing HTML is edge-cached** - `CacheableMarketingResponse` strips the session and
 CSRF cookies and sets `s-maxage=600` on cookie-free anonymous `marketing.*` GETs, so page views are

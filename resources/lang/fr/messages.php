@@ -2560,6 +2560,8 @@ return [
 
     // Admin amount mismatch
     'amount_mismatch_sales' => 'Écart de montant ventes',
+    'unrecognized_subscriptions' => 'Abonnements à un prix non reconnu',
+    'unrecognized_subscriptions_help' => 'Stripe facture ces abonnements avec un ID de prix que cette installation ne référence pas dans STRIPE_PRICE_*, donc l’application ne peut pas résoudre leur formule : le niveau est retiré et le revenu compté comme nul. Ajoutez cet ID de prix à la configuration STRIPE_PRICE_*, ou basculez l’abonnement sur un prix actuel dans Stripe.',
     'amount_mismatch_boosts' => 'Écart de montant boosts',
     'no_amount_mismatch' => 'Aucun enregistrement d\'écart de montant trouvé.',
     'expected_amount' => 'Attendu',
@@ -3592,6 +3594,7 @@ return [
     'admin_alert_jobs_stalled' => '{1} Les tâches en file d\'attente ne sont pas traitées|[2,*] Les tâches en file d\'attente ne sont pas traitées',
     'admin_alert_scheduler_stalled' => '{1} Les tâches planifiées ne s\'exécutent pas|[2,*] Les tâches planifiées ne s\'exécutent pas',
     'admin_alert_jobs_failed' => '{1} :count tâche en échec|[2,*] :count tâches en échec',
+    'admin_alert_subscriptions_unrecognized' => '{1} :count abonnement à un prix non reconnu|[2,*] :count abonnements à un prix non reconnu',
     'admin_alert_domains_failed' => '{1} :count domaine personnalisé n\'a pas pu être configuré|[2,*] :count domaines personnalisés n\'ont pas pu être configurés',
     'admin_alert_boosts_stuck' => '{1} :count campagne bloquée en attente de paiement|[2,*] :count campagnes bloquées en attente de paiement',
     'admin_alert_boosts_failed' => '{1} :count campagne en échec|[2,*] :count campagnes en échec',

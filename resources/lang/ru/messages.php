@@ -2636,6 +2636,8 @@ return [
 
     // Admin amount mismatch
     'amount_mismatch_sales' => 'Несоответствие сумм продажи',
+    'unrecognized_subscriptions' => 'Подписки с неизвестной ценой',
+    'unrecognized_subscriptions_help' => 'Stripe списывает по этим подпискам цену с ID, которого нет в STRIPE_PRICE_* этой установки, поэтому приложение не может определить их тариф: уровень отзывается, а доход считается нулевым. Добавьте этот ID цены в конфигурацию STRIPE_PRICE_* или переведите подписку на текущую цену в Stripe.',
     'amount_mismatch_boosts' => 'Несоответствие сумм продвижения',
     'no_amount_mismatch' => 'Записи о несоответствии сумм не найдены.',
     'expected_amount' => 'Ожидаемая',
@@ -3668,6 +3670,7 @@ return [
     'admin_alert_jobs_stalled' => '{1} Задачи в очереди не обрабатываются|[2,*] Задачи в очереди не обрабатываются',
     'admin_alert_scheduler_stalled' => '{1} Запланированные задачи не выполняются|[2,*] Запланированные задачи не выполняются',
     'admin_alert_jobs_failed' => '{1} :count неудачная задача|[2,*] :count неудачных задач',
+    'admin_alert_subscriptions_unrecognized' => '{1} :count подписка с неизвестной ценой|[2,*] :count подписок с неизвестной ценой',
     'admin_alert_domains_failed' => '{1} :count свой домен не удалось настроить|[2,*] :count своих доменов не удалось настроить',
     'admin_alert_boosts_stuck' => '{1} :count кампания застряла в ожидании оплаты|[2,*] :count кампаний застряли в ожидании оплаты',
     'admin_alert_boosts_failed' => '{1} :count неудачная кампания|[2,*] :count неудачных кампаний',

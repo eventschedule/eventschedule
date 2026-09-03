@@ -2557,6 +2557,8 @@ return [
 
     // Admin amount mismatch
     'amount_mismatch_sales' => 'Discrepanza importo vendite',
+    'unrecognized_subscriptions' => 'Abbonamenti con un prezzo non riconosciuto',
+    'unrecognized_subscriptions_help' => 'Stripe fattura questi abbonamenti con un ID prezzo che questa installazione non elenca in STRIPE_PRICE_*, quindi l’app non riesce a risolvere il loro piano: il livello viene revocato e vengono conteggiati come ricavo zero. Aggiungi quell’ID prezzo alla configurazione STRIPE_PRICE_*, oppure sposta l’abbonamento su un prezzo attuale in Stripe.',
     'amount_mismatch_boosts' => 'Discrepanza importo boost',
     'no_amount_mismatch' => 'Nessun record di discrepanza importo trovato.',
     'expected_amount' => 'Previsto',
@@ -3589,6 +3591,7 @@ return [
     'admin_alert_jobs_stalled' => '{1} I processi in coda non vengono elaborati|[2,*] I processi in coda non vengono elaborati',
     'admin_alert_scheduler_stalled' => '{1} Le attività pianificate non sono in esecuzione|[2,*] Le attività pianificate non sono in esecuzione',
     'admin_alert_jobs_failed' => '{1} :count processo fallito|[2,*] :count processi falliti',
+    'admin_alert_subscriptions_unrecognized' => '{1} :count abbonamento con un prezzo non riconosciuto|[2,*] :count abbonamenti con un prezzo non riconosciuto',
     'admin_alert_domains_failed' => '{1} :count dominio personalizzato non configurato|[2,*] :count domini personalizzati non configurati',
     'admin_alert_boosts_stuck' => '{1} :count campagna bloccata in attesa di pagamento|[2,*] :count campagne bloccate in attesa di pagamento',
     'admin_alert_boosts_failed' => '{1} :count campagna fallita|[2,*] :count campagne fallite',

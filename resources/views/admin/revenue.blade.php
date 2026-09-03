@@ -169,6 +169,40 @@
         </div>
         @endif
 
+        {{-- Subscriptions on a price ID config no longer names --}}
+        @if ($unrecognizedSubscriptions->count() > 0)
+        <div id="unrecognized-subscriptions" class="ap-card rounded-xl shadow p-6 border-l-4 border-red-500 scroll-mt-4">
+            <h3 class="text-lg font-medium text-red-600 dark:text-red-400 mb-2">@lang('messages.unrecognized_subscriptions')</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mb-4 max-w-3xl">@lang('messages.unrecognized_subscriptions_help')</p>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.schedule')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.price')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.status')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.date')</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        @foreach ($unrecognizedSubscriptions as $subscription)
+                        <tr>
+                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                                {{ \Illuminate\Support\Str::limit($subscription->role_name ?: $subscription->role_subdomain, 30) }}
+                            </td>
+                            <td class="px-4 py-3 text-sm font-mono text-gray-900 dark:text-white">{{ $subscription->stripe_price }}</td>
+                            <td class="px-4 py-3 text-sm text-red-600 dark:text-red-400">{{ $subscription->stripe_status }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400" title="{{ $subscription->created_at }}">
+                                {{ \Illuminate\Support\Carbon::parse($subscription->created_at)->diffForHumans() }}
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @endif
+
         {{-- Recent Sales Table --}}
         <div class="ap-card rounded-xl shadow p-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.recent_sales')</h3>

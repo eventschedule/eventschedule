@@ -9,6 +9,7 @@ use App\Models\Sale;
 use App\Models\SupportMessage;
 use App\Models\TranslationOverride;
 use App\Models\TranslationSuggestion;
+use App\Utils\PlanPriceUtils;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -50,6 +51,9 @@ class AdminAlertService
         // ever reaching the dashboard panel or the nav badge.
         'jobs_stalled',
         'jobs_failed',
+        // Above every review queue below it: this is money moving against a customer who is
+        // simultaneously losing the tier they are paying for, and nothing else reports it.
+        'subscriptions_unrecognized',
         'domains_failed',
         'boosts_stuck',
         'boosts_failed',
@@ -166,6 +170,42 @@ class AdminAlertService
             },
 
             'jobs_failed' => fn () => DB::table('failed_jobs')->count(),
+
+            // A live subscription whose stripe_price is none of the four configured IDs.
+            //
+            // PlanPriceUtils resolves a tier ONLY by exact match against those four, so an
+            // unrecognized ID means hasActiveEnterpriseSubscription() returns false while Stripe
+            // keeps charging the Enterprise rate, both webhook handlers decline to write, and
+            // AdminController::revenue()'s ARR loop contributes zero for that customer - with
+            // nothing but a Log::warning to announce any of it. See PlanPriceUtils::tierFor().
+            //
+            // Reads the four through PlanPriceUtils rather than re-listing the config keys, so
+            // this row cannot disagree with the recognition the rest of the app performs.
+            // past_due is live on purpose: Stripe is still retrying and the role keeps access
+            // through the dunning window, so a stranded past_due subscriber has exactly the
+            // problem being looked for.
+            'subscriptions_unrecognized' => function () {
+                $configured = array_values(array_filter([
+                    PlanPriceUtils::current('pro', 'monthly'),
+                    PlanPriceUtils::current('pro', 'yearly'),
+                    PlanPriceUtils::current('enterprise', 'monthly'),
+                    PlanPriceUtils::current('enterprise', 'yearly'),
+                ]));
+
+                // Nothing configured means no Stripe plans on this install, not that every
+                // subscription is stranded - counting them all would badge a selfhost install
+                // that never sold a plan.
+                if ($configured === []) {
+                    return 0;
+                }
+
+                return DB::table('subscriptions')
+                    ->where('type', 'default')
+                    ->whereIn('stripe_status', ['active', 'trialing', 'past_due'])
+                    ->whereNotNull('stripe_price')
+                    ->whereNotIn('stripe_price', $configured)
+                    ->count();
+            },
 
             'domains_failed' => fn () => $isHosted ? (int) self::roleCounts()->domains_failed : 0,
 
@@ -325,6 +365,9 @@ class AdminAlertService
             'scheduler_stalled' => ['system', 'queue', 'admin.queue', [], '', 'red', __('messages.queue')],
             'jobs_stalled' => ['system', 'queue', 'admin.queue', [], '', 'red', __('messages.queue')],
             'jobs_failed' => ['system', 'queue', 'admin.queue', [], '', 'red', __('messages.queue')],
+            // Its own anchor, not #amount-mismatch: that block is a table of mismatched SALES,
+            // and landing there would scroll past the thing the row is about.
+            'subscriptions_unrecognized' => ['insights', 'revenue', 'admin.revenue', [], '#unrecognized-subscriptions', 'red', __('messages.revenue')],
             'domains_failed' => ['manage', 'domains', 'admin.domains', ['status' => 'failed'], '', 'red', __('messages.domains')],
             'boosts_stuck' => ['manage', 'boost', 'admin.boost', [], '#boost-alerts', 'red', 'Boost'],
             'boosts_failed' => ['manage', 'boost', 'admin.boost', [], '#boost-alerts', 'red', 'Boost'],

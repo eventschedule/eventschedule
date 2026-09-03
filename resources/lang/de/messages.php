@@ -2561,6 +2561,8 @@ return [
 
     // Admin amount mismatch
     'amount_mismatch_sales' => 'Betragsabweichung Verkaeufe',
+    'unrecognized_subscriptions' => 'Abonnements mit unbekanntem Preis',
+    'unrecognized_subscriptions_help' => 'Stripe rechnet diese Abonnements mit einer Preis-ID ab, die diese Installation nicht in STRIPE_PRICE_* auflistet. Die App kann den Tarif deshalb nicht auflösen: Die Tarifstufe wird entzogen und der Umsatz als null gezählt. Fügen Sie die Preis-ID der STRIPE_PRICE_*-Konfiguration hinzu oder stellen Sie das Abonnement in Stripe auf einen aktuellen Preis um.',
     'amount_mismatch_boosts' => 'Betragsabweichung Boosts',
     'no_amount_mismatch' => 'Keine Betragsabweichungen gefunden.',
     'expected_amount' => 'Erwartet',
@@ -3594,6 +3596,7 @@ return [
     'admin_alert_jobs_stalled' => '{1} Jobs in der Warteschlange werden nicht abgearbeitet|[2,*] Jobs in der Warteschlange werden nicht abgearbeitet',
     'admin_alert_scheduler_stalled' => '{1} Geplante Aufgaben laufen nicht|[2,*] Geplante Aufgaben laufen nicht',
     'admin_alert_jobs_failed' => '{1} :count fehlgeschlagener Job|[2,*] :count fehlgeschlagene Jobs',
+    'admin_alert_subscriptions_unrecognized' => '{1} :count Abonnement mit unbekanntem Preis|[2,*] :count Abonnements mit unbekanntem Preis',
     'admin_alert_domains_failed' => '{1} :count eigene Domain konnte nicht eingerichtet werden|[2,*] :count eigene Domains konnten nicht eingerichtet werden',
     'admin_alert_boosts_stuck' => '{1} :count Kampagne wartet auf Zahlung|[2,*] :count Kampagnen warten auf Zahlung',
     'admin_alert_boosts_failed' => '{1} :count fehlgeschlagene Kampagne|[2,*] :count fehlgeschlagene Kampagnen',

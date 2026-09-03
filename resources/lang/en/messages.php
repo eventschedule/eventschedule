@@ -2927,6 +2927,8 @@ return [
 
     // Admin amount mismatch
     'amount_mismatch_sales' => 'Amount Mismatch Sales',
+    'unrecognized_subscriptions' => 'Subscriptions on an Unrecognized Price',
+    'unrecognized_subscriptions_help' => 'Stripe is billing these subscriptions at a price ID this installation does not list in STRIPE_PRICE_*, so the app cannot resolve their plan: the tier is withdrawn and they count as zero revenue. Either add that price ID to the STRIPE_PRICE_* configuration, or move the subscription onto a current price in Stripe.',
     'amount_mismatch_boosts' => 'Amount Mismatch Boosts',
     'no_amount_mismatch' => 'No amount mismatch records found.',
     'expected_amount' => 'Expected',
@@ -4143,6 +4145,7 @@ return [
     'admin_alert_jobs_stalled' => '{1} Queued jobs are not draining|[2,*] Queued jobs are not draining',
     'admin_alert_scheduler_stalled' => '{1} Scheduled tasks are not running|[2,*] Scheduled tasks are not running',
     'admin_alert_jobs_failed' => '{1} :count failed job|[2,*] :count failed jobs',
+    'admin_alert_subscriptions_unrecognized' => '{1} :count subscription on an unrecognized price|[2,*] :count subscriptions on an unrecognized price',
     'admin_alert_domains_failed' => '{1} :count custom domain failed to provision|[2,*] :count custom domains failed to provision',
     'admin_alert_boosts_stuck' => '{1} :count campaign stuck awaiting payment|[2,*] :count campaigns stuck awaiting payment',
     'admin_alert_boosts_failed' => '{1} :count failed campaign|[2,*] :count failed campaigns',

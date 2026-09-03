@@ -29,12 +29,12 @@ use RuntimeException;
  *
  *  - The scheduler. /up is a liveness signal, and DigitalOcean App Platform will recycle a
  *    container whose HTTP health check fails. A stalled scheduler must not take the web tier
- *    down with it - it is a genuine alert, but it belongs on /admin/queue and in
- *    `php artisan deploy:verify`, which is where AdminAlertService already surfaces it.
+ *    down with it - it is a genuine alert, but it belongs on /admin/queue, where
+ *    AdminAlertService already surfaces it.
  *  - Whether the cache store is `database` rather than `file`. A round trip cannot tell them
  *    apart: the file driver works perfectly well inside one container, which is exactly why
- *    the multi-container hazard is silent. That is a policy assertion about the app spec, so
- *    `deploy:verify` makes it instead.
+ *    the multi-container hazard is silent. AdminAlertService's `scheduler_stalled` row is what
+ *    catches that, because the two containers stop sharing a heartbeat.
  *
  * Nothing here leaks. ApplicationBuilder catches, report()s to Sentry and passes only a
  * boolean-ish $exception into health-up.blade.php, which renders "Application experiencing

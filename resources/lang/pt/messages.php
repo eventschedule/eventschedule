@@ -2556,6 +2556,8 @@ return [
 
     // Admin amount mismatch
     'amount_mismatch_sales' => 'Divergência de valor vendas',
+    'unrecognized_subscriptions' => 'Assinaturas com um preço não reconhecido',
+    'unrecognized_subscriptions_help' => 'O Stripe cobra estas assinaturas com um ID de preço que esta instalação não lista em STRIPE_PRICE_*, então o aplicativo não consegue identificar o plano: o nível é revogado e elas contam como receita zero. Adicione esse ID de preço na configuração STRIPE_PRICE_*, ou mova a assinatura para um preço atual no Stripe.',
     'amount_mismatch_boosts' => 'Divergência de valor impulsos',
     'no_amount_mismatch' => 'Nenhum registro de divergência de valor encontrado.',
     'expected_amount' => 'Esperado',
@@ -3588,6 +3590,7 @@ return [
     'admin_alert_jobs_stalled' => '{1} As tarefas em fila não estão a ser processadas|[2,*] As tarefas em fila não estão a ser processadas',
     'admin_alert_scheduler_stalled' => '{1} As tarefas agendadas não estão em execução|[2,*] As tarefas agendadas não estão em execução',
     'admin_alert_jobs_failed' => '{1} :count tarefa com falha|[2,*] :count tarefas com falha',
+    'admin_alert_subscriptions_unrecognized' => '{1} :count assinatura com um preço não reconhecido|[2,*] :count assinaturas com um preço não reconhecido',
     'admin_alert_domains_failed' => '{1} :count domínio personalizado não pôde ser configurado|[2,*] :count domínios personalizados não puderam ser configurados',
     'admin_alert_boosts_stuck' => '{1} :count campanha parada aguardando pagamento|[2,*] :count campanhas paradas aguardando pagamento',
     'admin_alert_boosts_failed' => '{1} :count campanha com falha|[2,*] :count campanhas com falha',

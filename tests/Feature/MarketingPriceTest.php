@@ -650,7 +650,6 @@ class MarketingPriceTest extends TestCase
             'config/services.php' => 'defines the keys',
             'app/Utils/PlatformPricing.php' => 'is the reader every other caller goes through',
             'app/Services/GrowthExportService.php' => 'is revenue reporting, which must not follow a marketing change',
-            'app/Console/Commands/DeployPreflight.php' => 'exists to SHOW the two layers side by side before a deploy, so it has to read both',
         ];
 
         $offenders = [];

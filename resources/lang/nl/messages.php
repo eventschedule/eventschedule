@@ -2555,6 +2555,8 @@ return [
 
     // Admin amount mismatch
     'amount_mismatch_sales' => 'Bedragsverschil verkopen',
+    'unrecognized_subscriptions' => 'Abonnementen met een onbekende prijs',
+    'unrecognized_subscriptions_help' => 'Stripe factureert deze abonnementen met een prijs-ID die deze installatie niet vermeldt in STRIPE_PRICE_*, dus de app kan hun pakket niet bepalen: het niveau wordt ingetrokken en ze tellen als nul omzet. Voeg die prijs-ID toe aan de STRIPE_PRICE_*-configuratie, of zet het abonnement in Stripe over naar een actuele prijs.',
     'amount_mismatch_boosts' => 'Bedragsverschil boosts',
     'no_amount_mismatch' => 'Geen records met bedragsverschil gevonden.',
     'expected_amount' => 'Verwacht',
@@ -3587,6 +3589,7 @@ return [
     'admin_alert_jobs_stalled' => '{1} Taken in de wachtrij worden niet verwerkt|[2,*] Taken in de wachtrij worden niet verwerkt',
     'admin_alert_scheduler_stalled' => '{1} Geplande taken worden niet uitgevoerd|[2,*] Geplande taken worden niet uitgevoerd',
     'admin_alert_jobs_failed' => '{1} :count mislukte taak|[2,*] :count mislukte taken',
+    'admin_alert_subscriptions_unrecognized' => '{1} :count abonnement met een onbekende prijs|[2,*] :count abonnementen met een onbekende prijs',
     'admin_alert_domains_failed' => '{1} :count eigen domein kon niet worden ingesteld|[2,*] :count eigen domeinen konden niet worden ingesteld',
     'admin_alert_boosts_stuck' => '{1} :count campagne wacht vast op betaling|[2,*] :count campagnes wachten vast op betaling',
     'admin_alert_boosts_failed' => '{1} :count mislukte campagne|[2,*] :count mislukte campagnes',

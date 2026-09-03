@@ -2557,6 +2557,8 @@ return [
 
     // Admin amount mismatch
     'amount_mismatch_sales' => 'Ventas con discrepancia de monto',
+    'unrecognized_subscriptions' => 'Suscripciones con un precio no reconocido',
+    'unrecognized_subscriptions_help' => 'Stripe cobra estas suscripciones con un ID de precio que esta instalación no incluye en STRIPE_PRICE_*, por lo que la aplicación no puede resolver su plan: se retira el nivel y se contabilizan como ingresos cero. Añade ese ID de precio a la configuración STRIPE_PRICE_* o cambia la suscripción a un precio actual en Stripe.',
     'amount_mismatch_boosts' => 'Impulsos con discrepancia de monto',
     'no_amount_mismatch' => 'No se encontraron registros con discrepancia de monto.',
     'expected_amount' => 'Esperado',
@@ -3589,6 +3591,7 @@ return [
     'admin_alert_jobs_stalled' => '{1} Los trabajos en cola no se están procesando|[2,*] Los trabajos en cola no se están procesando',
     'admin_alert_scheduler_stalled' => '{1} Las tareas programadas no se están ejecutando|[2,*] Las tareas programadas no se están ejecutando',
     'admin_alert_jobs_failed' => '{1} :count trabajo fallido|[2,*] :count trabajos fallidos',
+    'admin_alert_subscriptions_unrecognized' => '{1} :count suscripción con un precio no reconocido|[2,*] :count suscripciones con un precio no reconocido',
     'admin_alert_domains_failed' => '{1} :count dominio personalizado no se pudo configurar|[2,*] :count dominios personalizados no se pudieron configurar',
     'admin_alert_boosts_stuck' => '{1} :count campaña bloqueada esperando el pago|[2,*] :count campañas bloqueadas esperando el pago',
     'admin_alert_boosts_failed' => '{1} :count campaña fallida|[2,*] :count campañas fallidas',

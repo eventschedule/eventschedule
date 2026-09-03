@@ -2620,6 +2620,8 @@ return [
 
     // Admin amount mismatch
     'amount_mismatch_sales' => 'مبيعات عدم تطابق المبلغ',
+    'unrecognized_subscriptions' => 'اشتراكات بسعر غير معروف',
+    'unrecognized_subscriptions_help' => 'يفوتر Stripe هذه الاشتراكات بمعرّف سعر لا يدرجه هذا التثبيت ضمن STRIPE_PRICE_*، لذا يتعذر على التطبيق تحديد خطتها: تُسحب مزايا الخطة وتُحتسب بإيراد صفري. أضف معرّف السعر إلى إعدادات STRIPE_PRICE_*، أو انقل الاشتراك إلى سعر حالي في Stripe.',
     'amount_mismatch_boosts' => 'تعزيزات عدم تطابق المبلغ',
     'no_amount_mismatch' => 'لم يتم العثور على سجلات عدم تطابق المبلغ.',
     'expected_amount' => 'المتوقع',
@@ -3651,6 +3653,7 @@ return [
     'admin_alert_jobs_stalled' => '{1} المهام في قائمة الانتظار لا تُنفَّذ|[2,*] المهام في قائمة الانتظار لا تُنفَّذ',
     'admin_alert_scheduler_stalled' => '{1} المهام المجدولة لا تعمل|[2,*] المهام المجدولة لا تعمل',
     'admin_alert_jobs_failed' => '{1} :count مهمة فاشلة|[2,*] :count مهام فاشلة',
+    'admin_alert_subscriptions_unrecognized' => '{1} :count اشتراك بسعر غير معروف|[2,*] :count اشتراكات بسعر غير معروف',
     'admin_alert_domains_failed' => '{1} :count نطاق مخصص فشل إعداده|[2,*] :count نطاقات مخصصة فشل إعدادها',
     'admin_alert_boosts_stuck' => '{1} :count حملة متوقفة بانتظار الدفع|[2,*] :count حملات متوقفة بانتظار الدفع',
     'admin_alert_boosts_failed' => '{1} :count حملة فاشلة|[2,*] :count حملات فاشلة',

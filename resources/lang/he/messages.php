@@ -2610,6 +2610,8 @@ return [
 
     // Admin amount mismatch
     'amount_mismatch_sales' => 'אי התאמת סכום מכירות',
+    'unrecognized_subscriptions' => 'מנויים במחיר לא מזוהה',
+    'unrecognized_subscriptions_help' => 'Stripe מחייב את המנויים האלה במזהה מחיר שההתקנה הזו לא מפרטת ב-STRIPE_PRICE_*, ולכן האפליקציה לא מצליחה לזהות את התוכנית שלהם: הדרגה נשללת והם נספרים כהכנסה אפס. הוסיפו את מזהה המחיר להגדרות STRIPE_PRICE_*, או העבירו את המנוי למחיר עדכני ב-Stripe.',
     'amount_mismatch_boosts' => 'אי התאמת סכום קידומים',
     'no_amount_mismatch' => 'לא נמצאו רשומות אי התאמת סכום.',
     'expected_amount' => 'צפוי',
@@ -3642,6 +3644,7 @@ return [
     'admin_alert_jobs_stalled' => '{1} עבודות בתור אינן מתבצעות|[2,*] עבודות בתור אינן מתבצעות',
     'admin_alert_scheduler_stalled' => '{1} המשימות המתוזמנות אינן פועלות|[2,*] המשימות המתוזמנות אינן פועלות',
     'admin_alert_jobs_failed' => '{1} :count משימה שנכשלה|[2,*] :count משימות שנכשלו',
+    'admin_alert_subscriptions_unrecognized' => '{1} :count מנוי במחיר לא מזוהה|[2,*] :count מנויים במחיר לא מזוהה',
     'admin_alert_domains_failed' => '{1} :count דומיין מותאם אישית שהגדרתו נכשלה|[2,*] :count דומיינים מותאמים אישית שהגדרתם נכשלה',
     'admin_alert_boosts_stuck' => '{1} :count קמפיין תקוע בהמתנה לתשלום|[2,*] :count קמפיינים תקועים בהמתנה לתשלום',
     'admin_alert_boosts_failed' => '{1} :count קמפיין שנכשל|[2,*] :count קמפיינים שנכשלו',

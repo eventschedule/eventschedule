@@ -56,6 +56,137 @@ class AdminAlertsTest extends TestCase
         ], $overrides));
     }
 
+    /**
+     * Seed a subscription row directly: Cashier's model is not used for reads anywhere in the
+     * alert path, and the four price IDs are what the assertion is about.
+     */
+    private function makeSubscription(string $priceId, string $status = 'active'): void
+    {
+        $role = $this->createRole($this->createOwner());
+
+        DB::table('subscriptions')->insert([
+            'role_id' => $role->id,
+            'type' => 'default',
+            'stripe_id' => 'sub_'.Str::random(14),
+            'stripe_status' => $status,
+            'stripe_price' => $priceId,
+            'quantity' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
+    private function configureCurrentPrices(): void
+    {
+        config([
+            'services.stripe_platform.price_monthly' => 'price_current_pro_monthly',
+            'services.stripe_platform.price_yearly' => 'price_current_pro_yearly',
+            'services.stripe_platform.enterprise_price_monthly' => 'price_current_ent_monthly',
+            'services.stripe_platform.enterprise_price_yearly' => 'price_current_ent_yearly',
+        ]);
+    }
+
+    /**
+     * The row exists because PlanPriceUtils resolves a tier ONLY by exact match against the four
+     * configured price IDs. A live subscription on any other ID keeps being charged while
+     * hasActiveEnterpriseSubscription() returns false and ARR counts it at zero, and before this
+     * row nothing but a Log::warning said so.
+     */
+    public function test_a_live_subscription_on_a_retired_price_is_surfaced(): void
+    {
+        $this->createOwner(true);
+        $this->configureCurrentPrices();
+
+        $this->makeSubscription('price_current_pro_monthly');
+        $this->makeSubscription('price_retired_from_2024');
+
+        AdminAlertService::flush();
+
+        $row = AdminAlertService::items()->firstWhere('type', 'subscriptions_unrecognized');
+
+        $this->assertNotNull($row, 'A subscription on an unconfigured price must raise the alert.');
+        $this->assertSame(1, $row['count'], 'Only the retired price counts; the configured one is fine.');
+        $this->assertSame('red', $row['color']);
+        $this->assertStringContainsString('#unrecognized-subscriptions', $row['url'],
+            'The row must land on its own panel, not the amount-mismatch sales table.');
+    }
+
+    /**
+     * Cancelled means nothing is being charged and no tier is being withdrawn, so it is not the
+     * condition this row is about. past_due IS, because Stripe is still retrying and the role
+     * keeps access through the dunning window.
+     */
+    public function test_a_cancelled_subscription_on_a_retired_price_is_ignored(): void
+    {
+        $this->createOwner(true);
+        $this->configureCurrentPrices();
+
+        $this->makeSubscription('price_retired_from_2024', 'canceled');
+
+        AdminAlertService::flush();
+
+        $this->assertNull(AdminAlertService::items()->firstWhere('type', 'subscriptions_unrecognized'));
+    }
+
+    public function test_a_past_due_subscription_on_a_retired_price_is_surfaced(): void
+    {
+        $this->createOwner(true);
+        $this->configureCurrentPrices();
+
+        $this->makeSubscription('price_retired_from_2024', 'past_due');
+
+        AdminAlertService::flush();
+
+        $this->assertSame(1, AdminAlertService::items()->firstWhere('type', 'subscriptions_unrecognized')['count']);
+    }
+
+    /**
+     * An install that sells no plans has no configured price IDs, and counting every
+     * subscription as stranded there would badge a selfhost install permanently.
+     */
+    public function test_no_configured_prices_means_no_alert(): void
+    {
+        $this->createOwner(true);
+
+        config([
+            'services.stripe_platform.price_monthly' => null,
+            'services.stripe_platform.price_yearly' => null,
+            'services.stripe_platform.enterprise_price_monthly' => null,
+            'services.stripe_platform.enterprise_price_yearly' => null,
+        ]);
+
+        $this->makeSubscription('price_whatever');
+
+        AdminAlertService::flush();
+
+        $this->assertNull(AdminAlertService::items()->firstWhere('type', 'subscriptions_unrecognized'));
+    }
+
+    /**
+     * The panel the alert links to, rendered with a row in it.
+     *
+     * The existing revenue-page tests only ever render it EMPTY - with no stranded subscription
+     * the @if is false and the whole block is skipped - so a mistake inside the loop would
+     * surface for the first time on production, on the day the alert fires. This is the only
+     * test that compiles that markup.
+     */
+    public function test_the_revenue_page_lists_the_unrecognized_subscriptions(): void
+    {
+        $admin = $this->createOwner(true);
+        $this->configureCurrentPrices();
+
+        $this->makeSubscription('price_current_pro_monthly');
+        $this->makeSubscription('price_retired_from_2024', 'past_due');
+
+        $html = $this->adminActing($admin)->get(route('admin.revenue'))->assertOk()->getContent();
+
+        $this->assertStringContainsString('id="unrecognized-subscriptions"', $html,
+            'The alert links to this anchor, so the panel has to carry it.');
+        $this->assertStringContainsString('price_retired_from_2024', $html);
+        $this->assertStringNotContainsString('price_current_pro_monthly', $html,
+            'A subscription on a configured price is not stranded and must not be listed.');
+    }
+
     public function test_nothing_pending_renders_no_panel_and_no_badges(): void
     {
         $admin = $this->createOwner(true);

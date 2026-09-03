@@ -2572,6 +2572,8 @@ return [
 
     // Admin amount mismatch
     'amount_mismatch_sales' => 'Summa mittevastavus müügid',
+    'unrecognized_subscriptions' => 'Tundmatu hinnaga tellimused',
+    'unrecognized_subscriptions_help' => 'Stripe arveldab need tellimused hinna ID-ga, mida see paigaldus ei loetle STRIPE_PRICE_* seadetes, seega ei suuda rakendus nende paketti tuvastada: tase võetakse ära ja tulu loetakse nulliks. Lisa see hinna ID STRIPE_PRICE_* seadetesse või vii tellimus Stripe’is üle kehtivale hinnale.',
     'amount_mismatch_boosts' => 'Summa mittevastavus võimendused',
     'no_amount_mismatch' => 'Summa mittevastavuse kirjeid ei leitud.',
     'expected_amount' => 'Oodatud',
@@ -3604,6 +3606,7 @@ return [
     'admin_alert_jobs_stalled' => '{1} Järjekorras olevaid töid ei töödelda|[2,*] Järjekorras olevaid töid ei töödelda',
     'admin_alert_scheduler_stalled' => '{1} Ajastatud ülesanded ei tööta|[2,*] Ajastatud ülesanded ei tööta',
     'admin_alert_jobs_failed' => '{1} :count ebaõnnestunud töö|[2,*] :count ebaõnnestunud tööd',
+    'admin_alert_subscriptions_unrecognized' => '{1} :count tundmatu hinnaga tellimus|[2,*] :count tundmatu hinnaga tellimust',
     'admin_alert_domains_failed' => '{1} :count kohandatud domeeni seadistamine ebaõnnestus|[2,*] :count kohandatud domeeni seadistamine ebaõnnestus',
     'admin_alert_boosts_stuck' => '{1} :count kampaania ootab makset|[2,*] :count kampaaniat ootavad makset',
     'admin_alert_boosts_failed' => '{1} :count ebaõnnestunud kampaania|[2,*] :count ebaõnnestunud kampaaniat',

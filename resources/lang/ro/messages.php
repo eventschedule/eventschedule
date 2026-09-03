@@ -2588,6 +2588,8 @@ return [
 
     // Admin amount mismatch
     'amount_mismatch_sales' => 'Vânzări cu Diferență de Sumă',
+    'unrecognized_subscriptions' => 'Abonamente cu un Preț Nerecunoscut',
+    'unrecognized_subscriptions_help' => 'Stripe facturează aceste abonamente cu un ID de preț pe care această instalare nu îl listează în STRIPE_PRICE_*, așa că aplicația nu poate determina planul lor: nivelul este retras și sunt contorizate ca venit zero. Adaugă acel ID de preț în configurația STRIPE_PRICE_* sau mută abonamentul pe un preț curent în Stripe.',
     'amount_mismatch_boosts' => 'Promovări cu Diferență de Sumă',
     'no_amount_mismatch' => 'Nicio înregistrare cu diferență de sumă găsită.',
     'expected_amount' => 'Așteptat',
@@ -3627,6 +3629,7 @@ return [
     'admin_alert_jobs_stalled' => '{1} Sarcinile din coadă nu sunt procesate|[2,*] Sarcinile din coadă nu sunt procesate',
     'admin_alert_scheduler_stalled' => '{1} Sarcinile programate nu rulează|[2,*] Sarcinile programate nu rulează',
     'admin_alert_jobs_failed' => '{1} :count sarcină eșuată|[2,*] :count sarcini eșuate',
+    'admin_alert_subscriptions_unrecognized' => '{1} :count abonament cu un preț nerecunoscut|[2,*] :count abonamente cu un preț nerecunoscut',
     'admin_alert_domains_failed' => '{1} :count domeniu personalizat nu a putut fi configurat|[2,*] :count domenii personalizate nu au putut fi configurate',
     'admin_alert_boosts_stuck' => '{1} :count campanie blocată în așteptarea plății|[2,*] :count campanii blocate în așteptarea plății',
     'admin_alert_boosts_failed' => '{1} :count campanie eșuată|[2,*] :count campanii eșuate',

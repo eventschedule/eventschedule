@@ -66,6 +66,12 @@ jobs:
     steps:
       - name: Check out the code
         uses: actions/checkout@v5
+        with:
+          # Full history: sitemap:lastmod dates each page from the last commit that touched
+          # its view. On the default shallow clone every path resolves to the one fetched
+          # commit, so the regenerated manifest would differ from the committed one and the
+          # check below would fail on every push regardless of whether anything drifted.
+          fetch-depth: 0
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
@@ -95,6 +101,15 @@ jobs:
 
       - name: Generate application key
         run: php artisan key:generate
+
+      # config/sitemap_lastmod.php is generated, and a marketing page whose <lastmod> is older
+      # than its own content trains Google to ignore the signal. Regenerating and diffing is
+      # the mechanical version of CLAUDE.md's "run sitemap:lastmod before a release" rule, so
+      # nobody has to remember it on deploy day.
+      - name: Sitemap lastmod manifest is current
+        run: |
+          php artisan sitemap:lastmod
+          git diff --exit-code config/sitemap_lastmod.php
 
       - name: Run Feature & Unit tests
         run: php artisan test
