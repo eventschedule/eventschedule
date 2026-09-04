@@ -63,6 +63,33 @@ return [
             'bucket' => env('DO_SPACES_BUCKET'),
             'endpoint' => env('DO_SPACES_ENDPOINT'),
             'visibility' => 'public',
+
+            /*
+             * Every key in this bucket is unique to its content: user uploads are
+             * strtolower(<prefix>.Str::random(32).<ext>) at all ~20 write sites, AI-generated
+             * images go through ImageUtils::saveImageData() which uses the same random name, and
+             * derivatives are ImageUtils::variantFilename() = "<that random name>_w480.webp".
+             * Replacing an image mints a new name rather than overwriting the old one, so a key
+             * that resolves today resolves to the same bytes forever - which is exactly what
+             * `immutable` promises. Without this the DO Spaces CDN applies its own 1-hour default
+             * and repeat visitors re-fetch the whole poster wall every hour.
+             *
+             * createS3Driver() hands this array to the AwsS3V3Adapter as its default $options, and
+             * createOptionsFromConfig() copies every key in the adapter's AVAILABLE_OPTIONS -
+             * CacheControl among them - onto PutObject. So one entry here covers every write path
+             * without touching a single call site.
+             *
+             * The one way to break it is to regenerate a derivative for an unchanged original with
+             * different encoder settings: same key, new bytes, and edges hold the old copy for a
+             * year. ImageUtils only builds MISSING widths, so this cannot happen by accident - but
+             * a deliberate re-encode needs a CDN purge.
+             *
+             * Deliberately not on the 'backups' disk below: those objects are private tenant
+             * exports with a 7-day retention.
+             */
+            'options' => [
+                'CacheControl' => 'public, max-age=31536000, immutable',
+            ],
         ],
 
         /*

@@ -86,7 +86,7 @@
     <x-slot name="description">{{ __('marketing.home_description') }}</x-slot>
     <x-slot name="breadcrumbTitle">Home</x-slot>
     <x-slot name="headMeta">
-        <link rel="preconnect" href="https://img.youtube.com">
+        <link rel="preconnect" href="https://i.ytimg.com">
         @if ($wallPreconnect)
             <link rel="preconnect" href="{{ $wallPreconnect }}">
         @endif
@@ -645,7 +645,7 @@
                            data-video-title="Event Schedule Overview"
                            class="group absolute inset-0 block"
                            aria-label="Play the Event Schedule overview video">
-                            <img src="https://img.youtube.com/vi/w1JLIvGmIjQ/maxresdefault.jpg" alt="Event Schedule overview video" class="h-full w-full object-cover opacity-90 transition-opacity group-hover:opacity-100" loading="lazy" decoding="async" width="1280" height="720">
+                            <img src="https://i.ytimg.com/vi/w1JLIvGmIjQ/maxresdefault.jpg" alt="Event Schedule overview video" class="h-full w-full object-cover opacity-90 transition-opacity group-hover:opacity-100" loading="lazy" decoding="async" width="1280" height="720">
                             <span class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10" aria-hidden="true"></span>
                             <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" aria-hidden="true">
                                 <span class="es-play-ring absolute inset-0 rounded-full bg-white/40"></span>
@@ -1013,8 +1013,8 @@
                             </span>
                             <span class="absolute inset-0 animate-shimmer" aria-hidden="true"></span>
                         </a>
-                        <a href="{{ route('marketing.appointments') }}" aria-label="Learn more about appointments" class="group inline-flex items-center gap-1 text-lg font-medium text-blue-600 transition-all hover:gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA] focus-visible:ring-offset-2 dark:text-blue-400 dark:focus-visible:ring-offset-[#0a0a0f]">
-                            Learn more
+                        <a href="{{ route('marketing.appointments') }}" class="group inline-flex items-center gap-1 text-lg font-medium text-blue-600 transition-all hover:gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA] focus-visible:ring-offset-2 dark:text-blue-400 dark:focus-visible:ring-offset-[#0a0a0f]">
+                            Learn more<span class="sr-only"> about appointments</span>
                             <svg class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                         </a>
                     </div>

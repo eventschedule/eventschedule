@@ -138,7 +138,7 @@
         <!-- Bottom Bar: Logo, Copyright, Social Icons -->
         <div class="mt-12 pt-8 border-t border-gray-200 dark:border-white/10">
             <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <a href="{{ marketing_url('/') }}" class="flex items-center space-x-2">
+                <a href="{{ marketing_url('/') }}" class="flex shrink-0 items-center space-x-2">
                     <picture class="dark:hidden">
                         <source srcset="{{ url('images/dark_logo.webp') }}" type="image/webp">
                         <img class="h-8 w-auto" src="{{ url('images/dark_logo.png') }}" alt="Event Schedule" width="163" height="32" loading="lazy" />

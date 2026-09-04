@@ -476,10 +476,10 @@ html.es-anim .es-fade-up {
     to   { opacity: 1; transform: none; }
 }
 html.es-anim .es-d-1 { animation-delay: 0.05s; }
-html.es-anim .es-d-2 { animation-delay: 0.45s; }
-html.es-anim .es-d-3 { animation-delay: 0.6s; }
-html.es-anim .es-d-4 { animation-delay: 0.75s; }
-html.es-anim .es-d-5 { animation-delay: 1.3s; }
+html.es-anim .es-d-2 { animation-delay: 0.15s; }
+html.es-anim .es-d-3 { animation-delay: 0.25s; }
+html.es-anim .es-d-4 { animation-delay: 0.35s; }
+html.es-anim .es-d-5 { animation-delay: 0.6s; }
 
 .es-gradient-anim {
     background-size: 200% 200%;

@@ -2,19 +2,19 @@
     <nav aria-label="Main navigation" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
             <!-- Logo -->
-            <a href="{{ marketing_url('/') }}" class="flex items-center space-x-2">
+            <a href="{{ marketing_url('/') }}" class="flex shrink-0 items-center space-x-2">
                 <picture class="dark:hidden">
                     <source srcset="{{ url('images/dark_logo.webp') }}" type="image/webp">
-                    <img class="h-8 w-auto" src="{{ url('images/dark_logo.png') }}" alt="Event Schedule" width="163" height="32" />
+                    <img class="h-7 sm:h-8 w-auto" src="{{ url('images/dark_logo.png') }}" alt="Event Schedule" width="163" height="32" />
                 </picture>
                 <picture class="hidden dark:block">
                     <source srcset="{{ url('images/light_logo.webp') }}" type="image/webp">
-                    <img class="h-8 w-auto" src="{{ url('images/light_logo.png') }}" alt="Event Schedule" width="163" height="32" />
+                    <img class="h-7 sm:h-8 w-auto" src="{{ url('images/light_logo.png') }}" alt="Event Schedule" width="163" height="32" />
                 </picture>
             </a>
 
             <!-- Desktop Navigation -->
-            <div class="hidden md:flex items-center space-x-8">
+            <div class="hidden lg:flex items-center space-x-8">
                 <a href="{{ marketing_url('/features') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 pb-0.5 {{ request()->is('*/features') || request()->is('features') ? 'text-blue-600 dark:text-blue-400 font-medium !border-blue-600 dark:!border-blue-400 hover:!border-blue-600 dark:hover:!border-blue-400' : '' }}">
                     Features
                 </a>
@@ -45,7 +45,11 @@
                     <span class="hidden lg:inline text-sm font-medium">Browse</span>
                 </a>
 
-                <!-- GitHub star badge (desktop only) -->
+                {{-- Deliberately md:, while the nav and hamburger below switch at lg:. Once the
+                     five nav links drop out at 768px the bar has ~112px of slack, so the badge
+                     still fits on tablets - and it is social proof on an open-source product, so
+                     it is worth keeping visible there. It is not part of the nav/hamburger set
+                     that MarketingHeaderLogoTest locks together. --}}
                 @if(isset($githubStars) && $githubStars)
                 <a href="https://github.com/eventschedule/eventschedule" target="_blank"
                     class="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300 transition-all duration-200 no-underline">
@@ -103,7 +107,7 @@
                 <!-- Mobile menu button -->
                 <button
                     id="mobile-menu-button"
-                    class="md:hidden p-2 text-gray-600 dark:text-gray-300"
+                    class="lg:hidden p-2 text-gray-600 dark:text-gray-300"
                     aria-label="Toggle menu"
                     aria-expanded="false"
                     aria-controls="mobile-menu"
@@ -116,7 +120,7 @@
         </div>
 
         <!-- Mobile Navigation -->
-        <div id="mobile-menu" class="hidden md:hidden pb-4">
+        <div id="mobile-menu" class="hidden lg:hidden pb-4">
             <div class="flex flex-col space-y-3">
                 <a href="{{ marketing_url('/browse') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2">
                     Browse
@@ -136,7 +140,7 @@
                 <a href="{{ marketing_url('/docs') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2">
                     Docs
                 </a>
-                <div class="pt-3 border-t border-gray-200 dark:border-gray-700 flex flex-col space-y-3">
+                <div class="pt-3 border-t border-gray-200 dark:border-gray-700 flex sm:hidden flex-col space-y-3">
                     @auth
                         @if(auth()->user()->email === \App\Services\DemoService::DEMO_EMAIL)
                             <a href="{{ app_url('/login') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2">
@@ -169,6 +173,17 @@ document.getElementById('mobile-menu-button').addEventListener('click', function
     var menu = document.getElementById('mobile-menu');
     var isHidden = menu.classList.toggle('hidden');
     this.setAttribute('aria-expanded', !isHidden);
+});
+
+// The panel is a mobile affordance. Past lg: the CSS hides it and the button, but `hidden` is
+// still off and aria-expanded is stranded true on a control nobody can see - and narrowing back
+// re-reveals the menu already open. Close it on the way up instead. Same pattern as docs.js.
+window.matchMedia('(min-width: 1024px)').addEventListener('change', function(e) {
+    if (!e.matches) {
+        return;
+    }
+    document.getElementById('mobile-menu').classList.add('hidden');
+    document.getElementById('mobile-menu-button').setAttribute('aria-expanded', 'false');
 });
 
 document.getElementById('theme-toggle').addEventListener('click', function() {

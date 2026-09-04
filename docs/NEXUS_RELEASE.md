@@ -196,6 +196,14 @@ php artisan images:backfill-variants --limit=500          # then the rest, in ba
 Batch it: the console session is ephemeral, and image work can push `memory_limit` on a 512 MB
 box. Use `--dry-run` first for a count.
 
+**This must run on a build that already carries the `do_spaces` `CacheControl` option**
+(`config/filesystems.php`). Object metadata is written once, at PutObject time, so every derivative
+this command creates inherits whatever the deployed config says. Backfill on an older build and all
+2 x N thumbnails are stamped with the DO Spaces CDN default of `max-age=3600` for as long as they
+exist - re-stamping them afterwards means a bucket-wide copy-in-place, not a config edit. Step 2
+deploys `main`, so this is satisfied by default; it only bites if the backfill is run against a
+container that predates the config.
+
 **Verify:** homepage wall images come back as `.webp` derivatives rather than originals. Allow up
 to 10 minutes - the wall query is cached (`config('marketing.wall_cache_seconds')`) and recording
 a variant deliberately does *not* bust that cache, so the switch is not instant.
