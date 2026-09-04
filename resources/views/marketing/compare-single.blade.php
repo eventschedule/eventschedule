@@ -164,7 +164,7 @@
                 "name": "Free",
                 "price": "0",
                 "priceCurrency": "{{ platform_currency() }}",
-                "description": "Unlimited events, Google Calendar and CalDAV sync, newsletters, RSVP with capacity, embeddable calendar, and fan engagement features.",
+                "description": "Unlimited events, two-way Google, Outlook and CalDAV sync, newsletters, RSVP with capacity, 25 paid tickets a month with QR scanning at the door, one bookable appointment type, the embeddable calendar, and fan engagement features.",
                 "availability": "https://schema.org/InStock"
             },
             {
@@ -172,7 +172,7 @@
                 "name": "Pro",
                 "price": "{{ number_format($proMonthly, 2) }}",
                 "priceCurrency": "{{ platform_currency() }}",
-                "description": "Everything in Free plus ticketing with QR check-ins and live dashboard, ticket waitlist, sale notifications, sales CSV export, Stripe payments, remove branding, custom CSS, event graphics, REST API, and webhooks.",
+                "description": "Everything in Free plus unlimited ticket sales, the live check-in dashboard, ticket waitlist, promo codes, add-ons, gift cards, sale notifications, sales CSV export, remove branding, custom CSS, event graphics, REST API, and webhooks.",
                 "availability": "https://schema.org/InStock"
             },
             {

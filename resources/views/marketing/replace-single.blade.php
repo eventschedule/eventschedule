@@ -34,13 +34,16 @@
             ? 'Create your free schedule and close the other ' . $otherTabsWord . ' tabs.'
             : 'Create your free schedule.';
 
-        // What the one tab does natively, with the tier that carries it. Each
-        // line is checked against docs/FEATURES.md: RSVP with a capacity limit
-        // is free, ticketing and the check-in dashboard are Pro.
+        // What the one tab does natively, with the tier that carries it. Each line
+        // is checked against the code rather than a summary: RSVP with a capacity
+        // limit is free, selling paid tickets is free to Role::ticketSaleLimit()
+        // (25 a month), scanning them has no plan check at all, and the LIVE
+        // check-in dashboard is the Pro half.
         $inRows = [
             ['A public page for every event, and a calendar of all of them', 'Free'],
             ['Free RSVP with a capacity limit per date', 'Free'],
-            ['Tickets with QR check-in and a check-in dashboard', 'Pro'],
+            ['Paid tickets, 25 a month, each one scanned at the door', 'Free'],
+            ['Unlimited ticket sales and the live check-in dashboard', 'Pro'],
             ['Newsletters to the people who follow your schedule', 'Free'],
         ];
 
