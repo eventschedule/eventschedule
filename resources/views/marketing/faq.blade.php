@@ -592,7 +592,7 @@
                 'items' => [
                     [
                         'q' => 'How do I start selling tickets?',
-                        'a' => 'Connect your Stripe account, which takes a couple of minutes, then add ticket types to an event with a name, a price and a quantity. Buyers pay on the event page and get an emailed ticket carrying a QR code. Ticketing is on the Pro plan.',
+                        'a' => 'Connect your Stripe account, which takes a couple of minutes, then add ticket types to an event with a name, a price and a quantity. Buyers pay on the event page and get an emailed ticket carrying a QR code. The first 25 paid tickets a month are on the free plan; Pro removes the ceiling.',
                         'links' => [['Ticketing', marketing_url('/features/ticketing')], ['Connect Stripe', marketing_url('/stripe')]],
                     ],
                     [

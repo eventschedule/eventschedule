@@ -356,7 +356,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for restaurants?',
-                'a' => 'The schedule itself is free forever: your public page and its link, sub-schedules for private dining or a supper club, enquiries for private hire, Drafts that keep an event off the public page until you announce it, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling covers is on the Pro plan at '.plan_price($proMonthly).' a month, and Event Schedule charges zero platform fees on sales.',
+                'a' => 'The schedule itself is free forever: your public page and its link, sub-schedules for private dining or a supper club, enquiries for private hire, Drafts that keep an event off the public page until you announce it, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling covers is free up to 25 paid tickets a month per schedule, which is one supper club a month with room to spare; Pro at '.plan_price($proMonthly).' a month takes the ceiling off and is also where questions on the ticket live. Event Schedule charges zero platform fees on sales either way.',
             ],
             [
                 'q' => 'How do I stop selling more covers than the kitchen can cook?',
@@ -507,7 +507,7 @@
             <div class="mt-8 text-center" data-reveal>
                 <span class="es-cover-plan es-cover-plan-pro">Pro</span>
                 <span class="es-cover-muted ml-2 text-sm">
-                    Selling covers is on the Pro plan at {{ plan_price($proMonthly) }} a month, with no platform fee on top of what Stripe charges.
+                    Selling covers is free up to 25 a month, and Pro at {{ plan_price($proMonthly) }} a month takes the ceiling off. No platform fee on top of what Stripe charges, on either.
                 </span>
             </div>
         </div>

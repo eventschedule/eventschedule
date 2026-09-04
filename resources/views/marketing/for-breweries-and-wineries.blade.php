@@ -340,7 +340,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for a taproom?',
-                'a' => 'Almost all of what a taproom runs is free forever: the weekly nights as recurring events, date exceptions for the weeks you are shut, free registration with a capacity for a tour that is limited but not paid, sub-schedules with their own shareable links, booking requests from bands and food trucks, two-way calendar sync and an embeddable calendar. Selling a ticket to a paid tour or tasting is on the Pro plan at '.plan_price($proMonthly).' a month, with zero platform fees on sales.',
+                'a' => 'Almost all of what a taproom runs is free forever: the weekly nights as recurring events, date exceptions for the weeks you are shut, free registration with a capacity for a tour that is limited but not paid, sub-schedules with their own shareable links, booking requests from bands and food trucks, two-way calendar sync and an embeddable calendar. Selling a ticket to a paid tour or tasting is free too, up to 25 paid ones a month per schedule; Pro at '.plan_price($proMonthly).' a month takes that ceiling off, which a taproom running weekly tours reaches and a taproom running monthly ones does not. Zero platform fees on sales either way.',
             ],
             [
                 'q' => 'Most of our events are free. Is that a problem?',

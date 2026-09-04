@@ -534,7 +534,7 @@
             ],
             [
                 'q' => 'Can I sell tickets to a ticketed night?',
-                'a' => 'Yes, on the Pro plan. Connect your Stripe account and sell straight from your calendar with QR check-in at the door. Event Schedule charges zero platform fees, so beyond Stripe processing the money is yours. Free registration with a capacity limit is available on every plan for nights you do not charge for.',
+                'a' => 'Yes, and the first 25 paid tickets a month are on the free plan. Connect your Stripe account, sell straight from your calendar, and scan the QR code at the door - none of that is gated. What Pro buys at '.plan_price($proMonthly).' a month is the ceiling coming off, plus the live check-in dashboard for a busy door, promo codes and add-ons. Event Schedule charges zero platform fees either way, so beyond Stripe processing the money is yours, and free registration with a capacity limit is there for the nights you do not charge for.',
             ],
         ];
 

@@ -1754,7 +1754,7 @@
             },
             {
                 "question": "How much does QR code ticketing cost?",
-                "answer": "QR code tickets are included in the Pro plan at $5/month with zero platform fees. You only pay standard Stripe processing fees (typically 2.9% + $0.30 per transaction). The free plan includes unlimited events without ticketing."
+                "answer": "Nothing, to start. The free plan sells up to 25 paid tickets a month per schedule, each with its own QR code, and scanning them at the door is not gated at all. Pro at $5/month removes that ceiling and adds the live check-in dashboard. There are zero platform fees on either, so you only pay standard Stripe processing (typically 2.9% + $0.30 per transaction)."
             },
             {
                 "question": "How does the QR check-in system work?",

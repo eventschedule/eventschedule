@@ -480,7 +480,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for open mics and readings?',
-                'a' => 'Yes. Sharing your schedule, running recurring nights, taking free registrations with a capacity limit, and syncing with Google, Outlook, or CalDAV are all free forever. Ticketing, event graphics, and custom questions on the sign-up form are on the Pro plan at '.plan_price($proMonthly).' a month, and Event Schedule charges zero platform fees on tickets.',
+                'a' => 'Yes. Sharing your schedule, running recurring nights, taking free registrations with a capacity limit, and syncing with Google, Outlook, or CalDAV are all free forever. Selling is free too, up to 25 paid tickets a month per schedule, which covers a monthly night comfortably. Pro at '.plan_price($proMonthly).' a month lifts that ceiling and adds event graphics and custom questions on the sign-up form. Event Schedule charges zero platform fees on tickets either way.',
             ],
             [
                 'q' => 'Can poets sign up for a slot themselves?',
@@ -500,7 +500,7 @@
             ],
             [
                 'q' => 'Can I sell tickets to a featured reading?',
-                'a' => 'Yes, on the Pro plan. Connect your Stripe account and sell tickets straight from your schedule with QR check-in at the door. Event Schedule takes zero platform fees, so you only pay Stripe processing. You can also sell a pass that covers a whole season of the series.',
+                'a' => 'Yes, and a monthly reading night rarely needs a paid plan to do it. The free plan sells 25 paid tickets a month per schedule, through your own Stripe account, with the QR code scanned at the door like any other. Pro at '.plan_price($proMonthly).' a month lifts the ceiling and adds the live check-in dashboard, and it is also what a season pass across the whole series needs. Event Schedule takes zero platform fees on any of it, so you only pay Stripe processing.',
             ],
         ];
 

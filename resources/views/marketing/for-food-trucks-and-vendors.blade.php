@@ -353,7 +353,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for food trucks?',
-                'a' => 'The parts you use every week are free forever: your public schedule and its list layout, the regular pitches as recurring events, date exceptions for the weeks you lose a spot, an address and map on every stop, a QR code for the serving window, booking requests for catering, sub-schedules, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling tickets to a ticketed event is on the Pro plan at '.plan_price($proMonthly).' a month, with zero platform fees on sales.',
+                'a' => 'The parts you use every week are free forever: your public schedule and its list layout, the regular pitches as recurring events, date exceptions for the weeks you lose a spot, an address and map on every stop, a QR code for the serving window, booking requests for catering, sub-schedules, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling tickets to a ticketed event - a supper club, a collaboration night - is free as well, up to 25 paid ones a month per schedule; Pro at '.plan_price($proMonthly).' a month removes that ceiling. Zero platform fees on sales either way.',
             ],
             [
                 'q' => 'How do customers know where I am today?',
@@ -609,8 +609,9 @@
                     <div class="space-y-3" data-reveal-group="90">
                         @foreach ([
                             ['Print the QR, tape it up', 'Download it from your Followers page. It points at your schedule, so it never needs reprinting when the route changes.'],
-                            ['They follow, you get the email address', 'With their consent, and they can unfollow whenever they like. It is your list, not a platform\'s.'],
-                            ['You send the week out', 'Nothing goes automatically - you write the route and send it. Ten a month free and a hundred on Pro, counted per recipient rather than per send.'],
+                            ['They leave an email, you get the address', 'With their consent, confirmed by a link, and they can leave whenever they like. It is your list, not a platform\'s.'],
+                            ['New stops go out on their own', 'Put next week up and a short digest reaches everyone who confirmed, at most one every three days, and it does not touch your newsletter allowance.'],
+                            ['You write the week when there is more to say', 'A newsletter is the one you send yourself, for the specials and the closures a list of dates cannot carry. Ten a month free and a hundred on Pro, counted per recipient rather than per send.'],
                         ] as [$t, $d])
                             <div class="es-stop-card es-stop-hover p-4" data-reveal>
                                 <p class="es-stop-ink text-sm font-bold">{{ $t }}</p>

@@ -368,7 +368,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for theater performers?',
-                'a' => 'The parts you use every day are free forever: your public schedule and its list layout, past productions kept and dated, sub-schedules, booking requests from companies that want to cast you, Drafts that keep auditions off the public page, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling tickets to work you produce yourself is on the Pro plan at '.plan_price($proMonthly).' a month, and Event Schedule charges zero platform fees on sales.',
+                'a' => 'The parts you use every day are free forever: your public schedule and its list layout, past productions kept and dated, sub-schedules, booking requests from companies that want to cast you, Drafts that keep auditions off the public page, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling tickets to work you produce yourself is free as well, up to 25 paid ones a month per schedule, which is a short run in a small room; Pro at '.plan_price($proMonthly).' a month is what removes the ceiling. Event Schedule charges zero platform fees on sales either way.',
             ],
             [
                 'q' => 'How does my schedule become a credits list?',
@@ -384,7 +384,7 @@
             ],
             [
                 'q' => 'Can I sell tickets to my own show?',
-                'a' => 'Yes, on the Pro plan. Set up named ticket types with their own prices, quantities and sales windows, check people in at the door by scanning a QR code, and take payment through your own Stripe account. Event Schedule charges no platform fee on top.',
+                'a' => 'Yes, and a short run usually fits inside the free plan. Named ticket types with their own prices, quantities and sales windows, payment through your own Stripe account, and scanning the QR code at the door are all free, up to 25 paid tickets a month per schedule. Pro at '.plan_price($proMonthly).' a month removes that ceiling and adds the live check-in dashboard, promo codes, add-ons and per-attendee tickets. Event Schedule charges no platform fee on either plan.',
             ],
         ];
 
