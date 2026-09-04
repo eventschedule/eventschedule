@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Recurring Events | Flexible Scheduling - Event Schedule</x-slot>
-    <x-slot name="description">Set events to repeat daily, weekly, biweekly, monthly, or yearly with flexible end conditions, per-occurrence tickets, and automatic sync to Google, Outlook and CalDAV.</x-slot>
+    <x-slot name="description">Repeat events daily, weekly, biweekly, monthly or yearly, with three end conditions, date exceptions, per-occurrence tickets and two-way calendar sync.</x-slot>
     <x-slot name="breadcrumbTitle">Recurring Events</x-slot>
 
     <x-slot name="structuredData">
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule Recurring Events",
-        "description": "Set events to repeat daily, weekly, biweekly, monthly, or yearly with flexible end conditions, per-occurrence tickets, and automatic sync to Google, Outlook and CalDAV.",
+        "description": "Repeat events daily, weekly, biweekly, monthly or yearly, with three end conditions, date exceptions, per-occurrence tickets and two-way calendar sync.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",

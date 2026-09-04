@@ -48,7 +48,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">What each tab needs</div>
-            <p>Web Analytics is available on every plan and starts collecting as soon as someone visits a schedule page. The Revenue tab fills in once you have a completed sale, a boost campaign or a newsletter send in the range, and selling tickets is free up to 25 paid tickets per calendar month per schedule (Pro removes that cap). The Check-Ins tab fills in once you have sold tickets for an event in the range, but its attendance figures only become meaningful when you scan tickets at the door, which is a Pro feature.</p>
+            <p>Web Analytics is available on every plan and starts collecting as soon as someone visits a schedule page. The Revenue tab fills in once you have a completed sale, a boost campaign or a newsletter send in the range, and selling tickets is free up to 25 paid tickets per calendar month per schedule (Pro removes that cap). The Check-Ins tab fills in once you have sold tickets for an event in the range, but its attendance figures only become meaningful once you scan tickets at the door. Scanning itself is free on every plan; the live check-in dashboard with its running count is the Pro half.</p>
         </div>
 
         <div class="doc-callout doc-callout-tip">
@@ -295,7 +295,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15a2.25 2.25 0 012.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m8.9-4.414c.376.023.75.05 1.124.08 1.131.094 1.976 1.057 1.976 2.192V16.5A2.25 2.25 0 0118 18.75h-2.25m-7.5-10.5H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V18.75m-7.5-10.5h6.375c.621 0 1.125.504 1.125 1.125v9.375m-8.25-3l1.5 1.5 3-3.75" />
             </svg>
-            Check-Ins <x-doc-badge plan="pro" />
+            Check-Ins <x-doc-badge plan="free" />
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             The Check-Ins tab turns door scans into attendance analytics: how many ticket holders actually showed up, when they arrived, and which events and ticket types had the best turnout. It reads completed sales only, and it groups them by the <strong>event date</strong> the ticket is for.
@@ -303,7 +303,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Note</div>
-            <p>This tab has data only for events where tickets were scanned with the <a href="{{ route('marketing.docs.tickets') }}#check-in" class="doc-link">check-in feature</a>, which is a Pro feature. Without a scan a ticket counts as sold but never as attended, so an unscanned event reads as 100% no-shows rather than as missing data.</p>
+            <p>This tab has data only for events where tickets were scanned with the <a href="{{ route('marketing.docs.tickets') }}#check-in" class="doc-link">check-in feature</a>, which is free on every plan. Without a scan a ticket counts as sold but never as attended, so an unscanned event reads as 100% no-shows rather than as missing data.</p>
         </div>
 
         <h3 id="checkins-stats" class="doc-subheading">Stats Cards</h3>

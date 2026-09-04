@@ -6,7 +6,7 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 
 **Progress:** 153 / 153 reviewed
 
-**Updated:** 115 / 153 rebuilt
+**Updated:** 153 / 153 rebuilt
 
 > **Ticketing plan model change - SWEPT 2026-07-31.** Another session shipped a real product
 > change mid-campaign: the FREE tier now SELLS paid tickets, 25 per calendar month per
@@ -148,7 +148,7 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 
 > **Restyle briefs.** Each note below can be pasted into Claude as the instruction for making that page's design more unique to its audience. Each page lives at `resources/views/marketing/for-{slug}.blade.php`. On most pages the existing signature is the accent gradient on the seven section headings plus a motif rendered in exactly three full-bleed layers (hero art, dark band, finale); the briefs below extend it deeper into the page. Shared ground rules for every brief: keep the shared es-* skeleton and section order; implement theming inside the page's nonce'd `<style>` block following the `/* For-x "Nickname" styles */` convention; every gradient needs light and dark variants; every animation needs a reduced-motion kill-switch; carry the accent and motif into at least one mid-page moment (bento, stats or week grid) and recolor the hard-coded blue "See all features" link and related-card hovers to the page accent; remove or actually use any dead `es-*-float` class; never use purple, violet, indigo, fuchsia or pink as accents; never use decorative line drawings (outline SVG illustrations of objects or scenes) - see CLAUDE.md; no new dependencies or external assets.
 
-**Restyle progress:** 0 / 31 applied
+**Restyle progress:** 31 / 31 applied
 
 > **Review status of the last 14 (2026-07-30).** The final 14 pages were rebuilt in one
 > parallel pass. Each was verified MECHANICALLY: HTTP 200, `audit-blade.py` reporting 0
@@ -250,59 +250,59 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 
 | Reviewed | Updated | Page | URL | Notes |
 |:--------:|:-------:|------|-----|-------|
-| ✅ |   | Docs Home | `/docs` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Getting Started | `/docs/getting-started` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Creating Schedules | `/docs/creating-schedules` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Schedule Styling | `/docs/schedule-styling` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Managing Schedules | `/docs/managing-schedules` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Creating Events | `/docs/creating-events` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Sharing | `/docs/sharing` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Tickets | `/docs/tickets` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Subscriptions | `/docs/subscriptions` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Gift Cards | `/docs/gift-cards` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Allocated Seating | `/docs/allocated-seating` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Appointments | `/docs/appointments` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Event Graphics | `/docs/event-graphics` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Newsletters | `/docs/newsletters` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Analytics | `/docs/analytics` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Account Settings | `/docs/account-settings` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Boost | `/docs/boost` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | AI Import | `/docs/ai-import` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Scan Agenda | `/docs/scan-agenda` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Referral Program | `/docs/referral-program` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Docs Home | `/docs` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. The glossary now separates account followers from email subscribers, because only one of the two lists gets the automatic digest. |
+| ✅ | ✅ | Getting Started | `/docs/getting-started` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. |
+| ✅ | ✅ | Creating Schedules | `/docs/creating-schedules` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. |
+| ✅ | ✅ | Schedule Styling | `/docs/schedule-styling` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. |
+| ✅ | ✅ | Managing Schedules | `/docs/managing-schedules` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. |
+| ✅ | ✅ | Creating Events | `/docs/creating-events` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. |
+| ✅ | ✅ | Sharing | `/docs/sharing` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. The "Following Is Not a Notification Subscription" callout became "Following and Subscribing Are Different Lists", because subscribers now do get an automatic digest. |
+| ✅ | ✅ | Tickets | `/docs/tickets` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. Reviewed; the 5,000-row import cap and the "scanning is free, the dashboard is Pro" callout both verified in code. |
+| ✅ | ✅ | Subscriptions | `/docs/subscriptions` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. |
+| ✅ | ✅ | Gift Cards | `/docs/gift-cards` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. |
+| ✅ | ✅ | Allocated Seating | `/docs/allocated-seating` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. Reviewed; the 12-minute hold verified against `SeatHoldService::HOLD_SECONDS`. |
+| ✅ | ✅ | Appointments | `/docs/appointments` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. Reviewed; already correct that booking is on every plan and the plan governs how many types. |
+| ✅ | ✅ | Event Graphics | `/docs/event-graphics` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. Reviewed; template-variable list matches `EventTextGenerator::parseTemplate()`. |
+| ✅ | ✅ | Newsletters | `/docs/newsletters` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. The "nothing goes out automatically" line was corrected: `app:send-event-announcements` is a separate rail that does not spend the allowance. |
+| ✅ | ✅ | Analytics | `/docs/analytics` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. Two claims that scanning tickets is a Pro feature were corrected (`AnalyticsController` has no plan check at all), and the Check-Ins tab badge moved from Pro to Free. |
+| ✅ | ✅ | Account Settings | `/docs/account-settings` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. |
+| ✅ | ✅ | Boost | `/docs/boost` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. |
+| ✅ | ✅ | AI Import | `/docs/ai-import` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. |
+| ✅ | ✅ | Scan Agenda | `/docs/scan-agenda` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. |
+| ✅ | ✅ | Referral Program | `/docs/referral-program` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. |
 
 ## Docs - Selfhost (11)
 
 | Reviewed | Updated | Page | URL | Notes |
 |:--------:|:-------:|------|-----|-------|
-| ✅ |   | Selfhost Overview | `/docs/selfhost` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Installation | `/docs/selfhost/installation` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Stripe (Selfhost) | `/docs/selfhost/stripe` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Google Calendar (Selfhost) | `/docs/selfhost/google-calendar` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Microsoft Calendar (Selfhost) | `/docs/selfhost/microsoft-calendar` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Boost (Selfhost) | `/docs/selfhost/boost` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Admin (Selfhost) | `/docs/selfhost/admin` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Federation (Selfhost) | `/docs/selfhost/federation` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Email (Selfhost) | `/docs/selfhost/email` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | AI (Selfhost) | `/docs/selfhost/ai` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Accessibility (Selfhost) | `/docs/selfhost/accessibility` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | Selfhost Overview | `/docs/selfhost` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. The card grid sat straight under an h2, so the shared component now takes a heading level instead of hardcoding h4. |
+| ✅ | ✅ | Installation | `/docs/selfhost/installation` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. |
+| ✅ | ✅ | Stripe (Selfhost) | `/docs/selfhost/stripe` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. |
+| ✅ | ✅ | Google Calendar (Selfhost) | `/docs/selfhost/google-calendar` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. |
+| ✅ | ✅ | Microsoft Calendar (Selfhost) | `/docs/selfhost/microsoft-calendar` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. |
+| ✅ | ✅ | Boost (Selfhost) | `/docs/selfhost/boost` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. |
+| ✅ | ✅ | Admin (Selfhost) | `/docs/selfhost/admin` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. |
+| ✅ | ✅ | Federation (Selfhost) | `/docs/selfhost/federation` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. |
+| ✅ | ✅ | Email (Selfhost) | `/docs/selfhost/email` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. The newsletter description now covers both outbound rails, so an install with no mail settings knows it sends neither. |
+| ✅ | ✅ | AI (Selfhost) | `/docs/selfhost/ai` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. |
+| ✅ | ✅ | Accessibility (Selfhost) | `/docs/selfhost/accessibility` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. |
 
 ## Docs - SaaS (5)
 
 | Reviewed | Updated | Page | URL | Notes |
 |:--------:|:-------:|------|-----|-------|
-| ✅ |   | SaaS Setup | `/docs/saas` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Custom Domains (SaaS) | `/docs/saas/custom-domains` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Twilio (SaaS) | `/docs/saas/twilio` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Federation (SaaS) | `/docs/saas/federation` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Monetization (SaaS) | `/docs/saas/monetization` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | SaaS Setup | `/docs/saas` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. |
+| ✅ | ✅ | Custom Domains (SaaS) | `/docs/saas/custom-domains` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. |
+| ✅ | ✅ | Twilio (SaaS) | `/docs/saas/twilio` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. |
+| ✅ | ✅ | Federation (SaaS) | `/docs/saas/federation` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. |
+| ✅ | ✅ | Monetization (SaaS) | `/docs/saas/monetization` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. |
 
 ## Docs - Developer (2)
 
 | Reviewed | Updated | Page | URL | Notes |
 |:--------:|:-------:|------|-----|-------|
-| ✅ |   | API | `/docs/developer/api` | Accuracy pass (shared docs shell by design) |
-| ✅ |   | Webhooks | `/docs/developer/webhooks` | Accuracy pass (shared docs shell by design) |
+| ✅ | ✅ | API | `/docs/developer/api` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. |
+| ✅ | ✅ | Webhooks | `/docs/developer/webhooks` | Accuracy pass (shared docs shell by design). 2026-09 review: plan badges checked against the gate in code, every heading-level skip fixed, and all 418 doc-search anchors plus 110 Help-button deep links verified to resolve. |
 
 ## Dynamic pages (not counted in the 151)
 

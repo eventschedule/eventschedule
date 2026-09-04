@@ -4006,7 +4006,7 @@ class MarketingController extends Controller
                 'keywords' => 'Mailchimp alternative for events, Mailchimp replacement, event email marketing, event newsletter',
                 'audience_hint' => 'For organizers managing event emails in a separate platform',
                 'about' => 'Mailchimp is a popular email marketing platform that many event organizers use to promote events and communicate with attendees. However, using Mailchimp means managing a separate tool alongside your event platform, manually syncing attendee lists, and paying for email marketing on top of your event tools.',
-                'pricing_note' => 'Mailchimp starts at $13/month for 500 contacts and goes up from there. Event Schedule newsletters are free for unlimited subscribers, and Selling tickets is free too, up to 25 paid ones a month with zero platform fees, and Pro at '.plan_price($this->planPrice()).'/month removes that ceiling.',
+                'pricing_note' => 'Mailchimp starts at $13/month for 500 contacts and goes up from there. Event Schedule newsletters are free for unlimited subscribers, and so is selling up to 25 paid tickets a month at zero platform fees, with Pro at '.plan_price($this->planPrice()).'/month removing that ceiling.',
                 'competitor_price' => 'From $13/mo',
                 'es_price' => 'From '.plan_price(0).'/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [

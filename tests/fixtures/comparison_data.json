@@ -42,13 +42,19 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Unlimited ticket sales",
                     "Yes (Pro)",
                     "Yes",
                     false
                 ],
                 [
                     "QR check-ins",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "Yes",
                     false
                 ],
@@ -127,7 +133,7 @@
                     true
                 ],
                 [
-                    "Google Calendar sync",
+                    "Calendar sync, both ways",
                     "Yes (Free)",
                     "No native 2-way sync",
                     true
@@ -378,7 +384,7 @@
                 "Zero platform fees vs Eventbrite's 3.7% + $1.79 per ticket",
                 "One-click Eventbrite import brings your events, tickets, and venues over automatically",
                 "Custom domains and full branding control that Eventbrite doesn't offer at any price",
-                "AI-powered event parsing, flyer generation, and two-way Google Calendar sync"
+                "AI-powered event parsing, flyer generation, and two-way sync with Google, Outlook and CalDAV"
             ]
         },
         "switch_steps": [
@@ -457,13 +463,19 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Unlimited ticket sales",
                     "Yes (Pro)",
                     "Yes",
                     false
                 ],
                 [
                     "QR check-ins",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "Yes",
                     false
                 ],
@@ -536,7 +548,7 @@
             ],
             "Integrations": [
                 [
-                    "Google Calendar sync",
+                    "Calendar sync, both ways",
                     "Yes (Free)",
                     "Yes",
                     false
@@ -773,7 +785,7 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to Luma?",
-                "answer": "Luma charges $59/mo for its premium plan. Event Schedule Pro is $5/mo with zero platform fees. Even the free plan includes unlimited events, Google Calendar sync, and newsletters."
+                "answer": "Luma charges $59/mo for its premium plan. Event Schedule Pro is $5/mo with zero platform fees. Even the free plan includes unlimited events, two-way calendar sync, 25 paid tickets a month and newsletters."
             },
             {
                 "question": "Does Event Schedule support virtual events like Luma?",
@@ -824,13 +836,19 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Unlimited ticket sales",
                     "Yes (Pro)",
                     "Yes",
                     false
                 ],
                 [
                     "QR check-ins",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "Yes",
                     false
                 ],
@@ -903,7 +921,7 @@
             ],
             "Integrations": [
                 [
-                    "Google Calendar sync",
+                    "Calendar sync, both ways",
                     "Yes (Free)",
                     "No",
                     true
@@ -1414,7 +1432,7 @@
                     true
                 ],
                 [
-                    "Google Calendar sync",
+                    "Calendar sync, both ways",
                     "Yes (Free)",
                     "N/A",
                     true
@@ -1495,7 +1513,7 @@
             "summary": "Event Schedule is purpose-built for sharing events publicly with ticketing, newsletters, and custom branding - things Google Calendar was never designed for.",
             "points": [
                 "Full ticketing with QR check-ins, waitlists, and a live sales dashboard",
-                "Two-way Google Calendar sync keeps both platforms in sync automatically",
+                "Two-way sync with Google, Outlook and CalDAV keeps both platforms in sync automatically",
                 "Public schedule pages with custom domains, branding, and embeddable widgets",
                 "Built-in newsletters, event graphics, and AI-powered event import"
             ]
@@ -1507,7 +1525,7 @@
             },
             {
                 "question": "Is Event Schedule free like Google Calendar?",
-                "answer": "Event Schedule has a generous free plan that includes unlimited events, Google Calendar sync, newsletters, and team collaboration. The Pro plan at $5/mo adds ticketing, QR check-ins, and custom branding."
+                "answer": "Event Schedule has a generous free plan that includes unlimited events, Google Calendar sync, newsletters, and team collaboration. Selling is on the free plan as well, up to 25 paid tickets a month, scanned at the door. The Pro plan at $5/mo removes that ceiling and adds the live check-in dashboard and custom branding."
             },
             {
                 "question": "Can Event Schedule handle ticketing that Google Calendar cannot?",
@@ -1558,13 +1576,19 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "Yes (paid events)",
                     false
                 ],
                 [
-                    "QR check-ins",
+                    "Unlimited ticket sales",
                     "Yes (Pro)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "QR check-ins",
+                    "Yes (Free)",
                     "No",
                     true
                 ],
@@ -1631,7 +1655,7 @@
             ],
             "Integrations": [
                 [
-                    "Google Calendar sync",
+                    "Calendar sync, both ways",
                     "Yes (Free)",
                     "Add to calendar only",
                     true
@@ -1904,13 +1928,19 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Unlimited ticket sales",
                     "Yes (Pro)",
                     "Yes",
                     false
                 ],
                 [
                     "QR check-ins",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "Yes (app-based)",
                     false
                 ],
@@ -1983,7 +2013,7 @@
             ],
             "Integrations": [
                 [
-                    "Google Calendar sync",
+                    "Calendar sync, both ways",
                     "Yes (Free)",
                     "No",
                     true
@@ -2256,13 +2286,19 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Unlimited ticket sales",
                     "Yes (Pro)",
                     "Yes",
                     false
                 ],
                 [
                     "QR check-ins",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "Limited",
                     true
                 ],
@@ -2335,7 +2371,7 @@
             ],
             "Integrations": [
                 [
-                    "Google Calendar sync",
+                    "Calendar sync, both ways",
                     "Yes (Free)",
                     "No",
                     true
@@ -2608,13 +2644,19 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Unlimited ticket sales",
                     "Yes (Pro)",
                     "Yes",
                     false
                 ],
                 [
                     "QR check-ins",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "Yes",
                     false
                 ],
@@ -2681,7 +2723,7 @@
             ],
             "Integrations": [
                 [
-                    "Google Calendar sync",
+                    "Calendar sync, both ways",
                     "Yes (Free)",
                     "Limited",
                     true
@@ -2960,13 +3002,19 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "Yes (paid add-on)",
                     true
                 ],
                 [
-                    "QR check-ins",
+                    "Unlimited ticket sales",
                     "Yes (Pro)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "QR check-ins",
+                    "Yes (Free)",
                     "Yes (Boost+)",
                     false
                 ],
@@ -3033,7 +3081,7 @@
             ],
             "Integrations": [
                 [
-                    "Google Calendar sync",
+                    "Calendar sync, both ways",
                     "Yes (Free)",
                     "Export/subscribe only",
                     true
@@ -3306,13 +3354,19 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Unlimited ticket sales",
                     "Yes (Pro)",
                     "Yes",
                     false
                 ],
                 [
                     "QR check-ins",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "Yes",
                     false
                 ],
@@ -3379,7 +3433,7 @@
             ],
             "Integrations": [
                 [
-                    "Google Calendar sync",
+                    "Calendar sync, both ways",
                     "Yes (Free)",
                     "No (Zapier only)",
                     true
@@ -3658,13 +3712,19 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Unlimited ticket sales",
                     "Yes (Pro)",
                     "Yes",
                     false
                 ],
                 [
                     "QR check-ins",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "Yes",
                     false
                 ],
@@ -3737,7 +3797,7 @@
             ],
             "Integrations": [
                 [
-                    "Google Calendar sync",
+                    "Calendar sync, both ways",
                     "Yes (Free)",
                     "No (add-to-calendar only)",
                     true
@@ -4016,13 +4076,19 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Unlimited ticket sales",
                     "Yes (Pro)",
                     "Yes",
                     false
                 ],
                 [
                     "QR check-ins",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "Yes (iOS/Android/web)",
                     false
                 ],
@@ -4095,7 +4161,7 @@
             ],
             "Integrations": [
                 [
-                    "Google Calendar sync",
+                    "Calendar sync, both ways",
                     "Yes (Free)",
                     "No",
                     true
@@ -4374,13 +4440,19 @@
             "Events & Calendar": [
                 [
                     "Ticketing",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "No",
                     true
                 ],
                 [
-                    "QR check-ins",
+                    "Unlimited ticket sales",
                     "Yes (Pro)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "QR check-ins",
+                    "Yes (Free)",
                     "No",
                     true
                 ],
@@ -4435,7 +4507,7 @@
             ],
             "Integrations": [
                 [
-                    "Google Calendar sync",
+                    "Calendar sync, both ways",
                     "Yes (Free)",
                     "Import only (one-way)",
                     true
@@ -4651,7 +4723,7 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to AddEvent?",
-                "answer": "AddEvent charges $36/mo for its premium plan. Event Schedule Pro is $5/mo with zero platform fees. Even the free plan includes unlimited events, Google Calendar sync, and newsletters."
+                "answer": "AddEvent charges $36/mo for its premium plan. Event Schedule Pro is $5/mo with zero platform fees. Even the free plan includes unlimited events, two-way calendar sync, 25 paid tickets a month and newsletters."
             },
             {
                 "question": "How is Event Schedule different from AddEvent?",
@@ -4702,13 +4774,19 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Unlimited ticket sales",
                     "Yes (Pro)",
                     "Yes",
                     false
                 ],
                 [
                     "QR check-ins",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "Yes (pretixSCAN, offline-capable)",
                     false
                 ],
@@ -4781,7 +4859,7 @@
             ],
             "Integrations": [
                 [
-                    "Google Calendar sync",
+                    "Calendar sync, both ways",
                     "Yes (Free)",
                     "No",
                     true
@@ -5060,13 +5138,19 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Unlimited ticket sales",
                     "Yes (Pro)",
                     "Yes",
                     false
                 ],
                 [
                     "QR check-ins",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "Yes",
                     false
                 ],
@@ -5139,7 +5223,7 @@
             ],
             "Integrations": [
                 [
-                    "Google Calendar sync",
+                    "Calendar sync, both ways",
                     "Yes (Free)",
                     "No",
                     true
@@ -5418,13 +5502,19 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Unlimited ticket sales",
                     "Yes (Pro)",
                     "Yes",
                     false
                 ],
                 [
                     "QR check-ins",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "Yes (kiosk mode)",
                     false
                 ],
@@ -5497,7 +5587,7 @@
             ],
             "Integrations": [
                 [
-                    "Google Calendar sync",
+                    "Calendar sync, both ways",
                     "Yes (Free)",
                     "No",
                     true
