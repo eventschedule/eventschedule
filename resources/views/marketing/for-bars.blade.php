@@ -514,7 +514,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for bars and pubs?',
-                'a' => 'Yes. Sharing your calendar, running recurring weekly nights, splitting them into sub-schedules, taking free registrations, and syncing with Google, Outlook or CalDAV are all free forever. Newsletters are free too, at 10 emails a month, counted per recipient rather than per send. Ticketing, event graphics and the higher 100-a-month newsletter limit are on the Pro plan at '.plan_price($proMonthly).' a month.',
+                'a' => 'Yes. Sharing your calendar, running recurring weekly nights, splitting them into sub-schedules, taking free registrations, and syncing with Google, Outlook or CalDAV are all free forever. Newsletters are free too, at 10 emails a month, counted per recipient rather than per send. Selling tickets is free as well, up to 25 paid ones a month, scanned at the door on any plan. Unlimited sales, the live check-in dashboard, event graphics and the higher 100-a-month newsletter limit are on the Pro plan at '.plan_price($proMonthly).' a month.',
             ],
             [
                 'q' => 'Can I set up a night that repeats every week?',

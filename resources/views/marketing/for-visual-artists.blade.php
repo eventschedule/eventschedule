@@ -622,7 +622,7 @@
             ],
             [
                 'q' => 'How do collectors and art lovers find out about a new show?',
-                'a' => 'Two ways, and you control both. Anyone can follow your schedule, which puts their name and email on your list, and you write and send the newsletter yourself when there is something to say. Nothing goes out in your name automatically, and nobody is emailed on your behalf. The other way is the link: your schedule has one permanent address you can put in a bio, print on a show card, hand out as a QR code, or embed in the portfolio site you already have.',
+                'a' => 'Two ways, and you control both. Anyone can leave their email on your schedule, and once they confirm it they hear when you put new dates up, as one digest rather than a message per show. Anything you want to say in your own words is a newsletter you write and send. The other way is the link: your schedule has one permanent address you can put in a bio, print on a show card, hand out as a QR code, or embed in the portfolio site you already have.',
             ],
             [
                 'q' => 'Do my open studio Saturdays have to be entered one at a time?',
@@ -1110,7 +1110,7 @@
 
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="90">
                 @foreach ([
-                    ['Free', 'Followers and newsletters', 'Following puts a name and an email on your list, and you write and send the newsletter yourself. Free covers 10 emails a month, Pro 100 and Enterprise 1,000, counted per recipient rather than per send.'],
+                    ['Free', 'Followers and newsletters', 'An email address on your list hears about new dates on its own, as a digest that costs nothing from the allowance. A newsletter you write is what the allowance counts: 10 emails a month free, 100 on Pro and 1,000 on Enterprise, per recipient rather than per send.'],
                     ['Free', 'A QR code for the door', 'Download a QR code that opens your schedule and put it on the show card, the price list, or a card by the door of the studio. On every plan.'],
                     ['Free', 'Embedded in your own site', 'Drop the calendar into the portfolio site you already have. The dates on your site and the dates on your schedule are then the same dates.'],
                     ['Free', 'Google, Outlook and CalDAV', 'Two-way sync, so the install week, the opening and the fair sit in the calendar you actually look at, and a change in either place reaches the other.'],

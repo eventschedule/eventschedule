@@ -6,7 +6,7 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 
 **Progress:** 153 / 153 reviewed
 
-**Updated:** 47 / 153 rebuilt
+**Updated:** 81 / 153 rebuilt
 
 > **Ticketing plan model change - SWEPT 2026-07-31.** Another session shipped a real product
 > change mid-campaign: the FREE tier now SELLS paid tickets, 25 per calendar month per
@@ -140,9 +140,9 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 
 | Reviewed | Updated | Page | URL | Notes |
 |:--------:|:-------:|------|-----|-------|
-| ✅ |   | For Talent | `/for-talent` | Rebuilt July 2026 to match `/`, `/features`, `/pricing` and `/use-cases`: brand blue→sky→cyan (retiring the amber/rose "Center Stage" gels), hero schedule mockup, a five-banner "Life of a gig" run via `<x-marketing.feature-banner>`, a `#live` rail of real talent events (hides below 4), the `#keep` fee band, an accurate free/Pro split, and the 12 performer cards via `<x-marketing.audience-card>` off the shared `config/marketing_audiences.php`. |
-| ✅ |   | For Venues | `/for-venues` | "Front of House" ground-up rebuild, July 2026. Two acts: front of house (calendar, box office, own brand, private hire) and back of house (booking inbox, the door, rooms, the numbers), hinged by a full-bleed "pass door" that carries the mid-page CTA. The two acts read through copy, ground colour and lighting - the facade-elevation and floor-plan line drawings that originally carried the motif were removed in the July 2026 line-drawing sweep. Act 02 uses the new `ground="dark"` on `<x-marketing.feature-banner>`/`feature-chapter` (fixed dark in both colour modes). Adds a week board, a "stack this replaces" row linking seven `replace`/`compare` pages, a venue-specific plan strip reading prices from config, `HowTo` schema, and the 12 venue cards via `<x-marketing.audience-card>` off the shared `config/marketing_audiences.php`. Fixed a wrong FAQ answer that claimed a "door staff" role. |
-| ✅ |   | For Curators | `/for-curators` | "The Listings" ground-up rebuild |
+| ✅ | ✅ | For Talent | `/for-talent` | Rebuilt July 2026 onto the shared components off `config/marketing_audiences.php`. 2026-09 pass: the follower story is now the automatic subscriber digest plus the newsletter you write, in the "fill the room" banner, the free-plan strip and the FAQ; fee comparison and plan split re-verified. |
+| ✅ | ✅ | For Venues | `/for-venues` | "Front of House" ground-up rebuild. 2026-09 pass: reviewed and accurate throughout - the 25-ticket allowance, un-gated door scanning, the one-free/five-Enterprise team split and the free bookable appointment type are all stated correctly; removed a dead `.es-od-strip` rule left behind by an earlier edit. |
+| ✅ | ✅ | For Curators | `/for-curators` | "The Listings" ground-up rebuild. 2026-09 pass: reviewed and accurate; fixed a heading-level skip (h2 straight to h4) in the "and so" trio, which is the only a11y defect the whole for-page set turned up. |
 
 ## Audience "For" pages (31)
 
@@ -163,37 +163,37 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 
 | Reviewed | Updated | Page | URL | Notes |
 |:--------:|:-------:|------|-----|-------|
-| ✅ |   | For Musicians | `/for-musicians` | "The Tour Poster" ground-up rebuild |
-| ✅ |   | For DJs | `/for-djs` | "The Neon Sign" ground-up rebuild |
-| ✅ |   | For Comedians | `/for-comedians` | "The Tight Five" ground-up rebuild |
-| ✅ |   | For Circus and Acrobatics | `/for-circus-acrobatics` | "The Center Ring" ground-up rebuild |
-| ✅ |   | For Magicians | `/for-magicians` | "Pick a Card" ground-up rebuild |
-| ✅ |   | For Spoken Word | `/for-spoken-word` | "The Sign-Up Sheet" ground-up rebuild |
-| ✅ |   | For Bars | `/for-bars` | "The Chalkboard" ground-up rebuild |
-| ✅ |   | For Nightclubs | `/for-nightclubs` | "The Door" ground-up rebuild |
-| ✅ |   | For Music Venues | `/for-music-venues` | "The Running Order" ground-up rebuild |
-| ✅ |   | For Theaters | `/for-theaters` | "The Run" ground-up rebuild |
-| ✅ |   | For Dance Groups | `/for-dance-groups` | "The Barre" ground-up rebuild |
-| ✅ |   | For Theater Performers | `/for-theater-performers` | "The Résumé" ground-up rebuild |
-| ✅ |   | For Food Trucks and Vendors | `/for-food-trucks-and-vendors` | "Today's Stop" ground-up rebuild |
-| ✅ |   | For Comedy Clubs | `/for-comedy-clubs` | "Friday at Eight" ground-up rebuild |
-| ✅ |   | For Restaurants | `/for-restaurants` | "Twenty-Four Covers" ground-up rebuild |
-| ✅ |   | For Breweries and Wineries | `/for-breweries-and-wineries` | "Most Nights Are Free" ground-up rebuild |
-| ✅ |   | For Art Galleries | `/for-art-galleries` | "Four Evenings" ground-up rebuild |
-| ✅ |   | For Community Centers | `/for-community-centers` | "The Gathering Place" ground-up rebuild |
-| ✅ |   | For Fitness and Yoga | `/for-fitness-and-yoga` | "The Flow" ground-up rebuild |
-| ✅ |   | For Workshop Instructors | `/for-workshop-instructors` | "The Workshop" ground-up rebuild |
-| ✅ |   | For Visual Artists | `/for-visual-artists` | "The Studio Wall" ground-up rebuild |
-| ✅ |   | For Farmers Markets | `/for-farmers-markets` | "The Market" ground-up rebuild |
-| ✅ |   | For Hotels and Resorts | `/for-hotels-and-resorts` | "The Concierge" ground-up rebuild |
-| ✅ |   | For Libraries | `/for-libraries` | "The Catalog" ground-up rebuild |
-| ✅ |   | For Webinars | `/for-webinars` | "On Air" ground-up rebuild |
-| ✅ |   | For Live Concerts | `/for-live-concerts` | "Live On Stage" ground-up rebuild |
-| ✅ |   | For Online Classes | `/for-online-classes` | "The Syllabus" ground-up rebuild |
-| ✅ |   | For Virtual Conferences | `/for-virtual-conferences` | "The Agenda" ground-up rebuild |
-| ✅ |   | For Live Q&A Sessions | `/for-live-qa-sessions` | "The Conversation" ground-up rebuild |
-| ✅ |   | For Watch Parties | `/for-watch-parties` | "The Screening" ground-up rebuild |
-| ✅ |   | For AI Agents | `/for-ai-agents` | "The Console" ground-up rebuild |
+| ✅ | ✅ | For Musicians | `/for-musicians` | "The Tour Poster" ground-up rebuild. 2026-09 pass: reviewed; calendar-sync card now names Outlook and CalDAV, and the shared plan band it renders was rebuilt (it billed QR check-in as Pro). |
+| ✅ | ✅ | For DJs | `/for-djs` | "The Neon Sign" ground-up rebuild. 2026-09 pass: reviewed; calendar-sync card corrected to name all three carriers, shared plan band rebuilt. |
+| ✅ | ✅ | For Comedians | `/for-comedians` | "The Tight Five" ground-up rebuild. 2026-09 pass: reviewed; calendar-sync card corrected, shared plan band rebuilt. |
+| ✅ | ✅ | For Circus and Acrobatics | `/for-circus-acrobatics` | "The Center Ring" ground-up rebuild. 2026-09 pass: the discovery FAQ said there is no automatic alert, which `app:send-event-announcements` made false - now the subscriber digest plus the newsletter you write; calendar-sync card corrected. |
+| ✅ | ✅ | For Magicians | `/for-magicians` | "Pick a Card" ground-up rebuild. 2026-09 pass: reviewed; calendar-sync card corrected, shared plan band rebuilt. |
+| ✅ | ✅ | For Spoken Word | `/for-spoken-word` | "The Sign-Up Sheet" ground-up rebuild. 2026-09 pass: reviewed and accurate - free registration with a per-date capacity, recurring dates with exceptions and the custom questions tier are all stated correctly. |
+| ✅ | ✅ | For Bars | `/for-bars` | "The Chalkboard" ground-up rebuild. 2026-09 pass: the free/Pro answer put ticketing on the Pro side; selling is free to 25 paid tickets a month with door scanning included, so the answer now says that and Pro is the ceiling plus the live dashboard. |
+| ✅ | ✅ | For Nightclubs | `/for-nightclubs` | "The Door" ground-up rebuild. 2026-09 pass: reviewed and accurate - free registration as a zero-price ticket, time-based pricing via sales windows, and door scanning on every plan. |
+| ✅ | ✅ | For Music Venues | `/for-music-venues` | "The Running Order" ground-up rebuild. 2026-09 pass: reviewed and accurate - event parts for set times, per-part fan content, and the sub-schedule split for main and back room. |
+| ✅ | ✅ | For Theaters | `/for-theaters` | "The Run" ground-up rebuild. 2026-09 pass: reviewed and accurate - the run as one recurring event with dark nights excluded, per-date inventory, season passes and the Enterprise seat map. |
+| ✅ | ✅ | For Dance Groups | `/for-dance-groups` | "The Barre" ground-up rebuild. 2026-09 pass: a feature row billed QR check-in as Pro; scanning has no plan check, so the row is now the live check-in view and says which half is Pro. |
+| ✅ | ✅ | For Theater Performers | `/for-theater-performers` | "The Résumé" ground-up rebuild. 2026-09 pass: reviewed and accurate - the List layout as a self-maintaining credits list, and events arriving from the company that cast you. |
+| ✅ | ✅ | For Food Trucks and Vendors | `/for-food-trucks-and-vendors` | "Today's Stop" ground-up rebuild. 2026-09 pass: the "do my followers get an alert" answer was a flat no; subscribers now get a batched digest of new stops, with account followers still newsletter-only. |
+| ✅ | ✅ | For Comedy Clubs | `/for-comedy-clubs` | "Friday at Eight" ground-up rebuild. 2026-09 pass: the free/Pro answer said selling tickets is on the Pro plan - it is free to 25 paid tickets a month with scanning included, and Pro is the ceiling plus the live dashboard. |
+| ✅ | ✅ | For Restaurants | `/for-restaurants` | "Twenty-Four Covers" ground-up rebuild. 2026-09 pass: reviewed and accurate - RSVP capacity per date, sales windows that close before you shop, and custom questions for allergies. |
+| ✅ | ✅ | For Breweries and Wineries | `/for-breweries-and-wineries` | "Most Nights Are Free" ground-up rebuild. 2026-09 pass: the email answer said nothing goes out automatically; new dates now reach confirmed subscribers as a digest, with the allowance still counting the newsletters you write. |
+| ✅ | ✅ | For Art Galleries | `/for-art-galleries` | "Four Evenings" ground-up rebuild. 2026-09 pass: two places said there is no automatic announcement - a new show now reaches confirmed subscribers on its own, and the opening you want to write about is still yours. |
+| ✅ | ✅ | For Community Centers | `/for-community-centers` | "The Gathering Place" ground-up rebuild. 2026-09 pass: reviewed and accurate; shared plan band rebuilt. |
+| ✅ | ✅ | For Fitness and Yoga | `/for-fitness-and-yoga` | "The Flow" ground-up rebuild. 2026-09 pass: the discovery answer said there is no automatic alert when you add a class; students who left an email now get one digest covering the batch. |
+| ✅ | ✅ | For Workshop Instructors | `/for-workshop-instructors` | "The Workshop" ground-up rebuild. 2026-09 pass: reviewed and accurate; shared plan band rebuilt. |
+| ✅ | ✅ | For Visual Artists | `/for-visual-artists` | "The Studio Wall" ground-up rebuild. 2026-09 pass: two places said nothing goes out in your name automatically; new dates now reach confirmed subscribers as a digest that costs nothing from the allowance. |
+| ✅ | ✅ | For Farmers Markets | `/for-farmers-markets` | "The Market" ground-up rebuild. 2026-09 pass: three places said following triggers nothing; new market days now reach the list on their own, batched, with the newsletter still the thing you write. |
+| ✅ | ✅ | For Hotels and Resorts | `/for-hotels-and-resorts` | "The Concierge" ground-up rebuild. 2026-09 pass: three places said nothing is sent automatically; a guest who left an email now gets next week's additions as one digest. |
+| ✅ | ✅ | For Libraries | `/for-libraries` | "The Catalog" ground-up rebuild. 2026-09 pass: two places said nothing is sent automatically when you add a program; new programs now reach the list as a digest, with the newsletter allowance unchanged. |
+| ✅ | ✅ | For Webinars | `/for-webinars` | "On Air" ground-up rebuild. 2026-09 pass: reviewed and accurate; shared plan band rebuilt. |
+| ✅ | ✅ | For Live Concerts | `/for-live-concerts` | "Live On Stage" ground-up rebuild. 2026-09 pass: reviewed and accurate; the Twitch and Instagram platform chips keep their real brand colours, which is the documented third-party exemption. |
+| ✅ | ✅ | For Online Classes | `/for-online-classes` | "The Syllabus" ground-up rebuild. 2026-09 pass: reviewed and accurate; shared plan band rebuilt. |
+| ✅ | ✅ | For Virtual Conferences | `/for-virtual-conferences` | "The Agenda" ground-up rebuild. 2026-09 pass: reviewed and accurate; shared plan band rebuilt. |
+| ✅ | ✅ | For Live Q&A Sessions | `/for-live-qa-sessions` | "The Conversation" ground-up rebuild. 2026-09 pass: reviewed and accurate; shared plan band rebuilt. |
+| ✅ | ✅ | For Watch Parties | `/for-watch-parties` | "The Screening" ground-up rebuild. 2026-09 pass: reviewed and accurate; shared plan band rebuilt. |
+| ✅ | ✅ | For AI Agents | `/for-ai-agents` | "The Console" ground-up rebuild. 2026-09 pass: reconciled the endpoint count with `/open-source` - both are right, and the hero now says which is which (three routes to get a key, 24 behind it); the four machine-readable files re-verified as served. |
 
 ## Comparison / "Alternative" pages (17)
 

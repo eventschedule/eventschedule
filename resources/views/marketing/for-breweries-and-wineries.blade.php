@@ -356,7 +356,7 @@
             ],
             [
                 'q' => 'Can we email people about a release?',
-                'a' => 'Followers give you their email with their consent, and you write and send the newsletter yourself - nothing goes out automatically. Be aware of the allowance before you plan around it: the free plan covers 10 emails a month and Pro raises it to 100, counted per recipient rather than per send, so a single newsletter to a hundred followers uses a hundred of them.',
+                'a' => 'Two ways. Somebody who leaves an email address on your page gets a short digest automatically when you put new dates up, at most one every few days, and it costs nothing from the allowance. A release you want to write properly about is a newsletter you send yourself, and that is what the allowance counts: 10 emails a month free, 100 on Pro, counted per recipient rather than per send, so a single newsletter to a hundred followers uses a hundred of them.',
             ],
         ];
 

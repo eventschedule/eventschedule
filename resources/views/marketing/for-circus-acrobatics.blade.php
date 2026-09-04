@@ -1065,7 +1065,7 @@
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Calendar Sync" description="Two-way sync with Google Calendar" :url="marketing_url('/features/calendar-sync')" icon-color="amber">
+                    <x-feature-link-card name="Calendar Sync" description="Two-way sync with Google, Outlook and CalDAV" :url="marketing_url('/features/calendar-sync')" icon-color="amber">
                         <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
@@ -1139,7 +1139,7 @@
                     ],
                     [
                         'q' => 'How do audiences discover my performances?',
-                        'a' => 'Share your schedule link on social media, on your booking page, or embed the calendar on your website. Fans who follow you are giving you permission to email them, and there is no automatic alert: you write the newsletter and choose when it goes out, so followers hear from you when you have something to say.',
+                        'a' => 'Share your schedule link on social media, on your booking page, or embed the calendar on your website. Fans who leave an email address get a digest automatically when you add dates, at most one every few days. Beyond that you write the newsletter and choose when it goes out, and somebody who followed you from their own account only ever hears from you that way.',
                     ],
                     [
                         'q' => 'Can I sell tickets to my shows?',

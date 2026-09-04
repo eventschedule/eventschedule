@@ -627,7 +627,7 @@
             ],
             [
                 'q' => 'How do students find and follow my classes?',
-                'a' => 'You get one link for the whole timetable, so it works in a bio, on a flyer, and as a QR code you can print for the studio door. Students who follow your schedule are yours: you can see their name and email, and you write and send the newsletter yourself. To be straight about it, there is no automatic alert when you add a class. Nothing is emailed to your followers unless you send it.',
+                'a' => 'You get one link for the whole timetable, so it works in a bio, on a flyer, and as a QR code you can print for the studio door. Students who leave an email address are yours: you see their name and address, and when you add classes they get one digest covering the batch, never one message per class and never more than one every few days. Anything else you want to say is a newsletter you write and send.',
             ],
             [
                 'q' => 'Can I sell class passes and drop-ins?',

@@ -885,7 +885,7 @@
                 <div class="grid gap-4" data-reveal-group="100">
                     @foreach ([
                         ['Zero platform fees', 'You keep the whole ticket price minus what Stripe charges to process the card. There is no per-ticket cut on top.', 'pro'],
-                        ['QR check-in', 'Scan tickets at the door from a phone, with a live check-in view so two people can work the queue.', 'pro'],
+                        ['Live check-in view', 'Scanning tickets from a phone is free on every plan. Pro adds the running count and the per-ticket breakdown, so two people can work the queue and both see the same total.', 'pro'],
                         ['Questions at checkout', 'Ask for the dancer\'s name, the class they are in, or a photo consent - collected with the sale instead of chased afterwards.', 'pro'],
                     ] as [$t, $d, $tier])
                         <div class="es-barre-card es-barre-hover p-6" data-reveal>

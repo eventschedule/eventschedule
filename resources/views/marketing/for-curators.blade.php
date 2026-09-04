@@ -875,7 +875,7 @@
                     <div class="grid gap-6 pt-7 md:grid-cols-3" data-reveal-group="80">
                         @foreach ([['One link to share', 'Post the guide once instead of every event twice.'], ['A standing archive', 'Readers can browse what is coming and what already happened.'], ['Reach past the group', 'Anyone can find the guide, not only the people already in the room.']] as [$mTitle, $mBody])
                             <div data-reveal>
-                                <h4 class="es-cur-serif text-lg font-bold">{{ $mTitle }}</h4>
+                                <h3 class="es-cur-serif text-lg font-bold">{{ $mTitle }}</h3>
                                 <p class="es-cur-agate es-cur-muted mt-1.5">{{ $mBody }}</p>
                             </div>
                         @endforeach

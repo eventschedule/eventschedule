@@ -679,7 +679,7 @@
             ],
             [
                 'q' => 'How do guests find out what is on during their stay?',
-                'a' => 'Your schedule has its own address and a QR code you can download and print, so the link can go on the key-card sleeve, the room folder, a sign by the pool or the pre-arrival email. You can also embed the same calendar in the website you already have. Nothing is installed and no account is needed to read it. Guests can follow the schedule, which builds a list you can write a newsletter to; nothing is sent automatically, a newsletter goes out when you send it.',
+                'a' => 'Your schedule has its own address and a QR code you can download and print, so the link can go on the key-card sleeve, the room folder, a sign by the pool or the pre-arrival email. You can also embed the same calendar in the website you already have. Nothing is installed and no account is needed to read it. A guest who leaves an email address gets next week\'s additions as one digest without you lifting a finger, and anything more considered than that is a newsletter you write.',
             ],
             [
                 'q' => 'Can I set up the activities that run every week?',
@@ -981,7 +981,7 @@
                         @foreach ([
                             ['A QR code you can print', 'Free', 'Download your schedule\'s code and put it where guests already look: the key-card sleeve, the room folder, the lift, a sign by the pool, the pre-arrival email. It opens the page in a browser, with nothing to install and no account needed to read it.'],
                             ['The calendar, inside your own site', 'Free', 'Embed the same calendar in the page your website already has, so the "What\'s on" tab stops being a PDF from last season.'],
-                            ['A list you can write to', 'Free', 'Guests can follow the schedule, which gives you a list to send a newsletter to. Nothing goes out on its own: a newsletter is something you write and send. The allowance counts recipients, 10 a month free, 100 on Pro and 1,000 on Enterprise.'],
+                            ['A list that hears about new dates', 'Free', 'Guests who leave an email address get a digest when you add activities, batched and no more than one every few days, and it does not draw on the allowance. A newsletter you write does: 10 recipients a month free, 100 on Pro and 1,000 on Enterprise.'],
                         ] as [$sTitle, $sPlan, $sDesc])
                             <li class="flex items-start gap-3" data-reveal>
                                 <svg aria-hidden="true" class="es-conc-accent mt-0.5 h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -1220,7 +1220,7 @@
                                 ['Times in the property\'s own zone', 'Free', 'The schedule holds a time zone, so a guest reading the page in another one still sees seven in the morning here.'],
                                 ['A day that is simply not offered', 'Free', 'An excepted date does not appear as cancelled. It is not there, which is what a guest actually needs to know.'],
                                 ['One tap to their own phone', 'Free', 'A date on the card adds itself to Google, Apple or Outlook as a single calendar entry, so Thursday\'s sunset sail is in their own week.'],
-                                ['Nothing they did not ask for', 'Free', 'The card does not say who else signed up, and nobody is emailed because you added something. A newsletter reaches the guests who followed you when you write one and send it.'],
+                                ['Nothing they did not ask for', 'Free', 'The card does not say who else signed up. A guest hears about new activities only if they left an email address and confirmed it, and then it is one digest every few days rather than a message per activity.'],
                             ] as [$cTitle, $cPlan, $cDesc])
                                 <li class="flex gap-3">
                                     <span class="es-conc-bullet mt-1.5" aria-hidden="true"></span>

@@ -199,8 +199,8 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">Following gives you a standing list of people who asked to hear from you. It is the audience your newsletters go to, and it builds up over time.</p>
 
         <div class="doc-callout doc-callout-warning">
-            <div class="doc-callout-title">Following Is Not a Notification Subscription</div>
-            <p>Following does not send anyone an automatic email when you add or change an event. Nothing is sent to your followers unless you write and send a <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletter</a>. If someone wants your events to appear on their own calendar without you doing anything, point them at the <a href="#calendar-feeds" class="doc-link">iCal feed</a> instead.</p>
+            <div class="doc-callout-title">Following and Subscribing Are Different Lists</div>
+            <p>Somebody who leaves an email address on your page and confirms it is a <strong class="text-gray-900 dark:text-white">subscriber</strong>, and subscribers are sent a digest automatically when you publish new events, batched and no more often than once every few days. Somebody signed in who presses Follow is an <strong class="text-gray-900 dark:text-white">account follower</strong>, and that list is reached only when you write and send a <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletter</a>. If someone wants your events on their own calendar with no email at all, point them at the <a href="#calendar-feeds" class="doc-link">iCal feed</a> instead.</p>
         </div>
 
         <h3 class="doc-subheading">How Following Works</h3>

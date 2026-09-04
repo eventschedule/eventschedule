@@ -42,7 +42,7 @@
         <x-doc-screenshot id="newsletters--list" alt="Newsletter list" loading="eager" />
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The builder lays out your email as a stack of content blocks with a live preview beside it, and audience segments decide who receives it. Nothing goes out automatically: every newsletter is one you compose and send.
+            The builder lays out your email as a stack of content blocks with a live preview beside it, and audience segments decide who receives it. A newsletter is always one you compose and send: the only mail that leaves on its own is the automatic new-event digest to confirmed subscribers, which is a separate rail and does not spend your allowance.
         </p>
 
         <div class="doc-callout doc-callout-info">

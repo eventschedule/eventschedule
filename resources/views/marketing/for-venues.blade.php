@@ -103,8 +103,6 @@
 
         /* Shared odometer digits carry a hard-coded brand-blue gradient in
            marketing.css, because translateY breaks background-clip inheritance. */
-        .es-od-strip span { background-image: linear-gradient(135deg, #0284c7, #0891b2); }
-        .dark .es-od-strip span { background-image: linear-gradient(135deg, #38bdf8, #22d3ee); }
 
         /* ---- Front of house: the lights are on and slightly alive ---- */
         .es-foh-light {

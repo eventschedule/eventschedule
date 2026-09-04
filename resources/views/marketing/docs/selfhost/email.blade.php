@@ -31,7 +31,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Newsletters</h4>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">Newsletters that a schedule owner writes and sends to their followers. Following is an opt-in to be emailed by the schedule; there is no automatic email when a new event is added.</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Newsletters a schedule owner writes and sends, plus the automatic new-event digest that goes to confirmed email subscribers when a schedule publishes events. Both leave through this transport, so an install with no mail settings sends neither.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Guest notifications</h4>

@@ -361,7 +361,7 @@
             ],
             [
                 'q' => 'Do my followers get an alert when I add a stop?',
-                'a' => 'No, and it is worth being straight about that. Following does not fire off an automatic message. What it does is give you their email address with their consent, so you can send the week\'s route yourself as a newsletter - ten emails a month on the free plan and a hundred on Pro, counted per recipient rather than per send. That is the difference between a list you own and a feed that decides who sees you.',
+                'a' => 'If they left you an email address, yes. New stops reach them as one digest covering the batch, so a week of pitches posted on a Sunday is one message rather than five, and it never comes more than once every few days. Somebody who followed you from their own account is a separate list, and that one only hears from a newsletter you write: ten emails a month on the free plan and a hundred on Pro, counted per recipient rather than per send. Either way it is a list you own rather than a feed that decides who sees you.',
             ],
             [
                 'q' => 'What happens the week I lose a pitch?',

@@ -366,7 +366,7 @@
             ],
             [
                 'q' => 'Will my collectors be told when a new show goes up?',
-                'a' => 'Only when you tell them. People follow your gallery and give you their email with their consent, and you write and send the newsletter yourself - nothing goes out automatically. The free plan covers 10 emails a month and Pro raises it to 100, counted per recipient rather than per send, so one message to a hundred collectors uses a hundred of them.',
+                'a' => 'Anyone who leaves an email address on your gallery page is sent a short digest when a new show goes up, at most one every few days, and it does not touch your newsletter allowance. Anything with more in it than the dates is a newsletter you write: the free plan covers 10 emails a month and Pro raises it to 100, counted per recipient rather than per send, so one message to a hundred collectors uses a hundred of them.',
             ],
         ];
 
@@ -687,9 +687,9 @@
                         Nothing goes out <span class="es-hang-grad">without you</span>.
                     </h2>
                     <p class="es-hang-muted mb-8 max-w-xl text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
-                        People follow your gallery and give you their email with their consent. There
-                        is no automatic announcement and no feed deciding who sees the show - when
-                        the next one is worth an email, you write it and you send it.
+                        People leave their email on your gallery page and confirm it, and from then on
+                        a new show reaches them without an algorithm deciding who sees it. When the
+                        opening is worth more than the dates, you write that one yourself.
                     </p>
 
                     <div class="space-y-3" data-reveal-group="90">

@@ -1286,7 +1286,7 @@
                 <div data-reveal>
                     <x-feature-link-card
                         name="Calendar Sync"
-                        description="Two-way sync with Google Calendar, and add-to-calendar links for everyone else"
+                        description="Two-way sync with Google, Outlook and CalDAV, and add-to-calendar links for everyone else"
                         :url="marketing_url('/features/calendar-sync')"
                         icon-color="blue"
                     >

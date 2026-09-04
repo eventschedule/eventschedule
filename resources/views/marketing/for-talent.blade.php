@@ -36,7 +36,7 @@
             ['q' => 'What happens when a venue books me for a show?', 'a' => 'The venue adds you to their event and you get a request. Accept it and the gig appears on your schedule automatically, with the venue listed on it. You never type the same date into two calendars, and both schedules stay in sync from then on.'],
             ['q' => 'I already have a Linktree. Why would I need this?', 'a' => 'A link page shows buttons. A schedule shows dates. Your Event Schedule page lists your actual upcoming shows with venues, times and ticket links, updates itself as you add dates, and lets fans follow you so you can email them when a new show lands. You can keep your link page and point it here, or replace it entirely.'],
             ['q' => 'Can I put my dates on my own website and social profiles?', 'a' => 'Yes. Embed your schedule on any website with a single iframe, or share your schedule URL on social profiles, EPKs and booking platforms. There are also iCal and RSS feeds, so your dates can flow into other calendars and sites automatically. Everything updates the moment you add a show.'],
-            ['q' => 'How do fans find out about my upcoming shows?', 'a' => 'Your dates are public the moment you add them, on your schedule page and in your iCal and RSS feeds. Fans who follow you are giving you permission to email them, and you write and send that email yourself: 10 recipients a month free, 100 on Pro. Pro also generates a shareable graphic of your upcoming shows and lets you boost events with Meta Ads.'],
+            ['q' => 'How do fans find out about my upcoming shows?', 'a' => 'Your dates are public the moment you add them, on your schedule page and in your iCal and RSS feeds. A fan who leaves an email address and confirms it gets a digest automatically when you announce new shows, at most one every few days, and it does not draw on your newsletter allowance. Beyond that you write the newsletter yourself: 10 recipients a month free, 100 on Pro. Pro also generates a shareable graphic of your upcoming shows and lets you boost events with Meta Ads.'],
         ];
     @endphp
 
@@ -380,7 +380,7 @@
         accent="emerald"
         badge="Fill the room"
         heading="Tell the people who already said yes."
-        lede="Following you is a fan handing over their email address. You write the newsletter and choose when it goes, and Event Schedule builds a graphic of your upcoming dates so you have something to post the same afternoon."
+        lede="A fan who leaves an email address gets a digest automatically the next time you announce dates. Write a newsletter yourself when there is more to say, and Event Schedule builds a graphic of your upcoming shows so you have something to post the same afternoon."
         :chips="['Followers, free', '10 recipients a month free', '100 on Pro', 'Schedule graphics, Pro']"
         :flip="true"
         ground="gray"
@@ -528,7 +528,7 @@
                             'Website embed, iCal and RSS feeds',
                             '<a href="' . marketing_url('/features/online-events') . '" class="font-medium text-blue-600 hover:underline dark:text-blue-400">Online and hybrid shows</a> with a link to wherever it happens',
                             'Up to 25 paid tickets a month, with QR scanning at the door',
-                            'Followers you can email, 10 recipients a month',
+                            'Subscribers who hear automatically when you announce dates, plus 10 newsletter recipients a month',
                             'Fan photos, videos and comments, all approved by you',
                         ] as $freeItem)
                             <li class="flex gap-2.5">

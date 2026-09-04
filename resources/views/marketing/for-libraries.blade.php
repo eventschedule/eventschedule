@@ -638,7 +638,7 @@
             ],
             [
                 'q' => 'How do patrons find out about library programs?',
-                'a' => 'Four ways, and none of them is an algorithm. Patrons follow your schedule and you email them a newsletter when you have something to say. Your calendar embeds on the library website you already have. Every schedule has a downloadable QR code you can print on a bookmark, a poster or a shelf label. And each date has an iCal download so it lands in the patron\'s own calendar. Being straight about the newsletter: nothing is sent automatically when you add a program, because you decide when to write and what goes in it.',
+                'a' => 'Four ways, and none of them is an algorithm. Patrons follow your schedule and you email them a newsletter when you have something to say. Your calendar embeds on the library website you already have. Every schedule has a downloadable QR code you can print on a bookmark, a poster or a shelf label. And each date has an iCal download so it lands in the patron\'s own calendar. Being exact about the two kinds of email: newly published programs reach the list on their own, as one digest covering the batch, while a newsletter with anything else in it is written and sent by you.',
             ],
             [
                 'q' => 'Can patrons register for programs?',
@@ -1139,7 +1139,7 @@
                                 <h3 class="text-lg font-bold es-cat-band-ink">You write to them</h3>
                                 <span class="es-cat-plan">Free</span>
                             </div>
-                            <p class="text-sm es-cat-band-muted">Newsletters are yours to compose and send: the autumn program, a cancelled session, a new author date. Nothing goes out on its own, which is the point. 10 emails a month free, 100 on Pro, 1,000 on Enterprise, counted per recipient.</p>
+                            <p class="text-sm es-cat-band-muted">New programs reach the list on their own, as one digest rather than one email per session. A newsletter is the other kind, written by you: the autumn program, a cancelled session, a note about the building. 10 emails a month free, 100 on Pro, 1,000 on Enterprise, counted per recipient, and the automatic digest is outside that count.</p>
                         </div>
                         <div class="es-cat-panel p-6" data-reveal="panel">
                             <div class="mb-2 flex flex-wrap items-center gap-2">

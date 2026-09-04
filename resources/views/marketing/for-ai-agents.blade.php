@@ -631,7 +631,7 @@
                     </h1>
 
                     <p class="es-fade-up es-d-2 es-cons-muted mb-6 max-w-xl text-lg sm:text-xl">
-                        {{ $endpointCount }} REST endpoints over the whole product: schedules, sub-schedules, events, recurrences, ticket types, sales, feedback and fan content. JSON in, JSON out, one header.
+                        {{ $endpointCount }} REST endpoints over the whole product: three to get a key, then twenty-four behind it covering schedules, sub-schedules, events, recurrences, ticket types, sales, feedback and fan content. JSON in, JSON out, one header.
                     </p>
                     <p class="es-fade-up es-d-2 es-cons-muted mb-10 max-w-xl text-base">
                         An OpenAPI 3.0 spec, <span class="es-cons-mono es-cons-key">llms.txt</span> and <span class="es-cons-mono es-cons-key">agents.json</span> ship with it, so an agent can discover this API and drive it without a human reading the docs first.

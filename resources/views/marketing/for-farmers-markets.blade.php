@@ -543,7 +543,7 @@
             ],
             [
                 'q' => 'How do shoppers hear about the market?',
-                'a' => 'They follow the market, and you email them. Your schedule has a QR code you can download and print on the A-board, the pitch sign or the tote bags, so somebody standing in front of you is one scan and one tap from following. Nothing is sent automatically: when you have something worth saying, a new trader or the first strawberries, you write a newsletter and send it. You can also embed the calendar on the website you already have, and shoppers can add market days to their own Google, Outlook or Apple calendar.',
+                'a' => 'They follow the market, and you email them. Your schedule has a QR code you can download and print on the A-board, the pitch sign or the tote bags, so somebody standing in front of you is one scan and one tap from being on the list. Once they confirm the address, new market dates reach them on their own, batched so a season posted in one sitting is one message. When there is something worth saying beyond the dates, a new trader or the first strawberries, that is a newsletter you write. You can also embed the calendar on the website you already have, and shoppers can add market days to their own Google, Outlook or Apple calendar.',
             ],
             [
                 'q' => 'Can I run a separate winter or evening market?',
@@ -1077,7 +1077,7 @@
                     <div class="space-y-3" data-reveal-group="90">
                         @foreach ([
                             ['Print the code once', 'Every schedule has a QR code you can download as an image and put on the A-board, the pitch signs or the tote bags. One scan opens your market page, and Follow is a tap from there.'],
-                            ['You write the email', 'Nothing goes out on its own. When there is something worth saying, a new cheesemaker or the first strawberries, you write a newsletter and send it.'],
+                            ['The dates go on their own', 'New market days reach the list without you doing anything, batched and no more than one message every few days. A new cheesemaker or the first strawberries is a newsletter you write.'],
                             ['Ten a month, free', 'The free plan covers ten newsletter emails a month, counted one per recipient. Pro is a hundred and Enterprise is a thousand.'],
                             ['No algorithm in the middle', 'A market page and an email list are yours. Nobody decides how many of your shoppers get to see that you are open this week.'],
                         ] as [$bT, $bD])
@@ -1092,9 +1092,10 @@
                     </div>
 
                     <p class="es-mkt-muted mt-6 text-sm" data-reveal>
-                        Being straight about it: following does not trigger anything by itself. There is
-                        no automatic notice when you add a market day, and that is deliberate. The list
-                        is yours to write to, in your own words, when you have something to say.
+                        Being exact about it: new market days reach the list on their own, batched into
+                        one digest rather than a message per date, and never more than one every few days.
+                        Anything you want to say in your own words is a newsletter, written when you have
+                        something to say.
                         <a href="{{ marketing_url('/features/newsletters') }}" class="es-mkt-link font-semibold">How newsletters work</a>
                     </p>
                 </div>
