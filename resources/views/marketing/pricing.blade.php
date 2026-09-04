@@ -297,9 +297,12 @@
                         </ul>
                     </details>
 
-                    <a href="{{ app_url('/sign_up') }}" class="mt-auto block w-full rounded-2xl border-2 border-emerald-300 bg-white px-6 py-4 text-center font-semibold text-emerald-700 transition-all hover:bg-emerald-50 dark:border-emerald-500/40 dark:bg-white/10 dark:text-emerald-300 dark:hover:bg-white/20">
-                        Get Started Free
-                    </a>
+                    <div class="mt-auto">
+                        <a href="{{ app_url('/sign_up') }}" class="block w-full rounded-2xl border-2 border-emerald-300 bg-white px-6 py-4 text-center font-semibold text-emerald-700 transition-all hover:bg-emerald-50 dark:border-emerald-500/40 dark:bg-white/10 dark:text-emerald-300 dark:hover:bg-white/20">
+                            Get Started Free
+                        </a>
+                        <p class="mt-3 text-center text-xs text-gray-500 dark:text-gray-400">No card. No expiry. Nothing to cancel.</p>
+                    </div>
                     <div class="es-glare rounded-3xl"></div>
                 </div>
 
@@ -337,9 +340,12 @@
                         @endforeach
                     </ul>
 
-                    <a href="{{ app_url('/sign_up') }}" class="mt-auto block w-full rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-6 py-4 text-center font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:from-blue-500 hover:to-sky-500 hover:shadow-xl">
-                        Start Free Trial
-                    </a>
+                    <div class="mt-auto">
+                        <a href="{{ app_url('/sign_up') }}" class="block w-full rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-6 py-4 text-center font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:from-blue-500 hover:to-sky-500 hover:shadow-xl">
+                            Start Free Trial
+                        </a>
+                        <p class="mt-3 text-center text-xs text-gray-500 dark:text-gray-400">7 days free, then {{ plan_price($proMonthly) }} a month. Cancel any time and the schedule stays live.</p>
+                    </div>
                     <div class="es-glare rounded-3xl"></div>
                     <div class="es-ring-glow"></div>
                 </div>
@@ -382,9 +388,12 @@
                         </ul>
                     </details>
 
-                    <a href="{{ app_url('/sign_up') }}" class="mt-auto block w-full rounded-2xl bg-gradient-to-r from-amber-700 to-amber-800 px-6 py-4 text-center font-semibold text-white shadow-lg shadow-amber-700/25 transition-all hover:from-amber-600 hover:to-amber-700 hover:shadow-xl">
-                        Start Free Trial
-                    </a>
+                    <div class="mt-auto">
+                        <a href="{{ app_url('/sign_up') }}" class="block w-full rounded-2xl bg-gradient-to-r from-amber-700 to-amber-800 px-6 py-4 text-center font-semibold text-white shadow-lg shadow-amber-700/25 transition-all hover:from-amber-600 hover:to-amber-700 hover:shadow-xl">
+                            Start Free Trial
+                        </a>
+                        <p class="mt-3 text-center text-xs text-gray-500 dark:text-gray-400">7 days free. Or selfhost, where every line above is included at no cost.</p>
+                    </div>
                     <div class="es-glare rounded-3xl"></div>
                 </div>
 
