@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Custom Domain | Use Your Own Domain - Event Schedule</x-slot>
-    <x-slot name="description">Use your own domain name for your event schedule. Replace the default subdomain with a professional branded URL like events.yourdomain.com.</x-slot>
+    <x-slot name="description">Serve your whole schedule from events.yourdomain.com. HTTPS is issued for you once the CNAME resolves, and the links you send out carry your domain, not ours.</x-slot>
     <x-slot name="breadcrumbTitle">Custom Domain</x-slot>
 
     <x-slot name="structuredData">

@@ -113,6 +113,48 @@ class MarketingCountedClaimsTest extends TestCase
         );
     }
 
+    /**
+     * /for-ai-agents prints the API as a ledger of 27 rows and states that number
+     * in its own meta description. The count is the easy half: what actually
+     * matters is that each printed row is a route that exists, because a reader
+     * of that page is an agent about to call it.
+     *
+     * 27, not 31: the page documents the three auth routes plus the 24 behind the
+     * key, and leaves out the four machine-to-machine ones (translation
+     * suggestions, federation) that nothing on that page would ever call.
+     */
+    public function test_the_ai_agent_ledger_matches_the_routes(): void
+    {
+        $source = $this->page('for-ai-agents');
+        $start = strpos($source, '$ledger = [');
+        $this->assertNotFalse($start, 'the /for-ai-agents endpoint ledger has been renamed');
+        $ledger = substr($source, $start, strpos($source, "\n        ];", $start) - $start);
+
+        preg_match_all("/\['(GET|POST|PUT|DELETE)',\s*'(\/api\/[^']*)'/", $ledger, $rows, PREG_SET_ORDER);
+        $this->assertGreaterThan(20, count($rows), 'the ledger looks truncated, not shorter');
+
+        $routes = file_get_contents(base_path('routes/api.php'));
+
+        $absent = [];
+        foreach ($rows as [, $verb, $path]) {
+            // routes/api.php declares them without the /api prefix, and {id}
+            // placeholders are named there too, so compare on the literal path.
+            $needle = "Route::".strtolower($verb)."('".substr($path, 4)."'";
+            if (! str_contains($routes, $needle)) {
+                $absent[] = "{$verb} {$path}";
+            }
+        }
+
+        $this->assertSame([], $absent,
+            "these endpoints are printed on /for-ai-agents but are not in routes/api.php:\n".implode("\n", $absent));
+
+        $this->assertStringContainsString(
+            count($rows).' REST endpoints',
+            $source,
+            'the stated endpoint count and the ledger have drifted apart'
+        );
+    }
+
     public function test_the_openapi_counts_match_the_published_spec(): void
     {
         $spec = json_decode(file_get_contents(public_path('api/openapi.json')), true);

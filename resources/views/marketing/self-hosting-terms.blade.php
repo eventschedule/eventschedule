@@ -655,7 +655,7 @@
                             @endforeach
                         </dl>
                         <p class="es-fine-muted mt-4 text-xs leading-relaxed">
-                            Every Pro and Enterprise feature is included when you run it yourself: with hosting turned off, the app's plan checks pass for every schedule. The license asks only that the original attribution stays in place.
+                            Every Pro and Enterprise feature is included when you run it yourself: with hosting turned off, the app's plan checks pass for every schedule. Two things exist only here, on the far side of that switch: one-click updates from inside the admin panel, and importing events from a URL or by city. The license asks only that the original attribution stays in place.
                         </p>
                     </div>
                 </div>

@@ -21,6 +21,7 @@ return [
 
     'section_status_title' => 'Starea de conformitate',
     'section_status_body' => 'Nu revendicăm conformitate WCAG completă pe fiecare ecran. Zone interactive mari (calendare, bilete, controale moștenite) sunt în curs de revizuire. Declarația descrie abordarea noastră de bună-credință și modul de raportare.',
+    'section_status_measured' => 'La :date am măsurat toate cele :pages pagini publice de prezentare și documentație, în tema deschisă și în cea întunecată. Niciun text sau element de interfață nu a coborât sub contrastul minim WCAG 2.1 nivel AA, fiecare link și buton avea un nume accesibil, nicio țintă nu a fost mai mică decât minimul WCAG 2.2 de 24 pe 24 de pixeli, nicio pagină nu a derulat orizontal la o lățime de 390 de pixeli, iar fiecare pagină animată respectă preferința pentru mișcare redusă. Această înregistrare acoperă doar site-ul public: panoul de administrare, portalul pentru invitați și vizualizările de calendar rămân în afara ei, iar limitările enumerate mai jos rămân valabile.',
 
     'section_measures_title' => 'Măsuri',
     'section_measures_body' => 'Oferim legături de sărit și structură de document unde este implementat, panou integrat de accesibilitate, trasee de tastatură unde identificăm lacune și stil sensibil la contrast în părți ale produsului.',

@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Carpool Matching - Event Schedule</x-slot>
-    <x-slot name="description">Let attendees coordinate rides to your events. Drivers offer seats, riders request spots, with approvals, reminders, and reviews. Pro feature.</x-slot>
+    <x-slot name="description">Attendees offer and request lifts on the event page itself. The driver approves each rider before any contact details are shared, and reviews follow after.</x-slot>
     <x-slot name="breadcrumbTitle">Carpool</x-slot>
 
     <x-slot name="structuredData">
@@ -13,7 +13,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Ride Sharing Coordination Software",
         "operatingSystem": "Web",
-        "description": "Let attendees coordinate rides to your events. Drivers offer seats, riders request spots, with approvals, reminders, and reviews. Pro feature.",
+        "description": "Attendees offer and request lifts on the event page itself. The driver approves each rider before any contact details are shared, and reviews follow after.",
         "offers": {
             "@type": "Offer",
             "price": "0",

@@ -21,6 +21,7 @@ return [
 
     'section_status_title' => 'Konformitätsstatus',
     'section_status_body' => 'Wir beanspruchen keine vollständige WCAG-Konformität auf jedem Bildschirm. Große interaktive Bereiche (Kalender, Ticketing, ältere Steuerelemente) werden fortlaufend geprüft und verbessert. Diese Erklärung beschreibt unseren redlichen Ansatz und wie Sie Probleme melden.',
+    'section_status_measured' => 'Am :date haben wir alle :pages öffentlichen Marketing- und Dokumentationsseiten im hellen und im dunklen Modus gemessen. Kein Text und kein Bedienelement lag unter dem Kontrastminimum von WCAG 2.1 Stufe AA, jeder Link und jede Schaltfläche hatte einen zugänglichen Namen, kein Ziel war kleiner als das WCAG-2.2-Minimum von 24 mal 24 Pixeln, keine Seite scrollte bei 390 Pixeln Breite waagerecht, und jede animierte Seite berücksichtigt die Einstellung für reduzierte Bewegung. Dieser Befund gilt nur für die öffentliche Website: Verwaltungsbereich, Gästeportal und Kalenderansichten sind nicht enthalten, und die unten genannten Einschränkungen bestehen weiter.',
 
     'section_measures_title' => 'Maßnahmen',
     'section_measures_body' => 'Wir bieten Skip-Links und Dokumentstruktur wo umgesetzt, ein integriertes Barrierefreiheitsfeld für gängige Anpassungen, tastaturbedienbare Pfade nach identifizierten Lücken und kontrastbewusstes Styling in Teilen des Produkts.',

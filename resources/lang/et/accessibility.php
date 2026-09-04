@@ -21,6 +21,7 @@ return [
 
     'section_status_title' => 'Vastavuse olek',
     'section_status_body' => 'Me ei väida täielikku WCAG vastavust igal ekraanil. Suuri interaktiivseid alasid (kalendrid, piletimüük, pärandjuhtelemendid) uuendatakse. See avaldus kirjeldab meie heauskset lähenemist ja kuidas probleeme teatada.',
+    'section_status_measured' => 'Mõõtsime :date kõiki :pages avalikku turundus- ja dokumentatsioonilehte nii heledas kui tumedas režiimis. Ükski tekst ega liidese element ei jäänud alla WCAG 2.1 taseme AA kontrasti alammäära, igal lingil ja nupul oli juurdepääsetav nimi, ükski sihtmärk ei olnud väiksem kui WCAG 2.2 alammäär 24 korda 24 pikslit, ükski leht ei kerinud 390 piksli laiuses horisontaalselt ning kõik animeeritud lehed arvestavad vähendatud liikumise eelistusega. See ülevaade hõlmab ainult avalikku veebisaiti: haldusliides, külalisportaal ja kalendrivaated jäävad sellest välja ning allpool loetletud piirangud kehtivad endiselt.',
 
     'section_measures_title' => 'Meetmed',
     'section_measures_body' => 'Pakume vahelejätmislinke ja dokumendistruktuuri seal, kus see on rakendatud, sisseehitatud juurdepääsetavuse paneeli, klaviatuuriteid, kui tuvastame lünki, ja kontrastiteadlikku kujundust toote osades.',

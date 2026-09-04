@@ -21,6 +21,7 @@ return [
 
     'section_status_title' => 'Conformance status',
     'section_status_body' => 'We do not claim full WCAG conformance for every screen. Large interactive areas (including calendars, ticketing, and some legacy controls) are being reviewed and improved over time. This statement describes our good-faith approach and how to report problems.',
+    'section_status_measured' => 'On :date we measured every one of the :pages public marketing and documentation pages, in both the light and the dark theme. No text or interface element fell below the WCAG 2.1 Level AA contrast minimum, every link and button carried an accessible name, no target was smaller than the WCAG 2.2 minimum of 24 by 24 pixels, no page scrolled sideways at a 390-pixel viewport width, and every animated page honours a reduced-motion preference. That record covers the public site only: the admin portal, the guest portal and the calendar views are outside it, and the limitations listed below still stand.',
 
     'section_measures_title' => 'Measures we take',
     'section_measures_body' => 'We provide skip links and document structure where implemented, a built-in accessibility panel for common display adjustments, keyboard-accessible paths as we identify gaps, and contrast-aware styling in parts of the product. We train support to route accessibility feedback.',

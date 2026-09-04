@@ -555,7 +555,7 @@
             ],
             [
                 'q' => 'Will following a schedule fill my inbox?',
-                'a' => 'No, because nothing about it is automatic. There is no notification that fires when a schedule adds an event. Following puts the schedule on your Following page and lets that schedule include you when somebody there writes a newsletter, and those are capped at 10 recipients a month on the free plan, 100 on Pro and 1,000 on Enterprise.',
+                'a' => 'No, and it is worth knowing why, because the two lists on this page behave differently. Pressing Follow makes you an ACCOUNT FOLLOWER: it puts the schedule on your Following page and lets that schedule include you when somebody there writes a newsletter, capped at 10 recipients a month on the free plan, 100 on Pro and 1,000 on Enterprise. Nothing fires at an account follower when a schedule adds an event. Leaving an email address in the sign-up panel on a schedule page is the other thing, and that one does send you a short digest when new events are published, at most one every three days. You can do either, or both, or neither.',
             ],
             [
                 'q' => 'Can I have an account without creating a schedule?',

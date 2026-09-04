@@ -41,6 +41,15 @@ class MarketingAudienceClaimTest extends TestCase
         .'{0,90}?\b(?:emails?|emailed|e-mails?|sent|send|goes\s+out|go\s+out)\b'
         .'(?:(?!newsletter)[^.]){0,70}?\b(?:automatic(?:ally)?|on\s+its\s+own|by\s+itself|of\s+its\s+own\s+accord)\b/i';
 
+    /**
+     * A second shape with no email verb in it: "there is no notification that
+     * fires when a schedule adds an event", "nothing about it is automatic".
+     * /why-create-account carried this one straight through the first sweep.
+     */
+    private const NEGATION_2 = '/\b(?:nothing|no)\b(?:(?!newsletter)[^.])'
+        .'{0,90}?\b(?:notification|alert|digest|announcement|reminder)s?\b'
+        .'(?:(?!newsletter)[^.]){0,80}?\b(?:automatic(?:ally)?|fires?|goes?\s+out|on\s+its\s+own|by\s+itself)\b/i';
+
     /** The claim only matters when it is about who hears from a schedule. */
     private const AUDIENCE = '/\b(?:followers?|subscribers?|fans?|attendees?|guests?|audience|your\s+list|mailing\s+list)\b/i';
 
@@ -56,6 +65,18 @@ class MarketingAudienceClaimTest extends TestCase
      * site. Naming the list is the cost of making the claim.
      */
     private const SCOPED_TO_FOLLOWERS = '/\baccount\s+followers?\b/i';
+
+    /** The sentence a match sits in, bounded by full stops or by 400 characters. */
+    private static function sentenceAround(string $body, int $offset): string
+    {
+        $start = strrpos(substr($body, max(0, $offset - 400), min(400, $offset)), '.');
+        $start = $start === false ? max(0, $offset - 400) : max(0, $offset - 400) + $start + 1;
+
+        $end = strpos($body, '.', $offset);
+        $end = $end === false ? min(strlen($body), $offset + 400) : $end + 1;
+
+        return substr($body, $start, $end - $start);
+    }
 
     /** @return array<string, string> */
     private function marketingSources(): array
@@ -100,15 +121,25 @@ class MarketingAudienceClaimTest extends TestCase
         foreach ($this->marketingSources() as $path => $body) {
             $explainsTheDigest = (bool) preg_match('/\bdigest\b/i', $body);
 
-            if (! preg_match_all(self::NEGATION, $body, $m)) {
-                continue;
+            $hits = [];
+            foreach ([self::NEGATION, self::NEGATION_2] as $pattern) {
+                if (preg_match_all($pattern, $body, $m, PREG_OFFSET_CAPTURE)) {
+                    $hits = array_merge($hits, $m[0]);
+                }
             }
 
-            foreach ($m[0] as $hit) {
-                if (! preg_match(self::AUDIENCE, $hit)) {
+            foreach ($hits as [$hit, $offset]) {
+                // Both tests read the whole SENTENCE, not the matched span. The
+                // match stops at the verb, so "no notification that fires when a
+                // schedule adds an event for its subscribers" carries neither its
+                // subject nor its scope inside the span, and checking the span
+                // alone silently exempted it.
+                $sentence = self::sentenceAround($body, $offset);
+
+                if (! preg_match(self::AUDIENCE, $sentence)) {
                     continue;  // not about who hears from a schedule
                 }
-                if (preg_match(self::SCOPED_TO_FOLLOWERS, $hit) && $explainsTheDigest) {
+                if (preg_match(self::SCOPED_TO_FOLLOWERS, $sentence) && $explainsTheDigest) {
                     continue;  // true, and the page says what the other list gets
                 }
                 $offences[] = $path.': "'.trim(preg_replace('/\s+/', ' ', $hit)).'"';

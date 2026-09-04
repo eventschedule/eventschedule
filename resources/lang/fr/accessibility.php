@@ -21,6 +21,7 @@ return [
 
     'section_status_title' => 'État de conformité',
     'section_status_body' => 'Nous ne prétendons pas à une conformité WCAG complète sur tous les écrans. Les zones interactives importantes (calendriers, billetterie, contrôles hérités) font l\'objet d\'améliorations progressives. Cette déclaration décrit notre démarche de bonne foi et comment signaler un problème.',
+    'section_status_measured' => 'Le :date, nous avons mesuré l\'ensemble des :pages pages publiques du site vitrine et de la documentation, en thème clair et en thème sombre. Aucun texte ni élément d\'interface n\'est passé sous le contraste minimal WCAG 2.1 niveau AA, chaque lien et chaque bouton portait un nom accessible, aucune cible n\'était inférieure au minimum WCAG 2.2 de 24 sur 24 pixels, aucune page ne défilait horizontalement à une largeur de 390 pixels, et chaque page animée respecte la préférence de mouvement réduit. Ce relevé ne couvre que le site public : l\'espace d\'administration, le portail invité et les vues calendrier en sont exclus, et les limites indiquées ci-dessous restent d\'actualité.',
 
     'section_measures_title' => 'Mesures prises',
     'section_measures_body' => 'Nous proposons des liens d\'évitement et une structure de document lorsque c\'est implémenté, un panneau d\'accessibilité intégré, des parcours clavier lorsque nous identifions des lacunes, et une mise en forme sensible au contraste dans certaines parties du produit.',

@@ -578,6 +578,10 @@
                 'The free plan is one team member.',
                 'Multiple team members, capped at five, are an Enterprise feature. Selfhost and you have them, because a selfhosted install is Enterprise.',
             ],
+            [
+                '"Unlimited events" has a daily ceiling on the hosted site.',
+                'Not a plan feature, a rate limit: a schedule on eventschedule.com can create 500 events in a day, 1,000 on Enterprise and 100 while a Pro trial is running, with a wider ceiling across every schedule one owner runs. Nothing about a real programme comes near it, and a selfhosted install has no ceiling at all because there is nobody else to protect it from.',
+            ],
         ];
 
         $faqs = [
@@ -1016,7 +1020,7 @@
                 </h2>
                 <div class="es-colo-rule es-colo-draw" aria-hidden="true"></div>
                 <p class="es-colo-muted mt-5 text-lg">
-                    Books ship an errata slip tipped in at the front. Software rarely does. Five things Event Schedule does not do, so you can decide with the whole picture rather than half of it.
+                    Books ship an errata slip tipped in at the front. Software rarely does. {{ ucfirst(\Illuminate\Support\Number::spell(count($errata))) }} things Event Schedule does not do, so you can decide with the whole picture rather than half of it.
                 </p>
             </div>
 

@@ -145,7 +145,7 @@
     @endphp
 
     <x-slot name="title">Event Graphics | Auto-Generated Images - Event Schedule</x-slot>
-    <x-slot name="description">Auto-generate shareable event images and formatted text for Instagram, WhatsApp, email, and more. Custom header images and multiple output formats.</x-slot>
+    <x-slot name="description">Turn an event into a poster and a caption without opening a design tool: pick a size and a template, and the date, venue and price fill themselves in.</x-slot>
     <x-slot name="breadcrumbTitle">Event Graphics</x-slot>
 
     <x-slot name="structuredData">
@@ -154,7 +154,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule Event Graphics",
-        "description": "Auto-generate shareable event images and formatted text for Instagram, WhatsApp, email, and more. Custom header images and multiple output formats.",
+        "description": "Turn an event into a poster and a caption without opening a design tool: pick a size and a template, and the date, venue and price fill themselves in.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -171,7 +171,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Event Graphics Generator",
         "operatingSystem": "Web",
-        "description": "Auto-generate shareable event images and formatted text for Instagram, WhatsApp, email, and more. Custom header images and multiple output formats.",
+        "description": "Turn an event into a poster and a caption without opening a design tool: pick a size and a template, and the date, venue and price fill themselves in.",
         "offers": {
             "@type": "Offer",
             "price": "{{ $proMonthly }}",

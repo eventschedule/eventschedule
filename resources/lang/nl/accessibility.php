@@ -21,6 +21,7 @@ return [
 
     'section_status_title' => 'Conformiteitsstatus',
     'section_status_body' => 'We claimen geen volledige WCAG-conformiteit op elk scherm. Grote interactieve gebieden worden stapsgewijs verbeterd. Deze verklaring beschrijft onze goed-faith aanpak en hoe u problemen meldt.',
+    'section_status_measured' => 'Op :date hebben we alle :pages openbare marketing- en documentatiepagina\'s gemeten, in de lichte en de donkere modus. Geen tekst of interface-element bleef onder het contrastminimum van WCAG 2.1 niveau AA, elke link en knop had een toegankelijke naam, geen doel was kleiner dan het WCAG 2.2-minimum van 24 bij 24 pixels, geen pagina schoof horizontaal bij een breedte van 390 pixels, en elke pagina met animatie respecteert de voorkeur voor minder beweging. Dit overzicht dekt alleen de openbare website: het beheerportaal, het gastenportaal en de kalenderweergaven vallen erbuiten, en de hieronder genoemde beperkingen gelden nog steeds.',
 
     'section_measures_title' => 'Maatregelen',
     'section_measures_body' => 'We bieden skiplinks en documentstructuur waar geïmplementeerd, een ingebouwd toegankelijkheidspaneel, toetsenbordpaden waar we hiaten vinden, en contrastbewuste opmaak in delen van het product.',

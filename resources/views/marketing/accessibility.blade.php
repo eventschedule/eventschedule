@@ -710,6 +710,16 @@
                     <span class="es-fine-num" aria-hidden="true">{{ $clauseNum('status') }}</span>
                     <h2 id="status-h" class="es-fine-ink mb-3 text-2xl font-bold tracking-tight">{{ $clauses['status'] }}</h2>
                     <p class="es-fine-muted es-fine-measure">{{ __('accessibility.section_status_body') }}</p>
+                    {{-- The measured record. A conformance statement is worth more
+                         when it says what was actually measured, over what, and
+                         when, so the numbers come from config/accessibility.php
+                         rather than from adjectives. Scope is the PUBLIC site: the
+                         clause says so, and clause 06 still carries what is not
+                         covered. --}}
+                    <p class="es-fine-muted es-fine-measure mt-4">{{ __('accessibility.section_status_measured', [
+                        'date' => \Carbon\Carbon::parse(config('accessibility.public_measurement_date'))->translatedFormat('j F Y'),
+                        'pages' => number_format((int) config('accessibility.public_pages_measured')),
+                    ]) }}</p>
                     {{-- Refer to clauses by LINK, never by their numeral: the hanging
                          numerals are decorative and aria-hidden, so "see clause 06"
                          would be a dead reference for anyone not looking at them. --}}

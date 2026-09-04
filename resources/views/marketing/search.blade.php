@@ -1,7 +1,7 @@
 <x-marketing-layout>
     {{-- SEO Slots --}}
     <x-slot name="title">Search Schedules & Events | Event Schedule</x-slot>
-    <x-slot name="description">Search for schedules and upcoming events on Event Schedule. Find fitness classes, music venues, community groups, and more.</x-slot>
+    <x-slot name="description">Look up a schedule by name, web address, city or a word from its blurb, and upcoming events by name. Two characters is the minimum; past dates never come back.</x-slot>
     <x-slot name="breadcrumbTitle">{{ __('messages.search') }}</x-slot>
 
     @if($query)

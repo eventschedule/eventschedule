@@ -41,6 +41,28 @@ return [
     | Last review date shown on the public declaration (YYYY-MM-DD)
     |--------------------------------------------------------------------------
     */
-    'declaration_last_reviewed' => env('ACCESSIBILITY_LAST_REVIEWED', '2026-05-03'),
+    'declaration_last_reviewed' => env('ACCESSIBILITY_LAST_REVIEWED', '2026-09-04'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | The measured record published under "Conformance status"
+    |--------------------------------------------------------------------------
+    |
+    | A conformance statement is worth more when it says what was actually
+    | measured, over what, and when. These two values are interpolated into
+    | accessibility.section_status_measured, so re-measuring the public site
+    | means editing config rather than twelve translation files.
+    |
+    | Scope is the PUBLIC marketing and documentation pages only. The admin
+    | portal, the guest portal and the calendar views are not in this figure,
+    | and the declaration says so.
+    |
+    | 153, not the 157 URLs the sweep visits: four of those are legacy /docs
+    | redirects that resolve to pages already in the set, so counting them would
+    | count four pages twice. It is the same 153 config/sitemap_lastmod.php dates.
+    |
+    */
+    'public_pages_measured' => (int) env('ACCESSIBILITY_PUBLIC_PAGES_MEASURED', 153),
+    'public_measurement_date' => env('ACCESSIBILITY_PUBLIC_MEASUREMENT_DATE', '2026-09-04'),
 
 ];

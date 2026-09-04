@@ -21,6 +21,7 @@ return [
 
     'section_status_title' => 'Estado de conformidade',
     'section_status_body' => 'Não reivindicamos conformidade WCAG completa em todos os ecrãs. Áreas interativas grandes (calendários, bilhetes, controlos legados) estão a ser revistas. Esta declaração descreve a nossa abordagem de boa-fé e como reportar problemas.',
+    'section_status_measured' => 'Em :date medimos todas as :pages páginas públicas de marketing e documentação, em modo claro e em modo escuro. Nenhum texto ou elemento de interface ficou abaixo do contraste mínimo da WCAG 2.1 nível AA, todas as ligações e botões tinham um nome acessível, nenhum alvo foi menor do que o mínimo da WCAG 2.2 de 24 por 24 píxeis, nenhuma página deslocou na horizontal com 390 píxeis de largura e todas as páginas animadas respeitam a preferência de movimento reduzido. Este registo abrange apenas o site público: o painel de administração, o portal de convidados e as vistas de calendário ficam de fora, e as limitações indicadas abaixo mantêm-se.',
 
     'section_measures_title' => 'Medidas',
     'section_measures_body' => 'Oferecemos ligações de salto e estrutura de documento onde implementado, um painel de acessibilidade integrado, percursos de teclado quando identificamos lacunas, e estilo sensível ao contraste em partes do produto.',

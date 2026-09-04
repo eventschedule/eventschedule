@@ -397,7 +397,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for theaters?',
-                'a' => 'Yes. Setting a production up as a run, marking dark days, splitting your spaces into sub-schedules, publishing your season and syncing two ways with Google, Outlook or CalDAV are all free forever, and so is selling: the free plan takes payment for up to 25 tickets a month per schedule, with free registration uncapped. The Pro plan at '.plan_price($proMonthly).' a month lifts that ceiling and adds QR check-in, the check-in dashboard, season passes and custom checkout questions. Event Schedule charges zero platform fees on ticket sales on every plan, the free one included.',
+                'a' => 'Yes. Setting a production up as a run, marking dark days, splitting your spaces into sub-schedules, publishing your season and syncing two ways with Google, Outlook or CalDAV are all free forever, and so is selling: the free plan takes payment for up to 25 paid tickets a month per schedule, with free registration uncapped (a zero-price ticket never counts). The Pro plan at '.plan_price($proMonthly).' a month lifts that ceiling and adds QR check-in, the check-in dashboard, season passes and custom checkout questions. Event Schedule charges zero platform fees on ticket sales on every plan, the free one included.',
             ],
             [
                 'q' => 'How do I set up a multi-week run?',

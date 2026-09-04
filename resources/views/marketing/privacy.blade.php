@@ -1019,6 +1019,16 @@
                                                     Accepting also lets us set three first-party <strong>attribution</strong> cookies, <code class="es-fine-code">utm_params</code>, <code class="es-fine-code">utm_referrer_url</code> and <code class="es-fine-code">utm_landing_page</code>, which last 30 days. They remember which link, campaign or referring site brought you here, so that if you later create an account or buy a ticket we can credit it to the right source. They hold campaign tags and page addresses, never anything you typed. If you decline, or never answer, they are not set, and any copy left from an earlier visit is deleted on your next request. Attribution then lasts only for the current browsing session, carried by the session cookie that signs you in and keeps your cart, which is required for the site to work and so is not part of this choice.
                                                 </p>
 
+                                                {{-- es_attribution is written by layouts/marketing.blade.php on every
+                                                     marketing page for a signed-out visitor, and is deliberately NOT
+                                                     gated on consent because it stands in for exactly what the session
+                                                     cookie used to hold once anonymous marketing HTML became
+                                                     edge-cacheable. A cookie set without asking has to be disclosed
+                                                     here, in the same words the code uses. --}}
+                                                <p>
+                                                    One more attribution cookie is set whether or not you accept, and it is fair to say plainly why. Marketing pages are cached for everyone at the edge, so they can no longer carry a session, and <code class="es-fine-code">es_attribution</code> holds in your browser exactly what that session used to hold for the walk from a marketing page to the sign-up form: the page you landed on, the off-site address that referred you, and any <code class="es-fine-code">utm_*</code> or <code class="es-fine-code">ref</code> tag in the link you followed. It is written by your browser rather than by us, it expires when you close it, it is written once and never overwritten while it exists, and it is capped at 2&nbsp;KB with the referrer dropped first if it does not fit. It holds nothing you typed. The consented 30-day cookies above take precedence over it wherever both exist, because they carry an earlier first touch.
+                                                </p>
+
                                                 {{-- A reading aid, not a clause: the exact strings named above,
                                                      collected so they can be found in a browser inspector. It asserts
                                                      nothing the paragraphs do not already say. --}}
@@ -1032,6 +1042,7 @@
                                                         <span class="es-fine-chip">utm_params</span>
                                                         <span class="es-fine-chip">utm_referrer_url</span>
                                                         <span class="es-fine-chip">utm_landing_page</span>
+                                                        <span class="es-fine-chip">es_attribution</span>
                                                     </p>
                                                 </div>
 
