@@ -3585,7 +3585,7 @@ return [
     'task_ran_ago' => ':age geleden uitgevoerd',
     'task_overdue_by' => ':age te laat',
     'task_running_for' => 'actief sinds :age',
-    'task_never_finished' => ':age geleden gestart en nooit voltooid',
+    'task_never_finished' => 'in :age niets voltooid',
     'task_not_yet_run' => 'nog niet uitgevoerd',
     'scheduled_tasks_reporting' => ':ok van :total rapporteren',
     'scheduled_tasks_needs_attention' => '{0} Alle taken in orde|{1} :count taak vraagt aandacht|[2,*] :count taken vragen aandacht',

@@ -204,4 +204,43 @@ class MarketingMetaLengthTest extends TestCase
 
         $this->assertSame([], $stale, 'these pages are inside the bounds now; remove them from ALLOWED');
     }
+
+    /**
+     * A raw `"` in a title or description slot truncates the meta tag in every browser.
+     *
+     * `<x-slot name="description">` becomes an Illuminate\View\ComponentSlot, which implements
+     * Htmlable - and e() short-circuits on Htmlable and returns the value UNESCAPED. So a slot
+     * containing a quote closes the content attribute early and the rest of the sentence is parsed
+     * as junk boolean attributes on the <meta> tag. /features/custom-labels shipped 150 characters
+     * of description of which a browser could see 42.
+     *
+     * The length tests above cannot see it: their regex ends at the LAST `">` on the line, so they
+     * measure the full string the server wrote rather than the fragment a parser keeps. This asserts
+     * on the raw attribute instead, which is the only place the difference shows.
+     */
+    public function test_no_page_meta_breaks_out_of_its_attribute(): void
+    {
+        $broken = [];
+
+        foreach ($this->pageRoutes() as $path => $name) {
+            $html = $this->get($path)->getContent();
+
+            foreach (['description', 'og:description', 'twitter:description'] as $tag) {
+                $attr = $tag === 'og:description' ? 'property' : 'name';
+
+                if (! preg_match('~<meta '.$attr.'="'.preg_quote($tag, '~').'" content="(.*?)">~s', $html, $m)) {
+                    continue;
+                }
+
+                if (str_contains($m[1], '"')) {
+                    $broken[] = "{$path} ({$tag})";
+                }
+            }
+        }
+
+        $this->assertSame([], $broken,
+            'these meta values contain a raw double quote, which ends the content attribute early. '.
+            'A slot is Htmlable, so Blade does NOT escape it - reword without quotes, or use the '.
+            'typographic characters.');
+    }
 }

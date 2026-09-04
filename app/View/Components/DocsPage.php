@@ -145,8 +145,33 @@ class DocsPage extends Component
                 '@id' => url()->current(),
             ],
             'datePublished' => $this->published ?? ($this->page['published'] ?? '2024-01-01'),
-            'dateModified' => $this->modified ?? ($this->page['modified'] ?? '2024-01-01'),
+            // The sitemap manifest first, config/docs.php only as a fallback.
+            //
+            // These two dates describe the same page and were maintained independently: the
+            // manifest is regenerated from git by `sitemap:lastmod`, `modified` is typed by hand.
+            // They had drifted on 34 of the 35 docs pages that carry both, always with the JSON-LD
+            // older - /docs/getting-started shipped 2026-02-01 against a <lastmod> of 2026-09-01.
+            // Google's stated condition for trusting lastmod is that it agrees with the on-page
+            // date signals, so a site-wide disagreement of that size is exactly the "teach Google
+            // to ignore lastmod" outcome GenerateSitemapLastmod was written to prevent.
+            //
+            // An explicit `modified` prop still wins, for a page that genuinely knows better.
+            'dateModified' => $this->modified ?? $this->manifestModified() ?? ($this->page['modified'] ?? '2024-01-01'),
         ];
+    }
+
+    /**
+     * This page's date from config/sitemap_lastmod.php, as a plain Y-m-d, or null.
+     *
+     * Bracket lookup, never config('sitemap_lastmod.'.$path): the manifest keys are URL paths
+     * containing slashes, and dot notation would try to walk them as nested arrays and miss every
+     * time. SitemapController::lastmodTag() reads it the same way and says so.
+     */
+    private function manifestModified(): ?string
+    {
+        $stamp = (config('sitemap_lastmod') ?: [])['/docs/'.$this->key] ?? null;
+
+        return is_string($stamp) && $stamp !== '' ? substr($stamp, 0, 10) : null;
     }
 
     public function render(): View

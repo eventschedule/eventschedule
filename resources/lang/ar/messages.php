@@ -3649,7 +3649,7 @@ return [
     'task_ran_ago' => 'تم التشغيل قبل :age',
     'task_overdue_by' => 'متأخرة بمقدار :age',
     'task_running_for' => 'قيد التشغيل منذ :age',
-    'task_never_finished' => 'بدأت قبل :age ولم تنتهِ أبدًا',
+    'task_never_finished' => 'لم يكتمل شيء منذ :age',
     'task_not_yet_run' => 'لم تعمل بعد',
     'scheduled_tasks_reporting' => ':ok من :total تُبلغ',
     'scheduled_tasks_needs_attention' => '{0} جميع المهام سليمة|{1} :count مهمة تحتاج إلى انتباه|[2,*] :count مهام تحتاج إلى انتباه',

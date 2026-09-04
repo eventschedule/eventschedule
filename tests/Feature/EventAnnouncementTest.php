@@ -298,6 +298,83 @@ class EventAnnouncementTest extends TestCase
         $this->assertEquals($first->toDateTimeString(), $event->fresh()->published_at->toDateTimeString());
     }
 
+    /**
+     * A schedule created through the UI must announce by default, like its column says.
+     *
+     * The Notifications tab is not gated on $role->exists, so its <x-toggle> renders on the CREATE
+     * page too - against a `new Role` whose announce_new_events attribute does not exist. A toggle
+     * reading null paints OFF while still submitting its companion hidden input at 0, and
+     * RoleController::store() fills from $request->all(), so the migration's default(true) was
+     * overwritten for every schedule made through the app. dueRoles() filters on this column, so
+     * the effect was that no new schedule ever sent the email its subscribe panel promises guests.
+     *
+     * RoleController::create() already carries the identical guard for roles.event_layout, with a
+     * comment describing this exact failure. This one was simply missed.
+     */
+    public function test_a_new_schedule_starts_with_announcements_on(): void
+    {
+        $owner = $this->createOwner('founder@venues.test');
+
+        $response = $this->actingAs($owner)->get('/new/venue');
+
+        $response->assertOk();
+
+        // The mechanism is the rendered checkbox: it is what decides whether the browser submits
+        // 1 or the hidden 0 beside it.
+        $this->assertMatchesRegularExpression(
+            '~name="announce_new_events"[^>]*value="1"[^>]*\bchecked\b~s',
+            $response->getContent(),
+            'the announce_new_events toggle must render ON for a new schedule, or the form posts '.
+            'the hidden 0 and store() persists it over the column default'
+        );
+
+        // And the column default it mirrors really is on, so the two cannot drift apart.
+        $this->assertTrue(
+            (bool) $this->createRole($owner, 'venue')->fresh()->announce_new_events,
+            'roles.announce_new_events must default to true at the database level'
+        );
+    }
+
+    /**
+     * The stamp is a TRANSITION, not a state - or every legacy event is announced as new.
+     *
+     * events.published_at has existed since 2024 and nothing ever wrote it, so every public row in
+     * production holds NULL. A state test (`! is_draft && ! published_at`) therefore stamps the
+     * first time ANY save touches such a row - and saving() runs before Eloquent's dirty check,
+     * with the assignment itself dirtying the model, so it fires even on a save that would have
+     * been a no-op. Event::updateRsvpSold() does exactly that on every RSVP, against precisely the
+     * upcoming events newEventsFor() selects for.
+     */
+    public function test_an_unrelated_save_does_not_republish_a_long_public_event(): void
+    {
+        $this->subscribe();
+
+        // A public event from months ago, in the state production is actually in: no published_at.
+        $event = $this->publish();
+        $event->forceFill([
+            'created_at' => now()->subDays(90),
+            'published_at' => null,
+        ])->saveQuietly();
+
+        $this->baseline(now()->subDays(30)->toDateTimeString());
+
+        // Somebody RSVPs. updateRsvpSold() re-reads the row and save()s it.
+        $event->refresh();
+        $event->updateRsvpSold(substr((string) $event->starts_at, 0, 10), 1);
+
+        $this->assertNull(
+            $event->fresh()->published_at,
+            'an RSVP is not a publication: stamping here makes a months-old event look new'
+        );
+
+        $this->runCommand();
+
+        $this->assertEmpty(
+            $this->announcements(),
+            'an event that has been public for months must not be announced because somebody RSVPd'
+        );
+    }
+
     public function test_a_failed_dispatch_hands_the_window_back(): void
     {
         // Hazard (b). The watermark used to be stamped AFTER the dispatch loop with no try/catch,

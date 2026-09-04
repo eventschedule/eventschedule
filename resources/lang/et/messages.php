@@ -3602,7 +3602,7 @@ return [
     'task_ran_ago' => 'käivitus :age tagasi',
     'task_overdue_by' => 'hilinenud :age',
     'task_running_for' => 'töötab :age',
-    'task_never_finished' => 'algas :age tagasi ega lõppenud kunagi',
+    'task_never_finished' => 'pole :age jooksul midagi lõpetanud',
     'task_not_yet_run' => 'pole veel käivitunud',
     'scheduled_tasks_reporting' => ':ok / :total annavad teada',
     'scheduled_tasks_needs_attention' => '{0} Kõik ülesanded korras|{1} :count ülesanne vajab tähelepanu|[2,*] :count ülesannet vajab tähelepanu',

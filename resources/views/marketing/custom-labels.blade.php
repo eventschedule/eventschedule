@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Custom Labels for Schedules - Event Schedule</x-slot>
-    <x-slot name="description">Rename the words on your public schedule. "Events" can be Classes, Services, Openings or Sessions, across 34 labels, plus a form for your translation.</x-slot>
+    <x-slot name="description">Rename the words on your public schedule. Events can become Classes, Services, Openings or Sessions, across 34 labels, plus a form for your translation.</x-slot>
     <x-slot name="breadcrumbTitle">Custom Labels</x-slot>
 
     <x-slot name="structuredData">

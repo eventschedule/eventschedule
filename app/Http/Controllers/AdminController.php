@@ -18,7 +18,6 @@ use App\Models\Newsletter;
 use App\Models\Referral;
 use App\Models\Role;
 use App\Models\Sale;
-use App\Models\ScheduledTaskRun;
 use App\Models\Setting;
 use App\Models\UsageDaily;
 use App\Models\User;
@@ -1966,12 +1965,13 @@ class AdminController extends Controller
         $lastTaskActivityAt = SchedulerHealth::lastTaskActivityAt();
         // The container and rail actually completing work, from the database rather than the
         // cache - the evidence behind the note above, and otherwise only visible as a tooltip.
-        $lastTaskHost = ScheduledTaskRun::whereNotNull('last_started_at')
-            ->orderByDesc('last_started_at')
-            ->value('last_host');
-        $lastTaskRail = ScheduledTaskRun::whereNotNull('last_started_at')
-            ->orderByDesc('last_started_at')
-            ->value('last_via');
+        // Through SchedulerHealth, which guards on Schema::hasTable() like every other reader of
+        // this table. Querying the model directly here meant /admin/queue - the one page written
+        // to keep working on an install that has the code but not the migration - was the page
+        // that 42S02'd on it.
+        $lastTaskRunner = SchedulerHealth::lastTaskRunner();
+        $lastTaskHost = $lastTaskRunner?->host;
+        $lastTaskRail = $lastTaskRunner?->via;
         $schedulerHttpRailOnly = SchedulerHealth::isHttpRailOnly();
 
         // Per-task health. Ordered worst-first so the exceptions block reads top-down, then by

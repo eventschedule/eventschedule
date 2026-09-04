@@ -3625,7 +3625,7 @@ return [
     'task_ran_ago' => 'rulată acum :age',
     'task_overdue_by' => 'întârziată cu :age',
     'task_running_for' => 'rulează de :age',
-    'task_never_finished' => 'pornită acum :age și nefinalizată',
+    'task_never_finished' => 'nimic finalizat de :age',
     'task_not_yet_run' => 'încă nerulată',
     'scheduled_tasks_reporting' => ':ok din :total raportează',
     'scheduled_tasks_needs_attention' => '{0} Toate sarcinile sunt în regulă|{1} :count sarcină necesită atenție|[2,*] :count sarcini necesită atenție',

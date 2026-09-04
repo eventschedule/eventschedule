@@ -180,6 +180,33 @@ class SchedulerHealth
     }
 
     /**
+     * The container and rail that most recently STARTED a scheduled task, or null.
+     *
+     * Guarded like every other reader of this table (lastTaskActivityAt() above, tasks() below,
+     * ScheduledTaskRecorder::write()). /admin/queue used to run these two columns as raw
+     * ScheduledTaskRun queries of its own, unguarded - so an install that pulled this release
+     * without running `php artisan migrate` got a 42S02 on the one page written to keep working
+     * in exactly that state, and the page that would have told the operator what was wrong was
+     * the page that crashed.
+     *
+     * One query, not two: both columns come off the same row.
+     *
+     * @return object{host: ?string, via: ?string}|null
+     */
+    public static function lastTaskRunner(): ?object
+    {
+        if (! Schema::hasTable('scheduled_task_runs')) {
+            return null;
+        }
+
+        $row = ScheduledTaskRun::whereNotNull('last_started_at')
+            ->orderByDesc('last_started_at')
+            ->first(['last_host', 'last_via']);
+
+        return $row ? (object) ['host' => $row->last_host, 'via' => $row->last_via] : null;
+    }
+
+    /**
      * The scheduler reports stalled, but the database says tasks are still completing.
      *
      * That combination has one common cause: a cache store that is not shared between
@@ -232,6 +259,27 @@ class SchedulerHealth
         $rails = self::rails();
 
         if ($rails->contains(fn ($rail) => $rail->name !== 'http')) {
+            return false;
+        }
+
+        // The database can DISPROVE the claim, and the cache cannot. scheduled_task_runs is written
+        // only by the ScheduledTask* events, which the HTTP rail never dispatches - so a fresh row
+        // in it is proof that a schedule:run rail is alive, whatever the per-rail cache keys say.
+        //
+        // That gap is reachable through one plausible misconfiguration: SCHEDULER_EXPECTED_RAIL set
+        // at component scope instead of app scope (docs/DIGITALOCEAN_WORKER.md section 3 warns about
+        // exactly this), so the web container reads null; CACHE_STORE still unset, so the worker's
+        // heartbeat is written to its own container's file cache and is invisible here; and
+        // /translate_data still firing as the documented fallback, so the http key IS fresh. The
+        // page then tells the operator the cron endpoint is their liveness signal while the worker
+        // is quietly running everything - and the branch suppresses the per-task list that would
+        // have named the failing task.
+        //
+        // A genuinely http-only install never writes this table at all, and one that really did
+        // retire its worker has rows that have gone stale, so neither is affected.
+        $lastTask = self::lastTaskActivityAt();
+
+        if ($lastTask !== null && $lastTask->diffInMinutes(now()) <= self::staleMinutes()) {
             return false;
         }
 

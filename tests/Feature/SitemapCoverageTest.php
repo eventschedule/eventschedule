@@ -130,6 +130,48 @@ class SitemapCoverageTest extends TestCase
      * The manifest is keyed by the same path strings the view passes to $lastmodTag(), so a typo in
      * either one silently costs that page its date rather than failing anything.
      */
+    /**
+     * A submitted URL must not tell Google to index a different one.
+     *
+     * Sitemap inclusion is a canonical hint, so a listed page whose own rel=canonical points
+     * elsewhere is a contradiction Search Console files as "Alternate page with proper canonical
+     * tag" - the URL is submitted, crawled, and then permanently excluded. /docs/saas/federation
+     * shipped in exactly that state: it gained a canonical pointing at its selfhost mirror while
+     * staying in this sitemap, and neither the coverage checks above nor the length tests could
+     * see it, because the page answers 200 and its meta is fine.
+     *
+     * test_no_listed_url_redirects_or_fails() is the sibling rule (a listed URL must not redirect);
+     * this is the same idea for the softer signal.
+     */
+    public function test_no_listed_page_canonicals_somewhere_else(): void
+    {
+        $contradictions = [];
+
+        foreach ($this->sitemapPaths() as $path) {
+            // Only same-host paths; the blog lives on another host and is listed deliberately.
+            if (! str_starts_with($path, '/')) {
+                continue;
+            }
+
+            $html = $this->get($path)->getContent();
+
+            if (! preg_match('~<link[^>]+rel="canonical"[^>]+href="([^"]+)"~i', $html, $m)) {
+                continue;
+            }
+
+            $canonicalPath = parse_url($m[1], PHP_URL_PATH) ?: '/';
+
+            if (rtrim($canonicalPath, '/') !== rtrim($path, '/')) {
+                $contradictions[] = "{$path} canonicals to {$canonicalPath}";
+            }
+        }
+
+        $this->assertSame([], $contradictions,
+            'a page listed in the sitemap must be its own canonical. Either drop the canonical '.
+            'override or stop listing the page - submitting both is how a URL ends up permanently '.
+            'unindexed.');
+    }
+
     public function test_the_lastmod_manifest_keys_match_the_listed_paths(): void
     {
         $listed = $this->sitemapPaths();

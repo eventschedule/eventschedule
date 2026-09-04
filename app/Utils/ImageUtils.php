@@ -358,7 +358,25 @@ class ImageUtils
 
         $sourcePath = self::storagePathFor($storedName);
 
-        if (! Storage::exists($sourcePath)) {
+        // Wrapped, and the two failure shapes kept apart. Storage::exists() is the first network
+        // call in the pipeline and FilesystemAdapter::exists() has no try/catch of its own - unlike
+        // readStream() and put() below - so an S3 HeadObject blip throws straight out of here. The
+        // job's catch then recorded that as 'failed', which is DETERMINISTIC, so the backfill never
+        // came back to the row and the event served its full-size original until somebody ran
+        // --retry-skipped by hand. That is precisely what the transient/deterministic split exists
+        // to prevent.
+        //
+        // A genuine 404 comes back as `false`, not an exception, so it stays 'missing' - catching
+        // both would send really-absent originals round the retry loop forever.
+        try {
+            $exists = Storage::exists($sourcePath);
+        } catch (\Throwable) {
+            // Deliberately not report()ed: the backfill walks thousands of rows, and the caller
+            // already reports whatever it decides to do about this.
+            return $skipAll('read_failed');
+        }
+
+        if (! $exists) {
             return $skipAll('missing');
         }
 

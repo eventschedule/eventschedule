@@ -3590,7 +3590,7 @@ return [
     'task_ran_ago' => 'exécutée il y a :age',
     'task_overdue_by' => 'en retard de :age',
     'task_running_for' => 'en cours depuis :age',
-    'task_never_finished' => 'démarrée il y a :age et jamais terminée',
+    'task_never_finished' => 'rien de terminé depuis :age',
     'task_not_yet_run' => 'pas encore exécutée',
     'scheduled_tasks_reporting' => ':ok sur :total signalent',
     'scheduled_tasks_needs_attention' => '{0} Toutes les tâches sont saines|{1} :count tâche nécessite votre attention|[2,*] :count tâches nécessitent votre attention',

@@ -33,6 +33,13 @@ use Illuminate\Support\Facades\Schedule;
 // --sleep=0 because Worker::daemon() sleeps BEFORE stopIfNecessary() evaluates stopWhenEmpty, so
 // the default of 3 burns three seconds of every tick on an empty queue - which is the normal state.
 // Idle pacing is irrelevant here: the worker stops on its first empty poll either way.
+//
+// The overlap expiry is 5, not the 20 the rest of the frequent entries carry, because this one is
+// different in kind: nothing else on the install drains the queue, so a stranded mutex here stops
+// ALL queued work rather than one job. And it is genuinely reachable - a queue:work job timeout
+// calls posix_kill(getmypid(), SIGKILL), and getmypid() is the schedule:run process itself, so
+// Event::finish()'s finally never runs and the mutex sits for its full TTL. 5 is just above the
+// entry's own --max-time=120 worst case, which is what the rule at the top of this file asks for.
 Schedule::call(function () {
     Artisan::call('queue:work', [
         '--stop-when-empty' => true,
@@ -40,7 +47,7 @@ Schedule::call(function () {
         '--max-time' => 120,
         '--tries' => 3,
     ]);
-})->everyMinute()->name('process-queue')->withoutOverlapping(20)->appendOutputTo(storage_path('logs/scheduler.log'));
+})->everyMinute()->name('process-queue')->withoutOverlapping(5)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 // Keep in sync with AppController::translateData(). The per-job cap, the cooldown and the
 // per-job error handling live inside the command, so this rail's five-minute cadence and

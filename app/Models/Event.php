@@ -288,14 +288,22 @@ class Event extends Model
             // is_private is deliberately NOT considered, because an unlisted event IS published,
             // just not listed, and the announcement query filters it out on its own terms.
             //
-            // No backfill migration accompanies this. newEventsFor() reads
-            // COALESCE(published_at, created_at), so a row that predates this stamp keeps exactly
-            // the behaviour it has today, and writing created_at into the column for every
-            // historical event would be inventing a publication date we do not know.
+            // 2026_09_04_000000 backfills created_at onto every already-public row. That is not a
+            // publication date we know, but it is exactly what newEventsFor()'s
+            // COALESCE(published_at, created_at) already reads for those rows, so it changes no
+            // behaviour - and it stops the column being a landmine: without it, a legacy public
+            // event toggled to draft and back would satisfy the isDirty() guard below and stamp
+            // today, announcing an event that has been on sale for months.
             // saveQuietly() fires no events, so a BackupService restore leaves it null and falls
             // into that same COALESCE - which is right, since the restore date is not a
             // publication date either.
-            if (! $model->is_draft && ! $model->published_at) {
+            // The transition, not the state. Without the isDirty() half this is a state test on a
+            // column nothing has ever written, so the FIRST save of any kind - an RSVP through
+            // updateRsvpSold(), an inbound calendar sync, a typo fix - stamps a years-old event as
+            // published today and SendEventAnnouncements mails it out as new. saving() also runs
+            // before Eloquent's dirty check and the assignment itself dirties the model, so that
+            // fires even on a save that would otherwise have been a no-op.
+            if (! $model->is_draft && ! $model->published_at && (! $model->exists || $model->isDirty('is_draft'))) {
                 $model->published_at = now();
             }
 

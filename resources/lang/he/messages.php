@@ -3640,7 +3640,7 @@ return [
     'task_ran_ago' => 'רצה לפני :age',
     'task_overdue_by' => 'באיחור של :age',
     'task_running_for' => 'רצה כבר :age',
-    'task_never_finished' => 'התחילה לפני :age ומעולם לא הסתיימה',
+    'task_never_finished' => 'שום ריצה לא הסתיימה מזה :age',
     'task_not_yet_run' => 'עדיין לא רצה',
     'scheduled_tasks_reporting' => ':ok מתוך :total מדווחות',
     'scheduled_tasks_needs_attention' => '{0} כל המשימות תקינות|{1} משימה :count דורשת תשומת לב|[2,*] :count משימות דורשות תשומת לב',

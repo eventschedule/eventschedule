@@ -3845,6 +3845,13 @@ class RoleController extends Controller
         // schedule created through the UI ever got the list layout the column default asks for.
         // Set here rather than in eventLayout(), whose fallback also serves existing rows.
         $role->event_layout = 'list';
+        // Match the roles.announce_new_events column default, for exactly the reason above.
+        // The Notifications tab is not gated on $role->exists, so its <x-toggle> renders on this
+        // page too - and a toggle reading a null attribute paints OFF while still submitting its
+        // companion hidden input at 0. store()'s fill() then persists that over the column's
+        // default(true), so no schedule created through the UI would ever announce a new event,
+        // silently breaking the promise the subscribe panel makes to every guest who signs up.
+        $role->announce_new_events = true;
         $role->font_family = 'Roboto';
         $role->font_color = '#ffffff';
         $role->accent_color = '#007BFF';

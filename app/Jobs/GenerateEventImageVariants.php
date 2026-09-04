@@ -100,13 +100,24 @@ class GenerateEventImageVariants implements ShouldQueue
             return;
         }
 
+        // Merged onto what is already recorded, never rebuilt from scratch. A width that
+        // failed this time must not erase a filename recorded by an earlier run: the file is
+        // still on the disk (names are deterministic from the flyer, and recordImageVariants()
+        // guards its UPDATE on that flyer being unchanged), so dropping the record just makes
+        // every card fall back to the full-size original for no reason. `skipped` is rewritten
+        // or removed below rather than merged, so a stale reason cannot survive a good run.
         $variants = [];
         $transient = null;
         $deterministic = null;
+        $existing = $event->image_variants;
+        $existing = is_array($existing) ? $existing : [];
 
         foreach (ImageUtils::VARIANT_WIDTHS as $width) {
             $result = $results[$width] ?? ['ok' => false, 'filename' => null, 'reason' => 'failed'];
-            $variants['w'.$width] = $result['ok'] ? $result['filename'] : null;
+            $kept = $existing['w'.$width] ?? null;
+            $variants['w'.$width] = $result['ok']
+                ? $result['filename']
+                : (is_string($kept) && $kept !== '' ? $kept : null);
 
             if ($result['ok']) {
                 continue;

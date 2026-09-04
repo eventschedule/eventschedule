@@ -3666,7 +3666,7 @@ return [
     'task_ran_ago' => 'выполнена :age назад',
     'task_overdue_by' => 'просрочена на :age',
     'task_running_for' => 'выполняется :age',
-    'task_never_finished' => 'запущена :age назад и не завершилась',
+    'task_never_finished' => 'ничего не завершилось за :age',
     'task_not_yet_run' => 'ещё не выполнялась',
     'scheduled_tasks_reporting' => ':ok из :total отчитываются',
     'scheduled_tasks_needs_attention' => '{0} Все задачи в порядке|{1} :count задача требует внимания|[2,*] :count задач требуют внимания',

@@ -98,14 +98,44 @@ class CacheableMarketingResponse
         'marketing.docs.search_index',
     ];
 
+    /**
+     * Query parameters that describe where a visitor CAME FROM and nothing else.
+     *
+     * A request carrying only these is still dynamic - CaptureUtmParameters has to run and may
+     * write the consented 30-day cookies - but it needs no SESSION, and handing it one is
+     * expensive out of all proportion. requestIsAnonymous() below returns false the moment a
+     * laravel_session cookie is present, and the Cloudflare rule in docs/CACHING.md bypasses on
+     * the same cookie, so ONE ?fbclid= landing took that visitor off the edge for every clean-URL
+     * page they opened afterwards, for the whole SESSION_LIFETIME. That is all paid, social,
+     * email and referral traffic - most of what these pages are optimised for.
+     *
+     * Dropping the session here loses nothing, because it was never the carrier on this path:
+     * layouts/marketing.blade.php writes the es_attribution cookie client-side on every marketing
+     * page, deliberately un-gated on consent (CaptureUtmParameters::CLIENT_COOKIE), and it holds
+     * the landing page, the off-site referrer, all five utm_* values and ref - exactly what the
+     * session held. Every read site is already a `session ?? cookie ?? es_attribution` chain, and
+     * seedSessionFromClientAttribution() re-seeds on the first request that HAS a real session.
+     *
+     * `lang` is deliberately absent: it is the one query parameter whose whole purpose is to
+     * persist a choice into the session, so it keeps its cookie and stays off the edge.
+     */
+    private const ATTRIBUTION_ONLY_PARAMS = [
+        'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'utm_token',
+        'fbclid', 'gclid', 'gbraid', 'wbraid', 'msclkid', 'ttclid', 'igshid', 'mc_cid', 'mc_eid',
+        'ref',
+    ];
+
     public function handle(Request $request, Closure $next): Response
     {
         // Mutually exclusive by construction: marketing.visit is a POST and
         // marketing.docs.search_index is in EXCLUDED_ROUTES, so neither can be eligible.
         $stateless = $this->isStateless($request);
         $eligible = $this->isEligible($request);
+        // Not cacheable itself, but it must not leave a session cookie behind either - see
+        // ATTRIBUTION_ONLY_PARAMS.
+        $attributionOnly = ! $eligible && $this->isAttributionOnlyLanding($request);
 
-        if ($stateless || $eligible) {
+        if ($stateless || $eligible || $attributionOnly) {
             // Must happen before StartSession resolves the driver, which is why this
             // middleware is prepended to the web group rather than appended.
             config(['session.driver' => 'array']);
@@ -114,7 +144,7 @@ class CacheableMarketingResponse
 
         $response = $next($request);
 
-        if (! $stateless && ! $eligible) {
+        if (! $stateless && ! $eligible && ! $attributionOnly) {
             return $response;
         }
 
@@ -162,6 +192,45 @@ class CacheableMarketingResponse
         }
 
         return in_array($request->route()?->getName(), self::STATELESS_ROUTES, true);
+    }
+
+    /**
+     * An otherwise-eligible marketing page reached with ONLY attribution parameters on it.
+     *
+     * Everything isEligible() asks holds except the query string, and every parameter present is
+     * one the browser-written es_attribution cookie already carries. Such a request stays dynamic
+     * and is never marked public - CaptureUtmParameters still runs, and may still Set-Cookie the
+     * consented 30-day values - but it must not hand back a session cookie, because that is what
+     * takes the visitor off the edge for every page AFTER this one.
+     *
+     * Empty query strings count: `?` and `?utm_source=` are both attribution-shaped.
+     */
+    private function isAttributionOnlyLanding(Request $request): bool
+    {
+        if (! config('app.is_nexus') || $request->getQueryString() === null) {
+            return false;
+        }
+
+        if (! $request->isMethod('GET') && ! $request->isMethod('HEAD')) {
+            return false;
+        }
+
+        if (! $this->requestIsAnonymous($request)) {
+            return false;
+        }
+
+        $routeName = $request->route()?->getName();
+
+        if ($routeName === null || ! str_starts_with($routeName, 'marketing.')) {
+            return false;
+        }
+
+        if (in_array($routeName, self::EXCLUDED_ROUTES, true)) {
+            return false;
+        }
+
+        // array_diff_key, not a loop over the values: what matters is which KEYS are present.
+        return array_diff_key($request->query(), array_flip(self::ATTRIBUTION_ONLY_PARAMS)) === [];
     }
 
     /**

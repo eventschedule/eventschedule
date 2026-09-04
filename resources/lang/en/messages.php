@@ -4141,7 +4141,7 @@ return [
     'task_ran_ago' => 'ran :age ago',
     'task_overdue_by' => 'overdue by :age',
     'task_running_for' => 'running for :age',
-    'task_never_finished' => 'started :age ago and never finished',
+    'task_never_finished' => 'nothing completed in :age',
     'task_not_yet_run' => 'not yet run',
     'scheduled_tasks_reporting' => ':ok of :total reporting',
     'scheduled_tasks_needs_attention' => '{0} All tasks healthy|{1} :count task needs attention|[2,*] :count tasks need attention',

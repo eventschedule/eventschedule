@@ -193,6 +193,52 @@ class MarketingEdgeCacheTest extends TestCase
      * store that was never written. Without that, accepting cookies opted a visitor out of
      * edge caching for good.
      */
+    /**
+     * A ?fbclid= landing must not cost the visitor the edge cache for the rest of their session.
+     *
+     * The landing page itself is dynamic and stays that way - CaptureUtmParameters has to run.
+     * What must NOT happen is a laravel_session cookie coming back with it, because
+     * requestIsAnonymous() returns false on that cookie and the Cloudflare rule bypasses on it,
+     * so every clean-URL page afterwards would miss the edge too. That is all paid, social, email
+     * and referral traffic.
+     *
+     * Nothing is lost by dropping the session here: layouts/marketing.blade.php writes the
+     * es_attribution cookie client-side on this very page, un-gated on consent, carrying the
+     * landing path, the referrer, the utm_* values and ref.
+     */
+    public function test_an_attribution_query_string_does_not_cost_the_visitor_the_edge(): void
+    {
+        $first = $this->get('/pricing?utm_source=newsletter&utm_medium=email&fbclid=IwAR123');
+
+        $first->assertOk();
+
+        $this->assertNotContains(
+            config('session.cookie'),
+            array_map(fn ($cookie) => $cookie->getName(), $first->headers->getCookies()),
+            'An attribution-only landing must not hand back a session cookie: it is the cookie '.
+            'Cloudflare bypasses on, so one ?fbclid= click would take the visitor off the edge '.
+            'for every page after it.'
+        );
+
+        // And the next page, on a clean URL, is served from the edge as normal.
+        $second = $this->get('/faq');
+
+        $second->assertOk();
+        $this->assertStringContainsString('public', $second->headers->get('Cache-Control'));
+    }
+
+    /**
+     * ?lang= is the exception, and it has to stay one: its whole purpose is to persist a choice
+     * into the session, so it keeps its session cookie and its private response.
+     */
+    public function test_a_lang_query_string_still_keeps_its_session(): void
+    {
+        $response = $this->get('/pricing?lang=fr');
+
+        $response->assertOk();
+        $this->assertStringContainsString('private', $response->headers->get('Cache-Control'));
+    }
+
     public function test_a_consented_visitor_is_cacheable_from_the_second_page(): void
     {
         $first = $this->withUnencryptedCookie('cookie_consent', 'granted')->get('/pricing');

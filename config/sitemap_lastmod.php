@@ -37,7 +37,7 @@ return [
     '/docs/appointments' => '2026-09-02T00:27:47+00:00',
     '/docs/boost' => '2026-07-31T15:37:32+00:00',
     '/docs/creating-events' => '2026-08-21T11:43:54+00:00',
-    '/docs/creating-schedules' => '2026-08-31T16:36:30+00:00',
+    '/docs/creating-schedules' => '2026-09-04T00:02:08+00:00',
     '/docs/developer/api' => '2026-08-24T13:45:28+00:00',
     '/docs/developer/webhooks' => '2026-08-12T01:32:20+00:00',
     '/docs/event-graphics' => '2026-08-30T16:16:58+00:00',

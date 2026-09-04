@@ -3592,7 +3592,7 @@ return [
     'task_ran_ago' => 'vor :age ausgeführt',
     'task_overdue_by' => 'überfällig seit :age',
     'task_running_for' => 'läuft seit :age',
-    'task_never_finished' => 'vor :age gestartet und nie beendet',
+    'task_never_finished' => 'seit :age nichts abgeschlossen',
     'task_not_yet_run' => 'noch nicht ausgeführt',
     'scheduled_tasks_reporting' => ':ok von :total melden',
     'scheduled_tasks_needs_attention' => '{0} Alle Aufgaben in Ordnung|{1} :count Aufgabe erfordert Aufmerksamkeit|[2,*] :count Aufgaben erfordern Aufmerksamkeit',
