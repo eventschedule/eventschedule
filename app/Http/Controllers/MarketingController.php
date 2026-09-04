@@ -1850,10 +1850,14 @@ class MarketingController extends Controller
                         'AI-powered event parsing, flyer generation, and two-way sync with Google, Outlook and CalDAV',
                     ],
                 ],
+                // Eventbrite is the one competitor with a real importer, so its
+                // second step is the connector rather than the paste-and-parse
+                // route the default steps describe.
                 'switch_steps' => [
-                    ['title' => 'Create your schedule', 'description' => 'Sign up free and create your first schedule in under a minute.'],
-                    ['title' => 'Add your events', 'description' => 'Import your events directly from Eventbrite, use AI import, or create events manually.'],
-                    ['title' => 'Share and sell', 'description' => 'Share your schedule URL and start selling tickets.'],
+                    ['title' => 'Create your schedule', 'description' => 'Free, no card, and it has its own address the moment it exists.'],
+                    ['title' => 'Connect Eventbrite', 'description' => 'Authorise the connection once and your events come across with their ticket types, venues and images. On Pro.'],
+                    ['title' => 'Bring your list across', 'description' => 'Export your Eventbrite attendees and paste them in or upload a CSV, up to ten thousand rows, on any plan.'],
+                    ['title' => 'Connect Stripe and sell', 'description' => 'Payouts land in your own Stripe account, with zero platform fees instead of 3.7% + $1.79 a ticket.'],
                 ],
                 'faq' => [
                     ['question' => 'Can I import my existing Eventbrite events?', 'answer' => 'Yes. With the Pro plan, you can connect your Eventbrite account and import your events in bulk. Event details, ticket types, venues, and images are all transferred automatically.'],
@@ -2172,10 +2176,16 @@ class MarketingController extends Controller
                         ['Personal scheduling', 'No', 'Yes', false],
                         ['Meeting invites', 'No', 'Yes', false],
                     ],
+                    // Row labels and tiers are deliberately the SAME strings the other
+                    // fifteen comparison tables use. This page had its own older
+                    // vocabulary - "Ticket sales", "QR code check-in",
+                    // "Sub-schedules/categories" - and with it two tiers that stopped
+                    // being true when the free plan started selling.
                     'Ticketing & Payments' => [
-                        ['Ticket sales', 'Yes (Pro)', 'No', true],
-                        ['Payment processing', 'Stripe integration', 'No', true],
-                        ['QR code check-in', 'Yes (Pro)', 'No', true],
+                        ['Ticketing', 'Yes (Free)', 'No', true],
+                        ['Unlimited ticket sales', 'Yes (Pro)', 'No', true],
+                        ['Payment processing', 'Stripe (2.9% + $0.30)', 'No', true],
+                        ['QR check-ins', 'Yes (Free)', 'No', true],
                         ['Ticket waitlist', 'Yes (Pro)', 'No', true],
                         ['Check-in dashboard', 'Yes (Pro)', 'No', true],
                         ['Sale notifications', 'Yes (Pro)', 'No', true],
@@ -2187,7 +2197,7 @@ class MarketingController extends Controller
                     ],
                     'Event Features' => [
                         ['AI suite (event parsing, flyer gen, style gen)', 'Yes (Enterprise)', 'No', true],
-                        ['Event graphics generation', 'Yes (Pro)', 'No', true],
+                        ['Event graphics gen', 'Yes (Pro)', 'No', true],
                         ['Rich descriptions (Markdown)', 'Yes (Free)', 'Plain text only', true],
                         ['Custom fields', 'Yes (Pro)', 'No', true],
                         ['Fan videos & comments', 'Yes (Free)', 'No', true],
@@ -2201,18 +2211,18 @@ class MarketingController extends Controller
                     ],
                     'Sharing & Promotion' => [
                         ['Shareable event pages', 'Yes (Free)', 'No', true],
-                        ['Social sharing images', 'Yes (Pro)', 'No', true],
+                        ['Link preview images', 'Yes (Free)', 'No', true],
                         ['Newsletter integration', 'Yes (Free)', 'No', true],
                         ['Embeddable calendars', 'Yes (customizable)', 'Yes (limited styling)', true],
                         ['Sponsor/partner logos', 'Yes (Pro)', 'No', true],
                     ],
                     'Organization' => [
-                        ['Sub-schedules/categories', 'Yes (Free)', 'Multiple calendars', true],
+                        ['Sub-schedules', 'Yes (Free)', 'Multiple calendars', true],
                         ['Team collaboration', 'Yes (Enterprise)', 'Yes', false],
                         ['Built-in analytics', 'Yes (Free)', 'No', true],
                     ],
                     'Platform' => [
-                        ['Custom domain', 'Yes (Enterprise)', 'No', true],
+                        ['Custom domains', 'Yes (Enterprise)', 'No', true],
                         ['Custom CSS', 'Yes (Pro)', 'No', true],
                         ['Webhooks', 'Yes (Pro)', 'No', true],
                         ['Open source', 'Yes', 'No', true],

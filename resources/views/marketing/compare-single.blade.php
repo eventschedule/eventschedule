@@ -93,17 +93,30 @@
         // --- Optional blocks ----------------------------------------------
         // Only four competitors carry why_choose, one carries auto_import and
         // switch_steps, so every read is defaulted.
+        // The default used to be three lines of "sign up, add events, share",
+        // which is the one section on a comparison page a reader has actually
+        // come for and the one that said the least. Every step below names a
+        // real route out of the tool they are leaving: EventController::parse
+        // for the events (10 a day free, 50 on Pro, 100 on Enterprise),
+        // NewsletterController::importStore for the list (10,000 rows, no plan
+        // gate), and Role::ticketSaleLimit() for what selling costs on day one.
         $switchSteps = $switch_steps ?? [
-            ['title' => 'Create your schedule', 'description' => 'Sign up free and create your first schedule in under a minute.'],
-            ['title' => 'Add your events', 'description' => 'Paste event details for AI import or create events manually.'],
-            ['title' => 'Share and sell', 'description' => 'Share your schedule URL and start selling tickets.'],
+            ['title' => 'Create your schedule', 'description' => 'Free, no card, and it has its own address the moment it exists. Nothing has to move before it is useful.'],
+            ['title' => 'Bring the events across', 'description' => 'Paste a listing or upload the flyer and the parser fills in the name, date, time, venue and description for you to check. Ten a day on the free plan, fifty on Pro.'],
+            ['title' => 'Bring your list across', 'description' => 'Export the addresses you already have and paste them in or upload a CSV, up to ten thousand rows, on any plan. What the newsletter allowance counts is sending to them, not holding them.'],
+            ['title' => 'Connect Stripe and sell', 'description' => 'Your own Stripe account, so the money settles into it rather than into ours. Zero platform fees, and the first 25 paid tickets a month are on the free plan.'],
         ];
-        $whyChooseSummary = $why_choose['summary'] ?? 'Event Schedule offers a combination no other platform matches: zero platform fees, open source transparency, and AI tools built in.';
+        // Twelve of the sixteen competitors fall through to these, so they are
+        // written as facts with their tier attached rather than as adjectives.
+        // AI flyer and style generation is Enterprise and event graphics is Pro,
+        // which the previous default ran together into one free-sounding line.
+        $whyChooseSummary = $why_choose['summary']
+            ?? 'Three things decide it against '.$name.': the money is yours, the code is public, and the calendar keeps itself in step with the one you already use.';
         $whyChoosePoints = $why_choose['points'] ?? [
-            'Zero platform fees on all ticket sales, at any plan level',
-            'Fully open source with a selfhosting option for complete control',
-            'AI event parsing, flyer generation, and automatic event graphics',
-            'Two-way Google Calendar and CalDAV sync included free',
+            'Zero platform fees on ticket sales, at every plan level, into your own Stripe account',
+            'Selling starts on the free plan, at 25 paid tickets a month, each one scanned at the door',
+            'Two-way Google, Outlook and CalDAV sync, free, so the public listing and your own diary cannot disagree',
+            'Open source under the Attribution Assurance License, and selfhostable, which resolves to Enterprise',
         ];
 
         // FAQ: one array feeds the visible list AND the schema component, so
@@ -1303,14 +1316,21 @@
                 </h2>
                 <p class="es-score-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
                     @if (! empty($auto_import))
-                        Get started in minutes. Bring your {{ $name }} events across with the importer above, or paste the details in and let the AI do the typing.
+                        Bring your {{ $name }} events across with the importer above, or paste the details in and let the parser do the typing.
                     @else
-                        Get started in minutes. There is nothing to migrate and no export file to wait for.
+                        Nothing has to move on day one. The schedule is useful the moment it exists, and the events and the list follow at whatever pace suits you.
                     @endif
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-3" data-reveal-group="100">
+            {{-- Four steps on three columns leaves a lone card on the second row.
+                 The column count follows the step count so the grid always
+                 completes. --}}
+            <div @class([
+                    'grid grid-cols-1 gap-4',
+                    'sm:grid-cols-2 lg:grid-cols-4' => count($switchSteps) % 3 !== 0,
+                    'md:grid-cols-3' => count($switchSteps) % 3 === 0,
+                ]) data-reveal-group="100">
                 @foreach ($switchSteps as $index => $step)
                     <div class="es-score-card flex flex-col p-7" data-reveal="panel">
                         <p class="es-score-num es-score-accent mb-3 text-2xl">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}</p>

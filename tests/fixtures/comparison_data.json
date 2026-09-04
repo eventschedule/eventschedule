@@ -390,15 +390,19 @@
         "switch_steps": [
             {
                 "title": "Create your schedule",
-                "description": "Sign up free and create your first schedule in under a minute."
+                "description": "Free, no card, and it has its own address the moment it exists."
             },
             {
-                "title": "Add your events",
-                "description": "Import your events directly from Eventbrite, use AI import, or create events manually."
+                "title": "Connect Eventbrite",
+                "description": "Authorise the connection once and your events come across with their ticket types, venues and images. On Pro."
             },
             {
-                "title": "Share and sell",
-                "description": "Share your schedule URL and start selling tickets."
+                "title": "Bring your list across",
+                "description": "Export your Eventbrite attendees and paste them in or upload a CSV, up to ten thousand rows, on any plan."
+            },
+            {
+                "title": "Connect Stripe and sell",
+                "description": "Payouts land in your own Stripe account, with zero platform fees instead of 3.7% + $1.79 a ticket."
             }
         ],
         "faq": [
@@ -1208,20 +1212,26 @@
             ],
             "Ticketing & Payments": [
                 [
-                    "Ticket sales",
+                    "Ticketing",
+                    "Yes (Free)",
+                    "No",
+                    true
+                ],
+                [
+                    "Unlimited ticket sales",
                     "Yes (Pro)",
                     "No",
                     true
                 ],
                 [
                     "Payment processing",
-                    "Stripe integration",
+                    "Stripe (2.9% + $0.30)",
                     "No",
                     true
                 ],
                 [
-                    "QR code check-in",
-                    "Yes (Pro)",
+                    "QR check-ins",
+                    "Yes (Free)",
                     "No",
                     true
                 ],
@@ -1282,7 +1292,7 @@
                     true
                 ],
                 [
-                    "Event graphics generation",
+                    "Event graphics gen",
                     "Yes (Pro)",
                     "No",
                     true
@@ -1356,8 +1366,8 @@
                     true
                 ],
                 [
-                    "Social sharing images",
-                    "Yes (Pro)",
+                    "Link preview images",
+                    "Yes (Free)",
                     "No",
                     true
                 ],
@@ -1382,7 +1392,7 @@
             ],
             "Organization": [
                 [
-                    "Sub-schedules/categories",
+                    "Sub-schedules",
                     "Yes (Free)",
                     "Multiple calendars",
                     true
@@ -1402,7 +1412,7 @@
             ],
             "Platform": [
                 [
-                    "Custom domain",
+                    "Custom domains",
                     "Yes (Enterprise)",
                     "No",
                     true
