@@ -141,7 +141,8 @@
             gap: 0.5rem;
             font-size: 0.75rem;
             letter-spacing: 0.08em;
-            color: #059669;
+            /* emerald-700, not -600: at 12px the -600 shade is 3.6:1 here. */
+            color: #047857;
         }
         .es-prompt::before {
             content: "";
@@ -154,7 +155,7 @@
         .dark .es-prompt { color: #34d399; }
         .es-band-dark .es-prompt,
         .es-finale-panel .es-prompt { color: #34d399; }
-        .es-prompt .es-prompt-path { opacity: 0.55; }
+        .es-prompt .es-prompt-path { opacity: 0.72; }
 
         /* Exit-code chip: the "this worked" affirmation */
         .es-exit {
@@ -686,7 +687,7 @@
                 <div data-reveal="left">
                     <div class="es-prompt mb-3" aria-hidden="true"><span class="es-prompt-path">~/eventschedule</span> $ open https://your-domain.com</div>
                     <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl">Set up in a browser, not a text editor</h2>
-                    <p class="mb-8 text-lg text-gray-500 dark:text-gray-400">Leave <code class="rounded bg-gray-200 px-1.5 py-0.5 font-mono text-[0.85em] dark:bg-white/10">APP_URL</code> blank and open your domain. The app generates its own key on first boot, and the wizard tests the database, runs the migrations and writes the configuration back itself. Mail settings are the one thing it leaves to you.</p>
+                    <p class="mb-8 text-lg text-gray-500 dark:text-gray-400">Leave <code class="rounded bg-gray-200 px-1.5 py-0.5 font-mono text-[0.85em] text-gray-800 dark:bg-white/10 dark:text-gray-100">APP_URL</code> blank and open your domain. The app generates its own key on first boot, and the wizard tests the database, runs the migrations and writes the configuration back itself. Mail settings are the one thing it leaves to you.</p>
 
                     <ol class="space-y-4" data-reveal-group="90">
                         @foreach ($howToSteps as $sIndex => $step)
@@ -896,7 +897,7 @@
                                     </div>
                                 @else
                                     <div class="flex items-center justify-between gap-3">
-                                        <span dir="ltr" class="rounded-lg bg-gray-100 px-2.5 py-1 font-mono text-[11px] text-gray-500 dark:bg-white/10 dark:text-gray-400">{{ $installedVersion }}</span>
+                                        <span dir="ltr" class="rounded-lg bg-gray-100 px-2.5 py-1 font-mono text-[11px] text-gray-700 dark:bg-white/10 dark:text-gray-400">{{ $installedVersion }}</span>
                                         <div class="relative h-px flex-1">
                                             <div class="h-px w-full bg-emerald-400/40"></div>
                                             <span class="es-sync-dot es-fed-dot"></span>
@@ -1046,11 +1047,11 @@
                             <div class="relative z-10 w-[33%] rounded-xl border border-white/15 bg-white/5 px-2 py-3 text-center">
                                 <svg class="mx-auto mb-1.5 h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
                                 <div class="text-xs font-semibold text-white">Listings</div>
-                                <div class="font-mono text-[10px] text-gray-400">eventschedule.com</div>
+                                <div class="font-mono text-[10px] text-gray-500 dark:text-gray-400">eventschedule.com</div>
                             </div>
                         </div>
 
-                        <div class="mt-4 flex items-center justify-center gap-2 text-[11px] text-gray-400">
+                        <div class="mt-4 flex items-center justify-center gap-2 text-[11px] text-gray-500 dark:text-gray-400">
                             <svg class="h-3.5 w-3.5 rotate-180 text-emerald-400 rtl:rotate-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                             every listing links back to your site
                         </div>
@@ -1078,7 +1079,7 @@
                     @foreach ($responsibilities as [$rTitle, $rBody])
                         <div data-reveal>
                             <div class="es-own mb-1.5 font-semibold">{{ $rTitle }}</div>
-                            <p class="text-sm text-gray-400">{{ $rBody }}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $rBody }}</p>
                         </div>
                     @endforeach
                 </div>
@@ -1254,7 +1255,7 @@
                     <a href="{{ marketing_url('/pricing') }}" class="inline-flex items-center justify-center rounded-2xl border border-gray-200 bg-white px-6 py-3 font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:text-gray-200">
                         Compare plans
                     </a>
-                    <a href="{{ app_url('/sign_up') }}" class="group inline-flex items-center gap-2 rounded-2xl px-4 py-3 font-semibold text-emerald-600 transition-all hover:gap-3 dark:text-emerald-400">
+                    <a href="{{ app_url('/sign_up') }}" class="group inline-flex items-center gap-2 rounded-2xl px-4 py-3 font-semibold text-emerald-700 transition-all hover:gap-3 dark:text-emerald-400">
                         Try hosted
                         <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </a>
@@ -1312,14 +1313,14 @@
                                 <div class="rounded-xl border border-gray-100 bg-gray-100 p-4 dark:border-white/5 dark:bg-white/5">
                                     <div class="mb-2 flex items-center justify-between">
                                         <span class="text-sm text-gray-600 dark:text-gray-300">Monthly subscribers</span>
-                                        <span class="text-sm text-emerald-600 dark:text-emerald-400">+12%</span>
+                                        <span class="text-sm text-emerald-700 dark:text-emerald-400">+12%</span>
                                     </div>
                                     <div class="text-2xl font-bold text-gray-900 dark:text-white">247</div>
                                 </div>
                                 <div class="rounded-xl border border-gray-100 bg-gray-100 p-4 dark:border-white/5 dark:bg-white/5">
                                     <div class="mb-2 flex items-center justify-between">
                                         <span class="text-sm text-gray-600 dark:text-gray-300">Monthly revenue</span>
-                                        <span class="text-sm text-emerald-600 dark:text-emerald-400">+8%</span>
+                                        <span class="text-sm text-emerald-700 dark:text-emerald-400">+8%</span>
                                     </div>
                                     <div class="text-2xl font-bold text-gray-900 dark:text-white">$4,940</div>
                                 </div>

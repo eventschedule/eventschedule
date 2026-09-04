@@ -41,7 +41,7 @@
             'badgeDark' => 'bg-sky-500/20 text-sky-300',
             'head' => 'group-hover:text-sky-600 dark:group-hover:text-sky-400',
             'headDark' => 'group-hover:text-sky-400',
-            'link' => 'text-sky-600 dark:text-sky-400',
+            'link' => 'text-sky-700 dark:text-sky-400',
             'linkDark' => 'text-sky-400',
         ],
         'blue' => [
@@ -49,7 +49,7 @@
             'badgeDark' => 'bg-blue-500/20 text-blue-300',
             'head' => 'group-hover:text-blue-600 dark:group-hover:text-blue-400',
             'headDark' => 'group-hover:text-blue-400',
-            'link' => 'text-blue-600 dark:text-blue-400',
+            'link' => 'text-blue-700 dark:text-blue-400',
             'linkDark' => 'text-blue-400',
         ],
         'cyan' => [
@@ -57,7 +57,7 @@
             'badgeDark' => 'bg-cyan-500/20 text-cyan-300',
             'head' => 'group-hover:text-cyan-600 dark:group-hover:text-cyan-400',
             'headDark' => 'group-hover:text-cyan-400',
-            'link' => 'text-cyan-600 dark:text-cyan-400',
+            'link' => 'text-cyan-700 dark:text-cyan-400',
             'linkDark' => 'text-cyan-400',
         ],
         'teal' => [
@@ -65,7 +65,7 @@
             'badgeDark' => 'bg-teal-500/20 text-teal-300',
             'head' => 'group-hover:text-teal-600 dark:group-hover:text-teal-400',
             'headDark' => 'group-hover:text-teal-400',
-            'link' => 'text-teal-600 dark:text-teal-400',
+            'link' => 'text-teal-700 dark:text-teal-400',
             'linkDark' => 'text-teal-400',
         ],
         'emerald' => [
@@ -73,7 +73,7 @@
             'badgeDark' => 'bg-emerald-500/20 text-emerald-300',
             'head' => 'group-hover:text-emerald-600 dark:group-hover:text-emerald-400',
             'headDark' => 'group-hover:text-emerald-400',
-            'link' => 'text-emerald-600 dark:text-emerald-400',
+            'link' => 'text-emerald-700 dark:text-emerald-400',
             'linkDark' => 'text-emerald-400',
         ],
         'amber' => [
@@ -81,7 +81,7 @@
             'badgeDark' => 'bg-amber-500/20 text-amber-300',
             'head' => 'group-hover:text-amber-600 dark:group-hover:text-amber-400',
             'headDark' => 'group-hover:text-amber-400',
-            'link' => 'text-amber-600 dark:text-amber-400',
+            'link' => 'text-amber-700 dark:text-amber-400',
             'linkDark' => 'text-amber-400',
         ],
         'yellow' => [
@@ -89,7 +89,7 @@
             'badgeDark' => 'bg-yellow-500/20 text-yellow-300',
             'head' => 'group-hover:text-yellow-600 dark:group-hover:text-yellow-400',
             'headDark' => 'group-hover:text-yellow-400',
-            'link' => 'text-yellow-600 dark:text-yellow-400',
+            'link' => 'text-yellow-700 dark:text-yellow-400',
             'linkDark' => 'text-yellow-400',
         ],
         'orange' => [
@@ -97,7 +97,7 @@
             'badgeDark' => 'bg-orange-500/20 text-orange-300',
             'head' => 'group-hover:text-orange-600 dark:group-hover:text-orange-400',
             'headDark' => 'group-hover:text-orange-400',
-            'link' => 'text-orange-600 dark:text-orange-400',
+            'link' => 'text-orange-700 dark:text-orange-400',
             'linkDark' => 'text-orange-400',
         ],
         'gray' => [
@@ -105,7 +105,7 @@
             'badgeDark' => 'bg-white/10 text-gray-300',
             'head' => 'group-hover:text-gray-600 dark:group-hover:text-gray-300',
             'headDark' => 'group-hover:text-gray-300',
-            'link' => 'text-gray-600 dark:text-gray-400',
+            'link' => 'text-gray-700 dark:text-gray-400',
             'linkDark' => 'text-gray-400',
         ],
     ];
@@ -196,7 +196,7 @@
                                     <span class="h-2.5 w-2.5 rounded-full" style="background-color: #FEBC2E;"></span>
                                     <span class="h-2.5 w-2.5 rounded-full" style="background-color: #28C840;"></span>
                                     @if ($frameUrl)
-                                        <span dir="ltr" class="ms-2 flex-1 truncate rounded-md bg-white px-2 py-1 text-[10px] text-gray-400 dark:bg-white/5 dark:text-gray-500">{{ $frameUrl }}</span>
+                                        <span dir="ltr" class="ms-2 flex-1 truncate rounded-md bg-white px-2 py-1 text-[10px] text-gray-500 dark:bg-white/5 dark:text-gray-400">{{ $frameUrl }}</span>
                                     @endif
                                 </div>
                                 <div class="p-5">{{ $slot }}</div>

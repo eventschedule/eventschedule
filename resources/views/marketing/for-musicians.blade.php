@@ -114,7 +114,7 @@
             --esp-ink: #1c2733;
             --esp-ink-soft: rgba(28, 39, 51, 0.72);
             --esp-line: rgba(28, 39, 51, 0.16);
-            --esp-cyan: #0e7490;
+            --esp-cyan: #155e75;
             --esp-teal: #0f766e;
             --esp-amber: #b45309;
             --esp-amber-deep: #92400e;
@@ -399,7 +399,9 @@
 
         /* Teal accent (recolored from the hard-coded blue) so the poster
            inks carry through the "See all" links and related-card hovers. */
-        .es-accent-link { color: #0d9488; transition: color 0.2s ease; }
+        /* teal-700, not -600: this link runs 16px on the page's warm ground, where
+           -600 is 3.05:1. */
+        .es-accent-link { color: #115e59; transition: color 0.2s ease; }
         .es-accent-link:hover { color: #0f766e; }
         .dark .es-accent-link { color: #2dd4bf; }
         .dark .es-accent-link:hover { color: #5eead4; }
@@ -533,7 +535,7 @@
                     <h2 class="es-poster-display es-balance text-4xl text-white md:text-6xl" data-reveal style="--reveal-delay: 0.08s;">
                         Great show. <span class="text-[#fbbf24]">Empty room.</span>
                     </h2>
-                    <p class="mt-4 text-lg text-gray-400" data-reveal style="--reveal-delay: 0.16s;">
+                    <p class="mt-4 text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.16s;">
                         You played your heart out. Your fans found out on Monday.
                     </p>
                 </div>
@@ -541,22 +543,22 @@
                 <div class="grid gap-6 pt-2 md:grid-cols-3" data-reveal-group="120">
                     <div class="es-poster-block es-poster-block-night flex flex-col items-center p-7 text-center" data-reveal="panel">
                         <div class="es-poster-display mb-2 text-4xl text-[#22d3ee]">Most</div>
-                        <p class="text-sm text-gray-400">of your social media followers never see your posts about shows</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">of your social media followers never see your posts about shows</p>
                         <span class="es-poster-stamp es-poster-stamp-cyan mt-5" style="--stamp-rot: -2deg;">Buried by the feed</span>
                     </div>
                     <div class="es-poster-block es-poster-block-night flex flex-col items-center p-7 text-center" data-reveal="panel">
                         <div class="es-poster-display mb-2 text-4xl text-[#2dd4bf]">Too late</div>
-                        <p class="text-sm text-gray-400">fans only hear about your shows after they've happened</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">fans only hear about your shows after they've happened</p>
                         <span class="es-poster-stamp es-poster-stamp-teal mt-5" style="--stamp-rot: 2deg;">Missed it</span>
                     </div>
                     <div class="es-poster-block es-poster-block-night flex flex-col items-center p-7 text-center" data-reveal="panel">
                         <div class="es-od es-poster-display mb-2 justify-center text-4xl text-[#fbbf24]" data-odometer="10-20%">10-20%</div>
-                        <p class="text-sm text-gray-400">of ticket revenue lost to platform fees elsewhere. Event Schedule charges zero.</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">of ticket revenue lost to platform fees elsewhere. Event Schedule charges zero.</p>
                         <span class="es-poster-stamp es-poster-stamp-amber mt-5" style="--stamp-rot: -3deg;">Gone</span>
                     </div>
                 </div>
 
-                <p class="mt-10 text-center text-gray-400" data-reveal>
+                <p class="mt-10 text-center text-gray-500 dark:text-gray-400" data-reveal>
                     Your fans deserve a better flyer.
                     <a href="#features" class="inline-flex items-center gap-1 font-semibold text-[#67e8f9] transition-all hover:gap-2">
                         Here is the fix
@@ -989,7 +991,7 @@
                         </div>
                         <div>
                             <h3 class="mb-2 text-lg font-semibold text-white">Add your gigs</h3>
-                            <p class="text-sm text-gray-400">Import from Google Calendar or add tour dates manually. Set up ticket sales if you want.</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Import from Google Calendar or add tour dates manually. Set up ticket sales if you want.</p>
                         </div>
                     </div>
 
@@ -1000,7 +1002,7 @@
                         </div>
                         <div>
                             <h3 class="mb-2 text-lg font-semibold text-white">Share your link</h3>
-                            <p class="text-sm text-gray-400">Add it to your Spotify bio, Bandcamp, EPK, or anywhere fans find you.</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Add it to your Spotify bio, Bandcamp, EPK, or anywhere fans find you.</p>
                         </div>
                     </div>
 
@@ -1011,7 +1013,7 @@
                         </div>
                         <div>
                             <h3 class="mb-2 text-lg font-semibold text-white">Grow your fanbase</h3>
-                            <p class="text-sm text-gray-400">Fans follow your schedule, get notified about shows near them, and share videos and comments after your gigs (all approved by you before going live). Build your audience on your terms.</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Fans follow your schedule, get notified about shows near them, and share videos and comments after your gigs (all approved by you before going live). Build your audience on your terms.</p>
                         </div>
                     </div>
                 </div>
@@ -1118,7 +1120,7 @@
                         <div class="text-sm text-[color:var(--esp-ink-soft)]">Event Schedule for</div>
                         <div class="text-lg font-semibold text-[color:var(--esp-ink)] transition-colors es-related-title">Comedians</div>
                     </div>
-                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors es-related-arrow rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-colors es-related-arrow rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
@@ -1127,7 +1129,7 @@
                         <div class="text-sm text-[color:var(--esp-ink-soft)]">Event Schedule for</div>
                         <div class="text-lg font-semibold text-[color:var(--esp-ink)] transition-colors es-related-title">DJs</div>
                     </div>
-                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors es-related-arrow rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-colors es-related-arrow rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
@@ -1136,7 +1138,7 @@
                         <div class="text-sm text-[color:var(--esp-ink-soft)]">Event Schedule for</div>
                         <div class="text-lg font-semibold text-[color:var(--esp-ink)] transition-colors es-related-title">Spoken Word Artists</div>
                     </div>
-                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors es-related-arrow rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-colors es-related-arrow rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
@@ -1145,7 +1147,7 @@
                         <div class="text-sm text-[color:var(--esp-ink-soft)]">Event Schedule for</div>
                         <div class="text-lg font-semibold text-[color:var(--esp-ink)] transition-colors es-related-title">Dance Groups</div>
                     </div>
-                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors es-related-arrow rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-colors es-related-arrow rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
@@ -1239,14 +1241,14 @@
                         <div class="es-poster-laminate p-6 text-center sm:p-8">
                             <div class="es-poster-slot mb-5" aria-hidden="true"></div>
                             <div class="es-poster-display text-3xl text-white">All access</div>
-                            <div class="mb-6 mt-1 text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400">Backstage &middot; Tour laminate</div>
+                            <div class="mb-6 mt-1 text-[10px] font-bold uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">Backstage &middot; Tour laminate</div>
 
                             <div class="flex flex-col items-stretch gap-3">
                                 <label for="es-claim-input" class="sr-only">Your schedule name</label>
                                 <div dir="ltr" class="es-claim flex min-w-0 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
                                     <input id="es-claim-input" type="text" placeholder="your-band" autocomplete="off" spellcheck="false" maxlength="30"
                                         class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
-                                    <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
+                                    <span class="shrink-0 select-none font-mono text-sm text-gray-500 dark:text-gray-400 sm:text-base">.eventschedule.com</span>
                                 </div>
                                 <a href="{{ app_url('/sign_up?type=talent') }}" class="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-cyan-600 to-teal-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-cyan-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-teal-500/40">
                                     <span class="relative z-10 flex items-center gap-2">
@@ -1259,7 +1261,7 @@
                                 </a>
                             </div>
 
-                            <p class="mt-5 text-sm text-gray-400">No credit card required</p>
+                            <p class="mt-5 text-sm text-gray-500 dark:text-gray-400">No credit card required</p>
 
                             <div class="-mx-6 mt-6 border-t-2 border-dashed border-white/15 px-6 pt-4 sm:-mx-8 sm:px-8">
                                 <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-gray-500">Free forever &middot; Zero platform fees &middot; Keep 100% of ticket sales</p>

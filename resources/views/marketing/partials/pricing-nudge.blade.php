@@ -15,7 +15,7 @@
             <h2 class="es-balance text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>
                 Free forever. Upgrade when you're ready.
             </h2>
-            <p class="mt-3 text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.08s;">
+            <p class="mt-3 text-gray-600 dark:text-gray-400" data-reveal style="--reveal-delay: 0.08s;">
                 Zero platform fees on ticket sales, on every plan. The only deduction is your payment
                 processor's own.
             </p>
@@ -91,7 +91,7 @@
                             </li>
                         @endforeach
                     </ul>
-                    <p class="mt-auto text-xs text-gray-500 dark:text-gray-400">
+                    <p class="mt-auto text-xs text-gray-600 dark:text-gray-400">
                         @if ($nudgeTier === 'Free')
                             No expiry, and no card asked for.
                         @elseif ($nudgeTier === 'Pro')

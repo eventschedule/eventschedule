@@ -141,7 +141,8 @@
         .es-foh-stamp {
             transform: rotate(-9deg);
             border: 2px solid rgba(5, 150, 105, 0.6);
-            color: #059669;
+            /* emerald-800: at 11px on this stamp's own tint, -600 is 3.35:1. */
+            color: #065f46;
             background-color: rgba(16, 185, 129, 0.08);
             letter-spacing: 0.14em;
         }
@@ -436,9 +437,9 @@
         <div class="space-y-2">
             @foreach ([['Thu 12', 'Open Mic', '8pm'], ['Fri 13', 'The Rialtos', '8pm'], ['Sat 14', 'Soul Night', '9pm'], ['Sun 15', 'Makers Market', '11am']] as $i => [$when, $what, $startTime])
                 <div class="es-ai-field flex items-center gap-3 rounded-lg border p-2.5 {{ $i === 1 ? 'border-sky-400/40 bg-sky-500/10' : 'border-gray-200 bg-gray-50 dark:border-white/10 dark:bg-white/5' }}" style="--i: {{ $i }};">
-                    <div class="w-12 shrink-0 font-mono text-[11px] text-sky-600 dark:text-sky-300">{{ $when }}</div>
+                    <div class="w-12 shrink-0 font-mono text-[11px] text-sky-700 dark:text-sky-300">{{ $when }}</div>
                     <span class="min-w-0 flex-1 truncate text-sm text-gray-900 dark:text-white">{{ $what }}</span>
-                    <span class="shrink-0 text-[11px] text-gray-500 dark:text-gray-400">{{ $startTime }}</span>
+                    <span class="shrink-0 text-[11px] text-gray-600 dark:text-gray-400">{{ $startTime }}</span>
                 </div>
             @endforeach
         </div>
@@ -512,7 +513,7 @@
             <div class="h-2.5 w-4/5 rounded-full bg-gray-200 dark:bg-white/10"></div>
             <div class="h-2.5 w-3/5 rounded-full bg-gray-200 dark:bg-white/10"></div>
         </div>
-        <div class="mt-4 rounded-lg border border-dashed border-gray-300 px-3 py-2 text-center text-[11px] text-gray-400 dark:border-white/15 dark:text-gray-500">
+        <div class="mt-4 rounded-lg border border-dashed border-gray-300 px-3 py-2 text-center text-[11px] text-gray-500 dark:border-white/15 dark:text-gray-400">
             No "powered by" line here
         </div>
     </x-marketing.feature-banner>
@@ -617,7 +618,10 @@
                             <h3 class="text-sm font-semibold text-gray-900 dark:text-white sm:text-base">{{ $item['title'] }}</h3>
                         </div>
                         <p class="hidden flex-grow text-sm text-gray-600 dark:text-gray-400 sm:block">{{ $item['desc'] }}</p>
-                        <span class="mt-auto hidden items-center gap-1 pt-3 text-sm font-medium {{ $item['text'] }} transition-all group-hover:gap-2 sm:inline-flex">
+                        {{-- One link colour rather than one per card: the icon chip already
+                             carries each card's identity, and four of the twelve accents sat
+                             under 4.5:1 on white at this size. --}}
+                        <span class="mt-auto hidden items-center gap-1 pt-3 text-sm font-medium text-blue-700 transition-all group-hover:gap-2 dark:text-blue-400 sm:inline-flex">
                             Learn more
                             <svg class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                         </span>
@@ -625,7 +629,7 @@
                 @endforeach
             </div>
             <div class="mt-8 text-center" data-reveal>
-                <a href="{{ marketing_url('/features') }}" class="group inline-flex items-center gap-1.5 font-medium text-sky-600 hover:underline dark:text-sky-400">
+                <a href="{{ marketing_url('/features') }}" class="group inline-flex items-center gap-1.5 font-medium text-sky-700 hover:underline dark:text-sky-400">
                     See all features
                     <svg aria-hidden="true" class="h-4 w-4 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                 </a>
@@ -713,7 +717,7 @@
                 <div class="es-ai-field flex items-center gap-2.5 rounded-lg bg-gray-50 px-3 py-2 dark:bg-white/5" style="--i: {{ $i + 1 }};">
                     <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400"></span>
                     <span class="min-w-0 flex-1 truncate text-[11px] text-gray-700 dark:text-gray-300">{{ $actName }}</span>
-                    <span class="shrink-0 text-[11px] text-gray-500 dark:text-gray-400">{{ $actNote }}</span>
+                    <span class="shrink-0 text-[11px] text-gray-600 dark:text-gray-400">{{ $actNote }}</span>
                 </div>
             @endforeach
         </div>
@@ -778,7 +782,7 @@
                 <div class="es-ai-field flex items-center gap-2 rounded-lg p-2 {{ $roomActive ? 'border border-sky-400/30 bg-sky-500/15' : 'bg-gray-100 dark:bg-white/5' }}" style="--i: {{ $i }};">
                     <div class="h-2 w-2 shrink-0 rounded-full {{ $roomDot }}"></div>
                     <span class="min-w-0 flex-1 truncate text-[13px] {{ $roomActive ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-300' }}">{{ $roomName }}</span>
-                    <span class="shrink-0 text-[11px] {{ $roomActive ? 'text-sky-700 dark:text-sky-300' : 'text-gray-500 dark:text-gray-400' }}">{{ $roomCount }}</span>
+                    <span class="shrink-0 text-[11px] {{ $roomActive ? 'text-sky-700 dark:text-sky-300' : 'text-gray-600 dark:text-gray-400' }}">{{ $roomCount }}</span>
                 </div>
             @endforeach
         </div>
@@ -878,8 +882,11 @@
                             </span>
                             <h3 class="text-sm font-semibold text-white sm:text-base">{{ $item['title'] }}</h3>
                         </div>
-                        <p class="hidden flex-grow text-sm text-gray-400 sm:block">{{ $item['desc'] }}</p>
-                        <span class="mt-auto hidden items-center gap-1 pt-3 text-sm font-medium {{ $item['text'] }} transition-all group-hover:gap-2 sm:inline-flex">
+                        <p class="hidden flex-grow text-sm text-gray-500 dark:text-gray-400 sm:block">{{ $item['desc'] }}</p>
+                        {{-- One link colour rather than one per card: the icon chip already
+                             carries each card's identity, and four of the twelve accents sat
+                             under 4.5:1 on white at this size. --}}
+                        <span class="mt-auto hidden items-center gap-1 pt-3 text-sm font-medium text-blue-700 transition-all group-hover:gap-2 dark:text-blue-400 sm:inline-flex">
                             Learn more
                             <svg class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                         </span>
@@ -909,7 +916,7 @@
                     <li data-reveal class="rounded-2xl border border-white/10 bg-white/[0.04] p-6">
                         <div class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-cyan-500 text-base font-black text-white">{{ $i + 1 }}</div>
                         <h3 class="mb-2 text-lg font-semibold text-white">{{ $step['name'] }}</h3>
-                        <p class="text-sm text-gray-400">{{ $step['text'] }}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $step['text'] }}</p>
                     </li>
                 @endforeach
             </ol>
@@ -968,7 +975,7 @@
                  version stacked into fourteen rows on a phone and made the reader
                  hold the left list in their head while scrolling the right one. --}}
             <div data-reveal="panel" class="overflow-hidden rounded-3xl border border-gray-200 bg-white dark:border-white/10 dark:bg-white/[0.04]">
-                <div class="hidden border-b border-gray-200 px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:border-white/10 dark:text-gray-500 sm:grid sm:grid-cols-[1fr_auto_1fr] sm:items-center sm:gap-4">
+                <div class="hidden border-b border-gray-200 px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:border-white/10 dark:text-gray-400 sm:grid sm:grid-cols-[1fr_auto_1fr] sm:items-center sm:gap-4">
                     <span>What you run today</span>
                     <span class="w-4"></span>
                     <span>With one schedule</span>
@@ -989,8 +996,8 @@
 
             <p class="mt-6 text-center text-sm text-gray-500 dark:text-gray-400" data-reveal>
                 Moving off a ticketing platform? See how we compare to
-                <a href="{{ marketing_url('/eventbrite-alternative') }}" class="font-medium text-sky-600 hover:underline dark:text-sky-400">Eventbrite</a>
-                and <a href="{{ marketing_url('/dice-alternative') }}" class="font-medium text-sky-600 hover:underline dark:text-sky-400">DICE</a>.
+                <a href="{{ marketing_url('/eventbrite-alternative') }}" class="font-medium text-sky-700 hover:underline dark:text-sky-400">Eventbrite</a>
+                and <a href="{{ marketing_url('/dice-alternative') }}" class="font-medium text-sky-700 hover:underline dark:text-sky-400">DICE</a>.
             </p>
         </div>
     </section>
@@ -1013,7 +1020,7 @@
                         <div class="mb-1 flex items-center gap-2">
                             <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ $plan['name'] }}</h3>
                             @if ($plan['featured'])
-                                <span class="rounded-full bg-sky-600 px-2 py-0.5 text-[11px] font-semibold text-white">Most venues</span>
+                                <span class="rounded-full bg-sky-700 px-2 py-0.5 text-[11px] font-semibold text-white">Most venues</span>
                             @endif
                         </div>
                         <div class="mb-2.5 flex items-baseline gap-1.5">
@@ -1029,7 +1036,7 @@
                                 </li>
                             @endforeach
                         </ul>
-                        <a href="{{ marketing_url('/pricing') }}" class="group mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-sky-600 transition-all hover:gap-2.5 dark:text-sky-400">
+                        <a href="{{ marketing_url('/pricing') }}" class="group mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-sky-700 transition-all hover:gap-2.5 dark:text-sky-400">
                             Compare the plans
                             <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                         </a>
@@ -1053,7 +1060,7 @@
                     <details name="faq" class="group rounded-2xl border border-gray-200 bg-white px-5 py-4 transition-colors hover:border-sky-300 dark:border-white/10 dark:bg-white/[0.04] dark:hover:border-sky-500/40" data-reveal>
                         <summary class="flex cursor-pointer items-center justify-between gap-4 text-base font-semibold text-gray-900 dark:text-white">
                             {{ $faq['q'] }}
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-400 transition-transform duration-200 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 dark:text-gray-400 transition-transform duration-200 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>
@@ -1091,7 +1098,7 @@
                         <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
                             <input id="es-claim-input" type="text" placeholder="your-venue" autocomplete="off" spellcheck="false" maxlength="30"
                                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
-                            <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
+                            <span class="shrink-0 select-none font-mono text-sm text-gray-500 dark:text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
                         <a href="{{ app_url('/sign_up?type=venue') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-sky-600 to-cyan-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-sky-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-cyan-500/40">
                             <span class="relative z-10 flex items-center gap-2">
@@ -1104,7 +1111,7 @@
                         </a>
                     </div>
 
-                    <p class="mt-6 text-sm text-gray-400">No credit card required</p>
+                    <p class="mt-6 text-sm text-gray-500 dark:text-gray-400">No credit card required</p>
                 </div>
             </div>
         </div>

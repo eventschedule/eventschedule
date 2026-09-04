@@ -549,7 +549,7 @@
                     <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
                         You play at <span class="es-dj-display es-dj-tube-lit-amber">2 AM.</span> The algorithm posts at 9.
                     </h2>
-                    <p class="mt-4 text-lg text-gray-400" data-reveal style="--reveal-delay: 0.16s;">
+                    <p class="mt-4 text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.16s;">
                         Your set announcement dies in a story. Your fans find out on Monday.
                     </p>
                 </div>
@@ -557,19 +557,19 @@
                 <div class="grid gap-4 md:grid-cols-3" data-reveal-group="120">
                     <div class="es-dj-sign-night rounded-2xl p-7 text-center" data-reveal="panel">
                         <div class="es-dj-display es-dj-tube-lit mb-3 text-2xl">Unseen</div>
-                        <p class="text-sm text-gray-400">Your gig post is three swipes deep before doors even open.</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Your gig post is three swipes deep before doors even open.</p>
                     </div>
                     <div class="es-dj-sign-night rounded-2xl p-7 text-center" data-reveal="panel">
                         <div class="es-dj-display es-dj-tube-lit mb-3 text-2xl">Scattered</div>
-                        <p class="text-sm text-gray-400">One date on the club page, one on RA, one in a chat. No single place that is yours.</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">One date on the club page, one on RA, one in a chat. No single place that is yours.</p>
                     </div>
                     <div class="es-dj-sign-night rounded-2xl p-7 text-center" data-reveal="panel">
                         <div class="es-dj-display es-dj-tube-lit-amber mb-3 text-2xl">10-20%</div>
-                        <p class="text-sm text-gray-400">of the door lost to ticket platform fees elsewhere. Event Schedule takes zero.</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">of the door lost to ticket platform fees elsewhere. Event Schedule takes zero.</p>
                     </div>
                 </div>
 
-                <p class="mt-10 text-center text-gray-400" data-reveal>
+                <p class="mt-10 text-center text-gray-500 dark:text-gray-400" data-reveal>
                     Time to switch your own sign on.
                     <a href="#features" class="inline-flex items-center gap-1 font-semibold text-[#67e8f9] transition-all hover:gap-2">
                         See the setup
@@ -621,7 +621,7 @@
                             <div class="w-full shrink-0 lg:w-auto" aria-hidden="true">
                                 <div class="animate-float">
                                     <div class="max-w-xs rounded-2xl border border-cyan-300 bg-gradient-to-br from-cyan-50 to-sky-50 p-4 shadow-lg dark:border-cyan-400/30 dark:from-[#0d1220] dark:to-[#0a0e18]">
-                                        <div class="mb-3 text-xs font-semibold text-cyan-600 dark:text-cyan-300">DECEMBER</div>
+                                        <div class="mb-3 text-xs font-semibold text-cyan-700 dark:text-cyan-300">DECEMBER</div>
                                         <div class="space-y-2">
                                             <div class="es-ai-field es-res-row flex items-center gap-3 rounded-lg p-2" style="--i: 0;">
                                                 <div class="w-12 text-xs font-bold es-res-date">FRI 6</div>
@@ -794,7 +794,7 @@
                             </div>
                             <div class="es-dj-od mx-auto w-full max-w-[240px] rounded-xl border border-emerald-300/50 bg-emerald-50 p-4 dark:border-emerald-400/30 dark:bg-emerald-500/10" aria-hidden="true">
                                 <div class="mb-3 text-center">
-                                    <div class="text-xs uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-300">Platform fee</div>
+                                    <div class="text-xs uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">Platform fee</div>
                                     <div class="es-od justify-center text-3xl font-black text-gray-900 dark:text-white" data-odometer="{{ plan_price(0) }}">{{ plan_price(0) }}</div>
                                     <div class="text-xs text-gray-500 dark:text-gray-400">You keep 100%</div>
                                 </div>
@@ -803,7 +803,7 @@
                                         <svg aria-hidden="true" class="h-4 w-4 text-emerald-500 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                         </svg>
-                                        <span class="text-xs text-emerald-600 dark:text-emerald-300">Direct to your Stripe</span>
+                                        <span class="text-xs text-emerald-700 dark:text-emerald-300">Direct to your Stripe</span>
                                     </div>
                                 </div>
                             </div>
@@ -841,14 +841,14 @@
                         <div dir="ltr" class="es-dj-slot-time pt-0.5 text-lg font-bold sm:text-xl">22:00</div>
                         <div>
                             <div class="es-dj-display mb-1 text-lg text-white sm:text-xl">Open decks</div>
-                            <p class="text-sm text-gray-400">Add your first set in minutes. Type it in, import from Google Calendar, or let AI parse the booking email. Drafts are free until you are ready.</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Add your first set in minutes. Type it in, import from Google Calendar, or let AI parse the booking email. Drafts are free until you are ready.</p>
                         </div>
                     </div>
                     <div class="es-dj-slot grid grid-cols-[5.5rem_1fr] gap-x-4 py-5 sm:grid-cols-[6.5rem_1fr] sm:gap-x-6" data-reveal>
                         <div dir="ltr" class="es-dj-slot-time pt-0.5 text-lg font-bold sm:text-xl">00:00</div>
                         <div>
                             <div class="es-dj-display mb-1 text-lg text-white sm:text-xl">Resident</div>
-                            <p class="text-sm text-gray-400">Set your night to repeat weekly or monthly. Templates clone it in one tap, and sub-schedules keep each club night or brand separate.</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Set your night to repeat weekly or monthly. Templates clone it in one tap, and sub-schedules keep each club night or brand separate.</p>
                         </div>
                     </div>
                     <div class="es-dj-slot es-dj-slot-live -mx-3 grid grid-cols-[5.5rem_1fr] gap-x-4 rounded-xl px-3 py-5 sm:grid-cols-[6.5rem_1fr] sm:gap-x-6" data-reveal>
@@ -858,14 +858,14 @@
                                 <span class="es-dj-display text-lg text-white sm:text-xl">Headline</span>
                                 <span class="es-dj-decal es-dj-decal-on !py-1 !px-2.5 text-[10px]">On air</span>
                             </div>
-                            <p class="text-sm text-gray-400">Fans sign up for email and hear automatically when you add a date. One newsletter fills the floor before you are on.</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Fans sign up for email and hear automatically when you add a date. One newsletter fills the floor before you are on.</p>
                         </div>
                     </div>
                     <div class="es-dj-slot grid grid-cols-[5.5rem_1fr] gap-x-4 py-5 sm:grid-cols-[6.5rem_1fr] sm:gap-x-6" data-reveal>
                         <div dir="ltr" class="es-dj-slot-time pt-0.5 text-lg font-bold sm:text-xl">04:00</div>
                         <div>
                             <div class="es-dj-display mb-1 text-lg text-white sm:text-xl">Festival closer</div>
-                            <p class="text-sm text-gray-400">Your manager or agency gets team access. Venues sync you into their lineups automatically. You just play.</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Your manager or agency gets team access. Venues sync you into their lineups automatically. You just play.</p>
                         </div>
                     </div>
                 </div>
@@ -1027,17 +1027,17 @@
                     <div class="es-dj-sign-night rounded-2xl p-7 text-center" data-reveal="panel">
                         <div class="es-dj-display es-dj-tube-lit mx-auto mb-5 text-4xl">1</div>
                         <h3 class="mb-2 text-lg font-semibold text-white">Add your sets</h3>
-                        <p class="text-sm text-gray-400">Import from Google Cal or add manually. Residencies auto-repeat weekly or monthly.</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Import from Google Cal or add manually. Residencies auto-repeat weekly or monthly.</p>
                     </div>
                     <div class="es-dj-sign-night rounded-2xl p-7 text-center" data-reveal="panel">
                         <div class="es-dj-display es-dj-tube-lit mx-auto mb-5 text-4xl">2</div>
                         <h3 class="mb-2 text-lg font-semibold text-white">Drop your link</h3>
-                        <p class="text-sm text-gray-400">Add to your RA profile, Linktree, SoundCloud bio. Anywhere fans find you.</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Add to your RA profile, Linktree, SoundCloud bio. Anywhere fans find you.</p>
                     </div>
                     <div class="es-dj-sign-night rounded-2xl p-7 text-center" data-reveal="panel">
                         <div class="es-dj-display es-dj-tube-lit-amber mx-auto mb-5 text-4xl">3</div>
                         <h3 class="mb-2 text-lg font-semibold text-white">Pack the dancefloor</h3>
-                        <p class="text-sm text-gray-400">Fans sign up for email, hear automatically when you're spinning, and show up ready to dance.</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Fans sign up for email, hear automatically when you're spinning, and show up ready to dance.</p>
                     </div>
                 </div>
             </div>
@@ -1134,7 +1134,7 @@
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
                             <div class="es-dj-hover-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="es-dj-hover-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="es-dj-hover-arrow w-5 h-5 text-gray-500 dark:text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
@@ -1230,7 +1230,7 @@
                         <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
                             <input id="es-claim-input" type="text" placeholder="dj-name" autocomplete="off" spellcheck="false" maxlength="30"
                                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
-                            <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
+                            <span class="shrink-0 select-none font-mono text-sm text-gray-500 dark:text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
                         <a href="{{ app_url('/sign_up?type=talent') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl es-dj-cta px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-cyan-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-cyan-500/40">
                             <span class="relative z-10 flex items-center gap-2">
@@ -1243,7 +1243,7 @@
                         </a>
                     </div>
 
-                    <p class="mt-6 text-sm text-gray-400">No credit card required</p>
+                    <p class="mt-6 text-sm text-gray-500 dark:text-gray-400">No credit card required</p>
                 </div>
             </div>
         </div>

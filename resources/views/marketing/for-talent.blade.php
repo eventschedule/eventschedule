@@ -289,7 +289,7 @@
                     <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-[10px] font-black text-white">TL</span>
                     <div class="min-w-0 flex-1">
                         <div class="truncate text-xs font-bold text-gray-900 dark:text-white">The Lantern</div>
-                        <div class="truncate text-[11px] text-gray-500 dark:text-gray-400">wants to add you to a show</div>
+                        <div class="truncate text-[11px] text-gray-600 dark:text-gray-400">wants to add you to a show</div>
                     </div>
                 </div>
                 <div class="mb-3 rounded-lg bg-white/70 px-2.5 py-2 text-[11px] text-gray-600 dark:bg-black/20 dark:text-gray-300">
@@ -327,9 +327,9 @@
             <div class="space-y-1.5">
                 @foreach ([['Sep 12', 'The Lantern'], ['Sep 20', 'Blue Room'], ['Oct 02', 'Open Mic Night']] as [$d, $v])
                     <div class="flex items-center gap-2.5 rounded-lg border border-gray-200 px-2.5 py-1.5 dark:border-white/10">
-                        <span class="w-12 shrink-0 text-[10px] font-bold text-sky-600 dark:text-sky-400">{{ $d }}</span>
+                        <span class="w-12 shrink-0 text-[10px] font-bold text-sky-700 dark:text-sky-400">{{ $d }}</span>
                         <span class="min-w-0 flex-1 truncate text-[11px] text-gray-700 dark:text-gray-300">{{ $v }}</span>
-                        <span class="shrink-0 text-[10px] text-gray-400">Tickets</span>
+                        <span class="shrink-0 text-[10px] text-gray-500 dark:text-gray-400">Tickets</span>
                     </div>
                 @endforeach
             </div>
@@ -467,33 +467,33 @@
                     <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
                         A sold-out night, <span class="text-gradient-talent">two invoices</span>
                     </h2>
-                    <p class="text-lg text-gray-400" data-reveal style="--reveal-delay: 0.14s;">
+                    <p class="text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.14s;">
                         {{ $feeTickets }} tickets at ${{ $feePrice }}, so ${{ number_format($feeRevenue) }} through the door. Here is what each platform takes.
                     </p>
                 </div>
 
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-3" data-reveal-group="110">
                     <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-6 text-center backdrop-blur-sm" data-reveal="panel">
-                        <div class="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">Eventbrite</div>
+                        <div class="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Eventbrite</div>
                         <div class="mb-2 text-4xl font-black text-white">${{ number_format($feeEb, 2) }}</div>
-                        <p class="text-sm text-gray-400">3.7% + $1.79 per ticket, with payment processing bundled in.</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">3.7% + $1.79 per ticket, with payment processing bundled in.</p>
                     </div>
 
                     <div class="rounded-2xl border border-cyan-400/30 bg-cyan-500/10 p-6 text-center backdrop-blur-sm" data-reveal="panel">
                         <div class="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300">Event Schedule</div>
                         <div class="mb-2 text-4xl font-black text-white">${{ number_format($feeEs, 2) }}</div>
-                        <p class="text-sm text-gray-400">{{ plan_price($proMonthly) }} for Pro plus Stripe's 2.9% + $0.30. Our platform fee is {{ plan_price(0) }}.</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ plan_price($proMonthly) }} for Pro plus Stripe's 2.9% + $0.30. Our platform fee is {{ plan_price(0) }}.</p>
                     </div>
 
                     <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-6 text-center backdrop-blur-sm" data-reveal="panel">
-                        <div class="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">You keep</div>
+                        <div class="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">You keep</div>
                         <div class="mb-2 text-4xl font-black text-gradient-talent">${{ number_format($feeKeep, 2) }}</div>
-                        <p class="text-sm text-gray-400">More, on one night. Roughly {{ floor($feeKeep / $feePrice) }} extra tickets you didn't have to sell.</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">More, on one night. Roughly {{ floor($feeKeep / $feePrice) }} extra tickets you didn't have to sell.</p>
                     </div>
                 </div>
 
                 {{-- gray-400, not gray-500: small text on the dark band needs 4.5:1. --}}
-                <p class="mx-auto mt-8 max-w-3xl text-center text-sm text-gray-400" data-reveal>
+                <p class="mx-auto mt-8 max-w-3xl text-center text-sm text-gray-500 dark:text-gray-400" data-reveal>
                     Card processing is real either way. Eventbrite folds it into their rate; we show Stripe's separately and charge nothing on top, so the comparison is like for like.
                     <a href="{{ marketing_url('/pricing') }}#fees" class="ms-1 font-medium text-cyan-300 hover:underline">Run your own numbers</a>
                 </p>
@@ -662,7 +662,7 @@
                     <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-colors hover:border-blue-300 dark:border-white/10 dark:bg-white/[0.04] dark:hover:border-blue-500/40">
                         <summary class="flex cursor-pointer items-center justify-between gap-4 p-6">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $faq['q'] }}</h3>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>
@@ -699,7 +699,7 @@
                         <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
                             <input id="es-claim-input" type="text" placeholder="your-name" autocomplete="off" spellcheck="false" maxlength="30"
                                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
-                            <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
+                            <span class="shrink-0 select-none font-mono text-sm text-gray-500 dark:text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
                         <a href="{{ app_url('/sign_up?type=talent') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
                             <span class="relative z-10 flex items-center gap-2">
@@ -712,7 +712,7 @@
                         </a>
                     </div>
 
-                    <p class="mt-6 text-sm text-gray-400">No credit card required</p>
+                    <p class="mt-6 text-sm text-gray-500 dark:text-gray-400">No credit card required</p>
                 </div>
             </div>
         </div>

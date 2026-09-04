@@ -616,7 +616,7 @@
                     <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>
                         See it in <span class="text-gradient">action</span>
                     </h2>
-                    <p class="text-lg text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
+                    <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                         From first event to sold-out show, in one short tour.
                     </p>
                 </div>
@@ -630,7 +630,7 @@
                                 <span class="h-3 w-3 rounded-full bg-[#FEBC2E]"></span>
                                 <span class="h-3 w-3 rounded-full bg-[#28C840]"></span>
                             </span>
-                            <span class="mx-auto flex items-center gap-1.5 rounded-lg bg-white/10 px-4 py-1 text-xs font-medium text-gray-400">
+                            <span class="mx-auto flex items-center gap-1.5 rounded-lg bg-white/10 px-4 py-1 text-xs font-medium text-gray-300">
                                 <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                                 eventschedule.com
                             </span>
@@ -737,7 +737,7 @@
                                 <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                                 Secure payments by Stripe
                             </span>
-                            <span class="inline-flex items-center gap-1 text-sm font-medium text-sky-600 transition-all group-hover:gap-2 dark:text-sky-400">
+                            <span class="inline-flex items-center gap-1 text-sm font-medium text-sky-700 transition-all group-hover:gap-2 dark:text-sky-400">
                                 Learn more
                                 <svg class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                             </span>
@@ -760,7 +760,7 @@
                                 </div>
                                 <p class="text-gray-600 dark:text-gray-400">Send branded emails to followers and ticket buyers with a drag-and-drop editor and A/B testing.</p>
                                 <p class="mt-3 text-xs font-medium text-gray-500 dark:text-gray-400">Templates · Audience segments · A/B testing</p>
-                                <span class="mt-4 inline-flex items-center gap-1 text-sm font-medium text-sky-600 transition-all group-hover:gap-2 dark:text-sky-400">
+                                <span class="mt-4 inline-flex items-center gap-1 text-sm font-medium text-sky-700 transition-all group-hover:gap-2 dark:text-sky-400">
                                     Learn more
                                     <svg class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                                 </span>
@@ -784,7 +784,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="absolute -top-3 ltr:-right-2 rtl:-left-2 rounded-full border border-sky-200 bg-white px-3 py-1 text-[10px] font-semibold text-sky-600 shadow-md dark:border-sky-500/30 dark:bg-[#15151c] dark:text-sky-400">
+                                <div class="absolute -top-3 ltr:-right-2 rtl:-left-2 rounded-full border border-sky-200 bg-white px-3 py-1 text-[10px] font-semibold text-sky-700 shadow-md dark:border-sky-500/30 dark:bg-[#15151c] dark:text-sky-400">
                                     {{-- Kept under the 1,000-recipient Enterprise ceiling
                                          (Role::newsletterLimit): the allowance counts
                                          recipients, so a send of 1,248 is not possible on
@@ -813,7 +813,7 @@
                         <div class="mt-5 grid grid-cols-[1fr_auto_1.2fr] items-center gap-3" aria-hidden="true">
                             <div class="rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-white/10 dark:bg-white/5">
                                 <div class="mb-2 flex h-10 items-center justify-center rounded-lg bg-gray-200 dark:bg-white/10">
-                                    <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                    <svg class="h-4 w-4 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                                 </div>
                                 <div class="mb-1.5 h-1.5 w-full rounded-full bg-gray-200 dark:bg-white/10"></div>
                                 <div class="h-1.5 w-2/3 rounded-full bg-gray-200 dark:bg-white/10"></div>
@@ -863,7 +863,7 @@
                                 </span>
                                 <div>
                                     <div class="text-[9px] font-semibold text-gray-900 dark:text-white">The Blue Note</div>
-                                    <div class="text-[8px] text-gray-400">Sponsored</div>
+                                    <div class="text-[8px] text-gray-500 dark:text-gray-400">Sponsored</div>
                                 </div>
                             </div>
                             <div class="flex h-16 items-center justify-center bg-gradient-to-br from-orange-200 to-amber-200 text-[10px] font-bold text-orange-600 dark:from-orange-800/60 dark:to-amber-800/60 dark:text-orange-300">Jazz Night</div>
@@ -876,7 +876,7 @@
                             </div>
                         </div>
 
-                        <span class="mt-auto inline-flex items-center gap-1 pt-4 text-sm font-medium text-orange-600 transition-all group-hover:gap-2 dark:text-orange-400">
+                        <span class="mt-auto inline-flex items-center gap-1 pt-4 text-sm font-medium text-orange-700 transition-all group-hover:gap-2 dark:text-orange-400">
                             Learn more
                             <svg class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                         </span>
@@ -910,7 +910,7 @@
                             </div>
                         </div>
 
-                        <span class="mt-auto inline-flex items-center gap-1 pt-4 text-sm font-medium text-emerald-600 transition-all group-hover:gap-2 dark:text-emerald-400">
+                        <span class="mt-auto inline-flex items-center gap-1 pt-4 text-sm font-medium text-emerald-700 transition-all group-hover:gap-2 dark:text-emerald-400">
                             Learn more
                             <svg class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                         </span>
@@ -1040,12 +1040,12 @@
                                 <div>
                                     <div class="mb-3 flex items-center justify-between">
                                         <span class="text-sm font-bold text-gray-900 dark:text-white">July</span>
-                                        <span class="flex gap-1 text-gray-400">
+                                        <span class="flex gap-1 text-gray-500 dark:text-gray-400">
                                             <span class="flex h-6 w-6 items-center justify-center rounded-lg border border-gray-200 text-xs dark:border-white/10">&lsaquo;</span>
                                             <span class="flex h-6 w-6 items-center justify-center rounded-lg border border-gray-200 text-xs dark:border-white/10">&rsaquo;</span>
                                         </span>
                                     </div>
-                                    <div class="mb-1 grid grid-cols-7 text-center text-[10px] font-semibold uppercase text-gray-400">
+                                    <div class="mb-1 grid grid-cols-7 text-center text-[10px] font-semibold uppercase text-gray-500 dark:text-gray-400">
                                         <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
                                     </div>
                                     <div class="grid grid-cols-7 gap-1 text-center text-xs font-medium text-gray-700 dark:text-gray-300">
@@ -1069,11 +1069,11 @@
                                         <span class="py-1.5">31</span>
                                         <span class="py-1.5"></span><span class="py-1.5"></span><span class="py-1.5"></span>
                                     </div>
-                                    <div class="mt-3 border-t border-gray-100 pt-2 text-[10px] font-medium text-gray-400 dark:border-white/5">Times shown in your timezone</div>
+                                    <div class="mt-3 border-t border-gray-100 pt-2 text-[10px] font-medium text-gray-500 dark:border-white/5 dark:text-gray-400">Times shown in your timezone</div>
                                 </div>
                                 <!-- Slots -->
                                 <div class="flex flex-col gap-2">
-                                    <span class="text-xs font-bold uppercase tracking-wide text-gray-400">Tue, Jul 15</span>
+                                    <span class="text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">Tue, Jul 15</span>
                                     <span class="glass rounded-full px-4 py-2 text-center text-xs font-semibold text-gray-700 dark:text-gray-300" data-reveal>9:00 AM</span>
                                     <span class="glass rounded-full px-4 py-2 text-center text-xs font-semibold text-gray-700 dark:text-gray-300" data-reveal>11:30 AM</span>
                                     <span class="flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#4E81FA] to-[#0EA5E9] px-4 py-2 text-center text-xs font-bold text-white shadow-md shadow-blue-500/30" data-reveal>
@@ -1112,7 +1112,7 @@
                 // stream, so name platforms only as examples of a link.
                 'desc' => 'Paste the link people join on: Zoom, Meet, Twitch, your own page. Toggle between in person and online, and the link prints on every ticket.',
                 'chip' => 'bg-sky-100 dark:bg-sky-500/20',
-                'text' => 'text-sky-600 dark:text-sky-400',
+                'text' => 'text-sky-700 dark:text-sky-400',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />',
             ],
             [
@@ -1143,7 +1143,7 @@
                 'title' => 'Fan Videos & Comments',
                 'desc' => 'Fans add YouTube videos and comments to your events, with your approval before anything goes live.',
                 'chip' => 'bg-rose-100 dark:bg-rose-500/20',
-                'text' => 'text-rose-600 dark:text-rose-400',
+                'text' => 'text-rose-700 dark:text-rose-400',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />',
             ],
             [
@@ -1154,7 +1154,7 @@
                 // Rooms are not a feature, so do not imply per-room scheduling.
                 'desc' => 'Give a run of events a name, a colour and a link of its own. Perfect for a weekly series or a season of shows.',
                 'chip' => 'bg-rose-100 dark:bg-rose-500/20',
-                'text' => 'text-rose-600 dark:text-rose-400',
+                'text' => 'text-rose-700 dark:text-rose-400',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />',
             ],
             [
@@ -1163,7 +1163,7 @@
                 'title' => 'Event Graphics',
                 'desc' => 'Auto-generate shareable images and formatted text for your upcoming events. Ready for Instagram, WhatsApp, email, and more.',
                 'chip' => 'bg-orange-100 dark:bg-orange-500/20',
-                'text' => 'text-orange-600 dark:text-orange-400',
+                'text' => 'text-orange-700 dark:text-orange-400',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />',
             ],
             [
@@ -1172,7 +1172,7 @@
                 'title' => 'Custom Fields',
                 'desc' => 'Six field types, from a yes/no toggle to a multi-select. Ask at checkout, or put the question on your public event request form.',
                 'chip' => 'bg-amber-100 dark:bg-amber-500/20',
-                'text' => 'text-amber-600 dark:text-amber-400',
+                'text' => 'text-amber-700 dark:text-amber-400',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />',
             ],
             [
@@ -1181,7 +1181,7 @@
                 'title' => 'Private Events',
                 'desc' => 'Four levels of visibility, from a public listing to an unlisted page behind a password. Hide an event from your calendar and still send someone the link.',
                 'chip' => 'bg-yellow-100 dark:bg-yellow-500/20',
-                'text' => 'text-yellow-600 dark:text-yellow-400',
+                'text' => 'text-yellow-700 dark:text-yellow-400',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />',
             ],
             [
@@ -1190,7 +1190,7 @@
                 'title' => 'Recurring Events',
                 'desc' => 'Set events to repeat weekly on chosen days with flexible end conditions and per-occurrence tickets.',
                 'chip' => 'bg-lime-100 dark:bg-lime-500/20',
-                'text' => 'text-lime-600 dark:text-lime-400',
+                'text' => 'text-lime-700 dark:text-lime-400',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />',
             ],
             [
@@ -1199,7 +1199,7 @@
                 'title' => 'White-label Branding',
                 'desc' => 'Take our name off every page, ticket and email, then bring your own colours, fonts, favicon and CSS.',
                 'chip' => 'bg-emerald-100 dark:bg-emerald-500/20',
-                'text' => 'text-emerald-600 dark:text-emerald-400',
+                'text' => 'text-emerald-700 dark:text-emerald-400',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />',
             ],
             [
@@ -1208,7 +1208,7 @@
                 'title' => 'Team Scheduling',
                 'desc' => 'Invite people instead of sharing a login. Admins run the schedule and see sales; viewers are read-only but can still scan tickets at the door.',
                 'chip' => 'bg-cyan-100 dark:bg-cyan-500/20',
-                'text' => 'text-cyan-600 dark:text-cyan-400',
+                'text' => 'text-cyan-700 dark:text-cyan-400',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />',
             ],
             [
@@ -1219,7 +1219,7 @@
                 // PassBookingService (visit passes, memberships, season and festival passes).
                 'desc' => 'Sell gift cards that arrive by email with a running balance, and passes that admit the same guest across a season or a whole festival.',
                 'chip' => 'bg-teal-100 dark:bg-teal-500/20',
-                'text' => 'text-teal-600 dark:text-teal-400',
+                'text' => 'text-teal-700 dark:text-teal-400',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zM5 12h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />',
             ],
         ];
@@ -1241,7 +1241,11 @@
                             <h3 class="font-semibold text-gray-900 dark:text-white">{{ $feature['title'] }}</h3>
                         </div>
                         <p class="flex-grow text-sm text-gray-600 dark:text-gray-400">{{ $feature['desc'] }}</p>
-                        <span class="mt-auto inline-flex items-center gap-1 pt-3 text-sm font-medium {{ $feature['text'] }} transition-all group-hover:gap-2">
+                        {{-- One link colour, not twelve. The icon chip already carries each
+                             card's identity; giving the affordance twelve different colours
+                             made the grid read as a paint chart and put four of them under
+                             4.5:1 on white. --}}
+                        <span class="mt-auto inline-flex items-center gap-1 pt-3 text-sm font-medium text-blue-700 transition-all group-hover:gap-2 dark:text-blue-400">
                             Learn more
                             <svg class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                         </span>
@@ -1294,7 +1298,7 @@
                                 <div class="absolute -top-20 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-[#4E81FA]/30 blur-[80px]" aria-hidden="true"></div>
                                 <div class="relative">
                                     <div class="mb-3 text-2xl font-black text-white">Your events could be here</div>
-                                    <p class="mb-6 text-sm text-gray-400">Create your schedule and get discovered by the community.</p>
+                                    <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">Create your schedule and get discovered by the community.</p>
                                     <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#4E81FA] via-[#0EA5E9] to-[#22D3EE] px-6 py-3 font-semibold text-white shadow-xl shadow-blue-500/30 transition-transform hover:scale-105">
                                         Start for free
                                         <svg class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
@@ -1610,17 +1614,17 @@
                                     </div>
                                     <div class="space-y-3">
                                         <div class="es-pop flex items-center gap-3 rounded-xl border border-gray-200 p-3 dark:border-white/10" style="--i: 1;">
-                                            <span class="w-12 shrink-0 rounded-lg bg-blue-50 py-1.5 text-center dark:bg-blue-500/15"><span class="block text-[9px] font-bold uppercase text-blue-500">Jul</span><span class="block text-lg font-black leading-none text-gray-900 dark:text-white">18</span></span>
+                                            <span class="w-12 shrink-0 rounded-lg bg-blue-50 py-1.5 text-center dark:bg-blue-500/15"><span class="block text-[9px] font-bold uppercase text-blue-600 dark:text-blue-400">Jul</span><span class="block text-lg font-black leading-none text-gray-900 dark:text-white">18</span></span>
                                             <div class="min-w-0"><div class="truncate text-sm font-semibold text-gray-900 dark:text-white">Jazz Night</div><div class="text-xs text-gray-500 dark:text-gray-400">8:00 PM · $25</div></div>
                                             <span class="ml-auto rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400">Tickets</span>
                                         </div>
                                         <div class="es-pop flex items-center gap-3 rounded-xl border border-gray-200 p-3 dark:border-white/10" style="--i: 2;">
-                                            <span class="w-12 shrink-0 rounded-lg bg-sky-50 py-1.5 text-center dark:bg-sky-500/15"><span class="block text-[9px] font-bold uppercase text-sky-500">Jul</span><span class="block text-lg font-black leading-none text-gray-900 dark:text-white">24</span></span>
+                                            <span class="w-12 shrink-0 rounded-lg bg-sky-50 py-1.5 text-center dark:bg-sky-500/15"><span class="block text-[9px] font-bold uppercase text-sky-700 dark:text-sky-400">Jul</span><span class="block text-lg font-black leading-none text-gray-900 dark:text-white">24</span></span>
                                             <div class="min-w-0"><div class="truncate text-sm font-semibold text-gray-900 dark:text-white">Open Mic</div><div class="text-xs text-gray-500 dark:text-gray-400">7:30 PM · Free</div></div>
                                             <span class="ml-auto rounded-full bg-blue-100 px-2.5 py-1 text-[10px] font-semibold text-blue-700 dark:bg-blue-500/20 dark:text-blue-400">RSVP</span>
                                         </div>
                                         <div class="es-pop flex items-center gap-3 rounded-xl border border-gray-200 p-3 dark:border-white/10" style="--i: 3;">
-                                            <span class="w-12 shrink-0 rounded-lg bg-cyan-50 py-1.5 text-center dark:bg-cyan-500/15"><span class="block text-[9px] font-bold uppercase text-cyan-500">Aug</span><span class="block text-lg font-black leading-none text-gray-900 dark:text-white">01</span></span>
+                                            <span class="w-12 shrink-0 rounded-lg bg-cyan-50 py-1.5 text-center dark:bg-cyan-500/15"><span class="block text-[9px] font-bold uppercase text-cyan-700 dark:text-cyan-400">Aug</span><span class="block text-lg font-black leading-none text-gray-900 dark:text-white">01</span></span>
                                             <div class="min-w-0"><div class="truncate text-sm font-semibold text-gray-900 dark:text-white">Blues & Brews</div><div class="text-xs text-gray-500 dark:text-gray-400">9:00 PM · $18</div></div>
                                             <span class="ml-auto rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400">Tickets</span>
                                         </div>
@@ -1743,7 +1747,7 @@
                         <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
                             <input id="es-claim-input" type="text" placeholder="your-name" autocomplete="off" spellcheck="false" maxlength="30"
                                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
-                            <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
+                            <span class="shrink-0 select-none font-mono text-sm text-gray-500 dark:text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
                         <a href="{{ app_url('/sign_up') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-[#4E81FA] via-[#0EA5E9] to-[#22D3EE] px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-cyan-500/40">
                             <span class="relative z-10 flex items-center gap-2">
@@ -1754,7 +1758,7 @@
                         </a>
                     </div>
 
-                    <p class="mt-6 text-sm text-gray-400">No credit card required. Free forever.</p>
+                    <p class="mt-6 text-sm text-gray-500 dark:text-gray-400">No credit card required. Free forever.</p>
                 </div>
             </div>
         </div>

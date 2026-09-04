@@ -8,7 +8,7 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 
 **Updated:** 153 / 153 rebuilt
 
-**Pass 2:** 0 / 153 deepened
+**Pass 2:** 1 / 153 deepened
 
 > **Ticketing plan model change - SWEPT 2026-07-31.** Another session shipped a real product
 > change mid-campaign: the FREE tier now SELLS paid tickets, 25 per calendar month per
@@ -83,7 +83,7 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 
 | Reviewed | Updated | Pass 2 | Page | URL | Notes |
 |:--------:|:-------:|:------:|------|-----|-------|
-| ✅ | ✅ |   | Homepage | `/` | Homepage-exclusive design (poster wall, 3D showcase, pinned gallery rail, integrations orbit). 2026-09 pass: reserved seating + gift cards added to the grid, calendar/analytics/AI/ticketing claims re-grounded, FAQ expanded to 7 with payouts and custom domains, how-it-works corrected for automatic new-event digests, claim input no longer a dead end. |
+| ✅ | ✅ | ✅ | Homepage | `/` | Homepage-exclusive design (poster wall, 3D showcase, pinned gallery rail, integrations orbit). 2026-09 pass: reserved seating + gift cards added to the grid, calendar/analytics/AI/ticketing claims re-grounded, FAQ expanded to 7 with payouts and custom domains, how-it-works corrected for automatic new-event digests, claim input no longer a dead end. PASS 2: contrast clean in both modes (accent "Learn more" links were 3.2-4.1:1 on white); the twelve-colour link palette in the feature grid unified on one brand blue so the icon chips carry identity and the affordance reads as one thing; captions inside the mockups raised off gray-400. |
 | ✅ | ✅ |   | Features | `/features` | Five chapters via `<x-marketing.feature-chapter>` / `<x-marketing.feature-banner>`. 2026-09 pass: new "small print" section covering 16 real capabilities the page never named (installments, add-ons, waitlist, bulk import, WhatsApp, agenda scanning) with per-row tier badges; private-events banner rebuilt around the four real visibility states; newsletters, fan content and analytics claims re-grounded. |
 | ✅ | ✅ |   | Pricing | `/pricing` | Rebuilt July 2026 (the feature lists are curated - see CLAUDE.md before editing them). 2026-09 pass: added the two questions asked most before signing up - what happens at the 25-ticket cap, and what happens on cancel or downgrade - answered from `Role::ticketSaleLimit()` / `paidTicketAllowanceAvailable()` behaviour; fee answer rewritten around direct payouts; fixed a hardcoded `$` beside our own Pro price in the fee calculator. |
 | ✅ | ✅ |   | About | `/about` | "The Colophon" ground-up rebuild. 2026-09 pass: errata corrected now that `app:send-event-announcements` ships - the automatic digest reaches confirmed subscribers, while account followers stay newsletter-only, and the double-booking erratum now excludes appointments, which genuinely cannot clash. |

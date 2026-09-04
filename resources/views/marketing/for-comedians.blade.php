@@ -401,13 +401,13 @@
             <!-- The journey: open mic to headliner -->
             <div class="es-fade-up es-d-4 mt-14 flex flex-wrap items-center justify-center gap-3">
                 <span class="inline-flex items-center rounded-lg border border-red-300 bg-red-100 px-3 py-1.5 text-xs font-medium text-red-700 dark:border-red-800/50 dark:bg-red-900/40 dark:text-red-300">Open Mic</span>
-                <svg aria-hidden="true" class="h-4 w-4 text-gray-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                <svg aria-hidden="true" class="h-4 w-4 text-gray-500 dark:text-gray-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                 <span class="inline-flex items-center rounded-lg border border-amber-300 bg-amber-100 px-3 py-1.5 text-xs font-medium text-amber-700 dark:border-amber-800/50 dark:bg-amber-900/40 dark:text-amber-300">Bringer</span>
-                <svg aria-hidden="true" class="h-4 w-4 text-gray-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                <svg aria-hidden="true" class="h-4 w-4 text-gray-500 dark:text-gray-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                 <span class="inline-flex items-center rounded-lg border border-orange-300 bg-orange-100 px-3 py-1.5 text-xs font-medium text-orange-700 dark:border-orange-800/50 dark:bg-orange-900/40 dark:text-orange-300">Guest Spot</span>
-                <svg aria-hidden="true" class="h-4 w-4 text-gray-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                <svg aria-hidden="true" class="h-4 w-4 text-gray-500 dark:text-gray-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                 <span class="inline-flex items-center rounded-lg border border-rose-300 bg-rose-100 px-3 py-1.5 text-xs font-medium text-rose-700 dark:border-rose-800/50 dark:bg-rose-900/40 dark:text-rose-300">Feature</span>
-                <svg aria-hidden="true" class="h-4 w-4 text-gray-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                <svg aria-hidden="true" class="h-4 w-4 text-gray-500 dark:text-gray-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                 <span class="inline-flex items-center rounded-lg border border-amber-500/50 bg-gradient-to-r from-amber-500 to-rose-500 px-4 py-1.5 text-xs font-bold text-white shadow-lg shadow-amber-500/20">Headliner</span>
             </div>
         </div>
@@ -438,19 +438,19 @@
                 <div class="grid gap-4 md:grid-cols-3" data-reveal-group="120">
                     <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-7 text-center backdrop-blur-sm" data-reveal="panel">
                         <div class="mb-2 text-4xl font-black text-red-400">7</div>
-                        <div class="text-sm text-gray-400">mics a week just to stay sharp</div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">mics a week just to stay sharp</div>
                     </div>
                     <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-7 text-center backdrop-blur-sm" data-reveal="panel">
                         <div class="mb-2 text-4xl font-black text-amber-400">5</div>
-                        <div class="text-sm text-gray-400">clubs where you're trying to get regular</div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">clubs where you're trying to get regular</div>
                     </div>
                     <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-7 text-center backdrop-blur-sm" data-reveal="panel">
                         <div class="mb-2 text-4xl font-black text-rose-400">~3%</div>
-                        <div class="text-sm text-gray-400">of your followers actually see your show posts</div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">of your followers actually see your show posts</div>
                     </div>
                 </div>
 
-                <p class="mt-10 text-center text-gray-400" data-reveal>
+                <p class="mt-10 text-center text-gray-500 dark:text-gray-400" data-reveal>
                     There is a better way to fill the room.
                     <a href="#set" class="inline-flex items-center gap-1 font-semibold text-amber-400 transition-all hover:gap-2">
                         Here is the set
@@ -516,13 +516,13 @@
                             <span class="es-comic-mono w-7 shrink-0 text-sm font-bold text-gray-500 dark:text-gray-400">--</span>
                             <span class="min-w-0 truncate font-semibold">Crowd Work</span>
                             <span class="es-comic-leader" aria-hidden="true"></span>
-                            <span class="es-comic-mono text-sm text-gray-500 dark:text-gray-400">runs long</span>
+                            <span class="es-comic-mono text-sm text-gray-600 dark:text-gray-400">runs long</span>
                         </a>
                         <a class="es-comic-row" href="#claim">
                             <span class="es-comic-mono w-7 shrink-0 text-sm font-bold text-gray-500 dark:text-gray-400">--</span>
                             <span class="min-w-0 truncate font-semibold">Encore</span>
                             <span class="es-comic-leader" aria-hidden="true"></span>
-                            <span class="es-comic-mono truncate text-sm text-gray-500 dark:text-gray-400">they always want one more</span>
+                            <span class="es-comic-mono truncate text-sm text-gray-600 dark:text-gray-400">they always want one more</span>
                         </a>
 
                         <div class="mt-4 flex items-baseline gap-2 border-t border-amber-900/10 pt-4 dark:border-white/10">
@@ -590,27 +590,27 @@
                             <div class="es-comic-paper rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-white/10 dark:bg-black/40" aria-hidden="true">
                                 <div class="mb-4 flex items-center justify-between">
                                     <span class="text-sm font-medium text-gray-500 dark:text-gray-400">This Week</span>
-                                    <span class="es-comic-mono text-xs font-semibold text-amber-600 dark:text-amber-400"><span data-count-to="47">47</span> min stage time</span>
+                                    <span class="es-comic-mono text-xs font-semibold text-amber-700 dark:text-amber-400"><span data-count-to="47">47</span> min stage time</span>
                                 </div>
                                 <div class="space-y-3">
                                     <div class="es-ai-field flex items-center gap-4 rounded-xl border border-red-200 bg-red-100 p-3 dark:border-red-800/30 dark:bg-red-900/20" style="--i: 0;">
-                                        <div class="w-12 text-center"><div class="text-xs font-bold text-red-600 dark:text-red-300">MON</div><div class="text-lg font-bold text-gray-900 dark:text-white">12</div></div>
-                                        <div class="flex-1"><div class="font-semibold text-gray-900 dark:text-white">Stand Up NY</div><div class="text-sm text-gray-500 dark:text-gray-400">Open mic · 7 PM signup</div></div>
+                                        <div class="w-12 text-center"><div class="text-xs font-bold text-red-700 dark:text-red-300">MON</div><div class="text-lg font-bold text-gray-900 dark:text-white">12</div></div>
+                                        <div class="flex-1"><div class="font-semibold text-gray-900 dark:text-white">Stand Up NY</div><div class="text-sm text-gray-600 dark:text-gray-400">Open mic · 7 PM signup</div></div>
                                         <div class="inline-flex items-center rounded bg-red-100 px-2 py-1 text-xs font-medium text-red-700 dark:bg-red-900/40 dark:text-red-300">5 min</div>
                                     </div>
                                     <div class="es-ai-field flex items-center gap-4 rounded-xl border border-amber-200 bg-amber-100 p-3 dark:border-amber-800/30 dark:bg-amber-900/20" style="--i: 1;">
-                                        <div class="w-12 text-center"><div class="text-xs font-bold text-amber-600 dark:text-amber-300">WED</div><div class="text-lg font-bold text-gray-900 dark:text-white">14</div></div>
-                                        <div class="flex-1"><div class="font-semibold text-gray-900 dark:text-white">Comedy Cellar</div><div class="text-sm text-gray-500 dark:text-gray-400">Guest set · 9:30 PM</div></div>
+                                        <div class="w-12 text-center"><div class="text-xs font-bold text-amber-700 dark:text-amber-300">WED</div><div class="text-lg font-bold text-gray-900 dark:text-white">14</div></div>
+                                        <div class="flex-1"><div class="font-semibold text-gray-900 dark:text-white">Comedy Cellar</div><div class="text-sm text-gray-600 dark:text-gray-400">Guest set · 9:30 PM</div></div>
                                         <div class="inline-flex items-center rounded bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">12 min</div>
                                     </div>
                                     <div class="es-ai-field flex items-center gap-4 rounded-xl border border-orange-200 bg-orange-100 p-3 dark:border-orange-800/30 dark:bg-orange-900/20" style="--i: 2;">
-                                        <div class="w-12 text-center"><div class="text-xs font-bold text-orange-600 dark:text-orange-300">THU</div><div class="text-lg font-bold text-gray-900 dark:text-white">15</div></div>
-                                        <div class="flex-1"><div class="font-semibold text-gray-900 dark:text-white">Gotham Comedy</div><div class="text-sm text-gray-500 dark:text-gray-400">Late show · 11 PM</div></div>
+                                        <div class="w-12 text-center"><div class="text-xs font-bold text-orange-700 dark:text-orange-300">THU</div><div class="text-lg font-bold text-gray-900 dark:text-white">15</div></div>
+                                        <div class="flex-1"><div class="font-semibold text-gray-900 dark:text-white">Gotham Comedy</div><div class="text-sm text-gray-600 dark:text-gray-400">Late show · 11 PM</div></div>
                                         <div class="inline-flex items-center rounded bg-orange-100 px-2 py-1 text-xs font-medium text-orange-700 dark:bg-orange-900/40 dark:text-orange-300">10 min</div>
                                     </div>
                                     <div class="es-ai-field flex items-center gap-4 rounded-xl border border-rose-200 bg-gradient-to-r from-rose-100 to-amber-100 p-3 dark:border-rose-700/40 dark:from-rose-900/30 dark:to-amber-900/30" style="--i: 3;">
-                                        <div class="w-12 text-center"><div class="text-xs font-bold text-rose-600 dark:text-rose-300">SAT</div><div class="text-lg font-bold text-gray-900 dark:text-white">17</div></div>
-                                        <div class="flex-1"><div class="font-semibold text-gray-900 dark:text-white">Carolines</div><div class="text-sm text-gray-500 dark:text-gray-400">Two shows: 8 PM & 10:30 PM</div></div>
+                                        <div class="w-12 text-center"><div class="text-xs font-bold text-rose-700 dark:text-rose-300">SAT</div><div class="text-lg font-bold text-gray-900 dark:text-white">17</div></div>
+                                        <div class="flex-1"><div class="font-semibold text-gray-900 dark:text-white">Carolines</div><div class="text-sm text-gray-600 dark:text-gray-400">Two shows: 8 PM & 10:30 PM</div></div>
                                         <div class="inline-flex items-center rounded bg-gradient-to-r from-rose-500 to-amber-500 px-2 py-1 text-xs font-bold text-white">Headlining</div>
                                     </div>
                                 </div>
@@ -631,14 +631,14 @@
                         <div class="relative grid items-center gap-10 lg:grid-cols-2">
                             <div class="es-comic-paper rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-white/10 dark:bg-black/40 lg:order-first" aria-hidden="true">
                                 <div class="mb-4 flex items-center justify-between">
-                                    <span class="text-sm text-gray-500 dark:text-gray-400">Saturday Late Show</span>
-                                    <span class="text-sm font-semibold text-emerald-600 dark:text-emerald-400"><span data-count-to="73">73</span> sold</span>
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">Saturday Late Show</span>
+                                    <span class="text-sm font-semibold text-emerald-700 dark:text-emerald-400"><span data-count-to="73">73</span> sold</span>
                                 </div>
                                 <div class="space-y-2">
                                     <div class="flex items-center justify-between rounded-lg bg-gray-100 p-2 dark:bg-white/5"><span class="text-sm text-gray-900 dark:text-white">General Admission</span><span class="font-medium text-gray-900 dark:text-white">$20</span></div>
                                     <div class="flex items-center justify-between rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-2"><span class="text-sm text-gray-900 dark:text-white">Front Row + Meet & Greet</span><span class="font-medium text-gray-900 dark:text-white">$50</span></div>
                                 </div>
-                                <div class="mt-4 flex justify-between border-t border-gray-200 pt-3 dark:border-white/10"><span class="text-sm text-gray-500 dark:text-gray-400">Platform fee</span><span class="font-bold text-emerald-600 dark:text-emerald-400">{{ plan_price(0) }}</span></div>
+                                <div class="mt-4 flex justify-between border-t border-gray-200 pt-3 dark:border-white/10"><span class="text-sm text-gray-600 dark:text-gray-400">Platform fee</span><span class="font-bold text-emerald-600 dark:text-emerald-400">{{ plan_price(0) }}</span></div>
                             </div>
 
                             <div>
@@ -675,7 +675,7 @@
                                     <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 text-xs font-bold text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">CC</div>
                                     <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-rose-100 text-xs font-bold text-rose-700 dark:bg-rose-900/40 dark:text-rose-300">GC</div>
                                     <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100 text-xs font-bold text-red-700 dark:bg-red-900/40 dark:text-red-300">SU</div>
-                                    <span class="ml-1 text-sm text-gray-500 dark:text-gray-400">+ more</span>
+                                    <span class="ml-1 text-sm text-gray-600 dark:text-gray-400">+ more</span>
                                 </div>
                                 <svg aria-hidden="true" class="h-5 w-5 text-amber-500 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
                                 <div dir="ltr" class="es-comic-mono inline-flex items-center gap-2 rounded-xl border border-amber-300/60 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-gray-900 dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-white">
@@ -720,9 +720,9 @@
                                     <span class="inline-flex items-center rounded bg-gray-200 px-2 py-1 text-xs font-medium text-gray-600 dark:bg-white/10 dark:text-gray-300">Skipping Dec 24</span>
                                 </div>
                                 <div class="space-y-2">
-                                    <div class="es-ai-field flex items-center justify-between rounded-lg bg-gray-100 p-2 text-sm dark:bg-white/5" style="--i: 0;"><span class="text-gray-700 dark:text-gray-300">Tue, Dec 3</span><span class="text-xs text-gray-500 dark:text-gray-400">8 PM</span></div>
-                                    <div class="es-ai-field flex items-center justify-between rounded-lg bg-gray-100 p-2 text-sm dark:bg-white/5" style="--i: 1;"><span class="text-gray-700 dark:text-gray-300">Tue, Dec 10</span><span class="text-xs text-gray-500 dark:text-gray-400">8 PM</span></div>
-                                    <div class="es-ai-field flex items-center justify-between rounded-lg bg-gray-100 p-2 text-sm dark:bg-white/5" style="--i: 2;"><span class="text-gray-700 dark:text-gray-300">Tue, Dec 17</span><span class="text-xs text-gray-500 dark:text-gray-400">8 PM</span></div>
+                                    <div class="es-ai-field flex items-center justify-between rounded-lg bg-gray-100 p-2 text-sm dark:bg-white/5" style="--i: 0;"><span class="text-gray-700 dark:text-gray-300">Tue, Dec 3</span><span class="text-xs text-gray-600 dark:text-gray-400">8 PM</span></div>
+                                    <div class="es-ai-field flex items-center justify-between rounded-lg bg-gray-100 p-2 text-sm dark:bg-white/5" style="--i: 1;"><span class="text-gray-700 dark:text-gray-300">Tue, Dec 10</span><span class="text-xs text-gray-600 dark:text-gray-400">8 PM</span></div>
+                                    <div class="es-ai-field flex items-center justify-between rounded-lg bg-gray-100 p-2 text-sm dark:bg-white/5" style="--i: 2;"><span class="text-gray-700 dark:text-gray-300">Tue, Dec 17</span><span class="text-xs text-gray-600 dark:text-gray-400">8 PM</span></div>
                                 </div>
                             </div>
                         </div>
@@ -755,7 +755,7 @@
                                         </div>
                                         <div>
                                             <div class="text-sm font-medium text-gray-900 dark:text-white">Headlining Saturday!</div>
-                                            <div class="text-xs text-gray-500 dark:text-gray-400">Sent to <span data-count-to="1,247">1,247</span> fans</div>
+                                            <div class="text-xs text-gray-600 dark:text-gray-400">Sent to <span data-count-to="1,247">1,247</span> fans</div>
                                         </div>
                                     </div>
                                     <div class="flex gap-4 text-xs">
@@ -894,7 +894,7 @@
                             <svg aria-hidden="true" class="h-6 w-6 {{ $jText }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $jIcon !!}</svg>
                         </div>
                         <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{{ $jTitle }}</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $jDesc }}</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ $jDesc }}</p>
                     </div>
                 @endforeach
             </div>
@@ -978,17 +978,17 @@
                 <div class="text-center" data-reveal>
                     <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-red-600 to-red-700 text-xl font-bold text-white shadow-lg shadow-red-600/25">1</div>
                     <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Add your sets</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Import from Google Calendar or add your mics, guest sets, and headlining gigs.</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Import from Google Calendar or add your mics, guest sets, and headlining gigs.</p>
                 </div>
                 <div class="text-center" data-reveal>
                     <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-600 to-amber-700 text-xl font-bold text-white shadow-lg shadow-amber-600/25">2</div>
                     <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Share one link</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Drop it in your bio. Fans see all your upcoming shows in one place.</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Drop it in your bio. Fans see all your upcoming shows in one place.</p>
                 </div>
                 <div class="text-center" data-reveal>
                     <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-600 to-rose-700 text-xl font-bold text-white shadow-lg shadow-rose-600/25">3</div>
                     <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Fill the room</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Fans sign up for email and hear from you directly. No more posting into the algorithm void.</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Fans sign up for email and hear from you directly. No more posting into the algorithm void.</p>
                 </div>
             </div>
         </div>
@@ -1045,10 +1045,10 @@
                 @foreach ([['/for-musicians', 'Musicians'], ['/for-magicians', 'Magicians'], ['/for-spoken-word', 'Spoken Word Artists'], ['/for-theater-performers', 'Theater Performers']] as [$relHref, $relName])
                     <a href="{{ marketing_url($relHref) }}" data-reveal class="group es-comic-hover flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Event Schedule for</div>
                             <div class="es-comic-hover-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="es-comic-hover-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="es-comic-hover-arrow w-5 h-5 text-gray-500 dark:text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
@@ -1124,7 +1124,7 @@
                         <span class="h-1.5 w-1.5 rounded-full bg-amber-400" aria-hidden="true"></span>
                         <span class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-300">Encore</span>
                     </div>
-                    <p class="text-sm font-medium uppercase tracking-[0.14em] text-gray-400" data-reveal>That's the set.</p>
+                    <p class="text-sm font-medium uppercase tracking-[0.14em] text-gray-500 dark:text-gray-400" data-reveal>That's the set.</p>
                     <span class="es-comic-beat my-3 justify-center" data-reveal style="--reveal-delay: 0.15s;" aria-hidden="true"><i></i><i></i><i></i></span>
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.3s;">
                         Your fans want to see you. <span class="es-comic-neon-lit">Give them one link.</span>
@@ -1138,7 +1138,7 @@
                         <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
                             <input id="es-claim-input" type="text" placeholder="your-name" autocomplete="off" spellcheck="false" maxlength="30"
                                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
-                            <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
+                            <span class="shrink-0 select-none font-mono text-sm text-gray-600 dark:text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
                         <a href="{{ app_url('/sign_up?type=talent') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 px-8 py-4 text-lg font-semibold text-black shadow-xl shadow-amber-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-amber-500/40">
                             <span class="relative z-10 flex items-center gap-2">
@@ -1151,7 +1151,7 @@
                         </a>
                     </div>
 
-                    <p class="mt-6 text-sm text-gray-400">No credit card required</p>
+                    <p class="mt-6 text-sm text-gray-600 dark:text-gray-400">No credit card required</p>
                     <p class="es-comic-mono mt-2 text-xs text-gray-500">Total stage time: <span data-count-to="47">47</span> min. Some tight five.</p>
                 </div>
             </div>

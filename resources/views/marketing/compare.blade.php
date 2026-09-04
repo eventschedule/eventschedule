@@ -480,7 +480,7 @@
                     <div class="flex items-center gap-3">
                         <label for="fc-price" class="whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">Ticket price</label>
                         <div class="relative">
-                            <span class="absolute top-1/2 -translate-y-1/2 text-sm text-gray-400 ltr:left-3 rtl:right-3">$</span>
+                            <span class="absolute top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400 ltr:left-3 rtl:right-3">$</span>
                             <input id="fc-price" type="number" value="{{ $calcPrice }}" min="1" max="10000" class="w-28 rounded-xl border border-gray-200 bg-white py-2.5 text-sm text-gray-900 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-white/10 dark:bg-white/5 dark:text-white ltr:pl-7 ltr:pr-3 rtl:pr-7 rtl:pl-3">
                         </div>
                     </div>
@@ -765,7 +765,7 @@
                                         @endforeach
                                     </div>
                                 </div>
-                                <div class="bg-white px-3 py-1.5 text-center text-[8px] font-medium text-gray-400 dark:bg-[#101016] dark:text-gray-500">yourschedule.com</div>
+                                <div class="bg-white px-3 py-1.5 text-center text-[8px] font-medium text-gray-500 dark:bg-[#101016] dark:text-gray-300">yourschedule.com</div>
                             </div>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
@@ -809,7 +809,7 @@
                     <div data-reveal class="rounded-2xl border border-white/10 bg-white/[0.04] p-6">
                         <div class="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/20 text-sm font-bold text-blue-300">{{ $sIndex + 1 }}</div>
                         <h3 class="mb-2 font-semibold text-white">{{ $sTitle }}</h3>
-                        <p class="text-sm text-gray-400">{{ $sBody }}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $sBody }}</p>
                     </div>
                 @endforeach
             </div>

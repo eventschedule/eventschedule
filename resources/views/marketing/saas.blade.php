@@ -83,7 +83,8 @@
         }
 
         /* Money rule: every dollar amount on the page is amber */
-        .es-money { color: #d97706; }
+        /* amber-700, not -600: the money figures run 12-14px and -600 is 3.1:1. */
+        .es-money { color: #b45309; }
         .dark .es-money { color: #fbbf24; }
 
         /* Blueprint mono tag */
@@ -598,7 +599,7 @@
                             @foreach ([['01', 'Brand'], ['02', 'Tenants'], ['03', 'Billing'], ['04', 'Infra']] as $leg)
                                 <div class="flex items-center gap-2">
                                     <span class="es-tag">{{ $leg[0] }} · {{ $leg[1] }}</span>
-                                    <svg class="text-blue-400/70 dark:text-blue-500/50" width="42" height="2" fill="none"><path class="es-ants" d="M0 1 H42" stroke="currentColor" stroke-width="1.5"/></svg>
+                                    <svg class="text-blue-400/70 dark:text-blue-700 dark:text-blue-400/50" width="42" height="2" fill="none"><path class="es-ants" d="M0 1 H42" stroke="currentColor" stroke-width="1.5"/></svg>
                                 </div>
                             @endforeach
                         </div>
@@ -660,7 +661,7 @@
                                                 <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
                                             </span>
                                             <span class="font-mono text-xs text-gray-300">$ ./deploy · live</span>
-                                            <span class="ml-auto rounded-full border border-white/15 px-2.5 py-1 font-mono text-[10px] text-gray-400">your infra</span>
+                                            <span class="ml-auto rounded-full border border-white/15 px-2.5 py-1 font-mono text-[10px] text-gray-300">your infra</span>
                                         </div>
                                         <div class="mt-3 flex gap-1.5">
                                             <span class="h-1.5 w-10 rounded-full bg-emerald-500/50"></span>
@@ -761,7 +762,7 @@
                         <p class="mb-6 text-gray-500 dark:text-gray-400">One environment variable sets the trial length for your whole platform. Set it to 0 for no trial.</p>
                         <div class="mt-auto flex items-center justify-between gap-4" aria-hidden="true">
                             <div class="rounded-xl border border-gray-200 bg-gray-100 px-4 py-3 dark:border-white/10 dark:bg-[#0f0f14]">
-                                <code class="font-mono text-sm text-gray-600 dark:text-gray-300"><span class="text-blue-500 dark:text-blue-400">TRIAL_DAYS</span>=<span class="text-emerald-500 dark:text-emerald-400">14</span></code>
+                                <code class="font-mono text-sm text-gray-600 dark:text-gray-300"><span class="text-blue-700 dark:text-blue-400">TRIAL_DAYS</span>=<span class="text-emerald-500 dark:text-emerald-400">14</span></code>
                             </div>
                             <div class="relative flex h-24 w-24 shrink-0 items-center justify-center">
                                 <div class="es-trial-ring absolute inset-0 rounded-full"></div>
@@ -856,7 +857,7 @@
     <section id="revenue" class="bg-white py-24 scroll-mt-24 dark:bg-[#0a0a0f]">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mb-16 text-center">
-                <div class="mb-4 inline-flex items-center gap-2 rounded-full bg-amber-500/20 px-3 py-1 text-sm font-medium text-amber-700 dark:text-amber-300">
+                <div class="mb-4 inline-flex items-center gap-2 rounded-full bg-amber-500/25 px-3 py-1 text-sm font-medium text-amber-800 dark:text-amber-300">
                     <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -923,7 +924,7 @@
                         </div>
                     </div>
                 </div>
-                <p class="mt-8 border-t border-gray-100 pt-5 text-xs text-gray-400 dark:border-white/5 dark:text-gray-500">Estimates for illustration. Subscriptions are billed per schedule, so a customer running more than one pays for each. Stripe processing fees apply per transaction and vary by country. Your results depend on your pricing and your customers.</p>
+                <p class="mt-8 border-t border-gray-100 pt-5 text-xs text-gray-500 dark:border-white/5 dark:text-gray-400">Estimates for illustration. Subscriptions are billed per schedule, so a customer running more than one pays for each. Stripe processing fees apply per transaction and vary by country. Your results depend on your pricing and your customers.</p>
             </div>
 
             <!-- Illustrative activity ticker -->
@@ -1107,7 +1108,7 @@
                                 </div>
                                 <div>
                                     <h3 class="font-semibold text-white">The AAL license</h3>
-                                    <p class="text-sm text-gray-400">Event Schedule is open source under the Attribution Assurance License. Use it commercially at no cost; just keep the attribution intact.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Event Schedule is open source under the Attribution Assurance License. Use it commercially at no cost; just keep the attribution intact.</p>
                                 </div>
                             </div>
                             <div class="flex items-start gap-4">
@@ -1116,7 +1117,7 @@
                                 </div>
                                 <div>
                                     <h3 class="font-semibold text-white">A small backlink</h3>
-                                    <p class="text-sm text-gray-400">Public schedule pages carry a small, discreet link back to eventschedule.com, on every tier you sell, the paid ones included. Your free tier carries your own footer strip in its place, so no page shows two credits. That link is how the project grows, which keeps the software maintained for everyone.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Public schedule pages carry a small, discreet link back to eventschedule.com, on every tier you sell, the paid ones included. Your free tier carries your own footer strip in its place, so no page shows two credits. That link is how the project grows, which keeps the software maintained for everyone.</p>
                                 </div>
                             </div>
                         </div>
@@ -1139,7 +1140,7 @@
                                 Join the Discussions
                             </a>
                         </div>
-                        <p class="mt-6 text-sm text-gray-400">Read more about <a href="{{ route('marketing.open_source') }}" class="text-sky-300 underline decoration-sky-300/40 underline-offset-2 hover:text-sky-200">the open source project</a> or the full <a href="{{ route('marketing.self_hosting_terms') }}" class="text-sky-300 underline decoration-sky-300/40 underline-offset-2 hover:text-sky-200">self-hosting terms</a>.</p>
+                        <p class="mt-6 text-sm text-gray-500 dark:text-gray-400">Read more about <a href="{{ route('marketing.open_source') }}" class="text-sky-300 underline decoration-sky-300/40 underline-offset-2 hover:text-sky-200">the open source project</a> or the full <a href="{{ route('marketing.self_hosting_terms') }}" class="text-sky-300 underline decoration-sky-300/40 underline-offset-2 hover:text-sky-200">self-hosting terms</a>.</p>
                     </div>
 
                     <!-- The loupe: the catch shown at actual size -->
@@ -1156,20 +1157,20 @@
                             <div class="space-y-2.5">
                                 @foreach ([['Aug', '02', 'Open Mic Night', '8:00 PM · Free'], ['Aug', '09', 'Headliner Showcase', '9:00 PM · $22'], ['Aug', '16', 'Improv Jam', '7:30 PM · $15']] as $ev)
                                     <div class="flex items-center gap-3 rounded-xl border border-gray-200 p-2.5">
-                                        <span class="w-11 shrink-0 rounded-lg bg-blue-50 py-1 text-center"><span class="block text-[9px] font-bold uppercase text-blue-500">{{ $ev[0] }}</span><span class="block text-base font-black leading-none text-gray-900">{{ $ev[1] }}</span></span>
+                                        <span class="w-11 shrink-0 rounded-lg bg-blue-50 py-1 text-center"><span class="block text-[9px] font-bold uppercase text-blue-800">{{ $ev[0] }}</span><span class="block text-base font-black leading-none text-gray-900">{{ $ev[1] }}</span></span>
                                         <div class="min-w-0"><div class="truncate text-sm font-semibold text-gray-900">{{ $ev[2] }}</div><div class="text-xs text-gray-500">{{ $ev[3] }}</div></div>
                                     </div>
                                 @endforeach
                             </div>
                             <div class="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
-                                <span class="text-[10px] text-gray-400">© TicketPilot</span>
+                                <span class="text-[10px] text-gray-600">© TicketPilot</span>
                                 {{-- The real attribution shown on public schedule pages (see
                                      layouts/app-guest.blade.php): a small flat brand credit.
                                      This tenant has to stay a PAID one, and the $22/$15 ticket
                                      prices above are what say so. Role::creditChipReason() stands
                                      the chip down wherever the footer strip renders, so a free
                                      tenant here would show the operator's strip and no chip. --}}
-                                <span id="es-backlink-chip" class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-1.5 py-0.5 text-[9px] font-medium text-gray-500 ring-1 ring-black/5">
+                                <span id="es-backlink-chip" class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-1.5 py-0.5 text-[9px] font-medium text-gray-700 ring-1 ring-black/5">
                                     <span class="flex h-3 w-3 items-center justify-center rounded-[3px] bg-gradient-to-br from-[#4E81FA] to-[#22D3EE] text-[6px] font-black leading-none text-white">ES</span>
                                     Event Schedule
                                 </span>
@@ -1179,7 +1180,7 @@
                         <div class="es-loupe hidden bottom-[-28px] items-center justify-center ltr:right-[-18px] rtl:left-[-18px] lg:flex">
                             <span class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#4E81FA] to-[#22D3EE] text-2xl font-black text-white shadow-lg">ES</span>
                         </div>
-                        <p class="mt-4 text-center text-sm text-gray-400">Shown at actual size. That is the whole catch.</p>
+                        <p class="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">Shown at actual size. That is the whole catch.</p>
                     </div>
                 </div>
             </div>
@@ -1251,17 +1252,17 @@
                                     <div class="h-full rounded-xl bg-[#0b0f19] p-5 font-mono text-sm leading-8 text-gray-200">
                                         <div class="es-pop" style="--i: 0;"><span class="text-emerald-400">$</span> git clone eventschedule/eventschedule</div>
                                         <div class="es-pop" style="--i: 1;"><span class="text-emerald-400">$</span> docker compose up -d</div>
-                                        <div class="es-pop text-gray-400" style="--i: 2;">Pulling images... done</div>
-                                        <div class="es-pop text-gray-400" style="--i: 3;">Running migrations... done</div>
+                                        <div class="es-pop text-gray-300" style="--i: 2;">Pulling images... done</div>
+                                        <div class="es-pop text-gray-300" style="--i: 3;">Running migrations... done</div>
                                         <div class="es-pop" style="--i: 4;"><span class="text-emerald-400">✓</span> Platform live at <span class="text-sky-400">yourdomain.com</span></div>
                                     </div>
                                 </div>
                                 <!-- Scene 2: wire up the business -->
                                 <div class="es-scene es-scene-1 flex flex-col items-center justify-center gap-5 p-6">
                                     <div class="es-pop w-full max-w-sm rounded-xl border border-gray-200 bg-gray-50 p-4 font-mono text-sm dark:border-white/10 dark:bg-white/5" style="--i: 0;">
-                                        <div><span class="text-blue-500 dark:text-blue-400">APP_NAME</span>=<span class="text-gray-700 dark:text-gray-200">TicketPilot</span></div>
-                                        <div><span class="text-blue-500 dark:text-blue-400">TRIAL_DAYS</span>=<span class="text-emerald-500 dark:text-emerald-400">14</span></div>
-                                        <div><span class="text-blue-500 dark:text-blue-400">STRIPE_SECRET</span>=<span class="text-gray-500 dark:text-gray-400">sk_live_••••</span></div>
+                                        <div><span class="text-blue-700 dark:text-blue-400">APP_NAME</span>=<span class="text-gray-700 dark:text-gray-200">TicketPilot</span></div>
+                                        <div><span class="text-blue-700 dark:text-blue-400">TRIAL_DAYS</span>=<span class="text-emerald-500 dark:text-emerald-400">14</span></div>
+                                        <div><span class="text-blue-700 dark:text-blue-400">STRIPE_SECRET</span>=<span class="text-gray-500 dark:text-gray-400">sk_live_••••</span></div>
                                     </div>
                                     <div class="flex gap-3">
                                         @foreach ([['Free', '$0', 0], ['Pro', '$29', 1], ['Enterprise', '$99', 2]] as $tier)
@@ -1312,7 +1313,7 @@
     <section id="product" class="bg-white py-24 scroll-mt-24 dark:bg-[#0a0a0f]">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mb-16 text-center">
-                <div class="mb-4 inline-flex items-center gap-2 rounded-full bg-cyan-500/20 px-3 py-1 text-sm font-medium text-cyan-700 dark:text-cyan-300">
+                <div class="mb-4 inline-flex items-center gap-2 rounded-full bg-cyan-500/20 px-3 py-1 text-sm font-medium text-cyan-800 dark:text-cyan-300">
                     <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
@@ -1381,7 +1382,7 @@
                                     </div>
                                     @foreach ([['Sep', '05', 'Rooftop Sessions'], ['Sep', '12', 'Fall Showcase']] as $ev)
                                         <div class="flex items-center gap-2 rounded-lg border border-gray-100 p-1.5 dark:border-white/5">
-                                            <span class="w-8 shrink-0 rounded-md bg-blue-50 py-0.5 text-center dark:bg-blue-500/15"><span class="block text-[7px] font-bold uppercase text-blue-500">{{ $ev[0] }}</span><span class="block text-xs font-black leading-none text-gray-900 dark:text-white">{{ $ev[1] }}</span></span>
+                                            <span class="w-8 shrink-0 rounded-md bg-blue-50 py-0.5 text-center dark:bg-blue-500/15"><span class="block text-[7px] font-bold uppercase text-blue-700 dark:text-blue-400">{{ $ev[0] }}</span><span class="block text-xs font-black leading-none text-gray-900 dark:text-white">{{ $ev[1] }}</span></span>
                                             <span class="truncate text-[10px] font-semibold text-gray-700 dark:text-gray-300">{{ $ev[2] }}</span>
                                             <span class="ml-auto rounded-full bg-gradient-to-r from-blue-600 to-sky-500 px-2 py-0.5 text-[8px] font-bold text-white">Buy</span>
                                         </div>
@@ -1502,13 +1503,13 @@
             <div class="grid gap-4 md:grid-cols-2" data-reveal-group="90">
                 <!-- Selfhost for yourself -->
                 <div class="flex flex-col rounded-3xl border border-emerald-200 bg-white p-8 dark:border-emerald-500/25 dark:bg-white/[0.04]" data-reveal>
-                    <div class="mb-3 text-sm font-semibold text-emerald-600 dark:text-emerald-400">Just want your own instance?</div>
+                    <div class="mb-3 text-sm font-semibold text-emerald-700 dark:text-emerald-400">Just want your own instance?</div>
                     <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Selfhost for yourself</h3>
                     <p class="mb-5 text-gray-500 dark:text-gray-400">Run Event Schedule for your own events, with every Enterprise feature unlocked and zero platform fees.</p>
                     <div class="mb-6 rounded-xl bg-[#0b0f19] px-4 py-3 font-mono text-sm text-gray-200" aria-hidden="true">
                         <span class="text-emerald-400">$</span> docker compose up -d
                     </div>
-                    <a href="{{ route('marketing.selfhost') }}" class="mt-auto inline-flex items-center gap-2 self-start font-semibold text-emerald-600 hover:text-emerald-500 dark:text-emerald-400 dark:hover:text-emerald-300">
+                    <a href="{{ route('marketing.selfhost') }}" class="mt-auto inline-flex items-center gap-2 self-start font-semibold text-emerald-700 hover:text-emerald-500 dark:text-emerald-400 dark:hover:text-emerald-300">
                         Explore selfhosting
                         <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
                     </a>
@@ -1636,9 +1637,9 @@
 
                 <div class="relative z-10">
                     <div class="mb-8 inline-flex items-center gap-3" aria-hidden="true">
-                        <span class="es-tag !text-gray-400">clone</span>
+                        <span class="es-tag !text-gray-500 dark:text-gray-400">clone</span>
                         <svg class="h-3.5 w-3.5 text-gray-500 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 7l5 5-5 5" /></svg>
-                        <span class="es-tag !text-gray-400">configure</span>
+                        <span class="es-tag !text-gray-500 dark:text-gray-400">configure</span>
                         <svg class="h-3.5 w-3.5 text-gray-500 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 7l5 5-5 5" /></svg>
                         <span class="es-tag !text-amber-400">charge</span>
                     </div>

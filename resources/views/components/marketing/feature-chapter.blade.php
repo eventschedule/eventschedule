@@ -29,35 +29,35 @@
     // classes do not JIT-generate.
     $accents = [
         'blue' => [
-            'text' => 'text-blue-600 dark:text-blue-400',
+            'text' => 'text-blue-700 dark:text-blue-400',
             'onDark' => 'text-blue-400',
             'dot' => 'bg-blue-500',
             'rule' => 'from-blue-500/70',
             'glow' => 'rgba(37, 99, 235, ALPHA)',
         ],
         'sky' => [
-            'text' => 'text-sky-600 dark:text-sky-400',
+            'text' => 'text-sky-700 dark:text-sky-400',
             'onDark' => 'text-sky-400',
             'dot' => 'bg-sky-500',
             'rule' => 'from-sky-500/70',
             'glow' => 'rgba(14, 165, 233, ALPHA)',
         ],
         'cyan' => [
-            'text' => 'text-cyan-600 dark:text-cyan-400',
+            'text' => 'text-cyan-700 dark:text-cyan-400',
             'onDark' => 'text-cyan-400',
             'dot' => 'bg-cyan-500',
             'rule' => 'from-cyan-500/70',
             'glow' => 'rgba(6, 182, 212, ALPHA)',
         ],
         'emerald' => [
-            'text' => 'text-emerald-600 dark:text-emerald-400',
+            'text' => 'text-emerald-700 dark:text-emerald-400',
             'onDark' => 'text-emerald-400',
             'dot' => 'bg-emerald-500',
             'rule' => 'from-emerald-500/70',
             'glow' => 'rgba(16, 185, 129, ALPHA)',
         ],
         'amber' => [
-            'text' => 'text-amber-600 dark:text-amber-400',
+            'text' => 'text-amber-700 dark:text-amber-400',
             'onDark' => 'text-amber-400',
             'dot' => 'bg-amber-500',
             'rule' => 'from-amber-500/70',

@@ -236,7 +236,7 @@
             <div class="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-white/10 dark:bg-white/5">
                 <div>
                     <div class="font-medium text-gray-900 dark:text-white">Early Bird</div>
-                    <div class="text-xs text-emerald-600 dark:text-emerald-400">50 remaining</div>
+                    <div class="text-xs text-emerald-700 dark:text-emerald-400">50 remaining</div>
                 </div>
                 <div class="text-xl font-bold text-gray-900 dark:text-white">$18</div>
             </div>
@@ -250,13 +250,13 @@
             <div class="flex items-center justify-between rounded-xl border border-sky-200 bg-sky-50 p-3 dark:border-sky-400/30 dark:bg-sky-500/15">
                 <div>
                     <div class="font-medium text-gray-900 dark:text-white">VIP</div>
-                    <div class="text-xs text-sky-600 dark:text-sky-300">38 sold</div>
+                    <div class="text-xs text-sky-700 dark:text-sky-300">38 sold</div>
                 </div>
                 <div class="text-xl font-bold text-gray-900 dark:text-white">$75</div>
             </div>
             <div class="flex items-center justify-between border-t border-gray-200 pt-3 dark:border-white/10">
                 <span class="text-xs text-gray-500 dark:text-gray-400">Platform fee</span>
-                <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">{{ plan_price(0) }}</span>
+                <span class="text-xs font-semibold text-emerald-700 dark:text-emerald-400">{{ plan_price(0) }}</span>
             </div>
         </div>
     </x-marketing.feature-banner>
@@ -279,15 +279,15 @@
 
         <div class="mb-4 flex gap-2">
             <div class="flex-1 rounded-xl border border-gray-200 bg-gray-50 py-2 text-center dark:border-white/10 dark:bg-white/5">
-                <div class="text-[10px] font-bold uppercase text-gray-400">Mon</div>
+                <div class="text-[10px] font-bold uppercase text-gray-500 dark:text-gray-400">Mon</div>
                 <div class="text-lg font-black leading-none text-gray-900 dark:text-white">14</div>
             </div>
             <div class="flex-1 rounded-xl border border-blue-200 bg-blue-50 py-2 text-center dark:border-blue-400/30 dark:bg-blue-500/15">
-                <div class="text-[10px] font-bold uppercase text-blue-500 dark:text-blue-300">Tue</div>
+                <div class="text-[10px] font-bold uppercase text-blue-700 dark:text-blue-300">Tue</div>
                 <div class="text-lg font-black leading-none text-gray-900 dark:text-white">15</div>
             </div>
             <div class="flex-1 rounded-xl border border-gray-200 bg-gray-50 py-2 text-center dark:border-white/10 dark:bg-white/5">
-                <div class="text-[10px] font-bold uppercase text-gray-400">Wed</div>
+                <div class="text-[10px] font-bold uppercase text-gray-500 dark:text-gray-400">Wed</div>
                 <div class="text-lg font-black leading-none text-gray-900 dark:text-white">16</div>
             </div>
         </div>
@@ -332,11 +332,11 @@
         </div>
         <div class="mb-3 rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-white/10 dark:bg-white/5">
             <div class="mb-1 text-xs text-gray-500 dark:text-gray-400">Code</div>
-            <div dir="ltr" class="font-mono text-sm text-cyan-600 dark:text-cyan-300">8Q2K-7MRT-4XPW</div>
+            <div dir="ltr" class="font-mono text-sm text-cyan-700 dark:text-cyan-300">8Q2K-7MRT-4XPW</div>
         </div>
         <div class="flex items-center justify-between text-xs">
-            <span class="text-gray-500 dark:text-gray-400">Balance</span>
-            <span class="font-medium text-emerald-600 dark:text-emerald-400">$100 available</span>
+            <span class="text-gray-600 dark:text-gray-400">Balance</span>
+            <span class="font-medium text-emerald-700 dark:text-emerald-400">$100 available</span>
         </div>
     </x-marketing.feature-banner>
 
@@ -364,7 +364,7 @@
                 <div class="mb-1 text-[10px] text-gray-500 dark:text-gray-400">T-Shirt Size</div>
                 <div class="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-white">
                     <span>Large</span>
-                    <svg aria-hidden="true" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                    <svg aria-hidden="true" class="h-4 w-4 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                 </div>
             </div>
             <div>
@@ -571,7 +571,7 @@
             </svg>
         </x-slot>
 
-        <div class="mb-2 text-[10px] uppercase tracking-wider text-gray-400">Paste or drop</div>
+        <div class="mb-2 text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400">Paste or drop</div>
         <div dir="ltr" class="mb-3 rounded-lg border border-gray-200 bg-gray-50 p-3 font-mono text-xs leading-relaxed text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-300">
             Jazz Night at Blue Note<br>
             Friday, March 15 at 8pm<br>
@@ -585,9 +585,9 @@
         <div class="rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-400/30 dark:bg-blue-500/15">
             <div class="mb-2 text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-300">Extracted</div>
             <div class="space-y-1.5 text-sm">
-                <div class="es-ai-field flex justify-between" style="--i: 0;"><span class="text-gray-500 dark:text-gray-400">Name:</span><span class="text-gray-900 dark:text-white">Jazz Night</span></div>
-                <div class="es-ai-field flex justify-between" style="--i: 1;"><span class="text-gray-500 dark:text-gray-400">Date:</span><span class="text-gray-900 dark:text-white">Mar 15, 8 PM</span></div>
-                <div class="es-ai-field flex justify-between" style="--i: 2;"><span class="text-gray-500 dark:text-gray-400">Venue:</span><span class="text-gray-900 dark:text-white">Blue Note</span></div>
+                <div class="es-ai-field flex justify-between" style="--i: 0;"><span class="text-gray-600 dark:text-gray-400">Name:</span><span class="text-gray-900 dark:text-white">Jazz Night</span></div>
+                <div class="es-ai-field flex justify-between" style="--i: 1;"><span class="text-gray-600 dark:text-gray-400">Date:</span><span class="text-gray-900 dark:text-white">Mar 15, 8 PM</span></div>
+                <div class="es-ai-field flex justify-between" style="--i: 2;"><span class="text-gray-600 dark:text-gray-400">Venue:</span><span class="text-gray-900 dark:text-white">Blue Note</span></div>
             </div>
         </div>
     </x-marketing.feature-banner>
@@ -659,8 +659,8 @@
 
         <div class="mb-3">
             <div class="mb-1 flex justify-between text-xs">
-                <span class="text-gray-500 dark:text-gray-400">Open rate</span>
-                <span class="font-medium text-sky-600 dark:text-sky-300">42%</span>
+                <span class="text-gray-600 dark:text-gray-400">Open rate</span>
+                <span class="font-medium text-sky-700 dark:text-sky-300">42%</span>
             </div>
             <div class="h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
                 <div class="es-bar h-full rounded-full bg-sky-500" style="width: 42%; --bd: 0.1s;"></div>
@@ -668,8 +668,8 @@
         </div>
         <div class="mb-4">
             <div class="mb-1 flex justify-between text-xs">
-                <span class="text-gray-500 dark:text-gray-400">Click rate</span>
-                <span class="font-medium text-cyan-600 dark:text-cyan-300">18%</span>
+                <span class="text-gray-600 dark:text-gray-400">Click rate</span>
+                <span class="font-medium text-cyan-700 dark:text-cyan-300">18%</span>
             </div>
             <div class="h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
                 <div class="es-bar h-full rounded-full bg-cyan-500" style="width: 18%; --bd: 0.25s;"></div>
@@ -723,7 +723,7 @@
                 <span class="text-[10px] text-orange-700 dark:text-orange-300">Image graphic</span>
             </div>
             <div class="flex items-center gap-2 rounded-lg bg-gray-50 p-2 dark:bg-white/5">
-                <svg aria-hidden="true" class="h-3.5 w-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg aria-hidden="true" class="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 <span class="text-[10px] text-gray-600 dark:text-gray-300">Formatted text</span>
@@ -760,11 +760,11 @@
             <div class="h-1.5 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
                 <div class="es-bar h-full w-3/5 rounded-full bg-gradient-to-r from-orange-400 to-amber-500" style="--bd: 0.15s;"></div>
             </div>
-            <div class="mt-1 text-[10px] font-medium text-amber-600 dark:text-amber-300">$60 / 7 days</div>
+            <div class="mt-1 text-[10px] font-medium text-amber-700 dark:text-amber-300">$60 / 7 days</div>
         </div>
         <div class="rounded-lg border border-gray-200 bg-gray-50 p-2 text-center dark:border-white/10 dark:bg-white/5">
             <div class="text-[10px] text-gray-500 dark:text-gray-400">Est. reach</div>
-            <div class="text-sm font-bold text-amber-600 dark:text-amber-300">2,400 - 6,800</div>
+            <div class="text-sm font-bold text-amber-700 dark:text-amber-300">2,400 - 6,800</div>
         </div>
     </x-marketing.feature-banner>
 
@@ -888,11 +888,11 @@
         </div>
         <div class="space-y-2">
             <div class="rounded-lg border border-gray-200 bg-gray-50 p-2 dark:border-white/10 dark:bg-white/5">
-                <div class="mb-1 text-[10px] text-amber-500">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                <div class="mb-1 text-[10px] text-amber-700 dark:text-amber-400">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
                 <div class="text-[11px] text-gray-500 dark:text-gray-400">"Amazing show!"</div>
             </div>
             <div class="rounded-lg border border-gray-200 bg-gray-50 p-2 dark:border-white/10 dark:bg-white/5">
-                <div class="mb-1 text-[10px] text-amber-500">&#9733;&#9733;&#9733;&#9733;<span class="text-gray-300 dark:text-white/20">&#9733;</span></div>
+                <div class="mb-1 text-[10px] text-amber-700 dark:text-amber-400">&#9733;&#9733;&#9733;&#9733;<span class="text-gray-300 dark:text-white/20">&#9733;</span></div>
                 <div class="text-[11px] text-gray-500 dark:text-gray-400">"Great venue, will return"</div>
             </div>
         </div>
@@ -960,14 +960,14 @@
         </x-slot>
 
         <div class="mb-1 text-[10px] text-gray-500 dark:text-gray-400">Before</div>
-        <div dir="ltr" class="mb-4 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 font-mono text-sm text-gray-400 line-through dark:border-white/10 dark:bg-white/5 dark:text-gray-500">
+        <div dir="ltr" class="mb-4 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 font-mono text-sm text-gray-600 line-through dark:border-white/10 dark:bg-white/5 dark:text-gray-400">
             myband.eventschedule.com
         </div>
         <div class="mb-1 text-[10px] text-gray-500 dark:text-gray-400">After</div>
         <div dir="ltr" class="rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 font-mono text-sm font-medium text-teal-700 dark:border-teal-500/30 dark:bg-teal-500/15 dark:text-teal-300">
             events.myband.com
         </div>
-        <div class="mt-3 flex items-center gap-1.5 text-[10px] text-teal-600 dark:text-teal-400">
+        <div class="mt-3 flex items-center gap-1.5 text-[10px] text-teal-700 dark:text-teal-400">
             <svg aria-hidden="true" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
@@ -1089,12 +1089,12 @@
         </x-slot>
 
         <div dir="ltr" class="space-y-1 font-mono text-xs">
-            <div class="text-gray-500 dark:text-gray-400">$ git clone</div>
-            <div class="break-all leading-tight text-cyan-600 dark:text-cyan-400">github.com/eventschedule</div>
+            <div class="text-gray-600 dark:text-gray-400">$ git clone</div>
+            <div class="break-all leading-tight text-cyan-700 dark:text-cyan-400">github.com/eventschedule</div>
             <div class="pt-2 text-gray-500 dark:text-gray-400">$ composer install</div>
-            <div class="text-emerald-600 dark:text-emerald-400">Done!</div>
-            <div class="text-gray-500 dark:text-gray-400">$ php artisan serve</div>
-            <div class="text-gray-500 dark:text-gray-400">Server running...</div>
+            <div class="text-emerald-700 dark:text-emerald-400">Done!</div>
+            <div class="text-gray-600 dark:text-gray-400">$ php artisan serve</div>
+            <div class="text-gray-600 dark:text-gray-400">Server running...</div>
         </div>
     </x-marketing.feature-banner>
 
@@ -1233,7 +1233,7 @@
                             <h3 class="text-sm font-semibold text-gray-900 dark:text-white sm:text-base">{{ $feature['title'] }}</h3>
                         </div>
                         <p class="hidden flex-grow text-sm text-gray-600 dark:text-gray-400 sm:block">{{ $feature['desc'] }}</p>
-                        <span class="mt-auto hidden items-center gap-1 pt-3 text-sm font-medium {{ $feature['text'] }} transition-all group-hover:gap-2 sm:inline-flex">
+                        <span class="mt-auto hidden items-center gap-1 pt-3 text-sm font-medium text-blue-700 dark:text-blue-400 transition-all group-hover:gap-2 sm:inline-flex">
                             Learn more
                             <svg class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                         </span>
@@ -1342,7 +1342,7 @@
                     <details name="faq" class="group rounded-2xl border border-gray-200 bg-white px-5 py-4 transition-colors hover:border-blue-300 dark:border-white/10 dark:bg-white/[0.04] dark:hover:border-blue-500/40" data-reveal>
                         <summary class="flex cursor-pointer items-center justify-between gap-4 text-base font-semibold text-gray-900 dark:text-white">
                             {{ $faq['q'] }}
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-400 transition-transform duration-200 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 dark:text-gray-400 transition-transform duration-200 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>
@@ -1379,7 +1379,7 @@
                         <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
                             <input id="es-claim-input" type="text" placeholder="your-schedule" autocomplete="off" spellcheck="false" maxlength="30"
                                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
-                            <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
+                            <span class="shrink-0 select-none font-mono text-sm text-gray-500 dark:text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
                         <a href="{{ app_url('/sign_up') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
                             <span class="relative z-10 flex items-center gap-2">
