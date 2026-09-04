@@ -6,7 +6,7 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 
 **Progress:** 153 / 153 reviewed
 
-**Updated:** 111 / 153 rebuilt
+**Updated:** 115 / 153 rebuilt
 
 > **Ticketing plan model change - SWEPT 2026-07-31.** Another session shipped a real product
 > change mid-campaign: the FREE tier now SELLS paid tickets, 25 per calendar month per
@@ -239,10 +239,10 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 
 | Reviewed | Updated | Page | URL | Notes |
 |:--------:|:-------:|------|-----|-------|
-| ✅ |   | Privacy Policy | `/privacy` | "The Fine Print" family treatment (shared restrained legal set); legal text verbatim |
-| ✅ |   | Terms of Service | `/terms-of-service` | "The Fine Print" family treatment; legal text verbatim |
-| ✅ |   | Accessibility | `/accessibility` | "The Fine Print" family treatment; legal text verbatim |
-| ✅ |   | Self-Hosting Terms of Service | `/self-hosting-terms-of-service` | "The Fine Print" family treatment; legal text verbatim |
+| ✅ | ✅ | Privacy Policy | `/privacy` | "The Fine Print" family treatment (shared restrained legal set); legal text verbatim. 2026-09 pass: reviewed, clause numbering and anchors intact, and the page passes the structural sweep clean. |
+| ✅ | ✅ | Terms of Service | `/terms-of-service` | "The Fine Print" family treatment; legal text verbatim. 2026-09 pass: reviewed, sixteen clauses intact and citable, structural sweep clean. |
+| ✅ | ✅ | Accessibility | `/accessibility` | "The Fine Print" family treatment; legal text verbatim. 2026-09 pass: reviewed. The statement invites exactly the check this campaign ran, so the site-wide structural sweep behind it is recorded here: 37 heading-level skips fixed across the docs and one on /for-curators, and every page now has one h1, a clean outline, no unlabelled control and valid JSON-LD. The Last reviewed date is the operator`s to move, so it was left alone. |
+| ✅ | ✅ | Self-Hosting Terms of Service | `/self-hosting-terms-of-service` | "The Fine Print" family treatment; legal text verbatim. 2026-09 pass: reviewed; the hosted-terms footnote linked `/terms`, which 302s, and now points straight at `/terms-of-service`. |
 
 ## Docs - User Guide (20)
 

@@ -81,7 +81,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">Choose how your events are displayed on your schedule page, under <strong class="text-gray-900 dark:text-white">Edit Schedule &rarr; Style &rarr; Advanced &rarr; Default Layout</strong>. Two layouts exist:</p>
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Calendar</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Calendar</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Events laid out on a month grid, one cell per day, loaded one month at a time. Best when the shape of the month matters, such as a venue with something on most nights.</p>
             </div>
             <div class="doc-field">
@@ -107,7 +107,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">Choose how the header appears at the top of your public schedule page under <strong class="text-gray-900 dark:text-white">Edit Schedule &rarr; Style &rarr; Advanced &rarr; Header Style</strong>. Schedules use <strong class="text-gray-900 dark:text-white">Banner</strong> unless you change it, and the live preview updates as you switch between the two.</p>
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Banner</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Banner</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">A large header carrying your header image, a prominent logo, the schedule name, description and social links. The most spacious option, and the only one that can show a header image or a logo wall.</p>
             </div>
             <div class="doc-field">
@@ -132,7 +132,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">Upload a logo, photo or avatar that represents your schedule under <strong class="text-gray-900 dark:text-white">Edit Schedule &rarr; Style &rarr; Branding &rarr; Square Profile Image</strong>. It does three jobs:</p>
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Your header</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Your header</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">A large logo in the Banner header style, or a small square avatar beside your name in the Compact style.</p>
             </div>
             <div class="doc-field">
@@ -164,7 +164,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Header Image</strong> dropdown on the Advanced tab creates the visual banner at the top of your schedule page. It offers four kinds of option, in this order:</p>
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">None</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">None</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">The default. A cleaner look with no header image, so your profile image and name take centre stage.</p>
             </div>
             <div class="doc-field">
@@ -240,7 +240,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">One <strong class="text-gray-900 dark:text-white">Accent Color</strong> picker on the Branding tab drives every highlighted element on your public pages. New schedules start on a standard blue.</p>
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Where it appears</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Where it appears</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Buttons and calls to action, the follow and submit controls, the calendar and list layout toggles, the filter button, and highlights on your event pages.</p>
             </div>
             <div class="doc-field">
@@ -265,7 +265,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Font Family</strong> dropdown on the Branding tab offers more than 230 Google Fonts. It sets the typeface for your schedule name and headings on your public pages.</p>
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Finding a font</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Finding a font</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">The dropdown is searchable, so you can type a name you already know. The arrows beside it step to the previous or next font alphabetically, which is the quickest way to browse.</p>
             </div>
             <div class="doc-field">
@@ -300,7 +300,7 @@
         </ol>
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Color and font come first</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Color and font come first</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">The accent color and font are generated in one step, then the images are generated with that color passed in, so they share a palette. If you leave the profile image out of the selection, the existing one is described to the model instead, so a new header still matches it.</p>
             </div>
             <div class="doc-field">
@@ -325,7 +325,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">Free schedules on the hosted platform carry a dark "Powered by Event Schedule" strip at the foot of their public pages. There is no switch for it: it is removed automatically the moment the schedule is on <strong class="text-gray-900 dark:text-white">Pro</strong> or <strong class="text-gray-900 dark:text-white">Enterprise</strong>, and it returns if the plan lapses.</p>
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">What a paid plan removes</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">What a paid plan removes</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Five surfaces at once: the footer strip, the "create your own" card on your event pages, the credit line printed under your embed snippets, the same line inside a ticket or RSVP embed, and the footer of your newsletter emails. Ads, where a platform runs them on free schedules, follow the same tier. Embeds of your calendar never carry any of it, on any plan.</p>
             </div>
             <div class="doc-field">

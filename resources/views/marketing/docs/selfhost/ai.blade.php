@@ -26,7 +26,7 @@
 
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Every feature is unlocked</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Every feature is unlocked</h3>
                 <p class="text-gray-600 dark:text-gray-400 text-sm">A selfhosted install resolves to the Enterprise tier, so the plan gates on agenda scanning, generated details, generated flyers, AI styling, graphic captions and WhatsApp event creation are all satisfied. The plan badges below are there so you can match this page against the hosted docs, not because anything is held back.</p>
             </div>
             <div class="doc-field">
@@ -326,7 +326,7 @@
 
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">"Setup Required: Gemini API Key" on the import screen</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">"Setup Required: Gemini API Key" on the import screen</h3>
                 <ul class="doc-list text-sm">
                     <li>This panel shows when neither key is readable, so check that <code class="doc-inline-code">GEMINI_API_KEY</code> or <code class="doc-inline-code">OPENAI_API_KEY</code> is set in <code class="doc-inline-code">.env</code></li>
                     <li>Run <code class="doc-inline-code">php artisan config:clear</code>, and <code class="doc-inline-code">php artisan config:cache</code> again if you cache your config</li>

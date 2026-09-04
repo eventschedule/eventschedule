@@ -27,7 +27,7 @@
             </p>
         </div>
 
-        <x-docs.card-grid group="selfhost" except="selfhost/index" accent="sky" />
+        <x-docs.card-grid group="selfhost" except="selfhost/index" accent="sky" :level="3" />
 
         <h3 class="doc-subheading">Where to start</h3>
         <ol class="doc-list doc-list-numbered mb-6">

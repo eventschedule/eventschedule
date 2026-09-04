@@ -196,7 +196,7 @@
 
         <div class="doc-fields doc-fields--2">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Stripe Connect</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Stripe Connect</h3>
                 <p class="text-gray-600 dark:text-gray-400 text-sm">So your event creator customers can connect their Stripe accounts and receive ticket payments directly. You never hold their ticket money.</p>
             </div>
             <div class="doc-field">

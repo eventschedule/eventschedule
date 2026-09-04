@@ -255,7 +255,7 @@
 
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">In-Person Events</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">In-Person Events</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Choose <strong class="text-gray-900 dark:text-white">Use Existing</strong> to pick a venue that has appeared on your schedule before, or <strong class="text-gray-900 dark:text-white">Create New</strong> to enter a venue name, contact details, and address. A map of the location is shown on the public event page.</p>
             </div>
             <div class="doc-field">
@@ -285,7 +285,7 @@
 
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Adding Participants</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Adding Participants</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Add</strong>, then either <strong class="text-gray-900 dark:text-white">Use Existing</strong> to choose someone who has appeared on your schedule before, or <strong class="text-gray-900 dark:text-white">Create New</strong> and fill in a name (required) plus an optional email, phone number, and <strong class="text-gray-900 dark:text-white">YouTube Video URL</strong>. Click <strong class="text-gray-900 dark:text-white">Done</strong> to add them to the list, where each entry can be edited or removed.</p>
             </div>
             <div class="doc-field">

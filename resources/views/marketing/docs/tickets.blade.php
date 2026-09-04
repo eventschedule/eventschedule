@@ -473,7 +473,7 @@
 
         <div class="doc-fields" id="payment-setup">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Stripe</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Stripe</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Accept card payments directly. Money goes straight to your own Stripe account, with no platform fee added on any plan. Set up Stripe in <a href="{{ route('marketing.docs.account_settings') }}#payments" class="doc-link">Account Settings</a>.</p>
             </div>
             <div class="doc-field">
@@ -1165,7 +1165,7 @@
 
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Refunds</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Refunds</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Refunds are handled through your payment provider (Stripe, Invoice Ninja or Payfast). Event Schedule marks the sale as cancelled, but you must process the actual refund in that provider's dashboard. A Payfast reference is shown as plain text rather than a link, so you will need to search for it in your Payfast dashboard. Stripe refunds appear on customer statements within 5-10 business days.</p>
             </div>
             <div class="doc-field">

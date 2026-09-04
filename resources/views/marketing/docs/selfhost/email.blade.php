@@ -26,7 +26,7 @@
 
         <div class="grid md:grid-cols-2 gap-4 mb-6">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Ticket and booking confirmations</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Ticket and booking confirmations</h3>
                 <p class="text-gray-600 dark:text-gray-400 text-sm">The confirmation a buyer receives after checkout, with the ticket details and QR code, plus appointment confirmations, reminders and reschedule notices, and gift card deliveries.</p>
             </div>
             <div class="doc-field">
@@ -365,7 +365,7 @@
 
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Emails not sending</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Emails not sending</h3>
                 <ul class="doc-list text-sm">
                     <li>Verify <code class="doc-inline-code">MAIL_MAILER</code> is not still <code class="doc-inline-code">log</code> or <code class="doc-inline-code">array</code> (<code class="doc-inline-code">log</code> is the default)</li>
                     <li>Run <code class="doc-inline-code">php artisan config:clear</code> after changing <code class="doc-inline-code">.env</code></li>

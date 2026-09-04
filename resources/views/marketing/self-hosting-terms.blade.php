@@ -832,7 +832,7 @@
 
             <p class="es-fine-muted mx-auto mt-6 max-w-3xl text-center text-sm" data-reveal>
                 Running the hosted app at eventschedule.com instead? The
-                <a href="{{ marketing_url('/terms') }}" class="es-fine-link font-medium">Terms of Service</a>
+                <a href="{{ marketing_url('/terms-of-service') }}" class="es-fine-link font-medium">Terms of Service</a>
                 and
                 <a href="{{ marketing_url('/privacy') }}" class="es-fine-link font-medium">Privacy Policy</a>
                 cover that arrangement.

@@ -232,7 +232,7 @@
 
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Can I have multiple schedules?</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Can I have multiple schedules?</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Yes. One account can own up to 50 schedules on eventschedule.com, and a selfhosted install has no limit. This is how you run several bands, venues or organizations side by side, and how you mix types, since a schedule's type cannot be changed after it is saved.</p>
             </div>
             <div class="doc-field">

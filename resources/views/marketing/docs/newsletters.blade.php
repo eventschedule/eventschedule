@@ -105,7 +105,7 @@
 
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Content</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Content</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">The subject line (required) and the block list. <strong class="text-gray-900 dark:text-white">Add Block</strong> opens the block palette; click a block to add it or drag it onto the canvas. Blocks are reordered by their drag handle, and each one can be selected to edit its fields inline, cloned, or removed.</p>
             </div>
             <div class="doc-field">
@@ -587,7 +587,7 @@
 
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Send Now</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Send Now</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Confirm the prompt and the newsletter moves to Sending. Messages go out in small batches a few seconds apart rather than all at once, so a large send takes a few minutes to finish.</p>
             </div>
             <div class="doc-field">
@@ -731,7 +731,7 @@
 
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Draft</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Draft</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">In progress, not sent or scheduled. Editable at any time.</p>
             </div>
             <div class="doc-field">

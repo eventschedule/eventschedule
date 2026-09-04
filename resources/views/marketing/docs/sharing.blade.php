@@ -311,7 +311,7 @@
 
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">The frame is empty or the browser refuses to load it</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">The frame is empty or the browser refuses to load it</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Almost always a missing <code class="doc-inline-code">?embed=true</code>. Every other Event Schedule URL is served with framing switched off, so a plain schedule link inside an iframe is refused by the browser. Copy the Embed URL out of the Embed Schedule dialog rather than out of your address bar. Privacy extensions that block third-party frames are the other, rarer cause; test in a private window.</p>
             </div>
             <div class="doc-field">

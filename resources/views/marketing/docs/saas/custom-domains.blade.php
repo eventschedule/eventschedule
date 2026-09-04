@@ -127,7 +127,7 @@ DO_APP_HOSTNAME=your-app.ondigitalocean.app</code></pre>
 
         <div class="space-y-4 mb-6 mt-6">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">DO_API_TOKEN</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">DO_API_TOKEN</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Your DigitalOcean personal access token. Generate one at <code class="doc-inline-code">cloud.digitalocean.com/account/api/tokens</code>. Select <strong>Custom Scopes</strong>, then expand the <strong>app</strong> resource and check <strong>read</strong> and <strong>update</strong>.</p>
             </div>
             <div class="doc-field">
@@ -316,7 +316,7 @@ DO_APP_HOSTNAME=your-app.ondigitalocean.app</code></pre>
 
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Domain stuck on "Setting up..."</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Domain stuck on "Setting up..."</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Check the DO Status column first. If it is blank the domain was never registered on your app, and by far the most common reason is DNS: DigitalOcean will not accept a domain whose CNAME does not resolve to your app yet. Verify the record before anything else, remembering propagation can take up to 48 hours. A blank column can also mean the API credentials are missing or wrong. If it shows a phase but the stored status has not moved, confirm your scheduler is running, since only <code class="doc-inline-code">app:sync-domain-statuses</code> promotes a domain to active.</p>
             </div>
             <div class="doc-field">

@@ -23,6 +23,10 @@
     'group' => null,
     'pages' => null,
     'except' => null,
+    // Heading level for the card titles. /docs nests these under an h3, but the
+    // selfhost hub puts a grid straight under its h2, and a fixed h4 made that a
+    // level skip. Callers say which rank they are actually sitting at.
+    'level' => 4,
     'accent' => 'blue',
     /** 3 or 4 - how many cards per row at the widest breakpoint. Null = plain grid. */
     'cols' => null,
@@ -101,7 +105,7 @@
                              they are what a screen-reader user browsing by
                              heading actually wants from a documentation index.
                              A heading is valid flow content inside an <a>. --}}
-                        <h4 class="text-[0.9375rem] font-semibold text-gray-900 dark:text-white">{{ $item['title'] }}</h4>
+                        <h{{ $level }} class="text-[0.9375rem] font-semibold text-gray-900 dark:text-white">{{ $item['title'] }}</h{{ $level }}>
                     </span>
 
                     <span class="block text-sm leading-relaxed text-gray-500 dark:text-gray-400">{{ $item['blurb'] }}</span>

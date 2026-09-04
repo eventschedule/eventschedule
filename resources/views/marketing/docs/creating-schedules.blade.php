@@ -255,7 +255,7 @@
 
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Street Address</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Street Address</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Required. Your venue's street address, for example "123 Main Street".</p>
             </div>
             <div class="doc-field">
@@ -292,7 +292,7 @@
 
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Email</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Email</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Required. This is the schedule's own address: it receives the notifications you turn on, and it has to be verified before the schedule's guest page can be opened. Turn on <strong class="text-gray-900 dark:text-white">Show email address</strong> to publish it to visitors as well; leave it off and the address stays private to you.</p>
             </div>
             <div class="doc-field">
@@ -366,7 +366,7 @@
 
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">YouTube Videos</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">YouTube Videos</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Paste a YouTube link and it is added with its thumbnail and title. Videos appear in a panel on your schedule page, which the <a href="#settings-advanced" class="doc-link">Hide Videos</a> setting can turn off for Venue and Curator schedules.</p>
             </div>
             <div class="doc-field">
@@ -1124,7 +1124,7 @@
 
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Schedules</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Schedules</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Search by name or address and pick the talent or venue schedule you want. Only talent and venue schedules can be a source, so one curator never chains onto another.</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Anything the schedule has chosen not to publish stays private: drafts, internal events, unlisted events and anything it has not accepted are all left out.</p>
             </div>
@@ -1165,7 +1165,7 @@
 
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Import URLs</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Import URLs</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">The addresses to read. Add as many as you like: venue event pages, artist tour pages, ticketing organizer pages, and most other sites that list events with a date. The page is fetched and the events on it are read out by AI.</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400">A site's <code class="doc-inline-code">robots.txt</code> is checked first, and a page it asks robots to leave alone is skipped.</p>
             </div>
@@ -1206,7 +1206,7 @@
 
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sync direction</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Sync direction</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Four choices per integration: push your events out to the calendar, pull that calendar's events in, keep both in step, or <strong class="text-gray-900 dark:text-white">No sync</strong>, which is where every integration starts.</p>
             </div>
             <div id="delete-sync" class="scroll-mt-24 bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">

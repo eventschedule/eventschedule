@@ -324,7 +324,7 @@
 
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">In-person events</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">In-person events</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Targeting is a 25 mile radius around the venue's coordinates. If the venue has no coordinates, its country is used instead. The copy names the event, venue and city.</p>
             </div>
             <div class="doc-field">

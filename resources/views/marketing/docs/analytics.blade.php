@@ -71,7 +71,7 @@
 
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Schedule selector</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Schedule selector</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Choose <strong>All Schedules</strong> or a single schedule. The dropdown only appears when you manage more than one schedule; if you manage exactly one, it is selected for you automatically. Switching schedules clears the event filter.</p>
             </div>
             <div class="doc-field">

@@ -282,7 +282,7 @@
 
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Enable API Access</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Enable API Access</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">A single toggle. Saving it on generates a key straight away. Saving it off deletes the key, so anything using it stops working immediately.</p>
             </div>
             <div class="doc-field">
@@ -350,7 +350,7 @@
 
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Google Account</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Google Account</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Links your Google identity so you can sign in with Google. <strong class="text-gray-900 dark:text-white">Disconnect</strong> is only available once your account has a password, otherwise you would lock yourself out; set one first under <a href="#password" class="doc-link">Update Password</a>.</p>
             </div>
             <div class="doc-field">
@@ -384,7 +384,7 @@
 
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Connecting</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Connecting</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Connect Outlook Calendar</strong> and approve the permissions on Microsoft. Changes then flow both ways: Microsoft notifies Event Schedule as they happen, and a catch-up sync runs every 15 minutes in case a notification is missed. Once connected, switch sync on for each schedule under <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-microsoft" class="doc-link">Integrations</a>.</p>
             </div>
             <div class="doc-field">

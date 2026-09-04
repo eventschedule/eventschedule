@@ -179,7 +179,7 @@
         </p>
         <div class="doc-fields mb-6">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Header Image</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Header Image</h3>
                 <p class="text-sm text-gray-600 dark:text-gray-400">Upload a JPG, PNG, GIF or WebP to run across the top of the graphic. It is scaled to the full width of the image and capped at 200 pixels tall, so a wide, short logo band works better than a tall one. Upload a new file to replace it, or remove it to go back to no header.</p>
             </div>
             <div class="doc-field">
@@ -377,7 +377,7 @@ https://example.com/event/summer-concert</code></pre>
 
         <div class="grid md:grid-cols-2 gap-4 mb-6">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Event Basics</h4>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-3">Event Basics</h3>
                 <div class="space-y-2 text-sm">
                     <div class="flex justify-between gap-3"><code class="doc-inline-code">{event_name}</code> <span class="text-gray-600 dark:text-gray-400">Event name</span></div>
                     <div class="flex justify-between gap-3"><code class="doc-inline-code">{short_description}</code> <span class="text-gray-600 dark:text-gray-400">Short description</span></div>
