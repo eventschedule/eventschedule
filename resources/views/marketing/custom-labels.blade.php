@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Custom Labels for Schedules - Event Schedule</x-slot>
-    <x-slot name="description">Rename the words on your public schedule. Events can become Classes, Services, Openings or Sessions, across 34 labels, plus a form for your translation.</x-slot>
+    <x-slot name="description">Rename the words on your public schedule. Events can become Classes, Services, Openings or Sessions, across 35 labels, plus a form for your translation.</x-slot>
     <x-slot name="breadcrumbTitle">Custom Labels</x-slot>
 
     <x-slot name="structuredData">
@@ -12,7 +12,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Event Management Software",
         "operatingSystem": "Web",
-        "description": "Rename the built-in labels on your public schedule. Change 'Events' to 'Classes', 'Follow' to 'Subscribe' or 'Free entry' to 'No cover', across 34 labels. Each label keeps a second form for the language your schedule translates into. Pro plan.",
+        "description": "Rename the built-in labels on your public schedule. Change 'Events' to 'Classes', 'Follow' to 'Subscribe' or 'Free entry' to 'No cover', across 35 labels. Each label keeps a second form for the language your schedule translates into. Pro plan.",
         "offers": {
             "@type": "Offer",
             "price": "{{ $proMonthly }}",
@@ -20,7 +20,7 @@
             "description": "Included in the Pro plan at {{ plan_price($proMonthly) }} per month. Every Pro feature is included in a selfhosted install."
         },
         "featureList": [
-            "34 renameable labels across the public schedule, event pages, photo gallery and appointment booking",
+            "35 renameable labels across the public schedule, event pages, photo gallery and appointment booking",
             "Your own wording, typed in, up to 200 characters per label",
             "Per-schedule configuration, so two schedules on one account can use different vocabularies",
             "A second form per label for the language your schedule translates into, filled in automatically or written by hand",
@@ -60,7 +60,7 @@
            WHY NOT THE FIRST-WAVE TAG CLOUD: pulsing pills of random width
            said "labels" but argued nothing, and it repeated the chip and
            marquee furniture that already appears on a dozen WP pages. The
-           duplex is the argument, and the 34-row specimen table is the
+           duplex is the argument, and the 35-row specimen table is the
            record.
 
            NO FULL-TRANSLATION IMAGERY. A custom label carries exactly two
@@ -582,7 +582,7 @@
         ];
 
         // Every renameable label, grouped by the surface it appears on. The keys
-        // are Role::getCustomizableLabels() (34 of them) and the wording is the
+        // are Role::getCustomizableLabels() (35 of them) and the wording is the
         // English default from resources/lang/en/messages.php.
         $sheet = [
             [
@@ -590,6 +590,7 @@
                 'role/partials/headers/banner.blade.php, compact.blade.php and action-buttons.blade.php',
                 [
                     ['Follow', 'Join the list'],
+                    ['Email me new events', 'Tell me when a class opens'],
                     ['Submit Event', 'Suggest a class'],
                     ['Request to Book', 'Enquire'],
                     ['Book a Time', 'Book a slot'],
