@@ -120,6 +120,30 @@
                             {{ $slot }}
                         </div>
 
+                        {{-- How current the page is, and where to fix it. The date
+                             is the one the JSON-LD already publishes, so the two
+                             cannot disagree; the link is this page's own view file
+                             in the public repo, which is the whole argument for
+                             documenting an open-source product in its own tree. --}}
+                        @if ($lastUpdated() || $sourceUrl())
+                            <p class="doc-page-meta">
+                                @if ($lastUpdated())
+                                    <span>Last updated {{ $lastUpdated() }}</span>
+                                @endif
+                                @if ($lastUpdated() && $sourceUrl())
+                                    <span class="doc-page-meta-dot" aria-hidden="true">&middot;</span>
+                                @endif
+                                @if ($sourceUrl())
+                                    <a href="{{ $sourceUrl() }}" target="_blank" rel="noopener noreferrer" class="doc-page-meta-link">
+                                        Improve this page on GitHub
+                                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                        </svg>
+                                    </a>
+                                @endif
+                            </p>
+                        @endif
+
                         @if ($withPager)
                             <x-docs.pager :prev="$siblings['prev']" :next="$siblings['next']" />
                         @endif

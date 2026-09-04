@@ -174,6 +174,48 @@ class DocsPage extends Component
         return is_string($stamp) && $stamp !== '' ? substr($stamp, 0, 10) : null;
     }
 
+    /**
+     * The same date the JSON-LD publishes, formatted for a reader.
+     *
+     * A manual is worth less when you cannot tell how current it is, and this
+     * date already existed - it was going into dateModified and nowhere a person
+     * could see it. Reading it from the same place means the page and the
+     * structured data cannot disagree.
+     */
+    public function lastUpdated(): ?string
+    {
+        $stamp = $this->modified ?? $this->manifestModified();
+
+        if (! is_string($stamp) || $stamp === '') {
+            return null;
+        }
+
+        try {
+            return \Carbon\Carbon::createFromFormat('Y-m-d', substr($stamp, 0, 10))->format('j F Y');
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /**
+     * This page's own source file on GitHub, or null if the manifest key and the
+     * view have drifted apart.
+     *
+     * Every one of the 37 manifest keys resolves to
+     * resources/views/marketing/docs/<key>.blade.php today; the is_file() guard is
+     * what keeps a renamed view from shipping a 404 to every reader of that page.
+     */
+    public function sourceUrl(): ?string
+    {
+        $relative = 'resources/views/marketing/docs/'.$this->key.'.blade.php';
+
+        if (! is_file(base_path($relative))) {
+            return null;
+        }
+
+        return 'https://github.com/eventschedule/eventschedule/blob/main/'.$relative;
+    }
+
     public function render(): View
     {
         return view('components.docs-page');

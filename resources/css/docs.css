@@ -1093,6 +1093,36 @@ a.doc-shot-frame:focus-visible { outline: 2px solid var(--doc-focus); outline-of
 .doc-seealso-item:hover .doc-seealso-arrow { color: var(--doc-hue); transform: translateX(2px); }
 [dir="rtl"] .doc-seealso-item:hover .doc-seealso-arrow { transform: translateX(-2px); }
 
+/* Page provenance: how current this page is, and where to fix it. Sits above
+   the pager, so the tail reads date, then neighbours, then the CTA - weakest
+   to strongest. The link is padded to clear the WCAG 2.2 24px target minimum,
+   with the padding given straight back as margin so the row keeps its height. */
+.doc-page-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 3rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--doc-border-soft);
+    font-size: 0.8125rem;
+    color: var(--doc-text-faint);
+}
+.doc-page-meta-dot { opacity: 0.6; }
+.doc-page-meta-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding-block: 0.3125rem;
+    margin-block: -0.3125rem;
+    color: var(--doc-link);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.18s ease;
+}
+.doc-page-meta-link:hover { color: var(--doc-link-hover); text-decoration: underline; }
+.doc-page-meta-link:focus-visible { outline: 2px solid var(--doc-focus); outline-offset: 2px; }
+
 /* Prev / next. A slim bar, not two chunky cards - it shares the page tail
    with #see-also and the CTA, and only one of the three should have weight. */
 .doc-pager {
