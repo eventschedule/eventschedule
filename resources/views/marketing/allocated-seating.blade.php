@@ -160,6 +160,10 @@
         }
         .dark .es-house-mark { border-color: rgba(126, 166, 255, 0.35); color: #7ea6ff; }
 
+        /* The ring around the seat the box office has open. Stroke only, so it
+           reads on both the pale and the dark paper without a fill. */
+        .es-house-seat-ring { fill: none; stroke: #1d4ed8; stroke-width: 1.4; opacity: 0.55; }
+        .dark .es-house-seat-ring { stroke: #7ea6ff; opacity: 0.7; }
         .es-house-rule { border-top: 1px solid rgba(16, 21, 34, 0.08); }
         .dark .es-house-rule { border-top-color: rgba(232, 236, 244, 0.08); }
 
@@ -408,8 +412,70 @@
                         The same map, <span class="es-house-accent">with the names on.</span>
                     </h2>
                     <p class="es-house-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                        Click a seat and it tells you who has it. Type "C14" or a customer's name and the map jumps to them, because staff on a phone type faster than they click.
+                        Click a seat and it tells you who has it. Type "C4" or a customer's name and the map jumps to them, because staff on a phone type faster than they click.
                     </p>
+                </div>
+
+                {{-- The console itself. Same seat geometry as the hero so the two read
+                     as one room, with a seat selected and the record that opens beside
+                     it - which is the whole difference between the buyer's map and this
+                     one. Decorative: the four cards below carry the actual claims. --}}
+                <div class="es-house-paper mb-8 rounded-2xl p-5 sm:p-7" data-reveal="panel">
+                    <div class="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+                        <p class="es-house-ink text-sm font-bold">Box office &middot; The Aztec &middot; Stalls</p>
+                        <p class="es-house-muted text-xs">Sat 14 Nov &middot; 168 of 216 sold</p>
+                    </div>
+                    <div class="grid gap-6 lg:grid-cols-[1.6fr_1fr] lg:items-start">
+                        <svg viewBox="0 0 240 118" class="w-full" role="img" aria-label="The same seating plan in the box office console, with row C seat 14 selected.">
+                            @php
+                                // The same fixed sets as the hero, plus one seat under the
+                                // cursor - the one the record panel beside it describes.
+                                $boSold = ['A' => [3, 4, 5], 'B' => [4, 5], 'C' => [7, 8, 9, 10], 'D' => [1, 2]];
+                                $boHeld = ['F' => [6, 7]];
+                                $boPick = ['C' => [4]];
+                            @endphp
+                            @foreach (range('A', 'F') as $ri => $row)
+                                <text x="4" y="{{ 14 + $ri * 18 }}" class="es-house-row" dominant-baseline="middle">{{ $row }}</text>
+                                @for ($n = 1; $n <= 12; $n++)
+                                    @php
+                                        $cx = 16 + ($n - 1) * 17 + ($n > 6 ? 12 : 0);
+                                        $cy = 14 + $ri * 18;
+                                        $isSold = in_array($n, $boSold[$row] ?? [], true);
+                                        $isHeld = in_array($n, $boHeld[$row] ?? [], true);
+                                        $isPick = in_array($n, $boPick[$row] ?? [], true);
+                                        $cls = $isPick ? 'es-house-seat es-house-seat-mine'
+                                            : ($isSold ? 'es-house-seat es-house-seat-sold'
+                                            : ($isHeld ? 'es-house-seat es-house-seat-held' : 'es-house-seat'));
+                                    @endphp
+                                    @if ($isPick)
+                                        <circle cx="{{ $cx }}" cy="{{ $cy }}" r="8.5" class="es-house-seat-ring" />
+                                    @endif
+                                    <circle cx="{{ $cx }}" cy="{{ $cy }}" r="5.5" class="{{ $cls }}" />
+                                    @if ($isSold)
+                                        <line x1="{{ $cx - 2.6 }}" y1="{{ $cy - 2.6 }}" x2="{{ $cx + 2.6 }}" y2="{{ $cy + 2.6 }}" class="es-house-seat-x" />
+                                        <line x1="{{ $cx + 2.6 }}" y1="{{ $cy - 2.6 }}" x2="{{ $cx - 2.6 }}" y2="{{ $cy + 2.6 }}" class="es-house-seat-x" />
+                                    @endif
+                                @endfor
+                            @endforeach
+                        </svg>
+
+                        <div class="es-house-card p-4" aria-hidden="true">
+                            <p class="es-house-tag mb-3">Row C &middot; Seat 4</p>
+                            <dl class="space-y-2 text-sm">
+                                @foreach ([['Held by', 'Dana Ruiz'], ['Order', '#8F42-1176'], ['Ticket', 'Stalls, &pound;28'], ['Paid', 'Card, 2 Nov'], ['Checked in', 'Not yet']] as [$boK, $boV])
+                                    <div class="flex items-baseline justify-between gap-3">
+                                        <dt class="es-house-muted">{{ $boK }}</dt>
+                                        <dd class="es-house-ink font-semibold">{!! $boV !!}</dd>
+                                    </div>
+                                @endforeach
+                            </dl>
+                            <div class="es-house-rule mt-4 flex flex-wrap gap-2 pt-3">
+                                @foreach (['Move seat', 'Release', 'Resend'] as $boAction)
+                                    <span class="es-house-muted rounded-lg border border-gray-300 px-2.5 py-1 text-xs font-medium dark:border-white/15">{{ $boAction }}</span>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="grid gap-4 sm:grid-cols-2" data-reveal-group="80">
