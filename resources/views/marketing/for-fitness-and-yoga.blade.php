@@ -973,7 +973,7 @@
                                     @for ($visit = 0; $visit < 10; $visit++)
                                         <span class="es-flow-punch {{ $visit < 3 ? 'es-flow-punch-used' : 'es-flow-punch-open' }}">
                                             @if ($visit < 3)
-                                                <svg class="es-flow-tick" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                                <svg aria-hidden="true" class="es-flow-tick" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                                             @endif
                                         </span>
                                     @endfor

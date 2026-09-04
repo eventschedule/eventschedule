@@ -634,6 +634,14 @@
                 'a' => 'Whatever you told it to do. Each schedule has a policy for events deleted in the connected calendar: keep the event here, mark it cancelled so guests stop seeing it, or delete it here as well. It defaults to keeping the event, because that is the choice you can undo.',
             ],
             [
+                'q' => 'I connected after I had already added events. Do the old ones go across?',
+                'a' => 'Not on their own. Connecting starts the sync from that moment, so events you save afterwards are written out and the ones already on the schedule sit where they are. The re-send button on the schedule\'s calendar tab is what backfills them: it walks every published event and puts it on the calendar the schedule points at now. It is owner-only, it needs a direction that pushes, and it runs in the background rather than making you wait.',
+            ],
+            [
+                'q' => 'What happens to the entries in Google if I disconnect?',
+                'a' => 'They stay. Disconnecting closes the notification channels, clears each schedule\'s direction and calendar choice, and drops the tokens, so nothing further is written or read. It deliberately does not go back through Google deleting what it wrote, because that is not a decision worth making on your behalf. If you reconnect later, use the re-send button to bring the two back into step.',
+            ],
+            [
                 'q' => 'Does Google Calendar sync work with selfhosted Event Schedule?',
                 'a' => 'Yes. A selfhosted install uses its own Google OAuth credentials: create a client in the Google Cloud Console, add your callback URL as an authorized redirect URI, and set the client id, secret and redirect in your environment file. Push notifications also need your install to be reachable over HTTPS. Full setup instructions are in the selfhosted documentation.',
             ],

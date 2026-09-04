@@ -676,7 +676,7 @@
                                     </div>
                                     <div class="es-post-stamp flex w-20 flex-col items-center gap-1.5 text-center" aria-hidden="true">
                                         <span class="es-post-stamp-value">FREE</span>
-                                        <svg class="es-post-accent h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                                        <svg aria-hidden="true" class="es-post-accent h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
                                         <span class="es-post-frank"></span>

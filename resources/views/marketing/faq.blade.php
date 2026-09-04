@@ -251,6 +251,11 @@
             font-size: 0.78rem;
             font-weight: 600;
             color: #1d4ed8;
+            /* 19px of text is under the WCAG 2.2 target-size minimum of 24.
+               The padding buys the height, the negative margin gives it back,
+               so the plate row it sits in does not grow. */
+            padding-block: 0.3rem;
+            margin-block: -0.3rem;
         }
         .dark .es-desk-back { color: #a8c3ff; }
         .es-desk-back:hover { text-decoration: underline; }

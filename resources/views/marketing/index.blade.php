@@ -631,7 +631,7 @@
                                 <span class="h-3 w-3 rounded-full bg-[#28C840]"></span>
                             </span>
                             <span class="mx-auto flex items-center gap-1.5 rounded-lg bg-white/10 px-4 py-1 text-xs font-medium text-gray-300">
-                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                <svg aria-hidden="true" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                                 eventschedule.com
                             </span>
                             <span class="w-14"></span>
@@ -651,7 +651,7 @@
                             <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" aria-hidden="true">
                                 <span class="es-play-ring absolute inset-0 rounded-full bg-white/40"></span>
                                 <span class="relative flex h-20 w-20 items-center justify-center rounded-full bg-white/95 shadow-2xl transition-transform group-hover:scale-110">
-                                    <svg class="h-8 w-8 text-gray-900 ltr:ml-1 rtl:mr-1 rtl:rotate-180" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                    <svg aria-hidden="true" class="h-8 w-8 text-gray-900 ltr:ml-1 rtl:mr-1 rtl:rotate-180" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                                 </span>
                             </span>
                             <span class="absolute bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-black/50 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm" aria-hidden="true">
@@ -710,7 +710,7 @@
                                     <span class="absolute -right-2 -top-2 h-4 w-4 rounded-full bg-gray-50 dark:bg-[#0f0f14]"></span>
                                 </div>
                                 <div class="relative px-4 py-4">
-                                    <svg class="mx-auto h-24 w-24 text-gray-900 dark:text-white" viewBox="0 0 29 29" fill="currentColor">
+                                    <svg aria-hidden="true" class="mx-auto h-24 w-24 text-gray-900 dark:text-white" viewBox="0 0 29 29" fill="currentColor">
                                         <path d="M0 0h9v9H0V0zm2 2v5h5V2H2zm1 1h3v3H3V3zm17-3h9v9h-9V0zm2 2v5h5V2h-5zm1 1h3v3h-3V3zM0 20h9v9H0v-9zm2 2v5h5v-5H2zm1 1h3v3H3v-3zM12 0h2v2h-2V0zm3 0h2v4h-2V0zm-3 4h2v3h-2V4zm3 3h4v2h-4V7zm-3 3h3v2h-3v-2zm5 0h2v3h-2v-3zm7 1h2v2h-2v-2zm3-1h2v4h-2v-4zM0 12h2v2H0v-2zm3 0h4v2H3v-2zm5 1h2v4H8v-4zm3 3h2v2h-2v-2zm3-2h3v2h-3v-2zm5 1h2v3h-2v-3zm3 1h4v2h-4v-2zm5 1h2v2h-2v-2zm-15 4h4v2h-4v-2zm5 1h2v2h-2v-2zm3-2h2v4h-2v-4zm3 2h4v2h-4v-2zm-7 3h2v4h-2v-4zm-3 1h2v3h-2v-3zm8 0h3v2h-3v-2zm5-1h2v4h-2v-4z"/>
                                     </svg>
                                     <div class="es-laser"></div>
@@ -723,7 +723,7 @@
                             <!-- Hover payoff: checked in -->
                             <div class="es-checkin absolute right-1 top-2 flex items-center gap-2 rounded-xl border border-emerald-200 bg-white px-3 py-2 shadow-lg dark:border-emerald-500/30 dark:bg-[#15151c]">
                                 <span class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-500/20">
-                                    <svg class="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                    <svg aria-hidden="true" class="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                                 </span>
                                 <span class="text-xs font-semibold text-gray-900 dark:text-white">Checked in</span>
                             </div>
@@ -770,7 +770,7 @@
                                 <div class="overflow-hidden rounded-xl border border-gray-200 shadow-lg dark:border-white/10">
                                     <div class="flex items-center gap-2 bg-gradient-to-r from-sky-500 to-cyan-500 px-3 py-2">
                                         <span class="flex h-5 w-5 items-center justify-center rounded-full bg-white/25">
-                                            <svg class="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                                            <svg aria-hidden="true" class="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                                         </span>
                                         <span class="text-[10px] font-semibold text-white">This Week's Events</span>
                                     </div>
@@ -813,23 +813,23 @@
                         <div class="mt-5 grid grid-cols-[1fr_auto_1.2fr] items-center gap-3" aria-hidden="true">
                             <div class="rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-white/10 dark:bg-white/5">
                                 <div class="mb-2 flex h-10 items-center justify-center rounded-lg bg-gray-200 dark:bg-white/10">
-                                    <svg class="h-4 w-4 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                    <svg aria-hidden="true" class="h-4 w-4 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                                 </div>
                                 <div class="mb-1.5 h-1.5 w-full rounded-full bg-gray-200 dark:bg-white/10"></div>
                                 <div class="h-1.5 w-2/3 rounded-full bg-gray-200 dark:bg-white/10"></div>
                             </div>
-                            <svg class="h-5 w-5 animate-pulse-slow text-blue-500 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                            <svg aria-hidden="true" class="h-5 w-5 animate-pulse-slow text-blue-500 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                             <div class="space-y-1.5">
                                 <div class="es-ai-field flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1.5 text-xs font-medium text-gray-700 dark:border-blue-500/25 dark:bg-blue-500/10 dark:text-gray-300" style="--i: 0;">
-                                    <svg class="h-3.5 w-3.5 shrink-0 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                    <svg aria-hidden="true" class="h-3.5 w-3.5 shrink-0 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                                     Sat, Jul 18 · 8:00 PM
                                 </div>
                                 <div class="es-ai-field flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1.5 text-xs font-medium text-gray-700 dark:border-blue-500/25 dark:bg-blue-500/10 dark:text-gray-300" style="--i: 1;">
-                                    <svg class="h-3.5 w-3.5 shrink-0 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                    <svg aria-hidden="true" class="h-3.5 w-3.5 shrink-0 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                                     The Blue Note
                                 </div>
                                 <div class="es-ai-field flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1.5 text-xs font-medium text-gray-700 dark:border-blue-500/25 dark:bg-blue-500/10 dark:text-gray-300" style="--i: 2;">
-                                    <svg class="h-3.5 w-3.5 shrink-0 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
+                                    <svg aria-hidden="true" class="h-3.5 w-3.5 shrink-0 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
                                     $25 · 120 tickets
                                 </div>
                             </div>
@@ -859,7 +859,7 @@
                         <div class="mx-auto mt-5 w-40 overflow-hidden rounded-xl border border-gray-200 shadow-lg dark:border-white/10" aria-hidden="true">
                             <div class="flex items-center gap-1.5 bg-white px-2.5 py-2 dark:bg-[#15151c]">
                                 <span class="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-amber-500">
-                                    <svg class="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" /></svg>
+                                    <svg aria-hidden="true" class="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" /></svg>
                                 </span>
                                 <div>
                                     <div class="text-[9px] font-semibold text-gray-900 dark:text-white">The Blue Note</div>
@@ -869,7 +869,7 @@
                             <div class="flex h-16 items-center justify-center bg-gradient-to-br from-orange-200 to-amber-200 text-[10px] font-bold text-orange-600 dark:from-orange-800/60 dark:to-amber-800/60 dark:text-orange-300">Jazz Night</div>
                             <div class="flex items-center justify-between bg-white px-2.5 py-1.5 dark:bg-[#15151c]">
                                 <span class="flex items-center gap-1 text-[9px] text-gray-500 dark:text-gray-400">
-                                    <svg class="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                                    <svg aria-hidden="true" class="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
                                     <span data-count-to="142">142</span>
                                 </span>
                                 <span class="rounded bg-gradient-to-r from-orange-500 to-amber-500 px-2 py-0.5 text-[8px] font-semibold text-white">Learn More</span>
@@ -1077,7 +1077,7 @@
                                     <span class="glass rounded-full px-4 py-2 text-center text-xs font-semibold text-gray-700 dark:text-gray-300" data-reveal>9:00 AM</span>
                                     <span class="glass rounded-full px-4 py-2 text-center text-xs font-semibold text-gray-700 dark:text-gray-300" data-reveal>11:30 AM</span>
                                     <span class="flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#4E81FA] to-[#0EA5E9] px-4 py-2 text-center text-xs font-bold text-white shadow-md shadow-blue-500/30" data-reveal>
-                                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                        <svg aria-hidden="true" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                                         3:00 PM
                                     </span>
                                     <span class="glass rounded-full px-4 py-2 text-center text-xs font-semibold text-gray-700 dark:text-gray-300" data-reveal>4:30 PM</span>
@@ -1088,7 +1088,7 @@
                         <!-- Payoff toast (last reveal in the group, pops last) -->
                         <div class="absolute -right-3 -top-3 flex items-center gap-2 rounded-xl border border-emerald-200 bg-white px-3 py-2 shadow-lg dark:border-emerald-500/30 dark:bg-[#15151c]" data-reveal="zoom" aria-hidden="true">
                             <span class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-500/20">
-                                <svg class="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <svg aria-hidden="true" class="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                             </span>
                             <span class="text-xs font-semibold text-gray-900 dark:text-white">Booked · Tue 3:00 PM</span>
                         </div>
@@ -1633,7 +1633,7 @@
                                 <!-- Scene 2: share the link -->
                                 <div class="es-scene es-scene-1 flex flex-col items-center justify-center gap-5 p-6">
                                     <div class="es-pop flex items-center gap-3 rounded-2xl border border-blue-200 bg-blue-50 px-6 py-4 dark:border-blue-500/30 dark:bg-blue-500/10" style="--i: 0;">
-                                        <svg class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                                        <svg aria-hidden="true" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
                                         <span class="font-mono text-sm font-semibold text-gray-900 dark:text-white">blue-note.eventschedule.com</span>
                                         <span class="rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-gray-600 shadow-sm dark:bg-white/10 dark:text-gray-300">Copy</span>
                                     </div>
@@ -1654,7 +1654,7 @@
                                     </div>
                                     <div class="es-pop flex items-center gap-3 rounded-2xl border border-gray-200 bg-white px-5 py-3 shadow-lg dark:border-white/10 dark:bg-[#15151c]" style="--i: 5;">
                                         <span class="flex h-9 w-9 items-center justify-center rounded-full bg-sky-100 dark:bg-sky-500/20">
-                                            <svg class="h-5 w-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                                            <svg aria-hidden="true" class="h-5 w-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                                         </span>
                                         <div class="text-left rtl:text-right">
                                             <div class="text-sm font-semibold text-gray-900 dark:text-white">Newsletter sent</div>
@@ -1665,7 +1665,7 @@
                                                  NOT draw on it - see SendEventAnnouncements.) --}}
                                             <div class="text-xs text-gray-500 dark:text-gray-400">940 recipients</div>
                                         </div>
-                                        <svg class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                        <svg aria-hidden="true" class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                                     </div>
                                 </div>
                             </div>

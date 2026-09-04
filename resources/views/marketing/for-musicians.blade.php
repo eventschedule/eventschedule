@@ -439,7 +439,7 @@
         <div class="relative z-10 mx-auto w-full max-w-4xl px-4 text-center sm:px-6 lg:px-8">
             <p class="es-poster-eyebrow es-fade-up es-d-1 text-[11px] sm:text-xs">Event Schedule presents</p>
             <div class="es-poster-rule es-fade-up es-d-1 mx-auto mt-4 max-w-xs" aria-hidden="true">
-                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" /></svg>
+                <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" /></svg>
             </div>
             <p class="es-fade-up es-d-1 mt-4 inline-flex items-center justify-center gap-3 text-[11px] font-bold uppercase tracking-[0.3em] text-[#0e7490] dark:text-[#22d3ee] sm:text-xs">
                 For musicians, bands &amp; solo artists
@@ -582,7 +582,7 @@
                     Everything a working musician needs
                 </h2>
                 <div class="es-poster-rule mx-auto max-w-[12rem]" aria-hidden="true" data-reveal style="--reveal-delay: 0.16s;">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" /></svg>
+                    <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" /></svg>
                 </div>
             </div>
 
@@ -859,11 +859,11 @@
             <div class="es-poster-lineup mx-auto mb-14 max-w-3xl text-center" aria-hidden="true" data-reveal>
                 <div class="es-poster-display es-poster-lineup-t1 text-3xl sm:text-5xl">Solo artists</div>
                 <div class="es-poster-rule mx-auto my-3 max-w-[10rem]">
-                    <svg class="h-3 w-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" /></svg>
+                    <svg aria-hidden="true" class="h-3 w-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" /></svg>
                 </div>
                 <div class="es-poster-display es-poster-lineup-t2 text-xl sm:text-3xl">Rock &amp; pop bands &middot; Jazz musicians</div>
                 <div class="es-poster-rule mx-auto my-3 max-w-[10rem]">
-                    <svg class="h-3 w-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" /></svg>
+                    <svg aria-hidden="true" class="h-3 w-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" /></svg>
                 </div>
                 <div class="es-poster-display es-poster-lineup-t3 text-base sm:text-xl">Cover bands &middot; Tribute acts &middot; Session musicians</div>
             </div>

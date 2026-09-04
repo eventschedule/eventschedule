@@ -884,7 +884,7 @@
                                 @if ($soIndex === 0)
                                     {{-- URL in, parsed fields out: the shared es-ai-field reveal. --}}
                                     <div dir="ltr" class="mb-3 flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 font-mono text-[11px] text-gray-500 dark:border-white/10 dark:bg-white/5 dark:text-gray-400">
-                                        <svg class="h-3.5 w-3.5 shrink-0 text-emerald-500 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                                        <svg aria-hidden="true" class="h-3.5 w-3.5 shrink-0 text-emerald-500 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
                                         <span class="truncate">thevenue.com/gigs</span>
                                     </div>
                                     <div class="space-y-1.5">
@@ -905,7 +905,7 @@
                                         <span dir="ltr" class="rounded-lg bg-emerald-100 px-2.5 py-1 font-mono text-[11px] font-semibold text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">{{ $nextVersion }}</span>
                                     </div>
                                     <div class="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 py-2 text-[11px] font-semibold text-white">
-                                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                        <svg aria-hidden="true" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                                         Update now
                                     </div>
                                     <p class="mt-2 text-center text-[10px] text-gray-500 dark:text-gray-400">Migrations included.</p>
@@ -1032,7 +1032,7 @@
                     <div class="es-fed relative mb-6 rounded-2xl border border-white/10 bg-black/25 p-5" aria-hidden="true">
                         <div class="relative flex items-center justify-between gap-2">
                             <div class="relative z-10 w-[33%] rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-2 py-3 text-center">
-                                <svg class="mx-auto mb-1.5 h-5 w-5 text-emerald-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" /></svg>
+                                <svg aria-hidden="true" class="mx-auto mb-1.5 h-5 w-5 text-emerald-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" /></svg>
                                 <div class="text-xs font-semibold text-white">Your server</div>
                                 <div class="font-mono text-[10px] text-emerald-300/70">your-domain.com</div>
                             </div>
@@ -1045,14 +1045,14 @@
                             </div>
 
                             <div class="relative z-10 w-[33%] rounded-xl border border-white/15 bg-white/5 px-2 py-3 text-center">
-                                <svg class="mx-auto mb-1.5 h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
+                                <svg aria-hidden="true" class="mx-auto mb-1.5 h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
                                 <div class="text-xs font-semibold text-white">Listings</div>
                                 <div class="font-mono text-[10px] text-gray-500 dark:text-gray-400">eventschedule.com</div>
                             </div>
                         </div>
 
                         <div class="mt-4 flex items-center justify-center gap-2 text-[11px] text-gray-500 dark:text-gray-400">
-                            <svg class="h-3.5 w-3.5 rotate-180 text-emerald-400 rtl:rotate-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                            <svg aria-hidden="true" class="h-3.5 w-3.5 rotate-180 text-emerald-400 rtl:rotate-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                             every listing links back to your site
                         </div>
                     </div>

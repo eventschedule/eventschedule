@@ -986,7 +986,7 @@
                              lines already read top to bottom, and a third row per item
                              cost ~200px of scroll for punctuation. --}}
                         <li class="grid gap-0.5 px-5 py-3 sm:grid-cols-[1fr_auto_1fr] sm:items-center sm:gap-4">
-                            <a href="{{ marketing_url($r['url']) }}" class="text-sm text-gray-500 underline-offset-4 transition-colors hover:text-sky-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA] dark:text-gray-400 dark:hover:text-sky-400">{{ $r['tool'] }}</a>
+                            <a href="{{ marketing_url($r['url']) }}" class="text-sm [padding-block:0.3125rem] [margin-block:-0.3125rem] text-gray-500 underline-offset-4 transition-colors hover:text-sky-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA] dark:text-gray-400 dark:hover:text-sky-400">{{ $r['tool'] }}</a>
                             <svg aria-hidden="true" class="hidden h-4 w-4 shrink-0 text-sky-500 sm:block rtl:sm:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                             <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $r['now'] }}</span>
                         </li>

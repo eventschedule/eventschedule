@@ -236,6 +236,8 @@
             background-color: rgba(143, 179, 255, 0.09);
             color: #8fb3ff;
         }
+        /* Only the anchor form is a target, so only it needs the 24px height. */
+        a.es-commit-ref { padding-block: 0.28rem; }
         a.es-commit-ref:hover { border-color: rgba(30, 64, 175, 0.6); }
         .dark a.es-commit-ref:hover { border-color: rgba(143, 179, 255, 0.65); }
 

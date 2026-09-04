@@ -1012,7 +1012,7 @@
 
                             <div class="es-scr-screen-inset mb-5 flex items-center gap-3 px-3 py-3" aria-hidden="true">
                                 <span class="flex-none rounded" style="background-color: #161311; padding: 0.4rem;">
-                                    <svg class="h-7 w-7" style="color: #f4f3f0;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                                    <svg aria-hidden="true" class="h-7 w-7" style="color: #f4f3f0;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 4h5v5H4V4zm11 0h5v5h-5V4zM4 15h5v5H4v-5zm11 2h2m3 0v3m-5 3h5M12 4v4m0 3h3m-3 4v5" />
                                     </svg>
                                 </span>

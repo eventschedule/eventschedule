@@ -58,6 +58,10 @@
     $spacing = $align === 'block' ? 'mb-3' : 'align-middle';
 
     $classes = 'inline-flex items-center gap-1.5 rounded-full px-2 py-[0.1875rem] text-[0.6875rem] font-semibold uppercase tracking-[0.06em] leading-none ring-1 whitespace-nowrap '
+        // As a LINK this is a 17px tap target, under the WCAG 2.2 minimum of 24.
+        // The extra block padding buys the height and the negative margin gives
+        // it straight back, so the pill still reads the same size.
+        .($link ? '[padding-block:0.3125rem] [margin-block:-0.1875rem] ' : '')
         .$tier['chip'].' '.$spacing;
 
     $isLink = $link && in_array($plan, ['pro', 'enterprise'], true);

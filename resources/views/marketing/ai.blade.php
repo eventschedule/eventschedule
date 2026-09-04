@@ -1497,6 +1497,12 @@
 
     </div>
 
+    {{-- The shared plan band. Every one of these pages states its tiers inline
+         with Free/Pro chips, but none of them offered a way to see what the
+         tiers cost, or even a link to /pricing - a reader who got this far had
+         to go back to the header. --}}
+    @include('marketing.partials.pricing-nudge')
+
     <x-marketing.related-pages />
 
     <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>

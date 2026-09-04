@@ -711,6 +711,19 @@ html.es-anim .es-d-5 { animation-delay: 0.6s; }
 }
 
 
+/* WCAG 2.2 target size. A standalone "learn more" link is a navigation target,
+   not a link inside a sentence, so the inline exception does not cover it - and
+   these render 20px tall from their line-height alone. inline-flex is the tell:
+   a link inside prose is display:inline, stays exempt and is untouched here.
+   The negative margin hands the space straight back, so no layout moves.
+   Anything that already carries its own padding is a button and is excluded -
+   matched at a word boundary, because [class*="p-"] also matches gap-1.5 and
+   silently exempted every link on the site that sets a gap. */
+main a:is(.inline-flex, .flex, .inline-block):not([class*=" py-"]):not([class^="py-"]):not([class*=" p-"]):not([class^="p-"]):not([class*=" h-"]):not([class^="h-"]) {
+    padding-block: 0.1875rem;
+    margin-block: -0.1875rem;
+}
+
 /* Reduced motion for the shared es-* effects (page-specific effects add
    their own kills in their page style blocks). */
 @media (prefers-reduced-motion: reduce) {

@@ -292,7 +292,7 @@
             /* 24px tall so a thumb has something to grab on a phone, with the
                track painted as a 6px band down the middle so it still reads as a
                hairline. A 6px-tall input is a 6px-tall tap target. */
-            height: 24px;
+            height: 26px;
             background: linear-gradient(90deg, #f59e0b var(--fill, 50%), rgba(2, 6, 23, 0.08) var(--fill, 50%)) center / 100% 6px no-repeat;
             border-radius: 9999px;
             cursor: pointer;
@@ -599,7 +599,7 @@
                             @foreach ([['01', 'Brand'], ['02', 'Tenants'], ['03', 'Billing'], ['04', 'Infra']] as $leg)
                                 <div class="flex items-center gap-2">
                                     <span class="es-tag">{{ $leg[0] }} · {{ $leg[1] }}</span>
-                                    <svg class="text-blue-400/70 dark:text-blue-700 dark:text-blue-400/50" width="42" height="2" fill="none"><path class="es-ants" d="M0 1 H42" stroke="currentColor" stroke-width="1.5"/></svg>
+                                    <svg aria-hidden="true" class="text-blue-400/70 dark:text-blue-700 dark:text-blue-400/50" width="42" height="2" fill="none"><path class="es-ants" d="M0 1 H42" stroke="currentColor" stroke-width="1.5"/></svg>
                                 </div>
                             @endforeach
                         </div>
@@ -1281,7 +1281,7 @@
                                             <div class="truncate text-sm font-semibold text-gray-900 dark:text-white">acme.yourdomain.com</div>
                                             <div class="text-xs text-gray-500 dark:text-gray-400">Trial started · 14 days</div>
                                         </div>
-                                        <svg class="ml-auto h-5 w-5 shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                        <svg aria-hidden="true" class="ml-auto h-5 w-5 shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                                     </div>
                                     <div class="es-pop rounded-full border border-amber-200 bg-amber-50 px-5 py-2.5 font-mono text-sm font-bold text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300" style="--i: 1;">+$0 today · $29/mo after trial</div>
                                     <div class="es-pop text-xs text-gray-500 dark:text-gray-400" style="--i: 2;">Straight into your Stripe account</div>
@@ -1427,7 +1427,7 @@
                                     ['Embeds', 'M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4'],
                                 ] as $feat)
                                     <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-xs font-medium text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-300">
-                                        <svg class="h-3.5 w-3.5 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $feat[1] }}" /></svg>
+                                        <svg aria-hidden="true" class="h-3.5 w-3.5 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $feat[1] }}" /></svg>
                                         {{ $feat[0] }}
                                     </span>
                                 @endforeach
@@ -1468,7 +1468,7 @@
 
                 <!-- Constellation -->
                 <div class="relative mx-auto h-[280px] w-[340px] max-w-full" aria-hidden="true" data-reveal style="--reveal-delay: 0.1s;">
-                    <svg viewBox="0 0 340 280" class="absolute inset-0 h-full w-full" fill="none">
+                    <svg aria-hidden="true" viewBox="0 0 340 280" class="absolute inset-0 h-full w-full" fill="none">
                         <path class="es-ants stroke-blue-300 dark:stroke-blue-500/50" stroke-width="1.5" d="M60 60 C 90 80, 130 110, 172 140" />
                         <path class="es-ants stroke-sky-300 dark:stroke-sky-500/50" stroke-width="1.5" d="M285 58 C 250 80, 210 110, 172 140" />
                         <path class="es-ants stroke-cyan-300 dark:stroke-cyan-500/50" stroke-width="1.5" d="M50 205 C 90 190, 130 165, 172 140" />
@@ -1638,9 +1638,9 @@
                 <div class="relative z-10">
                     <div class="mb-8 inline-flex items-center gap-3" aria-hidden="true">
                         <span class="es-tag !text-gray-500 dark:text-gray-400">clone</span>
-                        <svg class="h-3.5 w-3.5 text-gray-500 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 7l5 5-5 5" /></svg>
+                        <svg aria-hidden="true" class="h-3.5 w-3.5 text-gray-500 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 7l5 5-5 5" /></svg>
                         <span class="es-tag !text-gray-500 dark:text-gray-400">configure</span>
-                        <svg class="h-3.5 w-3.5 text-gray-500 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 7l5 5-5 5" /></svg>
+                        <svg aria-hidden="true" class="h-3.5 w-3.5 text-gray-500 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 7l5 5-5 5" /></svg>
                         <span class="es-tag !text-amber-400">charge</span>
                     </div>
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">

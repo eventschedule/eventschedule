@@ -333,7 +333,10 @@
             font-size: 0.72rem;
             font-weight: 700;
             letter-spacing: 0.06em;
+            /* 0.72rem x 2 is 23px, one pixel under the WCAG 2.2 target minimum,
+               and this is the clause index every reader taps to navigate. */
             line-height: 2;
+            padding-block: 0.15rem;
             color: #1d4ed8;
             transition: color 0.2s ease;
         }

@@ -428,7 +428,10 @@
         }
 
         /* --- Links and buttons --- */
-        .es-sheet2-link { color: #1d4ed8; }
+        /* Vertical padding on an inline box is part of its hit area and part of
+           its border box, but not of its line box, so this lifts three 19px
+           links over the 24px target minimum without moving the row. */
+        .es-sheet2-link { color: #1d4ed8; padding-block: 0.25rem; }
         .es-sheet2-link:hover { color: #11151c; }
         .dark .es-sheet2-link { color: #8ab4ff; }
         .dark .es-sheet2-link:hover { color: #e9edf4; }
