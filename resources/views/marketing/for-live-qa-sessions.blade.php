@@ -1184,7 +1184,7 @@
                                 <span class="es-conv-plan">Free</span>
                             </div>
                             <p class="es-conv-muted mb-4">Your audience follows the schedule, and you see who they are. When there is something worth saying, you write a newsletter and send it, to everyone or to a segment, and you get open and click rates back.</p>
-                            <p class="es-conv-muted text-sm">Nothing goes out on its own. The allowance is 10 recipients a month on free, 100 on Pro and 1,000 on Enterprise, counted per recipient rather than per send. Read more about <a href="{{ marketing_url('/features/newsletters') }}" class="es-conv-link font-medium hover:underline">newsletters</a>.</p>
+                            <p class="es-conv-muted text-sm">New sessions reach confirmed email subscribers on their own, as a digest, without touching this. The allowance is for the newsletters you write: 10 recipients a month on free, 100 on Pro and 1,000 on Enterprise, counted per recipient rather than per send. Read more about <a href="{{ marketing_url('/features/newsletters') }}" class="es-conv-link font-medium hover:underline">newsletters</a>.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>

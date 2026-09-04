@@ -1068,7 +1068,7 @@
             </div>
 
             <p class="es-syl-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
-                One thing that is deliberately absent: nothing here emails your followers on its own when you add a session. Following you gives you permission to write to them, and you write it.
+                Worth being precise about which list is which. Somebody who left an email address and confirmed it hears when you add sessions, as one digest rather than a message per week. Somebody who pressed Follow from their own account is on the other list, and that one is reached only by a newsletter you write. There is no automation builder here either way: no branching sequence, no drip.
             </p>
         </div>
     </section>

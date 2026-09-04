@@ -677,7 +677,7 @@
             ],
             [
                 'q' => 'What happens to the people who post?',
-                'a' => 'A fan who is signed in when they submit is added to your schedule as a follower, which puts them on the list the next time you write a newsletter. Newsletters are free and the monthly allowance counts recipients: 10 on the free plan, 100 on Pro and 1,000 on Enterprise. Nothing is emailed to them automatically.',
+                'a' => 'A fan who is signed in when they submit is added to your schedule as a follower, which puts them on the list the next time you write a newsletter. Newsletters are free and the monthly allowance counts recipients: 10 on the free plan, 100 on Pro and 1,000 on Enterprise. An account follower hears from you only through one of those. The list that hears about new dates on its own is the other one, the people who left an email address on your page and confirmed it.',
             ],
         ];
 

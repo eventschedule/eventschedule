@@ -690,7 +690,7 @@
             ],
             [
                 'q' => 'Do people who registered find out if I move the session?',
-                'a' => 'Yes, once you say so. Change the join link or the venue and Event Schedule stops on the way to saving and asks whether to email everyone who registered, with a short note you can write into it; cancelling asks the same way. On a one-off session moving the date or the time asks too, though on a recurring series the prompt covers the link and the venue rather than the weekly time. Free registrations are on the list either way. Followers are different: following your schedule puts somebody on a list you can email, and you write and send that newsletter yourself. Nothing is sent to followers automatically when you add a session.',
+                'a' => 'Yes, once you say so. Change the join link or the venue and Event Schedule stops on the way to saving and asks whether to email everyone who registered, with a short note you can write into it; cancelling asks the same way. On a one-off session moving the date or the time asks too, though on a recurring series the prompt covers the link and the venue rather than the weekly time. Free registrations are on the list either way. Followers are different, and there are two of them. Somebody signed in who pressed Follow is on a list only a newsletter you write reaches; nothing is sent to an account follower automatically when you add a session. Somebody who left an email address on your page and confirmed it is on the other list, and a new session does reach them on its own, as a digest rather than a message per webinar.',
             ],
             [
                 'q' => 'Is Event Schedule free for hosting webinars?',

@@ -26,7 +26,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Email Marketing Software",
         "operatingSystem": "Web",
-        "description": "Compose a newsletter from fourteen block types, choose who receives it, and send it yourself. Nothing is emailed to your followers automatically. Monthly allowances count recipients rather than sends.",
+        "description": "Compose a newsletter from fourteen block types, choose who receives it, and send it yourself. A newsletter never sends itself; the separate new-event digest to confirmed subscribers is the only mail that goes on its own. Monthly allowances count recipients rather than sends.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -34,7 +34,7 @@
             "description": "The newsletter builder is included on the free plan, with 10 recipients per month"
         },
         "featureList": [
-            "Nothing is sent to followers automatically: you compose and send every newsletter",
+            "Every newsletter is one you compose and send; the separate new-event digest to confirmed subscribers is the only automatic mail",
             "Fourteen block types, dragged into order, cloned or deleted",
             "An events block that pulls your upcoming events into the email",
             "Five built-in templates, plus templates you save yourself",
@@ -639,7 +639,7 @@
             ],
             [
                 'q' => 'Does adding an event email my followers?',
-                'a' => 'No. Nothing is emailed to your followers automatically. There is no digest job and no new-event alert: you compose a newsletter, choose who receives it, and send it. The one automatic email in this area goes to ticket buyers, who are told when an event they bought for changes or is cancelled.',
+                'a' => 'It depends which list you mean, and the two behave differently. Somebody who left an email address on your schedule and confirmed it is a SUBSCRIBER, and publishing new public events does send them a short digest on its own, batched and never more than one every three days per schedule, outside the allowance this page counts. Somebody signed in who pressed Follow is an ACCOUNT FOLLOWER, and nothing reaches them except a newsletter you compose and send. The other automatic email in this area goes to ticket buyers, who are told when an event they bought for changes or is cancelled.',
             ],
             [
                 'q' => 'How many newsletters can I send?',

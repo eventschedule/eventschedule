@@ -577,7 +577,7 @@
             ],
             [
                 'q' => 'How do attendees hear about the next edition?',
-                'a' => 'They follow your schedule, and you write them a newsletter when the next programme is set. Nothing goes out on its own: a newsletter is something you compose and send, with 10 emails a month on the free plan, 100 on Pro and 1,000 on Enterprise, counted one per recipient. Followers also show up with their name and email on your followers tab, so the audience is yours rather than a platform\'s.',
+                'a' => 'Two ways. Somebody who left an email address on your page and confirmed it is sent a digest on its own when the sessions go up, batched rather than one message per talk. Somebody who pressed Follow from their own account is reached only by a newsletter you write, which is what you want when the programme is set and there is something to say about it: 10 emails a month on the free plan, 100 on Pro and 1,000 on Enterprise, counted one per recipient. Followers also show up with their name and email on your followers tab, so the audience is yours rather than a platform\'s.',
             ],
         ];
 
@@ -1079,7 +1079,7 @@
                                 <h3 class="es-agenda-ink text-xl font-bold">Write to the people who came</h3>
                                 <span class="es-agenda-plan">Free</span>
                             </div>
-                            <p class="es-agenda-muted">Attendees follow your schedule and you send them a newsletter when next year's programme is set. Nothing goes out on its own: 10 emails a month on Free, 100 on Pro and 1,000 on Enterprise, counted one per recipient.</p>
+                            <p class="es-agenda-muted">A confirmed email subscriber hears when sessions go up without you doing anything. The newsletter is the one you write when next year's programme is set: 10 emails a month on Free, 100 on Pro and 1,000 on Enterprise, counted one per recipient.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>

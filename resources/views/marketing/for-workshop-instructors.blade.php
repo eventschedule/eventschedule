@@ -560,7 +560,7 @@
             ],
             [
                 'q' => 'How do students find out about a new class?',
-                'a' => 'They follow your schedule, and then you email them. Nothing goes out on its own: you write the newsletter and send it, and you get open and click rates afterwards. The allowance counts recipients rather than sends, at 10 a month on Free, 100 on Pro and 1,000 on Enterprise. Alongside that, share your one link, embed the calendar on the studio site you already have, and download your schedule\'s QR code to tape to the bench.',
+                'a' => 'Two ways, and they are not the same list. Somebody who leaves an email address on your page and confirms it is sent a short digest on its own when you put new classes up, batched so a whole term posted in one sitting is one message, and it costs nothing from your allowance. Somebody signed in who pressed Follow is on the other list, and that one only ever hears from a newsletter you write and send, with open and click rates afterwards. The allowance counts recipients rather than sends, at 10 a month on Free, 100 on Pro and 1,000 on Enterprise. Alongside that, share your one link, embed the calendar on the studio site you already have, and download your schedule\'s QR code to tape to the bench.',
             ],
             [
                 'q' => 'Can I sell spots and cap the class?',

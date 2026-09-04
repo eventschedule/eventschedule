@@ -922,7 +922,7 @@
             <div class="grid gap-6 md:grid-cols-2" data-reveal-group="90">
                 <div class="es-belt-card p-7" data-reveal="panel">
                     <h3 class="es-belt-ink mb-2 text-lg font-bold">Automations and drip sequences</h3>
-                    <p class="es-belt-muted es-belt-small">Newsletters here are written and sent by you, with open and click rates and an optional subject-line A/B test. There is no automation builder, no branching sequence, and no trigger that emails followers on its own. If you run nurture flows, keep the email platform.</p>
+                    <p class="es-belt-muted es-belt-small">Newsletters here are written and sent by you, with open and click rates and an optional subject-line A/B test. There is no automation builder, no branching sequence and no drip. The one thing that does send itself is a digest of newly published events to people who left an email address and confirmed it, which is a fact about the calendar rather than a campaign you build. If you run nurture flows, keep the email platform.</p>
                 </div>
                 <div class="es-belt-card p-7" data-reveal="panel">
                     <h3 class="es-belt-ink mb-2 text-lg font-bold">A blank design canvas</h3>

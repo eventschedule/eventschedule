@@ -1079,9 +1079,9 @@
             <div class="es-scr-card mt-6 p-7 sm:p-8" data-reveal="panel">
                 <div class="grid gap-8 md:grid-cols-2 md:items-center">
                     <div>
-                        <h3 class="es-scr-ink mb-3 text-xl font-bold">No newsletter goes out on its own</h3>
+                        <h3 class="es-scr-ink mb-3 text-xl font-bold">The newsletter is the one you write</h3>
                         <p class="es-scr-muted text-sm leading-relaxed">
-                            There is no job that emails your followers when you add a date, and no page here is going to pretend otherwise. You write the email and you send it, which is slower and also the reason your list does not quietly rot. Open and click rates come back afterwards so you can tell whether Friday's note actually landed.
+                            A new screening does reach confirmed email subscribers on its own, as a batched digest. What never sends itself is the newsletter: no automation builder, no branching sequence, no drip. You write that one and you send it, which is slower and also the reason your list does not quietly rot. Open and click rates come back afterwards so you can tell whether Friday's note actually landed.
                         </p>
                         <p class="es-scr-muted mt-4 text-sm leading-relaxed">
                             Automatic mail is kept for the things a person asked for: the confirmation every registrant gets the moment they take a place, and the note to the waitlist when a full night frees up. And notifications run the other way too: when somebody asks you to add their screening to your calendar, you are the one who gets the email.

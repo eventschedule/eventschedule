@@ -634,7 +634,7 @@
             ],
             [
                 'q' => 'How do community members stay informed about programs?',
-                'a' => 'Through as many doors as you care to open, and all of them are yours to trigger. People follow the center and you write to them when there is something to say - you compose the newsletter and press send, nothing is emailed automatically. The calendar embeds into the website you already have. It syncs both ways with Google, Outlook and CalDAV, one entry per event, and the schedule also publishes an iCal feed that unrolls every date of a weekly program for anyone who subscribes to it. And your schedule has a QR code you can download and print for the board in the lobby.',
+                'a' => 'Through as many doors as you care to open, and all of them are yours to trigger. People leave an email address and hear about new dates on their own, as one digest rather than a message per program; the newsletter is the one you compose and press send on, for when there is something to say beyond the listing. The calendar embeds into the website you already have. It syncs both ways with Google, Outlook and CalDAV, one entry per event, and the schedule also publishes an iCal feed that unrolls every date of a weekly program for anyone who subscribes to it. And your schedule has a QR code you can download and print for the board in the lobby.',
             ],
             [
                 'q' => 'Can we handle event registration and payments?',
