@@ -138,8 +138,8 @@
             </div>
 
             <h1 class="es-balance mb-5 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
-                <span class="es-mask"><span class="es-mask-line">Built for every kind</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-usecases">of organizer</span></span></span>
+                <span class="es-mask"><span class="es-mask-line">Whatever you put on,</span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-usecases">somebody here runs it</span></span></span>
             </h1>
 
             <p class="es-fade-up es-d-2 mx-auto mb-7 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">

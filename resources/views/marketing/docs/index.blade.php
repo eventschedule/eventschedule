@@ -73,7 +73,7 @@
     $steps = [
         ['icon' => 'cog', 'title' => 'Create a schedule', 'text' => 'Pick Talent, Venue or Curator, claim your URL, and add a logo and colors.', 'route' => 'marketing.docs.getting_started'],
         ['icon' => 'plus', 'title' => 'Add your events', 'text' => 'Type them in, paste a listing for AI to parse, or scan a printed agenda on Enterprise.', 'route' => 'marketing.docs.creating_events'],
-        ['icon' => 'share', 'title' => 'Share it', 'text' => 'Embed the calendar on your site, post the link, and collect followers you can email later.', 'route' => 'marketing.docs.sharing'],
+        ['icon' => 'share', 'title' => 'Share it', 'text' => 'Embed the calendar on your site, post the link, and collect subscribers who hear about new events on their own.', 'route' => 'marketing.docs.sharing'],
     ];
 @endphp
 

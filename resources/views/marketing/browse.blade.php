@@ -615,8 +615,8 @@
                         {{-- No es-balance here: the two h1 lines are broken by hand,
                              and text-wrap:balance re-breaks the first one mid-phrase. --}}
                         <h1 class="es-news-h1 es-news-serif es-news-ink mb-6 font-black">
-                            <span class="es-mask"><span class="es-mask-line">Upcoming events,</span></span>
-                            <span class="es-mask es-mask-2"><span class="es-mask-line">all in <span class="es-news-accent">one place.</span></span></span>
+                            <span class="es-mask"><span class="es-mask-line">Upcoming events, from</span></span>
+                            <span class="es-mask es-mask-2"><span class="es-mask-line">the people <span class="es-news-accent">putting them on.</span></span></span>
                         </h1>
                         <div class="es-news-stamp es-news-folio mt-2 hidden shrink-0 text-center sm:block" aria-hidden="true">
                             Free
