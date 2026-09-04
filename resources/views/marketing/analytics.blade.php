@@ -897,7 +897,7 @@
             </div>
 
             <p class="es-dash-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
-                Want names? Ask for them. People who follow your schedule hand over a name and an email on purpose, and you can write to them from the newsletter tool: ten emails a month on Free, a hundred on Pro, a thousand on Enterprise, counted per recipient.
+                Want names? Ask for them. People who subscribe hand over a name and an email on purpose, and from then on they get a digest automatically whenever you publish new events. Anything more is a newsletter you write: ten emails a month on Free, a hundred on Pro, a thousand on Enterprise, counted per recipient, and the automatic digest is outside that count.
             </p>
         </div>
     </section>

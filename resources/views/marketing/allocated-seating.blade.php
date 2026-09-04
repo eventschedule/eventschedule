@@ -473,6 +473,10 @@
                 ['q' => 'What happens if I edit a plan that is already selling?', 'a' => 'You can keep editing. A seat somebody has bought will not be removed, and neither will one a customer is choosing at that moment. Everything else moves freely around them.'],
                 ['q' => 'Do buyers have to pick their own seats?', 'a' => 'No. They choose how many they want and can take the best available together, which keeps a party seated as a block. Choosing from the map is the other option, not the only one.'],
                 ['q' => 'Does it work with tables?', 'a' => 'Yes. Give a section round or rectangular tables and say how many sit at each. A table can sell as single seats, as a whole table only, or either way, which is the difference between a cabaret night and a fundraising dinner.'],
+                // The Seating tab is rendered on venue schedules only, which is the single
+                // most surprising thing about this feature if you run a talent schedule.
+                ['q' => 'Which kind of schedule can build a plan?', 'a' => 'A venue schedule. Plans describe a room, so the Seating tab appears on the schedule that has the room and not on a talent or curator one. That does not shut anyone else out of a seated night: a talent or curator schedule listing a seated event still sells from the map and still gets the box office console for it. If you promote in a room you do not own, the venue draws the plan once and every show in it uses the same drawing.'],
+                ['q' => 'What happens to a seated event if my plan lapses?', 'a' => 'The show carries on. A plan already attached to an event stays attached and keeps selling seats, and the box office keeps working on it, because pulling a seating chart out from under a run that is on sale would be indefensible. What Enterprise gates is attaching a new plan to another event.'],
                 ['q' => 'Which plan do I need?', 'a' => 'Allocated seating is on the Enterprise plan, and on every selfhosted install at no cost. The rest of ticketing - types, check-in, promo codes, waitlists, the sales export - is available below it.'],
             ];
         @endphp

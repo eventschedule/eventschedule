@@ -71,23 +71,27 @@
         /* ==============================================================
            For-newsletters "The Send" styles.
 
-           CONCEPT: the franking counter in a mailroom. Nothing leaves the
-           building on its own. Somebody writes the letter, decides who it
-           goes to, feeds it in and presses the lever - and the meter
-           charges BY THE ENVELOPE, not by the letter that was written.
+           CONCEPT: the franking counter in a mailroom. The meter charges BY
+           THE ENVELOPE, not by the letter that was written - so one letter
+           to forty people costs forty. One tray leaves on a timer (the
+           new-event digest) and is deliberately not metered; everything
+           else is fed in by hand.
 
            Both halves of that object are the product, exactly:
 
-             1. There is no automatic follower notification anywhere in
-                this codebase. No job, no mailable, no scheduled command.
-                The only follower-facing mailable is NewsletterEmail, and
-                NewsletterController::send() runs from a button a human
-                pressed. (The two automatic emails that DO exist run the
-                other way: EventChangeNotifier tells TICKET BUYERS when
-                their event changes, and NotifyRequestChanges emails the
-                OWNER when a booking request lands.) So "nothing sends
-                itself" is a literal statement about the code, and it is
-                the spine of this page.
+             1. CORRECTED 2026-09. There IS one automatic rail now:
+                app:send-event-announcements, hourly on both rails, mails
+                a DIGEST of newly published public events to CONFIRMED
+                role_subscribers (AudienceResolver::announcementRecipients),
+                floored at usage.audience_announcement_min_hours and
+                deliberately OUTSIDE the newsletter allowance. Account
+                followers (role_user level 'follower') are NOT on it - they
+                are reached only by NewsletterEmail, which still runs from
+                a button a human pressed. The page's spine is now that
+                split, not the absence of automatic mail. (The two other
+                automatic emails still run the other way: EventChangeNotifier
+                tells TICKET BUYERS when their event changes, and
+                NotifyRequestChanges emails the OWNER when a request lands.)
 
              2. Role::newsletterLimit() caps RECIPIENTS, not sends.
                 NewsletterService::send() rejects the send when
@@ -347,19 +351,6 @@
         }
         .dark .es-send-stamp::before {
             background-image: repeating-linear-gradient(180deg, #7fd0ea 0 2px, transparent 2px 5px);
-        }
-
-        /* --- The empty tray: what leaves on its own ---------------- */
-        .es-send-void {
-            border: 1px dashed rgba(17, 26, 32, 0.28);
-            border-radius: 0.6rem;
-            background-color: rgba(17, 26, 32, 0.03);
-            background-image: repeating-linear-gradient(135deg, rgba(17, 26, 32, 0.05) 0 6px, transparent 6px 14px);
-        }
-        .dark .es-send-void {
-            border-color: rgba(232, 238, 242, 0.24);
-            background-color: rgba(232, 238, 242, 0.02);
-            background-image: repeating-linear-gradient(135deg, rgba(232, 238, 242, 0.05) 0 6px, transparent 6px 14px);
         }
 
         /* --- The letter: one sheet, folded into thirds -------------
@@ -674,7 +665,7 @@
 
         $dotSections = [
             ['top', 'The send'],
-            ['nothing', 'Nothing sends itself'],
+            ['rails', 'Two rails'],
             ['meter', 'The allowance'],
             ['list', 'The list'],
             ['letter', 'The letter'],
@@ -705,14 +696,14 @@
                     <p class="es-send-tag es-fade-up es-d-1 mb-5">Newsletters</p>
 
                     <h1 class="es-balance mb-7 text-[2.6rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
-                        <span class="es-mask"><span class="es-mask-line">Nothing goes out</span></span>
-                        <span class="es-mask es-mask-2"><span class="es-mask-line">until <span class="es-send-grad">you send it</span>.</span></span>
+                        <span class="es-mask"><span class="es-mask-line">Franked one at a time,</span></span>
+                        <span class="es-mask es-mask-2"><span class="es-mask-line">and <span class="es-send-grad">counted that way</span>.</span></span>
                     </h1>
 
                     <p class="es-send-muted es-fade-up es-d-2 mb-9 max-w-xl text-lg sm:text-xl">
-                        Your followers never get mail from this platform in your name. Adding a show
-                        notifies nobody. A follow is permission to be written to, and you are the one
-                        who writes: compose it, pick the list, press send.
+                        Publish new events and the people who subscribed get one digest, automatically,
+                        and it costs you nothing from the meter. Everything else is a letter you write:
+                        compose it, pick the list, press send. The allowance charges by the envelope.
                     </p>
 
                     <div class="es-fade-up es-d-3 flex flex-col gap-3 sm:flex-row">
@@ -774,41 +765,47 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 2. Nothing sends itself (01)                                 -->
+    <!-- 2. Two rails (01)                                            -->
     <!-- ============================================================ -->
-    <section id="nothing" class="es-send-rule-t scroll-mt-24 py-20 lg:py-28">
+    <section id="rails" class="es-send-rule-t scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <div class="es-send-die mb-6" data-reveal aria-hidden="true"><span>01</span></div>
                 <p class="es-send-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The distinction</p>
                 <h2 class="es-balance es-send-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Nothing <span class="es-send-grad">sends itself</span>.
+                    One rail runs itself. <span class="es-send-grad">The other is yours</span>.
                 </h2>
                 <p class="es-send-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Most tools in this category will mail your list on your behalf the moment you
-                    change something. This one has no such thing to switch off.
+                    Exactly one thing leaves without you: a digest of the events you just published,
+                    to the people who asked for it. Everything else is a letter you wrote.
                 </p>
             </div>
 
             <!-- A duplex split, because the argument IS the split. -->
             <div class="grid gap-4 md:grid-cols-2" data-reveal-group="100">
                 <div class="es-send-card p-6 sm:p-8" data-reveal="panel">
-                    <p class="es-send-tag mb-4">Sent to followers automatically</p>
-                    <div class="es-send-void px-6 py-10 text-center">
-                        <p class="es-send-ink text-3xl font-black tracking-tight">Nothing.</p>
-                        <p class="es-send-muted mx-auto mt-3 max-w-xs text-sm">
-                            No digest, no new-event alert, no reminder. Publishing an event, editing
-                            one, or cancelling one sends your followers no mail at all.
-                        </p>
+                    <p class="es-send-tag mb-4">Leaves on its own</p>
+                    <div class="es-send-split">
+                        @foreach ([
+                            ['A digest of what you published', 'One message covering the batch. Announce a whole season in an afternoon and it is still one message, never one per event.'],
+                            ['To people who confirmed an address', 'Only subscribers who gave your schedule an email and clicked the link in the confirmation. Somebody who followed with an account is not on this rail.'],
+                            ['At most once every three days', 'A cadence floor per schedule, so a busy week cannot turn into a run of mail in your name.'],
+                            ['Outside the allowance entirely', 'It does not spend a single envelope, because the promise was made to the reader rather than to you.'],
+                        ] as [$t, $d])
+                            <div class="py-3.5">
+                                <p class="es-send-ink text-sm font-bold">{{ $t }}</p>
+                                <p class="es-send-muted mt-1 text-sm">{{ $d }}</p>
+                            </div>
+                        @endforeach
                     </div>
                     <p class="es-send-muted mt-5 text-sm">
-                        Which means your name is never on a message you did not write, and a quiet
-                        month is simply a quiet month.
+                        One toggle under Settings, Notifications turns it off for a schedule. It is on
+                        by default, because six places on your public pages promise it.
                     </p>
                 </div>
 
                 <div class="es-send-card p-6 sm:p-8" data-reveal="panel">
-                    <p class="es-send-tag mb-4">Sent because you decided to</p>
+                    <p class="es-send-tag mb-4">Leaves because you decided</p>
                     <div class="es-send-split">
                         @foreach ([
                             ['A newsletter you composed', 'Your words, your blocks, your subject line.'],
@@ -830,11 +827,11 @@
             </div>
 
             <div class="es-send-tint mt-4 p-6 sm:p-7" data-reveal>
-                <p class="es-send-ink text-sm font-bold">The automatic mail that does exist runs the other way</p>
+                <p class="es-send-ink text-sm font-bold">Two more automatic emails, and they run the other way</p>
                 <p class="es-send-muted mt-2 text-sm">
                     People who bought a ticket are told when that event changes or is cancelled, and
-                    you are emailed when a booking request lands on your schedule. Neither of those is
-                    a newsletter, and neither of them touches your follower list.
+                    you are emailed when a booking request lands on your schedule. Neither is a
+                    newsletter, and neither spends an envelope.
                 </p>
             </div>
         </div>

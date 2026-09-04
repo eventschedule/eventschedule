@@ -1046,6 +1046,9 @@
                             ['Covers the whole order', 'Checkout finishes with nothing left to pay, and the ticket is issued the same way it would be on any other sale.'],
                             ['A code that will not work stops the order', 'An expired, empty or cancelled card is not quietly ignored and the buyer charged full price. Checkout says what is wrong and waits.'],
                             ['Same schedule, same currency', 'A card is valid at events on the schedule that sold it, priced in the card\'s currency. The checkout names both currencies when they do not match.'],
+                            // guest-cart.blade.php carries its own gift_card_code field, so a card
+                            // pays for a whole basket rather than one event at a time.
+                            ['One card, a whole basket', 'The multi-event cart takes a gift card code too, so somebody holding tickets to three of your nights spends the card once against the total rather than event by event.'],
                         ] as [$t, $d])
                             <div class="es-gift-band-panel p-5" data-reveal>
                                 <h3 class="mb-1.5 text-base font-bold text-white">{{ $t }}</h3>

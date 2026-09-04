@@ -551,7 +551,7 @@
                 'items' => [
                     [
                         'q' => "What's the difference between Free and Pro?",
-                        'a' => 'Free gives you the calendar: unlimited events, two-way calendar sync, sub-schedules, recurring events, built-in analytics, the embed, and newsletters at 10 emails a month. Pro is ' . plan_price($proMonthly) . ' a month and is mostly about selling: ticketing with QR check-in, the check-in dashboard, passes, promo codes, gift cards, appointment booking, the sold-out waitlist, custom fields, generated event graphics, webhooks, the REST API, custom CSS, and taking the Event Schedule branding off your public pages. It also raises newsletters to 100 emails a month.',
+                        'a' => 'Free gives you the calendar: unlimited events, two-way calendar sync, sub-schedules, recurring events, built-in analytics, the embed, and newsletters at 10 emails a month. Free also sells: 25 paid tickets a month, scanned at the door, and one bookable appointment type. Pro is ' . plan_price($proMonthly) . ' a month and takes both ceilings off, then adds the rest of the selling kit: the live check-in dashboard, passes, promo codes, gift cards, add-ons, unlimited appointment types, the sold-out waitlist, custom fields, generated event graphics, webhooks, the REST API, custom CSS, and taking the Event Schedule branding off your public pages. It also raises newsletters to 100 emails a month.',
                         'links' => [['Compare the plans', marketing_url('/pricing')]],
                     ],
                     [

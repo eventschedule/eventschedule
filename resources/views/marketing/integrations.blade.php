@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Integrations | Calendars, Stripe, Webhooks and the API</x-slot>
-    <x-slot name="description">Twelve real integrations, each with its direction, its trigger and its plan written on the label: Google Calendar, Outlook, CalDAV, Stripe, webhooks and more.</x-slot>
+    <x-slot name="description">Thirteen real integrations, each with its direction, its trigger and its plan written on the label: Google Calendar, Outlook, CalDAV, Stripe, webhooks and more.</x-slot>
     <x-slot name="breadcrumbTitle">Integrations</x-slot>
 
     <x-slot name="structuredData">
@@ -584,7 +584,7 @@
     </style>
 
     @php
-        // The twelve ports. Direction is the first thing a reader needs, so it is
+        // The thirteen ports. Direction is the first thing a reader needs, so it is
         // screen-printed on the panel and repeated in the register below. It is
         // the direction the DATA runs, not the direction the call is made in:
         // CalDAV and Eventbrite arrive by us asking rather than them telling.
@@ -594,13 +594,14 @@
             ['03', 'CalDAV',           'your own server',     'both', 'Free'],
             ['04', 'Stripe',           'checkout + webhook',  'both', 'Free'],
             ['05', 'Invoice Ninja',    'invoice or pay link', 'both', 'Free'],
-            ['06', 'Webhooks',         'your endpoint',       'out',  'Pro'],
-            ['07', 'REST API',         'you call us',         'in',   'Pro'],
-            ['08', 'Eventbrite',       'import on demand',    'in',   'Pro'],
-            ['09', 'Web push',         'OneSignal',           'out',  'Pro'],
-            ['10', 'Accommodation',    'Stay22 map',          'out',  'Free'],
-            ['11', 'Meta ads',         'boost a campaign',    'out',  'Pro'],
-            ['12', 'WhatsApp',         'Twilio inbound',      'in',   'Ent'],
+            ['06', 'Payfast',          'ZAR checkout + ITN',  'both', 'Free'],
+            ['07', 'Webhooks',         'your endpoint',       'out',  'Pro'],
+            ['08', 'REST API',         'you call us',         'in',   'Pro'],
+            ['09', 'Eventbrite',       'import on demand',    'in',   'Pro'],
+            ['10', 'Web push',         'OneSignal',           'out',  'Pro'],
+            ['11', 'Accommodation',    'Stay22 map',          'out',  'Free'],
+            ['12', 'Meta ads',         'boost a campaign',    'out',  'Pro'],
+            ['13', 'WhatsApp',         'Twilio inbound',      'in',   'Ent'],
         ];
 
         // The register. Every row is traceable to code: the calendar services,
@@ -626,6 +627,10 @@
             [
                 'Invoice Ninja', 'out then in', 'Free',
                 'Either an invoice per sale, or a payment link the buyer completes on your Invoice Ninja install. A webhook marks the sale paid when it clears.',
+            ],
+            [
+                'Payfast', 'out then in', 'Free',
+                'South African rand only, so it is offered on ZAR events and nowhere else. The buyer pays on Payfast and the sale is confirmed by an ITN callback. A Payfast event cannot join the multi-event cart or use installments. A selfhost operator can supply one merchant account for the whole install, which an owner who connected their own keeps overriding.',
             ],
             [
                 'Webhooks', 'out', 'Pro',
@@ -732,7 +737,7 @@
                         <svg aria-hidden="true" class="es-wire-accent h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                         </svg>
-                        <span class="es-wire-muted text-sm font-medium tracking-wide">Twelve ports, both ends visible</span>
+                        <span class="es-wire-muted text-sm font-medium tracking-wide">Thirteen ports, both ends visible</span>
                     </div>
 
                     <h1 class="es-balance es-wire-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
@@ -741,7 +746,7 @@
                     </h1>
 
                     <p class="es-fade-up es-d-2 es-wire-muted mb-8 max-w-xl text-lg sm:text-xl">
-                        Event Schedule talks straight to the services you already run: your calendar or your own CalDAV server, your own Stripe account, your own endpoint. Twelve ports, each labelled with which way it runs, what makes data move, and which plan it is on.
+                        Event Schedule talks straight to the services you already run: your calendar or your own CalDAV server, your own Stripe account, your own endpoint. Thirteen ports, each labelled with which way it runs, what makes data move, and which plan it is on.
                     </p>
 
                     <div class="es-fade-up es-d-3 flex flex-col items-start gap-4 sm:flex-row">
@@ -768,7 +773,7 @@
 
                         <div class="mb-2 flex items-baseline justify-between gap-3 px-1">
                             <p class="es-wire-tag">Integration panel</p>
-                            <p class="es-wire-dir">12 ports</p>
+                            <p class="es-wire-dir">13 ports</p>
                         </div>
                         <div class="es-wire-bar mb-1.5" aria-hidden="true"></div>
 
@@ -876,7 +881,7 @@
                 <div class="es-wire-corner mb-6" data-reveal aria-hidden="true"><span>03</span></div>
                 <p class="es-wire-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The register</p>
                 <h2 class="es-balance es-wire-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Twelve ports, <span class="es-wire-accent">written down.</span>
+                    Thirteen ports, <span class="es-wire-accent">written down.</span>
                 </h2>
                 <p class="es-wire-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
                     Every one of them is on this page in full: the direction it runs, what makes data move along it, and the plan it is on. No marketplace, no logos we merely admire, and the gaps people hit are spelled out further down rather than left for you to find.
@@ -886,7 +891,7 @@
             <div class="es-wire-card p-5 sm:p-7" data-reveal="panel">
                 <div class="es-wire-scroll">
                     <table class="es-wire-reg">
-                        <caption class="sr-only">The twelve Event Schedule integration ports, with the direction each one runs, what makes data move along it, and the plan it is on</caption>
+                        <caption class="sr-only">The thirteen Event Schedule integration ports, with the direction each one runs, what makes data move along it, and the plan it is on</caption>
                         <thead>
                             <tr class="es-wire-tag">
                                 <th scope="col" class="font-bold">Port</th>

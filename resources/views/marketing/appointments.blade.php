@@ -202,7 +202,7 @@
         $facts = [
             ['Bookings stay out of the shop window', 'Every booking is created as a private event, so it never shows on your public schedule, your iCal feed, your RSS feed or your event graphics. It still holds the time.'],
             ['Email has to be working', 'On the hosted platform appointment mail goes out through your own email settings, so confirmations come from your address. Until those are set up nothing is sent, and the Appointments tab says so.'],
-            ['Not the same as Availability', 'Availability is a separate tab, on Enterprise talent schedules, where members cross out whole dates they cannot be booked for events. Appointments hand out one specific slot at a time, on Pro, on any schedule type.'],
+            ['Not the same as Availability', 'Availability is a separate tab, on Enterprise talent schedules, where members cross out whole dates they cannot be booked for events. Appointments hand out one specific slot at a time, free with one type on any schedule type, and uncapped on Pro.'],
             ['Turn a type off, do not delete it', 'Untick Active and the type leaves your booking page. Bookings already on it keep their time, their emails and their reminders, though nothing can be moved onto a type that is switched off.'],
             ['One guest, one time', 'The same email address cannot hold two bookings at the same moment on your schedule.'],
             ['Reminders chase confirmed bookings only', 'A request still waiting on you, or a card booking still waiting on payment, does not get one.'],
@@ -239,7 +239,7 @@
             ],
             [
                 'q' => 'Which plan includes appointment booking?',
-                'a' => 'Appointment booking is a Pro feature on the hosted platform and is included on every selfhosted deployment. If a hosted plan lapses your booking page stops taking new times and reminders pause, but nothing already booked is lost: the times stay held on your calendar, and every guest\'s private link still opens so they can cancel if they need to.',
+                'a' => 'Booking is on the free plan, with one appointment type. Everything about that type is fully featured: weekly hours, per-date overrides, buffers, approvals and payment. Pro is what lets you run several types side by side, and a selfhosted deployment has no cap at all. If a hosted Pro plan lapses you keep every type you created and the oldest bookable one stays bookable, so nothing already booked is ever lost and every guest\'s private link still opens.',
             ],
         ];
 
@@ -1573,10 +1573,11 @@
 
             <div class="es-book-card mt-6 p-6" data-reveal>
                 <p class="es-book-muted text-sm">
-                    <span class="es-book-ink font-bold">Appointment booking is a Pro feature on the hosted platform</span>
-                    and is included on every selfhosted deployment, no plan required. Everything else the
-                    book leans on is free: your public schedule, two-way Google, Outlook and CalDAV
-                    calendar sync, and the calendar you can embed on your own site.
+                    <span class="es-book-ink font-bold">Booking is on the free plan, with one appointment type</span>,
+                    and that one type is the whole feature: hours, overrides, buffers, approvals and payment.
+                    Pro is what lets you offer several side by side, and a selfhosted deployment is uncapped.
+                    Everything the book leans on is free too: your public schedule, two-way Google, Outlook
+                    and CalDAV calendar sync, and the calendar you can embed on your own site.
                 </p>
             </div>
         </div>
@@ -1684,7 +1685,7 @@
                         </a>
                     </div>
 
-                    <p class="es-book-lit mt-6 text-sm font-semibold">Pro plan, and included on every selfhosted deployment</p>
+                    <p class="es-book-lit mt-6 text-sm font-semibold">Free with one type, uncapped on Pro, and unlimited on every selfhosted deployment</p>
                 </div>
             </div>
             {{-- The same page-edge stack every sheet on this page sits on, sized for the

@@ -27,7 +27,7 @@ return [
     'ticketing_description' => 'Sell tickets directly from your event schedule with zero platform fees. QR code check-in, multiple ticket types, promo codes, and secure Stripe payments.',
 
     'ai_title' => 'AI-Powered Event Features - Event Schedule',
-    'ai_description' => 'AI-powered event management. Generate flyers, write descriptions, scan agendas, translate to 11 languages, and automate with a full API for AI agents.',
+    'ai_description' => 'AI-powered event management. Generate flyers, write descriptions, scan agendas, translate to 12 languages, and automate with a full API for AI agents.',
 
     'calendar_sync_title' => 'Calendar Sync - Google, CalDAV & Apple | Event Schedule',
     'calendar_sync_description' => 'Two-way sync with Google Calendar and CalDAV. Real-time webhook updates. Let attendees add events to Apple, Google, or Outlook calendars instantly.',

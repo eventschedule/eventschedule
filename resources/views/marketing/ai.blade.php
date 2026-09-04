@@ -707,6 +707,12 @@
                 'a' => 'Yes. The parser returns a list, not a single record, and it is told to split distinct performers into separate events. A month grid or a festival line-up comes back as one row per event, each with its own date, venue and performer, and you save them one at a time or all together.',
             ],
             [
+                // EventController::guestParse: the same GeminiUtils::parseEvent call, on the
+                // public submission route, metered against the RECEIVING schedule's allowance.
+                'q' => 'Do the people submitting events to me get the parser too?',
+                'a' => 'Yes, and it is the same parser. Somebody filling in your public submission form can paste the text or drop the flyer exactly as you would, and the fields come back filled for them to check before they send it. Nobody needs an account to use it. It draws on your schedule\'s daily parse allowance rather than theirs, which is the trade: your form is far easier to fill in, and a busy day of submissions spends the same budget your own imports do.',
+            ],
+            [
                 'q' => 'Which AI features are free and which are Enterprise?',
                 'a' => 'Event parsing and whole-schedule translation are on every plan, including the free one. Agenda scanning into event parts, description writing, flyer generation, schedule style generation, the AI pass over graphic email text and event creation over WhatsApp are Enterprise. Parsing is metered by a daily allowance rather than a plan gate, and a selfhosted install has no cap at all.',
             ],

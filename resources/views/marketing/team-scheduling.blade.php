@@ -868,13 +868,14 @@
                         <span class="es-line-code">OW</span>
                         <h3 class="es-line-ink text-lg font-bold">Owner</h3>
                     </div>
-                    <p class="es-line-muted mb-4 text-sm">Whoever created the schedule. There is exactly one, and the position cannot be handed over from the Team tab.</p>
+                    <p class="es-line-muted mb-4 text-sm">Whoever created the schedule. There is exactly one, and it can be handed to somebody else: Transfer ownership sits on the same Team tab, on every plan including Free.</p>
                     <ul class="es-line-muted space-y-2 text-sm">
                         <li class="flex gap-2"><span class="es-line-accent flex-none font-bold" aria-hidden="true">+</span><span>Everything an admin can do</span></li>
                         <li class="flex gap-2"><span class="es-line-accent flex-none font-bold" aria-hidden="true">+</span><span>Changes any member's position</span></li>
                         <li class="flex gap-2"><span class="es-line-accent flex-none font-bold" aria-hidden="true">+</span><span>Removes any member</span></li>
                         <li class="flex gap-2"><span class="es-line-accent flex-none font-bold" aria-hidden="true">+</span><span>Holds the plan and billing</span></li>
                         <li class="flex gap-2"><span class="es-line-accent flex-none font-bold" aria-hidden="true">+</span><span>Deletes the schedule, and cannot be removed from it</span></li>
+                        <li class="flex gap-2"><span class="es-line-accent flex-none font-bold" aria-hidden="true">+</span><span>Hands the whole schedule to another account, ticket revenue included</span></li>
                     </ul>
                 </div>
 

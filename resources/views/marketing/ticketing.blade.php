@@ -623,6 +623,8 @@
             ['Add-ons', 'Parking, merchandise, a meal package. Priced separately and never discounted by a promo code.'],
             ['Custom questions', 'Up to ten per order, plus up to ten more on any one ticket type when each guest has to answer.'],
             ['Passes and subscriptions', 'One purchase a guest reuses across many events, with its own usage rules.'],
+            ['Installments', 'A buyer splits the price over monthly charges. The first is taken at checkout and the ticket is valid straight away; the rest come off the saved card on their own.'],
+            ['One cart, several events', 'Somebody buying into three of your nights pays once, as a single amount, instead of running checkout three times.'],
         ];
 
         $doorSide = [
@@ -637,7 +639,7 @@
         ];
 
         $afterSale = [
-            ['Sale notification emails', 'An email each time a ticket sells, with the buyer, the ticket type, the amount, the status and any code used.', 'Pro'],
+            ['Sale notification emails', 'An email each time a ticket sells, with the buyer, the ticket type, the amount, the status and any code used. The first paid sale on an event always notifies you, whatever plan you are on.', 'Pro'],
             ['Sales CSV export', 'Buyer, ticket type, amount, promo code, payment method, check-in status and every custom answer.', 'Pro'],
             ['Ticket waitlist', 'When a date sells out, guests can join. One person is notified at a time, with a 24 hour link to buy.', 'Pro'],
             ['Bulk attendee import', 'Paste rows or upload a CSV for people who paid out of band. Up to 5,000 in one go.', 'Pro'],

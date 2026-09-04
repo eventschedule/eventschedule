@@ -6,7 +6,7 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 
 **Progress:** 153 / 153 reviewed
 
-**Updated:** 14 / 153 rebuilt
+**Updated:** 47 / 153 rebuilt
 
 > **Ticketing plan model change - SWEPT 2026-07-31.** Another session shipped a real product
 > change mid-campaign: the FREE tier now SELLS paid tickets, 25 per calendar month per
@@ -100,39 +100,39 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 
 | Reviewed | Updated | Page | URL | Notes |
 |:--------:|:-------:|------|-----|-------|
-| ✅ |   | Ticketing | `/features/ticketing` | "The Turnstile" ground-up rebuild |
-| ✅ |   | Gift Cards | `/features/gift-cards` | "The Gift Envelope" ground-up rebuild |
-| ✅ |   | Allocated Seating | `/features/allocated-seating` | Reserved-seating landing page |
-| ✅ |   | AI | `/features/ai` | "The Spark" ground-up rebuild |
-| ✅ |   | Calendar Sync | `/features/calendar-sync` | "The Round Trip" ground-up rebuild (renamed from "The Loop", which recurring-events holds) |
-| ✅ |   | Analytics | `/features/analytics` | "The Dashboard" ground-up rebuild |
-| ✅ |   | Integrations | `/features/integrations` | "The Wire" ground-up rebuild |
-| ✅ |   | Custom Fields | `/features/custom-fields` | "The Form" ground-up rebuild |
-| ✅ |   | Custom Labels | `/features/custom-labels` | "The Rename" ground-up rebuild |
-| ✅ |   | Team Scheduling | `/features/team-scheduling` | "The Lineup" ground-up rebuild |
-| ✅ |   | Sub-schedules | `/features/sub-schedules` | "The Sort" ground-up rebuild |
-| ✅ |   | Online Events | `/features/online-events` | "Go Live" ground-up rebuild |
-| ✅ |   | Newsletters | `/features/newsletters` | "The Send" ground-up rebuild |
-| ✅ |   | Recurring Events | `/features/recurring-events` | "The Loop" ground-up rebuild |
-| ✅ |   | Embed Calendar | `/features/embed-calendar` | "The Paste" ground-up rebuild |
-| ✅ |   | Embed Tickets | `/features/embed-tickets` | "The Widget" ground-up rebuild |
-| ✅ |   | Fan Videos | `/features/fan-videos` | "The Reel" ground-up rebuild |
-| ✅ |   | Polls | `/features/polls` | "The Vote" ground-up rebuild |
-| ✅ |   | Boost | `/features/boost` | "The Launch" ground-up rebuild |
-| ✅ |   | Private Events | `/features/private-events` | "The Vault" ground-up rebuild |
-| ✅ |   | Event Graphics | `/features/event-graphics` | "The Gallery" ground-up rebuild |
-| ✅ |   | White Label | `/features/white-label` | "The Blank Slate" ground-up rebuild |
-| ✅ |   | Custom CSS | `/features/custom-css` | "The Stylesheet" ground-up rebuild |
-| ✅ |   | Custom Domain | `/features/custom-domain` | "The Nameplate" ground-up rebuild |
-| ✅ |   | Feedback | `/features/feedback` | "The Comment Card" ground-up rebuild |
-| ✅ |   | Availability | `/features/availability` | "Office Hours" ground-up rebuild |
-| ✅ |   | Appointments | `/features/appointments` | "The Appointment Book" ground-up rebuild (replaces the shared gift-cards skeleton) |
-| ✅ |   | Carpool | `/features/carpool` | "Four Seats" ground-up rebuild |
-| ✅ |   | Google Calendar | `/google-calendar` | "The Invitation" ground-up rebuild; root-level integration page |
-| ✅ |   | Outlook Calendar | `/outlook-calendar` | "The Meeting Request" ground-up rebuild; root-level integration page |
-| ✅ |   | CalDAV | `/caldav` | "The Open Protocol" ground-up rebuild; root-level integration page |
-| ✅ |   | Stripe | `/stripe` | "The Payout" ground-up rebuild; root-level integration page |
-| ✅ |   | Invoice Ninja | `/invoiceninja` | "The Ledger" ground-up rebuild; root-level integration page |
+| ✅ | ✅ | Ticketing | `/features/ticketing` | "The Turnstile" ground-up rebuild. 2026-09 pass: added installments and the multi-event cart to the sale side (both real checkout behaviour the page never named), and the sale-notification card now states the first paid sale on an event always notifies, on any plan. |
+| ✅ | ✅ | Gift Cards | `/features/gift-cards` | "The Gift Envelope" ground-up rebuild. 2026-09 pass: every number re-verified in code (max:12 denominations, max:500 message, redeem-after-promo ordering) and the checkout section gained the one behaviour it was missing - a card pays for a whole multi-event cart in one go, not event by event. |
+| ✅ | ✅ | Allocated Seating | `/features/allocated-seating` | Reserved-seating landing page (was missing from this tracker entirely). 2026-09 pass: the 12-minute hold and the orphan-seat rule re-verified against `SeatHoldService::HOLD_SECONDS` and `OrphanSeatRule`; two FAQs added for the two things that surprise people - plans are built on VENUE schedules only, and a plan already attached to an event survives the schedule lapsing. |
+| ✅ | ✅ | AI | `/features/ai` | "The Spark" ground-up rebuild. 2026-09 pass: field list, venue-matching ladder, allowances and the WhatsApp path all re-verified in code and already exact; added the one path the page never covered - `EventController::guestParse` gives visitors filling your public submission form the same parser, metered against your allowance rather than theirs. |
+| ✅ | ✅ | Calendar Sync | `/features/calendar-sync` | "The Round Trip" ground-up rebuild. 2026-09 pass: reviewed against `GoogleCalendarService`, the Graph sync and the CalDAV poller - both legs, the fifteen-minute sweep, the delete-sync choice and the loop guard are all stated correctly; no changes needed. |
+| ✅ | ✅ | Analytics | `/features/analytics` | "The Dashboard" ground-up rebuild. 2026-09 pass: the intake gates, the nine dials, the one-row-a-day record and the revenue/check-in tabs all re-verified and already exact (this page had the QR-scanning tier right when three others had it wrong); the "want names" line now states the automatic subscriber digest and that it sits outside the newsletter allowance. |
+| ✅ | ✅ | Integrations | `/features/integrations` | "The Wire" ground-up rebuild. 2026-09 pass: Payfast was a shipped gateway missing from a page that claims to list every port in full, so the panel and register are now thirteen ports with its ZAR-only constraint, ITN callback and cart/installment exclusions written down; the fourteen webhook types re-verified against `Webhook::EVENT_TYPES`. |
+| ✅ | ✅ | Custom Fields | `/features/custom-fields` | "The Form" ground-up rebuild. 2026-09 pass: the ten-field cap, the six types, the four switches and the five validation presets all re-verified against `RoleUpdateRequest` and the edit form; the free/Pro line on this page was already correct about scanning and the 25-ticket allowance. |
+| ✅ | ✅ | Custom Labels | `/features/custom-labels` | "The Rename" ground-up rebuild. 2026-09 pass: reviewed, accurate as written - the override set is per schedule rather than per account, and the page is careful that renaming a word moves nothing else on the page. |
+| ✅ | ✅ | Team Scheduling | `/features/team-scheduling` | "The Lineup" ground-up rebuild. 2026-09 pass: the owner card claimed the position "cannot be handed over from the Team tab" when Transfer ownership is a button on that exact tab, deliberately un-gated by plan - corrected, since it is the one multi-person action a free schedule has. |
+| ✅ | ✅ | Sub-schedules | `/features/sub-schedules` | "The Sort" ground-up rebuild. 2026-09 pass: reviewed, accurate as written - the four-field record matches the `Group` model exactly, and the page is careful that a sub-schedule sorts rather than hides. |
+| ✅ | ✅ | Online Events | `/features/online-events` | "Go Live" ground-up rebuild. 2026-09 pass: reviewed and accurate throughout, including the three attendance modes in the structured data, the domain-on-the-listing / full-link-on-the-ticket split, the Teams exception, and the schedule-timezone rule with its honest caveat; no changes needed. |
+| ✅ | ✅ | Newsletters | `/features/newsletters` | "The Send" ground-up rebuild. 2026-09 pass: the page was built on "nothing sends itself", which `app:send-event-announcements` made false. Section 01 is now the two real rails - an automatic, batched, three-day-floored digest to confirmed subscribers that spends no envelopes, beside the newsletter you write - with the hero, dot nav and the style block`s concept note rewritten to match and `.es-send-void` removed as dead. |
+| ✅ | ✅ | Recurring Events | `/features/recurring-events` | "The Loop" ground-up rebuild. 2026-09 pass: the six patterns, three end conditions and both exception directions re-verified against `Event::matchesDate()`; the page title and JSON-LD said "automatic Google Calendar sync" when Outlook and CalDAV sync the same way, now corrected. |
+| ✅ | ✅ | Embed Calendar | `/features/embed-calendar` | "The Paste" ground-up rebuild. 2026-09 pass: reviewed and accurate throughout, including all six URL parameters, the noindex on the embed URL, the deliberate exclusion of embed loads from view counts, and the live iframe demo on the page itself; no changes needed. |
+| ✅ | ✅ | Embed Tickets | `/features/embed-tickets` | "The Widget" ground-up rebuild. 2026-09 pass: reviewed and accurate - the seven layers are the real checkout, the sold-out state becomes the waitlist form, and the free RSVP variant is correctly separated from the Pro ticket widget; no changes needed. |
+| ✅ | ✅ | Fan Videos | `/features/fan-videos` | "The Reel" ground-up rebuild. 2026-09 pass: reviewed and accurate - photos, YouTube links and comments, the reject-deletes-rather-than-hides rule, the per-occurrence filing on a recurring show, and the free-tier 25-photo cap all check out; no changes needed. |
+| ✅ | ✅ | Polls | `/features/polls` | "The Vote" ground-up rebuild. 2026-09 pass: reviewed against `EventPoll` - the five-per-event and two-to-ten limits, the seal-on-first-vote rule, and both write-in modes including the pending queue are all stated correctly; no changes needed. |
+| ✅ | ✅ | Boost | `/features/boost` | "The Launch" ground-up rebuild. 2026-09 pass: reviewed and accurate - five pre-launch gates, both channels (Meta and the on-network promotion), prepay-and-refund, and the audience section already states the automatic subscriber digest correctly; no changes needed. |
+| ✅ | ✅ | Private Events | `/features/private-events` | "The Vault" ground-up rebuild. 2026-09 pass: reviewed and accurate - the four states match `Event::visibilityState()` exactly, with the password correctly attached to Unlisted and both Enterprise states badged; no changes needed. |
+| ✅ | ✅ | Event Graphics | `/features/event-graphics` | "The Gallery" ground-up rebuild. 2026-09 pass: reviewed and accurate - the generator hangs flyers already on the events rather than pretending to be a design tool, and the template-variable list matches `EventTextGenerator::parseTemplate()`; no changes needed. |
+| ✅ | ✅ | White Label | `/features/white-label` | "The Blank Slate" ground-up rebuild. 2026-09 pass: reviewed against `Role::showBranding()` / `creditChipReason()` and BRANDING_MATRIX.md - all seven surfaces, the plan-tier keying and the credit chip that no plan buys off are stated exactly; no changes needed. |
+| ✅ | ✅ | Custom CSS | `/features/custom-css` | "The Stylesheet" ground-up rebuild. 2026-09 pass: reviewed and accurate - the cascade position (same sheet, immediately after the generated styles, equal specificity) is the honest description of what the feature is; no changes needed. |
+| ✅ | ✅ | Custom Domain | `/features/custom-domain` | "The Nameplate" ground-up rebuild. 2026-09 pass: reviewed and accurate - both modes, automatic HTTPS once the CNAME resolves, and the rewriting of links, feeds and the checkout return URL all check out against `ResolveCustomDomain` and the provisioning contract; no changes needed. |
+| ✅ | ✅ | Feedback | `/features/feedback` | "The Comment Card" ground-up rebuild. 2026-09 pass: reviewed and accurate - one card per booking, the 1-to-48-hour window, the 30-day cutoff, the 2,000-character comment cap and the `feedback.submitted` webhook all check out; no changes needed. |
+| ✅ | ✅ | Availability | `/features/availability` | "Office Hours" ground-up rebuild. 2026-09 pass: reviewed and accurate - the cross-out-what-is-gone model, the Enterprise talent-schedule scope, and its separation from bookable appointments are all correct; no changes needed. |
+| ✅ | ✅ | Appointments | `/features/appointments` | "The Appointment Book" ground-up rebuild. 2026-09 pass: the page still called booking a Pro feature in four places. `Role::appointmentTypeLimit()` gives a free hosted schedule one fully-featured type and Pro uncaps the count, so the FAQ, the plan note, the availability comparison and the finale line now say that, including what a lapse actually does (every type kept, the oldest bookable one stays bookable). |
+| ✅ | ✅ | Carpool | `/features/carpool` | "Four Seats" ground-up rebuild. 2026-09 pass: reviewed and accurate - the six-field offer record, driver approval before contact details are shared, and the deliberate absence of routing or payment are all stated plainly; no changes needed. |
+| ✅ | ✅ | Google Calendar | `/google-calendar` | "The Invitation" ground-up rebuild; root-level integration page. 2026-09 pass: reviewed and accurate - OAuth connect, per-schedule calendar choice, the watch channel plus fifteen-minute sweep, and the location-to-venue conversion all check out; its Google-only framing is correct for a page about Google. |
+| ✅ | ✅ | Outlook Calendar | `/outlook-calendar` | "The Meeting Request" ground-up rebuild; root-level integration page. 2026-09 pass: reviewed and accurate - Graph change subscriptions, delta tokens, the optional Teams meeting written back into the event link field, and the schedule-timezone stamping all check out; no changes needed. |
+| ✅ | ✅ | CalDAV | `/caldav` | "The Open Protocol" ground-up rebuild; root-level integration page. 2026-09 pass: reviewed and accurate - RFC 4791 over HTTPS only, encrypted credentials, the six requests, and the honest fifteen-minute poll because CalDAV has no notification standard; no changes needed. |
+| ✅ | ✅ | Stripe | `/stripe` | "The Payout" ground-up rebuild; root-level integration page. 2026-09 pass: reviewed and accurate - the charge is created on the connected account with no application fee, and the page argues zero fees as a statement line rather than a promise; no changes needed. |
+| ✅ | ✅ | Invoice Ninja | `/invoiceninja` | "The Ledger" ground-up rebuild; root-level integration page. 2026-09 pass: verified the tier this page implies - Invoice Ninja has NO `isPro()` gate anywhere (gateway, controller, or the settings write), so `docs/FEATURES.md` was corrected to move it out of the Pro table, and `/about` no longer calls it a Pro-only payment route. |
 
 ## Schedule Type Hubs (3)
 
