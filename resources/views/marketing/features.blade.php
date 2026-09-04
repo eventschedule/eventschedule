@@ -636,7 +636,7 @@
         id="promote"
         accent="cyan"
         title="Fill the room"
-        lede="Reach the people who already follow you, and the ones who have not heard of you yet, without opening a single ad manager."
+        lede="Publishing an event already tells the people who subscribed. Newsletters, shareable graphics and Meta ads cover everyone else, without opening a single ad manager."
         ground="gray" />
 
     <x-marketing.feature-banner
@@ -644,8 +644,8 @@
         accent="sky"
         badge="Newsletters"
         heading="Engage your audience"
-        lede="Send branded newsletters to followers and ticket buyers. Drag-and-drop builder, audience segments, A/B testing, and delivery analytics."
-        :chips="['Drag-and-drop builder', 'A/B testing', 'Open & click tracking']"
+        lede="Subscribers get a digest automatically when you publish new events. Write the rest yourself in a drag-and-drop builder, with segments, A/B testing and open and click tracking."
+        :chips="['Automatic new-event digest', 'Drag-and-drop builder', 'A/B testing', 'Open and click tracking']"
         :lead="true"
         :flip="true"
         frame="browser"
@@ -784,8 +784,8 @@
         accent="cyan"
         badge="Fan Engagement"
         heading="Build community around events"
-        lede="Fans and attendees can add YouTube videos and comments to your events, including on individual agenda items. All submissions need your approval before they go live."
-        :chips="['YouTube videos', 'Comments', 'Community', 'Organizer approval', 'Per agenda item']"
+        lede="Fans add YouTube videos, photos and comments to your events, down to an individual agenda item. Everything waits in an approval queue, and a name and email is enough to contribute."
+        :chips="['YouTube videos', 'Photos', 'Comments', 'Approval queue', 'Per agenda item']"
         :lead="true"
         frame="phone"
         ground="white">
@@ -904,8 +904,8 @@
         accent="emerald"
         badge="Analytics"
         heading="Know your audience"
-        lede="Track page views, device breakdown, and traffic sources. Privacy-first with no external services."
-        :chips="['Privacy-first', 'No external services']"
+        lede="Three tabs: web traffic, revenue and check-ins. Page views, referrers, UTM campaigns, devices and your best-earning events, with no third-party tracker involved."
+        :chips="['Web, revenue, check-ins', 'UTM campaigns', 'No external services']"
         :flip="true"
         frame="browser"
         frame-url="eventschedule.com/admin/analytics"
@@ -980,8 +980,8 @@
         accent="yellow"
         badge="Private Events"
         heading="Control who sees what"
-        lede="Password-protect events for VIP audiences or invite-only gatherings. Mix public and private events on the same schedule."
-        :chips="['Password protection', 'Per-event privacy', 'Hidden from public']"
+        lede="Every event carries one of four visibility states, set on the event itself, so public nights and members-only ones live on the same schedule."
+        :chips="['Public', 'Draft', 'Internal', 'Unlisted plus password']"
         :flip="true"
         ground="gray">
         <x-slot name="badgeIcon">
@@ -990,32 +990,45 @@
             </svg>
         </x-slot>
 
-        <div class="mb-4">
-            <div class="mb-1 text-[10px] text-gray-500 dark:text-gray-400">Event password</div>
+        @php
+            // The four states Event::visibilityState() can return, with the app's own
+            // descriptions from messages.visibility_*_desc.
+            $visibilityStates = [
+                ['Public', 'Anyone can find it', 'emerald', false],
+                ['Draft', 'Members only, until you publish', 'gray', false],
+                ['Internal', 'Members only, never public', 'sky', true],
+                ['Unlisted', 'Link only, password optional', 'yellow', true],
+            ];
+            $visibilityDot = [
+                'emerald' => 'bg-emerald-400',
+                'gray' => 'bg-gray-400',
+                'sky' => 'bg-sky-400',
+                'yellow' => 'bg-yellow-400',
+            ];
+        @endphp
+        <div class="space-y-1.5">
+            @foreach ($visibilityStates as [$stateName, $stateDesc, $stateHue, $stateEnterprise])
+                <div @class([
+                    'flex items-center gap-2 rounded-lg p-2',
+                    'border border-yellow-200 bg-yellow-50 dark:border-yellow-400/30 dark:bg-yellow-500/15' => $stateHue === 'yellow',
+                    'bg-gray-50 dark:bg-white/5' => $stateHue !== 'yellow',
+                ])>
+                    <span class="h-2 w-2 shrink-0 rounded-full {{ $visibilityDot[$stateHue] }}" aria-hidden="true"></span>
+                    <span class="text-[11px] font-semibold text-gray-700 dark:text-gray-200">{{ $stateName }}</span>
+                    <span class="flex-1 text-[10px] text-gray-500 dark:text-gray-400">{{ $stateDesc }}</span>
+                    @if ($stateEnterprise)
+                        <span class="rounded-full bg-gray-200 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-gray-600 dark:bg-white/10 dark:text-gray-300">Ent</span>
+                    @endif
+                </div>
+            @endforeach
+        </div>
+        <div class="mt-4">
+            <div class="mb-1 text-[10px] text-gray-500 dark:text-gray-400">Password, on an unlisted event</div>
             <div class="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-white">
                 <svg aria-hidden="true" class="h-4 w-4 shrink-0 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
                 <span class="tracking-widest">&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;</span>
-            </div>
-        </div>
-        <div class="space-y-1.5">
-            <div class="flex items-center gap-2 rounded-lg bg-gray-50 p-2 dark:bg-white/5">
-                <div class="h-2 w-2 rounded-full bg-emerald-400"></div>
-                <span class="flex-1 text-[11px] text-gray-600 dark:text-gray-300">Summer Concert</span>
-                <span class="text-[10px] text-gray-400">Public</span>
-            </div>
-            <div class="flex items-center gap-2 rounded-lg border border-yellow-200 bg-yellow-50 p-2 dark:border-yellow-400/30 dark:bg-yellow-500/15">
-                <svg aria-hidden="true" class="h-2.5 w-2.5 text-yellow-600 dark:text-yellow-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                <span class="flex-1 text-[11px] text-yellow-700 dark:text-yellow-300">VIP Meetup</span>
-                <span class="text-[10px] text-yellow-600 dark:text-yellow-400">Private</span>
-            </div>
-            <div class="flex items-center gap-2 rounded-lg bg-gray-50 p-2 dark:bg-white/5">
-                <div class="h-2 w-2 rounded-full bg-emerald-400"></div>
-                <span class="flex-1 text-[11px] text-gray-600 dark:text-gray-300">Open Mic Night</span>
-                <span class="text-[10px] text-gray-400">Public</span>
             </div>
         </div>
     </x-marketing.feature-banner>
@@ -1230,6 +1243,63 @@
         </div>
     </section>
 
+    {{-- The 12 cards above each have a page behind them. These do not, and were
+         simply missing from the site's most complete page. Every row cites the
+         gate it is really behind (docs/FEATURES.md), because a list like this
+         goes stale the moment a tier moves. --}}
+    @php
+        $alsoIncluded = [
+            ['Installment payments', 'Split a ticket over monthly charges, taken off the saved card', 'Pro'],
+            ['Ticket add-ons', 'Parking, merchandise or a workshop, each with its own stock', 'Pro'],
+            ['Promo codes', 'Percentage or fixed, with usage limits and an expiry date', 'Pro'],
+            ['Ticket waitlist', 'Notify people automatically when a sold-out type frees up', 'Pro'],
+            ['Multi-event cart', 'One checkout across several of your events, paid as a single amount', 'Free'],
+            ['Bulk attendee import', 'Up to 5,000 rows from a CSV, for a list you already hold', 'Pro'],
+            ['Eventbrite import', 'Bring an existing run of events across in one go', 'Pro'],
+            ['Event templates', 'Save an event you repeat and start the next one from it', 'Pro'],
+            ['Sales CSV export', 'Every sale across every schedule you own, custom fields included', 'Pro'],
+            ['Push notifications', 'Browser and mobile web push mirroring your email alerts', 'Pro'],
+            ['Agenda scanning', 'Photograph a running order and get the parts back as event parts', 'Enterprise'],
+            ['WhatsApp event creation', 'Message or photograph an event and it lands on the schedule', 'Enterprise'],
+            ['Event cloning', 'Duplicate any event as the starting point for the next one', 'Free'],
+            ['iCal and RSS feeds', 'Every schedule publishes both, and every date downloads as .ics', 'Free'],
+            ['Schedule transfer', 'Hand a schedule and its ticket revenue to another account', 'Free'],
+            ['Sponsor and partner logos', 'A tiered logo wall on your schedule page, for the people funding it', 'Pro'],
+        ];
+        $alsoBadge = [
+            'Free' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
+            'Pro' => 'bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300',
+            'Enterprise' => 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300',
+        ];
+    @endphp
+    <section id="also" class="relative scroll-mt-24 bg-gray-50 py-16 dark:bg-[#0f0f14] lg:py-24">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-10 max-w-3xl text-center">
+                <h2 class="es-balance text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>
+                    And the small print, which is mostly good news
+                </h2>
+                <p class="mt-3 text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.08s;">
+                    Sixteen more things the app does, and the plan each one sits on.
+                </p>
+            </div>
+            <dl class="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-4" data-reveal-group="35">
+                @foreach ($alsoIncluded as [$alsoName, $alsoDesc, $alsoTier])
+                    <div class="border-gray-200 ltr:border-l ltr:pl-4 rtl:border-r rtl:pr-4 dark:border-white/10" data-reveal>
+                        <dt class="flex flex-wrap items-center gap-2">
+                            <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ $alsoName }}</span>
+                            <span class="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide {{ $alsoBadge[$alsoTier] }}">{{ $alsoTier }}</span>
+                        </dt>
+                        <dd class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ $alsoDesc }}</dd>
+                    </div>
+                @endforeach
+            </dl>
+            <p class="mt-10 text-center text-sm text-gray-500 dark:text-gray-400" data-reveal>
+                Selfhosted installs resolve to the top tier, so every row above is included.
+                <a href="{{ marketing_url('/pricing') }}" class="font-semibold text-blue-600 underline decoration-blue-300 underline-offset-4 transition-colors hover:text-blue-500 dark:text-blue-400 dark:decoration-blue-500/50">See the full plan comparison</a>.
+            </p>
+        </div>
+    </section>
+
     <!-- ============================================================ -->
     <!-- FAQ                                                         -->
     <!-- ============================================================ -->
@@ -1336,6 +1406,7 @@
             ['engage', 'Engage'],
             ['own-it', 'Make it yours'],
             ['more', 'Everything else'],
+            ['also', 'Small print'],
             ['claim', 'Get started'],
         ];
     @endphp

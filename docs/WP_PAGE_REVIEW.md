@@ -4,9 +4,9 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 
 **Legend:** a checkmark in the **Reviewed** column marks a page as reviewed; a blank cell means it has not been reviewed yet. The **Updated** column marks pages that have a page-exclusive, ground-up design - either motif-driven (a large page-local `<style>` block with its own class namespace, headed by a `/* ... "Nickname" ... */` concept comment) or component-driven (restructured onto the shared components in `resources/views/components/marketing/`). A blank cell means the page is still on the first-wave es-* skeleton with a themed `.text-gradient-<page>` accent and is a candidate for a rebuild; the Notes cell of an updated page names its design. **The docs tables are the deliberate exception:** the 37 documentation pages share ONE restrained shell on purpose so the manual reads as a single book, so ✅ there records the July 2026 *accuracy and legibility* pass (every capability claim re-verified against code, stale UI labels fixed, contrast measured) rather than a page-exclusive design. On the audience "For" pages table, Updated also means that page's restyle brief (the Notes cell) has been applied.
 
-**Progress:** 151 / 151 reviewed
+**Progress:** 153 / 153 reviewed
 
-**Updated:** 0 / 151 rebuilt
+**Updated:** 14 / 153 rebuilt
 
 > **Ticketing plan model change - SWEPT 2026-07-31.** Another session shipped a real product
 > change mid-campaign: the FREE tier now SELLS paid tickets, 25 per calendar month per
@@ -81,27 +81,28 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 
 | Reviewed | Updated | Page | URL | Notes |
 |:--------:|:-------:|------|-----|-------|
-| ✅ |   | Homepage | `/` | Homepage-exclusive design: live poster wall, 3D showcase, pinned gallery rail, integrations orbit |
-| ✅ |   | Features | `/features` | Rebuilt as five chapters via `<x-marketing.feature-chapter>` / `<x-marketing.feature-banner>` |
-| ✅ |   | Pricing | `/pricing` | Rebuilt July 2026 (the feature lists are curated - see CLAUDE.md before editing them) |
-| ✅ |   | About | `/about` | "The Colophon" ground-up rebuild |
-| ✅ |   | Demos / Examples | `/examples` | "The Showroom" ground-up rebuild; route name is `marketing.demos` |
-| ✅ |   | Search | `/search` | "The Lookup" ground-up rebuild; functional page, search form and query handling preserved |
-| ✅ |   | Browse | `/browse` | "The Newsstand" ground-up rebuild; functional page, filters and query params preserved |
-| ✅ |   | FAQ | `/faq` | "The Front Desk" ground-up rebuild |
-| ✅ |   | Why Create an Account | `/why-create-account` | "The Keyring" ground-up rebuild |
-| ✅ |   | Use Cases | `/use-cases` | Component-driven directory via `<x-marketing.audience-card>` |
-| ✅ |   | Contact | `/contact` | "The Postcard" ground-up rebuild |
-| ✅ |   | Open Source | `/open-source` | "The Commit Log" ground-up rebuild |
-| ✅ |   | Selfhost | `/selfhost` | "The Terminal" ground-up rebuild |
-| ✅ |   | SaaS | `/saas` | "The Stack" ground-up rebuild; white-label SaaS operator landing |
+| ✅ | ✅ | Homepage | `/` | Homepage-exclusive design (poster wall, 3D showcase, pinned gallery rail, integrations orbit). 2026-09 pass: reserved seating + gift cards added to the grid, calendar/analytics/AI/ticketing claims re-grounded, FAQ expanded to 7 with payouts and custom domains, how-it-works corrected for automatic new-event digests, claim input no longer a dead end. |
+| ✅ | ✅ | Features | `/features` | Five chapters via `<x-marketing.feature-chapter>` / `<x-marketing.feature-banner>`. 2026-09 pass: new "small print" section covering 16 real capabilities the page never named (installments, add-ons, waitlist, bulk import, WhatsApp, agenda scanning) with per-row tier badges; private-events banner rebuilt around the four real visibility states; newsletters, fan content and analytics claims re-grounded. |
+| ✅ | ✅ | Pricing | `/pricing` | Rebuilt July 2026 (the feature lists are curated - see CLAUDE.md before editing them). 2026-09 pass: added the two questions asked most before signing up - what happens at the 25-ticket cap, and what happens on cancel or downgrade - answered from `Role::ticketSaleLimit()` / `paidTicketAllowanceAvailable()` behaviour; fee answer rewritten around direct payouts; fixed a hardcoded `$` beside our own Pro price in the fee calculator. |
+| ✅ | ✅ | About | `/about` | "The Colophon" ground-up rebuild. 2026-09 pass: errata corrected now that `app:send-event-announcements` ships - the automatic digest reaches confirmed subscribers, while account followers stay newsletter-only, and the double-booking erratum now excludes appointments, which genuinely cannot clash. |
+| ✅ | ✅ | Demos / Examples | `/examples` | "The Showroom" ground-up rebuild; route name is `marketing.demos`. 2026-09 pass: all 18 demo schedules re-verified live (HTTP 200), and the spec sheet now says the Follow button earns an automatic new-event digest, not just a list to write to. |
+| ✅ | ✅ | Search | `/search` | "The Lookup" ground-up rebuild; functional page, search form and query handling preserved. 2026-09 pass: the "when you sell a ticket" row was badged Pro while the page FAQ said Free two sections later - selling is free to 25 paid tickets a month, so the badge and copy now agree; follower row corrected for automatic digests. |
+| ✅ | ✅ | Browse | `/browse` | "The Newsstand" ground-up rebuild; functional page, filters and query params preserved. 2026-09 pass: added the question organizers actually ask - how an event ends up on the page - answered from `MarketingController::browse()` (public + a flyer, or a talent/venue profile photo, 24 shown). |
+| ✅ | ✅ | FAQ | `/faq` | "The Front Desk" ground-up rebuild. 2026-09 pass: rate card split QR scanning (free on every plan) out of the Pro check-in dashboard row, and three answers that still called ticketing a paid feature were corrected against `Role::ticketSaleLimit()`; 05.03 rewritten now that `app:send-event-announcements` reaches confirmed subscribers. |
+| ✅ | ✅ | Why Create an Account | `/why-create-account` | "The Keyring" ground-up rebuild. 2026-09 pass: two more genuinely open doors added (hearing about new events via the guest sign-up panel, and submitting an event), keeping the grid at 2x3, and the ledger`s Follow row now separates the Follow button, which needs an account, from leaving an email address, which does not. |
+| ✅ | ✅ | Use Cases | `/use-cases` | Component-driven directory via `<x-marketing.audience-card>`. 2026-09 pass: all 31 audience links verified against the route table; the curator "Build Your Audience" tile now states the automatic new-event digest, with the subscriber-vs-follower distinction pinned in a comment so it cannot drift back. |
+| ✅ | ✅ | Contact | `/contact` | "The Postcard" ground-up rebuild. 2026-09 pass: added a private security-disclosure row to the routing table (the page previously sent "something is broken" straight to a public issue tracker with no stated alternative), and the two-of-five self-service note now reads six. |
+| ✅ | ✅ | Open Source | `/open-source` | "The Commit Log" ground-up rebuild. 2026-09 pass: the hosted-vs-selfhost diff billed QR check-in as Pro when scanning has no plan check at all - the row is now the check-in dashboard. API surface (24 authenticated endpoints), OpenAPI counts (16 paths, 26 operations) and the four machine-readable files re-verified against `routes/api.php` and `public/api/openapi.json`. |
+| ✅ | ✅ | Selfhost | `/selfhost` | "The Terminal" ground-up rebuild. 2026-09 pass: the "yours to run" list gained the two responsibilities selfhosters discover late - outbound SMTP, which the setup wizard deliberately does not write, and disk for uploaded flyers, photos and generated graphics - and the grid moved to 3-wide so six cells fill cleanly. |
+| ✅ | ✅ | SaaS | `/saas` | "The Stack" ground-up rebuild; white-label SaaS operator landing. 2026-09 pass: added the three operator revenue rails the page never mentioned (AdSense on your free tier, prepaid promotions between your tenants, the Stay22 accommodation affiliate) with their real gates and exclusions, linked to `/docs/saas/monetization`; timeline pills no longer wrap in the third comparison card. |
 
-## Feature pages (32)
+## Feature pages (33)
 
 | Reviewed | Updated | Page | URL | Notes |
 |:--------:|:-------:|------|-----|-------|
 | ✅ |   | Ticketing | `/features/ticketing` | "The Turnstile" ground-up rebuild |
 | ✅ |   | Gift Cards | `/features/gift-cards` | "The Gift Envelope" ground-up rebuild |
+| ✅ |   | Allocated Seating | `/features/allocated-seating` | Reserved-seating landing page |
 | ✅ |   | AI | `/features/ai` | "The Spark" ground-up rebuild |
 | ✅ |   | Calendar Sync | `/features/calendar-sync` | "The Round Trip" ground-up rebuild (renamed from "The Loop", which recurring-events holds) |
 | ✅ |   | Analytics | `/features/analytics` | "The Dashboard" ground-up rebuild |
@@ -243,7 +244,7 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 | ✅ |   | Accessibility | `/accessibility` | "The Fine Print" family treatment; legal text verbatim |
 | ✅ |   | Self-Hosting Terms of Service | `/self-hosting-terms-of-service` | "The Fine Print" family treatment; legal text verbatim |
 
-## Docs - User Guide (19)
+## Docs - User Guide (20)
 
 > The docs deliberately share one restrained shell (`config/docs.php` + `<x-docs-page>`, rebuilt July 2026) rather than per-page designs, so no docs page carries an Updated checkmark.
 
@@ -259,6 +260,7 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 | ✅ |   | Tickets | `/docs/tickets` | Accuracy pass (shared docs shell by design) |
 | ✅ |   | Subscriptions | `/docs/subscriptions` | Accuracy pass (shared docs shell by design) |
 | ✅ |   | Gift Cards | `/docs/gift-cards` | Accuracy pass (shared docs shell by design) |
+| ✅ |   | Allocated Seating | `/docs/allocated-seating` | Accuracy pass (shared docs shell by design) |
 | ✅ |   | Appointments | `/docs/appointments` | Accuracy pass (shared docs shell by design) |
 | ✅ |   | Event Graphics | `/docs/event-graphics` | Accuracy pass (shared docs shell by design) |
 | ✅ |   | Newsletters | `/docs/newsletters` | Accuracy pass (shared docs shell by design) |

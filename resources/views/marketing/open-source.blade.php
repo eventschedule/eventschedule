@@ -539,7 +539,7 @@
         // Every row is backed by a gate that tests config('app.hosted').
         $diffRows = [
             ['Selling tickets with Stripe payouts', 'Free, up to 25 paid tickets a month', 'Included, no cap'],
-            ['QR check-in, waitlists, promo codes and passes', 'Pro, '.plan_price($proMonthly).' a month', 'Included'],
+            ['Check-in dashboard, waitlists, promo codes and passes', 'Pro, '.plan_price($proMonthly).' a month', 'Included'],
             ['REST API and webhooks', 'Pro', 'Included'],
             ['Custom domain', 'Enterprise', 'The install is your domain'],
             ['Team members on one schedule', 'Up to five, on Enterprise', 'No cap'],

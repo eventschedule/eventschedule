@@ -262,12 +262,13 @@
                             ['AI Import', 'Paste the text or drop a flyer photo, AI fills in the details', 'M13 10V3L4 14h7v7l9-11h-7z'],
                             ['Aggregation', 'Pull events from venues, performers, and other curators', 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'],
                             ['Approval Workflow', 'Review and approve events before publishing', 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
-                            // Still deliberately not "Followers get notified when you add events".
-                            // app:send-event-announcements mails confirmed EMAIL SUBSCRIBERS -
+                            // Careful wording, and it has to stay careful: the automatic digest
+                            // (app:send-event-announcements) reaches confirmed EMAIL SUBSCRIBERS -
                             // role_subscribers rows, captured by the subscribe panel and the
                             // checkout opt-in. Account followers (role_user at level 'follower')
-                            // are reached only by a newsletter the owner composes and sends.
-                            ['Build Your Following', 'Followers you can email directly, no algorithm in between', 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z'],
+                            // are reached only by a newsletter the owner composes and sends. So
+                            // "subscribers", never "followers", in any sentence about automatic mail.
+                            ['Build Your Audience', 'Subscribers hear when you publish, with no algorithm in between', 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z'],
                         ];
                     @endphp
                     <div class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

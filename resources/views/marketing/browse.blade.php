@@ -567,6 +567,12 @@
                 'q' => 'Can I browse by city?',
                 'a' => 'Not with a filter, but search will do it. Type in a city and you get the schedules based there.',
             ],
+            [
+                // MarketingController::browse(): flyer_image_url, OR a talent/venue schedule
+                // with a profile_image_url, AND is_hidden_from_discovery = false. 24 shown.
+                'q' => 'How does an event end up on this page?',
+                'a' => 'By being public and having a picture. That is either the event\'s own flyer, or the profile photo on a talent or venue schedule, which covers every event on it at once. Nothing else is required: no application, no fee and no waiting. The page shows the next 24, soonest first.',
+            ],
         ];
 
         $dotSections = [
@@ -909,7 +915,7 @@
                          named. Pricing detail belongs on /pricing, not on a listing
                          page. --}}
                     <p class="es-news-muted mx-auto mb-10 max-w-2xl text-lg">
-                        Publish an event with a picture and it appears here automatically. No application, no fee.
+                        Publish a public event with a flyer, or put a profile photo on your talent or venue schedule, and everything on it appears here. No application, no fee, no waiting.
                     </p>
 
                     {{-- The blank plate. Every section above shows a schedule somebody

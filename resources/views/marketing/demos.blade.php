@@ -569,7 +569,7 @@
             ['A class every Tuesday that nobody retyped fifty times', 'Recurring dates, with exceptions for the days you skip', 'Free'],
             ['Color-coded strands inside one schedule', 'Sub-schedules', 'Free'],
             ['Add to Google, Outlook or Apple Calendar', 'An iCal download per date, plus two-way Google, Outlook and CalDAV sync', 'Free'],
-            ['The Follow button under the schedule name', 'Followers you can write to: 10 newsletter emails a month on Free, counted per recipient', 'Free'],
+            ['The Follow button under the schedule name', 'An audience you can reach. Anyone who leaves an email address gets a digest automatically when you publish new events, plus any newsletter you write: 10 emails a month on Free, counted per recipient', 'Free'],
             ['Save me a place, and the count of places left', 'Free registration with an optional capacity, per date', 'Free'],
             ['Buy a ticket without leaving the page', 'Ticket types and card checkout, with zero platform fees. Free sells 25 paid tickets a month per schedule', 'Free'],
             ['Photos and comments from the people who came', 'Fan photos, video and comments, held in an approval queue. Free covers 25 photos per schedule', 'Free'],

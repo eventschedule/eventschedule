@@ -488,6 +488,13 @@
                 'why' => 'Issues are public, so you can see whether somebody has already hit it, add what you are seeing, and follow the fix.',
             ],
             [
+                'what' => 'A security vulnerability',
+                'label' => $supportEmail,
+                'href' => 'mailto:'.$supportEmail.'?subject=Security%20report',
+                'external' => false,
+                'why' => 'Please do not open a public issue for this one. Write to the address instead, with the steps to reproduce it, and give us a chance to ship a fix before it is described in the open.',
+            ],
+            [
                 'what' => 'An idea, or a feature you want',
                 'label' => 'GitHub Discussions',
                 'href' => 'https://github.com/eventschedule/eventschedule/discussions',

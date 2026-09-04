@@ -1038,7 +1038,7 @@
                                 <h3 class="es-look-ink text-xl font-bold">The people who found you once</h3>
                                 <span class="es-look-plan">Free</span>
                             </div>
-                            <p class="es-look-muted mb-4">Visitors can follow your schedule, which gives you a list of names and email addresses you can write to yourself. Nothing is sent automatically: you compose the newsletter and you send it, then you get open and click rates back.</p>
+                            <p class="es-look-muted mb-4">Visitors leave a name and an email address, and get a digest automatically the next time you publish events. Anything more than that is a newsletter you write yourself, with open and click rates back afterwards.</p>
                             <p class="es-look-muted text-sm">The number worth knowing first: 10 emails a month on Free, 100 on Pro, 1,000 on Enterprise, counted per recipient rather than per send.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
@@ -1067,9 +1067,9 @@
                         <div class="relative z-10">
                             <div class="mb-4 flex flex-wrap items-center gap-2">
                                 <h3 class="es-look-ink text-xl font-bold">And when you sell a ticket</h3>
-                                <span class="es-look-plan es-look-plan-pro">Pro</span>
+                                <span class="es-look-plan">Free</span>
                             </div>
-                            <p class="es-look-muted mb-4">Named ticket types with their own prices, quantities and sales windows, QR check-in at the door, and Stripe connected to your own account. Event Schedule charges zero platform fees on ticket sales.</p>
+                            <p class="es-look-muted mb-4">Named ticket types with their own prices, quantities and sales windows, QR check-in at the door, and Stripe connected to your own account. Zero platform fees on every plan, including this one: Free sells 25 paid tickets a month per schedule and Pro lifts the ceiling.</p>
                             <p class="es-look-muted text-sm">
                                 Built-in analytics are free: page views, devices and where the traffic came from.
                                 <a href="{{ marketing_url('/features') }}" class="es-look-link font-semibold hover:underline">See all features</a>

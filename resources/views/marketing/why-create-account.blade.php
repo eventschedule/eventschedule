@@ -470,6 +470,16 @@
                 'Add photos and comments',
                 'Photos, video and comments on an event take a name and an email, and they go through the schedule\'s approval queue before anyone else sees them. A schedule can choose to require an account here instead, and some do.',
             ],
+            [
+                // RoleSubscriberController::store is on the guest routes, not behind auth:
+                // the sign-up panel renders on both the schedule page and every event page.
+                'Hear about new events',
+                'Leave an email address in the panel on any schedule page and confirm it from the message that follows. From then on you get a digest when that schedule publishes new events, at most one every few days. One link in the footer of any of them takes you back off the list.',
+            ],
+            [
+                'Submit an event',
+                'Most schedules will take a submission from anybody. The form is public, and it is the interesting case on this page: the door opens either way, and what changes is whose record the event becomes afterwards.',
+            ],
         ];
 
         // The duplex ledger. Same action, two records.
@@ -506,7 +516,7 @@
             ],
             [
                 'Follow a schedule',
-                'Not available. There is no guest version of following: the record IS the link between you and them.',
+                'The Follow button asks you to sign in first, because the record IS the link between you and them. Leaving an email address in the sign-up panel is the guest version, and it gets you the announcements without the ring.',
                 'On your ring, listed on your Following page, and one click to unfollow.',
             ],
         ];
@@ -680,7 +690,7 @@
                         An account is <span class="es-key-lit">not a turnstile.</span>
                     </h2>
                     <p class="es-key-dim mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                        These plates are blank on purpose. Four things people routinely assume sit behind a sign-up are not gated at all, and pretending otherwise would be a poor argument for making one.
+                        These plates are blank on purpose. Six things people routinely assume sit behind a sign-up are not gated at all, and pretending otherwise would be a poor argument for making one.
                     </p>
                 </div>
 
@@ -700,7 +710,7 @@
                 </div>
 
                 <p class="es-key-dim mx-auto mt-10 max-w-2xl text-center" data-reveal>
-                    Submitting an event belongs on that list too, because most schedules will take one from anybody. It is the interesting case: the door opens either way, and what changes is whose record the event becomes.
+                    None of that needs a key. The ledger below is where the difference actually shows up: same action, two records, and only one of them is yours to change afterwards.
                     <a href="#ledger" class="es-key-link inline-flex items-center gap-1 font-semibold transition-all hover:gap-2">
                         See both records
                         <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>

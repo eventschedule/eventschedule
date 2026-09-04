@@ -467,7 +467,8 @@
             </h1>
 
             <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-2xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
-                Share events, sell tickets, and grow your audience. Built for venues, performers, and communities.
+                One page for everything you have on. Sell tickets with zero platform fees, email the people who
+                follow it, and scan them in at the door.
             </p>
 
             <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -486,7 +487,7 @@
                 </a>
             </div>
 
-            <p class="es-fade-up es-d-4 mt-6 text-sm text-gray-500 dark:text-gray-400">Set up in under 2 minutes</p>
+            <p class="es-fade-up es-d-4 mt-6 text-sm text-gray-500 dark:text-gray-400">Set up in under 2 minutes. Open source, and yours to selfhost.</p>
 
             {{-- Compact clickable poster strip (mobile and tablets) --}}
             <div class="es-fade-up es-d-5 pointer-events-auto mt-12 lg:hidden">
@@ -694,7 +695,7 @@
                             </span>
                             <h3 class="text-xl font-bold text-gray-900 transition-colors group-hover:text-sky-600 dark:text-white dark:group-hover:text-sky-400">Ticketing & QR Check-ins</h3>
                         </div>
-                        <p class="mb-2 text-gray-600 dark:text-gray-400">Sell tickets online with multiple types, scan QR codes for check-ins, and track attendance with a live dashboard.</p>
+                        <p class="mb-2 text-gray-600 dark:text-gray-400">Multiple ticket types, add-ons, promo codes and reserved seating. Every ticket carries a QR code you scan at the door, on any plan, with zero platform fees.</p>
 
                         <!-- Ticket mockup -->
                         <div class="relative my-4 flex min-h-[260px] flex-1 items-center justify-center" aria-hidden="true">
@@ -806,7 +807,7 @@
                             </span>
                             <h3 class="text-xl font-bold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">AI-Powered</h3>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-400">Parse text and images, generate flyers and descriptions, create your brand style, and translate to 12 languages with AI.</p>
+                        <p class="text-gray-600 dark:text-gray-400">Paste a poster, a press release or a screenshot and get a filled-in event back. Generate flyers, descriptions and a whole brand style, and publish in 12 languages.</p>
 
                         <!-- Flyer to event mockup -->
                         <div class="mt-5 grid grid-cols-[1fr_auto_1.2fr] items-center gap-3" aria-hidden="true">
@@ -893,7 +894,7 @@
                             </span>
                             <h3 class="text-xl font-bold text-gray-900 transition-colors group-hover:text-emerald-600 dark:text-white dark:group-hover:text-emerald-400">Built-in Analytics</h3>
                         </div>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Track page views, device breakdown, top events, and traffic sources. No external services required.</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Page views, traffic sources, devices, check-ins and revenue per event, on three tabs. Built in and first-party, so no Google Analytics account is required.</p>
 
                         <!-- Bars mockup -->
                         <div class="mt-5" aria-hidden="true">
@@ -927,7 +928,7 @@
                             </span>
                             <h3 class="text-xl font-bold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">Calendar Sync</h3>
                         </div>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Two-way sync with Google Calendar. Let attendees add events to Apple, Google, or Outlook calendars.</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Two-way sync with Google Calendar, Microsoft 365 and any CalDAV server. Edit an event in either place and the other follows, deletions included.</p>
 
                         <!-- Sync mockup -->
                         <div class="relative mt-5 h-24 px-2" aria-hidden="true">
@@ -1126,13 +1127,15 @@
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />',
             ],
             [
-                'href' => route('marketing.embed_calendar'),
-                'aria' => 'Learn more about embed calendar',
-                'title' => 'Embed Calendar',
-                'desc' => 'Embed your schedule on any website with a simple iframe.',
+                'href' => route('marketing.allocated_seating'),
+                'aria' => 'Learn more about reserved seating',
+                'title' => 'Reserved Seating',
+                // SeatingPlanController: reusable plans with levels, sections, rows, tables,
+                // standing areas and wheelchair spaces; guests pick their own seat.
+                'desc' => 'Draw your room once, then let guests pick their own seat. Rows, tables, standing areas and a box office console for phone bookings.',
                 'chip' => 'bg-blue-100 dark:bg-blue-500/20',
                 'text' => 'text-blue-600 dark:text-blue-400',
-                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25A2.25 2.25 0 015.25 3h13.5A2.25 2.25 0 0121 5.25z" />',
+                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 18v-6a2 2 0 012-2h12a2 2 0 012 2v6M4 18h16M4 18v2m16-2v2M7 10V6a2 2 0 012-2h6a2 2 0 012 2v4M8 14h.01M12 14h.01M16 14h.01" />',
             ],
             [
                 'href' => marketing_url('/features/fan-videos'),
@@ -1167,7 +1170,7 @@
                 'href' => marketing_url('/features/custom-fields'),
                 'aria' => 'Learn more about custom fields',
                 'title' => 'Custom Fields',
-                'desc' => 'Collect additional info from ticket buyers with text, dropdown, date, and yes/no fields.',
+                'desc' => 'Six field types, from a yes/no toggle to a multi-select. Ask at checkout, or put the question on your public event request form.',
                 'chip' => 'bg-amber-100 dark:bg-amber-500/20',
                 'text' => 'text-amber-600 dark:text-amber-400',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />',
@@ -1176,7 +1179,7 @@
                 'href' => route('marketing.private_events'),
                 'aria' => 'Learn more about private events',
                 'title' => 'Private Events',
-                'desc' => 'Password-protect events for VIP audiences or invite-only gatherings. Control who sees what.',
+                'desc' => 'Four levels of visibility, from a public listing to an unlisted page behind a password. Hide an event from your calendar and still send someone the link.',
                 'chip' => 'bg-yellow-100 dark:bg-yellow-500/20',
                 'text' => 'text-yellow-600 dark:text-yellow-400',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />',
@@ -1194,7 +1197,7 @@
                 'href' => route('marketing.white_label'),
                 'aria' => 'Learn more about white-label branding',
                 'title' => 'White-label Branding',
-                'desc' => 'Remove branding, add custom CSS, and match your brand.',
+                'desc' => 'Take our name off every page, ticket and email, then bring your own colours, fonts, favicon and CSS.',
                 'chip' => 'bg-emerald-100 dark:bg-emerald-500/20',
                 'text' => 'text-emerald-600 dark:text-emerald-400',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />',
@@ -1203,19 +1206,21 @@
                 'href' => marketing_url('/features/team-scheduling'),
                 'aria' => 'Learn more about team scheduling',
                 'title' => 'Team Scheduling',
-                'desc' => 'Invite your team so everyone can add events and manage tickets without sharing a login.',
+                'desc' => 'Invite people instead of sharing a login. Admins run the schedule and see sales; viewers are read-only but can still scan tickets at the door.',
                 'chip' => 'bg-cyan-100 dark:bg-cyan-500/20',
                 'text' => 'text-cyan-600 dark:text-cyan-400',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />',
             ],
             [
-                'href' => marketing_url('/open-source'),
-                'aria' => 'Learn more about open source and API',
-                'title' => 'Open Source & API',
-                'desc' => 'Selfhost for full control over your data. Integrate with your existing tools through our REST API.',
-                'chip' => 'bg-gray-100 dark:bg-gray-500/20',
-                'text' => 'text-gray-600 dark:text-gray-400',
-                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />',
+                'href' => route('marketing.gift_cards'),
+                'aria' => 'Learn more about gift cards and passes',
+                'title' => 'Gift Cards & Passes',
+                // GiftCardController (balance-tracked, emailed to a recipient) plus
+                // PassBookingService (visit passes, memberships, season and festival passes).
+                'desc' => 'Sell gift cards that arrive by email with a running balance, and passes that admit the same guest across a season or a whole festival.',
+                'chip' => 'bg-teal-100 dark:bg-teal-500/20',
+                'text' => 'text-teal-600 dark:text-teal-400',
+                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zM5 12h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />',
             ],
         ];
     @endphp
@@ -1352,6 +1357,12 @@
                 <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal style="--reveal-delay: 0.08s;">
                     The tools you already use
                 </h2>
+                <p class="mt-4 text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.14s;">
+                    Calendars sync both ways. Card payments go straight to your own account. Existing events come
+                    across from Eventbrite, and a
+                    <a href="{{ marketing_url('/docs/developer/api') }}" class="font-semibold text-blue-600 underline decoration-blue-300 underline-offset-4 transition-colors hover:text-blue-500 dark:text-blue-400 dark:decoration-blue-500/50">REST API and webhooks</a>
+                    handle whatever is left.
+                </p>
             </div>
 
             <!-- Orbit (desktop) -->
@@ -1496,18 +1507,29 @@
                 <div class="rounded-3xl border border-blue-200 bg-gradient-to-br from-blue-50 to-sky-50 p-8 text-center dark:border-blue-500/20 dark:from-blue-900/25 dark:to-sky-900/25" data-reveal="panel">
                     <div class="es-od text-gradient mb-4 justify-center text-6xl font-black lg:text-7xl" data-odometer="0%">0%</div>
                     <div class="mb-1 text-xl font-bold text-gray-900 dark:text-white">No platform fees</div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">We don't take a cut of your ticket sales</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Card payments land in your own Stripe account, not ours</p>
                 </div>
                 <div class="rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-8 text-center dark:border-emerald-500/20 dark:from-emerald-900/25 dark:to-teal-900/25" data-reveal="panel">
                     <div class="es-od text-gradient mb-4 justify-center text-6xl font-black lg:text-7xl" data-odometer="{{ plan_price(0) }}">{{ plan_price(0) }}</div>
                     <div class="mb-1 text-xl font-bold text-gray-900 dark:text-white">Free forever</div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Unlimited events and schedules on our free plan</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Unlimited events and schedules, and 25 paid tickets a month</p>
                 </div>
                 <div class="rounded-3xl border border-sky-200 bg-gradient-to-br from-sky-50 to-cyan-50 p-8 text-center dark:border-sky-500/20 dark:from-sky-900/25 dark:to-cyan-900/25" data-reveal="panel">
                     <div class="es-od text-gradient mb-4 justify-center text-6xl font-black lg:text-7xl" data-odometer="100%">100%</div>
                     <div class="mb-1 text-xl font-bold text-gray-900 dark:text-white">Open source</div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Selfhost on your own server. Your data, your rules.</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">AAL licensed. Selfhost it and every paid feature is included</p>
                 </div>
+            </div>
+
+            <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row" data-reveal style="--reveal-delay: 0.2s;">
+                <a href="{{ marketing_url('/open-source') }}" class="group inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-lg dark:border-white/10 dark:bg-white/[0.04] dark:text-gray-100 dark:hover:border-blue-500/40">
+                    Read the licence and the code
+                    <svg class="h-4 w-4 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                </a>
+                <a href="{{ marketing_url('/selfhost') }}" class="group inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-lg dark:border-white/10 dark:bg-white/[0.04] dark:text-gray-100 dark:hover:border-blue-500/40">
+                    Install it on your own server
+                    <svg class="h-4 w-4 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                </a>
             </div>
         </div>
     </section>
@@ -1527,7 +1549,7 @@
                         Live in <span class="text-gradient">minutes</span>
                     </h2>
                     <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.16s;">
-                        Three steps. That's all it takes.
+                        Publish, share, and let the people who follow you hear about it.
                     </p>
                 </div>
 
@@ -1541,20 +1563,21 @@
                             <div class="es-step es-step-0 relative ltr:pl-20 rtl:pr-20">
                                 <span class="absolute top-0 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-400 text-xl font-bold text-white shadow-lg shadow-blue-500/30 ltr:left-0 rtl:right-0">1</span>
                                 <h3 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">Create your schedule</h3>
-                                <p class="text-gray-600 dark:text-gray-400">Sign up free. Add your events manually or import from Google Calendar.</p>
+                                <p class="text-gray-600 dark:text-gray-400">Sign up free, then fill it however suits you: type an event in, connect a calendar, or paste a poster and let the AI read the details off it.</p>
                             </div>
                             <div class="es-step es-step-1 relative ltr:pl-20 rtl:pr-20">
                                 <span class="absolute top-0 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-cyan-500 text-xl font-bold text-white shadow-lg shadow-sky-500/30 ltr:left-0 rtl:right-0">2</span>
                                 <h3 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">Share your link</h3>
-                                <p class="text-gray-600 dark:text-gray-400">Get your custom URL. Put it in your bio, website, or anywhere you want.</p>
+                                <p class="text-gray-600 dark:text-gray-400">You get yourname.eventschedule.com. Put it in your bio, print the QR code on a poster, or embed the calendar in your own site.</p>
                             </div>
                             <div class="es-step es-step-2 relative ltr:pl-20 rtl:pr-20">
                                 <span class="absolute top-0 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-xl font-bold text-white shadow-lg shadow-emerald-500/30 ltr:left-0 rtl:right-0">3</span>
                                 <h3 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">Grow your audience</h3>
-                                {{-- No job, command or mailable sends followers a "new event"
-                                     alert: following grants permission to email, and the owner
-                                     composes and sends every NewsletterEmail themselves. --}}
-                                <p class="text-gray-600 dark:text-gray-400">Fans follow your schedule, which gives you permission to email them. Write a newsletter and send it whenever you have news.</p>
+                                {{-- app:send-event-announcements, hourly on both rails: CONFIRMED
+                                     role_subscribers get one digest per batch of newly published
+                                     public events. Account followers are NOT included - they are
+                                     reached only by a newsletter the owner writes. --}}
+                                <p class="text-gray-600 dark:text-gray-400">Visitors leave an email address and get a digest automatically when you publish new events. Write a newsletter yourself whenever there is more to say.</p>
                             </div>
                         </div>
                     </div>
@@ -1631,10 +1654,11 @@
                                         </span>
                                         <div class="text-left rtl:text-right">
                                             <div class="text-sm font-semibold text-gray-900 dark:text-white">Newsletter sent</div>
-                                            {{-- "notified" read as an automatic alert, which
-                                                 does not exist: the owner composes and sends
-                                                 every newsletter. Recipients is also the unit
-                                                 the monthly allowance actually counts. --}}
+                                            {{-- Recipients, not sends: Role::newsletterLimit()
+                                                 counts one per address, so a newsletter to 940
+                                                 people spends 940 of the allowance. (Automatic
+                                                 new-event digests are a separate rail and do
+                                                 NOT draw on it - see SendEventAnnouncements.) --}}
                                             <div class="text-xs text-gray-500 dark:text-gray-400">940 recipients</div>
                                         </div>
                                         <svg class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -1659,10 +1683,12 @@
             // check, so scanning at the door is free too. Promo codes are Pro, so they are not
             // listed in an answer about what selling includes.
             ['q' => 'Is Event Schedule free?', 'a' => 'Yes, Event Schedule is free to use with unlimited events and schedules, and the free plan sells up to 25 paid tickets a month. Pro and Enterprise plans add unlimited ticket sales, event boosting, custom branding, and AI image generation.'],
-            ['q' => 'Can I sell tickets with Event Schedule?', 'a' => 'Yes, with zero platform fees using Stripe or Invoice Ninja. The free plan covers 25 paid tickets a month per schedule and Pro removes the cap. Every ticket carries a QR code you can scan at the door, and you can create multiple ticket types.'],
-            ['q' => 'Does Event Schedule sync with Google Calendar?', 'a' => 'Yes, Event Schedule offers two-way Google Calendar sync with real-time webhook updates. You can also sync with any CalDAV-compatible calendar server.'],
-            ['q' => 'Can I selfhost Event Schedule?', 'a' => 'Yes, Event Schedule is 100% open source. You can selfhost it on your own server for full control over your data, or use the hosted platform at eventschedule.com.'],
-            ['q' => 'Who is Event Schedule for?', 'a' => 'Event Schedule is built for musicians, DJs, comedians, venues, bars, theaters, event curators, and anyone who needs to share an event schedule with their audience.'],
+            ['q' => 'Can I sell tickets with Event Schedule?', 'a' => 'Yes, with zero platform fees. The free plan covers 25 paid tickets a month per schedule and Pro removes the cap. Create as many ticket types as you need, add extras like parking or merchandise, and scan the QR code on every ticket at the door.'],
+            ['q' => 'How do I get paid?', 'a' => 'Straight into your own account. You connect your Stripe account and card payments land there directly, so we never hold your money and never take a cut. Payfast, an external payment link and cash at the door are supported too, and Pro schedules can bill through Invoice Ninja.'],
+            ['q' => 'Does Event Schedule sync with my calendar?', 'a' => 'Yes. Google Calendar and Microsoft 365 both sync two ways, with webhook updates so a change made in either place shows up in the other, deletions included. Any CalDAV server works as well, and guests can add a single event to Apple, Google or Outlook from the event page.'],
+            ['q' => 'Can I use my own domain?', 'a' => 'Yes. Every schedule gets a free subdomain such as yourname.eventschedule.com, and Enterprise schedules can serve the whole guest portal from a domain you own, with the certificate issued automatically. Selfhosted installs run on your own domain from day one.'],
+            ['q' => 'Can I selfhost Event Schedule?', 'a' => 'Yes, Event Schedule is 100% open source. Selfhost it on your own server for full control over your data and every paid feature is included, or use the hosted platform at eventschedule.com.'],
+            ['q' => 'Who is Event Schedule for?', 'a' => 'Anyone who keeps a schedule other people need to see: musicians, DJs, comedians, venues, bars, theaters, galleries, studios, markets, libraries and the curators who list them all in one place.'],
         ];
     @endphp
     <x-seo.faq-schema :items="$homeFaqs" />

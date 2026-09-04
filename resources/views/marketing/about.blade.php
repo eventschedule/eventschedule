@@ -563,16 +563,16 @@
                 'On every other plan a ticket type carries a name, a price, a quantity and a sales window, and buyers are not choosing a specific seat. Drawing a room and selling the seats in it is the one part of ticketing that sits behind the top plan.',
             ],
             [
-                'Followers are not emailed automatically.',
-                'Nothing goes out when you add an event. Following gives you a list you can write to: you compose the newsletter and press send. Ticket buyers are the exception, and they are emailed when an event they bought for changes or is cancelled.',
+                'Only subscribers get the automatic digest.',
+                'Publishing new events emails the people who left you an email address and confirmed it, at most one digest every three days. Somebody who followed you with an account is on a different list, and that one is reached only by a newsletter you write yourself.',
             ],
             [
-                'Nothing checks for double bookings.',
-                'Two events at the same time in the same place will both simply appear. The calendar does not object, and it will not warn you.',
+                'Nothing warns you about a clash on the calendar.',
+                'Two ordinary events at the same time in the same room will both simply appear, and nothing objects. Bookable appointments are the exception: an appointment slot disappears the moment anything on that schedule occupies the time, synced calendar entries included.',
             ],
             [
                 'Newsletter allowances count recipients.',
-                'Not sends. One newsletter to a hundred followers uses a hundred of the allowance: 10 a month on Free, 100 on Pro, 1,000 on Enterprise.',
+                'Not sends. One newsletter to a hundred followers uses a hundred of the allowance: 10 a month on Free, 100 on Pro, 1,000 on Enterprise. The automatic new-event digest is the one thing outside that count, because the promise there was made to the reader rather than to you.',
             ],
             [
                 'The free plan is one team member.',

@@ -979,6 +979,10 @@
             ['SSL and the domain', 'HTTPS is required. Most hosts issue a free certificate.'],
             ['The cron entry', 'One line, once. Without it reminders and calendar sync stop.'],
             ['Backups', 'Export and restore is built in, but scheduling it is on you.'],
+            // The wizard writes everything except mail, and it is the step selfhosters
+            // most often discover late, when a ticket confirmation does not arrive.
+            ['Outbound email', 'The wizard configures everything but this. Point it at an SMTP service or tickets go nowhere.'],
+            ['Disk for uploads', 'Flyers, fan photos and generated graphics sit on your filesystem, so size the volume for them.'],
         ];
     @endphp
     <section id="data" class="es-band-dark relative scroll-mt-24 overflow-hidden py-16 lg:py-24 noise">
@@ -1070,7 +1074,7 @@
             <div class="mt-4 rounded-3xl border border-amber-400/25 bg-amber-500/[0.06] p-8" data-reveal="panel">
                 <h3 class="es-own mb-2 text-xs font-bold uppercase tracking-[0.18em]">Yours to run</h3>
                 <p class="mb-6 max-w-3xl text-gray-300">Selfhosting means you are the operator. It is not much, but it is honest to say it out loud.</p>
-                <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4" data-reveal-group="70">
+                <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
                     @foreach ($responsibilities as [$rTitle, $rBody])
                         <div data-reveal>
                             <div class="es-own mb-1.5 font-semibold">{{ $rTitle }}</div>

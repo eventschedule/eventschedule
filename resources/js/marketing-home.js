@@ -567,6 +567,19 @@ function initClaim() {
             input.value = slug;
         }
     });
+
+    // The input is not inside a form, so Enter did nothing at all: somebody typed the
+    // name they wanted and the field just sat there. Follow the CTA beside it instead.
+    input.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter') {
+            return;
+        }
+        const cta = input.closest('.es-claim')?.parentElement?.querySelector('a[href]');
+        if (cta) {
+            event.preventDefault();
+            cta.click();
+        }
+    });
 }
 
 /* ------------------------------------------------------------------ */

@@ -533,7 +533,7 @@
                     ],
                     [
                         'q' => 'Is Event Schedule really free?',
-                        'a' => 'Yes, and the free plan is not a trial that quietly expires. Unlimited events, a mobile-friendly public page at your own address, two-way Google, Outlook and CalDAV sync, sub-schedules, recurring events, free registration with a capacity limit, built-in analytics, the embeddable calendar, backup and restore, and newsletters at 10 emails a month all cost nothing, permanently. The paid plans add ticketing and a short list of other things, and the rate card above sets out exactly which.',
+                        'a' => 'Yes, and the free plan is not a trial that quietly expires. Unlimited events, a mobile-friendly public page at your own address, two-way Google, Outlook and CalDAV sync, sub-schedules, recurring events, free registration with a capacity limit, built-in analytics, the embeddable calendar, backup and restore, and newsletters at 10 emails a month all cost nothing, permanently. Selling tickets is on the free plan too, capped at 25 paid ones a month rather than charged for. The paid plans lift that ceiling and add a short list of other things, and the rate card above sets out exactly which.',
                         'links' => [['Pricing', marketing_url('/pricing')]],
                     ],
                     [
@@ -615,7 +615,7 @@
                     ],
                     [
                         'q' => 'Can I take sign-ups for a free event without paying for Pro?',
-                        'a' => 'Yes. Free registration is on the free plan, with an optional capacity limit counted per date, so a weekly session can hold twenty people this Thursday and twenty more next Thursday. Priced ticket types, card payment and QR check-in are the parts Pro adds.',
+                        'a' => 'Yes. Free registration is on the free plan, with an optional capacity limit counted per date, so a weekly session can hold twenty people this Thursday and twenty more next Thursday. Priced ticket types, card payment through your own Stripe account and scanning the QR at the door are all on the free plan as well, capped at 25 paid tickets a month. Pro is what removes the cap and adds the live check-in dashboard.',
                         'links' => [['Registration', marketing_url('/docs/tickets#registration')]],
                     ],
                     [
@@ -669,8 +669,12 @@
                         'links' => [['Recipients and segments', marketing_url('/docs/newsletters#recipients')]],
                     ],
                     [
+                        // app:send-event-announcements, hourly on both rails. It reaches CONFIRMED
+                        // role_subscribers only (AudienceResolver::announcementRecipients), floored at
+                        // usage.audience_announcement_min_hours, and does NOT draw on the newsletter
+                        // allowance. Account followers are a different list and get newsletters only.
                         'q' => 'Do my followers get an email automatically when I add an event?',
-                        'a' => 'No, and it is worth being straight about that, because plenty of tools imply otherwise. Nothing goes out on your behalf when you add or change an event. Following your schedule puts somebody on your list so that you can write to them, and the newsletter is written and sent by you. Two automatic emails do exist and they run the other way: people holding a ticket are told if that event changes or is cancelled, and you are emailed when somebody submits a booking request.',
+                        'a' => 'Some of them do, and the difference matters. Anyone who gave your schedule an email address and confirmed it is emailed a digest when you publish new public events, batched so a season announced in one sitting is one message rather than twenty, and never more often than once every three days. It does not count against your newsletter allowance. Somebody who followed you while signed in to their own account is on a separate list, and that one only ever hears from a newsletter you write yourself. You can switch the automatic digest off per schedule under Settings, Notifications.',
                         'links' => [['Followers', marketing_url('/docs/managing-schedules#followers')]],
                     ],
                     [
@@ -810,7 +814,8 @@
             ['Newsletter emails a month', '10', '100', '1,000'],
             ['Paid tickets you can sell a month', 'Up to 25', 'Unlimited', 'Unlimited'],
             ['Platform fee on ticket sales', 'Zero', 'Zero', 'Zero'],
-            ['QR check-in, waitlist, promo codes and passes', 'No', 'Yes', 'Yes'],
+            ['Scan tickets at the door', 'Yes', 'Yes', 'Yes'],
+            ['Live check-in dashboard, waitlist, promo codes and passes', 'No', 'Yes', 'Yes'],
             ['Appointment booking', '1 type', 'Unlimited types', 'Unlimited types'],
             ['Remove Event Schedule branding', 'No', 'Yes', 'Yes'],
             ['Team members', '1', '1', 'Up to 5'],
@@ -984,7 +989,7 @@
                     The rate card, <span class="text-gradient-desk">including the rows that say no.</span>
                 </h2>
                 <p class="es-desk-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.1s;">
-                    Twelve rows, three plans. If a page ever tells you newsletters or analytics are paid features here, that page is out of date.
+                    Thirteen rows, three plans. If a page ever tells you newsletters, analytics or scanning a ticket at the door are paid features here, that page is out of date.
                 </p>
             </div>
 
