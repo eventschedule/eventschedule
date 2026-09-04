@@ -288,13 +288,16 @@
             -webkit-appearance: none;
             appearance: none;
             width: 100%;
-            height: 6px;
+            /* 24px tall so a thumb has something to grab on a phone, with the
+               track painted as a 6px band down the middle so it still reads as a
+               hairline. A 6px-tall input is a 6px-tall tap target. */
+            height: 24px;
+            background: linear-gradient(90deg, #f59e0b var(--fill, 50%), rgba(2, 6, 23, 0.08) var(--fill, 50%)) center / 100% 6px no-repeat;
             border-radius: 9999px;
-            background: linear-gradient(90deg, #f59e0b var(--fill, 50%), rgba(2, 6, 23, 0.08) var(--fill, 50%));
             cursor: pointer;
         }
         .dark .es-range {
-            background: linear-gradient(90deg, #fbbf24 var(--fill, 50%), rgba(255, 255, 255, 0.12) var(--fill, 50%));
+            background: linear-gradient(90deg, #fbbf24 var(--fill, 50%), rgba(255, 255, 255, 0.12) var(--fill, 50%)) center / 100% 6px no-repeat;
         }
         .es-range::-webkit-slider-thumb {
             -webkit-appearance: none;
