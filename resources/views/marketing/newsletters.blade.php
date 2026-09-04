@@ -897,7 +897,9 @@
                 </div>
 
                 <!-- Same allowance, three ways to spend it. -->
-                <div class="lg:col-span-3">
+                {{-- min-w-0: this holds the allowance table. Without it the grid track
+                     sizes to the table min-content and the page scrolls at 390px. --}}
+                <div class="min-w-0 lg:col-span-3">
                     <div class="grid gap-4 sm:grid-cols-3">
                         @foreach ($spends as [$sends, $each, $note])
                             <div class="es-send-card es-send-hover flex h-full flex-col p-5" data-reveal>

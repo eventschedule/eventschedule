@@ -1364,7 +1364,7 @@
 
 {url}</code></pre>
             <p>Would produce a calendar description like:</p>
-            <pre class="bg-gray-100 dark:bg-gray-800 rounded p-3 text-sm mt-2"><code>Summer Concert
+            <pre class="bg-gray-100 dark:bg-gray-800 rounded p-3 text-sm mt-2 overflow-x-auto"><code>Summer Concert
 15/03/2025 20:00
 Central Park | New York
 

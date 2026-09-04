@@ -751,7 +751,10 @@
             </div>
 
             <div class="es-gather-card p-5 sm:p-7" data-reveal="panel">
-                <div class="overflow-x-auto">
+                {{-- relative: the sr-only day labels in this table are absolutely
+                     positioned, and without a containing block here they escape to
+                     the page and widen it at 390px. --}}
+                <div class="relative overflow-x-auto">
                     <table class="es-gather-table w-full border-collapse text-left">
                         <caption class="sr-only">A community center week: each recurring program, the days it runs, and how people sign up</caption>
                         <thead>

@@ -87,7 +87,7 @@ return [
     '/features/carpool' => '2026-09-04',
     '/features/custom-css' => '2026-09-04',
     '/features/custom-domain' => '2026-09-04',
-    '/features/custom-fields' => '2026-09-02',
+    '/features/custom-fields' => '2026-09-04',
     '/features/custom-labels' => '2026-09-04',
     '/features/embed-calendar' => '2026-09-04',
     '/features/embed-tickets' => '2026-09-04',

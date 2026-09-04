@@ -304,7 +304,15 @@
 
     @include('marketing.partials.header')
 
-    <main id="main-content">
+    {{-- overflow-x: clip so nothing inside can put a horizontal scrollbar on a
+         phone. Marketing pages are full of things that legitimately sit outside
+         their own box - aurora blobs, marquee strips, reveal transforms that
+         animate in from the right - and any one of them widened the page at
+         390px. `clip` rather than `hidden` on purpose: hidden would make this a
+         scroll container and break `position: sticky` inside it, and neither
+         value makes it the containing block for `position: fixed`, so the guest
+         CTA bar stays fixed (see CLAUDE.md on filter/transform and fixed). --}}
+    <main id="main-content" class="[overflow-x:clip]">
         {{ $slot }}
     </main>
 

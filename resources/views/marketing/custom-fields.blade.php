@@ -1098,7 +1098,9 @@
                     </div>
                 </div>
 
-                <div class="es-form-divide" data-reveal="panel">
+                {{-- min-w-0: holds the sales-CSV extract table, which otherwise sets
+                     this grid track to its min-content and scrolls the page on a phone. --}}
+                <div class="es-form-divide min-w-0" data-reveal="panel">
                     <p class="es-form-tag mb-4">The column you get</p>
                     <div class="es-form-card p-6 sm:p-7">
                         <div class="overflow-x-auto">

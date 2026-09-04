@@ -231,6 +231,10 @@
 
         {{-- The full matrix --}}
         .compare-table-wrapper {
+            /* Containing block for the .sr-only cell labels inside the table:
+               absolutely positioned, they otherwise escape to the page and
+               widen it by however far right their static position fell. */
+            position: relative;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
         }

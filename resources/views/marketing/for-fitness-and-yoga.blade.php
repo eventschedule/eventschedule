@@ -302,7 +302,9 @@
         .dark .es-flow-plan-ent { border-color: rgba(230, 239, 236, 0.38); color: #e6efec; }
 
         /* ==== 5. THE TIMETABLE RAIL ================================== */
-        .es-flow-scroll { overflow-x: auto; }
+        /* position: relative so the sr-only column label inside the table cannot
+           escape this scroll box and widen the page at 390px. */
+        .es-flow-scroll { position: relative; overflow-x: auto; }
         .es-flow-rail { width: 100%; border-collapse: collapse; min-width: 33rem; }
         .es-flow-rail th, .es-flow-rail td { padding: 0.5rem; vertical-align: middle; }
         .es-flow-rail th:first-child, .es-flow-rail td:first-child { padding-inline-start: 0; }
