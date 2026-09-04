@@ -645,7 +645,7 @@
                                                 </div>
                                             @endforeach
                                         </div>
-                                        <div class="mt-2 text-center font-mono text-[10px] text-gray-400 dark:text-gray-500">prices you set · your Stripe</div>
+                                        <div class="mt-2 text-center font-mono text-[10px] text-gray-500 dark:text-gray-400">prices you set · your Stripe</div>
                                     </div>
 
                                     <!-- Plane 4: your server -->
@@ -705,7 +705,7 @@
                                     <span class="h-2.5 w-2.5 rounded-full bg-[#28C840]"></span>
                                 </span>
                                 <div class="flex-1 overflow-hidden rounded-lg bg-white px-3 py-2 font-mono text-xs text-gray-700 shadow-sm dark:bg-white/10 dark:text-gray-200">
-                                    <span class="text-gray-400 dark:text-gray-500">https://</span><span class="es-sub-type"><span>acme.yourdomain.com</span><span style="--w: 3s;">blues-bar.yourdomain.com</span><span style="--w: 6s;">comedy.yourdomain.com</span></span>
+                                    <span class="text-gray-500 dark:text-gray-400">https://</span><span class="es-sub-type"><span>acme.yourdomain.com</span><span style="--w: 3s;">blues-bar.yourdomain.com</span><span style="--w: 6s;">comedy.yourdomain.com</span></span>
                                 </div>
                             </div>
                             <div class="mt-4 flex items-center gap-3" style="mask-image: linear-gradient(to right, black 75%, transparent);">
@@ -728,9 +728,9 @@
                         <div class="mt-auto overflow-hidden rounded-2xl border border-gray-200 text-sm dark:border-white/10" aria-hidden="true">
                             <div class="grid grid-cols-[1fr_2.5rem_2.5rem_2.5rem] items-center gap-y-1 p-3">
                                 <span></span>
-                                <span class="text-center text-[11px] font-semibold text-gray-400 dark:text-gray-500">Free</span>
+                                <span class="text-center text-[11px] font-semibold text-gray-500 dark:text-gray-400">Free</span>
                                 <span class="es-tier-pro rounded-md py-0.5 text-center text-[11px] font-bold text-blue-600 dark:text-blue-400">Pro</span>
-                                <span class="text-center text-[11px] font-semibold text-gray-400 dark:text-gray-500">Ent</span>
+                                <span class="text-center text-[11px] font-semibold text-gray-500 dark:text-gray-400">Ent</span>
                                 @foreach ([['Schedule pages', true, true, true], ['Unlimited ticket sales', false, true, true], ['API + webhooks', false, true, true], ['Custom domains', false, false, true]] as $row)
                                     <span class="truncate py-1.5 text-xs text-gray-600 dark:text-gray-300">{{ $row[0] }}</span>
                                     @foreach ([1, 2, 3] as $col)
@@ -764,7 +764,7 @@
                                 <div class="es-trial-ring absolute inset-0 rounded-full"></div>
                                 <div class="text-center">
                                     <div class="text-xl font-black text-gray-900 dark:text-white">14</div>
-                                    <div class="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">days</div>
+                                    <div class="text-[10px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">days</div>
                                 </div>
                             </div>
                         </div>
@@ -873,7 +873,7 @@
                                 <span id="es-out-customers" class="rounded-full bg-gray-100 px-3 py-1 font-mono text-sm font-bold tabular-nums text-gray-700 dark:bg-white/10 dark:text-gray-200">25</span>
                             </div>
                             <input type="range" id="es-r-customers" class="es-range" min="1" max="500" step="1" value="25" style="--fill: 4.8%;">
-                            <div class="mt-2 flex justify-between font-mono text-[11px] text-gray-400 dark:text-gray-500"><span>1</span><span>500</span></div>
+                            <div class="mt-2 flex justify-between font-mono text-[11px] text-gray-500 dark:text-gray-400"><span>1</span><span>500</span></div>
                         </div>
                         <div>
                             <div class="mb-4 flex items-center justify-between gap-4">
@@ -881,7 +881,7 @@
                                 <span id="es-out-price" class="es-money rounded-full bg-amber-50 px-3 py-1 font-mono text-sm font-bold tabular-nums dark:bg-amber-500/10">$29</span>
                             </div>
                             <input type="range" id="es-r-price" class="es-range" min="5" max="199" step="1" value="29" style="--fill: 12.4%;">
-                            <div class="mt-2 flex justify-between font-mono text-[11px] text-gray-400 dark:text-gray-500"><span>$5</span><span>$199</span></div>
+                            <div class="mt-2 flex justify-between font-mono text-[11px] text-gray-500 dark:text-gray-400"><span>$5</span><span>$199</span></div>
                         </div>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Slide to match your niche and your pricing. The defaults are just a starting point.</p>
                     </div>
@@ -942,7 +942,7 @@
                         @endfor
                     </div>
                 </div>
-                <p class="mt-3 text-center text-xs text-gray-400 dark:text-gray-500">A feed you could be running.</p>
+                <p class="mt-3 text-center text-xs text-gray-500 dark:text-gray-400">A feed you could be running.</p>
             </div>
 
             <div class="mx-auto mt-14 max-w-5xl" data-reveal>
@@ -977,7 +977,7 @@
                         @foreach ($saasMeters as [$meterName, $meterFlag, $meterBody])
                             <div>
                                 <dt class="mb-1.5 font-semibold text-gray-900 dark:text-white">{{ $meterName }}</dt>
-                                <p class="mb-2 font-mono text-[11px] text-gray-400 dark:text-gray-500">{{ $meterFlag }}</p>
+                                <p class="mb-2 font-mono text-[11px] text-gray-500 dark:text-gray-400">{{ $meterFlag }}</p>
                                 <dd class="text-sm text-gray-600 dark:text-gray-400">{{ $meterBody }}</dd>
                             </div>
                         @endforeach
@@ -1019,7 +1019,7 @@
                     <ul class="mb-6 space-y-3 text-sm text-gray-600 dark:text-gray-300">
                         @foreach (['Multi-tenancy, billing, ticketing, check-in, calendar sync, GDPR: all on you', 'Every feature request lands on your backlog', 'Total control, eventually'] as $li)
                             <li class="flex items-start gap-2.5">
-                                <svg aria-hidden="true" class="mt-0.5 h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M5 12h14" /></svg>
+                                <svg aria-hidden="true" class="mt-0.5 h-4 w-4 shrink-0 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M5 12h14" /></svg>
                                 {{ $li }}
                             </li>
                         @endforeach
@@ -1280,7 +1280,7 @@
                                         <svg class="ml-auto h-5 w-5 shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                                     </div>
                                     <div class="es-pop rounded-full border border-amber-200 bg-amber-50 px-5 py-2.5 font-mono text-sm font-bold text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300" style="--i: 1;">+$0 today · $29/mo after trial</div>
-                                    <div class="es-pop text-xs text-gray-400 dark:text-gray-500" style="--i: 2;">Straight into your Stripe account</div>
+                                    <div class="es-pop text-xs text-gray-500 dark:text-gray-400" style="--i: 2;">Straight into your Stripe account</div>
                                 </div>
                             </div>
                         </div>
@@ -1326,7 +1326,7 @@
                         <div class="mb-5 overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10" aria-hidden="true">
                             <div class="flex items-center gap-2 border-b border-gray-200 bg-gray-50 px-3 py-2 dark:border-white/10 dark:bg-white/5">
                                 <span class="flex gap-1"><span class="h-2 w-2 rounded-full bg-[#FF5F57]"></span><span class="h-2 w-2 rounded-full bg-[#FEBC2E]"></span><span class="h-2 w-2 rounded-full bg-[#28C840]"></span></span>
-                                <span class="mx-auto font-mono text-[10px] text-gray-400 dark:text-gray-500">admin · acme.yourdomain.com</span>
+                                <span class="mx-auto font-mono text-[10px] text-gray-500 dark:text-gray-400">admin · acme.yourdomain.com</span>
                             </div>
                             <div class="flex">
                                 <div class="flex w-10 flex-col items-center gap-2 border-r border-gray-100 py-3 dark:border-white/5">
@@ -1368,7 +1368,7 @@
                         <div class="mb-5 overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10" aria-hidden="true">
                             <div class="flex items-center gap-2 border-b border-gray-200 bg-gray-50 px-3 py-2 dark:border-white/10 dark:bg-white/5">
                                 <span class="flex gap-1"><span class="h-2 w-2 rounded-full bg-[#FF5F57]"></span><span class="h-2 w-2 rounded-full bg-[#FEBC2E]"></span><span class="h-2 w-2 rounded-full bg-[#28C840]"></span></span>
-                                <span class="mx-auto font-mono text-[10px] text-gray-400 dark:text-gray-500">acme.yourdomain.com</span>
+                                <span class="mx-auto font-mono text-[10px] text-gray-500 dark:text-gray-400">acme.yourdomain.com</span>
                             </div>
                             <div class="flex gap-3 p-3">
                                 <div class="flex-1 space-y-2">
@@ -1431,7 +1431,7 @@
                         @endfor
                     </div>
                 </div>
-                <p class="mt-3 text-center text-xs text-gray-400 dark:text-gray-500">Every plan tier you sell is backed by the full event platform.</p>
+                <p class="mt-3 text-center text-xs text-gray-500 dark:text-gray-400">Every plan tier you sell is backed by the full event platform.</p>
             </div>
         </div>
     </section>

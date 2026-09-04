@@ -705,7 +705,7 @@
                             <div class="space-y-1.5">
                                 @foreach ([['Event', 'Friday Night Jazz'], ['Date', 'Fri 14 Aug, 8:00 PM'], ['Venue', 'The Blue Room']] as $fi => $field)
                                     <div class="es-ai-field flex items-center justify-between gap-2 text-[11px]" style="--i: {{ $fi }};">
-                                        <span class="text-gray-400 dark:text-gray-500">{{ $field[0] }}</span>
+                                        <span class="text-gray-500 dark:text-gray-400">{{ $field[0] }}</span>
                                         <span class="truncate font-medium text-gray-800 dark:text-gray-200">{{ $field[1] }}</span>
                                     </div>
                                 @endforeach
@@ -734,7 +734,7 @@
                                     <div class="text-[11px] font-semibold text-gray-700 dark:text-gray-300">Their calendar</div>
                                 </div>
                             </div>
-                            <div class="mt-3 text-center text-[10px] text-gray-400 dark:text-gray-500">changes flow both ways</div>
+                            <div class="mt-3 text-center text-[10px] text-gray-500 dark:text-gray-400">changes flow both ways</div>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>

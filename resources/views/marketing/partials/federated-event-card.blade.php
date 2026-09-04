@@ -44,7 +44,7 @@
                     @php $zone = $event->safeTimezone(); @endphp
                     <span class="truncate">
                         {{ $event->next_occurrence_at->copy()->setTimezone($zone)->format('M j, Y g:ia') }}
-                        <span class="text-gray-400 dark:text-gray-500">{{ $event->next_occurrence_at->copy()->setTimezone($zone)->format('T') }}</span>
+                        <span class="text-gray-500 dark:text-gray-400">{{ $event->next_occurrence_at->copy()->setTimezone($zone)->format('T') }}</span>
                     </span>
                 </div>
             @endif

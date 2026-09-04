@@ -483,43 +483,43 @@
                 <div class="es-comic-board es-comic-paper es-comic-tape mx-auto max-w-2xl p-6 sm:p-8" data-reveal="panel">
                     <div class="ltr:pl-10 rtl:pr-10">
                         <a class="es-comic-row" href="#bit-1">
-                            <span class="es-comic-mono w-7 shrink-0 text-sm font-bold text-gray-400 dark:text-gray-500">01</span>
+                            <span class="es-comic-mono w-7 shrink-0 text-sm font-bold text-gray-500 dark:text-gray-400">01</span>
                             <span class="min-w-0 truncate font-semibold">The One-Link Bit</span>
                             <span class="es-comic-leader" aria-hidden="true"></span>
                             <span class="es-comic-mono es-comic-time text-sm">5:00</span>
                         </a>
                         <a class="es-comic-row" href="#bit-2">
-                            <span class="es-comic-mono w-7 shrink-0 text-sm font-bold text-gray-400 dark:text-gray-500">02</span>
+                            <span class="es-comic-mono w-7 shrink-0 text-sm font-bold text-gray-500 dark:text-gray-400">02</span>
                             <span class="min-w-0 truncate font-semibold">The Zero-Fee Bit</span>
                             <span class="es-comic-leader" aria-hidden="true"></span>
                             <span class="es-comic-mono es-comic-time text-sm">17:00</span>
                         </a>
                         <a class="es-comic-row" href="#bit-3">
-                            <span class="es-comic-mono w-7 shrink-0 text-sm font-bold text-gray-400 dark:text-gray-500">03</span>
+                            <span class="es-comic-mono w-7 shrink-0 text-sm font-bold text-gray-500 dark:text-gray-400">03</span>
                             <span class="min-w-0 truncate font-semibold">The Clubs-Book-You Bit</span>
                             <span class="es-comic-leader" aria-hidden="true"></span>
                             <span class="es-comic-mono es-comic-time text-sm">27:00</span>
                         </a>
                         <a class="es-comic-row" href="#bit-4">
-                            <span class="es-comic-mono w-7 shrink-0 text-sm font-bold text-gray-400 dark:text-gray-500">04</span>
+                            <span class="es-comic-mono w-7 shrink-0 text-sm font-bold text-gray-500 dark:text-gray-400">04</span>
                             <span class="min-w-0 truncate font-semibold">The Callback</span>
                             <span class="es-comic-leader" aria-hidden="true"></span>
                             <span class="es-comic-mono es-comic-time text-sm">35:00</span>
                         </a>
                         <a class="es-comic-row" href="#bit-5">
-                            <span class="es-comic-mono w-7 shrink-0 text-sm font-bold text-gray-400 dark:text-gray-500">05</span>
+                            <span class="es-comic-mono w-7 shrink-0 text-sm font-bold text-gray-500 dark:text-gray-400">05</span>
                             <span class="min-w-0 truncate font-semibold">The Closer</span>
                             <span class="es-comic-leader" aria-hidden="true"></span>
                             <span class="es-comic-mono es-comic-time text-sm">47:00</span>
                         </a>
                         <a class="es-comic-row" href="#crowd-work">
-                            <span class="es-comic-mono w-7 shrink-0 text-sm font-bold text-gray-400 dark:text-gray-500">--</span>
+                            <span class="es-comic-mono w-7 shrink-0 text-sm font-bold text-gray-500 dark:text-gray-400">--</span>
                             <span class="min-w-0 truncate font-semibold">Crowd Work</span>
                             <span class="es-comic-leader" aria-hidden="true"></span>
                             <span class="es-comic-mono text-sm text-gray-500 dark:text-gray-400">runs long</span>
                         </a>
                         <a class="es-comic-row" href="#claim">
-                            <span class="es-comic-mono w-7 shrink-0 text-sm font-bold text-gray-400 dark:text-gray-500">--</span>
+                            <span class="es-comic-mono w-7 shrink-0 text-sm font-bold text-gray-500 dark:text-gray-400">--</span>
                             <span class="min-w-0 truncate font-semibold">Encore</span>
                             <span class="es-comic-leader" aria-hidden="true"></span>
                             <span class="es-comic-mono truncate text-sm text-gray-500 dark:text-gray-400">they always want one more</span>
@@ -889,7 +889,7 @@
                 @foreach ($comedyJourney as $jIndex => [$jTitle, $jDesc, $jChip, $jText, $jIcon])
                     <div data-reveal class="relative rounded-2xl border border-gray-200 bg-white p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-white/[0.04]">
                         <span class="es-comic-marker" aria-hidden="true"></span>
-                        <div class="es-comic-mono mb-3 text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500" aria-hidden="true">{{ $journeyYears[$jIndex] }}</div>
+                        <div class="es-comic-mono mb-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400" aria-hidden="true">{{ $journeyYears[$jIndex] }}</div>
                         <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl {{ $jChip }}">
                             <svg aria-hidden="true" class="h-6 w-6 {{ $jText }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $jIcon !!}</svg>
                         </div>
@@ -909,7 +909,7 @@
             <!-- Running order scribble (decorative) -->
             <div class="es-comic-paper es-comic-tape absolute -top-6 right-8 hidden rotate-2 rounded-xl border border-gray-200 bg-white p-4 lg:block dark:border-white/10 dark:bg-[#141010]" aria-hidden="true">
                 <div class="es-comic-mono space-y-1 text-[11px] font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">
-                    <div class="text-[10px] text-gray-400 dark:text-gray-500">Running order</div>
+                    <div class="text-[10px] text-gray-500 dark:text-gray-400">Running order</div>
                     <div>1. Stand-up <span class="text-amber-500">✓</span></div>
                     <div>2. Improv <span class="text-amber-500">✓</span></div>
                     <div>3. Sketch <span class="text-amber-500">✓</span></div>

@@ -374,15 +374,15 @@
                 @foreach ($week as $slot)
                     @if (empty($slot['name']))
                         <div data-reveal class="flex items-center gap-3 rounded-2xl border border-dashed border-gray-300 bg-transparent p-3.5 dark:border-white/15 md:min-h-[7.5rem] md:flex-col md:items-stretch md:gap-2">
-                            <div class="w-10 shrink-0 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 md:w-auto">{{ $slot['day'] }}</div>
-                            <div class="flex items-center gap-1.5 text-sm text-gray-400 dark:text-gray-500 md:mt-auto">
+                            <div class="w-10 shrink-0 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 md:w-auto">{{ $slot['day'] }}</div>
+                            <div class="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 md:mt-auto">
                                 <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" /></svg>
                                 Free night
                             </div>
                         </div>
                     @else
                         <div data-reveal class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-3.5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-sky-300 hover:shadow-md dark:border-white/10 dark:bg-white/[0.04] dark:hover:border-sky-500/30 md:min-h-[7.5rem] md:flex-col md:items-stretch md:gap-2">
-                            <div class="w-10 shrink-0 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 md:w-auto">{{ $slot['day'] }}</div>
+                            <div class="w-10 shrink-0 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 md:w-auto">{{ $slot['day'] }}</div>
                             <div class="min-w-0 flex-1 md:flex-none">
                                 <div class="truncate text-sm font-semibold text-gray-900 dark:text-white md:whitespace-normal">{{ $slot['name'] }}</div>
                             </div>
@@ -713,7 +713,7 @@
                 <div class="es-ai-field flex items-center gap-2.5 rounded-lg bg-gray-50 px-3 py-2 dark:bg-white/5" style="--i: {{ $i + 1 }};">
                     <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400"></span>
                     <span class="min-w-0 flex-1 truncate text-[11px] text-gray-700 dark:text-gray-300">{{ $actName }}</span>
-                    <span class="shrink-0 text-[11px] text-gray-400 dark:text-gray-500">{{ $actNote }}</span>
+                    <span class="shrink-0 text-[11px] text-gray-500 dark:text-gray-400">{{ $actNote }}</span>
                 </div>
             @endforeach
         </div>
@@ -737,7 +737,7 @@
 
         <div class="mb-3 text-center text-[11px] font-medium text-gray-500 dark:text-gray-400">Soul Night, Sat 14</div>
         <div class="mb-3 rounded-xl border border-gray-200 bg-gray-50 p-3 text-center dark:border-white/10 dark:bg-white/5">
-            <div class="text-2xl font-black text-gray-900 dark:text-white">128<span class="text-base font-bold text-gray-400 dark:text-gray-500"> / 240</span></div>
+            <div class="text-2xl font-black text-gray-900 dark:text-white">128<span class="text-base font-bold text-gray-500 dark:text-gray-400"> / 240</span></div>
             <div class="text-[11px] text-gray-500 dark:text-gray-400">Checked in</div>
             <div class="mt-2 h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-white/10">
                 <div class="es-bar h-full rounded-full bg-gradient-to-r from-sky-500 to-cyan-500" style="width: 53%; --bd: 0.1s;"></div>
@@ -771,7 +771,7 @@
         <div class="mb-3 flex items-center gap-2">
             <svg class="h-4 w-4 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
             <span class="text-xs font-semibold text-gray-600 dark:text-gray-300">Rooms</span>
-            <span class="ms-auto text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500">Filter by room</span>
+            <span class="ms-auto text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400">Filter by room</span>
         </div>
         <div class="space-y-1.5">
             @foreach ([['Main Stage', '12 events', 'bg-sky-400', true], ['Rooftop Bar', '8 events', 'bg-cyan-400', false], ['Back Room', '5 events', 'bg-blue-400', false], ['Patio', '3 events', 'bg-teal-400', false]] as $i => [$roomName, $roomCount, $roomDot, $roomActive])

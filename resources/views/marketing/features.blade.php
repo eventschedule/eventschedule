@@ -796,7 +796,7 @@
         </x-slot>
 
         <div class="mb-1 text-xs font-medium text-gray-900 dark:text-white">Jazz Night</div>
-        <div class="mb-3 text-[10px] text-gray-400 dark:text-gray-500">Fri, Mar 15 at 8 PM</div>
+        <div class="mb-3 text-[10px] text-gray-500 dark:text-gray-400">Fri, Mar 15 at 8 PM</div>
         <div class="mb-3 flex items-center justify-center rounded-lg bg-gray-900 p-5 dark:bg-black/60">
             <div class="flex h-9 w-9 items-center justify-center rounded-full bg-red-600">
                 <svg aria-hidden="true" class="ms-0.5 h-4 w-4 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -1089,11 +1089,11 @@
         </x-slot>
 
         <div dir="ltr" class="space-y-1 font-mono text-xs">
-            <div class="text-gray-400 dark:text-gray-500">$ git clone</div>
+            <div class="text-gray-500 dark:text-gray-400">$ git clone</div>
             <div class="break-all leading-tight text-cyan-600 dark:text-cyan-400">github.com/eventschedule</div>
-            <div class="pt-2 text-gray-400 dark:text-gray-500">$ composer install</div>
+            <div class="pt-2 text-gray-500 dark:text-gray-400">$ composer install</div>
             <div class="text-emerald-600 dark:text-emerald-400">Done!</div>
-            <div class="text-gray-400 dark:text-gray-500">$ php artisan serve</div>
+            <div class="text-gray-500 dark:text-gray-400">$ php artisan serve</div>
             <div class="text-gray-500 dark:text-gray-400">Server running...</div>
         </div>
     </x-marketing.feature-banner>

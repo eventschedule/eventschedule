@@ -91,7 +91,7 @@
                             </li>
                         @endforeach
                     </ul>
-                    <p class="mt-auto text-xs text-gray-400 dark:text-gray-500">
+                    <p class="mt-auto text-xs text-gray-500 dark:text-gray-400">
                         @if ($nudgeTier === 'Free')
                             No expiry, and no card asked for.
                         @elseif ($nudgeTier === 'Pro')

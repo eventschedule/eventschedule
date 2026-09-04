@@ -650,7 +650,7 @@
                                 <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $reqIcons[$rIcon] }}" /></svg>
                             </span>
                             <div>
-                                <div class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">{{ $rLabel }}</div>
+                                <div class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ $rLabel }}</div>
                                 <div class="mt-0.5 font-semibold text-gray-900 dark:text-white">{{ $rValue }}</div>
                             </div>
                         </div>
@@ -735,7 +735,7 @@
                                          account. It never asks for an app name or mail settings. --}}
                                     @foreach ([['Database host', 'localhost'], ['Database', 'eventschedule'], ['Database user', 'eventschedule'], ['Admin email', 'you@your-domain.com']] as $fi => $field)
                                         <div class="es-ai-field" style="--i: {{ $fi }};">
-                                            <div class="mb-1 text-[10px] font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">{{ $field[0] }}</div>
+                                            <div class="mb-1 text-[10px] font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ $field[0] }}</div>
                                             <div class="flex items-center justify-between gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 dark:border-white/10 dark:bg-white/5">
                                                 <span dir="ltr" class="truncate font-mono text-xs text-gray-700 dark:text-gray-300">{{ $field[1] }}</span>
                                                 <svg aria-hidden="true" class="h-3.5 w-3.5 shrink-0 text-emerald-500 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -889,7 +889,7 @@
                                     <div class="space-y-1.5">
                                         @foreach ([['Event', 'Friday Night Jazz'], ['Date', 'Fri 14 Aug, 8:00 PM'], ['Venue', 'The Blue Room']] as $afi => $af)
                                             <div class="es-ai-field flex items-center justify-between gap-2 text-[11px]" style="--i: {{ $afi }};">
-                                                <span class="text-gray-400 dark:text-gray-500">{{ $af[0] }}</span>
+                                                <span class="text-gray-500 dark:text-gray-400">{{ $af[0] }}</span>
                                                 <span class="truncate font-medium text-gray-800 dark:text-gray-200">{{ $af[1] }}</span>
                                             </div>
                                         @endforeach
@@ -907,7 +907,7 @@
                                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                                         Update now
                                     </div>
-                                    <p class="mt-2 text-center text-[10px] text-gray-400 dark:text-gray-500">Migrations included.</p>
+                                    <p class="mt-2 text-center text-[10px] text-gray-500 dark:text-gray-400">Migrations included.</p>
                                 @endif
                             </div>
 
@@ -1232,11 +1232,11 @@
                         <dl class="mb-6 space-y-3.5">
                             @foreach ($col['rows'] as [$aspect, $detail])
                                 <div class="flex items-start gap-3">
-                                    <svg aria-hidden="true" class="mt-1 h-4 w-4 shrink-0 {{ $col['lead'] ? 'text-emerald-500 dark:text-emerald-400' : 'text-gray-400 dark:text-gray-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                                    <svg aria-hidden="true" class="mt-1 h-4 w-4 shrink-0 {{ $col['lead'] ? 'text-emerald-500 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                                     </svg>
                                     <div>
-                                        <dt class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">{{ $aspect }}</dt>
+                                        <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ $aspect }}</dt>
                                         <dd class="mt-0.5 text-sm text-gray-700 dark:text-gray-300">{{ $detail }}</dd>
                                     </div>
                                 </div>
@@ -1383,7 +1383,7 @@
             <div class="grid gap-4 md:grid-cols-3" data-reveal-group="80">
                 @foreach ($docGroups as $docGroup)
                     <div data-reveal="panel" class="rounded-2xl border border-gray-200 bg-gray-50 p-6 transition-all duration-200 hover:-translate-y-1 hover:border-emerald-300 hover:shadow-lg dark:border-white/10 dark:bg-white/[0.04] dark:hover:border-emerald-500/40">
-                        <h3 class="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">{{ $docGroup['heading'] }}</h3>
+                        <h3 class="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">{{ $docGroup['heading'] }}</h3>
                         <ul class="space-y-2.5">
                             @foreach ($docGroup['links'] as [$docLabel, $docRoute])
                                 <li>

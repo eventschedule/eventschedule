@@ -759,7 +759,7 @@
                                     <h3 class="text-xl font-bold text-gray-900 transition-colors group-hover:text-sky-600 dark:text-white dark:group-hover:text-sky-400">Newsletters</h3>
                                 </div>
                                 <p class="text-gray-600 dark:text-gray-400">Send branded emails to followers and ticket buyers with a drag-and-drop editor and A/B testing.</p>
-                                <p class="mt-3 text-xs font-medium text-gray-400 dark:text-gray-500">Templates · Audience segments · A/B testing</p>
+                                <p class="mt-3 text-xs font-medium text-gray-500 dark:text-gray-400">Templates · Audience segments · A/B testing</p>
                                 <span class="mt-4 inline-flex items-center gap-1 text-sm font-medium text-sky-600 transition-all group-hover:gap-2 dark:text-sky-400">
                                     Learn more
                                     <svg class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
@@ -1353,7 +1353,7 @@
     <section id="integrations" class="relative scroll-mt-24 overflow-hidden bg-white py-24 dark:bg-[#0a0a0f] lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-4 max-w-3xl text-center">
-                <p class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500" data-reveal>Integrates with</p>
+                <p class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400" data-reveal>Integrates with</p>
                 <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal style="--reveal-delay: 0.08s;">
                     The tools you already use
                 </h2>
