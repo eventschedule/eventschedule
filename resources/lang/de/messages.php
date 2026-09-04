@@ -4964,4 +4964,10 @@ return [
     'audience_share_link' => 'Dein Follow-Link',
     'audience_share_link_help' => 'Teile ihn überall. Er öffnet deinen Terminplan mit bereitstehendem Anmeldeformular, und der QR-Code oben führt an dieselbe Stelle.',
     'audience_opt_in_label_cart' => 'Schickt mir eine E-Mail, wenn diese Terminpläne neue Termine eintragen',
+    'short_link_help' => 'Wer diese Adresse aufruft, wird an den Link weitergeleitet. Leer lassen, um den Kurzlink zu entfernen.',
+    'short_link_invalid' => '":slug" kann nicht als Kurzlink verwendet werden.',
+    'short_link_reserved' => '":slug" ist von der App reserviert, bitte wähle einen anderen.',
+    'short_link_taken' => '":slug" wird in diesem Zeitplan bereits verwendet.',
+    'short_link_clicks' => '{1} :count Klick|[2,*] :count Klicks',
+    'short_link_change_warning' => 'Dieser Kurzlink wurde :count Mal angeklickt. Eine Änderung macht bereits geteilte Links ungültig.',
 ];

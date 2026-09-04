@@ -4960,4 +4960,10 @@ return [
     'audience_share_link' => 'Il tuo link per seguirti',
     'audience_share_link_help' => 'Condividilo ovunque. Apre il tuo calendario con il modulo di iscrizione pronto, e il codice QR qui sopra porta allo stesso posto.',
     'audience_opt_in_label_cart' => 'Avvisami via email quando questi calendari aggiungono nuovi eventi',
+    'short_link_help' => 'Chi visita questo indirizzo viene reindirizzato al link. Lascia vuoto per rimuovere il link breve.',
+    'short_link_invalid' => '":slug" non può essere usato come link breve.',
+    'short_link_reserved' => '":slug" è riservato dall\'app, scegline un altro.',
+    'short_link_taken' => '":slug" è già in uso in questo calendario.',
+    'short_link_clicks' => '{1} :count clic|[2,*] :count clic',
+    'short_link_change_warning' => 'Questo link breve ha ricevuto :count clic. Modificarlo interromperà i link già condivisi.',
 ];

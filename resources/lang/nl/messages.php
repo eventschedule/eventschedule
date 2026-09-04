@@ -4960,4 +4960,10 @@ return [
     'audience_share_link' => 'Je volglink',
     'audience_share_link_help' => 'Deel hem overal. Hij opent je schema met het aanmeldformulier klaar, en de QR-code hierboven wijst naar dezelfde plek.',
     'audience_opt_in_label_cart' => 'Mail me wanneer deze schema\'s nieuwe evenementen toevoegen',
+    'short_link_help' => 'Iedereen die dit adres bezoekt wordt doorgestuurd naar de link. Laat leeg om de korte link te verwijderen.',
+    'short_link_invalid' => '":slug" kan niet als korte link worden gebruikt.',
+    'short_link_reserved' => '":slug" is gereserveerd door de app, kies een andere.',
+    'short_link_taken' => '":slug" is al in gebruik in dit schema.',
+    'short_link_clicks' => '{1} :count klik|[2,*] :count kliks',
+    'short_link_change_warning' => 'Op deze korte link is :count keer geklikt. Wijzigen breekt links die je al hebt gedeeld.',
 ];

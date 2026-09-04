@@ -5076,4 +5076,10 @@ return [
     'announcement_view_schedule' => 'See the full schedule',
     'announce_new_events' => 'Email subscribers about new events',
     'announce_new_events_help' => 'When you publish events, everyone who asked to hear from you gets one digest email covering them. At most one every few days, and never one per event.',
+    'short_link_help' => 'Anyone who visits this address is forwarded to the link. Leave it empty to remove the short link.',
+    'short_link_invalid' => '":slug" cannot be used as a short link.',
+    'short_link_reserved' => '":slug" is reserved by the app, please choose another.',
+    'short_link_taken' => '":slug" is already in use on this schedule.',
+    'short_link_clicks' => '{1} :count click|[2,*] :count clicks',
+    'short_link_change_warning' => 'This short link has been clicked :count times. Changing it will break links you have already shared.',
 ];

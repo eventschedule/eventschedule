@@ -4979,4 +4979,10 @@ return [
     'audience_share_link' => 'Sinu jälgimislink',
     'audience_share_link_help' => 'Jaga seda kõikjal. See avab sinu kava koos valmis tellimisvormiga ja ülalolev QR-kood viib samasse kohta.',
     'audience_opt_in_label_cart' => 'Teata mulle e-postiga, kui need kavad lisavad uusi sündmusi',
+    'short_link_help' => 'Igaüks, kes seda aadressi külastab, suunatakse lingile. Lühilingi eemaldamiseks jäta tühjaks.',
+    'short_link_invalid' => '":slug" ei sobi lühilingiks.',
+    'short_link_reserved' => '":slug" on rakenduse jaoks reserveeritud, vali palun teine.',
+    'short_link_taken' => '":slug" on selles ajakavas juba kasutusel.',
+    'short_link_clicks' => '{1} :count klõps|[2,*] :count klõpsu',
+    'short_link_change_warning' => 'Sellel lühilingil on :count klõpsu. Muutmine rikub juba jagatud lingid.',
 ];

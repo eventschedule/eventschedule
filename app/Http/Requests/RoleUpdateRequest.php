@@ -37,11 +37,46 @@ class RoleUpdateRequest extends FormRequest
             $aid = trim((string) $this->input('stay22_aid'));
             $this->merge(['stay22_aid' => $aid === '' ? null : $aid]);
         }
+
+        // Normalize custom short-link slugs BEFORE validation, so the rules below and the value
+        // the controller finally stores are the same string. A malformed payload is left alone
+        // for the 'json' rule to report rather than being silently rewritten.
+        if ($this->has('social_links')) {
+            $links = json_decode((string) $this->input('social_links'), true);
+
+            if (is_array($links)) {
+                foreach ($links as &$link) {
+                    if (! is_array($link) || ! array_key_exists('slug', $link)) {
+                        continue;
+                    }
+
+                    $slug = UrlUtils::normalizeLinkSlug(
+                        is_string($link['slug']) ? $link['slug'] : null
+                    );
+
+                    // Keep the raw value alongside it: a slug that normalizes away to nothing
+                    // (Hebrew that romanizes to "", punctuation only) has to be reportable as an
+                    // error rather than vanishing as though the owner had cleared the box.
+                    $link['slug_input'] = is_string($link['slug']) ? $link['slug'] : '';
+                    $link['slug'] = $slug;
+                }
+                unset($link);
+
+                $this->merge(['social_links' => json_encode($links)]);
+            }
+        }
+    }
+
+    private ?Role $roleForValidation = null;
+
+    private function role(): Role
+    {
+        return $this->roleForValidation ??= Role::subdomain(request()->subdomain)->firstOrFail();
     }
 
     public function rules(): array
     {
-        $role = Role::subdomain(request()->subdomain)->firstOrFail();
+        $role = $this->role();
 
         // Default-category id must be one of this schedule's enabled categories,
         // unless the column is null (in which case the system defaults apply).
@@ -245,5 +280,107 @@ class RoleUpdateRequest extends FormRequest
                 $seen[$id] = true;
             }
         });
+
+        $validator->after(function ($validator) {
+            $this->validateShortLinkSlugs($validator);
+        });
+    }
+
+    /**
+     * Validate the owner-typed short-link slugs on social_links.
+     *
+     * Errors land on 'social_links' as a whole because it is one hidden JSON input; the AP
+     * reports collisions inline as the owner types, and renders these as the backstop.
+     *
+     * Only a CHANGED slug is checked, mirroring Role::cleanSubdomain()'s documented behaviour:
+     * reservedPathSlugs() grows whenever a route is added, and an owner must never find that an
+     * unrelated save of their schedule now fails because of a slug they set months ago.
+     */
+    private function validateShortLinkSlugs($validator): void
+    {
+        if (! $this->has('social_links')) {
+            return;
+        }
+
+        $links = json_decode((string) $this->input('social_links'), true);
+
+        if (! is_array($links)) {
+            return;
+        }
+
+        $role = $this->role();
+        $stored = [];
+
+        foreach ($role->decodeLinks('social_links') as $link) {
+            $stored[(string) $link->url] = UrlUtils::normalizeLinkSlug($link->slug ?? null);
+        }
+
+        $groupSlugs = $role->groups->pluck('slug')->filter()->map(fn ($s) => strtolower($s))->all();
+        $platforms = UrlUtils::getUniquePlatforms();
+        $reserved = UrlUtils::reservedPathSlugs();
+        $seen = [];
+
+        foreach ($links as $link) {
+            if (! is_array($link)) {
+                continue;
+            }
+
+            $url = is_string($link['url'] ?? null) ? $link['url'] : '';
+            $slug = is_string($link['slug'] ?? null) ? $link['slug'] : '';
+            $raw = trim((string) ($link['slug_input'] ?? $slug));
+
+            if ($slug === '' && $raw === '') {
+                continue;
+            }
+
+            // Unchanged from what is already stored: grandfathered, whatever the rules now say.
+            if ($url !== '' && ($stored[$url] ?? null) === $slug) {
+                continue;
+            }
+
+            $add = fn (string $message) => $validator->errors()->add('social_links', $message);
+
+            if ($slug === '') {
+                $add(__('messages.short_link_invalid', ['slug' => $raw]));
+
+                continue;
+            }
+
+            if (! preg_match('/^[a-z0-9][a-z0-9-]{0,29}$/', $slug)) {
+                $add(__('messages.short_link_invalid', ['slug' => $raw]));
+
+                continue;
+            }
+
+            // A slug equal to another platform's name would shadow that platform's short link.
+            // Its OWN platform is fine and is a no-op: /facebook already points here.
+            $ownPlatform = $url !== '' ? UrlUtils::detectPlatform($url) : 'website';
+
+            if ($slug !== $ownPlatform && (in_array($slug, $platforms, true) || $slug === 'website')) {
+                $add(__('messages.short_link_reserved', ['slug' => $slug]));
+
+                continue;
+            }
+
+            if (in_array($slug, $reserved, true)) {
+                $add(__('messages.short_link_reserved', ['slug' => $slug]));
+
+                continue;
+            }
+
+            if (in_array($slug, $groupSlugs, true)) {
+                $add(__('messages.short_link_taken', ['slug' => $slug]));
+
+                continue;
+            }
+
+            if (isset($seen[$slug])) {
+                $add(__('messages.short_link_taken', ['slug' => $slug]));
+
+                continue;
+            }
+
+            $seen[$slug] = true;
+        }
     }
 }

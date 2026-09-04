@@ -1764,10 +1764,14 @@ class RoleController extends Controller
         }
 
         if ($slug) {
-            // Check if slug is a social platform vanity URL. An event id in the URL means the
+            // Check if slug is a social link's short URL. An event id in the URL means the
             // slug names an event, even one named after a platform, so don't redirect off-site.
-            if (! $eventIdParam && in_array($slug, UrlUtils::getUniquePlatforms())) {
-                return $this->handleSocialRedirect($role, $slug, $request);
+            //
+            // Scoped to the links this schedule actually HAS, not the global platform list: the
+            // old in_array(getUniquePlatforms()) fired even with no such link, so a schedule with
+            // an event slugged "discord" and no Discord link bounced /discord to its home page.
+            if (! $eventIdParam && ($social = $this->resolveSocialLink($role, $slug))) {
+                return $this->handleSocialRedirect($role, $social, $request);
             }
 
             // An event id identifies an event, so resolve it before treating the slug as a group
@@ -2374,30 +2378,79 @@ class RoleController extends Controller
         ]);
     }
 
-    private function handleSocialRedirect(Role $role, string $platform, Request $request)
+    /**
+     * The social link a short-URL slug points at, or null when the schedule owns no such slug.
+     *
+     * A link answers to both its domain-derived platform slug and, when set, the owner's custom
+     * one, so /facebook keeps working after someone adds /fb. The platform pass runs FIRST: a
+     * custom slug equal to a platform name is rejected at save time, so this only tie-breaks rows
+     * written before that validation existed, but it is what makes "a printed slug cannot be
+     * stolen" structural rather than a thing to remember.
+     *
+     * 'key' is what the click is counted under, and is deliberately NOT the slug: a visit to
+     * /facebook and a visit to a custom /fb are the same link and must land in one bucket rather
+     * than splitting a platform's existing history in two.
+     *
+     * @return array{url: string, key: string}|null
+     */
+    private function resolveSocialLink(Role $role, string $slug): ?array
     {
+        $slug = strtolower(trim($slug));
+
+        if ($slug === '') {
+            return null;
+        }
+
         $socialLinks = is_string($role->social_links)
             ? json_decode($role->social_links, true)
             : $role->social_links;
 
-        if (is_array($socialLinks)) {
-            foreach ($socialLinks as $link) {
-                $url = $link['url'] ?? '';
-                if ($url && UrlUtils::detectPlatform($url) === $platform) {
-                    $user = auth()->user();
-                    if (! $user || (! $user->isMember($role->subdomain) && ! $user->isAdmin())) {
-                        $this->recordSocialClick($role, $platform, $request);
-                    }
+        if (! is_array($socialLinks)) {
+            return null;
+        }
 
-                    return redirect($url, 302);
-                }
+        foreach ($socialLinks as $link) {
+            $url = $link['url'] ?? '';
+
+            if (is_string($url) && $url !== '' && UrlUtils::detectPlatform($url) === $slug) {
+                return ['url' => $url, 'key' => $slug];
             }
         }
 
-        return redirect($role->getGuestUrl());
+        foreach ($socialLinks as $link) {
+            $url = $link['url'] ?? '';
+
+            if (! is_string($url) || $url === '') {
+                continue;
+            }
+
+            if (UrlUtils::normalizeLinkSlug($link['slug'] ?? null) !== $slug) {
+                continue;
+            }
+
+            $platform = UrlUtils::detectPlatform($url);
+
+            return ['url' => $url, 'key' => $platform !== 'website' ? $platform : $slug];
+        }
+
+        return null;
     }
 
-    private function recordSocialClick(Role $role, string $platform, Request $request): void
+    /**
+     * @param  array{url: string, key: string}  $social
+     */
+    private function handleSocialRedirect(Role $role, array $social, Request $request)
+    {
+        $user = auth()->user();
+
+        if (! $user || (! $user->isMember($role->subdomain) && ! $user->isAdmin())) {
+            $this->recordSocialClick($role, $social['key'], $request);
+        }
+
+        return redirect($social['url'], 302);
+    }
+
+    private function recordSocialClick(Role $role, string $key, Request $request): void
     {
         $userAgent = $request->userAgent();
 
@@ -2420,7 +2473,7 @@ class RoleController extends Controller
             }
         }
 
-        AnalyticsSocialClicksDaily::incrementClick($role->id, $platform);
+        AnalyticsSocialClicksDaily::incrementClick($role->id, $key);
 
         // Track referrer source
         $referrer = $request->header('referer');
@@ -3873,6 +3926,9 @@ class RoleController extends Controller
             'backgrounds' => $backgroundOptions,
             'headers' => $headerOptions,
             'fonts' => $fonts,
+            // The links section is gated on $role->exists so this is never read here, but the
+            // view must not depend on that gate staying put.
+            'socialClickTotals' => [],
         ];
 
         return view('role/edit', $data);
@@ -4278,6 +4334,7 @@ class RoleController extends Controller
             'event_category_counts' => $eventCategoryCounts,
             'mergeCandidates' => $mergeCandidates,
             'mergeSuggestion' => $mergeSuggestion,
+            'socialClickTotals' => $this->socialClickTotals($role),
         ];
 
         return view('role/edit', $data);
@@ -4438,7 +4495,7 @@ class RoleController extends Controller
             $role->youtube_links = $this->sanitizeLinksJson($request->input('youtube_links'));
         }
         if ($request->has('social_links')) {
-            $role->social_links = $this->sanitizeLinksJson($request->input('social_links'));
+            $role->social_links = $this->sanitizeLinksJson($request->input('social_links'), true);
         }
         if ($request->has('payment_links')) {
             $role->payment_links = $this->sanitizeLinksJson($request->input('payment_links'));
@@ -5949,7 +6006,10 @@ class RoleController extends Controller
         }
     }
 
-    private function sanitizeLinksJson($value)
+    /**
+     * @param  bool  $withSlugs  normalize the optional custom short-link slug (social links only)
+     */
+    private function sanitizeLinksJson($value, bool $withSlugs = false)
     {
         $links = json_decode($value ?? '');
 
@@ -5960,6 +6020,30 @@ class RoleController extends Controller
         $links = array_values(array_filter($links, function ($link) {
             return $link && isset($link->url) && $link->url !== '';
         }));
+
+        if ($withSlugs) {
+            foreach ($links as $link) {
+                // Scratch field added by RoleUpdateRequest so a slug that normalizes away to
+                // nothing is still reportable. It must never reach the column.
+                unset($link->slug_input);
+
+                if (! isset($link->slug)) {
+                    continue;
+                }
+
+                // RoleUpdateRequest has already normalized and validated these; this is the
+                // belt-and-braces pass so no other caller can land an unnormalized slug in the
+                // column. An empty result drops the key rather than storing "", which keeps an
+                // untouched link byte-identical to how it was stored before this feature.
+                $slug = UrlUtils::normalizeLinkSlug(is_string($link->slug) ? $link->slug : null);
+
+                if ($slug === '') {
+                    unset($link->slug);
+                } else {
+                    $link->slug = $slug;
+                }
+            }
+        }
 
         return $links ? json_encode($links) : null;
     }
@@ -5981,7 +6065,55 @@ class RoleController extends Controller
         $urlInfo->clean_url = UrlUtils::clean($urlInfo->url);
         $urlInfo->platform = UrlUtils::detectPlatform($urlInfo->url);
 
+        // Offered as a placeholder, never stored on the owner's behalf: the AP fills it in only
+        // once they open the short-link editor. De-conflicted here so accepting it cannot fail
+        // the validation it is about to be checked against.
+        $role = Role::subdomain($subdomain)->first();
+        $urlInfo->suggested_slug = UrlUtils::suggestLinkSlug(
+            $urlInfo->url,
+            $role ? $this->takenSlugs($role) : []
+        );
+
         return response()->json($urlInfo);
+    }
+
+    /**
+     * Every short-link slug and sub-schedule slug already spoken for on this schedule.
+     *
+     * @return array<int, string>
+     */
+    private function takenSlugs(Role $role): array
+    {
+        $taken = $role->groups->pluck('slug')->filter()->map(fn ($s) => strtolower($s))->all();
+
+        foreach ($role->decodeLinks('social_links') as $link) {
+            $slug = UrlUtils::linkSlug($link);
+
+            if ($slug !== '') {
+                $taken[] = $slug;
+            }
+        }
+
+        return array_values(array_unique($taken));
+    }
+
+    /**
+     * All-time click totals per analytics key, for the short-link rows in the AP.
+     *
+     * Keyed the same way recordSocialClick() writes them, so a link carrying both /facebook and a
+     * custom /fb reports one combined figure rather than a split one. Answers "is this link
+     * used", which is why there is no date window.
+     *
+     * @return array<string, int>
+     */
+    private function socialClickTotals(Role $role): array
+    {
+        return AnalyticsSocialClicksDaily::forRoles([$role->id])
+            ->selectRaw('platform, SUM(clicks) as clicks')
+            ->groupBy('platform')
+            ->pluck('clicks', 'platform')
+            ->map(fn ($n) => (int) $n)
+            ->all();
     }
 
     public function qrCode($subdomain)

@@ -374,8 +374,9 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">Add profile URLs (Instagram, Facebook, X, TikTok, Bandcamp, Spotify and so on) so visitors can find you elsewhere. The platform is recognised from the URL and its icon is used automatically.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Short link per platform</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Every social link except a plain website gets a short forwarding address under your own schedule URL, for example <code class="doc-inline-code">yourname.eventschedule.com/instagram</code>, with a copy button next to it. It is handy in printed material and bios, and it keeps working if you change the underlying profile URL.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Short links</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Every social link can have a short forwarding address under your own schedule URL, for example <code class="doc-inline-code">yourname.eventschedule.com/instagram</code>, with a copy button next to it. Links on a recognised platform get one automatically. For anything else, and for any link you want a nicer address for, click <strong>Add</strong> or <strong>Edit</strong> under the link and choose your own, so a ticketing partner at <code class="doc-inline-code">example.com/?ref=33221</code> becomes <code class="doc-inline-code">yourname.eventschedule.com/tickets</code>. Short links are handy in printed material and bios, they keep working if you change the underlying profile URL, and clicks on them are counted in <a href="{{ route('marketing.docs.analytics') }}" class="doc-link">Analytics</a>.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Adding your own address never replaces the automatic one, so a link already printed on a poster keeps working. A short link cannot reuse the name of another platform, of a <a href="#customize-subschedules" class="doc-link">sub-schedule</a>, or of a page the app already uses. Clear the box to remove it.</p>
             </div>
         </div>
     </section>

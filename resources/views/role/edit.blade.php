@@ -2261,9 +2261,34 @@
                             <ul role="list" class="link-list divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
                                 {!! (!$role->social_links || $role->social_links == '[]') ? 'style="display:none"' : '' !!}>
                                 @if ($role->social_links && $role->social_links != '[]')
+                                @php
+                                    // Every slug already spoken for on this schedule, so a suggestion
+                                    // offered below cannot fail the validation it is checked against.
+                                    $socialTakenSlugs = $role->groups->pluck('slug')->filter()
+                                        ->map(fn ($s) => strtolower($s))->all();
+                                    foreach ($role->decodeLinks('social_links') as $takenLink) {
+                                        $takenSlug = \App\Utils\UrlUtils::linkSlug($takenLink);
+                                        if ($takenSlug !== '') {
+                                            $socialTakenSlugs[] = $takenSlug;
+                                        }
+                                    }
+                                    $socialHostPrefix = preg_replace('/^https?:\/\//', '', $scheduleUrl);
+                                @endphp
                                 @foreach($role->decodeLinks('social_links') as $link)
-                                @php $linkPlatform = \App\Utils\UrlUtils::detectPlatform($link->url); @endphp
-                                <li class="p-4 bg-white dark:bg-gray-800" data-link-url="{{ $link->url }}">
+                                @php
+                                    $linkPlatform = \App\Utils\UrlUtils::detectPlatform($link->url);
+                                    $linkSlug = \App\Utils\UrlUtils::linkSlug($link);
+                                    $linkSuggestion = $linkSlug !== '' ? $linkSlug : \App\Utils\UrlUtils::suggestLinkSlug($link->url, $socialTakenSlugs);
+                                    // Keyed the way recordSocialClick() writes it, so a link with both
+                                    // /facebook and a custom /fb reports one total, not a split one.
+                                    $linkClickKey = $linkPlatform !== 'website' ? $linkPlatform : $linkSlug;
+                                    $linkClicks = $linkClickKey !== '' ? ($socialClickTotals[$linkClickKey] ?? 0) : 0;
+                                @endphp
+                                <li class="p-4 bg-white dark:bg-gray-800" data-link-url="{{ $link->url }}"
+                                    data-link-slug="{{ $link->slug ?? '' }}"
+                                    data-link-platform="{{ $linkPlatform }}"
+                                    data-link-suggestion="{{ $linkSuggestion }}"
+                                    data-link-clicks="{{ $linkClicks }}">
                                     <div class="flex items-center gap-4">
                                         <div class="flex-shrink-0 text-gray-500 dark:text-gray-400">
                                             <x-url-icon class="w-5 h-5" color="currentColor">
@@ -2275,15 +2300,44 @@
                                                 <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ \App\Utils\UrlUtils::getBrand($link->url) }}</h4>
                                                 <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ \App\Utils\UrlUtils::clean($link->url) }}</p>
                                             </a>
-                                            @if ($linkPlatform !== 'website')
-                                            @php $vanityUrl = $scheduleUrl . '/' . $linkPlatform; @endphp
-                                            <div class="flex items-center gap-1.5 mt-1">
-                                                <p class="text-xs text-gray-400 dark:text-gray-500 truncate">{{ preg_replace('/^https?:\/\//', '', $vanityUrl) }}</p>
-                                                <button type="button" data-action="copy-vanity-url" class="flex-shrink-0 text-gray-400 dark:text-gray-500 hover:text-[var(--brand-blue)] transition-colors" data-url="{{ $vanityUrl }}" title="{{ __('messages.copy') }}">
+                                            {{-- Short link. Two states: a live slug is shown with copy
+                                                 and edit; a link without one shows its SUGGESTION greyed
+                                                 out, which is never stored until the owner clicks Add. --}}
+                                            <div class="link-slug-display flex flex-wrap items-center gap-1.5 mt-1" @if ($linkSuggestion === '') style="display:none" @endif>
+                                                <p class="link-slug-url text-xs truncate {{ $linkSlug !== '' ? 'text-gray-400 dark:text-gray-500' : 'text-gray-300 dark:text-gray-600 italic' }}" dir="ltr">{{ $socialHostPrefix }}/{{ $linkSlug !== '' ? $linkSlug : $linkSuggestion }}</p>
+                                                {{-- Copy only when the slug is live: copying a suggestion
+                                                     would hand the owner a URL that does not resolve. --}}
+                                                <button type="button" data-action="copy-vanity-url" class="link-slug-copy flex-shrink-0 text-gray-400 dark:text-gray-500 hover:text-[var(--brand-blue)] transition-colors" data-url="{{ $scheduleUrl }}/{{ $linkSlug }}" title="{{ __('messages.copy') }}" @if ($linkSlug === '') style="display:none" @endif>
                                                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" /></svg>
                                                 </button>
+                                                <button type="button" class="btn-edit-link-slug link-slug-toggle flex-shrink-0 text-xs text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] transition-colors">{{ $linkSlug !== '' ? __('messages.edit') : __('messages.add') }}</button>
+                                                <span class="link-slug-clicks text-xs text-gray-400 dark:text-gray-500" @if ($linkClicks < 1) style="display:none" @endif>{{ trans_choice('messages.short_link_clicks', $linkClicks, ['count' => number_format($linkClicks)]) }}</span>
                                             </div>
-                                            @endif
+
+                                            {{-- dir="ltr" is load-bearing: a URL is left-to-right text, and
+                                                 on a Hebrew schedule the host prefix and the typed slug
+                                                 otherwise swap and the address reads backwards. --}}
+                                            <div class="link-slug-editor mt-2" style="display:none">
+                                                <div class="flex flex-wrap items-center gap-2">
+                                                    {{-- Only the ADDRESS is forced left-to-right. The buttons stay in
+                                                         page direction so the forward action keeps its usual side. --}}
+                                                    <div class="flex items-center gap-1 min-w-0" dir="ltr">
+                                                        <span class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $socialHostPrefix }}/</span>
+                                                        <input type="text" class="link-slug-input w-32 flex-shrink-0 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 text-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
+                                                            maxlength="{{ \App\Utils\UrlUtils::LINK_SLUG_MAX }}" value="{{ $linkSlug }}" placeholder="{{ $linkSuggestion }}" spellcheck="false" autocapitalize="off" />
+                                                    </div>
+                                                    <button type="button" class="btn-cancel-link-slug flex-shrink-0 text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">{{ __('messages.cancel') }}</button>
+                                                    <button type="button" class="btn-save-link-slug flex-shrink-0 text-xs font-semibold text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">{{ __('messages.save') }}</button>
+                                                </div>
+                                                <p class="link-slug-help text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.short_link_help') }}</p>
+                                                <p class="link-slug-error text-xs text-red-600 dark:text-red-400 mt-1" style="display:none"></p>
+                                                @if ($linkClicks > 0 && $linkSlug !== '')
+                                                <div class="mt-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2">
+                                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+                                                    <p class="text-xs text-amber-800 dark:text-amber-200">{{ __('messages.short_link_change_warning', ['count' => number_format($linkClicks)]) }}</p>
+                                                </div>
+                                                @endif
+                                            </div>
                                         </div>
                                         <button type="button"
                                             class="btn-remove-link flex-shrink-0 text-red-600 hover:text-red-800 dark:text-red-400 text-sm"
@@ -2307,6 +2361,10 @@
                                 data-link-type="social_links">
                                 + {{ __('messages.add_link') }}
                             </button>
+                            {{-- Backstop only. social_links is one hidden JSON input, so a server
+                                 rejection has nowhere else to render; the editor reports collisions
+                                 inline as the owner types. --}}
+                            <x-input-error class="mt-2" :messages="$errors->get('social_links')" />
                         </div>
 
                         {{-- Payment Links (hidden) --}}
@@ -2354,12 +2412,14 @@
                             </button>
                         </div> --}}
 
+                        {{-- old() matters now that social_links can fail validation: without it a
+                             bounce-back would silently discard every unsaved link edit. --}}
                         <input type="hidden" name="youtube_links" id="youtube_links_data"
-                            value="{{ $role->youtube_links ?? '[]' }}">
+                            value="{{ old('youtube_links', $role->youtube_links ?? '[]') }}">
                         <input type="hidden" name="social_links" id="social_links_data"
-                            value="{{ $role->social_links ?? '[]' }}">
+                            value="{{ old('social_links', $role->social_links ?? '[]') }}">
                         <input type="hidden" name="payment_links" id="payment_links_data"
-                            value="{{ $role->payment_links ?? '[]' }}">
+                            value="{{ old('payment_links', $role->payment_links ?? '[]') }}">
 
                     </div>
                 </div>
@@ -8782,26 +8842,95 @@ document.addEventListener('DOMContentLoaded', function() {
             a.appendChild(p);
             content.appendChild(a);
 
-            // Show vanity URL for social links with a detected platform
+            // Short-link row, matching the Blade markup above so the shared handlers and
+            // renderSlugRow() work on a link added without a page reload.
             var platform = link.platform || '';
-            if (linkType === 'social_links' && platform && platform !== 'website' && guestUrl) {
-                var fullVanityUrl = guestUrl + '/' + platform;
-                var displayUrl = fullVanityUrl.replace(/^https?:\/\//, '');
-                var vanityRow = document.createElement('div');
-                vanityRow.className = 'flex items-center gap-1.5 mt-1';
-                var vanityText = document.createElement('p');
-                vanityText.className = 'text-xs text-gray-400 dark:text-gray-500 truncate';
-                vanityText.textContent = displayUrl;
-                vanityRow.appendChild(vanityText);
+            if (linkType === 'social_links' && guestUrl) {
+                var host = guestUrl.replace(/^https?:\/\//, '');
+                var liveSlug = platform && platform !== 'website' ? platform : '';
+                var suggestion = liveSlug || link.suggested_slug || '';
+
+                li.setAttribute('data-link-slug', '');
+                li.setAttribute('data-link-platform', platform);
+                li.setAttribute('data-link-suggestion', suggestion);
+
+                var display = document.createElement('div');
+                display.className = 'link-slug-display flex flex-wrap items-center gap-1.5 mt-1';
+                if (!suggestion) display.style.display = 'none';
+
+                var slugText = document.createElement('p');
+                slugText.className = 'link-slug-url text-xs truncate ' + (liveSlug
+                    ? 'text-gray-400 dark:text-gray-500'
+                    : 'text-gray-300 dark:text-gray-600 italic');
+                slugText.setAttribute('dir', 'ltr');
+                slugText.textContent = host + '/' + suggestion;
+                display.appendChild(slugText);
+
                 var copyBtn = document.createElement('button');
                 copyBtn.type = 'button';
-                copyBtn.className = 'flex-shrink-0 text-gray-400 dark:text-gray-500 hover:text-[var(--brand-blue)] transition-colors';
-                copyBtn.setAttribute('data-url', fullVanityUrl);
+                copyBtn.className = 'link-slug-copy flex-shrink-0 text-gray-400 dark:text-gray-500 hover:text-[var(--brand-blue)] transition-colors';
+                copyBtn.setAttribute('data-url', guestUrl + '/' + liveSlug);
                 copyBtn.setAttribute('data-action', 'copy-vanity-url');
                 copyBtn.title = @json(__('messages.copy'));
                 copyBtn.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" /></svg>';
-                vanityRow.appendChild(copyBtn);
-                content.appendChild(vanityRow);
+                if (!liveSlug) copyBtn.style.display = 'none';
+                display.appendChild(copyBtn);
+
+                var toggleBtn = document.createElement('button');
+                toggleBtn.type = 'button';
+                toggleBtn.className = 'btn-edit-link-slug link-slug-toggle flex-shrink-0 text-xs text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] transition-colors';
+                toggleBtn.textContent = liveSlug ? @json(__('messages.edit')) : @json(__('messages.add'));
+                display.appendChild(toggleBtn);
+
+                var clicks = document.createElement('span');
+                clicks.className = 'link-slug-clicks text-xs text-gray-400 dark:text-gray-500';
+                clicks.style.display = 'none';
+                display.appendChild(clicks);
+
+                content.appendChild(display);
+
+                var editor = document.createElement('div');
+                editor.className = 'link-slug-editor mt-2';
+                editor.style.display = 'none';
+                var editorRow = document.createElement('div');
+                editorRow.className = 'flex flex-wrap items-center gap-2';
+                // Address group is LTR; the buttons stay in page direction.
+                var urlGroup = document.createElement('div');
+                urlGroup.className = 'flex items-center gap-1 min-w-0';
+                urlGroup.setAttribute('dir', 'ltr');
+                var prefix = document.createElement('span');
+                prefix.className = 'text-xs text-gray-500 dark:text-gray-400 truncate';
+                prefix.textContent = host + '/';
+                urlGroup.appendChild(prefix);
+                editorRow.appendChild(urlGroup);
+                var slugInput = document.createElement('input');
+                slugInput.type = 'text';
+                slugInput.className = 'link-slug-input w-32 flex-shrink-0 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 text-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]';
+                slugInput.maxLength = {{ \App\Utils\UrlUtils::LINK_SLUG_MAX }};
+                slugInput.placeholder = suggestion;
+                slugInput.spellcheck = false;
+                slugInput.setAttribute('autocapitalize', 'off');
+                urlGroup.appendChild(slugInput);
+                var cancelBtn = document.createElement('button');
+                cancelBtn.type = 'button';
+                cancelBtn.className = 'btn-cancel-link-slug flex-shrink-0 text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200';
+                cancelBtn.textContent = @json(__('messages.cancel'));
+                editorRow.appendChild(cancelBtn);
+                var saveSlugBtn = document.createElement('button');
+                saveSlugBtn.type = 'button';
+                saveSlugBtn.className = 'btn-save-link-slug flex-shrink-0 text-xs font-semibold text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]';
+                saveSlugBtn.textContent = @json(__('messages.save'));
+                editorRow.appendChild(saveSlugBtn);
+                editor.appendChild(editorRow);
+                var help = document.createElement('p');
+                help.className = 'link-slug-help text-xs text-gray-500 dark:text-gray-400 mt-1';
+                help.textContent = @json(__('messages.short_link_help'));
+                editor.appendChild(help);
+                var errorEl = document.createElement('p');
+                errorEl.className = 'link-slug-error text-xs text-red-600 dark:text-red-400 mt-1';
+                errorEl.style.display = 'none';
+                editor.appendChild(errorEl);
+                content.appendChild(editor);
             }
 
             var removeBtn = document.createElement('button');
@@ -8918,6 +9047,147 @@ document.addEventListener('DOMContentLoaded', function() {
                 saveLinkBtn.textContent = origText;
             });
         });
+
+        // --- Short-link slug editing (social links only) ---
+        // Reserved names and sub-schedule slugs are re-checked server-side; this is the immediate
+        // feedback, because social_links is one hidden JSON input with nowhere to render a
+        // per-field error.
+        var reservedSlugs = @json(\App\Utils\UrlUtils::reservedPathSlugs());
+        var platformSlugs = @json(\App\Utils\UrlUtils::getUniquePlatforms());
+        var groupSlugs = @json($role->groups->pluck('slug')->filter()->map(fn ($s) => strtolower($s))->values());
+
+        function slugRowParts(li) {
+            return {
+                display: li.querySelector('.link-slug-display'),
+                editor: li.querySelector('.link-slug-editor'),
+                input: li.querySelector('.link-slug-input'),
+                error: li.querySelector('.link-slug-error'),
+                url: li.querySelector('.link-slug-url'),
+                copy: li.querySelector('.link-slug-copy'),
+                toggle: li.querySelector('.link-slug-toggle')
+            };
+        }
+
+        // Mirrors UrlUtils::normalizeLinkSlug for the Latin case. Anything it cannot handle
+        // (Hebrew, CJK) is left for the server, which romanizes rather than dropping it.
+        function normalizeSlug(value) {
+            return (value || '').toString().trim().toLowerCase()
+                .replace(/[^a-z0-9-]+/g, '-')
+                .replace(/-+/g, '-')
+                .substring(0, {{ \App\Utils\UrlUtils::LINK_SLUG_MAX }})
+                .replace(/^-+|-+$/g, '');
+        }
+
+        function slugConflict(slug, ownUrl, ownPlatform) {
+            if (!slug) return @json(__('messages.short_link_invalid', ['slug' => '']));
+
+            if (slug !== ownPlatform && (platformSlugs.indexOf(slug) !== -1 || slug === 'website')) {
+                return @json(__('messages.short_link_reserved', ['slug' => ':slug'])).replace(':slug', slug);
+            }
+            if (reservedSlugs.indexOf(slug) !== -1) {
+                return @json(__('messages.short_link_reserved', ['slug' => ':slug'])).replace(':slug', slug);
+            }
+            if (groupSlugs.indexOf(slug) !== -1) {
+                return @json(__('messages.short_link_taken', ['slug' => ':slug'])).replace(':slug', slug);
+            }
+            // A sibling link already holding this slug. Compare on the stored custom slug only:
+            // a platform-derived one is handled by the platform check above.
+            var clash = linkData.social_links.some(function (l) {
+                return l && l.url !== ownUrl && normalizeSlug(l.slug || '') === slug;
+            });
+            if (clash) {
+                return @json(__('messages.short_link_taken', ['slug' => ':slug'])).replace(':slug', slug);
+            }
+            return '';
+        }
+
+        document.querySelectorAll('.links-tab-content').forEach(function(tab) {
+            tab.addEventListener('click', function(e) {
+                var li = e.target.closest('li[data-link-url]');
+                if (!li) return;
+                var parts = slugRowParts(li);
+
+                if (e.target.closest('.btn-edit-link-slug')) {
+                    if (parts.input) {
+                        // Prefilled with the SUGGESTION only once the owner opts in, never
+                        // rendered as a value on the row itself: an always-populated field would
+                        // be claimed by the next unrelated save of the schedule.
+                        if (!parts.input.value) parts.input.value = li.dataset.linkSuggestion || '';
+                        parts.display.style.display = 'none';
+                        parts.editor.style.display = '';
+                        parts.input.focus();
+                        parts.input.select();
+                    }
+                    return;
+                }
+
+                if (e.target.closest('.btn-cancel-link-slug')) {
+                    parts.input.value = li.dataset.linkSlug || '';
+                    parts.error.style.display = 'none';
+                    parts.editor.style.display = 'none';
+                    parts.display.style.display = '';
+                    return;
+                }
+
+                if (e.target.closest('.btn-save-link-slug')) {
+                    var raw = parts.input.value.trim();
+                    var slug = normalizeSlug(raw);
+                    var linkUrl = li.dataset.linkUrl;
+
+                    // Cleared on purpose: drop the custom slug and fall back to the platform one.
+                    if (raw === '') {
+                        linkData.social_links.forEach(function (l) {
+                            if (l && l.url === linkUrl) delete l.slug;
+                        });
+                        li.dataset.linkSlug = '';
+                    } else {
+                        // Only ASCII can be normalized faithfully here. Anything else (Hebrew, CJK)
+                        // is passed through for the server to romanize via ICU, which also means
+                        // its collision check is the server's - tested in
+                        // SocialShortLinkValidationTest. Testing for ASCII rather than for "letters
+                        // and spaces" matters: "My Shop!" is perfectly normalizable, and treating
+                        // its "!" as non-Latin stored the raw string as the slug.
+                        var isAscii = /^[\x20-\x7E]+$/.test(raw);
+                        var message = isAscii ? slugConflict(slug, linkUrl, li.dataset.linkPlatform || '') : '';
+                        if (message) {
+                            parts.error.textContent = message;
+                            parts.error.style.display = '';
+                            return;
+                        }
+                        var value = isAscii ? slug : raw;
+                        linkData.social_links.forEach(function (l) {
+                            if (l && l.url === linkUrl) l.slug = value;
+                        });
+                        li.dataset.linkSlug = value;
+                    }
+
+                    parts.error.style.display = 'none';
+                    updateLinkInput('social_links');
+                    renderSlugRow(li);
+                    parts.editor.style.display = 'none';
+                    parts.display.style.display = '';
+                }
+            });
+        });
+
+        function renderSlugRow(li) {
+            var parts = slugRowParts(li);
+            var slug = li.dataset.linkSlug || '';
+            var shown = slug || li.dataset.linkSuggestion || '';
+            var host = guestUrl.replace(/^https?:\/\//, '');
+
+            if (!shown) { parts.display.style.display = 'none'; return; }
+
+            parts.display.style.display = '';
+            parts.url.textContent = host + '/' + shown;
+            parts.url.className = 'link-slug-url text-xs truncate ' + (slug
+                ? 'text-gray-400 dark:text-gray-500'
+                : 'text-gray-300 dark:text-gray-600 italic');
+            // No copy button until the slug is live: the suggestion does not resolve yet.
+            parts.copy.style.display = slug ? '' : 'none';
+            parts.copy.dataset.url = guestUrl + '/' + slug;
+            parts.toggle.textContent = slug ? @json(__('messages.edit')) : @json(__('messages.add'));
+        }
 
         // Remove link (event delegation for both Blade-rendered and JS-appended items)
         document.querySelectorAll('.links-tab-content').forEach(function(tab) {

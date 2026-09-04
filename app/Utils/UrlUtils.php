@@ -201,6 +201,144 @@ class UrlUtils
         ));
     }
 
+    /** The widest slug analytics_social_clicks_daily.platform can store. */
+    public const LINK_SLUG_MAX = 30;
+
+    /**
+     * The short-link slug a social link answers to, or '' when it has none.
+     *
+     * A link owns at most two: the one derived from its domain (facebook.com -> "facebook") and
+     * an optional custom one the owner typed. The custom one is what renders, but BOTH keep
+     * resolving, which is what stops a slug already printed on a flyer from breaking the day an
+     * owner adds a nicer one. See RoleController::resolveSocialLink().
+     *
+     * Takes a stdClass (Role::decodeLinks) or an array (json_decode(..., true) in the
+     * controller) because both shapes are in use for the same column.
+     */
+    public static function linkSlug(object|array $link): string
+    {
+        $link = (array) $link;
+
+        $custom = self::normalizeLinkSlug($link['slug'] ?? null);
+
+        if ($custom !== '') {
+            return $custom;
+        }
+
+        $url = $link['url'] ?? '';
+
+        if (! is_string($url) || $url === '') {
+            return '';
+        }
+
+        $platform = self::detectPlatform($url);
+
+        return $platform === 'website' ? '' : $platform;
+    }
+
+    /**
+     * Normalize an owner-typed short-link slug, or '' when nothing usable survives.
+     *
+     * Goes through SlugUtils::slugOrRomanize() rather than Str::slug(), which returns "" for
+     * Hebrew and CJK - on a Hebrew install the plain version would make the field unusable for
+     * the people it belongs to. The 30-character cap is the width of the analytics column the
+     * slug is later written into verbatim.
+     */
+    public static function normalizeLinkSlug(?string $input): string
+    {
+        $slug = SlugUtils::slugOrRomanize($input);
+
+        if ($slug === '') {
+            return '';
+        }
+
+        // Trimmed AFTER the cut, so truncating onto a hyphen cannot leave a trailing one.
+        return trim(strtolower(substr($slug, 0, self::LINK_SLUG_MAX)), '-');
+    }
+
+    /**
+     * The slug to offer for a link that has none, de-conflicted against $taken.
+     *
+     * Platform FIRST, brand only as the fallback. getBrand() reads the first dot-segment of the
+     * host, so chat.whatsapp.com yields "Chat" while that link's live short URL is /whatsapp:
+     * offering the brand would move a working short link the moment the owner accepted it.
+     */
+    public static function suggestLinkSlug(string $url, array $taken = []): string
+    {
+        $platform = self::detectPlatform($url);
+
+        $base = $platform !== 'website'
+            ? $platform
+            : self::normalizeLinkSlug(self::getBrand($url));
+
+        if ($base === '') {
+            return '';
+        }
+
+        if (! in_array($base, $taken, true)) {
+            return $base;
+        }
+
+        // Same shape as Group::cleanSlug's uniqueness loop. A suggestion that fails validation
+        // the instant it is accepted is worse than no suggestion.
+        for ($i = 2; $i <= 99; $i++) {
+            $candidate = self::normalizeLinkSlug($base.'-'.$i);
+
+            if ($candidate !== '' && ! in_array($candidate, $taken, true)) {
+                return $candidate;
+            }
+        }
+
+        return '';
+    }
+
+    /** @var array<int, string>|null */
+    private static ?array $reservedPathSlugs = null;
+
+    /**
+     * First path segments already owned by a route inside a schedule's own URL space.
+     *
+     * A short link lives at /{slug} on a tenant host and at /{subdomain}/{slug} on selfhost, and
+     * any literal route registered ahead of those catch-alls wins outright. A slug named "edit"
+     * would never reach viewGuest at all, and because viewGuest redirects rather than 404s on a
+     * miss, it would fail as a bounce to the schedule home rather than as anything diagnosable.
+     *
+     * Derived from the router rather than hand-listed: selfhost alone puts over a hundred routes
+     * in this space, and a hand-list would drift on the first one added. The admin routes are
+     * registered unconditionally under /{subdomain}/..., so both routing modes contribute them
+     * and the answer stays stable across a BackupService move between installs.
+     */
+    public static function reservedPathSlugs(): array
+    {
+        if (self::$reservedPathSlugs !== null) {
+            return self::$reservedPathSlugs;
+        }
+
+        $slugs = [];
+
+        foreach (\Illuminate\Support\Facades\Route::getRoutes() as $route) {
+            $uri = $route->uri();
+
+            if (str_starts_with($uri, '{subdomain}/')) {
+                $uri = substr($uri, strlen('{subdomain}/'));
+            } elseif (! str_starts_with((string) $route->getDomain(), '{subdomain}.')) {
+                // Not in a schedule's path space: a marketing or app-domain route.
+                continue;
+            }
+
+            $segment = explode('/', $uri)[0];
+
+            // A wildcard first segment IS the catch-all being protected, not a name it reserves.
+            if ($segment === '' || str_contains($segment, '{')) {
+                continue;
+            }
+
+            $slugs[strtolower($segment)] = true;
+        }
+
+        return self::$reservedPathSlugs = array_keys($slugs);
+    }
+
     public static function getPlatformBrandName(string $platform): string
     {
         return self::PLATFORM_BRAND_NAMES[$platform] ?? ucfirst($platform);

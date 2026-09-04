@@ -137,8 +137,8 @@
                     @endif
                     @if($hasSocial)
                         @foreach ($role->decodeLinks('social_links') as $link)
-                        @php $gpLinkPlatform = \App\Utils\UrlUtils::detectPlatform($link->url); @endphp
-                        <a href="{{ $gpLinkPlatform !== 'website' ? $role->getGuestUrl() . '/' . $gpLinkPlatform : $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
+                        @php $gpLinkSlug = \App\Utils\UrlUtils::linkSlug($link); @endphp
+                        <a href="{{ $gpLinkSlug !== '' ? $role->getGuestUrl() . '/' . $gpLinkSlug : $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
                            class="w-10 h-10 rounded-lg flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 social-tooltip"
                            style="background-color: {{ $accentColor }}"
                            data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}">
@@ -325,8 +325,8 @@
                       @endif
                       @if($hasSocial)
                           @foreach ($role->decodeLinks('social_links') as $link)
-                          @php $gpLinkPlatform2 = \App\Utils\UrlUtils::detectPlatform($link->url); @endphp
-                          <a href="{{ $gpLinkPlatform2 !== 'website' ? $role->getGuestUrl() . '/' . $gpLinkPlatform2 : $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
+                          @php $gpLinkSlug2 = \App\Utils\UrlUtils::linkSlug($link); @endphp
+                          <a href="{{ $gpLinkSlug2 !== '' ? $role->getGuestUrl() . '/' . $gpLinkSlug2 : $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
                              class="text-[#33383C] dark:text-gray-400 hover:text-[#151B26] dark:hover:text-gray-200 transition-colors social-tooltip"
                              data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}">
                               <x-url-icon class="w-5 h-5" color="currentColor">

@@ -4999,4 +4999,10 @@ return [
     'audience_share_link' => 'Linkul tău de urmărire',
     'audience_share_link_help' => 'Distribuie-l oriunde. Deschide programul tău cu formularul de abonare pregătit, iar codul QR de mai sus duce în același loc.',
     'audience_opt_in_label_cart' => 'Anunță-mă pe e-mail când aceste programe adaugă evenimente noi',
+    'short_link_help' => 'Oricine vizitează această adresă este redirecționat către link. Lasă gol pentru a elimina linkul scurt.',
+    'short_link_invalid' => '":slug" nu poate fi folosit ca link scurt.',
+    'short_link_reserved' => '":slug" este rezervat de aplicație, alege altul.',
+    'short_link_taken' => '":slug" este deja folosit în acest program.',
+    'short_link_clicks' => '{1} :count clic|[2,*] :count clicuri',
+    'short_link_change_warning' => 'Acest link scurt a fost accesat de :count ori. Modificarea lui va strica linkurile deja distribuite.',
 ];

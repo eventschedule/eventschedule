@@ -4960,4 +4960,10 @@ return [
     'audience_share_link' => 'Seu link para seguir',
     'audience_share_link_help' => 'Compartilhe onde quiser. Ele abre sua agenda com o formulário de inscrição pronto, e o código QR acima leva ao mesmo lugar.',
     'audience_opt_in_label_cart' => 'Avise-me por e-mail quando estas agendas adicionarem novos eventos',
+    'short_link_help' => 'Quem visitar este endereço é encaminhado para o link. Deixe vazio para remover o link curto.',
+    'short_link_invalid' => '":slug" não pode ser usado como link curto.',
+    'short_link_reserved' => '":slug" está reservado pela aplicação, escolha outro.',
+    'short_link_taken' => '":slug" já está em uso nesta agenda.',
+    'short_link_clicks' => '{1} :count clique|[2,*] :count cliques',
+    'short_link_change_warning' => 'Este link curto recebeu :count cliques. Alterá-lo vai quebrar os links que já partilhou.',
 ];
