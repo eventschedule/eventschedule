@@ -17,8 +17,9 @@ use Illuminate\Support\Facades\Route;
  * every deploy told Google that the whole marketing site had changed, which is exactly what makes
  * Google stop trusting the signal.
  *
- * Run it before a release (see CLAUDE.md) and commit the result. A page missing from the manifest
- * simply gets no <lastmod>, which Google prefers to a wrong one.
+ * Run it in any commit that edits a marketing page (see CLAUDE.md) and commit the result; CI
+ * regenerates this and fails the build on a diff. A page missing from the manifest simply gets no
+ * <lastmod>, which Google prefers to a wrong one.
  *
  * Resolution, per marketing GET route:
  *   1. Reflect the controller method and take the single view('marketing.…') literal in its body.
@@ -29,9 +30,22 @@ use Illuminate\Support\Facades\Route;
  *   3. A view shared by several routes (compare-single, replace-single) also tracks the data block
  *      that distinguishes this page from its siblings - `'<key>' => [` inside the controller helper
  *      the method calls - via `git log -L`, falling back to the whole controller.
- *   4. The date is the newest `git log -1 --format=%cI` across that file set, in UTC. A view that
- *      exists but has no history yet - a page being added in the commit being written - is dated
- *      now and warned about, because an undated page fails SitemapCoverageTest.
+ *   4. The date is the newest `git log -1 --format=%cI` across that file set, as a plain Y-m-d in
+ *      UTC. A source the working tree has already changed is dated TODAY instead of read from git,
+ *      and a view that exists but has no history at all - a page being added in the commit being
+ *      written - is dated today too, because an undated page fails SitemapCoverageTest.
+ *
+ * Why days rather than timestamps, and why today for a file with uncommitted changes: this manifest
+ * is committed, and the commit that edits a view is the commit that becomes that view's newest
+ * commit. A run made just before that commit therefore has to predict its date, which is possible
+ * to the day and impossible to the second. Get either half wrong and the manifest is permanently one
+ * commit behind, which makes the "Sitemap lastmod manifest is current" step in
+ * .github/workflows/test.yml unsatisfiable: it regenerates and diffs, so every push that touches a
+ * marketing page fails, including the one that dutifully refreshed the manifest. Do not restore
+ * second precision.
+ *
+ * Two cases still need a second run, both harmless and both a one-line fix: generating just before
+ * UTC midnight and committing just after it, and a rebase, which resets committer dates to now.
  */
 class GenerateSitemapLastmod extends Command
 {
@@ -56,6 +70,9 @@ class GenerateSitemapLastmod extends Command
         'marketing.privacy' => 'marketing.privacy',
         'marketing.terms' => 'marketing.terms',
     ];
+
+    /** @var array<string, array<int, array{oldStart: int, oldCount: int, newStart: int, newCount: int}>>|null */
+    private ?array $changes = null;
 
     public function handle(): int
     {
@@ -119,7 +136,7 @@ class GenerateSitemapLastmod extends Command
         }
 
         foreach ($uncommitted as $name => $file) {
-            $this->warn('  '.$name.' - '.$file.': uncommitted view, dated now; re-run sitemap:lastmod after committing');
+            $this->line('  '.$name.' - '.$file.': not in git yet, dated today because today is when it is being committed');
         }
 
         $contents = $this->render($manifest);
@@ -131,7 +148,7 @@ class GenerateSitemapLastmod extends Command
             $this->info('Wrote '.self::MANIFEST.'.');
         }
 
-        $this->info(count($manifest).' pages dated ('.count($uncommitted).' from an uncommitted view), '.
+        $this->info(count($manifest).' pages dated ('.count($uncommitted).' from a view git has not seen yet), '.
             count($skipped).' skipped.');
 
         return self::SUCCESS;
@@ -344,7 +361,11 @@ class GenerateSitemapLastmod extends Command
     }
 
     /**
-     * The newest commit date across a file set, as an ISO 8601 UTC string.
+     * The newest date across a file set, as a plain Y-m-d in UTC, or null when git has never seen
+     * any of them.
+     *
+     * Sources are compared at full precision and only the winner is truncated, so "newest" still
+     * means newest.
      *
      * @param  array<int, array{file: string, lines?: array{int, int}}>  $sources
      */
@@ -353,17 +374,9 @@ class GenerateSitemapLastmod extends Command
         $newest = null;
 
         foreach ($sources as $source) {
-            $raw = isset($source['lines'])
-                ? $this->git(['log', '-1', '--format=%cI', '--no-patch', '-L'.$source['lines'][0].','.$source['lines'][1].':'.$source['file']])
-                : $this->git(['log', '-1', '--format=%cI', '--', $source['file']]);
+            $date = $this->dateFor($source);
 
-            if (! $raw) {
-                continue;
-            }
-
-            try {
-                $date = Carbon::parse(trim($raw))->utc();
-            } catch (\Throwable) {
+            if ($date === null) {
                 continue;
             }
 
@@ -372,20 +385,195 @@ class GenerateSitemapLastmod extends Command
             }
         }
 
-        return $newest?->toIso8601String();
+        return $newest?->toDateString();
     }
 
     /**
-     * The date a page whose view has no git history gets: now, in the same UTC ISO 8601 shape the
+     * One source's date: today when the working tree has already changed it, otherwise the date of
+     * the newest commit that touched it.
+     *
+     * The dirty case is what lets a run made just before a commit predict what the same run will
+     * produce just after it - that commit is about to become the file's newest commit, and its date
+     * is today. See the class docblock for why the alternative is unworkable.
+     *
+     * @param  array{file: string, lines?: array{int, int}}  $source
+     */
+    private function dateFor(array $source): ?Carbon
+    {
+        if (! isset($source['lines'])) {
+            if (isset($this->changes()[$source['file']])) {
+                return Carbon::now()->utc();
+            }
+
+            $raw = $this->git(['log', '-1', '--format=%cI', '--', $source['file']]);
+        } else {
+            // A line range counts as changed only when an edit actually lands inside it. Dating
+            // every range in a dirty MarketingController today would not converge: after the commit
+            // `git log -L` still reports the older commit for the data blocks that commit left
+            // alone, so the 29 compare and replace pages would drift straight back on the next run.
+            if ($this->rangeIsDirty($source['file'], $source['lines'])) {
+                return Carbon::now()->utc();
+            }
+
+            [$from, $to] = $this->rangeInHead($source['file'], $source['lines']);
+
+            $raw = $this->git(['log', '-1', '--format=%cI', '--no-patch', '-L'.$from.','.$to.':'.$source['file']]);
+        }
+
+        if (! $raw) {
+            return null;
+        }
+
+        try {
+            return Carbon::parse(trim($raw))->utc();
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /**
+     * The working tree's uncommitted changes, as hunk line ranges keyed by repo-relative path.
+     *
+     * One `git diff` for the whole run, memoized: the command already spawns a `git log` per source
+     * file, so the cost is noise. `HEAD` rather than nothing, so staged and unstaged changes both
+     * count - a view is about to be committed either way. `--unified=0` so a hunk covers only the
+     * lines that actually changed, which is what makes the line-range test above meaningful.
+     *
+     * Untracked files are deliberately absent: git has no history for one, so newestDate() returns
+     * null and the uncommittedDate() fallback already dates it today. A rename lands in that same
+     * fallback, because the new path has no history in HEAD either.
+     *
+     * A path git has to quote (a space or a non-ASCII byte in it) does not match the header pattern
+     * and reads as clean. Nothing under resources/views is named that way, and the cost would be a
+     * stale date rather than a wrong one.
+     *
+     * Overridable so tests can drive both branches without depending on the real working tree.
+     *
+     * @return array<string, array<int, array{oldStart: int, oldCount: int, newStart: int, newCount: int}>>
+     */
+    protected function workingTreeChanges(): array
+    {
+        $diff = $this->git(['diff', '--unified=0', '--no-color', '--no-ext-diff', 'HEAD']);
+
+        return $diff ? $this->parseDiff($diff) : [];
+    }
+
+    /**
+     * The hunk ranges in a `git diff --unified=0` document, keyed by the new-side path.
+     *
+     * Split out from the git call so it can be tested against a literal diff: this is a regex over
+     * another program's output, and the cost of getting a hunk header subtly wrong is a page dated
+     * from the wrong commit, which nothing else here would notice.
+     *
+     * @return array<string, array<int, array{oldStart: int, oldCount: int, newStart: int, newCount: int}>>
+     */
+    private function parseDiff(string $diff): array
+    {
+        $changes = [];
+        $file = null;
+
+        foreach (explode("\n", $diff) as $line) {
+            if (preg_match('~^diff --git a/(.+) b/(.+)$~', $line, $header)) {
+                $file = $header[2];
+
+                continue;
+            }
+
+            if ($file === null || ! preg_match('/^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@/', $line, $hunk)) {
+                continue;
+            }
+
+            $changes[$file][] = [
+                'oldStart' => (int) $hunk[1],
+                'oldCount' => ! isset($hunk[2]) || $hunk[2] === '' ? 1 : (int) $hunk[2],
+                'newStart' => (int) $hunk[3],
+                'newCount' => ! isset($hunk[4]) || $hunk[4] === '' ? 1 : (int) $hunk[4],
+            ];
+        }
+
+        return $changes;
+    }
+
+    /** @return array<string, array<int, array{oldStart: int, oldCount: int, newStart: int, newCount: int}>> */
+    private function changes(): array
+    {
+        return $this->changes ??= $this->workingTreeChanges();
+    }
+
+    /**
+     * Whether any uncommitted change falls inside a working-tree line range.
+     *
+     * @param  array{int, int}  $lines
+     */
+    private function rangeIsDirty(string $file, array $lines): bool
+    {
+        foreach ($this->changes()[$file] ?? [] as $hunk) {
+            [$from, $to] = $this->hunkExtent($hunk);
+
+            if ($from <= $lines[1] && $to >= $lines[0]) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * A working-tree line range translated into HEAD's numbering.
+     *
+     * sharedDataSource() locates the page's data block in the file on disk, but `git log -L` reads
+     * its range out of HEAD, so the two disagree by however many lines the uncommitted edits added
+     * or removed above the block. On a clean tree that difference is zero, which is why this never
+     * mattered before; dating a dirty tree is now the normal case, and an unshifted range reads a
+     * neighbouring competitor's history instead.
+     *
+     * Only hunks entirely above the range are counted - one that overlaps it never reaches here,
+     * because rangeIsDirty() has already dated the page today.
+     *
+     * @param  array{int, int}  $lines
+     * @return array{int, int}
+     */
+    private function rangeInHead(string $file, array $lines): array
+    {
+        $shift = 0;
+
+        foreach ($this->changes()[$file] ?? [] as $hunk) {
+            if ($this->hunkExtent($hunk)[1] < $lines[0]) {
+                $shift += $hunk['oldCount'] - $hunk['newCount'];
+            }
+        }
+
+        return [max(1, $lines[0] + $shift), max(1, $lines[1] + $shift)];
+    }
+
+    /**
+     * The new-side lines a hunk covers.
+     *
+     * A `+c,0` hunk is a pure deletion: nothing occupies a new-side line, and what vanished sat
+     * between c and c+1, so cover both rather than let a block that lost its last line read as
+     * untouched.
+     *
+     * @param  array{oldStart: int, oldCount: int, newStart: int, newCount: int}  $hunk
+     * @return array{int, int}
+     */
+    private function hunkExtent(array $hunk): array
+    {
+        return $hunk['newCount'] === 0
+            ? [$hunk['newStart'], $hunk['newStart'] + 1]
+            : [$hunk['newStart'], $hunk['newStart'] + $hunk['newCount'] - 1];
+    }
+
+    /**
+     * The date a page whose view has no git history at all gets: today, in the same Y-m-d shape the
      * git-derived dates use, so the manifest's format check cannot tell the two apart.
      *
-     * It is a guess, and the warning says so. The alternative - no date at all - is worse: the
-     * page is real and its content is genuinely new, and an absent entry reads as a stale manifest
-     * rather than as a page that has not been committed yet.
+     * It is a prediction, and the same one dateFor() makes for a file with uncommitted changes: the
+     * page is about to be committed, and that commit is today. The alternative - no date at all -
+     * is worse, because an absent entry reads as a stale manifest rather than as a new page.
      */
     private function uncommittedDate(): string
     {
-        return Carbon::now()->utc()->toIso8601String();
+        return Carbon::now()->utc()->toDateString();
     }
 
     private function git(array $arguments): ?string
@@ -411,9 +599,13 @@ class GenerateSitemapLastmod extends Command
          * Per-page <lastmod> for /sitemap-pages.xml, keyed by the URL path as it appears in
          * resources/views/sitemap.blade.php.
          *
-         * GENERATED - do not hand-edit. Run `php artisan sitemap:lastmod` before a release and
-         * commit the result; see app/Console/Commands/GenerateSitemapLastmod.php for how the dates
-         * are resolved, and CLAUDE.md for where this sits in the release checklist.
+         * GENERATED - do not hand-edit. Run `php artisan sitemap:lastmod` in any commit that edits a
+         * marketing page and commit the result; CI regenerates this file and fails the build on a
+         * diff. See app/Console/Commands/GenerateSitemapLastmod.php for how the dates are resolved.
+         *
+         * The dates are days rather than timestamps on purpose: the commit that edits a view is the
+         * commit that becomes that view's newest commit, so the run that necessarily precedes it can
+         * predict the day and cannot predict the second.
          *
          * The deployed container has neither real file mtimes nor a git history, which is why this
          * is committed rather than computed. A path that is absent gets no <lastmod> at all, which

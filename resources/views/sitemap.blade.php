@@ -8,7 +8,7 @@
  *
  * $lastmodTag() renders the whole <lastmod> element, or nothing at all when config/sitemap_lastmod.php
  * has no date for that path - Google prefers an absent lastmod to one it can prove wrong. Rebuild
- * that manifest with `php artisan sitemap:lastmod` before a release. The path passed here must be
+ * that manifest with `php artisan sitemap:lastmod` in any commit that edits a page. The path here must be
  * byte-identical to the one in the url() call above it, which is how the manifest is keyed.
  *
  * There is deliberately no <changefreq> or <priority>: Google ignores both. There are no hreflang

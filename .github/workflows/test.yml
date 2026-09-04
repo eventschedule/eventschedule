@@ -104,12 +104,21 @@ jobs:
 
       # config/sitemap_lastmod.php is generated, and a marketing page whose <lastmod> is older
       # than its own content trains Google to ignore the signal. Regenerating and diffing is
-      # the mechanical version of CLAUDE.md's "run sitemap:lastmod before a release" rule, so
-      # nobody has to remember it on deploy day.
+      # the mechanical version of CLAUDE.md's "run sitemap:lastmod" rule, so nobody has to
+      # remember it on deploy day.
+      #
+      # This is satisfiable in the same commit that edits a view only because the generator dates a
+      # file the working tree has already changed as today, at day granularity. Briefly it did not,
+      # and then every push touching a marketing page failed here - including the ones that
+      # refreshed the manifest correctly, because the commit doing the refreshing is the commit that
+      # becomes the view's newest commit. See app/Console/Commands/GenerateSitemapLastmod.php.
       - name: Sitemap lastmod manifest is current
         run: |
           php artisan sitemap:lastmod
-          git diff --exit-code config/sitemap_lastmod.php
+          if ! git diff --exit-code config/sitemap_lastmod.php; then
+            echo "::error file=config/sitemap_lastmod.php::Stale sitemap lastmod manifest. Run 'php artisan sitemap:lastmod' and commit the result - the diff above is exactly what it writes."
+            exit 1
+          fi
 
       - name: Run Feature & Unit tests
         run: php artisan test
