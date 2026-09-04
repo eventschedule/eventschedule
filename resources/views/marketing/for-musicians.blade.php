@@ -83,7 +83,7 @@
                 "@type": "HowToStep",
                 "position": 3,
                 "name": "Grow your fanbase",
-                "text": "Fans follow your schedule, get notified about shows near them, and share videos and comments after your gigs."
+                "text": "Fans follow your schedule, hear when you announce new dates, and share videos and comments after your gigs."
             }
         ]
     }
@@ -1013,7 +1013,7 @@
                         </div>
                         <div>
                             <h3 class="mb-2 text-lg font-semibold text-white">Grow your fanbase</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Fans follow your schedule, get notified about shows near them, and share videos and comments after your gigs (all approved by you before going live). Build your audience on your terms.</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Fans leave an email address, hear when you announce new dates, and share videos and comments after your gigs, all approved by you before they go live. Build your audience on your terms.</p>
                         </div>
                     </div>
                 </div>
@@ -1184,7 +1184,7 @@
                 @php
                     $faqs = [
                         ['q' => 'Is Event Schedule free for musicians?', 'a' => 'Yes. Event Schedule is free forever for sharing your gig schedule, building a fan following, and syncing with Google Calendar. The free plan also sells up to 25 paid tickets a month and sends 10 newsletter emails a month. Scanning tickets at the door is free too. Pro lifts the ticket ceiling and adds the rest of the door kit: live check-in dashboard, promo codes, waitlists. Platform fees are zero on every plan.'],
-                        ['q' => 'How do fans find out about my upcoming shows?', 'a' => 'Fans can follow your schedule and receive email notifications when you add new shows. You can also send newsletters directly to followers with your upcoming dates, and share your schedule link on Spotify, Bandcamp, your EPK, or any social profile.'],
+                        ['q' => 'How do fans find out about my upcoming shows?', 'a' => 'A fan who leaves an email address on your page and confirms it gets a digest when you announce new shows, batched so a run of dates is one message rather than six, and never more than once every few days. Beyond that you write the newsletter yourself. Your schedule link also goes anywhere a link goes: Spotify, Bandcamp, your EPK, any social profile.'],
                         ['q' => 'Can I sell tickets to my own shows?', 'a' => 'Yes. Connect your Stripe account and sell tickets directly from your schedule. Every ticket includes a QR code for check-in at the door. Event Schedule charges zero platform fees - you only pay Stripe\'s standard processing fees.'],
                         ['q' => 'What happens when a venue books me for a show?', 'a' => 'When a venue adds you to their event on Event Schedule, it automatically appears on your schedule too. No need to manually add the same gig in two places. Both calendars stay in sync.'],
                         ['q' => 'Can I list a weekly residency or recurring gigs?', 'a' => 'Yes. Recurring events are free. Set the day-of-week pattern once, like every Thursday at the same club, and Event Schedule fills in the dates. You can exclude the weeks you skip, and fans always see the next upcoming show.'],

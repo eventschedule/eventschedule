@@ -618,7 +618,7 @@
             ],
             [
                 'q' => 'Do my followers get emailed when I add a screening?',
-                'a' => 'Not automatically, and no page here will tell you otherwise. No newsletter goes out on its own: you write it and you send it. What you get is the list and the targeting, free, so you can send to everyone who follows the schedule, to everyone who registered for one particular screening, or to one sub-schedule. The free plan covers 10 recipients a month, Pro 100 and Enterprise 1,000.',
+                'a' => 'If they left you an email address, yes: a new screening reaches them as a digest on its own, batched and never more than one every few days. A newsletter is the other kind and you write that one, with the targeting to go with it, free: everyone who follows the schedule, everyone who registered for one particular screening, or one sub-schedule. The free plan covers 10 recipients a month, Pro 100 and Enterprise 1,000.',
             ],
             [
                 'q' => 'Is Event Schedule free for hosting watch parties?',

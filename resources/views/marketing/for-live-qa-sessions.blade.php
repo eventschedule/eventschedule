@@ -628,7 +628,7 @@
             ],
             [
                 'q' => 'Do my followers get an email when I schedule a new session?',
-                'a' => 'No, and no page here will tell you otherwise. Nothing is sent to your audience automatically. You write a newsletter and send it when you have something to say, with 10 recipients a month on the free plan, 100 on Pro and 1,000 on Enterprise, counted per recipient rather than per send. The automatic emails run the other way, and even those are opt-in: you switch on a notification to yourself for when somebody suggests a poll option or leaves a comment waiting for approval.',
+                'a' => 'Anyone who left you an email address and confirmed it, yes: a newly scheduled session reaches them as a digest, batched and never more often than once every few days, and it does not draw on your newsletter allowance. Somebody who followed you from their own account is a separate list, reached only by a newsletter you write, with 10 recipients a month on the free plan, 100 on Pro and 1,000 on Enterprise, counted per recipient rather than per send.',
             ],
             [
                 'q' => 'Can I cap how many people join?',
