@@ -4059,7 +4059,7 @@ class MarketingController extends Controller
                 ],
                 'switch_steps' => [
                     ['title' => 'Create your schedule', 'description' => 'Sign up free and set up your schedule with events, branding, and ticket options.'],
-                    ['title' => 'Import your subscribers', 'description' => 'Your attendees subscribe directly through your schedule page. New ticket buyers are added automatically.'],
+                    ['title' => 'Import your subscribers', 'description' => 'Export your Mailchimp audience and paste it in or upload a CSV, up to ten thousand rows, on any plan. After that people subscribe through your schedule page and ticket buyers are added as they buy.'],
                     ['title' => 'Send your first newsletter', 'description' => 'Write and send event updates with the built-in newsletter builder. A/B test subject lines to maximize engagement.'],
                 ],
                 'faq' => [
@@ -4241,7 +4241,7 @@ class MarketingController extends Controller
                     ['feature' => 'QR code check-in', 'competitor' => false, 'es' => true],
                     ['feature' => 'CSV export', 'competitor' => true, 'es' => true],
                     ['feature' => 'REST API', 'competitor' => 'Google API', 'es' => true],
-                    ['feature' => 'Team collaboration', 'competitor' => 'Shared sheets', 'es' => 'Role-based access'],
+                    ['feature' => 'Team collaboration', 'competitor' => 'Shared sheets', 'es' => 'Role-based (Enterprise)'],
                     ['feature' => 'Platform fees', 'competitor' => 'N/A', 'es' => 'Zero'],
                 ],
                 'tool_strengths' => [
@@ -4259,7 +4259,7 @@ class MarketingController extends Controller
                     ['title' => 'Automatic Tracking', 'description' => 'Ticket sales, attendee lists, and check-ins are tracked automatically. No manual data entry or formula maintenance.', 'icon' => 'chart', 'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30', 'border' => 'border-emerald-200 dark:border-emerald-500/20', 'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20', 'icon_color' => 'text-emerald-600 dark:text-emerald-400'],
                     ['title' => 'CSV Export', 'description' => 'Export your sales data to CSV anytime for custom analysis. Get the spreadsheet format when you need it.', 'icon' => 'code', 'gradient' => 'from-blue-50 to-blue-50 dark:from-blue-900/30 dark:to-blue-900/30', 'border' => 'border-blue-200 dark:border-blue-500/20', 'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20', 'icon_color' => 'text-blue-600 dark:text-blue-400'],
                     ['title' => 'Live Dashboard', 'description' => 'Real-time check-in dashboard shows who has arrived, ticket counts, and revenue. Better than refreshing a spreadsheet.', 'icon' => 'dollar', 'gradient' => 'from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30', 'border' => 'border-sky-200 dark:border-sky-500/20', 'icon_bg' => 'bg-sky-100 dark:bg-sky-500/20', 'icon_color' => 'text-sky-600 dark:text-sky-400'],
-                    ['title' => 'Team Collaboration', 'description' => 'Invite team members to manage events together. Role-based access is built in, not a shared spreadsheet link.', 'icon' => 'globe', 'gradient' => 'from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30', 'border' => 'border-amber-200 dark:border-amber-500/20', 'icon_bg' => 'bg-amber-100 dark:bg-amber-500/20', 'icon_color' => 'text-amber-600 dark:text-amber-400'],
+                    ['title' => 'Team Collaboration', 'description' => 'Invite team members to manage events together, up to five on the Enterprise plan. Role-based access is built in, not a shared spreadsheet link.', 'icon' => 'globe', 'gradient' => 'from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30', 'border' => 'border-amber-200 dark:border-amber-500/20', 'icon_bg' => 'bg-amber-100 dark:bg-amber-500/20', 'icon_color' => 'text-amber-600 dark:text-amber-400'],
                     ['title' => 'REST API', 'description' => 'Need custom integrations? Use the REST API to connect Event Schedule with your other tools programmatically.', 'icon' => 'code', 'gradient' => 'from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30', 'border' => 'border-cyan-200 dark:border-cyan-500/20', 'icon_bg' => 'bg-cyan-100 dark:bg-cyan-500/20', 'icon_color' => 'text-cyan-600 dark:text-cyan-400'],
                     ['title' => 'Webhooks & Integrations', 'description' => 'Connect Event Schedule to your other tools with webhooks and REST API. Automate workflows without manual data copying.', 'icon' => 'link', 'gradient' => 'from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30', 'border' => 'border-sky-200 dark:border-sky-500/20', 'icon_bg' => 'bg-sky-100 dark:bg-sky-500/20', 'icon_color' => 'text-sky-600 dark:text-sky-400'],
                 ],
@@ -4281,7 +4281,7 @@ class MarketingController extends Controller
                     ['question' => 'Is Event Schedule a good Google Sheets alternative for event tracking?', 'answer' => 'Yes. Event Schedule automatically tracks ticket sales, attendee lists, and check-ins. You get a live dashboard instead of a static spreadsheet, and you can export to CSV anytime for custom analysis.'],
                     ['question' => 'Is there a free plan for Event Schedule?', 'answer' => 'Yes. The free plan includes unlimited events, Google Calendar sync, newsletters, and fan engagement features. Selling tickets is free too, up to 25 paid ones a month with zero platform fees; Pro at '.plan_price($this->planPrice()).'/month removes the cap and adds the live check-in dashboard.'],
                     ['question' => 'Can I still export data to a spreadsheet?', 'answer' => 'Yes. Pro plan includes CSV export of your sales data, so you can use spreadsheets for custom analysis when needed. The difference is that data collection and tracking happens automatically instead of through manual entry.'],
-                    ['question' => 'Can multiple team members access event data at the same time?', 'answer' => 'Yes. Event Schedule supports team collaboration with role-based access. Multiple team members can view dashboards, manage events, and check in attendees simultaneously without worrying about overwriting each other in a shared spreadsheet.'],
+                    ['question' => 'Can multiple team members access event data at the same time?', 'answer' => 'Yes, on the Enterprise plan, which carries up to five team members; a free schedule is a single account. With them, several people can view dashboards, manage events and check attendees in at the same time without overwriting each other the way a shared spreadsheet lets you.'],
                     ['question' => 'Does Event Schedule have a REST API for custom integrations?', 'answer' => 'Yes. The Pro plan includes a REST API that lets you pull event data, attendee lists, and sales information programmatically. Connect Event Schedule with your CRM, accounting software, or any other tool.'],
                 ],
                 'cross_links' => [
@@ -4355,6 +4355,8 @@ class MarketingController extends Controller
                     ['question' => 'Does Event Schedule sync with Google Calendar like Calendly?', 'answer' => 'Yes. Event Schedule includes two-way Google Calendar sync on the free plan. Events you create sync to your Google Calendar, and Google Calendar events can sync back. CalDAV sync is also supported.'],
                     ['question' => 'Can attendees add events to their own Google Calendar?', 'answer' => 'Yes. Event pages include an option to add the event to Google Calendar or download an iCal file. Two-way Google Calendar sync also keeps your own calendar updated automatically when you create or edit events in Event Schedule.'],
                     ['question' => 'Can I use Event Schedule for recurring events?', 'answer' => 'Yes. Event Schedule supports recurring events with flexible scheduling patterns. Each occurrence can have its own ticket types and attendee limits, which is something Calendly cannot handle for public events.'],
+                    ['question' => 'Can people still book a slot with me one to one?', 'answer' => 'Yes, and that part is free with one appointment type. Publish the hours you are available, set the slot length and the interval between start times, add buffers either side, and people pick a time in their own timezone from a public booking page. Overrides cover the days that are different, an approval step is optional, and a slot can take payment through Stripe, a payment link or cash. Nothing can be booked over something already on your schedule, synced calendar entries included. More than one appointment type is on the Pro plan.'],
+                    ['question' => 'What happens if somebody needs to move their booking?', 'answer' => 'They reschedule it themselves from the private link in their confirmation, and you can do it from the booking row. It moves the existing booking rather than cancelling and rebooking, so the payment, the private link and the calendar entry all carry over instead of the guest having to pay again.'],
                 ],
                 'cross_links' => [
                     ['name' => 'Doodle', 'route' => 'marketing.replace_doodle', 'description' => 'Full event management, not just date polls.'],
@@ -4445,7 +4447,7 @@ class MarketingController extends Controller
                 'keywords' => 'Doodle alternative for events, Doodle replacement, event scheduling poll, event date scheduling',
                 'audience_hint' => 'For organizers using date polling to coordinate events',
                 'about' => 'Doodle is a scheduling poll tool that helps groups find a common time to meet. Event organizers sometimes use it to pick event dates, but Doodle stops at the poll - it does not help you create, promote, or manage the actual event once a date is chosen.',
-                'pricing_note' => 'Doodle charges $7+/month per user for its Pro plan. Event Schedule is free for unlimited events with a public schedule, and '.plan_price($this->planPrice()).'/month for ticketing with no per-user fees.',
+                'pricing_note' => 'Doodle charges $7+/month per user for its Pro plan. Event Schedule is free for unlimited events with a public schedule, and selling starts free as well, at 25 paid tickets a month. '.plan_price($this->planPrice()).'/month lifts that ceiling, and nothing here is priced per user.',
                 'competitor_price' => 'From $7+/mo per user',
                 'es_price' => 'From '.plan_price(0).'/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [
@@ -4561,7 +4563,7 @@ class MarketingController extends Controller
                 'switch_steps' => [
                     ['title' => 'Create tickets', 'description' => 'Set up ticket types for your event. Every ticket automatically includes a unique QR code.'],
                     ['title' => 'Sell online', 'description' => 'Attendees buy tickets and receive their QR codes via email. No manual code generation needed.'],
-                    ['title' => 'Scan at the door', 'description' => 'Use any smartphone to scan QR codes. The live dashboard tracks check-ins in real time.'],
+                    ['title' => 'Scan at the door', 'description' => 'Any smartphone scans them, on any plan, with no app to install. The live dashboard that tracks check-ins as they happen is the Pro half.'],
                 ],
                 'faq' => [
                     ['question' => 'Is Event Schedule a good QR code generator alternative for events?', 'answer' => 'Yes. Every ticket sold through Event Schedule includes a unique QR code automatically. No need for a separate QR generation tool. QR codes are linked to attendee data for instant validation at the door.'],
@@ -4588,7 +4590,7 @@ class MarketingController extends Controller
                 'keywords' => 'Squarespace alternative for events, Squarespace replacement, event website builder, event landing page',
                 'audience_hint' => 'For organizers building event pages on a general website builder',
                 'about' => 'Squarespace is a general website builder that some event organizers use to create event pages and sell tickets through third-party integrations. While it produces beautiful websites, building event functionality on top of a website builder means extra complexity, plugins, and ongoing maintenance for features that should be built in.',
-                'pricing_note' => 'Squarespace costs $16+/month for a basic site, plus extra for third-party ticketing. Event Schedule is free for event pages, and '.plan_price($this->planPrice()).'/month for ticketing with zero platform fees.',
+                'pricing_note' => 'Squarespace costs $16+/month for a basic site, plus extra for third-party ticketing. Event Schedule is free for event pages, and selling starts free too, at 25 paid tickets a month with zero platform fees. '.plan_price($this->planPrice()).'/month lifts the ceiling.',
                 'competitor_price' => 'From $16+/mo',
                 'es_price' => 'From '.plan_price(0).'/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [
@@ -4659,7 +4661,7 @@ class MarketingController extends Controller
                 'keywords' => 'Notion alternative for events, Notion replacement, Notion event planning, event management workspace',
                 'audience_hint' => 'For organizers planning events in workspace tools like Notion',
                 'about' => 'Notion is a workspace and productivity tool that some event organizers use to plan events with databases, calendars, and shared pages. While Notion is excellent for internal project management, it has no public-facing event pages, no ticketing or RSVP functionality, and a steep learning curve for setting up event workflows.',
-                'pricing_note' => 'Notion Plus costs $10/month per user. Event Schedule is free for unlimited events, public pages, and team features. Selling is free too, 25 paid tickets a month at zero platform fees, and Pro at '.plan_price($this->planPrice()).'/month removes the ceiling, still with no per-user charges.',
+                'pricing_note' => 'Notion Plus costs $10/month per user. Event Schedule is free for unlimited events and public pages, and selling is free too, 25 paid tickets a month at zero platform fees; Pro at '.plan_price($this->planPrice()).'/month removes the ceiling. Nothing is charged per user either way: a team of up to five is the Enterprise plan, not five seats.',
                 'competitor_price' => 'From $10/mo per user',
                 'es_price' => 'From '.plan_price(0).'/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [
@@ -4668,7 +4670,7 @@ class MarketingController extends Controller
                     ['feature' => 'Calendar sync (Google, Outlook, CalDAV)', 'competitor' => false, 'es' => 'Two-way sync'],
                     ['feature' => 'AI event import', 'competitor' => 'AI writing only', 'es' => 'Full event parsing'],
                     ['feature' => 'Newsletters', 'competitor' => false, 'es' => 'With A/B testing'],
-                    ['feature' => 'Team collaboration', 'competitor' => true, 'es' => 'Event-focused'],
+                    ['feature' => 'Team collaboration', 'competitor' => true, 'es' => 'Up to 5 (Enterprise)'],
                     ['feature' => 'Sub-schedules', 'competitor' => 'Manual databases', 'es' => 'Built-in'],
                     ['feature' => 'Per-user pricing', 'competitor' => '$10/user/mo', 'es' => 'No per-user fees'],
                 ],
@@ -4688,7 +4690,7 @@ class MarketingController extends Controller
                     ['title' => 'Built-in Ticketing', 'description' => 'Sell tickets with Stripe payments, automatic confirmations, and zero platform fees. No third-party integration needed.', 'icon' => 'ticket', 'gradient' => 'from-blue-50 to-blue-50 dark:from-blue-900/30 dark:to-blue-900/30', 'border' => 'border-blue-200 dark:border-blue-500/20', 'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20', 'icon_color' => 'text-blue-600 dark:text-blue-400'],
                     ['title' => 'Google Calendar Sync', 'description' => 'Two-way sync with Google, Outlook and CalDAV keeps events updated automatically. No manual copying between your workspace and calendar.', 'icon' => 'calendar', 'gradient' => 'from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30', 'border' => 'border-sky-200 dark:border-sky-500/20', 'icon_bg' => 'bg-sky-100 dark:bg-sky-500/20', 'icon_color' => 'text-sky-600 dark:text-sky-400'],
                     ['title' => 'AI Event Import', 'description' => 'Paste event details in any format and AI extracts dates, times, and descriptions. Faster than building Notion database entries.', 'icon' => 'ai', 'gradient' => 'from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30', 'border' => 'border-amber-200 dark:border-amber-500/20', 'icon_bg' => 'bg-amber-100 dark:bg-amber-500/20', 'icon_color' => 'text-amber-600 dark:text-amber-400'],
-                    ['title' => 'Team Collaboration', 'description' => 'Invite team members to manage events together with role-based access. Built for event teams, not generic workspace collaboration.', 'icon' => 'globe', 'gradient' => 'from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30', 'border' => 'border-cyan-200 dark:border-cyan-500/20', 'icon_bg' => 'bg-cyan-100 dark:bg-cyan-500/20', 'icon_color' => 'text-cyan-600 dark:text-cyan-400'],
+                    ['title' => 'Team Collaboration', 'description' => 'Invite team members to manage events together with role-based access, up to five on the Enterprise plan. Built for event teams, not generic workspace collaboration.', 'icon' => 'globe', 'gradient' => 'from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30', 'border' => 'border-cyan-200 dark:border-cyan-500/20', 'icon_bg' => 'bg-cyan-100 dark:bg-cyan-500/20', 'icon_color' => 'text-cyan-600 dark:text-cyan-400'],
                     ['title' => 'Sub-schedules', 'description' => 'Organize events into sub-schedules by category, location, or type. Better than building separate Notion databases for each event series.', 'icon' => 'layout', 'gradient' => 'from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30', 'border' => 'border-sky-200 dark:border-sky-500/20', 'icon_bg' => 'bg-sky-100 dark:bg-sky-500/20', 'icon_color' => 'text-sky-600 dark:text-sky-400'],
                 ],
                 'why_switch' => [
@@ -4707,7 +4709,7 @@ class MarketingController extends Controller
                 ],
                 'faq' => [
                     ['question' => 'Is Event Schedule a good Notion alternative for event planning?', 'answer' => 'Yes, for the event management side. Event Schedule handles everything Notion cannot: public event pages, ticket sales, attendee management, Google Calendar sync, and newsletters. You may still use Notion for internal project notes, but Event Schedule replaces it for audience-facing event work.'],
-                    ['question' => 'Is Event Schedule free like Notion?', 'answer' => 'Yes. The free plan includes unlimited events, public event pages, Google Calendar sync, newsletters, and team collaboration. Selling is free too, 25 paid tickets a month at zero platform fees. The Pro plan at '.plan_price($this->planPrice()).'/month removes that ceiling and adds event graphics, the live check-in dashboard and more.'],
+                    ['question' => 'Is Event Schedule free like Notion?', 'answer' => 'Yes. The free plan includes unlimited events, public event pages, Google Calendar sync and newsletters, and selling is free too, 25 paid tickets a month at zero platform fees. The Pro plan at '.plan_price($this->planPrice()).'/month removes that ceiling and adds event graphics and the live check-in dashboard. One difference worth knowing before you move a team off Notion: a free schedule is a single account, and multiple team members, up to five, are an Enterprise feature.'],
                     ['question' => 'Does Event Schedule support team collaboration like Notion?', 'answer' => 'Yes. You can invite team members to manage events together with role-based access on the Enterprise plan. Unlike Notion, collaboration is purpose-built for event management with tools like shared schedules, sub-schedules, and delegated event editing.'],
                     ['question' => 'Is Event Schedule easier to set up than a Notion event database?', 'answer' => 'Yes. Create a schedule in under a minute with no databases, templates, or formulas to configure. Add events with AI import or manual entry and you have a public event page with ticketing immediately. No workspace setup needed.'],
                     ['question' => 'Can I use Event Schedule alongside Notion?', 'answer' => 'Yes. Many organizers use Notion for internal project planning and Event Schedule for the audience-facing side: public event pages, ticket sales, newsletters, and attendee management. The REST API can also connect Event Schedule data with your Notion workflows.'],
@@ -4730,7 +4732,7 @@ class MarketingController extends Controller
                 'keywords' => 'Trello alternative for events, Trello replacement, Trello event planning, event management board',
                 'audience_hint' => 'For organizers managing events with task boards and project tools',
                 'about' => 'Trello is a kanban-style project management tool that some event organizers use to track event planning tasks. While Trello is great for organizing workflows with boards and cards, it has no attendee-facing features, no registration or ticketing, and task boards do not map well to the event lifecycle of creating, promoting, and managing events.',
-                'pricing_note' => 'Trello Standard costs $6/month per user. Event Schedule is free for unlimited events and public pages with team collaboration, and '.plan_price($this->planPrice()).'/month for ticketing with no per-user fees.',
+                'pricing_note' => 'Trello Standard costs $6/month per user. Event Schedule is free for unlimited events and public pages, and selling starts free too, at 25 paid tickets a month. '.plan_price($this->planPrice()).'/month lifts that ceiling and nothing here is charged per user; a team of five is the Enterprise plan rather than five subscriptions.',
                 'competitor_price' => 'From $6/mo per user',
                 'es_price' => 'From '.plan_price(0).'/mo (Pro '.plan_price($this->planPrice()).'/mo)',
                 'comparison_rows' => [
@@ -4740,7 +4742,7 @@ class MarketingController extends Controller
                     ['feature' => 'AI event import', 'competitor' => false, 'es' => true],
                     ['feature' => 'Event submissions', 'competitor' => false, 'es' => 'Review & approve'],
                     ['feature' => 'Newsletters', 'competitor' => false, 'es' => 'With A/B testing'],
-                    ['feature' => 'Team collaboration', 'competitor' => true, 'es' => 'Event-focused'],
+                    ['feature' => 'Team collaboration', 'competitor' => true, 'es' => 'Up to 5 (Enterprise)'],
                     ['feature' => 'Per-user pricing', 'competitor' => '$6/user/mo', 'es' => 'No per-user fees'],
                 ],
                 'tool_strengths' => [
@@ -4757,7 +4759,7 @@ class MarketingController extends Controller
                 'es_solutions' => [
                     ['title' => 'Public Event Pages', 'description' => 'Every event gets a shareable page with all details and ticket purchasing. Your audience sees event pages, not task cards.', 'icon' => 'globe', 'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30', 'border' => 'border-emerald-200 dark:border-emerald-500/20', 'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20', 'icon_color' => 'text-emerald-600 dark:text-emerald-400'],
                     ['title' => 'Ticketing & Payments', 'description' => 'Sell tickets with Stripe payments, multiple ticket types, and zero platform fees. Trello has no way to handle registrations or payments.', 'icon' => 'ticket', 'gradient' => 'from-blue-50 to-blue-50 dark:from-blue-900/30 dark:to-blue-900/30', 'border' => 'border-blue-200 dark:border-blue-500/20', 'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20', 'icon_color' => 'text-blue-600 dark:text-blue-400'],
-                    ['title' => 'Team Collaboration', 'description' => 'Invite team members with role-based access to manage events together. Purpose-built for event teams, not generic task management.', 'icon' => 'globe', 'gradient' => 'from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30', 'border' => 'border-sky-200 dark:border-sky-500/20', 'icon_bg' => 'bg-sky-100 dark:bg-sky-500/20', 'icon_color' => 'text-sky-600 dark:text-sky-400'],
+                    ['title' => 'Team Collaboration', 'description' => 'Invite team members with role-based access to manage events together, up to five on the Enterprise plan. Purpose-built for event teams, not generic task management, and never priced per seat.', 'icon' => 'globe', 'gradient' => 'from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30', 'border' => 'border-sky-200 dark:border-sky-500/20', 'icon_bg' => 'bg-sky-100 dark:bg-sky-500/20', 'icon_color' => 'text-sky-600 dark:text-sky-400'],
                     ['title' => 'Google Calendar Sync', 'description' => 'Two-way sync with Google, Outlook and CalDAV keeps events updated everywhere. No manual copying between boards and calendars.', 'icon' => 'calendar', 'gradient' => 'from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30', 'border' => 'border-amber-200 dark:border-amber-500/20', 'icon_bg' => 'bg-amber-100 dark:bg-amber-500/20', 'icon_color' => 'text-amber-600 dark:text-amber-400'],
                     ['title' => 'AI Event Import', 'description' => 'Paste event details in any format and AI extracts structured event data automatically. Faster than creating Trello cards.', 'icon' => 'ai', 'gradient' => 'from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30', 'border' => 'border-cyan-200 dark:border-cyan-500/20', 'icon_bg' => 'bg-cyan-100 dark:bg-cyan-500/20', 'icon_color' => 'text-cyan-600 dark:text-cyan-400'],
                     ['title' => 'Event Submissions', 'description' => 'Accept event submissions from performers, speakers, or vendors. Review and approve submissions before they go live on your schedule.', 'icon' => 'clipboard', 'gradient' => 'from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30', 'border' => 'border-sky-200 dark:border-sky-500/20', 'icon_bg' => 'bg-sky-100 dark:bg-sky-500/20', 'icon_color' => 'text-sky-600 dark:text-sky-400'],
@@ -4773,7 +4775,7 @@ class MarketingController extends Controller
                 ],
                 'switch_steps' => [
                     ['title' => 'Create your events', 'description' => 'Add events with details, images, and ticket options. AI can import event details from any format.'],
-                    ['title' => 'Invite your team', 'description' => 'Add team members with role-based access to manage events together.'],
+                    ['title' => 'Invite your team', 'description' => 'Team members with role-based access, up to five, on the Enterprise plan. A free schedule is a single account, which is the one place a board of collaborators does not map straight across.'],
                     ['title' => 'Publish and sell', 'description' => 'Share your public schedule page. Attendees see events, buy tickets, and subscribe for updates.'],
                 ],
                 'faq' => [

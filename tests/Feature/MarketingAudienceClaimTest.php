@@ -67,6 +67,13 @@ class MarketingAudienceClaimTest extends TestCase
             [
                 lang_path('en/marketing.php'),
                 app_path('Http/Controllers/MarketingController.php'),
+                // The RENDERED comparison and replacement data. The controller
+                // builds these sentences by concatenating plan_price() into the
+                // middle of them, so a claim like "$5/month for ticketing" is
+                // never a contiguous string in the source and a source-only scan
+                // cannot see it. These fixtures hold the finished text.
+                base_path('tests/fixtures/comparison_data.json'),
+                base_path('tests/fixtures/replacement_data.json'),
             ]
         );
 

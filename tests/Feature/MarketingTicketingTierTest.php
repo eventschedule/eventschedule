@@ -43,6 +43,16 @@ class MarketingTicketingTierTest extends TestCase
         // "sell tickets ... requires Pro" / "only on the Pro plan".
         '/\bsell(?:ing)?\s+(?:paid\s+)?tickets?\b[^.]{0,120}?\b(?:requires?\s+(?:the\s+)?Pro|only\s+on\s+(?:the\s+)?Pro)\b/i',
 
+        // "Event Schedule is ... $5/month for ticketing" - the price-first shape,
+        // which says the same thing without naming a plan. Two guards: it has to
+        // be about US (a competitor's own "$16/month for a basic site, plus extra
+        // for third-party ticketing" is a fact about them), and "for UNLIMITED
+        // ticketing" is true and has to keep working.
+        '/Event\s+Schedule\b[^.]{0,160}\bmonth\b[^.]{0,40}\bfor\s+(?!unlimited\b)(?:[\w-]+\s+){0,2}ticketing\b/i',
+
+        // "$5 a month to start selling tickets".
+        '/Event\s+Schedule\b[^.]{0,160}\bmonth\b[^.]{0,40}\bto\s+(?:start\s+)?sell(?:ing)?\s+(?:paid\s+)?tickets\b/i',
+
         // Scanning at the door has no plan check. The DASHBOARD does, so the word
         // "dashboard" anywhere in the sentence exempts it.
         '/\b(?:QR\s+check-in|scan(?:ning)?\s+(?:the\s+)?(?:QR|tickets?))\b(?:(?!dashboard)[^.]){0,120}?\b(?:is|are)\s+(?:only\s+)?on\s+the\s+Pro\b/i',
@@ -58,6 +68,13 @@ class MarketingTicketingTierTest extends TestCase
             [
                 lang_path('en/marketing.php'),
                 app_path('Http/Controllers/MarketingController.php'),
+                // The RENDERED comparison and replacement data. The controller
+                // builds these sentences by concatenating plan_price() into the
+                // middle of them, so a claim like "$5/month for ticketing" is
+                // never a contiguous string in the source and a source-only scan
+                // cannot see it. These fixtures hold the finished text.
+                base_path('tests/fixtures/comparison_data.json'),
+                base_path('tests/fixtures/replacement_data.json'),
             ]
         );
 

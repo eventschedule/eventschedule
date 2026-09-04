@@ -334,7 +334,7 @@
             },
             {
                 "title": "Import your subscribers",
-                "description": "Your attendees subscribe directly through your schedule page. New ticket buyers are added automatically."
+                "description": "Export your Mailchimp audience and paste it in or upload a CSV, up to ten thousand rows, on any plan. After that people subscribe through your schedule page and ticket buyers are added as they buy."
             },
             {
                 "title": "Send your first newsletter",
@@ -843,7 +843,7 @@
             {
                 "feature": "Team collaboration",
                 "competitor": "Shared sheets",
-                "es": "Role-based access"
+                "es": "Role-based (Enterprise)"
             },
             {
                 "feature": "Platform fees",
@@ -892,7 +892,7 @@
             },
             {
                 "title": "Team Collaboration",
-                "description": "Invite team members to manage events together. Role-based access is built in, not a shared spreadsheet link.",
+                "description": "Invite team members to manage events together, up to five on the Enterprise plan. Role-based access is built in, not a shared spreadsheet link.",
                 "icon": "globe",
                 "gradient": "from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30",
                 "border": "border-amber-200 dark:border-amber-500/20",
@@ -956,7 +956,7 @@
             },
             {
                 "question": "Can multiple team members access event data at the same time?",
-                "answer": "Yes. Event Schedule supports team collaboration with role-based access. Multiple team members can view dashboards, manage events, and check in attendees simultaneously without worrying about overwriting each other in a shared spreadsheet."
+                "answer": "Yes, on the Enterprise plan, which carries up to five team members; a free schedule is a single account. With them, several people can view dashboards, manage events and check attendees in at the same time without overwriting each other the way a shared spreadsheet lets you."
             },
             {
                 "question": "Does Event Schedule have a REST API for custom integrations?",
@@ -1166,6 +1166,14 @@
             {
                 "question": "Can I use Event Schedule for recurring events?",
                 "answer": "Yes. Event Schedule supports recurring events with flexible scheduling patterns. Each occurrence can have its own ticket types and attendee limits, which is something Calendly cannot handle for public events."
+            },
+            {
+                "question": "Can people still book a slot with me one to one?",
+                "answer": "Yes, and that part is free with one appointment type. Publish the hours you are available, set the slot length and the interval between start times, add buffers either side, and people pick a time in their own timezone from a public booking page. Overrides cover the days that are different, an approval step is optional, and a slot can take payment through Stripe, a payment link or cash. Nothing can be booked over something already on your schedule, synced calendar entries included. More than one appointment type is on the Pro plan."
+            },
+            {
+                "question": "What happens if somebody needs to move their booking?",
+                "answer": "They reschedule it themselves from the private link in their confirmation, and you can do it from the booking row. It moves the existing booking rather than cancelling and rebooking, so the payment, the private link and the calendar entry all carry over instead of the guest having to pay again."
             }
         ],
         "cross_links": [
@@ -1411,7 +1419,7 @@
         "keywords": "Doodle alternative for events, Doodle replacement, event scheduling poll, event date scheduling",
         "audience_hint": "For organizers using date polling to coordinate events",
         "about": "Doodle is a scheduling poll tool that helps groups find a common time to meet. Event organizers sometimes use it to pick event dates, but Doodle stops at the poll - it does not help you create, promote, or manage the actual event once a date is chosen.",
-        "pricing_note": "Doodle charges $7+/month per user for its Pro plan. Event Schedule is free for unlimited events with a public schedule, and $5/month for ticketing with no per-user fees.",
+        "pricing_note": "Doodle charges $7+/month per user for its Pro plan. Event Schedule is free for unlimited events with a public schedule, and selling starts free as well, at 25 paid tickets a month. $5/month lifts that ceiling, and nothing here is priced per user.",
         "competitor_price": "From $7+/mo per user",
         "es_price": "From $0/mo (Pro $5/mo)",
         "comparison_rows": [
@@ -1744,7 +1752,7 @@
             },
             {
                 "title": "Scan at the door",
-                "description": "Use any smartphone to scan QR codes. The live dashboard tracks check-ins in real time."
+                "description": "Any smartphone scans them, on any plan, with no app to install. The live dashboard that tracks check-ins as they happen is the Pro half."
             }
         ],
         "faq": [
@@ -1812,7 +1820,7 @@
         "keywords": "Squarespace alternative for events, Squarespace replacement, event website builder, event landing page",
         "audience_hint": "For organizers building event pages on a general website builder",
         "about": "Squarespace is a general website builder that some event organizers use to create event pages and sell tickets through third-party integrations. While it produces beautiful websites, building event functionality on top of a website builder means extra complexity, plugins, and ongoing maintenance for features that should be built in.",
-        "pricing_note": "Squarespace costs $16+/month for a basic site, plus extra for third-party ticketing. Event Schedule is free for event pages, and $5/month for ticketing with zero platform fees.",
+        "pricing_note": "Squarespace costs $16+/month for a basic site, plus extra for third-party ticketing. Event Schedule is free for event pages, and selling starts free too, at 25 paid tickets a month with zero platform fees. $5/month lifts the ceiling.",
         "competitor_price": "From $16+/mo",
         "es_price": "From $0/mo (Pro $5/mo)",
         "comparison_rows": [
@@ -2012,7 +2020,7 @@
         "keywords": "Notion alternative for events, Notion replacement, Notion event planning, event management workspace",
         "audience_hint": "For organizers planning events in workspace tools like Notion",
         "about": "Notion is a workspace and productivity tool that some event organizers use to plan events with databases, calendars, and shared pages. While Notion is excellent for internal project management, it has no public-facing event pages, no ticketing or RSVP functionality, and a steep learning curve for setting up event workflows.",
-        "pricing_note": "Notion Plus costs $10/month per user. Event Schedule is free for unlimited events, public pages, and team features. Selling is free too, 25 paid tickets a month at zero platform fees, and Pro at $5/month removes the ceiling, still with no per-user charges.",
+        "pricing_note": "Notion Plus costs $10/month per user. Event Schedule is free for unlimited events and public pages, and selling is free too, 25 paid tickets a month at zero platform fees; Pro at $5/month removes the ceiling. Nothing is charged per user either way: a team of up to five is the Enterprise plan, not five seats.",
         "competitor_price": "From $10/mo per user",
         "es_price": "From $0/mo (Pro $5/mo)",
         "comparison_rows": [
@@ -2044,7 +2052,7 @@
             {
                 "feature": "Team collaboration",
                 "competitor": true,
-                "es": "Event-focused"
+                "es": "Up to 5 (Enterprise)"
             },
             {
                 "feature": "Sub-schedules",
@@ -2107,7 +2115,7 @@
             },
             {
                 "title": "Team Collaboration",
-                "description": "Invite team members to manage events together with role-based access. Built for event teams, not generic workspace collaboration.",
+                "description": "Invite team members to manage events together with role-based access, up to five on the Enterprise plan. Built for event teams, not generic workspace collaboration.",
                 "icon": "globe",
                 "gradient": "from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30",
                 "border": "border-cyan-200 dark:border-cyan-500/20",
@@ -2154,7 +2162,7 @@
             },
             {
                 "question": "Is Event Schedule free like Notion?",
-                "answer": "Yes. The free plan includes unlimited events, public event pages, Google Calendar sync, newsletters, and team collaboration. Selling is free too, 25 paid tickets a month at zero platform fees. The Pro plan at $5/month removes that ceiling and adds event graphics, the live check-in dashboard and more."
+                "answer": "Yes. The free plan includes unlimited events, public event pages, Google Calendar sync and newsletters, and selling is free too, 25 paid tickets a month at zero platform fees. The Pro plan at $5/month removes that ceiling and adds event graphics and the live check-in dashboard. One difference worth knowing before you move a team off Notion: a free schedule is a single account, and multiple team members, up to five, are an Enterprise feature."
             },
             {
                 "question": "Does Event Schedule support team collaboration like Notion?",
@@ -2212,7 +2220,7 @@
         "keywords": "Trello alternative for events, Trello replacement, Trello event planning, event management board",
         "audience_hint": "For organizers managing events with task boards and project tools",
         "about": "Trello is a kanban-style project management tool that some event organizers use to track event planning tasks. While Trello is great for organizing workflows with boards and cards, it has no attendee-facing features, no registration or ticketing, and task boards do not map well to the event lifecycle of creating, promoting, and managing events.",
-        "pricing_note": "Trello Standard costs $6/month per user. Event Schedule is free for unlimited events and public pages with team collaboration, and $5/month for ticketing with no per-user fees.",
+        "pricing_note": "Trello Standard costs $6/month per user. Event Schedule is free for unlimited events and public pages, and selling starts free too, at 25 paid tickets a month. $5/month lifts that ceiling and nothing here is charged per user; a team of five is the Enterprise plan rather than five subscriptions.",
         "competitor_price": "From $6/mo per user",
         "es_price": "From $0/mo (Pro $5/mo)",
         "comparison_rows": [
@@ -2249,7 +2257,7 @@
             {
                 "feature": "Team collaboration",
                 "competitor": true,
-                "es": "Event-focused"
+                "es": "Up to 5 (Enterprise)"
             },
             {
                 "feature": "Per-user pricing",
@@ -2289,7 +2297,7 @@
             },
             {
                 "title": "Team Collaboration",
-                "description": "Invite team members with role-based access to manage events together. Purpose-built for event teams, not generic task management.",
+                "description": "Invite team members with role-based access to manage events together, up to five on the Enterprise plan. Purpose-built for event teams, not generic task management, and never priced per seat.",
                 "icon": "globe",
                 "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
                 "border": "border-sky-200 dark:border-sky-500/20",
@@ -2340,7 +2348,7 @@
             },
             {
                 "title": "Invite your team",
-                "description": "Add team members with role-based access to manage events together."
+                "description": "Team members with role-based access, up to five, on the Enterprise plan. A free schedule is a single account, which is the one place a board of collaborators does not map straight across."
             },
             {
                 "title": "Publish and sell",
