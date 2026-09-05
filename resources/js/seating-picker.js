@@ -2,7 +2,8 @@ import { createApp } from 'vue';
 import SeatingPicker from './components/SeatingPicker.vue';
 
 /**
- * One app per allocated ticket row.
+ * One app per ticket form. (It was one per allocated ticket ROW until the bands were merged into a
+ * single full-width picker - see the note above the placeholder in event/tickets.blade.php.)
  *
  * The ticket form runs on the GLOBAL Vue build with the runtime template compiler, so an SFC
  * bundled here cannot be registered as one of its components - they are two different Vue

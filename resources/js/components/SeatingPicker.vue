@@ -1094,7 +1094,9 @@ function heldByServer() {
 /**
  * The poller was started only from load(), which only ran from openMap() - so a hold taken on the
  * quantity path lapsed in complete silence and the stale ids sat in seat_ids[] until checkout
- * rejected them. Any hold at all is now watched.
+ * rejected them. Any hold at all is now watched - but by way of load(), which is this function's
+ * ONLY caller and now runs the moment the picker becomes visible, not when a map is opened. The
+ * conclusion holds; the guarantee lives in that visibility observer, not here.
  */
 let polling = false;
 function ensurePolling() {

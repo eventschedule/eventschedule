@@ -24,6 +24,20 @@ use Illuminate\Http\Request;
  */
 class SeatingPickerController extends Controller
 {
+    /**
+     * Every column guestState() reads, section aside.
+     *
+     * A constant because the omission is silent: an unselected column reads back as NULL rather
+     * than raising, so dropping one does not break the poll - it disables a RULE on the poll, and
+     * the screen goes on looking fine. That is how the accessibility rule came to apply on a full
+     * load and not on a diff.
+     */
+    private const STATE_COLUMNS = [
+        'id', 'status', 'hold_token', 'hold_expires_at',
+        // ruleWouldRefuse(): the kind it judges, the row it walks, and the gangway that ends it.
+        'kind', 'event_seating_map_id', 'seating_section_id', 'row_position', 'aisle_after',
+    ];
+
     public function __construct(
         private SeatingMapService $maps,
         private SeatHoldService $holds,
@@ -61,16 +75,40 @@ class SeatingPickerController extends Controller
         if ($since > 0) {
             // inLiveSection() so the poll cannot report seats from a section the organizer has
             // removed - the full payload filters them out, so the two used to disagree.
+            //
+            // The narrowed select must carry everything guestState() reads, SECTION INCLUDED. It
+            // used to stop at the four columns isAvailable() needs, and a missing column is null
+            // rather than an error: `$seat->kind === 'wheelchair'` was false for every seat on
+            // earth, so ruleWouldRefuse() returned false unconditionally and the whole
+            // accessibility rule quietly evaporated on this path. A wheelchair space the full
+            // payload correctly draws as `unavailable` came back `available` from the first poll
+            // that touched its row, went clickable, and the hold was then refused - which is
+            // precisely the dead end the `unavailable` state exists to prevent.
             $changed = SeatingSeat::where('event_seating_map_id', $map->id)
                 ->where('state_version', '>', $since)
                 ->inLiveSection()
-                ->get(['id', 'status', 'hold_token', 'hold_expires_at']);
+                ->get(self::STATE_COLUMNS);
+
+            // A companion seat is judged by the seat NEXT to it, so its answer can change without
+            // its own state_version moving: sell the wheelchair space beside it and the companion
+            // becomes sellable, free that space again and it stops being - and nothing stamps the
+            // companion either time. Sweep the rows that did move, or the poll leaves a seat
+            // clickable that the hold then refuses.
+            if ($changed->isNotEmpty()) {
+                $changed = $changed->concat($this->companionsBesideChanges($map, $changed));
+            }
+
+            // Only once the diff has something in it: an idle poll must not pay for this.
+            $sections = $changed->isEmpty()
+                ? collect()
+                : SeatingSection::where('event_seating_map_id', $map->id)
+                    ->get(['id', 'accessibility_only'])->keyBy('id');
 
             $payload = [
                 'version' => (int) $map->version,
                 'seats' => $changed->map(fn ($s) => [
                     'id' => $s->id,
-                    'state' => $this->guestState($s, $token),
+                    'state' => $this->guestState($s, $token, $sections[$s->seating_section_id] ?? null),
                 ])->values(),
             ];
 
@@ -233,6 +271,34 @@ class SeatingPickerController extends Controller
     private function perOrderCap(Ticket $ticket): int
     {
         return (int) ($ticket->max_per_order ?: (config('app.max_tickets_per_order') ?: 20));
+    }
+
+    /**
+     * The companion seats sitting in a row that just changed, minus the ones already reported.
+     *
+     * Their state is derived from a NEIGHBOUR, so `state_version` - which only ever records what
+     * happened to a seat itself - cannot see them move.
+     *
+     * @return \Illuminate\Support\Collection<int,SeatingSeat>
+     */
+    private function companionsBesideChanges(EventSeatingMap $map, $changed)
+    {
+        $rows = $changed
+            ->map(fn ($s) => [$s->seating_section_id, $s->row_position])
+            ->unique(fn ($pair) => implode('|', $pair));
+
+        return SeatingSeat::where('event_seating_map_id', $map->id)
+            ->where('kind', 'companion')
+            ->whereNotIn('id', $changed->pluck('id'))
+            ->where(function ($q) use ($rows) {
+                foreach ($rows as [$sectionId, $rowPosition]) {
+                    $q->orWhere(fn ($x) => $x
+                        ->where('seating_section_id', $sectionId)
+                        ->where('row_position', $rowPosition));
+                }
+            })
+            ->inLiveSection()
+            ->get(self::STATE_COLUMNS);
     }
 
     /**

@@ -617,6 +617,25 @@ class SeatingTest extends DuskTestCase
             // A house seat is off sale, so the map's version has to move or every other open
             // console keeps polling with a cursor that never returns it.
             $this->assertGreaterThan($versionBefore, $map->fresh()->version);
+
+            // ...and this console must still be listening afterwards. applyState() used to REPLACE
+            // map.value, which pointed the component at a new object while the shared poller went
+            // on mutating the orphaned one - so from the first block, release or exchange onward,
+            // this till showed nothing any other till did. The console is a live view of a room
+            // several people are selling at once; that is the whole reason it polls.
+            //
+            // Sell a seat behind its back, exactly as another till would, and watch the map catch
+            // up. aria-label carries the state in words, which is the only rendered signal that is
+            // not a colour.
+            $other = SeatingSeat::where('event_seating_map_id', $map->id)
+                ->where('id', '!=', $seat->id)->orderBy('position')->firstOrFail();
+            $other->update(['status' => 'sold', 'state_version' => $map->fresh()->bumpVersion()]);
+
+            $browser->waitUntil(sprintf(
+                'document.getElementById("bo-seat-%d").getAttribute("aria-label").includes(%s)',
+                $other->id,
+                json_encode(__('messages.seating_count_sold')),
+            ), 15);
         });
     }
 

@@ -12,6 +12,7 @@ use App\Models\SeatingSection;
 use App\Repos\EventRepo;
 use App\Services\SeatHoldService;
 use App\Services\SeatingMapService;
+use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Tests\Feature\Concerns\CreatesScheduleData;
@@ -366,5 +367,120 @@ class SeatingRulesTest extends TestCase
         $this->assertSame([8, 8], $event->tickets->pluck('quantity')->map(fn ($q) => (int) $q)->sort()->values()->all(),
             'fixture sanity: the two bands really are the same size');
         $this->assertFalse($event->hasSameTicketQuantities());
+    }
+
+    /**
+     * The poll and the full payload must judge a seat the same way.
+     *
+     * They did not. `state()`'s `?since=` branch selected only the four columns isAvailable()
+     * needs, and an unselected column reads back as NULL rather than raising - so
+     * `$seat->kind === 'wheelchair'` was false for every seat alive, ruleWouldRefuse() returned
+     * false unconditionally, and this entire rule evaporated on the poll. It passed no section
+     * either, which would have done the same damage on its own from the other direction.
+     *
+     * The visible bug: a wheelchair space the full payload draws as `unavailable` came back
+     * `available` from the first poll that touched it, went clickable, and the hold was then
+     * refused - the exact dead end the `unavailable` state was added to prevent. Nothing covered
+     * the diff branch at all, which is how it survived.
+     */
+    public function test_the_poll_reports_the_same_state_as_the_full_payload(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue');
+        $event = $this->seatedEvent($role, $this->makePlan($role));
+        $map = $this->maps()->materialize($event);
+
+        $access = $this->row($map, 'Access');
+        $stalls = $this->row($map, 'Stalls');
+
+        // A wheelchair space drawn mid-row in an ORDINARY section - the shape the organizer gets
+        // wrong, and the one the rule exists to refuse. Seat 1 of Access is the same kind in an
+        // accessibility_only section, so it stays sellable and proves this is the rule talking
+        // rather than the word "wheelchair".
+        $stalls[5]->update(['kind' => 'wheelchair']);
+
+        $args = [
+            'subdomain' => $role->subdomain,
+            'event_id' => UrlUtils::encodeId($event->id),
+            'date' => $event->saleEventDateFromStartsAt(),
+        ];
+
+        $full = collect($this->getJson(route('seating.state', $args))->assertOk()->json('levels'))
+            ->flatMap(fn ($lvl) => collect($lvl['sections'])->flatMap(fn ($sec) => $sec['seats']))
+            ->pluck('state', 'id');
+
+        $expected = [
+            $stalls[5]->id => 'unavailable',   // wheelchair space, ordinary section
+            $access[1]->id => 'unavailable',   // companion beside a still-free wheelchair space
+            $access[0]->id => 'available',     // wheelchair space, accessibility_only section
+            $stalls[0]->id => 'available',     // an ordinary seat, as a control
+        ];
+
+        foreach ($expected as $id => $state) {
+            $this->assertSame($state, $full[$id], "the full payload got seat {$id} wrong");
+        }
+
+        // Now the same seats through the diff. Stamping state_version off a bumped map version is
+        // exactly what every mutation does (SeatHoldService::acquire()).
+        $since = $map->bumpVersion();
+        $version = $map->bumpVersion();
+        SeatingSeat::whereIn('id', array_keys($expected))->update(['state_version' => $version]);
+
+        $diff = collect($this->getJson(route('seating.state', $args + ['since' => $since]))
+            ->assertOk()->json('seats'))->pluck('state', 'id');
+
+        $this->assertCount(count($expected), $diff, 'the diff must carry every seat that moved');
+
+        foreach ($expected as $id => $state) {
+            $this->assertSame($state, $diff[$id], "the poll disagreed with the full payload on seat {$id}");
+        }
+    }
+
+    /**
+     * A companion seat has to come back through the poll when its NEIGHBOUR moves.
+     *
+     * Its answer is derived from the seat beside it, and `state_version` only ever records what
+     * happened to a seat itself - so selling the wheelchair space next to it makes the companion
+     * sellable, and freeing that space makes it unsellable again, with nothing to stamp the
+     * companion either time. A poll that reports only what literally changed therefore leaves a
+     * seat drawn as clickable that the hold will refuse, which is the dead end `unavailable` was
+     * added to prevent.
+     */
+    public function test_the_poll_reports_a_companion_whose_neighbour_moved(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue');
+        $event = $this->seatedEvent($role, $this->makePlan($role));
+        $map = $this->maps()->materialize($event);
+
+        $access = $this->row($map, 'Access');
+        [$wheelchair, $companion] = [$access[0], $access[1]];
+
+        $args = [
+            'subdomain' => $role->subdomain,
+            'event_id' => UrlUtils::encodeId($event->id),
+            'date' => $event->saleEventDateFromStartsAt(),
+        ];
+
+        // Only the WHEELCHAIR space moves. Nothing touches the companion's own row entry.
+        $since = $map->bumpVersion();
+        $wheelchair->update(['status' => 'sold', 'state_version' => $map->bumpVersion()]);
+
+        $diff = collect($this->getJson(route('seating.state', $args + ['since' => $since]))
+            ->assertOk()->json('seats'))->pluck('state', 'id');
+
+        $this->assertSame('taken', $diff[$wheelchair->id]);
+        $this->assertArrayHasKey(
+            $companion->id,
+            $diff->all(),
+            'the companion beside it has changed answer and the poll never said so'
+        );
+        $this->assertSame('available', $diff[$companion->id],
+            'with the wheelchair space gone the companion beside it is sellable on its own');
+
+        // ...and the full payload agrees, which is the property that matters.
+        $full = collect($this->getJson(route('seating.state', $args))->assertOk()->json('levels'))
+            ->flatMap(fn ($lvl) => collect($lvl['sections'])->flatMap(fn ($sec) => $sec['seats']))
+            ->pluck('state', 'id');
+
+        $this->assertSame($full[$companion->id], $diff[$companion->id]);
     }
 }

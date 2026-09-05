@@ -40,6 +40,13 @@ export function loadMap(stateUrl, eventId, date) {
 /**
  * Start the diff poll for this key, once. Subsequent callers just get the same shared map mutated
  * in place. `onChange` fires after each applied diff so a picker can drop seats it has lost.
+ *
+ * `map`'s OBJECT IDENTITY is the contract: this closes over the object it is handed and mutates
+ * that one, and the poller is keyed by (event, date) so it can never be re-registered. A component
+ * that later does `map.value = freshPayload` is pointing itself at something this will never touch
+ * again, and its live view is dead from that moment. Both components merge into the object instead
+ * - SeatingPicker.mergeState() and SeatingBoxOffice.applyState() - and each has been broken by
+ * ignoring this once already.
  */
 export function startPolling(stateUrl, eventId, date, map, onChange, intervalMs = 5000) {
     const k = key(eventId, date);
@@ -99,7 +106,7 @@ export function startPolling(stateUrl, eventId, date, map, onChange, intervalMs 
     }, intervalMs);
 }
 
-/** Test seam, and used when a picker is the last one to unmount. */
+/** Test seam. Nothing calls this in the app: a picker's map outlives it, by design. */
 export function resetSeatMaps() {
     pollers.forEach((entry) => clearInterval(entry.timer));
     pollers.clear();

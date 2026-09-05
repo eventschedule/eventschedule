@@ -680,9 +680,38 @@ async function post(url, body) {
     }
 }
 
+/**
+ * Copy a fresh payload INTO the map object rather than replacing the ref.
+ *
+ * startPolling() captures the object it is handed and mutates THAT one, and its poller is keyed by
+ * (event, date) so it can never be re-registered. `map.value = state` therefore pointed the console
+ * at a new object while the poller went on updating the orphaned one - so the live view died at the
+ * first block, release or exchange, and from then on this till showed nothing any other till did.
+ * The guest picker hit exactly this and documents it on mergeState(); the console was still doing
+ * the thing that comment warns about.
+ *
+ * Whole seat ARRAYS, not Object.assign per seat: a released seat has no `booker` in the payload,
+ * and assigning over the old object would leave the customer's name attached to a free seat.
+ *
+ * Only the seats move. Every caller here is a box-office mutation - block, release, exchange, book
+ * - and none of them can add or remove a section; that is the designer's screen.
+ */
 function applyState(state) {
     if (!state || !state.levels) return;
-    map.value = state;
+
+    const current = map.value;
+    if (! current) { map.value = state; return; }
+
+    const incoming = new Map();
+    (state.levels || []).forEach((lvl) => (lvl.sections || []).forEach((sec) => incoming.set(sec.id, sec)));
+
+    current.version = state.version;
+    if (state.counts) current.counts = state.counts;
+
+    (current.levels || []).forEach((lvl) => (lvl.sections || []).forEach((sec) => {
+        const next = incoming.get(sec.id);
+        if (next) sec.seats = next.seats;
+    }));
 }
 
 const block = () => post(props.blockUrl, { seat_ids: selected.value, kind: holdKind.value, note: holdNote.value });
