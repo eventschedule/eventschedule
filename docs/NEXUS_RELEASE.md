@@ -1,14 +1,14 @@
 # Nexus release runbook
 
 How a release reaches the hosted install (eventschedule.com), and the ordered cutover for the
-two pieces of infrastructure that ship with **v1.0.129**: edge caching of marketing HTML, and
+two pieces of infrastructure that ship with **v1.0.130**: edge caching of marketing HTML, and
 moving the scheduler onto a DigitalOcean App Platform worker.
 
 Selfhosted installs are unaffected by everything here. Cutting the GitHub release that
 selfhosters update from is a **separate, later act** - see [Selfhost release](#selfhost-release)
 at the end.
 
-Steps marked **[one-time]** are the v1.0.129 infrastructure cutover and will not recur. The rest
+Steps marked **[one-time]** are the v1.0.130 infrastructure cutover and will not recur. The rest
 is the standing shape of a hosted deploy.
 
 **This file is self-contained for the cutover.** Everything you need to do on the day, verify
@@ -21,7 +21,7 @@ the cutover.
 
 ## What is shipping
 
-`main` is **11 migrations** ahead of what is live (`git log v1.0.128..HEAD` for the commits - a
+`main` is **12 migrations** ahead of what is live (`git log v1.0.128..HEAD` for the commits - a
 number written here goes stale the next time anyone commits, including commits to this file). Deploys are manual
 (`deploy_on_push` is unset on the app spec), so nothing in this release has reached production.
 
@@ -61,6 +61,102 @@ Two changes need operator action **outside the repo** before they do anything at
    the named and bounded overlap mutexes and the runbook; the worker component itself has to be
    created in the DigitalOcean console.
 
+## Environment variables at a glance
+
+Every app-spec edit the cutover needs, in one place, so that what has been saved is checkable
+without re-reading three steps. The reasoning, the verification and the undo for each one live in
+the step that owns it; this table is the index, not a second copy.
+
+Checked against the live spec rather than against this file. At the time of writing it carries
+**69 app-level variables and none at component scope**, and every "add" below is genuinely absent
+from it.
+
+### Must add
+
+| Variable | Value | Scope | Step |
+|---|---|---|---|
+| `CACHE_STORE` | `database` | app, **RUN_AND_BUILD_TIME** | step 5 |
+| `BACKUP_DISK_DRIVER` | `s3` | app | step 5 |
+| `BACKUP_SPACES_KEY` | key for the step-1 bucket | app | step 5 |
+| `BACKUP_SPACES_SECRET` | secret for the step-1 bucket | app | step 5 |
+| `BACKUP_SPACES_REGION` | region of the step-1 bucket | app | step 5 |
+| `BACKUP_SPACES_ENDPOINT` | endpoint of the step-1 bucket | app | step 5 |
+| `BACKUP_SPACES_BUCKET` | the step-1 **private** bucket, never `DO_SPACES_BUCKET` | app | step 5 |
+| `LOG_CHANNEL` | `stderr` | **component**, `scheduler` only | step 6 |
+| `SCHEDULER_RAIL` | `worker` | **component**, `scheduler` only | step 6 |
+| `SCHEDULER_EXPECTED_RAIL` | `worker` | **app**, not component | step 7 |
+
+The app-level and component-scope split is load-bearing in both directions. `LOG_CHANNEL` is
+worker-only because setting it app-level would change how PHP-FPM logs; `SCHEDULER_EXPECTED_RAIL`
+is app-level because the *web* container is what reads it, so a component-scoped copy is the same
+as not setting it. Nothing else belongs at component scope: the rest is inherited, and a copy
+there is a second place to rotate every key.
+
+### Should add: the four display-price amounts
+
+`STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_YEARLY`, `STRIPE_ENTERPRISE_PRICE_MONTHLY` and
+`STRIPE_ENTERPRISE_PRICE_YEARLY` hold the Stripe price **IDs** and are set. The four matching
+`*_AMOUNT` variables are not:
+
+- `STRIPE_PRICE_MONTHLY_AMOUNT`
+- `STRIPE_PRICE_YEARLY_AMOUNT`
+- `STRIPE_ENTERPRISE_PRICE_MONTHLY_AMOUNT`
+- `STRIPE_ENTERPRISE_PRICE_YEARLY_AMOUNT`
+
+This release moves their fallbacks in `config/services.php` from 9 / 90 / 29 / 290 to
+5 / 50 / 15 / 150, and production is running on the fallback, so the numbers change on deploy with
+no spec edit. Display is unaffected, because `PlatformPricing` prefers the admin `settings` row
+and that already reads 5 / 50 / 15 / 150. But `GrowthExportService` (ARR and MRR) and the renewal
+emails read `config('services.stripe_platform.*')` directly and deliberately, precisely so that a
+marketing change cannot restate revenue already booked. Left unset, revenue reporting re-bases
+itself on this deploy instead.
+
+Pin all four, after confirming the amounts against the four Stripe Price objects: nothing in the
+app reconciles the two. See P5 in Pre-flight.
+
+### New this release, and correct to leave unset
+
+Listed so the omission reads as a decision. Each has a working default.
+
+| Variable | Default |
+|---|---|
+| `SCHEDULER_STALE_MINUTES` | `20`, floored at 16 |
+| `MARKETING_WALL_CACHE_SECONDS` | `600` |
+| `ACTIVATION_NUDGE_BATCH` | `200` |
+| `AUDIENCE_ANNOUNCEMENT_BATCH` | `100` schedules per run |
+| `AUDIENCE_ANNOUNCEMENT_RECIPIENT_BATCH` | `2000`, the cap that actually bounds outbound mail |
+| `AUDIENCE_ANNOUNCEMENT_MIN_HOURS` | `72` |
+| `AUDIENCE_MAIL_UNVERIFIED_MAX_RECIPIENTS` | `50` |
+| `ACCESSIBILITY_PUBLIC_PAGES_MEASURED` | `153` |
+| `ACCESSIBILITY_PUBLIC_MEASUREMENT_DATE` | `2026-09-04` |
+
+### Nothing to remove
+
+The five `STRIPE_LEGACY_*` variables retired with the price-recognition mechanism are not on the
+live spec, so there is nothing to delete. What replaces them is P4's alert.
+
+### Must not add
+
+`APP_NAME` and `SESSION_COOKIE` are both absent, and have to stay that way unless the Cloudflare
+rule in step 4 changes with them.
+
+`config('app.name')` is the hardcoded string `Event Schedule`, so `APP_NAME` is never the display
+name. It is read in exactly three places, each as an input to a *default* for something else: the
+session cookie name (`config/session.php`), the cache key prefix (`config/cache.php`) and the
+Redis key prefix (`config/database.php`). Setting it renames the session cookie to
+`event_schedule_session`, which signs everyone out and silently breaks the bypass expression that
+hardcodes `laravel_session`. It also moves the cache prefix, which with `CACHE_STORE=database`
+orphans every existing key, the scheduler heartbeat and every `withoutOverlapping()` mutex
+included.
+
+### The one trap that applies to all of them
+
+**Never save any of these blank.** `env()`'s second argument fires only for a *missing* key, never
+for a present-but-empty one, which is why most of these read `env('X') ?: default` instead. A
+blank `CACHE_STORE=` is not a fallback to `file`: it is `''` reaching `CacheManager::resolve()`,
+throwing `Cache store [] is not defined` on the first cache read anywhere in the app. P3 checks
+for exactly this, because a blank value looks identical to a set one in the console.
+
 ## Pre-flight
 
 Read-only. Do all of it before touching anything. It is worth the ten minutes because most of
@@ -72,7 +168,7 @@ release - so read the table once now and revisit P4 as soon as step 2 is `ACTIVE
 | # | Check | Why it matters |
 |---|---|---|
 | P1 | **Snapshot the database.** | `2026_08_28_000000_replace_federated_event_url_with_is_online.php` **drops `federated_events.event_url`**. Its own `down()` recreates the column empty: the stored links are not recoverable, which is the point of the change. `2026_09_02_000000_reset_blog_post_updated_at.php` rewrites `updated_at` on ~161 blog rows with a no-op `down()`. Neither is reversible by a deployment rollback. |
-| P2 | Watch the step 2 deploy log | **Three** migrations land on `events`, not two. Two are ALTERs: `widen_events_event_url` (varchar 255 to 500, a table rebuild on MySQL 8) and `add_image_variants_to_events` (a JSON column at the end, so INSTANT). The third, `reset_untouched_coupon_discount_types`, is the only one that WRITES rows, and neither column it filters on is indexed - so it scans `events` inside the start command's `migrate --force`. Its write set is small (the columns only exist since 2026-08-21) but the scan is not. `federated_events` is separately rebuilt **twice** in one migration: `replace_federated_event_url_with_is_online` adds `is_online` positionally with `->after()`, which forfeits `ALGORITHM=INSTANT`, then drops `event_url`. On large tables, run those three migrations by hand from the console *before* triggering the deploy. |
+| P2 | Watch the step 2 deploy log | **Four** migrations land on `events`, not two. Two are ALTERs: `widen_events_event_url` (varchar 255 to 500, a table rebuild on MySQL 8) and `add_image_variants_to_events` (a JSON column at the end, so INSTANT). The other two WRITE rows, and neither indexes the columns it filters on - so each scans `events` inside the start command's `migrate --force`. `reset_untouched_coupon_discount_types` has a small write set (the columns only exist since 2026-08-21), but the scan is not small. `backfill_events_published_at` stamps every already-public row, and says so in its own docblock, which points back at this row. `federated_events` is separately rebuilt **twice** in one migration: `replace_federated_event_url_with_is_online` adds `is_online` positionally with `->after()`, which forfeits `ALGORITHM=INSTANT`, then drops `event_url`. On large tables, run those four migrations by hand from the console *before* triggering the deploy. |
 | P3 | Read the app spec in the DO console | Production config is the app spec, not any `.env`. Confirm `QUEUE_CONNECTION=database`, `APP_URL=https://eventschedule.com`, `IS_HOSTED=true` and `IS_NEXUS=true`; note whether `CACHE_STORE` is set (step 5 sets it); and confirm the web service is **`instance_count: 1`** - more than one container on the `file` cache store means every lock in the app serialises against nothing. Note the active deployment ID while you are there: it is what a rollback targets. |
 | P4 | `/admin` tells you, permanently | **The highest-value check in this table, and the one that was missing.** The legacy price recognition mechanism was removed this release, so `PlanPriceUtils` now matches a tier *only* against the four `STRIPE_PRICE_*` IDs on the spec. `AdminAlertService` compares every live subscription's price ID against those four using `PlanPriceUtils` itself, so the alert cannot drift from what the app believes, and `/admin` &rarr; Revenue lists the affected schedules. Anything it flags is a customer whose card is still being charged while `hasActiveEnterpriseSubscription()` returns false, both webhook handlers decline to write and ARR counts them at zero - the cost is spelled out in `PlanPriceUtils::tierFor()`'s docblock. Note the four configured IDs all share a `price_1T3s...` prefix, i.e. one creation batch, so anyone predating it is already stranded. **This is a post-deploy check, unavoidably**: the alert ships in this release, so it cannot report before step 2. That is acceptable because the condition predates the deploy rather than being caused by it - but look at `/admin` as soon as step 2 is `ACTIVE`, because the release also removes the `STRIPE_LEGACY_*` mechanism that used to absorb it. |
 | P5 | `/admin` &rarr; Revenue after the deploy | The *defaults* changed from 9/90/29/290 to 5/50/15/150. **The env vars are named `STRIPE_PRICE_MONTHLY_AMOUNT`, `STRIPE_PRICE_YEARLY_AMOUNT`, `STRIPE_ENTERPRISE_PRICE_MONTHLY_AMOUNT` and `STRIPE_ENTERPRISE_PRICE_YEARLY_AMOUNT`** - earlier revisions of this file named `STRIPE_PRO_MONTHLY_AMOUNT`, which exists nowhere in the codebase. But config is only the *second* layer: `PlatformPricing` reads the `settings` row first, so what the site advertises is decided by that row, not by the spec. As of writing production already advertises 5/50/15/150, so the config change is an alignment and the displayed price does not move. Note ARR, MRR and renewal emails deliberately read **config**, never `PlatformPricing` - so those figures *will* restate on deploy. That is a reporting artefact, not lost revenue. |
@@ -120,7 +216,7 @@ verification.
 | # | Step | Where | Notes |
 |---|---|---|---|
 | 1 | Create the backups bucket | DO infra | one-time |
-| 2 | Deploy `main` | DO deploy | 11 migrations; two irreversible, a third with a no-op `down()` |
+| 2 | Deploy `main` | DO deploy | 12 migrations; two irreversible, two more with a no-op `down()` |
 | 3 | Backfill the flyer thumbnails | console command | one-time; must precede step 4 |
 | 4 | Cloudflare cache rule | Cloudflare dashboard | one-time; the edge cache is inert until this exists |
 | 5 | Set `BACKUP_*` and `CACHE_STORE` | DO app spec | one-time; one save, one redeploy |
@@ -156,9 +252,9 @@ and phone number. `BACKUP_SPACES_BUCKET` deliberately has no fallback, and
 
 ### 2. Deploy `main` on its own - [DO deploy]
 
-Console, then Deploy. This runs `migrate --force` (11 migrations) and ships all the code.
+Console, then Deploy. This runs `migrate --force` (12 migrations) and ships all the code.
 
-**Verify:** the deploy log shows all 11 migrations completing (this is where a slow `events`
+**Verify:** the deploy log shows all 12 migrations completing (this is where a slow `events`
 rebuild would surface); deployment `ACTIVE`; `/admin/queue` shows no failed-job spike; spot-check
 the homepage, a schedule page and checkout; `/admin` shows no new alerts. The per-task list on
 `/admin/queue` names every scheduled entry - `SchedulerHealthTest` already fails the build if one
@@ -573,7 +669,7 @@ The per-task list on `/admin/queue` is the only place it shows, and it ages from
 
 ## Selfhost release
 
-Cutting v1.0.129 for selfhosters is deliberately **not** part of the hosted deploy. Do it after
+Cutting v1.0.130 for selfhosters is deliberately **not** part of the hosted deploy. Do it after
 the hosted soak.
 
 The version is already bumped in `config/self-update.php` and `.github/workflows/build.yml`.
@@ -581,7 +677,7 @@ The version is already bumped in `config/self-update.php` and `.github/workflows
 does not re-run the suite.
 
 Before publishing, note that `AppUpdateService::performUpdate()` runs `migrate --force` **inline
-in the web request**, and this release's 11 migrations include the irreversible
+in the web request**, and this release's 12 migrations include the irreversible
 `federated_events.event_url` drop. Release notes follow the process in `CLAUDE.md`.
 
 ## Deferred
