@@ -1115,8 +1115,32 @@ async function sendHold(ids, attempt = 0) {
     return requestHold({ seat_ids: ids }, attempt);
 }
 
+/**
+ * Which hold is the current one. A click posts the WHOLE selection and the server replaces
+ * whatever the token was holding, so the newest answer is the only one that is true - and with
+ * more than one PHP worker two of them really can be in flight at once and come back out of order.
+ * An older answer landing last used to reinstate the selection the buyer had already changed.
+ */
+let holdSeq = 0;
+
 async function requestHold(payload, attempt = 0) {
+    const seq = ++holdSeq;
     const { ok, status, data } = await post(props.holdUrl, { ...base(), ...payload });
+
+    // A newer hold has already been answered, so this one describes a selection that no longer
+    // exists - including its refusals, which are refusals of a selection the buyer has moved on
+    // from. The retry below re-enters this function and takes a fresh seq, so it is unaffected.
+    if (seq !== holdSeq) {
+        return ok;
+    }
+
+    // Tell the shared map where the room is now. Without this the picker keeps asking the poll
+    // for a diff "since the version at page load", so every tick re-sends the whole hold history -
+    // and, worse, a poll answered from BEFORE this hold still looks current to the staleness guard
+    // in seat-map-store.js. Forward only: two holds can answer out of order.
+    if (map.value && typeof data.version === 'number' && data.version > (Number(map.value.version) || 0)) {
+        map.value.version = data.version;
+    }
 
     if (!ok) {
         showError(data.error || t.holdFailed);

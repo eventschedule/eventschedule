@@ -58,6 +58,24 @@ export function startPolling(stateUrl, eventId, date, map, onChange, intervalMs 
             if (!res.ok) return;
 
             const data = await res.json();
+
+            // Drop an answer that has fallen behind what we have already applied.
+            //
+            // The server reads the map version FIRST and the advisory LAST (SeatingPickerController
+            // ::state), and a hold bumps the version inside the same transaction that writes the
+            // seats - so another connection can only see the new version once the seats are
+            // visible too. A payload whose version is lower than ours therefore describes a room
+            // that has since moved on, and applying it undoes whatever moved it.
+            //
+            // That is the reported bug: with four PHP workers a poll and a hold really do overlap,
+            // and a poll answered before the last click landed after it and wiped the
+            // stranded-seat warning the hold had just raised. Nothing ever put it back, because
+            // the next poll's diff was empty and an absent `warning` means "unchanged" - so the
+            // buyer was left holding a stranded selection with no notice and no block on checkout.
+            // The same staleness reverted seats a buyer had just dropped and raised "some seats
+            // have gone" for seats nobody had taken.
+            if (typeof data.version === 'number' && data.version < map.version) return;
+
             map.version = data.version;
             // The box office's summary bar reads these. Only the box office endpoint sends them,
             // and only on a tick where something moved.

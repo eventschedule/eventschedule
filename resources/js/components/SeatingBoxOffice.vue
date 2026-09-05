@@ -176,18 +176,23 @@
                         </p>
                     </div>
                     <div class="flex flex-wrap gap-2 pt-1">
-                        <button type="button" @click="startExchange"
+                        <!-- Ids, not labels, are how these are driven from a browser test: the
+                             pinned bar below renders the same three controls, so matching on
+                             button text picks whichever happens to come first in the DOM - and it
+                             matches against the label in the TEST process's locale, not the
+                             browser session's. -->
+                        <button type="button" id="bo-exchange" @click="startExchange"
                             class="px-3 py-2 rounded-md text-xs font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-[var(--brand-blue)] transition-all duration-200">
                             {{ exchangeFrom ? t.exchangeChoose : t.exchange }}
                         </button>
-                        <button v-if="exchangeFrom" type="button" @click="cancelExchange"
+                        <button v-if="exchangeFrom" type="button" id="bo-cancel-exchange" @click="cancelExchange"
                             class="px-3 py-2 rounded-md text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-all duration-200">
                             {{ t.cancelExchange }}
                         </button>
                         <!-- A bordered danger button, not underlined red text: this is the most
                              destructive control on the screen and it used to be the least
                              substantial thing next to a properly drawn button. -->
-                        <button type="button" @click="releaseSeat"
+                        <button type="button" id="bo-release" @click="releaseSeat"
                             class="px-3 py-2 rounded-md text-xs font-medium border border-red-300 dark:border-red-700 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200">
                             {{ t.releaseSeat }}
                         </button>
@@ -323,15 +328,18 @@
 
                 <div class="flex shrink-0 items-center gap-2">
                     <template v-if="single.state === 'sold'">
-                        <button type="button" @click="startExchange"
+                        <!-- The pinned bar duplicates the inspector's controls for a narrow
+                             screen, so its ids are suffixed: two nodes sharing an id is the same
+                             ambiguity as two nodes sharing a label. -->
+                        <button type="button" id="bo-exchange-mobile" @click="startExchange"
                             class="px-3 py-2 rounded-md text-xs font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 transition-all duration-200">
                             {{ exchangeFrom ? t.exchangeChoose : t.exchange }}
                         </button>
-                        <button v-if="exchangeFrom" type="button" @click="cancelExchange"
+                        <button v-if="exchangeFrom" type="button" id="bo-cancel-exchange-mobile" @click="cancelExchange"
                             class="px-3 py-2 rounded-md text-xs font-medium text-gray-500 dark:text-gray-400 transition-all duration-200">
                             {{ t.cancelExchange }}
                         </button>
-                        <button v-else type="button" @click="releaseSeat"
+                        <button v-else type="button" id="bo-release-mobile" @click="releaseSeat"
                             class="px-3 py-2 rounded-md text-xs font-medium border border-red-300 dark:border-red-700 text-red-700 dark:text-red-400 transition-all duration-200">
                             {{ t.releaseSeat }}
                         </button>

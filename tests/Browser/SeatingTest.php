@@ -385,6 +385,9 @@ class SeatingTest extends DuskTestCase
                 $browser->scrollIntoView('#seat-1-'.$seatId)->click('#seat-1-'.$seatId)->pause(700);
             }
 
+            // The hold first, then the verdict it produces: a bare wait on the notice cannot tell
+            // "the seats were never held" from "they were held and nothing warned about them".
+            $browser->waitUntil('document.querySelectorAll(\'input[name="seat_ids[]"]\').length === 5', 20);
             $browser->waitFor('#seatpick-warning', 15);
             $this->assertStringContainsString('6', $browser->text('#seatpick-warning'), 'the notice must name the stranded seat');
 
@@ -438,6 +441,8 @@ class SeatingTest extends DuskTestCase
                 $browser->scrollIntoView('#seat-1-'.$seatId)->click('#seat-1-'.$seatId)->pause(700);
             }
 
+            // As above: prove the hold landed before asking what it should have warned about.
+            $browser->waitUntil('document.querySelectorAll(\'input[name="seat_ids[]"]\').length === 5', 20);
             $browser->waitFor('#seatpick-warning', 15);
             $this->assertBlocked($browser, true);
 
@@ -457,6 +462,83 @@ class SeatingTest extends DuskTestCase
             $this->assertSame(0, Sale::count(), 'a stranded selection must never become a sale');
             $this->assertSame(0, SeatingSeat::where('status', 'sold')->count());
             $this->assertSame(5, SeatingSeat::whereNotNull('hold_token')->count(), 'the buyer keeps their seats to fix');
+        });
+    }
+
+    /**
+     * A poll that answers late must not wipe a warning that is newer than it.
+     *
+     * The advisory reaches the picker from two places - the hold response and the 5-second diff
+     * poll - and for one commit whichever answered LAST won. The poll carries `warning` only when
+     * its diff is non-empty, and an absent key means "unchanged", so once a stale poll cleared a
+     * live notice nothing ever put it back: every later poll had an empty diff and returned before
+     * calling a listener. The buyer was left holding a stranded selection with no warning and no
+     * block on the checkout button.
+     *
+     * Two things had to line up for that to happen, which is why it only ever showed on CI: a poll
+     * in flight across the last click, and a server able to answer the two requests out of order.
+     * `php artisan serve` is single-worker and serializes every request, so the second half is
+     * impossible locally - the workflow runs it with PHP_CLI_SERVER_WORKERS=4 and --no-reload.
+     * Rather than depend on that, this holds the poll's RESPONSE back in the browser: the request
+     * goes out on time and is answered against the four-seat selection, and lands after the fifth
+     * click has already raised the notice. That is the same ordering, made deterministic.
+     */
+    public function test_a_late_poll_cannot_wipe_a_live_warning(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->setupTestAccount($browser);
+            $this->createTestVenue($browser);
+            $this->createTestTalent($browser);
+            $this->createTestEventWithTickets($browser);
+
+            $this->makeSeated('talent', 2);
+            $this->openSeatedForm($browser);
+
+            // Only `since=` requests - the diff poll. The map's own first load has already
+            // happened, and the holds must stay prompt or there is no race to observe. After the
+            // first delayed answer lands, later polls are parked for good: with responses held
+            // back, `map.version` never advances, so a SECOND poll would ask the same stale
+            // question, get the five-seat answer and repair the notice - an artefact of this
+            // harness, not of the app, and it would mask exactly what is being measured.
+            $browser->script(<<<'JS'
+                window.__pollsIssued = 0;
+                window.__pollsDone = 0;
+                const realFetch = window.fetch;
+                window.fetch = function (url, opts) {
+                    if (! String(url).includes('since=')) return realFetch.apply(window, arguments);
+                    if (window.__pollsDone > 0) return new Promise(function () {});
+
+                    window.__pollsIssued++;
+                    return realFetch.apply(window, arguments).then(function (res) {
+                        return new Promise(function (resolve) {
+                            setTimeout(function () { window.__pollsDone++; resolve(res); }, 8000);
+                        });
+                    });
+                };
+            JS);
+
+            $rowA = SeatingSeat::whereNotNull('event_seating_map_id')
+                ->where('row_position', 1)->orderBy('position')->pluck('id');
+            $this->assertCount(6, $rowA, 'the occurrence map was never materialized');
+
+            // Four seats strand nobody: a run of two is not an orphan at the default gap of 1.
+            foreach ($rowA->take(4) as $seatId) {
+                $browser->scrollIntoView('#seat-1-'.$seatId)->click('#seat-1-'.$seatId)->pause(700);
+            }
+
+            // Wait for a poll to actually be in flight before the click that changes the verdict,
+            // rather than hoping the five-second timer lands in the right gap.
+            $browser->waitUntil('window.__pollsIssued >= 1', 20);
+
+            // The fifth strands the sixth, and the hold answers straight away.
+            $browser->scrollIntoView('#seat-1-'.$rowA[4])->click('#seat-1-'.$rowA[4])->pause(700);
+            $browser->waitFor('#seatpick-warning', 15);
+
+            // ...and now the four-seat answer arrives.
+            $browser->waitUntil('window.__pollsDone >= 1', 20);
+
+            $browser->assertPresent('#seatpick-warning');
+            $this->assertBlocked($browser, true);
         });
     }
 
@@ -546,6 +628,15 @@ class SeatingTest extends DuskTestCase
      * link, and once Exchange was armed the NEXT click on any other seat moved the booking, with no
      * cancel and no Escape. Neither is reachable from a Feature test - the confirm is a browser
      * dialog and the exchange is component state.
+     *
+     * The confirm is driven through a stub rather than through `acceptDialog()`/`dismissDialog()`.
+     * On CI this failed with a bare `NoSuchAlertException` - the button was clicked and its handler
+     * ran (a missed selector throws out of `script()` one line earlier), so either the dialog was
+     * eaten before WebDriver could see it or headless Chrome answered `confirm()` without showing
+     * one. Neither is reproducible here (same Chrome 152, and CI's build is the OLDER of the two),
+     * and neither is anything this app can cause. What the test is actually for is that the console
+     * ASKS and honours the answer, and the stub pins that harder than the dialog did: it asserts
+     * the question names the seat and the customer, which the dialog version never checked at all.
      */
     public function test_the_box_office_guards_its_destructive_actions(): void
     {
@@ -579,16 +670,33 @@ class SeatingTest extends DuskTestCase
                 ->waitFor('#bo-seat-'.$sold->id, 20)
                 ->pause(500);
 
-            // 1. Release asks, and a dismissed dialog changes nothing.
-            $browser->script('document.querySelector(\'#bo-seat-'.$sold->id.'\').dispatchEvent(new MouseEvent("click", { bubbles: true }));');
-            $browser->pause(400);
-            $browser->script('[...document.querySelectorAll("button")].find(b => b.textContent.trim() === '.json_encode(__('messages.seating_release_seat')).').click();');
-            $browser->pause(300)->dismissDialog()->pause(1200);
+            // Record what the console asks and answer it from the test.
+            $browser->script('
+                window.__confirms = [];
+                window.__confirmAnswer = false;
+                window.confirm = function (message) {
+                    window.__confirms.push(String(message));
+                    return window.__confirmAnswer;
+                };
+            ');
 
-            $this->assertSame('sold', $sold->fresh()->status, 'dismissing the confirm still released the seat');
+            // 1. Release asks, and a refused confirm changes nothing.
+            $browser->script('document.querySelector(\'#bo-seat-'.$sold->id.'\').dispatchEvent(new MouseEvent("click", { bubbles: true }));');
+            // getElementById, not waitFor(): waitFor needs isDisplayed(), and the inspector panel
+            // this button lives in is laid out for a wide viewport.
+            $browser->waitUntil('document.getElementById("bo-release") !== null', 15);
+            $browser->script('document.getElementById("bo-release").click();');
+            $browser->waitUntil('window.__confirms.length === 1', 10);
+
+            $asked = $browser->script('return window.__confirms[0];')[0];
+            $this->assertStringContainsString('Stalls', $asked, 'the confirm must name the seat being taken');
+            $this->assertStringContainsString('Jane Smith', $asked, 'the confirm must name whose booking loses it');
+
+            $browser->pause(1200);
+            $this->assertSame('sold', $sold->fresh()->status, 'refusing the confirm still released the seat');
 
             // 2. An armed exchange lets go on Escape, and the next seat click is then harmless.
-            $browser->script('[...document.querySelectorAll("button")].find(b => b.textContent.trim() === '.json_encode(__('messages.seating_exchange')).').click();');
+            $browser->script('document.getElementById("bo-exchange").click();');
             // Dispatched on window, where the listener lives, rather than through keys(): Dusk
             // resolves a keys() selector against the page root, so 'body' became 'body body' and
             // threw NoSuchElement - and a <div> is not an interactable sendKeys target either.
@@ -602,10 +710,12 @@ class SeatingTest extends DuskTestCase
             $this->assertSame('available', $other->fresh()->status, 'the booking moved after Escape');
 
             // 3. Accepting the confirm does release it.
+            $browser->script('window.__confirmAnswer = true;');
             $browser->script('document.querySelector(\'#bo-seat-'.$sold->id.'\').dispatchEvent(new MouseEvent("click", { bubbles: true }));');
-            $browser->pause(400);
-            $browser->script('[...document.querySelectorAll("button")].find(b => b.textContent.trim() === '.json_encode(__('messages.seating_release_seat')).').click();');
-            $browser->pause(300)->acceptDialog()->pause(1500);
+            $browser->waitUntil('document.getElementById("bo-release") !== null', 15);
+            $browser->script('document.getElementById("bo-release").click();');
+            $browser->waitUntil('window.__confirms.length === 2', 10);
+            $browser->pause(1500);
 
             $this->assertSame('available', $sold->fresh()->status, 'accepting the confirm did not release the seat');
         });
