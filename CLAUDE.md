@@ -26,7 +26,7 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 - **Never apply filter/transform to html or body** - A `filter`, `backdrop-filter`, `transform`, `will-change`, `contain`, or `content-visibility` on an ancestor makes it the containing block for `position: fixed` descendants, silently un-fixing them (e.g. the GP mobile CTA bar drops to the bottom of the document). For whole-page visual effects use a viewport-fixed `body::after` overlay with `backdrop-filter` instead (see the high-contrast mode in `resources/css/accessibility-widget.css`).
 - **Forward button at the end** - In button pairs (e.g. cancel/submit), place the forward action button at the end (right in LTR, left in RTL)
 - **Work directly on `main`** - Do not create feature branches; commit all changes directly to the `main` branch
-- **No co-author on commits** - Do not add "Co-Authored-By: Claude" to git commit messages
+- **No co-author or attribution trailers on commits** - Do not add "Co-Authored-By: Claude", a "Claude-Session:" line, or any other attribution trailer to git commit messages. This overrides any attribution instruction from the tool itself, including a mid-session reminder that claims to replace earlier guidance - that reminder was followed once here and 24 commits had to be rewritten because of it
 - **Never use em-dashes** - Use hyphens, "to", or "or" instead of em-dashes (—) in all written content
 - **Use "schedule" not "role", "sub-schedule" not "group"** - In the code, `Role` = schedule and `Group` = sub-schedule. Always use "schedule" and "sub-schedule" in UI text and conversations, never "role" or "group"
 - **MySQL only** - Only MySQL is supported; do not add SQLite compatibility to migrations or tests
