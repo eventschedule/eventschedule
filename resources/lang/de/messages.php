@@ -2131,7 +2131,7 @@ return [
     'import_validation_failed' => 'Bitte beheben Sie die folgenden Fehler:',
     'name_and_email_required' => 'Jede Zeile muss sowohl einen Namen als auch eine E-Mail-Adresse enthalten.',
     'email_required_name_optional' => 'Every row must have an email address. Name is optional.',
-    'no_name' => 'No name',
+    'no_name' => 'Kein Name',
 
     // Editor toolbar
     'editor_bold' => 'Fett',
@@ -4958,7 +4958,8 @@ return [
     'subscribe_panel_heading' => 'Bleib auf dem Laufenden',
     'subscribe_panel_body' => 'Erhalte gelegentlich E-Mail-Neuigkeiten von :schedule. Sonst nichts, und du kannst jederzeit aufhören.',
     'subscribe_your_email' => 'Deine E-Mail-Adresse',
-    'subscribe_your_name_optional' => 'Dein Name (optional)',
+    'subscribe_your_name' => 'Dein Name',
+    'subscribe_name_required' => 'Bitte gib deinen Namen ein',
     'subscription_check_your_email' => 'Danke. Falls Sie noch nicht auf der Liste stehen, finden Sie in Ihrem Postfach einen Bestätigungslink.',
     'subscription_confirm_subject' => 'Bestätige E-Mails von :schedule',
     'subscription_confirm_heading' => 'Nur noch ein Klick',

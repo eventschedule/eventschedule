@@ -2134,7 +2134,7 @@ return [
     'import_validation_failed' => 'Corrigeer de volgende fouten:',
     'name_and_email_required' => 'Elke rij moet zowel een naam als een e-mailadres bevatten.',
     'email_required_name_optional' => 'Every row must have an email address. Name is optional.',
-    'no_name' => 'No name',
+    'no_name' => 'Geen naam',
 
     // Editor toolbar
     'editor_bold' => 'Vet',
@@ -4954,7 +4954,8 @@ return [
     'subscribe_panel_heading' => 'Blijf op de hoogte',
     'subscribe_panel_body' => 'Ontvang af en toe nieuws van :schedule per e-mail. Verder niets, en je kunt altijd stoppen.',
     'subscribe_your_email' => 'Je e-mailadres',
-    'subscribe_your_name_optional' => 'Je naam (optioneel)',
+    'subscribe_your_name' => 'Je naam',
+    'subscribe_name_required' => 'Voer je naam in',
     'subscription_check_your_email' => 'Bedankt. Als u nog niet op de lijst staat, vindt u in uw mailbox een link om te bevestigen.',
     'subscription_confirm_subject' => 'Bevestig dat je e-mails van :schedule wilt',
     'subscription_confirm_heading' => 'Nog één klik',

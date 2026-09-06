@@ -2136,7 +2136,7 @@ return [
     'import_validation_failed' => 'Si prega di correggere i seguenti errori:',
     'name_and_email_required' => 'Ogni riga deve avere sia un nome che un indirizzo email.',
     'email_required_name_optional' => 'Every row must have an email address. Name is optional.',
-    'no_name' => 'No name',
+    'no_name' => 'Senza nome',
 
     // Editor toolbar
     'editor_bold' => 'Grassetto',
@@ -4954,7 +4954,8 @@ return [
     'subscribe_panel_heading' => 'Resta aggiornato',
     'subscribe_panel_body' => 'Ricevi ogni tanto aggiornamenti via e-mail da :schedule. Nient\'altro, e puoi smettere quando vuoi.',
     'subscribe_your_email' => 'La tua email',
-    'subscribe_your_name_optional' => 'Il tuo nome (facoltativo)',
+    'subscribe_your_name' => 'Il tuo nome',
+    'subscribe_name_required' => 'Inserisci il tuo nome',
     'subscription_check_your_email' => 'Grazie. Se non sei già nell\'elenco, trovi nella tua email un link per confermare.',
     'subscription_confirm_subject' => 'Conferma di voler ricevere email da :schedule',
     'subscription_confirm_heading' => 'Manca solo un clic',

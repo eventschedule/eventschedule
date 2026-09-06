@@ -89,6 +89,11 @@
          min-w-0, so without a cap here each would stretch to roughly 650px. The heading, body and
          the cadence/privacy footnote still span the card - only the form slot is capped. On the
          event page the column is narrower than 56rem, so this is a no-op there. --}}
+    @php
+        // Which input the rejection is about. respond() flashes it; the fallback keeps the
+        // pre-existing behaviour for bails that name no field (honeypot, rate limit, mailer).
+        $subscribeInvalidField = $subscribeError ? session('subscribe_error_field', 'email') : null;
+    @endphp
     <form method="POST"
         action="{{ route('role.audience.join', ['subdomain' => $subscribePanelRole->subdomain]) }}"
         class="mt-4 max-w-4xl flex flex-col sm:flex-row gap-3">
@@ -108,16 +113,30 @@
             <input type="email" name="email" id="subscribe_email_{{ $subscribePanelRole->id }}" required
                 autocomplete="email"
                 value="{{ session('subscribe_email') }}"
-                @if ($subscribeError) aria-invalid="true" aria-describedby="subscribe_error_{{ $subscribePanelRole->id }}" autofocus @endif
+                @if ($subscribeInvalidField === 'email') aria-invalid="true" aria-describedby="subscribe_error_{{ $subscribePanelRole->id }}" autofocus @endif
                 class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
         </div>
 
         <div class="flex-1 min-w-0">
             <label for="subscribe_name_{{ $subscribePanelRole->id }}" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                {{ __('messages.subscribe_your_name_optional') }}
+                {{ __('messages.subscribe_your_name') }}
             </label>
-            <input type="text" name="name" id="subscribe_name_{{ $subscribePanelRole->id }}"
+            {{-- Required, like the address. The schedule owner sees this name on the followers tab
+                 and the newsletter segments, and "(optional)" left most rows there identified only
+                 by an email address.
+
+                 RoleSubscriberController::store() is what actually enforces it. The modal in
+                 follow-consent-modal.blade.php carries this same attribute but gets nothing from
+                 it: its inputs are not inside a <form>, so constraint validation never runs and
+                 only its own JS guard plus the server stand between an empty name and a request.
+
+                 Repopulated for the same reason the address is: `required` means the browser
+                 blocks resubmission until this box is filled, so dropping what was typed turns
+                 any rejection into retyping. --}}
+            <input type="text" name="name" id="subscribe_name_{{ $subscribePanelRole->id }}" required
                 autocomplete="name"
+                value="{{ session('subscribe_name') }}"
+                @if ($subscribeInvalidField === 'name') aria-invalid="true" aria-describedby="subscribe_error_{{ $subscribePanelRole->id }}" autofocus @endif
                 class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
         </div>
 

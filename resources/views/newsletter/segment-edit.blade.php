@@ -111,7 +111,7 @@
                         @php $encodedId = \App\Utils\UrlUtils::encodeId($subscriber->id); @endphp
                         {{-- Display row --}}
                         <tr data-display-row="{{ $encodedId }}">
-                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{{ $subscriber->name }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">@if ($subscriber->name)<x-user-text>{{ $subscriber->name }}</x-user-text>@else<span class="italic text-gray-400 dark:text-gray-500">{{ __('messages.no_name') }}</span>@endif</td>
                             <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $subscriber->email }}</td>
                             <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $subscriber->created_at?->format('M j, Y') }}</td>
                             <td class="px-4 py-3 text-sm text-right">
@@ -149,7 +149,7 @@
                         @else
                         {{-- Read-only row for non-manual segments --}}
                         <tr>
-                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{{ $subscriber->name }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">@if ($subscriber->name)<x-user-text>{{ $subscriber->name }}</x-user-text>@else<span class="italic text-gray-400 dark:text-gray-500">{{ __('messages.no_name') }}</span>@endif</td>
                             <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $subscriber->email }}</td>
                         </tr>
                         @endif

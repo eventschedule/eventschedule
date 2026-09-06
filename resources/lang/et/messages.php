@@ -2141,7 +2141,7 @@ return [
     'import_validation_failed' => 'Palun parandage järgmised vead:',
     'name_and_email_required' => 'Iga rida peab sisaldama nii nime kui ka e-posti aadressi.',
     'email_required_name_optional' => 'Every row must have an email address. Name is optional.',
-    'no_name' => 'No name',
+    'no_name' => 'Nimeta',
     'choose_file' => 'Vali fail',
 
     // Editor toolbar
@@ -4973,7 +4973,8 @@ return [
     'subscribe_panel_heading' => 'Püsi kursis',
     'subscribe_panel_body' => 'Saad aeg-ajalt e-postiga uudiseid kalendrist :schedule. Muud midagi, ja võid igal ajal loobuda.',
     'subscribe_your_email' => 'Sinu e-post',
-    'subscribe_your_name_optional' => 'Sinu nimi (valikuline)',
+    'subscribe_your_name' => 'Sinu nimi',
+    'subscribe_name_required' => 'Sisestage oma nimi',
     'subscription_check_your_email' => 'Aitäh. Kui te ei ole veel nimekirjas, leiate oma e-postist kinnituslingi.',
     'subscription_confirm_subject' => 'Kinnita, et soovid kirju kavalt :schedule',
     'subscription_confirm_heading' => 'Veel üks klõps',

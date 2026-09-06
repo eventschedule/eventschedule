@@ -93,7 +93,7 @@ class AudienceSegmentTest extends TestCase
      */
     private function subscribeAndConfirm(Role $role, string $email): void
     {
-        $this->post(route('role.audience.join', ['subdomain' => $role->subdomain]), ['email' => $email]);
+        $this->post(route('role.audience.join', ['subdomain' => $role->subdomain]), ['email' => $email, 'name' => 'A Fan']);
 
         $sub = RoleSubscriber::where('role_id', $role->id)->where('email', $email)->firstOrFail();
 

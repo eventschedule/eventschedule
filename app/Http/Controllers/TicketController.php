@@ -2201,11 +2201,20 @@ class TicketController extends Controller
 
     private function captureAudienceOptInFor(\App\Models\Role $role, string $email, ?string $name): void
     {
+        // Trimmed AFTER the strip, and back to null when nothing survives. strip_tags alone turns
+        // "<b> </b>" into "   ", and a whitespace-only string is TRUTHY - so it slips past the
+        // `@if ($subscriber->name)` fallback on show-admin-followers.blade.php and renders a
+        // visually blank cell instead of "No name". A row with no usable name should be null and
+        // say so. Same normalisation RoleSubscriberController::store() applies to the panel and
+        // modal, minus the rejection: both callers here already validate a required name upstream,
+        // and a checkout must not fail over the audience checkbox.
+        $name = trim(strip_tags((string) $name));
+
         try {
             $subscriber = \App\Models\RoleSubscriber::firstOrCreate(
                 ['role_id' => $role->id, 'email' => strtolower(trim($email))],
                 [
-                    'name' => $name ? strip_tags($name) : null,
+                    'name' => $name !== '' ? $name : null,
                     'locale' => app()->getLocale(),
                     'source' => 'checkout',
                     'confirmed_at' => now(),

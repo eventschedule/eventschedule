@@ -115,7 +115,7 @@
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                     @forelse ($recipients as $recipient)
                     <tr>
-                        <td class="px-6 py-3 text-sm text-gray-900 dark:text-gray-100">{{ $recipient->name }}</td>
+                        <td class="px-6 py-3 text-sm text-gray-900 dark:text-gray-100">@if ($recipient->name)<x-user-text>{{ $recipient->name }}</x-user-text>@else<span class="italic text-gray-400 dark:text-gray-500">{{ __('messages.no_name') }}</span>@endif</td>
                         <td class="px-6 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $recipient->email }}</td>
                         <td class="px-6 py-3 text-sm">
                             @php

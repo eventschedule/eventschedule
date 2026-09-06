@@ -74,17 +74,46 @@ class RoleSubscriberController extends Controller
         // RSVP / ticket-purchase modal, so a bad email address would pop the wrong dialog.
         //
         // Same rule as the honeypot bail below: match the bail to what the surface renders.
+
+        // strip_tags BEFORE validating, not at write time: 'required' is satisfied by any non-empty
+        // string, so "<b></b>" would pass the rule and then be stored as '' - a name the form
+        // insists on and the database does not have. Trimming here also means max:255 measures what
+        // is actually kept. Merging is safe on a field this endpoint always expects: an absent name
+        // becomes '', which 'required' rejects exactly as a missing key would.
+        //
+        // is_string() is load-bearing, NOT defensive tidiness. input() hands back `name[]=x` as an
+        // array untouched, this runs BEFORE the validator so the 'string' rule cannot protect it,
+        // and `(string) []` raises "Array to string conversion" - which HandleExceptions promotes
+        // to an ErrorException, i.e. a 500 on a public endpoint. Exactly the bug
+        // test_an_array_email_is_rejected_rather_than_fatal exists for, and the same guard respond()
+        // already uses on the address below. Reachable in the query string too (`?name[]=x`), since
+        // input() unions query->all(). Anything non-string becomes '' and is rejected as missing.
+        $submittedName = $request->input('name');
+        $request->merge(['name' => is_string($submittedName) ? trim(strip_tags($submittedName)) : '']);
+
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
-            'name' => ['nullable', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255'],
             'email' => array_merge(
                 ['required', 'string', 'email', 'max:255'],
                 config('app.hosted') ? [new NoFakeEmail] : []
             ),
+        ], [
+            // Spelled out because there is no resources/lang/*/validation.php in this repo, so
+            // Laravel's own "The name field is required." would be English in every locale - and
+            // now that the field is required, this is the one validation message a real visitor
+            // actually hits. Only .required is worth a key: a 255-character name falls through to
+            // the framework string exactly as every email failure already does.
+            'name.required' => __('messages.subscribe_name_required'),
         ]);
 
         if ($validator->fails()) {
+            // Email first, then name - the order the fields appear in on both surfaces, so someone
+            // fixing them top-down hears about the first one they can see. Neither may fall through
+            // to an empty string, hence the invalid_request backstop.
+            $failedField = $validator->errors()->has('email') ? 'email' : 'name';
+
             return $this->respond($request, $subdomain, $validator->errors()->first('email')
-                ?: __('messages.invalid_request'), false);
+                ?: ($validator->errors()->first('name') ?: __('messages.invalid_request')), false, $failedField);
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
@@ -137,7 +166,8 @@ class RoleSubscriberController extends Controller
             $subscriber = RoleSubscriber::create([
                 'role_id' => $role->id,
                 'email' => $email,
-                'name' => $request->filled('name') ? strip_tags($request->name) : null,
+                // Already stripped and trimmed above, and validated non-empty.
+                'name' => $request->name,
                 'locale' => app()->getLocale(),
                 'source' => $request->input('source') === 'modal' ? 'guest_modal' : 'guest_panel',
                 'token' => RoleSubscriber::newToken(),
@@ -780,7 +810,7 @@ class RoleSubscriberController extends Controller
      *
      * The keys carry the subdomain so a redirect can only ever light up the panel it belongs to.
      */
-    private function respond(Request $request, string $subdomain, string $message, bool $success)
+    private function respond(Request $request, string $subdomain, string $message, bool $success, ?string $errorField = null)
     {
         if ($request->expectsJson()) {
             return response()->json(['success' => $success, 'message' => $message]);
@@ -805,8 +835,21 @@ class RoleSubscriberController extends Controller
             return $back
                 ->with('subscribe_error', $message)
                 ->with('subscribe_error_for', $subdomain)
+                // Which input to mark invalid and focus. Callers that are not a field-level
+                // rejection (honeypot, rate limit, mailer failure) pass nothing and keep the
+                // original behaviour of pointing at the address.
+                ->with('subscribe_error_field', $errorField ?: 'email')
                 ->with('subscribe_email', is_string($request->input('email'))
                     ? $request->input('email')
+                    : '')
+                // The name comes back too, for the same reason the address does. It only started
+                // mattering when the field became required: before, losing it on a rejected
+                // address was an annoyance; now the browser blocks resubmission until it is
+                // retyped, and every retry costs one of five attempts per minute. Already
+                // normalised by store(), and is_string() guards the callers that bail before that
+                // ran - the honeypot bails FIRST, so this can still see a raw `name[]=x`.
+                ->with('subscribe_name', is_string($request->input('name'))
+                    ? $request->input('name')
                     : '');
         }
 

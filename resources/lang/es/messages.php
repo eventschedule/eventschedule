@@ -2127,7 +2127,7 @@ return [
     'import_validation_failed' => 'Por favor corrija los siguientes errores:',
     'name_and_email_required' => 'Cada fila debe tener un nombre y una dirección de correo electrónico.',
     'email_required_name_optional' => 'Every row must have an email address. Name is optional.',
-    'no_name' => 'No name',
+    'no_name' => 'Sin nombre',
 
     // Editor toolbar
     'editor_bold' => 'Negrita',
@@ -4954,7 +4954,8 @@ return [
     'subscribe_panel_heading' => 'Mantente al día',
     'subscribe_panel_body' => 'Recibe de vez en cuando novedades de :schedule por correo. Nada más, y puedes darte de baja cuando quieras.',
     'subscribe_your_email' => 'Tu correo electrónico',
-    'subscribe_your_name_optional' => 'Tu nombre (opcional)',
+    'subscribe_your_name' => 'Tu nombre',
+    'subscribe_name_required' => 'Introduce tu nombre',
     'subscription_check_your_email' => 'Gracias. Si aún no estás en la lista, busca en tu correo un enlace para confirmar.',
     'subscription_confirm_subject' => 'Confirma que quieres correos de :schedule',
     'subscription_confirm_heading' => 'Un paso más',

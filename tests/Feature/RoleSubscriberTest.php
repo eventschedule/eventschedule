@@ -41,11 +41,103 @@ class RoleSubscriberTest extends TestCase
         return route('role.audience.join', ['subdomain' => $this->role->subdomain]);
     }
 
-    public function test_a_signed_out_visitor_subscribes_with_only_an_email(): void
+    /**
+     * The minimum a real submission carries.
+     *
+     * The name is REQUIRED (RoleSubscriberController::store()), so a test that only cares about
+     * the address still has to send one. Keeping that in one place means the next required field
+     * is one edit rather than thirty; `$overrides + $defaults` lets a caller replace either key,
+     * because PHP's array union keeps the LEFT operand's value on a collision.
+     */
+    private function joinPayload(array $overrides = []): array
+    {
+        return $overrides + ['email' => 'fan@fans.test', 'name' => 'A Fan'];
+    }
+
+    public function test_a_subscription_without_a_name_is_rejected(): void
+    {
+        // The name is what the owner sees on the followers tab, the newsletter stats and the
+        // segment editor. While it was optional those surfaces filled up with rows identified by
+        // nothing but an address.
+        $response = $this->from($this->role->getGuestUrl())
+            ->post($this->joinUrl(), ['email' => 'fan@fans.test']);
+
+        $this->assertSame(0, RoleSubscriber::count());
+
+        // Visible, and visible on the panel's own key - guest layouts render no per-field errors,
+        // so a ValidationException would redirect back showing nothing. Same contract as a
+        // rejected address, and session('error') must stay clear or event/show-guest.blade.php
+        // reopens the ticket modal.
+        $response->assertSessionHas('subscribe_error', __('messages.subscribe_name_required'));
+        $response->assertSessionHas('subscribe_error_for', $this->role->subdomain);
+        $response->assertSessionMissing('error');
+        $response->assertSessionHasNoErrors();
+    }
+
+    public function test_a_name_of_nothing_but_markup_is_rejected(): void
+    {
+        // strip_tags runs BEFORE the rule, not at write time. Validating first and stripping after
+        // would let "<b></b>" satisfy 'required' and then land as an empty string - a name the
+        // form insists on and the row does not have.
+        foreach (['<b></b>', '<b> </b>', '   '] as $name) {
+            $this->post($this->joinUrl(), $this->joinPayload(['name' => $name]))
+                ->assertSessionHas('subscribe_error', __('messages.subscribe_name_required'));
+        }
+
+        $this->assertSame(0, RoleSubscriber::count());
+    }
+
+    public function test_a_missing_name_is_rejected_on_the_json_path_too(): void
+    {
+        // The follow-consent modal posts this endpoint as JSON from hand-built payload, where the
+        // input's `required` attribute does not exist - so the server is the only gate it has.
+        // 200, not 422: the caller throws a generic failure on !response.ok and only renders
+        // data.message on a 200.
+        $this->postJson($this->joinUrl(), ['email' => 'fan@fans.test', 'source' => 'modal'])
+            ->assertOk()
+            ->assertJson(['success' => false, 'message' => __('messages.subscribe_name_required')]);
+
+        $this->assertSame(0, RoleSubscriber::count());
+    }
+
+    public function test_the_stored_name_is_stripped_then_trimmed(): void
+    {
+        // The ORDER is the point, and '<b> </b>Fan' is the fixture that shows it: TrimStrings has
+        // nothing to trim on the way in, strip_tags then EXPOSES a leading space, and only a trim
+        // running after the strip removes it. A plain outer-whitespace fixture proves nothing here
+        // - the middleware would have handled that one on its own, so the test would pass with or
+        // without this code.
+        $this->post($this->joinUrl(), $this->joinPayload(['name' => '<b> </b>Fan']));
+
+        $this->assertSame('Fan', RoleSubscriber::first()->name);
+    }
+
+    public function test_both_subscribe_surfaces_require_a_name(): void
+    {
+        // The label lost "(optional)" and the input gained `required`. Checked on the rendered
+        // page rather than on the partial, because the modal and the panel are separate copies of
+        // the same two fields and only one of them is a real <form>.
+        $html = $this->get($this->role->getGuestUrl())->assertOk()->getContent();
+
+        // Asserted against the label's rendered TEXT, not against the old key: that key is gone, so
+        // __() would hand back the key name itself and the check would pass for free.
+        preg_match('/<label for="subscribe_name_[^"]*"[^>]*>(.*?)<\\/label>/s', $html, $label);
+        $this->assertNotEmpty($label, 'the panel name label did not render');
+        $this->assertSame(__('messages.subscribe_your_name'), trim($label[1]));
+
+        foreach (['subscribe_name_', 'follow-consent-name'] as $id) {
+            preg_match('/<input[^>]*id="'.preg_quote($id, '/').'[^>]*>/', $html, $m);
+            $this->assertNotEmpty($m, "the {$id} input did not render");
+            $this->assertStringContainsString('required', $m[0],
+                "the {$id} input must be marked required");
+        }
+    }
+
+    public function test_a_signed_out_visitor_subscribes_without_an_account(): void
     {
         $userCount = User::count();
 
-        $this->post($this->joinUrl(), ['email' => 'fan@fans.test', 'name' => 'A Fan'])
+        $this->post($this->joinUrl(), $this->joinPayload())
             ->assertRedirect();
 
         $sub = RoleSubscriber::where('role_id', $this->role->id)->first();
@@ -66,7 +158,7 @@ class RoleSubscriberTest extends TestCase
     {
         Queue::fake();
 
-        $this->post($this->joinUrl(), ['email' => 'fan@fans.test']);
+        $this->post($this->joinUrl(), $this->joinPayload());
 
         $sub = RoleSubscriber::first();
         $this->assertNull($sub->confirmed_at, 'a fresh subscriber must not be mailable yet');
@@ -79,7 +171,7 @@ class RoleSubscriberTest extends TestCase
 
     public function test_confirming_makes_the_row_mailable(): void
     {
-        $this->post($this->joinUrl(), ['email' => 'fan@fans.test']);
+        $this->post($this->joinUrl(), $this->joinPayload());
         $sub = RoleSubscriber::first();
 
         $this->post(route('subscriber.confirm', ['token' => $sub->confirm_token]))
@@ -91,8 +183,8 @@ class RoleSubscriberTest extends TestCase
 
     public function test_email_case_and_whitespace_do_not_create_a_second_row(): void
     {
-        $this->post($this->joinUrl(), ['email' => 'Fan@Fans.test']);
-        $this->post($this->joinUrl(), ['email' => '  fan@fans.test  ']);
+        $this->post($this->joinUrl(), $this->joinPayload(['email' => 'Fan@Fans.test']));
+        $this->post($this->joinUrl(), $this->joinPayload(['email' => '  fan@fans.test  ']));
 
         $this->assertSame(1, RoleSubscriber::count());
         $this->assertSame('fan@fans.test', RoleSubscriber::first()->email);
@@ -100,8 +192,8 @@ class RoleSubscriberTest extends TestCase
 
     public function test_a_duplicate_submission_is_idempotent_and_says_nothing_different(): void
     {
-        $first = $this->post($this->joinUrl(), ['email' => 'fan@fans.test']);
-        $second = $this->post($this->joinUrl(), ['email' => 'fan@fans.test']);
+        $first = $this->post($this->joinUrl(), $this->joinPayload());
+        $second = $this->post($this->joinUrl(), $this->joinPayload());
 
         $this->assertSame(1, RoleSubscriber::count());
 
@@ -117,10 +209,7 @@ class RoleSubscriberTest extends TestCase
 
     public function test_a_filled_honeypot_writes_nothing_and_flashes_an_error(): void
     {
-        $this->post($this->joinUrl(), [
-            'email' => 'fan@fans.test',
-            'website' => 'http://spam.example',
-        ])->assertSessionHas('subscribe_error');
+        $this->post($this->joinUrl(), $this->joinPayload(['website' => 'http://spam.example']))->assertSessionHas('subscribe_error');
 
         $this->assertSame(0, RoleSubscriber::count());
     }
@@ -129,7 +218,7 @@ class RoleSubscriberTest extends TestCase
     {
         // Every non-browser caller omits the field entirely; a has() check instead of filled()
         // would break all of them at once.
-        $this->post($this->joinUrl(), ['email' => 'fan@fans.test']);
+        $this->post($this->joinUrl(), $this->joinPayload());
 
         $this->assertSame(1, RoleSubscriber::count());
     }
@@ -138,10 +227,7 @@ class RoleSubscriberTest extends TestCase
     {
         // Not an error status: the modal's caller throws a generic failure on !response.ok and
         // only renders data.message on a 200.
-        $this->postJson($this->joinUrl(), [
-            'email' => 'fan@fans.test',
-            'website' => 'http://spam.example',
-        ])->assertOk()->assertJson(['success' => false]);
+        $this->postJson($this->joinUrl(), $this->joinPayload(['website' => 'http://spam.example']))->assertOk()->assertJson(['success' => false]);
 
         $this->assertSame(0, RoleSubscriber::count());
     }
@@ -154,7 +240,7 @@ class RoleSubscriberTest extends TestCase
             'unsubscribed_at' => now(),
         ]);
 
-        $this->post($this->joinUrl(), ['email' => 'fan@fans.test']);
+        $this->post($this->joinUrl(), $this->joinPayload());
 
         // Reversing an explicit "no" from an unauthenticated POST is worse than the accepted
         // single-opt-in risk. Only confirming, which proves mailbox possession, may lift it.
@@ -163,7 +249,7 @@ class RoleSubscriberTest extends TestCase
 
     public function test_confirming_does_lift_a_previous_unsubscribe(): void
     {
-        $this->post($this->joinUrl(), ['email' => 'fan@fans.test']);
+        $this->post($this->joinUrl(), $this->joinPayload());
         NewsletterUnsubscribe::create([
             'role_id' => $this->role->id,
             'email' => 'fan@fans.test',
@@ -183,7 +269,7 @@ class RoleSubscriberTest extends TestCase
         // AND deleted the recipient's newsletter_unsubscribes row on their behalf. Anyone can put
         // any address into the public form, so it made an unauthenticated caller able to erase a
         // stranger's newsletter opt-out by proxy.
-        $this->post($this->joinUrl(), ['email' => 'fan@fans.test']);
+        $this->post($this->joinUrl(), $this->joinPayload());
         $sub = RoleSubscriber::first();
 
         NewsletterUnsubscribe::create([
@@ -216,10 +302,92 @@ class RoleSubscriberTest extends TestCase
         // raised "Array to string conversion" - which HandleExceptions promotes to an
         // ErrorException, i.e. a 500 on a public endpoint. Same class as ArrayLanguageParamTest,
         // and as the is_valid_language_code() signature change in this release.
-        $this->post($this->joinUrl(), ['email' => ['a']])->assertRedirect();
-        $this->post($this->joinUrl(), ['email' => 'fan@fans.test', 'website' => ['x']])->assertRedirect();
+        $this->post($this->joinUrl(), $this->joinPayload(['email' => ['a']]))->assertRedirect();
+        $this->post($this->joinUrl(), $this->joinPayload(['website' => ['x']]))->assertRedirect();
 
         $this->assertSame(0, RoleSubscriber::count());
+    }
+
+    public function test_an_array_name_is_rejected_rather_than_fatal(): void
+    {
+        // The name's turn at the same trap. store() normalises the name with strip_tags BEFORE
+        // validating - which is what stops "<b></b>" being stored as '' - and that put a cast in
+        // front of the 'string' rule, where the rule cannot defend it. `name[]=x` therefore reached
+        // `(string) []`, "Array to string conversion", an ErrorException, and a 500 on a public
+        // endpoint. Same failure as the address above, and it needs its own test because
+        // joinPayload() always supplies a well-typed name.
+        $this->post($this->joinUrl(), $this->joinPayload(['name' => ['a']]))->assertRedirect();
+
+        // Not only the body: input() unions query->all(), so a query string reaches the same cast
+        // even when the posted body is entirely well-formed.
+        $this->post($this->joinUrl().'?name[]=x', ['email' => 'fan@fans.test'])->assertRedirect();
+
+        $this->assertSame(0, RoleSubscriber::count());
+    }
+
+    public function test_a_rejected_submission_hands_back_the_typed_name(): void
+    {
+        // The address already came back; the name did not, and `required` turned that from an
+        // annoyance into retyping - the browser will not resubmit until the box is filled again,
+        // and each attempt costs one of five per minute.
+        $response = $this->from($this->role->getGuestUrl())
+            ->post($this->joinUrl(), $this->joinPayload([
+                'email' => 'not-an-email',
+                'name' => 'María González',
+            ]));
+
+        $response->assertSessionHas('subscribe_email', 'not-an-email');
+        $response->assertSessionHas('subscribe_name', 'María González');
+
+        // And it actually reaches the input, rather than only the session.
+        $this->assertStringContainsString('value="María González"',
+            $this->get($this->role->getGuestUrl())->getContent());
+    }
+
+    public function test_the_rejected_field_is_the_one_marked_invalid(): void
+    {
+        // aria-invalid/aria-describedby/autofocus used to hang off the email input on ANY error,
+        // which was right while an address was the only thing that could fail. With the name
+        // required, the common rejection would otherwise focus the already-correct email box and
+        // tell a screen reader that the EMAIL is invalid, described by the NAME's error text.
+        $this->post($this->joinUrl(), ['email' => 'fan@fans.test'])
+            ->assertSessionHas('subscribe_error_field', 'name');
+
+        $html = $this->get($this->role->getGuestUrl())->getContent();
+
+        preg_match('/<input[^>]*id="subscribe_name_[^>]*>/', $html, $name);
+        $this->assertNotEmpty($name, 'the name input did not render');
+        $this->assertStringContainsString('aria-invalid', $name[0],
+            'the name is what failed, so the name input is what must be flagged');
+
+        preg_match('/<input[^>]*id="subscribe_email_[^>]*>/', $html, $email);
+        $this->assertNotEmpty($email, 'the email input did not render');
+        $this->assertStringNotContainsString('aria-invalid', $email[0],
+            'the address was fine, so nothing may announce it as invalid');
+    }
+
+    public function test_a_bad_address_still_marks_the_address(): void
+    {
+        // The other side of the same switch: the original behaviour has to survive it.
+        $this->post($this->joinUrl(), $this->joinPayload(['email' => 'not-an-email']))
+            ->assertSessionHas('subscribe_error_field', 'email');
+
+        preg_match('/<input[^>]*id="subscribe_email_[^>]*>/',
+            $this->get($this->role->getGuestUrl())->getContent(), $email);
+        $this->assertStringContainsString('aria-invalid', $email[0]);
+    }
+
+    public function test_the_json_path_normalises_the_name_too(): void
+    {
+        // Request::merge() writes to the JSON bag on a JSON request, so the modal gets the same
+        // strip-then-trim the form does. Worth pinning: every other normalisation test drives the
+        // form path, and a merge that silently missed the JSON bag would leave the modal storing
+        // raw markup with nothing failing.
+        $this->postJson($this->joinUrl(), $this->joinPayload(['name' => '<b> </b>Fan', 'source' => 'modal']))
+            ->assertOk()
+            ->assertJson(['success' => true]);
+
+        $this->assertSame('Fan', RoleSubscriber::first()->name);
     }
 
     public function test_a_failing_mailer_does_not_500_the_public_form(): void
@@ -232,7 +400,7 @@ class RoleSubscriberTest extends TestCase
         Queue::shouldReceive('push')->andThrow(new \RuntimeException('smtp is down'));
         Queue::shouldReceive('connection')->andReturnSelf();
 
-        $this->post($this->joinUrl(), ['email' => 'fan@fans.test'])->assertRedirect();
+        $this->post($this->joinUrl(), $this->joinPayload())->assertRedirect();
 
         // The row is still written, and the visitor is told the same thing as always.
         $this->assertSame(1, RoleSubscriber::count());
@@ -240,7 +408,7 @@ class RoleSubscriberTest extends TestCase
 
     public function test_one_click_unsubscribe_writes_the_shared_list(): void
     {
-        $this->post($this->joinUrl(), ['email' => 'fan@fans.test']);
+        $this->post($this->joinUrl(), $this->joinPayload());
         $sub = RoleSubscriber::first();
 
         $this->post('/sub/u/'.$sub->token)->assertOk();
@@ -274,8 +442,8 @@ class RoleSubscriberTest extends TestCase
     public function test_unsubscribe_all_covers_every_schedule_the_address_reaches(): void
     {
         $other = $this->createRole($this->createOwner(), 'talent');
-        $this->post($this->joinUrl(), ['email' => 'fan@fans.test']);
-        $this->post(route('role.audience.join', ['subdomain' => $other->subdomain]), ['email' => 'fan@fans.test']);
+        $this->post($this->joinUrl(), $this->joinPayload());
+        $this->post(route('role.audience.join', ['subdomain' => $other->subdomain]), $this->joinPayload());
 
         $this->post('/sub/u/'.RoleSubscriber::first()->token, ['all' => 1])->assertOk();
 
@@ -286,8 +454,8 @@ class RoleSubscriberTest extends TestCase
     public function test_a_single_unsubscribe_does_not_touch_another_schedule(): void
     {
         $other = $this->createRole($this->createOwner(), 'talent');
-        $this->post($this->joinUrl(), ['email' => 'fan@fans.test']);
-        $this->post(route('role.audience.join', ['subdomain' => $other->subdomain]), ['email' => 'fan@fans.test']);
+        $this->post($this->joinUrl(), $this->joinPayload());
+        $this->post(route('role.audience.join', ['subdomain' => $other->subdomain]), $this->joinPayload());
 
         $this->post('/sub/u/'.RoleSubscriber::where('role_id', $this->role->id)->first()->token)->assertOk();
 
@@ -314,7 +482,7 @@ class RoleSubscriberTest extends TestCase
 
     public function test_subscriber_emails_never_reach_a_guest_surface(): void
     {
-        $this->post($this->joinUrl(), ['email' => 'private@fans.test']);
+        $this->post($this->joinUrl(), $this->joinPayload(['email' => 'private@fans.test']));
 
         $this->get($this->role->getGuestUrl())
             ->assertOk()
@@ -552,10 +720,12 @@ class RoleSubscriberTest extends TestCase
     {
         $role = $role ?: $this->role;
 
-        $this->post(route('role.audience.join', ['subdomain' => $role->subdomain]), array_filter([
+        // Defaulted, not passed through as null: the endpoint requires a name, and every caller
+        // here that leaves it out is testing the CONFIRM half rather than the form.
+        $this->post(route('role.audience.join', ['subdomain' => $role->subdomain]), [
             'email' => $email,
-            'name' => $name,
-        ]));
+            'name' => $name ?: 'A Fan',
+        ]);
 
         $sub = RoleSubscriber::where('role_id', $role->id)->where('email', $email)->firstOrFail();
 
@@ -596,7 +766,7 @@ class RoleSubscriberTest extends TestCase
         // newsletter with no opt-in at all.
         $before = User::count();
 
-        $this->post($this->joinUrl(), ['email' => 'fan@fans.test']);
+        $this->post($this->joinUrl(), $this->joinPayload());
 
         $this->assertSame($before, User::count());
         $this->assertSame(0, $this->followerPivots($this->role));
@@ -797,7 +967,7 @@ class RoleSubscriberTest extends TestCase
         $follower = $this->createOwner();
         $this->followRole($follower, $this->role);
 
-        $this->post($this->joinUrl(), ['email' => $follower->email]);
+        $this->post($this->joinUrl(), $this->joinPayload(['email' => $follower->email]));
 
         $sub = RoleSubscriber::where('role_id', $this->role->id)->firstOrFail();
         $this->assertNull($sub->confirmed_at);
@@ -1021,7 +1191,7 @@ class RoleSubscriberTest extends TestCase
         // surface before the account exists - later than the email, and unlike the email it renders
         // at click time, so it is the one that can still be right if the schedule was claimed after
         // the mail went out.
-        $this->post($this->joinUrl(), ['email' => 'fan@fans.test']);
+        $this->post($this->joinUrl(), $this->joinPayload());
         $token = RoleSubscriber::where('email', 'fan@fans.test')->first()->confirm_token;
 
         $this->get('/sub/c/'.$token)
@@ -1092,6 +1262,45 @@ class RoleSubscriberTest extends TestCase
         $this->assertSame('checkout', $sub->source);
     }
 
+    public function test_the_checkout_opt_in_stores_null_rather_than_a_blank_name(): void
+    {
+        // captureAudienceOptInFor() stripped tags without trimming, so "<b> </b>" landed as "   ".
+        // A whitespace-only string is TRUTHY, so it walked straight past the
+        // `@if ($subscriber->name)` fallback on show-admin-followers.blade.php and drew an empty
+        // cell where "No name" belongs. Null is the honest value, and it is the one the fallback
+        // can see. Not rejected here the way the subscribe panel rejects it - a checkout must not
+        // fail over the audience checkbox.
+        $event = $this->createEvent($this->role, ['rsvp_enabled' => true]);
+
+        $this->post(route('event.rsvp', ['subdomain' => $this->role->subdomain]), [
+            'name' => '<b> </b>',
+            'email' => 'fan@fans.test',
+            'event_id' => \App\Utils\UrlUtils::encodeId($event->id),
+            'event_date' => $event->getStartDateTime()->format('Y-m-d'),
+            'audience_opt_in' => '1',
+        ]);
+
+        $sub = RoleSubscriber::where('email', 'fan@fans.test')->first();
+        $this->assertNotNull($sub, 'the opt-in must still capture the buyer');
+        $this->assertNull($sub->name, 'a name with nothing in it must be null, not whitespace');
+    }
+
+    public function test_the_checkout_opt_in_keeps_a_real_name(): void
+    {
+        // The other half: normalising must not eat a name that has one.
+        $event = $this->createEvent($this->role, ['rsvp_enabled' => true]);
+
+        $this->post(route('event.rsvp', ['subdomain' => $this->role->subdomain]), [
+            'name' => '<b> </b>Fan',
+            'email' => 'fan@fans.test',
+            'event_id' => \App\Utils\UrlUtils::encodeId($event->id),
+            'event_date' => $event->getStartDateTime()->format('Y-m-d'),
+            'audience_opt_in' => '1',
+        ]);
+
+        $this->assertSame('Fan', RoleSubscriber::where('email', 'fan@fans.test')->first()->name);
+    }
+
     public function test_the_opt_in_prefers_the_owning_schedule_over_the_storefront(): void
     {
         // A curator's storefront listing a venue's event: the opt-in belongs to whoever owns the
@@ -1137,7 +1346,7 @@ class RoleSubscriberTest extends TestCase
         // never expired, so subscribe -> confirm -> unsubscribe -> reopening the ORIGINAL
         // confirmation email silently re-subscribed. "Reopening" included a corporate mail gateway
         // prefetching links, which is why confirming is now a POST - see the GET test below.
-        $this->post($this->joinUrl(), ['email' => 'fan@fans.test']);
+        $this->post($this->joinUrl(), $this->joinPayload());
         $sub = RoleSubscriber::first();
         $liveConfirmUrl = route('subscriber.confirm', ['token' => $sub->confirm_token]);
 
@@ -1164,7 +1373,7 @@ class RoleSubscriberTest extends TestCase
     {
         // The other order: they unsubscribe from the confirmation email itself, without ever
         // confirming. The confirm link in that same email must die with it.
-        $this->post($this->joinUrl(), ['email' => 'fan@fans.test']);
+        $this->post($this->joinUrl(), $this->joinPayload());
         $sub = RoleSubscriber::first();
         $liveConfirmUrl = route('subscriber.confirm', ['token' => $sub->confirm_token]);
 
@@ -1179,13 +1388,13 @@ class RoleSubscriberTest extends TestCase
     {
         // The flip side of never lifting a suppression from the form: there has to be a way back,
         // or an unsubscribe is permanent even for the person who changes their mind.
-        $this->post($this->joinUrl(), ['email' => 'fan@fans.test']);
+        $this->post($this->joinUrl(), $this->joinPayload());
         $sub = RoleSubscriber::first();
         $this->post(route('subscriber.confirm', ['token' => $sub->confirm_token]));
         $this->post('/sub/u/'.$sub->token);
 
         // Fill the form in again: a fresh confirmation goes out.
-        $this->post($this->joinUrl(), ['email' => 'fan@fans.test']);
+        $this->post($this->joinUrl(), $this->joinPayload());
         $fresh = $sub->fresh();
         $this->assertNotNull($fresh->confirm_token, 'a suppressed address must get a new confirmation');
 
@@ -1221,7 +1430,7 @@ class RoleSubscriberTest extends TestCase
         // keys on $errors->any() to force-open the RSVP / purchase modal, so a bad address would
         // pop the wrong dialog.
         $response = $this->from($this->role->getGuestUrl())
-            ->post($this->joinUrl(), ['email' => 'not-an-email']);
+            ->post($this->joinUrl(), $this->joinPayload(['email' => 'not-an-email']));
 
         // The rejection has to be VISIBLE. It no longer toasts - the panel renders it inline and
         // respond() redirects to #subscribe-panel, so a toast at the top of the viewport would be a
@@ -1245,7 +1454,7 @@ class RoleSubscriberTest extends TestCase
 
     public function test_a_rejected_address_returns_200_on_the_json_path(): void
     {
-        $this->postJson($this->joinUrl(), ['email' => 'not-an-email'])
+        $this->postJson($this->joinUrl(), $this->joinPayload(['email' => 'not-an-email']))
             ->assertOk()
             ->assertJson(['success' => false]);
     }

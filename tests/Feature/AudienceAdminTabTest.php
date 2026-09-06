@@ -56,7 +56,7 @@ class AudienceAdminTabTest extends TestCase
         // is literally count($followers) + $subscribersCount - would count them twice.
         $role = $this->createRole($this->createOwner());
 
-        $this->post(route('role.audience.join', ['subdomain' => $role->subdomain]), ['email' => 'fan@fans.test']);
+        $this->post(route('role.audience.join', ['subdomain' => $role->subdomain]), ['email' => 'fan@fans.test', 'name' => 'A Fan']);
         $sub = \App\Models\RoleSubscriber::where('role_id', $role->id)->firstOrFail();
         $this->post(route('subscriber.confirm', ['token' => $sub->confirm_token]));
 
@@ -80,7 +80,7 @@ class AudienceAdminTabTest extends TestCase
         $follower = $this->createOwner();
         $this->followRole($follower, $role);
 
-        $this->post(route('role.audience.join', ['subdomain' => $role->subdomain]), ['email' => $follower->email]);
+        $this->post(route('role.audience.join', ['subdomain' => $role->subdomain]), ['email' => $follower->email, 'name' => 'A Fan']);
 
         $this->assertSame(1, $role->fresh()->accountOnlyFollowers()->count());
     }

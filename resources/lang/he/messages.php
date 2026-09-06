@@ -2189,7 +2189,7 @@ return [
     'import_validation_failed' => 'אנא תקן את השגיאות הבאות:',
     'name_and_email_required' => 'כל שורה חייבת לכלול שם וכתובת אימייל.',
     'email_required_name_optional' => 'Every row must have an email address. Name is optional.',
-    'no_name' => 'No name',
+    'no_name' => 'ללא שם',
 
     // Editor toolbar
     'editor_bold' => 'מודגש',
@@ -4949,7 +4949,8 @@ return [
     'subscribe_panel_heading' => 'הישארו מעודכנים',
     'subscribe_panel_body' => 'קבלו מדי פעם עדכונים במייל מ:schedule. שום דבר מעבר, ואפשר להפסיק בכל רגע.',
     'subscribe_your_email' => 'האימייל שלך',
-    'subscribe_your_name_optional' => 'השם שלך (לא חובה)',
+    'subscribe_your_name' => 'השם שלך',
+    'subscribe_name_required' => 'אנא הזן את שמך',
     'subscription_check_your_email' => 'תודה. אם עדיין אינך ברשימה, מחכה לך במייל קישור לאישור.',
     'subscription_confirm_subject' => 'אשרו שאתם רוצים לקבל מיילים מ:schedule',
     'subscription_confirm_heading' => 'עוד לחיצה אחת',

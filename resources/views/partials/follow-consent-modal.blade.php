@@ -162,6 +162,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 // A page cached from before this shipped has no data-subscribe-url. Fall back to
                 // the account route rather than leaving a button that does nothing.
                 if (!subscribeUrl.value) return confirm();
+
+                // The `required` on the name input below is inert - these fields are not inside a
+                // <form>, and the submit control is a type="button" that calls this directly - so
+                // without this check an empty name always costs a round trip. That matters here
+                // because role.audience.join is throttled at 5/minute per IP: fumble the form six
+                // times and the 429 comes back through the !response.ok branch below as the
+                // generic invalid_request, which says nothing about the name. The address is
+                // deliberately left to the server, exactly as it was before.
+                if (!subscriberName.value.trim()) {
+                    resultSuccess.value = false;
+                    resultMessage.value = @json(__('messages.subscribe_name_required'), JSON_UNESCAPED_UNICODE);
+                    return;
+                }
+
                 submitting.value = true;
                 resultMessage.value = '';
 
@@ -305,10 +319,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                     </div>
                     <div>
-                        <label for="follow-consent-name" class="sr-only">{{ __('messages.subscribe_your_name_optional') }}</label>
-                        <input id="follow-consent-name" type="text" v-model="subscriberName" autocomplete="name"
+                        <label for="follow-consent-name" class="sr-only">{{ __('messages.subscribe_your_name') }}</label>
+                        <input id="follow-consent-name" type="text" v-model="subscriberName" required autocomplete="name"
                             @keyup.enter="submitSubscribe"
-                            placeholder="{{ __('messages.subscribe_your_name_optional') }}"
+                            placeholder="{{ __('messages.subscribe_your_name') }}"
                             class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                     </div>
                     <div class="hidden" aria-hidden="true">

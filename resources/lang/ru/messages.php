@@ -2204,7 +2204,7 @@ return [
     'import_validation_failed' => 'Пожалуйста, исправьте следующие ошибки:',
     'name_and_email_required' => 'В каждой строке должно быть указано имя и адрес электронной почты.',
     'email_required_name_optional' => 'Every row must have an email address. Name is optional.',
-    'no_name' => 'No name',
+    'no_name' => 'Без имени',
 
     // Editor toolbar
     'editor_bold' => 'Смелый',
@@ -4975,7 +4975,8 @@ return [
     'subscribe_panel_heading' => 'Оставайтесь в курсе',
     'subscribe_panel_body' => 'Иногда получайте новости от :schedule по почте. Больше ничего, и вы можете отписаться в любой момент.',
     'subscribe_your_email' => 'Ваш адрес электронной почты',
-    'subscribe_your_name_optional' => 'Ваше имя (необязательно)',
+    'subscribe_your_name' => 'Ваше имя',
+    'subscribe_name_required' => 'Введите ваше имя',
     'subscription_check_your_email' => 'Спасибо. Если вас ещё нет в списке, в почте вас ждёт ссылка для подтверждения.',
     'subscription_confirm_subject' => 'Подтвердите, что хотите получать письма от :schedule',
     'subscription_confirm_heading' => 'Остался один шаг',
