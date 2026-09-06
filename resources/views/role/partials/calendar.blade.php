@@ -734,6 +734,27 @@
                         </div>
                     </template>
                 </div>
+                {{-- Only an includer that caps the list opts in, so the schedule's own page never
+                     links to itself. The server half of the condition is baked into the v-if the
+                     way $alwaysShowFilters is: the window gap is known before Vue boots, the
+                     max_events cap only once the payload lands. --}}
+                @if (! empty($view_all_url))
+                <div v-if="{!! ! empty($view_all_has_earlier) ? 'true' : 'hasMoreEventsThanShown' !!}" id="viewFullScheduleFooter" class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 text-center">
+                    {{-- es-date-month, not a raw inline accent: it resolves --es-date-month /
+                         --es-date-month-dark, which ColorUtils::readableAccentColor already
+                         contrast-corrects per theme. A pale accent is unreadable on this panel,
+                         and an inline style cannot vary by dark: at all. That correction falls back
+                         to plain ink when an accent fails contrast, which costs the link its only
+                         colour cue - hence the resting underline rather than hover:underline. --}}
+                    <a href="{{ $view_all_url }}"
+                       class="es-date-month inline-flex items-center gap-1 rounded-lg px-4 py-3 text-sm font-medium underline underline-offset-4 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--es-accent)]">
+                        {{ $label('view_full_schedule') }}
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 {{ ($role && $role->isRtl()) ? 'rotate-180' : '' }}" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                        </svg>
+                    </a>
+                </div>
+                @endif
             </div>
             <div v-else-if="!isLoadingEvents && {{ $tab != 'availability' ? 'true' : 'false' }}" class="pb-4 text-center">
                 <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
@@ -2357,7 +2378,10 @@ const calendarApp = createApp({
             });
             return result;
         },
-        mobileEventsList() {
+        // Every upcoming occurrence the loaded payload can project, UNSLICED. Split out of
+        // mobileEventsList so the widget can tell whether its own max_events cap hid anything -
+        // the cap is applied below, and a computed that has already sliced cannot report that.
+        allMobileOccurrences() {
             // Create a mobile-friendly events list that includes all upcoming occurrences
             const mobileEvents = [];
             
@@ -2518,7 +2542,22 @@ const calendarApp = createApp({
                     return new Date(a.local_starts_at) - new Date(b.local_starts_at);
                 }
                 return 0;
-            }).slice(0, this.maxEvents || 200);
+            });
+        },
+        mobileEventsList() {
+            return this.allMobileOccurrences.slice(0, this.maxEvents || 200);
+        },
+        // Whether the max_events cap is hiding occurrences the widget would otherwise render.
+        // mobileEventsList is by construction a PREFIX of allMobileOccurrences, so "more visible
+        // than shown" is just "any visible occurrence past the cap" - which short-circuits instead
+        // of walking every occurrence twice. Visibility matters because ?category= and ?schedule=
+        // reach this partial and each card is gated on isEventVisible(), so a raw length comparison
+        // would claim there is more to see when every extra occurrence is filtered out anyway.
+        hasMoreEventsThanShown() {
+            if (! this.maxEvents) {
+                return false;
+            }
+            return this.allMobileOccurrences.slice(this.maxEvents).some(e => this.isEventVisible(e));
         },
         eventsGroupedByDate() {
             const grouped = {};

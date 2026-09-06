@@ -2408,6 +2408,7 @@ class Role extends Model implements MustVerifyEmail
             'show_past_events' => 'Show Past Events',
             'submit_event' => 'Submit Event',
             'venue' => 'Venue',
+            'view_full_schedule' => 'View Full Schedule',
         ];
     }
 

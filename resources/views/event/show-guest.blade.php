@@ -132,6 +132,34 @@
 
   @include('role.partials.guest-banner', ['onEventPage' => true])
 
+  {{-- Built here rather than beside the breadcrumb that used to own it: the sidebar's agenda
+       widget renders FIRST and links to the same place, and one block is what keeps the two
+       from drifting apart. --}}
+  @php
+    $backUrl = route('role.view_guest', ['subdomain' => $role->subdomain]);
+    $queryParams = [];
+    if (request('category')) $queryParams['category'] = request('category');
+    if (request('schedule')) $queryParams['schedule'] = request('schedule');
+    if ($requestedLayout = requested_event_layout()) $queryParams['layout'] = $requestedLayout;
+    // Scratch name, never $date: the controller passes a sanitized $date into this view and
+    // assigning to it here would replace it with the raw query param for the whole rest of
+    // the page (Blade @php shares the template scope), feeding garbage to every date
+    // consumer below - the calendar links throw on it.
+    if ($rawDateParam) {
+      $tDate = $rawDateParam;
+      if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $tDate)) {
+        $tDateParts = explode('-', $tDate);
+        $queryParams['month'] = (int)$tDateParts[1];
+        $queryParams['year'] = (int)$tDateParts[0];
+      }
+    } else {
+      if (request('month')) $queryParams['month'] = request('month');
+      if (request('year')) $queryParams['year'] = request('year');
+    }
+    if (!empty($queryParams)) {
+      $backUrl .= '?' . http_build_query($queryParams);
+    }
+  @endphp
   <div class="container mx-auto max-w-5xl px-0 sm:px-5 pt-4 pb-20 sm:pb-8">
     <div class="flex flex-col gap-4 lg:grid lg:grid-cols-[380px_minmax(0,1fr)] lg:gap-10">
 
@@ -654,11 +682,19 @@
         </div>
         @endif
 
-        {{-- Calendar widget --}}
+        {{-- Calendar widget. The agenda is capped at max_events and its payload starts at THIS
+             event's month, so it is a partial view of the schedule twice over - hence the heading
+             naming what the list is, and view_all_url giving it a way out. --}}
         @if(count($events) > 0)
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-5 flex flex-col gap-6 {{ $role->isRtl() ? 'rtl' : '' }}">
-          <div class="w-full">
-            @include('role/partials/calendar', ['route' => 'guest', 'tab' => '', 'category' => request('category'), 'schedule' => request('schedule'), 'force_mobile' => true, 'max_events' => 20, 'hide_past_events' => true])
+          {{-- A real heading, not the <p> the neighbouring cards use for a venue or talent NAME:
+               this titles a section, and the partial's own <h2 id="month-year-title"> is hidden by
+               force_mobile, so without one the list has no accessible label at all. The tighter gap
+               lives on this inner wrapper rather than on the panel, so a future third child of the
+               panel does not silently inherit spacing chosen for a heading. --}}
+          <div class="w-full flex flex-col gap-3">
+            <h2 class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100">{{ $role->customLabel('events') }}</h2>
+            @include('role/partials/calendar', ['route' => 'guest', 'tab' => '', 'category' => request('category'), 'schedule' => request('schedule'), 'force_mobile' => true, 'max_events' => 20, 'hide_past_events' => true, 'view_all_url' => $backUrl, 'view_all_has_earlier' => $hasEarlierUpcomingEvents ?? false])
           </div>
         </div>
         @endif
@@ -671,31 +707,6 @@
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 flex flex-col gap-6 z-10">
 
         {{-- Breadcrumb --}}
-        @php
-          $backUrl = route('role.view_guest', ['subdomain' => $role->subdomain]);
-          $queryParams = [];
-          if (request('category')) $queryParams['category'] = request('category');
-          if (request('schedule')) $queryParams['schedule'] = request('schedule');
-          if ($requestedLayout = requested_event_layout()) $queryParams['layout'] = $requestedLayout;
-          // Scratch name, never $date: the controller passes a sanitized $date into this view and
-          // assigning to it here would replace it with the raw query param for the whole rest of
-          // the page (Blade @php shares the template scope), feeding garbage to every date
-          // consumer below - the calendar links throw on it.
-          if ($rawDateParam) {
-            $tDate = $rawDateParam;
-            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $tDate)) {
-              $tDateParts = explode('-', $tDate);
-              $queryParams['month'] = (int)$tDateParts[1];
-              $queryParams['year'] = (int)$tDateParts[0];
-            }
-          } else {
-            if (request('month')) $queryParams['month'] = request('month');
-            if (request('year')) $queryParams['year'] = request('year');
-          }
-          if (!empty($queryParams)) {
-            $backUrl .= '?' . http_build_query($queryParams);
-          }
-        @endphp
         <nav aria-label="Breadcrumb" class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400 {{ $role->isRtl() ? 'rtl' : '' }}">
           <a href="{{ $backUrl }}" class="px-3 py-2 -mx-3 hover:underline hover:text-gray-700 dark:hover:text-gray-200">
             {{ $role->isRtl() ? '→' : '←' }} {{ $role->customLabel('back_to_schedule') }}

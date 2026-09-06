@@ -2125,6 +2125,63 @@ class RoleController extends Controller
             $pastEvents = $pastEvents->filter($keep);
         }
 
+        // The event page's agenda widget is keyed off $month/$year, which follow the EVENT's date,
+        // so its payload starts at that month's grid. Viewing an event a month or more out hides
+        // every upcoming event before it, and the client cannot count what it never fetched - the
+        // max_events cap it CAN see is a separate truncation. One EXISTS answers whether the window
+        // skipped anything. Skipped entirely when the window already starts at or before today,
+        // which is every event in the current month.
+        //
+        // Not run while a category or sub-schedule filter is active: the client half of this gate
+        // compares isEventVisible()-filtered counts, and re-deriving that filtering in SQL is the
+        // front/back sync burden this codebase has refused before. Under a filter the client half
+        // decides alone - it can under-report the window gap, but it cannot claim events that the
+        // filter would hide.
+        $hasEarlierUpcomingEvents = false;
+        $todayStartUtc = Carbon::now($timezone)->startOfDay()->setTimezone('UTC');
+
+        if ($event && ! request('category') && ! request('schedule') && $startOfGridUtc->gt($todayStartUtc)) {
+            $hasEarlierUpcomingEvents = Event::whereNull('days_of_week')
+                // The model's own "upcoming or still running", so a festival that began last week
+                // counts as reachable rather than past.
+                ->upcomingOrOngoing($todayStartUtc)
+                // ...and everything scopeInMonth($startOfGridUtc, null) would NOT return, because
+                // that is exactly what calendarEvents() fetches. Recurring events never qualify
+                // (that scope returns them regardless of the window) and neither does a still-
+                // running multi-day event, which it also carries in regardless of when it started -
+                // both are already in the widget, so neither is hidden. duration is nullable, hence
+                // the explicit whereNull: `NULL < 24` is NULL, not true, and would drop the row.
+                ->where(function ($q) use ($startOfGridUtc) {
+                    $q->where('starts_at', '<', $startOfGridUtc)
+                        ->where(function ($q2) use ($startOfGridUtc) {
+                            $q2->whereNull('duration')
+                                ->orWhere('duration', '<', 24)
+                                ->orWhereRaw('DATE_ADD(starts_at, INTERVAL duration HOUR) < ?', [$startOfGridUtc]);
+                        });
+                })
+                ->when(
+                    $role->isCurator(),
+                    fn ($q) => $q->whereIn('id', function ($query) use ($role) {
+                        $query->select('event_id')
+                            ->from('event_role')
+                            ->where('role_id', $role->id)
+                            ->where('is_accepted', true);
+                    }),
+                    fn ($q) => $q->whereHas('roles', fn ($r) => $r->where('role_id', $role->id)->where('is_accepted', true))
+                )
+                ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
+                    $q->where('is_draft', false);
+                    $q->where('is_cancelled', false);
+                    $q->where(function ($q) use ($unlockedEventIds) {
+                        $q->where('is_private', false);
+                        if ($unlockedEventIds) {
+                            $q->orWhereIn('id', $unlockedEventIds);
+                        }
+                    });
+                })
+                ->exists();
+        }
+
         // Dedicated bounded query for the homepage "upcoming events with videos" carousel. Kept
         // separate from the calendar's month-windowed $events so it can promote the next videos
         // across months without loading the entire event table (which OOMs large schedules). The
@@ -2268,6 +2325,7 @@ class RoleController extends Controller
             ->view($view, compact(
                 'subdomain',
                 'events',
+                'hasEarlierUpcomingEvents',
                 'carouselEvents',
                 'role',
                 'otherRole',

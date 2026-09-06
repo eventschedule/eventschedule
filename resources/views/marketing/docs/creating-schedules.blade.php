@@ -577,7 +577,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Available labels</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">34 labels in all, covering the buttons (Request to Book, Submit Event, Follow, Buy Tickets, Book a Time, Register, Share), the navigation (Events, Filter Events, Past Events, Load More, Show All), and the wording on events themselves (Free entry, Online, Schedule, Category, Venue, Agenda, About, Photo Gallery, Our Sponsors).</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">36 labels in all, covering the buttons (Request to Book, Submit Event, Follow, Buy Tickets, Book a Time, Register, Share), the navigation (Events, Filter Events, Past Events, Load More, Show All, View Full Schedule), and the wording on events themselves (Free entry, Online, Schedule, Category, Venue, Agenda, About, Photo Gallery, Our Sponsors).</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Translations</h4>

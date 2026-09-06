@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Custom Labels for Schedules - Event Schedule</x-slot>
-    <x-slot name="description">Rename the words on your public schedule. Events can become Classes, Services, Openings or Sessions, across 35 labels, plus a form for your translation.</x-slot>
+    <x-slot name="description">Rename the words on your public schedule. Events can become Classes, Services, Openings or Sessions, across 36 labels, plus a form for your translation.</x-slot>
     <x-slot name="breadcrumbTitle">Custom Labels</x-slot>
 
     <x-slot name="structuredData">
@@ -12,7 +12,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Event Management Software",
         "operatingSystem": "Web",
-        "description": "Rename the built-in labels on your public schedule. Change 'Events' to 'Classes', 'Follow' to 'Subscribe' or 'Free entry' to 'No cover', across 35 labels. Each label keeps a second form for the language your schedule translates into. Pro plan.",
+        "description": "Rename the built-in labels on your public schedule. Change 'Events' to 'Classes', 'Follow' to 'Subscribe' or 'Free entry' to 'No cover', across 36 labels. Each label keeps a second form for the language your schedule translates into. Pro plan.",
         "offers": {
             "@type": "Offer",
             "price": "{{ $proMonthly }}",
@@ -20,7 +20,7 @@
             "description": "Included in the Pro plan at {{ plan_price($proMonthly) }} per month. Every Pro feature is included in a selfhosted install."
         },
         "featureList": [
-            "35 renameable labels across the public schedule, event pages, photo gallery and appointment booking",
+            "36 renameable labels across the public schedule, event pages, photo gallery and appointment booking",
             "Your own wording, typed in, up to 200 characters per label",
             "Per-schedule configuration, so two schedules on one account can use different vocabularies",
             "A second form per label for the language your schedule translates into, filled in automatically or written by hand",
@@ -60,7 +60,7 @@
            WHY NOT THE FIRST-WAVE TAG CLOUD: pulsing pills of random width
            said "labels" but argued nothing, and it repeated the chip and
            marquee furniture that already appears on a dozen WP pages. The
-           duplex is the argument, and the 35-row specimen table is the
+           duplex is the argument, and the 36-row specimen table is the
            record.
 
            NO FULL-TRANSLATION IMAGERY. A custom label carries exactly two
@@ -582,7 +582,7 @@
         ];
 
         // Every renameable label, grouped by the surface it appears on. The keys
-        // are Role::getCustomizableLabels() (35 of them) and the wording is the
+        // are Role::getCustomizableLabels() (36 of them) and the wording is the
         // English default from resources/lang/en/messages.php.
         $sheet = [
             [
@@ -620,7 +620,7 @@
             ],
             [
                 'An event page',
-                'event/show-guest.blade.php',
+                'event/show-guest.blade.php and the agenda partial it embeds',
                 [
                     ['About', 'What to expect'],
                     ['Agenda', 'Running order'],
@@ -631,6 +631,7 @@
                     ['Buy Tickets', 'Pay and reserve'],
                     ['Share', 'Tell a friend'],
                     ['Back to Schedule', 'Back to the timetable'],
+                    ['View Full Schedule', 'See the whole timetable'],
                 ],
             ],
             [
@@ -661,7 +662,7 @@
             ],
             [
                 'q' => 'Which labels can I rename?',
-                'a' => 'Exactly ' . $sheetCount . ', all of them listed on this page: six on the header and its buttons, fourteen on the calendar and its filters, nine on an event page, and five across fan content and the sponsors panel. Schedule types, plan names and the rest of the admin portal are not on the list.',
+                'a' => 'Exactly ' . $sheetCount . ', all of them listed on this page: seven on the header and its buttons, fourteen on the calendar and its filters, ten on an event page, and five across fan content and the sponsors panel. Schedule types, plan names and the rest of the admin portal are not on the list.',
             ],
             [
                 'q' => 'Do custom labels work with translations?',
@@ -669,7 +670,7 @@
             ],
             [
                 'q' => 'Can I invent a label that does not exist yet?',
-                'a' => 'No. You rename one of the ' . $sheetCount . ' labels the pages already print; you cannot add a thirty-fifth. The replacement itself is yours to write, up to 200 characters, and a single save accepts up to 30 overrides at once.',
+                'a' => 'No. You rename one of the ' . $sheetCount . ' labels the pages already print; you cannot add a thirty-seventh. The replacement itself is yours to write, up to 200 characters, and a single save accepts up to 30 overrides at once.',
             ],
             [
                 'q' => 'Where do the renamed words show up?',
@@ -1081,7 +1082,7 @@
                         @foreach ([
                             'The rest of the admin portal. This is a rename of what visitors read, not a re-skin of the software you work in.',
                             'The words you already write yourself. Event titles, descriptions, ticket names and sub-schedule names were never on the list, because they were never ours.',
-                            'A label that does not exist. You override one of the ' . $sheetCount . '; you cannot invent a thirty-fifth.',
+                            'A label that does not exist. You override one of the ' . $sheetCount . '; you cannot invent a thirty-seventh.',
                             'Anybody else\'s schedule. Overrides live on one schedule, so a curator page that lists your events reads in the curator\'s own words, not yours.',
                         ] as $limit)
                             <li class="flex gap-3">
