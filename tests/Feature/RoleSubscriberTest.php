@@ -367,13 +367,62 @@ class RoleSubscriberTest extends TestCase
         // The other side of the same change: padding moved INSIDE $panelClass, so a caller that
         // passes one now owns it. If the schedule page's class string ever loses the padding
         // again, the form renders flush against the card edge.
+        //
+        // Asserted as the two axes separately rather than as 'p-6', because the horizontal half is
+        // px-6 lg:px-16 now (see the test below) and neither px-6 nor py-6 contains 'p-6'.
         $html = $this->get($this->role->getGuestUrl())->assertOk()->getContent();
 
         preg_match('/id="subscribe-panel"[^>]*class="([^"]*)"/', $html, $m);
         $this->assertNotEmpty($m, 'the panel did not render on the schedule page');
 
         $this->assertStringContainsString('rounded-2xl', $m[1]);
-        $this->assertStringContainsString('p-6', $m[1]);
+        $this->assertStringContainsString('px-6', $m[1]);
+        $this->assertStringContainsString('py-6', $m[1]);
+    }
+
+    public function test_the_subscribe_panel_indents_its_content_like_the_calendar_panel(): void
+    {
+        // Card EDGES already line up - that is the width test below. This is the inner inset, and
+        // it is a different thing that can regress on its own: every sibling card in the column
+        // (the banner header's inner <header>, the carousel, the calendar wrapper, the video grid)
+        // steps to lg:px-16, so a panel that stopped at its own p-8 put "Stay up to date" 32px to
+        // the left of "September 2026" on every screen at lg or wider.
+        //
+        // Asserted as an equality against the calendar's own lg step rather than against the
+        // literal 'lg:px-16', for the same reason the width test compares against the calendar:
+        // the requirement is "the same inset as the calendar", not any particular number.
+        //
+        // Only the lg step is compared. Below it the calendar is deliberately px-0 md:px-6 - it
+        // runs edge to edge once .calendar-panel-border drops its background under 768px - and in
+        // LIST view #calendar-panel-wrapper is zeroed outright by the CSS in show-guest.blade.php
+        // (padding: 0 !important, transparent background), because a list has no card of its own.
+        // That override is CSS-only, so the rendered class attribute still carries lg:px-16 in
+        // both views and this assertion holds; in list view the panel's inset is matching the
+        // header, carousel and video grid, which keep px-6 lg:px-16 in both views.
+        $html = $this->get($this->role->getGuestUrl())->assertOk()->getContent();
+
+        // Grab the whole opening tag first, then read class out of it: [^>]* cannot cross a '>',
+        // so the tag match is anchored to one element, and pulling class separately means neither
+        // side depends on the attribute ORDER. The calendar wrapper writes class before id and the
+        // panel writes it after, which is exactly the trap a single combined pattern falls into.
+        preg_match('/<[^>]*id="calendar-panel-wrapper"[^>]*>/', $html, $calendarTag);
+        $this->assertNotEmpty($calendarTag, 'the calendar wrapper did not render');
+        preg_match('/class="([^"]*)"/', $calendarTag[0], $calendar);
+        $this->assertNotEmpty($calendar, 'the calendar wrapper rendered no class attribute');
+
+        preg_match('/<[^>]*id="subscribe-panel"[^>]*>/', $html, $panelTag);
+        $this->assertNotEmpty($panelTag, 'the panel did not render on the schedule page');
+        preg_match('/class="([^"]*)"/', $panelTag[0], $panel);
+        $this->assertNotEmpty($panel, 'the panel rendered no class attribute');
+
+        preg_match('/(?:^|\s)(lg:px-\S+)/', $calendar[1], $calendarStep);
+        $this->assertNotEmpty($calendarStep, 'the calendar wrapper lost its lg inset');
+
+        preg_match('/(?:^|\s)(lg:px-\S+)/', $panel[1], $panelStep);
+        $this->assertNotEmpty($panelStep, 'the subscribe panel lost its lg inset');
+
+        $this->assertSame($calendarStep[1], $panelStep[1],
+            'the subscribe panel must indent its content as far as the calendar panel does');
     }
 
     public function test_the_subscribe_panel_matches_the_calendar_panel_width(): void

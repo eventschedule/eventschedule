@@ -403,11 +403,17 @@ html[data-es-view="list"] #calendar-panel-wrapper {
            partials/subscribe-panel.blade.php, so the card edge can line up with the calendar while
            the inputs stay readable. Do not put a width cap back on this wrapper: the panel sits
            directly under the calendar, and a width the calendar does not share reads as a
-           misaligned card. RoleSubscriberTest pins both halves. --}}
+           misaligned card. RoleSubscriberTest pins both halves.
+
+           The panelClass below tracks the column's INSET for the same reason it tracks its width.
+           px-6 lg:px-16 is copied verbatim from the carousel, the video grid, the calendar wrapper
+           and the banner header's inner <header>; it used to be p-6 sm:p-8, which put "Stay up to
+           date" 32px to the left of "September 2026" on every screen at lg or wider. py-6 sm:py-8
+           is the old p-6 sm:p-8 with only the horizontal half changed. --}}
       <div class="mb-6 mx-auto w-full transition-[max-width] duration-300 ease-in-out"
            data-view-width
            style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}">
-        @include('partials.subscribe-panel', ['panelClass' => 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl p-6 sm:p-8'])
+        @include('partials.subscribe-panel', ['panelClass' => 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl px-6 lg:px-16 py-6 sm:py-8'])
       </div>
 
       @if ($role->youtube_links && $role->youtube_links != '[]')
