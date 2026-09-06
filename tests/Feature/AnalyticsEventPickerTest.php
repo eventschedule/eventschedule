@@ -375,4 +375,105 @@ class AnalyticsEventPickerTest extends TestCase
                 return $ids->contains($mine->id) && ! $ids->contains($theirs->id);
             });
     }
+
+    /**
+     * The picker and the Top events chart must answer "which events may this schedule show numbers
+     * for" identically. They used to disagree in BOTH directions, and either disagreement reads as
+     * missing data: an event you can select but never see charted, or one charted that you cannot
+     * select to drill into.
+     */
+    public function test_top_events_charts_an_event_whose_pivot_row_is_missing(): void
+    {
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner, 'venue', ['name' => 'Pivotless Venue']);
+        $event = $this->createEvent($venue, ['creator_role_id' => $venue->id]);
+
+        // A real state: CheckData::checkEventCreatorRoles() finds it and deliberately never repairs
+        // it. The picker has always kept such an event; getTopEvents() used to be a bare event_role
+        // pluck, so it could never find one.
+        $event->roles()->detach($venue->id);
+
+        AnalyticsEventsDaily::create([
+            'event_id' => $event->id,
+            'date' => Carbon::now()->subDay()->toDateString(),
+            'desktop_views' => 9,
+        ]);
+
+        $this->assertContains($event->id, $this->pickerIds($venue));
+
+        $this->actingAs($owner)
+            ->get(route('analytics', ['role_id' => UrlUtils::encodeId($venue->id)]))
+            ->assertOk()
+            ->assertViewHas('topEvents', fn ($topEvents) => collect($topEvents)
+                ->map(fn ($row) => $row['event']->id)->contains($event->id));
+    }
+
+    public function test_top_events_does_not_chart_an_event_the_curator_never_accepted(): void
+    {
+        // is_accepted = null is syncCuratorSources()'s pending auto-attachment: nobody agreed to it
+        // and it never rendered on the curator's site. The picker excludes it and
+        // canViewEventTraffic() refuses to deep-link it, yet the chart used to name it - so the one
+        // row a curator could not click was the one the chart advertised.
+        [$owner, , $curator, $event] = $this->curatedEvent([], null);
+
+        AnalyticsEventsDaily::create([
+            'event_id' => $event->id,
+            'date' => Carbon::now()->subDay()->toDateString(),
+            'desktop_views' => 40,
+        ]);
+
+        $this->assertNotContains($event->id, $this->pickerIds($curator));
+
+        $this->actingAs($owner)
+            ->get(route('analytics', ['role_id' => UrlUtils::encodeId($curator->id)]))
+            ->assertOk()
+            ->assertViewHas('topEvents', fn ($topEvents) => ! collect($topEvents)
+                ->map(fn ($row) => $row['event']->id)->contains($event->id));
+    }
+
+    /**
+     * The per-IP view cap used to be keyed on the SCHEDULE and abort recordView() entirely, so the
+     * 11th event page a visitor opened that day recorded nothing anywhere. On a curator listing
+     * forty venues' events, browsing eleven in a sitting is ordinary. The effect was silent and
+     * uneven - whichever events were opened first that day got the views, and the key expires at
+     * midnight, so the winners changed daily.
+     */
+    public function test_one_visitor_reading_many_events_counts_for_every_one_of_them(): void
+    {
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner, 'venue', ['name' => 'Busy Venue']);
+
+        $events = collect(range(1, 15))->map(fn ($i) => $this->createEvent($venue, [
+            'creator_role_id' => $venue->id,
+            'name' => 'Show '.$i,
+        ]));
+
+        // A browser-shaped request: recordView() drops anything without a real user agent,
+        // Accept-Language and a document Accept header, so a bare request() records nothing at all
+        // and the test would pass against the bug.
+        $request = \Illuminate\Http\Request::create('/', 'GET', [], [], [], [
+            'HTTP_USER_AGENT' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36',
+            'HTTP_ACCEPT_LANGUAGE' => 'en-US,en;q=0.9',
+            'HTTP_ACCEPT' => 'text/html,application/xhtml+xml',
+            'REMOTE_ADDR' => '203.0.113.7',
+        ]);
+
+        $role = $venue->fresh();
+
+        foreach ($events as $event) {
+            \App\Models\PageView::recordView($role, $event, $request);
+        }
+
+        $counted = AnalyticsEventsDaily::whereIn('event_id', $events->pluck('id'))->count();
+
+        $this->assertSame(15, $counted, 'A visitor past the schedule cap stopped counting for events.');
+
+        // The schedule-level aggregate keeps its own, unchanged, cap of 10 per visitor per day.
+        $this->assertSame(
+            10,
+            (int) \App\Models\AnalyticsDaily::where('role_id', $venue->id)->sum(
+                \Illuminate\Support\Facades\DB::raw('desktop_views + mobile_views + tablet_views + unknown_views')
+            )
+        );
+    }
 }

@@ -85,6 +85,57 @@ class EventUpdateRequest extends FormRequest
         return $id ? Event::whereKey($id)->value('coupon_discount_type') : null;
     }
 
+    /**
+     * An owner-typed slug must not silently collide with one of their own events.
+     *
+     * EventRepo::uniqueSlugFor() suffixes a GENERATED slug, but doing that to a typed one would
+     * hand back an address the owner did not ask for - SocialShortLinkTest records the same
+     * position for short links ("a suffixed address is not one an owner would print"). So this
+     * rejects instead.
+     *
+     * Only a CHANGED slug is checked, mirroring RoleUpdateRequest::validateShortLinkSlugs(): an
+     * event that has quietly carried a duplicate for months must not start failing every unrelated
+     * save because of it.
+     */
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $typed = \App\Utils\SlugUtils::slugOrRomanize((string) $this->input('slug'));
+
+            if (! $this->filled('slug') || $typed === '') {
+                return;
+            }
+
+            $id = UrlUtils::decodeId($this->route('hash'));
+            $event = $id ? Event::find($id) : null;
+
+            if (! $event || $typed === $event->slug) {
+                return;
+            }
+
+            $roleIds = $event->roles()->pluck('roles.id')->all();
+            if ($event->creator_role_id) {
+                $roleIds[] = $event->creator_role_id;
+            }
+
+            if (! $roleIds) {
+                return;
+            }
+
+            $clash = Event::where('slug', $typed)
+                ->where('id', '!=', $event->id)
+                ->where(function ($q) use ($roleIds) {
+                    $q->whereIn('creator_role_id', $roleIds)
+                        ->orWhereHas('roles', fn ($r) => $r->whereIn('roles.id', $roleIds));
+                })
+                ->exists();
+
+            if ($clash) {
+                $validator->errors()->add('slug', __('messages.event_slug_taken'));
+            }
+        });
+    }
+
     public function attributes(): array
     {
         return $this->eventCustomFieldAttributes();

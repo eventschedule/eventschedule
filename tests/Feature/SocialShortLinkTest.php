@@ -89,11 +89,13 @@ class SocialShortLinkTest extends TestCase
         $this->get("/{$role->subdomain}/Promee")->assertRedirect(self::PROMEE);
     }
 
-    public function test_a_slug_the_schedule_does_not_own_falls_through_to_the_home_page(): void
+    public function test_a_slug_the_schedule_does_not_own_falls_through_to_a_404(): void
     {
         $role = $this->scheduleWithLinks([['name' => 'Facebook', 'url' => self::FACEBOOK]]);
 
-        $this->get("/{$role->subdomain}/nothing-here")->assertRedirect($role->getGuestUrl());
+        // Was a redirect to the schedule home; an address that names nothing now says so. What
+        // this test still proves is the important half: the 404 sits BELOW both social tiers.
+        $this->get("/{$role->subdomain}/nothing-here")->assertNotFound();
     }
 
     /**
@@ -262,7 +264,7 @@ class SocialShortLinkTest extends TestCase
 
         $this->get("/{$role->subdomain}/promee")->assertRedirect(self::FACEBOOK);
         // No "-2" consolation prize: a suffixed address is not one an owner would print.
-        $this->get("/{$role->subdomain}/promee-2")->assertRedirect($role->getGuestUrl());
+        $this->get("/{$role->subdomain}/promee-2")->assertNotFound();
     }
 
     /**

@@ -45,6 +45,9 @@ class CheckData extends Command
         if (! $check || $check === 'creator-roles') {
             $this->checkEventCreatorRoles($errors, $shouldFix);
         }
+        if (! $check || $check === 'duplicate-event-slugs') {
+            $this->checkDuplicateEventSlugs($errors, $shouldFix);
+        }
         if (! $check || $check === 'encryption') {
             $this->checkEncryption($errors);
         }
@@ -138,6 +141,79 @@ class CheckData extends Command
      * write-once (EventRepo::saveEvent, $isNewEvent block) but event_role is fully replaced by
      * sync() on every save, so the two drift and nothing else reconciles them.
      */
+    /**
+     * Two events on one schedule sharing a slug.
+     *
+     * events.slug has no unique constraint, and until uniqueSlugFor() landed nothing in the save
+     * path checked for a collision, so a pattern like {venue}-{day_pad}-{month} produced one
+     * whenever a venue ran two shows on a night - and produces one every year on the anniversary of
+     * any dated slug. EventRepo::getEvent() answers a bare /slug with a single row, so the other
+     * event is unreachable at that address, records no page views, and is simply missing from
+     * /analytics. That is not visible from anywhere else: both events render fine by their id URLs.
+     *
+     * Scoped per creator schedule, not globally: two unrelated schedules legitimately both have a
+     * "new-years-eve", and the lookup that matters is scoped by role.
+     *
+     * There is deliberately no unique index behind this. creator_role_id is nullable and known to
+     * be wrong on real rows (see checkEventCreatorRoles above), MySQL treats NULLs as distinct, and
+     * ADD UNIQUE fails outright on the first existing duplicate - which would fail the deploy on a
+     * database we cannot inspect beforehand.
+     */
+    private function checkDuplicateEventSlugs(array &$errors, bool $shouldFix): void
+    {
+        $groups = Event::query()
+            ->select('creator_role_id', 'slug', DB::raw('COUNT(*) as total'))
+            ->whereNotNull('creator_role_id')
+            ->where('slug', '!=', '')
+            ->whereNotNull('slug')
+            ->groupBy('creator_role_id', 'slug')
+            ->havingRaw('COUNT(*) > 1')
+            ->get();
+
+        foreach ($groups as $group) {
+            // Oldest occurrence keeps the address: it is the one most likely to have been printed,
+            // shared and linked, and the one already banking views under that slug.
+            $events = Event::where('creator_role_id', $group->creator_role_id)
+                ->where('slug', $group->slug)
+                ->orderBy('starts_at')
+                ->orderBy('id')
+                ->get();
+
+            $keep = $events->shift();
+
+            $errors[] = 'Duplicate event slug "'.$group->slug.'" on schedule '.$group->creator_role_id
+                .' shared by events '.$events->pluck('id')->prepend($keep->id)->implode(', ')
+                .' (keeping '.$keep->id.', starts_at '.($keep->starts_at ?: 'none').')';
+
+            if (! $shouldFix) {
+                continue;
+            }
+
+            $taken = Event::where('creator_role_id', $group->creator_role_id)
+                ->where(function ($q) use ($group) {
+                    $q->where('slug', $group->slug)->orWhere('slug', 'like', $group->slug.'-%');
+                })
+                ->pluck('slug')
+                ->flip();
+
+            foreach ($events as $event) {
+                // Same "-2"/"-3" shape uniqueSlugFor() and updateAllSlugs() produce.
+                for ($suffix = 2; $suffix <= 500; $suffix++) {
+                    if ($taken->has($candidate = $group->slug.'-'.$suffix)) {
+                        continue;
+                    }
+
+                    $event->slug = $candidate;
+                    $event->saveQuietly();
+                    $taken[$candidate] = true;
+                    $this->info('Re-slugged event '.$event->id.' to '.$candidate);
+
+                    break;
+                }
+            }
+        }
+    }
+
     private function checkEventCreatorRoles(array &$errors, bool $shouldFix): void
     {
         // Reported in aggregate and NEVER repaired. Choosing a creator for an event that never

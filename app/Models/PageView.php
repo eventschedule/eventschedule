@@ -223,9 +223,13 @@ class PageView
     }
 
     /**
-     * Generate a privacy-preserving hash for an IP address
+     * Generate a privacy-preserving hash for an IP address.
+     *
+     * Public alongside clientIp() and incrementDailyCounter() so a rate cap outside this class
+     * (AnalyticsMissingDaily's per-visitor budget) keys off the same salted daily hash instead of
+     * inventing a second, weaker identity for the same visitor.
      */
-    protected static function getIpHash(string $ip): string
+    public static function getIpHash(string $ip): string
     {
         $dailySalt = config('app.key').now()->format('Y-m-d');
 
@@ -344,19 +348,36 @@ class PageView
     }
 
     /**
-     * Check if IP has exceeded view limit for a role today
+     * Check if IP has exceeded the SCHEDULE-level view limit for a role today.
+     *
+     * One aggregate, one cap. Deliberately no longer gates the event-level counter - see
+     * hasExceededEventViewLimit().
      */
     protected static function hasExceededViewLimit(int $roleId, string $ipHash): bool
     {
         $maxViewsPerIpPerRole = 10; // Max views to count per IP per role per day
 
-        $cacheKey = "analytics_view:{$roleId}:{$ipHash}";
+        return self::incrementDailyCounter("analytics_view:{$roleId}:{$ipHash}") > $maxViewsPerIpPerRole;
+    }
 
-        // Atomically create the key (expiring at midnight so the count resets daily), then increment.
-        Cache::add($cacheKey, 0, self::secondsUntilEndOfDay());
-        $viewCount = Cache::increment($cacheKey);
+    /**
+     * Check if IP has exceeded the per-EVENT view limit today.
+     *
+     * The role cap above used to abort recordView() entirely, which meant the 11th event page a
+     * visitor opened on a given schedule recorded nothing anywhere - and on a curator listing forty
+     * venues' events, browsing eleven of them in a sitting is ordinary behaviour, not abuse. The
+     * effect was silent and uneven: whichever events a visitor happened to open first that day got
+     * the views, and because the key expires at midnight the winners changed daily. Events that
+     * looked "missing from statistics" one day and present the next are exactly this shape.
+     *
+     * A separate, tighter budget per (visitor, event) keeps the anti-inflation intent - one person
+     * cannot run up a single event's count - without letting one event's traffic silence another's.
+     */
+    protected static function hasExceededEventViewLimit(int $eventId, string $ipHash): bool
+    {
+        $maxViewsPerIpPerEvent = 3;
 
-        return $viewCount > $maxViewsPerIpPerRole;
+        return self::incrementDailyCounter("analytics_event_view:{$eventId}:{$ipHash}") > $maxViewsPerIpPerEvent;
     }
 
     /**
@@ -376,23 +397,24 @@ class PageView
             return false;
         }
 
-        // Skip recording if IP has exceeded view limit for this role today
         // Prefer Cloudflare's CF-Connecting-IP header for the real client IP
         $ip = $request->header('CF-Connecting-IP') ?? $request->ip();
-        if ($ip) {
-            $ipHash = self::getIpHash($ip);
-            if (self::hasExceededViewLimit($role->id, $ipHash)) {
-                return false;
-            }
-        }
+        $ipHash = $ip ? self::getIpHash($ip) : null;
+
+        // The role cap now suppresses only the schedule-level aggregates below; the event-level
+        // block at the bottom carries its own, so a visitor reading their eleventh event page today
+        // still counts for that event. Returning early here is what used to lose it.
+        $scheduleCapped = $ipHash !== null && self::hasExceededViewLimit($role->id, $ipHash);
 
         $deviceType = self::detectDeviceType($userAgent);
 
-        // Increment schedule-level analytics
-        AnalyticsDaily::incrementView($role->id, $deviceType);
+        if (! $scheduleCapped) {
+            // Increment schedule-level analytics
+            AnalyticsDaily::incrementView($role->id, $deviceType);
+        }
 
         // Track visitor location
-        if ($ip) {
+        if ($ip && ! $scheduleCapped) {
             $countryCode = app(GeoIpService::class)->lookup($ip);
             if ($countryCode) {
                 AnalyticsLocationsDaily::incrementView($role->id, $countryCode);
@@ -410,7 +432,9 @@ class PageView
         if (! $sourceOverride && $request->query('promo')) {
             $sourceOverride = 'promo';
         }
-        AnalyticsReferrersDaily::incrementView($role->id, $referrer, $role->custom_domain, $sourceOverride);
+        if (! $scheduleCapped) {
+            AnalyticsReferrersDaily::incrementView($role->id, $referrer, $role->custom_domain, $sourceOverride);
+        }
 
         // Track UTM parameters
         $utmParams = [
@@ -421,14 +445,14 @@ class PageView
             'term' => $request->query('utm_term'),
         ];
         foreach ($utmParams as $paramType => $paramValue) {
-            if ($paramValue !== null && $paramValue !== '') {
+            if (! $scheduleCapped && $paramValue !== null && $paramValue !== '') {
                 $paramValue = mb_substr(trim($paramValue), 0, 255);
                 AnalyticsUtmDaily::incrementView($role->id, $paramType, $paramValue);
             }
         }
 
         // Increment event-level analytics if event exists
-        if ($event) {
+        if ($event && ($ipHash === null || ! self::hasExceededEventViewLimit($event->id, $ipHash))) {
             AnalyticsEventsDaily::incrementView($event->id, $deviceType);
 
             // Track appearance views for associated talents/venues

@@ -55,16 +55,42 @@ class RoleGuestSurfaceCharacterizationTest extends TestCase
             ->assertSee('Weekly Session');
     }
 
-    public function test_view_guest_unknown_slug_redirects_to_schedule_home(): void
+    public function test_view_guest_unknown_slug_returns_a_branded_404(): void
     {
-        // An unmatched slug (no event, no sub-schedule) redirects to the
-        // schedule's guest URL - NOT a 404. The P7 split must keep this.
+        // This used to assert a redirect to the schedule's guest URL, with the note "NOT a 404".
+        // That bounce is what made a dead event address indistinguishable from a live one: the
+        // visitor landed on a working calendar and PageView::recordView() booked the hit against
+        // the schedule and against no event, so the event the address named never accrued a view.
+        // A schedule with rotted share links therefore presented as broken analytics.
+        //
+        // The body must be the schedule's own 404, not errors/404.blade.php, whose every link is
+        // a marketing_url() to eventschedule.com - a customer's custom domain must not hand its
+        // visitors to us.
         $owner = $this->createOwner();
         $role = $this->createRole($owner, 'venue', ['name' => 'Fallback Venue']);
         $this->createEvent($role);
 
-        $this->get('/'.$role->subdomain.'/no-such-event-slug')
-            ->assertRedirect($role->getGuestUrl());
+        $response = $this->get('/'.$role->subdomain.'/no-such-event-slug');
+
+        $response->assertNotFound()
+            ->assertSee('Fallback Venue')
+            ->assertSee(__('messages.guest_not_found_heading'))
+            ->assertSee($role->getCanonicalUrl(), false)
+            ->assertDontSee(marketing_url('/features'), false)
+            ->assertDontSee(marketing_url('/pricing'), false);
+    }
+
+    public function test_an_embedded_unknown_slug_404s_without_a_full_page(): void
+    {
+        // An embed is an iframe on somebody else's site. A full-bleed 404 in there is louder than
+        // the failure warrants, and "back to the schedule" has nowhere useful to go.
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue', ['name' => 'Embedded Venue']);
+
+        $response = $this->get('/'.$role->subdomain.'/no-such-event-slug?embed=1');
+
+        $response->assertNotFound();
+        $this->assertSame('', $response->getContent());
     }
 
     public function test_unknown_subdomain_redirects_home_not_404(): void

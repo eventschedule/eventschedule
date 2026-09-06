@@ -74,6 +74,7 @@ use Illuminate\Validation\ValidationException;
 class RoleController extends Controller
 {
     use Traits\CalendarDataTrait;
+    use Traits\RendersGuestNotFound;
     use Traits\ResolvesGuestLanguage;
 
     // Max events loaded whenever the month window is dropped, which is now both calendar-events
@@ -1915,7 +1916,18 @@ class RoleController extends Controller
                     return $this->handleSocialRedirect($role, $social, $request);
                 }
 
-                return redirect($role->getGuestUrl());
+                // Bottom of the ladder: not a short link, not a sub-schedule, not an event. This
+                // used to 302 to the schedule home, which made a dead event address look alive -
+                // the visitor got a working calendar, and recordView() below booked the hit
+                // against the schedule and against NO event, so the event the address was
+                // supposed to name sat at zero views forever. That is indistinguishable from
+                // "analytics is broken", and is how it was reported.
+                //
+                // Safe to 404 here precisely because of the rungs above: owned and platform short
+                // links returned at the top of this method, a sub-schedule slug set
+                // $selectedGroup (which this arm's elseif excludes), and suggested short links
+                // returned immediately above. SocialShortLinkTest pins all of them.
+                return $this->guestNotFound($role, $slug);
             }
         }
 

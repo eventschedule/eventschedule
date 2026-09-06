@@ -121,8 +121,16 @@ class AnalyticsController extends Controller
             default => [now()->subDays(30)->startOfDay(), now()->endOfDay()],
         };
 
+        // Every preset above except 'last_month' ends at now(), because they window things that
+        // HAPPENED - views, sales. The check-ins tab is the one panel that windows the event's own
+        // date instead, and a "…to now" upper bound there hides an event that has not happened yet:
+        // its tickets are sold and its door list exists, but it stays invisible until the morning
+        // of the show and then appears, which reads exactly like data going missing. Null means
+        // "no upper bound"; a closed historical range keeps both ends.
+        $eventDateEnd = $range === 'last_month' ? $end : null;
+
         if ($tab === 'checkins') {
-            $checkinStats = $analytics->getCheckinStats($user, $start, $end, $selectedRoleId, $selectedEventId);
+            $checkinStats = $analytics->getCheckinStats($user, $start, $end, $selectedRoleId, $selectedEventId, $eventDateEnd);
 
             return view('analytics.index', compact(
                 'roles',
@@ -193,6 +201,13 @@ class AnalyticsController extends Controller
         // Get top events
         $topEvents = $analytics->getTopEvents($user, 10, $start, $end, $selectedEventId, $selectedRoleId);
 
+        // Broken links: schedule-scoped and unfiltered by event, because a miss has no event to
+        // attribute it to. Only shown when a schedule is selected, for the same reason the event
+        // picker is.
+        $missingLinks = $selectedRoleId && ! $selectedEventId
+            ? $analytics->getMissingLinks($selectedRoleId, $start, $end)
+            : collect();
+
         // Get views by period for chart
         $viewsByPeriod = $analytics->getViewsByPeriod($user, $period, $start, $end, $selectedRoleId, $selectedEventId);
 
@@ -262,6 +277,7 @@ class AnalyticsController extends Controller
             'momComparison',
             'periodComparison',
             'topEvents',
+            'missingLinks',
             'viewsByPeriod',
             'deviceBreakdown',
             'viewsBySchedule',

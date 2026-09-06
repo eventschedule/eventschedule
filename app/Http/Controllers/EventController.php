@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Traits\RendersGuestNotFound;
 use App\Http\Requests\Concerns\ValidatesCouponDiscount;
 use App\Http\Requests\EventCommentSubmitRequest;
 use App\Http\Requests\EventCreateRequest;
@@ -68,6 +69,7 @@ use Illuminate\Validation\ValidationException;
 
 class EventController extends Controller
 {
+    use RendersGuestNotFound;
     use ValidatesCouponDiscount;
 
     protected $eventRepo;
@@ -4242,7 +4244,9 @@ class EventController extends Controller
         $event = $slug ? $eventRepo->getEvent($subdomain, $slug, $date, $eventIdParam, $role) : null;
 
         if (! $event) {
-            return redirect($role->getGuestUrl());
+            // Same reasoning as viewGuest's bottom rung: a gallery address that names nothing must
+            // say so rather than bounce, or the two surfaces disagree about what a dead link is.
+            return $this->guestNotFound($role, $slug);
         }
 
         // Privacy check

@@ -816,7 +816,10 @@
             @endif
         </div>
 
-        @if ($totalViews > 0 || $appearanceViews > 0)
+        {{-- missingLinks joins this gate deliberately: a schedule whose addresses are all broken
+             has no views to show, and hiding the one panel that would explain why is precisely the
+             failure this was built for. --}}
+        @if ($totalViews > 0 || $appearanceViews > 0 || ($missingLinks ?? collect())->isNotEmpty())
             {{-- Charts Row --}}
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {{-- Views Over Time Chart --}}
@@ -837,7 +840,7 @@
             </div>
 
             {{-- Bar Charts Grid --}}
-            @if ($topEvents->isNotEmpty() || ($viewsBySchedule->isNotEmpty() && $viewsBySchedule->count() > 1) || $topAppearances->isNotEmpty() || $topSchedulesAppearedOn->isNotEmpty() || $trafficSources->isNotEmpty() || $locationBreakdown->isNotEmpty() || $topUtmSources->isNotEmpty() || $topUtmMediums->isNotEmpty() || $topUtmCampaigns->isNotEmpty() || $socialClickStats->isNotEmpty())
+            @if ($topEvents->isNotEmpty() || ($viewsBySchedule->isNotEmpty() && $viewsBySchedule->count() > 1) || $topAppearances->isNotEmpty() || $topSchedulesAppearedOn->isNotEmpty() || $trafficSources->isNotEmpty() || $locationBreakdown->isNotEmpty() || $topUtmSources->isNotEmpty() || $topUtmMediums->isNotEmpty() || $topUtmCampaigns->isNotEmpty() || $socialClickStats->isNotEmpty() || ($missingLinks ?? collect())->isNotEmpty())
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {{-- Top Events Chart --}}
                 @if ($topEvents->isNotEmpty() && ! $selectedEventId)
@@ -845,6 +848,30 @@
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.top_events') }}</h3>
                     <div class="h-64">
                         <canvas id="topEventsChart"></canvas>
+                    </div>
+                </div>
+                @endif
+
+                {{-- Broken links --}}
+                {{-- Addresses on this schedule that visitors reached and that matched nothing.
+                     Before this existed, a dead event link 302'd to the schedule home: the visit
+                     counted for the schedule, counted for no event, and looked exactly like an
+                     event whose statistics had stopped working. --}}
+                @if (($missingLinks ?? collect())->isNotEmpty())
+                <div class="ap-card rounded-xl p-6 flex flex-col">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">{{ __('messages.broken_links') }}</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.broken_links_description') }}</p>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm">
+                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                @foreach ($missingLinks as $link)
+                                <tr>
+                                    <td class="py-2 pe-4 font-mono text-gray-900 dark:text-gray-100 break-all">/{{ $link['slug'] }}</td>
+                                    <td class="py-2 text-end text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ number_format($link['views']) }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 </div>
                 @endif

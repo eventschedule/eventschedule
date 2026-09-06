@@ -132,7 +132,13 @@ class ResolveCustomDomain
     {
         $contentType = $response->headers->get('Content-Type', '');
 
-        return str_contains($contentType, 'text/html') && $response->getStatusCode() < 400;
+        // 404 is included on purpose. The tenant not-found page (role/not-found.blade.php) links
+        // back to the schedule, and that link is built from the subdomain route, so without the
+        // rewrite a visitor on a custom domain is thrown onto {subdomain}.eventschedule.com by the
+        // one control the page offers. Other 4xx/5xx bodies are the platform's own error pages and
+        // are left alone.
+        return str_contains($contentType, 'text/html')
+            && ($response->getStatusCode() < 400 || $response->getStatusCode() === 404);
     }
 
     protected function isJsonResponse(Response $response): bool

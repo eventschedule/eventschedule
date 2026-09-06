@@ -6,6 +6,7 @@ use App\Models\AnalyticsAppearancesDaily;
 use App\Models\AnalyticsDaily;
 use App\Models\AnalyticsEventsDaily;
 use App\Models\AnalyticsLocationsDaily;
+use App\Models\AnalyticsMissingDaily;
 use App\Models\AnalyticsReferrersDaily;
 use App\Models\AnalyticsSocialClicksDaily;
 use App\Models\AnalyticsUtmDaily;
@@ -83,11 +84,14 @@ class AnalyticsService
             return collect();
         }
 
-        // Get event IDs that belong to user's roles (via pivot table)
-        $eventIds = $eventId ? collect([$eventId]) : DB::table('event_role')
-            ->whereIn('role_id', $roleIds)
-            ->pluck('event_id')
-            ->unique();
+        // Same candidate set as the picker beside it - see scopeEventsToRoles(). This used to be a
+        // bare event_role pluck, which both over- and under-counted: it charted a curator's
+        // never-accepted auto-sourced events and missed any event whose creator schedule has no
+        // pivot row. No date window here; the selected range bounds this panel through the
+        // analytics_events_daily rows themselves.
+        $eventIds = $eventId ? collect([$eventId]) : Event::query()
+            ->tap(fn ($q) => $this->scopeEventsToRoles($q, $roleIds, false))
+            ->pluck('id');
 
         if ($eventIds->isEmpty()) {
             return collect();
@@ -387,6 +391,86 @@ class AnalyticsService
     }
 
     /**
+     * Addresses on this schedule that visitors reached and that matched nothing.
+     *
+     * The panel this feeds exists because the failure it reports used to be invisible: a dead event
+     * address 302'd to the schedule home, so the visit counted for the schedule, counted for no
+     * event, and looked to the owner exactly like an event whose statistics had stopped working.
+     *
+     * Schedule-scoped only - a miss is recorded against the schedule that was asked, and there is
+     * no event to attribute it to by definition.
+     */
+    public function getMissingLinks(int $roleId, Carbon $start, Carbon $end, int $limit = 10): Collection
+    {
+        return AnalyticsMissingDaily::select('slug', DB::raw('SUM(views) as views'))
+            ->where('role_id', $roleId)
+            ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
+            ->groupBy('slug')
+            ->orderByDesc('views')
+            ->limit($limit)
+            ->get()
+            ->map(fn ($row) => [
+                'slug' => $row->slug,
+                'views' => (int) $row->views,
+            ]);
+    }
+
+    /**
+     * Which events a set of schedules may show numbers for. The ONE definition of that.
+     *
+     * The picker and the Top events chart used to answer this separately and disagreed in both
+     * directions: getTopEvents() took any event with an event_role row, so it charted a curator's
+     * auto-sourced, never-accepted events (which canViewEventTraffic() refuses to deep-link and the
+     * picker excludes), while the picker's creator_role_id arm let through events with no pivot row
+     * at all, which the chart then had no way to find. An event that is selectable but never
+     * charted, or charted but not selectable, reads as missing data either way.
+     *
+     * The rules, unchanged from the picker that had them:
+     *
+     *  - creator_role_id alone is enough, with NO pivot requirement. An event whose creator schedule
+     *    has no event_role row is a real state (CheckData::checkEventCreatorRoles() finds it and
+     *    deliberately never repairs it) and it still works, because canViewEventTraffic()
+     *    short-circuits on events.user_id exactly as Event::scopeManagedThrough()'s first arm does.
+     *    Requiring a pivot would hide a schedule's own event from it.
+     *  - a curator counts somebody else's event once it ACCEPTED it: acceptance is what put the
+     *    event on the page whose views these are. A decline leaves is_accepted = false rather than
+     *    detaching, so it stays out, and syncCuratorSources()'s pending auto-attachments cannot
+     *    flood either surface.
+     *  - $ownedDataOnly is the revenue and check-ins tabs, which read the creator's private data:
+     *    a curator that only lists an event does not own it.
+     *
+     * One type lookup for the whole set, then one OR-arm per schedule, so a user with several
+     * schedules still costs a single query.
+     */
+    protected function scopeEventsToRoles($query, Collection $roleIds, bool $ownedDataOnly): void
+    {
+        $curatorIds = Role::whereIn('id', $roleIds)->where('type', 'curator')->pluck('id')->all();
+
+        $query->where(function ($outer) use ($roleIds, $curatorIds, $ownedDataOnly) {
+            foreach ($roleIds as $roleId) {
+                $isCurator = in_array($roleId, $curatorIds);
+
+                $outer->orWhere(function ($q) use ($roleId, $isCurator, $ownedDataOnly) {
+                    if ($isCurator && $ownedDataOnly) {
+                        $q->where('creator_role_id', $roleId);
+
+                        return;
+                    }
+
+                    $q->where('creator_role_id', $roleId)
+                        ->orWhereHas('roles', function ($r) use ($roleId, $isCurator) {
+                            $r->where('roles.id', $roleId);
+
+                            if ($isCurator) {
+                                $r->where('event_role.is_accepted', true);
+                            }
+                        });
+                });
+            }
+        });
+    }
+
+    /**
      * Get events for the analytics filter dropdown (future, live recurrences, and the past 30 days).
      *
      * Two lists, not one. $ownedDataOnly is the revenue and check-ins tabs, which read the
@@ -403,8 +487,6 @@ class AnalyticsService
     public function getEventsForSchedule(int $roleId, bool $ownedDataOnly = true): Collection
     {
         $cutoff = now()->subDays(30)->startOfDay();
-
-        $isCurator = Role::where('id', $roleId)->where('type', 'curator')->exists();
 
         // creatorRole: the top-events list renders getShortDateRangeDisplay() per row.
         $query = Event::query()
@@ -441,38 +523,7 @@ class AnalyticsService
                     });
             });
 
-        if ($isCurator && $ownedDataOnly) {
-            $query->where('creator_role_id', $roleId);
-        } elseif ($isCurator) {
-            // Strictly the old list PLUS what this curator accepted, so nothing can vanish.
-            //
-            // The creator_role_id arm carries NO pivot requirement, on purpose. An event whose
-            // creator_role_id names a schedule with no matching event_role row is a real state
-            // (CheckData::checkEventCreatorRoles() finds it and deliberately never repairs it) and
-            // it still works here, because canViewEventTraffic() short-circuits on events.user_id
-            // exactly as Event::scopeManagedThrough()'s first arm does. That scope can afford its
-            // "a pivot row is REQUIRED" rule because it carries that user_id arm; this list does
-            // not, so requiring a pivot would hide the curator's own event instead.
-            //
-            // Somebody else's event counts once this curator ACCEPTED it: acceptance is what put
-            // it on the page whose views these are, and every listing query in RoleController
-            // filters the same way. A decline leaves is_accepted = false rather than detaching, so
-            // it stays out, and syncCuratorSources()'s pending auto-attachments cannot flood the
-            // picker.
-            $query->where(function ($q) use ($roleId) {
-                $q->where('creator_role_id', $roleId)
-                    ->orWhereHas('roles', fn ($r) => $r->where('roles.id', $roleId)
-                        ->where('event_role.is_accepted', true));
-            });
-        } else {
-            // Same creator arm as the curator branch above, for the same reason: an event whose
-            // creator lost its event_role row still resolves through events.user_id, and CheckData
-            // reports that state more often for venues than for curators.
-            $query->where(function ($q) use ($roleId) {
-                $q->where('creator_role_id', $roleId)
-                    ->orWhereHas('roles', fn ($r) => $r->where('roles.id', $roleId));
-            });
-        }
+        $this->scopeEventsToRoles($query, collect([$roleId]), $ownedDataOnly);
 
         return $query->orderBy('starts_at')
             ->get()
@@ -1269,7 +1320,7 @@ class AnalyticsService
     /**
      * Get check-in analytics stats
      */
-    public function getCheckinStats(User $user, Carbon $start, Carbon $end, ?int $roleId = null, ?int $eventId = null): array
+    public function getCheckinStats(User $user, Carbon $start, Carbon $end, ?int $roleId = null, ?int $eventId = null, ?Carbon $eventDateEnd = null): array
     {
         // Assigned only in the else branch below, but read again by the timezone lookup, which
         // runs on BOTH paths. An ?event_id= URL carrying no role_id lands here with it unset -
@@ -1297,11 +1348,21 @@ class AnalyticsService
             return ['has_data' => false];
         }
 
-        // Get all sale tickets for paid sales in the date range
-        $saleTickets = SaleTicket::whereHas('sale', function ($q) use ($eventIds, $start, $end) {
+        // Get all sale tickets for paid sales in the date range.
+        //
+        // event_date is the EVENT's date, not the sale's, so an upper bound of "now" hid every
+        // upcoming show: the tickets were sold and the door list existed, but the event only
+        // surfaced here on the day it happened. $eventDateEnd is null for every range that runs up
+        // to today and set only for a closed historical range (see AnalyticsController).
+        //
+        // is_deleted matches getConversionStats(): a deleted sale was still counting toward
+        // total_sold and dragging the attendance rate down with it.
+        $saleTickets = SaleTicket::whereHas('sale', function ($q) use ($eventIds, $start, $eventDateEnd) {
             $q->whereIn('event_id', $eventIds)
                 ->where('status', 'paid')
-                ->whereBetween('event_date', [$start->toDateString(), $end->toDateString()]);
+                ->where('is_deleted', false)
+                ->where('event_date', '>=', $start->toDateString())
+                ->when($eventDateEnd, fn ($q2) => $q2->where('event_date', '<=', $eventDateEnd->toDateString()));
         })
             ->with(['sale:id,event_id,event_date', 'sale.event:id,name,name_en,creator_role_id', 'ticket:id,type'])
             ->get();

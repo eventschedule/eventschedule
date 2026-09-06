@@ -999,14 +999,14 @@ class EventRepo
                 $event->slug = \App\Utils\SlugUtils::slugOrRomanize($request->slug) ?: $event->getOriginal('slug');
             } elseif ($currentRole?->slug_pattern
                 && self::slugPatternFieldsChanged($currentRole->slug_pattern, $event)) {
-                $event->slug = SlugPatternUtils::generateSlug(
+                $event->slug = $this->uniqueSlugFor($event, SlugPatternUtils::generateSlug(
                     $currentRole->slug_pattern,
                     $request->short_name ?: $request->name,
                     $request->short_name_en ?: $request->name_en,
                     $event,
                     $currentRole,
                     $venue
-                );
+                ), $currentRole, $venue);
             } else {
                 $event->slug = $event->getOriginal('slug');
             }
@@ -1014,14 +1014,14 @@ class EventRepo
 
         // Generate slug after event data is populated (needs starts_at for date variables)
         if ($isNewEvent) {
-            $event->slug = SlugPatternUtils::generateSlug(
+            $event->slug = $this->uniqueSlugFor($event, SlugPatternUtils::generateSlug(
                 $currentRole?->slug_pattern,
                 $request->short_name ?: $request->name,
                 $request->short_name_en ?: $request->name_en,
                 $event,
                 $currentRole,
                 $venue  // Pass venue directly since relationship isn't loaded yet
-            );
+            ), $currentRole, $venue);
         }
 
         // Handle recurring frequency and days_of_week
@@ -2470,6 +2470,71 @@ class EventRepo
             ->update(['is_accepted' => false]);
     }
 
+    /**
+     * Give a generated slug a "-2"/"-3" suffix when a sibling schedule already serves that address.
+     *
+     * events.slug carries no unique constraint and SlugPatternUtils::generateSlug() applies no
+     * uniqueness of its own, so a pattern like {venue}-{day_pad}-{month} collides twice over: two
+     * shows at one venue on one night, and the same calendar date next year. getEvent()'s bare-slug
+     * lookup answers a collision with ONE row, so the other row is unreachable at that address and
+     * banks no page views at all - it is simply absent from /analytics, which is what "this event
+     * is missing from statistics" turned out to mean.
+     *
+     * Scope: the read this defends is scoped by an accepted event_role pivot, but the pivot is not
+     * written until roles()->sync() much further down, so it cannot be consulted here. The schedules
+     * knowable at generation time - the acting schedule, the venue, the creator, and (for an
+     * existing event) whatever it is already attached to - are a superset of the reported case and a
+     * subset of the true read scope. A collision across two schedules that share neither is not
+     * caught; CheckData's duplicate-event-slugs arm is what finds those.
+     *
+     * Only ever renumbers a slug that is being generated, so no existing address moves on deploy.
+     */
+    private function uniqueSlugFor(Event $event, string $slug, ?Role $currentRole, ?Role $venue): string
+    {
+        if ($slug === '' || $slug === $event->getOriginal('slug')) {
+            // Idempotent: a save that regenerates the same slug must not turn "x" into "x-2", and
+            // the next one into "x-2-3".
+            return $slug;
+        }
+
+        $roleIds = array_values(array_unique(array_filter([
+            $currentRole?->id,
+            $venue?->id,
+            $event->creator_role_id,
+            ...($event->exists ? $event->roles()->pluck('roles.id')->all() : []),
+        ])));
+
+        if (! $roleIds) {
+            return $slug;
+        }
+
+        $taken = Event::query()
+            ->when($event->exists, fn ($q) => $q->where('id', '!=', $event->id))
+            ->where(function ($q) use ($slug) {
+                $q->where('slug', $slug)->orWhere('slug', 'like', $slug.'-%');
+            })
+            ->where(function ($q) use ($roleIds) {
+                $q->whereIn('creator_role_id', $roleIds)
+                    ->orWhereHas('roles', fn ($r) => $r->whereIn('roles.id', $roleIds));
+            })
+            ->pluck('slug')
+            ->flip();
+
+        if (! $taken->has($slug)) {
+            return $slug;
+        }
+
+        // Same "-2"/"-3" shape RoleController::updateAllSlugs() produces, so the two paths cannot
+        // hand out differently-shaped addresses for the same collision.
+        for ($suffix = 2; $suffix <= 50; $suffix++) {
+            if (! $taken->has($candidate = $slug.'-'.$suffix)) {
+                return $candidate;
+            }
+        }
+
+        return $slug.'-'.Str::lower(Str::random(6));
+    }
+
     public function getEvent($subdomain, $slug, $date = null, $eventId = null, ?Role $role = null)
     {
         $event = null;
@@ -2557,6 +2622,23 @@ class EventRepo
                 ->where('is_draft', false)
                 ->where(function ($q) {
                     $q->where('starts_at', '>=', now()->subDay())
+                        // A recurring event stores only its FIRST occurrence in starts_at, so a
+                        // live weekly residency older than a day fell out of this arm entirely and
+                        // was answered by the past-events fallback below - which orders DESC and so
+                        // hands back the series' anchor rather than treating it as current.
+                        // findEventBySlug() (the dated sibling) has always carried this arm; only
+                        // the undated branch was missing it. Bounded on the one end SQL can
+                        // evaluate, exactly as AnalyticsService::getEventsForSchedule() bounds it,
+                        // so a series that ended in 2019 cannot outrank a real upcoming event.
+                        ->orWhere(function ($q2) {
+                            $q2->whereNotNull('days_of_week')
+                                ->where(function ($q3) {
+                                    $q3->where('recurring_end_type', '!=', 'on_date')
+                                        ->orWhereNull('recurring_end_type')
+                                        ->orWhereNull('recurring_end_value')
+                                        ->orWhere('recurring_end_value', '>=', now()->toDateString());
+                                });
+                        })
                         ->orWhere(function ($q2) {
                             $q2->where('duration', '>=', 24)
                                 ->whereRaw('DATE_ADD(starts_at, INTERVAL duration HOUR) >= ?', [now()]);
@@ -2567,7 +2649,12 @@ class EventRepo
                         $q->where('subdomain', $subdomain)->where('is_accepted', true);
                     });
                 })
-                ->orderBy('starts_at', 'desc')
+                // ASCENDING, matching findEventBySlug() (the dated sibling) and the both-roles
+                // upcoming branch above. events.slug is not unique and a {day}-{month} pattern
+                // collides every year, so DESC meant a bare /slug resolved to NEXT year's event
+                // while /slug/{date} resolved to this year's - two addresses for one show, each
+                // banking its views on a different row. A bare slug means "the next one".
+                ->orderBy('starts_at')
                 ->first();
 
             if (! $event) {
