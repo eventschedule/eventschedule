@@ -155,8 +155,11 @@
                 </div>
             @endif
             <div class="min-w-0 flex-1">
-                <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
-                    {{ $role->name }}</h2>
+                {{-- h1, not h2: this is the page title for every admin tab. The Schedule and
+                     Availability tabs have no other heading of their own, so with the calendar
+                     partial's month title demoted to h2 they would otherwise have no h1 at all. --}}
+                <h1 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
+                    {{ $role->name }}</h1>
 
                 <div class="mt-1 flex flex-col sm:mt-0 sm:flex-row sm:flex-wrap sm:gap-x-6">
                     @if($role->email)
@@ -235,7 +238,7 @@
             {{-- Actions dropdown (always visible) --}}
             <div class="mt-2 md:ms-3">
                 <div class="relative inline-block text-start w-full">
-                    <button type="button" data-popup-target="role-actions-pop-up-menu" class="popup-toggle inline-flex w-full justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800" id="role-actions-menu-button" aria-expanded="true" aria-haspopup="true">
+                    <button type="button" data-popup-target="role-actions-pop-up-menu" class="popup-toggle inline-flex w-full justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800" id="role-actions-menu-button" aria-expanded="false" aria-haspopup="true">
                         {{ __('messages.actions') }}
                         <svg class="-me-1 ms-2 h-6 w-6 text-gray-400 dark:text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />

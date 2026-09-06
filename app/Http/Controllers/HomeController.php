@@ -198,8 +198,11 @@ class HomeController extends Controller
 
         // Dashboard data - skip queries for hidden panels
         $upcomingCount = 0;
-        $views30d = 0;
+        $viewsInPeriod = 0;
         $viewsChange = 0;
+        $viewsChangeLabel = '';
+        $viewsPeriod = 30;
+        $revenuePeriod = 30;
         $sparklineData = [];
         $followersCount = 0;
         $totalEventsCount = 0;
@@ -223,12 +226,21 @@ class HomeController extends Controller
             })->upcomingOrOngoing()->whereNull('days_of_week')->count();
         }
         if (in_array('views', $visiblePanels)) {
-            $viewsPeriod = $panelSettings['views']['period'] ?? 30;
+            $viewsPeriod = $this->resolvePanelPeriod($panelSettings['views']['period'] ?? 30);
             $viewsStart = now()->subDays($viewsPeriod)->startOfDay();
-            $periodStats = $analyticsService->getStatsForUser($user, $viewsStart, $now);
-            $momComparison = $analyticsService->getMonthOverMonthComparison($user);
-            $views30d = $periodStats['period_views'] ?? 0;
-            $viewsChange = $momComparison['percentage_change'] ?? 0;
+            // Like for like: the N days before the N days shown. getMonthOverMonthComparison()
+            // compares calendar-month-to-date against a WHOLE previous month, so it never
+            // described the rolling window beside it, and it reads hugely negative early in any
+            // month for arithmetic reasons rather than traffic ones. It stays in use on
+            // /analytics, where the month framing is the intended one.
+            //
+            // This also returns the current window's own total, so calling getStatsForUser here
+            // as well would repeat the query - and its other half is an unbounded all-time SUM
+            // over analytics_daily whose result nothing reads.
+            $comparison = $analyticsService->getPeriodComparison($user, 'last_'.$viewsPeriod.'_days', $viewsStart, $now);
+            $viewsInPeriod = $comparison['current_period'] ?? 0;
+            $viewsChange = $comparison['percentage_change'] ?? 0;
+            $viewsChangeLabel = $comparison['comparison_label'] ?? '';
             $sparklineData = $this->getSparklineData($user, $viewsPeriod);
         }
         if (in_array('followers', $visiblePanels)) {
@@ -252,7 +264,7 @@ class HomeController extends Controller
             $recentActivity = $this->getRecentActivity($roleIds, $recentActivityCount);
         }
         if (in_array('revenue', $visiblePanels)) {
-            $revenuePeriod = $panelSettings['revenue']['period'] ?? 30;
+            $revenuePeriod = $this->resolvePanelPeriod($panelSettings['revenue']['period'] ?? 30);
             $revenueStart = now()->subDays($revenuePeriod)->startOfDay();
             $revenueStats = $analyticsService->getConversionStats($user, $revenueStart, $now);
         }
@@ -320,8 +332,11 @@ class HomeController extends Controller
             'startOfMonth',
             'roleIds',
             'upcomingCount',
-            'views30d',
+            'viewsInPeriod',
             'viewsChange',
+            'viewsChangeLabel',
+            'viewsPeriod',
+            'revenuePeriod',
             'sparklineData',
             'followersCount',
             'totalEventsCount',
@@ -870,6 +885,20 @@ class HomeController extends Controller
             'success' => true,
             'message' => __('messages.dashboard_config_saved'),
         ]);
+    }
+
+    /**
+     * Panel periods are validated on write (saveDashboardConfig's in:7,14,30) but only int-cast on
+     * read (getDashboardConfig), so a row persisted under a different rule set reaches the view
+     * unchecked. Clamp to the set that has BOTH a getPeriodComparison match arm and a
+     * messages.last_N_days translation: without an arm the badge silently compares the 30-day
+     * window and mislabels it, and without a translation the card footer renders the raw key.
+     */
+    private function resolvePanelPeriod($period): int
+    {
+        $period = (int) $period;
+
+        return in_array($period, [7, 14, 30], true) ? $period : 30;
     }
 
     private function getDashboardConfig($user): array

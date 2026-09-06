@@ -142,25 +142,34 @@ Rules -> Cache Rules -> Create rule.
 
 **Name:** `Marketing HTML edge cache`
 
-**When incoming requests match** (expression editor):
+**When incoming requests match.** Click **Edit expression** and paste the following as ONE
+line. Do not reformat it across several indented lines to make it read better in this file: the
+editor rejects an expression it cannot parse by *disabling* Deploy rather than by printing an
+error, so a bad paste presents as a dead button and no message anywhere on the page.
 
 ```
-((http.host eq "eventschedule.com")
-  and not starts_with(http.request.uri.path, "/admin")
-  and not starts_with(http.request.uri.path, "/api")
-  and not starts_with(http.request.uri.path, "/sitemap")
-  and not starts_with(http.request.uri.path, "/login")
-  and not starts_with(http.request.uri.path, "/sign_up")
-  and not (http.cookie contains "laravel_session")
-  and not (http.cookie contains "remember_"))
+http.host eq "eventschedule.com" and not starts_with(http.request.uri.path, "/admin") and not starts_with(http.request.uri.path, "/api") and not starts_with(http.request.uri.path, "/sitemap") and not starts_with(http.request.uri.path, "/login") and not starts_with(http.request.uri.path, "/sign_up") and not (http.cookie contains "laravel_session") and not (http.cookie contains "remember_")
 ```
 
-**Then:**
+Confirm the page header reads **Cache Rules** and not **Cache Response Rules**. The latter is a
+different and newer phase that matches *response* fields, where `http.cookie` does not exist and
+this expression really is invalid.
+
+**Then**, naming each control the way the dashboard labels it:
 
 - Cache eligibility: **Eligible for cache**
-- Edge TTL: **Use cache-control header if present, use default otherwise** (this is what
-  makes `s-maxage=600` the edge TTL rather than a fixed number in the dashboard)
+- Edge TTL: **Use cache-control header if present, use default Cloudflare caching behavior if
+  not** (`respect_origin`). This is what makes `s-maxage=600` the edge TTL rather than a fixed
+  number in the dashboard, and it takes no number of its own. The adjacent menu item that does,
+  **Ignore cache-control header and use this TTL**, is both the wrong choice here and
+  unsatisfiable on a Free plan, whose floor is 7200 seconds.
 - Browser TTL: **Respect origin TTL**
+- Serve stale content: **on** (`disable_stale_while_updating: false`). The origin deliberately
+  omits `stale-while-revalidate`, because Firefox and Safari honour it in the *browser* cache and
+  would paint the stored anonymous copy to a freshly signed-in visitor. Serving stale while
+  revalidating is a shared-cache behaviour, so it belongs here. Setting it on the rule rather than
+  on the zone-wide Caching -> Configuration toggle scopes it to marketing HTML and leaves the rest
+  of the zone alone.
 
 The two cookie clauses are the important ones: they are what keeps a signed-in visitor on
 dynamic pages. Combined with the origin rule (a request carrying either cookie is never
@@ -179,7 +188,101 @@ silently stops matching and every signed-in visitor is served the anonymous copy
 
 The path exclusions are belt and braces. The origin already refuses to mark anything but a
 `marketing.*` page public, and `/sitemap*` and the manifest already opt out of the `web`
-group entirely.
+group entirely. That is worth knowing before editing them: if `starts_with()` ever has to go,
+dropping all five clauses and switching Edge TTL to **Use cache-control header if present, bypass
+cache if not** (`bypass_by_default`) leaves the origin as the allowlist and loses no safety. Check
+that a built asset carries its own `Cache-Control` before doing that, since the rule would then
+match static paths too.
+
+### `http.cookie` is not usable on a Free plan, and that blocks this rule
+
+**Measured on the eventschedule.com zone, 2026-09-06.** A cache rule whose expression is nothing
+but `http.cookie contains "laravel_session"` - one term, no negation, no `and` - is refused. The
+dashboard refuses it by disabling Deploy and Save as Draft rather than by printing a reason. The
+same expression with the two cookie clauses removed saves immediately, so the field is the whole
+of it.
+
+This contradicts the documentation, which is why it cost an afternoon: `http.cookie` appears in
+Cloudflare's own list of fields available to cache rules, their bypass-on-cookie example page uses
+it with no plan banner, and its field reference carries no availability note (unlike
+`http.request.cookies`, which does say "Requires a Cloudflare Pro, Business, or Enterprise plan").
+None of that survives contact with a Free zone. Bypass-on-cookie was a Business-plan Page Rules
+feature historically, and that entitlement appears to have carried over to cache rules whatever
+the docs say. **Trust the zone, not the docs, and test the cookie clause first when standing this
+up on a new zone or plan.**
+
+The consequence is not cosmetic. The cookie clauses are what keeps a signed-in visitor off the
+stored anonymous copy, and there is no free substitute: Cloudflare's default cache key ignores
+request cookies, `Vary` is ignored except for `Accept-Encoding` below Enterprise, and on a cache
+HIT the origin is never consulted, so the origin's own `no-cache, private` for a signed-in request
+never gets a chance to apply. A rule without the cookie clauses would serve the guest header to
+signed-in visitors for up to the edge TTL. `session.domain` is `.eventschedule.com`
+(`AppServiceProvider.php`), so the apex really does receive `laravel_session`, and
+`marketing/partials/header.blade.php` really does branch on `@auth`.
+
+So this rule ships only once cookie matching is available. Everything else it needs is fine on
+Free: 10 cache rules, `http.host` and `http.request.uri.path`, `starts_with()`, cache eligibility,
+Edge TTL, Browser TTL and serve stale. `matches` (regex), Cache Reserve, Caching on Port and Proxy
+Read Timeout are gated and this rule uses none of them.
+
+The one Free-plan limit that does bear on this is the **2-hour minimum Edge Cache TTL** (1 hour on
+Pro, 1 second on Business and Enterprise). It is documented against the TTL *value chosen in the
+dashboard*, which this rule never sets, and Origin Cache Control - the setting that makes
+Cloudflare respect an origin `Cache-Control` strictly - is on by default and not configurable
+below Enterprise. So `s-maxage=600` should be honoured as 600 seconds. Cloudflare documents no
+floor on an origin-sent `s-maxage`, but it does not document the absence of one either, so measure
+it rather than assume it: see the `age` check under Deploys below.
+
+### Creating the rule over the API instead
+
+The dashboard disables Deploy on an expression it cannot parse and does not print the parse error.
+The API prints it. This is also the reproducible form of the rule, so reach for it whenever the
+dashboard argues.
+
+A token scoped to **Zone / Cache Rules / Edit** on `eventschedule.com` is enough. Read the zone ID
+off the dashboard Overview page rather than granting **Zone / Zone / Read** just to look it up.
+
+```bash
+ZONE=<zone id from the Cloudflare Overview page>
+
+# Does a cache-rules entrypoint already exist? A 404 means no.
+curl -s -H "Authorization: Bearer $CF_TOKEN" \
+  "https://api.cloudflare.com/client/v4/zones/$ZONE/rulesets/phases/http_request_cache_settings/entrypoint" | jq
+```
+
+`rule.json`, the same rule the dashboard steps above describe:
+
+```json
+{
+  "description": "Marketing HTML edge cache",
+  "action": "set_cache_settings",
+  "expression": "http.host eq \"eventschedule.com\" and not starts_with(http.request.uri.path, \"/admin\") and not starts_with(http.request.uri.path, \"/api\") and not starts_with(http.request.uri.path, \"/sitemap\") and not starts_with(http.request.uri.path, \"/login\") and not starts_with(http.request.uri.path, \"/sign_up\") and not (http.cookie contains \"laravel_session\") and not (http.cookie contains \"remember_\")",
+  "action_parameters": {
+    "cache": true,
+    "edge_ttl": { "mode": "respect_origin" },
+    "browser_ttl": { "mode": "respect_origin" },
+    "serve_stale": { "disable_stale_while_updating": false }
+  }
+}
+```
+
+`edge_ttl` deliberately carries no `default`. One is required only for `override_origin`, and
+leaving it out is what keeps `s-maxage=600` in charge.
+
+```bash
+# The entrypoint exists: APPEND one rule, leaving the zone's other cache rules alone.
+curl -s -X POST -H "Authorization: Bearer $CF_TOKEN" -H 'Content-Type: application/json' \
+  "https://api.cloudflare.com/client/v4/zones/$ZONE/rulesets/$RULESET_ID/rules" --data @rule.json | jq
+
+# The GET 404d: PUT creates the entrypoint holding this one rule.
+curl -s -X PUT -H "Authorization: Bearer $CF_TOKEN" -H 'Content-Type: application/json' \
+  "https://api.cloudflare.com/client/v4/zones/$ZONE/rulesets/phases/http_request_cache_settings/entrypoint" \
+  --data "{\"rules\":[$(cat rule.json)]}" | jq
+```
+
+> **Never PUT the entrypoint when the GET returned rules.** PUT replaces the whole ruleset, so it
+> deletes every cache rule the zone already has. It is the same trap `NEXUS_RELEASE.md` spells out
+> for `doctl apps update --spec`.
 
 ## Cloudflare redirect rule (optional, separate)
 
@@ -206,7 +309,10 @@ the HTTP (port 80) scheme included, which is what removes the extra hop.
 ## Deploys
 
 A cached copy survives up to 10 minutes past a deploy, plus however long Cloudflare's
-serve-stale setting allows. That is fine for content changes and wrong for
+serve-stale setting allows. Confirm the 10 minutes once, on a plan below Business: request a
+cached page repeatedly and watch the `age` response header. If it climbs past 600 while
+`cf-cache-status` stays `HIT`, the origin `s-maxage` is being floored to the plan's minimum Edge
+Cache TTL and this paragraph is 2 hours rather than 10 minutes. That is fine for content changes and wrong for
 anything urgent, so for an urgent marketing fix purge the zone (Caching -> Configuration ->
 Purge Everything, or purge the affected URLs) after the deploy finishes. Automating a zone
 purge from the release flow is the obvious follow-up and is not wired up.

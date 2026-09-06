@@ -84,7 +84,18 @@
                 });
             }
 
-            menu.show();
+            // removeClass, not .show(): .show() writes an inline display, and event/show-guest
+            // toggles these same menus with classList.toggle('hidden'). Once an inline display
+            // exists the class can never win again, so a single Escape press - hidePopUp is bound
+            // globally on keydown - used to kill "Add to Calendar" for the rest of the session.
+            // Every .pop-up-menu in the app ships with the hidden class, so this is equivalent.
+            menu.removeClass('hidden').css('display', '');
+            // Several toggles ship a hardcoded aria-expanded that never changes. Keep it honest
+            // here rather than per call site. Both attribute spellings are handled: most toggles
+            // use data-popup-target, but ticket/sales.blade.php delegates a second family through
+            // data-popup-toggle, and setting the attribute on open without clearing it on close
+            // would strand those permanently expanded.
+            $(button).attr('aria-expanded', 'true');
             $(document).on('click', hidePopUp);
         } else {
             hidePopUp();
@@ -93,7 +104,9 @@
 
     function hidePopUp() {
         if (typeof $ === 'undefined') return;
-        $('.pop-up-menu').hide();
+        $('.pop-up-menu').addClass('hidden').css('display', '');
+        $('[data-popup-target][aria-expanded="true"], [data-popup-toggle][aria-expanded="true"]')
+            .attr('aria-expanded', 'false');
         $(document).off('click', hidePopUp);
     }
 

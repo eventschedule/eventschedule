@@ -55,6 +55,13 @@ window.sentryOnLoad = function () {
                 'The message port closed before a response',
                 'chrome.runtime',
                 'browser.runtime',
+                // The host app's own injected globals, in webviews that probe for a bridge and
+                // never define it. Same reasoning as the extension family above: a document
+                // cannot reach any of these, so page code cannot produce the name.
+                '__gCrWeb',                   // Chrome on iOS
+                '_AutofillCallbackHandler',   // iOS WKWebView autofill
+                'instantSearchSDKJSBridge',   // Edge on iOS
+                'msDiscoverChatAvailable',    // Edge on iOS
             ];
 
             // Terms that name the SOURCE rather than the message, so the giveaway is a frame path
@@ -63,6 +70,32 @@ window.sentryOnLoad = function () {
                 'cloudflare-static',      // Cloudflare Rocket Loader
                 'Turnstile',
                 '"value":"undefined"',
+            ];
+
+            // Frame FUNCTION names, matched against that field and nothing else. A third party
+            // that injects its script INTO our document, rather than loading it from a URL of its
+            // own, leaves frames carrying OUR page URL, so denyUrls above is blind to it - which
+            // is how EVENTSCHEDULE-JS-36 arrived with the iabjs:// entry already live: on iOS
+            // Meta's in-app browser injects via evaluateJavaScript, and WebKit attributes every
+            // frame to the document. Its message is a bare InvalidAccessError, which our own code
+            // could raise, so ignoreMessages would over-filter. The function name is the only
+            // giveaway left, and reading just that field keeps a breadcrumb, a console message, a
+            // request URL or an owner-authored event slug from ever tripping it.
+            //
+            // Substrings, and deliberately the STEM where there is one: a minified injector ships
+            // several near-identical entry points and renames them between releases, so whole
+            // names would catch the one code path we happened to be sent and miss the rest.
+            // Frames from our own bundle are exempted in the loop below, which is what makes
+            // stems safe to use.
+            var ignoreFrameFunctions = [
+                // Meta's in-app browser (Instagram, Facebook, Messenger, Threads), which is what
+                // EVENTSCHEDULE-JS-36 was. mutationObserverCallback is the OUTERMOST frame of
+                // that stack, so it also catches the paths that never reach the login-field
+                // logger or the bridge.
+                'logLoginField',
+                'ToBridge',
+                'sendPostMessage',
+                'mutationObserverCallback',
             ];
 
             var haystacks = [];
@@ -82,6 +115,34 @@ window.sentryOnLoad = function () {
                 for (var i = 0; i < ignoreMessages.length; i++) {
                     if (haystacks[h].indexOf(ignoreMessages[i]) !== -1) {
                         return null;
+                    }
+                }
+            }
+
+            for (var w = 0; w < values.length; w++) {
+                var frames = (values[w] && values[w].stacktrace && values[w].stacktrace.frames) || [];
+                if (! Array.isArray(frames)) {
+                    continue;
+                }
+                for (var f = 0; f < frames.length; f++) {
+                    var frame = frames[f];
+                    if (! frame || typeof frame.function !== 'string') {
+                        continue;
+                    }
+                    // Everything we write is bundled by Vite under /build/assets/, so a frame
+                    // from there is OURS whatever it happens to be called. Without this the day
+                    // someone writes a sendPostMessage() of our own its crashes stop arriving,
+                    // and a filter that has gone quiet looks exactly like a filter that is
+                    // working. An injected script cannot forge this: it is served from the
+                    // document, never from our build output.
+                    var path = frame.filename || frame.abs_path || '';
+                    if (typeof path === 'string' && path.indexOf('/build/assets/') !== -1) {
+                        continue;
+                    }
+                    for (var k = 0; k < ignoreFrameFunctions.length; k++) {
+                        if (frame.function.indexOf(ignoreFrameFunctions[k]) !== -1) {
+                            return null;
+                        }
                     }
                 }
             }

@@ -13,12 +13,12 @@ use Tests\TestCase;
  * the mistake sits on a path every event takes it silently takes all browser error
  * reporting with it. Nothing else in the suite would notice.
  *
- * The filter also has two lists with genuinely different reach, and reading the file
+ * The filter also has three lists with genuinely different reach, and reading the file
  * cannot tell you whether an entry lands in the right one. ignoreMessages is matched
- * only against the exception value and type; ignoreAnywhere is matched against the
- * whole serialized event, which is a much wider net - it used to be the ONLY net, and
- * a real crash was discarded whenever 'Load failed' or 'Network Error' appeared in an
- * unrelated breadcrumb.
+ * only against the exception value and type; ignoreFrameFunctions only against frame
+ * function names; ignoreAnywhere against the whole serialized event, which is a much
+ * wider net - it used to be the ONLY net, and a real crash was discarded whenever
+ * 'Load failed' or 'Network Error' appeared in an unrelated breadcrumb.
  *
  * So this stubs the SDK, evals the partial as shipped, and runs payloads through the
  * captured beforeSend in Node. It tests the JavaScript, not a PHP restatement of it.
@@ -98,6 +98,35 @@ class SentryJsFilterTest extends TestCase
             ]]],
             'request' => ['url' => 'https://house-show.eventschedule.com/a-very-star-shaped-back-to-school-bash'],
         ], $overrides);
+    }
+
+    /**
+     * EVENTSCHEDULE-JS-36's shape, with the frame function names left to the caller.
+     *
+     * One filename (our own page URL), one line, rising column offsets: what an injected
+     * script looks like once WebKit has attributed it to the document. Sentry orders frames
+     * oldest first, so the caller passes them that way too.
+     *
+     * @param  array<int, string>  $functions
+     */
+    private function injectedError(array $functions): array
+    {
+        $url = 'https://house-show.eventschedule.com/a-very-star-shaped-back-to-school-bash/9V8YDn';
+
+        return [
+            'exception' => ['values' => [[
+                'type' => 'InvalidAccessError',
+                'value' => 'The object does not support the operation or argument.',
+                'mechanism' => ['type' => 'onunhandledrejection', 'handled' => false],
+                'stacktrace' => ['frames' => array_map(fn ($function) => [
+                    'filename' => $url,
+                    'function' => $function,
+                    'lineno' => 1,
+                ], $functions)],
+            ]]],
+            'contexts' => ['browser' => ['name' => 'Instagram', 'version' => '445.0.0']],
+            'request' => ['url' => $url],
+        ];
     }
 
     /**
@@ -182,6 +211,122 @@ class SentryJsFilterTest extends TestCase
                 ]]],
             ]]],
         ])));
+    }
+
+    /**
+     * EVENTSCHEDULE-JS-36: Meta's in-app browser (Instagram, iOS), injected into our own page.
+     *
+     * denyUrls' iabjs:// entry was already live when this arrived and could not catch it - on
+     * iOS the script is injected with evaluateJavaScript rather than loaded from a URL of its
+     * own, so every frame carries OUR page URL. ignoreMessages cannot take it either, because a
+     * bare InvalidAccessError is something our own code can raise. Only the function name is
+     * left.
+     *
+     * The second payload is the A/B and is the whole point of the test: identical but for the
+     * frame function names, so keeping it proves the drop comes from ignoreFrameFunctions and
+     * not from the exception type, the message, the page URL or the rejection mechanism.
+     */
+    public function test_a_meta_in_app_browser_injected_error_is_dropped(): void
+    {
+        $stacks = [
+            // EVENTSCHEDULE-JS-36 exactly as reported.
+            ['mutationObserverCallback', 'logLoginFieldDetected', 'sendPostMessage', 'dispatchToBridge'],
+            // Its outer frames alone: a path that throws before it reaches the login-field
+            // logger or the bridge, which whole-name matching on those two would have missed.
+            ['mutationObserverCallback', 'None'],
+            // The same entry points under other names, which is what the stems are for.
+            ['onDomChange', 'logLoginFieldFocused'],
+            ['scanForms', 'postToBridge'],
+            // The A/B, and the point of the test: same exception type, same message, same page
+            // URL, same rejection mechanism, ordinary function names. Anything that drops this
+            // would drop our own errors too.
+            ['onMutation', 'detectFields', 'postToParent', 'sendMessage'],
+        ];
+
+        $this->assertSame(
+            ['dropped', 'dropped', 'dropped', 'dropped', 'kept'],
+            $this->verdicts(array_map(fn ($stack) => $this->injectedError($stack), $stacks))
+        );
+    }
+
+    /**
+     * The exemption that makes matching on stems safe.
+     *
+     * A frame from our own bundle is ours whatever it happens to be called. Without this, the day
+     * someone writes a sendPostMessage() of our own its crashes stop arriving and nothing says
+     * so - a filter that has gone quiet looks exactly like a filter that is working.
+     */
+    public function test_a_colliding_function_name_in_our_own_bundle_is_reported(): void
+    {
+        $this->assertSame('kept', $this->verdict($this->ourError([
+            'exception' => ['values' => [[
+                'type' => 'TypeError',
+                'value' => "Cannot read properties of null (reading 'postMessage')",
+                'stacktrace' => ['frames' => [[
+                    'filename' => 'https://house-show.eventschedule.com/build/assets/app-abc123.js',
+                    'function' => 'sendPostMessage',
+                ]]],
+            ]]],
+        ])));
+    }
+
+    /**
+     * Webviews that probe for their host app's bridge and never define it.
+     *
+     * These arrive as a ReferenceError message with no useful frame, so ignoreMessages is the
+     * list that can see them. A document cannot reach any of these globals, exactly as with the
+     * extension-API family above.
+     */
+    public function test_the_webview_injected_global_family_is_dropped(): void
+    {
+        $messages = [
+            "Can't find variable: __gCrWeb",
+            "Can't find variable: _AutofillCallbackHandler",
+            "Can't find variable: instantSearchSDKJSBridgeClearHighlight",
+            "Can't find variable: msDiscoverChatAvailable",
+        ];
+
+        $events = array_map(fn ($message) => [
+            'exception' => ['values' => [['type' => 'ReferenceError', 'value' => $message]]],
+        ], $messages);
+
+        $this->assertSame(
+            array_fill(0, count($messages), 'dropped'),
+            $this->verdicts($events)
+        );
+    }
+
+    /**
+     * The over-filtering guard: we key on the injector, never on the browser or on a DOM
+     * exception type our own code can raise. The same error from our own bundle, in the same
+     * in-app browser, is a real bug and has to survive.
+     */
+    public function test_an_ordinary_error_of_ours_in_the_instagram_browser_is_reported(): void
+    {
+        $this->assertSame('kept', $this->verdict($this->ourError([
+            'exception' => ['values' => [[
+                'type' => 'InvalidAccessError',
+                'value' => 'The object does not support the operation or argument.',
+                'stacktrace' => ['frames' => [[
+                    'filename' => 'https://house-show.eventschedule.com/build/assets/app-abc123.js',
+                    'function' => 'openSeatMap',
+                ]]],
+            ]]],
+            'contexts' => ['browser' => ['name' => 'Instagram', 'version' => '445.0.0']],
+        ])));
+    }
+
+    /**
+     * An exception value with no stacktrace and no ignored message, so it reaches the frame loop.
+     *
+     * Nothing else here exercises that shape - the extension family returns on the message long
+     * before the frames are read - so an unguarded .stacktrace.frames would ship green.
+     */
+    public function test_an_exception_with_no_stacktrace_does_not_throw(): void
+    {
+        $this->assertSame('kept', $this->verdict([
+            'exception' => ['values' => [['type' => 'TypeError', 'value' => 'r.focus is not a function']]],
+        ]));
     }
 
     /** ChunkLoadError names the exception TYPE, so the value alone would miss it. */

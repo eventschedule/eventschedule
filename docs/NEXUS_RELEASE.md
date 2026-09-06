@@ -240,8 +240,25 @@ has one of its own: never between 00:00 and 00:05 UTC):
 
 ### 1. Create the backups bucket - [one-time] [DO infra]
 
-A **new private Spaces bucket**, distinct from `DO_SPACES_BUCKET`, **no CDN in front, no public
-bucket policy**. Generate a key pair for it.
+A **new Spaces bucket**, distinct from `DO_SPACES_BUCKET`.
+
+There is no "private" switch anywhere in DO's create flow, because private is the default and is
+four settings rather than one. Only the first needs any action:
+
+- **CDN** - on the create page, leave **Content Delivery Network (CDN)** OFF. The one thing here
+  you have to actively not do.
+- **File Listing** - the bucket's **Settings** tab must read **Restrict File Listing**, which is
+  the default. "Enable File Listing" would publish the index of a bucket whose keys are
+  `backups/{user_id}/backup-{Y-m-d-His}.zip`.
+- **Bucket policy** - a fresh bucket has none. Do not add one.
+- **Object ACLs** - private unless uploaded otherwise, and the app forces it anyway: the `backups`
+  disk sets `'visibility' => 'private'` (`config/filesystems.php`) and `ProcessBackupExport` passes
+  `'private'` a second time at the `put()`, so every archive is PUT with `x-amz-acl: private`.
+
+Then a key pair: **Spaces Object Storage -> Access Keys -> Create Access Key -> Limited access**,
+scoped to this bucket only, permission **Read/Write/Delete** (`CleanupBackups` deletes expired
+exports, so Read alone strands them). A bucket-scoped key is why this is worth the extra clicks: a
+leaked `BACKUP_SPACES_KEY` then cannot reach the images bucket.
 
 Everything in the images bucket is reachable by concatenating the raw storage key onto the public
 CDN hostname (`ImageUtils::storedUrl()`, which hardcodes the CDN host), and a backup archive contains every sale, attendee email
@@ -308,29 +325,56 @@ a variant deliberately does *not* bust that cache, so the switch is not instant.
 
 ### 4. Cloudflare Cache Rule - [one-time] [Cloudflare dashboard]
 
-Rules, then Cache Rules, then Create rule. Name `Marketing HTML edge cache`. The expression is
-below; [`CACHING.md`](CACHING.md) explains the reasoning behind every clause if you need to
-change one:
+Rules, then Cache Rules, then Create rule. Name `Marketing HTML edge cache`. Confirm the page
+header reads **Cache Rules** and not **Cache Response Rules**, which is a different and newer
+phase matching *response* fields, where `http.cookie` does not exist.
+
+Click **Edit expression** and paste the following as ONE line.
+[`CACHING.md`](CACHING.md) explains the reasoning behind every clause if you need to change one:
 
 ```
-((http.host eq "eventschedule.com")
-  and not starts_with(http.request.uri.path, "/admin")
-  and not starts_with(http.request.uri.path, "/api")
-  and not starts_with(http.request.uri.path, "/sitemap")
-  and not starts_with(http.request.uri.path, "/login")
-  and not starts_with(http.request.uri.path, "/sign_up")
-  and not (http.cookie contains "laravel_session")
-  and not (http.cookie contains "remember_"))
+http.host eq "eventschedule.com" and not starts_with(http.request.uri.path, "/admin") and not starts_with(http.request.uri.path, "/api") and not starts_with(http.request.uri.path, "/sitemap") and not starts_with(http.request.uri.path, "/login") and not starts_with(http.request.uri.path, "/sign_up") and not (http.cookie contains "laravel_session") and not (http.cookie contains "remember_")
 ```
+
+**If Deploy and Save as Draft both do nothing** - no message anywhere on the page, and clearing
+the expression makes them work again - that is the editor refusing to parse the expression. It
+disables Deploy instead of printing an error, so there is no message to find, and nothing about
+the rule's *meaning* is wrong, so there is nothing to debug in the clauses. Paste the single line
+above exactly as it stands rather than a version wrapped across indented lines (which is how this
+file used to carry it), and confirm the page is Cache Rules rather than Cache Response Rules. If
+it still refuses, go to the API below, which prints the parse error verbatim.
 
 Then: Cache eligibility **Eligible for cache**; Edge TTL **Use cache-control header if present,
-use default otherwise** (this is what makes `s-maxage=600` the TTL rather than a dashboard
-number); Browser TTL **Respect origin TTL**.
+use default Cloudflare caching behavior if not** (this is what makes `s-maxage=600` the TTL rather
+than a dashboard number, and it takes no number of its own - the adjacent item that does, **Ignore
+cache-control header and use this TTL**, is both wrong here and unsatisfiable on a Free plan,
+whose floor is 7200 s); Browser TTL **Respect origin TTL**; Serve stale content **on**.
 
-Also set Caching, then Configuration, then **Serve stale content**. The origin deliberately omits
-`stale-while-revalidate` because Firefox and Safari honour it in the *browser* cache and would
-paint the anonymous copy to a freshly signed-in user; serve-stale belongs to the shared cache
-only.
+Serve stale belongs on this rule rather than on the zone-wide Caching, Configuration toggle, which
+is what earlier revisions of this step said: setting it here scopes it to marketing HTML and
+leaves the rest of the zone alone. The origin deliberately omits `stale-while-revalidate` because
+Firefox and Safari honour it in the *browser* cache and would paint the anonymous copy to a
+freshly signed-in user; serve-stale belongs to the shared cache only.
+
+**Blocked on a Free plan, and the blocker is `http.cookie`.** Measured on this zone on
+2026-09-06: a cache rule whose expression is nothing but `http.cookie contains "laravel_session"`
+is refused, while the same expression minus the two cookie clauses saves at once. The dashboard
+refuses it by disabling Deploy rather than by saying so. Cloudflare's docs claim otherwise, so
+test that one clause first on any new zone or plan rather than believing the field list. The
+clauses cannot simply be dropped: on a cache HIT the origin is never consulted, so its
+`no-cache, private` for a signed-in request never applies, and every signed-in visitor would get
+the guest header. [`CACHING.md`](CACHING.md) has the full reasoning and the options.
+
+Everything else the rule needs is fine on Free: 10 cache rules, `http.host`,
+`http.request.uri.path`, `starts_with()`, cache eligibility, Edge TTL, Browser TTL and serve
+stale. The one Free limit that bears on the rule itself is the 2-hour minimum Edge Cache TTL, and
+it applies to a TTL *chosen in the dashboard*, which this rule never sets. The verification below
+measures whether `s-maxage=600` really survives it.
+
+If the dashboard keeps refusing, create the rule over the API instead: it prints the parse error
+the dashboard swallows, and it is the reproducible form. The token scope, the zone lookup, the
+`rule.json` body and the warning about PUT replacing the whole ruleset are all in
+[`CACHING.md`](CACHING.md).
 
 Both cookie clauses are mandatory. Remember-me ships **checked by default** on the login form, so
 a remembered visitor with a lapsed 2-hour session sends `remember_*` and no `laravel_session`,
@@ -339,12 +383,15 @@ really is named `laravel_session` (`config('session.cookie')`), so the expressio
 written. It breaks *silently* if `APP_NAME` or `SESSION_COOKIE` ever changes, and every signed-in
 visitor would then be served the anonymous copy.
 
-**Verify:** the curls below. Two things are easy to miss by eye, so check them deliberately:
+**Verify:** the curls below. Three things are easy to miss by eye, so check them deliberately:
 that no cacheable page sends a `Vary` on `Cookie` (which would give every visitor a private cache
 entry, since the `utm_*` cookies are encrypted and differ per visitor), and that no apex 200
 lacks a `Cache-Control` header at all - the rule's Edge TTL is "use cache-control if present,
 **use default otherwise**", so a header-less response becomes newly cacheable at the zone
-default.
+default. Third, that the edge TTL really is 600 s: request a cached page repeatedly and watch the
+`age` response header. If it climbs past 600 while `cf-cache-status` stays `HIT`, the origin
+`s-maxage` is being floored to the plan's 2-hour minimum, and both the undo below and
+`CACHING.md`'s "up to 10 minutes past a deploy" are 2 hours instead.
 
 ```
 curl -sI https://eventschedule.com/pricing           # cf-cache-status MISS, then HIT on repeat

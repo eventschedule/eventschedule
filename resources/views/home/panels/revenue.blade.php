@@ -19,5 +19,13 @@
             <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white">{{ \App\Utils\MoneyUtils::format($revenueByCurrency[0]['amount'] ?? 0, $revenueByCurrency[0]['currency_code'] ?? ($revenueStats['primary_currency'] ?? ($defaultCurrency ?? 'USD'))) }}</p>
         @endif
     </div>
-    <p class="text-sm text-gray-500 dark:text-gray-400 mt-auto">{{ number_format($revenueStats['total_sales'] ?? 0) }} {{ strtolower(__('messages.sales')) }} ({{ $panelSettings['revenue']['period'] ?? 30 }}d)</p>
+    {{-- All four stat-card footers reserve the same height, because the value above sits in a
+         flex-1 box: a footer that grew an extra line here would shrink this card's box and lift
+         its number off the baseline the row shares. This is the longest of the four footers, and
+         at lg:grid-cols-4 a card is only ~108px of inner width, so it is what sets the number.
+         3.75rem is three lines at text-sm - Russian needs all three there
+         ("1 234 продажи ·" / "Последние 30" / "дней"). That is a bound sized against the longest
+         shipped translation, not a proof; a longer string in a future locale would need more.
+         mb_strtolower, not strtolower: the latter is byte-wise and mangles Turkish and Greek. --}}
+    <p class="text-sm text-gray-500 dark:text-gray-400 mt-auto min-h-[3.75rem] flex items-center justify-center text-center">{{ number_format($revenueStats['total_sales'] ?? 0) }} {{ mb_strtolower(__('messages.sales')) }} · {{ __('messages.last_'.$revenuePeriod.'_days') }}</p>
 </div>

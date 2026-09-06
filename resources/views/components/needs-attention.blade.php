@@ -7,9 +7,23 @@
     // was handed and knows nothing about what it is dismissing.
     'dismissRoute' => null,
     'dismissAllRoute' => null,
+    // 'brand' for a queue of work other people are waiting on, 'muted' for advisory rows the
+    // user can dismiss. Side by side the two panels are otherwise identical chrome, and the
+    // badge is the only thing carrying which of them is actually owed.
+    'badgeTone' => 'brand',
 ])
 
 @php
+    $heading = $title ?? __('messages.needs_attention');
+
+    // blue-600, not --brand-blue or --brand-button-bg: in :root those two tokens are the SAME
+    // colour (#4E81FA), which carries white at only 3.59:1 - under the 4.5:1 floor this badge's
+    // 12px semibold text needs. blue-600 (#2563EB) measures 5.17:1 and is identical in both
+    // themes, since the ratio is against the badge fill rather than the card behind it.
+    $toneClasses = $badgeTone === 'muted'
+        ? 'bg-gray-200 text-gray-700 dark:bg-white/10 dark:text-gray-300'
+        : 'bg-blue-600 text-white';
+
     // Aggregated to-do rows: HomeController::getPendingActionItems() on the user
     // dashboard, AdminAlertService::items() on the admin dashboard. Only rendered
     // when there is something pending (guarded by the caller).
@@ -61,9 +75,9 @@
     ];
 @endphp
 
-<div class="ap-card rounded-xl overflow-hidden mb-4">
+<div class="ap-card rounded-xl overflow-hidden">
     <div class="dashboard-panel-header px-5 py-4 flex items-center justify-between gap-3">
-        <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ $title ?? __('messages.needs_attention') }}</h3>
+        <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ $heading }}</h2>
         <div class="flex items-center gap-3">
             {{-- Only worth its own control past a single row: next to one suggestion the row's
                  own X is already right there. Small underlined text, like the federation
@@ -77,7 +91,12 @@
                     </button>
                 </form>
             @endif
-            <span class="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-2 text-xs font-semibold rounded-full bg-[var(--brand-blue)] text-white">{{ number_format($total) }}</span>
+            {{-- role="img" is load-bearing: a bare <span> maps to role=generic, which is in ARIA's
+                 name-prohibited set, so Chrome and Firefox drop an aria-label on it entirely. With
+                 the role the label is honoured and replaces the digits, so the count is announced
+                 as "Needs attention: 12" rather than as an orphan "12" after the heading. --}}
+            <span role="img" aria-label="{{ $heading }}: {{ number_format($total) }}"
+                class="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-2 text-xs font-semibold rounded-full {{ $toneClasses }}">{{ number_format($total) }}</span>
         </div>
     </div>
     <div class="divide-y divide-gray-100 dark:divide-white/[0.06]">

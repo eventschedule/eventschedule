@@ -205,6 +205,14 @@ class AnalyticsService
                 now()->subDays(8)->endOfDay(),
                 'vs_previous_7_days',
             ],
+            // The dashboard Views panel offers 7/14/30 (HomeController::getDashboardConfig), so
+            // 14 needs an arm here or it falls through to the 30-day default and the badge
+            // silently compares a window the number beside it never covered.
+            'last_14_days' => [
+                now()->subDays(28)->startOfDay(),
+                now()->subDays(15)->endOfDay(),
+                'vs_previous_14_days',
+            ],
             'last_30_days' => [
                 now()->subDays(60)->startOfDay(),
                 now()->subDays(31)->endOfDay(),

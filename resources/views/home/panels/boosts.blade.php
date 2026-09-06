@@ -1,6 +1,6 @@
 <div class="ap-card rounded-xl h-full flex flex-col overflow-hidden">
     <div class="dashboard-panel-header px-5 py-4">
-        <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('messages.panel_boosts') }}</h3>
+        <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('messages.panel_boosts') }}</h2>
     </div>
     <div class="divide-y divide-gray-100 dark:divide-white/[0.06] flex-1">
         @forelse($boostCampaigns as $campaign)
@@ -12,8 +12,8 @@
                 </span>
             </div>
             <div class="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                <span>{{ number_format($campaign->impressions ?? 0) }} {{ strtolower(__('messages.impressions')) }}</span>
-                <span>{{ number_format($campaign->clicks ?? 0) }} {{ strtolower(__('messages.clicks')) }}</span>
+                <span>{{ number_format($campaign->impressions ?? 0) }} {{ mb_strtolower(__('messages.impressions')) }}</span>
+                <span>{{ number_format($campaign->clicks ?? 0) }} {{ mb_strtolower(__('messages.clicks')) }}</span>
                 <span>{{ \App\Utils\MoneyUtils::format($campaign->actual_spend ?? 0, $campaign->currency_code) }}</span>
             </div>
         </div>

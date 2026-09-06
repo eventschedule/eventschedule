@@ -1,6 +1,6 @@
 <div class="ap-card rounded-xl h-full flex flex-col overflow-hidden">
     <div class="dashboard-panel-header px-5 py-4">
-        <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('messages.panel_newsletters') }}</h3>
+        <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('messages.panel_newsletters') }}</h2>
     </div>
     <div class="divide-y divide-gray-100 dark:divide-white/[0.06] flex-1">
         @forelse($latestNewsletters as $newsletter)

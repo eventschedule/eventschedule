@@ -289,14 +289,25 @@
     {{-- Main container: Stacks content on mobile, aligns in a row on desktop. --}}
     <div class="flex flex-col md:flex-row md:flex-wrap md:items-center md:justify-between gap-4">
 
-        {{-- Month and Year Title: Always visible and positioned first (hidden in list view). --}}
-        <h1 id="month-year-title" v-show="currentView === 'calendar'" class="text-2xl font-semibold leading-6 flex-shrink-0 {{ ($tab ?? '') == 'availability' ? '' : 'hidden md:block' }} text-gray-900 dark:text-gray-100" {!! ($eventLayout ?? 'calendar') === 'list' ? 'style="display:none"' : '' !!}>
+        {{-- Month and Year Title: Always visible and positioned first (hidden in list view).
+
+             h2 by default, because on most including pages something else is the page's subject -
+             the dashboard's title, the schedule name on show-admin, the guest banner/compact
+             headers - and an h1 here was a second one announcing a month. But show-guest-embed
+             has no header partial at all, so there the calendar IS the document and it passes
+             h1. Do not assume every caller supplies its own h1; two of them did not, which is
+             what a previous version of this comment got wrong.
+
+             The #month-year-title id is unchanged; it is a documented custom-CSS hook
+             (marketing/custom-css.blade.php) and show-guest.blade.php targets it by id. --}}
+        @php $calendarHeadingTag = ($calendarHeadingTag ?? 'h2') === 'h1' ? 'h1' : 'h2'; @endphp
+        <{{ $calendarHeadingTag }} id="month-year-title" v-show="currentView === 'calendar'" class="text-2xl font-semibold leading-6 flex-shrink-0 {{ ($tab ?? '') == 'availability' ? '' : 'hidden md:block' }} text-gray-900 dark:text-gray-100" {!! ($eventLayout ?? 'calendar') === 'list' ? 'style="display:none"' : '' !!}>
             @if ($route === 'guest' && !request()->graphic)
             <time :datetime="monthYearDatetime" v-text="monthYearLabel"></time>
             @else
             <time datetime="{{ sprintf('%04d-%02d', $year, $month) }}">{{ Carbon\Carbon::create($year, $month, 1)->locale($isAdminRoute && auth()->check() ? app()->getLocale() : (session()->has('translate') ? (isset($role) && $role->translation_language_code ? $role->translation_language_code : 'en') : (isset($role) && $role->language_code ? $role->language_code : 'en')))->translatedFormat('F Y') }}</time>
             @endif
-        </h1>
+        </{{ $calendarHeadingTag }}>
 
 
         {{-- All Controls Wrapper: Groups all interactive elements. Stacks on mobile, row on desktop. --}}

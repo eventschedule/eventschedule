@@ -5,6 +5,18 @@
     $style = $styles[$item['color']] ?? $styles['blue'];
     $dismissRoute = $dismissRoute ?? null;
     $dismissible = $dismissRoute && ! empty($item['dismiss_schedule']);
+
+    // Some subtitles are a mixed-direction concatenation built by the controller, e.g.
+    // "<event name> · <schedule name>" (HomeController::getPendingActionItems). Left as one
+    // string the bidi algorithm takes its direction from the first strong character and then
+    // reorders the rest, which strands the separator between a Hebrew event and a Latin venue.
+    // <bdi> isolates each side so each reads in its own direction and the separator stays put;
+    // a bdi element defaults to dir=auto, so each segment resolves its own direction.
+    // Each segment is escaped with e(), so the {!! !!} below emits no unescaped user data.
+    $subtitleHtml = implode(
+        ' · ',
+        array_map(fn ($part) => '<bdi>'.e($part).'</bdi>', explode(' · ', (string) $item['subtitle']))
+    );
 @endphp
 {{-- A form cannot be nested inside an anchor - the browser re-parents it and the row breaks -
      so the row is a wrapper with the link and the dismiss form as siblings. With no form the
@@ -25,7 +37,16 @@
         </span>
         <span class="min-w-0 flex-1">
             <span class="block text-sm font-medium text-gray-900 dark:text-white truncate">{{ $item['title'] }}</span>
-            <span class="block text-xs text-gray-500 dark:text-gray-400 truncate" dir="auto">{{ $item['subtitle'] }}</span>
+            {{-- w-fit so there is no slack for an RTL name to be pushed against the far edge of
+                 the row; max-w-full keeps truncate working at the row's width.
+
+                 Deliberately NO dir="auto" here. The contained-text-auto-directionality algorithm
+                 skips bdi descendants when looking for a strong character, so with every segment
+                 wrapped it would find none and fall back to ltr - pinning the segment order and
+                 putting truncate's ellipsis at the wrong end for Hebrew. Inheriting the page
+                 direction is both simpler and correct: the bdi children already handle each
+                 segment's own direction. --}}
+            <span class="block w-fit max-w-full text-xs text-gray-500 dark:text-gray-400 truncate">{!! $subtitleHtml !!}</span>
         </span>
         <svg class="flex-shrink-0 w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors {{ is_rtl() ? 'rotate-180' : '' }}"
             fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">

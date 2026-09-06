@@ -8,5 +8,8 @@
     <div class="flex-1 flex items-center justify-center">
         <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($upcomingCount) }}</p>
     </div>
-    <p class="text-sm text-gray-500 dark:text-gray-400 mt-auto">{{ __('messages.upcoming_events') }}</p>
+    {{-- The window the number covers, not a restatement of the header. It must not read
+         "Upcoming Events": home/panels/upcoming_events.blade.php already titles itself that, and
+         both panels are visible by default. --}}
+    <p class="text-sm text-gray-500 dark:text-gray-400 mt-auto min-h-[3.75rem] flex items-center justify-center text-center">{{ __('messages.from_today') }}</p>
 </div>
