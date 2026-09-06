@@ -315,8 +315,21 @@ Route::post('/nl/u/{token}', [NewsletterTrackingController::class, 'unsubscribe'
 // confirmed was fetched by corporate mail gateways (Safe Links, Proofpoint) before the recipient
 // saw it, which both completed the subscription and deleted their shared newsletter suppression
 // row. See RoleSubscriberController::showConfirm().
-Route::get('/sub/c/{token}', [RoleSubscriberController::class, 'showConfirm'])->name('subscriber.show_confirm')->middleware('throttle:10,1,audience_confirm');
+//
+// app_subdomain on the GET, and ONLY on the GET. sendConfirmation() builds the link with a bare
+// route() from inside store(), which is served on the tenant host - so on hosted the confirm link
+// is {subdomain}.eventschedule.com/sub/c/..., and on a schedule with a custom domain it is
+// customdomain.com/sub/c/.... ResolveCustomDomain nulls session.domain per-request on a
+// custom-domain host, so Auth::login() in claimAccount() would write a host-only cookie there and
+// the redirect to app_url(route('following')) would arrive signed out. RedirectToAppSubdomain
+// preserves the request URI, so the token survives the hop and links already in inboxes keep
+// working. Never on the POST: a 302 downgrades it to a GET.
+Route::get('/sub/c/{token}', [RoleSubscriberController::class, 'showConfirm'])->name('subscriber.show_confirm')->middleware(['app_subdomain', 'throttle:10,1,audience_confirm']);
 Route::post('/sub/c/{token}', [RoleSubscriberController::class, 'confirm'])->name('subscriber.confirm')->middleware('throttle:10,1,audience_confirm');
+// The GET half of confirm()'s post/redirect/get, and the one-shot "set a password" post. Both read
+// the claim credential from the session, never from the request - see claimState().
+Route::get('/sub/done', [RoleSubscriberController::class, 'confirmed'])->name('subscriber.confirmed')->middleware('app_subdomain');
+Route::post('/sub/account', [RoleSubscriberController::class, 'claimAccount'])->name('subscriber.claim_account')->middleware('throttle:5,1,audience_claim');
 Route::get('/sub/u/{token}', [RoleSubscriberController::class, 'showUnsubscribe'])->name('subscriber.show_unsubscribe');
 Route::post('/sub/u/{token}', [RoleSubscriberController::class, 'unsubscribe'])->name('subscriber.unsubscribe')->middleware('throttle:audience_unsubscribe');
 

@@ -22,8 +22,13 @@ use Tests\TestCase;
  *
  *   - EMAIL SUBSCRIBERS (role_subscribers, double opt-in) get the digest, on
  *     their own, and it does not touch the newsletter allowance.
- *   - ACCOUNT FOLLOWERS (signed in, pressed Follow) get nothing automatically.
- *     A newsletter the owner writes is the only thing that reaches them.
+ *   - PRESSING FOLLOW gets you nothing automatically. A newsletter the owner writes is the only
+ *     thing that reaches somebody who only ever did that. Since RoleSubscriberController::confirm()
+ *     started creating an account, most account followers ALSO hold a confirmed subscriber row and
+ *     do get the digest - through that row, never through the pivot - so the claim has to be about
+ *     what somebody DID, not what they are. The exemption below still keys on the literal phrase
+ *     "account follower" because that is the only wording readers do not conflate with the other
+ *     list; the sentences carrying it now name the qualifier.
  *   - A NEWSLETTER never sends itself. "No newsletter goes out on its own" is
  *     still true and must keep working, which is why the rule below is scoped
  *     rather than a ban on the words.

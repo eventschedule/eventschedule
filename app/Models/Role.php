@@ -743,6 +743,44 @@ class Role extends Model implements MustVerifyEmail
     }
 
     /**
+     * Followers who did NOT arrive through the subscribe panel.
+     *
+     * One person can hold both records now: RoleSubscriberController::confirm() creates a stub
+     * account and attaches a follower pivot, so a confirmed subscriber is also an account follower.
+     * Three read sites have to exclude that overlap or they double-count or misrepresent it - the
+     * two audience tables on the Followers tab, and NewsletterSegment's all_followers segment.
+     *
+     * all_followers is the load-bearing one. resolveSubscribers() below says in writing that
+     * widening all_followers "would silently change the recipient set of every saved segment and
+     * every already-scheduled newsletter, and would remove the owner's ability to mail only account
+     * holders" - and NewsletterService::send() resolves at send time, so a newsletter already
+     * sitting in status='scheduled' would gain recipients on deploy. This keeps "account follower"
+     * meaning what it has always meant: somebody who pressed Follow.
+     *
+     * Nobody loses mail. NewsletterService::resolveRecipientsUncached()'s default branch merges
+     * followers() and confirmed subscribers and dedups by email, so a subscription-follower is
+     * still reached exactly once by an ordinary "everyone" send - which is why that branch
+     * deliberately keeps using followers(), not this.
+     *
+     * Scoped to CONFIRMED rows on purpose. The subscribe endpoint is public, so an unconfirmed row
+     * proves nothing about who typed it; letting one hide a real follower would let a stranger
+     * empty this list by pasting addresses into the panel. Every subscription-created follower is
+     * confirmed by construction, so the narrower condition still catches all of them.
+     */
+    public function accountOnlyFollowers()
+    {
+        $roleId = $this->id;
+
+        return $this->followers()->whereNotExists(function ($query) use ($roleId) {
+            $query->selectRaw('1')
+                ->from('role_subscribers')
+                ->whereColumn('role_subscribers.email', 'users.email')
+                ->where('role_subscribers.role_id', $roleId)
+                ->whereNotNull('role_subscribers.confirmed_at');
+        });
+    }
+
+    /**
      * Account-less members of this schedule's audience: people who gave an email address on the
      * guest portal without creating an account. App\Services\AudienceResolver decides which of these
      * rows may actually be mailed; NewsletterService unions them with followers() for a campaign.
@@ -2294,7 +2332,11 @@ class Role extends Model implements MustVerifyEmail
             'category' => 'Category',
             'clear_filters' => 'Clear Filters',
             'done' => 'Done',
-            'email_me_new_events' => 'Email me new events',
+            // The KEY stays as it is even though the value no longer reads like it: it indexes
+            // stored roles.custom_labels JSON, so renaming it would silently drop every owner's
+            // override. The copy changed because SendEventAnnouncements sends a DIGEST floored at
+            // usage.audience_announcement_min_hours, not one email per event.
+            'email_me_new_events' => 'Keep me posted',
             'events' => 'Events',
             'filters' => 'Filter Events',
             'follow' => 'Follow',

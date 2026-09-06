@@ -7,12 +7,19 @@ use App\Mail\SubscriptionConfirmation;
 use App\Models\NewsletterUnsubscribe;
 use App\Models\Role;
 use App\Models\RoleSubscriber;
+use App\Models\RoleUser;
 use App\Models\User;
 use App\Rules\NoFakeEmail;
+use App\Services\AuditService;
 use App\Utils\HoneypotUtils;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Account-less audience capture for a schedule.
@@ -56,7 +63,7 @@ class RoleSubscriberController extends Controller
         // 200 rather than an error status on the JSON path: the caller throws a generic
         // "Request failed" on !response.ok and only renders data.message on a 200.
         if (HoneypotUtils::isTripped($request)) {
-            return $this->respond($request, __('messages.invalid_request'), false);
+            return $this->respond($request, $subdomain, __('messages.invalid_request'), false);
         }
 
         // Validated by hand rather than $request->validate(), because a ValidationException is
@@ -76,7 +83,7 @@ class RoleSubscriberController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->respond($request, $validator->errors()->first('email')
+            return $this->respond($request, $subdomain, $validator->errors()->first('email')
                 ?: __('messages.invalid_request'), false);
         }
 
@@ -96,7 +103,7 @@ class RoleSubscriberController extends Controller
 
         if (RateLimiter::tooManyAttempts($rateKey, self::PER_EMAIL_HOURLY_LIMIT)
             || RateLimiter::tooManyAttempts($roleKey, self::PER_ROLE_DAILY_LIMIT)) {
-            return $this->respond($request, __('messages.subscription_check_your_email'), true);
+            return $this->respond($request, $subdomain, __('messages.subscription_check_your_email'), true);
         }
 
         $existing = RoleSubscriber::where('role_id', $role->id)->where('email', $email)->first();
@@ -116,14 +123,14 @@ class RoleSubscriberController extends Controller
             // itself deliberately never lifts a suppression. Re-sending the confirmation is that
             // way back - it costs one email to an address that already asked for it once.
             if ($existing->isConfirmed() && ! $suppressed) {
-                return $this->respond($request, __('messages.subscription_check_your_email'), true);
+                return $this->respond($request, $subdomain, __('messages.subscription_check_your_email'), true);
             }
 
             RateLimiter::hit($rateKey, 3600);
             RateLimiter::hit($roleKey, 86400);
             $this->sendConfirmation($role, $existing);
 
-            return $this->respond($request, __('messages.subscription_check_your_email'), true);
+            return $this->respond($request, $subdomain, __('messages.subscription_check_your_email'), true);
         }
 
         try {
@@ -141,19 +148,19 @@ class RoleSubscriberController extends Controller
             // Lost a race with a concurrent identical submit. Indistinguishable from success, and
             // it genuinely is one.
             if (($e->errorInfo[1] ?? null) == 1062) {
-                return $this->respond($request, __('messages.subscription_check_your_email'), true);
+                return $this->respond($request, $subdomain, __('messages.subscription_check_your_email'), true);
             }
 
             report($e);
 
-            return $this->respond($request, __('messages.invalid_request'), false);
+            return $this->respond($request, $subdomain, __('messages.invalid_request'), false);
         }
 
         RateLimiter::hit($rateKey, 3600);
         RateLimiter::hit($roleKey, 86400);
         $this->sendConfirmation($role, $subscriber);
 
-        return $this->respond($request, __('messages.subscription_check_your_email'), true);
+        return $this->respond($request, $subdomain, __('messages.subscription_check_your_email'), true);
     }
 
     /**
@@ -216,11 +223,282 @@ class RoleSubscriberController extends Controller
             ->where('email', $subscriber->email)
             ->delete();
 
+        $user = $this->linkAccount($role, $subscriber);
+
+        // Post/redirect/get. This method has just burned confirm_token, so rendering the view
+        // straight from the POST meant the reward for pressing F5 on "you are on the list" was a
+        // 410 - and, now that page carries a password form, losing that form for good.
+        //
+        // The state goes in the SESSION rather than the URL. The only durable token this subscriber
+        // has is the UNSUBSCRIBE one, which ships in every List-Unsubscribe header and is
+        // dereferenced by mail gateways, so it must never be a credential for setting a password.
+        $request->session()->put('subscriber_confirmed', $this->claimState($role, $subscriber, $user));
+
+        return redirect()->route('subscriber.confirmed');
+    }
+
+    /**
+     * "You are on the list" - the GET half of confirm()'s redirect.
+     *
+     * Reads the session rather than a token, so a refresh keeps working for as long as the session
+     * does. With nothing there (a bookmark, a new session, somebody typing the URL) there is no
+     * schedule to name and no subscription to report, so send them to the front page instead of
+     * rendering a content-free version of this.
+     */
+    public function confirmed(Request $request)
+    {
+        $state = $request->session()->get('subscriber_confirmed');
+
+        if (! is_array($state) || empty($state['role_id'])) {
+            return redirect('/');
+        }
+
+        $role = Role::find($state['role_id']);
+
+        if (! $role || $role->is_deleted) {
+            return redirect('/');
+        }
+
+        $this->applyLocale($state['locale'] ?? null, $role);
+
         return view('subscriber.confirmed', [
             'role' => $role,
-            'subscriber' => $subscriber,
             'done' => true,
+            'claimToken' => $state['claim_token'] ?? null,
+            'claimEmail' => $state['claim_email'] ?? null,
+            'existingEmail' => $state['existing_email'] ?? null,
         ]);
+    }
+
+    /**
+     * Give a confirmed subscriber an account, and make that account follow the schedule.
+     *
+     * Runs on CONFIRM, never on submit. NewsletterSegment::resolveFollowers() and
+     * NewsletterService::resolveRecipientsUncached() resolve followers with no confirmation filter
+     * of their own, so a pivot written when the form was posted would put any address a stranger
+     * typed into the owner's next newsletter with no opt-in at all. Confirmation is the proof of
+     * mailbox possession that earns the row.
+     *
+     * The subscriber row is not replaced by this. It stays the mail-permission record - it carries
+     * confirmed_at, the locale, the source and the permanent RFC 8058 unsubscribe token, and
+     * EventAnnouncement takes a RoleSubscriber. The account is an identity layered on top of it.
+     *
+     * Modelled on NewsletterController::storeSegmentUser(), which has always created exactly this
+     * shape (passwordless stub + follower pivot) for an owner-imported address.
+     */
+    private function linkAccount(Role $role, RoleSubscriber $subscriber): ?User
+    {
+        // Every failure here is swallowed. The subscription is already committed a few lines above,
+        // so a throw would 500 a page whose actual work succeeded - and the repo's rule is that a
+        // user-facing catch never shows the exception.
+        try {
+            if (is_demo_role($role)) {
+                return null;
+            }
+
+            // NOT a tidiness rule. Role::isEditableBy() ends with
+            // "! $this->isClaimed() && $user->isFollowing($this->subdomain)" - following an
+            // unclaimed schedule grants EDIT rights on it, and the same rule is repeated in
+            // RoleController::following(), VenueUtils and GeminiUtils' venue_is_editable. The bar
+            // for that was "be signed in and press a button"; without this line it would become
+            // "type any address into a public form and click the link in the resulting email".
+            //
+            // It costs nothing to skip: an unclaimed schedule has no owner to write a newsletter,
+            // and SendEventAnnouncements::dueRoles() already requires a claimed schedule. The
+            // role_subscribers row is still written, so the audience waits for whoever claims it.
+            if (! $role->isClaimed()) {
+                return null;
+            }
+
+            // The gate every other account-creating path in the app honours. Without it a selfhost
+            // install with ALLOW_REGISTRATION unset accrues one permanently unclaimable users row
+            // per confirmed subscriber.
+            if (! public_registration_enabled()) {
+                return null;
+            }
+
+            $user = User::where('email', $subscriber->email)->first();
+
+            if (! $user) {
+                try {
+                    $user = User::create([
+                        'email' => $subscriber->email,
+                        'name' => $subscriber->name ?: '',
+                        'is_subscribed' => true,
+                        'language_code' => is_valid_language_code($subscriber->locale)
+                            ? $subscriber->locale
+                            : ($role->language_code ?: 'en'),
+                        // Keeps them out of the organizer funnel: AdminController,
+                        // GrowthExportService, SendOnboardingNudges and HomeController all scope
+                        // that cohort to signup_intent null-or-organizer. email_verified_at stays
+                        // null for the same reason - those counters also require a verified
+                        // account, and auto-verifying every subscriber would inflate all of them.
+                        'signup_intent' => 'subscriber',
+                    ]);
+                } catch (QueryException $e) {
+                    // Lost a race with a signup on the same address.
+                    if (($e->errorInfo[1] ?? null) != 1062) {
+                        throw $e;
+                    }
+
+                    $user = User::where('email', $subscriber->email)->first();
+                }
+            }
+
+            if (! $user) {
+                return null;
+            }
+
+            // isConnected() is any role_user row at any level, which is the guard
+            // RoleController::follow() uses - so an owner or admin who subscribes to their own
+            // schedule does not get a second pivot, and does not get demoted to follower.
+            if (! $user->isConnected($role->subdomain)) {
+                try {
+                    $role->followers()->attach($user->id, ['level' => 'follower', 'created_at' => now()]);
+                } catch (QueryException $e) {
+                    if (($e->errorInfo[1] ?? null) != 1062) {
+                        throw $e;
+                    }
+                }
+            }
+
+            return $user;
+        } catch (\Throwable $e) {
+            report($e);
+
+            return null;
+        }
+    }
+
+    /**
+     * What /sub/done renders, and the one-shot credential POST /sub/account requires.
+     *
+     * The claim token is a standard password-reset token (60 minutes, config/auth.php) and it lives
+     * ONLY here. claimAccount() reads it from the session and ignores whatever the form posts,
+     * which is what stops that endpoint being a general stub-takeover: password reset links can be
+     * minted for any stub by anyone, including a team-invite stub sitting at admin level, and
+     * NewPasswordController deliberately refuses to verify an email or sign anybody in off one.
+     */
+    private function claimState(Role $role, RoleSubscriber $subscriber, ?User $user): array
+    {
+        $state = [
+            'role_id' => $role->id,
+            'locale' => $subscriber->locale,
+            'claim_token' => null,
+            'claim_email' => null,
+            'existing_email' => null,
+        ];
+
+        if (! $user || ! public_registration_enabled()) {
+            return $state;
+        }
+
+        // Somebody signed in as a different account is looking at a stub belonging to another
+        // mailbox. Offering them the password form would be offering them that person's account.
+        if (Auth::check() && Auth::id() !== $user->id) {
+            return $state;
+        }
+
+        if (! $user->isStub()) {
+            // A real account, already signed in as themselves, has nothing to do here. Signed out,
+            // the useful thing to say is "sign in and you will see this on your Following list".
+            $state['existing_email'] = Auth::check() ? null : $user->email;
+
+            return $state;
+        }
+
+        $state['claim_token'] = Password::createToken($user);
+        $state['claim_email'] = $user->email;
+
+        return $state;
+    }
+
+    /**
+     * Turn the stub created by linkAccount() into a real account.
+     *
+     * Legitimately skips the emailed verification code that RegisteredUserController requires on
+     * hosted: the confirm click this page came from IS the proof of mailbox possession, and it is
+     * the same proof a password reset link carries.
+     */
+    public function claimAccount(Request $request)
+    {
+        // Public form, so a honeypot - and x-auth-layout renders only per-field errors, so every
+        // bail here has to be a ValidationException rather than a flash.
+        if (HoneypotUtils::isTripped($request)) {
+            throw ValidationException::withMessages(['password' => __('messages.invalid_request')]);
+        }
+
+        if (! public_registration_enabled()) {
+            abort(404);
+        }
+
+        $state = $request->session()->get('subscriber_confirmed');
+        $token = is_array($state) ? ($state['claim_token'] ?? null) : null;
+        $email = is_array($state) ? ($state['claim_email'] ?? null) : null;
+
+        // Never from the request. See claimState().
+        if (! $token || ! $email) {
+            return redirect()->route('password.request');
+        }
+
+        $request->validate(['password' => ['required', 'string', 'min:8']]);
+
+        $user = User::where('email', $email)->first();
+
+        if (! $user || ! $user->isStub()) {
+            $this->forgetClaim($request);
+
+            return redirect()->route('password.request');
+        }
+
+        $timezone = $request->input('timezone');
+        $languageCode = is_valid_language_code($user->language_code) ? $user->language_code : 'en';
+
+        $status = Password::reset(
+            ['email' => $email, 'password' => $request->password, 'token' => $token],
+            function (User $user) use ($request, $timezone, $languageCode) {
+                $user->forceFill([
+                    'password' => Hash::make($request->password),
+                    // The confirm link proved the mailbox, so this is verified in the same sense a
+                    // registration verification code makes it verified. It is also load-bearing:
+                    // /following sits behind the `verified` middleware, so without it the redirect
+                    // below lands on the verification wall.
+                    'email_verified_at' => $user->email_verified_at ?: now(),
+                    'remember_token' => Str::random(60),
+                    'timezone' => $user->timezone ?: ($timezone ?: 'America/New_York'),
+                    'use_24_hour_time' => detect_24_hour_time($user->timezone ?: $timezone, $languageCode),
+                ])->save();
+
+                AuditService::log(AuditService::AUTH_REGISTER, $user->id);
+            }
+        );
+
+        if ($status !== Password::PASSWORD_RESET) {
+            // back() lands on GET /sub/done, which re-renders this form from the session.
+            throw ValidationException::withMessages(['password' => __($status)]);
+        }
+
+        $role = ! empty($state['role_id']) ? Role::find($state['role_id']) : null;
+        $this->forgetClaim($request);
+
+        Auth::login($user->fresh(), true);
+
+        return redirect(app_url(route('following', [], false)))
+            ->with('message', __('messages.subscription_account_created', [
+                'schedule' => $role?->name ?: '',
+            ]));
+    }
+
+    /** Spend the one-shot claim credential, keeping the rest of the page's state. */
+    private function forgetClaim(Request $request): void
+    {
+        $state = $request->session()->get('subscriber_confirmed');
+
+        if (is_array($state)) {
+            $state['claim_token'] = null;
+            $state['claim_email'] = null;
+            $request->session()->put('subscriber_confirmed', $state);
+        }
     }
 
     /**
@@ -247,7 +525,7 @@ class RoleSubscriberController extends Controller
             abort(404);
         }
 
-        $this->applyLocale($subscriber, $role);
+        $this->applyLocale($subscriber->locale, $role);
 
         return [$subscriber, $role];
     }
@@ -256,7 +534,7 @@ class RoleSubscriberController extends Controller
     {
         $subscriber = RoleSubscriber::where('token', $token)->with('role')->firstOrFail();
 
-        $this->applyLocale($subscriber, $subscriber->role);
+        $this->applyLocale($subscriber->locale, $subscriber->role);
 
         return view('subscriber.unsubscribe', [
             'role' => $subscriber->role,
@@ -275,7 +553,7 @@ class RoleSubscriberController extends Controller
         $subscriber = RoleSubscriber::where('token', $token)->with('role')->firstOrFail();
         $role = $subscriber->role;
 
-        $this->applyLocale($subscriber, $role);
+        $this->applyLocale($subscriber->locale, $role);
 
         // Any confirmation link still sitting in an inbox dies here, so it cannot be replayed -
         // by the person or by their mail scanner - to undo what they just asked for.
@@ -314,7 +592,33 @@ class RoleSubscriberController extends Controller
         // Ids visible to users are encoded, per the repo rule and every sibling route on this page.
         $id = \App\Utils\UrlUtils::decodeId($hash);
 
-        RoleSubscriber::where('role_id', $role->id)->where('id', $id)->delete();
+        $subscriber = RoleSubscriber::where('role_id', $role->id)->where('id', $id)->first();
+
+        if (! $subscriber) {
+            return back()->with('message', __('messages.deleted_subscriber'));
+        }
+
+        $email = $subscriber->email;
+        $subscriber->delete();
+
+        // Deleting the row stopped being the whole job the moment confirm() started creating an
+        // account and attaching a follower pivot. resolveFollowers() and NewsletterService resolve
+        // followers with no confirmation filter and no suppression of their own, and there is no
+        // newsletter_unsubscribes row here because the person never unsubscribed - so leaving the
+        // pivot meant the owner pressed Delete, was told the subscriber was removed, and carried on
+        // mailing them, with the person reappearing in the Followers table on the next load.
+        //
+        // Scoped to level 'follower' explicitly rather than using followers()->detach(): that
+        // relation constrains the RELATED query, not the pivot, so detach() would happily delete an
+        // owner's own row if the owner had ever subscribed to their own schedule.
+        $user = User::where('email', $email)->first();
+
+        if ($user) {
+            RoleUser::where('role_id', $role->id)
+                ->where('user_id', $user->id)
+                ->where('level', 'follower')
+                ->delete();
+        }
 
         return back()->with('message', __('messages.deleted_subscriber'));
     }
@@ -327,9 +631,9 @@ class RoleSubscriberController extends Controller
      * The address was captured with a language attached; use it, and keep the schedule's own
      * language as the fallback it always was.
      */
-    private function applyLocale(?RoleSubscriber $subscriber, ?Role $role): void
+    private function applyLocale(?string $locale, ?Role $role): void
     {
-        foreach ([$subscriber?->locale, $role?->language_code] as $candidate) {
+        foreach ([$locale, $role?->language_code] as $candidate) {
             if ($candidate && is_valid_language_code($candidate)) {
                 app()->setLocale($candidate);
 
@@ -420,15 +724,86 @@ class RoleSubscriberController extends Controller
             $user->roles()->wherePivot('level', 'follower')
                 ->pluck('roles.id')
                 ->each(fn ($roleId) => $this->suppress($roleId, $email));
+
+            // The platform-wide opt-out, which AudienceResolver::platformSuppressedEmails() and
+            // NewsletterService both honour. Without it, "stop everything" only covered the
+            // schedules on the list at that moment, so following one more re-opened the tap.
+            if ($user->is_subscribed) {
+                $user->forceFill(['is_subscribed' => false])->saveQuietly();
+            }
+
+            $this->eraseStubIfEmpty($user);
         }
     }
 
-    /** One shape for both the async modal and the no-JS form. */
-    private function respond(Request $request, string $message, bool $success)
+    /**
+     * Delete an account that only ever existed because somebody subscribed, once they have asked to
+     * stop hearing from everybody.
+     *
+     * confirm() creates a passwordless stub for a confirmed subscriber, and a stub cannot sign in -
+     * so ProfileController::destroy() is unreachable for them (it is behind `auth`) and /sub/u/* is
+     * the only control they have. Leaving a permanent platform users row behind is what the comment
+     * on ProfileController's own subscriber cleanup says the privacy policy does not allow.
+     *
+     * Deliberately narrow, because the foreign keys here CASCADE: roles.user_id and sales.user_id
+     * are both onDelete('cascade'), so a wrong call would take somebody's schedules and their
+     * purchase history with it. Everything below has to be true, and a throw leaves the row in
+     * place - already opted out above, so the outcome is never worse than before.
+     */
+    private function eraseStubIfEmpty(User $user): void
+    {
+        try {
+            if (! $user->isStub() || $user->signup_intent !== 'subscriber') {
+                return;
+            }
+
+            if (Role::where('user_id', $user->id)->exists()) {
+                return;
+            }
+
+            if (RoleUser::where('user_id', $user->id)->where('level', '!=', 'follower')->exists()) {
+                return;
+            }
+
+            if (\App\Models\Sale::where('user_id', $user->id)->exists()) {
+                return;
+            }
+
+            if (\App\Models\Event::where('user_id', $user->id)->exists()) {
+                return;
+            }
+
+            $user->delete();
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
+
+    /**
+     * One shape for both the async modal and the no-JS form.
+     *
+     * The plain-form half redirects back to the PANEL, not just to the page. It used to flash
+     * session('message'), which layouts/app.blade.php renders as a three-second Toastify toast -
+     * invisible with JavaScript off, which contradicts this form's whole reason for being a plain
+     * POST, and out of context even with JavaScript, because back() lands at the TOP of a page
+     * whose panel sits a couple of thousand pixels down and which still shows an empty, apparently
+     * unsubmitted form. The flash now drives an inline state inside the panel and the fragment puts
+     * the visitor in front of it.
+     *
+     * The fallback URL matters: with no referer, back() lands on "/", where no panel renders and
+     * the state would be invisible. withFragment() strips any pre-existing fragment first, so it is
+     * safe on an arbitrary referer.
+     *
+     * The keys carry the subdomain so a redirect can only ever light up the panel it belongs to.
+     */
+    private function respond(Request $request, string $subdomain, string $message, bool $success)
     {
         if ($request->expectsJson()) {
             return response()->json(['success' => $success, 'message' => $message]);
         }
+
+        $back = back(302, [], route('role.view_guest', ['subdomain' => $subdomain]))
+            ->withFragment('subscribe-panel');
 
         if (! $success) {
             // NOT session('error'), and not withInput().
@@ -443,13 +818,19 @@ class RoleSubscriberController extends Controller
             // The address comes back under its own key too: old('email') is shared with the
             // ticket and RSVP forms on that same page, so repopulating through withInput() would
             // cross-fill them.
-            return back()
+            return $back
                 ->with('subscribe_error', $message)
+                ->with('subscribe_error_for', $subdomain)
                 ->with('subscribe_email', is_string($request->input('email'))
                     ? $request->input('email')
                     : '');
         }
 
-        return back()->with('message', $message);
+        // NOT session('message'): that is the toast key, and toasting from the top of the viewport
+        // while the panel below already says the same thing is double notification.
+        // No subscribe_email on this branch: the success state deliberately does not name the
+        // address (CLAUDE.md's guest-surface rule), so flashing it would only park it in the
+        // session for nothing to read.
+        return $back->with('subscribe_done', $subdomain);
     }
 }

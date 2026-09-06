@@ -590,7 +590,7 @@
                 'role/partials/headers/banner.blade.php, compact.blade.php and action-buttons.blade.php',
                 [
                     ['Follow', 'Join the list'],
-                    ['Email me new events', 'Tell me when a class opens'],
+                    ['Keep me posted', 'Tell me when a class opens'],
                     ['Submit Event', 'Suggest a class'],
                     ['Request to Book', 'Enquire'],
                     ['Book a Time', 'Book a slot'],

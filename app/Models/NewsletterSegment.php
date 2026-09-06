@@ -65,13 +65,28 @@ class NewsletterSegment extends Model
         };
     }
 
+    /**
+     * Account followers, meaning people who pressed Follow - NOT everyone holding a follower pivot.
+     *
+     * accountOnlyFollowers() excludes anyone with a confirmed role_subscribers row on this
+     * schedule, because RoleSubscriberController::confirm() now gives a confirmed subscriber an
+     * account and attaches a pivot. Without the exclusion this segment would silently widen to
+     * cover both lists, which is exactly what resolveSubscribers() below says must never happen:
+     * NewsletterService::send() resolves at SEND time, so a newsletter already sitting in
+     * status='scheduled' would gain recipients on deploy, and on the free tier it would spend the
+     * 10-recipient allowance faster.
+     *
+     * They are not dropped from anything: the composer's default "everyone" branch in
+     * NewsletterService merges followers and confirmed subscribers and dedups by email, and an
+     * all_subscribers segment names them directly.
+     */
     protected function resolveFollowers(): Collection
     {
         if (! $this->role) {
             return collect();
         }
 
-        return $this->role->followers()
+        return $this->role->accountOnlyFollowers()
             ->select('users.id', 'users.email', 'users.name', 'users.is_subscribed')
             ->where('users.is_subscribed', true)
             ->get()

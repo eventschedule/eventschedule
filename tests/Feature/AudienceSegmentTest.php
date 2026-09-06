@@ -86,6 +86,20 @@ class AudienceSegmentTest extends TestCase
         $this->assertEqualsCanonicalizing(['mine@fans.test'], $emails->all());
     }
 
+    /**
+     * Drive the real endpoint rather than writing the row: since RoleSubscriberController::confirm()
+     * started minting an account and attaching a follower pivot, a fixture that skips it no longer
+     * exercises the path that could break all_followers.
+     */
+    private function subscribeAndConfirm(Role $role, string $email): void
+    {
+        $this->post(route('role.audience.join', ['subdomain' => $role->subdomain]), ['email' => $email]);
+
+        $sub = RoleSubscriber::where('role_id', $role->id)->where('email', $email)->firstOrFail();
+
+        $this->post(route('subscriber.confirm', ['token' => $sub->confirm_token]));
+    }
+
     public function test_all_followers_still_excludes_subscribers(): void
     {
         // The non-regression half. Without it, someone "simplifying" by widening all_followers to
@@ -98,6 +112,39 @@ class AudienceSegmentTest extends TestCase
 
         $this->assertNotContains('subscriber@fans.test', $emails->all());
         $this->assertContains(strtolower($follower->email), $emails->all());
+    }
+
+    public function test_all_followers_excludes_a_subscriber_who_went_through_confirm(): void
+    {
+        // The version that matters now: confirming gives the subscriber a real users row and a
+        // follower pivot, so without Role::accountOnlyFollowers() this segment would silently
+        // widen - which NewsletterSegment::resolveSubscribers() says in writing must not happen,
+        // because NewsletterService::send() resolves at SEND time and would hand extra recipients
+        // to a newsletter already sitting in status='scheduled'.
+        $follower = $this->createOwner();
+        $this->followRole($follower, $this->role);
+
+        $this->subscribeAndConfirm($this->role, 'subscriber@fans.test');
+        $this->assertNotNull(\App\Models\User::where('email', 'subscriber@fans.test')->first(),
+            'the account really was created, so this test is exercising the overlap');
+
+        $emails = $this->segment($this->role, 'all_followers')->resolveRecipients()->pluck('email');
+
+        $this->assertNotContains('subscriber@fans.test', $emails->all());
+        $this->assertContains(strtolower($follower->email), $emails->all());
+    }
+
+    public function test_a_confirmed_subscriber_is_in_the_default_audience_exactly_once(): void
+    {
+        // And nobody loses mail for it: the composer's default "everyone" branch merges followers
+        // and confirmed subscribers, then dedups by email.
+        $this->subscribeAndConfirm($this->role, 'subscriber@fans.test');
+
+        $emails = app(NewsletterService::class)
+            ->resolveRecipients($this->role, [])
+            ->pluck('email');
+
+        $this->assertSame(1, $emails->filter(fn ($e) => $e === 'subscriber@fans.test')->count());
     }
 
     public function test_the_composer_default_audience_includes_subscribers(): void

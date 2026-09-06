@@ -40,6 +40,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const submitting = ref(false);
             const followUrl = ref('');
             const subscribeUrl = ref('');
+            // The panel renders this button's label through Role::customLabel(), so hardcoding the
+            // translated string here gave an owner who customised it two different labels for the
+            // same action on the same page. The trigger carries the resolved value.
+            const subscribeLabel = ref(@json(__('messages.email_me_new_events'), JSON_UNESCAPED_UNICODE));
             const email = ref('');
             const subscriberName = ref('');
             // Honeypot. It has to live in the Vue template below rather than as a Blade honeypot
@@ -82,6 +86,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 triggerEl = btn;
                 followUrl.value = btn.dataset.followUrl || '';
                 subscribeUrl.value = btn.dataset.subscribeUrl || '';
+                subscribeLabel.value = btn.dataset.subscribeLabel
+                    || @json(__('messages.email_me_new_events'), JSON_UNESCAPED_UNICODE);
                 email.value = '';
                 subscriberName.value = '';
                 website.value = '';
@@ -228,7 +234,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 open, dontAskAgain, submitting,
                 scheduleName, scheduleImage, accentColor, contrastColor,
                 isGuest, confirmButtonRef,
-                subscribeUrl, email, subscriberName, website, subscribeBody,
+                subscribeUrl, subscribeLabel, email, subscriberName, website, subscribeBody,
                 resultMessage, resultSuccess, done,
                 close, confirm, submitSubscribe,
             };
@@ -341,7 +347,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
                 </svg>
-                <span v-if="isGuest">{{ __('messages.email_me_new_events') }}</span>
+                <span v-if="isGuest" v-text="subscribeLabel"></span>
                 <span v-else>{{ __('messages.follow') }}</span>
             </button>
             <button v-if="done" type="button" @click="close"

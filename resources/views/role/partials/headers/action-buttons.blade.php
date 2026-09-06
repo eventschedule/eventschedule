@@ -50,6 +50,7 @@
         data-follow-trigger
         data-follow-url="{{ route('role.follow', ['subdomain' => $role->subdomain]) }}"
         data-subscribe-url="{{ route('role.audience.join', ['subdomain' => $role->subdomain]) }}"
+        data-subscribe-label="{{ $role->customLabel('email_me_new_events') }}"
         data-schedule-name="{{ $role->name }}"
         data-schedule-image="{{ $role->profile_image_url }}"
         data-accent-color="{{ $accentColor }}"

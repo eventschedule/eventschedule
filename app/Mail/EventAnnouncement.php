@@ -16,10 +16,11 @@ use Illuminate\Support\Collection;
 /**
  * "X has added new events" - the email the whole audience feature promises and nothing sent.
  *
- * A DIGEST, not one message per event. subscribe_panel_body offers "an email when :schedule adds a
- * new event" and the confirmation email narrows that to "at most one email every few days, only
- * when there is something new", so a schedule that publishes a season in one sitting owes its
- * audience one message, not thirty.
+ * A DIGEST, not one message per event. subscribe_panel_body offers "occasional email updates from
+ * :schedule" and the panel and the confirmation email both narrow that to "at most one email every
+ * few days, only when there is something new", so a schedule that publishes a season in one sitting
+ * owes its audience one message, not thirty. The copy used to promise an email per new event, which
+ * this has never done.
  *
  * Unlike NewsletterEmail this carries no open or click tracking. Nobody composed it, so there is
  * no campaign to report on, and an announcement people did not ask a human for should be the least

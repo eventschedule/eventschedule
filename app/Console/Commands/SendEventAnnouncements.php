@@ -25,8 +25,9 @@ use Illuminate\Support\Facades\Log;
  * Three things keep this from being a mailshot, and all three are load-bearing:
  *
  *   1. A DIGEST per schedule, never one email per event. subscription_confirm_cadence promises
- *      "at most one email every few days", so a schedule that publishes a season in one sitting
- *      owes its audience one message.
+ *      "at most one email every few days" - and now says so on the sign-up panel itself, not just
+ *      after the address has been handed over - so a schedule that publishes a season in one
+ *      sitting owes its audience one message.
  *   2. A cadence floor (usage.audience_announcement_min_hours) between sends to one schedule.
  *   3. A first-run WATERMARK. roles.last_announced_at starts NULL, and a schedule seen for the
  *      first time is stamped WITHOUT being sent. Without it the first run would announce every

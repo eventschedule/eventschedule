@@ -49,6 +49,42 @@ class AudienceAdminTabTest extends TestCase
         $this->assertStringContainsString(__('messages.subscriber_pending'), $html);
     }
 
+    public function test_a_confirmed_subscriber_is_listed_once_not_twice(): void
+    {
+        // Confirming gives them a users row and a follower pivot, so the raw relation would show
+        // the same person in the Followers table AND the subscriber table, and the tab strip - which
+        // is literally count($followers) + $subscribersCount - would count them twice.
+        $role = $this->createRole($this->createOwner());
+
+        $this->post(route('role.audience.join', ['subdomain' => $role->subdomain]), ['email' => 'fan@fans.test']);
+        $sub = \App\Models\RoleSubscriber::where('role_id', $role->id)->firstOrFail();
+        $this->post(route('subscriber.confirm', ['token' => $sub->confirm_token]));
+
+        $user = \App\Models\User::where('email', 'fan@fans.test')->firstOrFail();
+        $this->assertSame(1, \DB::table('role_user')
+            ->where('role_id', $role->id)->where('user_id', $user->id)->count());
+
+        $this->assertSame(0, $role->fresh()->accountOnlyFollowers()->count(),
+            'a subscription-created follower belongs to the subscriber table, not the followers one');
+        $this->assertSame(1, $role->fresh()->followers()->count(),
+            'the pivot is still there - only the audience tab narrows the view');
+    }
+
+    public function test_an_unconfirmed_row_never_hides_a_real_follower(): void
+    {
+        // The endpoint is public, so an unconfirmed row proves nothing about who typed it. If it
+        // could hide a follower, a stranger could empty the Followers table by pasting addresses
+        // into the panel - and the person would be re-rendered as "never emailed" while
+        // resolveFollowers() carried on mailing them.
+        $role = $this->createRole($this->createOwner());
+        $follower = $this->createOwner();
+        $this->followRole($follower, $role);
+
+        $this->post(route('role.audience.join', ['subdomain' => $role->subdomain]), ['email' => $follower->email]);
+
+        $this->assertSame(1, $role->fresh()->accountOnlyFollowers()->count());
+    }
+
     public function test_a_stranger_cannot_see_the_audience(): void
     {
         $role = $this->createRole($this->createOwner());

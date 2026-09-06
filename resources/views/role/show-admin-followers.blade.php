@@ -88,6 +88,151 @@
 
 @else
 
+{{-- One deduped statement of the audience, above both tables.
+     Necessary rather than decorative: a confirmed subscriber now also holds a follower pivot, so
+     accountOnlyFollowers() excludes them from the Followers table - and an owner watching this ship
+     would otherwise see that count drop with no explanation while a table called "Email
+     subscribers" quietly became the main list. Adding the two table totals by hand is exactly the
+     arithmetic this saves them. --}}
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+    <x-stat-panel :label="__('messages.audience_total')" size="lg">{{ number_format($followersWithRoles->total() + ($subscribers ? $subscribers->total() : 0)) }}</x-stat-panel>
+    <x-stat-panel :label="__('messages.audience_get_new_event_emails')" size="lg" color="green">{{ number_format($subscriberStats['confirmed'] ?? 0) }}</x-stat-panel>
+    <x-stat-panel :label="__('messages.audience_newsletter_only')" size="lg">{{ number_format($followersWithRoles->total()) }}</x-stat-panel>
+</div>
+
+@if ($hasSubscribers)
+{{--
+    Account-less subscribers: people who gave this schedule an email address on the guest portal
+    without creating an account. Owner-facing only - these addresses must never appear on a guest
+    surface, an embed or public stats.
+--}}
+@php
+    $canManageSubscribers = auth()->user() && auth()->user()->isEditor($role->subdomain);
+    $subscriberPending = $subscriberStats['pending'] ?? 0;
+@endphp
+<div class="mt-10">
+    <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">
+        {{ __('messages.all_subscribers') }} ({{ number_format($subscribers->total()) }})
+    </h3>
+    {{-- Says how a person GETS into this list, which is the question the two-table split raises and
+         never used to answer. --}}
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        {{ __('messages.subscribers_help') }}
+    </p>
+
+    @if ($subscriberStats)
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        {{ __('messages.subscriber_breakdown', [
+            'confirmed' => number_format($subscriberStats['confirmed']),
+            'pending' => number_format($subscriberStats['pending']),
+            'unsubscribed' => number_format($subscriberStats['unsubscribed']),
+        ]) }}
+    </p>
+    @endif
+
+    @if ($subscriberPending)
+    {{-- The pending count and the recipient count on a send legitimately differ, because an
+         unconfirmed row is never resolved as a recipient. That was documented only in a source
+         comment, which is no help to the owner staring at the discrepancy. --}}
+    <div class="mt-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+        </svg>
+        <p class="text-sm text-amber-700 dark:text-amber-300">
+            {{ __('messages.subscriber_pending_warning', ['count' => number_format($subscriberPending)]) }}
+        </p>
+    </div>
+    @endif
+
+    <div class="mt-4 flow-root">
+        <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                <div class="overflow-hidden shadow ring-1 ring-black/5 dark:ring-gray-700 md:rounded-lg">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-700">
+                            <tr>
+                                <th scope="col" class="py-3.5 ps-4 pe-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-100 sm:ps-6">{{ __('messages.name') }}</th>
+                                <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.email') }}</th>
+                                <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.status') }}</th>
+                                <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.date') }}</th>
+                                @if ($canManageSubscribers)
+                                <th scope="col" class="relative py-3.5 ps-3 pe-4 sm:pe-6"><span class="sr-only">{{ __('messages.delete') }}</span></th>
+                                @endif
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
+                            @foreach ($subscribers as $subscriber)
+                            <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                                <td class="whitespace-nowrap py-4 ps-4 pe-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:ps-6">
+                                    @if ($subscriber->name)
+                                        <x-user-text>{{ $subscriber->name }}</x-user-text>
+                                    @else
+                                        <span class="italic text-gray-400 dark:text-gray-500">{{ __('messages.no_name') }}</span>
+                                    @endif
+                                    {{-- Neutral outline chip, not a second coloured pill in the
+                                         Status cell: that cell already carries one, and two
+                                         coloured pills side by side compete for the same "what
+                                         state is this person in?" read. Icon plus text, never
+                                         colour alone, and no title= - invisible on touch and
+                                         unreliable with a screen reader. The section caption above
+                                         explains it once. --}}
+                                    @if (in_array(strtolower($subscriber->email), $subscriberAccountEmails ?? [], true))
+                                    <span class="ms-2 inline-flex items-center gap-1 rounded-md border border-gray-200 dark:border-gray-700 px-1.5 py-0.5 text-[11px] font-medium text-gray-500 dark:text-gray-400 align-middle">
+                                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 20.25a7.5 7.5 0 0 1 15 0" />
+                                        </svg>
+                                        {{ __('messages.subscriber_has_account') }}
+                                    </span>
+                                    @endif
+                                </td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                    {{ $subscriber->email }}
+                                </td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm">
+                                    @if ($subscriber->has_unsubscribed)
+                                        <span class="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300">{{ __('messages.subscriber_unsubscribed') }}</span>
+                                    @elseif ($subscriber->confirmed_at)
+                                        <span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-500/10 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400">{{ __('messages.subscriber_confirmed') }}</span>
+                                    @else
+                                        {{-- Never mailed. The amber panel above the table explains
+                                             the resulting discrepancy to the owner. --}}
+                                        <span class="inline-flex items-center rounded-md bg-amber-50 dark:bg-amber-500/10 px-2 py-1 text-xs font-medium text-amber-700 dark:text-amber-400">{{ __('messages.subscriber_pending') }}</span>
+                                    @endif
+                                </td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                    {{ $subscriber->created_at->format(get_use_24_hour_time($role) ? 'M jS, Y • H:i' : 'M jS, Y • g:i A') }}
+                                </td>
+                                @if ($canManageSubscribers)
+                                {{-- isEditor, matching RoleSubscriberController::remove(). viewAdmin
+                                     admits isMember, which includes viewers - who used to see this
+                                     button on every row and get a bare 403 on click. --}}
+                                <td class="relative whitespace-nowrap py-4 ps-3 pe-4 text-end text-sm font-medium sm:pe-6">
+                                    <form method="POST" action="{{ route('role.subscribers.remove', ['subdomain' => $role->subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($subscriber->id)]) }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" data-confirm="{{ __('messages.are_you_sure') }}"
+                                            class="text-sm text-red-600 dark:text-red-400 hover:underline">
+                                            {{ __('messages.delete') }}
+                                        </button>
+                                    </form>
+                                </td>
+                                @endif
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        {{ $subscribers->links() }}
+    </div>
+</div>
+@endif
+
+
 {{--
     Account followers. Guarded on isNotEmpty() because the branch above only takes the empty-state
     branch when BOTH lists are empty - so a schedule whose whole audience is account-less (the
@@ -99,6 +244,11 @@
     <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">
         {{ __('messages.followers') }} ({{ number_format($followersWithRoles->total()) }})
     </h3>
+    {{-- The same reframing the marketing pages carry, next to the table it describes: following on
+         its own does not sign anybody up for automatic email. --}}
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        {{ __('messages.followers_account_only_help') }}
+    </p>
 
 <div class="mt-4 flow-root">
     <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -189,116 +339,4 @@
 @endif
 </div>
 @endif
-@endif
-
-@if ($hasSubscribers)
-{{--
-    Account-less subscribers: people who gave this schedule an email address on the guest portal
-    without creating an account. Owner-facing only - these addresses must never appear on a guest
-    surface, an embed or public stats.
---}}
-@php
-    $canManageSubscribers = auth()->user() && auth()->user()->isEditor($role->subdomain);
-    $subscriberPending = $subscriberStats['pending'] ?? 0;
-@endphp
-<div class="mt-10">
-    <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">
-        {{ __('messages.all_subscribers') }} ({{ number_format($subscribers->total()) }})
-    </h3>
-
-    @if ($subscriberStats)
-    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        {{ __('messages.subscriber_breakdown', [
-            'confirmed' => number_format($subscriberStats['confirmed']),
-            'pending' => number_format($subscriberStats['pending']),
-            'unsubscribed' => number_format($subscriberStats['unsubscribed']),
-        ]) }}
-    </p>
-    @endif
-
-    @if ($subscriberPending)
-    {{-- The pending count and the recipient count on a send legitimately differ, because an
-         unconfirmed row is never resolved as a recipient. That was documented only in a source
-         comment, which is no help to the owner staring at the discrepancy. --}}
-    <div class="mt-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-3">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-        </svg>
-        <p class="text-sm text-amber-700 dark:text-amber-300">
-            {{ __('messages.subscriber_pending_warning', ['count' => number_format($subscriberPending)]) }}
-        </p>
-    </div>
-    @endif
-
-    <div class="mt-4 flow-root">
-        <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-            <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                <div class="overflow-hidden shadow ring-1 ring-black/5 dark:ring-gray-700 md:rounded-lg">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-700">
-                            <tr>
-                                <th scope="col" class="py-3.5 ps-4 pe-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-100 sm:ps-6">{{ __('messages.name') }}</th>
-                                <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.email') }}</th>
-                                <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.status') }}</th>
-                                <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.date') }}</th>
-                                @if ($canManageSubscribers)
-                                <th scope="col" class="relative py-3.5 ps-3 pe-4 sm:pe-6"><span class="sr-only">{{ __('messages.delete') }}</span></th>
-                                @endif
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
-                            @foreach ($subscribers as $subscriber)
-                            <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
-                                <td class="whitespace-nowrap py-4 ps-4 pe-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:ps-6">
-                                    @if ($subscriber->name)
-                                        <x-user-text>{{ $subscriber->name }}</x-user-text>
-                                    @else
-                                        <span class="italic text-gray-400 dark:text-gray-500">{{ __('messages.no_name') }}</span>
-                                    @endif
-                                </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $subscriber->email }}
-                                </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm">
-                                    @if ($subscriber->has_unsubscribed)
-                                        <span class="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300">{{ __('messages.subscriber_unsubscribed') }}</span>
-                                    @elseif ($subscriber->confirmed_at)
-                                        <span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-500/10 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400">{{ __('messages.subscriber_confirmed') }}</span>
-                                    @else
-                                        {{-- Never mailed. The amber panel above the table explains
-                                             the resulting discrepancy to the owner. --}}
-                                        <span class="inline-flex items-center rounded-md bg-amber-50 dark:bg-amber-500/10 px-2 py-1 text-xs font-medium text-amber-700 dark:text-amber-400">{{ __('messages.subscriber_pending') }}</span>
-                                    @endif
-                                </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $subscriber->created_at->format(get_use_24_hour_time($role) ? 'M jS, Y • H:i' : 'M jS, Y • g:i A') }}
-                                </td>
-                                @if ($canManageSubscribers)
-                                {{-- isEditor, matching RoleSubscriberController::remove(). viewAdmin
-                                     admits isMember, which includes viewers - who used to see this
-                                     button on every row and get a bare 403 on click. --}}
-                                <td class="relative whitespace-nowrap py-4 ps-3 pe-4 text-end text-sm font-medium sm:pe-6">
-                                    <form method="POST" action="{{ route('role.subscribers.remove', ['subdomain' => $role->subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($subscriber->id)]) }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" data-confirm="{{ __('messages.are_you_sure') }}"
-                                            class="text-sm text-red-600 dark:text-red-400 hover:underline">
-                                            {{ __('messages.delete') }}
-                                        </button>
-                                    </form>
-                                </td>
-                                @endif
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="mt-4">
-        {{ $subscribers->links() }}
-    </div>
-</div>
 @endif

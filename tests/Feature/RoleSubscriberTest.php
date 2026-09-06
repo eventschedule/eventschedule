@@ -16,10 +16,12 @@ use Tests\TestCase;
 /**
  * Account-less audience capture.
  *
- * The point of the feature is that following stops costing a user account: RoleController::follow()
+ * The point of the feature is that CAPTURE stops costing a user account: RoleController::follow()
  * bounces a signed-out visitor to sign_up, which is why 139k guest page views produced 764
- * followers. So the load-bearing assertion in most of these is not "a row was written" but "and NO
- * account was created", and not "one email went out" but "to whom".
+ * followers. Confirming now grants the account instead, so the split matters: at SUBMIT the
+ * load-bearing assertion is still "and NO account was created", and at CONFIRM it is that a stub
+ * plus a follower pivot appear - but only for a claimed schedule, and only where public
+ * registration is open.
  */
 class RoleSubscriberTest extends TestCase
 {
@@ -80,7 +82,8 @@ class RoleSubscriberTest extends TestCase
         $this->post($this->joinUrl(), ['email' => 'fan@fans.test']);
         $sub = RoleSubscriber::first();
 
-        $this->post(route('subscriber.confirm', ['token' => $sub->confirm_token]))->assertOk();
+        $this->post(route('subscriber.confirm', ['token' => $sub->confirm_token]))
+            ->assertRedirect(route('subscriber.confirmed'));
 
         $this->assertNotNull($sub->fresh()->confirmed_at);
         $this->assertSame(1, RoleSubscriber::confirmed()->count());
@@ -201,7 +204,8 @@ class RoleSubscriberTest extends TestCase
             'a GET must not lift a suppression');
 
         // And the token is still live for the person who actually presses the button.
-        $this->post(route('subscriber.confirm', ['token' => $sub->confirm_token]))->assertOk();
+        $this->post(route('subscriber.confirm', ['token' => $sub->confirm_token]))
+            ->assertRedirect(route('subscriber.confirmed'));
         $this->assertNotNull($sub->fresh()->confirmed_at);
         $this->assertSame(0, NewsletterUnsubscribe::where('email', 'fan@fans.test')->count());
     }
@@ -343,7 +347,7 @@ class RoleSubscriberTest extends TestCase
 
         $html = $this->get($this->guestEventUrl($this->role, $event))->assertOk()->getContent();
 
-        preg_match('/id="subscribe-panel" class="([^"]*)"/', $html, $m);
+        preg_match('/id="subscribe-panel"[^>]*class="([^"]*)"/', $html, $m);
         $this->assertNotEmpty($m, 'the panel did not render on the event page');
 
         $this->assertStringNotContainsString('backdrop-blur-sm', $m[1],
@@ -359,7 +363,7 @@ class RoleSubscriberTest extends TestCase
         // again, the form renders flush against the card edge.
         $html = $this->get($this->role->getGuestUrl())->assertOk()->getContent();
 
-        preg_match('/id="subscribe-panel" class="([^"]*)"/', $html, $m);
+        preg_match('/id="subscribe-panel"[^>]*class="([^"]*)"/', $html, $m);
         $this->assertNotEmpty($m, 'the panel did not render on the schedule page');
 
         $this->assertStringContainsString('rounded-2xl', $m[1]);
@@ -379,6 +383,326 @@ class RoleSubscriberTest extends TestCase
             ->assertDontSee(route('role.audience.join', ['subdomain' => $this->role->subdomain]), false);
     }
 
+    // ---------------------------------------------------------------------------------------
+    // Confirming now creates an account and makes it follow the schedule.
+    // ---------------------------------------------------------------------------------------
+
+    /** Drive the real endpoint, so these pin the path a person actually takes. */
+    private function subscribeAndConfirm(string $email, ?Role $role = null, ?string $name = null): void
+    {
+        $role = $role ?: $this->role;
+
+        $this->post(route('role.audience.join', ['subdomain' => $role->subdomain]), array_filter([
+            'email' => $email,
+            'name' => $name,
+        ]));
+
+        $sub = RoleSubscriber::where('role_id', $role->id)->where('email', $email)->firstOrFail();
+
+        $this->post(route('subscriber.confirm', ['token' => $sub->confirm_token]));
+    }
+
+    private function followerPivots(Role $role, ?User $user = null): int
+    {
+        $query = \DB::table('role_user')->where('role_id', $role->id)->where('level', 'follower');
+
+        if ($user) {
+            $query->where('user_id', $user->id);
+        }
+
+        return $query->count();
+    }
+
+    public function test_confirming_creates_a_stub_account_that_follows_the_schedule(): void
+    {
+        $this->subscribeAndConfirm('fan@fans.test', null, 'A Fan');
+
+        $user = User::where('email', 'fan@fans.test')->first();
+        $this->assertNotNull($user, 'confirming should mint an account');
+        $this->assertNull($user->password, 'it is a stub - nobody chose a password');
+        $this->assertNull($user->email_verified_at,
+            'unverified keeps them out of every cohort counter, which all require a verified account');
+        $this->assertSame('subscriber', $user->signup_intent,
+            'signup_intent keeps them out of the organizer funnel');
+        $this->assertTrue($user->isStub());
+        $this->assertSame(1, $this->followerPivots($this->role, $user));
+    }
+
+    public function test_submitting_alone_still_creates_no_account(): void
+    {
+        // The other half of test_a_signed_out_visitor_subscribes_with_only_an_email: the account is
+        // minted on CONFIRM, never on submit. resolveFollowers() applies no confirmation filter, so
+        // a pivot written here would put any address a stranger typed into the owner's next
+        // newsletter with no opt-in at all.
+        $before = User::count();
+
+        $this->post($this->joinUrl(), ['email' => 'fan@fans.test']);
+
+        $this->assertSame($before, User::count());
+        $this->assertSame(0, $this->followerPivots($this->role));
+    }
+
+    public function test_confirming_leaves_an_existing_account_untouched(): void
+    {
+        $existing = $this->createOwner();
+        $existing->forceFill(['name' => 'Real Name', 'is_subscribed' => true])->save();
+        $before = $existing->only(['name', 'password', 'email_verified_at', 'is_subscribed', 'signup_intent']);
+
+        $this->subscribeAndConfirm($existing->email, null, 'Typed Something Else');
+
+        $after = $existing->fresh();
+        $this->assertSame($before['name'], $after->name);
+        $this->assertSame($before['password'], $after->password);
+        $this->assertEquals($before['email_verified_at'], $after->email_verified_at);
+        $this->assertEquals($before['is_subscribed'], $after->is_subscribed);
+        $this->assertSame($before['signup_intent'], $after->signup_intent);
+        $this->assertSame(1, $this->followerPivots($this->role, $after));
+    }
+
+    public function test_confirming_does_not_touch_an_owners_own_pivot(): void
+    {
+        // isConnected() is any role_user row at any level, so the owner keeps level 'owner' rather
+        // than being demoted to follower or gaining a second row.
+        $owner = $this->role->owner();
+
+        $this->subscribeAndConfirm($owner->email);
+
+        $this->assertSame(0, $this->followerPivots($this->role, $owner));
+        $this->assertSame(1, \DB::table('role_user')
+            ->where('role_id', $this->role->id)->where('user_id', $owner->id)->count());
+    }
+
+    public function test_one_address_on_two_schedules_reuses_one_account(): void
+    {
+        $other = $this->createRole($this->createOwner());
+
+        $this->subscribeAndConfirm('fan@fans.test');
+        $this->subscribeAndConfirm('fan@fans.test', $other);
+
+        $this->assertSame(1, User::where('email', 'fan@fans.test')->count());
+        $user = User::where('email', 'fan@fans.test')->first();
+        $this->assertSame(1, $this->followerPivots($this->role, $user));
+        $this->assertSame(1, $this->followerPivots($other, $user));
+    }
+
+    public function test_confirming_on_an_unclaimed_schedule_creates_nothing(): void
+    {
+        // The security gate, not tidiness. Role::isEditableBy() ends with
+        // "! isClaimed() && $user->isFollowing(...)", so following an unclaimed schedule grants
+        // EDIT rights on it - and this endpoint is a public form. Without the guard, "type any
+        // address and click the emailed link" would be an edit-access path.
+        $unclaimed = $this->createRole($this->createOwner(), 'venue', [
+            'email_verified_at' => null,
+            'phone_verified_at' => null,
+        ]);
+        $unclaimed->forceFill(['user_id' => null])->save();
+        $this->assertFalse($unclaimed->fresh()->isClaimed());
+
+        $this->subscribeAndConfirm('fan@fans.test', $unclaimed->fresh());
+
+        $this->assertNotNull(RoleSubscriber::where('role_id', $unclaimed->id)->first(),
+            'the audience row is still kept for whoever claims the schedule');
+        $this->assertNull(User::where('email', 'fan@fans.test')->first());
+        $this->assertSame(0, $this->followerPivots($unclaimed));
+    }
+
+    public function test_nothing_is_created_when_public_registration_is_closed(): void
+    {
+        // Every other account-creating path in the app honours this gate. Without it a selfhost
+        // install with ALLOW_REGISTRATION unset accrues an unclaimable users row per subscriber.
+        config(['app.hosted' => false, 'app.allow_registration' => false]);
+        $this->assertFalse(public_registration_enabled());
+
+        $this->subscribeAndConfirm('fan@fans.test');
+
+        $this->assertNull(User::where('email', 'fan@fans.test')->first());
+        $this->assertSame(0, $this->followerPivots($this->role));
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // Turning the stub into a real account.
+    // ---------------------------------------------------------------------------------------
+
+    public function test_the_confirmed_page_offers_a_password_and_survives_a_refresh(): void
+    {
+        $this->subscribeAndConfirm('fan@fans.test');
+
+        // Twice: the page reads the session, not a token, so a refresh must not lose the form the
+        // way replaying the burned confirm POST used to.
+        foreach ([1, 2] as $ignored) {
+            $this->get(route('subscriber.confirmed'))
+                ->assertOk()
+                ->assertSee(__('messages.subscription_account_heading'))
+                ->assertSee(route('subscriber.claim_account'), false);
+        }
+    }
+
+    public function test_the_confirmed_page_offers_no_password_to_an_existing_account(): void
+    {
+        $existing = $this->createOwner();
+
+        $this->subscribeAndConfirm($existing->email);
+
+        $this->get(route('subscriber.confirmed'))
+            ->assertOk()
+            ->assertDontSee(__('messages.subscription_account_heading'))
+            ->assertSee(__('messages.subscription_account_existing_heading'));
+    }
+
+    public function test_the_confirmed_page_needs_the_session(): void
+    {
+        $this->get(route('subscriber.confirmed'))->assertRedirect('/');
+    }
+
+    public function test_claiming_sets_a_password_verifies_the_email_and_signs_in(): void
+    {
+        $this->subscribeAndConfirm('fan@fans.test');
+
+        $this->post(route('subscriber.claim_account'), ['password' => 'sup3rsecret'])
+            ->assertRedirect();
+
+        $user = User::where('email', 'fan@fans.test')->first();
+        $this->assertNotNull($user->password);
+        $this->assertFalse($user->isStub());
+        // /following sits behind the `verified` middleware, so this is load-bearing, not cosmetic.
+        $this->assertNotNull($user->email_verified_at);
+        $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_claiming_refuses_a_reset_token_that_did_not_come_from_this_session(): void
+    {
+        // Without the session check this endpoint is a general stub takeover AND an email
+        // verification bypass: PasswordResetLinkController has no stub filter, so a token can be
+        // minted for any stub - including a team invite sitting at admin level - and posted here to
+        // get email_verified_at stamped and be signed in. NewPasswordController deliberately
+        // refuses to do either off a reset token.
+        $victim = User::factory()->create(['password' => null, 'email_verified_at' => null]);
+        $token = \Illuminate\Support\Facades\Password::createToken($victim);
+
+        $this->post(route('subscriber.claim_account'), [
+            'email' => $victim->email,
+            'token' => $token,
+            'password' => 'sup3rsecret',
+        ])->assertRedirect(route('password.request'));
+
+        $victim->refresh();
+        $this->assertNull($victim->password);
+        $this->assertNull($victim->email_verified_at);
+        $this->assertGuest();
+    }
+
+    public function test_claiming_is_one_shot(): void
+    {
+        $this->subscribeAndConfirm('fan@fans.test');
+
+        $this->post(route('subscriber.claim_account'), ['password' => 'sup3rsecret'])->assertRedirect();
+        $this->post(route('subscriber.claim_account'), ['password' => 'anotherone1'])
+            ->assertRedirect(route('password.request'));
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // Keeping the two records in step.
+    // ---------------------------------------------------------------------------------------
+
+    public function test_removing_a_subscriber_also_removes_the_follower_pivot(): void
+    {
+        // Deleting the row stopped being the whole job: resolveFollowers() has no confirmation
+        // filter and there is no suppression row here, so a surviving pivot meant the owner pressed
+        // Delete and carried on mailing them.
+        $this->subscribeAndConfirm('fan@fans.test');
+        $user = User::where('email', 'fan@fans.test')->firstOrFail();
+        $this->assertSame(1, $this->followerPivots($this->role, $user));
+
+        $sub = RoleSubscriber::where('role_id', $this->role->id)->firstOrFail();
+
+        $this->actingAs($this->role->owner())
+            ->delete(route('role.subscribers.remove', [
+                'subdomain' => $this->role->subdomain,
+                'hash' => \App\Utils\UrlUtils::encodeId($sub->id),
+            ]))->assertRedirect();
+
+        $this->assertSame(0, RoleSubscriber::where('role_id', $this->role->id)->count());
+        $this->assertSame(0, $this->followerPivots($this->role, $user));
+    }
+
+    public function test_removing_a_subscriber_never_touches_an_owner_row(): void
+    {
+        // followers()->detach() would: that relation constrains the RELATED query, not the pivot.
+        $owner = $this->role->owner();
+        $this->subscribeAndConfirm($owner->email);
+
+        $sub = RoleSubscriber::where('role_id', $this->role->id)->firstOrFail();
+
+        $this->actingAs($owner)->delete(route('role.subscribers.remove', [
+            'subdomain' => $this->role->subdomain,
+            'hash' => \App\Utils\UrlUtils::encodeId($sub->id),
+        ]));
+
+        $this->assertSame(1, \DB::table('role_user')
+            ->where('role_id', $this->role->id)->where('user_id', $owner->id)
+            ->where('level', 'owner')->count());
+    }
+
+    public function test_unsubscribing_everywhere_opts_out_and_erases_a_bare_stub(): void
+    {
+        // A stub cannot sign in, so ProfileController::destroy() is unreachable for them and
+        // /sub/u/* is their only control. Leaving a permanent platform users row behind is what
+        // ProfileController's own subscriber cleanup says the privacy policy does not allow.
+        $this->subscribeAndConfirm('fan@fans.test');
+        $sub = RoleSubscriber::where('role_id', $this->role->id)->firstOrFail();
+
+        $this->post('/sub/u/'.$sub->token, ['all' => 1])->assertOk();
+
+        $this->assertNull(User::where('email', 'fan@fans.test')->first());
+        $this->assertSame(1, NewsletterUnsubscribe::where('email', 'fan@fans.test')->count());
+    }
+
+    public function test_unsubscribing_everywhere_keeps_a_real_account(): void
+    {
+        $existing = $this->createOwner();
+        $this->subscribeAndConfirm($existing->email);
+        $sub = RoleSubscriber::where('role_id', $this->role->id)->firstOrFail();
+
+        $this->post('/sub/u/'.$sub->token, ['all' => 1])->assertOk();
+
+        $kept = User::find($existing->id);
+        $this->assertNotNull($kept, 'a real account is never deleted by an unsubscribe link');
+        $this->assertFalse((bool) $kept->is_subscribed,
+            'but the platform-wide opt-out is set, so following one more schedule cannot reopen the tap');
+    }
+
+    public function test_the_confirm_page_is_pinned_to_the_auth_host(): void
+    {
+        // sendConfirmation() builds the link with a bare route() from inside store(), which is
+        // served on the TENANT host - so on hosted the confirm link is
+        // {subdomain}.eventschedule.com/sub/c/..., and on a custom domain it is
+        // customdomain.com/sub/c/.... ResolveCustomDomain nulls session.domain there, so
+        // Auth::login() in claimAccount() would write a host-only cookie and the redirect to
+        // app_url(route('following')) would arrive signed out.
+        //
+        // Asserted on the ROUTE, not by driving a request: RedirectToAppSubdomain no-ops under
+        // app.is_testing, so a functional test would pass with the middleware removed.
+        $middleware = collect(\Illuminate\Support\Facades\Route::getRoutes()->getRoutes())
+            ->first(fn ($route) => $route->getName() === 'subscriber.show_confirm')
+            ->gatherMiddleware();
+
+        $this->assertContains('app_subdomain', $middleware);
+
+        // Never on the POST: a 302 downgrades it to a GET.
+        $confirmPost = collect(\Illuminate\Support\Facades\Route::getRoutes()->getRoutes())
+            ->first(fn ($route) => $route->getName() === 'subscriber.confirm')
+            ->gatherMiddleware();
+
+        $this->assertNotContains('app_subdomain', $confirmPost);
+
+        // And never on the RFC 8058 one-click unsubscribe, which must not be redirected.
+        $unsubscribe = collect(\Illuminate\Support\Facades\Route::getRoutes()->getRoutes())
+            ->first(fn ($route) => $route->getName() === 'subscriber.unsubscribe')
+            ->gatherMiddleware();
+
+        $this->assertNotContains('app_subdomain', $unsubscribe);
+    }
+
     public function test_every_language_defines_its_own_subscription_copy(): void
     {
         // Read the language FILES, never the rendered mail. __() silently falls back to English,
@@ -391,6 +715,21 @@ class RoleSubscriberTest extends TestCase
             'subscription_confirm_button',
             'subscription_unsubscribe_confirm',
             'all_subscribers',
+            // The strings added with the account flow. Without them here, the "always translate"
+            // rule is unenforced for exactly the newest copy, which is where it fails.
+            'subscribe_done_heading',
+            'subscribe_done_body',
+            'subscribe_signup_instead',
+            'subscription_account_heading',
+            'subscription_account_button',
+            'subscription_account_skip_note',
+            'subscription_account_existing_heading',
+            // Sentences only. A one-word key like subscriber_has_account is legitimately identical
+            // in several languages ("Account" in Italian and Dutch), so it would fail this rule
+            // while being correctly translated - and it proves nothing about whether a whole file
+            // was copied from English, which is what this test is for.
+            'subscription_account_body',
+            'subscribers_help',
         ];
 
         $english = require resource_path('lang/en/messages.php');
@@ -519,7 +858,7 @@ class RoleSubscriberTest extends TestCase
         $sub = RoleSubscriber::first();
         $liveConfirmUrl = route('subscriber.confirm', ['token' => $sub->confirm_token]);
 
-        $this->post($liveConfirmUrl)->assertOk();
+        $this->post($liveConfirmUrl)->assertRedirect(route('subscriber.confirmed'));
         $this->post('/sub/u/'.$sub->token)->assertOk();
 
         // Replay the link that is still sitting in their inbox. 410, not 404: the link WAS
@@ -567,7 +906,8 @@ class RoleSubscriberTest extends TestCase
         $fresh = $sub->fresh();
         $this->assertNotNull($fresh->confirm_token, 'a suppressed address must get a new confirmation');
 
-        $this->post(route('subscriber.confirm', ['token' => $fresh->confirm_token]))->assertOk();
+        $this->post(route('subscriber.confirm', ['token' => $fresh->confirm_token]))
+            ->assertRedirect(route('subscriber.confirmed'));
         $this->assertSame(0, NewsletterUnsubscribe::where('email', 'fan@fans.test')->count());
     }
 

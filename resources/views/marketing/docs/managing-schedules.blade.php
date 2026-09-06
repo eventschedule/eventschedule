@@ -393,10 +393,10 @@
         </h2>
         @if(config('app.hosted'))
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The <strong class="text-gray-900 dark:text-white">Followers</strong> tab lists your audience, in two separate tables: people who followed your schedule with an account, and <a href="{{ route('marketing.docs.newsletters') }}#email-subscribers" class="doc-link">email subscribers</a> who gave you an address without creating one. Both are default recipients when you send a <a href="{{ route('marketing.docs.newsletters') }}#recipients" class="doc-link">newsletter</a>.
+            The <strong class="text-gray-900 dark:text-white">Followers</strong> tab lists your audience: three summary panels, then <a href="{{ route('marketing.docs.newsletters') }}#email-subscribers" class="doc-link">email subscribers</a>, then people who joined by pressing Follow. Nobody appears twice, because confirming an email address also creates an account, and those people are listed under Email subscribers with an <strong class="text-gray-900 dark:text-white">Account</strong> badge. Both lists are default recipients when you send a <a href="{{ route('marketing.docs.newsletters') }}#recipients" class="doc-link">newsletter</a>.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Adding an event does not email your account followers. Confirmed email subscribers are different: they asked to hear about new events, so publishing sends them <a href="{{ route('marketing.docs.newsletters') }}#email-subscribers" class="doc-link">an automatic digest</a>, at most one every few days. You can turn that off under Settings &rarr; Notifications.
+            Pressing Follow on its own does not sign anybody up for automatic email. Confirmed email subscribers are different: they asked to hear from you, so publishing sends them <a href="{{ route('marketing.docs.newsletters') }}#email-subscribers" class="doc-link">an automatic digest</a>, at most one every few days. You can turn that off under Settings &rarr; Notifications.
         </p>
 
         <ul class="doc-list mb-6">
@@ -405,6 +405,8 @@
             <li><strong>QR Code</strong> at the top right downloads a PNG that points at your public schedule page, or at your custom domain if you have one, ready to print on a poster or a flyer</li>
             <li>Before you have any followers, the tab shows your public link instead so you can copy and share it</li>
             <li>The subscriber table adds a <strong>status</strong> for each address: Confirmed, Awaiting confirmation, or Unsubscribed. Only confirmed addresses are ever emailed</li>
+            <li>An <strong>Account</strong> badge beside a name means that person also has an account here, so the schedule is on their Following page and they can manage it themselves</li>
+            <li>Removing a subscriber removes them from both lists at once, so they stop receiving newsletters as well as the digest</li>
         </ul>
 
         <div class="doc-callout doc-callout-info mb-6">

@@ -226,6 +226,18 @@ class HoneypotTest extends TestCase
     // because x-auth-layout never renders session('error').
     // -----------------------------------------------------------------
 
+    public function test_filled_honeypot_blocks_the_account_claim(): void
+    {
+        // This file is a hand-maintained list, not an enumeration, so a new public form is
+        // uncovered until it is added here.
+        $this->post(route('subscriber.claim_account'), [
+            'website' => self::TRAP,
+            'password' => 'sup3rsecret',
+        ])->assertSessionHasErrors('password');
+
+        $this->assertGuest();
+    }
+
     public function test_filled_honeypot_blocks_registration(): void
     {
         config(['app.hosted' => true]);

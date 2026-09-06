@@ -712,16 +712,19 @@
                     }).showToast();
                 }
             })();
-            {{-- subscribe_error is the audience panel's own error key. It toasts exactly like
-                 session('error') but is invisible to event/show-guest.blade.php, which opens the
-                 ticket form on session('error'). See RoleSubscriberController::respond(). --}}
-            @elseif (session('error') || session('subscribe_error'))
+            {{-- subscribe_error is the audience panel's own error key, and it deliberately does
+                 NOT toast: the panel renders it inline and respond() sends the visitor back to the
+                 panel with a fragment, so a toast at the top of the viewport would be a second
+                 notification for something already on screen. It stays a separate key from
+                 session('error') because event/show-guest.blade.php force-opens the ticket form on
+                 session('error'). See RoleSubscriberController::respond(). --}}
+            @elseif (session('error'))
             (function() {
                 var key = '{{ uniqid("toast_") }}';
                 if (!sessionStorage.getItem(key)) {
                     sessionStorage.setItem(key, '1');
                     Toastify({
-                        text: @json(session('error') ?: session('subscribe_error'), JSON_UNESCAPED_UNICODE),
+                        text: @json(session('error'), JSON_UNESCAPED_UNICODE),
                         close: true,
                         duration: 10000,
                         position: 'center',

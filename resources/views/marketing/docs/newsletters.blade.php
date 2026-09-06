@@ -407,7 +407,7 @@
             Email Subscribers
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Not everyone who wants to hear from you wants an account. A signed-out visitor can give your schedule an email address directly, and those people become your <strong class="text-gray-900 dark:text-white">email subscribers</strong>. They appear in their own list on the <a href="{{ route('marketing.docs.managing_schedules') }}#followers" class="doc-link">Followers tab</a>, separately from account followers.
+            Not everyone who wants to hear from you wants an account. A signed-out visitor can give your schedule an email address directly, and those people become your <strong class="text-gray-900 dark:text-white">email subscribers</strong>. They appear in their own list on the <a href="{{ route('marketing.docs.managing_schedules') }}#followers" class="doc-link">Followers tab</a>, separately from people who joined by pressing Follow. Confirming the address also creates an account for them, so they are listed once, under Email subscribers, with an Account badge.
         </p>
 
         <h3 class="doc-subheading">Where People Sign Up</h3>

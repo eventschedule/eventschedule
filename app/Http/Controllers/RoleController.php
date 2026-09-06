@@ -2894,11 +2894,15 @@ class RoleController extends Controller
             }
         }
         $members = $membersQuery->get();
-        $followers = $role->followers()->get();
+        // accountOnlyFollowers(), not followers(): a confirmed subscriber now also holds a follower
+        // pivot, so the raw relation would list them in both audience tables and count them twice
+        // in the tab strip below (count($followers) + $subscribersCount).
+        $followers = $role->accountOnlyFollowers()->get();
         $followersWithRoles = [];
         // Populated only on the followers tab; compact() below runs for every tab.
         $subscribers = null;
         $subscriberStats = null;
+        $subscriberAccountEmails = [];
 
         // Counted on EVERY tab, not just the followers one, because the tab strip needs it twice:
         // once to label the tab and once to decide whether to render the link at all. The link is
@@ -3040,7 +3044,7 @@ class RoleController extends Controller
                 $followerSortBy = 'pivot_created_at';
             }
 
-            $followersWithRoles = $role->followers()
+            $followersWithRoles = $role->accountOnlyFollowers()
                 ->with(['roles' => function ($query) {
                     $query->wherePivotIn('level', ['owner', 'admin'])
                         ->where('is_deleted', false)
@@ -3080,6 +3084,13 @@ class RoleController extends Controller
                 ->pluck('email')
                 ->map(fn ($email) => strtolower($email))
                 ->all();
+            // Which of the rows on THIS page have an account, for the badge. One query over ten
+            // emails rather than a join, because the two tables have no key in common.
+            $subscriberAccountEmails = \App\Models\User::whereIn(
+                'email',
+                collect($subscribers->items())->pluck('email')->all()
+            )->pluck('email')->map(fn ($email) => strtolower($email))->all();
+
             $subscriberStats = [
                 'confirmed' => \App\Models\RoleSubscriber::where('role_id', $role->id)
                     ->whereNotNull('confirmed_at')
@@ -3148,6 +3159,7 @@ class RoleController extends Controller
             'subscribers',
             'subscribersCount',
             'subscriberStats',
+            'subscriberAccountEmails',
             'requests',
             'month',
             'year',
