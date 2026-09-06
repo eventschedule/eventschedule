@@ -533,7 +533,10 @@ class RoleSubscriberTest extends TestCase
             $this->get(route('subscriber.confirmed'))
                 ->assertOk()
                 ->assertSee(__('messages.subscription_account_heading'))
-                ->assertSee(route('subscriber.claim_account'), false);
+                ->assertSee(route('subscriber.claim_account'), false)
+                // The conditional <x-slot name="head"> is the only one in the repo; if it silently
+                // stopped emitting, every claimed account would quietly get America/New_York.
+                ->assertSee('claim_timezone', false);
         }
     }
 
@@ -583,7 +586,7 @@ class RoleSubscriberTest extends TestCase
             'email' => $victim->email,
             'token' => $token,
             'password' => 'sup3rsecret',
-        ])->assertRedirect(route('password.request'));
+        ])->assertRedirect(route('subscriber.confirmed'));
 
         $victim->refresh();
         $this->assertNull($victim->password);
@@ -597,7 +600,7 @@ class RoleSubscriberTest extends TestCase
 
         $this->post(route('subscriber.claim_account'), ['password' => 'sup3rsecret'])->assertRedirect();
         $this->post(route('subscriber.claim_account'), ['password' => 'anotherone1'])
-            ->assertRedirect(route('password.request'));
+            ->assertRedirect(route('subscriber.confirmed'));
     }
 
     // ---------------------------------------------------------------------------------------
@@ -625,6 +628,65 @@ class RoleSubscriberTest extends TestCase
         $this->assertSame(0, $this->followerPivots($this->role, $user));
     }
 
+    public function test_a_stranger_cannot_get_a_real_follow_deleted(): void
+    {
+        // Anybody can type a known follower's address into the public panel. That writes an
+        // UNCONFIRMED row - confirm(), and therefore linkAccount(), never run - so the pivot on
+        // the table is the one the person made themselves by pressing Follow. An owner tidying
+        // that pending row away must not destroy it.
+        $follower = $this->createOwner();
+        $this->followRole($follower, $this->role);
+
+        $this->post($this->joinUrl(), ['email' => $follower->email]);
+
+        $sub = RoleSubscriber::where('role_id', $this->role->id)->firstOrFail();
+        $this->assertNull($sub->confirmed_at);
+
+        $this->actingAs($this->role->owner())->delete(route('role.subscribers.remove', [
+            'subdomain' => $this->role->subdomain,
+            'hash' => \App\Utils\UrlUtils::encodeId($sub->id),
+        ]));
+
+        $this->assertSame(1, $this->followerPivots($this->role, $follower),
+            'a pending row a stranger created must never delete a real follow');
+    }
+
+    public function test_removing_a_subscriber_keeps_a_follow_that_predates_it(): void
+    {
+        // The other order: pressed Follow first, subscribed and confirmed later. linkAccount()
+        // skips attach() because isConnected() is already true, so the only pivot is theirs.
+        $follower = $this->createOwner();
+        $this->followRole($follower, $this->role);
+        \DB::table('role_user')->where('user_id', $follower->id)
+            ->update(['created_at' => now()->subYear()]);
+
+        $this->subscribeAndConfirm($follower->email);
+
+        $sub = RoleSubscriber::where('role_id', $this->role->id)->firstOrFail();
+        $this->actingAs($this->role->owner())->delete(route('role.subscribers.remove', [
+            'subdomain' => $this->role->subdomain,
+            'hash' => \App\Utils\UrlUtils::encodeId($sub->id),
+        ]));
+
+        $this->assertSame(1, $this->followerPivots($this->role, $follower));
+    }
+
+    public function test_a_follow_that_predates_a_subscription_stays_an_account_follower(): void
+    {
+        // Narrowing all_followers has the same mechanism as widening it, which
+        // NewsletterSegment::resolveSubscribers() forbids in writing: a newsletter already sitting
+        // in status='scheduled' resolves at SEND time. Somebody who pressed Follow in 2025 and
+        // confirmed in 2026 is an account follower by any definition and must stay in that segment.
+        $follower = $this->createOwner();
+        $this->followRole($follower, $this->role);
+        \DB::table('role_user')->where('user_id', $follower->id)
+            ->update(['created_at' => now()->subYear()]);
+
+        $this->subscribeAndConfirm($follower->email);
+
+        $this->assertSame(1, $this->role->fresh()->accountOnlyFollowers()->count());
+    }
+
     public function test_removing_a_subscriber_never_touches_an_owner_row(): void
     {
         // followers()->detach() would: that relation constrains the RELATED query, not the pivot.
@@ -643,22 +705,25 @@ class RoleSubscriberTest extends TestCase
             ->where('level', 'owner')->count());
     }
 
-    public function test_unsubscribing_everywhere_opts_out_and_erases_a_bare_stub(): void
+    public function test_unsubscribing_everywhere_suppresses_without_deleting_the_account(): void
     {
-        // A stub cannot sign in, so ProfileController::destroy() is unreachable for them and
-        // /sub/u/* is their only control. Leaving a permanent platform users row behind is what
-        // ProfileController's own subscriber cleanup says the privacy policy does not allow.
+        // Deliberately NOT a delete. User has no SoftDeletes and the schema has 20 cascading
+        // user_id foreign keys, so deleting here would be a hard delete triggered from an
+        // unauthenticated link in an email.
         $this->subscribeAndConfirm('fan@fans.test');
         $sub = RoleSubscriber::where('role_id', $this->role->id)->firstOrFail();
 
         $this->post('/sub/u/'.$sub->token, ['all' => 1])->assertOk();
 
-        $this->assertNull(User::where('email', 'fan@fans.test')->first());
+        $this->assertNotNull(User::where('email', 'fan@fans.test')->first());
         $this->assertSame(1, NewsletterUnsubscribe::where('email', 'fan@fans.test')->count());
     }
 
-    public function test_unsubscribing_everywhere_keeps_a_real_account(): void
+    public function test_unsubscribing_everywhere_leaves_the_platform_flag_alone(): void
     {
+        // is_subscribed is not a bigger version of the suppression list. Setting it would reach
+        // User::sendEmailVerificationNotification(), which refuses to send while it is false, and
+        // nothing in the app ever sets it back to true for an existing user.
         $existing = $this->createOwner();
         $this->subscribeAndConfirm($existing->email);
         $sub = RoleSubscriber::where('role_id', $this->role->id)->firstOrFail();
@@ -667,40 +732,27 @@ class RoleSubscriberTest extends TestCase
 
         $kept = User::find($existing->id);
         $this->assertNotNull($kept, 'a real account is never deleted by an unsubscribe link');
-        $this->assertFalse((bool) $kept->is_subscribed,
-            'but the platform-wide opt-out is set, so following one more schedule cannot reopen the tap');
+        $this->assertTrue((bool) $kept->is_subscribed);
     }
 
-    public function test_the_confirm_page_is_pinned_to_the_auth_host(): void
+    public function test_a_later_subscription_to_another_schedule_still_works(): void
     {
-        // sendConfirmation() builds the link with a bare route() from inside store(), which is
-        // served on the TENANT host - so on hosted the confirm link is
-        // {subdomain}.eventschedule.com/sub/c/..., and on a custom domain it is
-        // customdomain.com/sub/c/.... ResolveCustomDomain nulls session.domain there, so
-        // Auth::login() in claimAccount() would write a host-only cookie and the redirect to
-        // app_url(route('following')) would arrive signed out.
-        //
-        // Asserted on the ROUTE, not by driving a request: RedirectToAppSubdomain no-ops under
-        // app.is_testing, so a functional test would pass with the middleware removed.
-        $middleware = collect(\Illuminate\Support\Facades\Route::getRoutes()->getRoutes())
-            ->first(fn ($route) => $route->getName() === 'subscriber.show_confirm')
-            ->gatherMiddleware();
+        // The regression this guards: a platform-wide opt-out written here would be cleared by
+        // nothing - confirm() only lifts the PER-SCHEDULE suppression - so a deliberate later
+        // subscription would confirm, say "you are on the list", and deliver nothing for ever.
+        $this->subscribeAndConfirm('fan@fans.test');
+        $sub = RoleSubscriber::where('role_id', $this->role->id)->firstOrFail();
+        $this->post('/sub/u/'.$sub->token, ['all' => 1])->assertOk();
 
-        $this->assertContains('app_subdomain', $middleware);
+        $other = $this->createRole($this->createOwner());
+        $this->subscribeAndConfirm('fan@fans.test', $other);
 
-        // Never on the POST: a 302 downgrades it to a GET.
-        $confirmPost = collect(\Illuminate\Support\Facades\Route::getRoutes()->getRoutes())
-            ->first(fn ($route) => $route->getName() === 'subscriber.confirm')
-            ->gatherMiddleware();
+        $recipients = app(\App\Services\AudienceResolver::class)
+            ->announcementRecipients($other->fresh())
+            ->pluck('email');
 
-        $this->assertNotContains('app_subdomain', $confirmPost);
-
-        // And never on the RFC 8058 one-click unsubscribe, which must not be redirected.
-        $unsubscribe = collect(\Illuminate\Support\Facades\Route::getRoutes()->getRoutes())
-            ->first(fn ($route) => $route->getName() === 'subscriber.unsubscribe')
-            ->gatherMiddleware();
-
-        $this->assertNotContains('app_subdomain', $unsubscribe);
+        $this->assertContains('fan@fans.test', $recipients->all(),
+            'the new subscription must actually be mailable');
     }
 
     public function test_every_language_defines_its_own_subscription_copy(): void
@@ -940,8 +992,12 @@ class RoleSubscriberTest extends TestCase
         $response = $this->from($this->role->getGuestUrl())
             ->post($this->joinUrl(), ['email' => 'not-an-email']);
 
-        // The rejection has to be VISIBLE: guest layouts toast this key.
+        // The rejection has to be VISIBLE. It no longer toasts - the panel renders it inline and
+        // respond() redirects to #subscribe-panel, so a toast at the top of the viewport would be a
+        // second notification for something already on screen - which is why the scoping key below
+        // matters: without it the panel cannot tell whose error it is.
         $response->assertSessionHas('subscribe_error');
+        $response->assertSessionHas('subscribe_error_for', $this->role->subdomain);
 
         // ...and it must not be the key that opens the modal. This is what the test name has
         // always claimed and what it did not previously check: session('error') sits in the same

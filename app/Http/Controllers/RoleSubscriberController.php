@@ -437,8 +437,14 @@ class RoleSubscriberController extends Controller
         $email = is_array($state) ? ($state['claim_email'] ?? null) : null;
 
         // Never from the request. See claimState().
+        //
+        // Back to /sub/done rather than password.request: the session holds ONE claim slot, so
+        // confirming a second schedule in the same browser clears the first page's token. Sending
+        // somebody to "Forgot your password?" for an account that has never had one is a dead end;
+        // /sub/done re-renders whatever state is current and still says, in
+        // subscription_account_skip_note, that signing up with the address works any time.
         if (! $token || ! $email) {
-            return redirect()->route('password.request');
+            return redirect()->route('subscriber.confirmed');
         }
 
         $request->validate(['password' => ['required', 'string', 'min:8']]);
@@ -451,12 +457,15 @@ class RoleSubscriberController extends Controller
             return redirect()->route('password.request');
         }
 
-        $timezone = $request->input('timezone');
+        // Resolved once: deriving use_24_hour_time from a different expression than the one stored
+        // meant a claim with JavaScript off saved America/New_York while detect_24_hour_time() saw
+        // null and left the preference unset.
+        $resolvedTimezone = $user->timezone ?: ($request->input('timezone') ?: 'America/New_York');
         $languageCode = is_valid_language_code($user->language_code) ? $user->language_code : 'en';
 
         $status = Password::reset(
             ['email' => $email, 'password' => $request->password, 'token' => $token],
-            function (User $user) use ($request, $timezone, $languageCode) {
+            function (User $user) use ($request, $resolvedTimezone, $languageCode) {
                 $user->forceFill([
                     'password' => Hash::make($request->password),
                     // The confirm link proved the mailbox, so this is verified in the same sense a
@@ -465,8 +474,8 @@ class RoleSubscriberController extends Controller
                     // below lands on the verification wall.
                     'email_verified_at' => $user->email_verified_at ?: now(),
                     'remember_token' => Str::random(60),
-                    'timezone' => $user->timezone ?: ($timezone ?: 'America/New_York'),
-                    'use_24_hour_time' => detect_24_hour_time($user->timezone ?: $timezone, $languageCode),
+                    'timezone' => $resolvedTimezone,
+                    'use_24_hour_time' => detect_24_hour_time($resolvedTimezone, $languageCode),
                 ])->save();
 
                 AuditService::log(AuditService::AUTH_REGISTER, $user->id);
@@ -474,7 +483,14 @@ class RoleSubscriberController extends Controller
         );
 
         if ($status !== Password::PASSWORD_RESET) {
-            // back() lands on GET /sub/done, which re-renders this form from the session.
+            // Spend the credential on anything but a rejected password. The token lasts 60 minutes
+            // (config/auth.php), and leaving an expired one in the session re-rendered the same
+            // form with the same dead token, so every retry failed identically for ever.
+            if ($status !== Password::INVALID_PASSWORD) {
+                $this->forgetClaim($request);
+            }
+
+            // back() lands on GET /sub/done, which re-renders from the session.
             throw ValidationException::withMessages(['password' => __($status)]);
         }
 
@@ -599,6 +615,7 @@ class RoleSubscriberController extends Controller
         }
 
         $email = $subscriber->email;
+        $confirmedAt = $subscriber->confirmed_at;
         $subscriber->delete();
 
         // Deleting the row stopped being the whole job the moment confirm() started creating an
@@ -608,15 +625,25 @@ class RoleSubscriberController extends Controller
         // pivot meant the owner pressed Delete, was told the subscriber was removed, and carried on
         // mailing them, with the person reappearing in the Followers table on the next load.
         //
+        // But ONLY the pivot this subscription created, which is what the two conditions below
+        // establish. Without them a stranger could destroy a real follow: anybody can type a known
+        // follower's address into the public panel, which writes an UNCONFIRMED row (confirm() and
+        // therefore linkAccount() never run), and the owner tidying that row away would delete a
+        // Follow the person made themselves - the mirror image of the hazard
+        // Role::accountOnlyFollowers() is scoped against, and strictly worse because it destroys
+        // rather than hides. The created_at test covers the other order too: somebody who pressed
+        // Follow first and confirmed later owns their pivot, and it predates the confirmation.
+        //
         // Scoped to level 'follower' explicitly rather than using followers()->detach(): that
         // relation constrains the RELATED query, not the pivot, so detach() would happily delete an
         // owner's own row if the owner had ever subscribed to their own schedule.
-        $user = User::where('email', $email)->first();
+        $user = $confirmedAt ? User::where('email', $email)->first() : null;
 
         if ($user) {
             RoleUser::where('role_id', $role->id)
                 ->where('user_id', $user->id)
                 ->where('level', 'follower')
+                ->where('created_at', '>=', $confirmedAt)
                 ->delete();
         }
 
@@ -724,60 +751,33 @@ class RoleSubscriberController extends Controller
             $user->roles()->wherePivot('level', 'follower')
                 ->pluck('roles.id')
                 ->each(fn ($roleId) => $this->suppress($roleId, $email));
-
-            // The platform-wide opt-out, which AudienceResolver::platformSuppressedEmails() and
-            // NewsletterService both honour. Without it, "stop everything" only covered the
-            // schedules on the list at that moment, so following one more re-opened the tap.
-            if ($user->is_subscribed) {
-                $user->forceFill(['is_subscribed' => false])->saveQuietly();
-            }
-
-            $this->eraseStubIfEmpty($user);
         }
     }
 
-    /**
-     * Delete an account that only ever existed because somebody subscribed, once they have asked to
-     * stop hearing from everybody.
+    /*
+     * Two things this deliberately does NOT do, both of which look like obvious improvements and
+     * were briefly implemented here before being taken back out.
      *
-     * confirm() creates a passwordless stub for a confirmed subscriber, and a stub cannot sign in -
-     * so ProfileController::destroy() is unreachable for them (it is behind `auth`) and /sub/u/* is
-     * the only control they have. Leaving a permanent platform users row behind is what the comment
-     * on ProfileController's own subscriber cleanup says the privacy policy does not allow.
+     * It does not set users.is_subscribed = false. That flag is not a bigger version of the
+     * suppression list: User::sendEmailVerificationNotification() refuses to send while it is
+     * false, so it reaches a transactional path; AudienceResolver folds it in platform-wide while
+     * confirm() only ever clears the PER-SCHEDULE newsletter_unsubscribes row - so somebody who
+     * stops everything here and later deliberately subscribes to a DIFFERENT schedule would
+     * confirm, be told they are on the list, and then receive nothing, for ever, with no signal;
+     * and nothing anywhere in the app sets it back to true for an existing user, so there is no
+     * way out of it. The button says "Stop emails from every schedule I follow", present tense,
+     * and the loop above is exactly that.
      *
-     * Deliberately narrow, because the foreign keys here CASCADE: roles.user_id and sales.user_id
-     * are both onDelete('cascade'), so a wrong call would take somebody's schedules and their
-     * purchase history with it. Everything below has to be true, and a throw leaves the row in
-     * place - already opted out above, so the outcome is never worse than before.
+     * It does not delete a passwordless stub either, tempting though that is: a stub cannot sign
+     * in, so ProfileController::destroy() is unreachable for them and this link is their only
+     * control. But User has no SoftDeletes and the schema has 28 user_id foreign keys, 20 of them
+     * cascading, so a delete here is a HARD delete triggered from an unauthenticated link in an
+     * email, behind whatever guard list happened to be written that day. Erasure for account-less
+     * subscribers is worth doing and needs its own pass: a complete FK audit plus a test that
+     * fails when a new user_id foreign key appears. And the status quo is not "the address is
+     * retained because of this feature" - a role_subscribers row carrying the same name and email
+     * already survived an unsubscribe-all long before any account existed.
      */
-    private function eraseStubIfEmpty(User $user): void
-    {
-        try {
-            if (! $user->isStub() || $user->signup_intent !== 'subscriber') {
-                return;
-            }
-
-            if (Role::where('user_id', $user->id)->exists()) {
-                return;
-            }
-
-            if (RoleUser::where('user_id', $user->id)->where('level', '!=', 'follower')->exists()) {
-                return;
-            }
-
-            if (\App\Models\Sale::where('user_id', $user->id)->exists()) {
-                return;
-            }
-
-            if (\App\Models\Event::where('user_id', $user->id)->exists()) {
-                return;
-            }
-
-            $user->delete();
-        } catch (\Throwable $e) {
-            report($e);
-        }
-    }
 
     /**
      * One shape for both the async modal and the no-JS form.
@@ -802,7 +802,7 @@ class RoleSubscriberController extends Controller
             return response()->json(['success' => $success, 'message' => $message]);
         }
 
-        $back = back(302, [], route('role.view_guest', ['subdomain' => $subdomain]))
+        $back = back(302, [], custom_domain_url(route('role.view_guest', ['subdomain' => $subdomain])))
             ->withFragment('subscribe-panel');
 
         if (! $success) {

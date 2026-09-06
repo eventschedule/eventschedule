@@ -239,6 +239,11 @@ class WindDownCompedPlans extends Command
             ->groupBy('role_id')
             ->pluck('v', 'role_id');
 
+        // Counts every follower pivot, which since RoleSubscriberController::confirm() started
+        // minting accounts includes confirmed email subscribers. That is deliberate: five people
+        // who confirmed an address are an audience in exactly the sense --min-followers is asking
+        // about, and a schedule with one is not dormant. It does mean the flag name is narrower
+        // than what it measures.
         $followers = DB::table('role_user')
             ->whereIn('role_id', $roleIds)
             ->where('level', 'follower')

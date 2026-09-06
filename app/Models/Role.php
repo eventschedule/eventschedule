@@ -743,40 +743,47 @@ class Role extends Model implements MustVerifyEmail
     }
 
     /**
-     * Followers who did NOT arrive through the subscribe panel.
+     * Followers whose pivot this schedule's subscribe panel did NOT create.
      *
-     * One person can hold both records now: RoleSubscriberController::confirm() creates a stub
-     * account and attaches a follower pivot, so a confirmed subscriber is also an account follower.
-     * Three read sites have to exclude that overlap or they double-count or misrepresent it - the
-     * two audience tables on the Followers tab, and NewsletterSegment's all_followers segment.
+     * One person can hold both records: RoleSubscriberController::confirm() creates a stub account
+     * and attaches a follower pivot, so a confirmed subscriber is also an account follower. Three
+     * read sites have to exclude that overlap or they double-count or misrepresent it - the two
+     * audience tables on the Followers tab, and NewsletterSegment's all_followers segment.
      *
-     * all_followers is the load-bearing one. resolveSubscribers() below says in writing that
-     * widening all_followers "would silently change the recipient set of every saved segment and
-     * every already-scheduled newsletter, and would remove the owner's ability to mail only account
-     * holders" - and NewsletterService::send() resolves at send time, so a newsletter already
-     * sitting in status='scheduled' would gain recipients on deploy. This keeps "account follower"
-     * meaning what it has always meant: somebody who pressed Follow.
+     * The rule is "was this pivot created BY the confirmation", not "does this person have a
+     * subscriber row", and the difference is load-bearing in both directions:
      *
-     * Nobody loses mail. NewsletterService::resolveRecipientsUncached()'s default branch merges
-     * followers() and confirmed subscribers and dedups by email, so a subscription-follower is
-     * still reached exactly once by an ordinary "everyone" send - which is why that branch
+     *   - Widening all_followers is forbidden in writing by resolveSubscribers(): it "would
+     *     silently change the recipient set of every saved segment and every already-scheduled
+     *     newsletter". NewsletterService::send() resolves at SEND time, so that is a live hazard.
+     *   - NARROWING it has exactly the same mechanism. Somebody who pressed Follow in 2025 and
+     *     confirmed a panel subscription in 2026 is an account follower by any definition, and an
+     *     owner who names only the all_followers segment must still reach them. Matching on email
+     *     alone dropped them.
+     *
+     * Hence the confirmed_at <= role_user.created_at comparison: linkAccount() attaches the pivot
+     * in the same request that stamps confirmed_at, so a pivot that PREDATES the confirmation was
+     * created by the person pressing Follow and is theirs. RoleSubscriberController::remove()
+     * applies the same test before detaching, for the same reason.
+     *
+     * Correlated on role_user.role_id rather than a captured $this->id: an eager load builds the
+     * relation from an ID-less instance (Builder::getRelation() calls newInstance()), and
+     * Relation::noConstraints suppresses addConstraints() but not a whereNotExists added here - so
+     * a captured id would bind NULL, match nothing, and silently filter nothing at all.
+     *
+     * Nobody loses mail either way: NewsletterService::resolveRecipientsUncached()'s default branch
+     * merges followers() and confirmed subscribers and dedups by email, which is why that branch
      * deliberately keeps using followers(), not this.
-     *
-     * Scoped to CONFIRMED rows on purpose. The subscribe endpoint is public, so an unconfirmed row
-     * proves nothing about who typed it; letting one hide a real follower would let a stranger
-     * empty this list by pasting addresses into the panel. Every subscription-created follower is
-     * confirmed by construction, so the narrower condition still catches all of them.
      */
     public function accountOnlyFollowers()
     {
-        $roleId = $this->id;
-
-        return $this->followers()->whereNotExists(function ($query) use ($roleId) {
+        return $this->followers()->whereNotExists(function ($query) {
             $query->selectRaw('1')
                 ->from('role_subscribers')
+                ->whereColumn('role_subscribers.role_id', 'role_user.role_id')
                 ->whereColumn('role_subscribers.email', 'users.email')
-                ->where('role_subscribers.role_id', $roleId)
-                ->whereNotNull('role_subscribers.confirmed_at');
+                ->whereNotNull('role_subscribers.confirmed_at')
+                ->whereColumn('role_subscribers.confirmed_at', '<=', 'role_user.created_at');
         });
     }
 

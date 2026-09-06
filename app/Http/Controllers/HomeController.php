@@ -244,10 +244,28 @@ class HomeController extends Controller
             $sparklineData = $this->getSparklineData($user, $viewsPeriod);
         }
         if (in_array('followers', $visiblePanels)) {
+            // Follower pivots, plus the confirmed subscribers who have no pivot at all. Since
+            // RoleSubscriberController::confirm() started minting an account, most subscribers ARE
+            // a pivot and are already counted here - but an unclaimed schedule, or a selfhost
+            // install with registration closed, never creates one, so counting pivots alone would
+            // show a smaller audience here than the Followers tab does. The whereNotExists keeps
+            // anybody who has both records from being counted twice.
             $followersCount = DB::table('role_user')
                 ->whereIn('role_id', $roleIds)
                 ->where('level', 'follower')
-                ->count();
+                ->count()
+                + DB::table('role_subscribers')
+                    ->whereIn('role_subscribers.role_id', $roleIds)
+                    ->whereNotNull('role_subscribers.confirmed_at')
+                    ->whereNotExists(function ($query) {
+                        $query->selectRaw('1')
+                            ->from('users')
+                            ->join('role_user', 'role_user.user_id', '=', 'users.id')
+                            ->whereColumn('users.email', 'role_subscribers.email')
+                            ->whereColumn('role_user.role_id', 'role_subscribers.role_id')
+                            ->where('role_user.level', 'follower');
+                    })
+                    ->count();
             $totalEventsCount = Event::whereIn('id', function ($query) use ($roleIds) {
                 $query->select('event_id')
                     ->from('event_role')

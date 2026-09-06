@@ -765,6 +765,21 @@ class RoleController extends Controller
         // join keeps it to one bounded statement, and it sidesteps 1093 (which forbids a subquery
         // on the table being written) because a multi-table DELETE is allowed to read its own
         // target.
+        // Carry the stronger confirmation across before the collision rows are dropped. The delete
+        // below keeps the TARGET's row, so a confirmed source colliding with a pending target would
+        // demote somebody who has already proved their mailbox - while their follower pivot moves
+        // across regardless, leaving them mailed through all_followers with the audience tab
+        // rendering "Awaiting confirmation, so they are not emailed" beside their name.
+        DB::table('role_subscribers as dst')
+            ->join('role_subscribers as src', function ($join) use ($source) {
+                $join->on('src.email', '=', 'dst.email')
+                    ->where('src.role_id', '=', $source->id);
+            })
+            ->where('dst.role_id', $target->id)
+            ->whereNull('dst.confirmed_at')
+            ->whereNotNull('src.confirmed_at')
+            ->update(['dst.confirmed_at' => DB::raw('src.confirmed_at')]);
+
         foreach (['role_subscribers', 'newsletter_unsubscribes'] as $table) {
             DB::table($table.' as src')
                 ->join($table.' as dst', function ($join) use ($target) {

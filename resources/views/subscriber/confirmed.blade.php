@@ -100,7 +100,7 @@
                             minlength="8" autocomplete="new-password"
                             aria-describedby="claim_password_hint" class="block mt-1 w-full" />
                         <p id="claim_password_hint" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                            {{ __('validation.min.string', ['attribute' => __('messages.password'), 'min' => 8]) }}
+                            {{ __('messages.subscription_account_password_hint', ['min' => 8]) }}
                         </p>
                         {{-- layouts/auth.blade.php renders {{ $slot }} and no $errors block, so a
                              per-field error is invisible unless the field renders it itself. --}}
@@ -138,17 +138,22 @@
                     @endif
                     {{-- app_url(): /sub/* is domain-less, so on hosted this page can be served on
                          the tenant host, where a bare route('login') is a URL the app_subdomain
-                         middleware only has to bounce. --}}
-                    <a href="{{ app_url(route('login', ['email' => $existingEmail], false)) }}">
+                         middleware only has to bounce. No ?email=: the login form reads old() and
+                         would ignore it anyway, and it is a follower address in a URL that lands in
+                         access logs and any outbound Referer. --}}
+                    <a href="{{ app_url(route('login', [], false)) }}">
                         <x-primary-button type="button">{{ __('messages.log_in') }}</x-primary-button>
                     </a>
                 </div>
             </div>
-        @elseif ($role->getGuestUrl())
+        @else
             {{-- getGuestUrl() is '' for an unclaimed schedule, and the panel has no isClaimed()
-                 gate - so an unguarded link here rendered href="" and reloaded this page. --}}
+                 gate - so an unguarded link here rendered href="" and reloaded this page. Falling
+                 back to the guest route rather than dropping the link entirely: an unclaimed
+                 schedule still has a public page, and confirming there otherwise left the visitor
+                 on a page with no way onward at all. --}}
             <div class="mt-6 text-center text-sm">
-                <x-link href="{{ $role->getGuestUrl() }}">
+                <x-link href="{{ $role->getGuestUrl() ?: route('role.view_guest', ['subdomain' => $role->subdomain]) }}">
                     {{ __('messages.back_to_schedule') }}
                 </x-link>
             </div>

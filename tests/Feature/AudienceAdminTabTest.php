@@ -167,6 +167,37 @@ class AudienceAdminTabTest extends TestCase
         );
     }
 
+    public function test_merging_keeps_the_more_confirmed_row(): void
+    {
+        // The delete-the-collision step keeps the TARGET's row, so without the promotion above it
+        // a confirmed source plus a pending target demotes somebody who has already confirmed -
+        // while their follower pivot moves across anyway.
+        $owner = $this->createOwner();
+        $target = $this->createRole($owner, 'venue', ['name' => 'Dup Venue']);
+        $source = $this->createRole($owner, 'venue', ['name' => 'Dup Venue', 'email_verified_at' => null]);
+        $source->refresh();
+
+        RoleSubscriber::create([
+            'role_id' => $source->id, 'email' => 'fan@fans.test',
+            'token' => RoleSubscriber::newToken(), 'confirmed_at' => now(),
+        ]);
+        RoleSubscriber::create([
+            'role_id' => $target->id, 'email' => 'fan@fans.test',
+            'token' => RoleSubscriber::newToken(), 'confirmed_at' => null,
+        ]);
+
+        $this->actingAs($owner)->post(route('following.merge_venues_group'), [
+            'target_id' => \App\Utils\UrlUtils::encodeId($target->id),
+            'source_ids' => [\App\Utils\UrlUtils::encodeId($source->id)],
+        ]);
+
+        $survivor = RoleSubscriber::where('role_id', $target->id)
+            ->where('email', 'fan@fans.test')->firstOrFail();
+
+        $this->assertNotNull($survivor->confirmed_at,
+            'a confirmation already given must survive the merge');
+    }
+
     public function test_merging_carries_the_suppression_list_over(): void
     {
         // Otherwise somebody who opted out of the source starts hearing from the survivor.

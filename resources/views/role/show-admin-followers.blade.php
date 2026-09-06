@@ -94,10 +94,24 @@
      would otherwise see that count drop with no explanation while a table called "Email
      subscribers" quietly became the main list. Adding the two table totals by hand is exactly the
      arithmetic this saves them. --}}
+@php
+    // The two panels beside it, summed - not a headcount of the tables below. The tab strip
+    // already counts rows (count($followers) + $subscribersCount), so a second "total" that
+    // disagreed with it by the number of pending rows was the confusing thing; this one is
+    // labelled for what it measures, and reconciles exactly with the two panels next to it.
+    // NOT followers + every subscriber row: accountOnlyFollowers() excludes a follower only when
+    // the subscription created their pivot, so an account follower who also has a pending row is
+    // in both paginators - and that state is reachable by a stranger typing a known follower's
+    // address into the public panel. It also kept people who had pressed Unsubscribe inside a
+    // number labelled "Total audience", while the breakdown line below broke them out as a
+    // separate state.
+    $audienceMailable = $subscriberStats['confirmed'] ?? 0;
+    $audienceFollowers = $followersWithRoles->total();
+@endphp
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
-    <x-stat-panel :label="__('messages.audience_total')" size="lg">{{ number_format($followersWithRoles->total() + ($subscribers ? $subscribers->total() : 0)) }}</x-stat-panel>
-    <x-stat-panel :label="__('messages.audience_get_new_event_emails')" size="lg" color="green">{{ number_format($subscriberStats['confirmed'] ?? 0) }}</x-stat-panel>
-    <x-stat-panel :label="__('messages.audience_newsletter_only')" size="lg">{{ number_format($followersWithRoles->total()) }}</x-stat-panel>
+    <x-stat-panel :label="__('messages.audience_reachable')" size="lg">{{ number_format($audienceMailable + $audienceFollowers) }}</x-stat-panel>
+    <x-stat-panel :label="__('messages.audience_get_new_event_emails')" size="lg" color="green">{{ number_format($audienceMailable) }}</x-stat-panel>
+    <x-stat-panel :label="__('messages.audience_newsletter_only')" size="lg">{{ number_format($audienceFollowers) }}</x-stat-panel>
 </div>
 
 @if ($hasSubscribers)
@@ -116,9 +130,11 @@
     </h3>
     {{-- Says how a person GETS into this list, which is the question the two-table split raises and
          never used to answer. --}}
+    @if (public_registration_enabled())
     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
         {{ __('messages.subscribers_help') }}
     </p>
+    @endif
 
     @if ($subscriberStats)
     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -176,7 +192,7 @@
                                          colour alone, and no title= - invisible on touch and
                                          unreliable with a screen reader. The section caption above
                                          explains it once. --}}
-                                    @if (in_array(strtolower($subscriber->email), $subscriberAccountEmails ?? [], true))
+                                    @if ($subscriber->confirmed_at && in_array(strtolower($subscriber->email), $subscriberAccountEmails ?? [], true))
                                     <span class="ms-2 inline-flex items-center gap-1 rounded-md border border-gray-200 dark:border-gray-700 px-1.5 py-0.5 text-[11px] font-medium text-gray-500 dark:text-gray-400 align-middle">
                                         <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 20.25a7.5 7.5 0 0 1 15 0" />
@@ -239,7 +255,7 @@
     likeliest state for any schedule using the subscribe panel) used to render this table with its
     four column headers and no rows, unlabelled, directly above "Email subscribers".
 --}}
-@if ($followers->isNotEmpty())
+@if ($followersWithRoles->isNotEmpty())
 <div class="mt-8">
     <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">
         {{ __('messages.followers') }} ({{ number_format($followersWithRoles->total()) }})
