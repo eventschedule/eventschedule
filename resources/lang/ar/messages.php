@@ -5021,4 +5021,6 @@ return [
     'short_link_taken' => '":slug" مستخدم بالفعل في هذا الجدول.',
     'short_link_clicks' => '{1} نقرة واحدة|[2,*] :count نقرة',
     'short_link_change_warning' => 'تم النقر على هذا الرابط المختصر :count مرة. تغييره سيعطل الروابط التي شاركتها بالفعل.',
+    'add_to_google_wallet' => 'إضافة إلى Google Wallet',
+    'wallet_pass_unavailable' => 'تعذّر إنشاء بطاقة المحفظة. يرجى المحاولة مرة أخرى.',
 ];

@@ -41,8 +41,12 @@
                     $isReleased = in_array($sale->status, ['cancelled', 'refunded', 'expired'])
                         || $legEvent->is_cancelled;
                 @endphp
+                {{-- The card is a div wrapping the link, not the link itself, so the wallet badge
+                     below can be a sibling. Nesting an anchor inside an anchor is invalid HTML and
+                     browsers recover from it by closing the outer one early. --}}
+                <div class="ap-card rounded-xl transition-all duration-200 {{ $isReleased ? 'opacity-60' : 'hover:shadow-md' }}">
                 <a @if (! $isReleased) href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($legEvent->id), 'secret' => $sale->secret]) }}" @endif
-                   class="ap-card rounded-xl p-5 flex flex-col sm:flex-row sm:items-center gap-3 transition-all duration-200 {{ $isReleased ? 'opacity-60' : 'hover:shadow-md' }}">
+                   class="p-5 flex flex-col sm:flex-row sm:items-center gap-3">
                     <div class="flex-1">
                         <div class="font-medium text-gray-900 dark:text-gray-100">
                             {{ $legEvent->translatedName() }}
@@ -68,6 +72,16 @@
                         @endif
                     </div>
                 </a>
+                {{-- Saves a multi-event buyer opening every leg just to add its pass. canOffer()
+                     already returns false for a released leg, so this follows $isReleased without
+                     restating it. The condensed badge is Google's own narrow variant, for exactly
+                     this kind of list. --}}
+                @if (\App\Services\Wallet\GoogleWalletService::canOffer($sale, $legEvent))
+                    <div class="px-5 pb-5 print:hidden">
+                        @include('partials.wallet-buttons', ['sale' => $sale, 'event' => $legEvent, 'condensed' => true])
+                    </div>
+                @endif
+                </div>
             @endforeach
         </div>
 

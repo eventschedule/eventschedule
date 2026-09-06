@@ -57,6 +57,20 @@ return [
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT_URI'),
         'webhook_secret' => env('GOOGLE_WEBHOOK_SECRET'),
+
+        // Google Wallet passes ("Add to Google Wallet" on a ticket). Unset = the feature is off and
+        // nothing is ever sent to Google; see App\Services\Wallet\GoogleWalletService::isConfigured().
+        //
+        // wallet_service_account holds EITHER an absolute path to the service-account JSON key file
+        // (the selfhost shape) OR the base64-encoded JSON itself, because hosted production config is
+        // the DigitalOcean app spec and it has no writable file mount to point a path at.
+        //
+        // wallet_id_prefix namespaces the class and object IDs this install creates. Google can never
+        // delete a class or an object, so two installs sharing one issuer account and one prefix would
+        // collide permanently - give staging its own.
+        'wallet_issuer_id' => env('GOOGLE_WALLET_ISSUER_ID'),
+        'wallet_service_account' => env('GOOGLE_WALLET_SERVICE_ACCOUNT'),
+        'wallet_id_prefix' => env('GOOGLE_WALLET_ID_PREFIX') ?: 'es',
     ],
 
     'microsoft' => [

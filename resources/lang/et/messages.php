@@ -5039,4 +5039,6 @@ return [
     'short_link_taken' => '":slug" on selles ajakavas juba kasutusel.',
     'short_link_clicks' => '{1} :count klõps|[2,*] :count klõpsu',
     'short_link_change_warning' => 'Sellel lühilingil on :count klõpsu. Muutmine rikub juba jagatud lingid.',
+    'add_to_google_wallet' => 'Lisa Google Walletisse',
+    'wallet_pass_unavailable' => 'Wallet\'i pääset ei õnnestunud luua. Palun proovi uuesti.',
 ];

@@ -5024,4 +5024,6 @@ return [
     'short_link_taken' => '":slug" wird in diesem Zeitplan bereits verwendet.',
     'short_link_clicks' => '{1} :count Klick|[2,*] :count Klicks',
     'short_link_change_warning' => 'Dieser Kurzlink wurde :count Mal angeklickt. Eine Änderung macht bereits geteilte Links ungültig.',
+    'add_to_google_wallet' => 'Zu Google Wallet hinzufügen',
+    'wallet_pass_unavailable' => 'Der Wallet-Pass konnte nicht erstellt werden. Bitte versuchen Sie es erneut.',
 ];

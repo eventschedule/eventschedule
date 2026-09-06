@@ -28,6 +28,7 @@
         </x-doc-nav-group>
         <x-doc-nav-group label="Check-in at the Door" href="#check-in">
             <x-doc-nav-link href="#checkin-dashboard">Check-in Dashboard</x-doc-nav-link>
+            <x-doc-nav-link href="#wallet-passes">Wallet Passes</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-link href="#waitlist">Waitlist</x-doc-nav-link>
         <x-doc-nav-link href="#feedback">Post-Event Feedback</x-doc-nav-link>
@@ -1065,6 +1066,25 @@
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Auto-Refresh</div>
             <p>The dashboard refreshes every 10 seconds while the tab is in the foreground, so you always see the latest check-in data without draining a phone in your pocket. It works on any device, including phones and tablets.</p>
+        </div>
+    </section>
+
+    <!-- Wallet Passes -->
+    <section id="wallet-passes" class="doc-section">
+        <h3 class="doc-subheading">Wallet Passes</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Ticket buyers can save their ticket into Google Wallet from the ticket page or the confirmation email. The pass carries the same QR code the ticket page shows, so it scans at the door exactly like any other ticket, and it works offline once saved.</p>
+
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Event details on the pass</strong> - name, venue, date and time, attendee name, ticket type and seat</li>
+            <li><strong class="text-gray-900 dark:text-white">Arrival reminder</strong> - when the venue has an address on file, the pass surfaces on the attendee's phone when they get there</li>
+            <li><strong class="text-gray-900 dark:text-white">One pass per ticket</strong> - a multi-event order gets a separate pass for each event, since each is scanned with its own code</li>
+        </ul>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The pass is a snapshot taken when the attendee saves it. Cancelling or refunding an order does not remove a pass already on someone's phone, but the code stops working: the door scanner checks the order's live status, and a cancelled ticket is refused there just as it is on the ticket page.</p>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Turned on by the operator</div>
+            <p>Wallet passes need a Google Wallet issuer account, so the button appears only once the person running the installation has connected one. On <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> installs that is a one-time setup step; with nothing configured, no button is shown and nothing is sent to Google. It is free on every plan.</p>
         </div>
     </section>
 

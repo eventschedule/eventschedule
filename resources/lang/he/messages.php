@@ -5015,4 +5015,6 @@ return [
     'short_link_taken' => '":slug" כבר בשימוש בלוח הזה.',
     'short_link_clicks' => '{1} לחיצה אחת|[2,*] :count לחיצות',
     'short_link_change_warning' => 'הקישור המקוצר הזה נלחץ :count פעמים. שינוי שלו ישבור קישורים ששיתפתם כבר.',
+    'add_to_google_wallet' => 'הוסף ל-Google Wallet',
+    'wallet_pass_unavailable' => 'לא ניתן היה ליצור את הכרטיס בארנק. נסה שוב.',
 ];

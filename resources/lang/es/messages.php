@@ -5020,4 +5020,6 @@ return [
     'short_link_taken' => '":slug" ya está en uso en esta agenda.',
     'short_link_clicks' => '{1} :count clic|[2,*] :count clics',
     'short_link_change_warning' => 'Este enlace corto se ha usado :count veces. Cambiarlo romperá los enlaces que ya has compartido.',
+    'add_to_google_wallet' => 'Agregar a Google Wallet',
+    'wallet_pass_unavailable' => 'No se pudo crear el pase de la cartera. Inténtalo de nuevo.',
 ];

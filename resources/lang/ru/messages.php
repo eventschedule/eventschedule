@@ -5041,4 +5041,6 @@ return [
     'short_link_taken' => '":slug" уже используется в этом расписании.',
     'short_link_clicks' => '{1} :count клик|[2,*] :count кликов',
     'short_link_change_warning' => 'По этой короткой ссылке перешли :count раз. Её изменение сломает уже опубликованные ссылки.',
+    'add_to_google_wallet' => 'Добавить в Google Wallet',
+    'wallet_pass_unavailable' => 'Не удалось создать пропуск для кошелька. Пожалуйста, попробуйте ещё раз.',
 ];

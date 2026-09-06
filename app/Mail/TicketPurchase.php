@@ -5,6 +5,7 @@ namespace App\Mail;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\Sale;
+use App\Services\Wallet\GoogleWalletService;
 use App\Utils\QrCodeUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Bus\Queueable;
@@ -77,6 +78,21 @@ class TicketPurchase extends Mailable
 
         $qrCodeData = QrCodeUtils::png($ticketUrl);
 
+        // Our own route, not a signed pay.google.com link: the JWT behind one is short-lived and
+        // building it calls Google, neither of which belongs inside a queued mailable. Null when
+        // no provider is configured or this sale cannot be offered as a pass, which is what the
+        // template branches on.
+        $googleWalletUrl = GoogleWalletService::canOffer($this->sale, $this->event)
+            ? canonical_url(route('ticket.wallet.google', [
+                'event_id' => UrlUtils::encodeId($this->event->id),
+                'secret' => $this->sale->secret,
+            ], false))
+            : null;
+
+        $googleWalletBadge = $googleWalletUrl
+            ? public_path('images/wallet/google/'.GoogleWalletService::badgeLocale().'.png')
+            : null;
+
         // Gift card feedback for the buyer: their deduction plus the balance left on the
         // card at send time (the live balance stays on the card page).
         $giftCardAmount = $this->sale->legTotalGiftCard();
@@ -95,6 +111,8 @@ class TicketPurchase extends Mailable
                 'role' => $this->role,
                 'ticketUrl' => $ticketUrl,
                 'qrCodeData' => $qrCodeData,
+                'googleWalletUrl' => $googleWalletUrl,
+                'googleWalletBadge' => $googleWalletBadge,
                 'giftCardAmount' => $giftCardAmount,
                 'giftCard' => $giftCard,
             ]

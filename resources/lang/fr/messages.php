@@ -5027,4 +5027,6 @@ return [
     'short_link_taken' => '":slug" est déjà utilisé sur cet agenda.',
     'short_link_clicks' => '{1} :count clic|[2,*] :count clics',
     'short_link_change_warning' => 'Ce lien court a été cliqué :count fois. Le modifier cassera les liens déjà partagés.',
+    'add_to_google_wallet' => 'Ajouter à Google Wallet',
+    'wallet_pass_unavailable' => 'Le billet Wallet n\'a pas pu être créé. Veuillez réessayer.',
 ];

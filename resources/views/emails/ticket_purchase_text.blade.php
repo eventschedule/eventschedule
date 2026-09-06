@@ -44,6 +44,9 @@ $addonTickets = $sale->saleTickets->filter(fn($st) => $st->ticket && $st->ticket
 
 @endif
 {{ __('messages.view_your_tickets') }}: {{ $ticketUrl }}
+@if ($googleWalletUrl)
+{{ __('messages.add_to_google_wallet') }}: {{ $googleWalletUrl }}
+@endif
 
 @php $ticketNotes = $event->parsedTicketNotesText($sale->event_date, $role); @endphp
 @if ($ticketNotes && trim($ticketNotes) !== '')

@@ -122,6 +122,19 @@
                 @if ($sale->isPass()){{ __('messages.manage_my_pass') }}@elseif ($sale->isRsvp()){{ __('messages.view_registration') }}@else{{ __('messages.view_your_tickets') }}@endif
             </a>
         </div>
+
+        @if ($googleWalletUrl && $googleWalletBadge && is_file($googleWalletBadge))
+        {{-- embedData, not a hotlink: this app never asks a recipient's mail client to fetch an
+             asset from someone else's server. Google's badge may not be recoloured or rebuilt, so
+             it ships as their own artwork under public/images/wallet/google. --}}
+        <div style="text-align: center; margin: 0 0 30px 0;">
+            <a href="{{ $googleWalletUrl }}" style="text-decoration: none;">
+                <img src="{{ $message->embedData(file_get_contents($googleWalletBadge), 'add-to-google-wallet.png', 'image/png') }}"
+                     alt="{{ __('messages.add_to_google_wallet') }}"
+                     height="50" style="height: 50px; width: auto; border: 0;" />
+            </a>
+        </div>
+        @endif
         
         @php $ticketNotes = $event->parsedTicketNotesHtml($sale->event_date, $role); @endphp
         @if ($ticketNotes && trim(strip_tags($ticketNotes)) !== '')

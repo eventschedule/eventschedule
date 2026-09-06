@@ -28,6 +28,7 @@ use App\Services\RoleMailerService;
 use App\Services\SaleSettlementService;
 use App\Services\TicketVolumeDiscount;
 use App\Services\UsageTrackingService;
+use App\Services\Wallet\GoogleWalletService;
 use App\Services\WebhookService;
 use App\Utils\CsvUtils;
 use App\Utils\HoneypotUtils;
@@ -2986,6 +2987,44 @@ class TicketController extends Controller
         return response(QrCodeUtils::png($url))
             ->header('Content-Type', 'image/png')
             ->header('X-Content-Type-Options', 'nosniff');
+    }
+
+    /**
+     * Redirect to a freshly signed "Add to Google Wallet" save link.
+     *
+     * A redirect rather than a link built into the page: the JWT is short-lived and roughly 1300
+     * characters, and building it needs a call to Google - neither belongs in a blade or a queued
+     * mailable. GoogleWalletService::canOffer() is the same predicate every button uses.
+     *
+     * Failure lands the buyer back on their ticket with an error rather than on a 404: they got
+     * here by tapping a badge inside an email, and a dead end there is indistinguishable from a
+     * broken ticket.
+     */
+    public function googleWalletPass($eventId, $secret)
+    {
+        $event = Event::findOrFail(UrlUtils::decodeId($eventId));
+        $sale = Sale::with('saleTickets.ticket')
+            ->where('event_id', $event->id)
+            ->where('is_deleted', false)
+            ->where('secret', $secret)
+            ->firstOrFail();
+
+        $ticketUrl = route('ticket.view', [
+            'event_id' => UrlUtils::encodeId($event->id),
+            'secret' => $secret,
+        ]);
+
+        if (! GoogleWalletService::canOffer($sale, $event)) {
+            return redirect($ticketUrl);
+        }
+
+        $url = app(GoogleWalletService::class)->saveUrl($sale, $event);
+
+        if (! $url) {
+            return redirect($ticketUrl)->with('error', __('messages.wallet_pass_unavailable'));
+        }
+
+        return redirect()->away($url);
     }
 
     /**

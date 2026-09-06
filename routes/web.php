@@ -402,6 +402,17 @@ Route::get('/translate_data', [AppController::class, 'translateData'])->name('tr
 
 Route::get('/ticket/qr_code/{event_id}/{secret}', [TicketController::class, 'qrCode'])->name('ticket.qr_code')->middleware('throttle:100,1');
 Route::get('/ticket/view/{event_id}/{secret}', [TicketController::class, 'view'])->name('ticket.view')->middleware('throttle:100,1');
+// "Add to Google Wallet". Redirects to a freshly signed pay.google.com save link rather than
+// embedding one in the page, so the ticket page and the confirmation email carry a short stable
+// URL of ours and the call to Google happens on tap, never during page or mail rendering. Same
+// {event_id}/{secret} credential ticket.view already accepts, so it grants nothing new.
+//
+// The THIRD throttle argument is load-bearing, for the reason spelled out above /release_tickets:
+// for a guest the limiter key is $prefix.sha1(domain|ip) with no route name in it, so leaving this
+// unprefixed would put it in the same bucket as /ticket/view and /ticket/qr_code and cap all three
+// at whichever limit is tightest. Note ThrottleRequests short-circuits when app.is_testing, so no
+// test can catch a regression here.
+Route::get('/ticket/wallet/google/{event_id}/{secret}', [TicketController::class, 'googleWalletPass'])->name('ticket.wallet.google')->middleware('throttle:60,1,wallet_pass');
 // One checkout that spanned several events. Keyed on the order primary's own secret, so it grants
 // no more than the ticket page that secret already opens.
 Route::get('/ticket/order/{order_id}/{secret}', [TicketController::class, 'viewOrder'])->name('ticket.order')->middleware('throttle:100,1');

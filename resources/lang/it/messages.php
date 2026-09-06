@@ -5020,4 +5020,6 @@ return [
     'short_link_taken' => '":slug" è già in uso in questo calendario.',
     'short_link_clicks' => '{1} :count clic|[2,*] :count clic',
     'short_link_change_warning' => 'Questo link breve ha ricevuto :count clic. Modificarlo interromperà i link già condivisi.',
+    'add_to_google_wallet' => 'Aggiungi a Google Wallet',
+    'wallet_pass_unavailable' => 'Non è stato possibile creare il pass del wallet. Riprova.',
 ];

@@ -5134,4 +5134,6 @@ return [
     'short_link_taken' => '":slug" is already in use on this schedule.',
     'short_link_clicks' => '{1} :count click|[2,*] :count clicks',
     'short_link_change_warning' => 'This short link has been clicked :count times. Changing it will break links you have already shared.',
+    'add_to_google_wallet' => 'Add to Google Wallet',
+    'wallet_pass_unavailable' => 'The wallet pass could not be created. Please try again.',
 ];

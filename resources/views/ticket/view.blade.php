@@ -192,6 +192,17 @@
             $isUnpaid = $sale->status === 'unpaid';
           @endphp
 
+          {{-- Fallback error slot, for a plain ticket that is neither a bookable pass nor on a
+               payment plan. Those two already carry their own session('error') blocks, deliberately
+               placed next to the action that raises one, so this is gated on their absence rather
+               than rendering a third copy over the top of them. Without it a redirect carrying an
+               error - the Google Wallet bail is the first - reloaded the page and said nothing. --}}
+          @if (session('error') && ! $passBookable && ! $sale->installmentPlan)
+            <div class="relative z-10 mb-[16px] rounded-[10px] bg-red-500/15 border border-red-400/30 px-[12px] py-[8px] text-[13px] text-red-200 print:hidden">
+              {{ session('error') }}
+            </div>
+          @endif
+
           {{-- Status banner for unpaid / cancelled / refunded / expired --}}
           @if ($sale->status !== 'paid')
             @php
@@ -363,6 +374,18 @@
               </p>
             </div>
           </div>
+
+          {{-- Wallet passes. Its own full-width row rather than under the QR: that column is 120px
+               wide and the badge has a 48px minimum height it would overflow. The wrapper is gated
+               on the same predicate as the partial so an unconfigured install renders no stray
+               20px of margin. --}}
+          @if (\App\Services\Wallet\GoogleWalletService::canOffer($sale, $event))
+            {{-- Its own row above the divider, not tucked under the badges column: centred with no
+                 separator it read as another line of the Guests field directly above it. --}}
+            <div class="mt-[20px] pt-[20px] border-t border-white/10 print:border-slate-200 flex justify-center print:hidden">
+              @include('partials.wallet-buttons', ['sale' => $sale, 'event' => $event])
+            </div>
+          @endif
         </div>
 
         @if ($sale->isRsvp())

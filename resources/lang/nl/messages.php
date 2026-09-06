@@ -5020,4 +5020,6 @@ return [
     'short_link_taken' => '":slug" is al in gebruik in dit schema.',
     'short_link_clicks' => '{1} :count klik|[2,*] :count kliks',
     'short_link_change_warning' => 'Op deze korte link is :count keer geklikt. Wijzigen breekt links die je al hebt gedeeld.',
+    'add_to_google_wallet' => 'Toevoegen aan Google Wallet',
+    'wallet_pass_unavailable' => 'Het wallet-pasje kon niet worden aangemaakt. Probeer het opnieuw.',
 ];
