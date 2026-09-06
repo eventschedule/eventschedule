@@ -333,13 +333,17 @@ class RoleSubscriberTest extends TestCase
             ->assertSee(route('role.audience.join', ['subdomain' => $this->role->subdomain]), false);
     }
 
-    public function test_the_event_page_panel_does_not_nest_a_second_card(): void
+    public function test_the_event_page_panel_carries_its_own_card(): void
     {
-        // The event page includes the panel INSIDE the right column's container, which already
-        // carries bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8.
-        // With no $panelClass the partial fell through to its default and rendered every one of
-        // those again: a white card nested inside an identical white card, backdrop-blur stacked
-        // on backdrop-blur, and the contents inset a further 24-32px from the rest of the column.
+        // This test used to assert the exact opposite, on a premise that was never true: that the
+        // include sits inside the right column's card, so a card of its own would nest one inside
+        // an identical one. That container opens above the breadcrumb and closes at the mobile
+        // calendar sheet, a thousand lines before the include - so what the panel actually got was
+        // a border-t rule with negative margins over the SCHEDULE'S BACKGROUND. On a light
+        // background image in dark mode that is near-white text on a photo.
+        //
+        // Every other block in the column (tickets, description, agenda, media, reviews,
+        // x-sponsor-grid) carries the guest-portal card, and so must this one.
         //
         // Local dev cannot show this - every schedule here belongs to the demo user, so the panel
         // is (correctly) suppressed - which is exactly why it is pinned here instead.
@@ -350,10 +354,12 @@ class RoleSubscriberTest extends TestCase
         preg_match('/id="subscribe-panel"[^>]*class="([^"]*)"/', $html, $m);
         $this->assertNotEmpty($m, 'the panel did not render on the event page');
 
-        $this->assertStringNotContainsString('backdrop-blur-sm', $m[1],
-            'the panel must not repeat the card treatment its container already applies');
-        $this->assertStringContainsString('border-t', $m[1],
-            'the panel should separate itself with a rule, not a nested card');
+        $this->assertStringContainsString('bg-white/95', $m[1],
+            'the panel renders over the schedule background and needs an opaque surface of its own');
+        $this->assertStringContainsString('backdrop-blur-sm', $m[1],
+            'the panel must use the same card treatment as every sibling in the column');
+        $this->assertStringContainsString('p-6', $m[1],
+            'a card without padding puts the form flush against its own edge');
     }
 
     public function test_the_schedule_page_panel_keeps_its_own_card_and_padding(): void
