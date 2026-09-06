@@ -57,7 +57,7 @@
     @if ($subscribeDone)
     {{-- Replaces the form rather than sitting above it. An empty form under "check your email"
          invites a second submit, which is rate limited and sends a second email. --}}
-    <div role="status" class="mt-4 flex items-start gap-3 rounded-lg border border-green-200 dark:border-green-700/50 bg-green-50 dark:bg-green-500/10 p-4">
+    <div role="status" class="mt-4 max-w-4xl flex items-start gap-3 rounded-lg border border-green-200 dark:border-green-700/50 bg-green-50 dark:bg-green-500/10 p-4">
         <svg class="h-5 w-5 shrink-0 mt-0.5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
         </svg>
@@ -84,9 +84,14 @@
         </div>
     </div>
     @else
+    {{-- max-w-4xl is what lets the schedule page's wrapper track the calendar's width: that
+         card runs to the full container in calendar view, and both inputs below are flex-1
+         min-w-0, so without a cap here each would stretch to roughly 650px. The heading, body and
+         the cadence/privacy footnote still span the card - only the form slot is capped. On the
+         event page the column is narrower than 56rem, so this is a no-op there. --}}
     <form method="POST"
         action="{{ route('role.audience.join', ['subdomain' => $subscribePanelRole->subdomain]) }}"
-        class="mt-4 flex flex-col sm:flex-row gap-3">
+        class="mt-4 max-w-4xl flex flex-col sm:flex-row gap-3">
         @csrf
         <x-honeypot />
         <input type="hidden" name="source" value="panel">
@@ -127,7 +132,7 @@
     </form>
 
     @if ($subscribeError)
-    <p id="subscribe_error_{{ $subscribePanelRole->id }}" role="alert" class="mt-2 text-sm text-red-600 dark:text-red-400">
+    <p id="subscribe_error_{{ $subscribePanelRole->id }}" role="alert" class="mt-2 max-w-4xl text-sm text-red-600 dark:text-red-400">
         {{ $subscribeError }}
     </p>
     @endif

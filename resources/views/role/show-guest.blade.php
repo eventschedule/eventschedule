@@ -391,14 +391,22 @@ html[data-es-view="list"] #calendar-panel-wrapper {
       </div>
       </section>
 
-      {{-- Outside the section and outside #calendar-panel-wrapper on purpose: that wrapper carries
-           data-view-width and a max-width that swings to 200rem in calendar view.
+      {{-- Outside the section and outside #calendar-panel-wrapper, but opted into the same
+           data-view-width system as every other panel in this column (the carousel, the sponsor
+           grid, the calendar, the video grid): 56rem in list view, the full container in calendar
+           view. The CSS at the top of this file and updateOuterContainers() in
+           role/partials/calendar.blade.php both select on that attribute, so the panel follows the
+           calendar on a toggle as well as on first paint.
 
-           mx-auto + max-w-4xl because of what that opt-out cost: in list view the calendar above
-           is 56rem centred while this inherited the full container, so the widest element on the
-           page was the email form. 56rem matches the list view and is a sane cap in calendar
-           view, where a form stretched to 200rem would look broken. --}}
-      <div class="mb-6 mx-auto w-full max-w-4xl">
+           It used to opt OUT and hard-cap at max-w-4xl, because a 1500px-wide email form looks
+           broken. That is still true - the cap just moved INSIDE, onto the form row in
+           partials/subscribe-panel.blade.php, so the card edge can line up with the calendar while
+           the inputs stay readable. Do not put a width cap back on this wrapper: the panel sits
+           directly under the calendar, and a width the calendar does not share reads as a
+           misaligned card. RoleSubscriberTest pins both halves. --}}
+      <div class="mb-6 mx-auto w-full transition-[max-width] duration-300 ease-in-out"
+           data-view-width
+           style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}">
         @include('partials.subscribe-panel', ['panelClass' => 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl p-6 sm:p-8'])
       </div>
 

@@ -376,6 +376,53 @@ class RoleSubscriberTest extends TestCase
         $this->assertStringContainsString('p-6', $m[1]);
     }
 
+    public function test_the_subscribe_panel_matches_the_calendar_panel_width(): void
+    {
+        // The panel sits directly under the calendar, both children of the same container, so a
+        // width the calendar does not share reads as a misaligned card: the calendar swings to the
+        // full container in calendar view while this stayed hard-capped at 56rem.
+        //
+        // Asserted as an EQUALITY against the calendar's own rendered max-width rather than against
+        // the literal '200rem', because the requirement is "the same width as the calendar", not
+        // any particular number.
+        $this->role->update(['event_layout' => 'calendar']);
+
+        $html = $this->get($this->role->getGuestUrl())->assertOk()->getContent();
+
+        // [^>]* keeps each match inside its own opening tag.
+        preg_match('/id="calendar-panel-wrapper"[^>]*style="max-width:\s*([^"]+)"/', $html, $calendar);
+        $this->assertNotEmpty($calendar, 'the calendar wrapper did not render');
+
+        // The wrapper is the element that opens immediately before the panel, so look back through
+        // a window for it - the same shape AudienceTemplateInjectionTest uses. Safe against false
+        // positives: transition-[max-width] in the class list cannot match style="max-width:, and
+        // the calendar wrapper is thousands of characters earlier in the output.
+        $panelPos = strpos($html, 'id="subscribe-panel"');
+        $this->assertNotFalse($panelPos, 'the panel did not render on the schedule page');
+        $wrapper = substr($html, max(0, $panelPos - 400), 400);
+
+        $this->assertStringContainsString('data-view-width', $wrapper,
+            'without it the wrapper cannot follow the calendar/list toggle');
+
+        preg_match('/style="max-width:\s*([^"]+)"/', $wrapper, $subscribe);
+        $this->assertNotEmpty($subscribe, 'the wrapper rendered no max-width');
+        $this->assertSame(trim($calendar[1]), trim($subscribe[1]),
+            'in calendar view the subscribe panel must be as wide as the calendar panel');
+    }
+
+    public function test_the_subscribe_form_stays_readable_when_the_card_is_wide(): void
+    {
+        // The other half of that change: the wrapper only gets to track the calendar because the
+        // readable cap moved onto the form. Both inputs are flex-1 min-w-0, so on a ~1496px card
+        // they would otherwise stretch to roughly 650px each.
+        $html = view('partials.subscribe-panel', ['role' => $this->role])->render();
+
+        preg_match('/<form[^>]*class="([^"]*)"/', $html, $m);
+        $this->assertNotEmpty($m, 'the form did not render');
+        $this->assertStringContainsString('max-w-4xl', $m[1],
+            'the form row carries the readable cap now that the wrapper no longer does');
+    }
+
     public function test_the_panel_offers_no_second_path_to_an_account(): void
     {
         // The panel used to end with "Prefer an account? Sign up and follow instead", linking to
