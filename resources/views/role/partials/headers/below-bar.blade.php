@@ -56,7 +56,7 @@
         @endif
         @if($hasSocial)
             @foreach ($role->decodeLinks('social_links') as $link)
-            @php $gpBelowSlug = \App\Utils\UrlUtils::linkSlug($link); @endphp
+            @php $gpBelowSlug = $role->shortLinkSlugs()[$loop->index] ?? ''; @endphp
             <a href="{{ $gpBelowSlug !== '' ? $role->getGuestUrl() . '/' . $gpBelowSlug : $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
                class="{{ $iconClass }} transition-colors social-tooltip" data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}">
                 <x-url-icon class="w-5 h-5" color="currentColor">{{ \App\Utils\UrlUtils::clean($link->url) }}</x-url-icon>

@@ -503,7 +503,7 @@
               @if ($event->venue->social_links)
               <div class="flex flex-row gap-3 items-center mt-2 {{ $role->isRtl() ? 'rtl' : '' }}">
                 @foreach ($event->venue->decodeLinks('social_links') as $link)
-                  @php $venueLinkSlug = \App\Utils\UrlUtils::linkSlug($link); @endphp
+                  @php $venueLinkSlug = $event->venue->shortLinkSlugs()[$loop->index] ?? ''; @endphp
                   <a
                     href="{{ $venueLinkSlug !== '' ? $event->venue->getGuestUrl() . '/' . $venueLinkSlug : $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
                     class="w-10 h-10 rounded-full flex justify-center items-center bg-gray-100 dark:bg-gray-700 shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200"

@@ -1649,6 +1649,48 @@ class Role extends Model implements MustVerifyEmail
         }));
     }
 
+    /** @var array<int, string>|null */
+    private ?array $shortLinkSlugs = null;
+
+    private ?string $shortLinkSlugsFor = null;
+
+    /**
+     * The short-link slug each of this schedule's social links answers to, keyed by its position
+     * in decodeLinks('social_links') so every renderer and the resolver agree.
+     *
+     * Seeded with the other things that own a first path segment here: sub-schedule slugs, and
+     * every literal route registered ahead of the /{slug} catch-all. A suggestion equal to one of
+     * those could never resolve, so it is never offered as live.
+     *
+     * Memoized on the instance rather than statically - a static would survive RefreshDatabase
+     * and leak one test's links into the next - and keyed on the column, so code that edits
+     * social_links and re-renders from the same instance cannot be served the old map.
+     *
+     * @return array<int, string>
+     */
+    public function shortLinkSlugs(): array
+    {
+        $key = (string) $this->social_links;
+
+        if ($this->shortLinkSlugs !== null && $this->shortLinkSlugsFor === $key) {
+            return $this->shortLinkSlugs;
+        }
+
+        $this->shortLinkSlugsFor = $key;
+
+        $this->loadMissing('groups');
+
+        $taken = array_merge(
+            $this->groups->pluck('slug')->filter()->map(fn ($s) => strtolower($s))->all(),
+            UrlUtils::reservedPathSlugs(),
+        );
+
+        return $this->shortLinkSlugs = UrlUtils::shortLinkSlugs(
+            $this->decodeLinks('social_links'),
+            $taken,
+        );
+    }
+
     public function getFirstVideoUrl()
     {
         if (! $this->youtube_links) {

@@ -205,12 +205,16 @@ class UrlUtils
     public const LINK_SLUG_MAX = 30;
 
     /**
-     * The short-link slug a social link answers to, or '' when it has none.
+     * The short-link slug a social link OWNS, or '' when it owns none.
      *
      * A link owns at most two: the one derived from its domain (facebook.com -> "facebook") and
      * an optional custom one the owner typed. The custom one is what renders, but BOTH keep
      * resolving, which is what stops a slug already printed on a flyer from breaking the day an
      * owner adds a nicer one. See RoleController::resolveSocialLink().
+     *
+     * A link on a domain we do not recognise owns nothing here and is handed its brand name by
+     * shortLinkSlugs() instead - a weaker claim, resolved after the schedule's own pages. Call
+     * shortLinkSlugs() for the address to SHOW; this one only answers who owns a name.
      *
      * Takes a stdClass (Role::decodeLinks) or an array (json_decode(..., true) in the
      * controller) because both shapes are in use for the same column.
@@ -234,6 +238,77 @@ class UrlUtils
         $platform = self::detectPlatform($url);
 
         return $platform === 'website' ? '' : $platform;
+    }
+
+    /**
+     * The short-link slug every social link on a schedule answers to, keyed by position.
+     *
+     * ONE function because the rule is read from four guest partials, the AP links tab and
+     * RoleController's resolver, and a renderer that de-conflicts differently from the resolver
+     * points an icon at an address that opens somebody else's link.
+     *
+     * Two passes over the links in stored order:
+     *
+     *  1. OWNED - linkSlug(): the slug the owner typed, else the one the domain gives for free
+     *     (facebook.com -> /facebook). Neither can be displaced by a suggestion.
+     *  2. SUGGESTED - the brand name, for a link whose domain we do not recognise
+     *     (promee.co.il -> /promee), and only while that base name is still free.
+     *
+     * No "-2" fallback in pass 2, deliberately: a suffixed address is not something an owner
+     * would print, and shifting one link's public URL because an unrelated link was added later
+     * is worse than offering none. suggestLinkSlug() keeps its numbering for the AP's editor
+     * placeholder, which is a value the owner accepts explicitly.
+     *
+     * $taken seeds pass 2 with everything else that owns a first path segment on this schedule -
+     * sub-schedule slugs and reservedPathSlugs(). A suggestion equal to a real route would never
+     * reach viewGuest at all. See Role::shortLinkSlugs().
+     *
+     * @param  iterable<int, object|array>  $links
+     * @param  array<int, string>  $taken
+     * @return array<int, string> '' for a link with no short link
+     */
+    public static function shortLinkSlugs(iterable $links, array $taken = []): array
+    {
+        $links = is_array($links) ? array_values($links) : iterator_to_array($links, false);
+
+        $slugs = [];
+        $used = [];
+
+        foreach ($taken as $slug) {
+            $used[strtolower((string) $slug)] = true;
+        }
+
+        foreach ($links as $i => $link) {
+            $slug = self::linkSlug($link);
+            $slugs[$i] = $slug;
+
+            if ($slug !== '') {
+                $used[$slug] = true;
+            }
+        }
+
+        foreach ($links as $i => $link) {
+            if ($slugs[$i] !== '') {
+                continue;
+            }
+
+            $url = ((array) $link)['url'] ?? '';
+
+            if (! is_string($url) || $url === '') {
+                continue;
+            }
+
+            $slug = self::normalizeLinkSlug(self::getBrand($url));
+
+            if ($slug === '' || isset($used[$slug])) {
+                continue;
+            }
+
+            $slugs[$i] = $slug;
+            $used[$slug] = true;
+        }
+
+        return $slugs;
     }
 
     /**

@@ -1907,6 +1907,14 @@ class RoleController extends Controller
                     $date = $nextDate->format('Y-m-d');
                 }
             } elseif (! $selectedGroup) {
+                // Last rung: a link whose domain we do not recognise answers to its brand name.
+                // Deliberately BELOW the sub-schedule and event lookups above - a slug nobody
+                // asked for must never cost the schedule a page of its own - and still behind the
+                // $eventIdParam guard, because an id in the URL means the slug names an event.
+                if (! $eventIdParam && ($social = $this->resolveSocialLink($role, $slug, true))) {
+                    return $this->handleSocialRedirect($role, $social, $request);
+                }
+
                 return redirect($role->getGuestUrl());
             }
         }
@@ -2396,11 +2404,16 @@ class RoleController extends Controller
     /**
      * The social link a short-URL slug points at, or null when the schedule owns no such slug.
      *
-     * A link answers to both its domain-derived platform slug and, when set, the owner's custom
-     * one, so /facebook keeps working after someone adds /fb. The platform pass runs FIRST: a
-     * custom slug equal to a platform name is rejected at save time, so this only tie-breaks rows
-     * written before that validation existed, but it is what makes "a printed slug cannot be
-     * stolen" structural rather than a thing to remember.
+     * A link answers to its domain-derived platform slug, to the owner's custom one when set, and
+     * - for a domain we do not recognise - to its brand name, so promee.co.il gets /promee the
+     * same way facebook.com gets /facebook. Role::shortLinkSlugs() decides which, once, for the
+     * whole set; this only picks the row out of that map.
+     *
+     * $suggested selects the TIER, because the two sit at different points in viewGuest's ladder.
+     * An OWNED slug (typed, or platform-derived) resolves ahead of events and sub-schedules, so a
+     * /facebook already printed on a flyer cannot be taken away by somebody naming an event
+     * "Facebook". A SUGGESTED one resolves last, after both: the schedule never asked for it, so
+     * it must never cost the schedule a page of its own.
      *
      * 'key' is what the click is counted under, and is deliberately NOT the slug: a visit to
      * /facebook and a visit to a custom /fb are the same link and must land in one bucket rather
@@ -2408,7 +2421,7 @@ class RoleController extends Controller
      *
      * @return array{url: string, key: string}|null
      */
-    private function resolveSocialLink(Role $role, string $slug): ?array
+    private function resolveSocialLink(Role $role, string $slug, bool $suggested = false): ?array
     {
         $slug = strtolower(trim($slug));
 
@@ -2416,36 +2429,42 @@ class RoleController extends Controller
             return null;
         }
 
-        $socialLinks = is_string($role->social_links)
-            ? json_decode($role->social_links, true)
-            : $role->social_links;
+        $links = $role->decodeLinks('social_links');
 
-        if (! is_array($socialLinks)) {
-            return null;
-        }
-
-        foreach ($socialLinks as $link) {
-            $url = $link['url'] ?? '';
-
-            if (is_string($url) && $url !== '' && UrlUtils::detectPlatform($url) === $slug) {
-                return ['url' => $url, 'key' => $slug];
+        // The platform pass runs FIRST: a custom slug equal to a platform name is rejected at save
+        // time, so this only tie-breaks rows written before that validation existed, but it is what
+        // makes "a printed slug cannot be stolen" structural rather than a thing to remember. It is
+        // also the alias pass - shortLinkSlugs() reports one slug per link, so a facebook.com link
+        // carrying a custom /fb is only listed there under "fb".
+        if (! $suggested) {
+            foreach ($links as $link) {
+                if (is_string($link->url) && UrlUtils::detectPlatform($link->url) === $slug) {
+                    return ['url' => $link->url, 'key' => $slug];
+                }
             }
         }
 
-        foreach ($socialLinks as $link) {
-            $url = $link['url'] ?? '';
+        $slugs = $role->shortLinkSlugs();
 
-            if (! is_string($url) || $url === '') {
+        foreach ($links as $i => $link) {
+            if (($slugs[$i] ?? '') !== $slug) {
                 continue;
             }
 
-            if (UrlUtils::normalizeLinkSlug($link['slug'] ?? null) !== $slug) {
+            // linkSlug() is non-empty exactly for the slugs the schedule owns, so this is the
+            // tier test. Skipping rather than returning null keeps a suggested slug resolvable
+            // even when an owned slug elsewhere in the map happens to read the same.
+            if ((UrlUtils::linkSlug($link) !== '') === $suggested) {
                 continue;
             }
 
-            $platform = UrlUtils::detectPlatform($url);
+            if (! is_string($link->url)) {
+                continue;
+            }
 
-            return ['url' => $url, 'key' => $platform !== 'website' ? $platform : $slug];
+            $platform = UrlUtils::detectPlatform($link->url);
+
+            return ['url' => $link->url, 'key' => $platform !== 'website' ? $platform : $slug];
         }
 
         return null;
@@ -6099,34 +6118,35 @@ class RoleController extends Controller
         $urlInfo->clean_url = UrlUtils::clean($urlInfo->url);
         $urlInfo->platform = UrlUtils::detectPlatform($urlInfo->url);
 
-        // Offered as a placeholder, never stored on the owner's behalf: the AP fills it in only
-        // once they open the short-link editor. De-conflicted here so accepting it cannot fail
-        // the validation it is about to be checked against.
         $role = Role::subdomain($subdomain)->first();
-        $urlInfo->suggested_slug = UrlUtils::suggestLinkSlug(
-            $urlInfo->url,
-            $role ? $this->takenSlugs($role) : []
-        );
+        $taken = $role ? $this->takenSlugs($role) : [];
+
+        // The slug this link gets for free the moment it is saved - the same answer
+        // Role::shortLinkSlugs() will give it, computed against everything already spoken for.
+        // The AP renders it as the row's live address, so the two must not disagree.
+        $urlInfo->auto_slug = UrlUtils::shortLinkSlugs([['url' => $urlInfo->url]], $taken)[0] ?? '';
+
+        // Offered as a placeholder for the editor, never stored on the owner's behalf. Numbered
+        // ("promee-2") where auto_slug gives up, so accepting it cannot fail the validation it is
+        // about to be checked against.
+        $urlInfo->suggested_slug = UrlUtils::suggestLinkSlug($urlInfo->url, $taken);
 
         return response()->json($urlInfo);
     }
 
     /**
-     * Every short-link slug and sub-schedule slug already spoken for on this schedule.
+     * Every first path segment already spoken for on this schedule: sub-schedule slugs, live
+     * short links, and the literal routes registered ahead of the /{slug} catch-all.
      *
      * @return array<int, string>
      */
     private function takenSlugs(Role $role): array
     {
-        $taken = $role->groups->pluck('slug')->filter()->map(fn ($s) => strtolower($s))->all();
-
-        foreach ($role->decodeLinks('social_links') as $link) {
-            $slug = UrlUtils::linkSlug($link);
-
-            if ($slug !== '') {
-                $taken[] = $slug;
-            }
-        }
+        $taken = array_merge(
+            $role->groups->pluck('slug')->filter()->map(fn ($s) => strtolower($s))->all(),
+            UrlUtils::reservedPathSlugs(),
+            array_filter($role->shortLinkSlugs()),
+        );
 
         return array_values(array_unique($taken));
     }

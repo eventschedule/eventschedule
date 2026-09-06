@@ -2262,22 +2262,32 @@
                                 {!! (!$role->social_links || $role->social_links == '[]') ? 'style="display:none"' : '' !!}>
                                 @if ($role->social_links && $role->social_links != '[]')
                                 @php
-                                    // Every slug already spoken for on this schedule, so a suggestion
-                                    // offered below cannot fail the validation it is checked against.
-                                    $socialTakenSlugs = $role->groups->pluck('slug')->filter()
-                                        ->map(fn ($s) => strtolower($s))->all();
-                                    foreach ($role->decodeLinks('social_links') as $takenLink) {
-                                        $takenSlug = \App\Utils\UrlUtils::linkSlug($takenLink);
-                                        if ($takenSlug !== '') {
-                                            $socialTakenSlugs[] = $takenSlug;
-                                        }
-                                    }
+                                    // The live short link for every row, decided once for the whole
+                                    // set so the AP cannot disagree with what viewGuest resolves.
+                                    $socialLinkSlugs = $role->shortLinkSlugs();
+                                    // Everything already spoken for, so the numbered placeholder the
+                                    // editor offers cannot fail the validation it is checked against.
+                                    $socialTakenSlugs = array_merge(
+                                        $role->groups->pluck('slug')->filter()->map(fn ($s) => strtolower($s))->all(),
+                                        \App\Utils\UrlUtils::reservedPathSlugs(),
+                                        array_filter($socialLinkSlugs),
+                                    );
                                     $socialHostPrefix = preg_replace('/^https?:\/\//', '', $scheduleUrl);
                                 @endphp
                                 @foreach($role->decodeLinks('social_links') as $link)
                                 @php
                                     $linkPlatform = \App\Utils\UrlUtils::detectPlatform($link->url);
-                                    $linkSlug = \App\Utils\UrlUtils::linkSlug($link);
+                                    // The address this row answers to right now: what the owner typed,
+                                    // else what the domain gives it for free.
+                                    $linkSlug = $socialLinkSlugs[$loop->index] ?? '';
+                                    $linkCustom = \App\Utils\UrlUtils::normalizeLinkSlug($link->slug ?? null);
+                                    // What it would fall back to if the owner cleared the custom slug.
+                                    // Its own two names come out of the taken set first - they are
+                                    // exactly what is being given up.
+                                    $linkAuto = \App\Utils\UrlUtils::shortLinkSlugs(
+                                        [['url' => $link->url]],
+                                        array_values(array_diff($socialTakenSlugs, array_filter([$linkSlug, $linkCustom]))),
+                                    )[0] ?? '';
                                     $linkSuggestion = $linkSlug !== '' ? $linkSlug : \App\Utils\UrlUtils::suggestLinkSlug($link->url, $socialTakenSlugs);
                                     // Keyed the way recordSocialClick() writes it, so a link with both
                                     // /facebook and a custom /fb reports one total, not a split one.
@@ -2285,7 +2295,8 @@
                                     $linkClicks = $linkClickKey !== '' ? ($socialClickTotals[$linkClickKey] ?? 0) : 0;
                                 @endphp
                                 <li class="p-4 bg-white dark:bg-gray-800" data-link-url="{{ $link->url }}"
-                                    data-link-slug="{{ $link->slug ?? '' }}"
+                                    data-link-custom="{{ $linkCustom }}"
+                                    data-link-auto="{{ $linkAuto }}"
                                     data-link-platform="{{ $linkPlatform }}"
                                     data-link-suggestion="{{ $linkSuggestion }}"
                                     data-link-clicks="{{ $linkClicks }}">
@@ -2300,9 +2311,11 @@
                                                 <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ \App\Utils\UrlUtils::getBrand($link->url) }}</h4>
                                                 <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ \App\Utils\UrlUtils::clean($link->url) }}</p>
                                             </a>
-                                            {{-- Short link. Two states: a live slug is shown with copy
-                                                 and edit; a link without one shows its SUGGESTION greyed
-                                                 out, which is never stored until the owner clicks Add. --}}
+                                            {{-- Short link. Nearly every link has a live one - typed,
+                                                 or given free by its domain - shown with copy and edit.
+                                                 A row only falls back to a greyed SUGGESTION when its
+                                                 own name is already taken by a sub-schedule, a route or
+                                                 another link; that one is stored only on Add. --}}
                                             <div class="link-slug-display flex flex-wrap items-center gap-1.5 mt-1" @if ($linkSuggestion === '') style="display:none" @endif>
                                                 <p class="link-slug-url text-xs truncate {{ $linkSlug !== '' ? 'text-gray-400 dark:text-gray-500' : 'text-gray-300 dark:text-gray-600 italic' }}" dir="ltr">{{ $socialHostPrefix }}/{{ $linkSlug !== '' ? $linkSlug : $linkSuggestion }}</p>
                                                 {{-- Copy only when the slug is live: copying a suggestion
@@ -2324,7 +2337,7 @@
                                                     <div class="flex items-center gap-1 min-w-0" dir="ltr">
                                                         <span class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $socialHostPrefix }}/</span>
                                                         <input type="text" class="link-slug-input w-32 flex-shrink-0 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 text-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
-                                                            maxlength="{{ \App\Utils\UrlUtils::LINK_SLUG_MAX }}" value="{{ $linkSlug }}" placeholder="{{ $linkSuggestion }}" spellcheck="false" autocapitalize="off" />
+                                                            maxlength="{{ \App\Utils\UrlUtils::LINK_SLUG_MAX }}" value="{{ $linkCustom }}" placeholder="{{ $linkSuggestion }}" spellcheck="false" autocapitalize="off" />
                                                     </div>
                                                     <button type="button" class="btn-cancel-link-slug flex-shrink-0 text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">{{ __('messages.cancel') }}</button>
                                                     <button type="button" class="btn-save-link-slug flex-shrink-0 text-xs font-semibold text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">{{ __('messages.save') }}</button>
@@ -8847,10 +8860,14 @@ document.addEventListener('DOMContentLoaded', function() {
             var platform = link.platform || '';
             if (linkType === 'social_links' && guestUrl) {
                 var host = guestUrl.replace(/^https?:\/\//, '');
-                var liveSlug = platform && platform !== 'website' ? platform : '';
+                // auto_slug is the server's own answer for this URL, computed against everything
+                // already taken on the schedule - the same call Role::shortLinkSlugs() makes - so a
+                // row added here reads exactly like one rendered by Blade.
+                var liveSlug = link.auto_slug || '';
                 var suggestion = liveSlug || link.suggested_slug || '';
 
-                li.setAttribute('data-link-slug', '');
+                li.setAttribute('data-link-custom', '');
+                li.setAttribute('data-link-auto', liveSlug);
                 li.setAttribute('data-link-platform', platform);
                 li.setAttribute('data-link-suggestion', suggestion);
 
@@ -9122,7 +9139,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 if (e.target.closest('.btn-cancel-link-slug')) {
-                    parts.input.value = li.dataset.linkSlug || '';
+                    parts.input.value = li.dataset.linkCustom || '';
                     parts.error.style.display = 'none';
                     parts.editor.style.display = 'none';
                     parts.display.style.display = '';
@@ -9134,12 +9151,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     var slug = normalizeSlug(raw);
                     var linkUrl = li.dataset.linkUrl;
 
-                    // Cleared on purpose: drop the custom slug and fall back to the platform one.
+                    // Cleared on purpose: drop the custom slug and fall back to the free one
+                    // (the platform name, or the brand for a domain we do not recognise).
                     if (raw === '') {
                         linkData.social_links.forEach(function (l) {
                             if (l && l.url === linkUrl) delete l.slug;
                         });
-                        li.dataset.linkSlug = '';
+                        li.dataset.linkCustom = '';
                     } else {
                         // Only ASCII can be normalized faithfully here. Anything else (Hebrew, CJK)
                         // is passed through for the server to romanize via ICU, which also means
@@ -9158,7 +9176,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         linkData.social_links.forEach(function (l) {
                             if (l && l.url === linkUrl) l.slug = value;
                         });
-                        li.dataset.linkSlug = value;
+                        li.dataset.linkCustom = value;
                     }
 
                     parts.error.style.display = 'none';
@@ -9172,7 +9190,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         function renderSlugRow(li) {
             var parts = slugRowParts(li);
-            var slug = li.dataset.linkSlug || '';
+            // Clearing the field does not clear the short link: the row falls back to the slug
+            // its domain gives it for free, which is what the server will render on the next load.
+            var slug = li.dataset.linkCustom || li.dataset.linkAuto || '';
             var shown = slug || li.dataset.linkSuggestion || '';
             var host = guestUrl.replace(/^https?:\/\//, '');
 

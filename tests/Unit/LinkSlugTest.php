@@ -113,4 +113,71 @@ class LinkSlugTest extends TestCase
             $this->assertNotContains($slug, $reserved);
         }
     }
+
+    public function test_the_map_gives_an_unrecognised_domain_its_brand_name(): void
+    {
+        $this->assertSame(
+            [0 => 'facebook', 1 => 'promee'],
+            UrlUtils::shortLinkSlugs([
+                ['url' => 'https://facebook.com/emeklive'],
+                ['url' => 'https://promee.co.il/?r=33221'],
+            ])
+        );
+    }
+
+    /** Pass 1 is the whole set, so a name is safe from pass 2 wherever it sits in the list. */
+    public function test_an_owned_slug_later_in_the_list_still_beats_a_suggestion_earlier_in_it(): void
+    {
+        $this->assertSame(
+            [0 => '', 1 => 'promee'],
+            UrlUtils::shortLinkSlugs([
+                ['url' => 'https://promee.co.il/?r=33221'],
+                ['url' => 'https://facebook.com/emeklive', 'slug' => 'promee'],
+            ])
+        );
+    }
+
+    /**
+     * No "-2" consolation prize. A suffixed address is not one an owner would print, and moving a
+     * link's public URL because an unrelated link was added later is worse than offering none.
+     */
+    public function test_a_contested_name_is_dropped_rather_than_numbered(): void
+    {
+        $this->assertSame(
+            [0 => 'promee', 1 => ''],
+            UrlUtils::shortLinkSlugs([
+                ['url' => 'https://promee.co.il/one'],
+                ['url' => 'https://promee.com/two'],
+            ])
+        );
+    }
+
+    public function test_the_map_never_hands_out_a_name_the_schedule_has_taken(): void
+    {
+        $this->assertSame(
+            [0 => ''],
+            UrlUtils::shortLinkSlugs([['url' => 'https://promee.co.il/x']], ['promee'])
+        );
+    }
+
+    /**
+     * A typed slug is grandfathered - RoleUpdateRequest only validates a CHANGED one - so the map
+     * reports it whatever the taken set says. Only pass 2 is de-conflicted.
+     */
+    public function test_a_typed_slug_is_reported_even_when_the_name_is_taken(): void
+    {
+        $this->assertSame(
+            [0 => 'promee'],
+            UrlUtils::shortLinkSlugs([['url' => 'https://promee.co.il/x', 'slug' => 'promee']], ['promee'])
+        );
+    }
+
+    /** Takes stdClass (Role::decodeLinks) as well as arrays, the way linkSlug() does. */
+    public function test_the_map_accepts_decoded_objects(): void
+    {
+        $this->assertSame(
+            [0 => 'promee'],
+            UrlUtils::shortLinkSlugs(json_decode('[{"url":"https://promee.co.il/x"}]'))
+        );
+    }
 }
