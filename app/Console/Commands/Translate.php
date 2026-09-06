@@ -14,8 +14,8 @@ use App\Utils\MarkdownUtils;
 use App\Utils\TextUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Console\Command;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -100,6 +100,33 @@ class Translate extends Command
     /** Absolute microtime the current pass must stop by, or null when unbudgeted. */
     private ?float $passDeadline = null;
 
+    /**
+     * Where the last unattended run leaves its summary, for /admin/queue.
+     *
+     * The cache, not a table: this is one small row that is rewritten every 15 minutes and is
+     * worthless once stale, which is a migration nobody should have to run. It is also the only
+     * channel that works - a scheduled command's stdout is discarded on both rails, so the
+     * counts the run already prints reach nobody.
+     *
+     * Seven days matches the per-rail scheduler heartbeat keys. A summary older than that is
+     * indistinguishable from no summary, and both render as "not measured yet".
+     */
+    public const LAST_RUN_CACHE_KEY = 'translate.last_run';
+
+    public const LAST_RUN_CACHE_DAYS = 7;
+
+    /** Rows this run sent to the AI and saved. */
+    private int $translatedCount = 0;
+
+    /** Rows this run sent to the AI that came back unusable. */
+    private int $failedCount = 0;
+
+    /** Rows this run opened and found nothing to do in. No AI call, no pause, no spend. */
+    private int $parkedCount = 0;
+
+    /** Set when a pass stopped on its time budget rather than running out of rows. */
+    private bool $budgetReached = false;
+
     public function handle()
     {
         $this->debug = (bool) $this->option('debug');
@@ -155,13 +182,46 @@ class Translate extends Command
         }
 
         $remaining = count($passes);
+        $startedAt = microtime(true);
 
         foreach ($passes as $pass) {
             $this->beginPass($remaining--);
             $this->runTranslateStep($pass);
         }
 
+        $this->recordRunSummary($startedAt, targeted: (bool) ($roleId || $eventId));
+
         return self::SUCCESS;
+    }
+
+    /**
+     * Leave behind what this run actually got through, so /admin/queue can report a MEASURED
+     * drain rate instead of arithmetic over the configured budget.
+     *
+     * Arithmetic would be wrong in both directions and could not tell which: parked rows cost no
+     * pause at all, so a run can clear hundreds of them in the time the estimate allows for
+     * sixteen, while a run that spends its budget on failures clears none. The command is the
+     * only place that knows, and it already counts all three.
+     *
+     * Skipped for a dry run (it did nothing) and for a targeted run (an operator translating one
+     * schedule by hand is not the cron, and its rate says nothing about how the queue drains).
+     * usage_daily cannot serve this: UsageTrackingService::track() returns early when the install
+     * is not hosted, so every selfhost install would show a blank rate for ever.
+     */
+    private function recordRunSummary(float $startedAt, bool $targeted): void
+    {
+        if ($this->dryRun || $targeted) {
+            return;
+        }
+
+        Cache::put(self::LAST_RUN_CACHE_KEY, [
+            'at' => now()->timestamp,
+            'seconds' => round(microtime(true) - $startedAt, 1),
+            'translated' => $this->translatedCount,
+            'failed' => $this->failedCount,
+            'parked' => $this->parkedCount,
+            'budget_reached' => $this->budgetReached,
+        ], now()->addDays(self::LAST_RUN_CACHE_DAYS));
     }
 
     private function runTranslateStep(callable $step): void
@@ -379,6 +439,7 @@ class Translate extends Command
                     $event->description_en = '';
                     $event->short_description_en = '';
                     $event->save();
+                    $this->parkedCount++;
                     $skipped++;
 
                     continue;
@@ -471,6 +532,7 @@ class Translate extends Command
                     $eventRole->description_translated = '';
                     $eventRole->short_description_translated = '';
                     $eventRole->save();
+                    $this->parkedCount++;
                     $skipped++;
 
                     continue;
@@ -556,6 +618,7 @@ class Translate extends Command
                     $part->name_en = '';
                     $part->description_en = '';
                     $part->save();
+                    $this->parkedCount++;
                     $skipped++;
 
                     continue;
@@ -929,6 +992,11 @@ class Translate extends Command
      */
     private function recordOutcome($model, int $successes, $usageRoleId): void
     {
+        // First, so the tally survives a throw further down this method or in recordFailure()'s
+        // save. recordFailure() reaches its fallback branch only AFTER calling this, so a row is
+        // counted exactly once either way.
+        $successes > 0 ? $this->translatedCount++ : $this->failedCount++;
+
         $model->translation_attempts = $successes > 0 ? 0 : ((int) $model->translation_attempts) + 1;
         $model->last_translated_at = now();
 
@@ -999,6 +1067,7 @@ class Translate extends Command
      */
     private function markChecked($model): void
     {
+        $this->parkedCount++;
         $model->last_translated_at = now();
         $model->saveQuietly();
     }
@@ -1115,12 +1184,14 @@ class Translate extends Command
             return;
         }
 
-        $threshold = (int) config('usage.stuck_translation_attempts', 3);
+        // Shared with TranslationQueue so /admin/queue counts the rows this excludes using the
+        // same ceiling and the same cutoff. Two readings of these config keys is how the panel
+        // ends up promising a drain time for rows the command has already parked for a day.
+        [$threshold, $cutoff] = TranslationQueue::retryLimits();
+
         if ($threshold <= 0) {
             return;
         }
-
-        $cutoff = $this->retryCutoff();
 
         $query->where(function ($q) use ($threshold, $cutoff) {
             $q->where('translation_attempts', '<', $threshold);
@@ -1137,25 +1208,21 @@ class Translate extends Command
             return false;
         }
 
-        $threshold = (int) config('usage.stuck_translation_attempts', 3);
+        // The per-row counterpart of applyRetryScope(), and the third reader of these two config
+        // keys - so it takes them from the same accessor. The comparison stays strict-greater
+        // where the scope is strict-less, which differ only for a row landing exactly on the
+        // cutoff second; that is pre-existing and not worth a behaviour change to unify.
+        [$threshold, $cutoff] = TranslationQueue::retryLimits();
+
         if ($threshold <= 0 || $model->translation_attempts < $threshold) {
             return false;
         }
-
-        $cutoff = $this->retryCutoff();
 
         if ($cutoff === null) {
             return true;
         }
 
         return $model->last_translated_at && $model->last_translated_at->greaterThan($cutoff);
-    }
-
-    private function retryCutoff(): ?Carbon
-    {
-        $hours = (int) config('usage.translation_retry_after_hours', 24);
-
-        return $hours > 0 ? now()->subHours($hours) : null;
     }
 
     private function startBudget(bool $targeted): void
@@ -1197,6 +1264,7 @@ class Translate extends Command
             return false;
         }
 
+        $this->budgetReached = true;
         $this->info("Time budget reached during {$pass}; stopping cleanly. The next run resumes with the longest-waiting rows.");
 
         return true;

@@ -38,10 +38,13 @@
         @endif
 
         {{-- Scheduler. One card holding summary, exceptions and the full list, so every scheduler
-             signal sits together and everything below this card is queue. Deliberately not a fifth
-             cell in the bento below: the grid is a 2/4-column layout and a fifth card would leave
-             it ragged, and this answers a different question - is the runner alive, not how much
-             work is waiting. --}}
+             signal sits together. Deliberately not a fifth cell in the bento below: the grid is a
+             2/4-column layout and a fifth card would leave it ragged, and this answers a different
+             question - is the runner alive, not how much work is waiting.
+
+             That second question is the Work Waiting card immediately below, and the page reads
+             top-down in that order: is the runner alive, how much has it left to do, then the
+             jobs table itself. --}}
         <div class="ap-card rounded-xl shadow overflow-hidden">
             <div class="p-5 flex flex-wrap items-center justify-between gap-3">
                 <div class="flex items-center gap-3">
@@ -190,6 +193,8 @@
             </details>
             @endif
         </div>
+
+        @include('admin.partials._work-backlog')
 
         {{-- Health Overview Cards --}}
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">

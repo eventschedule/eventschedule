@@ -923,6 +923,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
         Route::post('/admin/queue/retry-all', [AdminController::class, 'queueRetryAll'])->name('admin.queue.retry-all');
         Route::post('/admin/queue/clear-failed', [AdminController::class, 'queueClearFailed'])->name('admin.queue.clear-failed');
         Route::post('/admin/queue/flush-pending', [AdminController::class, 'queueFlushPending'])->name('admin.queue.flush-pending');
+        Route::post('/admin/queue/remeasure', [AdminController::class, 'queueRemeasure'])->name('admin.queue.remeasure');
 
         // Admin log viewer routes
         Route::get('/admin/logs', [AdminController::class, 'logs'])->name('admin.logs');

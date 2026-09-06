@@ -196,6 +196,19 @@
                     </tbody>
                 </table>
             </div>
+
+            {{-- Kept out of the Pending column on purpose. These are schedules the roles pass has
+                 to open to be sure, because their translations live under an `_en` sub-key inside
+                 a JSON column and SQL cannot see whether it is filled. Counted as pending they
+                 held the figure permanently above zero on any install with custom fields, labels,
+                 categories or sponsor logos, which reads as a stuck cron rather than as a caveat.
+                 The run parks them with no AI call and no pause. --}}
+            @php $usageRecheck = \App\Services\WorkBacklog::translationRecheck($translationBacklog); @endphp
+            @if ($usageRecheck > 0)
+            <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                {{ trans_choice('messages.translation_recheck_note', $usageRecheck, ['count' => number_format($usageRecheck)]) }}
+            </p>
+            @endif
         </div>
 
         {{-- Stuck Translation Records --}}

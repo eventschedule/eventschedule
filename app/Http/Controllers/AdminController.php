@@ -32,6 +32,7 @@ use App\Services\OneSignalService;
 use App\Services\SchedulerHealth;
 use App\Services\TranslationQueue;
 use App\Services\WebhookService;
+use App\Services\WorkBacklog;
 use App\Utils\MoneyUtils;
 use App\Utils\PlanPriceUtils;
 use App\Utils\PlatformCurrency;
@@ -1986,6 +1987,12 @@ class AdminController extends Controller
         $taskExceptions = $scheduledTasks->whereIn('state', ['failed', 'never_finished', 'overdue'])->values();
         $tasksReporting = $scheduledTasks->filter(fn ($t) => $t->row !== null)->count();
 
+        // How much work is WAITING, as opposed to whether the runner is alive. Cached inside the
+        // service: these are unindexed scans and this page is reloaded while watching something
+        // drain, unlike /admin/usage where the same translation figures are computed live.
+        $workBacklog = WorkBacklog::snapshot();
+        $translationRate = WorkBacklog::translationRate();
+
         // Group pending jobs by queue
         $pendingByQueue = DB::table('jobs')
             ->select('queue', DB::raw('COUNT(*) as count'))
@@ -2065,8 +2072,29 @@ class AdminController extends Controller
             'schedulerHttpRailOnly',
             'scheduledTasks',
             'taskExceptions',
-            'tasksReporting'
+            'tasksReporting',
+            'workBacklog',
+            'translationRate'
         ));
+    }
+
+    /**
+     * Re-measure the work backlog now.
+     *
+     * The counts are cached for WorkBacklog::CACHE_SECONDS because they are unindexed scans, which
+     * leaves the nav's Refresh button appearing to do nothing for five minutes while an operator
+     * watches a queue drain. This is the affordance that resolves that, and the card prints the
+     * measurement age beside it so the cached number is never passed off as live.
+     */
+    public function queueRemeasure()
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        WorkBacklog::flush();
+
+        return redirect()->route('admin.queue');
     }
 
     /**
