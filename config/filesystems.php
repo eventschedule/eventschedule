@@ -1,5 +1,49 @@
 <?php
 
+/*
+ * The endpoint of an S3/Spaces disk must NOT name the bucket, and this strips it if it does.
+ *
+ * The AWS SDK addresses S3 virtual-hosted style unless `use_path_style_endpoint` is on - neither
+ * Spaces disk below sets it - so it takes the endpoint HOST and prepends "{bucket}.". DigitalOcean's
+ * console shows each bucket's "origin endpoint" as https://{bucket}.{region}.digitaloceanspaces.com,
+ * which is the value an operator naturally copies, and that lands on the wire as
+ * {bucket}.{bucket}.{region}.digitaloceanspaces.com. DO's wildcard certificate covers exactly ONE
+ * label, so every request dies in the TLS handshake - `cURL error 60: SSL: no alternative
+ * certificate subject name matches target host name` - before it ever reaches the bucket. That is
+ * how every backup export on hosted failed from the v1.0.130 cutover until this was added.
+ *
+ * Stripping a leading "{bucket}." is canonicalisation, not a guess: the SDK puts the same label
+ * straight back, so the host on the wire is byte-identical to the one that was pasted. It is a
+ * no-op on an endpoint that does not begin with the bucket, which is why it can sit on a disk whose
+ * endpoint is already correct.
+ *
+ * Two things worth knowing before reusing it:
+ *
+ *  - Never apply it to a PATH-STYLE disk. There the endpoint host is used verbatim and the bucket
+ *    becomes the first path SEGMENT, so a bucket-prefixed endpoint produces a valid host and an
+ *    object key silently prefixed with the bucket name. That is also why path style is not the fix
+ *    for the failure above: it repairs the hostname and moves the damage into every key.
+ *  - The stripped value can look wrong in isolation. Bucket "acme" with endpoint "https://acme.com"
+ *    leaves "https://com", and that is still exactly right, because nothing ever uses the endpoint
+ *    without the bucket in front of it.
+ *
+ * `config:cache` bakes the result, which is fine: it is a pure function of the same env vars every
+ * other value here reads.
+ */
+$endpointWithoutBucket = function (?string $endpoint, ?string $bucket): ?string {
+    if (! $endpoint || ! $bucket) {
+        return $endpoint;
+    }
+
+    $host = parse_url($endpoint, PHP_URL_HOST);
+
+    if (! $host || strcasecmp(substr($host, 0, strlen($bucket) + 1), $bucket.'.') !== 0) {
+        return $endpoint;
+    }
+
+    return substr_replace($endpoint, '', strpos($endpoint, $host), strlen($bucket) + 1);
+};
+
 return [
 
     /*
@@ -61,7 +105,7 @@ return [
             'secret' => env('DO_SPACES_SECRET'),
             'region' => env('DO_SPACES_REGION'),
             'bucket' => env('DO_SPACES_BUCKET'),
-            'endpoint' => env('DO_SPACES_ENDPOINT'),
+            'endpoint' => $endpointWithoutBucket(env('DO_SPACES_ENDPOINT'), env('DO_SPACES_BUCKET')),
             'visibility' => 'public',
 
             /*
@@ -134,7 +178,13 @@ return [
             'key' => env('BACKUP_SPACES_KEY') ?: env('DO_SPACES_KEY'),
             'secret' => env('BACKUP_SPACES_SECRET') ?: env('DO_SPACES_SECRET'),
             'region' => env('BACKUP_SPACES_REGION') ?: env('DO_SPACES_REGION'),
-            'endpoint' => env('BACKUP_SPACES_ENDPOINT') ?: env('DO_SPACES_ENDPOINT'),
+            // Canonicalised AFTER the `?:` fallback, and against the BACKUPS bucket - that is the
+            // label the SDK prepends to whichever endpoint wins. A blank BACKUP_SPACES_BUCKET makes
+            // it a no-op, so the fallback advertised above is untouched.
+            'endpoint' => $endpointWithoutBucket(
+                env('BACKUP_SPACES_ENDPOINT') ?: env('DO_SPACES_ENDPOINT'),
+                env('BACKUP_SPACES_BUCKET')
+            ),
             'bucket' => env('BACKUP_SPACES_BUCKET'),
             'visibility' => 'private',
             'throw' => true,

@@ -9,6 +9,7 @@ use App\Services\BackupService;
 use App\Services\OneSignalService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
@@ -178,12 +179,28 @@ class ProcessBackupExport implements ShouldQueue
             ]);
 
             // Best-effort cleanup of a partial upload; never allowed to mask the failure above.
-            try {
-                if (isset($zipFilename) && Storage::disk('backups')->exists($zipFilename)) {
+            //
+            // delete() rather than exists() then delete(): both drivers treat deleting an object
+            // that is not there as success, so the probe bought nothing and doubled the ways this
+            // block can throw on a disk that is not answering.
+            //
+            // Logged rather than report()ed, because the failure that put us here is already in
+            // Sentry a few lines up, and the likeliest reason to be here at all is a disk that is
+            // not answering - so reporting the fallout files a SECOND issue for one root cause,
+            // under a fingerprint (UnableToCheckFileExistence) that reads like an unrelated bug.
+            // A doubled Spaces endpoint did exactly that, and the misleading issue is the one that
+            // got opened. The key goes in the context because it is what an operator would need to
+            // collect the orphan by hand, and the exception message carries it anyway.
+            if (isset($zipFilename)) {
+                try {
                     Storage::disk('backups')->delete($zipFilename);
+                } catch (\Throwable $cleanupFailure) {
+                    Log::warning('Could not clean up a partial backup export', [
+                        'backup_job_id' => $this->backupJobId,
+                        'path' => $zipFilename,
+                        'exception' => $cleanupFailure,
+                    ]);
                 }
-            } catch (\Throwable $cleanupFailure) {
-                report($cleanupFailure);
             }
         } finally {
             if ($tempZip && file_exists($tempZip)) {

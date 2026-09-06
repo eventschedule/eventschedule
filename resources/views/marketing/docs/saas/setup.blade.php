@@ -815,6 +815,8 @@ BACKUP_SPACES_REGION=nyc3
 BACKUP_SPACES_ENDPOINT=https://nyc3.digitaloceanspaces.com
 BACKUP_SPACES_BUCKET=your-private-backups-bucket</code></pre>
 
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The endpoint is your provider's <span class="font-semibold text-gray-900 dark:text-white">region</span> endpoint, not the per-bucket origin endpoint that storage consoles display beside the bucket itself. The bucket name is added to the hostname for you, so an endpoint that already carries it addresses <code class="doc-inline-code">bucket.bucket.region...</code> and every upload fails its TLS handshake. Event Schedule strips a leading bucket name if it finds one, so either form works.</p>
+
         <div class="doc-callout doc-callout-warning">
             <div class="doc-callout-title">Use a separate private bucket, never your images bucket</div>
             <p>An export archive contains every sale, attendee email address and phone number for the schedules inside it, and its path is a user id plus a timestamp. Image buckets are public and usually CDN-fronted, so anything landing in one is effectively published at a guessable URL - and a CDN keeps serving it after you make the object private again. Use a bucket with no public policy and no CDN in front of it. <code class="doc-inline-code">BACKUP_SPACES_BUCKET</code> has no default for this reason: a missing value fails rather than quietly writing backups somewhere public.</p>

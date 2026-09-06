@@ -50,7 +50,7 @@ return [
     '/docs/managing-schedules' => '2026-09-04',
     '/docs/newsletters' => '2026-09-04',
     '/docs/referral-program' => '2026-09-04',
-    '/docs/saas' => '2026-09-04',
+    '/docs/saas' => '2026-09-06',
     '/docs/saas/custom-domains' => '2026-09-04',
     '/docs/saas/federation' => '2026-09-04',
     '/docs/saas/monetization' => '2026-09-02',

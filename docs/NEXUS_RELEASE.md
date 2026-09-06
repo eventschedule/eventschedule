@@ -80,7 +80,7 @@ from it.
 | `BACKUP_SPACES_KEY` | key for the step-1 bucket | app | step 5 |
 | `BACKUP_SPACES_SECRET` | secret for the step-1 bucket | app | step 5 |
 | `BACKUP_SPACES_REGION` | region of the step-1 bucket | app | step 5 |
-| `BACKUP_SPACES_ENDPOINT` | endpoint of the step-1 bucket | app | step 5 |
+| `BACKUP_SPACES_ENDPOINT` | `https://<region>.digitaloceanspaces.com` - the **region** endpoint, never the bucket's own | app | step 5 |
 | `BACKUP_SPACES_BUCKET` | the step-1 **private** bucket, never `DO_SPACES_BUCKET` | app | step 5 |
 | `LOG_CHANNEL` | `stderr` | **component**, `scheduler` only | step 6 |
 | `SCHEDULER_RAIL` | `worker` | **component**, `scheduler` only | step 6 |
@@ -427,6 +427,16 @@ App-level environment variables, saved together so they cost one redeploy:
 - `BACKUP_DISK_DRIVER=s3`
 - `BACKUP_SPACES_KEY` / `SECRET` / `REGION` / `ENDPOINT` / `BUCKET`, pointing at the step-1 bucket
 - `CACHE_STORE=database`, scope **RUN_AND_BUILD_TIME**
+
+**The endpoint is the region's, not the bucket's.** The Spaces console shows each bucket's origin
+endpoint as `https://{bucket}.{region}.digitaloceanspaces.com`, and that is the wrong value here:
+the SDK addresses the disk virtual-hosted style and prepends the bucket itself, so the console's
+value arrives as `{bucket}.{bucket}.{region}.digitaloceanspaces.com`. DO's wildcard certificate
+covers exactly one label, so every export dies in the TLS handshake with `cURL error 60` without
+reaching the bucket - which is what the first export after the v1.0.130 deploy did. Set
+`https://{region}.digitaloceanspaces.com`. `config/filesystems.php` now strips a leading bucket
+label, so both forms work and this cannot break an install again, but the spec should still read
+true.
 
 **Type `database` carefully.** `config/cache.php` reads `env('CACHE_STORE', 'file')`, and a second
 argument never fires for a present-but-EMPTY value - so a blank entry is not a fallback to `file`,

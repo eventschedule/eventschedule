@@ -29,6 +29,39 @@ class BackupStorageTest extends TestCase
     use RefreshDatabase;
 
     /**
+     * The resolved `backups` disk, with the given env vars in force while the config file is read.
+     *
+     * Re-evaluating the file is the point: `root` and `endpoint` are both decided when it loads, so
+     * overriding a key on the already-resolved array would leave the value derived from it behind
+     * and the assertion would prove nothing. Storage::fake() is no use either - a faked disk ignores
+     * `root` and `endpoint` entirely, which is why the rest of this file could not catch either bug.
+     *
+     * $_SERVER rather than putenv(): Laravel's Env repository reads $_SERVER first, so putenv() is
+     * silently outranked by phpunit.xml's entries.
+     */
+    private function backupsDiskWith(array $overrides): array
+    {
+        $previous = [];
+
+        foreach ($overrides as $key => $value) {
+            $previous[$key] = $_SERVER[$key] ?? null;
+            $_SERVER[$key] = $value;
+        }
+
+        try {
+            return (require config_path('filesystems.php'))['disks']['backups'];
+        } finally {
+            foreach ($previous as $key => $value) {
+                if ($value === null) {
+                    unset($_SERVER[$key]);
+                } else {
+                    $_SERVER[$key] = $value;
+                }
+            }
+        }
+    }
+
+    /**
      * The images bucket is fronted by a public CDN and ImageUtils::getUrl() addresses any object in
      * it by concatenating the raw storage key onto the CDN hostname. A backup archive holds every
      * sale, attendee email and phone number for the schedules inside it, at a path that is a small
@@ -74,29 +107,15 @@ class BackupStorageTest extends TestCase
      * which is what an operator sets up as the backstop for the 7-day retention, silently matches
      * nothing. It also leaks the deploy path into every object key.
      *
-     * Re-evaluates the config file with the env var set, rather than overriding `driver` on the
-     * resolved array: `root` is decided when the file is loaded, so a runtime override of the
-     * driver alone would leave the old root in place and the assertion would prove nothing.
-     * Storage::fake() is no use here either - a faked disk ignores `root` entirely, which is
-     * exactly why the rest of this file could not catch the bug.
+     * Read through backupsDiskWith(), which re-evaluates the config file rather than overriding a
+     * key on the resolved array - see that helper for why nothing else can catch this.
      */
     public function test_the_backups_disk_does_not_prefix_s3_keys_with_a_filesystem_path(): void
     {
-        $previous = $_SERVER['BACKUP_DISK_DRIVER'] ?? null;
-        $_SERVER['BACKUP_DISK_DRIVER'] = 's3';
+        $backups = $this->backupsDiskWith(['BACKUP_DISK_DRIVER' => 's3']);
 
-        try {
-            $config = require config_path('filesystems.php');
-        } finally {
-            if ($previous === null) {
-                unset($_SERVER['BACKUP_DISK_DRIVER']);
-            } else {
-                $_SERVER['BACKUP_DISK_DRIVER'] = $previous;
-            }
-        }
-
-        $this->assertSame('s3', $config['disks']['backups']['driver'], 'env override did not take effect');
-        $this->assertSame('', $config['disks']['backups']['root'],
+        $this->assertSame('s3', $backups['driver'], 'env override did not take effect');
+        $this->assertSame('', $backups['root'],
             'the backups disk must not prefix S3 object keys with a filesystem path');
     }
 
@@ -110,7 +129,7 @@ class BackupStorageTest extends TestCase
      */
     public function test_blank_backup_credentials_still_fall_back_to_the_spaces_defaults(): void
     {
-        $overrides = [
+        $backups = $this->backupsDiskWith([
             'BACKUP_DISK_DRIVER' => 's3',
             'BACKUP_SPACES_KEY' => '',
             'BACKUP_SPACES_SECRET' => '',
@@ -121,26 +140,7 @@ class BackupStorageTest extends TestCase
             'DO_SPACES_SECRET' => 'images-secret',
             'DO_SPACES_REGION' => 'nyc3',
             'DO_SPACES_ENDPOINT' => 'https://nyc3.digitaloceanspaces.com',
-        ];
-
-        $previous = [];
-
-        foreach ($overrides as $key => $value) {
-            $previous[$key] = $_SERVER[$key] ?? null;
-            $_SERVER[$key] = $value;
-        }
-
-        try {
-            $backups = (require config_path('filesystems.php'))['disks']['backups'];
-        } finally {
-            foreach ($previous as $key => $value) {
-                if ($value === null) {
-                    unset($_SERVER[$key]);
-                } else {
-                    $_SERVER[$key] = $value;
-                }
-            }
-        }
+        ]);
 
         $this->assertSame('images-key', $backups['key']);
         $this->assertSame('images-secret', $backups['secret']);
@@ -150,6 +150,61 @@ class BackupStorageTest extends TestCase
         // The bucket must NOT fall back. A blank value has to stay blank and fail, rather than
         // reaching for the CDN-fronted images bucket and publishing every tenant export in it.
         $this->assertEmpty($backups['bucket'], 'the backups bucket must never inherit another bucket');
+    }
+
+    /**
+     * The endpoint must never name the bucket - and no longer has to be typed that way to work.
+     *
+     * The SDK addresses both Spaces disks virtual-hosted style, neither having
+     * use_path_style_endpoint set, so it takes the endpoint HOST and prepends "{bucket}.".
+     * DigitalOcean's console shows each bucket's origin endpoint as
+     * https://{bucket}.{region}.digitaloceanspaces.com, so the value an operator copies from it
+     * puts the label on twice. DO's wildcard certificate covers exactly ONE label, so the request
+     * dies in the TLS handshake - cURL error 60 - without ever reaching the bucket. That is what
+     * every hosted backup export did after the v1.0.130 cutover, from a spec carrying that value.
+     *
+     * Asserted on the REQUEST the client builds, not on the resolved config string, because the
+     * string cannot tell the fix from the trap: turning on use_path_style_endpoint also repairs the
+     * hostname, while silently prefixing every object key with the bucket name. Both endpoint forms
+     * are checked, so the canonicalisation is pinned as a no-op on the correct one too.
+     *
+     * Signing a presigned request builds a URI and opens no socket, so this needs neither real
+     * credentials nor a network.
+     */
+    public function test_a_bucket_prefixed_endpoint_still_addresses_the_bucket_exactly_once(): void
+    {
+        $common = [
+            'BACKUP_DISK_DRIVER' => 's3',
+            'BACKUP_SPACES_KEY' => 'test-key',
+            'BACKUP_SPACES_SECRET' => 'test-secret',
+            'BACKUP_SPACES_REGION' => 'nyc3',
+            'BACKUP_SPACES_BUCKET' => 'example-private',
+        ];
+
+        $endpoints = [
+            'https://example-private.nyc3.digitaloceanspaces.com',  // what the Spaces console shows
+            'https://nyc3.digitaloceanspaces.com',                  // what the docs ask for
+        ];
+
+        foreach ($endpoints as $endpoint) {
+            $backups = $this->backupsDiskWith($common + ['BACKUP_SPACES_ENDPOINT' => $endpoint]);
+
+            $client = Storage::build($backups)->getClient();
+
+            $uri = $client->createPresignedRequest(
+                $client->getCommand('PutObject', [
+                    'Bucket' => $backups['bucket'],
+                    'Key' => 'backups/1/export.zip',
+                ]),
+                '+5 minutes'
+            )->getUri();
+
+            $this->assertSame('example-private.nyc3.digitaloceanspaces.com', $uri->getHost(),
+                "the endpoint {$endpoint} did not resolve to the bucket's real host");
+
+            $this->assertSame('/backups/1/export.zip', $uri->getPath(),
+                'path-style addressing would prefix every object key with the bucket name');
+        }
     }
 
     /** The local default still roots at storage/app, so selfhost paths keep resolving. */

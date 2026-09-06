@@ -64,9 +64,15 @@ BACKUP_DISK_DRIVER=s3
 BACKUP_SPACES_KEY=...
 BACKUP_SPACES_SECRET=...
 BACKUP_SPACES_REGION=...
-BACKUP_SPACES_ENDPOINT=...
+BACKUP_SPACES_ENDPOINT=https://<region>.digitaloceanspaces.com
 BACKUP_SPACES_BUCKET=...
 ```
+
+The endpoint is the **region's**, not the bucket's. The Spaces console shows each bucket's origin
+endpoint as `https://{bucket}.{region}.digitaloceanspaces.com`; the SDK prepends the bucket itself,
+so pasting that produces `{bucket}.{bucket}.{region}...`, which DO's one-label wildcard certificate
+does not cover and every upload fails in the TLS handshake. `config/filesystems.php` strips a
+leading bucket label for exactly this reason, so both forms work.
 
 Backup **exports** are written by a queued job and read back later by a download request. Once the
 queue is drained by the worker those happen on different containers, and `storage_path('app')` is
