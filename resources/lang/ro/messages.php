@@ -5024,7 +5024,7 @@ return [
     'subscribe_done_body' => 'Ți-am trimis un link de confirmare. Deschide-l și ești pe listă.',
     'subscribe_done_note' => 'Poate dura un minut. Dacă nu îl găsești, verifică folderul spam.',
     'subscribe_use_another_email' => 'Folosește altă adresă',
-    'subscribe_signup_instead' => 'Preferi un cont? Înscrie-te și urmărește programul.',
+    'subscribe_account_note' => 'Confirmarea îți creează și un cont, ca să vezi într-un singur loc tot ce urmărești.',
     'subscription_account_heading' => 'Contul tău este gata',
     'subscription_account_body' => 'Am creat unul pentru :email, ca să vezi într-un singur loc tot ce urmărești. Alege o parolă pentru a-l finaliza.',
     'subscription_account_benefit_following' => 'Toate programele pe care le urmărești, într-un singur loc',

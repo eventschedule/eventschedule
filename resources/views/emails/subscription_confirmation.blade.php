@@ -20,6 +20,13 @@
 
         <p style="font-size: 15px; color: #555;">{{ __('messages.subscription_confirm_cadence') }}</p>
 
+        {{-- Said here as well as on the confirm page, because plenty of people never open that
+             page's fine print. The confirm PAGE is the authority, though: this renders when the
+             mail is built, and the schedule can be claimed between then and the click. --}}
+        @if ($role->willCreateAccountOnConfirm())
+        <p style="font-size: 15px; color: #555;">{{ __('messages.subscribe_account_note') }}</p>
+        @endif
+
         <div style="text-align: center; margin: 28px 0;">
             <a href="{{ $confirmUrl }}"
                style="background-color: #4E81FA; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-size: 16px; font-weight: 600; display: inline-block;">

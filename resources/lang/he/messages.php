@@ -4980,7 +4980,7 @@ return [
     'subscribe_done_body' => 'שלחנו לכם קישור אישור. פתחו אותו ואתם ברשימה.',
     'subscribe_done_note' => 'זה עשוי לקחת דקה. אם הוא לא שם, בדקו בתיקיית הספאם.',
     'subscribe_use_another_email' => 'השתמשו בכתובת אחרת',
-    'subscribe_signup_instead' => 'מעדיפים חשבון? הירשמו ועקבו במקום.',
+    'subscribe_account_note' => 'האישור גם פותח לכם חשבון, כדי שתראו את כל מה שאתם עוקבים אחריו במקום אחד.',
     'subscription_account_heading' => 'החשבון שלכם מוכן',
     'subscription_account_body' => 'פתחנו אחד עבור :email כדי שתראו את כל מה שאתם עוקבים אחריו במקום אחד. בחרו סיסמה כדי לסיים.',
     'subscription_account_benefit_following' => 'כל לוחות הזמנים שאתם עוקבים אחריהם, במקום אחד',

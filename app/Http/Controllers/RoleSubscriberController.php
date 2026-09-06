@@ -292,28 +292,12 @@ class RoleSubscriberController extends Controller
         // so a throw would 500 a page whose actual work succeeded - and the repo's rule is that a
         // user-facing catch never shows the exception.
         try {
-            if (is_demo_role($role)) {
-                return null;
-            }
-
-            // NOT a tidiness rule. Role::isEditableBy() ends with
-            // "! $this->isClaimed() && $user->isFollowing($this->subdomain)" - following an
-            // unclaimed schedule grants EDIT rights on it, and the same rule is repeated in
-            // RoleController::following(), VenueUtils and GeminiUtils' venue_is_editable. The bar
-            // for that was "be signed in and press a button"; without this line it would become
-            // "type any address into a public form and click the link in the resulting email".
-            //
-            // It costs nothing to skip: an unclaimed schedule has no owner to write a newsletter,
-            // and SendEventAnnouncements::dueRoles() already requires a claimed schedule. The
-            // role_subscribers row is still written, so the audience waits for whoever claims it.
-            if (! $role->isClaimed()) {
-                return null;
-            }
-
-            // The gate every other account-creating path in the app honours. Without it a selfhost
-            // install with ALLOW_REGISTRATION unset accrues one permanently unclaimable users row
-            // per confirmed subscriber.
-            if (! public_registration_enabled()) {
+            // Demo, unclaimed, or registration closed. The reasoning for each lives on the method
+            // - it is deliberately not inlined here, because the same three conditions decide
+            // whether the guest surfaces SAY an account is coming, and two copies of a rule that
+            // has to agree with itself is one copy too many. The role_subscribers row is written
+            // either way, so an unclaimed schedule's audience waits for whoever claims it.
+            if (! $role->willCreateAccountOnConfirm()) {
                 return null;
             }
 

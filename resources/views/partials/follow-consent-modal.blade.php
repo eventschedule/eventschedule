@@ -40,6 +40,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const submitting = ref(false);
             const followUrl = ref('');
             const subscribeUrl = ref('');
+            // Whether confirming will actually mint an account for THIS target, so the note below
+            // is a statement rather than a promise. It cannot be decided in Blade: one modal serves
+            // every Follow trigger on the page, and on an event page each performer is a different
+            // schedule. The trigger carries the answer, and a page cached from before this shipped
+            // carries nothing - which correctly reads as false.
+            const accountNote = ref(false);
             // The panel renders this button's label through Role::customLabel(), so hardcoding the
             // translated string here gave an owner who customised it two different labels for the
             // same action on the same page. The trigger carries the resolved value.
@@ -86,6 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 triggerEl = btn;
                 followUrl.value = btn.dataset.followUrl || '';
                 subscribeUrl.value = btn.dataset.subscribeUrl || '';
+                accountNote.value = btn.dataset.accountNote === '1';
                 subscribeLabel.value = btn.dataset.subscribeLabel
                     || @json(__('messages.email_me_new_events'), JSON_UNESCAPED_UNICODE);
                 email.value = '';
@@ -235,6 +242,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 scheduleName, scheduleImage, accentColor, contrastColor,
                 isGuest, confirmButtonRef,
                 subscribeUrl, subscribeLabel, email, subscriberName, website, subscribeBody,
+                accountNote,
                 resultMessage, resultSuccess, done,
                 close, confirm, submitSubscribe,
             };
@@ -316,6 +324,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         <a href="{{ policy_url('privacy') }}" target="_blank" rel="noopener"
                             class="text-[var(--brand-blue)] hover:underline">{{ __('messages.privacy_policy') }}</a>
                     </p>
+                    {{-- Same sentence the subscribe panel carries, on the same gate. Static
+                         translated text, so no CSTI surface. --}}
+                    <p v-if="accountNote" class="text-xs text-gray-500 dark:text-gray-400">
+                        {{ __('messages.subscribe_account_note') }}
+                    </p>
                     <p v-if="resultMessage && !resultSuccess" class="text-xs text-red-600 dark:text-red-400" v-text="resultMessage"></p>
                 </template>
             </template>
@@ -334,11 +347,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors disabled:opacity-50">
                 {{ __('messages.cancel') }}
             </button>
-            {{-- The account route is still offered, just no longer the only way through. --}}
-            <button v-if="isGuest && !done" type="button" @click="confirm" :disabled="submitting"
-                class="px-4 py-2 text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] rounded-lg transition-colors disabled:opacity-50">
-                {{ __('messages.follow_consent_signup_button') }}
-            </button>
+            {{-- The guest footer used to carry a muted "Sign up and follow" button here, next to
+                 the primary. It went with the subscribe panel's matching link: subscribing IS the
+                 account now, so offering the account separately was a choice between a thing and
+                 the same thing. confirm() is still the signed-in path, and the no-Vue fallback at
+                 the top of this file still navigates to followUrl. --}}
             <button v-if="!done" type="button" ref="confirmButtonRef"
                 @click="isGuest ? submitSubscribe() : confirm()" :disabled="submitting"
                 :style="{ backgroundColor: accentColor, color: contrastColor, borderColor: accentColor }"

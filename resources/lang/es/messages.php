@@ -4985,7 +4985,7 @@ return [
     'subscribe_done_body' => 'Te hemos enviado un enlace de confirmación. Ábrelo y estarás en la lista.',
     'subscribe_done_note' => 'Puede tardar un minuto. Si no aparece, mira en la carpeta de spam.',
     'subscribe_use_another_email' => 'Usar otra dirección',
-    'subscribe_signup_instead' => '¿Prefieres una cuenta? Regístrate y sigue la agenda.',
+    'subscribe_account_note' => 'Al confirmar también te creamos una cuenta, para que veas todo lo que sigues en un solo sitio.',
     'subscription_account_heading' => 'Tu cuenta está lista',
     'subscription_account_body' => 'Hemos creado una para :email para que veas todo lo que sigues en un solo sitio. Elige una contraseña para terminarla.',
     'subscription_account_benefit_following' => 'Todas las agendas que sigues, en un solo sitio',

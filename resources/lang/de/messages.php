@@ -4989,7 +4989,7 @@ return [
     'subscribe_done_body' => 'Wir haben dir einen Bestätigungslink geschickt. Öffne ihn, und du stehst auf der Liste.',
     'subscribe_done_note' => 'Das kann eine Minute dauern. Falls nichts ankommt, sieh im Spam-Ordner nach.',
     'subscribe_use_another_email' => 'Andere Adresse verwenden',
-    'subscribe_signup_instead' => 'Lieber ein Konto? Registriere dich und folge stattdessen.',
+    'subscribe_account_note' => 'Mit der Bestätigung legen wir dir auch ein Konto an, damit du alles, dem du folgst, an einem Ort siehst.',
     'subscription_account_heading' => 'Dein Konto ist bereit',
     'subscription_account_body' => 'Wir haben eins für :email angelegt, damit du alles, dem du folgst, an einem Ort siehst. Wähle ein Passwort, um es abzuschließen.',
     'subscription_account_benefit_following' => 'Alle Terminpläne, denen du folgst, an einem Ort',

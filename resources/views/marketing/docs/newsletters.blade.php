@@ -407,7 +407,7 @@
             Email Subscribers
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Not everyone who wants to hear from you wants an account. A signed-out visitor can give your schedule an email address directly, and those people become your <strong class="text-gray-900 dark:text-white">email subscribers</strong>. They appear in their own list on the <a href="{{ route('marketing.docs.managing_schedules') }}#followers" class="doc-link">Followers tab</a>, separately from people who joined by pressing Follow. Confirming the address also creates an account for them, so they are listed once, under Email subscribers, with an Account badge.
+            Signing up asks for nothing but a name and an email address. A signed-out visitor can give your schedule an address directly, and those people become your <strong class="text-gray-900 dark:text-white">email subscribers</strong>. They appear in their own list on the <a href="{{ route('marketing.docs.managing_schedules') }}#followers" class="doc-link">Followers tab</a>, separately from people who joined by pressing Follow. Confirming an address given through the sign-up form also creates an account for them, so they are listed once, under Email subscribers, with an Account badge. An address collected at checkout is already confirmed and does not create one, unless the buyer asked for an account on the ticket form itself.
         </p>
 
         <h3 class="doc-subheading">Where People Sign Up</h3>
@@ -467,7 +467,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Email Subscribers</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">People who gave you their email address on your schedule page or at checkout, without creating an account, and then confirmed it. See <a href="#email-subscribers" class="doc-link">Email Subscribers</a>.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">People who gave you their email address on your schedule page or at checkout and then confirmed it. See <a href="#email-subscribers" class="doc-link">Email Subscribers</a>.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Ticket Buyers</h4>

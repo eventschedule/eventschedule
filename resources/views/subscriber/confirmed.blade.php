@@ -44,6 +44,16 @@
             <p class="mt-2 text-sm text-gray-500 dark:text-gray-500">
                 {{ __('messages.subscription_confirm_cadence') }}
             </p>
+            {{-- The last thing before the account exists, and the only surface that can say so
+                 accurately: the button below POSTs straight into confirm() -> linkAccount(), and
+                 this renders on the CLICK, whereas the confirmation email's copy of this line was
+                 rendered when the mail was built. A schedule claimed in between would have sent a
+                 mail with no note and then made an account anyway. --}}
+            @if ($role->willCreateAccountOnConfirm())
+            <p class="mt-2 text-sm text-gray-500 dark:text-gray-500">
+                {{ __('messages.subscribe_account_note') }}
+            </p>
+            @endif
             {{-- url() rather than route(): the POST shares its name with nothing else, and the
                  token is already in hand. --}}
             <form method="POST" action="{{ url('/sub/c/' . $subscriber->confirm_token) }}" class="mt-6">

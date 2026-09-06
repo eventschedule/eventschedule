@@ -344,6 +344,7 @@
                           data-follow-url="{{ route('role.follow', ['subdomain' => $each->subdomain]) }}"
                           data-subscribe-url="{{ route('role.audience.join', ['subdomain' => $each->subdomain]) }}"
                           data-subscribe-label="{{ $each->customLabel('email_me_new_events') }}"
+                          data-account-note="{{ $each->willCreateAccountOnConfirm() ? '1' : '' }}"
                           data-schedule-name="{{ $each->name }}"
                           data-schedule-image="{{ $each->profile_image_url }}"
                           data-accent-color="{{ $accentColor }}"

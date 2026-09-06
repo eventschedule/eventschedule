@@ -5004,7 +5004,7 @@ return [
     'subscribe_done_body' => 'Saatsime sulle kinnituslingi. Ava see ja oled nimekirjas.',
     'subscribe_done_note' => 'See võib võtta minuti. Kui kirja pole, vaata rämpsposti kausta.',
     'subscribe_use_another_email' => 'Kasuta teist aadressi',
-    'subscribe_signup_instead' => 'Eelistad kontot? Registreeru ja jälgi hoopis nii.',
+    'subscribe_account_note' => 'Kinnitamisel loome sulle ka konto, et näeksid kõike, mida jälgid, ühes kohas.',
     'subscription_account_heading' => 'Sinu konto on valmis',
     'subscription_account_body' => 'Lõime selle aadressile :email, et näeksid kõike, mida jälgid, ühes kohas. Vali parool, et see lõpetada.',
     'subscription_account_benefit_following' => 'Kõik kalendrid, mida jälgid, ühes kohas',

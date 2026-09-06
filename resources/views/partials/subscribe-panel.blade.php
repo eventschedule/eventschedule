@@ -144,13 +144,17 @@
         <x-link href="{{ policy_url('privacy') }}" target="_blank">{{ __('messages.privacy_policy') }}</x-link>
     </p>
 
-    {{-- The account route, offered rather than required - the same secondary the guest follow modal
-         has. Gated on public_registration_enabled(), which is false on a closed selfhost install. --}}
-    @if (public_registration_enabled())
-    <p class="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
-        <x-link href="{{ route('role.follow', ['subdomain' => $subscribePanelRole->subdomain]) }}">
-            {{ __('messages.subscribe_signup_instead') }}
-        </x-link>
+    {{-- There is no second path any more. This used to offer "Prefer an account? Sign up and follow
+         instead", which was confusing for the good reason that it was a choice between a thing and
+         the same thing: RoleSubscriberController::linkAccount() has minted an account on confirm
+         since bdf545417, and /sub/done then offers a password for it.
+
+         willCreateAccountOnConfirm() is the same predicate linkAccount() refuses on, which is the
+         only way a sentence like this stays true. No border-t - the rule that was here separated
+         an alternative, and a statement of what happens is not one. --}}
+    @if ($subscribePanelRole->willCreateAccountOnConfirm())
+    <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
+        {{ __('messages.subscribe_account_note') }}
     </p>
     @endif
 </div>

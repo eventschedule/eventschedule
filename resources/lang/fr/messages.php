@@ -4992,7 +4992,7 @@ return [
     'subscribe_done_body' => 'Nous vous avons envoyé un lien de confirmation. Ouvrez-le et vous serez sur la liste.',
     'subscribe_done_note' => 'Cela peut prendre une minute. S\'il n\'est pas là, regardez dans les indésirables.',
     'subscribe_use_another_email' => 'Utiliser une autre adresse',
-    'subscribe_signup_instead' => 'Vous préférez un compte ? Inscrivez-vous et suivez plutôt.',
+    'subscribe_account_note' => 'En confirmant, nous vous créons aussi un compte, pour que vous retrouviez tout ce que vous suivez au même endroit.',
     'subscription_account_heading' => 'Votre compte est prêt',
     'subscription_account_body' => 'Nous en avons créé un pour :email afin que vous retrouviez tout ce que vous suivez au même endroit. Choisissez un mot de passe pour le finaliser.',
     'subscription_account_benefit_following' => 'Tous les agendas que vous suivez, au même endroit',

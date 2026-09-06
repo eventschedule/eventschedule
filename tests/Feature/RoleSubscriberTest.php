@@ -376,6 +376,64 @@ class RoleSubscriberTest extends TestCase
         $this->assertStringContainsString('p-6', $m[1]);
     }
 
+    public function test_the_panel_offers_no_second_path_to_an_account(): void
+    {
+        // The panel used to end with "Prefer an account? Sign up and follow instead", linking to
+        // role.follow. It was a choice between a thing and the same thing: linkAccount() mints an
+        // account on confirm anyway.
+        //
+        // Asserted against the whole page rather than a slice of it, and specifically against THIS
+        // schedule's follow URL. The event page can carry Follow triggers, but only inside the loop
+        // over the event's claimed performers, so they are other subdomains; the page's own
+        // schedule had exactly one thing pointing at role.follow, and it was the panel. The
+        // join-route assertion is what stops this passing because the panel failed to render.
+        $event = $this->createEvent($this->role);
+
+        $html = $this->get($this->guestEventUrl($this->role, $event))->assertOk()->getContent();
+
+        $this->assertStringContainsString(
+            route('role.audience.join', ['subdomain' => $this->role->subdomain]), $html,
+            'the panel did not render, so the assertion below would prove nothing');
+        $this->assertStringNotContainsString(
+            route('role.follow', ['subdomain' => $this->role->subdomain]), $html,
+            'the panel must not offer a separate sign-up path');
+    }
+
+    public function test_the_panel_says_an_account_is_created(): void
+    {
+        // The other half: having stopped offering the account, the panel has to say it makes one,
+        // or the password form on /sub/done is the first anyone hears of it.
+        //
+        // Rendered as a partial, not asserted against the page, and this is not fussiness: the
+        // follow modal carries the SAME sentence for its own guest form, and its Blade renders on
+        // every guest page whether or not the modal is ever opened. An assertSee() on the page was
+        // green with this paragraph deleted from the panel.
+        $html = view('partials.subscribe-panel', ['role' => $this->role])->render();
+
+        $this->assertStringContainsString(__('messages.subscribe_account_note'), $html);
+    }
+
+    public function test_the_panel_promises_no_account_where_none_is_created(): void
+    {
+        // The note is gated on linkAccount()'s own two conditions, because a promise that outlives
+        // the behaviour it describes is worse than silence.
+        //
+        // Rendered as a partial rather than through a page, because neither gate can be turned off
+        // on a real request: RoleController::viewGuest() redirects an unclaimed schedule away
+        // before any of this renders, and closing registration means app.hosted = false, which
+        // routes/web.php reads at BOOT to decide which half of the route table to register. The
+        // partial is the whole of the behaviour under test either way.
+        config(['app.hosted' => false, 'app.allow_registration' => false]);
+        $this->assertFalse(public_registration_enabled());
+
+        $html = view('partials.subscribe-panel', ['role' => $this->role])->render();
+
+        $this->assertStringContainsString(
+            route('role.audience.join', ['subdomain' => $this->role->subdomain]), $html,
+            'the panel itself must still render - only the account sentence is conditional');
+        $this->assertStringNotContainsString(__('messages.subscribe_account_note'), $html);
+    }
+
     public function test_the_panel_is_hidden_from_a_signed_in_visitor(): void
     {
         // It carries a honeypot, and the repo's rule is that an authenticated page must never
@@ -777,7 +835,7 @@ class RoleSubscriberTest extends TestCase
             // rule is unenforced for exactly the newest copy, which is where it fails.
             'subscribe_done_heading',
             'subscribe_done_body',
-            'subscribe_signup_instead',
+            'subscribe_account_note',
             'subscription_account_heading',
             'subscription_account_button',
             'subscription_account_skip_note',
@@ -808,6 +866,15 @@ class RoleSubscriberTest extends TestCase
                     "{$lang}.{$key} is still the English string"
                 );
             }
+
+            // Retired with the "Prefer an account? Sign up and follow instead" link and the
+            // matching button in the follow modal. An array-key check on the loaded file, not a
+            // grep of the source, so a comment mentioning the key cannot satisfy it - and leaving
+            // one behind in some files is what check_translations.php reports as drift.
+            foreach (['subscribe_signup_instead', 'follow_consent_signup_button', 'follow_consent_body_guest'] as $retired) {
+                $this->assertArrayNotHasKey($retired, $messages,
+                    "{$lang} still defines the retired key {$retired}");
+            }
         }
     }
 
@@ -821,9 +888,71 @@ class RoleSubscriberTest extends TestCase
         // inside a loop over the event's claimed performers, so a venue event with no claimed
         // talent renders none at all. That gap is exactly why the subscribe panel exists, and it
         // is covered by test_the_panel_renders_for_a_signed_out_visitor.
-        $this->get($this->role->getGuestUrl())
+        //
+        // Two details this test was originally missing, either of which made it green with no
+        // trigger on the page at all. accept_requests off, because with it on $hasSubmitButton is
+        // true and the trigger then requires auth()->user(), so a signed-out visitor gets none.
+        // And the ATTRIBUTE, not the bare URL: the subscribe panel prints that same URL in its
+        // form action, so the bare string was satisfied by the thing this is not about.
+        $role = $this->createRole($this->createOwner(), 'venue', ['accept_requests' => false]);
+
+        $this->get($role->getGuestUrl())
             ->assertOk()
-            ->assertSee(route('role.audience.join', ['subdomain' => $this->role->subdomain]), false);
+            ->assertSee('data-subscribe-url="'.route('role.audience.join', ['subdomain' => $role->subdomain]).'"', false);
+    }
+
+    public function test_the_follow_trigger_tells_the_modal_whether_an_account_follows(): void
+    {
+        // One modal serves every Follow trigger on the page, and on an event page each performer is
+        // a different schedule, so the modal cannot evaluate linkAccount()'s gates itself - the
+        // trigger carries the answer. This is the only automated guard on the modal half: it is a
+        // Vue app inlined in Blade, and tools/check-vue-bindings.mjs (what npm run build runs) is
+        // pointed at resources/js/components/*.vue, so it never sees that file.
+        //
+        // accept_requests off on purpose. With it on, $hasSubmitButton is true and the trigger's
+        // own condition then requires auth()->user(), so a signed-out visitor - the only kind that
+        // sees any of this - gets no trigger at all and the assertion would pass on nothing.
+        $role = $this->createRole($this->createOwner(), 'venue', ['accept_requests' => false]);
+
+        $this->get($role->getGuestUrl())
+            ->assertOk()
+            ->assertSee('data-account-note="1"', false);
+    }
+
+    public function test_the_confirm_page_says_an_account_is_coming(): void
+    {
+        // The button on this page POSTs straight into confirm() -> linkAccount(), so it is the last
+        // surface before the account exists - later than the email, and unlike the email it renders
+        // at click time, so it is the one that can still be right if the schedule was claimed after
+        // the mail went out.
+        $this->post($this->joinUrl(), ['email' => 'fan@fans.test']);
+        $token = RoleSubscriber::where('email', 'fan@fans.test')->first()->confirm_token;
+
+        $this->get('/sub/c/'.$token)
+            ->assertOk()
+            ->assertSee(__('messages.subscription_confirm_button'), false)
+            ->assertSee(__('messages.subscribe_account_note'), false);
+    }
+
+    public function test_a_demo_schedule_promises_no_account(): void
+    {
+        // store() abort(404)s a demo schedule, so nothing here can produce an account. The Follow
+        // trigger renders anyway - it gates on is_demo_mode(), which is about the signed-in demo
+        // USER, not the demo schedule - so without the demo clause in
+        // Role::willCreateAccountOnConfirm() the modal offers a signed-out visitor an account on
+        // top of a subscribe form that 404s. Confirmed against the live demo schedule before this
+        // was written.
+        $demoOwner = $this->createOwner();
+        $demoOwner->forceFill(['email' => \App\Services\DemoService::DEMO_EMAIL])->save();
+        $demo = $this->createRole($demoOwner, 'venue', ['accept_requests' => false]);
+        $this->assertTrue(is_demo_role($demo->fresh()));
+        $this->assertFalse($demo->fresh()->willCreateAccountOnConfirm());
+
+        $html = $this->get($demo->fresh()->getGuestUrl())->assertOk()->getContent();
+
+        $this->assertStringContainsString('data-follow-trigger', $html,
+            'the trigger still renders on a demo schedule - if that ever changes, this test is moot');
+        $this->assertStringNotContainsString('data-account-note="1"', $html);
     }
 
     public function test_the_modal_emits_exactly_one_honeypot_and_no_blade_component(): void

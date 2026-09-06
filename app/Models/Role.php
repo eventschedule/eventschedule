@@ -1235,6 +1235,36 @@ class Role extends Model implements MustVerifyEmail
     }
 
     /**
+     * Whether confirming an audience subscription to this schedule will mint an account.
+     *
+     * The single definition of RoleSubscriberController::linkAccount()'s three refusals, because
+     * the answer is also a SENTENCE shown to the visitor - "Confirming also sets up an account for
+     * you" - on the subscribe panel, in the follow modal, on the confirm page and in the
+     * confirmation email. Seven places asking the question, one place answering it: a promise that
+     * drifts from the code keeping it is worse than no promise.
+     *
+     * - **Unclaimed is the security clause, not tidiness.** isEditableBy() ends with
+     *   "! $this->isClaimed() && $user->isFollowing($this->subdomain)", and the same rule is
+     *   repeated in RoleController::following(), VenueUtils and GeminiUtils' venue_is_editable. The
+     *   bar for edit rights was "be signed in and press a button"; creating the account here would
+     *   make it "type any address into a public form and click the link in the resulting email".
+     *   Skipping costs nothing: an unclaimed schedule has no owner to write a newsletter, and
+     *   SendEventAnnouncements::dueRoles() already requires a claimed one.
+     * - **Registration** is the gate every other account-creating path in the app honours. Without
+     *   it a selfhost install with ALLOW_REGISTRATION unset accrues one permanently unclaimable
+     *   users row per confirmed subscriber.
+     * - **Demo** matches RoleSubscriberController::store(), which abort(404)s a demo schedule
+     *   outright. The Follow trigger does not: it gates on is_demo_mode(), which is about the
+     *   signed-in demo USER, so a demo schedule's page really does offer a signed-out visitor a
+     *   subscribe form that 404s. That is older than this method, but there is no reason for the
+     *   modal to promise an account on top of it.
+     */
+    public function willCreateAccountOnConfirm(): bool
+    {
+        return public_registration_enabled() && $this->isClaimed() && ! is_demo_role($this);
+    }
+
+    /**
      * The set of schedules /admin/schedules can actually show: real, owned schedules,
      * never the demo ones.
      *

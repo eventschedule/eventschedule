@@ -4986,7 +4986,7 @@ return [
     'subscribe_done_body' => 'أرسلنا إليك رابط تأكيد. افتحه وستكون ضمن القائمة.',
     'subscribe_done_note' => 'قد يستغرق ذلك دقيقة. إن لم تجده، فتحقق من مجلد البريد غير المرغوب فيه.',
     'subscribe_use_another_email' => 'استخدام عنوان آخر',
-    'subscribe_signup_instead' => 'تفضّل حسابًا؟ سجّل وتابع بدلاً من ذلك.',
+    'subscribe_account_note' => 'التأكيد ينشئ لك أيضًا حسابًا، لترى كل ما تتابعه في مكان واحد.',
     'subscription_account_heading' => 'حسابك جاهز',
     'subscription_account_body' => 'أنشأنا حسابًا للعنوان :email لترى كل ما تتابعه في مكان واحد. اختر كلمة مرور لإكماله.',
     'subscription_account_benefit_following' => 'كل الجداول التي تتابعها في مكان واحد',

@@ -4985,7 +4985,7 @@ return [
     'subscribe_done_body' => 'Ti abbiamo inviato un link di conferma. Aprilo e sarai nella lista.',
     'subscribe_done_note' => 'Può volerci un minuto. Se non lo trovi, guarda nella posta indesiderata.',
     'subscribe_use_another_email' => 'Usa un altro indirizzo',
-    'subscribe_signup_instead' => 'Preferisci un account? Registrati e segui il calendario.',
+    'subscribe_account_note' => 'Confermando ti creiamo anche un account, così vedi tutto ciò che segui in un unico posto.',
     'subscription_account_heading' => 'Il tuo account è pronto',
     'subscription_account_body' => 'Ne abbiamo creato uno per :email, così vedi tutto ciò che segui in un unico posto. Scegli una password per completarlo.',
     'subscription_account_benefit_following' => 'Tutti i calendari che segui, in un unico posto',

@@ -4985,7 +4985,7 @@ return [
     'subscribe_done_body' => 'We hebben je een bevestigingslink gestuurd. Open die en je staat op de lijst.',
     'subscribe_done_note' => 'Het kan een minuut duren. Staat hij er niet, kijk dan in je spammap.',
     'subscribe_use_another_email' => 'Ander adres gebruiken',
-    'subscribe_signup_instead' => 'Liever een account? Meld je aan en volg de agenda.',
+    'subscribe_account_note' => 'Met je bevestiging maken we ook een account voor je aan, zodat je alles wat je volgt op één plek ziet.',
     'subscription_account_heading' => 'Je account staat klaar',
     'subscription_account_body' => 'We hebben er een aangemaakt voor :email, zodat je alles wat je volgt op één plek ziet. Kies een wachtwoord om het af te ronden.',
     'subscription_account_benefit_following' => 'Alle agenda\'s die je volgt, op één plek',
