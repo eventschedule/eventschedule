@@ -56,6 +56,7 @@
                 <strong>Then the optional pieces.</strong>
                 <a href="{{ route('marketing.docs.selfhost.federation') }}" class="doc-link">Federation</a> lists your public events on eventschedule.com and links each one back to your site, and stays off until you turn it on in the admin panel;
                 <a href="{{ route('marketing.docs.selfhost.boost') }}" class="doc-link">Boost</a> runs Meta ads from inside the app, billed to the one Meta ad account you configure, so every campaign spends your money;
+                <a href="{{ route('marketing.docs.selfhost.google_wallet') }}" class="doc-link">Google Wallet</a> puts an "Add to Google Wallet" button on every paid ticket, and needs a Google Wallet issuer account of your own;
                 the <a href="{{ route('marketing.docs.selfhost.admin') }}" class="doc-link">admin panel</a> at <code class="doc-inline-code">/admin</code> gives you instance-wide monitoring and settings, and the account the setup wizard created is already an instance admin; and the
                 <a href="{{ route('marketing.docs.selfhost.accessibility') }}" class="doc-link">accessibility</a> guide covers what to put in your own accessibility statement.
             </li>

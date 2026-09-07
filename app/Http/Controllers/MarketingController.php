@@ -1442,6 +1442,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * Google Wallet documentation page
+     */
+    public function docsSelfhostGoogleWallet()
+    {
+        return view('marketing.docs.selfhost.google-wallet');
+    }
+
+    /**
      * Outlook / Microsoft Calendar documentation page
      */
     public function docsSelfhostMicrosoftCalendar()
@@ -5392,6 +5400,7 @@ class MarketingController extends Controller
             'selfhost_installation' => route('marketing.docs.selfhost.installation'),
             'selfhost_stripe' => route('marketing.docs.selfhost.stripe'),
             'selfhost_google_calendar' => route('marketing.docs.selfhost.google_calendar'),
+            'selfhost_google_wallet' => route('marketing.docs.selfhost.google_wallet'),
             'selfhost_microsoft_calendar' => route('marketing.docs.selfhost.microsoft_calendar'),
             'selfhost_email' => route('marketing.docs.selfhost.email'),
             'selfhost_ai' => route('marketing.docs.selfhost.ai'),
@@ -5712,6 +5721,12 @@ class MarketingController extends Controller
             ['page' => 'Stripe Integration', 'section' => 'Payfast ITN and proxies', 'description' => 'Why the unrecognised source address warning is harmless behind Cloudflare or Docker.', 'url' => $r['selfhost_stripe'].'#payfast', 'category' => 'Selfhost', 'keywords' => 'payfast itn unrecognised source address trusted proxies cloudflare docker reverse proxy warning'],
 
             // Google Calendar (Selfhost)
+            ['page' => 'Google Wallet', 'section' => 'Prerequisites', 'description' => 'What you need before enabling Google Wallet passes.', 'url' => $r['selfhost_google_wallet'].'#prerequisites', 'category' => 'Selfhost', 'keywords' => 'google wallet issuer account prerequisites pass'],
+            ['page' => 'Google Wallet', 'section' => 'Setup Instructions', 'description' => 'Issuer account, service account and env keys for Google Wallet passes.', 'url' => $r['selfhost_google_wallet'].'#setup', 'category' => 'Selfhost', 'keywords' => 'google wallet setup issuer service account GOOGLE_WALLET_ISSUER_ID GOOGLE_WALLET_SERVICE_ACCOUNT'],
+            ['page' => 'Google Wallet', 'section' => 'Verifying it works', 'description' => 'Confirm the Add to Google Wallet button and demo mode.', 'url' => $r['selfhost_google_wallet'].'#verify', 'category' => 'Selfhost', 'keywords' => 'google wallet verify demo mode test account'],
+            ['page' => 'Google Wallet', 'section' => 'What is sent to Google', 'description' => 'The attendee data a saved wallet pass carries.', 'url' => $r['selfhost_google_wallet'].'#privacy', 'category' => 'Selfhost', 'keywords' => 'google wallet privacy data sent attendee secret'],
+            ['page' => 'Google Wallet', 'section' => 'How it works', 'description' => 'Pass classes, snapshots and when a pass expires.', 'url' => $r['selfhost_google_wallet'].'#behaviour', 'category' => 'Selfhost', 'keywords' => 'google wallet pass class snapshot expiry archive'],
+            ['page' => 'Google Wallet', 'section' => 'Troubleshooting', 'description' => 'Why the Add to Google Wallet button is missing or failing.', 'url' => $r['selfhost_google_wallet'].'#troubleshooting', 'category' => 'Selfhost', 'keywords' => 'google wallet troubleshooting button missing error log'],
             ['page' => 'Google Calendar', 'section' => 'Prerequisites', 'description' => 'Google Cloud project requirements for calendar sync.', 'url' => $r['selfhost_google_calendar'].'#prerequisites', 'category' => 'Selfhost', 'keywords' => 'google cloud project prerequisites'],
             ['page' => 'Google Calendar', 'section' => 'Setup Instructions', 'description' => 'Step-by-step OAuth2 setup for Google Calendar.', 'url' => $r['selfhost_google_calendar'].'#setup', 'category' => 'Selfhost', 'keywords' => 'setup oauth2 credentials'],
             ['page' => 'Google Calendar', 'section' => 'Features', 'description' => 'Google Calendar sync capabilities.', 'url' => $r['selfhost_google_calendar'].'#features', 'category' => 'Selfhost', 'keywords' => 'features sync bidirectional'],

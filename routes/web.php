@@ -1244,6 +1244,7 @@ if (config('app.is_nexus')) {
         Route::get('/docs/selfhost/installation', [MarketingController::class, 'docsSelfhostInstallation'])->name('marketing.docs.selfhost.installation');
         Route::get('/docs/selfhost/stripe', [MarketingController::class, 'docsSelfhostStripe'])->name('marketing.docs.selfhost.stripe');
         Route::get('/docs/selfhost/google-calendar', [MarketingController::class, 'docsSelfhostGoogleCalendar'])->name('marketing.docs.selfhost.google_calendar');
+        Route::get('/docs/selfhost/google-wallet', [MarketingController::class, 'docsSelfhostGoogleWallet'])->name('marketing.docs.selfhost.google_wallet');
         Route::get('/docs/selfhost/microsoft-calendar', [MarketingController::class, 'docsSelfhostMicrosoftCalendar'])->name('marketing.docs.selfhost.microsoft_calendar');
         Route::get('/docs/selfhost/boost', [MarketingController::class, 'docsSelfhostBoost'])->name('marketing.docs.selfhost.boost');
         Route::get('/docs/selfhost/admin', [MarketingController::class, 'docsSelfhostAdmin'])->name('marketing.docs.selfhost.admin');
@@ -1484,6 +1485,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/selfhost/installation', [MarketingController::class, 'docsSelfhostInstallation'])->name('marketing.docs.selfhost.installation');
             Route::get('/docs/selfhost/stripe', [MarketingController::class, 'docsSelfhostStripe'])->name('marketing.docs.selfhost.stripe');
             Route::get('/docs/selfhost/google-calendar', [MarketingController::class, 'docsSelfhostGoogleCalendar'])->name('marketing.docs.selfhost.google_calendar');
+            Route::get('/docs/selfhost/google-wallet', [MarketingController::class, 'docsSelfhostGoogleWallet'])->name('marketing.docs.selfhost.google_wallet');
             Route::get('/docs/selfhost/microsoft-calendar', [MarketingController::class, 'docsSelfhostMicrosoftCalendar'])->name('marketing.docs.selfhost.microsoft_calendar');
             Route::get('/docs/selfhost/boost', [MarketingController::class, 'docsSelfhostBoost'])->name('marketing.docs.selfhost.boost');
             Route::get('/docs/selfhost/admin', [MarketingController::class, 'docsSelfhostAdmin'])->name('marketing.docs.selfhost.admin');
@@ -1676,6 +1678,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/selfhost/saas', fn () => redirect('https://'._base_domain().'/docs/saas', 301));
             Route::get('/docs/selfhost/stripe', fn () => redirect('https://'._base_domain().'/docs/selfhost/stripe', 301));
             Route::get('/docs/selfhost/google-calendar', fn () => redirect('https://'._base_domain().'/docs/selfhost/google-calendar', 301));
+            Route::get('/docs/selfhost/google-wallet', fn () => redirect('https://'._base_domain().'/docs/selfhost/google-wallet', 301));
             Route::get('/docs/selfhost/microsoft-calendar', fn () => redirect('https://'._base_domain().'/docs/selfhost/microsoft-calendar', 301));
             Route::get('/docs/selfhost/boost', fn () => redirect('https://'._base_domain().'/docs/selfhost/boost', 301));
             Route::get('/docs/selfhost/admin', fn () => redirect('https://'._base_domain().'/docs/selfhost/admin', 301));
@@ -1832,6 +1835,7 @@ if (config('app.is_nexus')) {
     Route::get('/docs/selfhost/saas', fn () => redirect()->route('home'));
     Route::get('/docs/selfhost/stripe', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.stripe');
     Route::get('/docs/selfhost/google-calendar', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.google_calendar');
+    Route::get('/docs/selfhost/google-wallet', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.google_wallet');
     Route::get('/docs/selfhost/microsoft-calendar', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.microsoft_calendar');
     Route::get('/docs/selfhost/boost', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.boost');
     Route::get('/docs/selfhost/admin', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.admin');

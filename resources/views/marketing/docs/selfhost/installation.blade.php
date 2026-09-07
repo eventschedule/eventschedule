@@ -420,6 +420,7 @@
             <li>Add a <a href="{{ route('marketing.docs.selfhost.ai') }}" class="doc-link">Gemini or OpenAI key</a> to turn on AI event import, agenda scanning and translation</li>
             <li>Set up <a href="{{ route('marketing.docs.selfhost.google_calendar') }}" class="doc-link">Google Calendar integration</a></li>
             <li>Set up <a href="{{ route('marketing.docs.selfhost.microsoft_calendar') }}" class="doc-link">Outlook Calendar integration</a></li>
+            <li>Let ticket buyers save their ticket to <a href="{{ route('marketing.docs.selfhost.google_wallet') }}" class="doc-link">Google Wallet</a> (optional)</li>
             <li>Set up <a href="{{ route('marketing.docs.saas.twilio') }}" class="doc-link">Twilio</a> to text invitations to venues or talent you added by phone number, and to send WhatsApp messages (<code class="doc-inline-code">TWILIO_SID</code>, <code class="doc-inline-code">TWILIO_AUTH_TOKEN</code>, <code class="doc-inline-code">TWILIO_FROM_NUMBER</code>)</li>
             <li>Enable <a href="#push-notifications" class="doc-link">push notifications</a> with OneSignal (optional)</li>
             <li>Add a <a href="#spam-protection" class="doc-link">Turnstile challenge</a> to your public forms (optional)</li>

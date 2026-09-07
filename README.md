@@ -78,6 +78,7 @@
 - 🔢 **Ticket Quantity Limits:** Set a maximum number of tickets available for each event to manage capacity.
 - ⏳ **Ticket Reservations:** Allow attendees to reserve tickets with a configurable release time before purchase.
 - 📲 **QR Code Ticketing:** Generate and scan QR codes for easy and secure event check-ins.
+- 👛 **Add to Google Wallet:** Let buyers save their ticket to Google Wallet, carrying the same QR code the door scanner already reads.
 - 💻 **Online Events:** Use the platform to sell tickets to online events.
 - 💳 **Online Payments:** Accept secure online payments via [Stripe](https://stripe.com), [Invoice Ninja](https://www.invoiceninja.com), [Payfast](https://payfast.io) (South Africa), or payment links.
 - 🏷️ **Promo Codes:** Create discount codes with percentage or fixed amounts, usage limits, and ticket-specific targeting.
@@ -165,6 +166,7 @@ Quick start options:
 - [SaaS Setup](https://eventschedule.com/docs/saas) - Configure Event Schedule for multi-tenant SaaS deployment with subdomain routing
 - [Stripe Setup](https://eventschedule.com/docs/stripe) - Set up Stripe Connect for ticket sales and Cashier for subscription billing
 - [Google Calendar Setup](https://eventschedule.com/docs/google-calendar) - Enable bidirectional sync with Google Calendar
+- [Google Wallet Setup](https://eventschedule.com/docs/selfhost/google-wallet) - Let ticket buyers save their ticket to Google Wallet
 
 ## Contributing
 

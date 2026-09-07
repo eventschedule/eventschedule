@@ -221,6 +221,7 @@
             <li><strong class="text-gray-900 dark:text-white">Valid until</strong> - the expiry date, if you set one.</li>
             <li><strong class="text-gray-900 dark:text-white">Covered events</strong> - the events the pass works at, so they know where to use it. Sub-schedule and specific-event passes list the events by name and date (up to 50); a pass covering the whole schedule shows "All events in this schedule" instead of a list, and a season pass lists nothing because it is simply every date of its own event.</li>
             <li>The QR code to show at the door, and the booking panel if advance booking is on.</li>
+            <li>An <a href="{{ route('marketing.docs.tickets') }}#wallet-passes" class="doc-link">Add to Google Wallet</a> button, where the operator has enabled wallet passes. A pass saves as a single wallet pass covering the whole series, showing how many it admits at each event and its valid-until date.</li>
         </ul>
     </section>
 

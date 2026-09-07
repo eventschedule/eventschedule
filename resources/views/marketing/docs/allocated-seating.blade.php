@@ -146,7 +146,7 @@
             <li><strong class="text-gray-900 dark:text-white">The map is keyboard operable.</strong> Tab into it once, then move with the arrow keys and select with Enter.</li>
         </ul>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Seat numbers follow the booking everywhere afterwards: on the ticket, in the confirmation email, on the door scanner, in the check-in feed and in the sales export.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Seat numbers follow the booking everywhere afterwards: on the ticket, in the confirmation email, on a wallet pass, on the door scanner, in the check-in feed and in the sales export.</p>
     </section>
 
     <!-- Rules -->

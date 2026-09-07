@@ -557,6 +557,10 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
         {!! $lastmodTag('/docs/selfhost/google-calendar') !!}
     </url>
     <url>
+        <loc>{{ url('/docs/selfhost/google-wallet') }}</loc>
+        {!! $lastmodTag('/docs/selfhost/google-wallet') !!}
+    </url>
+    <url>
         <loc>{{ url('/docs/selfhost/microsoft-calendar') }}</loc>
         {!! $lastmodTag('/docs/selfhost/microsoft-calendar') !!}
     </url>

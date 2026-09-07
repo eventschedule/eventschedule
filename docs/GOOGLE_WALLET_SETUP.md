@@ -1,5 +1,8 @@
 # Google Wallet Setup
 
+> The published version of this guide is at `/docs/selfhost/google-wallet`
+> (`resources/views/marketing/docs/selfhost/google-wallet.blade.php`). Keep the two in step.
+
 Lets ticket buyers save their ticket into Google Wallet with an "Add to Google Wallet" button on
 the ticket page, on the multi-event order page and in the confirmation email.
 
@@ -77,8 +80,12 @@ When a buyer taps the button, and only then, the app sends Google:
 
 - the attendee name, the event name, the venue name and address, and the start time
 - the ticket type, any seat labels, and the number of admissions
-- the venue's coordinates, when it has an address on file, so Google can notify the attendee when
-  they come within its own radius of the venue
+- the event's ticket notes, truncated to 200 characters
+- the schedule's name and accent colour, the event's public URL, and the logo and image URLs when
+  `APP_URL` is publicly reachable over https
+- the venue's coordinates, when it has them, so Google can notify the attendee when they come
+  within its own radius of the venue. Coordinates come from geocoding, which only runs when
+  `BACKEND_GOOGLE_KEY` is set, so a complete address is not enough on its own
 - the ticket URL, which contains that sale's secret
 
 The ticket URL has to be there: it is what the pass's QR code encodes, and the door scanner reads
@@ -90,23 +97,35 @@ that exact URL. Nothing is sent for a buyer who never taps the button.
   the Wallet REST API and then cached, because a JWT carrying both the class and the object exceeds
   the 1800 characters Google documents as the safe length of an encoded JWT.
 - **The object** is the individual ticket. It rides inside a signed JWT in the save link, so there
-  is no per-sale state on Google's side and no per-sale API call.
-- **The pass is a snapshot.** It is never updated after it is saved. Cancelling or refunding an
+  is no per-sale API call. Note that Google does create the object on its side once the buyer
+  saves, and it cannot be deleted afterwards, only expired.
+- **The pass is a snapshot.** Neither half is patched once written. Cancelling or refunding an
   order does not remove a pass from someone's phone, but the QR stops working: the door scanner
   checks the order's live status and refuses a cancelled ticket exactly as the ticket page does.
+  Renaming or rescheduling an event after the first buyer has tapped leaves the original details on
+  every pass saved from then on, because the class is written once per occurrence.
 - Class and object IDs are derived from the event and sale IDs, so re-saving the same ticket
-  updates the same pass rather than creating a second one.
+  returns the original pass rather than creating a second one. It is not refreshed.
+- **A pass expires** a few hours after the event ends, and Google archives it. Two cases never
+  expire: a season pass whose ticket has no valid-days set, and an all-day or time-less event.
 
 ## Troubleshooting
 
 **The button does not appear.** The feature is unconfigured, or the ticket is not eligible. A
 button is only offered for an order that is paid, not deleted, not on a delinquent payment plan,
-and whose event is not cancelled.
+whose event is not cancelled, and which is not an appointment booking.
 
 **The button appears but the buyer lands back on their ticket with an error.** The call to Google
-failed. Check `storage/logs` for `Google Wallet token exchange failed` (bad or revoked key) or
-`Google Wallet class insert failed` (usually the Developer access in step 3). A failure is cached
-for five minutes, so fix it and wait a moment rather than retrying in a loop.
+failed. Check `storage/logs` for `Google Wallet token exchange failed` (bad or revoked key),
+`Google Wallet class lookup failed` (usually the Developer access in step 3, and the line you will
+see most often since that check runs first), or `Google Wallet class insert failed`. A failure is
+cached for five minutes, so fix it and wait a moment rather than retrying in a loop. A success is
+cached for a day, and the access token for just under an hour.
+
+**A wrong path or a truncated key reads as unconfigured, silently.** A path that is not a file, an
+unreadable file, a line-wrapped base64 paste, or JSON missing `client_email` or `private_key` all
+leave the feature off with nothing logged: the button simply never appears. Check the path resolves
+to a file and that the JSON decodes with both keys.
 
 **The pass saves for you but not for anyone else.** The issuer is still in demo mode; see step 5.
 

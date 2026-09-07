@@ -436,6 +436,17 @@ return [
             'modified' => '2026-02-01',
         ],
 
+        'selfhost/google-wallet' => [
+            'group' => 'selfhost',
+            'route' => 'marketing.docs.selfhost.google_wallet',
+            'path' => '/docs/selfhost/google-wallet',
+            'title' => 'Google Wallet',
+            'blurb' => 'Let buyers save tickets to Google Wallet.',
+            'icon' => 'ticket',
+            'published' => '2026-09-07',
+            'modified' => '2026-09-07',
+        ],
+
         'selfhost/microsoft-calendar' => [
             'group' => 'selfhost',
             'route' => 'marketing.docs.selfhost.microsoft_calendar',

@@ -419,7 +419,7 @@
         <h3 class="doc-subheading">Buying Several Events at Once</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-6">A visitor browsing your schedule can collect tickets to more than one event and pay for the lot in a single checkout. On any event with tickets they choose their quantities and select <strong class="text-gray-900 dark:text-white">Add to cart</strong> instead of Checkout, then carry on browsing. A cart button appears in the corner with a running count; opening it lists everything gathered so far, and one Checkout pays for all of it.</p>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Afterwards the buyer lands on a page listing every event they bought, each linking to its own ticket. There is no combined ticket: every event is scanned with its own code, because each door only knows about its own event. The confirmation emails arrive one per event for the same reason.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Afterwards the buyer lands on a page listing every event they bought, each linking to its own ticket. There is no combined ticket: every event is scanned with its own code, because each door only knows about its own event. The confirmation emails arrive one per event for the same reason, and where <a href="#wallet-passes" class="doc-link">wallet passes</a> are enabled each live event on that page gets its own Add to Google Wallet button.</p>
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">What can share a cart</div>
@@ -1076,15 +1076,18 @@
 
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Event details on the pass</strong> - name, venue, date and time, attendee name, ticket type and seat</li>
-            <li><strong class="text-gray-900 dark:text-white">Arrival reminder</strong> - when the venue has an address on file, Google can notify the attendee as they arrive nearby</li>
+            <li><strong class="text-gray-900 dark:text-white">Arrival reminder</strong> - when the venue has map coordinates, Google can notify the attendee as they arrive nearby</li>
             <li><strong class="text-gray-900 dark:text-white">One pass per event</strong> - a multi-event order gets a separate pass for each event, since each is scanned with its own code. A single order for several people is one pass showing the number it admits, unless the event issues individual tickets</li>
+            <li><strong class="text-gray-900 dark:text-white">Passes and registrations too</strong> - a <a href="{{ route('marketing.docs.subscriptions') }}" class="doc-link">season pass</a> saves as a single pass covering the whole series rather than one per date, carrying the number it admits at each event and its "valid until" date. Free registrations get a wallet pass on the same terms as a paid ticket</li>
         </ul>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">At the door a wallet pass is scanned exactly like any other ticket: the attendee opens it and you scan it from <a href="#check-in" class="doc-link">Scan Ticket</a> as usual. On an <a href="{{ route('marketing.docs.allocated_seating') }}" class="doc-link">allocated</a> event the seat is printed on the pass.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">The pass is a snapshot taken when the attendee saves it. Cancelling or refunding an order does not remove a pass already on someone's phone, but the code stops working: the door scanner checks the order's live status, and a cancelled ticket is refused there just as it is on the ticket page.</p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Turned on by the operator</div>
-            <p>Wallet passes need a Google Wallet issuer account, so the button appears only once the person running the installation has connected one. On <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> installs that is a one-time setup step; with nothing configured, no button is shown and nothing is sent to Google. It is free on every plan.</p>
+            <p>Wallet passes need a Google Wallet issuer account, so the button appears only once the person running the installation has connected one. On a selfhosted install that is a one-time <a href="{{ route('marketing.docs.selfhost.google_wallet') }}" class="doc-link">setup step</a>; with nothing configured, no button is shown and nothing is sent to Google. It is free on every plan. There is no per-schedule setting: if you are unsure whether it is on, open a paid ticket and look for the badge.</p>
         </div>
     </section>
 
