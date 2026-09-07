@@ -131,6 +131,40 @@ class ImageVariantsTest extends TestCase
         Storage::put(ImageUtils::storagePathFor($filename), "\x89PNG\r\n\x1a\n".$chunk);
     }
 
+    /**
+     * A decode budget generous enough for $pixels against the CURRENT baseline.
+     *
+     * Every memory assertion in this class has to be written against memory_get_usage(true) as it
+     * is right now, never against a hardcoded figure: canDecodePixels() measures the live baseline
+     * internally, and a full-suite process carries hundreds of MB more than a lone run of this
+     * file. Three tests here were originally pinned to a flat '512M', passed under --filter, and
+     * failed in `php artisan test`.
+     */
+    private function budgetFor(int $pixels, int $slackMb = 64): int
+    {
+        return memory_get_usage(true) + ($pixels * 4 * 2) + (16 * 1024 * 1024) + ($slackMb * 1024 * 1024);
+    }
+
+    private function pinMemoryLimit(int $bytes): string
+    {
+        $limit = ((int) ceil($bytes / (1024 * 1024))).'M';
+        ini_set('memory_limit', $limit);
+
+        return $limit;
+    }
+
+    /** An on-disk (not Storage) PNG header declaring $width x $height, for resizeImageToMax(). */
+    private function oversizedHeaderFile(int $width, int $height): string
+    {
+        $ihdr = pack('NNCCCCC', $width, $height, 8, 6, 0, 0, 0);
+        $chunk = pack('N', strlen($ihdr)).'IHDR'.$ihdr.pack('N', crc32('IHDR'.$ihdr));
+
+        $path = tempnam(sys_get_temp_dir(), 'variant_test_');
+        file_put_contents($path, "\x89PNG\r\n\x1a\n".$chunk);
+
+        return $path;
+    }
+
     private function variantSize(string $filename): array
     {
         $bytes = Storage::get(ImageUtils::storagePathFor($filename));
@@ -274,16 +308,213 @@ class ImageVariantsTest extends TestCase
         $this->assertSame($first['filename'], $second['filename']);
     }
 
-    public function test_helper_refuses_an_image_over_twelve_megapixels(): void
+    public function test_helper_refuses_an_image_past_the_absolute_ceiling(): void
     {
-        // 5000x4000 = 20MP. GD would need ~80MB for the source canvas alone.
-        $this->storeOversizedHeader('flyer_huge.png', 5000, 4000);
+        // 12000x12000 = 144MP, past IMAGE_MAX_PIXELS_CEILING, so it is refused before the memory
+        // budget is even consulted. That is what makes this deterministic: below the ceiling the
+        // answer legitimately depends on the runner's memory_limit, which CI and a laptop
+        // disagree about (often -1 versus 128M).
+        $this->storeOversizedHeader('flyer_huge.png', 12000, 12000);
 
         $result = ImageUtils::generateStoredVariant('flyer_huge.png');
 
         $this->assertFalse($result['ok']);
         $this->assertSame('too_large', $result['reason']);
+        $this->assertSame('12000x12000, 144MP', $result['detail']);
         Storage::assertMissing('public/flyer_huge_w480.webp');
+    }
+
+    public function test_a_size_within_the_memory_budget_is_no_longer_refused(): void
+    {
+        // 20MP was a flat refusal before the guard started measuring. Given a budget that covers
+        // it, the pixel guard now lets it through and the decode fails on its own merits - these
+        // header-only fixtures have no pixel data behind them.
+        $this->storeOversizedHeader('flyer_big.png', 5000, 4000);
+
+        $budget = $this->budgetFor(20_000_000);
+        $previous = ini_get('memory_limit');
+        $this->pinMemoryLimit($budget);
+
+        try {
+            $result = ImageUtils::generateStoredVariants('flyer_big.png', [480], $budget)[480];
+        } finally {
+            ini_set('memory_limit', $previous);
+        }
+
+        $this->assertFalse($result['ok']);
+        $this->assertSame('unreadable', $result['reason']);
+    }
+
+    public function test_a_header_claiming_more_pixels_than_php_can_count_is_refused_not_fatal(): void
+    {
+        // getimagesize() reads PNG IHDR dimensions as raw unsigned 32-bit ints without checking
+        // them, so this 33-byte file reports 4294967295x4294967295 and width*height overflows
+        // PHP_INT_MAX into a FLOAT. canDecodePixels() therefore takes int|float: a typed `int`
+        // throws a TypeError, which on the resizeImageToMax() path is uncaught and turns a flyer
+        // upload into a 500, and on the backfill path records nothing so the row is re-selected
+        // and re-reported forever.
+        $this->assertFalse(ImageUtils::canDecodePixels(4294967295 * 4294967295));
+
+        $this->storeOversizedHeader('flyer_absurd.png', 4294967295, 4294967295);
+        $result = ImageUtils::generateStoredVariant('flyer_absurd.png');
+
+        $this->assertFalse($result['ok']);
+        $this->assertSame('too_large', $result['reason']);
+
+        // The same header through the upload resizer, which has no try/catch of its own.
+        $path = $this->oversizedHeaderFile(4294967295, 4294967295);
+
+        try {
+            $this->assertFalse(ImageUtils::resizeImageToMax($path, 2000));
+        } finally {
+            @unlink($path);
+        }
+    }
+
+    public function test_the_budget_check_measures_rather_than_assumes(): void
+    {
+        $previous = ini_get('memory_limit');
+
+        try {
+            // Under the floor: waved through without consulting anything.
+            $this->assertTrue(ImageUtils::canDecodePixels(1_000_000));
+
+            // A degenerate header cannot talk its way in.
+            $this->assertFalse(ImageUtils::canDecodePixels(0));
+
+            // Past the absolute ceiling: refused however much memory is on offer.
+            $this->pinMemoryLimit($this->budgetFor(ImageUtils::IMAGE_MAX_PIXELS_CEILING));
+            $this->assertFalse(ImageUtils::canDecodePixels(
+                ImageUtils::IMAGE_MAX_PIXELS_CEILING + 1,
+                $this->budgetFor(ImageUtils::IMAGE_MAX_PIXELS_CEILING + 1)
+            ));
+
+            // 20MP, over the old flat refusal, is allowed when the budget covers it.
+            $this->assertTrue(ImageUtils::canDecodePixels(20_000_000, $this->budgetFor(20_000_000)));
+
+            // The ceiling caps the DECODE, not just the raise. memory_limit is pinned generously
+            // above, so the "already fits" path would approve this if the ceiling were consulted
+            // only when a raise was needed - which is exactly what it used to do, and what let a
+            // host with memory_limit=-1 hand GD a quarter-gigabyte with nothing left to catch it.
+            $this->assertFalse(ImageUtils::canDecodePixels(
+                20_000_000,
+                $this->budgetFor(20_000_000) - (128 * 1024 * 1024)
+            ));
+
+            // floorPixels is what stops the shared helper tightening its callers: this is over
+            // the default floor and over the ceiling offered, yet waved through unmeasured.
+            $this->assertTrue(ImageUtils::canDecodePixels(20_000_000, 1024, floorPixels: 20_000_000));
+        } finally {
+            ini_set('memory_limit', $previous);
+        }
+    }
+
+    public function test_the_memory_limit_is_left_as_it_was_found(): void
+    {
+        // Just over the unmeasured floor, so the budget check has to raise the limit. A smaller
+        // fixture would take the floor fast path and this test would pass without the restore
+        // existing at all - which is exactly what it is here to catch.
+        $pixels = ImageUtils::VARIANT_MAX_PIXELS + 4000;
+        $this->storeOversizedHeader('flyer_wide.png', 4000, (int) ($pixels / 4000));
+
+        $budget = $this->budgetFor($pixels);
+        $previous = ini_get('memory_limit');
+
+        // Comfortably below what the decode needs, so a raise is forced. The margin is wide on
+        // purpose: canDecodePixels() re-reads memory_get_usage(true), and a wider gap makes the
+        // raise more certain, never less.
+        $base = $this->pinMemoryLimit($budget - (96 * 1024 * 1024));
+
+        try {
+            // Proves the raise genuinely happens for this size, so the assertion below is not
+            // quietly vacuous.
+            $this->assertTrue(ImageUtils::canDecodePixels($pixels, $budget));
+            $this->assertNotSame($base, ini_get('memory_limit'));
+
+            ini_set('memory_limit', $base);
+            ImageUtils::generateStoredVariants('flyer_wide.png', ImageUtils::VARIANT_WIDTHS, $budget);
+
+            // A raise left standing outlives the one image it was for: the backfill walks
+            // thousands of rows in a single process, and the queue worker is long-lived.
+            $this->assertSame($base, ini_get('memory_limit'));
+        } finally {
+            ini_set('memory_limit', $previous);
+        }
+    }
+
+    public function test_the_upload_resizer_also_puts_the_memory_limit_back(): void
+    {
+        // resizeImageToMax() had the same restore written the wrong way round - it captured the
+        // limit AFTER canDecodePixels() had already raised it, so the finally restored the raise
+        // to itself and a long-lived process ratcheted upward. Nothing covered it, because the
+        // only other test of this function uses a 3.84MP image, below the 16MP floor, and never
+        // reaches the memory path at all.
+        $pixels = 16_000_000 + 4000;
+        $path = $this->oversizedHeaderFile(4000, (int) ($pixels / 4000));
+
+        $budget = $this->budgetFor($pixels);
+        $previous = ini_get('memory_limit');
+        $base = $this->pinMemoryLimit($budget - (96 * 1024 * 1024));
+
+        try {
+            $this->assertTrue(ImageUtils::canDecodePixels($pixels, $budget, floorPixels: 16_000_000));
+            $this->assertNotSame($base, ini_get('memory_limit'));
+
+            ini_set('memory_limit', $base);
+
+            // Returns false - the header has no pixel data behind it - but the finally still runs,
+            // which is the half under test.
+            ImageUtils::resizeImageToMax($path, 2000, 85, $budget);
+
+            $this->assertSame($base, ini_get('memory_limit'));
+        } finally {
+            ini_set('memory_limit', $previous);
+            @unlink($path);
+        }
+    }
+
+    public function test_php_itself_refuses_to_restore_the_limit_below_current_usage(): void
+    {
+        // A characterization test, not a guard on our own branch: it pins the PHP behaviour the
+        // restore RELIES on. Lowering memory_limit under current usage is refused by PHP's own
+        // handler - ini_set() returns false and the value is untouched - so putting the limit
+        // back can never strand the process beneath its own footprint. If a future PHP made that
+        // lowering succeed instead, every restore site here would need a usage check, and this is
+        // the test that would say so.
+        $previous = ini_get('memory_limit');
+        $high = $this->pinMemoryLimit(memory_get_usage(true) + (256 * 1024 * 1024));
+
+        try {
+            $this->assertGreaterThan(16 * 1024 * 1024, memory_get_usage(true));
+            $this->assertFalse(@ini_set('memory_limit', '16M'));
+            $this->assertSame($high, ini_get('memory_limit'));
+
+            // An affordable restore still happens, which is the path the pipeline actually takes.
+            $affordable = ((int) ceil((memory_get_usage(true) + (128 * 1024 * 1024)) / (1024 * 1024))).'M';
+            ImageUtils::restoreMemoryLimit($affordable);
+            $this->assertSame($affordable, ini_get('memory_limit'));
+
+            // Unreadable values are ours to ignore rather than pass to ini_set().
+            ImageUtils::restoreMemoryLimit('');
+            ImageUtils::restoreMemoryLimit(false);
+            $this->assertSame($affordable, ini_get('memory_limit'));
+        } finally {
+            ini_set('memory_limit', $previous);
+        }
+    }
+
+    public function test_parse_memory_limit_reads_every_shape_php_uses(): void
+    {
+        $this->assertSame(PHP_INT_MAX, ImageUtils::parseMemoryLimit('-1'));
+
+        // NOT unlimited: ini_get() returns false when it cannot read the setting, and (string)
+        // false is ''. Reading that as PHP_INT_MAX would let a failure to read the limit approve
+        // the largest decode on offer.
+        $this->assertSame(0, ImageUtils::parseMemoryLimit(''));
+        $this->assertSame(128 * 1024 * 1024, ImageUtils::parseMemoryLimit('128M'));
+        $this->assertSame(1024 * 1024 * 1024, ImageUtils::parseMemoryLimit('1G'));
+        $this->assertSame(64 * 1024, ImageUtils::parseMemoryLimit('64K'));
+        $this->assertSame(65536, ImageUtils::parseMemoryLimit('65536'));
     }
 
     public function test_helper_skips_demo_and_external_images(): void
@@ -665,7 +896,7 @@ class ImageVariantsTest extends TestCase
         $owner = $this->createOwner();
         $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room']);
         $event = $this->createEvent($role, ['name' => 'Autumn Session', 'flyer_image_url' => 'flyer_huge.png']);
-        $this->storeOversizedHeader('flyer_huge.png', 5000, 4000);
+        $this->storeOversizedHeader('flyer_huge.png', 12000, 12000);
 
         // Deterministic, so the job returns normally rather than sending the queue round again.
         (new GenerateEventImageVariants($event->id, 'flyer_huge.png'))->handle();
@@ -824,12 +1055,49 @@ class ImageVariantsTest extends TestCase
         );
     }
 
+    public function test_the_backfill_command_says_how_large_and_tallies_by_reason(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room']);
+        $this->createEvent($role, ['name' => 'Autumn Session', 'flyer_image_url' => 'flyer_huge.png']);
+        $this->storeOversizedHeader('flyer_huge.png', 12000, 12000);
+        $this->createEvent($role, ['name' => 'Winter Session', 'flyer_image_url' => 'flyer_gone.png']);
+
+        Artisan::call('images:backfill-variants', ['--upcoming-only' => true]);
+        $output = Artisan::output();
+
+        // Without the dimensions there is no way to tell a 13MP flyer worth re-running for from
+        // a 200MP one that is never going to work.
+        $this->assertStringContainsString('skipped: too_large (12000x12000, 144MP)', $output);
+
+        // And without the tally, a production run's only account of itself is a bare count.
+        $this->assertStringContainsString('Skipped by reason - ', $output);
+        $this->assertStringContainsString('too_large: 1', $output);
+        $this->assertStringContainsString('missing: 1', $output);
+    }
+
+    public function test_a_decorated_skip_is_not_what_gets_recorded(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room']);
+        $event = $this->createEvent($role, ['name' => 'Autumn Session', 'flyer_image_url' => 'flyer_huge.png']);
+        $this->storeOversizedHeader('flyer_huge.png', 12000, 12000);
+
+        Artisan::call('images:backfill-variants', ['--upcoming-only' => true]);
+
+        // The console line carries the dimensions; the COLUMN must not. baseQuery() matches the
+        // recorded value against VARIANT_TRANSIENT_REASONS by equality, and --retry-skipped
+        // against 'STRING', so a decorated token would quietly strand the row forever.
+        $this->assertSame('too_large', $event->fresh()->image_variants['skipped']);
+        $this->assertContains($event->fresh()->image_variants['skipped'], ImageUtils::VARIANT_DETERMINISTIC_REASONS);
+    }
+
     public function test_the_backfill_command_records_and_then_respects_a_skip(): void
     {
         $owner = $this->createOwner();
         $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room']);
         $event = $this->createEvent($role, ['name' => 'Autumn Session', 'flyer_image_url' => 'flyer_huge.png']);
-        $this->storeOversizedHeader('flyer_huge.png', 5000, 4000);
+        $this->storeOversizedHeader('flyer_huge.png', 12000, 12000);
 
         Artisan::call('images:backfill-variants', ['--upcoming-only' => true]);
         $this->assertSame(

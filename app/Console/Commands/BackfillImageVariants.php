@@ -42,6 +42,9 @@ class BackfillImageVariants extends Command
 
     private int $skipped = 0;
 
+    /** @var array<string, int> reason => count, for the run summary */
+    private array $skippedReasons = [];
+
     private int $limit = 0;
 
     public function handle(): int
@@ -52,6 +55,7 @@ class BackfillImageVariants extends Command
         $this->processed = 0;
         $this->generated = 0;
         $this->skipped = 0;
+        $this->skippedReasons = [];
 
         $this->limit = max(0, (int) $this->option('limit'));
         $chunk = max(10, (int) $this->option('chunk'));
@@ -79,6 +83,18 @@ class BackfillImageVariants extends Command
         }
 
         $this->info("Done. Processed: {$this->processed}, generated: {$this->generated}, skipped: {$this->skipped}");
+
+        // Which reasons, not just how many. Nothing else reads the recorded `skipped` values back
+        // out, so without this the only way to find out why a production run skipped rows is to
+        // open a SQL console against the events table.
+        if ($this->skippedReasons) {
+            arsort($this->skippedReasons);
+            $parts = [];
+            foreach ($this->skippedReasons as $reason => $count) {
+                $parts[] = "{$reason}: {$count}";
+            }
+            $this->line('  Skipped by reason - '.implode(', ', $parts));
+        }
 
         return self::SUCCESS;
     }
@@ -179,7 +195,7 @@ class BackfillImageVariants extends Command
         } catch (\Throwable $e) {
             report($e);
             $this->warn("  [{$event->id}] error: ".$e->getMessage());
-            $this->skipped++;
+            $this->countSkip('error');
 
             return;
         }
@@ -193,6 +209,7 @@ class BackfillImageVariants extends Command
         $variants = [];
         $written = [];
         $reason = null;
+        $detail = null;
         $existing = $event->image_variants;
         $existing = is_array($existing) ? $existing : [];
 
@@ -205,8 +222,12 @@ class BackfillImageVariants extends Command
 
             if ($result['ok']) {
                 $written[] = $result['filename'];
-            } else {
-                $reason ??= $result['reason'];
+            } elseif ($reason === null) {
+                $reason = $result['reason'];
+                // Display only. Deliberately NOT merged into $variants: baseQuery() and
+                // --retry-skipped match the recorded value against the reason vocabulary
+                // exactly, so a decorated token would strand the row.
+                $detail = $result['detail'] ?? null;
             }
         }
 
@@ -218,15 +239,22 @@ class BackfillImageVariants extends Command
 
         // A partial run counts as skipped: the row still needs another pass.
         if ($reason !== null) {
-            $this->skipped++;
-            $this->line("  [{$event->id}] skipped: {$reason}");
-            Log::info("images:backfill-variants skipped event {$event->id}: {$reason}");
+            $this->countSkip($reason);
+            $described = $reason.($detail !== null ? " ({$detail})" : '');
+            $this->line("  [{$event->id}] skipped: {$described}");
+            Log::info("images:backfill-variants skipped event {$event->id}: {$described}");
 
             return;
         }
 
         $this->generated++;
         $this->line("  [{$event->id}] ".implode(', ', $written));
+    }
+
+    private function countSkip(string $reason): void
+    {
+        $this->skipped++;
+        $this->skippedReasons[$reason] = ($this->skippedReasons[$reason] ?? 0) + 1;
     }
 
     private function limitReached(): bool

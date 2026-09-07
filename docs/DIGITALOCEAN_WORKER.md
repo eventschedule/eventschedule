@@ -262,10 +262,20 @@ intermittently useful - that path is inside the source tree, so every deploy res
 committed to git. Country analytics keep working from that committed file; they are just not
 refreshed. Run it on the web container, or refresh the committed file periodically.
 
-**Graphic generation can raise `memory_limit` toward 512 MB**, which is the whole worker box.
-On the service that is harmless because App Platform locks the limit on the FPM pool; a CLI process
-usually has no such lock. `app:send-graphic-emails` is the reachable path. Watch worker memory
-during the soak.
+**Two things can raise `memory_limit` on the worker box.** Graphic generation goes toward 512 MB,
+which is the whole box; flyer variant generation goes toward 384 MB
+(`ImageUtils::IMAGE_MEMORY_CEILING_BYTES`) and puts the limit back after each image. On the service
+both are harmless because App Platform locks the limit on the FPM pool; a CLI process usually has
+no such lock, which is exactly why the raise works here and not there. The reachable paths are
+`app:send-graphic-emails` and the `GenerateEventImageVariants` jobs drained by `process-queue`
+(plus `images:backfill-variants` when an operator runs it in the console). Neither raiser runs
+concurrently with itself - the queue is drained one job at a time - but they can overlap each
+other. Watch worker memory during the soak.
+
+The variant ceiling caps the DECODE, not just the raise: an image whose estimated cost exceeds it
+is refused even where `memory_limit` is already higher or absent, so a box with `memory_limit=-1`
+cannot hand GD an unbounded allocation. Graphic generation deliberately does not put its raise
+back, so one oversized graphic leaves that process at its raised limit for the rest of the run.
 
 **Queue dispatch latency is up to about 60 seconds.** The queue is drained once a minute by the
 scheduler rather than by a resident worker. This matches the behaviour before the cutover.

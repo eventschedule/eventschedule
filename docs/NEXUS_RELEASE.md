@@ -309,6 +309,30 @@ php artisan images:backfill-variants --limit=500          # then the rest, in ba
 Batch it: the console session is ephemeral, and image work can push `memory_limit` on a 512 MB
 box. Use `--dry-run` first for a count.
 
+The run ends with a per-reason tally (`Skipped by reason - too_large: 3, missing: 1`), and a
+`too_large` line names the source size, e.g. `skipped: too_large (3508x3508, 12.3MP)`. That is the
+only account of what a run refused: nothing else reads the recorded `skipped` values back out.
+
+`too_large` no longer means a flat 12 MP refusal. `ImageUtils::canDecodePixels()` budgets the
+decode against real memory and raises `memory_limit` for it, then re-reads `ini_get()` to confirm
+the raise was not silently blocked - App Platform can pin the limit with `php_admin_value`.
+`ImageUtils::IMAGE_MEMORY_CEILING_BYTES` (384 MB, against 512 MB containers) caps what one decode
+may cost **whether or not a raise is needed**, so a host with a large or absent `memory_limit` gets
+the same answer as a constrained one. Anything past `IMAGE_MAX_PIXELS_CEILING` (64 MP) is refused
+outright, as is a header whose dimensions overflow PHP's integer range.
+
+The raise is put back after each image. PHP refuses to lower `memory_limit` below what a process is
+currently holding, so in the rare case where usage has not come back down the raise persists
+instead - never a fatal, but not a guarantee either.
+
+**Flyers skipped by an earlier run need `--retry-skipped`**: a recorded `too_large` is
+deterministic, so a plain run filters those rows out. One pass with the flag reconsiders them
+against the new budget:
+
+```
+php artisan images:backfill-variants --retry-skipped --upcoming-only --limit=500
+```
+
 **This must run on a build that already carries the `do_spaces` `CacheControl` option**
 (`config/filesystems.php`). Object metadata is written once, at PutObject time, so every derivative
 this command creates inherits whatever the deployed config says. Backfill on an older build and all
@@ -696,8 +720,13 @@ The per-task list on `/admin/queue` is the only place it shows, and it ages from
   minutes plus serve-stale, and there is no purge hook on a settings save the way there is a
   manual one on a deploy. Purge the zone after changing an advertised price.
 - **Flyer variant generation now shares the worker's memory.** `GenerateEventImageVariants` is
-  drained by the `process-queue` entry inside `schedule:run`, and decodes up to 12 MP through GD
-  on the 0.5 GB box - the second consumer to watch alongside `app:send-graphic-emails`.
+  drained by the `process-queue` entry inside `schedule:run` and decodes through GD on the 0.5 GB
+  box - the second consumer to watch alongside `app:send-graphic-emails`. It no longer stops at a
+  flat 12 MP: `ImageUtils::canDecodePixels()` raises `memory_limit` per image up to
+  `IMAGE_MEMORY_CEILING_BYTES` (384 MB) and puts it back afterwards, so the worst case for one
+  job is higher than it was, deliberately bounded, and still below the container. If App Platform
+  pins `memory_limit`, the raise is detected as blocked and the image is skipped rather than
+  risking the allocation.
 - **Automatic new-event announcements are live.** `announce_new_events` defaults to true and
   `role_subscribers` starts empty, so day one is quiet by construction; a real audience appears
   as guests tick the checkout opt-in. Two separate silences to watch, often confused:

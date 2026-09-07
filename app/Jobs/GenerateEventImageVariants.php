@@ -109,6 +109,7 @@ class GenerateEventImageVariants implements ShouldQueue
         $variants = [];
         $transient = null;
         $deterministic = null;
+        $deterministicDetail = null;
         $existing = $event->image_variants;
         $existing = is_array($existing) ? $existing : [];
 
@@ -125,8 +126,11 @@ class GenerateEventImageVariants implements ShouldQueue
 
             if (ImageUtils::isTransientVariantReason($result['reason'])) {
                 $transient ??= $result['reason'];
-            } else {
-                $deterministic ??= $result['reason'];
+            } elseif ($deterministic === null) {
+                $deterministic = $result['reason'];
+                // Display only, and only for the log line below: recordImageVariants() must keep
+                // receiving the bare token the backfill's query matches on.
+                $deterministicDetail = $result['detail'] ?? null;
             }
         }
 
@@ -153,7 +157,8 @@ class GenerateEventImageVariants implements ShouldQueue
         }
 
         if ($deterministic !== null) {
-            Log::info('GenerateEventImageVariants skipped event '.$this->eventId.': '.$deterministic);
+            Log::info('GenerateEventImageVariants skipped event '.$this->eventId.': '.$deterministic
+                .($deterministicDetail !== null ? ' ('.$deterministicDetail.')' : ''));
         }
 
         // Transient wins the `skipped` slot when both happened, because it is the one the

@@ -193,16 +193,184 @@ class ImageUtils
     }
 
     /**
-     * Refuse to decode anything bigger than this.
+     * The decode size that is ALWAYS allowed, with no memory bump and no ini_get() call.
      *
      * GD allocates 4 bytes per pixel for a truecolor canvas, so 12MP is ~48MB for the source
      * alone before the destination canvas, and the hosted PHP workers are capped at 128MB.
      * Only the web upload path resizes originals (EventRepo caps them at 2000px); the API,
-     * guest submit, WhatsApp and import paths all store whatever arrived, so this guard is
-     * the only thing standing between a 10MB camera JPEG and an OOM in the queue worker.
-     * getimagesize() reads the header only, so the check costs nothing.
+     * guest submit, WhatsApp and import paths all store whatever arrived, so something has to
+     * stand between a 10MB camera JPEG and an OOM in the queue worker.
+     *
+     * This used to be that something, as a flat refusal. It is now the FLOOR of
+     * canDecodePixels(): at or below it the decode proceeds exactly as it always has, so a
+     * worker whose memory_limit is pinned at 128MB behaves identically to before. Above it the
+     * budget is measured rather than assumed.
+     *
+     * getimagesize() reads the header only, so the check still costs nothing.
      */
     public const VARIANT_MAX_PIXELS = 12_000_000;
+
+    /**
+     * The most one image decode may cost, raise or no raise.
+     *
+     * This caps the DECODE, not merely how far memory_limit is willing to move: a host with a
+     * generous or absent memory_limit gets the same answer as a constrained one, because a host
+     * with no limit is the dangerous case, not the safe one - there is nothing left to turn an
+     * overrun into a catchable fatal instead of a container OOM kill.
+     *
+     * A headroom decision: the hosted containers are 512MB (see docs/NEXUS_RELEASE.md), and
+     * 384MB leaves 128MB for everything else in the box.
+     *
+     * What that buys, measured rather than guessed: canDecodePixels() budgets
+     * `usage + pixels*8 + 16MB`, so against a ~80MB worker baseline this admits roughly 36MP -
+     * every camera and phone flyer that exists. 256MB looked like the safer number until the
+     * same arithmetic was run against a real baseline, where it admits barely 20MP and would
+     * have left most of the images this exists for still skipping.
+     *
+     * The x2 in that budget means the true GD cost of an image at this ceiling is around half
+     * of it, so the headroom is larger in practice than the number suggests. Callers that can
+     * genuinely afford more - a console command rather than a queue worker - pass their own.
+     */
+    public const IMAGE_MEMORY_CEILING_BYTES = 384 * 1024 * 1024;
+
+    /**
+     * Absolute refusal, whatever the memory budget says.
+     *
+     * Checked before any arithmetic INSIDE canDecodePixels(), and while the argument may still
+     * be a float: the dimensions come from the file, and getimagesize() reports whatever an IHDR
+     * claims. Note this cannot protect the multiplication in the CALLERS, which happens first -
+     * that is why canDecodePixels() accepts int|float rather than int.
+     */
+    public const IMAGE_MAX_PIXELS_CEILING = 64_000_000;
+
+    /**
+     * Whether a truecolor GD decode of $pixels can be afforded, raising memory_limit if that is
+     * all it takes and the platform allows it.
+     *
+     * The arithmetic is lifted from AbstractEventDesign::safeImageCreateFromString(), which had
+     * the only correct version of it in the repo; that method and resizeImageToMax() now both
+     * call here, so one measured answer replaces three constants that disagreed (12MP, 16MP and
+     * a real budget).
+     *
+     * The re-read at the end is the point of the whole helper. Some hosts - DigitalOcean App
+     * Platform among them - pin memory_limit with php_admin_value (PHP_INI_SYSTEM), where
+     * ini_set() returns without complaint and changes nothing. Trusting it would turn a refusal
+     * the caller can record and recover from into a fatal allocation it cannot.
+     *
+     * $floorPixels is waved through unmeasured, and exists so this does not quietly tighten the
+     * callers it replaced. The thumbnail pipeline refused above 12MP but never looked at memory
+     * BELOW it, so measuring there for the first time could turn working thumbnails into
+     * too_large skips on a small box. safeImageCreateFromString() measured every size, so it
+     * passes 0 and keeps doing that. It does make the answer non-monotonic across that boundary
+     * on a process that is already bloated - 16MP waved through, 17MP possibly refused - which is
+     * the price of not tightening the callers this replaced.
+     *
+     * $pixels is int|float on purpose. getimagesize() reads PNG IHDR dimensions as raw unsigned
+     * 32-bit ints without sanity-checking them, so a 33-byte hand-built header can report
+     * 4294967295x4294967295 and the product overflows PHP_INT_MAX into a float. A typed `int`
+     * parameter throws a TypeError on that - uncaught in resizeImageToMax()'s caller, which is a
+     * 500 on a flyer upload. The code this replaced compared floats and simply refused.
+     *
+     * Callers are responsible for restoring memory_limit afterwards; a raise left standing
+     * outlives the one image it was for. restoreMemoryLimit() is the safe way to do it.
+     */
+    public static function canDecodePixels(
+        int|float $pixels,
+        int $ceilingBytes = self::IMAGE_MEMORY_CEILING_BYTES,
+        int $floorPixels = self::VARIANT_MAX_PIXELS
+    ): bool {
+        // Before any arithmetic, and while $pixels may still be a float: everything below this
+        // point is safely inside the integer range.
+        if (! is_finite((float) $pixels) || $pixels < 1 || $pixels > self::IMAGE_MAX_PIXELS_CEILING) {
+            return false;
+        }
+
+        $pixels = (int) $pixels;
+
+        if ($pixels <= $floorPixels) {
+            return true;
+        }
+
+        // 4 bytes per pixel for the truecolor canvas, x2 for allocator overhead and the temp
+        // image created during resampling, plus a fixed slice for the framework itself.
+        $needed = memory_get_usage(true) + ($pixels * 4 * 2) + (16 * 1024 * 1024);
+
+        // The ceiling caps the DECODE, not merely how far we are willing to raise. Checking it
+        // after the "already fits" test below would mean a host with memory_limit=-1 (the default
+        // in the official PHP Docker images) approves anything under IMAGE_MAX_PIXELS_CEILING and
+        // hands GD a quarter-gigabyte allocation with no PHP limit left to turn an overrun into a
+        // catchable fatal - a container OOM kill mid-job instead of a recorded skip, which the
+        // queue then retries into. It also makes the figure both docs quote actually true.
+        if ($needed > $ceilingBytes) {
+            return false;
+        }
+
+        if ($needed <= self::parseMemoryLimit((string) ini_get('memory_limit'))) {
+            return true;
+        }
+
+        @ini_set('memory_limit', ((int) ceil($needed / (1024 * 1024))).'M');
+
+        return self::parseMemoryLimit((string) ini_get('memory_limit')) >= $needed;
+    }
+
+    /**
+     * Put memory_limit back to what a caller saw before canDecodePixels() raised it.
+     *
+     * Lowering it is safe to attempt unconditionally: PHP's own handler REFUSES to set
+     * memory_limit below what the process is currently holding - ini_set() returns false and the
+     * value is left alone - so a restore can never strand the process under its own footprint.
+     * (Measured, not assumed: allocate 40MB against a 128M limit and ini_set('16M') returns
+     * bool(false) with the limit still reading 128M.)
+     *
+     * The consequence worth knowing is the other one: in that case the RAISE simply persists,
+     * quietly. Every caller here destroys its GD resources first, so usage has come back down and
+     * the restore takes; but "the limit is always put back" is a statement about the normal path,
+     * not a guarantee.
+     *
+     * Only the empty and non-string cases are ours to handle: ini_get() returns false when it
+     * cannot read the setting, and there is nothing useful to restore to.
+     */
+    public static function restoreMemoryLimit(string|false|null $previous): void
+    {
+        if (! is_string($previous) || $previous === '') {
+            return;
+        }
+
+        @ini_set('memory_limit', $previous);
+    }
+
+    /**
+     * Bytes in a memory_limit string. `-1` (no limit) reads as PHP_INT_MAX.
+     *
+     * An EMPTY string reads as 0, not as unlimited. canDecodePixels() calls this as
+     * `parseMemoryLimit((string) ini_get('memory_limit'))`, and ini_get() returns false - which
+     * casts to '' - when it cannot read the setting. Treating that as PHP_INT_MAX would let a
+     * failure to read the limit approve the largest decode on offer, which is the wrong way round
+     * for a value used to decide whether an allocation is safe.
+     */
+    public static function parseMemoryLimit(string $value): int
+    {
+        $value = trim($value);
+
+        if ($value === '-1') {
+            return PHP_INT_MAX;
+        }
+
+        if ($value === '') {
+            return 0;
+        }
+
+        $unit = strtolower(substr($value, -1));
+        $num = (int) $value;
+
+        return match ($unit) {
+            'g' => $num * 1024 * 1024 * 1024,
+            'm' => $num * 1024 * 1024,
+            'k' => $num * 1024,
+            default => (int) $value,
+        };
+    }
 
     /**
      * Deterministic name for a derivative of a stored image.
@@ -324,14 +492,26 @@ class ImageUtils
      * filename always names the REQUESTED width so the recorded key stays predictable.
      *
      * @param  int[]  $widths
-     * @return array<int, array{ok: bool, filename: ?string, reason: ?string}> keyed by width;
-     *                                                                         see VARIANT_DETERMINISTIC_REASONS and VARIANT_TRANSIENT_REASONS
+     * @return array<int, array{ok: bool, filename: ?string, reason: ?string, detail?: ?string}> keyed by
+     *                                                                                           width; see VARIANT_DETERMINISTIC_REASONS and
+     *                                                                                           VARIANT_TRANSIENT_REASONS. `detail` is an optional
+     *                                                                                           human-readable note about the reason (currently the source
+     *                                                                                           dimensions behind a `too_large`); it is for display only and
+     *                                                                                           is never persisted, so read it with `?? null`.
      */
-    public static function generateStoredVariants(string $storedName, array $widths = self::VARIANT_WIDTHS): array
-    {
+    public static function generateStoredVariants(
+        string $storedName,
+        array $widths = self::VARIANT_WIDTHS,
+        int $ceilingBytes = self::IMAGE_MEMORY_CEILING_BYTES
+    ): array {
         $widths = array_values(array_unique(array_map('intval', $widths)));
 
-        $skipAll = fn (string $reason) => array_fill_keys($widths, ['ok' => false, 'filename' => null, 'reason' => $reason]);
+        // `detail` is display only: it reaches the console line and the log, never the recorded
+        // `skipped` value, which stays the bare token the reason vocabulary is matched on.
+        $skipAll = fn (string $reason, ?string $detail = null) => array_fill_keys(
+            $widths,
+            ['ok' => false, 'filename' => null, 'reason' => $reason, 'detail' => $detail]
+        );
 
         if (! $storedName) {
             return $skipAll('missing');
@@ -385,6 +565,11 @@ class ImageUtils
 
         $sourceImage = null;
 
+        // canDecodePixels() below may raise memory_limit for this one image. The backfill walks
+        // thousands of rows in one process and the queue worker is long-lived, so the raise is
+        // undone in the finally rather than left standing for everything that follows.
+        $previousMemoryLimit = ini_get('memory_limit');
+
         try {
             $read = Storage::readStream($sourcePath);
             if (! $read) {
@@ -418,8 +603,11 @@ class ImageUtils
                 return $skipAll('unreadable');
             }
 
-            if (($srcWidth * $srcHeight) > self::VARIANT_MAX_PIXELS) {
-                return $skipAll('too_large');
+            // Measured, not assumed: canDecodePixels() raises memory_limit where that is all
+            // this needs and the platform is willing, so a 20MP flyer gets its derivatives in a
+            // console session even though it stays refused inside a pinned 128MB worker.
+            if (! self::canDecodePixels($srcWidth * $srcHeight, $ceilingBytes)) {
+                return $skipAll('too_large', $srcWidth.'x'.$srcHeight.', '.round($srcWidth * $srcHeight / 1_000_000, 1).'MP');
             }
 
             $sourceImage = match ($mimeType) {
@@ -459,6 +647,9 @@ class ImageUtils
             if (file_exists($tempOut)) {
                 @unlink($tempOut);
             }
+            // After imagedestroy(), so usage has had its best chance to come back down - but
+            // restoreMemoryLimit() checks rather than trusting that.
+            self::restoreMemoryLimit($previousMemoryLimit);
         }
     }
 
@@ -527,7 +718,7 @@ class ImageUtils
     /**
      * Write a single WebP derivative. Thin wrapper over generateStoredVariants().
      *
-     * @return array{ok: bool, filename: ?string, reason: ?string}
+     * @return array{ok: bool, filename: ?string, reason: ?string, detail?: ?string}
      */
     public static function generateStoredVariant(string $storedName, int $width = self::VARIANT_WIDTH): array
     {
@@ -785,8 +976,12 @@ class ImageUtils
      * transparency, and original format. Returns false if the image is too
      * large to safely decode within current memory limits.
      */
-    public static function resizeImageToMax(string $path, int $maxDim = 2000, int $quality = 85): bool
-    {
+    public static function resizeImageToMax(
+        string $path,
+        int $maxDim = 2000,
+        int $quality = 85,
+        int $ceilingBytes = self::IMAGE_MEMORY_CEILING_BYTES
+    ): bool {
         if (! file_exists($path)) {
             return false;
         }
@@ -803,13 +998,39 @@ class ImageUtils
             return true;
         }
 
-        // Refuse pathologically large images rather than risk an OOM during
-        // decode. ~16MP * 4 bytes = 64MB; with framework overhead this is the
-        // safe ceiling on a 128MB PHP_FPM process.
-        if (($srcWidth * $srcHeight) > 16_000_000) {
-            return false;
-        }
+        // BEFORE canDecodePixels(), which raises memory_limit as a side effect. Capturing after
+        // it snapshots the raised value, so the finally restores the raise to itself and the
+        // process keeps it - and on a long-lived one that ratchets, because every later image
+        // then measures against the already-raised limit. Callers include the web upload path,
+        // which goes on to do the rest of an event save.
+        $previousMemoryLimit = ini_get('memory_limit');
 
+        try {
+            // Refuse what will not fit rather than risk an OOM during decode. This was a flat
+            // 16MP, a third hardcoded ceiling for the same GD decode that generateStoredVariants()
+            // guarded at 12MP and AbstractEventDesign budgeted properly.
+            //
+            // The old 16MP stays as the unmeasured floor so this is purely additive: everything
+            // that resized before still resizes, and 16MP up to whatever the ceiling affords now
+            // resizes too. Tightening here would be the wrong direction - a refusal means the
+            // ORIGINAL is stored at full size (EventRepo ignores the return value), which is
+            // exactly the oversized flyer the thumbnail pipeline then has to cope with.
+            if (! self::canDecodePixels($srcWidth * $srcHeight, $ceilingBytes, floorPixels: 16_000_000)) {
+                return false;
+            }
+
+            return self::resizeDecodedImage($path, $mimeType, $maxDim, $quality);
+        } finally {
+            self::restoreMemoryLimit($previousMemoryLimit);
+        }
+    }
+
+    /**
+     * The decode-and-rewrite half of resizeImageToMax(), split out so the memory_limit raised for
+     * it is restored on every one of its exits rather than on the happy path only.
+     */
+    private static function resizeDecodedImage(string $path, ?string $mimeType, int $maxDim, int $quality): bool
+    {
         switch ($mimeType) {
             case 'image/jpeg':
                 $sourceImage = @imagecreatefromjpeg($path);

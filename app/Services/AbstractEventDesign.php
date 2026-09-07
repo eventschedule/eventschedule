@@ -5,9 +5,11 @@ namespace App\Services;
 use App\Models\Event;
 use App\Models\Role;
 use App\Utils\EventTextGenerator;
+use App\Utils\ImageUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 abstract class AbstractEventDesign
 {
@@ -1307,48 +1309,25 @@ abstract class AbstractEventDesign
         $width = (int) $info[0];
         $height = (int) $info[1];
 
-        // GD truecolor decode cost ≈ width × height × 4 bytes. Use 2x as a
-        // conservative multiplier covering allocator overhead and the temp
-        // image created during resampling.
-        $estimatedBytes = $width * $height * 4 * 2;
-        $currentUsage = memory_get_usage(true);
-        $needed = $currentUsage + $estimatedBytes + (16 * 1024 * 1024);
-        $currentLimit = $this->parseMemoryLimit(ini_get('memory_limit'));
+        // The estimate, the bump and the verify-it-took re-read all live in ImageUtils now, so
+        // this method and the thumbnail pipeline cannot drift apart. Graphic generation keeps its
+        // own, more generous ceiling: it runs one image per request rather than thousands in a
+        // long-lived worker, and its output is the whole point of the request.
+        //
+        // Logged because this is the one path the shared helper made STRICTER. The old code
+        // applied no pixel ceiling at all: on a box with a generous memory_limit the budget block
+        // was skipped entirely and any size decoded, so a 648MB background on a 512MB container
+        // was an OOM waiting to happen rather than a refusal. Refusing is right, but every caller
+        // here falls through to a placeholder, so without this line the graphic just quietly
+        // renders without its background.
+        if (! ImageUtils::canDecodePixels($width * $height, 512 * 1024 * 1024, floorPixels: 0)) {
+            Log::info('safeImageCreateFromString refused a '.$width.'x'.$height
+                .' image: past the decode budget for this process');
 
-        if ($needed > $currentLimit) {
-            $newLimitMb = (int) ceil($needed / (1024 * 1024));
-            if ($newLimitMb > 512) {
-                return false;
-            }
-            @ini_set('memory_limit', $newLimitMb.'M');
-
-            // Verify the bump actually took effect. Some hosts lock memory_limit
-            // via php_admin_value (PHP_INI_SYSTEM) — ini_set returns silently
-            // but the limit doesn't change.
-            $actualLimit = $this->parseMemoryLimit(ini_get('memory_limit'));
-            if ($actualLimit < $needed) {
-                return false;
-            }
+            return false;
         }
 
         return @imagecreatefromstring($imageData) ?: false;
-    }
-
-    private function parseMemoryLimit(string $value): int
-    {
-        $value = trim($value);
-        if ($value === '-1' || $value === '') {
-            return PHP_INT_MAX;
-        }
-        $unit = strtolower(substr($value, -1));
-        $num = (int) $value;
-
-        return match ($unit) {
-            'g' => $num * 1024 * 1024 * 1024,
-            'm' => $num * 1024 * 1024,
-            'k' => $num * 1024,
-            default => (int) $value,
-        };
     }
 
     /**
