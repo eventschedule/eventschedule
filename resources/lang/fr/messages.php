@@ -4255,6 +4255,7 @@ return [
     'federation_suspend_selected' => 'Suspendre la sélection',
     'federation_bulk_hint' => 'Sélectionnez des instances pour les examiner ensemble.',
     'federation_flagged_warning' => 'Cette instance a signalé une adresse différente de celle enregistrée. Vérifiez son authenticité avant de l\'approuver.',
+    'federation_no_contact_email_warning' => 'Aucune adresse e-mail de contact enregistrée. Approuver ou suspendre cette instance ne préviendra personne.',
     'federation_sample_listings' => 'Exemples d\'annonces',
     'federation_public_schedules' => 'Programmes publics',
     'federation_no_listings_yet' => 'Aucune annonce reçue pour le moment.',

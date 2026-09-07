@@ -1193,26 +1193,23 @@ class EventController extends Controller
             }
         }
 
-        // Send email to the user who submitted the event
-        // Only send if they have an email and aren't a member of the accepting role
-        // (Guest submissions without accounts have user_id set to venue's user)
-        if ($event->user && $event->user->email && ! is_demo_mode()) {
-            if (! $event->user->isMember($subdomain)) {
-                SendQueuedEmail::dispatch(
-                    new EventAccepted($event, $role),
-                    $event->user->email,
-                    null,
-                    $event->user->language_code
-                );
+        // Tell whoever asked this schedule for a listing - if anybody actually did. Same rule as
+        // decline(): events.user_id is the creator, not a record of who requested THIS schedule.
+        if ($recipient = $this->requestDecisionRecipient($event, $role)) {
+            SendQueuedEmail::dispatch(
+                new EventAccepted($event, $role),
+                $recipient->email,
+                null,
+                $recipient->language_code
+            );
 
-                OneSignalService::pushToUser($event->user, [
-                    'title_key' => 'messages.push_event_accepted_title',
-                    'body_key' => 'messages.push_event_accepted_body',
-                    'body_params' => ['event' => $event->name],
-                    'url' => $event->getGuestUrl(false, null, true),
-                    'options' => ['icon' => $role->profile_image_url],
-                ], $role);
-            }
+            OneSignalService::pushToUser($recipient, [
+                'title_key' => 'messages.push_event_accepted_title',
+                'body_key' => 'messages.push_event_accepted_body',
+                'body_params' => ['event' => $event->name],
+                'url' => $event->getGuestUrl(false, null, true),
+                'options' => ['icon' => $role->profile_image_url],
+            ], $role);
         }
 
         AuditService::log(AuditService::EVENT_ACCEPT, $user->id, 'Event', $event->id, null, null, $role->name);
@@ -1292,7 +1289,7 @@ class EventController extends Controller
         }
 
         // Tell whoever asked this schedule for a listing - if anybody actually did.
-        if ($recipient = $this->declineNotificationRecipient($event, $role)) {
+        if ($recipient = $this->requestDecisionRecipient($event, $role)) {
             SendQueuedEmail::dispatch(
                 new EventDeclined($event, $role),
                 $recipient->email,
@@ -1316,17 +1313,20 @@ class EventController extends Controller
     }
 
     /**
-     * Who to tell that $role turned this event down, or null if nobody asked $role for anything.
+     * Who to tell that $role accepted or declined this event, or null if nobody asked $role for
+     * anything. One rule for both verbs deliberately: the question "did this person request a
+     * listing here" has the same answer either way, and two copies would drift.
      *
      * events.user_id is the event's CREATOR, stamped once at creation (EventRepo::saveEvent, behind
      * an $isNewEvent guard) and never updated. It is NOT a record of who requested this schedule, so
-     * "your event request at X has been declined" is only true for some of the rows that reach here.
-     * Three shapes put a user in user_id who never made a request; each gets its own skip.
+     * "your event request at X has been accepted" (or declined) is only true for some of the rows
+     * that reach here. Three shapes put a user in user_id who never made a request; each gets its
+     * own skip.
      */
-    private function declineNotificationRecipient(Event $event, Role $role): ?User
+    private function requestDecisionRecipient(Event $event, Role $role): ?User
     {
-        // The curator pulled this event in themselves via a source, so declining it is a removal
-        // from their own listing, not an answer to anybody. uncurate() already makes the identical
+        // The curator pulled this event in themselves via a source, so a decision on it is an edit
+        // to their own listing, not an answer to anybody. uncurate() already makes the identical
         // pivot write silently - this is what keeps the two routes agreeing.
         //
         // Defensive today rather than a live path: CuratorSourceService::linkMissing() inserts
@@ -1350,9 +1350,10 @@ class EventController extends Controller
             return null;
         }
 
-        // An appointment booking: the guest already got AppointmentDeclined from the branch above,
-        // and user_id here is the schedule's own owner (AppointmentService sets it that way), so
-        // this would be a second mail with the wrong wording to the wrong person.
+        // An appointment booking: the guest already got AppointmentConfirmed or AppointmentDeclined
+        // from the branch above, and user_id here is the schedule's own owner (AppointmentService
+        // sets it that way), so this would be a second mail with the wrong wording to the wrong
+        // person. acceptAll() skips bookings before reaching here for the same reason.
         if ($event->appointment_type_id) {
             return null;
         }
@@ -1369,7 +1370,7 @@ class EventController extends Controller
             return null;
         }
 
-        // Somebody on the declining schedule's own team: they can see the decision in the UI.
+        // Somebody on the deciding schedule's own team: they can see the outcome in the UI.
         if ($user->isMember($role->subdomain)) {
             return null;
         }
@@ -1470,26 +1471,22 @@ class EventController extends Controller
                     continue; // the generic submitter email below never applies to bookings
                 }
 
-                // Send email to the user who submitted the event
-                // Only send if they have an email and aren't a member of the accepting role
-                // (Guest submissions without accounts have user_id set to venue's user)
-                if ($event->user && $event->user->email && ! is_demo_mode()) {
-                    if (! $event->user->isMember($subdomain)) {
-                        SendQueuedEmail::dispatch(
-                            new EventAccepted($event, $role),
-                            $event->user->email,
-                            null,
-                            $event->user->language_code
-                        );
+                // Same recipient rule as accept() and decline() - see requestDecisionRecipient().
+                if ($recipient = $this->requestDecisionRecipient($event, $role)) {
+                    SendQueuedEmail::dispatch(
+                        new EventAccepted($event, $role),
+                        $recipient->email,
+                        null,
+                        $recipient->language_code
+                    );
 
-                        OneSignalService::pushToUser($event->user, [
-                            'title_key' => 'messages.push_event_accepted_title',
-                            'body_key' => 'messages.push_event_accepted_body',
-                            'body_params' => ['event' => $event->name],
-                            'url' => $event->getGuestUrl(false, null, true),
-                            'options' => ['icon' => $role->profile_image_url],
-                        ], $role);
-                    }
+                    OneSignalService::pushToUser($recipient, [
+                        'title_key' => 'messages.push_event_accepted_title',
+                        'body_key' => 'messages.push_event_accepted_body',
+                        'body_params' => ['event' => $event->name],
+                        'url' => $event->getGuestUrl(false, null, true),
+                        'options' => ['icon' => $role->profile_image_url],
+                    ], $role);
                 }
             }
         }

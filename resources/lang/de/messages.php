@@ -4252,6 +4252,7 @@ return [
     'federation_suspend_selected' => 'Ausgewählte sperren',
     'federation_bulk_hint' => 'Wähle Instanzen aus, um sie gemeinsam zu prüfen.',
     'federation_flagged_warning' => 'Diese Instanz hat eine andere Adresse gemeldet als die hinterlegte. Prüfe vor der Genehmigung, ob sie echt ist.',
+    'federation_no_contact_email_warning' => 'Keine Kontakt-E-Mail hinterlegt. Diese Instanz zu genehmigen oder zu sperren benachrichtigt niemanden.',
     'federation_sample_listings' => 'Beispieleinträge',
     'federation_public_schedules' => 'Öffentliche Zeitpläne',
     'federation_no_listings_yet' => 'Noch keine Einträge erhalten.',

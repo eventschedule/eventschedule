@@ -4287,6 +4287,7 @@ return [
     'federation_suspend_selected' => 'Suspendă selecția',
     'federation_bulk_hint' => 'Selectează instanțe pentru a le analiza împreună.',
     'federation_flagged_warning' => 'Această instanță a raportat o altă adresă decât cea înregistrată. Confirmă că este autentică înainte de aprobare.',
+    'federation_no_contact_email_warning' => 'Nu există un e-mail de contact înregistrat. Aprobarea sau suspendarea acestei instanțe nu va notifica pe nimeni.',
     'federation_sample_listings' => 'Anunțuri de exemplu',
     'federation_public_schedules' => 'Programe publice',
     'federation_no_listings_yet' => 'Nu a fost primit încă niciun anunț.',

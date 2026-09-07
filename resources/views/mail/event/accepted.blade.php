@@ -32,14 +32,16 @@
         </div>
 
         <div style="text-align: center; margin: 25px 0;">
-            <a href="{{ $event->getGuestUrl() }}" style="display: inline-block; background-color: #4E81FA; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 600;">
+            <a href="{{ $event->getGuestUrl(false, null, true) }}" style="display: inline-block; background-color: #4E81FA; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 600;">
                 {{ __('messages.view_event') }}
             </a>
         </div>
 
+        @if ($creatorRole)
         <p style="font-size: 12px; color: #999; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
             {!! __('messages.claim_email_line2', ['click_here' => '<a href="' . route('role.show_unsubscribe', ['email' => base64_encode($creatorRole->email)]) . '" style="color: #4E81FA;">' . __('messages.click_here') . '</a>']) !!}
         </p>
+        @endif
 
         <p style="font-size: 12px; color: #999; margin-top: 10px;">
             {{ __('messages.thanks') }},<br>

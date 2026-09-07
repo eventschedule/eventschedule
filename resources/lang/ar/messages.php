@@ -4249,6 +4249,7 @@ return [
     'federation_suspend_selected' => 'إيقاف المحدد',
     'federation_bulk_hint' => 'حدد النسخ لمراجعتها معًا.',
     'federation_flagged_warning' => 'أبلغت هذه النسخة عن عنوان مختلف عن المسجل. تأكد من صحتها قبل الاعتماد.',
+    'federation_no_contact_email_warning' => 'لا يوجد بريد إلكتروني للتواصل. اعتماد هذه النسخة أو تعليقها لن يُشعر أحدًا.',
     'federation_sample_listings' => 'أمثلة على الإعلانات',
     'federation_public_schedules' => 'الجداول العامة',
     'federation_no_listings_yet' => 'لم يتم استلام أي إعلانات بعد.',

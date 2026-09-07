@@ -4248,6 +4248,7 @@ return [
     'federation_suspend_selected' => 'Suspender selecionadas',
     'federation_bulk_hint' => 'Selecione instâncias para as analisar em conjunto.',
     'federation_flagged_warning' => 'Esta instância indicou um endereço diferente do registado. Confirme que é autêntica antes de aprovar.',
+    'federation_no_contact_email_warning' => 'Não há email de contacto registado. Aprovar ou suspender esta instância não notificará ninguém.',
     'federation_sample_listings' => 'Anúncios de exemplo',
     'federation_public_schedules' => 'Agendas públicas',
     'federation_no_listings_yet' => 'Ainda não foram recebidos anúncios.',

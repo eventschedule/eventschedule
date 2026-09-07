@@ -4248,6 +4248,7 @@ return [
     'federation_suspend_selected' => 'Suspender seleccionadas',
     'federation_bulk_hint' => 'Selecciona instancias para revisarlas juntas.',
     'federation_flagged_warning' => 'Esta instancia informó una dirección distinta a la registrada. Confirma que es auténtica antes de aprobarla.',
+    'federation_no_contact_email_warning' => 'No hay correo de contacto registrado. Aprobar o suspender esta instancia no notificará a nadie.',
     'federation_sample_listings' => 'Publicaciones de muestra',
     'federation_public_schedules' => 'Agendas públicas',
     'federation_no_listings_yet' => 'Aún no se han recibido publicaciones.',

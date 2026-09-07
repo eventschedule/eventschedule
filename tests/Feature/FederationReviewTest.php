@@ -55,6 +55,31 @@ class FederationReviewTest extends TestCase
         ], $attributes));
     }
 
+    /**
+     * contact_email is optional at registration and applyStatus() silently skips the mail when it
+     * is missing, so without this panel an admin approves an install believing the operator was
+     * told. Both directions asserted: a warning that always shows would be just as useless.
+     */
+    public function test_an_instance_with_no_contact_email_is_flagged_in_the_queue(): void
+    {
+        $this->adminActing();
+        $this->makeInstance(['contact_email' => null]);
+
+        $this->get(route('admin.federation'))
+            ->assertOk()
+            ->assertSeeText(__('messages.federation_no_contact_email_warning'));
+    }
+
+    public function test_an_instance_with_a_contact_email_is_not_flagged(): void
+    {
+        $this->adminActing();
+        $this->makeInstance();
+
+        $this->get(route('admin.federation'))
+            ->assertOk()
+            ->assertDontSeeText(__('messages.federation_no_contact_email_warning'));
+    }
+
     public function test_the_queue_renders_with_pending_instances_and_a_sample(): void
     {
         $this->adminActing();

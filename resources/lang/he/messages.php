@@ -4243,6 +4243,7 @@ return [
     'federation_suspend_selected' => 'השעיית הנבחרים',
     'federation_bulk_hint' => 'בחרו מופעים כדי לבדוק אותם יחד.',
     'federation_flagged_warning' => 'המופע הזה דיווח על כתובת שונה מזו הרשומה. ודאו שהוא אמיתי לפני האישור.',
+    'federation_no_contact_email_warning' => 'לא נרשמה כתובת מייל ליצירת קשר. אישור או השעיה של המופע הזה לא יידעו אף אחד.',
     'federation_sample_listings' => 'רישומים לדוגמה',
     'federation_public_schedules' => 'לוחות זמנים פומביים',
     'federation_no_listings_yet' => 'עדיין לא התקבלו רישומים.',

@@ -167,6 +167,10 @@ class EventDeclineNotificationTest extends TestCase
         $this->decline($curatorOwner, $curator, $event->fresh());
 
         $this->assertSame([], $this->sentTo(EventDeclined::class)->all());
+
+        // Anchor the absence, as the other suppression tests here do: a 403 or a 404 on the POST
+        // would read exactly like working suppression.
+        $this->assertFalse((bool) $event->roles()->where('roles.id', $curator->id)->first()->pivot->is_accepted);
     }
 
     public function test_the_mail_renders_without_a_creator_role(): void
@@ -184,6 +188,13 @@ class EventDeclineNotificationTest extends TestCase
         // Both of these used to dereference a null creatorRole and fatal inside SendQueuedEmail.
         $this->assertSame([], $mailable->headers()->text);
         $this->assertStringContainsString($event->name, $mailable->render());
+
+        // Mailer::render() renders ONLY the html view (renderView($view ?: $plain)), while a real
+        // send renders both (Mailer::addContent()). Without this line the text twin's guard is
+        // unpinned: delete it and every send throws again while this test stays green. Driven off
+        // content() so the view name and the data cannot drift from the mailable.
+        $content = $mailable->content();
+        $this->assertStringContainsString($event->name, view($content->text, $content->with)->render());
     }
 
     // -- The write side: the flag has to actually get stamped ---------------------------------

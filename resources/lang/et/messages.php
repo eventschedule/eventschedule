@@ -4267,6 +4267,7 @@ return [
     'federation_suspend_selected' => 'Peata valitud',
     'federation_bulk_hint' => 'Vali eksemplarid, et need koos üle vaadata.',
     'federation_flagged_warning' => 'See eksemplar teatas registreeritust erineva aadressi. Kontrolli enne kinnitamist, kas see on ehtne.',
+    'federation_no_contact_email_warning' => 'Kontakt-e-posti aadressi ei ole. Selle eksemplari kinnitamine või peatamine ei teavita kedagi.',
     'federation_sample_listings' => 'Näidiskirjed',
     'federation_public_schedules' => 'Avalikud ajakavad',
     'federation_no_listings_yet' => 'Ühtegi kirjet ei ole veel saadud.',

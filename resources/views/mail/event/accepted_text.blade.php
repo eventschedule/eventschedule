@@ -10,9 +10,11 @@
 {{ $event->getVenueDisplayName() }}
 @endif
 
-{{ __('messages.view_event') }}: {{ $event->getGuestUrl() }}
+{{ __('messages.view_event') }}: {{ $event->getGuestUrl(false, null, true) }}
 
+@if ($creatorRole)
 {{ strip_tags(__('messages.claim_email_line2', ['click_here' => __('messages.click_here')])) }}: {{ route('role.show_unsubscribe', ['email' => base64_encode($creatorRole->email)]) }}
+@endif
 
 {{ __('messages.thanks') }},
 {{ config('app.name') }}

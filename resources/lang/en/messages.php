@@ -4673,6 +4673,7 @@ return [
     'federation_suspend_selected' => 'Suspend selected',
     'federation_bulk_hint' => 'Select instances to review them together.',
     'federation_flagged_warning' => 'This instance reported a different address than the one on record. Confirm it is genuine before approving.',
+    'federation_no_contact_email_warning' => 'No contact email on file. Approving or suspending this install will not notify anyone.',
     'federation_sample_listings' => 'Sample listings',
     'federation_public_schedules' => 'Public schedules',
     'federation_no_listings_yet' => 'No listings received yet.',

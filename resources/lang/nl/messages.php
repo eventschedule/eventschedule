@@ -4248,6 +4248,7 @@ return [
     'federation_suspend_selected' => 'Selectie schorsen',
     'federation_bulk_hint' => 'Selecteer instanties om ze samen te beoordelen.',
     'federation_flagged_warning' => 'Deze instantie meldde een ander adres dan het geregistreerde. Controleer of ze echt is voordat je goedkeurt.',
+    'federation_no_contact_email_warning' => 'Geen contact-e-mailadres bekend. Deze instantie goedkeuren of opschorten stelt niemand op de hoogte.',
     'federation_sample_listings' => 'Voorbeeldvermeldingen',
     'federation_public_schedules' => 'Openbare agenda\'s',
     'federation_no_listings_yet' => 'Nog geen vermeldingen ontvangen.',

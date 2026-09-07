@@ -4269,6 +4269,7 @@ return [
     'federation_suspend_selected' => 'Приостановить выбранные',
     'federation_bulk_hint' => 'Выберите экземпляры, чтобы рассмотреть их вместе.',
     'federation_flagged_warning' => 'Этот экземпляр указал адрес, отличный от записанного. Убедитесь в его подлинности перед одобрением.',
+    'federation_no_contact_email_warning' => 'Контактный адрес не указан. Одобрение или приостановка этого экземпляра никого не уведомит.',
     'federation_sample_listings' => 'Примеры объявлений',
     'federation_public_schedules' => 'Публичные расписания',
     'federation_no_listings_yet' => 'Объявлений пока не получено.',
