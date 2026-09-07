@@ -77,8 +77,8 @@ When a buyer taps the button, and only then, the app sends Google:
 
 - the attendee name, the event name, the venue name and address, and the start time
 - the ticket type, any seat labels, and the number of admissions
-- the venue's coordinates, when it has an address on file, so the pass can surface on the
-  attendee's phone when they arrive
+- the venue's coordinates, when it has an address on file, so Google can notify the attendee when
+  they come within its own radius of the venue
 - the ticket URL, which contains that sale's secret
 
 The ticket URL has to be there: it is what the pass's QR code encodes, and the door scanner reads
@@ -88,7 +88,7 @@ that exact URL. Nothing is sent for a buyer who never taps the button.
 
 - **The class** describes one occurrence: branding, venue, date and time. It is created once over
   the Wallet REST API and then cached, because a JWT carrying both the class and the object exceeds
-  the 1800-character limit Google truncates a save link at.
+  the 1800 characters Google documents as the safe length of an encoded JWT.
 - **The object** is the individual ticket. It rides inside a signed JWT in the save link, so there
   is no per-sale state on Google's side and no per-sale API call.
 - **The pass is a snapshot.** It is never updated after it is saved. Cancelling or refunding an

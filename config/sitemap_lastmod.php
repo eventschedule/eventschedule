@@ -70,7 +70,7 @@ return [
     '/docs/selfhost/stripe' => '2026-09-04',
     '/docs/sharing' => '2026-09-06',
     '/docs/subscriptions' => '2026-09-04',
-    '/docs/tickets' => '2026-09-06',
+    '/docs/tickets' => '2026-09-07',
     '/doodle-replacement' => '2026-09-04',
     '/eventbrite-alternative' => '2026-09-04',
     '/eventzilla-alternative' => '2026-09-04',

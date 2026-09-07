@@ -289,7 +289,11 @@ class GoogleWalletPassTest extends TestCase
 
         // Two admissions on one sale, so the pass says so.
         $admits = collect($object['textModulesData'] ?? [])->firstWhere('id', 'admits');
-        $this->assertSame('2', $admits['body'] ?? null);
+        $this->assertSame('2', $admits['localizedBody']['defaultValue']['value'] ?? null);
+        // localizedHeader, not header: a bare header resolves in the REQUEST locale, so a Hebrew
+        // schedule's pass saved by an English-locale buyer would carry English labels forever.
+        $this->assertSame('en', $admits['localizedHeader']['defaultValue']['language'] ?? null);
+        $this->assertArrayNotHasKey('header', $admits);
     }
 
     public function test_venue_coordinates_become_a_pass_location(): void
@@ -310,8 +314,14 @@ class GoogleWalletPassTest extends TestCase
         $response = $this->get($this->walletUrl($event, $sale));
         $object = $this->decodeJwtFromRedirect($response->headers->get('Location'))['claims']['payload']['eventTicketObjects'][0];
 
-        $this->assertEqualsWithDelta(40.7306, $object['locations'][0]['latitude'], 0.0001);
-        $this->assertEqualsWithDelta(-73.9866, $object['locations'][0]['longitude'], 0.0001);
+        // On the CLASS as merchantLocations. EventTicketObject.locations is deprecated and
+        // documented as "currently not supported to trigger geo notifications", so coordinates sent
+        // that way would be inert - the pass would look right and never fire a notification.
+        $class = $this->sentClassPayload();
+        $this->assertEqualsWithDelta(40.7306, $class['merchantLocations'][0]['latitude'], 0.0001);
+        $this->assertEqualsWithDelta(-73.9866, $class['merchantLocations'][0]['longitude'], 0.0001);
+        $this->assertArrayNotHasKey('locations', $class, 'The deprecated field must not be sent.');
+        $this->assertArrayNotHasKey('locations', $object, 'The deprecated field must not be sent.');
     }
 
     public function test_a_venue_without_coordinates_gets_no_location(): void
@@ -325,6 +335,81 @@ class GoogleWalletPassTest extends TestCase
         $object = $this->decodeJwtFromRedirect($response->headers->get('Location'))['claims']['payload']['eventTicketObjects'][0];
 
         $this->assertArrayNotHasKey('locations', $object);
+        $this->assertArrayNotHasKey('merchantLocations', $this->sentClassPayload());
+    }
+
+    /*
+     * ------------------------------------------------------------------ misconfiguration
+     */
+
+    public function test_a_directory_in_the_credential_path_turns_the_feature_off_rather_than_500ing(): void
+    {
+        // is_readable() answers TRUE for a directory, and file_get_contents() on one raises an
+        // E_WARNING that HandleExceptions rethrows as an ErrorException. canOffer() is called from
+        // four blade templates with no try/catch around them, so before the is_file() guard this
+        // took down every ticket page and every confirmation email on an install that had merely
+        // fat-fingered an optional setting.
+        config([
+            'services.google.wallet_issuer_id' => '3388000000012345678',
+            'services.google.wallet_service_account' => sys_get_temp_dir(),
+        ]);
+
+        $this->assertFalse(GoogleWalletService::isConfigured());
+
+        [$role, $event, $sale] = $this->paidTicket();
+
+        $this->get(route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]))
+            ->assertOk()
+            ->assertDontSee('images/wallet/google');
+
+        $this->get($this->walletUrl($event, $sale))->assertRedirect();
+    }
+
+    public function test_a_whitespace_only_issuer_id_does_not_switch_the_feature_on(): void
+    {
+        // ! empty('   ') is true, so an untrimmed check would have read this as configured and then
+        // failed on every tap with only a Google 400 in the log to show for it.
+        $this->configureWallet();
+        config(['services.google.wallet_issuer_id' => "  \n "]);
+
+        $this->assertFalse(GoogleWalletService::isConfigured());
+    }
+
+    public function test_an_appointment_booking_is_not_offered_a_pass(): void
+    {
+        // ticket.view redirects bookings to their own manage page and EmailService sends them their
+        // own mailables, so no badge renders - but the route would still have minted a pass for one
+        // from a hand-built URL.
+        $this->configureWallet();
+        $this->fakeGoogle();
+
+        [$role, $event, $sale] = $this->paidTicket();
+        $event->appointment_type_id = 1;
+        $event->save();
+
+        $this->assertFalse(GoogleWalletService::canOffer($sale, $event->fresh()));
+
+        $this->get($this->walletUrl($event, $sale))->assertRedirect();
+        $this->assertNothingSentToGoogle();
+    }
+
+    public function test_a_ticket_bought_far_in_advance_is_valid_immediately(): void
+    {
+        $this->configureWallet();
+        $this->fakeGoogle();
+
+        [$role, $event, $sale] = $this->paidTicket(['starts_at' => now()->addMonths(3)->setTime(20, 0)->format('Y-m-d H:i:s')]);
+
+        $object = $this->decodeJwtFromRedirect(
+            $this->get($this->walletUrl($event, $sale))->headers->get('Location')
+        )['claims']['payload']['eventTicketObjects'][0];
+
+        // End only. Google documents validTimeInterval as "the time period this object will be
+        // active and object can be used" and says nothing about the state BEFORE start, so a start
+        // would risk parking a ticket bought months out as not-yet-usable. The end still archives
+        // it, which is the whole reason the field is here.
+        $this->assertArrayHasKey('end', $object['validTimeInterval']);
+        $this->assertArrayNotHasKey('start', $object['validTimeInterval']);
     }
 
     /*
@@ -457,7 +542,14 @@ class GoogleWalletPassTest extends TestCase
         $sale->is_deleted = true;
         $sale->save();
 
-        $this->get($this->walletUrl($event, $sale))->assertNotFound();
+        // Redirect, not 404: ticket.view does not filter is_deleted either, so the page still
+        // renders - and googleWalletPass()'s docblock promises a buyer who tapped a badge in an
+        // email lands on their ticket rather than at a dead end.
+        $this->get($this->walletUrl($event, $sale))
+            ->assertRedirect(route('ticket.view', [
+                'event_id' => UrlUtils::encodeId($event->id),
+                'secret' => $sale->secret,
+            ]));
         $this->assertNothingSentToGoogle();
     }
 
@@ -471,6 +563,25 @@ class GoogleWalletPassTest extends TestCase
         $this->fakeGoogle();
 
         [$role, $event, $sale] = $this->paidTicket();
+
+        // Assert the mailable's DATA first, the way PassBookingTest does. render() is the preview
+        // path: Mailer::render() runs replaceEmbeddedAttachments(), which rewrites cid: to a data
+        // URI for any single-line <img> - so a rendered assertion silently depends on how the tag
+        // happens to be wrapped, and checks output no recipient ever receives.
+        $content = (new TicketPurchase($sale, $event, $role))->content();
+
+        $this->assertSame(
+            canonical_url(route('ticket.wallet.google', [
+                'event_id' => UrlUtils::encodeId($event->id),
+                'secret' => $sale->secret,
+            ], false)),
+            $content->with['googleWalletUrl']
+        );
+        $this->assertStringEndsWith('/images/wallet/google/en.png', $content->with['googleWalletBadge']);
+
+        // The plain-text twin, which nothing else in the suite renders.
+        $text = view('emails.ticket_purchase_text', $content->with)->render();
+        $this->assertStringContainsString($content->with['googleWalletUrl'], $text);
 
         $rendered = (new TicketPurchase($sale, $event, $role))->render();
 
@@ -486,8 +597,7 @@ class GoogleWalletPassTest extends TestCase
 
         // The badge is embedded, never hotlinked - this app does not ask a recipient's mail client
         // to fetch an asset from someone else's server.
-        $this->assertStringContainsString('cid:', $rendered);
-        $this->assertStringNotContainsString('https://developers.google.com', $rendered);
+        $this->assertStringContainsString('cid:add-to-google-wallet.png', $rendered);
 
         // And no call to Google was needed to render it.
         $this->assertNothingSentToGoogle();
@@ -497,10 +607,55 @@ class GoogleWalletPassTest extends TestCase
     {
         [$role, $event, $sale] = $this->paidTicket();
 
+        $this->assertNull((new TicketPurchase($sale, $event, $role))->content()->with['googleWalletUrl']);
+
         $rendered = (new TicketPurchase($sale, $event, $role))->render();
 
         $this->assertStringNotContainsString('ticket/wallet/google', $rendered);
         $this->assertStringContainsString('View Your Tickets', $rendered);
+    }
+
+    public function test_the_order_page_offers_a_condensed_badge_per_live_leg(): void
+    {
+        $this->configureWallet();
+        $this->fakeGoogle();
+
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent');
+
+        $primary = null;
+        $legs = [];
+
+        foreach (['First Night', 'Second Night', 'Cancelled Night'] as $name) {
+            $event = $this->createEvent($role, ['tickets_enabled' => true, 'name' => $name]);
+            $ticket = $this->createTicket($event, ['price' => 10]);
+            $sale = $this->createSale($event, $role, ['status' => 'paid'], $ticket, 1);
+
+            if (! $primary) {
+                $primary = $sale;
+                $sale->order_id = $sale->id;
+            } else {
+                $sale->order_id = $primary->id;
+            }
+
+            $sale->saveQuietly();
+            $legs[] = [$event, $sale];
+        }
+
+        // The last leg is cancelled, so canOffer() must refuse it without the blade restating why.
+        [$deadEvent, $deadSale] = $legs[2];
+        $deadSale->forceFill(['status' => 'cancelled'])->saveQuietly();
+
+        $html = $this->get(route('ticket.order', [
+            'order_id' => UrlUtils::encodeId($primary->id),
+            'secret' => $primary->secret,
+        ]))->assertOk()->getContent();
+
+        // The condensed variant, which only this surface uses - the primary badge would not fit a
+        // list row at its own minimum size.
+        $this->assertStringContainsString('images/wallet/google/en-condensed.svg', $html);
+        $this->assertSame(2, substr_count($html, 'en-condensed.svg'), 'Every live leg gets a badge, and only the live ones.');
+        $this->assertStringNotContainsString($this->walletUrl($deadEvent, $deadSale), $html);
     }
 
     /*
@@ -552,8 +707,8 @@ class GoogleWalletPassTest extends TestCase
         [$role, $event, $sale] = $this->paidTicket();
         $otherSale = $this->createSale($event, $role, ['status' => 'paid', 'email' => 'second@example.com'], null, 1);
 
-        $this->get($this->walletUrl($event, $sale))->assertRedirect();
-        $this->get($this->walletUrl($event, $otherSale))->assertRedirect();
+        $this->decodeJwtFromRedirect($this->get($this->walletUrl($event, $sale))->headers->get('Location'));
+        $this->decodeJwtFromRedirect($this->get($this->walletUrl($event, $otherSale))->headers->get('Location'));
 
         $inserts = collect(Http::recorded())
             ->filter(fn ($pair) => $pair[0]->method() === 'POST'
@@ -570,13 +725,25 @@ class GoogleWalletPassTest extends TestCase
 
         [$role, $event, $sale] = $this->paidTicket();
 
-        $this->get($this->walletUrl($event, $sale))->assertRedirect();
+        // decodeJwtFromRedirect, not a bare assertRedirect: the FAILURE path also returns a 302
+        // (to the ticket page), so without this the test passed even with ensureClass() returning
+        // null forever - it could not tell "found the class, skipped the insert" from "did nothing".
+        $this->decodeJwtFromRedirect(
+            $this->get($this->walletUrl($event, $sale))->headers->get('Location')
+        );
+
+        $lookups = collect(Http::recorded())
+            ->filter(fn ($pair) => $pair[0]->method() === 'GET'
+                && str_contains($pair[0]->url(), '/eventTicketClass/'))
+            ->count();
 
         $inserts = collect(Http::recorded())
             ->filter(fn ($pair) => $pair[0]->method() === 'POST'
                 && str_ends_with($pair[0]->url(), '/eventTicketClass'))
             ->count();
 
+        // The positive control: it really did look, and having found one, really did not insert.
+        $this->assertSame(1, $lookups);
         $this->assertSame(0, $inserts);
     }
 
@@ -626,9 +793,17 @@ class GoogleWalletPassTest extends TestCase
     {
         $this->configureWallet();
 
+        // One fake, with a SEQUENCE on the lookup, because Http::fake() APPENDS stubs rather than
+        // replacing them - a second fake() call can never override an earlier pattern that still
+        // matches, and it also wipes Http::recorded(). The first lookup fails; the second (after the
+        // negative cache is cleared) 404s so the insert path runs.
         Http::fake([
             'oauth2.googleapis.com/*' => Http::response(['access_token' => 'test-token', 'expires_in' => 3600]),
-            'walletobjects.googleapis.com/*' => Http::response(['error' => 'boom'], 500),
+            'walletobjects.googleapis.com/walletobjects/v1/eventTicketClass/*' => Http::sequence()
+                ->push(['error' => 'boom'], 500)
+                ->push(['error' => ['message' => 'not found']], 404),
+            'walletobjects.googleapis.com/walletobjects/v1/eventTicketClass' => Http::response(['id' => 'created']),
+            '*' => Http::response([], 200),
         ]);
 
         [$role, $event, $sale] = $this->paidTicket();
@@ -640,10 +815,14 @@ class GoogleWalletPassTest extends TestCase
 
         $this->assertSame($before, count(Http::recorded()), 'A failing class lookup was retried instead of being cached.');
 
-        // ...but it recovers once the operator fixes things.
+        // ...and it recovers once the operator fixes things. decodeJwtFromRedirect, not a bare
+        // assertRedirect: the failure path returns a 302 to the ticket page too, so only a signed
+        // save link proves recovery. The bare version passed while recovery was in fact broken.
         Cache::flush();
-        $this->fakeGoogle();
-        $this->get($this->walletUrl($event, $sale))->assertRedirect(); // to pay.google.com
+
+        $this->decodeJwtFromRedirect(
+            $this->get($this->walletUrl($event, $sale))->headers->get('Location')
+        );
     }
 
     /**

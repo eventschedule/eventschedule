@@ -24,7 +24,7 @@ use Illuminate\Support\Str;
  * /\/ticket\/view\/([^/]+)\/([^/]+)\/?$/ and POSTs the two captured segments. Change the value and
  * every wallet pass silently stops scanning while the on-page QR keeps working.
  *
- * WHY THE CLASS IS CREATED OVER REST AND THE OBJECT IS NOT. Google truncates a save link past 1800
+ * WHY THE CLASS IS CREATED OVER REST AND THE OBJECT IS NOT. Google caps a usable encoded JWT at 1800
  * characters. Class plus object inline measures about 2100 at realistic field lengths, because
  * every human string is wrapped in a LocalizedString and the RS256 signature alone is 342. So the
  * class - one per occurrence, carrying the branding, the venue and the date - is inserted once over
@@ -51,8 +51,11 @@ class GoogleWalletService
     const SCOPE = 'https://www.googleapis.com/auth/wallet_object.issuer';
 
     /**
-     * Google truncates the save link past this, so a longer JWT is a pass that silently fails to
-     * save. buildJwt() sheds optional fields rather than hand one back.
+     * Google measures this against the ENCODED JWT, not against the finished save link: "The safe
+     * length of an encoded JWT is 1800 characters... If the length is over 1800 characters, the
+     * save may not work due to truncation by web browsers." So the guard compares strlen($jwt)
+     * alone, and adding SAVE_URL's 33 characters to the comparison would shed pass fields early
+     * for no reason. buildJwt() sheds rather than hand back a link a browser would cut.
      */
     const MAX_JWT_LENGTH = 1800;
 
@@ -65,8 +68,22 @@ class GoogleWalletService
 
     public static function isConfigured(): bool
     {
-        return ! empty(config('services.google.wallet_issuer_id'))
-            && self::serviceAccount() !== null;
+        return self::issuerId() !== '' && self::serviceAccount() !== null;
+    }
+
+    /**
+     * The issuer id, trimmed.
+     *
+     * Trimmed in one place because it is the one credential an operator copy-pastes out of the
+     * Google console, and a quoted .env value, a DigitalOcean app-spec field and a Docker env file
+     * all preserve a trailing newline. Untrimmed it poisons every class and object id, Guzzle
+     * percent-encodes the newline into the request path, Google answers 400, and the only symptom
+     * is a badge that renders forever and fails on every tap. `! empty('   ')` is true, so the
+     * whitespace-only case would even have switched the feature ON.
+     */
+    protected static function issuerId(): string
+    {
+        return trim((string) config('services.google.wallet_issuer_id'));
     }
 
     /**
@@ -79,6 +96,17 @@ class GoogleWalletService
      * `paid`, which is the trap ticket/order.blade.php already documents ("the buyer saw a live
      * ticket with a working code for an event that is not happening"). It matters more here than
      * on a web page, because a wallet pass then sits on the phone indefinitely.
+     *
+     * The delinquency arm is DELIBERATELY STRICTER THAN THE DOOR, and that is not an oversight to
+     * be tidied up. TicketController::scanned() returns an amber 'overdue' with an "admit anyway"
+     * override rather than refusing, because turning a paying guest away over one late instalment
+     * is the organizer's call. A wallet pass is different in kind: it is a snapshot that is never
+     * patched, so issuing one would put a permanently valid-looking ticket on the phone of someone
+     * who may never pay. Refusing the pass leaves the on-page QR, and the override, untouched.
+     *
+     * appointment_type_id mirrors what TicketController::view() and EmailService already decide:
+     * bookings have their own manage page and their own mailables, and never enter the QR ticket
+     * flow. Without this the route would still mint a pass for one via a hand-built URL.
      */
     public static function canOffer(?Sale $sale, ?Event $event): bool
     {
@@ -89,6 +117,7 @@ class GoogleWalletService
         return $sale->status === 'paid'
             && ! $sale->is_deleted
             && ! $event->is_cancelled
+            && ! $event->appointment_type_id
             && ! $sale->isInstallmentDelinquent();
     }
 
@@ -143,6 +172,16 @@ class GoogleWalletService
      * Accepts either an absolute path to the JSON file (the selfhost shape) or the base64-encoded
      * JSON itself, because hosted production config is the DigitalOcean app spec and it has no
      * writable file mount to point a path at.
+     *
+     * NEVER THROWS, and that is load-bearing rather than defensive habit. canOffer() calls this
+     * from four blade templates and from TicketPurchase::content(), none of which sit inside a
+     * try/catch - saveUrl()'s catch covers only the link build, not the gate. And the read really
+     * can throw: is_readable() answers TRUE for a DIRECTORY, so an operator who points the var at
+     * /etc/secrets rather than at the file inside it gets an E_WARNING out of file_get_contents(),
+     * which HandleExceptions rethrows as an ErrorException - taking down every ticket page and
+     * every confirmation email, on an install that has merely misconfigured an optional feature.
+     * is_file() is the guard that answers the directory case; the try/catch covers the rest
+     * (a permission change between the two calls, a symlink loop, an unreadable mount).
      */
     public static function serviceAccount(): ?array
     {
@@ -152,26 +191,43 @@ class GoogleWalletService
             return null;
         }
 
-        if (str_starts_with($raw, '/') || str_starts_with($raw, './')) {
-            if (! is_readable($raw)) {
-                return null;
+        // Memoized on the raw config string rather than in a plain static: canOffer() runs this
+        // twice per badge, so a ten-leg order page would otherwise re-read the key file twenty
+        // times. Keying on the value means a test that swaps credentials is never served a stale
+        // parse, which a bare static would do.
+        static $memo = [];
+        $memoKey = hash('xxh128', $raw);
+
+        if (array_key_exists($memoKey, $memo)) {
+            return $memo[$memoKey];
+        }
+
+        try {
+            if (str_starts_with($raw, '/') || str_starts_with($raw, './')) {
+                if (! is_file($raw) || ! is_readable($raw)) {
+                    return $memo[$memoKey] = null;
+                }
+
+                $raw = (string) file_get_contents($raw);
+            } elseif (! str_starts_with($raw, '{')) {
+                // base64_decode(strict) so a truncated or line-wrapped paste fails here rather than
+                // producing bytes that json_decode reports as some unrelated syntax error.
+                $decoded = base64_decode($raw, true);
+                $raw = $decoded === false ? '' : $decoded;
             }
 
-            $raw = (string) file_get_contents($raw);
-        } elseif (! str_starts_with($raw, '{')) {
-            // base64_decode(strict) so a truncated or line-wrapped paste fails here rather than
-            // producing bytes that json_decode reports as some unrelated syntax error.
-            $decoded = base64_decode($raw, true);
-            $raw = $decoded === false ? '' : $decoded;
-        }
+            $data = json_decode($raw, true);
+        } catch (\Throwable $e) {
+            report($e);
 
-        $data = json_decode($raw, true);
+            return $memo[$memoKey] = null;
+        }
 
         if (! is_array($data) || empty($data['client_email']) || empty($data['private_key'])) {
-            return null;
+            return $memo[$memoKey] = null;
         }
 
-        return $data;
+        return $memo[$memoKey] = $data;
     }
 
     /**
@@ -201,7 +257,7 @@ class GoogleWalletService
                 'exp' => $now + 3600,
             ], $account['private_key']);
 
-            $response = Http::asForm()->timeout(15)->post(self::TOKEN_URL, [
+            $response = Http::asForm()->connectTimeout(5)->timeout(10)->post(self::TOKEN_URL, [
                 'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
                 'assertion' => $assertion,
             ]);
@@ -212,8 +268,10 @@ class GoogleWalletService
                     'body' => Str::limit((string) $response->body(), 500),
                 ]);
 
-                // Returned rather than thrown so Cache::remember stores nothing and the next tap
-                // retries; a null here is what makes saveUrl() bail cleanly.
+                // Returned rather than thrown, so saveUrl() bails cleanly. Note remember() DOES
+                // store this null - put() is unconditional - but Repository::get() treats a stored
+                // null as a miss, so the next tap re-runs the exchange rather than being stuck with
+                // a cached failure for the hour.
                 return null;
             }
 
@@ -253,7 +311,7 @@ class GoogleWalletService
             return null;
         }
 
-        $existing = Http::withToken($token)->timeout(15)
+        $existing = Http::withToken($token)->connectTimeout(5)->timeout(10)
             ->get(self::API_BASE.'/eventTicketClass/'.$classId);
 
         if ($existing->successful()) {
@@ -273,7 +331,7 @@ class GoogleWalletService
             return null;
         }
 
-        $created = Http::withToken($token)->timeout(15)
+        $created = Http::withToken($token)->connectTimeout(5)->timeout(10)
             ->post(self::API_BASE.'/eventTicketClass', $this->classPayload($sale, $event, $role, $classId));
 
         // 409 means another request won the race, which is a success for our purposes.
@@ -302,8 +360,9 @@ class GoogleWalletService
             'id' => $classId,
             'issuerName' => $this->clamp($role?->translatedName() ?: config('app.name'), 40),
             'eventName' => $this->localized($event->name, $language),
-            // UNDER_REVIEW, not DRAFT: a draft class can only be used by accounts registered as
-            // test accounts on the issuer, so every real buyer would silently fail to save.
+            // UNDER_REVIEW is what Google's own samples insert with, and it is what makes a class
+            // usable straight away. DRAFT is documented only as a state, not as a restriction, so
+            // do not write a rule here about what it blocks - it has not been confirmed.
             'reviewStatus' => 'UNDER_REVIEW',
         ];
 
@@ -337,6 +396,19 @@ class GoogleWalletService
 
         if ($color = $this->hexColor($role)) {
             $payload['hexBackgroundColor'] = $color;
+        }
+
+        // Geofenced arrival notification: Google alerts the holder when they come within its own
+        // radius of the point. On the CLASS, under merchantLocations, and both halves matter.
+        // EventTicketObject.locations is DEPRECATED and documented as "currently not supported to
+        // trigger geo notifications", so the obvious-looking field is inert. And the venue belongs
+        // to the occurrence rather than to one ticket, so the class is where it costs nothing
+        // against the JWT budget the object has to fit inside.
+        if ($venue && $venue->geo_lat && $venue->geo_lon) {
+            $payload['merchantLocations'] = [[
+                'latitude' => (float) $venue->geo_lat,
+                'longitude' => (float) $venue->geo_lon,
+            ]];
         }
 
         // Google fetches these from us, so they are only worth sending when it can actually reach
@@ -473,7 +545,17 @@ class GoogleWalletService
         }
 
         $sale->loadMissing('saleTickets.ticket');
-        $saleTicket = $sale->saleTickets->first(fn ($row) => $row->ticket && ! $row->ticket->is_addon);
+
+        // On a pass sale, pick the PASS row by name rather than trusting it to be the first
+        // non-addon - the same selector PassRedemptionService::redeem() uses. Everything below
+        // reads pass state off this row (pass_expires_at drives validTimeInterval, admitsPerEvent
+        // drives the guest count), so landing on a sibling row silently produces a pass with no
+        // expiry that never archives. Checkout rejects a mixed cart with pass_cannot_combine, so
+        // this is unreachable from the buy flow, but import, the API and a backup restore all write
+        // sale_tickets directly.
+        $saleTicket = $sale->isPass()
+            ? $sale->saleTickets->first(fn ($row) => $row->ticket?->is_pass)
+            : $sale->saleTickets->first(fn ($row) => $row->ticket && ! $row->ticket->is_addon);
 
         if ($saleTicket?->ticket?->type) {
             $object['ticketType'] = $this->localized($this->clamp($saleTicket->ticket->type, 60), $language);
@@ -487,18 +569,7 @@ class GoogleWalletService
             $object['validTimeInterval'] = $interval;
         }
 
-        // The reason a wallet pass beats a link: with coordinates Google surfaces the pass on the
-        // holder's lock screen when they arrive at the venue.
-        $venue = $event->venue;
-
-        if ($venue && $venue->geo_lat && $venue->geo_lon) {
-            $object['locations'] = [[
-                'latitude' => (float) $venue->geo_lat,
-                'longitude' => (float) $venue->geo_lon,
-            ]];
-        }
-
-        if ($rows = $this->textModules($sale, $event, $saleTicket)) {
+        if ($rows = $this->textModules($sale, $event, $saleTicket, $role)) {
             $object['textModulesData'] = $rows;
         }
 
@@ -508,30 +579,37 @@ class GoogleWalletService
     /**
      * Extra rows on the pass, so the attendee reads the door information without opening anything.
      */
-    protected function textModules(Sale $sale, Event $event, $saleTicket): array
+    protected function textModules(Sale $sale, Event $event, $saleTicket, ?Role $role): array
     {
         $rows = [];
+        $language = $this->language($role);
 
         $admits = $saleTicket?->ticket?->is_pass
             ? $saleTicket->ticket->admitsPerEvent()
             : ($sale->isRsvp() ? 1 : $sale->legTotalQuantity());
 
         if ($admits > 1) {
+            // localizedHeader, not header. A bare header resolves in the REQUEST locale, while
+            // every other human string on the pass resolves in the SCHEDULE's - so a Hebrew
+            // schedule's pass, saved by a buyer browsing in English, would carry English labels
+            // over Hebrew content. The pass is never patched afterwards, so it would stay that way.
             $rows[] = [
                 'id' => 'admits',
-                'header' => __('messages.guests'),
-                'body' => (string) $admits,
+                'localizedHeader' => $this->localized(__('messages.guests', [], $language), $language),
+                'localizedBody' => $this->localized((string) $admits, $language),
             ];
         }
 
         // The plain-text twin, not parsedTicketNotesHtml(): a wallet pass renders no markup.
-        $notes = $event->parsedTicketNotesText($sale->event_date);
+        // $role is passed through rather than re-resolved so the notes' inline variables are parsed
+        // against the same schedule the rest of the pass is built from.
+        $notes = $event->parsedTicketNotesText($sale->event_date, $role);
 
         if ($notes && trim($notes) !== '') {
             $rows[] = [
                 'id' => 'notes',
-                'header' => __('messages.important_information'),
-                'body' => $this->clamp(trim($notes), 200),
+                'localizedHeader' => $this->localized(__('messages.important_information', [], $language), $language),
+                'localizedBody' => $this->localized($this->clamp(trim($notes), 200), $language),
             ];
         }
 
@@ -557,10 +635,14 @@ class GoogleWalletService
         $start = $event->occurrenceStartUtc($sale->event_date);
         $minutes = max($event->durationInMinutes(), 60);
 
+        // END ONLY, deliberately. Google documents this as "the time period this object will be
+        // active and object can be used", and says nothing about what happens BEFORE start - so a
+        // start would risk parking a ticket bought a month out as not-yet-usable for the month it
+        // matters most that the buyer can find it. End alone still gets the archiving, which is the
+        // whole reason the field is here. It also sidesteps a mismatch that a start would have to
+        // pick a side of: the door admits from start - 24h (TicketController::scanned()), so any
+        // tighter window disagrees with the scanner about when a ticket is live.
         return [
-            // Doors, roughly: the pass becomes current the morning of the event rather than at the
-            // exact start, so an attendee arriving early still finds it at the top of their wallet.
-            'start' => ['date' => $start->copy()->subHours(12)->toIso8601String()],
             'end' => ['date' => $start->copy()->addMinutes($minutes + 180)->toIso8601String()],
         ];
     }
@@ -592,7 +674,7 @@ class GoogleWalletService
         $prefix = preg_replace('/[^A-Za-z0-9_.-]/', '', (string) config('services.google.wallet_id_prefix')) ?: 'es';
         $suffix = preg_replace('/[^A-Za-z0-9_.-]/', '', $suffix);
 
-        return config('services.google.wallet_issuer_id').'.'.$prefix.'-'.$suffix;
+        return self::issuerId().'.'.$prefix.'-'.$suffix;
     }
 
     /**
@@ -661,7 +743,12 @@ class GoogleWalletService
     {
         $color = $role?->manifestThemeColor();
 
-        return $color && preg_match('/^#[0-9a-fA-F]{6}$/', $color) ? strtolower($color) : '#4e81fa';
+        // Null, not our brand blue, when the schedule has no accent. manifestThemeColor() returns
+        // null in exactly this case for a documented reason (Role.php): a schedule that CLEARED its
+        // accent used to get Event Schedule's blue in its address bar, which reads as identity
+        // rather than as a UI default. A pass sitting in someone's wallet is identity too, and on a
+        // selfhost install our brand has no business being on it. Omitted, Google picks its own.
+        return $color && preg_match('/^#[0-9a-fA-F]{6}$/', $color) ? strtolower($color) : null;
     }
 
     protected function clamp(?string $value, int $length): string

@@ -3003,9 +3003,12 @@ class TicketController extends Controller
     public function googleWalletPass($eventId, $secret)
     {
         $event = Event::findOrFail(UrlUtils::decodeId($eventId));
+        // Deliberately NOT filtered on is_deleted, though scanned() is. ticket.view does not filter
+        // it either, so a soft-deleted sale still renders its ticket page - and filtering here would
+        // 404 the buyer instead of landing them on it, which is exactly what the docblock above
+        // promises not to do. canOffer()'s own `! $sale->is_deleted` does the refusing.
         $sale = Sale::with('saleTickets.ticket')
             ->where('event_id', $event->id)
-            ->where('is_deleted', false)
             ->where('secret', $secret)
             ->firstOrFail();
 
@@ -3047,7 +3050,9 @@ class TicketController extends Controller
 
         abort_unless($primary->isOrderPrimary(), 404);
 
-        $sales = Sale::with('event')
+        // installmentPlan is eager-loaded for the wallet badge's gate: canOffer() calls
+        // isInstallmentDelinquent() per row, which would otherwise be one query per leg.
+        $sales = Sale::with('event', 'installmentPlan')
             ->where('order_id', $primary->order_id)
             ->where('is_deleted', false)
             // Guest rows are per-attendee copies of a leg, not separate events; the buyer wants one

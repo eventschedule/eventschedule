@@ -382,7 +382,7 @@
           @if (\App\Services\Wallet\GoogleWalletService::canOffer($sale, $event))
             {{-- Its own row above the divider, not tucked under the badges column: centred with no
                  separator it read as another line of the Guests field directly above it. --}}
-            <div class="mt-[20px] pt-[20px] border-t border-white/10 print:border-slate-200 flex justify-center print:hidden">
+            <div class="mt-[20px] pt-[20px] border-t border-white/10 flex justify-center print:hidden">
               @include('partials.wallet-buttons', ['sale' => $sale, 'event' => $event])
             </div>
           @endif

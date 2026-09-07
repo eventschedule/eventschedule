@@ -1072,12 +1072,12 @@
     <!-- Wallet Passes -->
     <section id="wallet-passes" class="doc-section">
         <h3 class="doc-subheading">Wallet Passes</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Ticket buyers can save their ticket into Google Wallet from the ticket page or the confirmation email. The pass carries the same QR code the ticket page shows, so it scans at the door exactly like any other ticket, and it works offline once saved.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Ticket buyers can save their ticket into Google Wallet from the ticket page, from the order page of a multi-event purchase, or from the confirmation email. The pass carries the same QR code the ticket page shows, so it scans at the door exactly like any other ticket, and it works offline once saved.</p>
 
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Event details on the pass</strong> - name, venue, date and time, attendee name, ticket type and seat</li>
-            <li><strong class="text-gray-900 dark:text-white">Arrival reminder</strong> - when the venue has an address on file, the pass surfaces on the attendee's phone when they get there</li>
-            <li><strong class="text-gray-900 dark:text-white">One pass per ticket</strong> - a multi-event order gets a separate pass for each event, since each is scanned with its own code</li>
+            <li><strong class="text-gray-900 dark:text-white">Arrival reminder</strong> - when the venue has an address on file, Google can notify the attendee as they arrive nearby</li>
+            <li><strong class="text-gray-900 dark:text-white">One pass per event</strong> - a multi-event order gets a separate pass for each event, since each is scanned with its own code. A single order for several people is one pass showing the number it admits, unless the event issues individual tickets</li>
         </ul>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">The pass is a snapshot taken when the attendee saves it. Cancelling or refunding an order does not remove a pass already on someone's phone, but the code stops working: the door scanner checks the order's live status, and a cancelled ticket is refused there just as it is on the ticket page.</p>
